@@ -1,16 +1,16 @@
 # Mensajes en español para GNU bash
-# Copyright (C) 2018 Free Software Foundation, Inc.
+# Copyright (C) 2018, 2019 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
 # Cristian Othón Martínez Vera <cfuga@cfuga.mx>, 2000 - 2011.
 # Francisco Javier Serrador <fserrador@gmail.com>
-# Antonio Ceballos Roa <aceballos@gmail.com>, 2018
+# Antonio Ceballos Roa <aceballos@gmail.com>, 2018, 2019
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: GNU bash 4.4\n"
+"Project-Id-Version: GNU bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-08-07 12:00-0400\n"
-"PO-Revision-Date: 2018-06-04 22:22+0200\n"
+"PO-Revision-Date: 2019-08-18 10:08+0200\n"
 "Last-Translator: Antonio Ceballos Roa <aceballos@gmail.com>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
 "Language: es\n"
@@ -87,9 +87,9 @@ msgid "brace expansion: cannot allocate memory for %s"
 msgstr "expansión de llaves: no se puede asignar memoria a %s"
 
 #: braces.c:406
-#, fuzzy, c-format
+#, c-format
 msgid "brace expansion: failed to allocate memory for %u elements"
-msgstr "expansión de llaves: fallo al asignar memoria a %d elementos"
+msgstr "expansión de llaves: fallo al asignar memoria a %u elementos"
 
 #: braces.c:451
 #, c-format
@@ -1118,9 +1118,8 @@ msgid "attempted assignment to non-variable"
 msgstr "se intentó asignar a algo que no es una variable"
 
 #: expr.c:530
-#, fuzzy
 msgid "syntax error in variable assignment"
-msgstr "error sintáctico en la expresión"
+msgstr "error sintáctico en asignación de variable"
 
 #: expr.c:544 expr.c:911
 msgid "division by 0"
@@ -1345,20 +1344,19 @@ msgstr "(dir ahora: %s)\n"
 
 #: jobs.c:4391
 msgid "initialize_job_control: getpgrp failed"
-msgstr "initialize_jobs_control: falló getpgrp"
+msgstr "initialize_job_control: falló getpgrp"
 
 #: jobs.c:4447
-#, fuzzy
 msgid "initialize_job_control: no job control in background"
-msgstr "initialize_jobs_control: disciplina de línea"
+msgstr "initialize_job_control: no hay control de trabajos en segundo plano"
 
 #: jobs.c:4463
 msgid "initialize_job_control: line discipline"
-msgstr "initialize_jobs_control: disciplina de línea"
+msgstr "initialize_job_control: disciplina de línea"
 
 #: jobs.c:4473
 msgid "initialize_job_control: setpgid"
-msgstr "initialize_jobs_control: setpgid"
+msgstr "initialize_job_control: setpgid"
 
 #: jobs.c:4494 jobs.c:4503
 #, c-format
@@ -1741,7 +1739,7 @@ msgstr "/tmp debe ser un nombre de directorio válido"
 
 #: shell.c:804
 msgid "pretty-printing mode ignored in interactive shells"
-msgstr ""
+msgstr "modo de impresión bonita desactivado en shells interactivos"
 
 #: shell.c:948
 #, c-format
@@ -2085,9 +2083,9 @@ msgid "%s: invalid variable name"
 msgstr "%s: nombre de variable inválido"
 
 #: subst.c:7234
-#, fuzzy, c-format
+#, c-format
 msgid "%s: parameter not set"
-msgstr "%s: parámetro nulo o no establecido"
+msgstr "%s: parámetro no establecido"
 
 #: subst.c:7236
 #, c-format
@@ -2176,9 +2174,11 @@ msgid "invalid signal number"
 msgstr "número de señal inválido"
 
 #: trap.c:325
-#, fuzzy, c-format
+#, c-format
 msgid "trap handler: maximum trap handler level exceeded (%d)"
-msgstr "eval: nivel máximo de anidamiento de evaluaciones excedido (%d)"
+msgstr ""
+"manejador de capturas: se ha excedido el nivel máximo de manejadores de "
+"capturas (%d)"
 
 #: trap.c:414
 #, c-format
@@ -2273,7 +2273,7 @@ msgstr "%s: %s: valor de compatibilidad fuera del rango"
 #: version.c:46 version2.c:46
 #, fuzzy
 msgid "Copyright (C) 2020 Free Software Foundation, Inc."
-msgstr "Copyright (C) 2016 Free Software Foundation, Inc."
+msgstr "Copyright (C) 2018 Free Software Foundation, Inc."
 
 #: version.c:47 version2.c:47
 msgid ""
@@ -2533,7 +2533,7 @@ msgstr "umask [-p] [-S] [modo]"
 #: builtins.c:177
 #, fuzzy
 msgid "wait [-fn] [-p var] [id ...]"
-msgstr "wait [-n] [id ...]"
+msgstr "wait [-fn] [id ...]"
 
 #: builtins.c:181
 msgid "wait [pid ...]"
@@ -2630,7 +2630,7 @@ msgid ""
 "W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
 "suffix] [name ...]"
 msgstr ""
-"complete [-abcdefgjksuv] [-pr] [-DE] [-o opción] [-A acción] [-G patglob] [-"
+"complete [-abcdefgjksuv] [-pr] [-DEI] [-o opción] [-A acción] [-G patglob] [-"
 "W listapalabras] [-F función] [-C orden] [-X patfiltro] [-P prefijo] [-S "
 "sufijo] [nombre ...]"
 
@@ -2645,9 +2645,8 @@ msgstr ""
 "sufijo] [palabra]"
 
 #: builtins.c:239
-#, fuzzy
 msgid "compopt [-o|+o option] [-DEI] [name ...]"
-msgstr "compopt [-o|+o opción] [-DE] [nombre ...]"
+msgstr "compopt [-o|+o opción] [-DEI] [nombre ...]"
 
 #: builtins.c:242
 msgid ""
@@ -2658,13 +2657,12 @@ msgstr ""
 "llamada] [-c quantum] [matriz]"
 
 #: builtins.c:244
-#, fuzzy
 msgid ""
 "readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
 "callback] [-c quantum] [array]"
 msgstr ""
-"readarray [-n cuenta] [-O origen] [-s cuenta] [-t] [-u df] [-C llamada] [-c "
-"quantum] [matriz]"
+"readarray [-d delim] [-n cuenta] [-O origen] [-s cuenta] [-t] [-u df] [-C "
+"llamada] [-c quantum] [matriz]"
 
 # Más en español sería: se define un alias por cada NOMBRE cuyo VALOR se da. sv
 # Lo mismo de antes: el alias es expandido -> el alias se expande. sv
@@ -2844,7 +2842,6 @@ msgstr ""
 "    El estado de salida es 0 a menos que N no sea mayor o igual a 1."
 
 #: builtins.c:354
-#, fuzzy
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -3147,10 +3144,10 @@ msgstr ""
 "      -a\testablece NOMBREs como matrices indexadas (si se admiten)\n"
 "      -A\testablece NOMBREs como matrices asociativas (si se admiten)\n"
 "      -i\testablece NOMBREs con el atributo `integer'\n"
-"      -l\tconvierte NOMBREs a minúsculas en la asignación\n"
+"      -l\tconvierte el valor de cada NOMBRE a minúsculas en la asignación\n"
 "      -r\tcrea NOMBREs como de sólo lectura\n"
 "      -t\tcrea NOMBREs con el atributo `trace'\n"
-"      -u\tconvierte NOMBREs a mayúsculas en la asignación\n"
+"      -u\tconvierte el valor de cada NOMBRE a mayúsculas en la asignación\n"
 "      -x\tcrea NOMBREs para exportar\n"
 "    \n"
 "    Si se usa `+' en lugar de `-', se desactiva el atributo dado.\n"
@@ -3203,7 +3200,6 @@ msgstr ""
 "    un error de asignación, o el shell no esté ejecutando una función."
 
 #: builtins.c:557
-#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3272,6 +3268,11 @@ msgstr ""
 "    \t\tde 0 a 3 dígitos octales\n"
 "      \\xHH\tel de ocho bits cuyo valor es HH (hexadecimal).  HH\n"
 "    \t\tpuede ser de uno o dos dígitos hexadecimales\n"
+"      \\uHHHH\tcarácter Unicode cuyo valor es el valor hexadecimal HHHH.\n"
+"    \t\tHHHH puede tener de uno a cuatro dígitos hexadecimales.\n"
+"      \\UHHHHHHHH carácter Unicode cuyo valor es el valor hexadecimal "
+"HHHHHHHH.\n"
+"    \t\tHHHHHHHH puede tener de uno a ocho dígitos hexadecimales.\n"
 "    \n"
 "    Estado de Salida:\n"
 "    Devuelve correcto a menos que suceda un error de escritura."
@@ -3674,7 +3675,6 @@ msgstr ""
 "    una opción inválida."
 
 #: builtins.c:818
-#, fuzzy
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3716,7 +3716,6 @@ msgstr ""
 "    una opción inválida."
 
 #: builtins.c:842
-#, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3758,7 +3757,9 @@ msgstr ""
 "    \n"
 "    Opciones:\n"
 "      -c\tborra la lista de historia eliminando todas las entradas\n"
-"      -d despl\tborra la entrada de la historia en la posición DESPL\n"
+"      -d despl\tborra la entrada de la historia en la posición DESPL. Los\n"
+"    \t\tdesplazamientos negativos se cuentan hacia atrás desde el final de\n"
+"    \t\tla lista de historia\n"
 "    \n"
 "      -a\tagrega las líneas de historia de esta sesión al fichero de "
 "historia\n"
@@ -4002,7 +4003,6 @@ msgstr ""
 "    otra forma, ‘let’ devuelve 0."
 
 #: builtins.c:994
-#, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
@@ -4071,7 +4071,7 @@ msgstr ""
 "    \t\tla variable matricial MATRIZ, empezando en cero\n"
 "      -d delim\tcontinúa hasta que se lea el primer carácter de DELIM,\n"
 "    \t\ten lugar de línea nueva\n"
-"      -e\tusa Readline para obtener la línea en un shell interactivo\n"
+"      -e\tusa Readline para obtener la línea\n"
 "      -i texto\tEmplea el TEXTO como el texto inicial para Readline\n"
 "      -n ncars\tregresa tras leer NCARS caracteres en lugar de\n"
 "    \t\tesperar una línea nueva, pero honra a un delimitador si\n"
@@ -4999,6 +4999,15 @@ msgstr ""
 "    y el estado de devolución es cero.  Si ID es una especificación de\n"
 "    trabajo, espera a todos los procesos en la cola de trabajos.\n"
 "    \n"
+"    Si se proporciona la opción -n, espera a que termine el siguiente "
+"trabajo\n"
+"    y devuelve su estado de salida.\n"
+"    \n"
+"    Si se proporciona la opción -f y el control de trabajos está activado,\n"
+"    espera a que termine el ID especificado, en vez de esperar a que cambie "
+"de\n"
+"    estado.\n"
+"    \n"
 "    Estado de Salida:\n"
 "    Devuelve el estado de ID; falla si ID es inválido o se proporciona una\n"
 "    opción inválida."
@@ -5681,7 +5690,6 @@ msgstr ""
 "    suceda un error."
 
 #: builtins.c:1916
-#, fuzzy
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5703,8 +5711,10 @@ msgstr ""
 "Activa y desactiva opciones de shell.\n"
 "    \n"
 "    Cambia la configuración de cada opción de shell NOMBRE_OPCIÓN. Sin\n"
-"    alguna opción como argumento, muestra todas las opciones de shell con\n"
-"    una indicación si está activa o no.\n"
+"    ninguna opción como argumento, muestra cada NOMBRE_OPCIÓN\n"
+"    proporcionado o todas las opciones de shell si no se especifica\n"
+"    ningún NOMBRE_OPCIÓN, con una indicación de si está activa o no\n"
+"    cada una.\n"
 "    \n"
 "    Opciones:\n"
 "      -o\trestringe NOMBRE_OPCIÓN a aquellos definidos con `set -o'\n"
@@ -5837,10 +5847,16 @@ msgstr ""
 "    \t\tsin ninguna especificación de completado definida\n"
 "      -E\taplica los completados y acciones para órdenes \"vacías\" --\n"
 "    \t\tcuando se intenta completar en una línea en blanco\n"
+"      -I\taplica los completados a acciones a la palabra incial "
+"(habitualmente\n"
+"    \t\tla orden)\n"
 "    \n"
 "    Cuando se intenta el completado, las acciones se aplican en el orden\n"
-"    en que se listan las opciones de letra mayúscula antes indicadas.  La\n"
-"    opción -D tiene precedencia sobre -E.\n"
+"    en que se listan las opciones de letra mayúscula antes indicadas.  Si "
+"se\n"
+"    proporcionan varias opciones, la opción -D tiene precedencia sobre -E "
+"y,\n"
+"    ambas, sobre -I.\n"
 "    \n"
 "    Estado de Salida:\n"
 "    Devuelve correcto a menos que se proporcione una opción inválida o\n"
@@ -5869,7 +5885,6 @@ msgstr ""
 "    suceda un error."
 
 #: builtins.c:2016
-#, fuzzy
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -5911,6 +5926,7 @@ msgstr ""
 "    \t-o opción\tEstablece la opción de completado OPCIÓN para cada NOMBRE\n"
 "    \t-D\t\tCambia las opciones para el completado de orden \"por defecto\"\n"
 "    \t-E\t\tCambia las opciones para el completado de orden \"vacía\"\n"
+"    \t-I\t\tCambia las opciones para el completado en la palabra inicial\n"
 "    \n"
 "    Si se usa `+o' en lugar de `-o', desactiva la opción especificada.\n"
 "    \n"
@@ -5981,7 +5997,7 @@ msgstr ""
 "      -O origen\tComienza a asignar a MATRIZ en el índice ORIGEN.  El\n"
 "    \t\t\tíndice por defecto es 0.\n"
 "      -s cuenta\tDescarta las primeras CUENTA líneas leídas.\n"
-"      -t\tBorra el DELIM final de cada línea leída (nuea línea por "
+"      -t\tBorra el DELIM final de cada línea leída (nueva línea por "
 "defecto).\n"
 "      -u df\tLee líneas del descriptor de fichero DF en lugar de la\n"
 "    \t\t\tentrada estándar.\n"

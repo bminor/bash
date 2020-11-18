@@ -4001,7 +4001,8 @@ standard.
      shell.  It is a synonym for the 'declare' builtin command.
 
 'ulimit'
-          ulimit [-HSabcdefiklmnpqrstuvxPT] [LIMIT]
+          ulimit [-HS] -a
+          ulimit [-HS] [-bcdefiklmnpqrstuvxPRT] [LIMIT]
 
      'ulimit' provides control over the resources available to processes
      started by the shell, on systems that allow such control.  If an
@@ -4014,7 +4015,7 @@ standard.
           Change and report the hard limit associated with a resource.
 
      '-a'
-          All current limits are reported.
+          All current limits are reported; no limits are set.
 
      '-b'
           The maximum socket buffer size.
@@ -4091,14 +4092,16 @@ standard.
      cannot be increased by a non-root user once it is set; a soft limit
      may be increased up to the value of the hard limit.  Otherwise, the
      current value of the soft limit for the specified resource is
-     printed, unless the '-H' option is supplied.  When setting new
-     limits, if neither '-H' nor '-S' is supplied, both the hard and
-     soft limits are set.  If no option is given, then '-f' is assumed.
-     Values are in 1024-byte increments, except for '-t', which is in
-     seconds; '-R', which is in microseconds; '-p', which is in units of
-     512-byte blocks; '-P', '-T', '-b', '-k', '-n' and '-u', which are
-     unscaled values; and, when in POSIX Mode (*note Bash POSIX Mode::),
-     '-c' and '-f', which are in 512-byte increments.
+     printed, unless the '-H' option is supplied.  When more than one
+     resource is specified, the limit name and unit, if appropriate, are
+     printed before the value.  When setting new limits, if neither '-H'
+     nor '-S' is supplied, both the hard and soft limits are set.  If no
+     option is given, then '-f' is assumed.  Values are in 1024-byte
+     increments, except for '-t', which is in seconds; '-R', which is in
+     microseconds; '-p', which is in units of 512-byte blocks; '-P',
+     '-T', '-b', '-k', '-n' and '-u', which are unscaled values; and,
+     when in POSIX Mode (*note Bash POSIX Mode::), '-c' and '-f', which
+     are in 512-byte increments.
 
      The return status is zero unless an invalid option or argument is
      supplied, or an error occurs while setting a new limit.
@@ -11334,7 +11337,7 @@ D.1 Index of Shell Builtin Commands
 * ulimit:                                Bash Builtins.       (line 622)
 * umask:                                 Bourne Shell Builtins.
                                                               (line 404)
-* unalias:                               Bash Builtins.       (line 725)
+* unalias:                               Bash Builtins.       (line 728)
 * unset:                                 Bourne Shell Builtins.
                                                               (line 422)
 * wait:                                  Job Control Builtins.
@@ -12033,84 +12036,84 @@ Node: Shell Scripts122810
 Node: Shell Builtin Commands125822
 Node: Bourne Shell Builtins127860
 Node: Bash Builtins148789
-Node: Modifying Shell Behavior178724
-Node: The Set Builtin179069
-Node: The Shopt Builtin189482
-Node: Special Builtins204392
-Node: Shell Variables205371
-Node: Bourne Shell Variables205808
-Node: Bash Variables207912
-Node: Bash Features240546
-Node: Invoking Bash241559
-Node: Bash Startup Files247572
-Node: Interactive Shells252675
-Node: What is an Interactive Shell?253085
-Node: Is this Shell Interactive?253734
-Node: Interactive Shell Behavior254549
-Node: Bash Conditional Expressions258063
-Node: Shell Arithmetic262640
-Node: Aliases265580
-Node: Arrays268200
-Node: The Directory Stack274209
-Node: Directory Stack Builtins274993
-Node: Controlling the Prompt277961
-Node: The Restricted Shell280911
-Node: Bash POSIX Mode283505
-Node: Shell Compatibility Mode294541
-Node: Job Control301197
-Node: Job Control Basics301657
-Node: Job Control Builtins306653
-Node: Job Control Variables312053
-Node: Command Line Editing313209
-Node: Introduction and Notation314880
-Node: Readline Interaction316503
-Node: Readline Bare Essentials317694
-Node: Readline Movement Commands319477
-Node: Readline Killing Commands320437
-Node: Readline Arguments322355
-Node: Searching323399
-Node: Readline Init File325585
-Node: Readline Init File Syntax326844
-Node: Conditional Init Constructs347382
-Node: Sample Init File351578
-Node: Bindable Readline Commands354702
-Node: Commands For Moving355906
-Node: Commands For History357957
-Node: Commands For Text362750
-Node: Commands For Killing366399
-Node: Numeric Arguments369432
-Node: Commands For Completion370571
-Node: Keyboard Macros374762
-Node: Miscellaneous Commands375449
-Node: Readline vi Mode381133
-Node: Programmable Completion382040
-Node: Programmable Completion Builtins389820
-Node: A Programmable Completion Example400515
-Node: Using History Interactively405762
-Node: Bash History Facilities406446
-Node: Bash History Builtins409451
-Node: History Interaction414180
-Node: Event Designators417800
-Node: Word Designators419154
-Node: Modifiers420914
-Node: Installing Bash422725
-Node: Basic Installation423862
-Node: Compilers and Options427120
-Node: Compiling For Multiple Architectures427861
-Node: Installation Names429554
-Node: Specifying the System Type430372
-Node: Sharing Defaults431088
-Node: Operation Controls431761
-Node: Optional Features432719
-Node: Reporting Bugs443237
-Node: Major Differences From The Bourne Shell444431
-Node: GNU Free Documentation License461283
-Node: Indexes486460
-Node: Builtin Index486914
-Node: Reserved Word Index493741
-Node: Variable Index496189
-Node: Function Index512086
-Node: Concept Index525596
+Node: Modifying Shell Behavior178898
+Node: The Set Builtin179243
+Node: The Shopt Builtin189656
+Node: Special Builtins204566
+Node: Shell Variables205545
+Node: Bourne Shell Variables205982
+Node: Bash Variables208086
+Node: Bash Features240720
+Node: Invoking Bash241733
+Node: Bash Startup Files247746
+Node: Interactive Shells252849
+Node: What is an Interactive Shell?253259
+Node: Is this Shell Interactive?253908
+Node: Interactive Shell Behavior254723
+Node: Bash Conditional Expressions258237
+Node: Shell Arithmetic262814
+Node: Aliases265754
+Node: Arrays268374
+Node: The Directory Stack274383
+Node: Directory Stack Builtins275167
+Node: Controlling the Prompt278135
+Node: The Restricted Shell281085
+Node: Bash POSIX Mode283679
+Node: Shell Compatibility Mode294715
+Node: Job Control301371
+Node: Job Control Basics301831
+Node: Job Control Builtins306827
+Node: Job Control Variables312227
+Node: Command Line Editing313383
+Node: Introduction and Notation315054
+Node: Readline Interaction316677
+Node: Readline Bare Essentials317868
+Node: Readline Movement Commands319651
+Node: Readline Killing Commands320611
+Node: Readline Arguments322529
+Node: Searching323573
+Node: Readline Init File325759
+Node: Readline Init File Syntax327018
+Node: Conditional Init Constructs347556
+Node: Sample Init File351752
+Node: Bindable Readline Commands354876
+Node: Commands For Moving356080
+Node: Commands For History358131
+Node: Commands For Text362924
+Node: Commands For Killing366573
+Node: Numeric Arguments369606
+Node: Commands For Completion370745
+Node: Keyboard Macros374936
+Node: Miscellaneous Commands375623
+Node: Readline vi Mode381307
+Node: Programmable Completion382214
+Node: Programmable Completion Builtins389994
+Node: A Programmable Completion Example400689
+Node: Using History Interactively405936
+Node: Bash History Facilities406620
+Node: Bash History Builtins409625
+Node: History Interaction414354
+Node: Event Designators417974
+Node: Word Designators419328
+Node: Modifiers421088
+Node: Installing Bash422899
+Node: Basic Installation424036
+Node: Compilers and Options427294
+Node: Compiling For Multiple Architectures428035
+Node: Installation Names429728
+Node: Specifying the System Type430546
+Node: Sharing Defaults431262
+Node: Operation Controls431935
+Node: Optional Features432893
+Node: Reporting Bugs443411
+Node: Major Differences From The Bourne Shell444605
+Node: GNU Free Documentation License461457
+Node: Indexes486634
+Node: Builtin Index487088
+Node: Reserved Word Index493915
+Node: Variable Index496363
+Node: Function Index512260
+Node: Concept Index525770
 
 End Tag Table
 

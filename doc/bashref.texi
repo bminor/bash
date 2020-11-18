@@ -4743,7 +4743,8 @@ It is a synonym for the @code{declare} builtin command.
 @item ulimit
 @btindex ulimit
 @example
-ulimit [-HSabcdefiklmnpqrstuvxPT] [@var{limit}]
+ulimit [-HS] -a
+ulimit [-HS] [-bcdefiklmnpqrstuvxPRT] [@var{limit}]
 @end example
 
 @code{ulimit} provides control over the resources available to processes
@@ -4758,7 +4759,7 @@ Change and report the soft limit associated with a resource.
 Change and report the hard limit associated with a resource.
 
 @item -a
-All current limits are reported.
+All current limits are reported; no limits are set.
 
 @item -b
 The maximum socket buffer size.
@@ -4835,6 +4836,9 @@ A hard limit cannot be increased by a non-root user once it is set;
 a soft limit may be increased up to the value of the hard limit.
 Otherwise, the current value of the soft limit for the specified resource
 is printed, unless the @option{-H} option is supplied.
+When more than one
+resource is specified, the limit name and unit, if appropriate,
+are printed before the value.
 When setting new limits, if neither @option{-H} nor @option{-S} is supplied,
 both the hard and soft limits are set.
 If no option is given, then @option{-f} is assumed.  Values are in 1024-byte

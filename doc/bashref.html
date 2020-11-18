@@ -5372,7 +5372,8 @@ It is a synonym for the <code>declare</code> builtin command.
 <dt><code>ulimit</code></dt>
 <dd><span id="index-ulimit"></span>
 <div class="example">
-<pre class="example">ulimit [-HSabcdefiklmnpqrstuvxPT] [<var>limit</var>]
+<pre class="example">ulimit [-HS] -a
+ulimit [-HS] [-bcdefiklmnpqrstuvxPRT] [<var>limit</var>]
 </pre></div>
 
 <p><code>ulimit</code> provides control over the resources available to processes
@@ -5389,7 +5390,7 @@ option is given, it is interpreted as follows:
 </p>
 </dd>
 <dt><code>-a</code></dt>
-<dd><p>All current limits are reported.
+<dd><p>All current limits are reported; no limits are set.
 </p>
 </dd>
 <dt><code>-b</code></dt>
@@ -5488,6 +5489,9 @@ A hard limit cannot be increased by a non-root user once it is set;
 a soft limit may be increased up to the value of the hard limit.
 Otherwise, the current value of the soft limit for the specified resource
 is printed, unless the <samp>-H</samp> option is supplied.
+When more than one
+resource is specified, the limit name and unit, if appropriate,
+are printed before the value.
 When setting new limits, if neither <samp>-H</samp> nor <samp>-S</samp> is supplied,
 both the hard and soft limits are set.
 If no option is given, then <samp>-f</samp> is assumed.  Values are in 1024-byte

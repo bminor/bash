@@ -10610,7 +10610,11 @@ option suppresses shell function lookup, as with the \fBcommand\fP builtin.
 returns true if all of the arguments are found, false if
 any are not found.
 .TP
-\fBulimit\fP [\fB\-HSabcdefiklmnpqrstuvxPRT\fP [\fIlimit\fP]]
+\fBulimit\fP [\fB\-HS\fP] \fB\-a\fP
+.PD 0
+.TP
+\fBulimit\fP [\fB\-HS\fP] [\fB\-bcdefiklmnpqrstuvxPRT\fP [\fIlimit\fP]]
+.PD
 Provides control over the resources available to the shell and to
 processes started by it, on systems that allow such control.
 The \fB\-H\fP and \fB\-S\fP options specify that the hard or soft limit is
@@ -10633,13 +10637,14 @@ If
 .I limit
 is omitted, the current value of the soft limit of the resource is
 printed, unless the \fB\-H\fP option is given.  When more than one
-resource is specified, the limit name and unit are printed before the value.
+resource is specified, the limit name and unit, if appropriate,
+are printed before the value.
 Other options are interpreted as follows:
 .RS
 .PD 0
 .TP
 .B \-a
-All current limits are reported
+All current limits are reported; no limits are set
 .TP
 .B \-b
 The maximum socket buffer size

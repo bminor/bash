@@ -1,10 +1,10 @@
 # Esperanto language file for GNU Bash.
 # Copyright (C) 2011 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
-# Sergio Pokrovskij <sergio.pokrovskij@gmail.com>, 1998, ... 2016.
+# Sergio Pokrovskij <sergio.pokrovskij@gmail.com>, 1998, ... 2019.
 #
-# -*- eval: (po-consider-source-path "~/Documents/Eo/Work/i18n/4.4/bash-4.4/builtins"); -*-
-# -*- eval: (po-consider-source-path "~/Documents/Eo/Work/i18n/4.4/bash-4.4"); -*-
+# -*- eval: (po-consider-source-path "~/Documents/Eo/Work/i18n/5.0/bash-5.0/builtins"); -*-
+# -*- eval: (po-consider-source-path "~/Documents/Eo/Work/i18n/5.0/bash-5.0"); -*-
 # Stilaj notoj:
 # La angulaj citiloj limigas «plurajn vortojn»,
 # 99-66 estas la citiloj de „unuvortaĵo‟
@@ -28,10 +28,10 @@
 # unset                     malvalorizi (variablon); malaktivigi, malŝalti (opcion, nomon)
 msgid ""
 msgstr ""
-"Project-Id-Version: GNU bash 4.4\n"
+"Project-Id-Version: GNU bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-08-07 12:00-0400\n"
-"PO-Revision-Date: 2016-09-22 23:59+0700\n"
+"PO-Revision-Date: 2019-01-09 16:32+0700\n"
 "Last-Translator: Sergio Pokrovskij <sergio.pokrovskij@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -109,9 +109,9 @@ msgstr "vinkulmalvolvo: Maleblas memorhavigo por %s"
 
 # XXX: internal_error
 #: braces.c:406
-#, fuzzy, c-format
+#, c-format
 msgid "brace expansion: failed to allocate memory for %u elements"
-msgstr "vinkulmalvolvo: Fiaskis memorhavigo por %d elementoj"
+msgstr "vinkulmalvolvo: Fiaskis memorhavigo por %u elementoj"
 
 # XXX: internal_error
 #: braces.c:451
@@ -1141,9 +1141,8 @@ msgid "attempted assignment to non-variable"
 msgstr "Provo valorizi ne-variablon"
 
 #: expr.c:530
-#, fuzzy
 msgid "syntax error in variable assignment"
-msgstr "Sintaksa eraro en esprimo"
+msgstr "Sintaksa eraro en valorizo de variablo"
 
 #: expr.c:544 expr.c:911
 msgid "division by 0"
@@ -1361,9 +1360,8 @@ msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp fiaskis"
 
 #: jobs.c:4447
-#, fuzzy
 msgid "initialize_job_control: no job control in background"
-msgstr "initialize_job_control: liniaranĝo"
+msgstr "initialize_job_control: laborregado ne funkcias en la fono"
 
 #: jobs.c:4463
 msgid "initialize_job_control: line discipline"
@@ -1773,7 +1771,7 @@ msgstr "«/tmp» devas esti valida dosierujo"
 
 #: shell.c:804
 msgid "pretty-printing mode ignored in interactive shells"
-msgstr ""
+msgstr "La reĝimo de struktura tekstaranĝo ne funkcias en dialogaj ŝeloj"
 
 #: shell.c:948
 #, c-format
@@ -2138,9 +2136,9 @@ msgid "%s: invalid variable name"
 msgstr "%s: Maltaŭga variablonomo"
 
 #: subst.c:7234
-#, fuzzy, c-format
+#, c-format
 msgid "%s: parameter not set"
-msgstr "%s: Parametro estas NUL aŭ malaktiva"
+msgstr "%s: Parametro estas malaktiva"
 
 #: subst.c:7236
 #, c-format
@@ -2222,9 +2220,10 @@ msgid "invalid signal number"
 msgstr "Misa signalnumero"
 
 #: trap.c:325
-#, fuzzy, c-format
+#, c-format
 msgid "trap handler: maximum trap handler level exceeded (%d)"
-msgstr "eval: La ingado de „eval“oj superis sian maksimumon (%d)"
+msgstr ""
+"trap handler: La nivelo de kaptilotraktiloj superis sian maksimumon (%d)"
 
 # XXX: internal_warning
 #: trap.c:414
@@ -2330,7 +2329,7 @@ msgstr "%s: %s kongruo-nivelo estas ekster sia variejo"
 #: version.c:46 version2.c:46
 #, fuzzy
 msgid "Copyright (C) 2020 Free Software Foundation, Inc."
-msgstr "Copyright (C) 2016 ĉe «Free Software Foundation, Inc.»"
+msgstr "Copyright (C) 2018 ĉe «Free Software Foundation, Inc.»"
 
 #: version.c:47 version2.c:47
 msgid ""
@@ -2593,7 +2592,7 @@ msgstr "umask [-p] [-S] [REĜIMO]"
 #: builtins.c:177
 #, fuzzy
 msgid "wait [-fn] [-p var] [id ...]"
-msgstr "wait [-n] [IND ...]"
+msgstr "wait [-fn] [IND ...]"
 
 #: builtins.c:181
 msgid "wait [pid ...]"
@@ -2692,8 +2691,8 @@ msgid ""
 "W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
 "suffix] [name ...]"
 msgstr ""
-"complete [-abcdefgjksuv] [-pr] [-DE] [-o OPCIO] [-A AGO] [-G GLOBŜAB]\n"
-"         [-W VORTLISTO]  [-F FUNKCIO] [-C KOMANDO] [-X FILTROŜAB]\n"
+"complete [-abcdefgjksuv] [-pr] [-DEI] [-o OPCIO] [-A AGO] [-G ŜABLONO]\n"
+"         [-W VORTLISTO]  [-F FUNKCIO] [-C KOMANDO] [-X FILTRILO]\n"
 "         [-P PREFIKSO] [-S SUFIKSO] [NOMO ...]"
 
 #: builtins.c:235
@@ -2702,31 +2701,29 @@ msgid ""
 "compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-"
 "F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
 msgstr ""
-"compgen [-abcdefgjksuv] [-o OPCIO]  [-A AGO] [-G GLOBŜAB]\n"
-"        [-W VORTLISTO]  [-F FUNKCIO] [-C KOMANDO] [-X FILTROŜAB]\n"
+"compgen [-abcdefgjksuv] [-o OPCIO]  [-A AGO] [-G ŜABLONO]\n"
+"        [-W VORTLISTO]  [-F FUNKCIO] [-C KOMANDO] [-X FILTRILO]\n"
 "        [-P PREFIKSO] [-S SUFIKSO] [VORTO]"
 
 #: builtins.c:239
-#, fuzzy
 msgid "compopt [-o|+o option] [-DEI] [name ...]"
-msgstr "compopt [-o|+o OPCIO] [-DE] [NOMO ...]"
+msgstr "compopt [-o|+o OPCIO] [-DEI] [NOMO ...]"
 
 #: builtins.c:242
 msgid ""
 "mapfile [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
 "callback] [-c quantum] [array]"
 msgstr ""
-"mapfile [-d DISIG] [-n NOMBRILO] [-O ORIGINO] [-s NOMBRILO] [-t] [-u DN]\n"
+"mapfile [-d DISIG] [-n KIOM] [-O ORIGINO] [-s KIOM] [-t] [-u DN]\n"
 "        [-C RETROVOKO] [-c KVANTO] [TABELO]"
 
 #: builtins.c:244
-#, fuzzy
 msgid ""
 "readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
 "callback] [-c quantum] [array]"
 msgstr ""
-"readarray [-n NOMBRILO] [-O ORIGINO] [-s NOMBRILO] [-t] [-u DN]\n"
-"          [-C RETROVOKO] [-c KVANTO] [TABELO]"
+"readarray [-d DISIG] [-n KIOM] [-O ORIGINO] [-s KIOM] [-t]\n"
+"          [-u DN] [-C RETROVOKO] [-c KVANTO] [TABELO]"
 
 #  alias:
 #: builtins.c:256
@@ -2901,7 +2898,6 @@ msgstr ""
 # builtin [shell-builtin [arg ...]]
 # builtin [ŜELAĴO [ARG ...]]
 #: builtins.c:354
-#, fuzzy
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -3201,11 +3197,11 @@ msgstr ""
 "    -a\tla NOMOj estu entjerindicaj tabeloj (se realigite)\n"
 "    -A\tla NOMOj estu asocitabeloj (se realigite)\n"
 "    -i\thavigu al la variabloj NOMOj la atributon „integer‟ (entjera)\n"
-"    -l\tminuskligu la NOMOjn ĉe valorizo\n"
+"    -l\tminuskligu la valoron de ĉiu NOMO ĉe valorizo\n"
 "    -n  NOMO estu referenco al variablo nomata per ĝia valoro\n"
 "    -r\tla variabloj NOMOj estu nurlegaj\n"
 "    -t\thavigu al la NOMOj la atributon „trace‟ (spurata)\n"
-"    -u\tmajuskligu la NOMOjn ĉe valorizo\n"
+"    -u\tmajuskligu la valoron de ĉiu NOMO ĉe valorizo\n"
 "    -x\teksportu la variablojn NOMOj\n"
 "\n"
 "    La uzo de „+‟ anstataŭ „-‟ malŝaltas la koncernan attributon.\n"
@@ -3261,7 +3257,6 @@ msgstr ""
 
 # echo:
 #: builtins.c:557
-#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3327,6 +3322,12 @@ msgstr ""
 "\t\tpovas enteni 0, 1, 2 aŭ 3 okumajn ciferojn\n"
 "\t\\xHH\tla signo kies 8-bita kodono estas HH (16-ume).  HH\n"
 "\t\tpovas enteni unu aŭ du 16-umajn ciferojn\n"
+"        \\uHHHH  la Unikoda signo kies kodono estas la 16-uma\n"
+"                nombro HHHH.  HHHH povas enteni de unu ĝis kvar\n"
+"                16-umajn ciferojn.\n"
+"        \\UHHHHHHHH  la Unikoda signo kies kodono estas la 16-uma\n"
+"                nombro HHHHHHHH.  HHHHHHHH povas enteni de unu ĝis\n"
+"                ok 16-umajn ciferojn.\n"
 "\n"
 "    Elirstato:\n"
 "    Sukcesa, krom se okazas elig-eraro."
@@ -3729,7 +3730,6 @@ msgstr ""
 # help [-ds] [pattern ...]
 # help [-ds] [ŜABLONO ...]
 #: builtins.c:818
-#, fuzzy
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3775,7 +3775,6 @@ msgstr ""
 # history -awr [DOSIERNOMO] aŭ
 # history -ps ARG [ARG...]
 #: builtins.c:842
-#, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3817,8 +3816,9 @@ msgstr ""
 "\n"
 "    Opcioj:\n"
 "    -c  forviŝu la tutan historion (forigu ĉiujn erojn el la listo)\n"
-"    -d POZICIO  forviŝu la linion kies numero estas  POZICIO\n"
-"\n"
+"    -d POZICIO  forviŝu la linion kies numero estas  POZICIO.  Por\n"
+"        POZICIO negativa la numerado iras reen ekde la fino de la\n"
+"        historio \n"
 "    -a  aldonu la historiliniojn de la kuranta seanco al la\n"
 "        historidosiero\n"
 "    -n  legu ĉiujn ankoraŭ ne legitajn liniojn el la historidosiero\n"
@@ -4068,7 +4068,6 @@ msgstr ""
 # read [-ers] [-a TABELO] [-d DISIG] [-i TEKSTO] [-n NSIGN] [-N NSIGN]
 #      [-p INVIT] [-t TLIM] [-u DN] [NOMO ...]
 #: builtins.c:994
-#, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
@@ -4136,7 +4135,7 @@ msgstr ""
 "\t\tTABELO, komencante ekde la indico 0\n"
 "    -d DISIG\tlegu ĝis la unua signo de la disigilo DISIG (anstataŭ\n"
 "\t\tlegi ĝis linifino)\n"
-"    -e\t\tuzu Readline por akiri la linion en dialoga ŝelo\n"
+"    -e\t\tuzu Readline por akiri la linion\n"
 "    -i TEKSTO\tuzu TEKSTOn kiel komencan tekston por Readline\n"
 "    -n NSIGN\tĉesu leginte NSIGN da signoj (anstataŭ legi ĝis\n"
 "\t\tlinifino), krom se disigilo aperas pli frue\n"
@@ -4996,8 +4995,8 @@ msgstr ""
 "    Elirstato:\n"
 "    Sukceso, krom se REĜIMO estas nevalida aŭ aperas misa opcio."
 
-# wait [-n] [id ...]
-# wait [-n] [IND ...]
+# wait [-fn] [id ...]
+# wait [-fn] [IND ...]
 #: builtins.c:1502
 #, fuzzy
 msgid ""
@@ -5038,8 +5037,11 @@ msgstr ""
 "    elirstaton 0.  Se IND estas laborindiko, atendu ĉiujn procezojn en\n"
 "    la dukto de la laboro.\n"
 "\n"
-"    Kun la opcio „-n“: atendi finiĝon de la sekva laboro kaj liveru\n"
+"    Kun la opcio „-n“: atendu finiĝon de la sekva laboro kaj liveru\n"
 "    ĝian elirstaton.\n"
+"\n"
+"    Kun la opcio „-f“: se la laborregado estas ŝaltita, atendu finiĝon\n"
+"    de la donita IND (anstataŭ atendi ke ĝi ŝanĝu la staton)\n"
 "\n"
 "    Elirstato:\n"
 "    Tiu de la lasta IND; malsukceso, se IND estas nevalida aŭ se\n"
@@ -5727,7 +5729,6 @@ msgstr ""
 # shopt [-pqsu] [-o] [optname ...]
 # shopt [-pqsu] [-o] [OPCINOMO ...]
 #: builtins.c:1916
-#, fuzzy
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5748,8 +5749,9 @@ msgid ""
 msgstr ""
 "Ŝaltu kaj malŝaltu ŝelajn opciojn\n"
 "\n"
-"    Ŝanĝu la staton de ĉiu el la OPCINOMOj.  Sen opciaj argumentoj,\n"
-"    listigu ĉiujn ŝelajn opciojn, indikante pri ĉiu el ili, ĉu ĝi\n"
+"    Ŝanĝu la staton de ĉiu el la OPCINOMOj. Sen opciaj argumentoj,\n"
+"    listigu ĉiujn doniajn OPCINOMOjn -- aŭ ĉiujn ŝelajn opciojn se\n"
+"    neniu OPCINOMO estas donita, -- indikante pri ĉiu el ili, ĉu ĝi\n"
 "    estas ŝaltita.\n"
 "\n"
 "    Opcioj:\n"
@@ -5829,8 +5831,8 @@ msgstr ""
 "    Sukceso, krom se aperas misa opcio aŭ okazas eraro pri skribo aŭ\n"
 "    valorizo."
 
-# complete [-abcdefgjksuv] [-pr] [-DE] [-o OPCIO] [-A AGO] [-G GLOBŜAB]
-#          [-W VORTLISTO]  [-F FUNKCIO] [-C KOMANDO] [-X FILTROŜAB]
+# complete [-abcdefgjksuv] [-pr] [-DEI] [-o OPCIO] [-A AGO] [-G ŜABLONO]
+#          [-W VORTLISTO]  [-F FUNKCIO] [-C KOMANDO] [-X FILTRILO]
 #          [-P PREFIKSO] [-S SUFIKSO] [NOMO ...]
 #: builtins.c:1971
 #, fuzzy
@@ -5877,9 +5879,13 @@ msgstr ""
 "        komandoj sen specifa kompletigo-difino\n"
 "    -E  apliku la indikitajn kompletigojn kaj agojn al vakuaj (Empty)\n"
 "        komandoj (la kompletigoj provotaj en vakua komandolinio)\n"
+"    -I  apliku la kompletigojn kaj agojn al la unua (kutime, la\n"
+"        komanda) vorto\n"
 "\n"
 "    Ĉe provo kompletigi la agoj aplikiĝas laŭ la ordo de majusklaj\n"
-"    opcioj en la ĉi-supre listo. La opcio -D superregas la opcion -E.\n"
+"    opcioj en la ĉi-supra listo. Se pluraj opcioj estas donitaj, la\n"
+"    opcio „-D“ antaŭas la opcion „-E“, kaj ili ambaŭ antaŭas la\n"
+"    opcion „-I“.\n"
 "\n"
 "    Elirstato:\n"
 "    Sukceso, krom se misa opcio estas donita, aŭ eraro okazis."
@@ -5887,8 +5893,8 @@ msgstr ""
 # compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat]
 # 	[-W wordlist] [-P prefix] [-S suffix] [-X filterpat]
 # 	[-F function] [-C command] [word]
-# compgen [-abcdefgjksuv] [-o OPCIO]  [-A AGO] [-G GLOBŜAB]
-# 	[-W VORTLISTO]  [-F FUNKCIO] [-C KOMANDO] [-X FILTROŜAB]
+# compgen [-abcdefgjksuv] [-o OPCIO]  [-A AGO] [-G ŜABLONO]
+# 	[-W VORTLISTO]  [-F FUNKCIO] [-C KOMANDO] [-X FILTRILO]
 # 	[-P PREFIKSO] [-S SUFIKSO] [VORTO]
 #: builtins.c:2001
 msgid ""
@@ -5912,7 +5918,6 @@ msgstr ""
 
 # compopt [-o|+o OPCIO] [-DE] [NOMO ...]
 #: builtins.c:2016
-#, fuzzy
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -5953,7 +5958,8 @@ msgstr ""
 "    Opcioj:\n"
 "    -o OPCIO  Ŝaltu kompletigan OPCIOn por ĉiu NOMO\n"
 "    -D        Ŝanĝu opciojn por la Defaŭlta komandokompletigo\n"
-"    -E        Ŝanĝu opciojn por la vakua (Empty) komandokompletigo.\n"
+"    -E        Ŝanĝu opciojn por la vakua (Empty) komandokompletigo\n"
+"    -I        Ŝanĝu la kompletigajn opciojn por la unua vorto.\n"
 "\n"
 "    Uzante «+o» anstataŭ «-o» oni malŝaltas la indikitan OPCIOn.\n"
 "\n"
@@ -6021,11 +6027,11 @@ msgstr ""
 "\n"
 "    Opcioj:\n"
 "    -d DISIG    Por fini liniojn uzu ne la linifinilon, sed DISIG\n"
-"    -n NOMBRILO Kopiu maksimume NOMBRILOn da linioj.  Se NOMBRILO\n"
+"    -n KIOM     Kopiu maksimume KIOMon da linioj.  Se KIOM\n"
 "                estas 0, kopiu ĉiujn liniojn\n"
 "    -O ORIGINO  Komencu valorizi la TABELOn ekde la indekso ORIGINO.\n"
 "                La defaŭlta origino estas 0.\n"
-"    -s NOMBRILO Ignoru NOMBRILOn da unuaj linioj\n"
+"    -s KIOM     Ignoru KIOMon da unuaj linioj\n"
 "    -t          Forigu la vostan DISIG el ĉiu legita linio (defaŭlte\n"
 "                la linifinilon)\n"
 "    -u DN       Legu per la dosiernunero DN anstataŭ el la ĉefenigujo\n"

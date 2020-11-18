@@ -13389,7 +13389,10 @@ option suppresses shell function lookup, as with the <B>command</B> builtin.
 
 returns true if all of the arguments are found, false if
 any are not found.
-<DT><B>ulimit</B> [<B>-HSabcdefiklmnpqrstuvxPRT</B> [<I>limit</I>]]<DD>
+<DT><B>ulimit</B> [<B>-HS</B>] <B>-a</B><DD>
+
+<DT><B>ulimit</B> [<B>-HS</B>] [<B>-bcdefiklmnpqrstuvxPRT</B> [<I>limit</I>]]<DD>
+
 Provides control over the resources available to the shell and to
 processes started by it, on systems that allow such control.
 The <B>-H</B> and <B>-S</B> options specify that the hard or soft limit is
@@ -13417,7 +13420,8 @@ If
 
 is omitted, the current value of the soft limit of the resource is
 printed, unless the <B>-H</B> option is given.  When more than one
-resource is specified, the limit name and unit are printed before the value.
+resource is specified, the limit name and unit, if appropriate,
+are printed before the value.
 Other options are interpreted as follows:
 <DL COMPACT><DT><DD>
 
@@ -13425,7 +13429,7 @@ Other options are interpreted as follows:
 <DT><B>-a</B>
 
 <DD>
-All current limits are reported
+All current limits are reported; no limits are set
 <DT><B>-b</B>
 
 <DD>
@@ -14360,6 +14364,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 29 October 2020 16:21:32 EDT
+Time: 18 November 2020 15:13:09 EST
 </BODY>
 </HTML>

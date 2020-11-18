@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the bash package.
 #
 # Tomislav Krznar <tomislav.krznar@gmail.com>, 2012, 2013.
-# Božidar Putanec <bozidarp@yahoo.com>, 2018.
+# Božidar Putanec <bozidarp@yahoo.com>, 2018, 2019.
 msgid ""
 msgstr ""
-"Project-Id-Version: bash 5.0-beta2\n"
+"Project-Id-Version: bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-08-07 12:00-0400\n"
-"PO-Revision-Date: 2018-12-05 17:31-0800\n"
+"PO-Revision-Date: 2019-01-08 13:32-0800\n"
 "Last-Translator: Božidar Putanec <bozidarp@yahoo.com>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
 "Language: hr\n"
@@ -19,11 +19,7 @@ msgstr ""
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 2.2\n"
-"X-Poedit-Basepath: ../sources\n"
-"X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPath-1: bash-5.0-beta2\n"
-"X-Poedit-SearchPath-2: bash-5.0-beta2/builtins\n"
+"X-Generator: Lokalize 2.0\n"
 
 #: arrayfunc.c:66
 msgid "bad array subscript"
@@ -601,7 +597,7 @@ msgstr "mjesto u povijesti naredbi"
 #: builtins/history.def:340
 #, c-format
 msgid "%s: invalid timestamp"
-msgstr "%s: nevaljana vremenska oznaka"
+msgstr "%s: nevaljani vremenski žig"
 
 #: builtins/history.def:451
 #, c-format
@@ -721,7 +717,7 @@ msgstr "snop direktorija je prazan"
 
 #: builtins/pushd.def:526
 msgid "directory stack index"
-msgstr "indeks stoga direktorija"
+msgstr "indeks snopa direktorija"
 
 #: builtins/pushd.def:701
 msgid ""
@@ -1263,7 +1259,7 @@ msgstr "Nepoznati status"
 #: jobs.c:2001
 #, c-format
 msgid "(core dumped) "
-msgstr "(stanje memorije zapisano) "
+msgstr "(**krah**: stanje memorije je dokumentirano!) "
 
 #: jobs.c:2020
 #, c-format
@@ -1317,7 +1313,7 @@ msgstr "%s: redak %d: "
 #: jobs.c:4334 nojobs.c:919
 #, c-format
 msgid " (core dumped)"
-msgstr " (stanje memorije zapisano)"
+msgstr " (**krah**: stanje memorije je dokumentirano!)"
 
 #: jobs.c:4346 jobs.c:4359
 #, c-format
@@ -1561,11 +1557,11 @@ msgstr "neočekivani argument za uvjetni unarni operator"
 #: parse.y:4864
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
-msgstr "neočekivani token „%s“; očekivao se uvjetni binarni operator"
+msgstr "neočekivani token „%s“; očekivan je uvjetni binarni operator"
 
 #: parse.y:4868
 msgid "conditional binary operator expected"
-msgstr "očekivao se uvjetni binarni operator"
+msgstr "očekivan je uvjetni binarni operator"
 
 #: parse.y:4890
 #, c-format
@@ -1696,11 +1692,11 @@ msgstr "greška  preusmjeravanja: nije moguće kopirati deskriptor datoteke"
 
 #: shell.c:347
 msgid "could not find /tmp, please create!"
-msgstr "nije bilo moguće pronaći /tmp; napravite taj direktorij!"
+msgstr "nije moguće pronaći /tmp; napravite taj direktorij!"
 
 #: shell.c:351
 msgid "/tmp must be a valid directory name"
-msgstr "/tmp mora biti ispravno ime direktorija"
+msgstr "/tmp mora biti valjano ime direktorija"
 
 #: shell.c:804
 msgid "pretty-printing mode ignored in interactive shells"
@@ -1793,6 +1789,7 @@ msgstr "bash Web stranica: <http://www.gnu.org/software/bash>\n"
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr ""
 "Općenita pomoć za korištenje GNU softvera: <http://www.gnu.org/gethelp/>\n"
+"Prijavite primjedbe i greške u prijevoda na lokalizacija@linux.hr/\n"
 
 #: sig.c:752
 #, c-format
@@ -1805,7 +1802,7 @@ msgstr "Lažni signal"
 
 #: siglist.c:50
 msgid "Hangup"
-msgstr "Završetak"
+msgstr "SIGHUP"
 
 #: siglist.c:54
 msgid "Interrupt"
@@ -1833,7 +1830,7 @@ msgstr "EMT instrukcija"
 
 #: siglist.c:82
 msgid "Floating point exception"
-msgstr "Iznimka/greška u radu s realnim brojem"
+msgstr "Greška u manipulaciji broja s pomičnim zarezom"
 
 #: siglist.c:86
 msgid "Killed"
@@ -1841,7 +1838,7 @@ msgstr "Ubijen"
 
 #: siglist.c:90
 msgid "Bus error"
-msgstr "Greška adresiranja"
+msgstr "Greška u adresiranju"
 
 #: siglist.c:94
 msgid "Segmentation fault"
@@ -1929,7 +1926,7 @@ msgstr "HFT ulazni podaci čekaju"
 
 #: siglist.c:186
 msgid "power failure imminent"
-msgstr "prekid napajanja je neizbježan"
+msgstr "nestanak struje je neizbježan"
 
 #: siglist.c:190
 msgid "system crash imminent"
@@ -2092,12 +2089,12 @@ msgstr "očekuje se „)“, nađen %s"
 #: test.c:466 test.c:796
 #, c-format
 msgid "%s: binary operator expected"
-msgstr "%s: očekuje se binarni operator"
+msgstr "%s: očekivan je binarni operator"
 
 #: test.c:753 test.c:756
 #, c-format
 msgid "%s: unary operator expected"
-msgstr "%s: očekuje se unarni operator"
+msgstr "%s: očekivan je unarni operator"
 
 #: test.c:878
 msgid "missing `]'"
@@ -2225,7 +2222,7 @@ msgstr "GNU bash, inačica %s (%s)\n"
 
 #: version.c:91 version2.c:91
 msgid "This is free software; you are free to change and redistribute it."
-msgstr "Ovo je slobodni softver; slobodno ga mijenjajte i dijelite."
+msgstr "Ovo je slobodni softver; slobodno ga mijenjajte i distribuirajte."
 
 #: version.c:92 version2.c:92
 msgid "There is NO WARRANTY, to the extent permitted by law."
@@ -3082,7 +3079,6 @@ msgstr ""
 "    dogodila se greška pri dodijeli ili ljuska ne izvrši funkciju."
 
 #: builtins.c:557
-#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3124,7 +3120,7 @@ msgstr ""
 "Dȃne argumente ispiše na standardni izlaz.\n"
 "\n"
 "    Ispiše dȃne argumente na standardni izlaz, međusobno odvojene s\n"
-"    jednim razmakom (bjelina) i na kraju s novim retkom.\n"
+"    jednim razmakom (bjelinom) i na kraju s novim retkom.\n"
 "\n"
 "    Opcije:\n"
 "      -n   ne pripoji novi redak (znak novog retka)\n"
@@ -3146,8 +3142,12 @@ msgstr ""
 "      \\t   horizontalni tabulator\n"
 "      \\v   vertikalni tabulator\n"
 "      \\\\     backslash (\\)\n"
-"      \\0NNN   znak s ASCII kȏdom NNN (oktalni, 1 do 3 znamenke)\n"
-"      \\xHH    znak s ASCII kȏdom HH (heksadecimalni, 1 do 2 znamenke)\n"
+"      \\0NNN   znak s ASCII kȏdom NNN (oktalni, 1 do 3 oktalne znamenke)\n"
+"      \\xHH    osmobitni znak čija je vrijednost HH (heksadecimalna)\n"
+"      \\uHHHH  unikodni znak čija je vrijednost HHHH  (heksadecimalna)\n"
+"                 HHHH može biti od 1 do 4 heksadecimalne znamenke\n"
+"      \\UHHHHHHHH  unikodni znak čija je vrijednost HHHH  (heksadecimalna)\n"
+"                     HHHHHHHH može biti od 1 do 8 heksadecimalnih znamenki\n"
 "\n"
 "    Završi s kȏdom 0 osim ako se ne dogodi greška pisanja."
 
@@ -4420,7 +4420,7 @@ msgstr ""
 "        ! IZRAZ           istina ako IZRAZ neistiniti\n"
 "      IZRAZ1 -a IZRAZ2    istina ako su oba izraza istinita\n"
 "      IZRAZ1 -o IZRAZ2    laž ako su oba izraza neistinita\n"
-"      ARG1 OP ARG2        istina ako je aritmetika ispravna; operator OP je\n"
+"      ARG1 OP ARG2        istina ako je aritmetika valjana; operator OP je\n"
 "                            jedan od: -eq, -ne, -lt, -le, -gt, ili -ge;\n"
 "                            koji znače: jednako, nejednako, manje od, "
 "manje,\n"
@@ -5538,16 +5538,17 @@ msgstr ""
 "      -p   ispiše postojeće specifikacije kompletiranja u formatu\n"
 "             upotrebljivom za ulaz\n"
 "      -r   ukloni specifikaciju kompletiranja za svako dȃno IME\n"
-"             ili ukloni sve specifikacije ako nisu dȃna IMEna\n"
+"             ili ukloni sve specifikacije ako nisu dȃna IMENA\n"
 "      -D   na naredbe koje nemaju vlastitu specifikaciju za kompletiranje\n"
 "             primjeni „zadano“ ponašanje specifikacija i akcija\n"
 "      -E   primjeni zadano ponašanje specifikacija i akcija i na „prazne“\n"
-"             naredbe, to jest pokuša kompletirati prazni redak\n"
+"             naredbe --; pokuša kompletirati prazni redak\n"
 "      -I   primjeni zadano ponašanje specifikacija i akcija i na početnu\n"
 "             (obično naredbu) riječ\n"
 "\n"
 "    Redoslijed akcija pri pokušaju kompletiranja slijedi gore dȃni poredak\n"
-"    opcija u verzalu. Opcija „-D“ ima veći prioritet od opcije „-E“.\n"
+"    opcija pisanih u verzalu. Opcija „-D“ ima veći prioritet od opcije „-"
+"E“.\n"
 "    a obje imaju veći prioritet od opcije „-I“\n"
 "\n"
 "    Završi s kȏdom 0 osim ako je dȃna nevaljana opcija\n"
@@ -5711,10 +5712,6 @@ msgstr ""
 "\n"
 "    Sinonim za „mapfile“."
 
-#, fuzzy
-#~ msgid "Copyright (C) 2019 Free Software Foundation, Inc."
-#~ msgstr "Copyright (C) 2018 Free Software Foundation, Inc."
-
 #~ msgid ""
 #~ "Returns the context of the current subroutine call.\n"
 #~ "    \n"
@@ -5729,6 +5726,9 @@ msgstr ""
 
 #~ msgid "Unknown Signal #"
 #~ msgstr "Nepoznati signal #"
+
+#~ msgid "Copyright (C) 2018 Free Software Foundation, Inc."
+#~ msgstr "Copyright (C) 2018 Free Software Foundation, Inc."
 
 #~ msgid ""
 #~ "License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl."

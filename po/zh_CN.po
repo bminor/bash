@@ -8,7 +8,7 @@
 # Mingcong Bai <jeffbai@aosc.xyz>, 2015.
 # liushuyu <liushuyu011@gmail.com>, 2016.
 # Mingye Wang <arthur200126@gmail.com>, 2015, 2016.
-# Boyuan Yang <073plan@gmail.com>, 2018.
+# Boyuan Yang <073plan@gmail.com>, 2018, 2019.
 #
 # KNOWN DEFECTS (easy fixes, tedious work; sorted by priority):
 #  0. Translation coverage when upstream sends new strings.
@@ -37,10 +37,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bash 5.0-beta2\n"
+"Project-Id-Version: bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-08-07 12:00-0400\n"
-"PO-Revision-Date: 2018-12-13 13:27-0500\n"
+"PO-Revision-Date: 2019-01-08 15:20-0500\n"
 "Last-Translator: Boyuan Yang <073plan@gmail.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -3094,7 +3094,6 @@ msgstr ""
 "数。"
 
 #: builtins.c:557
-#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3143,7 +3142,7 @@ msgstr ""
 "      -E\t显式地抑制对于反斜杠转义的解释\n"
 "    \n"
 "    `echo' 对下列反斜杠字符进行转义：\n"
-"      \\a\t警告(响铃)\n"
+"      \a\t警告(响铃)\n"
 "      \\b\t退格\n"
 "      \\c\t抑制更多的输出\n"
 "      \\e\t转义字符\n"
@@ -3153,9 +3152,14 @@ msgstr ""
 "      \\t\t横向制表符\n"
 "      \\v\t纵向制表符\n"
 "      \\\\\t反斜杠\n"
-"      \\0nnn\t以 NNN (八进制)为 ASCII 码的字符。 NNN 可以是 0 到 3 个八进制"
+"      \\0nnn\t以 NNN（八进制）为 ASCII 码的字符。NNN 可以是 0 到 3 个八进制"
 "位\n"
-"      \\xHH\t以 HH (十六进制)为值的八按位字符。HH可以是一个或两个十六进制位\n"
+"      \\xHH\t以 HH（十六进制）为值的八比特字符。HH 可以是一个或两个十六进制"
+"位\n"
+"      \\uHHHH\t以 HHHH（十六进制）为值的 Unicode 字符。HHHH 可以是一个到\n"
+"    \t\t四个十六进制位。\n"
+"      \\UHHHHHHHH 以 HHHHHHHH（十六进制）为值的 Unicode 字符。\n"
+"    \t\tHHHHHHHH 可以是一到八个十六进制位。\n"
 "    \n"
 "    退出状态：\n"
 "    返回成功除非有写错误发生。"
@@ -5665,11 +5669,6 @@ msgstr ""
 "    \n"
 "    一个 `mapfile'的同义词。"
 
-#  Inc. 的 . 是个缩写
-#, fuzzy
-#~ msgid "Copyright (C) 2019 Free Software Foundation, Inc."
-#~ msgstr "版权所有 (C) 2018 自由软件基金会"
-
 #~ msgid ""
 #~ "Returns the context of the current subroutine call.\n"
 #~ "    \n"
@@ -5684,6 +5683,10 @@ msgstr ""
 
 #~ msgid "Unknown Signal #"
 #~ msgstr "未知信号 #"
+
+#  Inc. 的 . 是个缩写
+#~ msgid "Copyright (C) 2018 Free Software Foundation, Inc."
+#~ msgstr "版权所有 (C) 2018 自由软件基金会"
 
 #~ msgid "Copyright (C) 2014 Free Software Foundation, Inc."
 #~ msgstr "版权所有 (C) 2014 自由软件基金会."
