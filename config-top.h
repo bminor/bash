@@ -106,9 +106,11 @@
    which can be fooled under certain not-uncommon circumstances. */
 /* #define SSH_SOURCE_BASHRC */
 
-/* Define if you want the case-capitalizing operators (~[~]) and the
+/* Define if you want the case-toggling operators (~[~]) and the
    `capcase' variable attribute (declare -c). */
-#define  CASEMOD_CAPCASE
+/* TAG: bash-5.2 disable */
+#define CASEMOD_TOGGLECASE
+#define CASEMOD_CAPCASE
 
 /* This is used as the name of a shell function to call when a command
    name is not found.  If you want to name it something other than the
