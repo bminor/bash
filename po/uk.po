@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-07 12:00-0400\n"
+"POT-Creation-Date: 2020-11-18 16:09-0500\n"
 "PO-Revision-Date: 2019-01-08 20:48+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
@@ -26,8 +26,8 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "неправильний індекс масиву"
 
-#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2249 variables.c:2275
-#: variables.c:3108
+#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2274 variables.c:2300
+#: variables.c:3133
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr "%s: вилучаємо атрибут nameref"
@@ -57,29 +57,29 @@ msgstr "%s: %s: при означенні асоціативних масиві�
 msgid "%s: cannot create: %s"
 msgstr "%s: не вдалося створити: %s"
 
-#: bashline.c:4308
+#: bashline.c:4310
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command: не вдалося знайти відповідне призначення для "
 "команди"
 
-#: bashline.c:4455
+#: bashline.c:4459
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: перший непробільний символ не є «\"»"
 
 # c-format
-#: bashline.c:4484
+#: bashline.c:4488
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "нема заключної «%c» у %s"
 
-#: bashline.c:4515
+#: bashline.c:4519
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: пропущено двокрапку-роздільник"
 
-#: bashline.c:4551
+#: bashline.c:4555
 #, fuzzy, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "«%s»: не вдалося зняти призначення"
@@ -99,7 +99,7 @@ msgstr "розкриття дужок: не вдалося отримати об
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "розкриття дужок: не вдалося отримати об’єм пам’яті для «%s»"
 
-#: builtins/alias.def:131 variables.c:1835
+#: builtins/alias.def:131 variables.c:1844
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "«%s»: некоректна назва замінника"
@@ -175,7 +175,7 @@ msgstr ""
 msgid "HOME not set"
 msgstr "змінну HOME не встановлено"
 
-#: builtins/cd.def:335 builtins/common.c:161 test.c:898
+#: builtins/cd.def:335 builtins/common.c:161 test.c:901
 msgid "too many arguments"
 msgstr "забагато аргументів"
 
@@ -330,12 +330,12 @@ msgstr "%s: завдання вказано неоднозначно"
 msgid "help not available in this version"
 msgstr "у цій версії не можна скористатися довідкою"
 
-#: builtins/common.c:1008 builtins/set.def:953 variables.c:3814
+#: builtins/common.c:1008 builtins/set.def:953 variables.c:3839
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: не вдалося знищити: %s лише для читання"
 
-#: builtins/common.c:1013 builtins/set.def:932 variables.c:3819
+#: builtins/common.c:1013 builtins/set.def:932 variables.c:3844
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: не вдалося знищити"
@@ -372,13 +372,13 @@ msgstr "може використовуватися лише усередині 
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: еталонна змінна не може бути масивом"
 
-#: builtins/declare.def:374 variables.c:3360
+#: builtins/declare.def:374 variables.c:3385
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: не можна використовувати циклічне посилання у змінній посилання"
 
-#: builtins/declare.def:379 variables.c:2079 variables.c:3279 variables.c:3287
-#: variables.c:3357
+#: builtins/declare.def:379 variables.c:2104 variables.c:3304 variables.c:3312
+#: variables.c:3382
 #, c-format
 msgid "%s: circular name reference"
 msgstr "%s: циклічне посилання за назвою"
@@ -392,7 +392,7 @@ msgstr "«%s»: некоректна назва змінної для посил
 msgid "cannot use `-f' to make functions"
 msgstr "`-f' не використовується для створення функцій"
 
-#: builtins/declare.def:526 execute_cmd.c:5981
+#: builtins/declare.def:526 execute_cmd.c:5986
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: незмінна функція"
@@ -449,7 +449,7 @@ msgstr "%s: завантажений не динамічно"
 msgid "%s: cannot delete: %s"
 msgstr "%s: не вдалося вилучити: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5813
+#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5818
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: це каталог"
@@ -493,15 +493,16 @@ msgstr "Залишилися призупинені завдання.\n"
 msgid "There are running jobs.\n"
 msgstr "Фонові завдання все ще виконуються.\n"
 
-#: builtins/fc.def:267
+#: builtins/fc.def:275 builtins/fc.def:373 builtins/fc.def:417
 msgid "no command found"
 msgstr "команду не знайдено"
 
-#: builtins/fc.def:325 builtins/fc.def:359 builtins/fc.def:388
+#: builtins/fc.def:363 builtins/fc.def:368 builtins/fc.def:407
+#: builtins/fc.def:412
 msgid "history specification"
 msgstr "параметри журналу"
 
-#: builtins/fc.def:409
+#: builtins/fc.def:444
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: не вдалося відкрити тимчасовий файл: %s"
@@ -1054,52 +1055,52 @@ msgstr "execute_coproc: coproc [%d:%s] все ще існує"
 msgid "pipe error"
 msgstr "помилка каналу"
 
-#: execute_cmd.c:4792
+#: execute_cmd.c:4793
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: перевищено максимальний рівень вкладеності eval (%d)"
 
-#: execute_cmd.c:4804
+#: execute_cmd.c:4805
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: перевищено максимальний рівень вкладеності джерела (%d)"
 
-#: execute_cmd.c:4912
+#: execute_cmd.c:4913
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: перевищено максимальний рівень вкладеності функцій (%d)"
 
-#: execute_cmd.c:5466
+#: execute_cmd.c:5467
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: обмеження: не можна вказувати `/' у назві команди"
 
-#: execute_cmd.c:5569
+#: execute_cmd.c:5574
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: команду не знайдено"
 
-#: execute_cmd.c:5811
+#: execute_cmd.c:5816
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5849
+#: execute_cmd.c:5854
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: неправильний інтерпретатор"
 
-#: execute_cmd.c:5886
+#: execute_cmd.c:5891
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: не вдалося виконати бінарний файл: %s"
 
-#: execute_cmd.c:5972
+#: execute_cmd.c:5977
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "%s є спеціальною вбудованою командою оболонки"
 
-#: execute_cmd.c:6024
+#: execute_cmd.c:6029
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "не вдалося створити копію файлового дескриптору %d у %d"
@@ -1183,7 +1184,7 @@ msgstr "%s: помилка у виразі\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: не вдалося отримати доступ до каталогів вищого рівня"
 
-#: input.c:99 subst.c:6061
+#: input.c:99 subst.c:6069
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "не вдалося перевстановити режим без затримки файлового дескриптору %d"
@@ -1820,7 +1821,7 @@ msgstr ""
 "Загальна довідкова інформація щодо використання програмного забезпечення "
 "GNU: <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:752
+#: sig.c:757
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: некоректна операція"
@@ -2004,84 +2005,84 @@ msgstr "%s: неможливо означити елемент масиву сп
 msgid "cannot make pipe for process substitution"
 msgstr "не вдалося створити канал для підставляння процесу"
 
-#: subst.c:5977
+#: subst.c:5985
 msgid "cannot make child for process substitution"
 msgstr "не вдалося створити дочірній процес для підставляння процесу"
 
-#: subst.c:6051
+#: subst.c:6059
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "не вдалося відкрити іменований канал %s для читання"
 
-#: subst.c:6053
+#: subst.c:6061
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "не вдалося відкрити іменований канал %s для запису"
 
-#: subst.c:6076
+#: subst.c:6084
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "не вдалося здублювати іменований канал %s як fd %d"
 
-#: subst.c:6200
+#: subst.c:6213
 msgid "command substitution: ignored null byte in input"
 msgstr "заміна команди: проігноровано порожній байт у вхідних даних"
 
-#: subst.c:6340
+#: subst.c:6353
 msgid "cannot make pipe for command substitution"
 msgstr "не вдалося створити канал для підставляння команди"
 
-#: subst.c:6384
+#: subst.c:6397
 msgid "cannot make child for command substitution"
 msgstr "не вдалося створити дочірній процес для підставляння команди"
 
-#: subst.c:6410
+#: subst.c:6423
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr ""
 "command_substitute: не вдалося створити копію каналу із файловим "
 "дескриптором 1"
 
-#: subst.c:6861 subst.c:9916
+#: subst.c:6883 subst.c:9952
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: некоректна назва змінної для посилання за назвою"
 
-#: subst.c:6957 subst.c:6975 subst.c:7147
+#: subst.c:6979 subst.c:6997 subst.c:7169
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: некоректне непряме розгортання"
 
-#: subst.c:6991 subst.c:7155
+#: subst.c:7013 subst.c:7177
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: некоректна назва змінної"
 
-#: subst.c:7234
+#: subst.c:7256
 #, c-format
 msgid "%s: parameter not set"
 msgstr "%s: параметр не встановлено"
 
-#: subst.c:7236
+#: subst.c:7258
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: параметр нульової довжини чи не вказаний"
 
-#: subst.c:7481 subst.c:7496
+#: subst.c:7503 subst.c:7518
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: підрядок коротший за 0"
 
-#: subst.c:9245 subst.c:9266
+#: subst.c:9281 subst.c:9302
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: неправильна заміна"
 
-#: subst.c:9354
+#: subst.c:9390
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: не можна призначити таким чином"
 
-#: subst.c:9778
+#: subst.c:9814
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
@@ -2089,12 +2090,12 @@ msgstr ""
 "у наступних версіях оболонки буде виконуватися обчислення для заміни "
 "арифметичних виразів"
 
-#: subst.c:10331
+#: subst.c:10367
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "неправильна заміна: немає заключної \"`\" у %s"
 
-#: subst.c:11393
+#: subst.c:11434
 #, c-format
 msgid "no match: %s"
 msgstr "нема відповідника: %s"
@@ -2117,21 +2118,21 @@ msgstr "очікувалася `)'"
 msgid "`)' expected, found %s"
 msgstr "очікувалася `)', отримано %s"
 
-#: test.c:466 test.c:796
+#: test.c:466 test.c:799
 #, c-format
 msgid "%s: binary operator expected"
 msgstr "%s: очікувався бінарний оператор"
 
-#: test.c:753 test.c:756
+#: test.c:756 test.c:759
 #, c-format
 msgid "%s: unary operator expected"
 msgstr "%s: очікувався унарний оператор"
 
-#: test.c:878
+#: test.c:881
 msgid "missing `]'"
 msgstr "відсутня `]'"
 
-#: test.c:896
+#: test.c:899
 #, fuzzy, c-format
 msgid "syntax error: `%s' unexpected"
 msgstr "синтаксична помилка: неочікувана `;'"
@@ -2159,7 +2160,7 @@ msgstr ""
 "run_pending_traps: обробник сигналу є SIG_DFL, %d (%s) повторно надсилається "
 "собі"
 
-#: trap.c:476
+#: trap.c:487
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: неправильний сигнал %d"
@@ -2174,64 +2175,64 @@ msgstr "помилка імпортування означення функці�
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "рівень оболонки (%d) занадто високий, перевстановлено у 1"
 
-#: variables.c:2649
+#: variables.c:2674
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: немає контексту функції у поточній області"
 
-#: variables.c:2668
+#: variables.c:2693
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: змінною не може бути значення, яке приймають інші змінні"
 
-#: variables.c:3450
+#: variables.c:3475
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s: присвоєння цілого числа посиланню з назвою"
 
-#: variables.c:4379
+#: variables.c:4404
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: немає контексту функції у поточній області"
 
-#: variables.c:4746
+#: variables.c:4771
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s має нульове значення рядка експортування"
 
-#: variables.c:4751 variables.c:4760
+#: variables.c:4776 variables.c:4785
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "Помилковий символ %d у рядку експорту для %s"
 
-#: variables.c:4766
+#: variables.c:4791
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "немає `=' у рядку експорту для %s"
 
-#: variables.c:5306
+#: variables.c:5331
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "pop_var_context: перший елемент shell_variables не є контекстом функції"
 
-#: variables.c:5319
+#: variables.c:5344
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: немає контексту global_variables"
 
-#: variables.c:5399
+#: variables.c:5424
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: перший елемент shell_variables не є тимчасовим оточенням виконання"
 
-#: variables.c:6362
+#: variables.c:6387
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: не вдалося відкрити ФАЙЛ"
 
-#: variables.c:6367
+#: variables.c:6392
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: некоректне значення дескриптора файла трасування"
 
-#: variables.c:6412
+#: variables.c:6437
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: значення сумісності не належить припустимому діапазону значень"

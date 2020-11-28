@@ -1428,3 +1428,26 @@ signal_in_progress (sig)
 {
   return (sigmodes[sig] & SIG_INPROGRESS);
 }
+
+#if 0 /* TAG: bash-5.2 */
+int
+block_trapped_signals (maskp, omaskp)
+     sigset_t *maskp;
+     sigset_t *omaskp;
+{
+  int i;
+
+  sigemptyset (maskp);
+  for (i = 1; i < NSIG; i++)
+    if (sigmodes[i] & SIG_TRAPPED)
+      sigaddset (maskp, i);
+  return (sigprocmask (SIG_BLOCK, maskp, omaskp));
+}
+
+int
+unblock_trapped_signals (maskp)
+     sigset_t *maskp;
+{
+  return (sigprocmask (SIG_SETMASK, maskp, 0));
+}
+#endif

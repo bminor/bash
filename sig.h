@@ -135,4 +135,6 @@ extern SigHandler *set_sigint_handler PARAMS((void));
 extern SigHandler *trap_to_sighandler PARAMS((int));
 extern sighandler trap_handler PARAMS((int));
 
+extern int block_trapped_signals PARAMS((sigset_t *, sigset_t *));
+extern int unblock_trapped_signals PARAMS((sigset_t *));
 #endif /* _SIG_H_ */

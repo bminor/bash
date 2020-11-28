@@ -1839,6 +1839,7 @@ restore_token_state (ts)
 #define PSH_ALIAS	0x01
 #define PSH_DPAREN	0x02
 #define PSH_SOURCE	0x04
+#define PSH_ARRAY	0x08
 
 typedef struct string_saver {
   struct string_saver *next;
@@ -6472,7 +6473,7 @@ parse_string_to_word_list (s, flags, whom)
   WORD_LIST *wl;
   int tok, orig_current_token, orig_line_number, orig_input_terminator;
   int orig_line_count;
-  int old_echo_input, old_expand_aliases;
+  int old_echo_input, old_expand_aliases, ea;
 #if defined (HISTORY)
   int old_remember_on_history, old_history_expansion_inhibited;
 #endif
@@ -6492,6 +6493,10 @@ parse_string_to_word_list (s, flags, whom)
   old_expand_aliases = expand_aliases;
 
   push_stream (1);
+#if 0 /* TAG: bash-5.2 Alex fxmbsw7 Ratchev <fxmbsw7@gmail.com> 11/17/2020 */
+  if (ea = expanding_alias ())
+    parser_save_alias ();
+#endif
   last_read_token = WORD;		/* WORD to allow reserved words here */
   current_command_line_count = 0;
   echo_input_at_read = expand_aliases = 0;
@@ -6525,6 +6530,11 @@ parse_string_to_word_list (s, flags, whom)
   
   last_read_token = '\n';
   pop_stream ();
+
+#if 0 /* TAG: bash-5.2 */
+  if (ea)
+    parser_restore_alias ();
+#endif
 
 #if defined (HISTORY)
   remember_on_history = old_remember_on_history;

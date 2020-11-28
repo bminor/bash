@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash-4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-07 12:00-0400\n"
+"POT-Creation-Date: 2020-11-18 16:09-0500\n"
 "PO-Revision-Date: 2009-05-09 15:13+0300\n"
 "Last-Translator: Pekka Niemi <pekka.niemi@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -25,8 +25,8 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "virheellinen taulukkoindeksi"
 
-#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2249 variables.c:2275
-#: variables.c:3108
+#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2274 variables.c:2300
+#: variables.c:3133
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr ""
@@ -58,26 +58,26 @@ msgstr ""
 msgid "%s: cannot create: %s"
 msgstr "%s: ei voida luoda: %s"
 
-#: bashline.c:4308
+#: bashline.c:4310
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: komennolle ei löydy näppäinkarttaa"
 
-#: bashline.c:4455
+#: bashline.c:4459
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: ensimmäinen ei-tyhjä merkki ei ole ”\"”"
 
-#: bashline.c:4484
+#: bashline.c:4488
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "ei loppumerkkiä ”%c” rivissä %s"
 
-#: bashline.c:4515
+#: bashline.c:4519
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: puuttuva kaksoispiste-erotin"
 
-#: bashline.c:4551
+#: bashline.c:4555
 #, fuzzy, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "”%s”: ei voida irrottaa"
@@ -97,7 +97,7 @@ msgstr ""
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr ""
 
-#: builtins/alias.def:131 variables.c:1835
+#: builtins/alias.def:131 variables.c:1844
 #, fuzzy, c-format
 msgid "`%s': invalid alias name"
 msgstr "”%s”: virheellinen näppäinkartan nimi"
@@ -174,7 +174,7 @@ msgstr ""
 msgid "HOME not set"
 msgstr "HOME-ympäristömuuttujaa ei ole asetettu"
 
-#: builtins/cd.def:335 builtins/common.c:161 test.c:898
+#: builtins/cd.def:335 builtins/common.c:161 test.c:901
 msgid "too many arguments"
 msgstr "liian monta argumenttia"
 
@@ -330,12 +330,12 @@ msgstr "%s: ei ole yksiselitteinen työtunniste"
 msgid "help not available in this version"
 msgstr ""
 
-#: builtins/common.c:1008 builtins/set.def:953 variables.c:3814
+#: builtins/common.c:1008 builtins/set.def:953 variables.c:3839
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: ei voida poistaa: kirjoitussuojattu %s"
 
-#: builtins/common.c:1013 builtins/set.def:932 variables.c:3819
+#: builtins/common.c:1013 builtins/set.def:932 variables.c:3844
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: ei voida poistaa"
@@ -372,13 +372,13 @@ msgstr "voidaan käyttää ainoastaan funktiossa"
 msgid "%s: reference variable cannot be an array"
 msgstr ""
 
-#: builtins/declare.def:374 variables.c:3360
+#: builtins/declare.def:374 variables.c:3385
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr ""
 
-#: builtins/declare.def:379 variables.c:2079 variables.c:3279 variables.c:3287
-#: variables.c:3357
+#: builtins/declare.def:379 variables.c:2104 variables.c:3304 variables.c:3312
+#: variables.c:3382
 #, c-format
 msgid "%s: circular name reference"
 msgstr ""
@@ -392,7 +392,7 @@ msgstr ""
 msgid "cannot use `-f' to make functions"
 msgstr "”-f”:ää ei voida käyttää funktioiden luomiseen"
 
-#: builtins/declare.def:526 execute_cmd.c:5981
+#: builtins/declare.def:526 execute_cmd.c:5986
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: kirjoitussuojattu funktio"
@@ -446,7 +446,7 @@ msgstr "%s: ei dynaamisesti ladattu"
 msgid "%s: cannot delete: %s"
 msgstr "%s: ei voida poistaa: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5813
+#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5818
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: on hakemisto"
@@ -490,15 +490,16 @@ msgstr "Töitä on pysäytettynä.\n"
 msgid "There are running jobs.\n"
 msgstr "Töitä on ajossa.\n"
 
-#: builtins/fc.def:267
+#: builtins/fc.def:275 builtins/fc.def:373 builtins/fc.def:417
 msgid "no command found"
 msgstr "ei löytynyt komentoa"
 
-#: builtins/fc.def:325 builtins/fc.def:359 builtins/fc.def:388
+#: builtins/fc.def:363 builtins/fc.def:368 builtins/fc.def:407
+#: builtins/fc.def:412
 msgid "history specification"
 msgstr "komentohistoriamääritys"
 
-#: builtins/fc.def:409
+#: builtins/fc.def:444
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: väliaikaistiedostoa ei voitu avata: %s"
@@ -1040,52 +1041,52 @@ msgstr ""
 msgid "pipe error"
 msgstr "putkitusvirhe"
 
-#: execute_cmd.c:4792
+#: execute_cmd.c:4793
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr ""
 
-#: execute_cmd.c:4804
+#: execute_cmd.c:4805
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr ""
 
-#: execute_cmd.c:4912
+#: execute_cmd.c:4913
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr ""
 
-#: execute_cmd.c:5466
+#: execute_cmd.c:5467
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: rajoitettu: komentojen nimissä ei voi käyttää ”/”-merkkiä"
 
-#: execute_cmd.c:5569
+#: execute_cmd.c:5574
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: komentoa ei löydy"
 
-#: execute_cmd.c:5811
+#: execute_cmd.c:5816
 #, c-format
 msgid "%s: %s"
 msgstr ""
 
-#: execute_cmd.c:5849
+#: execute_cmd.c:5854
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: virheellinen tulkki"
 
-#: execute_cmd.c:5886
+#: execute_cmd.c:5891
 #, fuzzy, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: binääritiedostoa ei voida suorittaa"
 
-#: execute_cmd.c:5972
+#: execute_cmd.c:5977
 #, fuzzy, c-format
 msgid "`%s': is a special builtin"
 msgstr "%s on komentotulkin sisäänrakennettu komento\n"
 
-#: execute_cmd.c:6024
+#: execute_cmd.c:6029
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "tiedostokahvaa %d ei voida kopioida kahvaksi %d"
@@ -1170,7 +1171,7 @@ msgstr "%s: virhe lausekkeessa\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: ylempiin hakemistoihin ei päästä"
 
-#: input.c:99 subst.c:6061
+#: input.c:99 subst.c:6069
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "nodelay-tilaa ei voida asettaa tiedostokahvalle %d"
@@ -1791,7 +1792,7 @@ msgstr ""
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr ""
 
-#: sig.c:752
+#: sig.c:757
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: virheellinen operaatio"
@@ -1975,94 +1976,94 @@ msgstr "%s: listaa ei voida sijoittaa taulukon alkioon"
 msgid "cannot make pipe for process substitution"
 msgstr "putkea ei voida luoda prosessin korvaamista varten"
 
-#: subst.c:5977
+#: subst.c:5985
 msgid "cannot make child for process substitution"
 msgstr "lapsiprosessia ei voida luoda prosessin korvaamista varten"
 
-#: subst.c:6051
+#: subst.c:6059
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "nimettyä putkea %s ei voida avata lukemista varten"
 
-#: subst.c:6053
+#: subst.c:6061
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "nimettyä putkea %s ei voida avata kirjoitusta varten"
 
-#: subst.c:6076
+#: subst.c:6084
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "nimettyä putkea %s ei voida kopioida tiedostokahvaksi %d"
 
-#: subst.c:6200
+#: subst.c:6213
 #, fuzzy
 msgid "command substitution: ignored null byte in input"
 msgstr "virheellinen korvaus: ei sulkevaa ”`” jonossa %s"
 
-#: subst.c:6340
+#: subst.c:6353
 msgid "cannot make pipe for command substitution"
 msgstr "putkea ei voida luoda komennon korvaamista varten"
 
-#: subst.c:6384
+#: subst.c:6397
 msgid "cannot make child for command substitution"
 msgstr "ei voida luoda lapsiprosessia komennon korvaamista varten"
 
-#: subst.c:6410
+#: subst.c:6423
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: putkea ei voida kopioida tiedostokahvaksi 1"
 
-#: subst.c:6861 subst.c:9916
+#: subst.c:6883 subst.c:9952
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr ""
 
-#: subst.c:6957 subst.c:6975 subst.c:7147
+#: subst.c:6979 subst.c:6997 subst.c:7169
 #, fuzzy, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: virheellinen rivimäärä"
 
-#: subst.c:6991 subst.c:7155
+#: subst.c:7013 subst.c:7177
 #, fuzzy, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: virheellinen toiminnon nimi"
 
-#: subst.c:7234
+#: subst.c:7256
 #, fuzzy, c-format
 msgid "%s: parameter not set"
 msgstr "%s: parametria ei ole tai sitä ei ole asetettu"
 
-#: subst.c:7236
+#: subst.c:7258
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parametria ei ole tai sitä ei ole asetettu"
 
-#: subst.c:7481 subst.c:7496
+#: subst.c:7503 subst.c:7518
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: alimerkkijonolauseke < 0"
 
-#: subst.c:9245 subst.c:9266
+#: subst.c:9281 subst.c:9302
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: virheellinen korvaus"
 
-#: subst.c:9354
+#: subst.c:9390
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: ei voida asettaa näin"
 
-#: subst.c:9778
+#: subst.c:9814
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr ""
 
-#: subst.c:10331
+#: subst.c:10367
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "virheellinen korvaus: ei sulkevaa ”`” jonossa %s"
 
-#: subst.c:11393
+#: subst.c:11434
 #, c-format
 msgid "no match: %s"
 msgstr "ei osumia: %s"
@@ -2085,21 +2086,21 @@ msgstr "odotettiin ”)”"
 msgid "`)' expected, found %s"
 msgstr "odotettiin ”)”, löydettiin %s"
 
-#: test.c:466 test.c:796
+#: test.c:466 test.c:799
 #, c-format
 msgid "%s: binary operator expected"
 msgstr "%s: odotettiin binääristä operaattoria"
 
-#: test.c:753 test.c:756
+#: test.c:756 test.c:759
 #, c-format
 msgid "%s: unary operator expected"
 msgstr "%s: odotettiin unaarista operaattoria"
 
-#: test.c:878
+#: test.c:881
 msgid "missing `]'"
 msgstr "puuttuva ”]”"
 
-#: test.c:896
+#: test.c:899
 #, fuzzy, c-format
 msgid "syntax error: `%s' unexpected"
 msgstr "lauseoppivirhe: odottamaton ”;”"
@@ -2126,7 +2127,7 @@ msgstr ""
 "run_pending_traps: signaalikäsittelijä on SIG_DFL, lähetän %d (%s) uudelleen "
 "itselleni"
 
-#: trap.c:476
+#: trap.c:487
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: virheellinen signaali %d"
@@ -2141,64 +2142,64 @@ msgstr "virhe tuotaessa ”%s”:n funktiomääritystä"
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "komentotulkkitaso (%d) liian korkea, palautetaan 1:ksi"
 
-#: variables.c:2649
+#: variables.c:2674
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: ei funktiokontekstia nykytilassa"
 
-#: variables.c:2668
+#: variables.c:2693
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr ""
 
-#: variables.c:3450
+#: variables.c:3475
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr ""
 
-#: variables.c:4379
+#: variables.c:4404
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: ei funktiokontekstia nykytilassa"
 
-#: variables.c:4746
+#: variables.c:4771
 #, fuzzy, c-format
 msgid "%s has null exportstr"
 msgstr "%s: parametria ei ole tai sitä ei ole asetettu"
 
-#: variables.c:4751 variables.c:4760
+#: variables.c:4776 variables.c:4785
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "virheellinen merkki %d %s:n exportstr:ssä"
 
-#: variables.c:4766
+#: variables.c:4791
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "ei =:ä kohteen %s exportstr:ssä"
 
-#: variables.c:5306
+#: variables.c:5331
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: shell_variablesin alku ei ole funktiokonteksti"
 
-#: variables.c:5319
+#: variables.c:5344
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: ei global_variables-kontekstia"
 
-#: variables.c:5399
+#: variables.c:5424
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: shell_variablesin alku ei väliaikaisten ympäristömuuttujien "
 "ympäristössä"
 
-#: variables.c:6362
+#: variables.c:6387
 #, fuzzy, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: ei voida avata: %s"
 
-#: variables.c:6367
+#: variables.c:6392
 #, fuzzy, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%d: virheellinen tiedostokahva: %s"
 
-#: variables.c:6412
+#: variables.c:6437
 #, fuzzy, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s rajojen ulkopuolella"

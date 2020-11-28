@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-07 12:00-0400\n"
+"POT-Creation-Date: 2020-11-18 16:09-0500\n"
 "PO-Revision-Date: 2020-01-19 00:50+0800\n"
 "Last-Translator: pan93412 <pan93412@gmail.com>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@lists.linux.org.tw>\n"
@@ -26,8 +26,8 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "陣列下標不正確"
 
-#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2249 variables.c:2275
-#: variables.c:3108
+#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2274 variables.c:2300
+#: variables.c:3133
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr "%s：正在移除 nameref 屬性"
@@ -57,26 +57,26 @@ msgstr "%s: %s: 指派為關聯陣列時必須使用下標"
 msgid "%s: cannot create: %s"
 msgstr "%s: 無法建立: %s"
 
-#: bashline.c:4308
+#: bashline.c:4310
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: 無法為指令找到按鍵映射"
 
-#: bashline.c:4455
+#: bashline.c:4459
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: 第一個非空字元不是「\"」"
 
-#: bashline.c:4484
+#: bashline.c:4488
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "%2$s 中沒有閉合的「%1$c」"
 
-#: bashline.c:4515
+#: bashline.c:4519
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: 缺少冒號分隔符"
 
-#: bashline.c:4551
+#: bashline.c:4555
 #, fuzzy, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "「%s」: 無法解除綁定"
@@ -96,7 +96,7 @@ msgstr "大括號展開：為 %u 個元素分配記憶體失敗"
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "大括號展開：為「%s」分配記憶體失敗"
 
-#: builtins/alias.def:131 variables.c:1835
+#: builtins/alias.def:131 variables.c:1844
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "「%s」: 無效的別名"
@@ -172,7 +172,7 @@ msgstr ""
 msgid "HOME not set"
 msgstr "未設定 HOME"
 
-#: builtins/cd.def:335 builtins/common.c:161 test.c:898
+#: builtins/cd.def:335 builtins/common.c:161 test.c:901
 msgid "too many arguments"
 msgstr "太多參數"
 
@@ -327,12 +327,12 @@ msgstr "%s：模稜兩可的工作規格"
 msgid "help not available in this version"
 msgstr "這個版本沒有可用的說明"
 
-#: builtins/common.c:1008 builtins/set.def:953 variables.c:3814
+#: builtins/common.c:1008 builtins/set.def:953 variables.c:3839
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: 無法取消設定: 唯讀 %s"
 
-#: builtins/common.c:1013 builtins/set.def:932 variables.c:3819
+#: builtins/common.c:1013 builtins/set.def:932 variables.c:3844
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: 無法取消設定"
@@ -369,13 +369,13 @@ msgstr "只能用在函數中"
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: 引用變數不能為陣列"
 
-#: builtins/declare.def:374 variables.c:3360
+#: builtins/declare.def:374 variables.c:3385
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: 不允許名稱引用變數引用自身"
 
-#: builtins/declare.def:379 variables.c:2079 variables.c:3279 variables.c:3287
-#: variables.c:3357
+#: builtins/declare.def:379 variables.c:2104 variables.c:3304 variables.c:3312
+#: variables.c:3382
 #, c-format
 msgid "%s: circular name reference"
 msgstr "%s: 迴圈變數名引用"
@@ -389,7 +389,7 @@ msgstr "「%s」：無效的引用變數名"
 msgid "cannot use `-f' to make functions"
 msgstr "無法用「-f」產生函數"
 
-#: builtins/declare.def:526 execute_cmd.c:5981
+#: builtins/declare.def:526 execute_cmd.c:5986
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s：唯讀函數"
@@ -443,7 +443,7 @@ msgstr "%s: 未以動態方式載入"
 msgid "%s: cannot delete: %s"
 msgstr "%s: 無法刪除: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5813
+#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5818
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: 是一個目錄"
@@ -487,15 +487,16 @@ msgstr "有停止的工作。\n"
 msgid "There are running jobs.\n"
 msgstr "有執行中的工作。\n"
 
-#: builtins/fc.def:267
+#: builtins/fc.def:275 builtins/fc.def:373 builtins/fc.def:417
 msgid "no command found"
 msgstr "未找到指令"
 
-#: builtins/fc.def:325 builtins/fc.def:359 builtins/fc.def:388
+#: builtins/fc.def:363 builtins/fc.def:368 builtins/fc.def:407
+#: builtins/fc.def:412
 msgid "history specification"
 msgstr "歷史記錄規格"
 
-#: builtins/fc.def:409
+#: builtins/fc.def:444
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: 無法開啟暫存檔案: %s"
@@ -1035,52 +1036,52 @@ msgstr "execute_coproc：coproc [%d:%s] 仍然存在"
 msgid "pipe error"
 msgstr "管道錯誤"
 
-#: execute_cmd.c:4792
+#: execute_cmd.c:4793
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval：超出最大 eval 巢狀層數 (%d)"
 
-#: execute_cmd.c:4804
+#: execute_cmd.c:4805
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: 超出最大來源巢狀層數 (%d)"
 
-#: execute_cmd.c:4912
+#: execute_cmd.c:4913
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: 超出最大函數巢狀層數 (%d)"
 
-#: execute_cmd.c:5466
+#: execute_cmd.c:5467
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: 受限的: 無法在指令名稱中使用「/」"
 
-#: execute_cmd.c:5569
+#: execute_cmd.c:5574
 #, c-format
 msgid "%s: command not found"
 msgstr "%s：指令找不到"
 
-#: execute_cmd.c:5811
+#: execute_cmd.c:5816
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5849
+#: execute_cmd.c:5854
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: 不當的直譯器"
 
-#: execute_cmd.c:5886
+#: execute_cmd.c:5891
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: 無法執行二進位檔案: %s"
 
-#: execute_cmd.c:5972
+#: execute_cmd.c:5977
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "「%s」: 特殊內建"
 
-#: execute_cmd.c:6024
+#: execute_cmd.c:6029
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "無法複製檔案描述符 %d 到檔案描述符 %d"
@@ -1164,7 +1165,7 @@ msgstr "%s: 表示式錯誤\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: 無法存取上層目錄"
 
-#: input.c:99 subst.c:6061
+#: input.c:99 subst.c:6069
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "無法為檔案描述符 %d 重設無延遲模式"
@@ -1776,7 +1777,7 @@ msgstr "bash 官網：<http://www.gnu.org/software/bash>\n"
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr "GNU 軟體的常見使用說明：<http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:752
+#: sig.c:757
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask：%d：無效操作"
@@ -1960,93 +1961,93 @@ msgstr "%s: 無法將串列指派給陣列成員"
 msgid "cannot make pipe for process substitution"
 msgstr "無法為行程取代建立管道"
 
-#: subst.c:5977
+#: subst.c:5985
 msgid "cannot make child for process substitution"
 msgstr "無法為行程取代建立子行程"
 
-#: subst.c:6051
+#: subst.c:6059
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "無法開啟命名管道 %s 進 readline-"
 
-#: subst.c:6053
+#: subst.c:6061
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "無法開啟命名管道 %s 進行寫入"
 
-#: subst.c:6076
+#: subst.c:6084
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "無法將命名管道 %s 做為檔案描述符 %d 複製"
 
-#: subst.c:6200
+#: subst.c:6213
 msgid "command substitution: ignored null byte in input"
 msgstr "指令取代：在輸入中忽略了空位元組"
 
-#: subst.c:6340
+#: subst.c:6353
 msgid "cannot make pipe for command substitution"
 msgstr "無法為指令取代建立管道"
 
-#: subst.c:6384
+#: subst.c:6397
 msgid "cannot make child for command substitution"
 msgstr "無法為指令取代建立子行程"
 
-#: subst.c:6410
+#: subst.c:6423
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: 無法將管道複製為檔案描述符 1"
 
-#: subst.c:6861 subst.c:9916
+#: subst.c:6883 subst.c:9952
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: 無效的引用變數名"
 
-#: subst.c:6957 subst.c:6975 subst.c:7147
+#: subst.c:6979 subst.c:6997 subst.c:7169
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: 無效的間接擴充"
 
-#: subst.c:6991 subst.c:7155
+#: subst.c:7013 subst.c:7177
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s：無效的變數名稱"
 
-#: subst.c:7234
+#: subst.c:7256
 #, c-format
 msgid "%s: parameter not set"
 msgstr "%s：參數未設定"
 
-#: subst.c:7236
+#: subst.c:7258
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: 參數為空或未設定"
 
-#: subst.c:7481 subst.c:7496
+#: subst.c:7503 subst.c:7518
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: 子串表示式 < 0"
 
-#: subst.c:9245 subst.c:9266
+#: subst.c:9281 subst.c:9302
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: 錯誤的取代"
 
-#: subst.c:9354
+#: subst.c:9390
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: 無法如此指派"
 
-#: subst.c:9778
+#: subst.c:9814
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr "未來版本的 shell 會強制以算術取代求值"
 
-#: subst.c:10331
+#: subst.c:10367
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "錯誤的取代: 在 %s 中沒有閉合的「`」"
 
-#: subst.c:11393
+#: subst.c:11434
 #, c-format
 msgid "no match: %s"
 msgstr "無符合: %s"
@@ -2069,21 +2070,21 @@ msgstr "需要「)」"
 msgid "`)' expected, found %s"
 msgstr "需要「)」，得到 %s"
 
-#: test.c:466 test.c:796
+#: test.c:466 test.c:799
 #, c-format
 msgid "%s: binary operator expected"
 msgstr "%s: 需要二元表示式"
 
-#: test.c:753 test.c:756
+#: test.c:756 test.c:759
 #, c-format
 msgid "%s: unary operator expected"
 msgstr "%s: 需要一元表示式"
 
-#: test.c:878
+#: test.c:881
 msgid "missing `]'"
 msgstr "缺少「]」"
 
-#: test.c:896
+#: test.c:899
 #, fuzzy, c-format
 msgid "syntax error: `%s' unexpected"
 msgstr "語法錯誤：「;」意外"
@@ -2108,7 +2109,7 @@ msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
 msgstr "run_pending_traps：訊號處理是 SIG_DFL，resending %d (%s) to myself"
 
-#: trap.c:476
+#: trap.c:487
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler：不當的訊號 %d"
@@ -2123,62 +2124,62 @@ msgstr "錯誤，輸入的函數定義為「%s」"
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "shell 層次 (%d) 太高，重設為 1"
 
-#: variables.c:2649
+#: variables.c:2674
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: 目前作用域中沒有函數語境"
 
-#: variables.c:2668
+#: variables.c:2693
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: 變數不可指派值"
 
-#: variables.c:3450
+#: variables.c:3475
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s：指定數字至名稱參考"
 
-#: variables.c:4379
+#: variables.c:4404
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: 目前作用域中沒有函數語境"
 
-#: variables.c:4746
+#: variables.c:4771
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s 有空的 exportstr"
 
-#: variables.c:4751 variables.c:4760
+#: variables.c:4776 variables.c:4785
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "%2$s 的 exportstr 中有無效的字元 %1$d"
 
-#: variables.c:4766
+#: variables.c:4791
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "%s 的 exportstr 中沒有「=」"
 
-#: variables.c:5306
+#: variables.c:5331
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: shell_variables 的前端不是函數語境"
 
-#: variables.c:5319
+#: variables.c:5344
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: 沒有 global_variables 語境"
 
-#: variables.c:5399
+#: variables.c:5424
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: shell_variables 的前端不是臨時環境作用域"
 
-#: variables.c:6362
+#: variables.c:6387
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: 無法做為檔案開啟"
 
-#: variables.c:6367
+#: variables.c:6392
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: 追蹤檔案描述符的值無效"
 
-#: variables.c:6412
+#: variables.c:6437
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: 相容版本數值超出範圍"

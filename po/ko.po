@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash-5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-07 12:00-0400\n"
+"POT-Creation-Date: 2020-11-18 16:09-0500\n"
 "PO-Revision-Date: 2019-11-23 16:28+0900\n"
 "Last-Translator: SooHyun Kim <soohyunkim@kw.ac.kr>\n"
 "Language-Team: Korean <translation-team-ko@googlegroups.com>\n"
@@ -22,8 +22,8 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "잘못된 배열 첨자"
 
-#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2249 variables.c:2275
-#: variables.c:3108
+#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2274 variables.c:2300
+#: variables.c:3133
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr "%s: 이름 참조 속성을 지우는 중"
@@ -53,26 +53,26 @@ msgstr "%s: %s: 연관 배열을 할당하기 위해서 반드시 첨자를 사�
 msgid "%s: cannot create: %s"
 msgstr "%s: 생성할 수 없음: %s"
 
-#: bashline.c:4308
+#: bashline.c:4310
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: 명령어를 위한 keymap을 찾을 수 없음"
 
-#: bashline.c:4455
+#: bashline.c:4459
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: 공백이 아닌 첫 문자가 '\"' 가 아님"
 
-#: bashline.c:4484
+#: bashline.c:4488
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "%2$s에 닫는 '%1$c' 없음"
 
-#: bashline.c:4515
+#: bashline.c:4519
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: 콜론(:) 구분자 없음"
 
-#: bashline.c:4551
+#: bashline.c:4555
 #, fuzzy, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "'%s': unbind 할 수 없음"
@@ -92,7 +92,7 @@ msgstr "괄호 확장: %u개 요소를 위한 메모리 할당 실패"
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "괄호 확장: '%s'를 위한 메모리 할당 실패"
 
-#: builtins/alias.def:131 variables.c:1835
+#: builtins/alias.def:131 variables.c:1844
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "'%s': 유효하지 않은 별명"
@@ -155,7 +155,7 @@ msgstr ""
 msgid "HOME not set"
 msgstr "HOME 설정되지 않음"
 
-#: builtins/cd.def:335 builtins/common.c:161 test.c:898
+#: builtins/cd.def:335 builtins/common.c:161 test.c:901
 msgid "too many arguments"
 msgstr "인자가 너무 많음"
 
@@ -310,12 +310,12 @@ msgstr "%s: 모호한 job spec"
 msgid "help not available in this version"
 msgstr "이 버전에는 도움말이 없음"
 
-#: builtins/common.c:1008 builtins/set.def:953 variables.c:3814
+#: builtins/common.c:1008 builtins/set.def:953 variables.c:3839
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: unset할 수 없음: %s가 읽기 전용임"
 
-#: builtins/common.c:1013 builtins/set.def:932 variables.c:3819
+#: builtins/common.c:1013 builtins/set.def:932 variables.c:3844
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: unset할 수 없음"
@@ -352,13 +352,13 @@ msgstr "함수에서만 사용될 수 있음"
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: 참조 변수로 배열이 올 수 없음"
 
-#: builtins/declare.def:374 variables.c:3360
+#: builtins/declare.def:374 variables.c:3385
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: 이름 참조 변수의 자가 참조는 허용되지 않음"
 
-#: builtins/declare.def:379 variables.c:2079 variables.c:3279 variables.c:3287
-#: variables.c:3357
+#: builtins/declare.def:379 variables.c:2104 variables.c:3304 variables.c:3312
+#: variables.c:3382
 #, c-format
 msgid "%s: circular name reference"
 msgstr "%s: 순환 이름 참조"
@@ -372,7 +372,7 @@ msgstr "'%s': 유효하지 않은 이름 참조 변수 이름"
 msgid "cannot use `-f' to make functions"
 msgstr "함수를 만들기 위해 '-f'를 사용할 수 없음"
 
-#: builtins/declare.def:526 execute_cmd.c:5981
+#: builtins/declare.def:526 execute_cmd.c:5986
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: 읽기 전용 함수임"
@@ -426,7 +426,7 @@ msgstr "%s: 동적으로 로드되지 않음"
 msgid "%s: cannot delete: %s"
 msgstr "%s: 삭제할 수 없음: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5813
+#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5818
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: 디렉터리임"
@@ -470,15 +470,16 @@ msgstr "정지된 job이 있습니다.\n"
 msgid "There are running jobs.\n"
 msgstr "실행중인 job이 있습니다.\n"
 
-#: builtins/fc.def:267
+#: builtins/fc.def:275 builtins/fc.def:373 builtins/fc.def:417
 msgid "no command found"
 msgstr "명령어를 찾을 수 없음"
 
-#: builtins/fc.def:325 builtins/fc.def:359 builtins/fc.def:388
+#: builtins/fc.def:363 builtins/fc.def:368 builtins/fc.def:407
+#: builtins/fc.def:412
 msgid "history specification"
 msgstr "히스토리 사양"
 
-#: builtins/fc.def:409
+#: builtins/fc.def:444
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: 임시 파일을 열 수 없음: %s"
@@ -1023,52 +1024,52 @@ msgstr "execute_coproc: coproc [%d:%s] 가 여전히 존재"
 msgid "pipe error"
 msgstr "파이프 오류"
 
-#: execute_cmd.c:4792
+#: execute_cmd.c:4793
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: 최대 eval 중첩 레벨 초과 (%d)"
 
-#: execute_cmd.c:4804
+#: execute_cmd.c:4805
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: 최대 소스 중첩 레벨 초과 (%d)"
 
-#: execute_cmd.c:4912
+#: execute_cmd.c:4913
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: 최대 함수 중첩 레벨 초과 (%d)"
 
-#: execute_cmd.c:5466
+#: execute_cmd.c:5467
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: 제한됨: 명령 이름에 '/'를 지정할 수 없음"
 
-#: execute_cmd.c:5569
+#: execute_cmd.c:5574
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: 명령어를 찾을 수 없음"
 
-#: execute_cmd.c:5811
+#: execute_cmd.c:5816
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5849
+#: execute_cmd.c:5854
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: 잘못된 인터프리터"
 
-#: execute_cmd.c:5886
+#: execute_cmd.c:5891
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: 이진 파일을 실행할 수 없음: %s"
 
-#: execute_cmd.c:5972
+#: execute_cmd.c:5977
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "'%s': 특수한 내장 명령임"
 
-#: execute_cmd.c:6024
+#: execute_cmd.c:6029
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "fd %d를 fd %d로 복제할 수 없음"
@@ -1152,7 +1153,7 @@ msgstr "%s: 표현식 오류\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: 부모 디렉터리에 접근할 수 없음"
 
-#: input.c:99 subst.c:6061
+#: input.c:99 subst.c:6069
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "fd %d에 대해 nodelay 모드를 재설정 할 수 없음"
@@ -1770,7 +1771,7 @@ msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr ""
 "GNU 소프트웨어를 사용하는데 일반적인 도움말: <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:752
+#: sig.c:757
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: 유효하지 않은 작업"
@@ -1954,93 +1955,93 @@ msgstr "%s: 리스트를 배열 멤버에 할당할 수 없음"
 msgid "cannot make pipe for process substitution"
 msgstr "프로세스 대체를 위해 파이프를 만들 수 없음"
 
-#: subst.c:5977
+#: subst.c:5985
 msgid "cannot make child for process substitution"
 msgstr "프로세스 대체를 위해 자식을 만들 수 없음"
 
-#: subst.c:6051
+#: subst.c:6059
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "읽기를 위해 명명된 파이프 %s를 열 수 없음"
 
-#: subst.c:6053
+#: subst.c:6061
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "쓰기를 위해 명명된 파이프 %s를 열 수 없음"
 
-#: subst.c:6076
+#: subst.c:6084
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "명명된 파이프 %s를 fd %d로 복제할 수 없음"
 
-#: subst.c:6200
+#: subst.c:6213
 msgid "command substitution: ignored null byte in input"
 msgstr "command substitution: 입력의 null 바이트 무시됨"
 
-#: subst.c:6340
+#: subst.c:6353
 msgid "cannot make pipe for command substitution"
 msgstr "명령어 대체를 위해 파이프를 만들 수 없음"
 
-#: subst.c:6384
+#: subst.c:6397
 msgid "cannot make child for command substitution"
 msgstr "명령어 대체를 위해 자식을 만들 수 없음"
 
-#: subst.c:6410
+#: subst.c:6423
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: 파이프를 fd 1로 복제할 수 없음"
 
-#: subst.c:6861 subst.c:9916
+#: subst.c:6883 subst.c:9952
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: 이름 참조에 대해 유효하지 않은 변수 이름"
 
-#: subst.c:6957 subst.c:6975 subst.c:7147
+#: subst.c:6979 subst.c:6997 subst.c:7169
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: 유효하지 않은 간접 확장"
 
-#: subst.c:6991 subst.c:7155
+#: subst.c:7013 subst.c:7177
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: 유효하지 않은 변수 이름"
 
-#: subst.c:7234
+#: subst.c:7256
 #, c-format
 msgid "%s: parameter not set"
 msgstr "%s: 파라미터 설정되지 않음"
 
-#: subst.c:7236
+#: subst.c:7258
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: 파라미터가 null 또는 설정되지 않음"
 
-#: subst.c:7481 subst.c:7496
+#: subst.c:7503 subst.c:7518
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: 부분 문자열 표현식 < 0"
 
-#: subst.c:9245 subst.c:9266
+#: subst.c:9281 subst.c:9302
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: 잘못된 대체"
 
-#: subst.c:9354
+#: subst.c:9390
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: 이 방법으로 할당할 수 없음"
 
-#: subst.c:9778
+#: subst.c:9814
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr "향후 버전의 쉘에서는 산술 대체로 연산이 강제됩니다"
 
-#: subst.c:10331
+#: subst.c:10367
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "잘못된 대체: %s에 닫는 \"`\" 없음"
 
-#: subst.c:11393
+#: subst.c:11434
 #, c-format
 msgid "no match: %s"
 msgstr "일치 없음: %s"
@@ -2063,21 +2064,21 @@ msgstr "`)' 예상됨"
 msgid "`)' expected, found %s"
 msgstr "`)' 예상되었으나 %s를 발견"
 
-#: test.c:466 test.c:796
+#: test.c:466 test.c:799
 #, c-format
 msgid "%s: binary operator expected"
 msgstr "%s: 이항 연산자 예상됨"
 
-#: test.c:753 test.c:756
+#: test.c:756 test.c:759
 #, c-format
 msgid "%s: unary operator expected"
 msgstr "%s: 단항 연산자 예상됨"
 
-#: test.c:878
+#: test.c:881
 msgid "missing `]'"
 msgstr "']' 없음"
 
-#: test.c:896
+#: test.c:899
 #, fuzzy, c-format
 msgid "syntax error: `%s' unexpected"
 msgstr "문법 오류: ';' 예상되지 않음"
@@ -2103,7 +2104,7 @@ msgid ""
 msgstr ""
 "run_pending_traps: 신호 핸들러는 SIG_DFL 이고, %d (%s)를 자신에게 보내는 중"
 
-#: trap.c:476
+#: trap.c:487
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: 잘못된 신호 %d"
@@ -2118,62 +2119,62 @@ msgstr "'%s'에 대해 함수 정의를 불러오는데 오류 발생"
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "쉘 레벨 (%d)이 너무 높습니다, 1로 재설정합니다"
 
-#: variables.c:2649
+#: variables.c:2674
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: 현재 범위에서 함수 컨텍스트 없음"
 
-#: variables.c:2668
+#: variables.c:2693
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: 변수는 할당된 값이 될 수 없음"
 
-#: variables.c:3450
+#: variables.c:3475
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s: 이름 참조에 정수를 할당하고 있음"
 
-#: variables.c:4379
+#: variables.c:4404
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: 현재 범위에서 함수 컨텍스트 없음"
 
-#: variables.c:4746
+#: variables.c:4771
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s가 null exportstr을 가짐"
 
-#: variables.c:4751 variables.c:4760
+#: variables.c:4776 variables.c:4785
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "%2$s를 위한 exportstr에서 유효하지 않은 문자 %1$d"
 
-#: variables.c:4766
+#: variables.c:4791
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "%s를 위한 exportstr에 '=' 없음"
 
-#: variables.c:5306
+#: variables.c:5331
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: shell_variables의 시작이 함수의 컨텍스트가 아님"
 
-#: variables.c:5319
+#: variables.c:5344
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: 컨텍스트에 global_variables 없음"
 
-#: variables.c:5399
+#: variables.c:5424
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: shell_variables의 시작이 임시 환경 범위가 아님"
 
-#: variables.c:6362
+#: variables.c:6387
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: 파일로써 열 수 없음"
 
-#: variables.c:6367
+#: variables.c:6392
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: 추척 파일 디스크립터에 유효하지 않은 값"
 
-#: variables.c:6412
+#: variables.c:6437
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: 호환 값이 범위를 벗어남"

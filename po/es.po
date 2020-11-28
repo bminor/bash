@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-07 12:00-0400\n"
+"POT-Creation-Date: 2020-11-18 16:09-0500\n"
 "PO-Revision-Date: 2019-08-18 10:08+0200\n"
 "Last-Translator: Antonio Ceballos Roa <aceballos@gmail.com>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
@@ -24,8 +24,8 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "subíndice de matriz incorrecto"
 
-#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2249 variables.c:2275
-#: variables.c:3108
+#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2274 variables.c:2300
+#: variables.c:3133
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr "%s: se elimina el atributo nameref"
@@ -55,28 +55,28 @@ msgstr "%s: %s: se debe usar un subíndice al asignar a una matriz asociativa"
 msgid "%s: cannot create: %s"
 msgstr "%s: no se puede crear: %s"
 
-#: bashline.c:4308
+#: bashline.c:4310
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command: no se puede encontrar la combinación de teclas "
 "para la orden"
 
-#: bashline.c:4455
+#: bashline.c:4459
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: el primer carácter que no es espacio en blanco no es «\"»"
 
-#: bashline.c:4484
+#: bashline.c:4488
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "no hay un `%c' que cierre en %s"
 
-#: bashline.c:4515
+#: bashline.c:4519
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: falta un «:» separador"
 
-#: bashline.c:4551
+#: bashline.c:4555
 #, fuzzy, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "`%s': no se puede borrar la asignación"
@@ -96,7 +96,7 @@ msgstr "expansión de llaves: fallo al asignar memoria a %u elementos"
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "expansión de llaves: fallo al asignar memoria a «%s»"
 
-#: builtins/alias.def:131 variables.c:1835
+#: builtins/alias.def:131 variables.c:1844
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "`%s': nombre de alias inválido"
@@ -172,7 +172,7 @@ msgstr ""
 msgid "HOME not set"
 msgstr "HOME no está definido"
 
-#: builtins/cd.def:335 builtins/common.c:161 test.c:898
+#: builtins/cd.def:335 builtins/common.c:161 test.c:901
 msgid "too many arguments"
 msgstr "demasiados argumentos"
 
@@ -327,12 +327,12 @@ msgstr "%s: especificación de trabajo ambigua"
 msgid "help not available in this version"
 msgstr "ayuda no disponible en esta versión"
 
-#: builtins/common.c:1008 builtins/set.def:953 variables.c:3814
+#: builtins/common.c:1008 builtins/set.def:953 variables.c:3839
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: no se puede borrar: %s es de solo lectura"
 
-#: builtins/common.c:1013 builtins/set.def:932 variables.c:3819
+#: builtins/common.c:1013 builtins/set.def:932 variables.c:3844
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: no se puede borrar"
@@ -371,13 +371,13 @@ msgstr "sólo se puede usar dentro de una función"
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: referencia variable no puede ser una matriz"
 
-#: builtins/declare.def:374 variables.c:3360
+#: builtins/declare.def:374 variables.c:3385
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: no se permiten las autoreferencias a variables nameref"
 
-#: builtins/declare.def:379 variables.c:2079 variables.c:3279 variables.c:3287
-#: variables.c:3357
+#: builtins/declare.def:379 variables.c:2104 variables.c:3304 variables.c:3312
+#: variables.c:3382
 #, c-format
 msgid "%s: circular name reference"
 msgstr "%s: referencia de nombre circular"
@@ -391,7 +391,7 @@ msgstr "`%s': nombre variable inválido para referencia de nombre"
 msgid "cannot use `-f' to make functions"
 msgstr "no se puede usar `-f' para hacer funciones"
 
-#: builtins/declare.def:526 execute_cmd.c:5981
+#: builtins/declare.def:526 execute_cmd.c:5986
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: función de sólo lectura"
@@ -446,7 +446,7 @@ msgstr "%s: no cargado dinámicamente"
 msgid "%s: cannot delete: %s"
 msgstr "%s: no se puede borrar: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5813
+#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5818
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: es un directorio"
@@ -492,15 +492,16 @@ msgstr "Hay trabajos detenidos.\n"
 msgid "There are running jobs.\n"
 msgstr "Hay trabajos en ejecución.\n"
 
-#: builtins/fc.def:267
+#: builtins/fc.def:275 builtins/fc.def:373 builtins/fc.def:417
 msgid "no command found"
 msgstr "no se ha encontrado ninguna orden"
 
-#: builtins/fc.def:325 builtins/fc.def:359 builtins/fc.def:388
+#: builtins/fc.def:363 builtins/fc.def:368 builtins/fc.def:407
+#: builtins/fc.def:412
 msgid "history specification"
 msgstr "especificación de historia"
 
-#: builtins/fc.def:409
+#: builtins/fc.def:444
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: no se puede abrir el fichero temporal: %s"
@@ -1049,54 +1050,54 @@ msgstr "execute_coproc: coproc [%d:%s] aún existe"
 msgid "pipe error"
 msgstr "error de tubería"
 
-#: execute_cmd.c:4792
+#: execute_cmd.c:4793
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: nivel máximo de anidamiento de evaluaciones excedido (%d)"
 
-#: execute_cmd.c:4804
+#: execute_cmd.c:4805
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: nivel máximo de anidamiento de lecturas con `source' excedido (%d)"
 
-#: execute_cmd.c:4912
+#: execute_cmd.c:4913
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: nivel máximo de anidamiento de funciones excedido (%d)"
 
-#: execute_cmd.c:5466
+#: execute_cmd.c:5467
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: restringido: no se puede especificar `/' en nombres de órdenes"
 
-#: execute_cmd.c:5569
+#: execute_cmd.c:5574
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: orden no encontrada"
 
-#: execute_cmd.c:5811
+#: execute_cmd.c:5816
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5849
+#: execute_cmd.c:5854
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: intérprete erróneo"
 
 # file=fichero. archive=archivo. Si no, es imposible traducir tar. sv
 # De acuerdo. Corregido en todo el fichero. cfuga
-#: execute_cmd.c:5886
+#: execute_cmd.c:5891
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: no se puede ejecutar fichero binario: %s"
 
-#: execute_cmd.c:5972
+#: execute_cmd.c:5977
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "`%s': es una orden interna especial"
 
-#: execute_cmd.c:6024
+#: execute_cmd.c:6029
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "no se puede duplicar el df %d al df %d"
@@ -1186,7 +1187,7 @@ msgstr "%s: error de expresión\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: no se puede acceder a los directorios padre"
 
-#: input.c:99 subst.c:6061
+#: input.c:99 subst.c:6069
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "no se puede reestablecer el modo nodelay para el df %d"
@@ -1837,7 +1838,7 @@ msgstr "página inicial bash: <http://www.gnu.org/software/bash>\n"
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr "Ayuda general utilizando software GNU: <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:752
+#: sig.c:757
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: operación inválida"
@@ -2032,82 +2033,82 @@ msgstr "%s: no se puede asignar una lista a un miembro de la matriz"
 msgid "cannot make pipe for process substitution"
 msgstr "no se puede crear la tubería para la sustitución del proceso"
 
-#: subst.c:5977
+#: subst.c:5985
 msgid "cannot make child for process substitution"
 msgstr "no se puede crear un proceso hijo para la sustitución del proceso"
 
-#: subst.c:6051
+#: subst.c:6059
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "no se puede abrir la tubería llamada %s para lectura"
 
-#: subst.c:6053
+#: subst.c:6061
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "no se puede abrir la tubería llamada %s para escritura"
 
-#: subst.c:6076
+#: subst.c:6084
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "no se puede duplicar la tubería llamada %s como df %d"
 
-#: subst.c:6200
+#: subst.c:6213
 msgid "command substitution: ignored null byte in input"
 msgstr "sustitución de orden: se ignora byte nulo en la entrada"
 
-#: subst.c:6340
+#: subst.c:6353
 msgid "cannot make pipe for command substitution"
 msgstr "no se puede crear la tubería para la sustitución de la orden"
 
-#: subst.c:6384
+#: subst.c:6397
 msgid "cannot make child for command substitution"
 msgstr "no se puede crear un proceso hijo para la sustitución de la orden"
 
-#: subst.c:6410
+#: subst.c:6423
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: no se puede duplicar la tubería como df 1"
 
-#: subst.c:6861 subst.c:9916
+#: subst.c:6883 subst.c:9952
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: nombre de variable inválido para referencia de nombre"
 
-#: subst.c:6957 subst.c:6975 subst.c:7147
+#: subst.c:6979 subst.c:6997 subst.c:7169
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: expansión indirecta inválida"
 
-#: subst.c:6991 subst.c:7155
+#: subst.c:7013 subst.c:7177
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: nombre de variable inválido"
 
-#: subst.c:7234
+#: subst.c:7256
 #, c-format
 msgid "%s: parameter not set"
 msgstr "%s: parámetro no establecido"
 
-#: subst.c:7236
+#: subst.c:7258
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parámetro nulo o no establecido"
 
-#: subst.c:7481 subst.c:7496
+#: subst.c:7503 subst.c:7518
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: expresión de subcadena < 0"
 
-#: subst.c:9245 subst.c:9266
+#: subst.c:9281 subst.c:9302
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: sustitución errónea"
 
-#: subst.c:9354
+#: subst.c:9390
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: no se puede asignar de esta forma"
 
-#: subst.c:9778
+#: subst.c:9814
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
@@ -2115,12 +2116,12 @@ msgstr ""
 "versiones futuras del intérprete obligarán la evaluación como una "
 "sustitución aritmética"
 
-#: subst.c:10331
+#: subst.c:10367
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "sustitución errónea: no hay una \"`\" que cierre en %s"
 
-#: subst.c:11393
+#: subst.c:11434
 #, c-format
 msgid "no match: %s"
 msgstr "no hay coincidencia: %s"
@@ -2143,12 +2144,12 @@ msgstr "`)' esperado"
 msgid "`)' expected, found %s"
 msgstr "se esperaba `)', se encontró %s"
 
-#: test.c:466 test.c:796
+#: test.c:466 test.c:799
 #, c-format
 msgid "%s: binary operator expected"
 msgstr "%s: se esperaba un operador binario"
 
-#: test.c:753 test.c:756
+#: test.c:756 test.c:759
 #, c-format
 msgid "%s: unary operator expected"
 msgstr "%s: se esperaba un operador unario"
@@ -2160,11 +2161,11 @@ msgstr "%s: se esperaba un operador unario"
 # Abreviando "falta [al menos] un `]'" saldría: "falta un `]'".
 # ¿No es mejor "falta algún `]'"? cfuga
 # Tiene razón Enrique: singular. cfuga
-#: test.c:878
+#: test.c:881
 msgid "missing `]'"
 msgstr "falta un `]'"
 
-#: test.c:896
+#: test.c:899
 #, fuzzy, c-format
 msgid "syntax error: `%s' unexpected"
 msgstr "error sintáctico: `;' inesperado"
@@ -2193,7 +2194,7 @@ msgstr ""
 "run_pending_traps: el manejador de señal es SIG_DFL, reenviando %d (%s) a mí "
 "mismo"
 
-#: trap.c:476
+#: trap.c:487
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: señal errónea %d"
@@ -2208,64 +2209,64 @@ msgstr "error al importar la definición de la función para `%s'"
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "el nivel de shell (%d) es demasiado alto, se reestablece a 1"
 
-#: variables.c:2649
+#: variables.c:2674
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: no hay contexto de función en el ámbito actual"
 
-#: variables.c:2668
+#: variables.c:2693
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: variable quizá no es valor asignado"
 
-#: variables.c:3450
+#: variables.c:3475
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s: asignando entero a nombre referencia"
 
-#: variables.c:4379
+#: variables.c:4404
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: no hay contexto de función en el ámbito actual"
 
-#: variables.c:4746
+#: variables.c:4771
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s tiene exportstr nulo"
 
-#: variables.c:4751 variables.c:4760
+#: variables.c:4776 variables.c:4785
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "carácter inválido %d en exportstr para %s"
 
-#: variables.c:4766
+#: variables.c:4791
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "no hay `=' en exportstr para %s"
 
-#: variables.c:5306
+#: variables.c:5331
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "pop_var_context: la cabeza de shell_variables no es un contexto de función"
 
-#: variables.c:5319
+#: variables.c:5344
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: no es un contexto global_variables"
 
-#: variables.c:5399
+#: variables.c:5424
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: la cabeza de shell_variables no es un ámbito de entorno temporal"
 
-#: variables.c:6362
+#: variables.c:6387
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: no se puede abrir como FICHERO"
 
-#: variables.c:6367
+#: variables.c:6392
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: valor inválido para el descriptor de fichero de rastreo"
 
-#: variables.c:6412
+#: variables.c:6437
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: valor de compatibilidad fuera del rango"
