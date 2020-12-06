@@ -1,6 +1,6 @@
 /* bashhist.c -- bash interface to the GNU history library. */
 
-/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -68,10 +68,10 @@ extern int rl_done, rl_dispatching;	/* should really include readline.h */
 extern int errno;
 #endif
 
-static int histignore_item_func __P((struct ign *));
-static int check_history_control __P((char *));
-static void hc_erasedups __P((char *));
-static void really_add_history __P((char *));
+static int histignore_item_func PARAMS((struct ign *));
+static int check_history_control PARAMS((char *));
+static void hc_erasedups PARAMS((char *));
+static void really_add_history PARAMS((char *));
 
 static struct ignorevar histignore =
 {
@@ -89,7 +89,7 @@ static struct ignorevar histignore =
    list.  This is different than the user-controlled behaviour; this
    becomes zero when we read lines from a file, for example. */
 int remember_on_history = 0;
-int enable_history_list = 0;	/* value for `set -o history' */
+int enable_history_list = -1;	/* value for `set -o history' */
 
 /* The number of lines that Bash has added to this history session.  The
    difference between the number of the top element in the history list
@@ -193,17 +193,17 @@ int hist_verify;
 int dont_save_function_defs;
 
 #if defined (BANG_HISTORY)
-static int bash_history_inhibit_expansion __P((char *, int));
+static int bash_history_inhibit_expansion PARAMS((char *, int));
 #endif
 #if defined (READLINE)
-static void re_edit __P((char *));
+static void re_edit PARAMS((char *));
 #endif
-static int history_expansion_p __P((char *));
-static int shell_comment __P((char *));
-static int should_expand __P((char *));
-static HIST_ENTRY *last_history_entry __P((void));
-static char *expand_histignore_pattern __P((char *));
-static int history_should_ignore __P((char *));
+static int history_expansion_p PARAMS((char *));
+static int shell_comment PARAMS((char *));
+static int should_expand PARAMS((char *));
+static HIST_ENTRY *last_history_entry PARAMS((void));
+static char *expand_histignore_pattern PARAMS((char *));
+static int history_should_ignore PARAMS((char *));
 
 #if defined (BANG_HISTORY)
 /* Is the history expansion starting at string[i] one that should not
@@ -359,10 +359,11 @@ bash_delete_histent (i)
 
   discard = remove_history (i);
   if (discard)
-    free_history_entry (discard);
-  history_lines_this_session--;
-
-  return 1;
+    {
+      free_history_entry (discard);
+      history_lines_this_session--;
+    }
+  return discard != 0;
 }
 
 int
@@ -436,11 +437,11 @@ int
 maybe_append_history (filename)
      char *filename;
 {
-  int fd, result;
+  int fd, result, histlen;
   struct stat buf;
 
   result = EXECUTION_SUCCESS;
-  if (history_lines_this_session > 0 && (history_lines_this_session <= where_history ()))
+  if (history_lines_this_session > 0)
     {
       /* If the filename was supplied, then create it if necessary. */
       if (stat (filename, &buf) == -1 && errno == ENOENT)
@@ -453,6 +454,10 @@ maybe_append_history (filename)
 	    }
 	  close (fd);
 	}
+      /* cap the number of lines we write at the length of the history list */
+      histlen = where_history ();
+      if (histlen > 0 && history_lines_this_session > histlen)
+	history_lines_this_session = histlen;	/* reset below anyway */
       result = append_history (history_lines_this_session, filename);
       /* Pretend we already read these lines from the file because we just
 	 added them */
@@ -752,7 +757,7 @@ maybe_add_history (line)
   int is_comment;
 
   hist_last_line_added = 0;
-  is_comment = shell_comment (line);
+  is_comment = (parser_state & PST_HEREDOC) ? 0 : shell_comment (line);
 
   /* Don't use the value of history_control to affect the second
      and subsequent lines of a multi-line command (old code did
@@ -800,7 +805,9 @@ check_add_history (line, force)
 }
 
 #if defined (SYSLOG_HISTORY)
-#define SYSLOG_MAXLEN 600
+#define SYSLOG_MAXMSG	1024
+#define SYSLOG_MAXLEN	SYSLOG_MAXMSG
+#define SYSLOG_MAXHDR	256
 
 #ifndef OPENLOG_OPTS
 #define OPENLOG_OPTS 0
@@ -816,7 +823,10 @@ void
 bash_syslog_history (line)
      const char *line;
 {
-  char trunc[SYSLOG_MAXLEN];
+  char trunc[SYSLOG_MAXLEN], *msg;
+  char loghdr[SYSLOG_MAXHDR];
+  char seqbuf[32], *seqnum;
+  int hdrlen, msglen, seqlen, chunks, i;
   static int first = 1;
 
   if (first)
@@ -825,13 +835,25 @@ bash_syslog_history (line)
       first = 0;
     }
 
-  if (strlen(line) < SYSLOG_MAXLEN)
-    syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY: PID=%d UID=%d %s", getpid(), current_user.uid, line);
+  hdrlen = snprintf (loghdr, sizeof(loghdr), "HISTORY: PID=%d UID=%d", getpid(), current_user.uid);
+  msglen = strlen (line);
+
+  if ((msglen + hdrlen + 1) < SYSLOG_MAXLEN)
+    syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "%s %s", loghdr, line);
   else
     {
-      strncpy (trunc, line, SYSLOG_MAXLEN);
-      trunc[SYSLOG_MAXLEN - 1] = '\0';
-      syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY (TRUNCATED): PID=%d UID=%d %s", getpid(), current_user.uid, trunc);
+      chunks = ((msglen + hdrlen) / SYSLOG_MAXLEN) + 1;
+      for (msg = line, i = 0; i < chunks; i++)
+	{
+	  seqnum = inttostr (i + 1, seqbuf, sizeof (seqbuf));
+	  seqlen = STRLEN (seqnum);
+
+	  /* 7 == "(seq=) " */
+	  strncpy (trunc, msg, SYSLOG_MAXLEN - hdrlen - seqlen - 7 - 1);
+	  trunc[SYSLOG_MAXLEN - 1] = '\0';
+	  syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "%s (seq=%s) %s", loghdr, seqnum, trunc);
+	  msg += SYSLOG_MAXLEN - hdrlen - seqlen - 8;
+	}
     }
 }
 #endif
@@ -845,13 +867,15 @@ void
 bash_add_history (line)
      char *line;
 {
-  int add_it, offset, curlen;
+  int add_it, offset, curlen, is_comment;
   HIST_ENTRY *current, *old;
   char *chars_to_add, *new_line;
 
   add_it = 1;
   if (command_oriented_history && current_command_line_count > 1)
     {
+      is_comment = (parser_state & PST_HEREDOC) ? 0 : shell_comment (line);
+
       /* The second and subsequent lines of a here document have the trailing
 	 newline preserved.  We don't want to add extra newlines here, but we
 	 do want to add one after the first line (which is the command that
@@ -859,7 +883,11 @@ bash_add_history (line)
 	 does the right thing to take care of this for us.  We don't want to
 	 add extra newlines if the user chooses to enable literal_history,
 	 so we have to duplicate some of what that function does here. */
-      if ((parser_state & PST_HEREDOC) && literal_history && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
+      /* If we're in a here document and past the first line,
+		(current_command_line_count > 2)
+	 don't add a newline here. This will also take care of the literal_history
+	 case if the other conditions are met. */
+      if ((parser_state & PST_HEREDOC) && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
 	chars_to_add = "";
       else if (current_command_line_count == current_command_line_comment+1)
 	chars_to_add = "\n";
@@ -871,7 +899,7 @@ bash_add_history (line)
       using_history ();
       current = previous_history ();
 
-      current_command_line_comment = shell_comment (line) ? current_command_line_count : -2;
+      current_command_line_comment = is_comment ? current_command_line_count : -2;
 
       if (current)
 	{
@@ -911,6 +939,9 @@ bash_add_history (line)
 	}
     }
 
+  if (add_it && history_is_stifled() && history_length == 0 && history_length == history_max_entries)
+    add_it = 0;
+
   if (add_it)
     really_add_history (line);
 
@@ -936,7 +967,7 @@ int
 history_number ()
 {
   using_history ();
-  return (remember_on_history ? history_base + where_history () : 1);
+  return ((remember_on_history || enable_history_list) ? history_base + where_history () : 1);
 }
 
 static int

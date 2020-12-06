@@ -1,8 +1,9 @@
-/* A Bison parser, made by GNU Bison 3.0.5.  */
+/* A Bison parser, made by GNU Bison 3.6.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +31,10 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
 #ifndef YY_YY_Y_TAB_H_INCLUDED
 # define YY_YY_Y_TAB_H_INCLUDED
 /* Debug traces.  */
@@ -40,61 +45,69 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    IF = 258,
-    THEN = 259,
-    ELSE = 260,
-    ELIF = 261,
-    FI = 262,
-    CASE = 263,
-    ESAC = 264,
-    FOR = 265,
-    SELECT = 266,
-    WHILE = 267,
-    UNTIL = 268,
-    DO = 269,
-    DONE = 270,
-    FUNCTION = 271,
-    COPROC = 272,
-    COND_START = 273,
-    COND_END = 274,
-    COND_ERROR = 275,
-    IN = 276,
-    BANG = 277,
-    TIME = 278,
-    TIMEOPT = 279,
-    TIMEIGN = 280,
-    WORD = 281,
-    ASSIGNMENT_WORD = 282,
-    REDIR_WORD = 283,
-    NUMBER = 284,
-    ARITH_CMD = 285,
-    ARITH_FOR_EXPRS = 286,
-    COND_CMD = 287,
-    AND_AND = 288,
-    OR_OR = 289,
-    GREATER_GREATER = 290,
-    LESS_LESS = 291,
-    LESS_AND = 292,
-    LESS_LESS_LESS = 293,
-    GREATER_AND = 294,
-    SEMI_SEMI = 295,
-    SEMI_AND = 296,
-    SEMI_SEMI_AND = 297,
-    LESS_LESS_MINUS = 298,
-    AND_GREATER = 299,
-    AND_GREATER_GREATER = 300,
-    LESS_GREATER = 301,
-    GREATER_BAR = 302,
-    BAR_AND = 303,
-    yacc_EOF = 304
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    IF = 258,                      /* IF  */
+    THEN = 259,                    /* THEN  */
+    ELSE = 260,                    /* ELSE  */
+    ELIF = 261,                    /* ELIF  */
+    FI = 262,                      /* FI  */
+    CASE = 263,                    /* CASE  */
+    ESAC = 264,                    /* ESAC  */
+    FOR = 265,                     /* FOR  */
+    SELECT = 266,                  /* SELECT  */
+    WHILE = 267,                   /* WHILE  */
+    UNTIL = 268,                   /* UNTIL  */
+    DO = 269,                      /* DO  */
+    DONE = 270,                    /* DONE  */
+    FUNCTION = 271,                /* FUNCTION  */
+    COPROC = 272,                  /* COPROC  */
+    COND_START = 273,              /* COND_START  */
+    COND_END = 274,                /* COND_END  */
+    COND_ERROR = 275,              /* COND_ERROR  */
+    IN = 276,                      /* IN  */
+    BANG = 277,                    /* BANG  */
+    TIME = 278,                    /* TIME  */
+    TIMEOPT = 279,                 /* TIMEOPT  */
+    TIMEIGN = 280,                 /* TIMEIGN  */
+    WORD = 281,                    /* WORD  */
+    ASSIGNMENT_WORD = 282,         /* ASSIGNMENT_WORD  */
+    REDIR_WORD = 283,              /* REDIR_WORD  */
+    NUMBER = 284,                  /* NUMBER  */
+    ARITH_CMD = 285,               /* ARITH_CMD  */
+    ARITH_FOR_EXPRS = 286,         /* ARITH_FOR_EXPRS  */
+    COND_CMD = 287,                /* COND_CMD  */
+    AND_AND = 288,                 /* AND_AND  */
+    OR_OR = 289,                   /* OR_OR  */
+    GREATER_GREATER = 290,         /* GREATER_GREATER  */
+    LESS_LESS = 291,               /* LESS_LESS  */
+    LESS_AND = 292,                /* LESS_AND  */
+    LESS_LESS_LESS = 293,          /* LESS_LESS_LESS  */
+    GREATER_AND = 294,             /* GREATER_AND  */
+    SEMI_SEMI = 295,               /* SEMI_SEMI  */
+    SEMI_AND = 296,                /* SEMI_AND  */
+    SEMI_SEMI_AND = 297,           /* SEMI_SEMI_AND  */
+    LESS_LESS_MINUS = 298,         /* LESS_LESS_MINUS  */
+    AND_GREATER = 299,             /* AND_GREATER  */
+    AND_GREATER_GREATER = 300,     /* AND_GREATER_GREATER  */
+    LESS_GREATER = 301,            /* LESS_GREATER  */
+    GREATER_BAR = 302,             /* GREATER_BAR  */
+    BAR_AND = 303,                 /* BAR_AND  */
+    yacc_EOF = 304                 /* yacc_EOF  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define IF 258
 #define THEN 259
 #define ELSE 260
@@ -145,10 +158,9 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-#line 328 "/usr/homes/chet/src/bash/src/parse.y" /* yacc.c:1910  */
+#line 328 "/Users/chet/src/bash/src/parse.y"
 
   WORD_DESC *word;		/* the word that we read. */
   int number;			/* the number that we read. */
@@ -158,9 +170,9 @@ union YYSTYPE
   ELEMENT element;
   PATTERN_LIST *pattern;
 
-#line 162 "y.tab.h" /* yacc.c:1910  */
-};
+#line 174 "y.tab.h"
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

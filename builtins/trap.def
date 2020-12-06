@@ -1,7 +1,7 @@
 This file is trap.def, from which is created trap.c.
 It implements the builtin "trap" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -75,8 +75,8 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
-static void showtrap __P((int));
-static int display_traps __P((WORD_LIST *));
+static void showtrap PARAMS((int, int));
+static int display_traps PARAMS((WORD_LIST *, int));
 
 /* The trap command:
 
@@ -133,7 +133,7 @@ trap_builtin (list)
     {
       initialize_terminating_signals ();
       get_all_original_signals ();
-      return (sh_chkwrite (display_traps (list)));
+      return (sh_chkwrite (display_traps (list, display && posixly_correct)));
     }
   else
     {
@@ -211,7 +211,7 @@ trap_builtin (list)
 			if (interactive)
 			  set_signal_handler (SIGINT, sigint_sighandler);
 			/* special cases for interactive == 0 */
-			else if (interactive_shell && (sourcelevel||running_trap))
+			else if (interactive_shell && (sourcelevel||running_trap||parse_and_execute_level))
 			  set_signal_handler (SIGINT, sigint_sighandler);
 			else
 			  set_signal_handler (SIGINT, termsig_sighandler);
@@ -246,14 +246,19 @@ trap_builtin (list)
 }
 
 static void
-showtrap (i)
-     int i;
+showtrap (i, show_default)
+     int i, show_default;
 {
   char *t, *p, *sn;
 
   p = trap_list[i];
   if (p == (char *)DEFAULT_SIG && signal_is_hard_ignored (i) == 0)
-    return;
+    {
+      if (show_default)
+	t = "-";
+      else
+	return;
+    }
   else if (signal_is_hard_ignored (i))
     t = (char *)NULL;
   else
@@ -274,19 +279,21 @@ showtrap (i)
   else
     printf ("trap -- %s %s\n", t ? t : "''", sn);
 
-  FREE (t);
+  if (show_default == 0)
+    FREE (t);
 }
 
 static int
-display_traps (list)
+display_traps (list, show_all)
      WORD_LIST *list;
+     int show_all;
 {
   int result, i;
 
   if (list == 0)
     {
       for (i = 0; i < BASH_NSIG; i++)
-	showtrap (i);
+	showtrap (i, show_all);
       return (EXECUTION_SUCCESS);
     }
 
@@ -299,7 +306,7 @@ display_traps (list)
 	  result = EXECUTION_FAILURE;
 	}
       else
-	showtrap (i);
+	showtrap (i, show_all);
     }
 
   return (result);

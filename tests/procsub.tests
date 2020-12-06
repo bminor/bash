@@ -1,11 +1,25 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 # process substitution constructs that have caused problems in the past
 . ./test-glue-functions
 
 eval cat <(echo test1)
 eval "echo foo;cat" <(echo test2)
 
-unset f
-f=<(echo test3); cat "$f"
+# this doesn't work, and it never should have
+#unset f
+#f=<(echo test3); cat "$f"
 
 unset f
 eval f=<(echo test4) "; cat \$f"
@@ -69,10 +83,10 @@ count_lines()
 {
     wc -l < $1
 
-#    case "$1" in
-#    *sh-np*)	[ -e "$1" ] || { echo 0; echo 0; echo 0; echo 0; return; } ;;
-#    *) ;;
-#    esac
+    case "$1" in
+    *sh-np*)	[ -e "$1" ] || { echo 0; echo 0; echo 0; echo 0; return; } ;;
+    *) ;;
+    esac
 
     wc -l < $1
     wc -l < $1
@@ -88,6 +102,7 @@ echo extern
 FN=$TMPDIR/bashtest-$$
 cat >$FN << \EOF
 wc -l < $1
+case $1 in *sh-np*) [ -e $1 ] || { echo 0; echo 0; echo 0; echo 0; return; } ;; esac
 wc -l < $1
 wc -l < $1
 true | wc -l < $1
@@ -103,3 +118,4 @@ moo() { ls -al "$1" >/dev/null; (true); ls -al "$1" >/dev/null; }; moo >(true)
 unset -f moo
 
 ${THIS_SH} ./procsub1.sub
+${THIS_SH} ./procsub2.sub

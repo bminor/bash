@@ -1,6 +1,6 @@
 /* config.h -- Configuration file for bash. */
 
-/* Copyright (C) 1987-2009,2011-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009,2011-2012,2013-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -285,6 +285,11 @@
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
 
+/* Define if major/minor/makedev is defined in <sys/mkdev.h> */
+#undef MAJOR_IN_MAKEDEV
+
+/* Define if major/minor/makedev is defined in <sys/sysmacros.h> */
+#undef MAJOR_IN_SYSMACROS
 
 /* SYSTEM TYPES */
 
@@ -567,6 +572,9 @@
 
 /* Presence of system and C library functions. */
 
+/* Define if you have the arc4random function.  */
+#undef HAVE_ARC4RANDOM
+
 /* Define if you have the asprintf function.  */
 #undef HAVE_ASPRINTF
 
@@ -626,6 +634,9 @@
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 
+/* Define if you have the getentropy function.  */
+#undef HAVE_GETENTROPY
+
 /* Define if you have the getdtablesize function.  */
 #undef HAVE_GETDTABLESIZE
 
@@ -652,6 +663,9 @@
 
 /* Define if you have the getpwuid function. */
 #undef HAVE_GETPWUID
+
+/* Define if you have the getrandom function.  */
+#undef HAVE_GETRANDOM
 
 /* Define if you have the getrlimit function.  */
 #undef HAVE_GETRLIMIT
@@ -746,6 +760,9 @@
 /* Define if you have the memset function.  */
 #undef HAVE_MEMSET
 
+/* Define if you have the mkdtemp function.  */
+#undef HAVE_MKDTEMP
+
 /* Define if you have the mkfifo function.  */
 #undef HAVE_MKFIFO
 
@@ -806,6 +823,14 @@
 /* Define if you have the setregid function.  */
 #undef HAVE_SETREGID
 #undef HAVE_DECL_SETREGID
+
+/* Define if you have the setregid function.  */
+#undef HAVE_SETRESGID
+#undef HAVE_DECL_SETRESGID
+
+/* Define if you have the setresuid function.  */
+#undef HAVE_SETRESUID
+#undef HAVE_DECL_SETRESUID
 
 /* Define if you have the setvbuf function.  */
 #undef HAVE_SETVBUF
@@ -1045,6 +1070,9 @@
 
 /* Define if you have the <sys/ptem.h> header file.  */
 #undef HAVE_SYS_PTEM_H
+
+/* Define if you have the <sys/random.h> header file.  */
+#undef HAVE_SYS_RANDOM_H
 
 /* Define if you have the <sys/resource.h> header file.  */
 #undef HAVE_SYS_RESOURCE_H

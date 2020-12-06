@@ -55,12 +55,18 @@ ansicstr (string, len, flags, sawc, rlen)
   int c, temp;
   char *ret, *r, *s;
   unsigned long v;
+  size_t clen;
+  int b, mb_cur_max;
+#if defined (HANDLE_MULTIBYTE)
+  wchar_t wc;
+#endif
 
   if (string == 0 || *string == '\0')
     return ((char *)NULL);
 
+  mb_cur_max = MB_CUR_MAX;
 #if defined (HANDLE_MULTIBYTE)
-  temp = 4*len + 1;
+  temp = 4*len + 4;
   if (temp < 12)
     temp = 12;				/* ensure enough for eventual u32cesc */
   ret = (char *)xmalloc (temp);
@@ -71,7 +77,21 @@ ansicstr (string, len, flags, sawc, rlen)
     {
       c = *s++;
       if (c != '\\' || *s == '\0')
-	*r++ = c;
+	{
+	  clen = 1;
+#if defined (HANDLE_MULTIBYTE)
+	  if ((locale_utf8locale && (c & 0x80)) ||
+	      (locale_utf8locale == 0 && mb_cur_max > 0 && is_basic (c) == 0))
+	    {
+	      clen = mbrtowc (&wc, s - 1, mb_cur_max, 0);
+	      if (MB_INVALIDCH (clen))
+		clen = 1;
+	    }
+#endif
+	  *r++ = c;
+	  for (--clen; clen > 0; clen--)
+	    *r++ = *s++;
+	}
       else
 	{
 	  switch (c = *s++)

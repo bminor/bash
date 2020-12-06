@@ -5,7 +5,7 @@
  * chet@ins.CWRU.Edu
  */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,18 +63,18 @@ extern int errno;
 #endif
 
 #if !defined (HAVE_INET_ATON)
-extern int inet_aton __P((const char *, struct in_addr *));
+extern int inet_aton PARAMS((const char *, struct in_addr *));
 #endif
 
 #ifndef HAVE_GETADDRINFO
-static int _getaddr __P((char *, struct in_addr *));
-static int _getserv __P((char *, int, unsigned short *));
-static int _netopen4 __P((char *, char *, int));
+static int _getaddr PARAMS((char *, struct in_addr *));
+static int _getserv PARAMS((char *, int, unsigned short *));
+static int _netopen4 PARAMS((char *, char *, int));
 #else /* HAVE_GETADDRINFO */
-static int _netopen6 __P((char *, char *, int));
+static int _netopen6 PARAMS((char *, char *, int));
 #endif
 
-static int _netopen __P((char *, char *, int));
+static int _netopen PARAMS((char *, char *, int));
 
 #ifndef HAVE_GETADDRINFO
 /* Stuff the internet address corresponding to HOST into AP, in network

@@ -2,7 +2,7 @@
 
 /* Modified to run with the GNU shell Apr 25, 1988 by bfox. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -103,31 +103,31 @@ static int test_error_return;
 #define test_exit(val) \
 	do { test_error_return = val; sh_longjmp (test_exit_buf, 1); } while (0)
 
-extern int sh_stat __P((const char *, struct stat *));
+extern int sh_stat PARAMS((const char *, struct stat *));
 
 static int pos;		/* The offset of the current argument in ARGV. */
 static int argc;	/* The number of arguments present in ARGV. */
 static char **argv;	/* The argument list. */
 static int noeval;
 
-static void test_syntax_error __P((char *, char *)) __attribute__((__noreturn__));
-static void beyond __P((void)) __attribute__((__noreturn__));
-static void integer_expected_error __P((char *)) __attribute__((__noreturn__));
+static void test_syntax_error PARAMS((char *, char *)) __attribute__((__noreturn__));
+static void beyond PARAMS((void)) __attribute__((__noreturn__));
+static void integer_expected_error PARAMS((char *)) __attribute__((__noreturn__));
 
-static int unary_operator __P((void));
-static int binary_operator __P((void));
-static int two_arguments __P((void));
-static int three_arguments __P((void));
-static int posixtest __P((void));
+static int unary_operator PARAMS((void));
+static int binary_operator PARAMS((void));
+static int two_arguments PARAMS((void));
+static int three_arguments PARAMS((void));
+static int posixtest PARAMS((void));
 
-static int expr __P((void));
-static int term __P((void));
-static int and __P((void));
-static int or __P((void));
+static int expr PARAMS((void));
+static int term PARAMS((void));
+static int and PARAMS((void));
+static int or PARAMS((void));
 
-static int filecomp __P((char *, char *, int));
-static int arithcomp __P((char *, char *, int, int));
-static int patcomp __P((char *, char *, int));
+static int filecomp PARAMS((char *, char *, int));
+static int arithcomp PARAMS((char *, char *, int, int));
+static int patcomp PARAMS((char *, char *, int));
 
 static void
 test_syntax_error (format, arg)
@@ -273,14 +273,11 @@ term ()
   if ((pos + 3 <= argc) && test_binop (argv[pos + 1]))
     value = binary_operator ();
 
-  /* Might be a switch type argument */
-  else if (argv[pos][0] == '-' && argv[pos][1] &&  argv[pos][2] == '\0')
-    {
-      if (test_unop (argv[pos]))
-	value = unary_operator ();
-      else
-	test_syntax_error (_("%s: unary operator expected"), argv[pos]);
-    }
+  /* Might be a switch type argument -- make sure we have enough arguments for
+     the unary operator and argument */
+  else if ((pos + 2) <= argc && test_unop (argv[pos]))
+    value = unary_operator ();
+
   else
     {
       value = argv[pos][0] != '\0';
@@ -344,10 +341,10 @@ arithcomp (s, t, op, flags)
 
   if (flags & TEST_ARITHEXP)
     {
-      l = evalexp (s, 0, &expok);
+      l = evalexp (s, EXP_EXPANDED, &expok);
       if (expok == 0)
 	return (FALSE);		/* should probably longjmp here */
-      r = evalexp (t, 0, &expok);
+      r = evalexp (t, EXP_EXPANDED, &expok);
       if (expok == 0)
 	return (FALSE);		/* ditto */
     }
@@ -518,6 +515,7 @@ unary_test (op, arg)
 {
   intmax_t r;
   struct stat stat_buf;
+  struct timespec mtime, atime;
   SHELL_VAR *v;
      
   switch (op[1])
@@ -544,8 +542,11 @@ unary_test (op, arg)
 	      (gid_t) current_user.egid == (gid_t) stat_buf.st_gid);
 
     case 'N':
-      return (sh_stat (arg, &stat_buf) == 0 &&
-	      stat_buf.st_atime <= stat_buf.st_mtime);
+      if (sh_stat (arg, &stat_buf) < 0)
+	return (FALSE);
+      atime = get_stat_atime (&stat_buf);
+      mtime = get_stat_mtime (&stat_buf);
+      return (timespec_cmp (mtime, atime) > 0);
 
     case 'f':			/* File is a file? */
       if (sh_stat (arg, &stat_buf) < 0)
@@ -626,13 +627,18 @@ unary_test (op, arg)
       if (valid_array_reference (arg, 0))
 	{
 	  char *t;
-	  int rtype, ret;
-	  t = array_value (arg, 0, 0, &rtype, (arrayind_t *)0);
+	  int rtype, ret, flags;
+
+	  /* Let's assume that this has already been expanded once. */
+	  flags = assoc_expand_once ? AV_NOEXPAND : 0;
+	  t = array_value (arg, 0, flags, &rtype, (arrayind_t *)0);
 	  ret = t ? TRUE : FALSE;
 	  if (rtype > 0)	/* subscript is * or @ */
 	    free (t);
 	  return ret;
 	}
+      else if (legal_number (arg, &r))		/* -v n == is $n set? */
+	return ((r >= 0 && r <= number_of_args()) ? TRUE : FALSE);
       v = find_variable (arg);
       if (v && invisible_p (v) == 0 && array_p (v))
 	{
@@ -888,7 +894,12 @@ test_command (margc, margv)
   value = posixtest ();
 
   if (pos != argc)
-    test_syntax_error (_("too many arguments"), (char *)NULL);
+    {
+      if (pos < argc && argv[pos][0] == '-')
+	test_syntax_error (_("syntax error: `%s' unexpected"), argv[pos]);
+      else
+	test_syntax_error (_("too many arguments"), (char *)NULL);
+    }
 
   test_exit (SHELL_BOOLEAN (value));
 }

@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,7 +63,7 @@ extern int errno;
 
 int parse_and_execute_level = 0;
 
-static int cat_file __P((REDIRECT *));
+static int cat_file PARAMS((REDIRECT *));
 
 #define PE_TAG "parse_and_execute top"
 #define PS_TAG "parse_string top"
@@ -88,6 +88,11 @@ int
 should_suppress_fork (command)
      COMMAND *command;
 {
+#if 0 /* TAG: bash-5.2 */
+  int subshell;
+
+  subshell = subshell_environment & SUBSHELL_PROCSUB;	/* salt to taste */
+#endif
   return (startup_state == 2 && parse_and_execute_level == 1 &&
 	  running_trap == 0 &&
 	  *bash_input.location.string == '\0' &&
@@ -96,7 +101,11 @@ should_suppress_fork (command)
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
 	  signal_is_trapped (ERROR_TRAP) == 0 &&
 	  any_signals_trapped () < 0 &&
+#if 0 /* TAG: bash-5.2 */
+	  (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
+#else
 	  command->redirects == 0 && command->value.Simple->redirects == 0 &&
+#endif
 	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
 }
@@ -145,7 +154,27 @@ optimize_subshell_command (command)
 	   (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR))
     optimize_subshell_command (command->value.Connection->second);
 }
-     
+
+void
+optimize_shell_function (command)
+     COMMAND *command;
+{
+  COMMAND *fc;
+
+  fc = (command->type == cm_group) ? command->value.Group->command : command;
+
+  if (fc->type == cm_simple && should_suppress_fork (fc))
+    {
+      fc->flags |= CMD_NO_FORK;
+      fc->value.Simple->flags |= CMD_NO_FORK;
+    }
+  else if (fc->type == cm_connection && can_optimize_connection (fc) && should_suppress_fork (fc->value.Connection->second))
+    {
+      fc->value.Connection->second->flags |= CMD_NO_FORK;
+      fc->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
+    }  
+}
+
 /* How to force parse_and_execute () to clean up after itself. */
 void
 parse_and_execute_cleanup (old_running_trap)
@@ -339,6 +368,7 @@ parse_and_execute (string, from_file, flags)
 	      if (command)
 		run_unwind_frame ("pe_dispose");
 	      last_result = last_command_exit_value = EXECUTION_FAILURE; /* XXX */
+	      set_pipestatus_from_exit (last_command_exit_value);
 	      if (subshell_environment)
 		{
 		  should_jump_to_top_level = 1;
@@ -389,6 +419,7 @@ parse_and_execute (string, from_file, flags)
 		      internal_warning (_("%s: ignoring function definition attempt"), from_file);
 		      should_jump_to_top_level = 0;
 		      last_result = last_command_exit_value = EX_BADUSAGE;
+		      set_pipestatus_from_exit (last_command_exit_value);
 		      reset_parser ();
 		      break;
 		    }
@@ -609,7 +640,7 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	  break;
     }
 
- out:
+out:
 
   global_command = oglobal;
   nc = bash_input.location.string - ostring;
@@ -654,7 +685,7 @@ cat_file (r)
 
   if (fn == 0)
     {
-      redirection_error (r, AMBIGUOUS_REDIRECT);
+      redirection_error (r, AMBIGUOUS_REDIRECT, fn);
       return -1;
     }
 

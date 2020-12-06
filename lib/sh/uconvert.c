@@ -1,7 +1,7 @@
 /* uconvert - convert string representations of decimal numbers into whole
 	      number/fractional value pairs. */
 
-/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,16 +23,7 @@
 
 #include "bashtypes.h"
 
-#if defined (TIME_WITH_SYS_TIME)
-#  include <sys/time.h>
-#  include <time.h>
-#else
-#  if defined (HAVE_SYS_TIME_H)
-#    include <sys/time.h>
-#  else
-#    include <time.h>
-#  endif
-#endif
+#include "posixtime.h"
 
 #if defined (HAVE_UNISTD_H)
 #include <unistd.h>
@@ -50,6 +41,7 @@
 do { \
   if (ip) *ip = ipart * mult; \
   if (up) *up = upart; \
+  if (ep) *ep = p; \
   return (x); \
 } while (0)
 
@@ -61,12 +53,14 @@ static int multiplier[7] = { 1, 100000, 10000, 1000, 100, 10, 1 };
 /* Take a decimal number int-part[.[micro-part]] and convert it to the whole
    and fractional portions.  The fractional portion is returned in
    millionths (micro); callers are responsible for multiplying appropriately.
+   EP, if non-null, gets the address of the character where conversion stops.
    Return 1 if value converted; 0 if invalid integer for either whole or
    fractional parts. */
 int
-uconvert(s, ip, up)
+uconvert(s, ip, up, ep)
      char *s;
      long *ip, *up;
+     char **ep;
 {
   int n, mult;
   long ipart, upart;
@@ -102,7 +96,14 @@ uconvert(s, ip, up)
   for (n = 0; n < 6 && p[n]; n++)
     {
       if (DIGIT(p[n]) == 0)
-	RETURN(0);
+	{
+	  if (ep)
+	    {
+	      upart *= multiplier[n];
+	      p += n;		/* To set EP */
+	    }
+	  RETURN(0);
+	}
       upart = (upart * 10) + (p[n] - '0');
     }
 
@@ -111,6 +112,13 @@ uconvert(s, ip, up)
 
   if (n == 6 && p[6] >= '5' && p[6] <= '9')
     upart++;			/* round up 1 */
+
+  if (ep)
+    {
+      p += n;
+      while (DIGIT(*p))
+	p++;
+    }
 
   RETURN(1);
 }

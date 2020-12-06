@@ -1,7 +1,7 @@
 This file is hash.def, from which is created hash.c.
 It implements the builtin "hash" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,11 +70,11 @@ $END
 
 extern int dot_found_in_search;
 
-static int add_hashed_command __P((char *, int));
-static int print_hash_info __P((BUCKET_CONTENTS *));
-static int print_portable_hash_info __P((BUCKET_CONTENTS *));
-static int print_hashed_commands __P((int));
-static int list_hashed_filename_targets __P((WORD_LIST *, int));
+static int add_hashed_command PARAMS((char *, int));
+static int print_hash_info PARAMS((BUCKET_CONTENTS *));
+static int print_portable_hash_info PARAMS((BUCKET_CONTENTS *));
+static int print_hashed_commands PARAMS((int));
+static int list_hashed_filename_targets PARAMS((WORD_LIST *, int));
 
 /* Print statistics on the current state of hashed commands.  If LIST is
    not empty, then rehash (or hash in the first place) the specified
@@ -123,9 +123,9 @@ hash_builtin (list)
   list = loptend;
 
   /* hash -t requires at least one argument. */
-  if (list == 0 && list_targets)
+  if (list == 0 && (delete || list_targets))
     {
-      sh_needarg ("-t");
+      sh_needarg (delete ? "-d" : "-t");
       return (EXECUTION_FAILURE);
     }
 
@@ -134,7 +134,8 @@ hash_builtin (list)
   if (list == 0 && expunge_hash_table == 0)
     {
       opt = print_hashed_commands (list_portably);
-      if (opt == 0 && posixly_correct == 0)
+      if (opt == 0 && posixly_correct == 0 &&
+	    (list_portably == 0 || shell_compatibility_level <= 50))
 	printf (_("%s: hash table empty\n"), this_command_name);
 
       return (EXECUTION_SUCCESS);

@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,7 +37,7 @@
 #  include <varargs.h>
 #endif
 
-#include <sys/time.h>
+#include "posixtime.h"
 
 #include <stdio.h>
 #include "bashansi.h"
@@ -79,7 +79,7 @@
 typedef SHELL_VAR **SVFUNC ();
 
 #ifndef HAVE_STRPBRK
-extern char *strpbrk __P((char *, char *));
+extern char *strpbrk PARAMS((char *, char *));
 #endif
 
 extern STRING_INT_ALIST word_token_alist[];
@@ -91,59 +91,59 @@ static void debug_printf (const char *, ...)  __attribute__((__format__ (printf,
 #endif
 #endif /* DEBUG */
 
-static int it_init_joblist __P((ITEMLIST *, int));
+static int it_init_joblist PARAMS((ITEMLIST *, int));
 
-static int it_init_aliases __P((ITEMLIST *));
-static int it_init_arrayvars __P((ITEMLIST *));
-static int it_init_bindings __P((ITEMLIST *));
-static int it_init_builtins __P((ITEMLIST *));
-static int it_init_disabled __P((ITEMLIST *));
-static int it_init_enabled __P((ITEMLIST *));
-static int it_init_exported __P((ITEMLIST *));
-static int it_init_functions __P((ITEMLIST *));
-static int it_init_helptopics __P((ITEMLIST *));
-static int it_init_hostnames __P((ITEMLIST *));
-static int it_init_jobs __P((ITEMLIST *));
-static int it_init_running __P((ITEMLIST *));
-static int it_init_stopped __P((ITEMLIST *));
-static int it_init_keywords __P((ITEMLIST *));
-static int it_init_signals __P((ITEMLIST *));
-static int it_init_variables __P((ITEMLIST *));
-static int it_init_setopts __P((ITEMLIST *));
-static int it_init_shopts __P((ITEMLIST *));
+static int it_init_aliases PARAMS((ITEMLIST *));
+static int it_init_arrayvars PARAMS((ITEMLIST *));
+static int it_init_bindings PARAMS((ITEMLIST *));
+static int it_init_builtins PARAMS((ITEMLIST *));
+static int it_init_disabled PARAMS((ITEMLIST *));
+static int it_init_enabled PARAMS((ITEMLIST *));
+static int it_init_exported PARAMS((ITEMLIST *));
+static int it_init_functions PARAMS((ITEMLIST *));
+static int it_init_helptopics PARAMS((ITEMLIST *));
+static int it_init_hostnames PARAMS((ITEMLIST *));
+static int it_init_jobs PARAMS((ITEMLIST *));
+static int it_init_running PARAMS((ITEMLIST *));
+static int it_init_stopped PARAMS((ITEMLIST *));
+static int it_init_keywords PARAMS((ITEMLIST *));
+static int it_init_signals PARAMS((ITEMLIST *));
+static int it_init_variables PARAMS((ITEMLIST *));
+static int it_init_setopts PARAMS((ITEMLIST *));
+static int it_init_shopts PARAMS((ITEMLIST *));
 
-static int shouldexp_filterpat __P((char *));
-static char *preproc_filterpat __P((char *, const char *));
+static int shouldexp_filterpat PARAMS((char *));
+static char *preproc_filterpat PARAMS((char *, const char *));
 
-static void init_itemlist_from_varlist __P((ITEMLIST *, SVFUNC *));
+static void init_itemlist_from_varlist PARAMS((ITEMLIST *, SVFUNC *));
 
-static STRINGLIST *gen_matches_from_itemlist __P((ITEMLIST *, const char *));
-static STRINGLIST *gen_action_completions __P((COMPSPEC *, const char *));
-static STRINGLIST *gen_globpat_matches __P((COMPSPEC *, const char *));
-static STRINGLIST *gen_wordlist_matches __P((COMPSPEC *, const char *));
-static STRINGLIST *gen_shell_function_matches __P((COMPSPEC *, const char *,
+static STRINGLIST *gen_matches_from_itemlist PARAMS((ITEMLIST *, const char *));
+static STRINGLIST *gen_action_completions PARAMS((COMPSPEC *, const char *));
+static STRINGLIST *gen_globpat_matches PARAMS((COMPSPEC *, const char *));
+static STRINGLIST *gen_wordlist_matches PARAMS((COMPSPEC *, const char *));
+static STRINGLIST *gen_shell_function_matches PARAMS((COMPSPEC *, const char *,
 						   const char *,
 						   char *, int, WORD_LIST *,
 						   int, int, int *));
-static STRINGLIST *gen_command_matches __P((COMPSPEC *, const char *,
+static STRINGLIST *gen_command_matches PARAMS((COMPSPEC *, const char *,
 					    const char *,
 					    char *, int, WORD_LIST *,
 					    int, int));
 
-static STRINGLIST *gen_progcomp_completions __P((const char *, const char *,
+static STRINGLIST *gen_progcomp_completions PARAMS((const char *, const char *,
 						 const char *,
 						 int, int, int *, int *,
 						 COMPSPEC **));
 
-static char *pcomp_filename_completion_function __P((const char *, int));
+static char *pcomp_filename_completion_function PARAMS((const char *, int));
 
 #if defined (ARRAY_VARS)
-static SHELL_VAR *bind_comp_words __P((WORD_LIST *));
+static SHELL_VAR *bind_comp_words PARAMS((WORD_LIST *));
 #endif
-static void bind_compfunc_variables __P((char *, int, WORD_LIST *, int, int));
-static void unbind_compfunc_variables __P((int));
-static WORD_LIST *build_arg_list __P((char *, const char *, const char *, WORD_LIST *, int));
-static WORD_LIST *command_line_to_word_list __P((char *, int, int, int *, int *));
+static void bind_compfunc_variables PARAMS((char *, int, WORD_LIST *, int, int));
+static void unbind_compfunc_variables PARAMS((int));
+static WORD_LIST *build_arg_list PARAMS((char *, const char *, const char *, WORD_LIST *, int));
+static WORD_LIST *command_line_to_word_list PARAMS((char *, int, int, int *, int *));
 
 #ifdef DEBUG
 static int progcomp_debug = 0;
@@ -1184,7 +1184,7 @@ gen_shell_function_matches (cs, cmd, text, line, ind, lwords, nw, cw, foundp)
       /* XXX - should we filter the list of completions so only those matching
 	 TEXT are returned?  Right now, we do not. */
       sl = strlist_create (0);
-      sl->list = array_to_argv (a);
+      sl->list = array_to_argv (a, 0);
       sl->list_len = sl->list_size = array_num_elements (a);
     }
 

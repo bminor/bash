@@ -242,6 +242,10 @@ ${THIS_SH} ./dollar-at-star7.sub
 # members separated by spaces
 ${THIS_SH} ./dollar-at-star8.sub
 
+# more tests of the expansions of $@ and $* (and their array equivalents)
+# with different values for IFS
+${THIS_SH} ./dollar-at-star9.sub
+
 # tests for special expansion of "$*" and "${array[*]}" when used with other
 # expansions -- bugs through bash-2.05b
 ${THIS_SH} ./dollar-star1.sub
@@ -301,5 +305,9 @@ ${THIS_SH} ./dollar-at7.sub
 # tests for expansions of $* when in an assignment context (no splitting) and
 # IFS is null
 ${THIS_SH} ./dollar-star9.sub
+
+# more tests for expansions of $* when not splitting with IFS set or unset and
+# null strings as the positional parameters
+${THIS_SH} ./dollar-star10.sub
 
 exit 0

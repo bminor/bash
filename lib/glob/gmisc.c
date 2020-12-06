@@ -1,6 +1,6 @@
 /* gmisc.c -- miscellaneous pattern matching utility functions for Bash.
 
-   Copyright (C) 2010-2017 Free Software Foundation, Inc.
+   Copyright (C) 2010-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
    
@@ -38,7 +38,7 @@
 #include "glob.h"
 
 /* Make sure these names continue to agree with what's in smatch.c */
-extern char *glob_patscan __P((char *, char *, int));
+extern char *glob_patscan PARAMS((char *, char *, int));
 
 /* Compile `gm_loop.c' for single-byte characters. */
 #define CHAR	char

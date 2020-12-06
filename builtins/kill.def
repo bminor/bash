@@ -1,7 +1,7 @@
 This file is kill.def, from which is created kill.c.
 It implements the builtin "kill" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,7 +70,7 @@ $END
 extern int errno;
 #endif /* !errno */
 
-static void kill_error __P((pid_t, int));
+static void kill_error PARAMS((pid_t, int));
 
 #if !defined (CONTINUE_AFTER_KILL_ERROR)
 #  define CONTINUE_OR_FAIL return (EXECUTION_FAILURE)

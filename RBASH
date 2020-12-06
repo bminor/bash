@@ -8,11 +8,13 @@ the standard shell.  A restricted shell behaves identically to 'bash'
 with the exception that the following are disallowed or not performed:
 
    * Changing directories with the 'cd' builtin.
-   * Setting or unsetting the values of the 'SHELL', 'PATH', 'ENV', or
-     'BASH_ENV' variables.
+   * Setting or unsetting the values of the 'SHELL', 'PATH', 'HISTFILE',
+     'ENV', or 'BASH_ENV' variables.
    * Specifying command names containing slashes.
    * Specifying a filename containing a slash as an argument to the '.'
      builtin command.
+   * Specifying a filename containing a slash as an argument to the
+     'history' builtin command.
    * Specifying a filename containing a slash as an argument to the '-p'
      option to the 'hash' builtin command.
    * Importing function definitions from the shell environment at
@@ -34,4 +36,16 @@ These restrictions are enforced after any startup files are read.
 When a command that is found to be a shell script is executed (*note
 Shell Scripts::), 'rbash' turns off any restrictions in the shell
 spawned to execute the script.
+
+The restricted shell mode is only one component of a useful restricted
+environment.  It should be accompanied by setting 'PATH' to a value that
+allows execution of only a few verified commands (commands that allow
+shell escapes are particularly vulnerable), leaving the user in a
+non-writable directory other than his home directory after login, not
+allowing the restricted shell to execute shell scripts, and cleaning the
+environment of variables that cause some commands to modify their
+behavior (e.g., 'VISUAL' or 'PAGER').
+
+Modern systems provide more secure ways to implement a restricted
+environment, such as 'jails', 'zones', or 'containers'.
 

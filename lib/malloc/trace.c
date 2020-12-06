@@ -1,6 +1,6 @@
 /* trace.c - tracing functions for malloc */
 
-/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,7 +35,7 @@ static int _mtrace_verbose = 0;
 
 #ifdef MALLOC_TRACE
 
-extern FILE *_imalloc_fopen __P((char *, char *, char *, char *, size_t));
+extern FILE *_imalloc_fopen PARAMS((char *, char *, char *, char *, size_t));
 
 FILE *_mtrace_fp = NULL;
 extern char _malloc_trace_buckets[];

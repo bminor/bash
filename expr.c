@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -181,43 +181,43 @@ static int	already_expanded;
 static struct lvalue curlval = {0, 0, 0, -1};
 static struct lvalue lastlval = {0, 0, 0, -1};
 
-static int	_is_arithop __P((int));
-static void	readtok __P((void));	/* lexical analyzer */
+static int	_is_arithop PARAMS((int));
+static void	readtok PARAMS((void));	/* lexical analyzer */
 
-static void	init_lvalue __P((struct lvalue *));
-static struct lvalue *alloc_lvalue __P((void));
-static void	free_lvalue __P((struct lvalue *));
+static void	init_lvalue PARAMS((struct lvalue *));
+static struct lvalue *alloc_lvalue PARAMS((void));
+static void	free_lvalue PARAMS((struct lvalue *));
 
-static intmax_t	expr_streval __P((char *, int, struct lvalue *));
-static intmax_t	strlong __P((char *));
-static void	evalerror __P((const char *));
+static intmax_t	expr_streval PARAMS((char *, int, struct lvalue *));
+static intmax_t	strlong PARAMS((char *));
+static void	evalerror PARAMS((const char *));
 
-static void	pushexp __P((void));
-static void	popexp __P((void));
-static void	expr_unwind __P((void));
-static void	expr_bind_variable __P((char *, char *));
+static void	pushexp PARAMS((void));
+static void	popexp PARAMS((void));
+static void	expr_unwind PARAMS((void));
+static void	expr_bind_variable PARAMS((char *, char *));
 #if defined (ARRAY_VARS)
-static void	expr_bind_array_element __P((char *, arrayind_t, char *));
+static void	expr_bind_array_element PARAMS((char *, arrayind_t, char *));
 #endif
 
-static intmax_t subexpr __P((char *));
+static intmax_t subexpr PARAMS((char *));
 
-static intmax_t	expcomma __P((void));
-static intmax_t expassign __P((void));
-static intmax_t	expcond __P((void));
-static intmax_t explor __P((void));
-static intmax_t expland __P((void));
-static intmax_t	expbor __P((void));
-static intmax_t	expbxor __P((void));
-static intmax_t	expband __P((void));
-static intmax_t exp5 __P((void));
-static intmax_t exp4 __P((void));
-static intmax_t expshift __P((void));
-static intmax_t exp3 __P((void));
-static intmax_t expmuldiv __P((void));
-static intmax_t	exppower __P((void));
-static intmax_t exp1 __P((void));
-static intmax_t exp0 __P((void));
+static intmax_t	expcomma PARAMS((void));
+static intmax_t expassign PARAMS((void));
+static intmax_t	expcond PARAMS((void));
+static intmax_t explor PARAMS((void));
+static intmax_t expland PARAMS((void));
+static intmax_t	expbor PARAMS((void));
+static intmax_t	expbxor PARAMS((void));
+static intmax_t	expband PARAMS((void));
+static intmax_t exp5 PARAMS((void));
+static intmax_t exp4 PARAMS((void));
+static intmax_t expshift PARAMS((void));
+static intmax_t exp3 PARAMS((void));
+static intmax_t expmuldiv PARAMS((void));
+static intmax_t	exppower PARAMS((void));
+static intmax_t exp1 PARAMS((void));
+static intmax_t exp0 PARAMS((void));
 
 /* Global var which contains the stack of expression contexts. */
 static EXPR_CONTEXT **expr_stack;
@@ -549,6 +549,7 @@ expassign ()
 	  switch (op)
 	    {
 	    case MUL:
+	      /* Handle INTMAX_MIN and INTMAX_MAX * -1 specially here? */
 	      lvalue *= value;
 	      break;
 	    case DIV:
@@ -1168,6 +1169,8 @@ expr_streval (tok, e, lvalue)
 #else
   v = find_variable (tok);
 #endif
+  if (v == 0 && e != ']')
+    v = find_variable_last_nameref (tok, 0);  
 
   if ((v == 0 || invisible_p (v)) && unbound_vars_is_error)
     {
@@ -1177,7 +1180,7 @@ expr_streval (tok, e, lvalue)
       value = tok;
 #endif
 
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
       err_unboundvar (value);
 
 #if defined (ARRAY_VARS)
@@ -1520,9 +1523,11 @@ evalerror (msg)
 
    Base may be >=2 and <=64.  If base is <= 36, the numbers are drawn
    from [0-9][a-zA-Z], and lowercase and uppercase letters may be used
-   interchangably.  If base is > 36 and <= 64, the numbers are drawn
+   interchangeably.  If base is > 36 and <= 64, the numbers are drawn
    from [0-9][a-z][A-Z]_@ (a = 10, z = 35, A = 36, Z = 61, @ = 62, _ = 63 --
    you get the picture). */
+
+#define VALID_NUMCHAR(c)	(ISALNUM(c) || ((c) == '_') || ((c) == '@'))
 
 static intmax_t
 strlong (num)
@@ -1570,8 +1575,13 @@ strlong (num)
 	  base = val;
 	  val = 0;
 	  foundbase++;
+
+	  /* Make sure a base# is followed by a character that can compose a
+	     valid integer constant. Jeremy Townshend <jeremy.townshend@gmail.com> */
+	  if (VALID_NUMCHAR (*s) == 0)
+	    evalerror (_("invalid integer constant"));
 	}
-      else if (ISALNUM(c) || (c == '_') || (c == '@'))
+      else if (VALID_NUMCHAR (c))
 	{
 	  if (DIGIT(c))
 	    c = TODIGIT(c);

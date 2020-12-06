@@ -1,6 +1,6 @@
 /* bashhist.h -- interface to the bash history functions in bashhist.c. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation,  Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation,  Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -64,26 +64,26 @@ extern int history_expansion_inhibited;
 extern int double_quotes_inhibit_history_expansion;
 #  endif /* BANG_HISTORY */
 
-extern void bash_initialize_history __P((void));
-extern void bash_history_reinit __P((int));
-extern void bash_history_disable __P((void));
-extern void bash_history_enable __P((void));
-extern void bash_clear_history __P((void));
-extern int bash_delete_histent __P((int));
-extern int bash_delete_history_range __P((int, int));
-extern int bash_delete_last_history __P((void));
-extern void load_history __P((void));
-extern void save_history __P((void));
-extern int maybe_append_history __P((char *));
-extern int maybe_save_shell_history __P((void));
-extern char *pre_process_line __P((char *, int, int));
-extern void maybe_add_history __P((char *));
-extern void bash_add_history __P((char *));
-extern int check_add_history __P((char *, int));
-extern int history_number __P((void));
+extern void bash_initialize_history PARAMS((void));
+extern void bash_history_reinit PARAMS((int));
+extern void bash_history_disable PARAMS((void));
+extern void bash_history_enable PARAMS((void));
+extern void bash_clear_history PARAMS((void));
+extern int bash_delete_histent PARAMS((int));
+extern int bash_delete_history_range PARAMS((int, int));
+extern int bash_delete_last_history PARAMS((void));
+extern void load_history PARAMS((void));
+extern void save_history PARAMS((void));
+extern int maybe_append_history PARAMS((char *));
+extern int maybe_save_shell_history PARAMS((void));
+extern char *pre_process_line PARAMS((char *, int, int));
+extern void maybe_add_history PARAMS((char *));
+extern void bash_add_history PARAMS((char *));
+extern int check_add_history PARAMS((char *, int));
+extern int history_number PARAMS((void));
 
-extern void setup_history_ignore __P((char *));
+extern void setup_history_ignore PARAMS((char *));
 
-extern char *last_history_line __P((void));
+extern char *last_history_line PARAMS((void));
 
 #endif /* _BASHHIST_H_ */

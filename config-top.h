@@ -106,9 +106,11 @@
    which can be fooled under certain not-uncommon circumstances. */
 /* #define SSH_SOURCE_BASHRC */
 
-/* Define if you want the case-capitalizing operators (~[~]) and the
+/* Define if you want the case-toggling operators (~[~]) and the
    `capcase' variable attribute (declare -c). */
-#define  CASEMOD_CAPCASE
+/* TAG: bash-5.2 disable */
+#define CASEMOD_TOGGLECASE
+#define CASEMOD_CAPCASE
 
 /* This is used as the name of a shell function to call when a command
    name is not found.  If you want to name it something other than the
@@ -173,6 +175,7 @@
 /* Define to use libc mktemp/mkstemp instead of replacements in lib/sh/tmpfile.c */
 #define USE_MKTEMP
 #define USE_MKSTEMP
+#define USE_MKDTEMP
 
 /* Define to force the value of OLDPWD inherited from the environment to be a
    directory */
@@ -186,3 +189,7 @@
    interactive shells; define to 1 for the historical behavior of enabling
    when the shell is interactive. */
 #define HISTEXPAND_DEFAULT	1
+
+/* Undefine or define to 0 if you don't want to allow associative array
+   assignment using a compound list of key-value pairs. */
+#define ASSOC_KVPAIR_ASSIGNMENT 1

@@ -1,6 +1,6 @@
 /* mailcheck.h -- variables and function declarations for mail checking. */
 
-/* Copyright (C) 1987,1991,2001,2003,2005,2006,2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,13 +22,13 @@
 #define _MAILCHECK_H_
 
 /* Functions from mailcheck.c */
-extern int time_to_check_mail __P((void));
-extern void reset_mail_timer __P((void));
-extern void reset_mail_files __P((void));
-extern void free_mail_files __P((void));
-extern char *make_default_mailpath __P((void));
-extern void remember_mail_dates __P((void));
-extern void init_mail_dates __P((void));
-extern void check_mail __P((void));
+extern int time_to_check_mail PARAMS((void));
+extern void reset_mail_timer PARAMS((void));
+extern void reset_mail_files PARAMS((void));
+extern void free_mail_files PARAMS((void));
+extern char *make_default_mailpath PARAMS((void));
+extern void remember_mail_dates PARAMS((void));
+extern void init_mail_dates PARAMS((void));
+extern void check_mail PARAMS((void));
 
 #endif /* _MAILCHECK_H */

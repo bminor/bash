@@ -77,7 +77,11 @@ typedef int WAIT;
 #  endif /* !WIFSIGNALED */
 
 #  if !defined (WIFCORED)
-#    define WIFCORED(s)       ((s) & 0200)
+#    if defined (WCOREDUMP)
+#      define WIFCORED(s)	(WCOREDUMP(s))
+#    else
+#      define WIFCORED(s)       ((s) & 0200)
+#    endif
 #  endif /* !WIFCORED */
 
 #else /* !_POSIX_VERSION */

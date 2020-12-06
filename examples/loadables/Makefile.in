@@ -1,7 +1,7 @@
 #
 # Simple makefile for the sample loadable builtins
 #
-# Copyright (C) 1996-2015 Free Software Foundation, Inc.
+# Copyright (C) 1996-2019 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ INTL_BUILDDIR = ${LIBBUILD}/intl
 INTL_INC = @INTL_INC@
 LIBINTL_H = @LIBINTL_H@
 
-CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) $(CFLAGS)
+CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) $(CPPFLAGS) $(CFLAGS)
 
 #
 # These values are generated for configure by ${topdir}/support/shobj-conf.
@@ -101,9 +101,10 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 
 
 ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
-	  tty pathchk tee head mkdir rmdir printenv id whoami \
-	  uname sync push ln unlink realpath strftime mypid setpgid seq
-OTHERPROG = necho hello cat pushd stat rm
+	  tty pathchk tee head mkdir rmdir mkfifo mktemp printenv id whoami \
+	  uname sync push ln unlink realpath strftime mypid setpgid seq rm \
+	  accept csv cut
+OTHERPROG = necho hello cat pushd stat asort
 
 all:	$(SHOBJ_STATUS)
 
@@ -132,6 +133,9 @@ hello:	hello.o
 
 truefalse: truefalse.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ truefalse.o $(SHOBJ_LIBS)
+
+accept:	accept.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ accept.o $(SHOBJ_LIBS)
 
 sleep:	sleep.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ sleep.o $(SHOBJ_LIBS)
@@ -175,6 +179,12 @@ mkdir:	mkdir.o
 rmdir:	rmdir.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ rmdir.o $(SHOBJ_LIBS)
 
+mkfifo:	mkfifo.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ mkfifo.o $(SHOBJ_LIBS)
+
+mktemp:	mktemp.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ mktemp.o $(SHOBJ_LIBS)
+
 head:	head.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ head.o $(SHOBJ_LIBS)
 
@@ -205,6 +215,12 @@ unlink:	unlink.o
 realpath:	realpath.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ realpath.o $(SHOBJ_LIBS)
 
+csv:	csv.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ csv.o $(SHOBJ_LIBS)
+
+cut:	cut.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ cut.o $(SHOBJ_LIBS)
+
 strftime:	strftime.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ strftime.o $(SHOBJ_LIBS)
 
@@ -216,6 +232,9 @@ setpgid:	setpgid.o
 
 stat:	stat.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ stat.o $(SHOBJ_LIBS)
+
+asort:	asort.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ asort.o $(SHOBJ_LIBS)
 
 # pushd is a special case.  We use the same source that the builtin version
 # uses, with special compilation options.
@@ -272,6 +291,7 @@ uninstall:	uninstall-$(SHOBJ_STATUS)
 
 print.o: print.c
 truefalse.o: truefalse.c
+accept.o: accept.c
 sleep.o: sleep.c
 finfo.o: finfo.c
 logname.o: logname.c
@@ -285,6 +305,8 @@ rmdir.o: rmdir.c
 necho.o: necho.c
 hello.o: hello.c
 cat.o: cat.c
+csv.o: csv.c
+cut.o: cut.c
 printenv.o: printenv.c
 id.o: id.c
 whoami.o: whoami.c
@@ -292,9 +314,11 @@ uname.o: uname.c
 sync.o: sync.c
 push.o: push.c
 mkdir.o: mkdir.c
+mktemp.o: mktemp.c
 realpath.o: realpath.c
 strftime.o: strftime.c
 setpgid.o: setpgid.c
 stat.o: stat.c
 fdflags.o: fdflags.c
 seq.o: seq.c
+asort.o: asort.c

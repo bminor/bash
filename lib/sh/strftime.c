@@ -62,6 +62,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <time.h>
+#include <errno.h>
 
 #if defined(TM_IN_SYS_TIME)
 #include <sys/types.h>
@@ -79,6 +80,10 @@
 #define POSIX_2008	1	/* flag and fw for C, F, G, Y formats */
 
 #undef strchr	/* avoid AIX weirdness */
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 #if defined (SHELL)
 extern char *get_string_value (const char *);
@@ -172,7 +177,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 	char *start = s;
 	auto char tbuf[100];
 	long off;
-	int i, w;
+	int i, w, oerrno;
 	long y;
 	static short first = 1;
 #ifdef POSIX_SEMANTICS
@@ -216,6 +221,8 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 		"October", "November", "December",
 	};
 	static const char *ampm[] = { "AM", "PM", };
+
+	oerrno = errno;
 
 	if (s == NULL || format == NULL || timeptr == NULL || maxsize == 0)
 		return 0;
@@ -642,7 +649,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 			sprintf(tbuf+1, "%02ld%02ld", off/60, off%60);
 			break;
 
-		case 'Z':	/* time zone name or abbrevation */
+		case 'Z':	/* time zone name or abbreviation */
 #ifdef HAVE_TZNAME
 			i = (daylight && timeptr->tm_isdst > 0); /* 0 or 1 */
 			strcpy(tbuf, tzname[i]);
@@ -716,6 +723,8 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 out:
 	if (s < endp && *format == '\0') {
 		*s = '\0';
+		if (s == start)
+			errno = oerrno;
 		return (s - start);
 	} else
 		return 0;
@@ -939,7 +948,7 @@ static char *array[] =
 	"(%%H)                          hour (24-hour clock, 00..23)  %H",
 	"(%%I)                          hour (12-hour clock, 01..12)  %I",
 	"(%%M)                                       minute (00..59)  %M",
-	"(%%N)                                      Emporer/Era Name  %N",
+	"(%%N)                                      Emperor/Era Name  %N",
 	"(%%O)                           Locale extensions (ignored)  %O",
 	"(%%R)                                 time, 24-hour (%%H:%%M)  %R",
 	"(%%S)                                       second (00..60)  %S",
@@ -960,7 +969,7 @@ static char *array[] =
 	"(%%k)               hour, 24-hour clock, blank pad ( 0..23)  %k",
 	"(%%l)               hour, 12-hour clock, blank pad ( 0..12)  %l",
 	"(%%m)                                        month (01..12)  %m",
-	"(%%o)                                      Emporer/Era Year  %o",
+	"(%%o)                                      Emperor/Era Year  %o",
 	"(%%p)              locale's AM or PM based on 12-hour clock  %p",
 	"(%%r)                   time, 12-hour (same as %%I:%%M:%%S %%p)  %r",
 	"(%%u) ISO 8601: Weekday as decimal number [1 (Monday) - 7]   %u",

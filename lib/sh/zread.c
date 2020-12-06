@@ -1,6 +1,6 @@
 /* zread - read data from file descriptor into buffer with retries */
 
-/* Copyright (C) 1999-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,6 +37,10 @@ extern int errno;
 #  define SEEK_CUR 1
 #endif
 
+#ifndef ZBUFSIZ
+#  define ZBUFSIZ 4096
+#endif
+
 extern int executing_builtin;
 
 extern void check_signals_and_traps (void);
@@ -55,12 +59,17 @@ zread (fd, buf, len)
 
   check_signals ();	/* check for signals before a blocking read */
   while ((r = read (fd, buf, len)) < 0 && errno == EINTR)
-    /* XXX - bash-5.0 */
-    /* We check executing_builtin and run traps here for backwards compatibility */
-    if (executing_builtin)
-      check_signals_and_traps ();	/* XXX - should it be check_signals()? */
-    else
-      check_signals ();
+    {
+      int t;
+      t = errno;
+      /* XXX - bash-5.0 */
+      /* We check executing_builtin and run traps here for backwards compatibility */
+      if (executing_builtin)
+	check_signals_and_traps ();	/* XXX - should it be check_signals()? */
+      else
+	check_signals ();
+      errno = t;
+    }
 
   return r;
 }
@@ -112,7 +121,7 @@ zreadintr (fd, buf, len)
    in read(2).  This does some local buffering to avoid many one-character
    calls to read(2), like those the `read' builtin performs. */
 
-static char lbuf[128];
+static char lbuf[ZBUFSIZ];
 static size_t lind, lused;
 
 ssize_t

@@ -1,6 +1,6 @@
 /* strtoumax - convert string representation of a number into an uintmax_t value. */
 
-/* Copyright 1999-2009 Free Software Foundation, Inc.
+/* Copyright 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,14 +45,14 @@
 "this configure-time declaration test was not run"
 #endif
 #if !HAVE_DECL_STRTOUL
-extern unsigned long strtoul __P((const char *, char **, int));
+extern unsigned long strtoul PARAMS((const char *, char **, int));
 #endif
 
 #ifndef HAVE_DECL_STRTOULL
 "this configure-time declaration test was not run"
 #endif
 #if !HAVE_DECL_STRTOULL && HAVE_UNSIGNED_LONG_LONG
-extern unsigned long long strtoull __P((const char *, char **, int));
+extern unsigned long long strtoull PARAMS((const char *, char **, int));
 #endif
 
 #ifdef strtoumax

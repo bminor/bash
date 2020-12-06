@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -50,58 +50,58 @@
 #include "builtins/common.h"
 
 #if !HAVE_DECL_PRINTF
-extern int printf __P((const char *, ...));	/* Yuck.  Double yuck. */
+extern int printf PARAMS((const char *, ...));	/* Yuck.  Double yuck. */
 #endif
 
 static int indentation;
 static int indentation_amount = 4;
 
 #if defined (PREFER_STDARG)
-typedef void PFUNC __P((const char *, ...));
+typedef void PFUNC PARAMS((const char *, ...));
 
-static void cprintf __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
-static void xprintf __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
+static void cprintf PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
+static void xprintf PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 #else
 #define PFUNC VFunction
 static void cprintf ();
 static void xprintf ();
 #endif
 
-static void reset_locals __P((void));
-static void newline __P((char *));
-static void indent __P((int));
-static void semicolon __P((void));
-static void the_printed_command_resize __P((int));
+static void reset_locals PARAMS((void));
+static void newline PARAMS((char *));
+static void indent PARAMS((int));
+static void semicolon PARAMS((void));
+static void the_printed_command_resize PARAMS((int));
 
-static void make_command_string_internal __P((COMMAND *));
-static void _print_word_list __P((WORD_LIST *, char *, PFUNC *));
-static void command_print_word_list __P((WORD_LIST *, char *));
-static void print_case_clauses __P((PATTERN_LIST *));
-static void print_redirection_list __P((REDIRECT *));
-static void print_redirection __P((REDIRECT *));
-static void print_heredoc_header __P((REDIRECT *));
-static void print_heredoc_body __P((REDIRECT *));
-static void print_heredocs __P((REDIRECT *));
-static void print_heredoc_bodies __P((REDIRECT *));
-static void print_deferred_heredocs __P((const char *));
+static void make_command_string_internal PARAMS((COMMAND *));
+static void _print_word_list PARAMS((WORD_LIST *, char *, PFUNC *));
+static void command_print_word_list PARAMS((WORD_LIST *, char *));
+static void print_case_clauses PARAMS((PATTERN_LIST *));
+static void print_redirection_list PARAMS((REDIRECT *));
+static void print_redirection PARAMS((REDIRECT *));
+static void print_heredoc_header PARAMS((REDIRECT *));
+static void print_heredoc_body PARAMS((REDIRECT *));
+static void print_heredocs PARAMS((REDIRECT *));
+static void print_heredoc_bodies PARAMS((REDIRECT *));
+static void print_deferred_heredocs PARAMS((const char *));
 
-static void print_for_command __P((FOR_COM *));
+static void print_for_command PARAMS((FOR_COM *));
 #if defined (ARITH_FOR_COMMAND)
-static void print_arith_for_command __P((ARITH_FOR_COM *));
+static void print_arith_for_command PARAMS((ARITH_FOR_COM *));
 #endif
 #if defined (SELECT_COMMAND)
-static void print_select_command __P((SELECT_COM *));
+static void print_select_command PARAMS((SELECT_COM *));
 #endif
-static void print_group_command __P((GROUP_COM *));
-static void print_case_command __P((CASE_COM *));
-static void print_while_command __P((WHILE_COM *));
-static void print_until_command __P((WHILE_COM *));
-static void print_until_or_while __P((WHILE_COM *, char *));
-static void print_if_command __P((IF_COM *));
+static void print_group_command PARAMS((GROUP_COM *));
+static void print_case_command PARAMS((CASE_COM *));
+static void print_while_command PARAMS((WHILE_COM *));
+static void print_until_command PARAMS((WHILE_COM *));
+static void print_until_or_while PARAMS((WHILE_COM *, char *));
+static void print_if_command PARAMS((IF_COM *));
 #if defined (COND_COMMAND)
-static void print_cond_node __P((COND_COM *));
+static void print_cond_node PARAMS((COND_COM *));
 #endif
-static void print_function_def __P((FUNCTION_DEF *));
+static void print_function_def PARAMS((FUNCTION_DEF *));
 
 #define PRINTED_COMMAND_INITIAL_SIZE 64
 #define PRINTED_COMMAND_GROW_SIZE 128
@@ -1312,7 +1312,7 @@ print_function_def (func)
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
 					: cmdcopy);
-  /* XXX - PRINT_DEFERRED_HEREDOCS (""); ? */
+  PRINT_DEFERRED_HEREDOCS ("");
 
   remove_unwind_protect ();
   indentation -= indentation_amount;
@@ -1388,7 +1388,7 @@ named_function_string (name, command, flags)
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
 					: cmdcopy);
-  /* XXX - PRINT_DEFERRED_HEREDOCS (""); ? */
+  PRINT_DEFERRED_HEREDOCS ("");
 
   indentation = old_indent;
   indentation_amount = old_amount;

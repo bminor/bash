@@ -1,5 +1,5 @@
 /* File-name wildcard pattern matching for GNU.
-   Copyright (C) 1985, 1988, 1989, 2008,2009 Free Software Foundation, Inc.
+   Copyright (C) 1985-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -31,12 +31,13 @@
 #define GX_ADDCURDIR	0x200	/* internal -- add passed directory name */
 #define GX_GLOBSTAR	0x400	/* turn on special handling of ** */
 #define GX_RECURSE	0x800	/* internal -- glob_filename called recursively */
+#define GX_SYMLINK	0x1000	/* internal -- symlink to a directory */
 
-extern int glob_pattern_p __P((const char *));
-extern char **glob_vector __P((char *, char *, int));
-extern char **glob_filename __P((char *, int));
+extern int glob_pattern_p PARAMS((const char *));
+extern char **glob_vector PARAMS((char *, char *, int));
+extern char **glob_filename PARAMS((char *, int));
 
-extern int extglob_pattern_p __P((const char *));
+extern int extglob_pattern_p PARAMS((const char *));
 
 extern char *glob_error_return;
 extern int noglob_dot_filenames;

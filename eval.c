@@ -1,6 +1,6 @@
 /* eval.c -- reading and evaluating commands. */
 
-/* Copyright (C) 1996-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,12 +48,8 @@
 #  include "bashhist.h"
 #endif
 
-#if defined (HAVE_POSIX_SIGNALS)
-extern sigset_t top_level_mask;
-#endif
-
-static void send_pwd_to_eterm __P((void));
-static sighandler alrm_catcher __P((int));
+static void send_pwd_to_eterm PARAMS((void));
+static sighandler alrm_catcher PARAMS((int));
 
 /* Read and execute commands until EOF is reached.  This assumes that
    the input source has already been initialized. */
@@ -108,7 +104,7 @@ reader_loop ()
 		 leave existing non-zero values (e.g., > 128 on signal)
 		 alone. */
 	      if (last_command_exit_value == 0)
-		last_command_exit_value = EXECUTION_FAILURE;
+		set_exit_status (EXECUTION_FAILURE);
 	      if (subshell_environment)
 		{
 		  current_command = (COMMAND *)NULL;
@@ -121,9 +117,8 @@ reader_loop ()
 		  dispose_command (current_command);
 		  current_command = (COMMAND *)NULL;
 		}
-#if defined (HAVE_POSIX_SIGNALS)
-	      sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
-#endif
+
+	      restore_sigmask ();
 	      break;
 
 	    default:
@@ -144,7 +139,7 @@ reader_loop ()
 	{
 	  if (interactive_shell == 0 && read_but_dont_execute)
 	    {
-	      last_command_exit_value = EXECUTION_SUCCESS;
+	      set_exit_status (EXECUTION_SUCCESS);
 	      dispose_command (global_command);
 	      global_command = (COMMAND *)NULL;
 	    }
@@ -242,8 +237,11 @@ static sighandler
 alrm_catcher(i)
      int i;
 {
-  printf (_("\007timed out waiting for input: auto-logout\n"));
-  fflush (stdout);
+  char *msg;
+
+  msg = _("\007timed out waiting for input: auto-logout\n");
+  write (1, msg, strlen (msg));
+
   bash_logout ();	/* run ~/.bash_logout if this is a login shell */
   jump_to_top_level (EXITPROG);
   SIGRETURN (0);
@@ -264,15 +262,58 @@ send_pwd_to_eterm ()
   free (f);
 }
 
+#if defined (ARRAY_VARS)
+/* Caller ensures that A has a non-zero number of elements */
+int
+execute_array_command (a, v)
+     ARRAY *a;
+     void *v;
+{
+  char *tag;
+  char **argv;
+  int argc, i;
+
+  tag = (char *)v;
+  argc = 0;
+  argv = array_to_argv (a, &argc);
+  for (i = 0; i < argc; i++)
+    {
+      if (argv[i] && argv[i][0])
+	execute_variable_command (argv[i], tag);
+    }
+  strvec_dispose (argv);
+  return 0;
+}
+#endif
+  
 static void
 execute_prompt_command ()
 {
   char *command_to_execute;
+  SHELL_VAR *pcv;
+#if defined (ARRAY_VARS)
+  ARRAY *pcmds;
+#endif
 
-  command_to_execute = get_string_value ("PROMPT_COMMAND");
-  if (command_to_execute)
+  pcv = find_variable ("PROMPT_COMMAND");
+  if (pcv  == 0 || var_isset (pcv) == 0 || invisible_p (pcv))
+    return;
+#if defined (ARRAY_VARS)
+  if (array_p (pcv))
+    {
+      if ((pcmds = array_cell (pcv)) && array_num_elements (pcmds) > 0)
+	execute_array_command (pcmds, "PROMPT_COMMAND");
+      return;
+    }
+  else if (assoc_p (pcv))
+    return;	/* currently don't allow associative arrays here */
+#endif
+
+  command_to_execute = value_cell (pcv);
+  if (command_to_execute && *command_to_execute)
     execute_variable_command (command_to_execute, "PROMPT_COMMAND");
 }
+
 /* Call the YACC-generated parser and return the status of the parse.
    Input is read from the current input stream (bash_input).  yyparse
    leaves the parsed command in the global variable GLOBAL_COMMAND.
@@ -287,13 +328,16 @@ parse_command ()
 
   /* Allow the execution of a random command just before the printing
      of each primary prompt.  If the shell variable PROMPT_COMMAND
-     is set then the value of it is the command to execute. */
+     is set then its value (array or string) is the command(s) to execute. */
   /* The tests are a combination of SHOULD_PROMPT() and prompt_again() 
      from parse.y, which are the conditions under which the prompt is
      actually printed. */
   if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
-      execute_prompt_command ();
+#if defined (READLINE)
+      if (no_line_editing || (bash_input.type == st_stdin && parser_will_prompt ()))
+#endif
+        execute_prompt_command ();
 
       if (running_under_emacs == 2)
 	send_pwd_to_eterm ();	/* Yuck */

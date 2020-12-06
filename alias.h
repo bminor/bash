@@ -1,6 +1,6 @@
 /* alias.h -- structure definitions. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,36 +38,36 @@ typedef struct alias {
 /* The list of known aliases. */
 extern HASH_TABLE *aliases;
 
-extern void initialize_aliases __P((void));
+extern void initialize_aliases PARAMS((void));
 
 /* Scan the list of aliases looking for one with NAME.  Return NULL
    if the alias doesn't exist, else a pointer to the alias. */
-extern alias_t *find_alias __P((char *));
+extern alias_t *find_alias PARAMS((char *));
 
 /* Return the value of the alias for NAME, or NULL if there is none. */
-extern char *get_alias_value __P((char *));
+extern char *get_alias_value PARAMS((char *));
 
 /* Make a new alias from NAME and VALUE.  If NAME can be found,
    then replace its value. */
-extern void add_alias __P((char *, char *));
+extern void add_alias PARAMS((char *, char *));
 
 /* Remove the alias with name NAME from the alias list.  Returns
    the index of the removed alias, or -1 if the alias didn't exist. */
-extern int remove_alias __P((char *));
+extern int remove_alias PARAMS((char *));
 
 /* Remove all aliases. */
-extern void delete_all_aliases __P((void));
+extern void delete_all_aliases PARAMS((void));
 
 /* Return an array of all defined aliases. */
-extern alias_t **all_aliases __P((void));
+extern alias_t **all_aliases PARAMS((void));
 
 /* Expand a single word for aliases. */
-extern char *alias_expand_word __P((char *));
+extern char *alias_expand_word PARAMS((char *));
 
 /* Return a new line, with any aliases expanded. */
-extern char *alias_expand __P((char *));
+extern char *alias_expand PARAMS((char *));
 
 /* Helper definition for the parser */
-extern void clear_string_list_expander __P((alias_t *));
+extern void clear_string_list_expander PARAMS((alias_t *));
 
 #endif /* _ALIAS_H_ */

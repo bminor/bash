@@ -1,6 +1,6 @@
 /* table.c - bookkeeping functions for allocated memory */
 
-/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,15 +29,15 @@
 #include "table.h"
 
 #ifdef SHELL
-extern int interrupt_immediately, running_trap;
-extern int signal_is_trapped __P((int));
+extern int running_trap;
+extern int signal_is_trapped PARAMS((int));
 #endif
 
 extern int malloc_register;
 
 #ifdef MALLOC_REGISTER
 
-extern FILE *_imalloc_fopen __P((char *, char *, char *, char *, size_t));
+extern FILE *_imalloc_fopen PARAMS((char *, char *, char *, char *, size_t));
 
 #define FIND_ALLOC	0x01	/* find slot for new allocation */
 #define FIND_EXIST	0x02	/* find slot for existing entry for free() or search */
@@ -174,7 +174,7 @@ mregister_alloc (tag, mem, size, file, line)
   /* Block all signals in case we are executed from a signal handler. */
   blocked_sigs = 0;
 #ifdef SHELL
-  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+  if (running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
 #endif
     {
       _malloc_block_signals (&set, &oset);
@@ -229,7 +229,7 @@ mregister_free (mem, size, file, line)
   /* Block all signals in case we are executed from a signal handler. */
   blocked_sigs = 0;
 #ifdef SHELL
-  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+  if (running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
 #endif
     {
       _malloc_block_signals (&set, &oset);

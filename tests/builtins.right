@@ -105,9 +105,9 @@ m n o p
 /tmp/bash-dir-a
 /tmp/bash-dir-a
 /tmp/bash-dir-a
-./source5.sub: line 10: /tmp/source-notthere: No such file or directory
+./source5.sub: line 23: /tmp/source-notthere: No such file or directory
 after bad source 1
-./source5.sub: line 17: /tmp/source-notthere: No such file or directory
+./source5.sub: line 30: /tmp/source-notthere: No such file or directory
 one - OK
 0
 0
@@ -144,11 +144,11 @@ AVAR
 foo
 declare -x foo=""
 declare -x FOO="\$\$"
-./builtins.tests: line 213: declare: FOO: not found
+./builtins.tests: line 226: declare: FOO: not found
 declare -x FOO="\$\$"
 ok
 ok
-./builtins.tests: line 245: kill: 4096: invalid signal specification
+./builtins.tests: line 258: kill: 4096: invalid signal specification
 1
 a\n\n\nb
 a
@@ -208,8 +208,8 @@ f2 ()
 all unset:
 unset1
 unset2
-./builtins6.sub: line 28: declare: f1: not found
-./builtins6.sub: line 28: declare: f2: not found
+./builtins6.sub: line 41: declare: f1: not found
+./builtins6.sub: line 41: declare: f2: not found
 all reset:
 one-one
 two-one
@@ -235,4 +235,40 @@ f2 ()
 funcs unset:
 one-two
 two-two
-./builtins.tests: line 266: exit: status: numeric argument required
+bash: line 1: notthere: No such file or directory
+one
+bash: line 1: notthere: No such file or directory
+two
+bash: line 1: .: notthere: file not found
+one
+bash: line 1: .: notthere: file not found
+0
+0
+0
+0
+argv[1] = <one>
+0
+argv[1] = <two>
+0
+three
+0
+four
+0
+./builtins7.sub: line 19: : command not found
+127
+0
+./builtins7.sub: line 27: notthere: No such file or directory
+after 1
+./builtins7.sub: line 28: notthere: No such file or directory
+after 2
+type is a shell builtin
++ command -v type
+type
++ command command -v type
+type
++ command -p command -v type
+type
++ command -p -- command -v type
+type
++ set +x
+./builtins.tests: line 282: exit: status: numeric argument required

@@ -1,7 +1,7 @@
 /* pcomplete.h - structure definitions and other stuff for programmable
 		 completion. */
 
-/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -87,7 +87,7 @@ typedef struct compspec {
    completions. */
 typedef struct _list_of_items {
   int flags;
-  int (*list_getter) __P((struct _list_of_items *));	/* function to call to get the list */
+  int (*list_getter) PARAMS((struct _list_of_items *));	/* function to call to get the list */
 
   STRINGLIST *slist;
 
@@ -147,31 +147,31 @@ extern COMPSPEC *pcomp_curcs;
 extern const char *pcomp_curcmd;
 
 /* Functions from pcomplib.c */
-extern COMPSPEC *compspec_create __P((void));
-extern void compspec_dispose __P((COMPSPEC *));
-extern COMPSPEC *compspec_copy __P((COMPSPEC *));
+extern COMPSPEC *compspec_create PARAMS((void));
+extern void compspec_dispose PARAMS((COMPSPEC *));
+extern COMPSPEC *compspec_copy PARAMS((COMPSPEC *));
 
-extern void progcomp_create __P((void));
-extern void progcomp_flush __P((void));
-extern void progcomp_dispose __P((void));
+extern void progcomp_create PARAMS((void));
+extern void progcomp_flush PARAMS((void));
+extern void progcomp_dispose PARAMS((void));
 
-extern int progcomp_size __P((void));
+extern int progcomp_size PARAMS((void));
 
-extern int progcomp_insert __P((char *, COMPSPEC *));
-extern int progcomp_remove __P((char *));
+extern int progcomp_insert PARAMS((char *, COMPSPEC *));
+extern int progcomp_remove PARAMS((char *));
 
-extern COMPSPEC *progcomp_search __P((const char *));
+extern COMPSPEC *progcomp_search PARAMS((const char *));
 
-extern void progcomp_walk __P((hash_wfunc *));
+extern void progcomp_walk PARAMS((hash_wfunc *));
 
 /* Functions from pcomplete.c */
-extern void set_itemlist_dirty __P((ITEMLIST *));
+extern void set_itemlist_dirty PARAMS((ITEMLIST *));
 
-extern STRINGLIST *completions_to_stringlist __P((char **));
+extern STRINGLIST *completions_to_stringlist PARAMS((char **));
 
-extern STRINGLIST *gen_compspec_completions __P((COMPSPEC *, const char *, const char *, int, int, int *));
-extern char **programmable_completions __P((const char *, const char *, int, int, int *));
+extern STRINGLIST *gen_compspec_completions PARAMS((COMPSPEC *, const char *, const char *, int, int, int *));
+extern char **programmable_completions PARAMS((const char *, const char *, int, int, int *));
 
-extern void pcomp_set_readline_variables __P((int, int));
-extern void pcomp_set_compspec_options __P((COMPSPEC *, int, int));
+extern void pcomp_set_readline_variables PARAMS((int, int));
+extern void pcomp_set_compspec_options PARAMS((COMPSPEC *, int, int));
 #endif /* _PCOMPLETE_H_ */

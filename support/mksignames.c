@@ -1,7 +1,7 @@
 /* mksignames.c -- Create and write `signames.h', which contains an array of
    signal names. */
 
-/* Copyright (C) 1992-2006 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,7 +57,7 @@ write_signames (stream)
 	   "/* A translation list so we can be polite to our users. */\n");
 #if defined (CROSS_COMPILING)
   fprintf (stream, "extern char *signal_names[];\n\n");
-  fprintf (stream, "extern void initialize_signames __P((void));\n\n");
+  fprintf (stream, "extern void initialize_signames PARAMS((void));\n\n");
 #else
   fprintf (stream, "char *signal_names[NSIG + 4] = {\n");
 

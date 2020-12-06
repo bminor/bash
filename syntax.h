@@ -1,6 +1,6 @@
 /* syntax.h -- Syntax definitions for the shell */
 
-/* Copyright (C) 2000, 2001, 2005, 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2001, 2005, 2008, 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

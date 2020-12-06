@@ -1,6 +1,6 @@
 /* shmbutil.h -- utility functions for multibyte characters. */
 
-/* Copyright (C) 2002-2004 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,12 +29,13 @@
 #if defined (HANDLE_MULTIBYTE)
 #include "shmbchar.h"
 
-extern size_t xmbsrtowcs __P((wchar_t *, const char **, size_t, mbstate_t *));
-extern size_t xdupmbstowcs __P((wchar_t **, char ***, const char *));
+extern size_t xwcsrtombs PARAMS((char *, const wchar_t **, size_t, mbstate_t *));
+extern size_t xmbsrtowcs PARAMS((wchar_t *, const char **, size_t, mbstate_t *));
+extern size_t xdupmbstowcs PARAMS((wchar_t **, char ***, const char *));
 
-extern size_t mbstrlen __P((const char *));
+extern size_t mbstrlen PARAMS((const char *));
 
-extern char *xstrchr __P((const char *, int));
+extern char *xstrchr PARAMS((const char *, int));
 
 extern int locale_mb_cur_max;	/* XXX */
 extern int locale_utf8locale;	/* XXX */

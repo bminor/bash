@@ -3,7 +3,7 @@ argv[1] = <foo>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
-./new-exp.tests: line 28: HOME: }: syntax error: operand expected (error token is "}")
+./new-exp.tests: line 41: HOME: }: syntax error: operand expected (error token is "}")
 unset
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
@@ -66,8 +66,8 @@ argv[4] = <d>
 argv[1] = <a>
 argv[2] = <b c>
 argv[3] = <d>
-./new-exp.tests: line 184: ABX: unbound variable
-./new-exp.tests: line 188: $6: cannot assign in this way
+./new-exp.tests: line 197: ABX: unbound variable
+./new-exp.tests: line 201: $6: cannot assign in this way
 argv[1] = <xxcde>
 argv[1] = <axxde>
 argv[1] = <abxyz>
@@ -170,13 +170,13 @@ This-string-has-multiple-lines.
 this is a test of proc subst
 this is test 2
 a
-./new-exp2.sub: line 42: /tmp/redir-notthere: No such file or directory
+./new-exp2.sub: line 55: /tmp/redir-notthere: No such file or directory
 1
 
-./new-exp2.sub: line 49: 1111111111111111111111: command not found
+./new-exp2.sub: line 62: 1111111111111111111111: command not found
 
 argv[1] = <6>
-./new-exp.tests: line 289: ${#:}: bad substitution
+./new-exp.tests: line 302: ${#:}: bad substitution
 argv[1] = <'>
 argv[1] = <">
 argv[1] = <"hello">
@@ -411,13 +411,13 @@ argv[6] = <w>
 argv[7] = <x>
 argv[8] = <y>
 argv[9] = <z>
-./new-exp.tests: line 507: $9: unbound variable
-./new-exp.tests: line 508: 9: unbound variable
-./new-exp.tests: line 509: UNSET: unbound variable
-./new-exp.tests: line 510: UNSET: unbound variable
-./new-exp.tests: line 511: UNSET: unbound variable
-./new-exp.tests: line 512: UNSET: unbound variable
-./new-exp.tests: line 513: UNSET: unbound variable
+./new-exp.tests: line 520: $9: unbound variable
+./new-exp.tests: line 521: 9: unbound variable
+./new-exp.tests: line 522: UNSET: unbound variable
+./new-exp.tests: line 523: UNSET: unbound variable
+./new-exp.tests: line 524: UNSET: unbound variable
+./new-exp.tests: line 525: UNSET: unbound variable
+./new-exp.tests: line 526: UNSET: unbound variable
 argv[1] = <5>
 argv[1] = <#>
 argv[1] = <#>
@@ -453,9 +453,9 @@ argv[3] = <_QUEST>
 argv[4] = <_QUILL>
 argv[5] = <_QUOTA>
 argv[6] = <_QUOTE>
-./new-exp3.sub: line 23: ${!_Q* }: bad substitution
-./new-exp3.sub: line 28: ${!1*}: bad substitution
-./new-exp3.sub: line 30: ${!@*}: bad substitution
+./new-exp3.sub: line 36: ${!_Q* }: bad substitution
+./new-exp3.sub: line 41: ${!1*}: bad substitution
+./new-exp3.sub: line 43: ${!@*}: bad substitution
 Case01---3---A:B:C---
 Case02---1---A B C::---
 Case03---3---A:B:C---
@@ -464,7 +464,7 @@ Case05---3---A:B:C---
 Case06---1---A B C::---
 Case07---3---A:B:C---
 Case08---3---A:B:C---
-./new-exp.tests: line 533: ${$(($#-1))}: bad substitution
+./new-exp.tests: line 546: ${$(($#-1))}: bad substitution
 argv[1] = <a>
 argv[2] = <b>
 argv[3] = <c>
@@ -481,7 +481,8 @@ argv[1] = <a>
 argv[1] = <a>
 argv[2] = <b>
 argv[1] = <>
-./new-exp.tests: line 552: $(($# - 2)): substring expression < 0
+./new-exp.tests: line 565: $(($# - 2)): substring expression < 0
+./new-exp.tests: line 567: -2: substring expression < 0
 argv[1] = <bin>
 argv[2] = <bin>
 argv[3] = <ucb>
@@ -616,7 +617,7 @@ c Sub = 0 2 4 8
 <>
 <>
 <'ab '\''cd'\'' ef'> 
-./new-exp10.sub: line 11: ${x@C}: bad substitution
+./new-exp10.sub: line 24: ${x@C}: bad substitution
 <'ab'> <'cd ef'> <''> <'gh'> 
 <'ab' 'cd ef' '' 'gh'> 
 <'ab'> <'cd> <ef'> <''> <'gh'> 
@@ -624,7 +625,7 @@ c Sub = 0 2 4 8
 <'ab cd'> 
 <'4'> <'ab cd'> 
 <> 
-argv[1] = <host(2)[5.0]$ >
+argv[1] = <host(2)[5.1]$ >
 < 	
 >
 <' \t\n'>
@@ -635,7 +636,7 @@ declare -r x='ab '\''cd'\'' ef'
 set -- 'ab' 'cd ef' '' 'gh' 
 declare -a A=([0]="ab" [1]="cd ef" [2]="" [3]="gh") 
 declare -a B=() 
-declare -A A=([two]="b c" [three]="" [four]="de" [one]="1" ) 
+declare -A A=([four]="de" [two]="b c" [three]="" [one]="1" ) 
 r
 a 
 A 
@@ -667,6 +668,58 @@ prependÃ¥
 Ã¥
 ḅć
 ḅć
+HELLO;1 foo;2 foo;
+PASS;1 foo;2 foo;
+after: PASS
+'zzz'
+'zzz'
+declare -rl VAR1
+declare -rl VAR1
+declare -rl VAR1
+declare -rl VAR1
+rl
+rl
+rl
+rl
+declare -arl VAR3
+declare -arl VAR3
+declare -arl VAR3
+declare -arl VAR3
+arl
+arl
+arl
+arl
+one
+one
+'aaa'
+'aaa' 'bbb'
+./new-exp13.sub: line 56: aaa bbb: invalid variable name
+aaa bbb
+0 1
+'aaa'
+'aaa' 'bbb'
+'aaa' 'bbb'
+'aaa' 'bbb'
+a bbb
+aaa bb
+'string'
+'value with spaces'
+'a b' 'c d' 'e f'
+'a b' 'c d' 'e f'
+0 "zero" 1 "one" 2 "two" 3 "three"
+0 "zero z" 1 "one o" 2 "two t" 3 "three t"
+declare -a foo=()
+ai
+declare -ai foo
+bash: line 1: foo: unbound variable
+ai
+declare -ai foo
+bash: line 1: !bar: unbound variable
+a
+a
+a
+a
 argv[1] = </>
 argv[1] = </>
-./new-exp.tests: line 615: ABXD: parameter unset
+
+./new-exp.tests: line 1: ABXD: parameter unset

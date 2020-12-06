@@ -1,6 +1,6 @@
 /* casemod.c -- functions to change case of strings */
 
-/* Copyright (C) 2008,2009,2015 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -67,7 +67,7 @@
 
 #define CASE_USEWORDS	0x1000		/* modify behavior to act on words in passed string */
 
-extern char *substring __P((char *, int, int));
+extern char *substring PARAMS((char *, int, int));
 
 #ifndef UCHAR_MAX
 #  define UCHAR_MAX	TYPE_MAXIMUM(unsigned char)

@@ -1,6 +1,6 @@
 /* locale.c - Miscellaneous internationalization functions. */
 
-/* Copyright (C) 1996-2009,2012,2016 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2012,2016,2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,7 +45,7 @@ extern int errno;
 
 int locale_utf8locale;
 int locale_mb_cur_max;	/* value of MB_CUR_MAX for current locale (LC_CTYPE) */
-int locale_shiftstates;
+int locale_shiftstates = 0;
 
 extern int dump_translatable_strings, dump_po_strings;
 
@@ -66,10 +66,10 @@ static char *lang;
 
 /* Called to reset all of the locale variables to their appropriate values
    if (and only if) LC_ALL has not been assigned a value. */
-static int reset_locale_vars __P((void));
+static int reset_locale_vars PARAMS((void));
 
-static void locale_setblanks __P((void));
-static int locale_isutf8 __P((char *));
+static void locale_setblanks PARAMS((void));
+static int locale_isutf8 PARAMS((char *));
 
 /* Set the value of default_locale and make the current locale the
    system default locale.  This should be called very early in main(). */
@@ -80,13 +80,19 @@ set_default_locale ()
   default_locale = setlocale (LC_ALL, "");
   if (default_locale)
     default_locale = savestring (default_locale);
+#else
+  default_locale = savestring ("C");
 #endif /* HAVE_SETLOCALE */
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
   locale_mb_cur_max = MB_CUR_MAX;
   locale_utf8locale = locale_isutf8 (default_locale);
+#if defined (HANDLE_MULTIBYTE)
   locale_shiftstates = mblen ((char *)NULL, 0);
+#else
+  local_shiftstates = 0;
+#endif
 }
 
 /* Set default values for LC_CTYPE, LC_COLLATE, LC_MESSAGES, LC_NUMERIC and
@@ -107,7 +113,13 @@ set_default_locale_vars ()
       locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
       locale_utf8locale = locale_isutf8 (lc_all);
+
+#    if defined (HANDLE_MULTIBYTE)
       locale_shiftstates = mblen ((char *)NULL, 0);
+#    else
+      local_shiftstates = 0;
+#    endif
+
       u32reset ();
     }
 #  endif
@@ -211,7 +223,11 @@ set_locale_var (var, value)
       /* if LC_ALL == "", reset_locale_vars has already called this */
       if (*lc_all && x)
 	locale_utf8locale = locale_isutf8 (lc_all);
+#  if defined (HANDLE_MULTIBYTE)
       locale_shiftstates = mblen ((char *)NULL, 0);
+#  else
+      local_shiftstates = 0;
+#  endif
       u32reset ();
       return r;
 #else
@@ -231,7 +247,11 @@ set_locale_var (var, value)
 	  /* if setlocale() returns NULL, the locale is not changed */
 	  if (x)
 	    locale_utf8locale = locale_isutf8 (x);
+#if defined (HANDLE_MULTIBYTE)
 	  locale_shiftstates = mblen ((char *)NULL, 0);
+#else
+	  local_shiftstates = 0;
+#endif
 	  u32reset ();
 	}
 #  endif
@@ -368,7 +388,11 @@ reset_locale_vars ()
   locale_mb_cur_max = MB_CUR_MAX;
   if (x)
     locale_utf8locale = locale_isutf8 (x);
+#  if defined (HANDLE_MULTIBYTE)
   locale_shiftstates = mblen ((char *)NULL, 0);
+#  else
+  local_shiftstates = 0;
+#  endif
   u32reset ();
 #endif
   return 1;

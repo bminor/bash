@@ -1,6 +1,6 @@
 /* redir.h - functions from redir.c. */
 
-/* Copyright (C) 1997, 2001, 2005, 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 1997, 2001, 2005, 2008, 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -32,9 +32,9 @@
 #define RX_SAVCLEXEC	0x20	/* set close-on-exec off in restored fd even though saved on has it on */
 #define RX_SAVEFD	0x40	/* fd used to save another even if < SHELL_FD_BASE */
 
-extern void redirection_error __P((REDIRECT *, int));
-extern int do_redirections __P((REDIRECT *, int));
-extern char *redirection_expand __P((WORD_DESC *));
-extern int stdin_redirects __P((REDIRECT *));
+extern void redirection_error PARAMS((REDIRECT *, int, char *));
+extern int do_redirections PARAMS((REDIRECT *, int));
+extern char *redirection_expand PARAMS((WORD_DESC *));
+extern int stdin_redirects PARAMS((REDIRECT *));
 
 #endif /* _REDIR_H_ */

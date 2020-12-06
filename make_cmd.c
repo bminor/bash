@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -55,11 +55,11 @@ sh_obj_cache_t wlcache = {0, 0, 0};
 #define WDCACHESIZE	128
 #define WLCACHESIZE	128
 
-static COMMAND *make_for_or_select __P((enum command_type, WORD_DESC *, WORD_LIST *, COMMAND *, int));
+static COMMAND *make_for_or_select PARAMS((enum command_type, WORD_DESC *, WORD_LIST *, COMMAND *, int));
 #if defined (ARITH_FOR_COMMAND)
-static WORD_LIST *make_arith_for_expr __P((char *));
+static WORD_LIST *make_arith_for_expr PARAMS((char *));
 #endif
-static COMMAND *make_until_or_while __P((enum command_type, COMMAND *, COMMAND *));
+static COMMAND *make_until_or_while PARAMS((enum command_type, COMMAND *, COMMAND *));
 
 void
 cmd_init ()
@@ -235,7 +235,7 @@ make_select_command (name, map_list, action, lineno)
 #if defined (SELECT_COMMAND)
   return (make_for_or_select (cm_select, name, map_list, action, lineno));
 #else
-  last_command_exit_value = 2;
+  set_exit_status (2);
   return ((COMMAND *)NULL);
 #endif
 }
@@ -321,7 +321,7 @@ make_arith_for_command (exprs, action, lineno)
       free (init);
       free (test);
       free (step);
-      last_command_exit_value = 2;
+      set_exit_status (2);
       return ((COMMAND *)NULL);
     }
 
@@ -337,7 +337,7 @@ make_arith_for_command (exprs, action, lineno)
   return (make_command (cm_arith_for, (SIMPLE_COM *)temp));
 #else
   dispose_words (exprs);
-  last_command_exit_value = 2;
+  set_exit_status (2);
   return ((COMMAND *)NULL);
 #endif /* ARITH_FOR_COMMAND */
 }
@@ -447,7 +447,7 @@ make_arith_command (exp)
 
   return (command);
 #else
-  last_command_exit_value = 2;
+  set_exit_status (2);
   return ((COMMAND *)NULL);
 #endif
 }
@@ -490,7 +490,7 @@ make_cond_command (cond_node)
 
   return (command);
 #else
-  last_command_exit_value = 2;
+  set_exit_status (2);
   return ((COMMAND *)NULL);
 #endif
 }

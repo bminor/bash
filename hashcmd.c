@@ -1,7 +1,7 @@
 /* hashcmd.c - functions for managing a hash table mapping command names to
 	       full pathnames. */
 
-/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,7 +37,7 @@
 
 HASH_TABLE *hashed_filenames = (HASH_TABLE *)NULL;
 
-static void phash_freedata __P((PTR_T));
+static void phash_freedata PARAMS((PTR_T));
 
 void
 phash_create ()

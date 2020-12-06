@@ -28,6 +28,12 @@
 #endif
 
 #include <sys/types.h>
+#ifdef MAJOR_IN_MKDEV
+#  include <sys/mkdev.h>
+#endif
+#ifdef MAJOR_IN_SYSMACROS
+#  include <sys/sysmacros.h>
+#endif
 #include "posixstat.h"
 #include <stdio.h>
 #include <pwd.h>
@@ -334,13 +340,13 @@ int	flags;
 		else
 			printf("%ld\n", st->st_ctime);
 	} else if (flags & OPT_DEV)
-		printf("%d\n", st->st_dev);
+		printf("%lu\n", (unsigned long)st->st_dev);
 	else if (flags & OPT_INO)
 		printf("%lu\n", (unsigned long)st->st_ino);
 	else if (flags & OPT_FID)
-		printf("%d:%lu\n", st->st_dev, (unsigned long)st->st_ino);
+		printf("%lu:%lu\n", (unsigned long)st->st_dev, (unsigned long)st->st_ino);
 	else if (flags & OPT_NLINK)
-		printf("%d\n", st->st_nlink);
+		printf("%lu\n", (unsigned long)st->st_nlink);
 	else if (flags & OPT_LNKNAM) {
 #ifdef S_ISLNK
 		b = xmalloc(4096);

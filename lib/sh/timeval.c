@@ -67,6 +67,32 @@ addtimeval (d, t1, t2)
   return d;
 }
 
+struct timeval *
+multimeval (d, m)
+     struct timeval *d;
+     int m;
+{
+  time_t t;
+
+  t = d->tv_usec * m;
+  d->tv_sec = d->tv_sec * m + t / 1000000;
+  d->tv_usec = t % 1000000;
+  return d;
+}
+
+struct timeval *
+divtimeval (d, m)
+     struct timeval *d;
+     int m;
+{
+  time_t t;
+
+  t = d->tv_sec;
+  d->tv_sec = t / m;
+  d->tv_usec = (d->tv_usec + 1000000 * (t % m)) / m;
+  return d;
+}
+  
 /* Do "cpu = ((user + sys) * 10000) / real;" with timevals.
    Barely-tested code from Deven T. Corzine <deven@ties.org>. */
 int
@@ -149,4 +175,5 @@ print_timeval (fp, tvp)
 
   fprintf (fp, "%ldm%d%c%03ds",  minutes, seconds, locale_decpoint (), seconds_fraction);
 }
+
 #endif /* HAVE_TIMEVAL */

@@ -1,6 +1,6 @@
 /* table.h - definitions for tables for keeping track of allocated memory */
 
-/*  Copyright (C) 2001-2003 Free Software Foundation, Inc.
+/*  Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
     This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -57,12 +57,12 @@ typedef struct mr_table {
 
 #define REG_TABLE_SIZE	8192
 
-extern mr_table_t *mr_table_entry __P((PTR_T));
-extern void mregister_alloc __P((const char *, PTR_T, size_t, const char *, int));
-extern void mregister_free __P((PTR_T, int, const char *, int));
+extern mr_table_t *mr_table_entry PARAMS((PTR_T));
+extern void mregister_alloc PARAMS((const char *, PTR_T, size_t, const char *, int));
+extern void mregister_free PARAMS((PTR_T, int, const char *, int));
 extern void mregister_describe_mem ();
-extern void mregister_dump_table __P((void));
-extern void mregister_table_init __P((void));
+extern void mregister_dump_table PARAMS((void));
+extern void mregister_table_init PARAMS((void));
 
 typedef struct ma_table {
 	const char *file;
@@ -70,10 +70,10 @@ typedef struct ma_table {
 	int nalloc;
 } ma_table_t;
 
-extern void mlocation_register_alloc __P((const char *, int));
-extern void mlocation_table_init __P((void));
-extern void mlocation_dump_table __P((void));
-extern void mlocation_write_table __P((void));
+extern void mlocation_register_alloc PARAMS((const char *, int));
+extern void mlocation_table_init PARAMS((void));
+extern void mlocation_dump_table PARAMS((void));
+extern void mlocation_write_table PARAMS((void));
 
 /* NOTE:  HASH_MIX taken from dmalloc (http://dmalloc.com) */
 

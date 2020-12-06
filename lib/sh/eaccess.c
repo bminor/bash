@@ -1,6 +1,6 @@
 /* eaccess.c - eaccess replacement for the shell, plus other access functions. */
 
-/* Copyright (C) 2006-2010 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,10 +52,10 @@ extern int errno;
 #define F_OK 0
 #endif /* R_OK */
 
-static int path_is_devfd __P((const char *));
-static int sh_stataccess __P((const char *, int));
+static int path_is_devfd PARAMS((const char *));
+static int sh_stataccess PARAMS((const char *, int));
 #if HAVE_DECL_SETREGID
-static int sh_euidaccess __P((const char *, int));
+static int sh_euidaccess PARAMS((const char *, int));
 #endif
 
 static int
@@ -213,10 +213,10 @@ sh_eaccess (path, mode)
 #  else		/* HAVE_EACCESS */	/* FreeBSD */
   ret = eaccess (path, mode);	/* XXX -- not always correct for X_OK */
 #  endif	/* HAVE_EACCESS */
-#  if defined (__FreeBSD__) || defined (SOLARIS)
+#  if defined (__FreeBSD__) || defined (SOLARIS) || defined (_AIX)
   if (ret == 0 && current_user.euid == 0 && mode == X_OK)
     return (sh_stataccess (path, mode));
-#  endif	/* __FreeBSD__ || SOLARIS */
+#  endif	/* __FreeBSD__ || SOLARIS || _AIX */
   return ret;
 #elif defined (EFF_ONLY_OK)		/* SVR4(?), SVR4.2 */
   return access (path, mode|EFF_ONLY_OK);

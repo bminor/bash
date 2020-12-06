@@ -3,7 +3,7 @@
 /* I can't stand it anymore!  Please can't we just write the
    whole Unix system in lisp or something? */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -76,15 +76,15 @@ typedef union uwp {
   } sv;
 } UNWIND_ELT;
 
-static void without_interrupts __P((VFunction *, char *, char *));
-static void unwind_frame_discard_internal __P((char *, char *));
-static void unwind_frame_run_internal __P((char *, char *));
-static void add_unwind_protect_internal __P((Function *, char *));
-static void remove_unwind_protect_internal __P((char *, char *));
-static void run_unwind_protects_internal __P((char *, char *));
-static void clear_unwind_protects_internal __P((char *, char *));
-static inline void restore_variable __P((SAVED_VAR *));
-static void unwind_protect_mem_internal __P((char *, char *));
+static void without_interrupts PARAMS((VFunction *, char *, char *));
+static void unwind_frame_discard_internal PARAMS((char *, char *));
+static void unwind_frame_run_internal PARAMS((char *, char *));
+static void add_unwind_protect_internal PARAMS((Function *, char *));
+static void remove_unwind_protect_internal PARAMS((char *, char *));
+static void run_unwind_protects_internal PARAMS((char *, char *));
+static void clear_unwind_protects_internal PARAMS((char *, char *));
+static inline void restore_variable PARAMS((SAVED_VAR *));
+static void unwind_protect_mem_internal PARAMS((char *, char *));
 
 static UNWIND_ELT *unwind_protect_list = (UNWIND_ELT *)NULL;
 
@@ -108,21 +108,13 @@ uwp_init ()
 }
 
 /* Run a function without interrupts.  This relies on the fact that the
-   FUNCTION cannot change the value of interrupt_immediately.  (I.e., does
-   not call QUIT (). */
+   FUNCTION cannot call QUIT (). */
 static void
 without_interrupts (function, arg1, arg2)
      VFunction *function;
      char *arg1, *arg2;
 {
-  int old_interrupt_immediately;
-
-  old_interrupt_immediately = interrupt_immediately;
-  interrupt_immediately = 0;
-
   (*function)(arg1, arg2);
-
-  interrupt_immediately = old_interrupt_immediately;
 }
 
 /* Start the beginning of a region. */
@@ -349,6 +341,8 @@ unwind_protect_mem_internal (var, psize)
 
   size = *(int *) psize;
   allocated = size + offsetof (UNWIND_ELT, sv.v.desired_setting[0]);
+  if (allocated < sizeof (UNWIND_ELT))
+    allocated = sizeof (UNWIND_ELT);
   elt = (UNWIND_ELT *)xmalloc (allocated);
   elt->head.next = unwind_protect_list;
   elt->head.cleanup = (Function *) restore_variable;

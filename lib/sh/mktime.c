@@ -1,6 +1,6 @@
 /* mktime - convert struct tm to a time_t value */
 
-/* Copyright (C) 1993-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    Contributed by Paul Eggert (eggert@twinsun.com).
@@ -56,13 +56,13 @@
 #define mktime my_mktime
 #endif /* DEBUG_MKTIME */
 
-#ifndef __P
+#ifndef PARAMS
 #if defined (__GNUC__) || (defined (__STDC__) && __STDC__)
-#define __P(args) args
+#define PARAMS(args) args
 #else
-#define __P(args) ()
+#define PARAMS(args) ()
 #endif  /* GCC.  */
-#endif  /* Not __P.  */
+#endif  /* Not PARAMS.  */
 
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
@@ -117,13 +117,13 @@ const unsigned short int __mon_yday[2][13] =
     { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 }
   };
 
-static time_t ydhms_tm_diff __P ((int, int, int, int, int, const struct tm *));
-time_t __mktime_internal __P ((struct tm *,
+static time_t ydhms_tm_diff PARAMS ((int, int, int, int, int, const struct tm *));
+time_t __mktime_internal PARAMS ((struct tm *,
 			       struct tm *(*) (const time_t *, struct tm *),
 			       time_t *));
 
 
-static struct tm *my_localtime_r __P ((const time_t *, struct tm *));
+static struct tm *my_localtime_r PARAMS ((const time_t *, struct tm *));
 static struct tm *
 my_localtime_r (t, tp)
      const time_t *t;
@@ -193,7 +193,7 @@ mktime (tp)
 time_t
 __mktime_internal (tp, convert, offset)
      struct tm *tp;
-     struct tm *(*convert) __P ((const time_t *, struct tm *));
+     struct tm *(*convert) PARAMS ((const time_t *, struct tm *));
      time_t *offset;
 {
   time_t t, dt, t0;

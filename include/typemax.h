@@ -109,4 +109,23 @@ static const unsigned long long int maxquad = ULLONG_MAX;
 #  define SIZE_MAX	65535		/* POSIX minimum max */
 #endif
 
+#ifndef sh_imaxabs
+#  define sh_imaxabs(x)	(((x) >= 0) ? (x) : -(x))
+#endif
+
+/* Handle signed arithmetic overflow and underflow.  Have to do it this way
+   to avoid compilers optimizing out simpler overflow checks. */
+
+/* Make sure that a+b does not exceed MAXV or is smaller than MINV (if b < 0).
+   Assumes that b > 0 if a > 0 and b < 0 if a < 0 */
+#define ADDOVERFLOW(a,b,minv,maxv) \
+	((((a) > 0) && ((b) > ((maxv) - (a)))) || \
+	 (((a) < 0) && ((b) < ((minv) - (a)))))
+
+/* Make sure that a-b is not smaller than MINV or exceeds MAXV (if b < 0).
+   Assumes that b > 0 if a > 0 and b < 0 if a < 0 */
+#define SUBOVERFLOW(a,b,minv,maxv) \
+	((((b) > 0) && ((a) < ((minv) + (b)))) || \
+	 (((b) < 0) && ((a) > ((maxv) + (b)))))
+
 #endif /* _SH_TYPEMAX_H */

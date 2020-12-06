@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2018 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -151,24 +151,24 @@ Exit Status:
 Returns success unless an invalid option is given.
 $END
 
-typedef int setopt_set_func_t __P((int, char *));
-typedef int setopt_get_func_t __P((char *));
+typedef int setopt_set_func_t PARAMS((int, char *));
+typedef int setopt_get_func_t PARAMS((char *));
 
-static int find_minus_o_option __P((char *));
+static int find_minus_o_option PARAMS((char *));
 
-static void print_minus_o_option __P((char *, int, int));
-static void print_all_shell_variables __P((void));
+static void print_minus_o_option PARAMS((char *, int, int));
+static void print_all_shell_variables PARAMS((void));
 
-static int set_ignoreeof __P((int, char *));
-static int set_posix_mode __P((int, char *));
+static int set_ignoreeof PARAMS((int, char *));
+static int set_posix_mode PARAMS((int, char *));
 
 #if defined (READLINE)
-static int set_edit_mode __P((int, char *));
-static int get_edit_mode __P((char *));
+static int set_edit_mode PARAMS((int, char *));
+static int get_edit_mode PARAMS((char *));
 #endif
 
 #if defined (HISTORY)
-static int bash_set_history __P((int, char *));
+static int bash_set_history PARAMS((int, char *));
 #endif
 
 static const char * const on = "on";
@@ -358,17 +358,29 @@ void
 set_current_options (bitmap)
      const char *bitmap;
 {
-  int i;
+  int i, v, cv, *on_or_off;
 
   if (bitmap == 0)
     return;
 
   for (i = 0; o_options[i].name; i++)
     {
+      v = bitmap[i] ? FLAG_ON : FLAG_OFF;
       if (o_options[i].letter)
-	change_flag (o_options[i].letter, bitmap[i] ? FLAG_ON : FLAG_OFF);
+	{
+	  /* We should not get FLAG_UNKNOWN here */
+	  on_or_off = find_flag (o_options[i].letter);
+	  cv = *on_or_off ? FLAG_ON : FLAG_OFF;
+	  if (v != cv)
+	    change_flag (o_options[i].letter, v);
+	}
       else
-	SET_BINARY_O_OPTION_VALUE (i, bitmap[i] ? FLAG_ON : FLAG_OFF, o_options[i].name);
+	{
+	  cv = GET_BINARY_O_OPTION_VALUE (i, o_options[i].name);
+	  cv = cv ? FLAG_ON : FLAG_OFF;
+	  if (v != cv)
+	    SET_BINARY_O_OPTION_VALUE (i, v, o_options[i].name);
+	}
     }
 
   /* Now reset the variables changed by posix mode */
@@ -395,6 +407,11 @@ set_posix_mode (on_or_off, option_name)
      int on_or_off;
      char *option_name;
 {
+  /* short-circuit on no-op */
+  if ((on_or_off == FLAG_ON && posixly_correct) ||
+      (on_or_off == FLAG_OFF && posixly_correct == 0))
+    return 0;
+
   posixly_correct = on_or_off == FLAG_ON;
   if (posixly_correct == 0)
     unbind_variable_noref ("POSIXLY_CORRECT");
@@ -646,7 +663,7 @@ reset_shell_options ()
 #endif
 #if defined (HISTORY)
   dont_save_function_defs = 0;
-  remember_on_history = enable_history_list = 1;
+  remember_on_history = enable_history_list = 1;	/* XXX */
 #endif
 }
 
@@ -818,7 +835,7 @@ unset_builtin (list)
   WORD_LIST *list;
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
-  int global_unset_func, global_unset_var, vflags;
+  int global_unset_func, global_unset_var, vflags, valid_id;
   char *name, *tname;
 
   unset_function = unset_variable = unset_array = nameref = any_failed = 0;
@@ -884,17 +901,28 @@ unset_builtin (list)
 #endif
       /* Get error checking out of the way first.  The low-level functions
 	 just perform the unset, relying on the caller to verify. */
+      valid_id = legal_identifier (name);
+
+      /* Whether or not we are in posix mode, if neither -f nor -v appears,
+	 skip over trying to unset variables with invalid names and just
+	 treat them as potential shell function names. */
+      if (global_unset_func == 0 && global_unset_var == 0 && valid_id == 0)
+	{
+	  unset_variable = unset_array = 0;
+	  unset_function = 1;
+	}
 
       /* Bash allows functions with names which are not valid identifiers
 	 to be created when not in posix mode, so check only when in posix
 	 mode when unsetting a function. */
-      if (((unset_function && posixly_correct) || !unset_function) && legal_identifier (name) == 0)
+      if (unset_function == 0 && valid_id == 0)
 	{
 	  sh_invalidid (name);
 	  NEXT_VARIABLE ();
 	}
 
-      /* Only search for functions here if -f supplied. */
+      /* Search for functions here if -f supplied or if NAME cannot be a
+	 variable name. */
       var = unset_function ? find_function (name)
 			   : (nameref ? find_variable_last_nameref (name, 0) : find_variable (name));
 
