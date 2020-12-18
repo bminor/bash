@@ -911,7 +911,7 @@ bgp_delete (pid)
   if (psi == NO_PIDSTAT)
     return 0;		/* not found */
 
-#if defined (DEBUG)
+#if 0
   itrace("bgp_delete: deleting %d", pid);
 #endif
 

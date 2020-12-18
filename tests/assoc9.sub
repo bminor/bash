@@ -128,3 +128,32 @@ aa[$key]=foo
 echo "${aa[$key]}"
 
 [[ -v aa[$key] ]] || echo bad assoc expansion
+
+shopt -u assoc_expand_once
+
+declare -A assoc
+
+var=x123
+assoc['$var']=value
+
+declare -p assoc
+
+unset "assoc[$var]"
+declare -p assoc
+
+unset 'assoc[$var]'
+declare -p assoc
+
+shopt -s assoc_expand_once
+unset 'assoc[$var]'
+declare -p assoc
+
+typeset -A foo
+
+foo["foo]bar"]=bip
+typeset foo["foo]bar"]=bax
+
+echo ${!foo[@]}
+echo ${foo[@]}
+
+declare -p foo

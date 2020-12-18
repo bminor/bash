@@ -4531,7 +4531,7 @@ xparse_dolparen (base, string, indp, flags)
   /*(*/
   if (ep[-1] != ')')
     {
-#if DEBUG
+#if 0
       if (ep[-1] != '\n')
 	itrace("xparse_dolparen:%d: ep[-1] != RPAREN (%d), ep = `%s'", line_number, ep[-1], ep);
 #endif
@@ -4543,7 +4543,7 @@ xparse_dolparen (base, string, indp, flags)
   *indp = ep - base - 1;
 
   /*((*/
-#if DEBUG
+#if 0
   if (base[*indp] != ')')
     itrace("xparse_dolparen:%d: base[%d] != RPAREN (%d), base = `%s'", line_number, *indp, base[*indp], base);
   if (*indp < orig_ind)
