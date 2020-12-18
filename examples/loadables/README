@@ -1,11 +1,13 @@
 Some examples of ready-to-dynamic-load builtins.  Most of the
 examples given are reimplementations of standard commands whose
-execution time is dominated by process startup time.  The
+execution time is dominated by process startup time.  Some
 exceptions are sleep, which allows you to sleep for fractions
 of a second, finfo, which provides access to the rest of the
 elements of the `stat' structure that `test' doesn't let you
-see, and pushd/popd/dirs, which allows you to compile them out
-of the shell.
+see, csv, which allows you to manipulate data from comma-separated
+values files, fdflags, which lets you change the flags associated
+with one of the shell's file descriptors, and pushd/popd/dirs, which
+allows you to compile them out of the shell.
 
 All of the new builtins in ksh93 that bash didn't already have
 are included here, as is the ksh `print' builtin.
@@ -40,6 +42,8 @@ without having to search for the right CFLAGS and LDFLAGS.
 
 basename.c	Return non-directory portion of pathname.
 cat.c		cat(1) replacement with no options - the way cat was intended.
+csv.c		Process a line of csv data and store it in an indexed array.
+cut.c		Cut out selected portions of each line of a file.
 dirname.c	Return directory portion of pathname.
 fdflags.c	Change the flag associated with one of bash's open file descriptors.
 finfo.c		Print file info.
@@ -52,7 +56,9 @@ logname.c	Print login name of current user.
 Makefile.in	Simple makefile for the sample loadable builtins.
 Makefile.inc.in	Sample makefile to use for loadable builtin development.
 mkdir.c		Make directories.
-mypid.c		Add $MYPID variable, demonstrate use of unload hook functio.n
+mkfifo.c	Create named pipes.
+mktemp.c	Make unique temporary file name.
+mypid.c		Add $MYPID variable, demonstrate use of unload hook function.
 necho.c		echo without options or argument interpretation.
 pathchk.c	Check pathnames for validity and portability.
 print.c		Loadable ksh-93 style print builtin.

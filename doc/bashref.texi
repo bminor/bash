@@ -8808,9 +8808,13 @@ the installed version of Readline in subdirectories of that directory
 (include files in @var{PREFIX}/@code{include} and the library in
 @var{PREFIX}/@code{lib}).
 
-@item --with-purify
-Define this to use the Purify memory allocation checker from Rational
-Software.
+@item --with-libintl-prefix[=@var{PREFIX}]
+Define this to make Bash link with a locally-installed version of the
+libintl library instead ofthe version in @file{lib/intl}.
+
+@item --with-libiconv-prefix[=@var{PREFIX}]
+Define this to make Bash look for libiconv in @var{PREFIX} instead of the
+standard system locations. There is no version included with Bash.
 
 @item --enable-minimal-config
 This produces a shell with minimal features, close to the historical
@@ -8818,7 +8822,7 @@ Bourne shell.
 @end table
 
 There are several @option{--enable-} options that alter how Bash is
-compiled and linked, rather than changing run-time features.
+compiled, linked, and installed, rather than changing run-time features.
 
 @table @code
 @item --enable-largefile
@@ -8831,9 +8835,14 @@ default, if the operating system provides large file support.
 This builds a Bash binary that produces profiling information to be
 processed by @code{gprof} each time it is executed.
 
+@item --enable-separate-helpfiles
+Use external files for the documentation displayed by the @code{help} builtin
+instead of storing the text internally.
+
 @item --enable-static-link
 This causes Bash to be linked statically, if @code{gcc} is being used.
 This could be used to build a version to use as root's shell.
+
 @end table
 
 The @samp{minimal-config} option can be used to disable all of
@@ -8841,7 +8850,9 @@ the following options, but it is processed first, so individual
 options may be enabled using @samp{enable-@var{feature}}. 
 
 All of the following options except for @samp{disabled-builtins},
-@samp{direxpand-default}, and
+@samp{direxpand-default},
+@samp{strict-posix-default},
+and
 @samp{xpg-echo-default} are
 enabled by default, unless the operating system does not provide the
 necessary support.
@@ -8993,10 +9004,6 @@ when called as @code{rbash}, enters a restricted mode.  See
 @item --enable-select
 Include the @code{select} compound command, which allows the generation of
 simple menus (@pxref{Conditional Constructs}).
-
-@item --enable-separate-helpfiles
-Use external files for the documentation displayed by the @code{help} builtin
-instead of storing the text internally.
 
 @item --enable-single-help-strings
 Store the text displayed by the @code{help} builtin as a single string for
