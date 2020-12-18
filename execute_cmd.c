@@ -5551,6 +5551,9 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       clear_fifo_list ();	/* XXX - we haven't created any FIFOs */
 #endif
 
+      /* reset shell_pgrp to pipeline_pgrp here for word expansions performed
+         by the redirections here? */
+
       if (redirects && (do_redirections (redirects, RX_ACTIVE) != 0))
 	{
 #if defined (PROCESS_SUBSTITUTION)

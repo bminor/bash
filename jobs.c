@@ -4534,6 +4534,7 @@ debug_print_pgrps ()
 	 (long)original_pgrp, (long)shell_pgrp, (long)terminal_pgrp);
   itrace("tcgetpgrp(%d) -> %ld, getpgid(0) -> %ld",
 	 shell_tty, (long)tcgetpgrp (shell_tty), (long)getpgid(0));
+  itrace("pipeline_pgrp -> %ld", (long)pipeline_pgrp);
 }
 #endif
 

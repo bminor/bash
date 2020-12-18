@@ -855,7 +855,11 @@ install-headers: install-headers-dirs
 		${INSTALL_DATA} $(BUILTIN_SRCDIR)/"$$hf" $(DESTDIR)$(headersdir)/builtins/$$hf || exit 1; \
 	done
 	@for hf in $(CREATED_HEADERS) ; do \
-		${INSTALL_DATA} $(BUILD_DIR)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
+		if test -f $(BUILD_DIR)/"$$hf" ; then \
+			${INSTALL_DATA} $(BUILD_DIR)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
+		else \
+			${INSTALL_DATA} $(srcdir)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
+		fi ; \
 	done
 	-$(INSTALL_DATA) $(SDIR)/bash.pc $(DESTDIR)$(pkgconfigdir)/bash.pc
 

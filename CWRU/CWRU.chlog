@@ -9185,3 +9185,33 @@ doc/{bash.1,bashref.texi}
 Makefile.in
 	- bashline.o: add dependency on ${DEFDIR}/builtext.h. Report from
 	  Fazal Majid <fazal@majid.org>
+
+				   12/11
+				   -----
+builtins/wait.def
+	- wait_builtin: don't assign the variable given with -p if there are no
+	  jobs to wait for. Report and fix from OÄuz <oguzismailuysal@gmail.com>
+
+arrayfunc.c
+	- kvpair_assignment_p: return non-zero if argument L appears to be a
+	  key-value pair associative array compound assignment
+	- expand_and_quote_kvpair_word: run a single word in a key-value pair
+	  associative array compound assignment through the appropriate
+	  expansions and single-quote the result
+
+arrayfunc.h
+	- kvpair_assignment_p, expand_and_quote_kvpair_word: extern declarations
+
+subst.c
+	- expand_oneword: detect whether VALUE appears to be a key-value
+	  pair compound assignment and call the appropriate function to expand
+	  each word in the resulting list. Fixes inconsistency reported by
+	  oguzismailuysal@gmail.com
+
+				   12/12
+				   -----
+subst.c
+	- command_substitute: don't reset pipeline_pgrp to shell_pgrp if we
+	  are already forked to run a command (SUBSHELL_FORK). Fixes SIGINT
+	  in command substitution in here-document in forked child issue
+	  reported by oguzismailuysal@gmail.com
