@@ -1,6 +1,6 @@
 /* patchlevel.h -- current bash patch level */
 
-/* Copyright (C) 2001-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,6 +25,6 @@
    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
    looks for to find the patch level (for the sccs version string). */
 
-#define PATCHLEVEL 0
+#define PATCHLEVEL 1
 
 #endif /* _PATCHLEVEL_H_ */
