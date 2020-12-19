@@ -6356,8 +6356,10 @@ command_substitute (string, quoted, flags)
 
 #if defined (JOB_CONTROL)
   old_pipeline_pgrp = pipeline_pgrp;
-  /* Don't reset the pipeline pgrp if we're already a subshell in a pipeline. */
-  if ((subshell_environment & SUBSHELL_PIPE) == 0)
+  /* Don't reset the pipeline pgrp if we're already a subshell in a pipeline or
+     we've already forked to run a disk command (and are expanding redirections,
+     for example). */
+  if ((subshell_environment & (SUBSHELL_FORK|SUBSHELL_PIPE)) == 0)
     pipeline_pgrp = shell_pgrp;
   cleanup_the_pipeline ();
 #endif /* JOB_CONTROL */
