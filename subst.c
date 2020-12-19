@@ -11604,6 +11604,7 @@ expand_oneword (value, flags)
 {
   WORD_LIST *l, *nl;
   char *t;
+  int kvpair;
   
   if (flags == 0)
     {
@@ -11618,11 +11619,21 @@ expand_oneword (value, flags)
     {
       /* Associative array */
       l = parse_string_to_word_list (value, 1, "array assign");
+#if ASSOC_KVPAIR_ASSIGNMENT
+      kvpair = kvpair_assignment_p (l);
+#endif
+
       /* For associative arrays, with their arbitrary subscripts, we have to
 	 expand and quote in one step so we don't have to search for the
 	 closing right bracket more than once. */
       for (nl = l; nl; nl = nl->next)
 	{
+#if ASSOC_KVPAIR_ASSIGNMENT
+	  if (kvpair)
+	    /* keys and values undergo the same set of expansions */
+	    t = expand_and_quote_kvpair_word (nl->word->word);
+	  else
+#endif
 	  if ((nl->word->flags & W_ASSIGNMENT) == 0)
 	    t = sh_single_quote (nl->word->word ? nl->word->word : "");
 	  else

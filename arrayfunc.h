@@ -67,6 +67,9 @@ extern SHELL_VAR *assign_array_var_from_string PARAMS((SHELL_VAR *, char *, int)
 extern char *expand_and_quote_assoc_word PARAMS((char *, int));
 extern void quote_compound_array_list PARAMS((WORD_LIST *, int));
 
+extern int kvpair_assignment_p PARAMS((WORD_LIST *));
+extern char *expand_and_quote_kvpair_word PARAMS((char *));
+
 extern int unbind_array_element PARAMS((SHELL_VAR *, char *, int));
 extern int skipsubscript PARAMS((const char *, int, int));
 

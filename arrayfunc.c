@@ -597,6 +597,27 @@ assign_assoc_from_kvlist (var, nlist, h, flags)
 	free (aval);
     }
 }
+
+/* Return non-zero if L appears to be a key-value pair associative array
+   compound assignment. */ 
+int
+kvpair_assignment_p (l)
+     WORD_LIST *l;
+{
+  return (l && (l->word->flags & W_ASSIGNMENT) == 0 && l->word->word[0] != '[');	/*]*/
+}
+
+char *
+expand_and_quote_kvpair_word (w)
+     char *w;
+{
+  char *t, *r;
+
+  t = w ? expand_assignment_string_to_string (w, 0) : 0;
+  r = sh_single_quote (t ? t : "");
+  free (t);
+  return r;
+}
 #endif
      
 /* Callers ensure that VAR is not NULL. Associative array assignments have not
@@ -640,7 +661,7 @@ assign_compound_array_list (var, nlist, flags)
   last_ind = (a && (flags & ASS_APPEND)) ? array_max_index (a) + 1 : 0;
 
 #if ASSOC_KVPAIR_ASSIGNMENT
-  if (assoc_p (var) && nlist && (nlist->word->flags & W_ASSIGNMENT) == 0 && nlist->word->word[0] != '[')	/*]*/
+  if (assoc_p (var) && kvpair_assignment_p (nlist))
     {
       iflags = flags & ~ASS_APPEND;
       assign_assoc_from_kvlist (var, nlist, nhash, iflags);
