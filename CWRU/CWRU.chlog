@@ -9215,3 +9215,20 @@ subst.c
 	  are already forked to run a command (SUBSHELL_FORK). Fixes SIGINT
 	  in command substitution in here-document in forked child issue
 	  reported by oguzismailuysal@gmail.com
+
+				   12/18
+				   -----
+execute_cmd.c
+	- execute_pipeline: execute the lastpipe code even if prev == 0. It
+	  can only be 0 here if stdin was closed when this function was
+	  executed
+	- execute_pipeline: if prev == 0, set lstdin to a sentinel (-1) that
+	  means to close fd 0 after executing the command, and call close(prev)
+	  before restoring stdin. restore_stdin now understands -1, and closes
+	  fd 0. Fixes issue reported by Tomas Janousek <tomi@nomi.cz>
+
+				   12/21
+				   -----
+doc/bashref.texi
+	- PROMPT_COMMANDS: clean up a couple of remaining instances of this
+	  name. Report from Eli Schwartz <eschwartz@archlinux.org>

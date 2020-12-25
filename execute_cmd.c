@@ -2439,12 +2439,18 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
 }
 #endif
 
+/* If S == -1, it's a special value saying to close stdin */
 static void
 restore_stdin (s)
      int s;
 {
-  dup2 (s, 0);
-  close (s);
+  if (s == -1)
+    close (0);
+  else
+    {
+      dup2 (s, 0);
+      close (s);
+    }
 }
 
 /* Catch-all cleanup function for lastpipe code for unwind-protects */
@@ -2462,7 +2468,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      struct fd_bitmap *fds_to_close;
 {
   int prev, fildes[2], new_bitmap_size, dummyfd, ignore_return, exec_result;
-  int lstdin, lastpipe_flag, lastpipe_jid, old_frozen;
+  int lstdin, lastpipe_flag, lastpipe_jid, old_frozen, stdin_valid;
   COMMAND *cmd;
   struct fd_bitmap *fd_bitmap;
   pid_t lastpid;
@@ -2473,6 +2479,8 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif /* JOB_CONTROL */
 
   ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+
+  stdin_valid = sh_validfd (0);
 
   prev = pipe_in;
   cmd = command;
@@ -2564,14 +2572,18 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   lastpipe_flag = 0;
 
   begin_unwind_frame ("lastpipe-exec");
-  lstdin = -1;
+  lstdin = -2;		/* -1 is special, meaning fd 0 is closed */
   /* If the `lastpipe' option is set with shopt, and job control is not
      enabled, execute the last element of non-async pipelines in the
      current shell environment. */
-  if (lastpipe_opt && job_control == 0 && asynchronous == 0 && pipe_out == NO_PIPE && prev > 0)
+  /* prev can be 0 if fd 0 was closed when this function was executed. prev
+     will never be 0 at this point if fd 0 was valid when this function was
+     executed (though we check above). */
+  if (lastpipe_opt && job_control == 0 && asynchronous == 0 && pipe_out == NO_PIPE && prev >= 0)
     {
-      lstdin = move_to_high_fd (0, 1, -1);
-      if (lstdin > 0)
+      /* -1 is a special value meaning to close stdin */
+      lstdin = (prev > 0 && stdin_valid) ? move_to_high_fd (0, 1, -1) : -1;
+      if (lstdin > 0 || lstdin == -1)
 	{
 	  do_piping (prev, pipe_out);
 	  prev = NO_PIPE;
@@ -2592,11 +2604,11 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   exec_result = execute_command_internal (cmd, asynchronous, prev, pipe_out, fds_to_close);
 
-  if (lstdin > 0)
-    restore_stdin (lstdin);
-
   if (prev >= 0)
     close (prev);
+
+  if (lstdin > 0 || lstdin == -1)
+    restore_stdin (lstdin);
 
 #if defined (JOB_CONTROL)
   UNBLOCK_CHILD (oset);

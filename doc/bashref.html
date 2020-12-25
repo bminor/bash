@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 29 October 2020).
+the Bash shell (version 5.1, 21 December 2020).
 
-This is Edition 5.1, last updated 29 October 2020,
+This is Edition 5.1, last updated 21 December 2020,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.1.
 
@@ -275,10 +275,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 29 October 2020).
+the Bash shell (version 5.1, 21 December 2020).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.1, last updated 29 October 2020,
+<p>This is Edition 5.1, last updated 21 December 2020,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.1.
 </p>
@@ -8005,7 +8005,7 @@ executing it.
 See <a href="#Controlling-the-Prompt">Controlling the Prompt</a>, for a complete list of prompt
 string escape sequences.
 
-</li><li> Bash executes the values of the set elements of the <code>PROMPT_COMMANDS</code>
+</li><li> Bash executes the values of the set elements of the <code>PROMPT_COMMAND</code>
 array variable as commands before printing the primary prompt, <code>$PS1</code>
 (see <a href="#Bash-Variables">Bash Variables</a>).
 
@@ -8756,9 +8756,9 @@ Next: <a href="#The-Restricted-Shell" accesskey="n" rel="next">The Restricted Sh
 <span id="Controlling-the-Prompt-1"></span><h3 class="section">6.9 Controlling the Prompt</h3>
 <span id="index-prompting"></span>
 
-<p>Bash examines the value of the array variable <code>PROMPT_COMMANDS</code> just before
+<p>Bash examines the value of the array variable <code>PROMPT_COMMAND</code> just before
 printing each primary prompt.
-If any elements in  <code>PROMPT_COMMANDS</code> are set and non-null, Bash
+If any elements in  <code>PROMPT_COMMAND</code> are set and non-null, Bash
 executes each value, in numeric order,
 just as if it had been typed on the command line.
 </p>
@@ -13500,9 +13500,14 @@ the installed version of Readline in subdirectories of that directory
 <var>PREFIX</var>/<code>lib</code>).
 </p>
 </dd>
-<dt><code>--with-purify</code></dt>
-<dd><p>Define this to use the Purify memory allocation checker from Rational
-Software.
+<dt><code>--with-libintl-prefix[=<var>PREFIX</var>]</code></dt>
+<dd><p>Define this to make Bash link with a locally-installed version of the
+libintl library instead ofthe version in <samp>lib/intl</samp>.
+</p>
+</dd>
+<dt><code>--with-libiconv-prefix[=<var>PREFIX</var>]</code></dt>
+<dd><p>Define this to make Bash look for libiconv in <var>PREFIX</var> instead of the
+standard system locations. There is no version included with Bash.
 </p>
 </dd>
 <dt><code>--enable-minimal-config</code></dt>
@@ -13512,7 +13517,7 @@ Bourne shell.
 </dl>
 
 <p>There are several <samp>--enable-</samp> options that alter how Bash is
-compiled and linked, rather than changing run-time features.
+compiled, linked, and installed, rather than changing run-time features.
 </p>
 <dl compact="compact">
 <dt><code>--enable-largefile</code></dt>
@@ -13526,10 +13531,16 @@ default, if the operating system provides large file support.
 processed by <code>gprof</code> each time it is executed.
 </p>
 </dd>
+<dt><code>--enable-separate-helpfiles</code></dt>
+<dd><p>Use external files for the documentation displayed by the <code>help</code> builtin
+instead of storing the text internally.
+</p>
+</dd>
 <dt><code>--enable-static-link</code></dt>
 <dd><p>This causes Bash to be linked statically, if <code>gcc</code> is being used.
 This could be used to build a version to use as root&rsquo;s shell.
-</p></dd>
+</p>
+</dd>
 </dl>
 
 <p>The &lsquo;<samp>minimal-config</samp>&rsquo; option can be used to disable all of
@@ -13537,7 +13548,9 @@ the following options, but it is processed first, so individual
 options may be enabled using &lsquo;<samp>enable-<var>feature</var></samp>&rsquo;. 
 </p>
 <p>All of the following options except for &lsquo;<samp>disabled-builtins</samp>&rsquo;,
-&lsquo;<samp>direxpand-default</samp>&rsquo;, and
+&lsquo;<samp>direxpand-default</samp>&rsquo;,
+&lsquo;<samp>strict-posix-default</samp>&rsquo;,
+and
 &lsquo;<samp>xpg-echo-default</samp>&rsquo; are
 enabled by default, unless the operating system does not provide the
 necessary support.
@@ -13720,11 +13733,6 @@ when called as <code>rbash</code>, enters a restricted mode.  See
 <dt><code>--enable-select</code></dt>
 <dd><p>Include the <code>select</code> compound command, which allows the generation of
 simple menus (see <a href="#Conditional-Constructs">Conditional Constructs</a>).
-</p>
-</dd>
-<dt><code>--enable-separate-helpfiles</code></dt>
-<dd><p>Use external files for the documentation displayed by the <code>help</code> builtin
-instead of storing the text internally.
 </p>
 </dd>
 <dt><code>--enable-single-help-strings</code></dt>
