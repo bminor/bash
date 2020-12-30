@@ -9232,3 +9232,31 @@ execute_cmd.c
 doc/bashref.texi
 	- PROMPT_COMMANDS: clean up a couple of remaining instances of this
 	  name. Report from Eli Schwartz <eschwartz@archlinux.org>
+
+				   12/26
+				   -----
+subst.c
+	- command_substitute: make sure that the child process always has
+	  pipeline_pgrp == shell_pgrp: if pipeline_pgrp is non-zero when we
+	  get to the child, meaning that we're part of an already-forked
+	  child that is, for instance, running redirections, we need to reset
+	  shell_pgrp to it to preserve the invariant. Fixes bug with terminal
+	  being set to the incorrect pgrp reported by oguzismailuysal@gmail.com
+
+				   12/29
+				   -----
+configure.ac,builtins/shobj-conf,m4/threadlib.m4
+	- midnightbsd: update auto-configuration to treat MidnightBSD like
+	  FreeBSD. From https://savannah.gnu.org/patch/?10006
+
+				   12/30
+				   -----
+examples/loadables/stat.c
+	- stattime: use strftime with a default format or the format supplied
+	  with the -F option to format the file time information
+	- stat_builtin: now takes a -F fmt option for a strftime format string;
+	  change to function calling sequences to pass the format down to
+	  stattime
+
+examples/loadables/Makefile.in
+	- stat: now built and installed by default

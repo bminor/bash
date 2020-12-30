@@ -643,6 +643,9 @@ stop_pipeline (async, deferred)
 
       the_pipeline = (PROCESS *)NULL;
       newjob->pgrp = pipeline_pgrp;
+
+      /* Invariant: if the shell is executing a command substitution,
+	 pipeline_pgrp == shell_pgrp. Other parts of the shell assume this. */
       if (pipeline_pgrp != shell_pgrp)
 	pipeline_pgrp = 0;
 

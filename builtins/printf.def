@@ -184,6 +184,10 @@ extern int errno;
 #define SKIP1 "#'-+ 0"
 #define LENMODS "hjlLtz"
 
+#ifndef TIMELEN_MAX
+#  define TIMELEN_MAX 128
+#endif
+
 extern time_t shell_start_time;
 
 #if !HAVE_ASPRINTF
@@ -449,7 +453,7 @@ printf_builtin (list)
 
 	    case '(':
 	      {
-		char *timefmt, timebuf[128], *t;
+		char *timefmt, timebuf[TIMELEN_MAX], *t;
 		int n;
 		intmax_t arg;
 		time_t secs;

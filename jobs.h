@@ -316,6 +316,10 @@ extern void restore_pgrp_pipe PARAMS((int *));
 
 extern void set_maxchild PARAMS((int));
 
+#ifdef DEBUG
+extern void debug_print_pgrps (void);
+#endif
+
 extern int job_control;		/* set to 0 in nojobs.c */
 
 #endif /* _JOBS_H_ */

@@ -5,7 +5,7 @@ dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2020 Free Software Foundation, Inc.
+# Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -1164,7 +1164,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		*)	AC_DEFINE(PGRP_PIPE) ;;
 		esac ;;
 netbsd*|openbsd*)	LOCAL_CFLAGS="-DDEV_FD_STAT_BROKEN" ;;
-freebsd*)	LOCAL_CFLAGS='-DHEREDOC_PIPESIZE=4096' ;;
+freebsd*|midnightbsd*)	LOCAL_CFLAGS='-DHEREDOC_PIPESIZE=4096' ;;
 *qnx[[67]]*)	LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
@@ -1190,6 +1190,7 @@ freebsd[[3-9]]*)
 		fi ;;
 freebsdelf*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 dragonfly*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
+midnightbsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 esac
 
 case "$host_cpu" in

@@ -100,6 +100,10 @@ static int expand_and_print_history PARAMS((WORD_LIST *));
 #define CFLAG	0x40
 #define DFLAG	0x80
 
+#ifndef TIMELEN_MAX
+#  define TIMELEN_MAX 128
+#endif
+
 int
 history_builtin (list)
      WORD_LIST *list;
@@ -328,7 +332,7 @@ histtime (hlist, histtimefmt)
      HIST_ENTRY *hlist;
      const char *histtimefmt;
 {
-  static char timestr[128];
+  static char timestr[TIMELEN_MAX];
   time_t t;
   struct tm *tm;
 
