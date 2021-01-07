@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -304,6 +304,24 @@ declare_internal (list, local_var)
 	    }
 	}
       return (sh_chkwrite (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS));
+    }
+
+  /* Some option combinations that don't make any sense */
+  if ((flags_on & att_function) && (flags_on & (att_array|att_assoc|att_integer|att_nameref)))
+    {
+      char *optchar;
+
+      if (flags_on & att_nameref)
+	optchar = "-n";
+      else if (flags_on & att_integer)
+	optchar = "-i";
+      else if (flags_on & att_assoc)
+	optchar = "-A";
+      else if (flags_on & att_array)
+	optchar = "-a";
+
+      sh_invalidopt (optchar);	
+      return (EXECUTION_FAILURE);
     }
 
 #define NEXT_VARIABLE() free (name); list = list->next; continue
@@ -698,8 +716,8 @@ restart_new_var_name:
 			  assign_error++;
 			  NEXT_VARIABLE ();
 			}
-		      name[offset] = '\0';
-		      value = name + namelen;
+		      name[(aflags & ASS_APPEND) ? offset - 1 : offset] = '\0';
+		      value = name + namelen;	/* XXX name + offset + 1? */
 		    }
 		  free (oldname);
 

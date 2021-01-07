@@ -9294,3 +9294,11 @@ sig.c
 	  the return value from sigaction; a minor optimization that saves a
 	  system call or two
 
+				 1/5/2021
+				 --------
+builtins/declare.def
+	- declare_internal: make some option combinations that don't make
+	  sense errors (e.g., -f and -a/-A/-i/-n)
+	- declare_internal: if we build a new variable name by expanding the
+	  value of a nameref variable, make sure to chop the `+' in a `+='
+	  off before going on

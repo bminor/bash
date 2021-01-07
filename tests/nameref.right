@@ -348,6 +348,10 @@ declare -a v=([1]="1")
 declare -a v=([0]="0" [1]="1")
 declare -n n="v[1]"
 declare -a v=([0]="0")
+./nameref15.sub: line 120: warning: xref: removing nameref attribute
+declare -a xref=([1]="one")
+./nameref15.sub: line 126: warning: xref: removing nameref attribute
+declare -a xref=([1]="one")
 declare -n r1="y"
 declare -n r2="x"
 ./nameref16.sub: line 25: typeset: x: not found
@@ -440,6 +444,8 @@ declare -n foo="bar"
 declare -- bar
 declare -- foo="bar"
 declare -- bar
+8
+declare -n ivar="foo"
 declare -a v=([0]="Y")
 r: <Y>
 v: <Y>
@@ -483,3 +489,24 @@ declare -n ref="var"
 declare -ai var=([1]="0")
 declare -n ref="var"
 declare -- var="1"
+a string with spaces
+many spaces
+declare -n foo="bar[0]"
+declare -a bar=([0]=" still more spaces")
+declare -n foo="bar[0]"
+declare -a bar=([0]="spaces still more spaces")
+./nameref22.sub: line 50: declare: array: reference variable cannot be an array
+./nameref22.sub: line 53: declare: array[128]: reference variable cannot be an array
+declare -a array=([0]="one" [1]="two" [2]="three")
+declare -- array="(one two three)"
+declare -a array=([0]="one" [1]="two" [2]="three")
+./nameref22.sub: line 69: declare: `(one two three)': invalid variable name for name reference
+./nameref22.sub: line 70: declare: array: reference variable cannot be an array
+declare -a array=([0]="zero")
+./nameref22.sub: line 74: declare: array: reference variable cannot be an array
+declare -a array=([0]="one" [1]="two" [2]="three")
+./nameref22.sub: line 79: declare: array: reference variable cannot be an array
+declare -a array
+declare -ai array=([0]="one")
+declare -a array=([0]="zero")
+declare -a array=([0]="one" [1]="two" [2]="three")
