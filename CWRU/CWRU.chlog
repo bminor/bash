@@ -9260,3 +9260,37 @@ examples/loadables/stat.c
 
 examples/loadables/Makefile.in
 	- stat: now built and installed by default
+
+				   12/31
+				   -----
+command.h
+	- SUBSHELL_IGNTRAP: new flag value
+
+jobs.c
+	- make_child: set SUBSHELL_IGNTRAP in subshell_environment in the
+	  child process, meaning that we should not execute trap handlers for
+	  trapped signals
+
+execute_cmd.c
+	- execute_in_subshell, execute_simple_command, execute_disk_command:
+	  make sure to unset SUBSHELL_IGNTRAP after a child process restores
+	  the original signal dispositions
+	- execute_simple_command: make sure to set SUBSHELL_IGNTRAP after
+	  make_child returns and we're setting subshell_environment directly
+
+subst.c
+	- command_substitute,process_substitute: unset SUBSHELL_IGNTRAP after
+	  the child process has reset the trapped signal dispositions
+
+trap.c
+	- trap_handler: if we get a signal for which we have set a trap, but
+	  SUBSHELL_IGNTRAP is set in subshell_environmnent, make sure we
+	  restore the original signal disposition and resend the signal to
+	  ourselves. Fixes issue reported by Nikolay Borisov <nborisov@suse.com>
+	  (or at least makes the race window much smaller)
+
+sig.c
+	- initialize_terminating_signal: set the original signal handler from
+	  the return value from sigaction; a minor optimization that saves a
+	  system call or two
+

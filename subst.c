@@ -5951,6 +5951,7 @@ process_substitute (string, open_for_read_in_child)
       free_pushed_string_input ();
       /* Cancel traps, in trap.c. */
       restore_original_signals ();	/* XXX - what about special builtins? bash-4.2 */
+      subshell_environment &= ~SUBSHELL_IGNTRAP;
       QUIT;	/* catch any interrupts we got post-fork */
       setup_async_signals ();
 #if 0
@@ -6382,6 +6383,7 @@ command_substitute (string, quoted, flags)
 	}	
       QUIT;	/* catch any interrupts we got post-fork */
       subshell_environment |= SUBSHELL_RESETTRAP;
+      subshell_environment &= ~SUBSHELL_IGNTRAP;
     }
 
 #if defined (JOB_CONTROL)

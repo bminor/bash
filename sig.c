@@ -55,7 +55,8 @@
 #  include "bashhist.h"
 #endif
 
-extern void initialize_siglist ();
+extern void initialize_siglist PARAMS((void));
+extern void set_original_signal PARAMS((int, SigHandler *));
 
 #if !defined (JOB_CONTROL)
 extern void initialize_job_signals PARAMS((void));
@@ -255,6 +256,13 @@ initialize_terminating_signals ()
       sigaction (XSIG (i), &act, &oact);
       XHANDLER(i) = oact.sa_handler;
       XSAFLAGS(i) = oact.sa_flags;
+
+#if 0
+      set_original_signal (XSIG(i), XHANDLER(i));	/* optimization */
+#else
+      set_original_signal (XSIG(i), act.sa_handler);	/* optimization */
+#endif
+
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
       /* XXX - should we do this for interactive shells, too? */

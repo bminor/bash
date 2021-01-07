@@ -2220,6 +2220,8 @@ make_child (command, flags)
 	 signals to the default state for a new process. */
       pid_t mypid;
 
+      subshell_environment |= SUBSHELL_IGNTRAP;
+
       /* If this ends up being changed to modify or use `command' in the
 	 child process, go back and change callers who free `command' in
 	 the child process when this returns. */
