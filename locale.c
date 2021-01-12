@@ -91,7 +91,7 @@ set_default_locale ()
 #if defined (HANDLE_MULTIBYTE)
   locale_shiftstates = mblen ((char *)NULL, 0);
 #else
-  local_shiftstates = 0;
+  locale_shiftstates = 0;
 #endif
 }
 
@@ -117,7 +117,7 @@ set_default_locale_vars ()
 #    if defined (HANDLE_MULTIBYTE)
       locale_shiftstates = mblen ((char *)NULL, 0);
 #    else
-      local_shiftstates = 0;
+      locale_shiftstates = 0;
 #    endif
 
       u32reset ();
@@ -226,7 +226,7 @@ set_locale_var (var, value)
 #  if defined (HANDLE_MULTIBYTE)
       locale_shiftstates = mblen ((char *)NULL, 0);
 #  else
-      local_shiftstates = 0;
+      locale_shiftstates = 0;
 #  endif
       u32reset ();
       return r;
@@ -250,7 +250,7 @@ set_locale_var (var, value)
 #if defined (HANDLE_MULTIBYTE)
 	  locale_shiftstates = mblen ((char *)NULL, 0);
 #else
-	  local_shiftstates = 0;
+	  locale_shiftstates = 0;
 #endif
 	  u32reset ();
 	}
@@ -391,7 +391,7 @@ reset_locale_vars ()
 #  if defined (HANDLE_MULTIBYTE)
   locale_shiftstates = mblen ((char *)NULL, 0);
 #  else
-  local_shiftstates = 0;
+  locale_shiftstates = 0;
 #  endif
   u32reset ();
 #endif

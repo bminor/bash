@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Sep 23 09:28:31 EDT 2020
+.\"	Last Change: Thu Jan  7 15:00:44 EST 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2020 October 29" "GNU Bash 5.1"
+.TH BASH 1 "2021 January 7" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2020 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2020 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2021 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2021 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -7496,6 +7496,8 @@ or was started without job control.
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fIkeyseq\fP:\fIfunction\-name\fP
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fIkeyseq\fP:\fIreadline\-command\fP
+.TP
+\fBbind\fP \fIreadline-command-line\fP
 .PD
 Display current
 .B readline
@@ -7504,7 +7506,9 @@ key and function bindings, bind a key sequence to a
 function or macro, or set a
 .B readline
 variable.
-Each non-option argument is a command as it would appear in
+Each non-option argument is a command as it would appear in a
+.B readline
+initialization file such as
 .IR .inputrc ,
 but each binding or command must be passed as a separate argument;
 e.g., '"\eC\-x\eC\-r": re\-read\-init\-file'.

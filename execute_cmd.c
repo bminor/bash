@@ -3011,8 +3011,17 @@ eval_arith_for_expr (l, okp)
   WORD_LIST *new;
   intmax_t expresult;
   int r;
+  char *expr, *temp;
 
+#if 0	/* TAG: bash-5.2 */
+  expr = l->next ? string_list (l) : savestring (l->word->word);
+  temp = expand_arith_string (expr, Q_DOUBLE_QUOTES|Q_ARITH);
+  free (expr);
+  new = make_word_list (make_word (temp), (WORD_LIST *)NULL);
+  free (temp);
+#else
   new = expand_words_no_vars (l);
+#endif
   if (new)
     {
       if (echo_command_at_execute)
