@@ -399,7 +399,7 @@ search_for_command (pathname, flags)
 	    }
 	  /* If we're in posix mode, don't add files without the execute bit
 	     to the hash table. */
-	  else if (posixly_correct)
+	  else if (posixly_correct || check_hashed_filenames)
 	    {
 	      st = file_status (command);
 	      if (st & FS_EXECABLE)

@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -7439,8 +7439,12 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
   else
     t = (char *)0;
 
-  temp1 = expand_arith_string (substr, Q_DOUBLE_QUOTES);
+  temp1 = expand_arith_string (substr, Q_DOUBLE_QUOTES);	/* Q_ARITH? */
+#if 1 /* TAG: bash-5.2 */
+  *e1p = evalexp (temp1, EXP_EXPANDED, &expok);
+#else
   *e1p = evalexp (temp1, 0, &expok);		/* XXX - EXP_EXPANDED? */
+#endif
   free (temp1);
   if (expok == 0)
     return (0);
@@ -7495,10 +7499,14 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
     {
       t++;
       temp2 = savestring (t);
-      temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES);
+      temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES);	/* Q_ARITH? */
       free (temp2);
       t[-1] = ':';
+#if 1 /* TAG: bash-5.2 */
+      *e2p = evalexp (temp1, EXP_EXPANDED, &expok);
+#else
       *e2p = evalexp (temp1, 0, &expok);	/* XXX - EXP_EXPANDED? */
+#endif
       free (temp1);
       if (expok == 0)
 	return (0);
@@ -11682,6 +11690,8 @@ expand_compound_assignment_word (tlist, flags)
   free (value);
 
   value = string_list (l);
+  dispose_words (l);
+
   wlen = STRLEN (value);
 
   /* Now, let's rebuild the string */

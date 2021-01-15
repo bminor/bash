@@ -3136,8 +3136,14 @@ bind_variable_internal (name, value, table, hflags, aflags)
 	      VUNSETATTR (tentry, att_nameref);
 	    }
 	  free (tname);
-          /* XXX - should it be aflags? */
-	  entry = assign_array_element (newval, make_variable_value (entry, value, aflags), aflags|ASS_NAMEREF);
+
+	  /* entry == nameref variable; tentry == array variable;
+	     newval == x[2]; value = bar
+	     We don't need to call make_variable_value here, since
+	     assign_array_element will eventually do it itself based on
+	     newval and aflags. */
+	     
+	  entry = assign_array_element (newval, value, aflags|ASS_NAMEREF);
 	  if (entry == 0)
 	    return entry;
 	}

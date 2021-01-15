@@ -88,11 +88,11 @@ get_new_window_size (from_sig, rp, cp)
       sh_set_lines_and_columns (win.ws_row, win.ws_col);
 #if defined (READLINE)
       rl_set_screen_size (win.ws_row, win.ws_col);
+#endif
       if (rp)
 	*rp = win.ws_row;
       if (cp)
 	*cp = win.ws_col;
-#endif
     }
 #endif
 }

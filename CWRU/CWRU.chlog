@@ -9315,3 +9315,29 @@ doc/{bash.1,bashref.texi}
 locale.c
 	- local_shiftstates -> locale_shiftsates in the non-multibyte code
 	  branch. Reported by Henry Bent <henry.r.bent@gmail.com>
+
+subst.c
+	- expand_compound_assignment_word: make sure to call dispose_words on
+	  the WORD_LIST * returned from expand_oneword after turning it back
+	  into a string. Fixes memory leak reported by Alexander Mescheryakov
+	  <alexander.s.m@gmail.com>
+
+				   1/13
+				   ----
+variables.c
+	- bind_variable_internal: when performing an assignment to a subscripted
+	  array variable that was the value of a nameref (used in the original
+	  assignment), don't call make_variable_value on the value, since that
+	  messes up +=. Just call assign_array_element and let that take care
+	  of calling make_variable_value appropriately. Fixes bug reported by
+	  Oguz <oguzismailuysal@gmail.com>
+
+				   1/14
+				   ----
+findcmd.c
+	- search_for_command: if `checkhash' is set, don't add non-executable
+	  files to the command hash table, since we will just remove them
+	  later
+
+lib/sh/winsize.c
+	- get_new_window_size: set *rp and *cp even if READLINE is not defined

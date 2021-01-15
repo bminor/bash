@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3013,10 +3013,11 @@ eval_arith_for_expr (l, okp)
   int r;
   char *expr, *temp;
 
-#if 0	/* TAG: bash-5.2 */
-  expr = l->next ? string_list (l) : savestring (l->word->word);
+#if 1	/* TAG: bash-5.2 */
+  expr = l->next ? string_list (l) : l->word->word;
   temp = expand_arith_string (expr, Q_DOUBLE_QUOTES|Q_ARITH);
-  free (expr);
+  if (l->next)
+    free (expr);
   new = make_word_list (make_word (temp), (WORD_LIST *)NULL);
   free (temp);
 #else
@@ -3796,6 +3797,7 @@ execute_arith_command (arith_command)
     exp = new->word->word;
 
   exp = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH);
+  FREE (t);
 
   /* If we're tracing, make a new word list with `((' at the front and `))'
      at the back and print it. Change xtrace_print_arith_cmd to take a string
@@ -3818,7 +3820,6 @@ execute_arith_command (arith_command)
       expresult = 0;
       expok = 1;
     }
-  FREE (t);
 
   if (expok == 0)
     return (EXECUTION_FAILURE);
