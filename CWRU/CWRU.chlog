@@ -9341,3 +9341,39 @@ findcmd.c
 
 lib/sh/winsize.c
 	- get_new_window_size: set *rp and *cp even if READLINE is not defined
+
+				   1/15
+				   ----
+lib/sh/winsize.c
+	- get_new_window_size: call rl_set_window_size only if we can determine
+	  we're using readline: an interactive shell without no-line-editing,
+	  or if we've already initialized readline, presumably in a non-
+	  interactive shell 
+
+support/Makefile.in
+	- man2html: add LDFLAGS_FOR_BUILD to the recipe. Report from
+	  Jeffrey Walton <noloader@gmail.com>
+
+				   1/17
+				   ----
+lib/readline/misc.c
+	- rl_operate_and_get_next: fix old K&R function declaration. Report
+	  from Tom Tromey <tom@tromey.com>
+
+lib/readline/readline.c
+	- _rl_internal_char_cleanup: move code that cleans up the active region
+	  and deactivates the mark inside this function so callback mode
+	  applications get the intended functionality. Report and fix from
+	  sparrowhawk996@gmail.com
+
+lib/readline/bind.c
+	- rl_parse_and_bind: when using the arithmetic comparison operators on
+	  the version, make sure to invert the tests so that we stop parsing
+	  if the test fails. Report and fix from Tom Tromey <tom@tromey.com>
+
+				   1/19
+				   ----
+Makefile.in
+	- pipesize.h: add dependency on ${BUILTINS_LIBRARY} to avoid parallel
+	  makes trying to create it twice. Report and fix from
+	  Richard Purdie <richard.purdie@linuxfoundation.org>

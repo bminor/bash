@@ -664,14 +664,12 @@ set_saved_history ()
 }
 
 int
-rl_operate_and_get_next (count, c)
-     int count, c;
+rl_operate_and_get_next (int count, int c)
 {
   /* Accept the current line. */
   rl_newline (1, c);
 
   saved_history_logical_offset = rl_explicit_arg ? count : where_history () + history_base + 1;
-
 
   _rl_saved_internal_startup_hook = _rl_internal_startup_hook;
   _rl_internal_startup_hook = set_saved_history;

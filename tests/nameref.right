@@ -510,3 +510,34 @@ declare -a array
 declare -ai array=([0]="one")
 declare -a array=([0]="zero")
 declare -a array=([0]="one" [1]="two" [2]="three")
+declare -ai a=([0]="5")
+declare -ai a=([0]="6")
+declare -ai a=([0]="1")
+./nameref23.sub: line 15: declare: b: not found
+declare -ai a=([0]="1")
+declare -- b="1"
+declare -ai a=([0]="1")
+declare -- b="11"
+declare -ai a=([0]="1")
+declare -- b="110"
+./nameref23.sub: line 25: declare: `1': invalid variable name for name reference
+declare -ai a=([0]="1")
+./nameref23.sub: line 27: declare: b: not found
+declare -ai a=([0]="4")
+declare -in b="a[0]"
+declare -ai a=([0]="6")
+declare -in b="a[0]"
+foo
+foo bar
+declare -a a=([0]="" [1]="foo bar")
+declare -n b="a[1]"
+foo
+foo bar
+declare -a a=([0]="" [1]="foo bar")
+declare -n b="a[1]"
+12
+16
+declare -ai a=([0]="0" [1]="16")
+12
+16
+declare -ai a=([0]="0" [1]="16")

@@ -746,7 +746,7 @@ ${DEFDIR}/bashgetopt.o:	$(BUILTIN_SRCDIR)/bashgetopt.c
 ${DEFDIR}/builtext.h: $(BUILTIN_DEFS)
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) builtext.h ) || exit 1
 
-${DEFDIR}/pipesize.h:
+${DEFDIR}/pipesize.h:	${BUILTINS_LIBRARY}
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) pipesize.h ) || exit 1
 
 $(SDIR)/man2html$(EXEEXT):	${SUPPORT_SRC}/man2html.c
