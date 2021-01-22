@@ -9377,3 +9377,10 @@ Makefile.in
 	- pipesize.h: add dependency on ${BUILTINS_LIBRARY} to avoid parallel
 	  makes trying to create it twice. Report and fix from
 	  Richard Purdie <richard.purdie@linuxfoundation.org>
+
+				   1/21
+				   ----
+subst.c
+	- param_expand: if a nameref expands to array[@] or array[*], make sure
+	  to call chk_atstar so the right variables are set to split the
+	  result. Report from Oguz <oguzismailuysal@gmail.com>

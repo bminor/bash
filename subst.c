@@ -7221,18 +7221,30 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
   if (vname != name)
     free (vname);
 
+#if 0 /* TAG:bash-5.2 oguzismailuysal@gmail.com 01/20/2021 */
+  /* "In all cases, the final value of parameter shall be substituted." */
+  if (shell_compatibility_level > 51)
+    {
+      FREE (t1);
+      t1 = value_cell (v);
+    }
+#endif
+
   /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
 
   /* If we are double-quoted or if we are not going to be performing word
      splitting, we want to quote the value we return appropriately, like
      the other expansions this function handles. */
   w->word = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) ? quote_string (t1) : quote_escapes (t1);
-  /* If we have something that's non-null, that's not a quoted null string,
+  /* If we have something that's non-null, but not a quoted null string,
      and we're not going to be performing word splitting (we know we're not
      because the operator is `='), we can forget we saw a quoted null. */
   if (w->word && w->word[0] && QUOTED_NULL (w->word) == 0)
     w->flags &= ~W_SAWQUOTEDNULL;
+
+#if 1 /* TAG:bash-5.2 */
   free (t1);
+#endif
 
   /* If we convert a null string into a quoted null, make sure the caller
      knows it. */
@@ -9126,7 +9138,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       dispose_word_desc (tdesc);
     }
   else
-    temp = (char  *)0;
+    temp = (char *)0;
 
   if (temp == &expand_param_error || temp == &expand_param_fatal)
     {
@@ -9956,6 +9968,7 @@ comsub:
 #if defined (ARRAY_VARS)
 	  if (temp && *temp && valid_array_reference (temp, 0))
 	    {
+	      chk_atstar (temp, quoted, pflags, quoted_dollar_at_p, contains_dollar_at);
 	      tdesc = parameter_brace_expand_word (temp, SPECIAL_VAR (temp, 0), quoted, pflags, (arrayind_t *)NULL);
 	      if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
 		return (tdesc);
