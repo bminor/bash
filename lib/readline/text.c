@@ -1,6 +1,6 @@
 /* text.c -- text handling commands for readline. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -59,12 +59,12 @@
 #include "xmalloc.h"
 
 /* Forward declarations. */
-static int rl_change_case PARAMS((int, int));
-static int _rl_char_search PARAMS((int, int, int));
+static int rl_change_case (int, int);
+static int _rl_char_search (int, int, int);
 
 #if defined (READLINE_CALLBACKS)
-static int _rl_insert_next_callback PARAMS((_rl_callback_generic_arg *));
-static int _rl_char_search_callback PARAMS((_rl_callback_generic_arg *));
+static int _rl_insert_next_callback (_rl_callback_generic_arg *);
+static int _rl_char_search_callback (_rl_callback_generic_arg *);
 #endif
 
 /* The largest chunk of text that can be inserted in one call to

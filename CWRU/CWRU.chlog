@@ -9384,3 +9384,38 @@ subst.c
 	- param_expand: if a nameref expands to array[@] or array[*], make sure
 	  to call chk_atstar so the right variables are set to split the
 	  result. Report from Oguz <oguzismailuysal@gmail.com>
+
+				   1/22
+				   ----
+builtins/declare.def
+	- Rewrote to reduce complexity. Still needs some work.
+
+lib/readline/*.h, lib/tilde/tilde.h
+	- PARAMS: remove, rely on compilers understanding function prototypes
+
+lib/readline/{undo.c,histlib.h}
+	 - _hs_replace_history_data: move extern declaration to histlib.h
+
+lib/readline/readline.c
+	- _rl_parse_colors: instead of an extern declaration for this, include
+	  "parse-colors.h" for it
+
+lib/readline/{histfile.c,histlib.h}
+	- _hs_append_history_line: move extern declaration to histlib.h
+
+lib/readline/history.h
+	- HS_HISTORY_VERSION: define to 0x0801 (current library version) if
+	  it's not already defined. We conditionally define it in case an
+	  application has (unwisely) chosen to use it, since the history
+	  library doesn't do anything with it yet
+
+lib/readine/{rlprivate.h,{search,misc,readline}.c}
+	- _rl_free_history_entry: add extern declaration to rlprivate.h, remove
+	  extern declaration from c source files. Use HS_HISTORY_VERSION as a
+	  sentinel that it's ok to use HIST_ENTRY in rlprivate.h
+
+lib/readline/{rlprivate.h,{isearch,search,undo}.c}
+	- _rl_saved_line_for_history: add extern declaration to rlprivate.h,
+	  remove extern declaration from c source files, using HS_HISTORY_VERSION
+	  in the same way
+

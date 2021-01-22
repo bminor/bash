@@ -1,6 +1,6 @@
 /* misc.c -- miscellaneous bindable readline functions. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -53,11 +53,8 @@
 #include "rlshell.h"
 #include "xmalloc.h"
 
-static int rl_digit_loop PARAMS((void));
-static void _rl_history_set_point PARAMS((void));
-
-/* Forward declarations used in this file */
-void _rl_free_history_entry PARAMS((HIST_ENTRY *));
+static int rl_digit_loop (void);
+static void _rl_history_set_point (void);
 
 /* If non-zero, rl_get_previous_history and rl_get_next_history attempt
    to preserve the value of rl_point from line to line. */

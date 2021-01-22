@@ -1,6 +1,6 @@
 /* history.c -- standalone history library */
 
-/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -62,7 +62,7 @@ extern int errno;
 /* The number of slots to increase the_history by. */
 #define DEFAULT_HISTORY_GROW_SIZE 50
 
-static char *hist_inittime PARAMS((void));
+static char *hist_inittime (void);
 
 /* **************************************************************** */
 /*								    */

@@ -1,6 +1,6 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -57,7 +57,7 @@
 
 #define fielddelim(c)	(whitespace(c) || (c) == '\n')
 
-typedef int _hist_search_func_t PARAMS((const char *, int));
+typedef int _hist_search_func_t (const char *, int);
 
 static char error_pointer;
 
@@ -70,14 +70,14 @@ static int subst_rhs_len;
    specifications from word designators.  Static for now */
 static char *history_event_delimiter_chars = HISTORY_EVENT_DELIMITERS;
 
-static char *get_history_word_specifier PARAMS((char *, char *, int *));
-static int history_tokenize_word PARAMS((const char *, int));
-static char **history_tokenize_internal PARAMS((const char *, int, int *));
-static char *history_substring PARAMS((const char *, int, int));
-static void freewords PARAMS((char **, int));
-static char *history_find_word PARAMS((char *, int));
+static char *get_history_word_specifier (char *, char *, int *);
+static int history_tokenize_word (const char *, int);
+static char **history_tokenize_internal (const char *, int, int *);
+static char *history_substring (const char *, int, int);
+static void freewords (char **, int);
+static char *history_find_word (char *, int);
 
-static char *quote_breaks PARAMS((char *));
+static char *quote_breaks (char *);
 
 /* Variables exported by this file. */
 /* The character that represents the start of a history expansion

@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -95,7 +95,7 @@ typedef int QSFUNC ();
 /* Most systems don't declare getpwent in <pwd.h> if _POSIX_SOURCE is
    defined. */
 #if defined (HAVE_GETPWENT) && (!defined (HAVE_GETPW_DECLS) || defined (_POSIX_SOURCE))
-extern struct passwd *getpwent PARAMS((void));
+extern struct passwd *getpwent (void);
 #endif /* HAVE_GETPWENT && (!HAVE_GETPW_DECLS || _POSIX_SOURCE) */
 
 /* If non-zero, then this is the address of a function to call when
@@ -114,44 +114,44 @@ rl_compdisp_func_t *rl_completion_display_matches_hook = (rl_compdisp_func_t *)N
 #endif
 
 #if defined (VISIBLE_STATS)
-static int stat_char PARAMS((char *));
+static int stat_char (char *);
 #endif
 
 #if defined (COLOR_SUPPORT)
-static int colored_stat_start PARAMS((const char *));
-static void colored_stat_end PARAMS((void));
-static int colored_prefix_start PARAMS((void));
-static void colored_prefix_end PARAMS((void));
+static int colored_stat_start (const char *);
+static void colored_stat_end (void);
+static int colored_prefix_start (void);
+static void colored_prefix_end (void);
 #endif
 
-static int path_isdir PARAMS((const char *));
+static int path_isdir (const char *);
 
-static char *rl_quote_filename PARAMS((char *, int, char *));
+static char *rl_quote_filename (char *, int, char *);
 
-static void _rl_complete_sigcleanup PARAMS((int, void *));
+static void _rl_complete_sigcleanup (int, void *);
 
-static void set_completion_defaults PARAMS((int));
-static int get_y_or_n PARAMS((int));
-static int _rl_internal_pager PARAMS((int));
-static char *printable_part PARAMS((char *));
-static int fnwidth PARAMS((const char *));
-static int fnprint PARAMS((const char *, int, const char *));
-static int print_filename PARAMS((char *, char *, int));
+static void set_completion_defaults (int);
+static int get_y_or_n (int);
+static int _rl_internal_pager (int);
+static char *printable_part (char *);
+static int fnwidth (const char *);
+static int fnprint (const char *, int, const char *);
+static int print_filename (char *, char *, int);
 
-static char **gen_completion_matches PARAMS((char *, int, int, rl_compentry_func_t *, int, int));
+static char **gen_completion_matches (char *, int, int, rl_compentry_func_t *, int, int);
 
-static char **remove_duplicate_matches PARAMS((char **));
-static void insert_match PARAMS((char *, int, int, char *));
-static int append_to_match PARAMS((char *, int, int, int));
-static void insert_all_matches PARAMS((char **, int, char *));
-static int complete_fncmp PARAMS((const char *, int, const char *, int));
-static void display_matches PARAMS((char **));
-static int compute_lcd_of_matches PARAMS((char **, int, const char *));
-static int postprocess_matches PARAMS((char ***, int));
-static int compare_match PARAMS((char *, const char *));
-static int complete_get_screenwidth PARAMS((void));
+static char **remove_duplicate_matches (char **);
+static void insert_match (char *, int, int, char *);
+static int append_to_match (char *, int, int, int);
+static void insert_all_matches (char **, int, char *);
+static int complete_fncmp (const char *, int, const char *, int);
+static void display_matches (char **);
+static int compute_lcd_of_matches (char **, int, const char *);
+static int postprocess_matches (char ***, int);
+static int compare_match (char *, const char *);
+static int complete_get_screenwidth (void);
 
-static char *make_quoted_replacement PARAMS((char *, int, char *));
+static char *make_quoted_replacement (char *, int, char *);
 
 /* **************************************************************** */
 /*								    */

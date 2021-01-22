@@ -1,6 +1,6 @@
 /* terminal.c -- controlling the terminal with termcap. */
 
-/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -73,11 +73,11 @@
 #  include <windows.h>
 #  include <wincon.h>
 
-static void _win_get_screensize PARAMS((int *, int *));
+static void _win_get_screensize (int *, int *);
 #endif
 
 #if defined (__EMX__)
-static void _emx_get_screensize PARAMS((int *, int *));
+static void _emx_get_screensize (int *, int *);
 #endif
 
 /* If the calling application sets this to a non-zero value, readline will
@@ -194,7 +194,7 @@ static char *_rl_term_ve;	/* normal */
 #endif
 #define TGETFLAG(cap)	(tgetflag (cap) == TGETFLAG_SUCCESS)
 
-static void bind_termcap_arrow_keys PARAMS((Keymap));
+static void bind_termcap_arrow_keys (Keymap);
 
 /* Variables that hold the screen dimensions, used by the display code. */
 int _rl_screenwidth, _rl_screenheight, _rl_screenchars;

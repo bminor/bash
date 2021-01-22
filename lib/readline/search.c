@@ -1,6 +1,6 @@
 /* search.c - code for non-incremental searching in emacs and vi modes. */
 
-/* Copyright (C) 1992-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -55,11 +55,6 @@
 
 _rl_search_cxt *_rl_nscxt = 0;
 
-extern HIST_ENTRY *_rl_saved_line_for_history;
-
-/* Functions imported from the rest of the library. */
-extern void _rl_free_history_entry PARAMS((HIST_ENTRY *));
-
 static char *noninc_search_string = (char *) NULL;
 static int noninc_history_pos;
 
@@ -72,16 +67,16 @@ static int rl_history_search_flags;
 static char *history_search_string;
 static int history_string_size;
 
-static void make_history_line_current PARAMS((HIST_ENTRY *));
-static int noninc_search_from_pos PARAMS((char *, int, int, int, int *));
-static int noninc_dosearch PARAMS((char *, int, int));
-static int noninc_search PARAMS((int, int));
-static int rl_history_search_internal PARAMS((int, int));
-static void rl_history_search_reinit PARAMS((int));
+static void make_history_line_current (HIST_ENTRY *);
+static int noninc_search_from_pos (char *, int, int, int, int *);
+static int noninc_dosearch (char *, int, int);
+static int noninc_search (int, int);
+static int rl_history_search_internal (int, int);
+static void rl_history_search_reinit (int);
 
-static _rl_search_cxt *_rl_nsearch_init PARAMS((int, int));
-static void _rl_nsearch_abort PARAMS((_rl_search_cxt *));
-static int _rl_nsearch_dispatch PARAMS((_rl_search_cxt *, int));
+static _rl_search_cxt *_rl_nsearch_init (int, int);
+static void _rl_nsearch_abort (_rl_search_cxt *);
+static int _rl_nsearch_dispatch (_rl_search_cxt *, int);
 
 /* Make the data from the history entry ENTRY be the contents of the
    current line.  This doesn't do anything with rl_point; the caller

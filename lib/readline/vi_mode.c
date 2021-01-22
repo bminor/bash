@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -124,44 +124,44 @@ static const char * const vi_textmod = "_*\\AaIiCcDdPpYyRrSsXx~";
 /* Arrays for the saved marks. */
 static int vi_mark_chars['z' - 'a' + 1];
 
-static void _rl_vi_replace_insert PARAMS((int));
-static void _rl_vi_save_replace PARAMS((void));
-static void _rl_vi_stuff_insert PARAMS((int));
-static void _rl_vi_save_insert PARAMS((UNDO_LIST *));
+static void _rl_vi_replace_insert (int);
+static void _rl_vi_save_replace (void);
+static void _rl_vi_stuff_insert (int);
+static void _rl_vi_save_insert (UNDO_LIST *);
 
-static void vi_save_insert_buffer PARAMS ((int, int));
+static void vi_save_insert_buffer (int, int);
 
-static inline void _rl_vi_backup PARAMS((void));
+static inline void _rl_vi_backup (void);
 
-static int _rl_vi_arg_dispatch PARAMS((int));
-static int rl_digit_loop1 PARAMS((void));
+static int _rl_vi_arg_dispatch (int);
+static int rl_digit_loop1 (void);
 
-static int _rl_vi_set_mark PARAMS((void));
-static int _rl_vi_goto_mark PARAMS((void));
+static int _rl_vi_set_mark (void);
+static int _rl_vi_goto_mark (void);
 
-static inline int _rl_vi_advance_point PARAMS((void));
-static inline int _rl_vi_backup_point PARAMS((void));
+static inline int _rl_vi_advance_point (void);
+static inline int _rl_vi_backup_point (void);
 
-static void _rl_vi_append_forward PARAMS((int));
+static void _rl_vi_append_forward (int);
 
-static int _rl_vi_callback_getchar PARAMS((char *, int));
+static int _rl_vi_callback_getchar (char *, int);
 
 #if defined (READLINE_CALLBACKS)
-static int _rl_vi_callback_set_mark PARAMS((_rl_callback_generic_arg *));
-static int _rl_vi_callback_goto_mark PARAMS((_rl_callback_generic_arg *));
-static int _rl_vi_callback_change_char PARAMS((_rl_callback_generic_arg *));
-static int _rl_vi_callback_char_search PARAMS((_rl_callback_generic_arg *));
+static int _rl_vi_callback_set_mark (_rl_callback_generic_arg *);
+static int _rl_vi_callback_goto_mark (_rl_callback_generic_arg *);
+static int _rl_vi_callback_change_char (_rl_callback_generic_arg *);
+static int _rl_vi_callback_char_search (_rl_callback_generic_arg *);
 #endif
 
-static int rl_domove_read_callback PARAMS((_rl_vimotion_cxt *));
-static int rl_domove_motion_callback PARAMS((_rl_vimotion_cxt *));
-static int rl_vi_domove_getchar PARAMS((_rl_vimotion_cxt *));
+static int rl_domove_read_callback (_rl_vimotion_cxt *);
+static int rl_domove_motion_callback (_rl_vimotion_cxt *);
+static int rl_vi_domove_getchar (_rl_vimotion_cxt *);
 
-static int vi_change_dispatch PARAMS((_rl_vimotion_cxt *));
-static int vi_delete_dispatch PARAMS((_rl_vimotion_cxt *));
-static int vi_yank_dispatch PARAMS((_rl_vimotion_cxt *));
+static int vi_change_dispatch (_rl_vimotion_cxt *);
+static int vi_delete_dispatch (_rl_vimotion_cxt *);
+static int vi_yank_dispatch (_rl_vimotion_cxt *);
 
-static int vidomove_dispatch PARAMS((_rl_vimotion_cxt *));
+static int vidomove_dispatch (_rl_vimotion_cxt *);
 
 void
 _rl_vi_initialize_line (void)

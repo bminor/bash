@@ -1,6 +1,6 @@
 /* input.c -- character input functions for readline. */
 
-/* Copyright (C) 1994-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -97,9 +97,9 @@ rl_getc_func_t *rl_getc_function = rl_getc;
 
 static int _keyboard_input_timeout = 100000;		/* 0.1 seconds; it's in usec */
 
-static int ibuffer_space PARAMS((void));
-static int rl_get_char PARAMS((int *));
-static int rl_gather_tyi PARAMS((void));
+static int ibuffer_space (void);
+static int rl_get_char (int *);
+static int rl_gather_tyi (void);
 
 /* Windows isatty returns true for every character device, including the null
    device, so we need to perform additional checks. */

@@ -1,6 +1,6 @@
 /* signals.c -- signal handling support for readline. */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -78,12 +78,12 @@ typedef struct { SigHandler *sa_handler; int sa_mask, sa_flags; } sighandler_cxt
 #  define SA_RESTART 0
 #endif
 
-static SigHandler *rl_set_sighandler PARAMS((int, SigHandler *, sighandler_cxt *));
-static void rl_maybe_set_sighandler PARAMS((int, SigHandler *, sighandler_cxt *));
-static void rl_maybe_restore_sighandler PARAMS((int, sighandler_cxt *));
+static SigHandler *rl_set_sighandler (int, SigHandler *, sighandler_cxt *);
+static void rl_maybe_set_sighandler (int, SigHandler *, sighandler_cxt *);
+static void rl_maybe_restore_sighandler (int, sighandler_cxt *);
 
-static RETSIGTYPE rl_signal_handler PARAMS((int));
-static RETSIGTYPE _rl_handle_signal PARAMS((int));
+static RETSIGTYPE rl_signal_handler (int);
+static RETSIGTYPE _rl_handle_signal (int);
      
 /* Exported variables for use by applications. */
 

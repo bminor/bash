@@ -1,6 +1,6 @@
 /* display.c -- readline redisplay facility. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library    
    for reading lines of text with interactive input and history editing.
@@ -63,23 +63,23 @@
 extern char *strchr (), *strrchr ();
 #endif /* !strchr && !__STDC__ */
 
-static void putc_face PARAMS((int, int, char *));
-static void puts_face PARAMS((const char *, const char *, int));
-static void norm_face PARAMS((char *, int));
+static void putc_face (int, int, char *);
+static void puts_face (const char *, const char *, int);
+static void norm_face (char *, int);
 
-static void update_line PARAMS((char *, char *, char *, char *, int, int, int, int));
-static void space_to_eol PARAMS((int));
-static void delete_chars PARAMS((int));
-static void insert_some_chars PARAMS((char *, int, int));
-static void open_some_spaces PARAMS((int));
-static void cr PARAMS((void));
-static void redraw_prompt PARAMS((char *));
-static void _rl_move_cursor_relative PARAMS((int, const char *, const char *));
+static void update_line (char *, char *, char *, char *, int, int, int, int);
+static void space_to_eol (int);
+static void delete_chars (int);
+static void insert_some_chars (char *, int, int);
+static void open_some_spaces (int);
+static void cr (void);
+static void redraw_prompt (char *);
+static void _rl_move_cursor_relative (int, const char *, const char *);
 
 /* Values for FLAGS */
 #define PMT_MULTILINE	0x01
 
-static char *expand_prompt PARAMS((char *, int, int *, int *, int *, int *));
+static char *expand_prompt (char *, int, int *, int *, int *, int *);
 
 #define DEFAULT_LINE_BUFFER_SIZE	1024
 
@@ -115,7 +115,7 @@ static int line_structures_initialized = 0;
 #define inv_face	(line_state_invisible->lface)
 
 #if defined (HANDLE_MULTIBYTE)
-static int _rl_col_width PARAMS((const char *, int, int, int));
+static int _rl_col_width (const char *, int, int, int);
 #else
 #  define _rl_col_width(l, s, e, f)	(((e) <= (s)) ? 0 : (e) - (s))
 #endif

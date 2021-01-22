@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -72,7 +72,7 @@ extern char *strchr (), *strrchr ();
 /* Variables exported by this file. */
 Keymap rl_binding_keymap;
 
-static int _rl_skip_to_delim PARAMS((char *, int, int));
+static int _rl_skip_to_delim (char *, int, int);
 
 #if defined (USE_VARARGS) && defined (PREFER_STDARG)
 static void _rl_init_file_error (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
@@ -80,23 +80,23 @@ static void _rl_init_file_error (const char *, ...)  __attribute__((__format__ (
 static void _rl_init_file_error ();
 #endif
 
-static rl_command_func_t *_rl_function_of_keyseq_internal PARAMS((const char *, size_t, Keymap, int *));
+static rl_command_func_t *_rl_function_of_keyseq_internal (const char *, size_t, Keymap, int *);
 
-static char *_rl_read_file PARAMS((char *, size_t *));
-static int _rl_read_init_file PARAMS((const char *, int));
-static int glean_key_from_name PARAMS((char *));
+static char *_rl_read_file (char *, size_t *);
+static int _rl_read_init_file (const char *, int);
+static int glean_key_from_name (char *);
 
-static int find_boolean_var PARAMS((const char *));
-static int find_string_var PARAMS((const char *));
+static int find_boolean_var (const char *);
+static int find_string_var (const char *);
 
-static const char *boolean_varname PARAMS((int));
-static const char *string_varname PARAMS((int));
+static const char *boolean_varname (int);
+static const char *string_varname (int);
 
-static char *_rl_get_string_variable_value PARAMS((const char *));
-static int substring_member_of_array PARAMS((const char *, const char * const *));
+static char *_rl_get_string_variable_value (const char *);
+static int substring_member_of_array (const char *, const char * const *);
 
-static int _rl_get_keymap_by_name PARAMS((const char *));
-static int _rl_get_keymap_by_map PARAMS((Keymap));
+static int _rl_get_keymap_by_name (const char *);
+static int _rl_get_keymap_by_map (Keymap);
 
 static int currently_reading_init_file;
 
@@ -1143,7 +1143,7 @@ parse_comparison_op (s, indp)
 /*								    */
 /* **************************************************************** */
 
-typedef int _rl_parser_func_t PARAMS((char *));
+typedef int _rl_parser_func_t (char *);
 
 /* Things that mean `Control'. */
 const char * const _rl_possible_control_prefixes[] = {
@@ -1883,7 +1883,7 @@ hack_special_boolean_var (int i)
     _rl_enable_active_region = _rl_enable_bracketed_paste;
 }
 
-typedef int _rl_sv_func_t PARAMS((const char *));
+typedef int _rl_sv_func_t (const char *);
 
 /* These *must* correspond to the array indices for the appropriate
    string variable.  (Though they're not used right now.) */
@@ -1897,19 +1897,19 @@ typedef int _rl_sv_func_t PARAMS((const char *));
 #define V_INT		2
 
 /* Forward declarations */
-static int sv_bell_style PARAMS((const char *));
-static int sv_combegin PARAMS((const char *));
-static int sv_dispprefix PARAMS((const char *));
-static int sv_compquery PARAMS((const char *));
-static int sv_compwidth PARAMS((const char *));
-static int sv_editmode PARAMS((const char *));
-static int sv_emacs_modestr PARAMS((const char *));
-static int sv_histsize PARAMS((const char *));
-static int sv_isrchterm PARAMS((const char *));
-static int sv_keymap PARAMS((const char *));
-static int sv_seqtimeout PARAMS((const char *));
-static int sv_viins_modestr PARAMS((const char *));
-static int sv_vicmd_modestr PARAMS((const char *));
+static int sv_bell_style (const char *);
+static int sv_combegin (const char *);
+static int sv_dispprefix (const char *);
+static int sv_compquery (const char *);
+static int sv_compwidth (const char *);
+static int sv_editmode (const char *);
+static int sv_emacs_modestr (const char *);
+static int sv_histsize (const char *);
+static int sv_isrchterm (const char *);
+static int sv_keymap (const char *);
+static int sv_seqtimeout (const char *);
+static int sv_viins_modestr (const char *);
+static int sv_vicmd_modestr (const char *);
 
 static const struct {
   const char * const name;

@@ -6,7 +6,7 @@
 /*								    */
 /* **************************************************************** */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -59,13 +59,10 @@ char *_rl_isearch_terminators = (char *)NULL;
 
 _rl_search_cxt *_rl_iscxt = 0;
 
-/* Variables imported from other files in the readline library. */
-extern HIST_ENTRY *_rl_saved_line_for_history;
+static int rl_search_history (int, int);
 
-static int rl_search_history PARAMS((int, int));
-
-static _rl_search_cxt *_rl_isearch_init PARAMS((int));
-static void _rl_isearch_fini PARAMS((_rl_search_cxt *));
+static _rl_search_cxt *_rl_isearch_init (int);
+static void _rl_isearch_fini (_rl_search_cxt *);
 
 /* Last line found by the current incremental search, so we don't `find'
    identical lines many times in a row.  Now part of isearch context. */

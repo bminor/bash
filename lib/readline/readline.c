@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -72,37 +72,34 @@ extern int errno;
 #include "rlshell.h"
 #include "xmalloc.h"
 
+#if defined (COLOR_SUPPORT)
+#  include "parse-colors.h"
+#endif
+
 #ifndef RL_LIBRARY_VERSION
-#  define RL_LIBRARY_VERSION "8.0"
+#  define RL_LIBRARY_VERSION "8.1"
 #endif
 
 #ifndef RL_READLINE_VERSION
-#  define RL_READLINE_VERSION	0x0800
+#  define RL_READLINE_VERSION	0x0801
 #endif
-
-extern void _rl_free_history_entry PARAMS((HIST_ENTRY *));
-
-#if defined (COLOR_SUPPORT)
-extern void _rl_parse_colors PARAMS((void));		/* XXX */
-#endif
-
 
 /* Forward declarations used in this file. */
-static char *readline_internal PARAMS((void));
-static void readline_initialize_everything PARAMS((void));
+static char *readline_internal (void);
+static void readline_initialize_everything (void);
 
-static void run_startup_hooks PARAMS((void));
+static void run_startup_hooks (void);
 
-static void bind_arrow_keys_internal PARAMS((Keymap));
-static void bind_arrow_keys PARAMS((void));
+static void bind_arrow_keys_internal (Keymap);
+static void bind_arrow_keys (void);
 
-static void bind_bracketed_paste_prefix PARAMS((void));
+static void bind_bracketed_paste_prefix (void);
 
-static void readline_default_bindings PARAMS((void));
-static void reset_default_bindings PARAMS((void));
+static void readline_default_bindings (void);
+static void reset_default_bindings (void);
 
-static int _rl_subseq_result PARAMS((int, Keymap, int, int));
-static int _rl_subseq_getchar PARAMS((int));
+static int _rl_subseq_result (int, Keymap, int, int);
+static int _rl_subseq_getchar (int);
 
 /* **************************************************************** */
 /*								    */
