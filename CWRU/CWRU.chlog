@@ -9419,3 +9419,34 @@ lib/readline/{rlprivate.h,{isearch,search,undo}.c}
 	  remove extern declaration from c source files, using HS_HISTORY_VERSION
 	  in the same way
 
+				   1/24
+				   ----
+lib/readline/signals.c
+	- _rl_handle_signal: make sure that all sigprocmask calls are protected
+	  by HAVE_POSIX_SIGNALS. Report and fix from Tom Tromey <tom@tromey.com>
+
+				   1/26
+				   ----
+lib/readline/callback.c
+	- rl_callback_read_char: make sure rl_linefunc is non-NULL before
+	  calling through the pointer. The line function could have been
+	  removed by the application before readline processes any typeahead
+	  input. Bug reported by Matthias Klose <doko@debian.org>, pointer
+	  to root cause from Koichi Murase <myoga.murase@gmail.com>
+
+lib/glob/glob.c
+	- skipname,wskipname: put in some additional checks for `.' to ensure
+	  that we don't get false positives (or incomplete tests) that can 
+	  affect the results of extglob patterns. Reported by
+	  gregrwm <rhn-users@greatlakedata.com>
+
+				   1/27
+				   ----
+lib/glob/glob.c
+	- extglob_skipname,wextglob_skipname: fixed an off-by-one error (SE
+	  was being set to one character before the end of the pattern string,
+	  not the null character at the end of the pattern string like other
+	  callers of glob_patscan) that caused the last character of the last
+	  subpattern to be cut off when calling skipname
+	- extglob_skipname,wextglob_skipname: some cleanups so the code is
+	  closer to identical for the single-byte and wide character versions

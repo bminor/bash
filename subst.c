@@ -8197,19 +8197,28 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
 /*								*/
 /****************************************************************/
 
-#ifdef INCLUDE_UNUSED
+#if 0	/* TAG: bash-5.2? */
 static int
 shouldexp_replacement (s)
      char *s;
 {
-  register char *p;
+  size_t slen;
+  int sindex, c;
+  DECLARE_MBSTATE;
 
-  for (p = s; p && *p; p++)
+  sindex = 0;
+  slen = STRLEN (s);
+  while (c = s[sindex])
     {
-      if (*p == '\\')
-	p++;
-      else if (*p == '&')
+      if (c == '\\')
+	{
+	  sindex++;
+	  if (s[sindex] == 0)
+	    return 0;
+	}
+      else if (c == '&')
 	return 1;
+      ADVANCE_CHAR (s, slen, sindex);
     }
   return 0;
 }

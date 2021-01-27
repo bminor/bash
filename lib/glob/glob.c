@@ -185,6 +185,13 @@ glob_pattern_p (pattern)
 }
 
 #if EXTENDED_GLOB
+
+#if defined (HANDLE_MULTIBYTE)
+#  define XSKIPNAME(p, d, f)	mbskipname(p, d, f)
+#else
+#  define XSKIPNAME(p, d, f)	skipname(p, d, f)
+#endif
+
 /* Return 1 if all subpatterns in the extended globbing pattern PAT indicate
    that the name should be skipped.  XXX - doesn't handle pattern negation,
    not sure if it should */
@@ -199,25 +206,20 @@ extglob_skipname (pat, dname, flags)
   negate = *pat == '!';
   wild = *pat == '*' || *pat == '?';
   pp = pat + 2;
-  se = pp + strlen (pp) - 1;		/* end of string */
-  pe = glob_patscan (pp, se, 0);	/* end of extglob pattern (( */
-  /* we should check for invalid extglob pattern here */
+  se = pp + strlen (pp);		/* end of pattern string */
+  pe = glob_patscan (pp, se, 0);	/* end of extglob pattern */
+
+  /* if pe == 0, this is an invalid extglob pattern */
   if (pe == 0)
     return 0;
 
   /* if pe != se we have more of the pattern at the end of the extglob
      pattern. Check the easy case first ( */
-  if (pe == se && *pe == ')' && (t = strchr (pp, '|')) == 0)
+  if (pe == se && *pe == 0 && pe[-1] == ')' && (t = strchr (pp, '|')) == 0)
     {
-      *pe = '\0';
-#if defined (HANDLE_MULTIBYTE)
-      r = mbskipname (pp, dname, flags);
-#else
-      r = skipname (pp, dname, flags);	/*(*/
-#endif
-      *pe = ')';
-      if (wild && pe[1])	/* if we can match zero instances, check further */
-        return (skipname (pe+1, dname, flags));
+      pe[-1] = '\0';
+      r = XSKIPNAME (pp, dname, flags); /*(*/
+      pe[-1] = ')';
       return r;
     }
 
@@ -229,21 +231,21 @@ extglob_skipname (pat, dname, flags)
   /* check every subpattern */
   while (t = glob_patscan (pp, pe, '|'))
     {
+      /* If T == PE and *T == 0 (&& PE[-1] == RPAREN), we have hit the end
+	 of a pattern with no trailing characters. */
       n = t[-1];	/* ( */
-      if (extglob_pattern_p (pp) && n == ')')
+      if (extglob_pattern_p (pp) && n == ')')		/* nested extglob? */
 	t[-1] = n;	/* no-op for now */
       else
 	t[-1] = '\0';
-#if defined (HANDLE_MULTIBYTE)
-      r = mbskipname (pp, dname, flags);
-#else
-      r = skipname (pp, dname, flags);
-#endif
+      r = XSKIPNAME (pp, dname, flags);
       t[-1] = n;
       if (r == 0)	/* if any pattern says not skip, we don't skip */
         return r;
       pp = t;
-    }	/*(*/
+      if (pp == pe)
+	break;
+    }
 
   /* glob_patscan might find end of string */
   if (pp == se)
@@ -251,7 +253,8 @@ extglob_skipname (pat, dname, flags)
 
   /* but if it doesn't then we didn't match a leading dot */
   if (wild && *pe)	/* if we can match zero instances, check further */
-    return (skipname (pe, dname, flags));
+    return (XSKIPNAME (pe, dname, flags));
+
   return 1;
 }
 #endif
@@ -264,6 +267,8 @@ skipname (pat, dname, flags)
      char *dname;
      int flags;
 {
+  int i;
+
 #if EXTENDED_GLOB
   if (extglob_pattern_p (pat))		/* XXX */
     return (extglob_skipname (pat, dname, flags));
@@ -284,6 +289,20 @@ skipname (pat, dname, flags)
 	(pat[0] != '\\' || pat[1] != '.'))
     return 1;
 
+  /* Special checks for `.'. The only things that can match `.' are ".",
+     "\.", ".*", and "\.*". We don't try to match everything here, just
+     make sure that we don't let something obviously disqualifying by. */
+  else if (dname[0] == '.' && dname[1] == '\0')
+    {
+      if (pat[0] != '.' && (pat[0] != '\\' || pat[1] != '.'))
+	return 1;
+      i = (pat[0] == '.') ? 1 : 2;
+      if (pat[i] && pat[i] != '*')
+	return 1;
+    }
+
+  /* We don't currently have any additional special checks for `..' */
+
   return 0;
 }
 
@@ -294,6 +313,8 @@ wskipname (pat, dname, flags)
      wchar_t *pat, *dname;
      int flags;
 {
+  int i;
+
   if (glob_always_skip_dot_and_dotdot && WDOT_OR_DOTDOT (dname))
     return 1;
 
@@ -306,10 +327,22 @@ wskipname (pat, dname, flags)
 
   /* If a leading dot must be explicitly matched, check to see if the
      pattern and dirname both have one. */
- else if (noglob_dot_filenames && dname[0] == L'.' &&
+  else if (noglob_dot_filenames && dname[0] == L'.' &&
 	pat[0] != L'.' &&
 	   (pat[0] != L'\\' || pat[1] != L'.'))
     return 1;
+
+  /* Special checks for `.'. The only things that can match `.' are ".",
+     "\.", ".*", and "\.*". We don't try to match everything here, just
+     make sure that we don't let something obviously disqualifying by. */
+  else if (dname[0] == L'.' && dname[1] == L'\0')
+    {
+      if (pat[0] != L'.' && (pat[0] != L'\\' || pat[1] != L'.'))
+	return 1;
+      i = (pat[0] == L'.') ? 1 : 2;
+      if (pat[i] != L'\0' && pat[i] != L'*')
+	return 1;
+    }
 
   return 0;
 }
@@ -320,22 +353,26 @@ wextglob_skipname (pat, dname, flags)
      int flags;
 {
 #if EXTENDED_GLOB
-  wchar_t *pp, *pe, *t, n, *se;
+  wchar_t *pp, *pe, *t, *se, n;
   int r, negate, wild, nullpat;
 
   negate = *pat == L'!';
   wild = *pat == L'*' || *pat == L'?';
   pp = pat + 2;
-  se = pp + wcslen (pp) - 1;	/*(*/
+  se = pp + wcslen (pp);
   pe = glob_patscan_wc (pp, se, 0);
 
-  if (pe == se && *pe == ')' && (t = wcschr (pp, L'|')) == 0)
+  /* if pe == 0, this is an invalid extglob pattern */
+  if (pe == 0)
+    return 0;
+
+  /* if pe != se we have more of the pattern at the end of the extglob
+     pattern. Check the easy case first ( */
+  if (pe == se && *pe == L'\0' && pe[-1] == L')' && (t = wcschr (pp, L'|')) == 0)
     {
-      *pe = L'\0';
+      pe[-1] = L'\0';
       r = wskipname (pp, dname, flags); /*(*/
-      *pe = L')';
-      if (wild && pe[1] != L'\0')
-        return (wskipname (pe+1, dname, flags));
+      pe[-1] = L')';
       return r;
     }
 
@@ -348,7 +385,7 @@ wextglob_skipname (pat, dname, flags)
   while (t = glob_patscan_wc (pp, pe, '|'))
     {
       n = t[-1];	/* ( */
-      if (wextglob_pattern_p (pp) && n == L')')
+      if (wextglob_pattern_p (pp) && n == L')')		/* nested extglob? */
 	t[-1] = n;	/* no-op for now */
       else
 	t[-1] = L'\0';
@@ -357,14 +394,18 @@ wextglob_skipname (pat, dname, flags)
       if (r == 0)
 	return 0;
       pp = t;
+      if (pp == pe)
+	break;
     }
 
-  if (pp == pe)		/* glob_patscan_wc might find end of pattern */
+  /* glob_patscan_wc might find end of string */
+  if (pp == se)
     return r;
 
   /* but if it doesn't then we didn't match a leading dot */
   if (wild && *pe != L'\0')
     return (wskipname (pe, dname, flags));
+
   return 1;
 #else
   return (wskipname (pat, dname, flags));

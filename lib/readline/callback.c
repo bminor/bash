@@ -278,7 +278,8 @@ rl_callback_read_char (void)
 	  rl_clear_signals ();
 #endif
 	  in_handler = 0;
-	  (*rl_linefunc) (line);
+	  if (rl_linefunc)			/* just in case */
+	    (*rl_linefunc) (line);
 
 	  /* If the user did not clear out the line, do it for him. */
 	  if (rl_line_buffer[0])
