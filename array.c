@@ -84,7 +84,6 @@ array_create()
 	ARRAY_ELEMENT	*head;
 
 	r = (ARRAY *)xmalloc(sizeof(ARRAY));
-	r->type = array_indexed;
 	r->max_index = -1;
 	r->num_elements = 0;
 	r->lastref = (ARRAY_ELEMENT *)0;
@@ -134,7 +133,6 @@ ARRAY	*a;
 	if (a == 0)
 		return((ARRAY *) NULL);
 	a1 = array_create();
-	a1->type = a->type;
 	a1->max_index = a->max_index;
 	a1->num_elements = a->num_elements;
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
@@ -161,7 +159,6 @@ ARRAY_ELEMENT	*s, *e;
 	arrayind_t mi;
 
 	a = array_create ();
-	a->type = array->type;
 
 	for (mi = 0, p = s, i = 0; p != e; p = element_forw(p), i++) {
 		n = array_create_element (element_index(p), element_value(p));

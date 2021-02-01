@@ -7819,7 +7819,10 @@ a value to a readonly variable.
 @item
 A non-interactive shell exits with an error status if a variable
 assignment error occurs in an assignment statement preceding a special
-builtin, but not with any other simple command.
+builtin, but not with any other simple command. For any other simple
+command, the shell aborts execution of that command, and execution continues
+at the top level ("the shell shall not perform any further processing of the
+command in which the error occurred").
 
 @item
 A non-interactive shell exits with an error status if the iteration

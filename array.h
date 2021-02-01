@@ -27,10 +27,9 @@
 
 typedef intmax_t	arrayind_t;
 
-enum atype {array_indexed, array_assoc};	/* only array_indexed used */
+enum atype {array_indexed, array_assoc};	/* not used */
 
 typedef struct array {
-	enum atype	type;
 	arrayind_t	max_index;
 	int		num_elements;
 	struct array_element *head;

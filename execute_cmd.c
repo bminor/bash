@@ -3013,16 +3013,13 @@ eval_arith_for_expr (l, okp)
   int r;
   char *expr, *temp;
 
-#if 1	/* TAG: bash-5.2 */
   expr = l->next ? string_list (l) : l->word->word;
   temp = expand_arith_string (expr, Q_DOUBLE_QUOTES|Q_ARITH);
   if (l->next)
     free (expr);
   new = make_word_list (make_word (temp), (WORD_LIST *)NULL);
   free (temp);
-#else
-  new = expand_words_no_vars (l);
-#endif
+
   if (new)
     {
       if (echo_command_at_execute)
@@ -3791,10 +3788,7 @@ execute_arith_command (arith_command)
 
   t = (char *)NULL;
   new = arith_command->exp;
-  if (new->next)
-    exp = t = string_list (new);	/* just in case */
-  else
-    exp = new->word->word;
+  exp = (new->next) ? (t = string_list (new)) : new->word->word;
 
   exp = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH);
   FREE (t);
@@ -4459,16 +4453,23 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     }
 
   /* In POSIX mode, assignment errors in the temporary environment cause a
-     non-interactive shell to exit. */
-#if 1
-  if (posixly_correct && builtin_is_special && interactive_shell == 0 && tempenv_assign_error)
-#else
-  /* This is for strict posix conformance. */
-  if (posixly_correct && interactive_shell == 0 && tempenv_assign_error)
-#endif
+     non-interactive shell executing a special builtin to exit and a non-
+     interactive shell to otherwise jump back to the top level.  This is what
+     POSIX says to do for variable assignment errors, and errors in assigning
+     to the temporary environment are treated as variable assignment errors. */
+  if (posixly_correct && tempenv_assign_error)
     {
       last_command_exit_value = EXECUTION_FAILURE;
-      jump_to_top_level (ERREXIT);
+#if defined (STRICT_POSIX)
+      jump_to_top_level ((interactive_shell == 0) ? ERREXIT : DISCARD);
+#else
+      if (interactive_shell == 0 && builtin_is_special)
+	jump_to_top_level (ERREXIT);
+      else if (interactive_shell == 0)
+	jump_to_top_level (DISCARD);
+      else
+	jump_to_top_level (DISCARD);
+#endif
     }
   tempenv_assign_error = 0;	/* don't care about this any more */
 

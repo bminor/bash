@@ -9450,3 +9450,15 @@ lib/glob/glob.c
 	  subpattern to be cut off when calling skipname
 	- extglob_skipname,wextglob_skipname: some cleanups so the code is
 	  closer to identical for the single-byte and wide character versions
+
+				    2/1
+				    ---
+execute_cmd.c
+	- execute_simple_command: in posix mode, if we have a variable
+	  assignment error while assigning into the temporary environment (e.g.,
+	  assigning to a readonly variable), a non-interactive shell running a
+	  special builtin exits; a non-interactive shell running anything else
+	  jumps back to the top level. A shell compiled with -DSTRICT_POSIX
+	  exits unconditionally.
+	- execute_simple_command: make sure posix mode sets $? to non-zero
+	  if a variable assignment error occurs preceding a non-special builtin
