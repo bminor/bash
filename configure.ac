@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.1, version 5.022])dnl
+AC_REVISION([for Bash 5.1, version 5.023])dnl
 
 define(bashvers, 5.1)
 define(relstatus, maint)
@@ -368,7 +368,7 @@ fi
 HELPDIR= HELPDIRDEFINE= HELPINSTALL= HELPFILES_TARGET=
 if test "$opt_separate_help" != no; then
 	if test "$opt_separate_help" = "yes" ; then
-		HELPDIR='${datadir}/bash'
+		HELPDIR='${datadir}/bash/helpfiles'
 	else
 		HELPDIR=$opt_separate_help
 	fi

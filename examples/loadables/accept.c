@@ -30,6 +30,7 @@
 #include "bashtypes.h"
 #include <errno.h>
 #include <time.h>
+#include <limits.h>
 #include "typemax.h"
 
 #include <sys/socket.h>
@@ -44,7 +45,6 @@ int
 accept_builtin (list)
      WORD_LIST *list;
 {
-  WORD_LIST *l;
   SHELL_VAR *v;
   intmax_t iport;
   int opt;

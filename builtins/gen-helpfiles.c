@@ -64,6 +64,7 @@
 #undef xrealloc
 #undef xfree
 
+#undef malloc
 #undef free		/* defined in xmalloc.h */
 #endif
 

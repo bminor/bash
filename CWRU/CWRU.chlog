@@ -9462,3 +9462,45 @@ execute_cmd.c
 	  exits unconditionally.
 	- execute_simple_command: make sure posix mode sets $? to non-zero
 	  if a variable assignment error occurs preceding a non-special builtin
+
+subst.c
+	- do_assignment_statements: take the code from expand_word_list_internal
+	  that performs assignment statements, either standalone or preceding 
+	  simple command names, and factor it out into this function
+	- expand_word_list_internal: call do_assignment_statements where
+	  appropriate
+
+				    2/2
+				    ---
+lib/glob/glob.c
+	- dequote_pathname: fix function definition for non-multibyte systems.
+	  Report and fix from Marc Aurèle La France <tsi@tuyoix.net>
+
+Makefile.in,doc/Makefile.in
+	- for certain targets, remove files before creating them to deal with
+	  symlinked build trees.
+	  Report and fix from Marc Aurèle La France <tsi@tuyoix.net>
+
+examples/loadables/accept.c
+	- include limits.h before typemax.h
+	  Report and fix from Marc Aurèle La France <tsi@tuyoix.net>
+
+builtins/gen-helpfiles.c
+	- if USING_BASH_MALLOC is defined, make sure to undefine malloc as well
+	  as free. Fixes bug reported by George R Goffe <grgoffe@yahoo.com>
+
+builtins/Makefile.in
+	- install-help: now depends on $(HELPFILES_TARGET) so we make sure the
+	  separate helpfiles are created before we try to install them if we
+	  don't go through the `all' makefile target
+
+configure.ac
+	- HELPDIR: now ${datadir}/bash/helpfiles
+
+				    2/3
+				    ---
+parse.y
+	- parse_string_to_word_list: before expanding a compound assignment
+	  statement body, make sure to save any alias that's currently being
+	  expanded. Restore the alias after the compound assignment is parsed.
+	  Reported back in 11/2020 by Alex fxmbsw7 Ratchev <fxmbsw7@gmail.com>

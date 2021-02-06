@@ -203,7 +203,7 @@ builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
 helpdoc:	gen-helpfiles
 	./gen-helpfiles ${HELPDIRDEFINE}
 
-install-help:
+install-help:	$(HELPFILES_TARGET)
 	@-if test -n "${HELPDIR}" && test -d helpfiles ; then \
 		test -d $(DESTDIR)${HELPDIR} || ${SHELL} ${MKDIRS} $(DESTDIR)$(HELPDIR) ;\
 		( for f in helpfiles/*; do \

@@ -173,15 +173,17 @@ html: ${HTMLFILES}
 pdf: ${PDFFILES}
 
 bashref.dvi: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+	$(RM) $@
 	${SET_TEXINPUTS} $(TEXI2DVI) $(srcdir)/bashref.texi || { ${RM} $@ ; exit 1; }
 
 bashref.info: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+	$(RM) $@
 	$(MAKEINFO) --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
 # experimental
 bashref.pdf: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+	$(RM) $@
 	${SET_TEXINPUTS} $(TEXI2PDF) $(srcdir)/bashref.texi || { ${RM} $@ ; exit 1; }
-
 
 # can also use:
 #	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
@@ -189,7 +191,8 @@ bashref.html: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 	$(MAKEINFO) --html --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
 bash.info: bashref.info
-	${SHELL} ${INFOPOST} < $(srcdir)/bashref.info > $@ ; \
+	$(RM) $@
+	${SHELL} ${INFOPOST} < $(srcdir)/bashref.info > $@
 
 bash.txt: bash.1
 bash.ps: bash.1

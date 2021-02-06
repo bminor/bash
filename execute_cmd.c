@@ -4452,21 +4452,24 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	func = find_function (words->word->word);
     }
 
-  /* In POSIX mode, assignment errors in the temporary environment cause a
-     non-interactive shell executing a special builtin to exit and a non-
-     interactive shell to otherwise jump back to the top level.  This is what
-     POSIX says to do for variable assignment errors, and errors in assigning
-     to the temporary environment are treated as variable assignment errors. */
+  /* What happens in posix mode when an assignment preceding a command name
+     fails.  This should agree with the code in execute_cmd.c:
+     do_assignment_statements(), even though I don't think it's executed any
+     more. */
   if (posixly_correct && tempenv_assign_error)
     {
+#if defined (DEBUG)
+      /* I don't know if this clause is ever executed, so let's check */
+itrace("execute_simple_command: posix mode tempenv assignment error");
+#endif
       last_command_exit_value = EXECUTION_FAILURE;
 #if defined (STRICT_POSIX)
-      jump_to_top_level ((interactive_shell == 0) ? ERREXIT : DISCARD);
+      jump_to_top_level ((interactive_shell == 0) ? FORCE_EOF : DISCARD);
 #else
       if (interactive_shell == 0 && builtin_is_special)
-	jump_to_top_level (ERREXIT);
+	jump_to_top_level (FORCE_EOF);
       else if (interactive_shell == 0)
-	jump_to_top_level (DISCARD);
+	jump_to_top_level (DISCARD);	/* XXX - maybe change later */
       else
 	jump_to_top_level (DISCARD);
 #endif

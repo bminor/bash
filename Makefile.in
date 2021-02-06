@@ -649,6 +649,7 @@ ${GRAM_H}:	y.tab.h
 y.tab.c: parse.y
 #	-if test -f y.tab.h; then mv -f y.tab.h old-y.tab.h; fi
 	$(YACC) -d $(srcdir)/parse.y
+	$(RM) parser-built
 	touch parser-built
 #	-if cmp -s old-y.tab.h y.tab.h; then mv old-y.tab.h y.tab.h; else cp -p y.tab.h ${GRAM_H}; fi
 

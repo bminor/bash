@@ -361,6 +361,8 @@ static WORD_LIST *expand_declaration_argument PARAMS((WORD_LIST *, WORD_LIST *))
 static WORD_LIST *shell_expand_word_list PARAMS((WORD_LIST *, int));
 static WORD_LIST *expand_word_list_internal PARAMS((WORD_LIST *, int));
 
+static int do_assignment_statements PARAMS((WORD_LIST *, char *, int));
+
 /* **************************************************************** */
 /*								    */
 /*			Utility Functions			    */
@@ -11966,6 +11968,87 @@ shell_expand_word_list (tlist, eflags)
   return (new_list);
 }
 
+/* Perform assignment statements optionally preceding a command name COMMAND.
+   If COMMAND == NULL, is_nullcmd usually == 1. Follow the POSIX rules for
+   variable assignment errors. */
+static int
+do_assignment_statements (varlist, command, is_nullcmd)
+     WORD_LIST *varlist;
+     char *command;
+     int is_nullcmd;
+{
+  WORD_LIST *temp_list;
+  char *savecmd;
+  sh_wassign_func_t *assign_func;
+  int is_special_builtin, is_builtin_or_func, tint;
+
+  /* If the remainder of the words expand to nothing, Posix.2 requires
+     that the variable and environment assignments affect the shell's
+     environment (do_word_assignment). */
+  assign_func = is_nullcmd ? do_word_assignment : assign_in_env;
+  tempenv_assign_error = 0;
+
+  is_builtin_or_func = command && (find_shell_builtin (command) || find_function (command));
+  /* Posix says that special builtins exit if a variable assignment error
+     occurs in an assignment preceding it. (XXX - this is old -- current Posix
+     says that any variable assignment error causes a non-interactive shell
+     to exit. See the STRICT_POSIX checks below. */
+  is_special_builtin = posixly_correct && command && find_special_builtin (command);
+
+  savecmd = this_command_name;
+  for (temp_list = varlist; temp_list; temp_list = temp_list->next)
+    {
+      this_command_name = (char *)NULL;
+      assigning_in_environment = is_nullcmd == 0;
+      tint = (*assign_func) (temp_list->word, is_builtin_or_func);
+      assigning_in_environment = 0;
+      this_command_name = savecmd;
+
+      /* Variable assignment errors in non-interactive shells running
+	 in posix mode cause the shell to exit. */
+      if (tint == 0)
+	{
+	  if (is_nullcmd)	/* assignment statement */
+	    {
+	      last_command_exit_value = EXECUTION_FAILURE;
+#if defined (STRICT_POSIX)
+	      if (posixly_correct && interactive_shell == 0)
+#else
+	      if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
+#endif
+	        exp_jump_to_top_level (FORCE_EOF);
+	      else
+		exp_jump_to_top_level (DISCARD);
+	    }
+	  /* In posix mode, assignment errors in the temporary environment
+	     cause a non-interactive shell executing a special builtin to
+	     exit and a non-interactive shell to otherwise jump back to the
+	     top level. This is what POSIX says to do for variable assignment
+	     errors, and POSIX says errors in assigning to the temporary
+	     environment are treated as variable assignment errors.
+	     (XXX - this is not what current POSIX says - look at the
+	     STRICT_POSIX defines. */
+	  else if (posixly_correct)
+	    {
+	      last_command_exit_value = EXECUTION_FAILURE;
+#if defined (STRICT_POSIX)
+	      exp_jump_to_top_level ((interactive_shell == 0) ? FORCE_EOF : DISCARD);
+#else
+	      if (interactive_shell == 0 && is_special_builtin)
+		exp_jump_to_top_level (FORCE_EOF);
+	      else if (interactive_shell == 0)
+		exp_jump_to_top_level (DISCARD);	/* XXX - maybe change later */
+	      else
+		exp_jump_to_top_level (DISCARD);
+#endif
+	    }
+	  else
+	    tempenv_assign_error++;
+	}
+    }
+  return (tempenv_assign_error);
+}
+
 /* The workhorse for expand_words () and expand_words_no_vars ().
    First arg is LIST, a WORD_LIST of words.
    Second arg EFLAGS is a flags word controlling which expansions are
@@ -11985,8 +12068,6 @@ expand_word_list_internal (list, eflags)
      int eflags;
 {
   WORD_LIST *new_list, *temp_list;
-  int tint;
-  char *savecmd;
 
   tempenv_assign_error = 0;
   if (list == 0)
@@ -11999,30 +12080,11 @@ expand_word_list_internal (list, eflags)
       if (new_list == 0)
 	{
 	  if (subst_assign_varlist)
-	    {
-	      /* All the words were variable assignments, so they are placed
-		 into the shell's environment. */
-	      for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
-		{
-		  savecmd = this_command_name;
-		  this_command_name = (char *)NULL;	/* no arithmetic errors */
-		  tint = do_word_assignment (temp_list->word, 0);
-		  this_command_name = savecmd;
-		  /* Variable assignment errors in non-interactive shells
-		     running in Posix.2 mode cause the shell to exit, unless
-		     they are being run by the `command' builtin. */
-		  if (tint == 0)
-		    {
-		      last_command_exit_value = EXECUTION_FAILURE;
-		      if (interactive_shell == 0 && posixly_correct && executing_command_builtin == 0)
-			exp_jump_to_top_level (FORCE_EOF);
-		      else
-			exp_jump_to_top_level (DISCARD);
-		    }
-		}
-	      dispose_words (subst_assign_varlist);
-	      subst_assign_varlist = (WORD_LIST *)NULL;
-	    }
+	    do_assignment_statements (subst_assign_varlist, (char *)NULL, 1);
+	    
+	  dispose_words (subst_assign_varlist);
+	  subst_assign_varlist = (WORD_LIST *)NULL;
+
 	  return ((WORD_LIST *)NULL);
 	}
     }
@@ -12056,49 +12118,7 @@ expand_word_list_internal (list, eflags)
 
   if ((eflags & WEXP_VARASSIGN) && subst_assign_varlist)
     {
-      sh_wassign_func_t *assign_func;
-      int is_special_builtin, is_builtin_or_func;
-
-      /* If the remainder of the words expand to nothing, Posix.2 requires
-	 that the variable and environment assignments affect the shell's
-	 environment. */
-      assign_func = new_list ? assign_in_env : do_word_assignment;
-      tempenv_assign_error = 0;
-
-      is_builtin_or_func = (new_list && new_list->word && (find_shell_builtin (new_list->word->word) || find_function (new_list->word->word)));
-      /* Posix says that special builtins exit if a variable assignment error
-	 occurs in an assignment preceding it. */
-      is_special_builtin = (posixly_correct && new_list && new_list->word && find_special_builtin (new_list->word->word));
-      
-      for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
-	{
-	  savecmd = this_command_name;
-	  this_command_name = (char *)NULL;
-	  assigning_in_environment = (assign_func == assign_in_env);
-	  tint = (*assign_func) (temp_list->word, is_builtin_or_func);
-	  assigning_in_environment = 0;
-	  this_command_name = savecmd;
-	  /* Variable assignment errors in non-interactive shells running
-	     in Posix.2 mode cause the shell to exit. */
-	  if (tint == 0)
-	    {
-	      if (assign_func == do_word_assignment)
-		{
-		  last_command_exit_value = EXECUTION_FAILURE;
-		  if (interactive_shell == 0 && posixly_correct)
-		    exp_jump_to_top_level (FORCE_EOF);
-		  else
-		    exp_jump_to_top_level (DISCARD);
-		}
-	      else if (interactive_shell == 0 && is_special_builtin)
-		{
-		  last_command_exit_value = EXECUTION_FAILURE;
-		  exp_jump_to_top_level (FORCE_EOF);
-		}
-	      else
-		tempenv_assign_error++;
-	    }
-	}
+      do_assignment_statements (subst_assign_varlist, (new_list && new_list->word) ? new_list->word->word : (char *)NULL, new_list == 0);
 
       dispose_words (subst_assign_varlist);
       subst_assign_varlist = (WORD_LIST *)NULL;
