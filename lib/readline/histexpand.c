@@ -1207,11 +1207,34 @@ history_expand (char *hstring, char **output)
 	     characters in history_no_expand_chars, then it is not a
 	     candidate for expansion of any kind. */
 	  if (cc == 0 || member (cc, history_no_expand_chars) ||
-			 (dquote && cc == '"') ||
-	  		 (history_inhibit_expansion_function && (*history_inhibit_expansion_function) (string, i)))
+			 (dquote && cc == '"'))
 	    {
 	      ADD_CHAR (string[i]);
 	      break;
+	    }
+
+	  /* If the application has defined a function to determine whether
+	     or not a history expansion should be performed, call it here. */
+	  /* We check against what we've expanded so far, with the current
+	     expansion appended, because that seems to be what csh does. We
+	     decide to expand based on what we have to this point, not what
+	     we started with. */
+	  if (history_inhibit_expansion_function)
+	    {
+	      int save_j, temp;
+
+	      save_j = j;
+	      ADD_CHAR (string[i]);
+	      ADD_CHAR (cc);
+
+	      temp = (*history_inhibit_expansion_function) (result, save_j);
+	      if (temp)
+		{
+		  result[--j] = '\0';	/* `unadd' cc, leaving ADD_CHAR(string[i]) */
+		  break;
+		}
+	      else
+	        result[j = save_j] = '\0';
 	    }
 
 #if defined (NO_BANG_HASH_MODIFIERS)

@@ -653,6 +653,8 @@ shell_comment (line)
   char *p;
   int n;
 
+  if (dstack.delimiter_depth != 0 || (parser_state & PST_HEREDOC))
+    return 0;
   if (line == 0)
     return 0;
   for (p = line; p && *p && whitespace (*p); p++)
@@ -757,7 +759,7 @@ maybe_add_history (line)
   int is_comment;
 
   hist_last_line_added = 0;
-  is_comment = (parser_state & PST_HEREDOC) ? 0 : shell_comment (line);
+  is_comment = shell_comment (line);
 
   /* Don't use the value of history_control to affect the second
      and subsequent lines of a multi-line command (old code did
@@ -874,7 +876,7 @@ bash_add_history (line)
   add_it = 1;
   if (command_oriented_history && current_command_line_count > 1)
     {
-      is_comment = (parser_state & PST_HEREDOC) ? 0 : shell_comment (line);
+      is_comment = shell_comment (line);
 
       /* The second and subsequent lines of a here document have the trailing
 	 newline preserved.  We don't want to add extra newlines here, but we

@@ -9504,3 +9504,35 @@ parse.y
 	  statement body, make sure to save any alias that's currently being
 	  expanded. Restore the alias after the compound assignment is parsed.
 	  Reported back in 11/2020 by Alex fxmbsw7 Ratchev <fxmbsw7@gmail.com>
+
+				    2/4
+				    ---
+lib/readline/histexpand.c
+	- history_expand_internal: when calling the history_inhibit_expansion
+	  function, make sure to call it using the string as we've expanded it
+	  to that point (RESULT), adding the expansion and next characters
+	  temporarily, since we make expansion decisions based on what we've
+	  accumulated, not what we started with. This makes things like
+	  echo abc!$!$ work, where before the second `!' inhibited expansion
+	  because bash_history_inhibit_expansion mistakenly took it as the
+	  second character in a `$!' word expansion. Fixes bug reported back
+	  in 10/2020 by Paul Fox <paul.d.fox@gmail.com>
+
+array.h
+	- array_pop: instead of calling array_dispose_element from this macro,
+	  just call array_shift with the AS_DISPOSE flag
+
+				    2/5
+				    ---
+bashhist.c
+	- shell_comment: move condition to return 0 if the delimiter stack is
+	  not empty or the shell is parsing a here document into the function
+	  itself, don't have the callers check so the check is in one place.
+	  Fixes bug reported by Oguz <oguzismailuysal@gmail.com>
+
+array.h,variables.c
+	- ARRAY_ELEMENT_REPLACE: convenience define for modifying an array
+	  element's value
+
+variables.c
+	- pop_args: a couple of code simplifications

@@ -106,16 +106,25 @@ extern ARRAY *array_from_string PARAMS((char *, char *));
 
 #define set_element_value(ae, val)	((ae)->value = (val))
 
+#define set_max_index(a, i)	((a)->max_index = (i))
+#define set_num_elements(a, n)	((a)->num_elements = (n))
+
 /* Convenience */
 #define array_push(a,v)	\
   do { array_rshift ((a), 1, (v)); } while (0)
 #define array_pop(a) \
-  do { array_dispose_element (array_shift ((a), 1, 0)); } while (0)
+  do { array_shift ((a), 1, AS_DISPOSE); } while (0)
 
 #define GET_ARRAY_FROM_VAR(n, v, a) \
   do { \
     (v) = find_variable (n); \
     (a) = ((v) && array_p ((v))) ? array_cell (v) : (ARRAY *)0; \
+  } while (0)
+
+#define ARRAY_ELEMENT_REPLACE(ae, v) \
+  do { \
+    free ((ae)->value); \
+    (ae)->value = (v); \
   } while (0)
 
 #define ALL_ELEMENT_SUB(c)	((c) == '@' || (c) == '*')

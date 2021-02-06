@@ -5676,7 +5676,7 @@ pop_args ()
   GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
   GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
 
-  ce = array_shift (bash_argc_a, 1, 0);
+  ce = array_unshift_element (bash_argc_a);
   if (ce == 0 || legal_number (element_value (ce), &i) == 0)
     i = 0;
 
@@ -6286,8 +6286,7 @@ set_pipestatus_array (ps, nproc)
   if (array_num_elements (a) == nproc && nproc == 1)
     {
       ae = element_forw (a->head);
-      free (element_value (ae));
-      set_element_value (ae, itos (ps[0]));
+      ARRAY_ELEMENT_REPLACE (ae, itos (ps[0]));
     }
   else if (array_num_elements (a) <= nproc)
     {
@@ -6296,8 +6295,7 @@ set_pipestatus_array (ps, nproc)
       for (i = 0; i < array_num_elements (a); i++)
 	{
 	  ae = element_forw (ae);
-	  free (element_value (ae));
-	  set_element_value (ae, itos (ps[i]));
+	  ARRAY_ELEMENT_REPLACE (ae, itos (ps[i]));
 	}
       /* add any more */
       for ( ; i < nproc; i++)
@@ -6310,7 +6308,7 @@ set_pipestatus_array (ps, nproc)
     {
       /* deleting elements.  it's faster to rebuild the array. */	  
       array_flush (a);
-      for (i = 0; ps[i] != -1; i++)
+      for (i = 0; i < nproc; i++)
 	{
 	  t = inttostr (ps[i], tbuf, sizeof (tbuf));
 	  array_insert (a, i, t);
