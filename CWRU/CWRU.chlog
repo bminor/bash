@@ -9536,3 +9536,22 @@ array.h,variables.c
 
 variables.c
 	- pop_args: a couple of code simplifications
+
+				    2/7
+				    ---
+lib/malloc/malloc.c
+	- pagesz: at least MALLOC_PAGESIZE_MIN (4096) bytes
+	- union mhead: now 16-byte aligned on all systems, 32-bit and 64-bit
+	  pointers
+	- binsizes: since the smallest allocation overhead is now 16 bytes,
+	  redo the buckets so binsizes[0] == 32; adjust the thresholds for
+	  split/coalesce/prepopulate/mmap (NBUCKETS = 28; STARTBUCK = 0).
+	  Sizes stay pretty much the same; indices change
+	- consistently use MALLOC_SIZE_T instead of long/unsigned int/int
+	- use MAGIC8_NUMBYTES as the length of the mh_magic8 buffer, in case
+	  it changes later for alignment
+	- internal_remap: new function, calls mremap to reallocate a chunk of
+	  memory allocated using mmap(); called from internal_realloc if the
+	  old size and new size are both bigger than the mmap threshold
+	- internal_realloc: call internal_remap if the old size and new size
+	  are both above the threshold where we use mmap for allocation

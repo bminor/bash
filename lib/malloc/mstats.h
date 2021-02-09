@@ -27,7 +27,7 @@
 
 /* This needs to change if the definition in malloc.c changes */
 #ifndef NBUCKETS
-#  define NBUCKETS 30
+#  define NBUCKETS 28
 #endif
 
 /*

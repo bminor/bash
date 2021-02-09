@@ -683,6 +683,9 @@ check_binary_file (sample, sample_len)
   register int i;
   unsigned char c;
 
+  if (sample_len >= 4 && sample[0] == 0x7f && sample[1] == 'E' && sample[2] == 'L' && sample[3] == 'F')
+    return 1;
+
   for (i = 0; i < sample_len; i++)
     {
       c = sample[i];
