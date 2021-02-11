@@ -165,7 +165,8 @@ extern struct user_info current_user;
 /* Structure in which to save partial parsing state when doing things like
    PROMPT_COMMAND and bash_execute_unix_command execution. */
 
-typedef struct _sh_parser_state_t {
+typedef struct _sh_parser_state_t
+{
 
   /* parsing state */
   int parser_state;
@@ -208,7 +209,8 @@ typedef struct _sh_parser_state_t {
   REDIRECT *redir_stack[HEREDOC_MAX];
 } sh_parser_state_t;
 
-typedef struct _sh_input_line_state_t {
+typedef struct _sh_input_line_state_t
+{
   char *input_line;
   size_t input_line_index;
   size_t input_line_size;

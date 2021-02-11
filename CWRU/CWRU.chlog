@@ -9555,3 +9555,24 @@ lib/malloc/malloc.c
 	  old size and new size are both bigger than the mmap threshold
 	- internal_realloc: call internal_remap if the old size and new size
 	  are both above the threshold where we use mmap for allocation
+
+				   2/10
+				   ----
+include/timer.h
+	- new file, declaration for a timer struct to be used by a set of
+	  functions to implement timers using SIGALRM or select/pselect
+
+lib/sh/timers.c
+	- new file, set of functions to manipulate timer objects and timeouts
+	  using SIGALRM or select/pselect. Inspired by a patch from
+	  Koichi Murase <myoga.murase@gmail.com>. Not used yet
+
+				   2/11
+				   ----
+builtins/read.def
+	- read_builtin: if there is a timeout set, block SIGCHLD around calls
+	  to zread and its siblings, or calls to readline for `read -e', so
+	  SIGCHLD (and the consequent waitpid) doesn't interrupt the read.
+	  Fixes bug reported by Koichi Murase <myoga.murase@gmail.com>, but
+	  there may be a different fix coming
+

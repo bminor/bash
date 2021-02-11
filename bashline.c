@@ -4639,7 +4639,7 @@ bash_event_hook ()
   bashline_reset_event_hook ();
 
   /* posix mode SIGINT during read -e. We only get here if SIGINT is trapped. */
-  if (posixly_correct && this_shell_builtin == read_builtin && sig == 2)
+  if (posixly_correct && this_shell_builtin == read_builtin && sig == SIGINT)
     {
       last_command_exit_value = 128|SIGINT;
       throw_to_top_level ();

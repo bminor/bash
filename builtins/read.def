@@ -192,6 +192,7 @@ read_builtin (list)
   struct stat tsb;
   SHELL_VAR *var;
   TTYSTRUCT ttattrs, ttset;
+  sigset_t chldset, prevset;
 #if defined (ARRAY_VARS)
   WORD_LIST *alist;
   int vflags;
@@ -388,6 +389,12 @@ read_builtin (list)
 	}
     }
 
+#if defined (SIGCHLD)
+  sigemptyset (&chldset);
+  sigprocmask (SIG_BLOCK, (sigset_t *)0, &chldset);
+  sigaddset (&chldset, SIGCHLD); 
+#endif
+
   begin_unwind_frame ("read_builtin");
 
 #if defined (BUFFERED_INPUT)
@@ -576,6 +583,10 @@ read_builtin (list)
 	      free (rlbuf);
 	      rlbuf = (char *)0;
 	    }
+#if defined (SIGCHLD)
+	  if (tmsec > 0 || tmusec > 0)
+	    sigprocmask (SIG_SETMASK, &chldset, &prevset);
+#endif
 	  if (rlbuf == 0)
 	    {
 	      reading = 1;
@@ -583,6 +594,10 @@ read_builtin (list)
 	      reading = 0;
 	      rlind = 0;
 	    }
+#if defined (SIGCHLD)
+	  if (tmsec > 0 || tmusec > 0)
+	    sigprocmask (SIG_SETMASK, &prevset, (sigset_t *)0);
+#endif
 	  if (rlbuf == 0)
 	    {
 	      eof = 1;
@@ -606,12 +621,22 @@ read_builtin (list)
       reading = 1;
       CHECK_ALRM;
       errno = 0;
+
+#if defined (SIGCHLD)
+      if (tmsec > 0 || tmusec > 0)
+	sigprocmask (SIG_SETMASK, &chldset, &prevset);
+#endif
       if (unbuffered_read == 2)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zreadn (fd, &c, nchars - nr);
       else if (unbuffered_read)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zread (fd, &c, 1);
       else
 	retval = posixly_correct ? zreadcintr (fd, &c) : zreadc (fd, &c);
+#if defined (SIGCHLD)
+      if (tmsec > 0 || tmusec > 0)
+	sigprocmask (SIG_SETMASK, &prevset, (sigset_t *)0);
+#endif
+
       reading = 0;
 
       if (retval <= 0)
