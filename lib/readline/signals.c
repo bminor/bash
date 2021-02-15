@@ -222,6 +222,9 @@ _rl_handle_signal (int sig)
   switch (sig)
     {
     case SIGINT:
+      /* We will end up blocking SIGTTOU while we are resetting the tty, so
+	 watch out for this if it causes problems. We could prevent this by
+	 setting block_sig to 1 without modifying SET. */
       _rl_reset_completion_state ();
       rl_free_line_state ();
 #if defined (READLINE_CALLBACKS)
@@ -242,8 +245,11 @@ _rl_handle_signal (int sig)
 	 this even if we've been stopped on SIGTTOU, since we handle signals
 	 when we have returned from the signal handler and the signal is no
 	 longer blocked. */
-      sigaddset (&set, SIGTTOU);
-      block_sig = 1;
+      if (block_sig == 0)
+	{
+	  sigaddset (&set, SIGTTOU);
+	  block_sig = 1;
+	}
 #  endif
 #endif /* SIGTSTP */
    /* Any signals that should be blocked during cleanup should go here. */
@@ -285,19 +291,6 @@ _rl_handle_signal (int sig)
 
       /* We don't have to bother unblocking the signal because we are not
 	 running in a signal handler context. */
-#if 0
-#if defined (HAVE_POSIX_SIGNALS)
-      /* Make sure this signal is not blocked when we resend it to the
-	 calling application. */
-      sigemptyset (&set);
-      sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &set);
-      sigdelset (&set, sig);
-#else /* !HAVE_POSIX_SIGNALS */
-#  if defined (HAVE_BSD_SIGNALS)
-      omask = sigblock (0);
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
-#endif
 
 #if defined (__EMX__)
       signal (sig, SIG_ACK);
@@ -311,16 +304,6 @@ _rl_handle_signal (int sig)
 
       /* We don't need to modify the signal mask now that this is not run in
 	 a signal handler context. */
-#if 0
-      /* Let the signal that we just sent through if it is blocked.  */
-#if defined (HAVE_POSIX_SIGNALS)
-      sigprocmask (SIG_SETMASK, &set, (sigset_t *)NULL);
-#else /* !HAVE_POSIX_SIGNALS */
-#  if defined (HAVE_BSD_SIGNALS)
-      sigsetmask (omask & ~(sigmask (sig)));
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
-#endif
 
       rl_reset_after_signal ();      
     }

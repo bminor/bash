@@ -447,6 +447,8 @@ read_builtin (list)
       if (code)
 	{
 	  sigalrm_seen = 0;
+	  sigprocmask (SIG_SETMASK, &prevset, (sigset_t *)0);
+
 	  /* Tricky.  The top of the unwind-protect stack is the free of
 	     input_string.  We want to run all the rest and use input_string,
 	     so we have to save input_string temporarily, run the unwind-
@@ -477,6 +479,7 @@ read_builtin (list)
 	  add_unwind_protect (bashline_reset_event_hook, (char *)NULL);
 	}
 #endif
+      sigprocmask (SIG_BLOCK, (sigset_t *)0, &prevset);
       falarm (tmsec, tmusec);
     }
 

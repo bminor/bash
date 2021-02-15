@@ -1028,6 +1028,8 @@ posix_edit_macros (count, key)
   char alias_name[3], *alias_value, *macro;
 
   c = rl_read_key ();
+  if (c <= 0)
+    return 0;
   alias_name[0] = '_';
   alias_name[1] = c;
   alias_name[2] = '\0';

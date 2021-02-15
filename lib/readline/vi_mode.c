@@ -2036,6 +2036,9 @@ _rl_vi_callback_change_char (_rl_callback_generic_arg *data)
   char mb[MB_LEN_MAX+1];
 
   c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
+  if (c < 0)
+    return -1;
+
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     strncpy (_rl_vi_last_replacement, mb, MB_LEN_MAX);
@@ -2043,9 +2046,6 @@ _rl_vi_callback_change_char (_rl_callback_generic_arg *data)
 #endif
     _rl_vi_last_replacement[0] = c;
   _rl_vi_last_replacement[MB_LEN_MAX] = '\0';	/* XXX */
-
-  if (c < 0)
-    return -1;
 
   _rl_callback_func = 0;
   _rl_want_redisplay = 1;
@@ -2077,6 +2077,8 @@ rl_vi_change_char (int count, int key)
   else
     {
       c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
+      if (c < 0)
+	return -1;
 #ifdef HANDLE_MULTIBYTE
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	strncpy (_rl_vi_last_replacement, mb, MB_LEN_MAX);
@@ -2113,7 +2115,8 @@ rl_vi_overstrike (int count, int key)
 
   if (count > 0)
     {
-      _rl_overwrite_char (count, key);
+      if (_rl_overwrite_char (count, key) != 0)
+	return (1);
       vi_replace_count += count;
     }
 

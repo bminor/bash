@@ -497,6 +497,7 @@ rl_read_key (void)
 	      if ((r = rl_gather_tyi ()) < 0)	/* XXX - EIO */
 		{
 		  rl_done = 1;
+		  RL_SETSTATE (RL_STATE_DONE);
 		  return (errno == EIO ? (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF) : '\n');
 		}
 	      else if (r > 0)			/* read something */

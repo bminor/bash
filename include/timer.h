@@ -37,7 +37,7 @@ typedef struct _shtimer
 
   procenv_t jmpenv;
 
-  void (*handler) (struct _shtimer *);		/* XXX - unused right now */
+  int (*tm_handler) (struct _shtimer *);	/* called on timeout if set */
   PTR_T	*data;					/* reserved */
 } sh_timer;
 

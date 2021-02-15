@@ -318,7 +318,7 @@ _rl_search_getchar (_rl_search_cxt *cxt)
 #if defined (HANDLE_MULTIBYTE)
   /* This ends up with C (and LASTC) being set to the last byte of the
      multibyte character.  In most cases c == lastc == mb[0] */
-  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+  if (c >= 0 && MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     c = cxt->lastc = _rl_read_mbstring (cxt->lastc, cxt->mb, MB_LEN_MAX);
 #endif
 

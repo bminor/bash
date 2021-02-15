@@ -43,32 +43,49 @@
 extern int errno;
 #endif /* !errno */
 
+#ifndef FREE
+#define FREE(s)  do { if (s) free (s); } while (0)
+#endif
+
 extern unsigned int falarm (unsigned int, unsigned int);
 
-sh_timer *
-shtimer_alloc (void)
-{
-  sh_timer *r;
+static void shtimer_zero (sh_timer *);
 
-  r = (sh_timer *)xmalloc (sizeof (sh_timer));
-  shtimer_flush (r);
-  return r;
-}
-
-void
-shtimer_flush (sh_timer *t)
+static void
+shtimer_zero (sh_timer *t)
 {
   t->tmout.tv_sec = 0;
   t->tmout.tv_usec = 0;
 
-  t->fd = t->flags = t->alrmflag = 0;
+  t->fd = -1;
+  t->flags = t->alrmflag = 0;
 
   t->alrm_handler = t->old_handler = 0;
 
   memset (t->jmpenv, '\0', sizeof (t->jmpenv));
 
-  t->handler = 0;
+  t->tm_handler = 0;
   t->data = 0;
+}
+
+sh_timer *
+shtimer_alloc (void)
+{
+  sh_timer *t;
+
+  t = (sh_timer *)xmalloc (sizeof (sh_timer));
+  shtimer_zero (t);
+  return t;
+}
+
+void
+shtimer_flush (sh_timer *t)
+{
+  /* The caller can manage t->data arbitrarily as long as it frees and sets
+     t->data to 0 before calling this function. Otherwise, we do what we can
+     to avoid memleaks. */
+  FREE (t->data);
+  shtimer_zero (t);
 }
 
 void
@@ -120,6 +137,7 @@ shtimer_unset (sh_timer *t)
 	{
 	  set_signal_handler (SIGALRM, t->old_handler);
 	  t->flags &= ~SHTIMER_SIGSET;
+	  t->old_handler = 0;
 	}
     }
 }
@@ -163,7 +181,7 @@ shtimer_chktimeout (sh_timer *t)
 int
 shtimer_select (sh_timer *t)
 {
-  int r;
+  int r, nfd;
   sigset_t blocked_sigs, prevmask;
   struct timeval now, tv;
   fd_set readfds;
@@ -191,6 +209,8 @@ shtimer_select (sh_timer *t)
     {
       if (t->flags & SHTIMER_LONGJMP)
 	sh_longjmp (t->jmpenv, 1);
+      else if (t->tm_handler)
+	return ((*t->tm_handler) (t));
       else
 	return 0;
     }
@@ -211,14 +231,16 @@ shtimer_select (sh_timer *t)
   sigemptyset (&prevmask);
 #endif /* !HAVE_PSELECT */
 
+  nfd = (t->fd >= 0) ? t->fd + 1 : 0;
   FD_ZERO (&readfds);
-  FD_SET (t->fd, &readfds);
+  if (t->fd >= 0)
+    FD_SET (t->fd, &readfds);
 
 #if defined (HAVE_PSELECT)
-  r = pselect(t->fd + 1, &readfds, (fd_set *)0, (fd_set *)0, &ts, &blocked_sigs);
+  r = pselect(nfd, &readfds, (fd_set *)0, (fd_set *)0, &ts, &blocked_sigs);
 #else
   sigprocmask (SIG_SETMASK, &blocked_sigs, &prevmask);
-  r = select(t->fd + 1, &readfds, (fd_set *)0, (fd_set *)0, &tv);
+  r = select(nfd, &readfds, (fd_set *)0, (fd_set *)0, &tv);
   sigprocmask (SIG_SETMASK, &prevmask, NULL);
 #endif
 
@@ -226,6 +248,8 @@ shtimer_select (sh_timer *t)
     return r;		/* caller will handle */
   else if (r == 0 && (t->flags & SHTIMER_LONGJMP))
     sh_longjmp (t->jmpenv, 1);
+  else if (r == 0 && t->tm_handler)
+    return ((*t->tm_handler) (t));
   else
     return r;
 }

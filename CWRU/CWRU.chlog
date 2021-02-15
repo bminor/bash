@@ -9576,3 +9576,31 @@ builtins/read.def
 	  Fixes bug reported by Koichi Murase <myoga.murase@gmail.com>, but
 	  there may be a different fix coming
 
+Makefile.in,builtins/Makefile.in
+	- fix up dependencies, especially on builtins.h and builtext.h
+
+
+				   2/12
+				   ----
+lib/readline/input.c
+	- rl_read_key: if we set rl_done == 1, set RL_STATE_DONE as well
+	  Reported by Koichi Murase <myoga.murase@gmail.com>
+
+lib/readline/isearch.c
+	- _rl_search_getchar: only call _rl_read_mbstring if rl_read_key returns
+	  >= 0, avoid some work
+
+lib/readline/vi_mode.c
+	- _rl_vi_callback_change_char,_rl_vi_change_char: don't overwrite the
+	  last replacement string if _rl_vi_callback_getchar returns -1.
+	  It will likely make no difference, since the next read will return
+	  an error or EOF, but being careful
+	- rl_vi_overstrike: if _rl_overwrite_char doesn't return 0, break out
+	  of the loop
+
+lib/readline/text.c
+	- _rl_overwrite_char: return 1 if _rl_read_mbstring returns < 0 so
+	  we don't try to insert garbage
+
+bashline.c
+	- posix_edit_macros: handle rl_read_key() returning <= 0
