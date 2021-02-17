@@ -96,6 +96,10 @@ do
 
 	if [ -n "$mode" ]; then
 		chmod $mode $newdir/$fname
+	elif [ "$type" = "f" ]; then
+		chmod $filmode $newdir/$fname
+	elif [ "$type" = "d" ]; then
+		chmod $dirmode $newdir/$fname
 	fi
 
 done < $MANIFEST

@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3517,6 +3517,9 @@ tokword:
 #define LEX_QUOTEDDOC	0x0400		/* here doc with quoted delim */
 #define LEX_INWORD	0x0800
 #define LEX_GTLT	0x1000
+#define LEX_CKESAC	0x2000		/* check esac after in -- for later */
+#define LEX_CASEWD	0x4000		/* word after case */
+#define LEX_PATLIST	0x8000		/* case statement pattern list */
 
 #define COMSUB_META(ch)		((ch) == ';' || (ch) == '&' || (ch) == '|')
 
@@ -3861,10 +3864,25 @@ dump_tflags (flags)
       f &= ~LEX_CKCASE;
       fprintf (stderr, "LEX_CKCASE%s", f ? "|" : "");
     }
+  if (f & LEX_CKESAC)
+    {
+      f &= ~LEX_CKESAC;
+      fprintf (stderr, "LEX_CKESAC%s", f ? "|" : "");
+    }
   if (f & LEX_INCASE)
     {
       f &= ~LEX_INCASE;
       fprintf (stderr, "LEX_INCASE%s", f ? "|" : "");
+    }
+  if (f & LEX_CASEWD)
+    {
+      f &= ~LEX_CASEWD;
+      fprintf (stderr, "LEX_CASEWD%s", f ? "|" : "");
+    }
+  if (f & LEX_PATLIST)
+    {
+      f &= ~LEX_PATLIST;
+      fprintf (stderr, "LEX_PATLIST%s", f ? "|" : "");
     }
   if (f & LEX_INHEREDOC)
     {
@@ -3906,7 +3924,7 @@ parse_comsub (qc, open, close, lenp, flags)
      int *lenp, flags;
 {
   int count, ch, peekc, tflags, lex_rwlen, lex_wlen, lex_firstind;
-  int nestlen, ttranslen, start_lineno, orig_histexp;
+  int nestlen, ttranslen, start_lineno, orig_histexp, case_level;
   char *ret, *nestret, *ttrans, *heredelim;
   int retind, retsize, rflags, hdlen;
 
@@ -3932,7 +3950,7 @@ parse_comsub (qc, open, close, lenp, flags)
   /* RFLAGS is the set of flags we want to pass to recursive calls. */
   rflags = (flags & P_DQUOTE);
 
-  ret = (char *)xmalloc (retsize = 64);
+  ret = (char *)xmalloc (retsize = 128);
   retind = 0;
 
   start_lineno = line_number;
@@ -3940,6 +3958,8 @@ parse_comsub (qc, open, close, lenp, flags)
 
   heredelim = 0;
   lex_firstind = -1;
+
+  case_level = 0;
 
   while (count)
     {
@@ -4092,6 +4112,13 @@ eof_error:
 	 we either start or continue a word. */
       if MBTEST(shellbreak (ch))
 	{
+	  if (tflags & LEX_CASEWD)	/* word in case WORD in */
+	    {
+/*itrace("parse_comsub:%d: lex_inword -> 0 lex_casewd -> 0 ch = `%c' (%d)", line_number, ch, __LINE__);*/
+	      tflags &= ~LEX_CASEWD;
+	      tflags |= LEX_RESWDOK;	/* allow "in" next */
+	      lex_rwlen = 0;
+	    }
 	  tflags &= ~LEX_INWORD;
 /*itrace("parse_comsub:%d: lex_inword -> 0 ch = `%c' (%d)", line_number, ch, __LINE__);*/
 	}
@@ -4183,6 +4210,13 @@ eof_error:
 /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
 	      tflags |= LEX_RESWDOK;
 	      lex_rwlen = 0;
+	      if ((tflags & LEX_INCASE) && ch == ';')
+		tflags |= LEX_PATLIST;
+	      continue;
+	    }
+	  else if ((tflags & LEX_PATLIST) && ch == '|')
+	    {
+	      shell_ungetc (peekc);
 	      continue;
 	    }
 	  else if (ch == '\n' || COMSUB_META(ch))
@@ -4191,6 +4225,16 @@ eof_error:
 /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
 	      tflags |= LEX_RESWDOK;
 	      lex_rwlen = 0;
+	      continue;
+	    }
+	  /* If we read a right paren, we can get esac here, so make a note. ( */
+	  else if MBTEST((tflags & LEX_INCASE) && ch == ')')
+	    {
+	      shell_ungetc (peekc);
+/*itrace("parse_comsub:%d: found `)' while in case statement, turning on LEX_RESWDOK", line_number);*/
+	      tflags |= LEX_RESWDOK;
+	      lex_rwlen = 0;
+	      tflags &= ~LEX_PATLIST;
 	      continue;
 	    }
 	  else if (ch == EOF)
@@ -4203,10 +4247,23 @@ eof_error:
 	    }
 	}
 
+      /* If we're checking for esac and it looks like we might have one, try
+	 to read one. */
+      /* XXX - check LEX_PATLIST here? */
+      else if ((tflags & LEX_INCASE) && (tflags & LEX_CKESAC))
+	{
+	  if MBTEST(ch == 'e' && (tflags & LEX_RESWDOK) == 0)
+	    {
+	      tflags |= LEX_RESWDOK;
+	      lex_rwlen = 0;
+	    }
+	  tflags &= ~LEX_CKESAC;
+	}
+
       /* If we can read a reserved word, try to read one. */
       if (tflags & LEX_RESWDOK)
 	{
-	  if MBTEST(islower ((unsigned char)ch))
+	  if MBTEST(islower ((unsigned char)ch) || ch == '{' || ch == '}')
 	    {
 	      /* Add this character. */
 	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
@@ -4218,14 +4275,17 @@ eof_error:
 	    {
 	      if (STREQN (ret + retind - 4, "case", 4))
 		{
-		  tflags |= LEX_INCASE;
+		  tflags |= LEX_INCASE|LEX_CASEWD;
+		  case_level++;
 		  tflags &= ~LEX_RESWDOK;
 /*itrace("parse_comsub:%d: found `case', lex_incase -> 1 lex_reswdok -> 0", line_number);*/
 		}
 	      else if (STREQN (ret + retind - 4, "esac", 4))
 		{
-		  tflags &= ~LEX_INCASE;
-/*itrace("parse_comsub:%d: found `esac', lex_incase -> 0 lex_reswdok -> 1", line_number);*/
+		  case_level--;
+		  if (case_level == 0)
+		    tflags &= ~(LEX_INCASE|LEX_PATLIST);
+/*itrace("parse_comsub:%d: found `esac', lex_incase -> 0 lex_reswdok -> 1 case_level = %d", line_number, case_level);*/
 		  tflags |= LEX_RESWDOK;
 		  lex_rwlen = 0;
 		}
@@ -4263,6 +4323,43 @@ eof_error:
 /*itrace("parse_comsub:%d: lex_incase == 0 found `%c', found \"do\"", line_number, ch);*/
 	      lex_rwlen = 0;
 	    }
+	  /* { */
+	  else if MBTEST((tflags & LEX_INCASE) &&
+			  (isblank((unsigned char)ch) || ch == '\n') &&
+			  lex_rwlen == 1 &&
+			  ret[retind - 1] == '}')
+	    {	/* { */
+/*itrace("parse_comsub:%d: lex_incase == 1 found `%c', found \"}\"", line_number, ch);*/
+	      lex_rwlen = 0;
+	    }
+	  else if MBTEST((tflags & LEX_INCASE) &&
+			  (isblank((unsigned char)ch) || ch == '\n') &&
+			  lex_rwlen == 2 &&
+			  STREQN (ret + retind - 2, "fi", 2))
+	    {
+/*itrace("parse_comsub:%d: lex_incase == 1 found `%c', found \"fi\"", line_number, ch);*/
+	      lex_rwlen = 0;
+	    }
+	  else if MBTEST((tflags & LEX_INCASE) &&
+			  (isblank((unsigned char)ch) || ch == '\n') &&
+			  lex_rwlen == 2 &&
+			  STREQN (ret + retind - 2, "in", 2))
+	    {
+	      /* This works because we turn on the RESWDOK flag after reading
+		 WORD in `case WORD in'. */
+/*itrace("parse_comsub:%d: lex_incase == 1 found `%c', found \"in\"", line_number, ch);*/
+	      tflags &= ~LEX_RESWDOK;
+	      tflags |= LEX_CKESAC|LEX_PATLIST;
+	    }
+	  /* If we are in a case statement and we read a right paren, we leave
+	     LEX_RESWDOK alone but set rwlen to 0 so we can potentially read
+	     another reserved word. ( */
+	  else if MBTEST((tflags & LEX_INCASE) && ch == ')')
+	    {
+	      tflags |= LEX_RESWDOK;
+	      tflags &= ~LEX_PATLIST;
+	      lex_rwlen = 0;
+	    }
 	  else if MBTEST((tflags & LEX_INCASE) && ch != '\n')
 	    /* If we can read a reserved word and we're in case, we're at the
 	       point where we can read a new pattern list or an esac.  We
@@ -4278,15 +4375,6 @@ eof_error:
 	      tflags &= ~LEX_RESWDOK;
 /*itrace("parse_comsub:%d: found `%c', lex_reswordok -> 0", line_number, ch);*/
 	    }
-#if 0
-	  /* If we find a space or tab but have read something and it's not
-	     `do', turn off the reserved-word-ok flag */
-	  else if MBTEST(isblank ((unsigned char)ch) && lex_rwlen > 0)
-	    {
-	      tflags &= ~LEX_RESWDOK;
-/*itrace("parse_comsub:%d: found `%c', lex_reswordok -> 0", line_number, ch);*/
-	    }
-#endif
 	}
 
       /* Might be the start of a here-doc delimiter */
@@ -5473,8 +5561,10 @@ reserved_word_acceptable (toksym)
     case '{':
     case '}':		/* XXX */
     case AND_AND:
+    case ARITH_CMD:
     case BANG:
     case BAR_AND:
+    case COND_END:
     case DO:
     case DONE:
     case ELIF:

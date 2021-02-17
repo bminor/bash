@@ -74,5 +74,15 @@ swap32_posix ()
                 ));
     done
 }
+./comsub-posix5.sub: command substitution: line 38: syntax error near unexpected token `done'
+./comsub-posix5.sub: command substitution: line 38: `case x in x) ;; x) done esac)'
+./comsub-posix5.sub: command substitution: line 39: syntax error near unexpected token `done'
+./comsub-posix5.sub: command substitution: line 39: `case x in x) ;; x) done ;; esac)'
+./comsub-posix5.sub: command substitution: line 40: syntax error near unexpected token `esac'
+./comsub-posix5.sub: command substitution: line 40: `case x in x) (esac) esac)'
+bash: -c: line 1: syntax error near unexpected token `;;'
+bash: -c: line 1: `: $(case x in esac|in) foo;; esac)'
+bash: -c: line 1: unexpected EOF while looking for matching `)'
+bash: -c: line 2: syntax error: unexpected end of file
 yes
 ab cde

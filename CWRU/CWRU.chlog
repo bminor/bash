@@ -9604,3 +9604,33 @@ lib/readline/text.c
 
 bashline.c
 	- posix_edit_macros: handle rl_read_key() returning <= 0
+
+				   2/15
+				   ----
+parse.y
+	- read_comsub: make sure to turn on the LEX_RESWDOK flag if we are in
+	  a case statement and read a `)', since we can get a valid `esac'.
+	  Fixes bug reported by Oguz <oguzismailuysal@gmail.com>
+	- read_comsub: if we're in a case statement, recognize `}' as a
+	  reserved word and set the LEX_RESWDOK flag for the next word, since
+	  we can get an esac (or another reserved word) after it
+
+				   2/16
+				   ----
+parse.y
+	- reserved_word_acceptable: add ARITH_CMD and COND_END to the list of
+	  tokens that can precede a reserved word, so you can use reserved
+	  words after ((...)) and [[...]].
+	  Reported by Koichi Murase <myoga.murase@gmail.com>
+
+				   2/17
+				   ----
+parse.y
+	- parse_comsub: use new LEX_CASEWD flag to track when we are reading
+	  the WORD in `case WORD in' and turn on the LEX_RESWDOK flag when
+	  that word ends. This allows $(case x in esac), which no one uses.
+	- parse_comsub: use LEX_PATLIST flag to track when we are reading a
+	  case pattern list so `|' doesn't turn on the LES_RESWDOK flag
+	- parse_comsub: case_level: simple counter to count the number of esacs
+	  we need to see before we're no longer in a case statement; analog of
+	  esacs_needed_count from the lexer
