@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: GNU bash 5.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-28 12:51-0500\n"
-"PO-Revision-Date: 2020-12-12 15:45+0900\n"
+"PO-Revision-Date: 2020-12-20 21:33+0900\n"
 "Last-Translator: Hiroshi Takekawa <sian@big.or.jp>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "Language: ja\n"
@@ -29,7 +29,7 @@ msgstr "誤った配列の添字"
 #: variables.c:3133
 #, c-format
 msgid "%s: removing nameref attribute"
-msgstr ""
+msgstr "%s: 名前参照属性を削除します"
 
 #: arrayfunc.c:446 builtins/declare.def:851
 #, c-format
@@ -1176,12 +1176,12 @@ msgstr "start_pipeline: pgrp pipe"
 #: jobs.c:906
 #, c-format
 msgid "bgp_delete: LOOP: psi (%d) == storage[psi].bucket_next"
-msgstr ""
+msgstr "bgp_delete: LOOP: psi (%d) == storage[psi].bucket_next"
 
 #: jobs.c:959
 #, c-format
 msgid "bgp_search: LOOP: psi (%d) == storage[psi].bucket_next"
-msgstr ""
+msgstr "bgp_search: LOOP: psi (%d) == storage[psi].bucket_next"
 
 #: jobs.c:1283
 #, c-format
@@ -1492,7 +1492,7 @@ msgstr ""
 
 #: parse.y:2826
 msgid "maximum here-document count exceeded"
-msgstr ""
+msgstr "ヒアドキュメントの最大数を超えました"
 
 #: parse.y:3581 parse.y:3957 parse.y:4556
 #, c-format
@@ -1966,9 +1966,8 @@ msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "名前付きパイプ %s をファイル記述子(fd) %d として複製できません"
 
 #: subst.c:6213
-#, fuzzy
 msgid "command substitution: ignored null byte in input"
-msgstr "誤った代入: %s に閉じる \"`\" がありません"
+msgstr "コマンド代入: 入力のヌルバイトを無視しました"
 
 #: subst.c:6353
 msgid "cannot make pipe for command substitution"
@@ -2069,18 +2068,18 @@ msgid "missing `]'"
 msgstr "`]'がありません"
 
 #: test.c:899
-#, fuzzy, c-format
+#, c-format
 msgid "syntax error: `%s' unexpected"
-msgstr "構文エラー: 予期しない `;' です"
+msgstr "構文エラー: 予期しない `%s' です"
 
 #: trap.c:220
 msgid "invalid signal number"
 msgstr "無効なシグナル番号"
 
 #: trap.c:325
-#, fuzzy, c-format
+#, c-format
 msgid "trap handler: maximum trap handler level exceeded (%d)"
-msgstr "eval: eval の入れ子レベルの最大値を超えています (%d)"
+msgstr "trap handler: trap handler の最大レベルを超えています (%d)"
 
 #: trap.c:414
 #, c-format
@@ -2505,7 +2504,6 @@ msgid "readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C c
 msgstr "readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
 
 #: builtins.c:256
-#, fuzzy
 msgid ""
 "Define or display aliases.\n"
 "    \n"
@@ -2525,7 +2523,7 @@ msgid ""
 msgstr ""
 "エイリアスを定義または表示します。\n"
 "    \n"
-"    引数がない場合、`alias` は再使用可能なエイリアス一覧を `alias 名前=値'\n"
+"    引数がない場合、`alias` はエイリアス一覧を `alias 名前=値' という再使用可能な\n"
 "    形式で標準出力に表示します。\n"
 "    \n"
 "    そうでなければ、与えられた名前と値でエイリアスを定義します。値の後続に空白\n"
@@ -2539,7 +2537,6 @@ msgstr ""
 "    alias は与えられた名前でエイリアスが定義されなかった場合を除き true を返します。"
 
 #: builtins.c:278
-#, fuzzy
 msgid ""
 "Remove each NAME from the list of defined aliases.\n"
 "    \n"
@@ -2556,7 +2553,6 @@ msgstr ""
 "    名前がエイリアスに存在しない場合を除き true を返します。"
 
 #: builtins.c:291
-#, fuzzy
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2599,7 +2595,6 @@ msgstr ""
 "    同じです。しかし、単一の引数として与えなければなりません。\n"
 "    例: bind '\"\\C-x\\C-r\": re-read-init-file'\n"
 "\n"
-"    Options:\n"
 "    オプション:\n"
 "      -m  keymap         このコマンドの間のキーマップとして KEYMAP を使用する。\n"
 "                         利用可能なキーマップ名は emacs, emacs-standard, emacs-meta,\n"
@@ -2664,7 +2659,6 @@ msgstr ""
 "    N  が1未満の場合を除き、終了ステータスは 0 です。"
 
 #: builtins.c:354
-#, fuzzy
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2765,26 +2759,23 @@ msgstr ""
 "    DIR として扱われます。\n"
 "    \n"
 "    オプション:\n"
-"        -L\tシンボリックリンクを強制的にたどります: resolve symbolic links in\n"
-"                DIR after processing instances of `..'\n"
-"        -P\tシンボリックリンクをたどらず物理構造を利用します: resolve\n"
-"                 symbolic links in DIR before processing instances\n"
-"    \tof `..'\n"
+"        -L\tシンボリックリンクを強制的にたどります: '..' を処理後、\n"
+"                DIR のシンボリックリンクを解決します。\n"
+"        -P\tシンボリックリンクをたどらず物理構造を利用します: '..' を処理前に\n"
+"                DIR のシンボリックリンクを解決します。\n"
 "        -e\t-P オプションが与えられ、かつ、現在の作業ディレクトリが正しく\n"
 "                決定できない場合、終了ステータスが 0 以外で終了します\n"
-"        -@  on systems that support it, present a file with extended attributes\n"
-"            as a directory containing the file attributes\n"
+"        -@\tサポートしているシステムでは、\n"
+"                拡張属性のファイルをファイル属性つきのディレクトリとして表示します。\n"
 "    \n"
 "    デフォルトでは `-L' が指定された場合と同様シンボリックリンクをたどります。\n"
-"    `..' is processed by removing the immediately previous pathname component\n"
-"    back to a slash or the beginning of DIR.\n"
+"    `..' はその前のパスコンポーネント(ディレクトリ)を'/'か DIRの最初まで削除します。\n"
 "    \n"
 "    終了ステータス:\n"
 "    ディレクトリを変更した場合、および -P が使用されている時に $PWD が正しく\n"
 "    設定された場合は 0、それ以外は 0 以外の値です。"
 
 #: builtins.c:425
-#, fuzzy
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
@@ -2853,7 +2844,6 @@ msgstr ""
 "    常に失敗です。"
 
 #: builtins.c:471
-#, fuzzy
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -2962,7 +2952,6 @@ msgstr ""
 "    無効なオプションが与えられたかエラーが発生しない限り成功を返します。"
 
 #: builtins.c:532
-#, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2970,7 +2959,7 @@ msgid ""
 msgstr ""
 "変数の値および属性を設定します。\n"
 "    \n"
-"    旧式です。`help declare'を参照してください。"
+"    declare の同義語です。`help declare'を参照してください。"
 
 #: builtins.c:540
 msgid ""
@@ -3574,7 +3563,6 @@ msgstr ""
 "    もし -x が使用された場合、COMMAND の終了ステータスを返します。"
 
 #: builtins.c:906
-#, fuzzy
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -4948,7 +4936,6 @@ msgstr ""
 "    再開されたジョブの終了ステータスを返します。"
 
 #: builtins.c:1726
-#, fuzzy
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
