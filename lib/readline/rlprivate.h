@@ -4,7 +4,7 @@
 /* Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
-   for reading lines of text with interactive input and history editing.      
+   for reading lines of text with interactive input and history editing.
 
    Readline is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ typedef struct  __rl_search_context
   int search_string_size;
 
   char **lines;
-  char *allocated_line;    
+  char *allocated_line;
   int hlen;
   int hindex;
 
@@ -169,7 +169,7 @@ typedef struct __rl_vimotion_context
 
 /* fill in more as needed */
 /* `Generic' callback data and functions */
-typedef struct __rl_callback_generic_arg 
+typedef struct __rl_callback_generic_arg
 {
   int count;
   int i1, i2;
@@ -259,7 +259,7 @@ extern void _rl_keyseq_cxt_dispose (_rl_keyseq_cxt *);
 extern void _rl_keyseq_chain_dispose (void);
 
 extern int _rl_dispatch_callback (_rl_keyseq_cxt *);
-     
+
 /* callback.c */
 extern _rl_callback_generic_arg *_rl_callback_data_alloc (int);
 extern void _rl_callback_data_dispose (_rl_callback_generic_arg *);
@@ -371,7 +371,7 @@ extern void _rl_internal_char_cleanup (void);
 extern void _rl_init_executing_keyseq (void);
 extern void _rl_term_executing_keyseq (void);
 extern void _rl_end_executing_keyseq (void);
-extern void _rl_add_executing_keyseq (int); 
+extern void _rl_add_executing_keyseq (int);
 
 /* rltty.c */
 extern int _rl_disable_tty_signals (void);
@@ -469,7 +469,7 @@ extern int _rl_vi_domove_motion_cleanup (int, _rl_vimotion_cxt *);
 /* Use HS_HISTORY_VERSION as the sentinel to see if we've included history.h
    and so can use HIST_ENTRY */
 #if defined (HS_HISTORY_VERSION)
-extern void _rl_free_history_entry (HIST_ENTRY *); 
+extern void _rl_free_history_entry (HIST_ENTRY *);
 #endif
 
 /*************************************************************************

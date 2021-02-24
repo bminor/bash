@@ -656,15 +656,15 @@ The format for a pipeline is
 The output of each command in the pipeline is connected via a pipe
 to the input of the next command.
 That is, each command reads the previous command's output.  This
-connection is performed before any redirections specified by the
-command.
+connection is performed before any redirections specified by
+@var{command1}.
 
 If @samp{|&} is used, @var{command1}'s standard error, in addition to
 its standard output, is connected to
 @var{command2}'s standard input through the pipe;
 it is shorthand for @code{2>&1 |}.
 This implicit redirection of the standard error to the standard output is
-performed after any redirections specified by the command.
+performed after any redirections specified by @var{command1}.
 
 The reserved word @code{time} causes timing statistics
 to be printed for the pipeline once it finishes.

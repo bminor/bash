@@ -3433,11 +3433,13 @@ bind_int_variable (lhs, rhs, flags)
      int flags;
 {
   register SHELL_VAR *v;
-  int isint, isarr, implicitarray;
+  int isint, isarr, implicitarray, vflags;
 
   isint = isarr = implicitarray = 0;
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (lhs, (flags & ASS_NOEXPAND) != 0))
+  /* Don't rely on VA_NOEXPAND being 1, set it explicitly */
+  vflags = (flags & ASS_NOEXPAND) ? VA_NOEXPAND : 0;
+  if (valid_array_reference (lhs, vflags))
     {
       isarr = 1;
       v = array_variable_part (lhs, (flags & ASS_NOEXPAND) != 0, (char **)0, (int *)0);

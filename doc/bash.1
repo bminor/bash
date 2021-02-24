@@ -529,24 +529,24 @@ or \fB|&\fP.
 The format for a pipeline is:
 .RS
 .PP
-[\fBtime\fP [\fB\-p\fP]] [ ! ] \fIcommand\fP [ [\fB|\fP\(bv\fB|&\fP] \fIcommand2\fP ... ]
+[\fBtime\fP [\fB\-p\fP]] [ ! ] \fIcommand1\fP [ [\fB|\fP\(bv\fB|&\fP] \fIcommand2\fP ... ]
 .RE
 .PP
 The standard output of
-.I command
+.I command1
 is connected via a pipe to the standard input of
 .IR command2 .
 This connection is performed before any redirections specified by the
-command (see
+.IR command1 (see
 .SM
 .B REDIRECTION
 below).
-If \fB|&\fP is used, \fIcommand\fP's standard error, in addition to its
+If \fB|&\fP is used, \fIcommand1\fP's standard error, in addition to its
 standard output, is connected to
 \fIcommand2\fP's standard input through the pipe;
 it is shorthand for \fB2>&1 |\fP.
 This implicit redirection of the standard error to the standard output is
-performed after any redirections specified by the command.
+performed after any redirections specified by \fIcommand1\fP.
 .PP
 The return status of a pipeline is the exit status of the last
 command, unless the \fBpipefail\fP option is enabled.

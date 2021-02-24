@@ -9634,3 +9634,15 @@ parse.y
 	- parse_comsub: case_level: simple counter to count the number of esacs
 	  we need to see before we're no longer in a case statement; analog of
 	  esacs_needed_count from the lexer
+
+				   2/19
+				   ----
+parse.y
+	- CHECK_FOR_RESERVED_WORD: don't return ESAC if we read `esac' after a
+	  left paren in a case pattern list. From an austingroup-bugs discussion
+	  about https://www.austingroupbugs.net/view.php?id=1454
+	- parse_comsub: if we read a `(' while looking for a case pattern list
+	  and LEX_CKESAC is set, we have a leading left paren in the pattern
+	  list and should turn off LEX_CKESAC so (esac) doesn't prematurely
+	  terminate the case command. From an austingroup-bugs discussion
+	  about https://www.austingroupbugs.net/view.php?id=1454

@@ -190,11 +190,13 @@ case esac in (foo|esac) ;; *) testfail "case esac test 1" ;; esac
 newtest
 case esac in foo|esac) ;; *) testfail "case esac test 2" ;; esac
 
+# POSIX.2 grammar rule 4 problem through bash-5.1
+newtest
+eval 'case esac in (esac) ;; *) testfail "case esac test 3" ;; esac'
+
 # these are supposed to be syntax errors
 newtest
-eval 'case esac in (esac) ;; *) echo "case esac test 3" ;; esac'
-newtest
-eval 'case esac in esac) ;; *) echo "case esac test 4";; esac'
+eval 'case esac in esac) ;; *) echo "case esac test 4";; esac' && testfail 'case esac test 4'
 
 if [ $exitval = 0 ]; then
     echo "All tests passed"

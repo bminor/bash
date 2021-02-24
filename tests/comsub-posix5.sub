@@ -61,6 +61,8 @@
 : $(case in in esac)
 
 : $(case x in in|esac) foo;; esac)
+: $(case esac in (esac) echo esac;; esac)
+: $(case k in else|done|time|esac) for f in 1 2 3 ; do :; done esac)
 
 # this is an error
 ${THIS_SH} -c ': $(case x in esac|in) foo;; esac)' bash

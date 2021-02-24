@@ -2893,6 +2893,8 @@ static int open_brace_count;
 		break; \
 	      if ((parser_state & PST_CASEPAT) && last_read_token == '|' && word_token_alist[i].token == ESAC) \
 		break; /* Posix grammar rule 4 */ \
+	      if ((parser_state & PST_CASEPAT) && last_read_token == '(' && word_token_alist[i].token == ESAC) /*)*/ \
+		break; /* phantom Posix grammar rule 4 */ \
 	      if (word_token_alist[i].token == ESAC) \
 		parser_state &= ~(PST_CASEPAT|PST_CASESTMT); \
 	      else if (word_token_alist[i].token == CASE) \
@@ -4219,6 +4221,12 @@ eof_error:
 	      shell_ungetc (peekc);
 	      continue;
 	    }
+	  else if ((tflags & (LEX_PATLIST|LEX_CKESAC)) && ch == '(') /*)*/
+	    {
+	      shell_ungetc (peekc);
+	      tflags &= ~LEX_CKESAC;
+	      continue;
+	    }
 	  else if (ch == '\n' || COMSUB_META(ch))
 	    {
 	      shell_ungetc (peekc);
@@ -4252,7 +4260,9 @@ eof_error:
       /* XXX - check LEX_PATLIST here? */
       else if ((tflags & LEX_INCASE) && (tflags & LEX_CKESAC))
 	{
-	  if MBTEST(ch == 'e' && (tflags & LEX_RESWDOK) == 0)
+	  peekc = shell_getc (1);
+	  shell_ungetc (peekc);
+	  if MBTEST(ch == 'e' && peekc == 's' && (tflags & LEX_RESWDOK) == 0)
 	    {
 	      tflags |= LEX_RESWDOK;
 	      lex_rwlen = 0;
