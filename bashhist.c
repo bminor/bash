@@ -374,7 +374,9 @@ bash_delete_history_range (first, last)
   HIST_ENTRY **discard_list;
 
   discard_list = remove_history_range (first, last);
-  for (i = 0; discard_list && discard_list[i]; i++)
+  if (discard_list == 0)
+    return 0;
+  for (i = 0; discard_list[i]; i++)
     free_history_entry (discard_list[i]);
   history_lines_this_session -= i;
 

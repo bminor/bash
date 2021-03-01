@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Jan  7 15:00:44 EST 2021
+.\"	Last Change: Sun Feb 28 16:42:54 EST 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 January 7" "GNU Bash 5.1"
+.TH BASH 1 "2021 February 28" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -511,6 +511,7 @@ command (only \fBin\fP and \fBdo\fP are valid):
 .if t !    case    coproc    do    done    elif    else    esac    fi    for    function    if    in    select    then    until    while    {    }    time    [[    ]]
 .if t .RE
 .SH "SHELL GRAMMAR"
+This section describes the syntax of the various forms of shell commands.
 .SS Simple Commands
 A \fIsimple command\fP is a sequence of optional variable assignments
 followed by \fBblank\fP-separated words and redirections, and
@@ -945,17 +946,26 @@ A coprocess is executed asynchronously in a subshell, as if the command
 had been terminated with the \fB&\fP control operator, with a two-way pipe
 established between the executing shell and the coprocess.
 .PP
-The format for a coprocess is:
+The syntax for a coprocess is:
 .RS
 .PP
 \fBcoproc\fP [\fINAME\fP] \fIcommand\fP [\fIredirections\fP]
 .RE
 .PP
 This creates a coprocess named \fINAME\fP.
+\fIcommand\fP may be either a simple command or a compound
+command (see above).
+\fINAME\fP is a shell variable name.
 If \fINAME\fP is not supplied, the default name is \fBCOPROC\fP.
-\fINAME\fP must not be supplied if \fIcommand\fP is a \fIsimple
-command\fP (see above); otherwise, it is interpreted as the first word
-of the simple command.
+.PP
+If \fIcommand\fP is a compound command, \fINAME\fP is optional. The
+word following \fBcoproc\fP determines whether that word is interpreted
+as a variable name: it is interpreted as \fINAME\fP if it is not a
+reserved word that introduces a compound command.
+If \fIcommand\fP is a simple command, \fINAME\fP is not allowed; this
+is to avoid confusion between \fINAME\fP and the first word of the simple
+command.
+.PP
 When the coprocess is executed, the shell creates an array variable (see
 .B Arrays
 below) named \fINAME\fP in the context of the executing shell.
@@ -976,6 +986,7 @@ The file descriptors can be utilized as arguments to shell commands
 and redirections using standard word expansions.
 Other than those created to execute command and process substitutions,
 the file descriptors are not available in subshells.
+.PP
 The process ID of the shell spawned to execute the coprocess is
 available as the value of the variable \fINAME\fP_PID.
 The \fBwait\fP
@@ -1001,9 +1012,9 @@ The \fIbody\fP of the function is the compound command
 .I compound\-command
 (see \fBCompound Commands\fP above).
 That command is usually a \fIlist\fP of commands between { and }, but
-may be any command listed under \fBCompound Commands\fP above,
-with one exception: If the \fBfunction\fP reserved word is used, but the
-parentheses are not supplied, the braces are required.
+may be any command listed under \fBCompound Commands\fP above.
+If the \fBfunction\fP reserved word is used, but the
+parentheses are not supplied, the braces are recommended.
 \fIcompound\-command\fP is executed whenever \fIfname\fP is specified as the
 name of a simple command.
 When in \fIposix mode\fP, \fIfname\fP must be a valid shell \fIname\fP
@@ -3877,7 +3888,7 @@ Before a command is executed, its input and output
 may be
 .I redirected
 using a special notation interpreted by the shell.
-Redirection allows commands' file handles to be
+\fIRedirection\fP allows commands' file handles to be
 duplicated, opened, closed,
 made to refer to different files,
 and can change the files the command reads from and writes to.
@@ -4288,7 +4299,7 @@ command, and removed with the
 command.
 .PP
 There is no mechanism for using arguments in the replacement text.
-If arguments are needed, a shell function should be used (see
+If arguments are needed, use a shell function (see
 .SM
 .B FUNCTIONS
 below).
@@ -8785,8 +8796,9 @@ end of the history, and an index of \-1 refers to the current
 \fBhistory -d\fP command.
 .TP
 \fB\-d\fP \fIstart\fP\-\fIend\fP
-Delete the history entries between positions \fIstart\fP and \fIend\fP,
-inclusive.  Positive and negative values for \fIstart\fP and \fIend\fP
+Delete the range of history entries between positions \fIstart\fP and
+\fIend\fP, inclusive.
+Positive and negative values for \fIstart\fP and \fIend\fP
 are interpreted as described above.
 .TP
 .B \-a
@@ -8834,7 +8846,7 @@ comment character followed immediately by a digit are interpreted
 as timestamps for the following history entry.
 The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
-\fIoffset\fP is supplied as an argument to \fB\-d\fP, or the
+\fIoffset\fP or range is supplied as an argument to \fB\-d\fP, or the
 history expansion supplied as an argument to \fB\-p\fP fails.
 .RE
 .TP

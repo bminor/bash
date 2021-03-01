@@ -9646,3 +9646,22 @@ parse.y
 	  list and should turn off LEX_CKESAC so (esac) doesn't prematurely
 	  terminate the case command. From an austingroup-bugs discussion
 	  about https://www.austingroupbugs.net/view.php?id=1454
+
+				   2/26
+				   ----
+builtins/history.def
+	- history_builtin: when checking negative offsets to -d, which are
+	  supposed to count back from the end of the history list, check the
+	  range against 0 instead of history_base, because the calculation is
+	  done against history_length, which is independent of history_base.
+	  Report and fix from Christopher Gurnee <chris@gurneeconsulting.net>
+
+				   2/28
+				   ----
+doc/bashref.texi
+	- replaced a number of uses of @var with a mixture of @env and @dfn
+	  to better match up with the texinfo standards
+
+doc/{bash/1,bashref.texi}
+	- clarify some aspects of the coproc description, especially the
+	  use of NAME and when it's optional
