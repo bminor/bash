@@ -428,6 +428,15 @@ ulimit_builtin (list)
 	}
     }
 
+  /* POSIX compatibility. If the last item in cmdlist does not have an option
+     argument, but there is an operand (list != 0), treat the operand as if
+     it were an option argument for that last command. */
+  if (list && list->word && cmdlist[ncmd - 1].arg == 0)
+    {
+      cmdlist[ncmd - 1].arg = list->word->word;
+      list = list->next;
+    }
+
   for (c = 0; c < ncmd; c++)
     if (ulimit_internal (cmdlist[c].cmd, cmdlist[c].arg, mode, ncmd > 1) == EXECUTION_FAILURE)
       return (EXECUTION_FAILURE);

@@ -1230,6 +1230,7 @@ had been terminated with the @samp{&} control operator, with a two-way pipe
 established between the executing shell and the coprocess.
 
 The syntax for a coprocess is:
+
 @example
 coproc [@var{NAME}] @var{command} [@var{redirections}]
 @end example
@@ -1241,6 +1242,26 @@ or a compound command (@pxref{Compound Commands}).
 @var{NAME} is a shell variable name.
 If @var{NAME} is not supplied, the default name is @code{COPROC}.
 
+The recommended form to use for a coprocess is
+
+@example
+coproc @var{NAME} @{ @var{command}; @}
+@end example
+
+@noindent
+This form is recommended because simple commands result in the coprocess
+always being named @code{COPROC}, and it is simpler to use and more complete
+than the other compound commands.
+
+There are other forms of coprocesses:
+
+@example
+coproc @var{NAME} @var{compound-command}
+coproc @var{compound-command}
+coproc @var{simple-command}
+@end example
+
+@noindent
 If @var{command} is a compound command, @var{NAME} is optional. The
 word following @code{coproc} determines whether that word is interpreted
 as a variable name: it is interpreted as @var{NAME} if it is not a

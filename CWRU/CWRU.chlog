@@ -9662,6 +9662,46 @@ doc/bashref.texi
 	- replaced a number of uses of @var with a mixture of @env and @dfn
 	  to better match up with the texinfo standards
 
-doc/{bash/1,bashref.texi}
+doc/{bash.1,bashref.texi}
 	- clarify some aspects of the coproc description, especially the
 	  use of NAME and when it's optional
+
+				    3/1
+				    ---
+subst.c
+	- read_comsub: fix off-by-one error in mbrtowc that causes a read one
+	  character past the end of buf. Report and fix from
+	  Platon Pronko <platon7pronko@gmail.com> in
+	  https://savannah.gnu.org/patch/?10035
+
+				    3/3
+				    ---
+builtins/ulimit.def
+	- ulimit_builtin: Posix compatibility: if the last command specified
+	  by an option does not have an option argument, but there is an
+	  operand remaining after all the options are parsed, treat the
+	  operand as an argument to that last command. From an austin-group
+	  discussion and a Geoff Clare suggestion back in November, 2020.
+	  Austin Group interpretation 1418
+
+examples/shellmath
+	- a package of shell functions to perform floating-point math entirely
+	  in bash. Contributed by Michael Wood <mawood20@gmail.com>. Available
+	  at https://github.com/clarity20/shellmath
+
+				    3/4
+				    ---
+support/shobj-conf
+	- darwin: take out the -arch-only option in SHOBJ_XLDFLAGS and
+	  SHOBJ_ARCHFLAGS; no longer needed
+
+doc/{bash.1,bashref.texi}
+	- coprocesses: suggested changes from rms@gnu.org; recommend the
+	  `coproc NAME { commands; }' form as the simplest and most flexible
+
+				    3/5
+				    ---
+builtins/exec.def
+	- exec_builtin: set last_command_exit_value before calling exit_shell
+	  so any exit trap gets the right value for $?. From Matthew Bauer
+	  <mjbauer95@gmail.com> via https://savannah.gnu.org/patch/?10039

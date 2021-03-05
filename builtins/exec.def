@@ -253,7 +253,7 @@ failed_exec:
   FREE (command);
 
   if (subshell_environment || (interactive == 0 && no_exit_on_failed_exec == 0))
-    exit_shell (exit_value);
+    exit_shell (last_command_exit_value = exit_value);
 
   if (args)
     strvec_dispose (args);

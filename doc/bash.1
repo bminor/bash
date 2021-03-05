@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun Feb 28 16:42:54 EST 2021
+.\"	Last Change: Thu Mar  4 15:52:34 EST 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 February 28" "GNU Bash 5.1"
+.TH BASH 1 "2021 March 4" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -957,6 +957,16 @@ This creates a coprocess named \fINAME\fP.
 command (see above).
 \fINAME\fP is a shell variable name.
 If \fINAME\fP is not supplied, the default name is \fBCOPROC\fP.
+.PP
+The recommended form to use for a coprocess is
+.RS
+.PP
+\fBcoproc\fP \fINAME\fP { \fIcommand\fP [\fIredirections\fP]; }
+.RE
+.PP
+This form is recommended because simple commands result in the coprocess
+always being named \fBCOPROC\fP, and it is simpler to use and more complete
+than the other compound commands.
 .PP
 If \fIcommand\fP is a compound command, \fINAME\fP is optional. The
 word following \fBcoproc\fP determines whether that word is interpreted
