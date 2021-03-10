@@ -46,6 +46,7 @@ typedef struct _shtimer
 #define SHTIMER_LONGJMP	0x04
 
 #define SHTIMER_SIGSET	0x100
+#define SHTIMER_ALRMSET	0x200
 
 extern sh_timer *shtimer_alloc (void);
 extern void shtimer_flush (sh_timer *);

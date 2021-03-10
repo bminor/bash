@@ -106,14 +106,13 @@ shtimer_set (sh_timer *t, time_t sec, long usec)
       t->old_handler = set_signal_handler (SIGALRM, t->alrm_handler);
       t->flags |= SHTIMER_SIGSET;
       falarm (t->tmout.tv_sec = sec, t->tmout.tv_usec = usec);
+      t->flags |= SHTIMER_ALRMSET;
       return;
     }
 
   if (gettimeofday (&now, 0) < 0)
-    {
-      now.tv_sec = 0;
-      now.tv_usec = 0;
-    }
+    timerclear (&now);
+
   t->tmout.tv_sec = now.tv_sec + sec;
   t->tmout.tv_usec = now.tv_usec + usec;
   if (t->tmout.tv_usec > USEC_PER_SEC)
@@ -132,7 +131,8 @@ shtimer_unset (sh_timer *t)
   if (t->flags & SHTIMER_ALARM)
     {
       t->alrmflag = 0;
-      falarm (0, 0);
+      if (t->flags & SHTIMER_ALRMSET)
+	falarm (0, 0);
       if (t->old_handler && (t->flags & SHTIMER_SIGSET))
 	{
 	  set_signal_handler (SIGALRM, t->old_handler);

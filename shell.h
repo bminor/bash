@@ -167,13 +167,13 @@ extern struct user_info current_user;
 
 typedef struct _sh_parser_state_t
 {
-
   /* parsing state */
   int parser_state;
   int *token_state;
 
   char *token;
   int token_buffer_size;
+  int eof_token;
 
   /* input line state -- line number saved elsewhere */
   int input_line_terminator;
@@ -206,6 +206,7 @@ typedef struct _sh_parser_state_t
   int here_doc_first_line;
 
   /* structures affecting the parser */
+  void *pushed_strings;
   REDIRECT *redir_stack[HEREDOC_MAX];
 } sh_parser_state_t;
 

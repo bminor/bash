@@ -11,42 +11,45 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-a=4
+# test behavior of native readline timeouts
 
-read -t 1 a < /dev/tty
+read -t 0.001 -e var
 estat=$?
 if [ $estat -gt 128 ]; then
 	echo timeout 1: ok
 else
 	echo $estat
 fi
-echo ${a:-unset or null 1}
+echo ${var:-unset or null 1}
 
-read -t 0.000001 a < /dev/tty
+read -e -t 0.1 var
 estat=$?
 if [ $estat -gt 128 ]; then
 	echo timeout 2: ok
 else
 	echo $estat
 fi
-echo ${a:-unset or null 2}
+echo ${var:-unset or null 2}
 
-sleep 1 | read -t 0.25 a
+read -e -t 1 var < /dev/tty
 estat=$?
 if [ $estat -gt 128 ]; then
 	echo timeout 3: ok
 else
 	echo $estat
 fi
-echo ${a:-unset or null 3}
+echo ${var:-unset or null 3}
 
-read -t -3 a < /dev/tty
-echo $?
-
-echo $a
+sleep 2 | read -t 1 -e a
+estat=$?
+if [ $estat -gt 128 ]; then
+	echo timeout 4: ok
+else
+	echo $estat
+fi
 
 # the above should all time out
 echo abcde | {
-	read -t 0.5 a
+	read -e -t 2 a
 	echo $a
 }

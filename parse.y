@@ -4059,9 +4059,9 @@ eof_error:
 	 change the LEX_INHEREDOC to LEX_QUOTEDDOC here and uncomment the next
 	 clause below.  Note that to make this work completely, we need to make
 	 additional changes to allow xparse_dolparen to work right when the
-	 command substitution is parsed, because read_secondary_line doesn't know
-	 to recursively parse through command substitutions embedded in here-
-	 documents */
+	 command substitution is parsed, because read_secondary_line doesn't
+	 know to recursively parse through command substitutions embedded in
+	 here-documents */
       if (tflags & (LEX_INCOMMENT|LEX_INHEREDOC))
 	{
 	  /* Add this character. */
@@ -4552,11 +4552,8 @@ xparse_dolparen (base, string, indp, flags)
 {
   sh_parser_state_t ps;
   sh_input_line_state_t ls;
-  int orig_ind, nc, sflags, orig_eof_token, start_lineno;
+  int orig_ind, nc, sflags, start_lineno;
   char *ret, *ep, *ostring;
-#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
-  STRING_SAVER *saved_pushed_strings;
-#endif
 
 /*debug_parser(1);*/
   orig_ind = *indp;
@@ -4579,12 +4576,10 @@ xparse_dolparen (base, string, indp, flags)
     sflags |= SEVAL_NOLONGJMP;
   save_parser_state (&ps);
   save_input_line_state (&ls);
-  orig_eof_token = shell_eof_token;
+
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
-  saved_pushed_strings = pushed_string_list;	/* separate parsing context */
   pushed_string_list = (STRING_SAVER *)NULL;
 #endif
-
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
   shell_eof_token = ')';
@@ -4601,13 +4596,7 @@ xparse_dolparen (base, string, indp, flags)
   /* reset_parser() clears shell_input_line and associated variables, including
      parser_state, so we want to reset things, then restore what we need. */
   restore_input_line_state (&ls);
-
-  shell_eof_token = orig_eof_token;
   restore_parser_state (&ps);
-
-#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
-  pushed_string_list = saved_pushed_strings;
-#endif
 
   token_to_read = 0;
 
@@ -6792,6 +6781,11 @@ save_parser_state (ps)
   else
     memcpy (ps->redir_stack, redir_stack, sizeof (redir_stack[0]) * HEREDOC_MAX);
 
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
+  ps->pushed_strings = pushed_string_list;
+#endif
+
+  ps->eof_token = shell_eof_token;
   ps->token = token;
   ps->token_buffer_size = token_buffer_size;
   /* Force reallocation on next call to read_token_word */
@@ -6854,9 +6848,14 @@ restore_parser_state (ps)
     memcpy (redir_stack, ps->redir_stack, sizeof (redir_stack[0]) * HEREDOC_MAX);
 #endif
 
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
+  pushed_string_list = (STRING_SAVER *)ps->pushed_strings;
+#endif
+
   FREE (token);
   token = ps->token;
   token_buffer_size = ps->token_buffer_size;
+  shell_eof_token = ps->eof_token;
 }
 
 sh_input_line_state_t *

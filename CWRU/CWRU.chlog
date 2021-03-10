@@ -9705,3 +9705,24 @@ builtins/exec.def
 	- exec_builtin: set last_command_exit_value before calling exit_shell
 	  so any exit trap gets the right value for $?. From Matthew Bauer
 	  <mjbauer95@gmail.com> via https://savannah.gnu.org/patch/?10039
+
+				    3/8
+				    ---
+include/timer.h
+	- SHTIMER_ALRMSET: new flag, indicates that there is an active alarm
+	  associated with this timer (falarm() was called)
+
+lib/sh/timers.c
+	- shtimer_set: set the SHTIMER_ALRMSET flag after calling falarm
+	- shtimer_unset: don't call falarm(0,0) unless the SHTIMER_ALRMSET flag
+	  is set
+
+				    3/9
+				    ---
+include/posixtime.h
+	- added some BSD convenience defines if they are not present
+
+parse.y,shell.h
+	- {save,restore}_parser_state: save amd restore shell_eof_token and
+	  pushed_string_list; change callers (e.g., xparse_dolparen) so they
+	  don't have to manage them
