@@ -9726,3 +9726,34 @@ parse.y,shell.h
 	- {save,restore}_parser_state: save amd restore shell_eof_token and
 	  pushed_string_list; change callers (e.g., xparse_dolparen) so they
 	  don't have to manage them
+
+				   3/10
+				   ----
+builtins/common.h
+	- extern declarations for moving to timers (sh_timer) for read builtin
+	  timeouts
+
+quit.h
+	- CHECK_ALRM: remove, no longer used
+
+trap.c
+	- check_signals: call check_read_timeout instead of CHECK_ALRM
+
+bashline.c
+	- bash_event_hook: use read_timeout instead of checking `sigalrm_seen';
+	  that no longer exists
+	- bash_event_hook: accommodate readline timing out (not used yet)
+
+lib/sh/zread.c
+	- zread: call read_builtin_timeout() to check for a timeout before
+	  calling a blocking read()
+	  
+builtins/read.def
+	- sigalrm,reset_timeout,check_read_timeout,read_builtin_timeout: new
+	  and modified functions to use sh_timers for timeouts instead of
+	  SIGALRM. Based on work contributed by Koichi Murase
+	  <myoga.murase@gmail.com>
+	- read_builtin: use sh_timers for read timeouts (-t N) instead of
+	  using SIGALRM
+	- edit_line: simulate receiving SIGALRM if readline times out (not
+	  used yet)

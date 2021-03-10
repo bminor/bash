@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+: ${TMPDIR:=/var/tmp}
+
 a=4
 
 read -t 1 a < /dev/tty
@@ -50,3 +52,21 @@ echo abcde | {
 	read -t 0.5 a
 	echo $a
 }
+
+read -t .0001 a <<<abcde
+echo $a
+
+# this is the original test that prompted the change to sh_timers
+cd $TMPDIR
+rm -f a.pipe
+mkfifo a.pipe
+exec 9<> a.pipe
+rm -f a.pipe
+
+for c in {0..2000}; do
+  (eval "echo {0..$c}" & read -u 9 -t 0.0001) >/dev/null
+  printf $'ok %d' "$c" >/dev/null
+done
+
+cd $OLDPWD
+rm -f $TMPDIR/a.pipe		# paranoia

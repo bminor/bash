@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -87,7 +87,6 @@ static void reset_or_restore_signal_handlers (sh_resetsig_func_t *);
 static void trap_if_untrapped (int, char *);
 
 /* Variables used here but defined in other files. */
-extern procenv_t alrmbuf;
 
 extern volatile int from_return_trap;
 extern int waiting_for_child;
@@ -587,7 +586,8 @@ clear_pending_traps ()
 void
 check_signals ()
 {
-  CHECK_ALRM;		/* set by the read builtin */
+  /* Add any other shell timeouts here */
+  check_read_timeout ();	/* set by the read builtin */
   QUIT;
 }
 

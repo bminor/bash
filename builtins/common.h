@@ -1,6 +1,6 @@
 /* common.h -- extern declarations for functions defined in common.c. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -151,6 +151,9 @@ extern void builtin_help PARAMS((void));
 extern void read_tty_cleanup PARAMS((void));
 extern int read_tty_modified PARAMS((void));
 
+extern int read_builtin_timeout PARAMS((int));
+extern void check_read_timeout PARAMS((void));
+
 /* Functions from set.def */
 extern int minus_o_option_value PARAMS((char *));
 extern void list_minus_o_opts PARAMS((int, int));
@@ -235,9 +238,6 @@ extern int parse_and_execute_level;
 extern int breaking;
 extern int continuing;
 extern int loop_level;
-
-/* variables from read.def */
-extern int sigalrm_seen;
 
 /* variables from shift.def */
 extern int print_shift_error;

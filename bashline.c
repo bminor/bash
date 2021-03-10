@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -56,6 +56,7 @@
 #include "shmbutil.h"
 #include "trap.h"
 #include "flags.h"
+#include "timer.h"
 
 #if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
 #  include <mbstr.h>		/* mbschr */
@@ -225,6 +226,7 @@ static char **prog_complete_matches;
 
 extern int no_symbolic_links;
 extern STRING_INT_ALIST word_token_alist[];
+extern sh_timer *read_timeout;
 
 /* SPECIFIC_COMPLETION_FUNCTIONS specifies that we have individual
    completion functions which indicate what type of completion should be
@@ -4627,18 +4629,26 @@ bash_event_hook ()
     sig = terminating_signal;
   else if (interrupt_state)
     sig = SIGINT;
-  else if (sigalrm_seen)
+  else if (read_timeout && read_timeout->alrmflag)
     sig = SIGALRM;
+  else if (RL_ISSTATE (RL_STATE_TIMEOUT))		/* just in case */
+    {
+      sig = SIGALRM;
+      if (read_timeout)
+	read_timeout->alrmflag = 1;
+    }
   else
     sig = first_pending_trap ();
 
   /* If we're going to longjmp to top_level, make sure we clean up readline.
      check_signals will call QUIT, which will eventually longjmp to top_level,
-     calling run_interrupt_trap along the way.  The check for sigalrm_seen is
-     to clean up the read builtin's state. */
-  if (terminating_signal || interrupt_state || sigalrm_seen)
+     calling run_interrupt_trap along the way.  The check against read_timeout
+     is so we can clean up the read builtin's state. */
+  if (terminating_signal || interrupt_state || (read_timeout && read_timeout->alrmflag))
     rl_cleanup_after_signal ();
   bashline_reset_event_hook ();
+
+  RL_UNSETSTATE (RL_STATE_TIMEOUT);			/* XXX */
 
   /* posix mode SIGINT during read -e. We only get here if SIGINT is trapped. */
   if (posixly_correct && this_shell_builtin == read_builtin && sig == SIGINT)

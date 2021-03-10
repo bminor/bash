@@ -906,6 +906,7 @@ extern int rl_persistent_signal_handlers;
 #define RL_STATE_REDISPLAYING	0x1000000	/* updating terminal display */
 
 #define RL_STATE_DONE		0x2000000	/* done; accepted line */
+#define RL_STATE_TIMEOUT	0x4000000	/* readline() timed out */
 
 #define RL_SETSTATE(x)		(rl_readline_state |= (x))
 #define RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))

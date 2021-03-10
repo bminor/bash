@@ -13,7 +13,7 @@
 #
 # test behavior of native readline timeouts
 
-read -t 0.001 -e var
+read -t 0.00001 -e var
 estat=$?
 if [ $estat -gt 128 ]; then
 	echo timeout 1: ok
@@ -40,7 +40,7 @@ else
 fi
 echo ${var:-unset or null 3}
 
-sleep 2 | read -t 1 -e a
+sleep 1 | read -t 0.25 -e a
 estat=$?
 if [ $estat -gt 128 ]; then
 	echo timeout 4: ok
@@ -50,6 +50,6 @@ fi
 
 # the above should all time out
 echo abcde | {
-	read -e -t 2 a
+	read -e -t 0.5 a
 	echo $a
 }
