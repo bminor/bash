@@ -126,6 +126,7 @@ static int set_itext PARAMS((void));
 static char *edit_line PARAMS((char *, char *));
 static void set_eol_delim PARAMS((int));
 static void reset_eol_delim PARAMS((char *));
+static void set_readline_timeout PARAMS((sh_timer *t, time_t, long));
 #endif
 static SHELL_VAR *bind_read_variable PARAMS((char *, char *));
 #if defined (HANDLE_MULTIBYTE)
@@ -511,7 +512,9 @@ read_builtin (list)
 	{
 	  add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
 	  add_unwind_protect (bashline_reset_event_hook, (char *)NULL);
+	  set_readline_timeout (read_timeout, tmsec, tmusec);
 	}
+      else
 #endif
       shtimer_set (read_timeout, tmsec, tmusec);
     }
@@ -1207,6 +1210,17 @@ edit_line (p, itext)
   ret[len++] = delim;
   ret[len] = '\0';
   return ret;
+}
+
+static void
+set_readline_timeout (t, sec, usec)
+     sh_timer *t;
+     time_t sec;
+     long usec;
+{
+  t->tmout.tv_sec = sec;
+  t->tmout.tv_usec = usec;
+  rl_set_timeout (sec, usec);
 }
 
 static int old_delim_ctype;

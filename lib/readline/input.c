@@ -50,6 +50,7 @@
 #include <signal.h>
 
 #include "posixselect.h"
+#include "posixtime.h"
 
 #if defined (FIONREAD_IN_SYS_IOCTL)
 #  include <sys/ioctl.h>
@@ -88,6 +89,9 @@ rl_hook_func_t *rl_event_hook = (rl_hook_func_t *)NULL;
 
 /* A function to call if a read(2) is interrupted by a signal. */
 rl_hook_func_t *rl_signal_event_hook = (rl_hook_func_t *)NULL;
+
+/* A function to call when readline times out after a time is specified. */
+rl_hook_func_t *rl_timeout_event_hook = (rl_hook_func_t *)NULL;
 
 /* A function to replace _rl_input_available for applications using the
    callback interface. */
@@ -131,6 +135,36 @@ win32_isatty (int fd)
 
 #define isatty(x)	win32_isatty(x)
 #endif
+
+/* Readline timeouts */
+
+/* I don't know how to set a timeout for _getch() in MinGW32, so we use
+   SIGALRM. */
+#if (defined (HAVE_PSELECT) || defined (HAVE_SELECT)) && !defined (__MINGW32__)
+#  define RL_TIMEOUT_USE_SELECT
+#else
+#  define RL_TIMEOUT_USE_SIGALRM
+#endif
+
+int rl_set_timeout (unsigned int, unsigned int);
+int rl_timeout_remaining (unsigned int *, unsigned int *);
+
+int _rl_timeout_init (void);
+int _rl_timeout_sigalrm_handler (void);
+int _rl_timeout_select (int, fd_set *, fd_set *, fd_set *, const struct timeval *, const sigset_t *);
+
+static void _rl_timeout_handle (void);
+#if defined (RL_TIMEOUT_USE_SIGALRM)
+static int set_alarm (unsigned int *, unsigned int *);
+static void reset_alarm (void);
+#endif
+
+/* We implement timeouts as a future time using a supplied interval
+   (timeout_duration) from when the timeout is set (timeout_point).
+   That allows us to easily determine whether the timeout has occurred
+   and compute the time remaining until it does. */
+static struct timeval timeout_point;
+static struct timeval timeout_duration;
 
 /* **************************************************************** */
 /*								    */
@@ -223,13 +257,17 @@ rl_gather_tyi (void)
   input = 0;
   tty = fileno (rl_instream);
 
-#if defined (HAVE_SELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   FD_ZERO (&readfds);
   FD_ZERO (&exceptfds);
   FD_SET (tty, &readfds);
   FD_SET (tty, &exceptfds);
   USEC_TO_TIMEVAL (_keyboard_input_timeout, timeout);
+#if defined (RL_TIMEOUT_USE_SELECT)
+  result = _rl_timeout_select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout, NULL);
+#else
   result = select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+#endif
   if (result <= 0)
     return 0;	/* Nothing to read. */
 #endif
@@ -330,11 +368,11 @@ rl_set_keyboard_input_timeout (int u)
 int
 _rl_input_available (void)
 {
-#if defined(HAVE_SELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   fd_set readfds, exceptfds;
   struct timeval timeout;
 #endif
-#if !defined (HAVE_SELECT) && defined(FIONREAD)
+#if !defined (HAVE_SELECT) && defined (FIONREAD)
   int chars_avail;
 #endif
   int tty;
@@ -344,13 +382,17 @@ _rl_input_available (void)
 
   tty = fileno (rl_instream);
 
-#if defined (HAVE_SELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   FD_ZERO (&readfds);
   FD_ZERO (&exceptfds);
   FD_SET (tty, &readfds);
   FD_SET (tty, &exceptfds);
   USEC_TO_TIMEVAL (_keyboard_input_timeout, timeout);
+#  if defined (RL_TIMEOUT_USE_SELECT)
+  return (_rl_timeout_select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout, NULL) > 0);
+#  else
   return (select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout) > 0);
+#  endif
 #else
 
 #if defined (FIONREAD)
@@ -465,6 +507,242 @@ rl_clear_pending_input (void)
 
 /* **************************************************************** */
 /*								    */
+/*			    Timeout utility			    */
+/*								    */
+/* **************************************************************** */
+
+#if defined (RL_TIMEOUT_USE_SIGALRM)
+#  if defined (HAVE_SETITIMER)
+
+static int
+set_alarm (unsigned int *secs, unsigned int *usecs)
+{
+  struct itimerval it;
+
+  timerclear (&it.it_interval);
+  timerset (&it.it_value, *secs, *usecs);
+  return setitimer (ITIMER_REAL, &it, NULL);
+}
+
+static void
+reset_alarm ()
+{
+  struct itimerval it;
+
+  timerclear (&it.it_interval);
+  timerclear (&it.it_value);
+  setitimer (ITIMER_REAL, &it, NULL);
+}
+#  else
+static int
+set_alarm (unsigned int *secs, unsigned int *usecs)
+{
+  if (*secs == 0 || *usecs >= USEC_PER_SEC / 2)
+    (*secs)++;
+  *usecs = 0;
+
+  return alarm (*secs);
+}
+static void
+reset_alarm ()
+{
+  alarm (0);
+}
+#  endif
+#endif
+
+/* Set a timeout which will be used for the next call of `readline
+   ()'.  When (0, 0) are specified the timeout is cleared.  */
+int
+rl_set_timeout (unsigned int secs, unsigned int usecs)
+{
+  timeout_duration.tv_sec = secs + usecs / USEC_PER_SEC;
+  timeout_duration.tv_usec = usecs % USEC_PER_SEC;
+
+  return 0;
+}
+
+/* Start measuring the time.  Returns 0 on success.  Returns -1 on
+   error. */
+int
+_rl_timeout_init (void)
+{
+  unsigned int secs, usecs;
+
+  /* Clear the timeout state of the previous edit */
+  RL_UNSETSTATE(RL_STATE_TIMEOUT);
+  timerclear (&timeout_point);
+
+  /* Return 0 when timeout is unset. */
+  if (timerisunset (&timeout_duration))
+    return 0;
+
+  /* Return -1 on gettimeofday error. */
+  if (gettimeofday(&timeout_point, 0) != 0)
+    {
+      timerclear (&timeout_point);
+      return -1;
+    }
+
+  secs = timeout_duration.tv_sec;
+  usecs = timeout_duration.tv_usec;
+
+#if defined (RL_TIMEOUT_USE_SIGALRM)
+  /* If select(2)/pselect(2) is unavailable, use SIGALRM. */
+  if (set_alarm (&secs, &usecs) < 0)
+    return -1;
+#endif
+
+  timeout_point.tv_sec += secs;
+  timeout_point.tv_usec += usecs;
+  if (timeout_point.tv_usec >= USEC_PER_SEC)
+    {
+      timeout_point.tv_sec++;
+      timeout_point.tv_usec -= USEC_PER_SEC;
+    }
+
+  return 0;
+}
+
+/* Get the remaining time until the scheduled timeout.  Returns -1 on
+   error or no timeout set with secs and usecs unchanged.  Returns 0
+   on an expired timeout with secs and usecs unchanged.  Returns 1
+   when the timeout has not yet expired.  The remaining time is stored
+   in secs and usecs.  When NULL is specified to either of the
+   arguments, just the expiration is tested. */
+int
+rl_timeout_remaining (unsigned int *secs, unsigned int *usecs)
+{
+  struct timeval current_time;
+
+  /* Return -1 when timeout is unset. */
+  if (timerisunset (&timeout_point))
+    {
+      errno = 0;
+      return -1;
+    }
+
+  /* Return -1 on error. errno is set by gettimeofday. */
+  if (gettimeofday(&current_time, 0) != 0)
+    return -1;
+
+  /* Return 0 when timeout has already expired. */
+  /* could use timercmp (&timeout_point, &current_time, <) here */
+  if (current_time.tv_sec > timeout_point.tv_sec ||
+	(current_time.tv_sec == timeout_point.tv_sec &&
+	 current_time.tv_usec >= timeout_point.tv_usec))
+    return 0;
+
+  if (secs && usecs)
+    {
+      *secs = timeout_point.tv_sec - current_time.tv_sec;
+      *usecs = timeout_point.tv_usec - current_time.tv_usec;
+      if (timeout_point.tv_usec < current_time.tv_usec)
+	{
+	  (*secs)--;
+	  *usecs += USEC_PER_SEC;
+	}
+    }
+
+  return 1;
+}
+
+/* This should only be called if RL_TIMEOUT_USE_SELECT is defined. */
+
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
+int
+_rl_timeout_select (int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, const struct timeval *timeout, const sigset_t *sigmask)
+{
+  int result;
+#if defined (HAVE_PSELECT)
+  struct timespec ts;
+#else
+  sigset_t origmask;
+  struct timeval tv;
+#endif
+  int tmout_status;
+  struct timeval tmout;
+  unsigned int sec, usec;
+
+  /* When the remaining time for rl_timeout is shorter than the
+     keyboard input timeout, replace `timeout' with the remaining time
+     for `rl_timeout' and set `tmout_status = 1'. */
+  tmout_status = rl_timeout_remaining (&sec, &usec);
+  tmout.tv_sec = sec;
+  tmout.tv_usec = usec;
+
+  if (tmout_status == 0)
+    _rl_timeout_handle ();
+  else if (tmout_status == 1)
+    {
+      if (timeout == NULL || timercmp (&tmout, timeout, <))
+	timeout = &tmout;
+      else
+	tmout_status = -1;
+    }
+
+#if defined (HAVE_PSELECT)
+  if (timeout)
+    {
+      TIMEVAL_TO_TIMESPEC (timeout, &ts);
+      result = pselect (nfds, readfds, writefds, exceptfds, &ts, sigmask);
+    }
+  else
+    result = pselect (nfds, readfds, writefds, exceptfds, NULL, sigmask);
+#else
+  if (sigmask)
+    sigprocmask (SIG_SETMASK, sigmask, &origmask);
+
+  if (timeout)
+    {
+      tv.tv_sec = timeout->tv_sec;
+      tv.tv_usec = timeout->tv_usec;
+      result = select (nfds, readfds, writefds, exceptfds, &tv);
+    }
+  else
+    result = select (nfds, readfds, writefds, exceptfds, NULL);
+
+  if (sigmask)
+    sigprocmask (SIG_SETMASK, &origmask, NULL);
+#endif
+
+  if (tmout_status == 1 && result == 0)
+    _rl_timeout_handle ();
+
+  return result;
+}
+#endif
+
+static void
+_rl_timeout_handle ()
+{
+  if (rl_timeout_event_hook)
+    (*rl_timeout_event_hook) ();
+
+  RL_SETSTATE(RL_STATE_TIMEOUT);
+  _rl_abort_internal ();
+}
+
+int
+_rl_timeout_handle_sigalrm ()
+{
+#if defined (RL_TIMEOUT_USE_SIGALRM)
+  if (timerisunset (&timeout_point))
+    return -1;
+
+  /* Reset `timeout_point' to the current time to ensure that later
+     calls of `rl_timeout_pending ()' return 0 (timeout expired). */
+  if (gettimeofday(&timeout_point, 0) != 0)
+    timerclear (&timeout_point);
+
+  reset_alarm ();
+
+  _rl_timeout_handle ();
+#endif
+  return -1;
+}
+/* **************************************************************** */
+/*								    */
 /*			     Character Input			    */
 /*								    */
 /* **************************************************************** */
@@ -526,11 +804,13 @@ rl_getc (FILE *stream)
 {
   int result;
   unsigned char c;
+  int fd;
 #if defined (HAVE_PSELECT)
   sigset_t empty_set;
   fd_set readfds;
 #endif
 
+  fd = fileno (stream);
   while (1)
     {
       RL_CHECK_SIGNALS ();
@@ -538,23 +818,27 @@ rl_getc (FILE *stream)
       /* We know at this point that _rl_caught_signal == 0 */
 
 #if defined (__MINGW32__)
-      if (isatty (fileno (stream)))
+      if (isatty (fd)
 	return (_getch ());	/* "There is no error return." */
 #endif
       result = 0;
-#if defined (HAVE_PSELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
+      /* At this point, if we have pselect, we're using select/pselect for the
+	 timeouts. We handled MinGW above. */
       FD_ZERO (&readfds);
-      FD_SET (fileno (stream), &readfds);
+      FD_SET (fd, &readfds);
 #  if defined (HANDLE_SIGNALS)
-      result = pselect (fileno (stream) + 1, &readfds, NULL, NULL, NULL, &_rl_orig_sigset);
+      result = _rl_timeout_select (fd + 1, &readfds, NULL, NULL, NULL, &_rl_orig_sigset);
 #  else
       sigemptyset (&empty_set);
       sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &empty_set);
-      result = pselect (fileno (stream) + 1, &readfds, NULL, NULL, NULL, &empty_set);
+      result = _rl_timeout_select (fd + 1, &readfds, NULL, NULL, NULL, &empty_set);
 #  endif /* HANDLE_SIGNALS */
+      if (result == 0)
+        _rl_timeout_handle ();		/* check the timeout */
 #endif
       if (result >= 0)
-	result = read (fileno (stream), &c, sizeof (unsigned char));
+	result = read (fd, &c, sizeof (unsigned char));
 
       if (result == sizeof (unsigned char))
 	return (c);
@@ -583,7 +867,7 @@ rl_getc (FILE *stream)
 
       if (errno == X_EWOULDBLOCK || errno == X_EAGAIN)
 	{
-	  if (sh_unset_nodelay_mode (fileno (stream)) < 0)
+	  if (sh_unset_nodelay_mode (fd) < 0)
 	    return (EOF);
 	  continue;
 	}

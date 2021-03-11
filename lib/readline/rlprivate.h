@@ -301,6 +301,13 @@ extern void _rl_insert_typein (int);
 extern int _rl_unget_char (int);
 extern int _rl_pushed_input_available (void);
 
+extern int _rl_timeout_init (void);
+extern int _rl_timeout_handle_sigalrm (void);
+#if defined (_POSIXSELECT_H_)
+/* use as a sentinel for fd_set, struct timeval,  and sigset_t definitions */
+extern int _rl_timeout_select (int, fd_set *, fd_set *, fd_set *, const struct timeval *, const sigset_t *);
+#endif
+
 /* isearch.c */
 extern _rl_search_cxt *_rl_scxt_alloc (int, int);
 extern void _rl_scxt_dispose (_rl_search_cxt *, int);

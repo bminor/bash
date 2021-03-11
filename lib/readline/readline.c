@@ -577,6 +577,15 @@ readline_internal_charloop (void)
 	{
 	  (*rl_redisplay_function) ();
 	  _rl_want_redisplay = 0;
+
+	  /* If we longjmped because of a timeout, handle it here. */
+	  if (RL_ISSTATE (RL_STATE_TIMEOUT))
+	    {
+	      RL_SETSTATE (RL_STATE_DONE);
+	      rl_done = 1;
+	      return 1;
+	    }
+
 	  /* If we get here, we're not being called from something dispatched
 	     from _rl_callback_read_char(), which sets up its own value of
 	     _rl_top_level (saving and restoring the old, of course), so
@@ -1148,6 +1157,9 @@ _rl_subseq_result (int r, Keymap map, int key, int got_subseq)
 int
 rl_initialize (void)
 {
+  /* Initialize the timeout first to get the precise start time. */
+  _rl_timeout_init ();
+
   /* If we have never been called before, initialize the
      terminal and data structures. */
   if (rl_initialized == 0)

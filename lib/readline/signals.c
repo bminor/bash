@@ -267,6 +267,8 @@ _rl_handle_signal (int sig)
     case SIGTERM:
 #if defined (SIGALRM)
     case SIGALRM:
+      if (sig == SIGALRM)
+	_rl_timeout_handle_sigalrm ();
 #endif
 #if defined (SIGQUIT)
     case SIGQUIT:

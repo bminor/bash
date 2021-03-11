@@ -455,6 +455,11 @@ If non-zero, this is the address of a function to call if a read system
 call is interrupted when Readline is reading terminal input.
 @end deftypevar
 
+@deftypevar {rl_hook_func_t *} rl_timeout_event_hook
+If non-zero, this is the address of a function to call if Readline times
+out while reading input.
+@end deftypevar
+
 @deftypevar {rl_hook_func_t *} rl_input_available_hook
 If non-zero, Readline will use this function's return value when it needs
 to determine whether or not there is available input on the current input
@@ -588,6 +593,10 @@ the current call to @code{readline()}.
 @item RL_STATE_DONE
 Readline has read a key sequence bound to @code{accept-line}
 and is about to return the line to the caller.
+@item RL_STATE_TIMEOUT
+Readline has timed out (it did not receive a line or specified number of
+characters before the timeout duration specified by @code{rl_set_timeout}
+elapsed) and is returning that status to the caller.
 @end table
 
 @end deftypevar
@@ -1149,6 +1158,27 @@ assigned to @code{rl_event_hook}.  @var{u} must be greater than or equal
 to zero (a zero-length timeout is equivalent to a poll).
 The default waiting period is one-tenth of a second.
 Returns the old timeout value.
+@end deftypefun
+
+@deftypefun int rl_set_timeout (unsigned int secs, unsigned int usecs)
+Set a timeout for subsequent calls to @code{readline()}. If Readline does
+not read a complete line, or the number of characters specified by
+@code{rl_num_chars_to_read}, before the duration specfied by @var{secs}
+(in seconds) and @var{usecs} (microseconds), it returns and sets
+@code{RL_STATE_TIMEOUT} in @code{rl_readline_state}.
+Passing 0 for @code{secs} and @code{usecs} cancels any previously set
+timeout; the convenience macro @code{rl_clear_timeout()} is shorthand
+for this.
+Returns 0 if the timeout is set successfully.
+@end deftypefun
+
+@deftypefun int rl_timeout_remaining (unsigned int *secs, unsigned int *usecs)
+Return the number of seconds and microseconds remaining in the current
+timeout duration in @code{*secs} and @code{*usecs}, respectively.
+Returns -1 on error or when there is no timeout set, 0 when the timeout has
+expired (leaving @code{*secs} and @code{*usecs} unchanged), and 1 if the
+timeout has not expired. If @code{secs} and @code{usecs} are @code{NULL},
+the return value indicates whether the timeout has expired.
 @end deftypefun
 
 @node Terminal Management

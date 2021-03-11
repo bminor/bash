@@ -147,6 +147,14 @@ rl_callback_read_char (void)
       (*rl_redisplay_function) ();
       _rl_want_redisplay = 0;
       memcpy ((void *)_rl_top_level, (void *)olevel, sizeof (procenv_t));
+
+      /* If we longjmped because of a timeout, handle it here. */
+      if (RL_ISSTATE (RL_STATE_TIMEOUT))
+	{
+	  RL_SETSTATE (RL_STATE_DONE);
+	  rl_done = 1;
+	}
+
       CALLBACK_READ_RETURN ();
     }
 

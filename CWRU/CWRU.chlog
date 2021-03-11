@@ -9757,3 +9757,72 @@ builtins/read.def
 	  using SIGALRM
 	- edit_line: simulate receiving SIGALRM if readline times out (not
 	  used yet)
+
+				   3/11
+				   ----
+lib/readline/readline.c
+	- rl_initialize: call _rl_timeout_init to set things up for any timeout	
+	  that was set with rl_set_timeout
+	- readline_internal_charloop: if we longjmped because of a timeout,
+	  make sure to set rl_done/RL_STATE_DONE and return; we are
+	  abandoning this call to readline(). The readline timeout changes
+	  were based on work contributed by Koichi Murase
+	  <myoga.murase@gmail.com>
+
+lib/readline/readline.h
+	- extern declarations for new timeout functions and hook
+	- rl_clear_timeout: new define
+
+lib/readline/callback.c
+	- rl_callback_read_char: if we longjmped because of a timeout,
+	  make sure to set rl_done/RL_STATE_DONE and return; we are
+	  abandoning this call to readline()
+
+lib/readline/util.c
+	- _rl_abort_internal: if we time out, don't ring the bell; let the
+	  caller handle it
+
+lib/readline/input.c
+	- extern declarations for public and readline-library-private functions
+	  and hooks to implement timeouts
+	- rl_set_timeout,rl_timeout_remaining: new public functions
+	- _rl_timeout_select: new function, uses select/pselect to implement
+	  read timeouts that take timeouts set with rl_set_timeout into account;
+	  calling hook function if a timeout occurs
+	- rl_gather_tyi, _rl_input_available: use _rl_timeout_select, taking
+	  any existing timeout into consideration if it expires before the
+	  timeout passed as an argument
+	- rl_getc: use _rl_timeout_select and handle any timeouts by calling
+	  _rl_timehout_handle
+	- set_alarm,reset_alarm: new functions to implement timeouts using
+	  SIGALRM for systems that lack a working select/pselect
+	- _rl_timeout_init: new function, sets things up for reading input
+	  with a specified timeout
+	- _rl_timeout_handle: a timeout handler; calls any event hook and
+	  sets up to abort the current readline() call
+	- _rl_timeout_handle_sigalrm: a timeout handler for systems using
+	  SIGALRM to implement timeouts
+
+lib/readline/parens.c
+	- rl_insert_close: use _rl_timeout_select to take timeouts into account
+
+lib/readline/rlprivate.h
+	- extern declarations for readline-library-private timeout functions
+
+lib/readline/rltty.c
+	- rl_deprep_terminal: don't print a newline after the bracketed paste
+	  disable sequence if we timed out
+
+lib/readline/signals.c
+	- _rl_handle_signal: if sig is SIGALRM, call _rl_timeout_handle_sigalrm()
+
+lib/readline/doc/rltech.texi
+	- rl_set_timeout,rl_timeout_remaining: document new public functions
+	- RL_STATE_TIMEOUT: document new possible state value for rl_readline_state
+	- rl_timeout_event_hook: document new hook function, called when
+	  readline times out
+
+builtins/read.def
+	- read_builtin: changes to use the readline timeout functions to
+	  implement timeouts with `read -e'; these use rl_set_timeout and
+	  sh_timer structs together

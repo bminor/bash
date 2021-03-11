@@ -135,7 +135,11 @@ rl_insert_close (int count, int invoking_key)
       orig_point = rl_point;
       rl_point = match_point;
       (*rl_redisplay_function) ();
+#  if defined (RL_TIMEOUT_USE_SELECT)
+      ready = _rl_timeout_select (1, &readfds, (fd_set *)NULL, (fd_set *)NULL, &timer, NULL);
+#  else
       ready = select (1, &readfds, (fd_set *)NULL, (fd_set *)NULL, &timer);
+#  endif
       rl_point = orig_point;
 #else /* !HAVE_SELECT */
       _rl_insert_char (count, invoking_key);

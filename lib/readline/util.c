@@ -98,7 +98,8 @@ _rl_walphabetic (wchar_t wc)
 int
 _rl_abort_internal (void)
 {
-  rl_ding ();
+  if (RL_ISSTATE (RL_STATE_TIMEOUT) == 0)
+    rl_ding ();			/* Don't ring the bell on a timeout */
   rl_clear_message ();
   _rl_reset_argument ();
   rl_clear_pending_input ();

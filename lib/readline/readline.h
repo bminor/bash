@@ -448,6 +448,13 @@ extern int rl_read_key (void);
 extern int rl_getc (FILE *);
 extern int rl_set_keyboard_input_timeout (int);
 
+/* Functions to set and reset timeouts. */
+extern int rl_set_timeout (unsigned int, unsigned int);
+extern int rl_timeout_remaining (unsigned int *, unsigned int *);
+
+#undef rl_clear_timeout
+#define rl_clear_timeout() rl_set_timeout (0, 0)
+
 /* `Public' utility functions . */
 extern void rl_extend_line_buffer (int);
 extern int rl_ding (void);
@@ -598,6 +605,8 @@ extern rl_hook_func_t *rl_event_hook;
 
 /* The address of a function to call if a read is interrupted by a signal. */
 extern rl_hook_func_t *rl_signal_event_hook;
+
+extern rl_hook_func_t *rl_timeout_event_hook;
 
 /* The address of a function to call if Readline needs to know whether or not
    there is data available from the current input source. */
@@ -906,7 +915,7 @@ extern int rl_persistent_signal_handlers;
 #define RL_STATE_REDISPLAYING	0x1000000	/* updating terminal display */
 
 #define RL_STATE_DONE		0x2000000	/* done; accepted line */
-#define RL_STATE_TIMEOUT	0x4000000	/* readline() timed out */
+#define RL_STATE_TIMEOUT	0x4000000
 
 #define RL_SETSTATE(x)		(rl_readline_state |= (x))
 #define RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))
