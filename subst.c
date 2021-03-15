@@ -3721,6 +3721,95 @@ cond_expand_word (w, special)
 }
 #endif
 
+/* Expand $'...' and $"..." in a string for code paths that don't do it. The
+   FLAGS argument is 1 if this function should treat CTLESC as a quote
+   character (e.g., for here-documents) or not (e.g., for shell_expand_line). */
+char *
+expand_string_dollar_quote (string, flags)
+     char *string;
+     int flags;
+{
+  size_t slen;
+  int sindex, c, translen, retind, retsize, peekc, news;
+  char *ret, *trans, *send, *t;
+  DECLARE_MBSTATE;
+
+  retsize = slen + 1;
+  ret = xmalloc (retsize);
+  retind = 0;
+
+  slen = strlen (string);
+  send = string + slen;
+  sindex = 0;
+
+  while (c = string[sindex])
+    {
+      switch (c)
+	{
+	default:
+	  RESIZE_MALLOCED_BUFFER (ret, retind, locale_mb_cur_max + 1, retsize, 64);
+	  COPY_CHAR_I (ret, retind, string, send, sindex);
+	  break;
+
+	case '\\':
+	  RESIZE_MALLOCED_BUFFER (ret, retind, locale_mb_cur_max + 2, retsize, 64);
+	  ret[retind++] = string[sindex++];
+
+	  if (string[sindex])
+	    COPY_CHAR_I (ret, retind, string, send, sindex);
+	  break;
+
+	case CTLESC:
+	  RESIZE_MALLOCED_BUFFER (ret, retind, locale_mb_cur_max + 2, retsize, 64);
+	  if (flags)
+	    ret[retind++] = string[sindex++];
+	  if (string[sindex])
+	    COPY_CHAR_I (ret, retind, string, send, sindex);
+	  break;
+
+	case '$':
+	  peekc = string[++sindex];
+	  if (peekc != '\'' && peekc != '"')
+	    {
+	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 16);
+	      ret[retind++] = c;
+	      break;
+	    }
+	  if (peekc == '\'')
+	    {
+	      /* We overload SX_COMPLETE below */
+	      news = skip_single_quoted (string, slen, ++sindex, SX_COMPLETE);
+	      t = substring (string, sindex, news - 1);
+	      trans = ansiexpand (t, 0, news-sindex-1, &translen);
+	      free (t);
+	      t = sh_single_quote (trans);
+	      sindex = news;
+	    }
+	  else
+	    {
+	      news = ++sindex;
+	      t = string_extract_double_quoted (string, &news, SX_COMPLETE);
+	      trans = localeexpand (t, 0, news-sindex, 0, &translen);
+	      free (t);
+	      t = sh_mkdoublequoted (trans, translen, 0);
+	      sindex = news;
+	    }
+	  free (trans);
+	  trans = t;
+	  translen = strlen (trans);
+
+	  RESIZE_MALLOCED_BUFFER (ret, retind, translen + 1, retsize, 128);
+	  strcpy (ret + retind, trans);
+	  retind += translen;
+	  FREE (trans);
+	  break;
+	}
+    }
+
+  ret[retind] = 0;
+  return ret;
+}
+
 /* Call expand_word_internal to expand W and handle error returns.
    A convenience function for functions that don't want to handle
    any errors or free any memory before aborting. */
@@ -3844,7 +3933,6 @@ expand_string_assignment (string, quoted)
     }
   return (value);
 }
-
 
 /* Expand one of the PS? prompt strings. This is a sort of combination of
    expand_string_unsplit and expand_string_internal, but returns the

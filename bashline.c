@@ -2764,12 +2764,16 @@ static int
 history_and_alias_expand_line (count, ignore)
      int count, ignore;
 {
-  char *new_line;
+  char *new_line, *t;
 
   new_line = 0;
 #if defined (BANG_HISTORY)
   new_line = history_expand_line_internal (rl_line_buffer);
 #endif
+
+  t = expand_string_dollar_quote (new_line ? new_line : rl_line_buffer, 0);
+  FREE (new_line);
+  new_line = t;
 
 #if defined (ALIAS)
   if (new_line)
@@ -2802,7 +2806,7 @@ static int
 shell_expand_line (count, ignore)
      int count, ignore;
 {
-  char *new_line;
+  char *new_line, *t;
   WORD_LIST *expanded_string;
   WORD_DESC *w;
 
@@ -2810,6 +2814,10 @@ shell_expand_line (count, ignore)
 #if defined (BANG_HISTORY)
   new_line = history_expand_line_internal (rl_line_buffer);
 #endif
+
+  t = expand_string_dollar_quote (new_line ? new_line : rl_line_buffer, 0);
+  FREE (new_line);
+  new_line = t;
 
 #if defined (ALIAS)
   if (new_line)

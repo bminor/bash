@@ -128,6 +128,10 @@ unset mytab
 recho "${mytab:-$'\t'}"
 recho "$( args $'A\tB' )"
 
+# tests for $'...' not being expanded when inside double quotes
+recho $'a\tb\tc'
+recho "$'a\tb\tc'"
+
 ${THIS_SH} ./nquote1.sub
 ${THIS_SH} ./nquote2.sub
 ${THIS_SH} ./nquote3.sub

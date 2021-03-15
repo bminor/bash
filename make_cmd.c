@@ -575,7 +575,7 @@ make_here_document (temp, lineno)
 
   kill_leading = temp->instruction == r_deblank_reading_until;
 
-  document = (char *)NULL;
+  full_line = document = (char *)NULL;
   document_index = document_size = 0;
 
   /* Quote removal is the only expansion performed on the delimiter
@@ -628,17 +628,20 @@ make_here_document (temp, lineno)
 	     check the word before stripping the whitespace.  This
 	     is a hack, though. */
 	  if (STREQN (line, redir_word, redir_len) && line[redir_len] == '\n')
-	    goto document_done;
+	    break;
 
 	  while (*line == '\t')
 	    line++;
 	}
 
       if (*line == 0)
-	continue;
+	{
+	  free (full_line);
+	  continue;
+	}
 
       if (STREQN (line, redir_word, redir_len) && line[redir_len] == '\n')
-	goto document_done;
+	break;
 
       len = strlen (line);
       if (len + document_index >= document_size)
@@ -651,10 +654,14 @@ make_here_document (temp, lineno)
 	 being an empty string before the call to strlen. */
       FASTCOPY (line, document + document_index, len);
       document_index += len;
+
+      free (full_line);
     }
 
   if (full_line == 0)
     internal_warning (_("here-document at line %d delimited by end-of-file (wanted `%s')"), lineno, redir_word);
+
+  FREE (full_line);
 
 document_done:
   if (document)

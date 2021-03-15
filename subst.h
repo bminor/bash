@@ -187,6 +187,9 @@ extern char *expand_assignment_string_to_string PARAMS((char *, int));
 /* Expand an arithmetic expression string */
 extern char *expand_arith_string PARAMS((char *, int));
 
+/* Expand $'...' and $"..." in a string for code paths that do not. */
+extern char *expand_string_dollar_quote PARAMS((char *, int));
+
 /* De-quote quoted characters in STRING. */
 extern char *dequote_string PARAMS((char *));
 

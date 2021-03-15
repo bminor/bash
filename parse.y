@@ -2116,12 +2116,14 @@ read_a_line (remove_quoted_newline)
    the secondary prompt.  This is used to read the lines of a here
    document.  REMOVE_QUOTED_NEWLINE is non-zero if we should remove
    newlines quoted with backslashes while reading the line.  It is
-   non-zero unless the delimiter of the here document was quoted. */
+   non-zero unless the delimiter of the here document was quoted.
+   If it is zero, we don't perform $'...' and $"..." expansion because
+   we treat the lines as if they are between double quotes. */
 char *
 read_secondary_line (remove_quoted_newline)
      int remove_quoted_newline;
 {
-  char *ret;
+  char *ret, *t;
   int n, c;
 
   prompt_string_pointer = &ps2_prompt;
@@ -2141,7 +2143,23 @@ read_secondary_line (remove_quoted_newline)
       maybe_add_history (ret);
     }
 #endif /* HISTORY */
-  return ret;
+  if (ret == 0)
+    return ret;
+  if (remove_quoted_newline == 0)
+    return (savestring (ret));
+
+  t = ret;
+  while (t = strchr (t, '$'))
+    {
+      if (t[1] == '\'' || t[1] == '"')
+	break;
+      else
+	t++;
+    }
+  if (t == 0)
+    return (savestring (ret));
+  t = expand_string_dollar_quote (ret, 1);
+  return t;
 }
 
 /* **************************************************************** */

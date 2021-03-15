@@ -9826,3 +9826,27 @@ builtins/read.def
 	- read_builtin: changes to use the readline timeout functions to
 	  implement timeouts with `read -e'; these use rl_set_timeout and
 	  sh_timer structs together
+
+				   3/12
+				   ----
+subst.c
+	- expand_string_dollar_quote: new function, expands $'...' and $"..."
+	  in a string for those code paths that don't expand it themselves
+
+subst.h
+	- expand_string_dollar_quote: extern declaration
+
+parse.y
+	- read_secondary_line: if $'...' or $"..." appears in the line, call
+	  expand_string_dollar_quote to expand them. This now returns new
+	  memory, need to change callers
+
+make_cmd.c
+	- make_here_document: account for read_secondary_line returning newly
+	  allocated memory, free `full_line' appropriately
+
+bashline.c
+	- shell_expand_line,history_and_alias_expand_line: expand $'...' and
+	  $"..." in the line by calling expand_string_dollar_quote, since
+	  that happens after history expansion and before alias expansion in
+	  normal processing 
