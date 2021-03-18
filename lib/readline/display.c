@@ -2421,9 +2421,24 @@ dumb_update:
 		((nfd-new) < (prompt_last_invisible-(current_line*_rl_screenwidth+prompt_invis_chars_first_line))))
 	    ADJUST_CPOS (wrap_offset - prompt_invis_chars_first_line);
 
-	  /* XXX - what happens if wrap_offset == prompt_invis_chars_first_line
-	     and we are drawing the first line (current_line == 0)? We should
-	     adjust by _rl_last_c_pos -= prompt_invis_chars_first_line */
+	  /* What happens if wrap_offset == prompt_invis_chars_first_line
+	     and we are drawing the first line (current_line == 0), or if we
+	     are drawing the first line and changing the number of invisible
+	     characters in the line? If we're starting to draw before the last
+	     invisible character in the prompt, we need to adjust by
+	     _rl_last_c_pos -= prompt_invis_chars_first_line. This can happen
+	     when we finish reading a digit argument (with the "(arg: N)"
+	     prompt) and are switching back to displaying a line with a prompt
+	     containing invisible characters, since we have to redraw the
+	     entire prompt string. */
+	  if ((mb_cur_max > 1 && rl_byte_oriented == 0) &&
+		current_line == 0 && wrap_offset &&
+		displaying_prompt_first_line &&
+		wrap_offset == prompt_invis_chars_first_line &&
+		visible_wrap_offset != current_invis_chars &&
+		visible_wrap_offset != prompt_invis_chars_first_line &&
+		((nfd-new) < prompt_last_invisible))
+	    ADJUST_CPOS (prompt_invis_chars_first_line);
 	}
     }
   else				/* Delete characters from line. */

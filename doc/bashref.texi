@@ -1129,7 +1129,7 @@ This means that in the pattern @samp{xxx.txt}, the @samp{.} matches any
 character in the string (its usual regular expression meaning), but in the
 pattern @samp{"xxx.txt"} it can only match a literal @samp{.}.
 Shell programmers should take special care with backslashes, since backslashes
-are used both by the shell and regular expressions to remove the special
+are used by both the shell and regular expressions to remove the special
 meaning from the following character.
 The following two sets of commands are @emph{not} equivalent:
 @example
@@ -3572,6 +3572,11 @@ If a non-empty directory name from @env{CDPATH} is used, or if
 @samp{-} is the first argument, and the directory change is
 successful, the absolute pathname of the new working directory is
 written to the standard output.
+
+If the directory change is successful, @code{cd} sets the value of the
+@env{PWD} environment variable to the new directory name, and sets the
+@env{OLDPWD} environment variable to the value of the current working
+directory before the change.
 
 The return status is zero if the directory is successfully changed,
 non-zero otherwise.
@@ -7501,11 +7506,16 @@ with zero.
 popd [-n] [+@var{N} | -@var{N}]
 @end example
 
-When no arguments are given, @code{popd}
-removes the top directory from the stack and
-performs a @code{cd} to the new top directory.
+Removes elements from the directory stack.
 The elements are numbered from 0 starting at the first directory
-listed with @code{dirs}; that is, @code{popd} is equivalent to @code{popd +0}.
+listed by @code{dirs};
+that is, @code{popd} is equivalent to @code{popd +0}.
+
+When no arguments are given, @code{popd}
+removes the top directory from the stack and changes to
+the new top directory.
+
+Arguments, if supplied, have the following meanings:
 
 @table @code
 @item -n
@@ -7513,11 +7523,23 @@ Suppresses the normal change of directory when removing directories
 from the stack, so that only the stack is manipulated.
 @item +@var{N}
 Removes the @var{N}th directory (counting from the left of the
-list printed by @code{dirs}), starting with zero.
+list printed by @code{dirs}), starting with zero, from the stack.
 @item -@var{N}
 Removes the @var{N}th directory (counting from the right of the
-list printed by @code{dirs}), starting with zero.
+list printed by @code{dirs}), starting with zero, from the stack.
 @end table
+
+If the top element of the directory stack is modified, and
+the @option{-n} option was not supplied, @code{popd} uses the @code{cd}
+builtin to change to the directory at the top of the stack.
+If the @code{cd} fails, @code{popd} returns a non-zero value.
+
+Otherwise, @code{popd} returns an unsuccessful status if
+an invalid option is encountered, the directory stack
+is empty, or a non-existent directory stack entry is specified.
+
+If the @code{popd} command is successful, a @code{dirs}
+is performed as well, and the return status is 0.
 
 @btindex pushd
 @item pushd
@@ -7525,10 +7547,13 @@ list printed by @code{dirs}), starting with zero.
 pushd [-n] [@var{+N} | @var{-N} | @var{dir}]
 @end example
 
-Save the current directory on the top of the directory stack
-and then @code{cd} to @var{dir}.
-With no arguments, @code{pushd} exchanges the top two directories
-and makes the new top the current directory.
+Adds a directory to the top of the directory stack, or rotates
+the stack, making the new top of the stack the current working
+directory.
+With no arguments, @code{pushd} exchanges the top two elements
+of the directory stack.
+
+Arguments, if supplied, have the following meanings:
 
 @table @code
 @item -n
@@ -7543,10 +7568,22 @@ Brings the @var{N}th directory (counting from the right of the
 list printed by @code{dirs}, starting with zero) to the top of
 the list by rotating the stack.
 @item @var{dir}
-Makes @var{dir} be the top of the stack, making
-it the new current directory as if it had been supplied as an argument
-to the @code{cd} builtin.
+Makes @var{dir} be the top of the stack.
 @end table
+
+After the stack has been modified, if the @option{-n} option was not
+supplied, @code{pushd} uses the @code{cd} builtin to change to the
+directory at the top of the stack.
+If the @code{cd} fails, @code{pushd} returns a non-zero value.
+
+Otherwise, if no arguments are supplied, @code{pushd} returns 0 unless the
+directory stack is empty.
+When rotating the directory stack, @code{pushd} returns 0 unless
+the directory stack is empty or a non-existent directory stack element
+is specified.
+
+If the @code{pushd} command is successful, a @code{dirs} is performed as well.
+
 @end table
 
 @node Controlling the Prompt
@@ -7604,7 +7641,8 @@ The version of Bash (e.g., 2.00)
 @item \V
 The release of Bash, version + patchlevel (e.g., 2.00.0)
 @item \w
-The current working directory, with @env{$HOME} abbreviated with a tilde
+The value of the @code{PWD} shell variable (@env{$PWD}),
+with @env{$HOME} abbreviated with a tilde
 (uses the @env{$PROMPT_DIRTRIM} variable).
 @item \W
 The basename of @env{$PWD}, with @env{$HOME} abbreviated with a tilde.

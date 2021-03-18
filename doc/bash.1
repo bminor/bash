@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Mar  4 15:52:34 EST 2021
+.\"	Last Change: Tue Mar 16 14:35:58 EDT 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 March 4" "GNU Bash 5.1"
+.TH BASH 1 "2021 March 16" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5397,7 +5397,8 @@ the version of \fBbash\fP (e.g., 2.00)
 the release of \fBbash\fP, version + patch level (e.g., 2.00.0)
 .TP
 .B \ew
-the current working directory, with
+the value of the \fBPWD\fP shell variable (\fB$PWD\fP),
+with
 .SM
 .B $HOME
 abbreviated with a tilde
@@ -5407,7 +5408,8 @@ abbreviated with a tilde
 variable)
 .TP
 .B \eW
-the basename of the current working directory, with
+the basename of \fB$PWD\fP,
+with
 .SM
 .B $HOME
 abbreviated with a tilde
@@ -6757,6 +6759,11 @@ a shell comment.
 If a numeric argument causes the comment character to be removed, the line
 will be executed by the shell.
 .TP
+.B spell\-correct\-word (C\-x s)
+Perform spelling correction on the current word, treating it as a directory
+or filename, in the same way as the \fBcdspell\fP shell option.
+Word boundaries are the same as those used by \fBshell\-forward\-word\fP.
+.TP
 .B glob\-complete\-word (M\-g)
 The word before point is treated as a pattern for pathname expansion,
 with an asterisk implicitly appended.  This pattern is used to
@@ -7728,6 +7735,10 @@ is used, or if
 \fB\-\fP is the first argument, and the directory change is
 successful, the absolute pathname of the new working directory is
 written to the standard output.
+If the directory change is successful, \fBcd\fP sets the value of the
+\fBPWD\fP environment variable to the new directory name, and sets the
+\fBOLDPWD\fP environment variable to the value of the current working
+directory before the change.
 The return value is true if the directory was successfully changed;
 false otherwise.
 .TP
@@ -9084,10 +9095,12 @@ argument is supplied, \fIarray\fP is invalid or unassignable, or if
 .RE
 .TP
 \fBpopd\fP [\-\fBn\fP] [+\fIn\fP] [\-\fIn\fP]
-Removes entries from the directory stack.  With no arguments,
-removes the top directory from the stack, and performs a
-.B cd
-to the new top directory.
+Removes entries from the directory stack.
+The elements are numbered from 0 starting at the first directory
+listed by \fBdirs\fP.
+With no arguments, \fBpopd\fP
+removes the top directory from the stack, and
+changes to the new top directory.
 Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
@@ -9100,7 +9113,8 @@ from the stack, so that only the stack is manipulated.
 Removes the \fIn\fPth entry counting from the left of the list
 shown by
 .BR dirs ,
-starting with zero.  For example:
+starting with zero, from the stack.
+For example:
 .if n ``popd +0''
 .if t \f(CWpopd +0\fP
 removes the first directory,
@@ -9121,15 +9135,21 @@ removes the last directory,
 the next to last.
 .PD
 .PP
+If the top element of the directory stack is modified, and
+the \fI-n\fP option was not supplied, \fBpopd\fP uses the \fBcd\fP
+builtin to change to the directory at the top of the stack.
+If the \fBcd\fP fails, \fBpopd\fP returns a non-zero value.
+.PP
+Otherwise,
+.B popd
+returns false if an invalid option is encountered, the directory stack
+is empty, or a non-existent directory stack entry is specified.
+.PP
 If the
 .B popd
 command is successful, a
 .B dirs
 is performed as well, and the return status is 0.
-.B popd
-returns false if an invalid option is encountered, the directory stack
-is empty, a non-existent directory stack entry is specified, or the
-directory change fails.
 .RE
 .TP
 \fBprintf\fP [\fB\-v\fP \fIvar\fP] \fIformat\fP [\fIarguments\fP]
@@ -9193,8 +9213,9 @@ The return value is zero on success, non-zero on failure.
 .PD
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
-directory.  With no arguments, \fBpushd\fP exchanges the top two directories
-and returns 0, unless the directory stack is empty.
+directory.
+With no arguments, \fBpushd\fP exchanges the top two elements of
+the directory stack.
 Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
@@ -9219,26 +9240,27 @@ starting with zero) is at the top.
 .I dir
 Adds
 .I dir
-to the directory stack at the top, making it the
-new current working directory as if it had been supplied as the argument
-to the \fBcd\fP builtin.
+to the directory stack at the top
 .PD
+.PP
+After the stack has been modified, if the \fB\-n\fP option was not
+supplied, \fBpushd\fP uses the \fBcd\fP builtin to change to the
+directory at the top of the stack.
+If the \fBcd\fP fails, \fBpushd\fP returns a non-zero value.
+.PP
+Otherwise, if no arguments are supplied,
+.B pushd
+returns 0 unless the directory stack is empty.
+When rotating the directory stack,
+.B pushd
+returns 0 unless the directory stack is empty or
+a non-existent directory stack element is specified.
 .PP
 If the
 .B pushd
 command is successful, a
 .B dirs
 is performed as well.
-If the first form is used,
-.B pushd
-returns 0 unless the cd to
-.I dir
-fails.  With the second form,
-.B pushd
-returns 0 unless the directory stack is empty,
-a non-existent directory stack element is specified,
-or the directory change to the specified new current directory
-fails.
 .RE
 .TP
 \fBpwd\fP [\fB\-LP\fP]

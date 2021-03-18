@@ -18,7 +18,6 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
 topdir = .
 srcdir = .
 VPATH = .
@@ -49,6 +48,8 @@ TEXI2HTML   = $(srcdir)/texi2html
 QUIETPS     = #set this to -q to shut up dvips
 PSDPI       = 300	# I don't have any 600-dpi printers
 DVIPS       = dvips -D ${PSDPI} $(QUIETPS) -o $@     # tricky
+DVIPDF      = dvipdfm -o $@ -p ${PAPERSIZE}
+PSPDF       = gs -sPAPERSIZE=${PAPERSIZE} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -sOutputFile=$@
 
 RLSRC = $(srcdir)/rlman.texi $(srcdir)/rluser.texi \
 	$(srcdir)/rltech.texi $(srcdir)/version.texi \
@@ -66,15 +67,25 @@ DVIOBJ = readline.dvi history.dvi rluserman.dvi
 INFOOBJ = readline.info history.info rluserman.info
 PSOBJ = readline.ps history.ps rluserman.ps
 HTMLOBJ = readline.html history.html rluserman.html
+PDFOBJ = readline.pdf history.pdf rluserman.pdf
 
 INTERMEDIATE_OBJ = rlman.dvi
 
-CREATED_DOCS = $(DVIOBJ) $(INFOOBJ) $(PSOBJ) $(HTMLOBJ)
+CREATED_DOCS = $(DVIOBJ) $(INFOOBJ) $(PSOBJ) $(HTMLOBJ) $(PDFOBJ)
 
-.SUFFIXES:      .ps .txt .dvi
+.SUFFIXES:      .ps .txt .dvi .html .pdf
 
-all: info dvi html ps 
+.ps.pdf:
+	$(RM) $@
+	-${PSPDF} $<
+
+.dvi.pdf:
+	$(RM) $@
+	-${DVIPDF} $<
+
+all: info dvi html ps
 nodvi: info html
+pdf: $(PDFOBJ)
 
 readline.dvi: $(RLSRC)
 	TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS $(TEXI2DVI) $(srcdir)/rlman.texi
@@ -123,14 +134,17 @@ dvi:	$(DVIOBJ)
 ps:	$(PSOBJ)
 html:	$(HTMLOBJ)
 
+readline.pdf:   readline.dvi
+history.pdf:    history.dvi
+rluserman.pdf:  rluserman.dvi
+
 clean:
 	$(RM) *.aux *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps *.pgs \
-	      *.fns *.kys *.tps *.vrs *.o core
+	      *.fns *.kys *.tps *.vrs *.bt *.bts *.o core *.core
 
 distclean: clean
 	$(RM) $(CREATED_DOCS)
 	$(RM) $(INTERMEDIATE_OBJ)
-	$(RM) Makefile
 
 mostlyclean: clean
 

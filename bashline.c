@@ -142,6 +142,8 @@ static int bash_kill_shellword PARAMS((int, int));
 static int bash_backward_kill_shellword PARAMS((int, int));
 static int bash_transpose_shellwords PARAMS((int, int));
 
+static int bash_spell_correct_shellword PARAMS((int, int));
+
 /* Helper functions for Readline. */
 static char *restore_tilde PARAMS((char *, char *));
 static char *maybe_restore_tilde PARAMS((char *, char *));
@@ -469,6 +471,9 @@ initialize_readline ()
   rl_add_defun ("shell-kill-word", bash_kill_shellword, -1);
   rl_add_defun ("shell-backward-kill-word", bash_backward_kill_shellword, -1);
   rl_add_defun ("shell-transpose-words", bash_transpose_shellwords, -1);
+
+  rl_add_defun ("spell-correct-word", bash_spell_correct_shellword, -1);
+  rl_bind_key_if_unbound_in_map ('s', bash_spell_correct_shellword, emacs_ctlx_keymap);
 
 #ifdef ALIAS
   rl_add_defun ("alias-expand-line", alias_expand_line, -1);
@@ -1320,6 +1325,55 @@ bash_transpose_shellwords (count, key)
   rl_end_undo_group ();
   xfree (word1);
   xfree (word2);
+
+  return 0;
+}
+
+/* Directory name spelling correction on the current word (not shellword).
+   COUNT > 1 is not exactly correct yet. */
+static int
+bash_spell_correct_shellword (count, key)
+     int count, key;
+{
+  int opoint, wbeg, wend;
+  char *text, *newdir;
+
+  opoint = rl_point;
+  while (count)
+    {
+      bash_backward_shellword (1, key);
+      wbeg = rl_point;
+      bash_forward_shellword (1, key);
+      wend = rl_point;
+
+      if (wbeg > wend)
+	break;
+
+      text = rl_copy_text (wbeg, wend);
+
+      newdir = dirspell (text);
+      if (newdir)
+	{
+	  rl_begin_undo_group ();
+	  rl_delete_text (wbeg, wend);
+	  rl_point = wbeg;
+	  if (*newdir)
+	    rl_insert_text (newdir);
+	  rl_mark = wbeg;
+	  rl_end_undo_group ();
+	}
+
+      free (text);
+      free (newdir);
+
+      if (rl_point >= rl_end)
+	break;
+
+      count--;
+
+      if (count)
+	bash_forward_shellword (1, key);		/* XXX */
+    }
 
   return 0;
 }

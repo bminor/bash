@@ -2,20 +2,21 @@
 # This makefile for Readline library documentation is in -*- text -*- mode.
 # Emacs likes it that way.
 
-# Copyright (C) 1996-2002 Free Software Foundation, Inc.
-
+#   Copyright (C) 1996-2002 Free Software Foundation, Inc.
+#
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
-
+#
 #   This program is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
-
+#
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 topdir = .
 srcdir = .
@@ -45,7 +46,7 @@ MAKEINFO    = LANGUAGE= makeinfo
 TEXI2DVI    = $(srcdir)/texi2dvi
 TEXI2HTML   = $(srcdir)/texi2html
 QUIETPS     = #set this to -q to shut up dvips
-PSDPI       = 600
+PSDPI       = 300	# I don't have any 600-dpi printers
 DVIPS       = dvips -D ${PSDPI} $(QUIETPS) -o $@     # tricky
 DVIPDF      = dvipdfm -o $@ -p ${PAPERSIZE}
 PSPDF       = gs -sPAPERSIZE=${PAPERSIZE} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -sOutputFile=$@

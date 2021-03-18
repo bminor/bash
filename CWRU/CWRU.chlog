@@ -9850,3 +9850,48 @@ bashline.c
 	  $"..." in the line by calling expand_string_dollar_quote, since
 	  that happens after history expansion and before alias expansion in
 	  normal processing 
+
+				   3/15
+				   ----
+subst.c
+	- expand_string_dollar_quote: fix out-of-order initialization
+
+Makefile.in
+	- {TAGS,tags}: add ETAGS/ETAGSFLAGS/CTAGS/CTAGS flags; make sure to
+	  cd to the source directory before running them to get source files
+	  that don't have absolute paths. Fix from Mike Jonkmans
+	  <bashbug@jonkmans.nl>
+
+parse.y
+	- xparse_dolparen: don't longjmp if FLAGS includes SX_NOLONGJMP. From
+	  a report by Xu Lu <oliver_lew@outlook.com>
+
+				   3/16
+				   ----
+subst.c
+	- process_substitute: set startup_state and parse_and_execute_level
+	  to see if we can avoid a fork()
+
+bashline.c
+	- bash_spell_correct_word: bindable command (spell-correct-word) to
+	  perform spelling correction on the current `shellword', using the
+	  same code as the `cdspell' option and directory spelling correction
+	  during completion. Feature suggested by in 10/2020 by
+	  Karl Kleinpaste <karl@kleinpaste.org>
+	- bash_spell_correct_word: bound to "C-x s" by default in emacs mode
+
+lib/readline/display.c
+	- rl_redisplay: fix redisplay problem that occurs when switching from
+	  the rl-digit-argument prompt "(arg: N)" back to the regular prompt,
+	  and the regular prompt contains invisible characters
+
+doc/bash.1,lib/readline/doc/rluser.texi
+	- spell-correct-word: document new function and its default binding
+
+				   3/17
+				   ----
+doc/{bash.1,bashref.texi}
+	- cd: slight changes to specify that it sets PWD and OLDPWD
+	- {pushd,popd}: make it clear that these builtins use cd to change
+	  the current working directory; change wording to simplify the
+	  description and clarify the exit status

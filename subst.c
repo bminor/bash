@@ -3734,13 +3734,13 @@ expand_string_dollar_quote (string, flags)
   char *ret, *trans, *send, *t;
   DECLARE_MBSTATE;
 
-  retsize = slen + 1;
-  ret = xmalloc (retsize);
-  retind = 0;
-
   slen = strlen (string);
   send = string + slen;
   sindex = 0;
+
+  retsize = slen + 1;
+  ret = xmalloc (retsize);
+  retind = 0;
 
   while (c = string[sindex])
     {
@@ -6205,10 +6205,8 @@ process_substitute (string, open_for_read_in_child)
 
   remove_quoted_escapes (string);
 
-#if 0 /* TAG: bash-5.2 */
   startup_state = 2;	/* see if we can avoid a fork */
   parse_and_execute_level = 0;
-#endif
 
   /* Give process substitution a place to jump back to on failure,
      so we don't go back up to main (). */

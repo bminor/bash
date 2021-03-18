@@ -4655,7 +4655,7 @@ xparse_dolparen (base, string, indp, flags)
     itrace("xparse_dolparen:%d: *indp (%d) < orig_ind (%d), orig_string = `%s'", line_number, *indp, orig_ind, ostring);
 #endif
 
-  if (base[*indp] != ')')
+  if (base[*indp] != ')' && (flags & SX_NOLONGJMP) == 0)
     {
       /*(*/
       parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), ')');

@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.7 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.1, 28 February 2021).
+Bash shell (version 5.1, 4 March2021).
 
-   This is Edition 5.1, last updated 28 February 2021, of 'The GNU Bash
+   This is Edition 5.1, last updated 4 March2021, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.1.
 
    Copyright (C) 1988-2021 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.1, 28 February 2021).  The Bash home page is
+Bash shell (version 5.1, 4 March2021).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.1, last updated 28 February 2021, of 'The GNU Bash
+   This is Edition 5.1, last updated 4 March2021, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.1.
 
    Bash contains features that appear in other popular shells, and some
@@ -971,7 +971,7 @@ File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Pre
      any character in the string (its usual regular expression meaning),
      but in the pattern '"xxx.txt"' it can only match a literal '.'.
      Shell programmers should take special care with backslashes, since
-     backslashes are used both by the shell and regular expressions to
+     backslashes are used by both the shell and regular expressions to
      remove the special meaning from the following character.  The
      following two sets of commands are _not_ equivalent:
           pattern='\.'
@@ -1059,6 +1059,7 @@ had been terminated with the '&' control operator, with a two-way pipe
 established between the executing shell and the coprocess.
 
    The syntax for a coprocess is:
+
      coproc [NAME] COMMAND [REDIRECTIONS]
 
 This creates a coprocess named NAME.  COMMAND may be either a simple
@@ -1066,12 +1067,26 @@ command (*note Simple Commands::) or a compound command (*note Compound
 Commands::).  NAME is a shell variable name.  If NAME is not supplied,
 the default name is 'COPROC'.
 
-   If COMMAND is a compound command, NAME is optional.  The word
-following 'coproc' determines whether that word is interpreted as a
-variable name: it is interpreted as NAME if it is not a reserved word
-that introduces a compound command.  If COMMAND is a simple command,
-NAME is not allowed; this is to avoid confusion between NAME and the
-first word of the simple command.
+   The recommended form to use for a coprocess is
+
+     coproc NAME { COMMAND; }
+
+This form is recommended because simple commands result in the coprocess
+always being named 'COPROC', and it is simpler to use and more complete
+than the other compound commands.
+
+   There are other forms of coprocesses:
+
+     coproc NAME COMPOUND-COMMAND
+     coproc COMPOUND-COMMAND
+     coproc SIMPLE-COMMAND
+
+If COMMAND is a compound command, NAME is optional.  The word following
+'coproc' determines whether that word is interpreted as a variable name:
+it is interpreted as NAME if it is not a reserved word that introduces a
+compound command.  If COMMAND is a simple command, NAME is not allowed;
+this is to avoid confusion between NAME and the first word of the simple
+command.
 
    When the coprocess is executed, the shell creates an array variable
 (*note Arrays::) named NAME in the context of the executing shell.  The
@@ -3386,7 +3401,8 @@ standard.
      unset.  Readonly variables and functions may not be unset.  Some
      shell variables lose their special behavior if they are unset; such
      behavior is noted in the description of the individual variables.
-     The return status is zero unless a NAME is readonly.
+     The return status is zero unless a NAME is readonly or may not be
+     unset.
 
 
 File: bashref.info,  Node: Bash Builtins,  Next: Modifying Shell Behavior,  Prev: Bourne Shell Builtins,  Up: Shell Builtin Commands
@@ -8863,6 +8879,12 @@ File: bashref.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up: 
      is formatted in such a way that it can be made part of an INPUTRC
      file.  This command is unbound by default.
 
+'spell-correct-word (C-x s)'
+     Perform spelling correction on the current word, treating it as a
+     directory or filename, in the same way as the 'cdspell' shell
+     option.  Word boundaries are the same as those used by
+     'shell-forward-word'.
+
 'glob-complete-word (M-g)'
      The word before point is treated as a pattern for pathname
      expansion, with an asterisk implicitly appended.  This pattern is
@@ -11652,7 +11674,7 @@ D.4 Function Index
 * accept-line (Newline or Return):       Commands For History.
                                                               (line   6)
 * alias-expand-line ():                  Miscellaneous Commands.
-                                                              (line 125)
+                                                              (line 131)
 * backward-char (C-b):                   Commands For Moving. (line  15)
 * backward-delete-char (Rubout):         Commands For Text.   (line  17)
 * backward-kill-line (C-x Rubout):       Commands For Killing.
@@ -11701,7 +11723,7 @@ D.4 Function Index
                                                               (line  57)
 * digit-argument (M-0, M-1, ... M--):    Numeric Arguments.   (line   6)
 * display-shell-version (C-x C-v):       Miscellaneous Commands.
-                                                              (line 110)
+                                                              (line 116)
 * do-lowercase-version (M-A, M-B, M-X, ...): Miscellaneous Commands.
                                                               (line  14)
 * downcase-word (M-l):                   Commands For Text.   (line  62)
@@ -11714,7 +11736,7 @@ D.4 Function Index
 * dynamic-complete-history (M-<TAB>):    Commands For Completion.
                                                               (line  90)
 * edit-and-execute-command (C-x C-e):    Miscellaneous Commands.
-                                                              (line 134)
+                                                              (line 140)
 * end-kbd-macro (C-x )):                 Keyboard Macros.     (line   9)
 * end-of-file (usually C-d):             Commands For Text.   (line   6)
 * end-of-history (M->):                  Commands For History.
@@ -11728,15 +11750,15 @@ D.4 Function Index
                                                               (line  33)
 * forward-word (M-f):                    Commands For Moving. (line  18)
 * glob-complete-word (M-g):              Miscellaneous Commands.
-                                                              (line  92)
-* glob-expand-word (C-x *):              Miscellaneous Commands.
                                                               (line  98)
-* glob-list-expansions (C-x g):          Miscellaneous Commands.
+* glob-expand-word (C-x *):              Miscellaneous Commands.
                                                               (line 104)
+* glob-list-expansions (C-x g):          Miscellaneous Commands.
+                                                              (line 110)
 * history-and-alias-expand-line ():      Miscellaneous Commands.
-                                                              (line 128)
+                                                              (line 134)
 * history-expand-line (M-^):             Miscellaneous Commands.
-                                                              (line 118)
+                                                              (line 124)
 * history-search-backward ():            Commands For History.
                                                               (line  57)
 * history-search-forward ():             Commands For History.
@@ -11750,7 +11772,7 @@ D.4 Function Index
 * insert-completions (M-*):              Commands For Completion.
                                                               (line  22)
 * insert-last-argument (M-. or M-_):     Miscellaneous Commands.
-                                                              (line 131)
+                                                              (line 137)
 * kill-line (C-k):                       Commands For Killing.
                                                               (line   6)
 * kill-region ():                        Commands For Killing.
@@ -11760,7 +11782,7 @@ D.4 Function Index
 * kill-word (M-d):                       Commands For Killing.
                                                               (line  23)
 * magic-space ():                        Miscellaneous Commands.
-                                                              (line 121)
+                                                              (line 127)
 * menu-complete ():                      Commands For Completion.
                                                               (line  26)
 * menu-complete-backward ():             Commands For Completion.
@@ -11808,7 +11830,7 @@ D.4 Function Index
                                                               (line  37)
 * shell-backward-word (M-C-b):           Commands For Moving. (line  30)
 * shell-expand-line (M-C-e):             Miscellaneous Commands.
-                                                              (line 113)
+                                                              (line 119)
 * shell-forward-word (M-C-f):            Commands For Moving. (line  26)
 * shell-kill-word (M-C-d):               Commands For Killing.
                                                               (line  32)
@@ -11816,6 +11838,8 @@ D.4 Function Index
                                                               (line  41)
 * skip-csi-sequence ():                  Miscellaneous Commands.
                                                               (line  52)
+* spell-correct-word (C-x s):            Miscellaneous Commands.
+                                                              (line  92)
 * start-kbd-macro (C-x ():               Keyboard Macros.     (line   6)
 * tilde-expand (M-&):                    Miscellaneous Commands.
                                                               (line  30)
@@ -12007,137 +12031,137 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top897
-Node: Introduction2817
-Node: What is Bash?3033
-Node: What is a shell?4147
-Node: Definitions6685
-Node: Basic Shell Features9636
-Node: Shell Syntax10855
-Node: Shell Operation11881
-Node: Quoting13174
-Node: Escape Character14478
-Node: Single Quotes14963
-Node: Double Quotes15311
-Node: ANSI-C Quoting16589
-Node: Locale Translation17846
-Node: Comments19001
-Node: Shell Commands19619
-Node: Reserved Words20557
-Node: Simple Commands21313
-Node: Pipelines21967
-Node: Lists24924
-Node: Compound Commands26719
-Node: Looping Constructs27731
-Node: Conditional Constructs30226
-Node: Command Grouping41797
-Node: Coprocesses43272
-Node: GNU Parallel45542
-Node: Shell Functions49843
-Node: Shell Parameters57063
-Node: Positional Parameters61496
-Node: Special Parameters62398
-Node: Shell Expansions65622
-Node: Brace Expansion67749
-Node: Tilde Expansion70474
-Node: Shell Parameter Expansion73095
-Node: Command Substitution88224
-Node: Arithmetic Expansion89579
-Node: Process Substitution90511
-Node: Word Splitting91631
-Node: Filename Expansion93575
-Node: Pattern Matching96124
-Node: Quote Removal100114
-Node: Redirections100409
-Node: Executing Commands109983
-Node: Simple Command Expansion110653
-Node: Command Search and Execution112607
-Node: Command Execution Environment114985
-Node: Environment117971
-Node: Exit Status119634
-Node: Signals121306
-Node: Shell Scripts123273
-Node: Shell Builtin Commands126285
-Node: Bourne Shell Builtins128323
-Node: Bash Builtins149254
-Node: Modifying Shell Behavior179404
-Node: The Set Builtin179749
-Node: The Shopt Builtin190162
-Node: Special Builtins205074
-Node: Shell Variables206053
-Node: Bourne Shell Variables206490
-Node: Bash Variables208594
-Node: Bash Features241252
-Node: Invoking Bash242265
-Node: Bash Startup Files248278
-Node: Interactive Shells253381
-Node: What is an Interactive Shell?253791
-Node: Is this Shell Interactive?254440
-Node: Interactive Shell Behavior255255
-Node: Bash Conditional Expressions258768
-Node: Shell Arithmetic263345
-Node: Aliases266289
-Node: Arrays268902
-Node: The Directory Stack274911
-Node: Directory Stack Builtins275695
-Node: Controlling the Prompt278663
-Node: The Restricted Shell281611
-Node: Bash POSIX Mode284205
-Node: Shell Compatibility Mode295478
-Node: Job Control302134
-Node: Job Control Basics302594
-Node: Job Control Builtins307596
-Node: Job Control Variables312996
-Node: Command Line Editing314152
-Node: Introduction and Notation315823
-Node: Readline Interaction317446
-Node: Readline Bare Essentials318637
-Node: Readline Movement Commands320420
-Node: Readline Killing Commands321380
-Node: Readline Arguments323298
-Node: Searching324342
-Node: Readline Init File326528
-Node: Readline Init File Syntax327787
-Node: Conditional Init Constructs348325
-Node: Sample Init File352521
-Node: Bindable Readline Commands355645
-Node: Commands For Moving356849
-Node: Commands For History358900
-Node: Commands For Text363693
-Node: Commands For Killing367342
-Node: Numeric Arguments370375
-Node: Commands For Completion371514
-Node: Keyboard Macros375705
-Node: Miscellaneous Commands376392
-Node: Readline vi Mode382076
-Node: Programmable Completion382983
-Node: Programmable Completion Builtins390763
-Node: A Programmable Completion Example401458
-Node: Using History Interactively406705
-Node: Bash History Facilities407389
-Node: Bash History Builtins410394
-Node: History Interaction415402
-Node: Event Designators419022
-Node: Word Designators420376
-Node: Modifiers422136
-Node: Installing Bash423947
-Node: Basic Installation425084
-Node: Compilers and Options428342
-Node: Compiling For Multiple Architectures429083
-Node: Installation Names430776
-Node: Specifying the System Type431594
-Node: Sharing Defaults432310
-Node: Operation Controls432983
-Node: Optional Features433941
-Node: Reporting Bugs444741
-Node: Major Differences From The Bourne Shell445935
-Node: GNU Free Documentation License462785
-Node: Indexes487962
-Node: Builtin Index488416
-Node: Reserved Word Index495243
-Node: Variable Index497691
-Node: Function Index513588
-Node: Concept Index527098
+Node: Top887
+Node: Introduction2797
+Node: What is Bash?3013
+Node: What is a shell?4127
+Node: Definitions6665
+Node: Basic Shell Features9616
+Node: Shell Syntax10835
+Node: Shell Operation11861
+Node: Quoting13154
+Node: Escape Character14458
+Node: Single Quotes14943
+Node: Double Quotes15291
+Node: ANSI-C Quoting16569
+Node: Locale Translation17826
+Node: Comments18981
+Node: Shell Commands19599
+Node: Reserved Words20537
+Node: Simple Commands21293
+Node: Pipelines21947
+Node: Lists24904
+Node: Compound Commands26699
+Node: Looping Constructs27711
+Node: Conditional Constructs30206
+Node: Command Grouping41777
+Node: Coprocesses43252
+Node: GNU Parallel45915
+Node: Shell Functions50216
+Node: Shell Parameters57436
+Node: Positional Parameters61869
+Node: Special Parameters62771
+Node: Shell Expansions65995
+Node: Brace Expansion68122
+Node: Tilde Expansion70847
+Node: Shell Parameter Expansion73468
+Node: Command Substitution88597
+Node: Arithmetic Expansion89952
+Node: Process Substitution90884
+Node: Word Splitting92004
+Node: Filename Expansion93948
+Node: Pattern Matching96497
+Node: Quote Removal100487
+Node: Redirections100782
+Node: Executing Commands110356
+Node: Simple Command Expansion111026
+Node: Command Search and Execution112980
+Node: Command Execution Environment115358
+Node: Environment118344
+Node: Exit Status120007
+Node: Signals121679
+Node: Shell Scripts123646
+Node: Shell Builtin Commands126658
+Node: Bourne Shell Builtins128696
+Node: Bash Builtins149652
+Node: Modifying Shell Behavior179802
+Node: The Set Builtin180147
+Node: The Shopt Builtin190560
+Node: Special Builtins205472
+Node: Shell Variables206451
+Node: Bourne Shell Variables206888
+Node: Bash Variables208992
+Node: Bash Features241650
+Node: Invoking Bash242663
+Node: Bash Startup Files248676
+Node: Interactive Shells253779
+Node: What is an Interactive Shell?254189
+Node: Is this Shell Interactive?254838
+Node: Interactive Shell Behavior255653
+Node: Bash Conditional Expressions259166
+Node: Shell Arithmetic263743
+Node: Aliases266687
+Node: Arrays269300
+Node: The Directory Stack275309
+Node: Directory Stack Builtins276093
+Node: Controlling the Prompt279061
+Node: The Restricted Shell282009
+Node: Bash POSIX Mode284603
+Node: Shell Compatibility Mode295876
+Node: Job Control302532
+Node: Job Control Basics302992
+Node: Job Control Builtins307994
+Node: Job Control Variables313394
+Node: Command Line Editing314550
+Node: Introduction and Notation316221
+Node: Readline Interaction317844
+Node: Readline Bare Essentials319035
+Node: Readline Movement Commands320818
+Node: Readline Killing Commands321778
+Node: Readline Arguments323696
+Node: Searching324740
+Node: Readline Init File326926
+Node: Readline Init File Syntax328185
+Node: Conditional Init Constructs348723
+Node: Sample Init File352919
+Node: Bindable Readline Commands356043
+Node: Commands For Moving357247
+Node: Commands For History359298
+Node: Commands For Text364091
+Node: Commands For Killing367740
+Node: Numeric Arguments370773
+Node: Commands For Completion371912
+Node: Keyboard Macros376103
+Node: Miscellaneous Commands376790
+Node: Readline vi Mode382729
+Node: Programmable Completion383636
+Node: Programmable Completion Builtins391416
+Node: A Programmable Completion Example402111
+Node: Using History Interactively407358
+Node: Bash History Facilities408042
+Node: Bash History Builtins411047
+Node: History Interaction416055
+Node: Event Designators419675
+Node: Word Designators421029
+Node: Modifiers422789
+Node: Installing Bash424600
+Node: Basic Installation425737
+Node: Compilers and Options428995
+Node: Compiling For Multiple Architectures429736
+Node: Installation Names431429
+Node: Specifying the System Type432247
+Node: Sharing Defaults432963
+Node: Operation Controls433636
+Node: Optional Features434594
+Node: Reporting Bugs445394
+Node: Major Differences From The Bourne Shell446588
+Node: GNU Free Documentation License463438
+Node: Indexes488615
+Node: Builtin Index489069
+Node: Reserved Word Index495896
+Node: Variable Index498344
+Node: Function Index514241
+Node: Concept Index527889
 
 End Tag Table
 
