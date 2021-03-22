@@ -751,12 +751,14 @@ If the
 .B nocasematch
 shell option is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Any part of the pattern may be quoted to force the quoted portion
-to be matched as a string.
-Bracket expressions in regular expressions must be treated carefully,
-since normal quoting characters lose their meanings between brackets.
+If any part of the pattern is quoted, the quoted portion is matched literally.
+This means every character in the quoted portion matches itself,
+instead of having any special pattern matching meaning.
 If the pattern is stored in a shell variable, quoting the variable
-expansion forces the entire pattern to be matched as a string.
+expansion forces the entire pattern to be matched literally.
+Treat bracket expressions in regular expressions carefully,
+since normal quoting and pattern characters lose their meanings
+between brackets.
 .if t .sp 0.5
 .if n .sp 1
 The pattern will match if it matches any part of the string.

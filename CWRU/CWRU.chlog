@@ -9895,3 +9895,13 @@ doc/{bash.1,bashref.texi}
 	- {pushd,popd}: make it clear that these builtins use cd to change
 	  the current working directory; change wording to simplify the
 	  description and clarify the exit status
+
+				   3/18
+				   ----
+execute_cmd.c
+	- execute_disk_command: after performing redirections, call
+	  unlink_all_fifos() to remove the FIFOs created as part of
+	  expanding redirections. They should have been opened by then, and
+	  we're going to call shell_execve right away anyway, so we won't be
+	  around to remove the FIFOs. From a report from
+	  Michael Felt <aixtools@gmail.com>

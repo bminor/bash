@@ -913,67 +913,92 @@ File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Pre
      'shopt' in *note The Shopt Builtin::) is enabled, the match is
      performed without regard to the case of alphabetic characters.  The
      return value is 0 if the string matches ('==') or does not match
-     ('!=') the pattern, and 1 otherwise.  Any part of the pattern may
-     be quoted to force the quoted portion to be matched as a string.
+     ('!=') the pattern, and 1 otherwise.
+
+     If you quote any part of the pattern, using any of the shell's
+     quoting mechanisms, the quoted portion is matched literally.  This
+     means every character in the quoted portion matches itself, instead
+     of having any special pattern matching meaning.
 
      An additional binary operator, '=~', is available, with the same
-     precedence as '==' and '!='.  When it is used, the string to the
+     precedence as '==' and '!='.  When you use '=~', the string to the
      right of the operator is considered a POSIX extended regular
-     expression and matched accordingly (using the POSIX 'regcomp' and
-     'regexec' interfaces usually described in regex(3)).  The return
-     value is 0 if the string matches the pattern, and 1 otherwise.  If
-     the regular expression is syntactically incorrect, the conditional
-     expression's return value is 2.  If the 'nocasematch' shell option
-     (see the description of 'shopt' in *note The Shopt Builtin::) is
-     enabled, the match is performed without regard to the case of
-     alphabetic characters.  Any part of the pattern may be quoted to
-     force the quoted portion to be matched as a string.  Bracket
-     expressions in regular expressions must be treated carefully, since
-     normal quoting characters lose their meanings between brackets.  If
-     the pattern is stored in a shell variable, quoting the variable
-     expansion forces the entire pattern to be matched as a string.
+     expression pattern and matched accordingly (using the POSIX
+     'regcomp' and 'regexec' interfaces usually described in regex(3)).
+     The return value is 0 if the string matches the pattern, and 1 if
+     it does not.  If the regular expression is syntactically incorrect,
+     the conditional expression returns 2.  If the 'nocasematch' shell
+     option (see the description of 'shopt' in *note The Shopt
+     Builtin::) is enabled, the match is performed without regard to the
+     case of alphabetic characters.
 
-     The pattern will match if it matches any part of the string.
-     Anchor the pattern using the '^' and '$' regular expression
-     operators to force it to match the entire string.  The array
-     variable 'BASH_REMATCH' records which parts of the string matched
-     the pattern.  The element of 'BASH_REMATCH' with index 0 contains
-     the portion of the string matching the entire regular expression.
-     Substrings matched by parenthesized subexpressions within the
-     regular expression are saved in the remaining 'BASH_REMATCH'
-     indices.  The element of 'BASH_REMATCH' with index N is the portion
-     of the string matching the Nth parenthesized subexpression.
+     You can quote any part of the pattern to force the quoted portion
+     to be matched literally instead of as a regular expression (see
+     above).  If the pattern is stored in a shell variable, quoting the
+     variable expansion forces the entire pattern to be matched
+     literally.
+
+     The pattern will match if it matches any part of the string.  If
+     you want to force the pattern to match the entire string, anchor
+     the pattern using the '^' and '$' regular expression operators.
 
      For example, the following will match a line (stored in the shell
-     variable LINE) if there is a sequence of characters anywhere in the
-     value consisting of any number, including zero, of characters in
-     the 'space' character class, zero or one instances of 'a', then a
-     'b':
+     variable 'line') if there is a sequence of characters anywhere in
+     the value consisting of any number, including zero, of characters
+     in the 'space' character class, immediately followed by zero or one
+     instances of 'a', then a 'b':
+
           [[ $line =~ [[:space:]]*(a)?b ]]
 
-     That means values like 'aab' and ' aaaaaab' will match, as will a
-     line containing a 'b' anywhere in its value.
+     That means values for 'line' like 'aab', ' aaaaaab', 'xaby', and '
+     ab' will all match, as will a line containing a 'b' anywhere in its
+     value.
 
-     Storing the regular expression in a shell variable is often a
-     useful way to avoid problems with quoting characters that are
-     special to the shell.  It is sometimes difficult to specify a
-     regular expression literally without using quotes, or to keep track
-     of the quoting used by regular expressions while paying attention
-     to the shell's quote removal.  Using a shell variable to store the
-     pattern decreases these problems.  For example, the following is
-     equivalent to the above:
+     If you want to match a character that's special to the regular
+     expression grammar ('^$|[]()\.*+?'), it has to be quoted to remove
+     its special meaning.  This means that in the pattern 'xxx.txt', the
+     '.' matches any character in the string (its usual regular
+     expression meaning), but in the pattern '"xxx.txt"', it can only
+     match a literal '.'.
+
+     Likewise, if you want to include a character in your pattern that
+     has a special meaning to the regular expression grammar, you must
+     make sure it's not quoted.  If you want to anchor a pattern at the
+     beginning or end of the string, for instance, you cannot quote the
+     '^' or '$' characters using any form of shell quoting.
+
+     If you want to match 'initial string' at the start of a line, the
+     following will work:
+          [[ $line =~ ^"initial string" ]]
+     but this will not:
+          [[ $line =~ "^initial string" ]]
+     because in the second example the '^' is quoted and doesn't have
+     its usual special meaning.
+
+     It is sometimes difficult to specify a regular expression properly
+     without using quotes, or to keep track of the quoting used by
+     regular expressions while paying attention to shell quoting and the
+     shell's quote removal.  Storing the regular expression in a shell
+     variable is often a useful way to avoid problems with quoting
+     characters that are special to the shell.  For example, the
+     following is equivalent to the pattern used above:
+
           pattern='[[:space:]]*(a)?b'
           [[ $line =~ $pattern ]]
 
-     If you want to match a character that's special to the regular
-     expression grammar, it has to be quoted to remove its special
-     meaning.  This means that in the pattern 'xxx.txt', the '.' matches
-     any character in the string (its usual regular expression meaning),
-     but in the pattern '"xxx.txt"' it can only match a literal '.'.
      Shell programmers should take special care with backslashes, since
      backslashes are used by both the shell and regular expressions to
-     remove the special meaning from the following character.  The
-     following two sets of commands are _not_ equivalent:
+     remove the special meaning from the following character.  This
+     means that after the shell's word expansions complete (*note Shell
+     Expansions::), any backslashes remaining in parts of the pattern
+     that were originally not quoted can remove the special meaning of
+     pattern characters.  If any part of the pattern is quoted, the
+     shell does its best to ensure that the regular expression treats
+     those remaining backslashes as literal, if they appeared in a
+     quoted portion.
+
+     The following two sets of commands are _not_ equivalent:
+
           pattern='\.'
 
           [[ . =~ $pattern ]]
@@ -984,11 +1009,45 @@ File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Pre
 
      The first two matches will succeed, but the second two will not,
      because in the second two the backslash will be part of the pattern
-     to be matched.  In the first two examples, the backslash removes
-     the special meaning from '.', so the literal '.' matches.  If the
+     to be matched.  In the first two examples, the pattern passed to
+     the regular expression parser is '\.'.  The backslash removes the
+     special meaning from '.', so the literal '.' matches.  In the
+     second two examples, the pattern passed to the regular expression
+     parser has the backslash quoted (e.g., '\\\.'), which will not
+     match the string, since it does not contain a backslash.  If the
      string in the first examples were anything other than '.', say 'a',
      the pattern would not match, because the quoted '.' in the pattern
      loses its special meaning of matching any single character.
+
+     Bracket expressions in regular expressions can be sources of errors
+     as well, since characters that are normally special in regular
+     expressions lose their special meanings between brackets.  However,
+     you can use bracket expressions to match special pattern characters
+     without quoting them, so they are sometimes useful for this
+     purpose.
+
+     Though it might seem like a strange way to write it, the following
+     pattern will match a '.' in the string:
+
+          [[ . =~ [.] ]]
+
+     The shell performs any word expansions before passing the pattern
+     to the regular expression functions, so you can assume that the
+     shell's quoting takes precedence.  As noted above, the regular
+     expression parser will interpret any unquoted backslashes remaining
+     in the pattern after shell expansion according to its own rules.
+     The intention is to avoid making shell programmers quote things
+     twice as much as possible, so shell quoting should be sufficient to
+     quote special pattern characters where that's necessary.
+
+     The array variable 'BASH_REMATCH' records which parts of the string
+     matched the pattern.  The element of 'BASH_REMATCH' with index 0
+     contains the portion of the string matching the entire regular
+     expression.  Substrings matched by parenthesized subexpressions
+     within the regular expression are saved in the remaining
+     'BASH_REMATCH' indices.  The element of 'BASH_REMATCH' with index N
+     is the portion of the string matching the Nth parenthesized
+     subexpression.
 
      Expressions may be combined using the following operators, listed
      in decreasing order of precedence:
@@ -3045,6 +3104,11 @@ standard.
      the first argument, and the directory change is successful, the
      absolute pathname of the new working directory is written to the
      standard output.
+
+     If the directory change is successful, 'cd' sets the value of the
+     'PWD' environment variable to the new directory name, and sets the
+     'OLDPWD' environment variable to the value of the current working
+     directory before the change.
 
      The return status is zero if the directory is successfully changed,
      non-zero otherwise.
@@ -6503,10 +6567,14 @@ File: bashref.info,  Node: Directory Stack Builtins,  Up: The Directory Stack
 'popd'
           popd [-n] [+N | -N]
 
+     Removes elements from the directory stack.  The elements are
+     numbered from 0 starting at the first directory listed by 'dirs';
+     that is, 'popd' is equivalent to 'popd +0'.
+
      When no arguments are given, 'popd' removes the top directory from
-     the stack and performs a 'cd' to the new top directory.  The
-     elements are numbered from 0 starting at the first directory listed
-     with 'dirs'; that is, 'popd' is equivalent to 'popd +0'.
+     the stack and changes to the new top directory.
+
+     Arguments, if supplied, have the following meanings:
 
      '-n'
           Suppresses the normal change of directory when removing
@@ -6514,17 +6582,32 @@ File: bashref.info,  Node: Directory Stack Builtins,  Up: The Directory Stack
           manipulated.
      '+N'
           Removes the Nth directory (counting from the left of the list
-          printed by 'dirs'), starting with zero.
+          printed by 'dirs'), starting with zero, from the stack.
      '-N'
           Removes the Nth directory (counting from the right of the list
-          printed by 'dirs'), starting with zero.
+          printed by 'dirs'), starting with zero, from the stack.
+
+     If the top element of the directory stack is modified, and the '-n'
+     option was not supplied, 'popd' uses the 'cd' builtin to change to
+     the directory at the top of the stack.  If the 'cd' fails, 'popd'
+     returns a non-zero value.
+
+     Otherwise, 'popd' returns an unsuccessful status if an invalid
+     option is encountered, the directory stack is empty, or a
+     non-existent directory stack entry is specified.
+
+     If the 'popd' command is successful, a 'dirs' is performed as well,
+     and the return status is 0.
 
 'pushd'
           pushd [-n] [+N | -N | DIR]
 
-     Save the current directory on the top of the directory stack and
-     then 'cd' to DIR.  With no arguments, 'pushd' exchanges the top two
-     directories and makes the new top the current directory.
+     Adds a directory to the top of the directory stack, or rotates the
+     stack, making the new top of the stack the current working
+     directory.  With no arguments, 'pushd' exchanges the top two
+     elements of the directory stack.
+
+     Arguments, if supplied, have the following meanings:
 
      '-n'
           Suppresses the normal change of directory when rotating or
@@ -6539,9 +6622,20 @@ File: bashref.info,  Node: Directory Stack Builtins,  Up: The Directory Stack
           printed by 'dirs', starting with zero) to the top of the list
           by rotating the stack.
      'DIR'
-          Makes DIR be the top of the stack, making it the new current
-          directory as if it had been supplied as an argument to the
-          'cd' builtin.
+          Makes DIR be the top of the stack.
+
+     After the stack has been modified, if the '-n' option was not
+     supplied, 'pushd' uses the 'cd' builtin to change to the directory
+     at the top of the stack.  If the 'cd' fails, 'pushd' returns a
+     non-zero value.
+
+     Otherwise, if no arguments are supplied, 'pushd' returns 0 unless
+     the directory stack is empty.  When rotating the directory stack,
+     'pushd' returns 0 unless the directory stack is empty or a
+     non-existent directory stack element is specified.
+
+     If the 'pushd' command is successful, a 'dirs' is performed as
+     well.
 
 
 File: bashref.info,  Node: Controlling the Prompt,  Next: The Restricted Shell,  Prev: The Directory Stack,  Up: Bash Features
@@ -6597,8 +6691,8 @@ which can appear in the prompt variables 'PS0', 'PS1', 'PS2', and 'PS4':
 '\V'
      The release of Bash, version + patchlevel (e.g., 2.00.0)
 '\w'
-     The current working directory, with '$HOME' abbreviated with a
-     tilde (uses the '$PROMPT_DIRTRIM' variable).
+     The value of the 'PWD' shell variable ('$PWD'), with '$HOME'
+     abbreviated with a tilde (uses the '$PROMPT_DIRTRIM' variable).
 '\W'
      The basename of '$PWD', with '$HOME' abbreviated with a tilde.
 '\!'
@@ -11298,7 +11392,7 @@ D.1 Index of Shell Builtin Commands
 * ::                                     Bourne Shell Builtins.
                                                               (line  11)
 * [:                                     Bourne Shell Builtins.
-                                                              (line 270)
+                                                              (line 275)
 * alias:                                 Bash Builtins.       (line  11)
 * bg:                                    Job Control Builtins.
                                                               (line   7)
@@ -11317,7 +11411,7 @@ D.1 Index of Shell Builtin Commands
 * compopt:                               Programmable Completion Builtins.
                                                               (line 237)
 * continue:                              Bourne Shell Builtins.
-                                                              (line  85)
+                                                              (line  90)
 * declare:                               Bash Builtins.       (line 151)
 * dirs:                                  Directory Stack Builtins.
                                                               (line   7)
@@ -11326,21 +11420,21 @@ D.1 Index of Shell Builtin Commands
 * echo:                                  Bash Builtins.       (line 254)
 * enable:                                Bash Builtins.       (line 303)
 * eval:                                  Bourne Shell Builtins.
-                                                              (line  94)
+                                                              (line  99)
 * exec:                                  Bourne Shell Builtins.
-                                                              (line 102)
+                                                              (line 107)
 * exit:                                  Bourne Shell Builtins.
-                                                              (line 120)
+                                                              (line 125)
 * export:                                Bourne Shell Builtins.
-                                                              (line 127)
+                                                              (line 132)
 * fc:                                    Bash History Builtins.
                                                               (line  10)
 * fg:                                    Job Control Builtins.
                                                               (line  17)
 * getopts:                               Bourne Shell Builtins.
-                                                              (line 143)
+                                                              (line 148)
 * hash:                                  Bourne Shell Builtins.
-                                                              (line 187)
+                                                              (line 192)
 * help:                                  Bash Builtins.       (line 332)
 * history:                               Bash History Builtins.
                                                               (line  46)
@@ -11356,36 +11450,36 @@ D.1 Index of Shell Builtin Commands
                                                               (line  35)
 * printf:                                Bash Builtins.       (line 426)
 * pushd:                                 Directory Stack Builtins.
-                                                              (line  53)
+                                                              (line  69)
 * pwd:                                   Bourne Shell Builtins.
-                                                              (line 207)
+                                                              (line 212)
 * read:                                  Bash Builtins.       (line 475)
 * readarray:                             Bash Builtins.       (line 571)
 * readonly:                              Bourne Shell Builtins.
-                                                              (line 217)
+                                                              (line 222)
 * return:                                Bourne Shell Builtins.
-                                                              (line 236)
+                                                              (line 241)
 * set:                                   The Set Builtin.     (line  11)
 * shift:                                 Bourne Shell Builtins.
-                                                              (line 257)
+                                                              (line 262)
 * shopt:                                 The Shopt Builtin.   (line   9)
 * source:                                Bash Builtins.       (line 580)
 * suspend:                               Job Control Builtins.
                                                               (line 113)
 * test:                                  Bourne Shell Builtins.
-                                                              (line 270)
+                                                              (line 275)
 * times:                                 Bourne Shell Builtins.
-                                                              (line 349)
+                                                              (line 354)
 * trap:                                  Bourne Shell Builtins.
-                                                              (line 355)
+                                                              (line 360)
 * type:                                  Bash Builtins.       (line 585)
 * typeset:                               Bash Builtins.       (line 617)
 * ulimit:                                Bash Builtins.       (line 623)
 * umask:                                 Bourne Shell Builtins.
-                                                              (line 404)
+                                                              (line 409)
 * unalias:                               Bash Builtins.       (line 729)
 * unset:                                 Bourne Shell Builtins.
-                                                              (line 422)
+                                                              (line 427)
 * wait:                                  Job Control Builtins.
                                                               (line  76)
 
@@ -12054,114 +12148,114 @@ Node: Lists24904
 Node: Compound Commands26699
 Node: Looping Constructs27711
 Node: Conditional Constructs30206
-Node: Command Grouping41777
-Node: Coprocesses43252
-Node: GNU Parallel45915
-Node: Shell Functions50216
-Node: Shell Parameters57436
-Node: Positional Parameters61869
-Node: Special Parameters62771
-Node: Shell Expansions65995
-Node: Brace Expansion68122
-Node: Tilde Expansion70847
-Node: Shell Parameter Expansion73468
-Node: Command Substitution88597
-Node: Arithmetic Expansion89952
-Node: Process Substitution90884
-Node: Word Splitting92004
-Node: Filename Expansion93948
-Node: Pattern Matching96497
-Node: Quote Removal100487
-Node: Redirections100782
-Node: Executing Commands110356
-Node: Simple Command Expansion111026
-Node: Command Search and Execution112980
-Node: Command Execution Environment115358
-Node: Environment118344
-Node: Exit Status120007
-Node: Signals121679
-Node: Shell Scripts123646
-Node: Shell Builtin Commands126658
-Node: Bourne Shell Builtins128696
-Node: Bash Builtins149652
-Node: Modifying Shell Behavior179802
-Node: The Set Builtin180147
-Node: The Shopt Builtin190560
-Node: Special Builtins205472
-Node: Shell Variables206451
-Node: Bourne Shell Variables206888
-Node: Bash Variables208992
-Node: Bash Features241650
-Node: Invoking Bash242663
-Node: Bash Startup Files248676
-Node: Interactive Shells253779
-Node: What is an Interactive Shell?254189
-Node: Is this Shell Interactive?254838
-Node: Interactive Shell Behavior255653
-Node: Bash Conditional Expressions259166
-Node: Shell Arithmetic263743
-Node: Aliases266687
-Node: Arrays269300
-Node: The Directory Stack275309
-Node: Directory Stack Builtins276093
-Node: Controlling the Prompt279061
-Node: The Restricted Shell282009
-Node: Bash POSIX Mode284603
-Node: Shell Compatibility Mode295876
-Node: Job Control302532
-Node: Job Control Basics302992
-Node: Job Control Builtins307994
-Node: Job Control Variables313394
-Node: Command Line Editing314550
-Node: Introduction and Notation316221
-Node: Readline Interaction317844
-Node: Readline Bare Essentials319035
-Node: Readline Movement Commands320818
-Node: Readline Killing Commands321778
-Node: Readline Arguments323696
-Node: Searching324740
-Node: Readline Init File326926
-Node: Readline Init File Syntax328185
-Node: Conditional Init Constructs348723
-Node: Sample Init File352919
-Node: Bindable Readline Commands356043
-Node: Commands For Moving357247
-Node: Commands For History359298
-Node: Commands For Text364091
-Node: Commands For Killing367740
-Node: Numeric Arguments370773
-Node: Commands For Completion371912
-Node: Keyboard Macros376103
-Node: Miscellaneous Commands376790
-Node: Readline vi Mode382729
-Node: Programmable Completion383636
-Node: Programmable Completion Builtins391416
-Node: A Programmable Completion Example402111
-Node: Using History Interactively407358
-Node: Bash History Facilities408042
-Node: Bash History Builtins411047
-Node: History Interaction416055
-Node: Event Designators419675
-Node: Word Designators421029
-Node: Modifiers422789
-Node: Installing Bash424600
-Node: Basic Installation425737
-Node: Compilers and Options428995
-Node: Compiling For Multiple Architectures429736
-Node: Installation Names431429
-Node: Specifying the System Type432247
-Node: Sharing Defaults432963
-Node: Operation Controls433636
-Node: Optional Features434594
-Node: Reporting Bugs445394
-Node: Major Differences From The Bourne Shell446588
-Node: GNU Free Documentation License463438
-Node: Indexes488615
-Node: Builtin Index489069
-Node: Reserved Word Index495896
-Node: Variable Index498344
-Node: Function Index514241
-Node: Concept Index527889
+Node: Command Grouping44368
+Node: Coprocesses45843
+Node: GNU Parallel48506
+Node: Shell Functions52807
+Node: Shell Parameters60027
+Node: Positional Parameters64460
+Node: Special Parameters65362
+Node: Shell Expansions68586
+Node: Brace Expansion70713
+Node: Tilde Expansion73438
+Node: Shell Parameter Expansion76059
+Node: Command Substitution91188
+Node: Arithmetic Expansion92543
+Node: Process Substitution93475
+Node: Word Splitting94595
+Node: Filename Expansion96539
+Node: Pattern Matching99088
+Node: Quote Removal103078
+Node: Redirections103373
+Node: Executing Commands112947
+Node: Simple Command Expansion113617
+Node: Command Search and Execution115571
+Node: Command Execution Environment117949
+Node: Environment120935
+Node: Exit Status122598
+Node: Signals124270
+Node: Shell Scripts126237
+Node: Shell Builtin Commands129249
+Node: Bourne Shell Builtins131287
+Node: Bash Builtins152492
+Node: Modifying Shell Behavior182642
+Node: The Set Builtin182987
+Node: The Shopt Builtin193400
+Node: Special Builtins208312
+Node: Shell Variables209291
+Node: Bourne Shell Variables209728
+Node: Bash Variables211832
+Node: Bash Features244490
+Node: Invoking Bash245503
+Node: Bash Startup Files251516
+Node: Interactive Shells256619
+Node: What is an Interactive Shell?257029
+Node: Is this Shell Interactive?257678
+Node: Interactive Shell Behavior258493
+Node: Bash Conditional Expressions262006
+Node: Shell Arithmetic266583
+Node: Aliases269527
+Node: Arrays272140
+Node: The Directory Stack278149
+Node: Directory Stack Builtins278933
+Node: Controlling the Prompt283119
+Node: The Restricted Shell286084
+Node: Bash POSIX Mode288678
+Node: Shell Compatibility Mode299951
+Node: Job Control306607
+Node: Job Control Basics307067
+Node: Job Control Builtins312069
+Node: Job Control Variables317469
+Node: Command Line Editing318625
+Node: Introduction and Notation320296
+Node: Readline Interaction321919
+Node: Readline Bare Essentials323110
+Node: Readline Movement Commands324893
+Node: Readline Killing Commands325853
+Node: Readline Arguments327771
+Node: Searching328815
+Node: Readline Init File331001
+Node: Readline Init File Syntax332260
+Node: Conditional Init Constructs352798
+Node: Sample Init File356994
+Node: Bindable Readline Commands360118
+Node: Commands For Moving361322
+Node: Commands For History363373
+Node: Commands For Text368166
+Node: Commands For Killing371815
+Node: Numeric Arguments374848
+Node: Commands For Completion375987
+Node: Keyboard Macros380178
+Node: Miscellaneous Commands380865
+Node: Readline vi Mode386804
+Node: Programmable Completion387711
+Node: Programmable Completion Builtins395491
+Node: A Programmable Completion Example406186
+Node: Using History Interactively411433
+Node: Bash History Facilities412117
+Node: Bash History Builtins415122
+Node: History Interaction420130
+Node: Event Designators423750
+Node: Word Designators425104
+Node: Modifiers426864
+Node: Installing Bash428675
+Node: Basic Installation429812
+Node: Compilers and Options433070
+Node: Compiling For Multiple Architectures433811
+Node: Installation Names435504
+Node: Specifying the System Type436322
+Node: Sharing Defaults437038
+Node: Operation Controls437711
+Node: Optional Features438669
+Node: Reporting Bugs449469
+Node: Major Differences From The Bourne Shell450663
+Node: GNU Free Documentation License467513
+Node: Indexes492690
+Node: Builtin Index493144
+Node: Reserved Word Index499971
+Node: Variable Index502419
+Node: Function Index518316
+Node: Concept Index531964
 
 End Tag Table
 

@@ -1059,79 +1059,112 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (@samp{==}) or does not
 match (@samp{!=}) the pattern, and 1 otherwise.
-Any part of the pattern may be quoted to force the quoted portion
-to be matched as a string.
+
+If you quote any part of the pattern,
+using any of the shell's quoting mechanisms,
+the quoted portion is matched literally.
+This means every character in the quoted portion matches itself,
+instead of having any special pattern matching meaning.
 
 An additional binary operator, @samp{=~}, is available, with the same
 precedence as @samp{==} and @samp{!=}.
-When it is used, the string to the right of the operator is considered
-a @sc{posix} extended regular expression and matched accordingly
+When you use @samp{=~}, the string to the right of the operator is considered
+a @sc{posix} extended regular expression pattern and matched accordingly
 (using the @sc{posix} @code{regcomp} and @code{regexec} interfaces
 usually described in @i{regex}(3)).
-The return value is 0 if the string matches
-the pattern, and 1 otherwise.
+The return value is 0 if the string matches the pattern, and 1 if it does not.
 If the regular expression is syntactically incorrect, the conditional
-expression's return value is 2.
+expression returns 2.
 If the @code{nocasematch} shell option
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Any part of the pattern may be quoted to force the quoted portion
-to be matched as a string.
-Bracket expressions in regular expressions must be treated carefully,
-since normal quoting characters lose their meanings between brackets.
+
+You can quote any part of the pattern
+to force the quoted portion to be matched literally
+instead of as a regular expression (see above).
 If the pattern is stored in a shell variable, quoting the variable
-expansion forces the entire pattern to be matched as a string.
+expansion forces the entire pattern to be matched literally.
 
 The pattern will match if it matches any part of the string.
-Anchor the pattern using the @samp{^} and @samp{$} regular expression
-operators to force it to match the entire string.
-The array variable @code{BASH_REMATCH} records which parts of the string
-matched the pattern.
-The element of @code{BASH_REMATCH} with index 0 contains the portion of
-the string matching the entire regular expression.
-Substrings matched by parenthesized subexpressions within the regular
-expression are saved in the remaining @code{BASH_REMATCH} indices.
-The element of @code{BASH_REMATCH} with index @var{n} is the portion of the
-string matching the @var{n}th parenthesized subexpression.
+If you want to force the pattern to match the entire string,
+anchor the pattern using the @samp{^} and @samp{$} regular expression
+operators.
 
 For example, the following will match a line
-(stored in the shell variable @var{line})
+(stored in the shell variable @code{line})
 if there is a sequence of characters anywhere in the value consisting of
 any number, including zero, of 
 characters in the @code{space} character class,
-zero or one instances of @samp{a}, then a @samp{b}:
+immediately followed by zero or one instances of @samp{a},
+then a @samp{b}:
+
 @example
 [[ $line =~ [[:space:]]*(a)?b ]]
 @end example
 
 @noindent
-That means values like @samp{aab} and @samp{  aaaaaab} will match, as
-will a line containing a @samp{b} anywhere in its value.
+That means values for @code{line} like
+@samp{aab}, @samp{  aaaaaab}, @samp{xaby}, and @samp{ ab}
+will all match,
+as will a line containing a @samp{b} anywhere in its value.
 
+If you want to match a character that's special to the regular expression
+grammar (@samp{^$|[]()\.*+?}), it has to be quoted to remove its special
+meaning.
+This means that in the pattern @samp{xxx.txt}, the @samp{.} matches any
+character in the string (its usual regular expression meaning), but in the
+pattern @samp{"xxx.txt"}, it can only match a literal @samp{.}.
+
+Likewise, if you want to include a character in your pattern that has a
+special meaning to the regular expression grammar, you must make sure it's
+not quoted.
+If you want to anchor a pattern at the beginning or end of the string,
+for instance, you cannot quote the @samp{^} or @samp{$}
+characters using any form of shell quoting.
+
+If you want to match @samp{initial string} at the start of a line,
+the following will work:
+@example
+[[ $line =~ ^"initial string" ]]
+@end example
+@noindent
+but this will not:
+@example
+[[ $line =~ "^initial string" ]]
+@end example
+@noindent
+because in the second example the @samp{^} is quoted and doesn't have its
+usual special meaning.
+
+It is sometimes difficult to specify a regular expression properly
+without using quotes, or to keep track of the quoting used by regular
+expressions while paying attention to
+shell quoting and the shell's quote removal.
 Storing the regular expression in a shell variable is often a useful
 way to avoid problems with quoting characters that are special to the
 shell.
-It is sometimes difficult to specify a regular expression literally
-without using quotes, or to keep track of the quoting used by regular
-expressions while paying attention to the shell's quote removal.
-Using a shell variable to store the pattern decreases these problems.
-For example, the following is equivalent to the above:
+For example, the following is equivalent to the pattern used above:
+
 @example
 pattern='[[:space:]]*(a)?b'
 [[ $line =~ $pattern ]]
 @end example
 
-@noindent
-If you want to match a character that's special to the regular expression
-grammar, it has to be quoted to remove its special meaning.
-This means that in the pattern @samp{xxx.txt}, the @samp{.} matches any
-character in the string (its usual regular expression meaning), but in the
-pattern @samp{"xxx.txt"} it can only match a literal @samp{.}.
-Shell programmers should take special care with backslashes, since backslashes
-are used by both the shell and regular expressions to remove the special
-meaning from the following character.
+Shell programmers should take special care with backslashes, since
+backslashes are used by both the shell and regular expressions to remove
+the special meaning from the following character.
+This means that after the shell's word expansions complete
+(@pxref{Shell Expansions}),
+any backslashes remaining in parts of the pattern
+that were originally not quoted can remove the
+special meaning of pattern characters.
+If any part of the pattern is quoted, the shell does its best to ensure that
+the regular expression treats those remaining backslashes as literal,
+if they appeared in a quoted portion.
+
 The following two sets of commands are @emph{not} equivalent:
+
 @example
 pattern='\.'
 
@@ -1145,11 +1178,47 @@ pattern='\.'
 @noindent
 The first two matches will succeed, but the second two will not, because
 in the second two the backslash will be part of the pattern to be matched.
-In the first two examples, the backslash removes the special meaning from
+In the first two examples, the pattern passed to the regular expression
+parser is @samp{\.}. The backslash removes the special meaning from
 @samp{.}, so the literal @samp{.} matches.
+In the second two examples, the pattern passed to the regular expression
+parser has the backslash quoted (e.g., @samp{\\\.}), which will not match
+the string, since it does not contain a backslash.
 If the string in the first examples were anything other than @samp{.}, say
 @samp{a}, the pattern would not match, because the quoted @samp{.} in the
 pattern loses its special meaning of matching any single character.
+
+Bracket expressions in regular expressions can be sources of errors as well,
+since characters that are normally special in regular expressions
+lose their special meanings between brackets.
+However, you can use bracket expressions to match special pattern characters
+without quoting them, so they are sometimes useful for this purpose.
+
+Though it might seem like a strange way to write it, the following pattern
+will match a @samp{.} in the string:
+
+@example
+[[ . =~ [.] ]]
+@end example
+
+The shell performs any word expansions before passing the pattern
+to the regular expression functions,
+so you can assume that the shell's quoting takes precedence.
+As noted above, the regular expression parser will interpret any
+unquoted backslashes remaining in the pattern after shell expansion
+according to its own rules.
+The intention is to avoid making shell programmers quote things twice
+as much as possible, so shell quoting should be sufficient to quote
+special pattern characters where that's necessary.
+
+The array variable @code{BASH_REMATCH} records which parts of the string
+matched the pattern.
+The element of @code{BASH_REMATCH} with index 0 contains the portion of
+the string matching the entire regular expression.
+Substrings matched by parenthesized subexpressions within the regular
+expression are saved in the remaining @code{BASH_REMATCH} indices.
+The element of @code{BASH_REMATCH} with index @var{n} is the portion of the
+string matching the @var{n}th parenthesized subexpression.
 
 Expressions may be combined using the following operators, listed
 in decreasing order of precedence:
