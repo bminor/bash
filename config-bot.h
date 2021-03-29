@@ -99,7 +99,7 @@
 #endif
 
 #if !HAVE_MKDTEMP
-#  undef USE_MKDTMP
+#  undef USE_MKDTEMP
 #endif
 
 /* If the shell is called by this name, it will become restricted. */

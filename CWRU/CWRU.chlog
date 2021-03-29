@@ -9905,3 +9905,23 @@ execute_cmd.c
 	  we're going to call shell_execve right away anyway, so we won't be
 	  around to remove the FIFOs. From a report from
 	  Michael Felt <aixtools@gmail.com>
+
+				   3/22
+				   ----
+parse.y
+	- alias_expand_token: slight tweak to check for alias expansion: perform
+	  expansion unconditionally if PST_ALEXPNEXT is set, and disable it
+	  in case statement pattern lists if the previous token indicates a
+	  command name is acceptable.
+	  From a report by Oguz <oguzismailuysal@gmail.com>
+
+config-bot.h
+	- HAVE_MKDTEMP: fix typo
+
+				   3/25
+				   ----
+lib/readline/terminal.c
+	- look in terminfo for key sequences for page up (kP) and page down
+	  (kN) and bind them to history-search-{backward,forward},
+	  respectively. From a patch from Xose Vazquez Perez
+	  <xose.vazquez@gmail.com>
