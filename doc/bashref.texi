@@ -533,30 +533,136 @@ been present.
 @cindex internationalization
 @cindex native languages
 @cindex translation, native languages
+@menu
+* Creating Internationalized Scripts::	How to use translations and different
+					languages in your scripts.
+@end menu
 
-A double-quoted string preceded by a dollar sign (@samp{$})
+Prefixing a double-quoted string with a dollar sign (@samp{$}), such
+as @verb{|$"hello, world"|},
 will cause the string to be translated according to the current locale.
-The @code{gettext} infrastructure performs the message catalog lookup and 
-translation, using the @code{LC_MESSAGES} and @code{TEXTDOMAIN} shell
-variables, as explained below. See the gettext documentation for additional
-details.
+The @code{gettext} infrastructure performs the lookup and 
+translation, using the @code{LC_MESSAGES}, @code{TEXTDOMAINDIR},
+and @code{TEXTDOMAIN} shell variables, as explained below.
+See the gettext documentation for additional details not covered here.
 If the current locale is @code{C} or @code{POSIX},
 or if there are no translations available,
-the dollar sign is ignored.
-If the string is translated and replaced, the replacement is
-double-quoted.
+the dollar sign is ignored, and the shell doesn't attempt to translate the
+string.
+If the string is translated and replaced, the replacement
+remains double-quoted.
 
+The rest of this section is a brief overview of how you use gettext to
+create translations for strings in a shell script named @var{scriptname}.
+There are more details in the gettext documentation.
+
+@node Creating Internationalized Scripts
+@cindex internationalized scripts
+@cindex string translations
+Once you've marked the strings in your script
+that you want to translate using $"...",
+you create a gettext "template" file using the command
+
+@example
+bash --dump-po-strings @var{scriptname} > @var{domain}.pot
+@end example
+
+@noindent
+The @var{domain} is your @dfn{message domain}.
+It's just an arbitrary string that's used to identify the files gettext
+needs, like a package or script name.
+It needs to be unique among all
+the message domains on systems where you install the translations, so
+gettext knows which translations correspond to your script.
+You'll use the template file to create translations for each target language.
+The template file conventionally has the suffix @samp{.pot}.
+
+You copy this template file to a separate file for each target language
+you want to support (called "PO" files, which use the suffix @samp{.po}).
+PO files use various naming conventions, but
+when you are working to translate a template file into a particular
+language, you first copy the template file to a file whose name is the
+language you want to target, with the @samp{.po} suffix.
+For instance, the Spanish translations of your strings would be
+in a file named @samp{es.po}, and to get started using a message
+domain named "example," you would run
+
+@example
+cp example.pot es.po
+@end example
+
+@noindent
+Ultimately, PO files are often named @var{domain}.po and installed in
+directories that contain multiple translation files for a particular language.
+
+Whichever naming convention you choose, you will need to translate the
+strings in the PO files into the appropriate languages.
+This has to be done manually.
+
+When you have the translations and PO files complete, you'll use the
+gettext tools to produce what are called "MO" files, which are compiled
+versions of the PO files the gettext tools use to look up translations
+efficiently.
+MO files are also called "message catalog" files.
+You use the @command{msgfmt} program to do this.
+For instance, if you had a file with Spanish translations, you could run
+
+@example
+msgfmt -o es.mo es.po
+@end example
+
+@noindent
+to produce the corresponding MO file.
+
+Once you have the MO files, you decide where to install them and use the
+@code{TEXTDOMAINDIR} shell variable to tell the gettext tools where they are.
+Make sure to use the same message domain to name the MO files 
+as you did for the PO files when you install them.
+
+@vindex LANG
 @vindex LC_MESSAGES
 @vindex TEXTDOMAIN
 @vindex TEXTDOMAINDIR
-Some systems use the message catalog selected by the @env{LC_MESSAGES}
-shell variable.  Others create the name of the message catalog from the
-value of the @env{TEXTDOMAIN} shell variable, possibly adding a
-suffix of @samp{.mo}.  If you use the @env{TEXTDOMAIN} variable, you
-may need to set the @env{TEXTDOMAINDIR} variable to the location of
-the message catalog files.  Still others use both variables in this
-fashion:
-@env{TEXTDOMAINDIR}/@env{LC_MESSAGES}/LC_MESSAGES/@env{TEXTDOMAIN}.mo.
+Your users will use the @env{LANG} or @env{LC_MESSAGES} shell variables to
+select the desired language.
+
+You set the @env{TEXTDOMAIN} variable to the script's message domain.
+As above, you use the message domain to name your translation files.
+
+You, or possibly your users, set the @env{TEXTDOMAINDIR} variable to the
+name of a directory where the message catalog files are stored.
+If you install the message files into the system's standard message catalog
+directory, you don't need to worry about this variable.
+
+The directory where the message catalog files are stored varies between
+systems.
+Some use the message catalog selected by the @env{LC_MESSAGES}
+shell variable.
+Others create the name of the message catalog from the value of the
+@env{TEXTDOMAIN} shell variable, possibly adding the @samp{.mo} suffix.
+If you use the @env{TEXTDOMAIN} variable, you may need to set the
+@env{TEXTDOMAINDIR} variable to the location of the message catalog files,
+as above.
+It's common to use both variables in this fashion:
+@env{$TEXTDOMAINDIR}/@env{$LC_MESSAGES}/LC_MESSAGES/@env{$TEXTDOMAIN}.mo.
+
+If you used that last convention, and you wanted to store the message
+catalog files with Spanish (es) and Esperanto (eo) translations into a
+local directory you use for custom translation files, you could run
+
+@example
+TEXTDOMAIN=example
+TEXTDOMAINDIR=/usr/local/share/locale
+
+cp es.mo $@{TEXTDOMAINDIR@}/es/LC_MESSAGES/$@{TEXTDOMAIN@}.mo
+cp eo.mo $@{TEXTDOMAINDIR@}/eo/LC_MESSAGES/$@{TEXTDOMAIN@}.mo
+@end example
+
+When all of this is done, and the message catalog files containing the
+compiled translations are installed in the correct location,
+your users will be able to see translated strings
+in any of the supported languages by setting the @env{LANG} or
+@env{LC_MESSAGES} environment variables before running your script.
 
 @node Comments
 @subsection Comments
@@ -5596,7 +5702,7 @@ performing filename expansion.
 @item nocasematch
 If set, Bash matches patterns in a case-insensitive fashion when
 performing matching while executing @code{case} or @code{[[}
-conditional commands,
+conditional commands (@pxref{Conditional Constructs},
 when performing pattern substitution word expansions,
 or when filtering possible completions as part of programmable completion.
 
@@ -7037,7 +7143,10 @@ printing @env{$PS1} (@pxref{Bash Variables}).
 @cindex expressions, conditional
 
 Conditional expressions are used by the @code{[[} compound command
-and the @code{test} and @code{[} builtin commands. The @code{test}
+(@pxref{Conditional Constructs})
+and the @code{test} and @code{[} builtin commands
+(@pxref{Bourne Shell Builtins}).
+The @code{test}
 and @code{[} commands determine their behavior based on the number
 of arguments; see the descriptions of those commands for any other
 command-specific actions.
@@ -9539,7 +9648,7 @@ which specifies the behavior based on the number of arguments.
 @item
 Bash includes the @code{caller} builtin, which displays the context of
 any active subroutine call (a shell function or a script executed with
-the @code{.} or @code{source} builtins).  This supports the bash
+the @code{.} or @code{source} builtins).  This supports the Bash
 debugger.
 
 @item

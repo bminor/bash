@@ -514,7 +514,10 @@ show_var_attributes (var, pattr, nodefs)
     printf ("%s\n", var->name);
   else
     {
-      x = sh_double_quote (value_cell (var));
+      if (ansic_shouldquote (value_cell (var)))
+	x = ansic_quote (value_cell (var), 0, (int *)0);
+      else
+	x = sh_double_quote (value_cell (var));
       printf ("%s=%s\n", var->name, x);
       free (x);
     }

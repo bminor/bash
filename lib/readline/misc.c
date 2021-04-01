@@ -634,6 +634,42 @@ rl_get_previous_history (int count, int key)
   return 0;
 }
 
+/* With an argument, move back that many history lines, else move to the
+   beginning of history. */
+int
+rl_fetch_history (int count, int c)
+{
+  int wanted, nhist;
+
+  /* Giving an argument of n means we want the nth command in the history
+     file.  The command number is interpreted the same way that the bash
+     `history' command does it -- that is, giving an argument count of 450
+     to this command would get the command listed as number 450 in the
+     output of `history'. */
+  if (rl_explicit_arg)
+    {
+      nhist = history_base + where_history ();
+      /* Negative arguments count back from the end of the history list. */
+      wanted = (count >= 0) ? nhist - count : -count;
+
+      if (wanted <= 0 || wanted >= nhist)
+	{
+	  /* In vi mode, we don't change the line with an out-of-range
+	     argument, as for the `G' command. */
+	  if (rl_editing_mode == vi_mode)
+	    rl_ding ();
+	  else
+	    rl_beginning_of_history (0, 0);
+	}
+      else
+        rl_get_previous_history (wanted, c);
+    }
+  else
+    rl_beginning_of_history (count, 0);
+
+  return (0);
+}
+
 /* The equivalent of the Korn shell C-o operate-and-get-next-history-line
    editing command. */
 

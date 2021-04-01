@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.7 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.1, 4 March2021).
+Bash shell (version 5.1, 31 March 2021).
 
-   This is Edition 5.1, last updated 4 March2021, of 'The GNU Bash
+   This is Edition 5.1, last updated 31 March 2021, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.1.
 
    Copyright (C) 1988-2021 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.1, 4 March2021).  The Bash home page is
+Bash shell (version 5.1, 31 March 2021).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.1, last updated 4 March2021, of 'The GNU Bash
+   This is Edition 5.1, last updated 31 March 2021, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.1.
 
    Bash contains features that appear in other popular shells, and some
@@ -419,9 +419,10 @@ File: bashref.info,  Node: ANSI-C Quoting,  Next: Locale Translation,  Prev: Dou
 3.1.2.4 ANSI-C Quoting
 ......................
 
-Words of the form $'STRING' are treated specially.  The word expands to
-STRING, with backslash-escaped characters replaced as specified by the
-ANSI C standard.  Backslash escape sequences, if present, are decoded as
+Character sequences of the form $'STRING' are treated as a special kind
+of single quotes.  The sequence expands to STRING, with
+backslash-escaped characters in STRING replaced as specified by the ANSI
+C standard.  Backslash escape sequences, if present, are decoded as
 follows:
 
 '\a'
@@ -473,22 +474,104 @@ File: bashref.info,  Node: Locale Translation,  Prev: ANSI-C Quoting,  Up: Quoti
 3.1.2.5 Locale-Specific Translation
 ...................................
 
-A double-quoted string preceded by a dollar sign ('$') will cause the
-string to be translated according to the current locale.  The 'gettext'
-infrastructure performs the message catalog lookup and translation,
-using the 'LC_MESSAGES' and 'TEXTDOMAIN' shell variables, as explained
-below.  See the gettext documentation for additional details.  If the
-current locale is 'C' or 'POSIX', or if there are no translations
-available, the dollar sign is ignored.  If the string is translated and
-replaced, the replacement is double-quoted.
+Prefixing a double-quoted string with a dollar sign ('$'), such as
+$"hello, world", will cause the string to be translated according to the
+current locale.  The 'gettext' infrastructure performs the lookup and
+translation, using the 'LC_MESSAGES', 'TEXTDOMAINDIR', and 'TEXTDOMAIN'
+shell variables, as explained below.  See the gettext documentation for
+additional details not covered here.  If the current locale is 'C' or
+'POSIX', or if there are no translations available, the dollar sign is
+ignored, and the shell doesn't attempt to translate the string.  If the
+string is translated and replaced, the replacement is double-quoted.
 
-   Some systems use the message catalog selected by the 'LC_MESSAGES'
-shell variable.  Others create the name of the message catalog from the
-value of the 'TEXTDOMAIN' shell variable, possibly adding a suffix of
-'.mo'.  If you use the 'TEXTDOMAIN' variable, you may need to set the
-'TEXTDOMAINDIR' variable to the location of the message catalog files.
-Still others use both variables in this fashion:
-'TEXTDOMAINDIR'/'LC_MESSAGES'/LC_MESSAGES/'TEXTDOMAIN'.mo.
+   The rest of this section is a brief overview of how you use gettext
+to create translations for strings in a shell script named SCRIPTNAME.
+There are more details in the gettext documentation.
+
+   Once you've marked the strings in your script that you want to
+translate using $"...", you create a gettext "template" file using the
+command
+
+     bash --dump-po-strings SCRIPTNAME > DOMAIN.pot
+
+The DOMAIN is your "message domain".  It's just an arbitrary string
+that's used to identify the files gettext needs, like a package or
+script name.  It needs to be unique among all the message domains on
+systems where you install the translations, so gettext knows which
+translations correspond to your script.  You'll use the template file to
+create translations for each target language.  The template file
+conventionally has the suffix '.pot'.
+
+   You copy this template file to a separate file for each target
+language you want to support (called "PO" files, which use the suffix
+'.po').  PO files use various naming conventions, but when you are
+working to translate a template file into a particular language, you
+first copy the template file to a file whose name is the language you
+want to target, with the '.po' suffix.  For instance, the Spanish
+translations of your strings would be in a file named 'es.po', and to
+get started using a message domain named "example," you would run
+
+     cp example.pot es.po
+
+Ultimately, PO files are often named DOMAIN.po and installed in
+directories that contain multiple translation files for a particular
+language.
+
+   Whichever naming convention you choose, you will need to translate
+the strings in the PO files into the appropriate languages.  This has to
+be done manually.
+
+   When you have the translations and PO files complete, you'll use the
+gettext tools to produce what are called "MO" files, which are compiled
+versions of the PO files the gettext tools use to look up translations
+efficiently.  MO files are also called "message catalog" files.  You use
+the 'msgfmt' program to do this.  For instance, if you had a file with
+Spanish translations, you could run
+
+     msgfmt -o es.mo es.po
+
+to produce the corresponding MO file.
+
+   Once you have the MO files, you decide where to install them and use
+the 'TEXTDOMAINDIR' shell variable to tell the gettext tools where they
+are.  Make sure to use the same message domain to name the MO files as
+you did for the PO files when you install them.
+
+   Your users will use the 'LANG' or 'LC_MESSAGES' shell variables to
+select the desired language.
+
+   You set the 'TEXTDOMAIN' variable to the script's message domain.  As
+above, you use the message domain to name your translation files.
+
+   You, or possibly your users, set the 'TEXTDOMAINDIR' variable to the
+name of a directory where the message catalog files are stored.  If you
+install the message files into the system's standard message catalog
+directory, you don't need to worry about this variable.
+
+   The directory where the message catalog files are stored varies
+between systems.  Some use the message catalog selected by the
+'LC_MESSAGES' shell variable.  Others create the name of the message
+catalog from the value of the 'TEXTDOMAIN' shell variable, possibly
+adding the '.mo' suffix.  If you use the 'TEXTDOMAIN' variable, you may
+need to set the 'TEXTDOMAINDIR' variable to the location of the message
+catalog files, as above.  It's common to use both variables in this
+fashion: '$TEXTDOMAINDIR'/'$LC_MESSAGES'/LC_MESSAGES/'$TEXTDOMAIN'.mo.
+
+   If you used that last convention, and you wanted to store the message
+catalog files with Spanish (es) and Esperanto (eo) translations into a
+local directory you use for custom translation files, you could run
+
+     TEXTDOMAIN=example
+     TEXTDOMAINDIR=/usr/local/share/locale
+
+     cp es.mo ${TEXTDOMAINDIR}/es/LC_MESSAGES/${TEXTDOMAIN}.mo
+     cp eo.mo ${TEXTDOMAINDIR}/eo/LC_MESSAGES/${TEXTDOMAIN}.mo
+
+   When all of this is done, and the message catalog files containing
+the compiled translations are installed in the correct location, your
+users will be able to see translated strings in any of the supported
+languages by setting the 'LANG' or 'LC_MESSAGES' environment variables
+before running your script.
 
 
 File: bashref.info,  Node: Comments,  Prev: Quoting,  Up: Shell Syntax
@@ -8562,6 +8645,11 @@ File: bashref.info,  Node: Commands For History,  Next: Commands For Text,  Prev
      supplied, specifies the history entry to use instead of the current
      line.
 
+'fetch-history ()'
+     With a numeric argument, fetch that entry from the history list and
+     make it the current line.  Without an argument, move back to the
+     first entry in the history list.
+
 
 File: bashref.info,  Node: Commands For Text,  Next: Commands For Killing,  Prev: Commands For History,  Up: Bindable Readline Commands
 
@@ -11668,11 +11756,12 @@ D.3 Parameter and Variable Index
                                                               (line 197)
 * keymap:                                Readline Init File Syntax.
                                                               (line 204)
-* LANG:                                  Bash Variables.      (line 485)
+* LANG:                                  Locale Translation.  (line  69)
+* LANG <1>:                              Bash Variables.      (line 485)
 * LC_ALL:                                Bash Variables.      (line 489)
 * LC_COLLATE:                            Bash Variables.      (line 493)
 * LC_CTYPE:                              Bash Variables.      (line 500)
-* LC_MESSAGES:                           Locale Translation.  (line  15)
+* LC_MESSAGES:                           Locale Translation.  (line  69)
 * LC_MESSAGES <1>:                       Bash Variables.      (line 505)
 * LC_NUMERIC:                            Bash Variables.      (line 509)
 * LC_TIME:                               Bash Variables.      (line 513)
@@ -11741,8 +11830,8 @@ D.3 Parameter and Variable Index
 * skip-completed-text:                   Readline Init File Syntax.
                                                               (line 299)
 * SRANDOM:                               Bash Variables.      (line 657)
-* TEXTDOMAIN:                            Locale Translation.  (line  15)
-* TEXTDOMAINDIR:                         Locale Translation.  (line  15)
+* TEXTDOMAIN:                            Locale Translation.  (line  69)
+* TEXTDOMAINDIR:                         Locale Translation.  (line  69)
 * TIMEFORMAT:                            Bash Variables.      (line 666)
 * TMOUT:                                 Bash Variables.      (line 704)
 * TMPDIR:                                Bash Variables.      (line 716)
@@ -11838,6 +11927,8 @@ D.4 Function Index
 * end-of-line (C-e):                     Commands For Moving. (line   9)
 * exchange-point-and-mark (C-x C-x):     Miscellaneous Commands.
                                                               (line  37)
+* fetch-history ():                      Commands For History.
+                                                              (line 103)
 * forward-backward-delete-char ():       Commands For Text.   (line  21)
 * forward-char (C-f):                    Commands For Moving. (line  12)
 * forward-search-history (C-s):          Commands For History.
@@ -12125,137 +12216,137 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top887
-Node: Introduction2797
-Node: What is Bash?3013
-Node: What is a shell?4127
-Node: Definitions6665
-Node: Basic Shell Features9616
-Node: Shell Syntax10835
-Node: Shell Operation11861
-Node: Quoting13154
-Node: Escape Character14458
-Node: Single Quotes14943
-Node: Double Quotes15291
-Node: ANSI-C Quoting16569
-Node: Locale Translation17826
-Node: Comments18981
-Node: Shell Commands19599
-Node: Reserved Words20537
-Node: Simple Commands21293
-Node: Pipelines21947
-Node: Lists24904
-Node: Compound Commands26699
-Node: Looping Constructs27711
-Node: Conditional Constructs30206
-Node: Command Grouping44368
-Node: Coprocesses45843
-Node: GNU Parallel48506
-Node: Shell Functions52807
-Node: Shell Parameters60027
-Node: Positional Parameters64460
-Node: Special Parameters65362
-Node: Shell Expansions68586
-Node: Brace Expansion70713
-Node: Tilde Expansion73438
-Node: Shell Parameter Expansion76059
-Node: Command Substitution91188
-Node: Arithmetic Expansion92543
-Node: Process Substitution93475
-Node: Word Splitting94595
-Node: Filename Expansion96539
-Node: Pattern Matching99088
-Node: Quote Removal103078
-Node: Redirections103373
-Node: Executing Commands112947
-Node: Simple Command Expansion113617
-Node: Command Search and Execution115571
-Node: Command Execution Environment117949
-Node: Environment120935
-Node: Exit Status122598
-Node: Signals124270
-Node: Shell Scripts126237
-Node: Shell Builtin Commands129249
-Node: Bourne Shell Builtins131287
-Node: Bash Builtins152492
-Node: Modifying Shell Behavior182642
-Node: The Set Builtin182987
-Node: The Shopt Builtin193400
-Node: Special Builtins208312
-Node: Shell Variables209291
-Node: Bourne Shell Variables209728
-Node: Bash Variables211832
-Node: Bash Features244490
-Node: Invoking Bash245503
-Node: Bash Startup Files251516
-Node: Interactive Shells256619
-Node: What is an Interactive Shell?257029
-Node: Is this Shell Interactive?257678
-Node: Interactive Shell Behavior258493
-Node: Bash Conditional Expressions262006
-Node: Shell Arithmetic266583
-Node: Aliases269527
-Node: Arrays272140
-Node: The Directory Stack278149
-Node: Directory Stack Builtins278933
-Node: Controlling the Prompt283119
-Node: The Restricted Shell286084
-Node: Bash POSIX Mode288678
-Node: Shell Compatibility Mode299951
-Node: Job Control306607
-Node: Job Control Basics307067
-Node: Job Control Builtins312069
-Node: Job Control Variables317469
-Node: Command Line Editing318625
-Node: Introduction and Notation320296
-Node: Readline Interaction321919
-Node: Readline Bare Essentials323110
-Node: Readline Movement Commands324893
-Node: Readline Killing Commands325853
-Node: Readline Arguments327771
-Node: Searching328815
-Node: Readline Init File331001
-Node: Readline Init File Syntax332260
-Node: Conditional Init Constructs352798
-Node: Sample Init File356994
-Node: Bindable Readline Commands360118
-Node: Commands For Moving361322
-Node: Commands For History363373
-Node: Commands For Text368166
-Node: Commands For Killing371815
-Node: Numeric Arguments374848
-Node: Commands For Completion375987
-Node: Keyboard Macros380178
-Node: Miscellaneous Commands380865
-Node: Readline vi Mode386804
-Node: Programmable Completion387711
-Node: Programmable Completion Builtins395491
-Node: A Programmable Completion Example406186
-Node: Using History Interactively411433
-Node: Bash History Facilities412117
-Node: Bash History Builtins415122
-Node: History Interaction420130
-Node: Event Designators423750
-Node: Word Designators425104
-Node: Modifiers426864
-Node: Installing Bash428675
-Node: Basic Installation429812
-Node: Compilers and Options433070
-Node: Compiling For Multiple Architectures433811
-Node: Installation Names435504
-Node: Specifying the System Type436322
-Node: Sharing Defaults437038
-Node: Operation Controls437711
-Node: Optional Features438669
-Node: Reporting Bugs449469
-Node: Major Differences From The Bourne Shell450663
-Node: GNU Free Documentation License467513
-Node: Indexes492690
-Node: Builtin Index493144
-Node: Reserved Word Index499971
-Node: Variable Index502419
-Node: Function Index518316
-Node: Concept Index531964
+Node: Top891
+Node: Introduction2805
+Node: What is Bash?3021
+Node: What is a shell?4135
+Node: Definitions6673
+Node: Basic Shell Features9624
+Node: Shell Syntax10843
+Node: Shell Operation11869
+Node: Quoting13162
+Node: Escape Character14466
+Node: Single Quotes14951
+Node: Double Quotes15299
+Node: ANSI-C Quoting16577
+Node: Locale Translation17887
+Node: Comments22909
+Node: Shell Commands23527
+Node: Reserved Words24465
+Node: Simple Commands25221
+Node: Pipelines25875
+Node: Lists28832
+Node: Compound Commands30627
+Node: Looping Constructs31639
+Node: Conditional Constructs34134
+Node: Command Grouping48296
+Node: Coprocesses49771
+Node: GNU Parallel52434
+Node: Shell Functions56735
+Node: Shell Parameters63955
+Node: Positional Parameters68388
+Node: Special Parameters69290
+Node: Shell Expansions72514
+Node: Brace Expansion74641
+Node: Tilde Expansion77366
+Node: Shell Parameter Expansion79987
+Node: Command Substitution95116
+Node: Arithmetic Expansion96471
+Node: Process Substitution97403
+Node: Word Splitting98523
+Node: Filename Expansion100467
+Node: Pattern Matching103016
+Node: Quote Removal107006
+Node: Redirections107301
+Node: Executing Commands116875
+Node: Simple Command Expansion117545
+Node: Command Search and Execution119499
+Node: Command Execution Environment121877
+Node: Environment124863
+Node: Exit Status126526
+Node: Signals128198
+Node: Shell Scripts130165
+Node: Shell Builtin Commands133177
+Node: Bourne Shell Builtins135215
+Node: Bash Builtins156420
+Node: Modifying Shell Behavior186570
+Node: The Set Builtin186915
+Node: The Shopt Builtin197328
+Node: Special Builtins212240
+Node: Shell Variables213219
+Node: Bourne Shell Variables213656
+Node: Bash Variables215760
+Node: Bash Features248418
+Node: Invoking Bash249431
+Node: Bash Startup Files255444
+Node: Interactive Shells260547
+Node: What is an Interactive Shell?260957
+Node: Is this Shell Interactive?261606
+Node: Interactive Shell Behavior262421
+Node: Bash Conditional Expressions265934
+Node: Shell Arithmetic270511
+Node: Aliases273455
+Node: Arrays276068
+Node: The Directory Stack282077
+Node: Directory Stack Builtins282861
+Node: Controlling the Prompt287047
+Node: The Restricted Shell290012
+Node: Bash POSIX Mode292606
+Node: Shell Compatibility Mode303879
+Node: Job Control310535
+Node: Job Control Basics310995
+Node: Job Control Builtins315997
+Node: Job Control Variables321397
+Node: Command Line Editing322553
+Node: Introduction and Notation324224
+Node: Readline Interaction325847
+Node: Readline Bare Essentials327038
+Node: Readline Movement Commands328821
+Node: Readline Killing Commands329781
+Node: Readline Arguments331699
+Node: Searching332743
+Node: Readline Init File334929
+Node: Readline Init File Syntax336188
+Node: Conditional Init Constructs356726
+Node: Sample Init File360922
+Node: Bindable Readline Commands364046
+Node: Commands For Moving365250
+Node: Commands For History367301
+Node: Commands For Text372295
+Node: Commands For Killing375944
+Node: Numeric Arguments378977
+Node: Commands For Completion380116
+Node: Keyboard Macros384307
+Node: Miscellaneous Commands384994
+Node: Readline vi Mode390933
+Node: Programmable Completion391840
+Node: Programmable Completion Builtins399620
+Node: A Programmable Completion Example410315
+Node: Using History Interactively415562
+Node: Bash History Facilities416246
+Node: Bash History Builtins419251
+Node: History Interaction424259
+Node: Event Designators427879
+Node: Word Designators429233
+Node: Modifiers430993
+Node: Installing Bash432804
+Node: Basic Installation433941
+Node: Compilers and Options437199
+Node: Compiling For Multiple Architectures437940
+Node: Installation Names439633
+Node: Specifying the System Type440451
+Node: Sharing Defaults441167
+Node: Operation Controls441840
+Node: Optional Features442798
+Node: Reporting Bugs453598
+Node: Major Differences From The Bourne Shell454792
+Node: GNU Free Documentation License471642
+Node: Indexes496819
+Node: Builtin Index497273
+Node: Reserved Word Index504100
+Node: Variable Index506548
+Node: Function Index522518
+Node: Concept Index536302
 
 End Tag Table
 

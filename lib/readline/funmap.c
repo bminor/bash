@@ -93,6 +93,7 @@ static const FUNMAP default_funmap[] = {
   { "end-of-history", rl_end_of_history },
   { "end-of-line", rl_end_of_line },
   { "exchange-point-and-mark", rl_exchange_point_and_mark },
+  { "fetch-history", rl_fetch_history },
   { "forward-backward-delete-char", rl_rubout_or_delete },
   { "forward-byte", rl_forward_byte },
   { "forward-char", rl_forward_char },

@@ -9925,3 +9925,34 @@ lib/readline/terminal.c
 	  (kN) and bind them to history-search-{backward,forward},
 	  respectively. From a patch from Xose Vazquez Perez
 	  <xose.vazquez@gmail.com>
+
+				   3/30
+				   ----
+doc/bashref.texi
+	- expand the node describing $"..." string translation with additional
+	  details and examples
+
+				   3/31
+				   ----
+misc.c
+	- rl_fetch_history: moved here from vi_mode.c
+	- rl_fetch_history: negative arguments count back from the end of
+	  the history, instead of taking you to the beginning of the history
+	  list
+	- rl_fetch_history: in vi mode, an out-of-range argument rings the
+	  bell and doesn't change the line
+
+vi_mode.c
+	- rl_vi_fetch_history: call rl_fetch_history
+
+readline.h
+	- rl_fetch_history: new extern declaration
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- rl_fetch_history: add description
+
+builtins/setattr.def
+	- show_var_attributes: if a variable's value indicates that it should
+	  be ANSI-C quoted, use ansic_quote instead of sh_double_quote to
+	  format the value string. From proposal by Greg Wooledge
+	  <greg@wooledge.org>

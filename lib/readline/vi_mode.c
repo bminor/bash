@@ -337,24 +337,7 @@ rl_vi_yank_arg (int count, int key)
 int
 rl_vi_fetch_history (int count, int c)
 {
-  int wanted;
-
-  /* Giving an argument of n means we want the nth command in the history
-     file.  The command number is interpreted the same way that the bash
-     `history' command does it -- that is, giving an argument count of 450
-     to this command would get the command listed as number 450 in the
-     output of `history'. */
-  if (rl_explicit_arg)
-    {
-      wanted = history_base + where_history () - count;
-      if (wanted <= 0)
-        rl_beginning_of_history (0, 0);
-      else
-        rl_get_previous_history (wanted, c);
-    }
-  else
-    rl_beginning_of_history (count, 0);
-  return (0);
+  return (rl_fetch_history (count, c));
 }
 
 /* Search again for the last thing searched for. */

@@ -134,6 +134,7 @@ extern int rl_end_of_history (int, int);
 extern int rl_get_next_history (int, int);
 extern int rl_get_previous_history (int, int);
 extern int rl_operate_and_get_next (int, int);
+extern int rl_fetch_history (int, int);
 
 /* Bindable commands for managing the mark and region. */
 extern int rl_set_mark (int, int);
