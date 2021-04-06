@@ -9956,3 +9956,22 @@ builtins/setattr.def
 	  be ANSI-C quoted, use ansic_quote instead of sh_double_quote to
 	  format the value string. From proposal by Greg Wooledge
 	  <greg@wooledge.org>
+
+				    4/5
+				    ---
+arrayfunc.c
+	- unbind_array_element: if FLAGS includes VA_ONEWORD, don't use
+	  skipsubscript to parse the subscript, just assume the entire SUB is
+	  the subcript and that it contains the closing `]', so we just want
+	  everything in SUB except the last character.
+
+parse.y:
+	- select_command: use compound_list instead of list, like for_command.
+	  Report by Greywolf <greywolf@starwolf.com>
+	- list: move this into compound_list (replacing the instance of `list'
+	  in the compound_list production), remove from the grammar
+
+				    4/6
+				    ---
+arrayfunc.c
+	- unbind_array_element: use VA_NOEXPAND instead of literal 1

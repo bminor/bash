@@ -1025,7 +1025,10 @@ quote_array_assignment_chars (list)
 /* This function is called with SUB pointing to just after the beginning
    `[' of an array subscript and removes the array element to which SUB
    expands from array VAR.  A subscript of `*' or `@' unsets the array. */
-/* If FLAGS&1 we don't expand the subscript; we just use it as-is. */
+/* If FLAGS&1 (VA_NOEXPAND) we don't expand the subscript; we just use it
+   as-is. If FLAGS&VA_ONEWORD, we don't try to use skipsubscript to parse
+   the subscript, we just assume the subscript ends with a close bracket
+   and use the rest. */
 int
 unbind_array_element (var, sub, flags)
      SHELL_VAR *var;
@@ -1037,7 +1040,12 @@ unbind_array_element (var, sub, flags)
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  len = skipsubscript (sub, 0, (flags&1) || (var && assoc_p(var)));	/* XXX */
+  /* If the caller tells us to treat the entire `sub' as one word, we don't
+     bother to call skipsubscript. */
+  if (var && assoc_p (var) && (flags&VA_ONEWORD))
+    len = strlen (sub) - 1;
+  else
+    len = skipsubscript (sub, 0, (flags&VA_NOEXPAND) || (var && assoc_p(var)));	/* XXX */
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
@@ -1058,7 +1066,7 @@ unbind_array_element (var, sub, flags)
 
   if (assoc_p (var))
     {
-      akey = (flags & 1) ? sub : expand_assignment_string_to_string (sub, 0);
+      akey = (flags & VA_NOEXPAND) ? sub : expand_assignment_string_to_string (sub, 0);
       if (akey == 0 || *akey == 0)
 	{
 	  builtin_error ("[%s]: %s", sub, _(bash_badsub_errmsg));

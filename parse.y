@@ -356,7 +356,7 @@ static FILE *yyerrstream;
 /* The types that the various syntactical units return. */
 
 %type <command> inputunit command pipeline pipeline_command
-%type <command> list list0 list1 compound_list simple_list simple_list1
+%type <command> list0 list1 compound_list simple_list simple_list1
 %type <command> simple_command shell_command
 %type <command> for_command select_command case_command group_command
 %type <command> arith_command
@@ -865,32 +865,32 @@ arith_for_command:	FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_
 				}
 	;
 
-select_command:	SELECT WORD newline_list DO list DONE
+select_command:	SELECT WORD newline_list DO compound_list DONE
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
-	|	SELECT WORD newline_list '{' list '}'
+	|	SELECT WORD newline_list '{' compound_list '}'
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
-	|	SELECT WORD ';' newline_list DO list DONE
+	|	SELECT WORD ';' newline_list DO compound_list DONE
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
-	|	SELECT WORD ';' newline_list '{' list '}'
+	|	SELECT WORD ';' newline_list '{' compound_list '}'
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
-	|	SELECT WORD newline_list IN word_list list_terminator newline_list DO list DONE
+	|	SELECT WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
 			{
 			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
-	|	SELECT WORD newline_list IN word_list list_terminator newline_list '{' list '}'
+	|	SELECT WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
 			{
 			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -1094,15 +1094,12 @@ pattern:	WORD
    It must end with a newline or semicolon.
    Lists are used within commands such as if, for, while.  */
 
-list:		newline_list list0
+compound_list:	newline_list list0
 			{
 			  $$ = $2;
 			  if (need_here_doc)
 			    gather_here_documents ();
 			 }
-	;
-
-compound_list:	list
 	|	newline_list list1
 			{
 			  $$ = $2;
