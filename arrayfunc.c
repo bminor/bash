@@ -1057,8 +1057,14 @@ unbind_array_element (var, sub, flags)
     {
       if (array_p (var) || assoc_p (var))
 	{
-	  unbind_variable (var->name);	/* XXX -- {array,assoc}_flush ? */
-	  return (0);
+#if 0	/* TAG: bash-5.2 */
+	  if (flags & VA_ALLOWALL)
+#endif
+	    {
+	      unbind_variable (var->name);	/* XXX -- {array,assoc}_flush ? */
+	      return (0);
+	    }
+	  /* otherwise we fall through and try to unset element `@' or `*' */
 	}
       else
 	return -2;	/* don't allow this to unset scalar variables */

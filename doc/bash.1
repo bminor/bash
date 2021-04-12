@@ -3858,7 +3858,7 @@ the syntax \fB[.\fP\fIsymbol\fP\fB.]\fP matches the collating symbol
 .PD
 .PP
 If the \fBextglob\fP shell option is enabled using the \fBshopt\fP
-builtin, several extended pattern matching operators are recognized.
+builtin, the shell recognizes several extended pattern matching operators.
 In the following description, a \fIpattern-list\fP is a list of one
 or more patterns separated by a \fB|\fP.
 Composite patterns may be formed using one or more of the following
@@ -8381,7 +8381,11 @@ option means to load the new builtin command
 .I name
 from shared object
 .IR filename ,
-on systems that support dynamic loading.  The
+on systems that support dynamic loading.
+Bash will use the value of the \fBBASH_LOADABLES_PATH\fP variable as a
+colon-separated list of directories in which to search for \fIfilename\fP.
+The default is system-dependent.
+The
 .B \-d
 option will delete a builtin previously loaded with
 .BR \-f .
@@ -11291,7 +11295,8 @@ make sure that it really is a bug, and that it appears in the latest
 version of
 .BR bash .
 The latest version is always available from
-\fIftp://ftp.gnu.org/pub/gnu/bash/\fP.
+\fIftp://ftp.gnu.org/pub/gnu/bash/\fP and
+\fIhttp://git.savannah.gnu.org/cgit/bash.git/snapshot/bash-master.tar.gz\fP.
 .PP
 Once you have determined that a bug actually exists, use the
 .I bashbug

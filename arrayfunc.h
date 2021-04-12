@@ -41,7 +41,8 @@ extern int array_expand_once;
 #define AV_NOEXPAND	0x020	/* don't run assoc subscripts through word expansion */
 
 /* Flags for valid_array_reference. Value 1 is reserved for skipsubscript().
-   Also used by unbind_array_element. */
+   Also used by unbind_array_element, which is currently the only function
+   that uses VA_ALLOWALL. */
 #define VA_NOEXPAND	0x001
 #define VA_ONEWORD	0x002
 #define VA_ALLOWALL	0x004	/* allow @ to mean all elements of the array */

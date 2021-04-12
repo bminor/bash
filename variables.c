@@ -664,6 +664,8 @@ initialize_shell_variables (env, privmode)
   /* Get the user's real and effective user ids. */
   uidset ();
 
+  temp_var = set_if_not ("BASH_LOADABLES_PATH", DEFAULT_LOADABLE_BUILTINS_PATH);
+
   temp_var = find_variable ("BASH_XTRACEFD");
   if (temp_var && imported_p (temp_var))
     sv_xtracefd (temp_var->name);

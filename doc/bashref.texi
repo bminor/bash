@@ -2870,7 +2870,7 @@ matches the collating symbol @var{symbol}.
 @end table
 
 If the @code{extglob} shell option is enabled using the @code{shopt}
-builtin, several extended pattern matching operators are recognized.
+builtin, the shell recognizes several extended pattern matching operators.
 In the following description, a @var{pattern-list} is a list of one
 or more patterns separated by a @samp{|}.
 Composite patterns may be formed using one or more of the following
@@ -4590,6 +4590,9 @@ each builtin with an indication of whether or not it is enabled.
 
 The @option{-f} option means to load the new builtin command @var{name}
 from shared object @var{filename}, on systems that support dynamic loading.
+Bash will use the value of the @enable{BASH_LOADABLES_PATH} variable as a
+colon-separated list of directories in which to search for @var{filename}.
+The default is system-dependent.
 The @option{-d} option will delete a builtin loaded with @option{-f}.
 
 If there are no options, a list of the shell builtins is displayed.
@@ -9294,7 +9297,8 @@ But first, you should
 make sure that it really is a bug, and that it appears in the latest
 version of Bash.
 The latest version of Bash is always available for FTP from
-@uref{ftp://ftp.gnu.org/pub/gnu/bash/}.
+@uref{ftp://ftp.gnu.org/pub/gnu/bash/} and from
+@uref{http://git.savannah.gnu.org/cgit/bash.git/snapshot/bash-master.tar.gz}.
 
 Once you have determined that a bug actually exists, use the
 @code{bashbug} command to submit a bug report.

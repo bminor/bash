@@ -9975,3 +9975,28 @@ parse.y:
 				    ---
 arrayfunc.c
 	- unbind_array_element: use VA_NOEXPAND instead of literal 1
+
+				    4/7
+				    ---
+lib/readline/funmap.c
+	- default_funmap: add missing `vi-undo' to the list of vi-mode bindable
+	  functions. Reported by Xirui Zhao <quinean@icloud.com>
+
+				    4/8
+				    ---
+
+config-top.h
+	- DEFAULT_LOADABLE_BUILTINS_PATH: default value for BASH_LOADABLES_PATH
+
+doc/{bash.1,bashref.texi}
+	- enable: note that it uses $BASH_LOADABLES_PATH, and that the default
+	  is system-dependent
+
+variables.c
+	- initialize_shell_variables: initialize BASH_LOADABLES_PATH to the
+	  default given in DEFAULT_LOADABLE_BUILTINS_PATH
+
+				   4/12
+				   ----
+doc/{bash.1,bashref.texi}
+	- add link to git master tar file as a place to get the current version

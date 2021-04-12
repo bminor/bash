@@ -935,7 +935,7 @@ find_special_builtin (name)
   			current_builtin->function :
   			(sh_builtin_func_t *)NULL);
 }
-  
+
 static int
 shell_builtin_compare (sbp1, sbp2)
      struct builtin *sbp1, *sbp2;

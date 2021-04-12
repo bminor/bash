@@ -77,6 +77,12 @@
   "/bin:/usr/bin:/sbin:/usr/sbin:/etc:/usr/etc"
 #endif
 
+/* The default path for enable -f */
+#ifndef DEFAULT_LOADABLE_BUILTINS_PATH
+#define DEFAULT_LOADABLE_BUILTINS_PATH \
+  "/usr/local/lib/bash:/usr/lib/bash:/opt/local/lib/bash:/usr/pkg/lib/bash:/opt/pkg/lib/bash:."
+#endif
+
 /* Default primary and secondary prompt strings. */
 #define PPROMPT "\\s-\\v\\$ "
 #define SPROMPT "> "
