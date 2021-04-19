@@ -10000,3 +10000,24 @@ variables.c
 				   ----
 doc/{bash.1,bashref.texi}
 	- add link to git master tar file as a place to get the current version
+
+				   4/14
+				   ----
+bashline.c
+	- attempt_shell_completion: use -1 as a sentinel value for
+	  in_command_position indicating that we cannot be in a command position
+	  (e.g., because we're the target of a redirection) and should not
+	  check for a programmable command completion or tell the programmable
+	  completion code to use command completion. Report and fix from
+	  Marc Aurèle La France <tsi@tuyoix.net>
+
+				   4/16
+				   ----
+builtins/bind.def
+	- bind_builtin: reverse sense of strvec_search return value when
+	  deciding whether or not to remove a unix-command binding from the
+	  cmd keymap. Bug report by Dale Sedivec <dale@codefu.org>
+
+lib/readline/doc/rltech.texi
+	- RL_PROMPT_{START,END}_IGNORE: document current values of \001 and
+	  \002. Report from Mingye Wang <arthur200126@gmail.com>

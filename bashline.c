@@ -1618,7 +1618,7 @@ attempt_shell_completion (text, start, end)
       in_command_position++;
 
       if (check_redir (ti) == 1)
-	in_command_position = 0;
+	in_command_position = -1;	/* sentinel that we're not the first word on the line */
     }
   else
     {
@@ -1627,7 +1627,7 @@ attempt_shell_completion (text, start, end)
 	 assignments. */
     }
 
-  if (in_command_position && invalid_completion (text, ti))
+  if (in_command_position > 0 && invalid_completion (text, ti))
     {
       rl_attempted_completion_over = 1;
       return ((char **)NULL);
@@ -1635,9 +1635,9 @@ attempt_shell_completion (text, start, end)
 
   /* Check that we haven't incorrectly flagged a closed command substitution
      as indicating we're in a command position. */
-  if (in_command_position && ti >= 0 && rl_line_buffer[ti] == '`' &&
+  if (in_command_position > 0 && ti >= 0 && rl_line_buffer[ti] == '`' &&
 	*text != '`' && unclosed_pair (rl_line_buffer, end, "`") == 0)
-    in_command_position = 0;
+    in_command_position = -1;	/* not following a command separator */
 
   /* Special handling for command substitution.  If *TEXT is a backquote,
      it can be the start or end of an old-style command substitution, or
@@ -1645,8 +1645,8 @@ attempt_shell_completion (text, start, end)
      succeed.  Don't bother if readline found a single quote and we are
      completing on the substring.  */
   if (*text == '`' && rl_completion_quote_character != '\'' &&
-	(in_command_position || (unclosed_pair (rl_line_buffer, start, "`") &&
-				 unclosed_pair (rl_line_buffer, end, "`"))))
+	(in_command_position > 0 || (unclosed_pair (rl_line_buffer, start, "`") &&
+				     unclosed_pair (rl_line_buffer, end, "`"))))
     matches = rl_completion_matches (text, command_subst_completion_function);
 
 #if defined (PROGRAMMABLE_COMPLETION)
@@ -1654,7 +1654,7 @@ attempt_shell_completion (text, start, end)
   have_progcomps = prog_completion_enabled && (progcomp_size () > 0);
   iw_compspec = progcomp_search (INITIALWORD);
   if (matches == 0 &&
-      (in_command_position == 0 || text[0] == '\0' || (in_command_position && iw_compspec)) &&
+      (in_command_position == 0 || text[0] == '\0' || (in_command_position > 0 && iw_compspec)) &&
       current_prompt_string == ps1_prompt)
     {
       int s, e, s1, e1, os, foundcs;
@@ -1776,7 +1776,7 @@ attempt_shell_completion (text, start, end)
   if (matches == 0)
     {
       dflags = 0;
-      if (in_command_position)
+      if (in_command_position > 0)
 	dflags |= DEFCOMP_CMDPOS;
       matches = bash_default_completion (text, start, end, qc, dflags);
     }
