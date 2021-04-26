@@ -10021,3 +10021,56 @@ builtins/bind.def
 lib/readline/doc/rltech.texi
 	- RL_PROMPT_{START,END}_IGNORE: document current values of \001 and
 	  \002. Report from Mingye Wang <arthur200126@gmail.com>
+
+				   4/19
+				   ----
+arrayfunc.c
+	- assign_assoc_from_kvlist: fix memory leak reported by konsolebox
+	  <konsolebox@gmail.com>
+
+				   4/20
+				   ----
+command.h,subst.c
+	- W_ITILDE: remove, replace with a variable since it's only used inside
+	  a single call to expand_word_internal
+
+				   4/21
+				   ----
+{subst.c,make_cmd.c,parse.y}
+	- W_DQUOTE: no longer used, use W_NOPROCSUB and W_NOTILDE directly
+	  (for arithmetic commands and words in arithmetic for commands)
+
+				   4/24
+				   ----
+bashline.c
+	- executable_completion: since this function gets an unquoted filename
+	  from rl_filename_completion_function, we need to quote special
+	  characters before passing it to bash_directory_completion_hook.
+	  Report from Alex fxmbsw7 Ratchev <fxmbsw7@gmail.com>
+
+				   4/26
+				   ----
+lib/readline/search.c
+	- _rl_nsearch_abort: move function calls around so _rl_restore_prompt
+	  happens before rl_clear_message, like when aborting an incremental
+	  search. Suggested by sparrowhawk996@gmail.com
+
+subst.h
+	- ASS_ALLOWALLSUB: new assignment flag value, means to allow @ and * as
+	  array subscripts when assigning to existing associative arrays
+
+arrayfunc.c
+	- assign_array_element: allow assignment of key `@' to an existing
+	  associative array if the caller passes ASS_ALLOWALLSUB
+	- assign_compound_array_list: allow ( [@]=value ) to an existing
+	  associative array
+
+builtins/declare.def
+	- declare_internal: allow assignment of key `@' to an existing
+	  associative array by passing ASS_ALLOWALLSUB to assign_array_element
+	  as part of local_aflags
+
+subst.c
+	- do_assignment_internal: allow a[@]=value to an existing associative
+	  array by passing ASS_ALLOWALLSUB to assign_array_element
+

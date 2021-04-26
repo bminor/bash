@@ -7720,8 +7720,9 @@ Otherwise, @code{popd} returns an unsuccessful status if
 an invalid option is encountered, the directory stack
 is empty, or a non-existent directory stack entry is specified.
 
-If the @code{popd} command is successful, a @code{dirs}
-is performed as well, and the return status is 0.
+If the @code{popd} command is successful,
+Bash runs @code{dirs} to show the final contents of the directory stack,
+and the return status is 0.
 
 @btindex pushd
 @item pushd
@@ -7764,7 +7765,8 @@ When rotating the directory stack, @code{pushd} returns 0 unless
 the directory stack is empty or a non-existent directory stack element
 is specified.
 
-If the @code{pushd} command is successful, a @code{dirs} is performed as well.
+If the @code{pushd} command is successful,
+Bash runs @code{dirs} to show the final contents of the directory stack.
 
 @end table
 

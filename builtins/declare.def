@@ -942,6 +942,7 @@ restart_new_var_name:
 	  /* XXX - problem here with appending */
 	  local_aflags = aflags&ASS_APPEND;
 	  local_aflags |= assoc_noexpand ? ASS_NOEXPAND : 0;
+	  local_aflags |= ASS_ALLOWALLSUB;		/* allow declare a[@]=at */
 	  var = assign_array_element (name, value, local_aflags);	/* XXX - not aflags */
 	  *subscript_start = '\0';
 	  if (var == 0)	/* some kind of assignment error */

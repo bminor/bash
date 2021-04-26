@@ -4717,7 +4717,7 @@ parse_dparen (c)
 	{
 	  wd = alloc_word_desc ();
 	  wd->word = wval;
-	  wd->flags = W_QUOTED|W_NOSPLIT|W_NOGLOB|W_DQUOTE;
+	  wd->flags = W_QUOTED|W_NOSPLIT|W_NOGLOB|W_NOTILDE|W_NOPROCSUB;
 	  yylval.word_list = make_word_list (wd, (WORD_LIST *)NULL);
 	  return (ARITH_CMD);
 	}

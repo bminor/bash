@@ -747,16 +747,15 @@ argv[1] = <b+a>
 declare -A A=([$'\t']="2" [" "]="2" )
 ./array27.sub: line 36: ((: A[]]=2 : syntax error: invalid arithmetic operator (error token is "]=2 ")
 declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["@"]="2" )
-./array27.sub: line 45: A[]]: bad array subscript
+declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["]"]="2" ["@"]="2" )
+./array27.sub: line 52: A[]]: bad array subscript
 declare -A A=([$'\t']="X" ["*"]="X" [" "]="X" ["@"]="X" )
-./array27.sub: line 53: A[]]: bad array subscript
+./array27.sub: line 60: A[]]: bad array subscript
 declare -A A=([$'\t']="X" ["*"]="X" [" "]="X" ["@"]="X" )
-./array27.sub: line 61: declare: `A[]]=X': not a valid identifier
+./array27.sub: line 68: declare: `A[]]=X': not a valid identifier
 declare -A A=(["*"]="X" ["@"]="X" )
-./array27.sub: line 69: declare: `A[]]=X': not a valid identifier
-./array27.sub: line 69: A[*]: bad array subscript
-./array27.sub: line 69: A[@]: bad array subscript
-declare -A A
+./array27.sub: line 76: declare: `A[]]=X': not a valid identifier
+declare -A A=(["*"]="X" ["@"]="X" )
 declare -a bug4=([0]="" [1]="5" [2]="" [3]="1" [4]="")
 declare -a bug=([0]="" [1]="5" [2]="" [3]="1" [4]="")
 declare -a bug2=([0]="")

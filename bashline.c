@@ -1930,10 +1930,17 @@ executable_completion (filename, searching_path)
      const char *filename;
      int searching_path;
 {
-  char *f;
+  char *f, c;
   int r;
 
+  /* This gets an unquoted filename, so we need to quote special characters
+     in the filename before the completion hook gets it. */
+#if 0
   f = savestring (filename);
+#else
+  c = 0;
+  f = bash_quote_filename (filename, SINGLE_MATCH, &c);
+#endif
   bash_directory_completion_hook (&f);
   
   r = searching_path ? executable_file (f) : executable_or_directory (f);

@@ -16,25 +16,24 @@ declare -A wheat=([two]="b" [three]="c" [one]="a" [zero]="0" )
 declare -A chaff=(["hello world"]="flip" [one]="10" [zero]="5" )
 ./assoc.tests: line 51: waste: readonly variable
 ./assoc.tests: line 52: unset: waste: cannot unset: readonly variable
-./assoc.tests: line 53: chaff[*]: bad array subscript
-./assoc.tests: line 54: [*]=12: invalid associative array key
-declare -A chaff=(["hello world"]="flip" [one]="a" )
+declare -A chaff=(["*"]="12" ["hello world"]="flip" [one]="a" )
 flip
 argv[1] = <multiple>
 argv[2] = <words>
+argv[3] = <12>
+argv[4] = <flip>
+argv[5] = <a>
+argv[1] = <multiple words>
+argv[2] = <12>
 argv[3] = <flip>
 argv[4] = <a>
-argv[1] = <multiple words>
-argv[2] = <flip>
-argv[3] = <a>
 argv[1] = <multiple>
 argv[2] = <words>
-argv[3] = <flip>
-argv[4] = <a>
-argv[1] = <multiple words flip a>
+argv[3] = <12>
+argv[4] = <flip>
+argv[5] = <a>
+argv[1] = <multiple words 12 flip a>
 ./assoc.tests: line 71: declare: chaff: cannot destroy array variables in this way
-./assoc.tests: line 73: chaff[*]: bad array subscript
-./assoc.tests: line 74: [*]=12: invalid associative array key
 declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <qux>
 argv[2] = <qix>

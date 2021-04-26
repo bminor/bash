@@ -438,11 +438,6 @@ dump_word_flags (flags)
       f &= ~W_EXPANDRHS;
       fprintf (stderr, "W_EXPANDRHS%s", f ? "|" : "");
     }
-  if (f & W_ITILDE)
-    {
-      f &= ~W_ITILDE;
-      fprintf (stderr, "W_ITILDE%s", f ? "|" : "");
-    }
   if (f & W_NOTILDE)
     {
       f &= ~W_NOTILDE;
@@ -3283,6 +3278,7 @@ do_assignment_internal (word, expand)
 	  report_error (_("%s: cannot assign list to array member"), name);
 	  ASSIGN_RETURN (0);
 	}
+      aflags |= ASS_ALLOWALLSUB;
       entry = assign_array_element (name, value, aflags);
       if (entry == 0)
 	ASSIGN_RETURN (0);
@@ -10197,6 +10193,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   int had_quoted_null;
   int has_quoted_ifs;		/* did we add a quoted $IFS character here? */
   int has_dollar_at, temp_has_dollar_at;
+  int internal_tilde;
   int split_on_spaces;
   int local_expanded;
   int tflag;
@@ -10234,6 +10231,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   quoted_dollar_at = had_quoted_null = has_dollar_at = 0;
   has_quoted_ifs = 0;
   split_on_spaces = 0;
+  internal_tilde = 0;		/* expanding =~ or :~ */
   quoted_state = UNQUOTED;
 
   string = word->word;
@@ -10298,7 +10296,7 @@ add_string:
 	  {
 	       /* XXX - technically this should only be expanded at the start
 	       of a word */
-	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & (W_DQUOTE|W_NOPROCSUB)))
+	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & W_NOPROCSUB))
 	      {
 		sindex--;	/* add_character: label increments sindex */
 		goto add_character;
@@ -10349,7 +10347,7 @@ add_string:
 	      assignoff == -1 && sindex > 0)
 	    assignoff = sindex;
 	  if (sindex == assignoff && string[sindex+1] == '~')	/* XXX */
-	    word->flags |= W_ITILDE;
+	    internal_tilde = 1;
 
 	  if (word->flags & W_ASSIGNARG)
 	    word->flags |= W_ASSIGNRHS;		/* affects $@ */
@@ -10374,7 +10372,7 @@ add_string:
 	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS)) &&
 	      (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
 	      string[sindex+1] == '~')
-	    word->flags |= W_ITILDE;
+	    internal_tilde = 1;
 
 	  if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
 	    goto add_ifs_character;
@@ -10387,11 +10385,11 @@ add_string:
 	     assignment statement, we don't do tilde expansion.  We don't
 	     do tilde expansion if quoted or in an arithmetic context. */
 
-	  if ((word->flags & (W_NOTILDE|W_DQUOTE)) ||
-	      (sindex > 0 && ((word->flags & W_ITILDE) == 0)) ||
+	  if ((word->flags & W_NOTILDE) ||
+	      (sindex > 0 && (internal_tilde == 0)) ||
 	      (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	    {
-	      word->flags &= ~W_ITILDE;
+	      internal_tilde = 0;
 	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
 		goto add_ifs_character;
 	      else
@@ -10407,7 +10405,7 @@ add_string:
 
 	  temp = bash_tilde_find_word (string + sindex, tflag, &t_index);
 	    
-	  word->flags &= ~W_ITILDE;
+	  internal_tilde = 0;
 
 	  if (temp && *temp && t_index > 0)
 	    {

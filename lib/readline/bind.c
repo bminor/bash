@@ -1154,6 +1154,12 @@ const char * const _rl_possible_meta_prefixes[] = {
   "Meta", "M-", (const char *)NULL
 };
 
+/* Forward declarations */
+static int parser_if (char *);
+static int parser_else (char *);
+static int parser_endif (char *);
+static int parser_include (char *);
+
 /* Conditionals. */
 
 /* Calling programs set this to have their argv[0]. */

@@ -1,7 +1,7 @@
 /* command.h -- The structures used internally to represent commands, and
    the extern declarations of the functions used to create them. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -81,18 +81,18 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_NOGLOB	(1 << 5)	/* Do not perform globbing on this word. */
 #define W_NOSPLIT2	(1 << 6)	/* Don't split word except for $@ expansion (using spaces) because context does not allow it. */
 #define W_TILDEEXP	(1 << 7)	/* Tilde expand this assignment word */
-#define W_DOLLARAT	(1 << 8)	/* $@ and its special handling -- UNUSED */
-#define W_DOLLARSTAR	(1 << 9)	/* $* and its special handling -- UNUSED */
+#define W_DOLLARAT	(1 << 8)	/* UNUSED - $@ and its special handling */
+#define W_DOLLARSTAR	(1 << 9)	/* UNUSED - $* and its special handling */
 #define W_NOCOMSUB	(1 << 10)	/* Don't perform command substitution on this word */
 #define W_ASSIGNRHS	(1 << 11)	/* Word is rhs of an assignment statement */
 #define W_NOTILDE	(1 << 12)	/* Don't perform tilde expansion on this word */
-#define W_ITILDE	(1 << 13)	/* Internal flag for word expansion */
+#define W_NOASSNTILDE	(1 << 13)	/* don't do tilde expansion like an assignment statement */
 #define W_EXPANDRHS	(1 << 14)	/* Expanding word in ${paramOPword} */
 #define W_COMPASSIGN	(1 << 15)	/* Compound assignment */
 #define W_ASSNBLTIN	(1 << 16)	/* word is a builtin command that takes assignments */
 #define W_ASSIGNARG	(1 << 17)	/* word is assignment argument to command */
 #define W_HASQUOTEDNULL	(1 << 18)	/* word contains a quoted null character */
-#define W_DQUOTE	(1 << 19)	/* word should be treated as if double-quoted */
+#define W_DQUOTE	(1 << 19)	/* UNUSED - word should be treated as if double-quoted */
 #define W_NOPROCSUB	(1 << 20)	/* don't perform process substitution */
 #define W_SAWQUOTEDNULL	(1 << 21)	/* word contained a quoted null that was removed */
 #define W_ASSIGNASSOC	(1 << 22)	/* word looks like associative array assignment */
@@ -102,8 +102,8 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_NOBRACE	(1 << 26)	/* Don't perform brace expansion */
 #define W_COMPLETE	(1 << 27)	/* word is being expanded for completion */
 #define W_CHKLOCAL	(1 << 28)	/* check for local vars on assignment */
-#define W_NOASSNTILDE	(1 << 29)	/* don't do tilde expansion like an assignment statement */
-#define W_FORCELOCAL	(1 << 30)	/* force assignments to be to local variables, non-fatal on assignment errors */
+#define W_FORCELOCAL	(1 << 29)	/* force assignments to be to local variables, non-fatal on assignment errors */
+/* UNUSED		(1 << 30)	*/
 
 /* Flags for the `pflags' argument to param_expand() and various
    parameter_brace_expand_xxx functions; also used for string_list_dollar_at */
