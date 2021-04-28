@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -983,7 +983,7 @@ builtin_bind_variable (name, value, flags)
   if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
     v = bind_variable (name, value, flags);
   else
-    v = assign_array_element (name, value, flags | (assoc_expand_once ? ASS_NOEXPAND : 0));
+    v = assign_array_element (name, value, flags | (assoc_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB);
 #else /* !ARRAY_VARS */
   v = bind_variable (name, value, flags);
 #endif /* !ARRAY_VARS */
@@ -991,6 +991,17 @@ builtin_bind_variable (name, value, flags)
   if (v && readonly_p (v) == 0 && noassign_p (v) == 0)
     VUNSETATTR (v, att_invisible);
 
+  return v;
+}
+
+SHELL_VAR *
+builtin_bind_var_to_int (name, val)
+     char *name;
+     intmax_t val;
+{
+  SHELL_VAR *v;
+
+  v = bind_var_to_int (name, val, ASS_ALLOWALLSUB);	/* XXX */
   return v;
 }
 

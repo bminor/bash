@@ -10057,7 +10057,7 @@ lib/readline/search.c
 
 subst.h
 	- ASS_ALLOWALLSUB: new assignment flag value, means to allow @ and * as
-	  array subscripts when assigning to existing associative arrays
+	  valid array subscripts when assigning to existing associative arrays
 
 arrayfunc.c
 	- assign_array_element: allow assignment of key `@' to an existing
@@ -10068,9 +10068,43 @@ arrayfunc.c
 builtins/declare.def
 	- declare_internal: allow assignment of key `@' to an existing
 	  associative array by passing ASS_ALLOWALLSUB to assign_array_element
-	  as part of local_aflags
+	  as part of local_aflags. This affects declare, local, and typeset
 
 subst.c
 	- do_assignment_internal: allow a[@]=value to an existing associative
 	  array by passing ASS_ALLOWALLSUB to assign_array_element
 
+				   4/27
+				   ----
+builtins/common.[ch]
+	- builtin_bind_var_to_int: wrapper for bind_var_to_int to be used by
+	  builtin commands; placeholder for future work
+
+builtins/wait.def
+	- builtin_bind_var_to_int: use instead of bind_var_to_int
+
+builtins/common.c
+	- builtin_bind_variable: allow assignment of key `@' to an existing
+	  associative array by passing ASS_ALLOWALLSUB to assign_array_element.
+	  This affects printf and read
+
+builtins/variables.[ch]
+	- bind_var_to_int: add third `flags' argument to pass to bind_variable
+	  instead of always passing 0
+
+redir.c,builtins/common.c,builtins/printf.def
+	- bind_var_to_int: change callers, add third flags argument
+
+builtins/common.c
+	- builtin_bind_var_to_int: pass ASS_ALLOWALLSUB to bind_var_to_int so
+	  builtins like wait can assign to assoc[@] and assoc[*]
+
+				   4/28
+				   ----
+bashline.c
+	- command_word_completion_function: make sure to initialize
+	  old_glob_ignore_case before trying to restore from it
+	- command_word_completion_function: if we are completing a glob
+	  pattern, make sure to set rl_filename_completion_desired, so we get
+	  quoting and appending -- we are completing a filename, after all.
+	  From a report from Manuel Boni <ziosombrero@gmail.com>

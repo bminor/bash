@@ -3488,14 +3488,15 @@ bind_int_variable (lhs, rhs, flags)
 }
 
 SHELL_VAR *
-bind_var_to_int (var, val)
+bind_var_to_int (var, val, flags)
      char *var;
      intmax_t val;
+     int flags;
 {
   char ibuf[INT_STRLEN_BOUND (intmax_t) + 1], *p;
 
   p = fmtulong (val, 10, ibuf, sizeof (ibuf), 0);
-  return (bind_int_variable (var, p, 0));
+  return (bind_int_variable (var, p, flags));
 }
 
 /* Do a function binding to a variable.  You pass the name and

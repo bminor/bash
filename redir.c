@@ -1434,7 +1434,7 @@ redir_varassign (redir, fd)
   SHELL_VAR *v;
 
   w = redir->redirector.filename;
-  v = bind_var_to_int (w->word, fd);
+  v = bind_var_to_int (w->word, fd, 0);
   if (v == 0 || readonly_p (v) || noassign_p (v))
     return BADVAR_REDIRECT;
 

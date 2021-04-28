@@ -1939,7 +1939,7 @@ executable_completion (filename, searching_path)
   f = savestring (filename);
 #else
   c = 0;
-  f = bash_quote_filename (filename, SINGLE_MATCH, &c);
+  f = bash_quote_filename ((char *)filename, SINGLE_MATCH, &c);
 #endif
   bash_directory_completion_hook (&f);
   
@@ -1991,6 +1991,8 @@ command_word_completion_function (hint_text, state)
 
       temp = rl_variable_value ("completion-ignore-case");
       igncase = RL_BOOLEAN_VARIABLE_VALUE (temp);
+
+      old_glob_ignore_case = glob_ignore_case;
 
       if (glob_matches)
 	{
@@ -2177,6 +2179,8 @@ globword:
     {
       if (state == 0)
 	{
+	  rl_filename_completion_desired = 1;
+
 	  glob_ignore_case = igncase;
 	  glob_matches = shell_glob_filename (hint, 0);
 	  glob_ignore_case = old_glob_ignore_case;

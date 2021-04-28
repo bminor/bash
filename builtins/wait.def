@@ -214,7 +214,7 @@ wait_builtin (list)
 
       status = wait_for_any_job (wflags, &pstat);
       if (vname && status >= 0)
-	bind_var_to_int (vname, pstat.pid);
+	builtin_bind_var_to_int (vname, pstat.pid);
 
       if (status < 0)
 	status = 127;
@@ -230,7 +230,7 @@ wait_builtin (list)
     {
       wait_for_background_pids (&pstat);
       if (vname)
-	bind_var_to_int (vname, pstat.pid);
+	builtin_bind_var_to_int (vname, pstat.pid);
       WAIT_RETURN (EXECUTION_SUCCESS);
     }
 

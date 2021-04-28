@@ -226,6 +226,7 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern sh_builtin_func_t *last_shell_builtin;
 
 extern SHELL_VAR *builtin_bind_variable PARAMS((char *, char *, int));
+extern SHELL_VAR *builtin_bind_var_to_int PARAMS((char *, intmax_t));
 extern int builtin_unbind_variable PARAMS((const char *));
 
 /* variables from evalfile.c */
