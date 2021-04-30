@@ -458,10 +458,10 @@ dump_word_flags (flags)
       f &= ~W_NOCOMSUB;
       fprintf (stderr, "W_NOCOMSUB%s", f ? "|" : "");
     }
-  if (f & W_DOLLARSTAR)
+  if (f & W_ARRAYREF)
     {
-      f &= ~W_DOLLARSTAR;
-      fprintf (stderr, "W_DOLLARSTAR%s", f ? "|" : "");
+      f &= ~W_ARRAYREF;
+      fprintf (stderr, "W_ARRAYREF%s", f ? "|" : "");
     }
   if (f & W_DOLLARAT)
     {
@@ -3278,7 +3278,7 @@ do_assignment_internal (word, expand)
 	  report_error (_("%s: cannot assign list to array member"), name);
 	  ASSIGN_RETURN (0);
 	}
-      aflags |= ASS_ALLOWALLSUB;
+      aflags |= ASS_ALLOWALLSUB;	/* allow a[@]=value for existing associative arrays */
       entry = assign_array_element (name, value, aflags);
       if (entry == 0)
 	ASSIGN_RETURN (0);
@@ -10116,6 +10116,118 @@ return0:
     }
   return ret;
 }
+
+#if defined (ARRAY_VARS)
+/* Characters that need to be backslash-quoted after expanding array subscripts */
+static char abstab[256] = { '\1' };
+
+/* Run an array subscript through the appropriate word expansions. */
+char *
+expand_subscript_string (string, quoted)
+     char *string;
+     int quoted;
+{
+  WORD_DESC td;
+  WORD_LIST *tlist;
+  int oe;
+  char *ret;
+
+  if (string == 0 || *string == 0)
+    return (char *)NULL;
+
+  oe = expand_no_split_dollar_star;
+  ret = (char *)NULL;
+
+  td.flags = W_NOPROCSUB|W_NOTILDE|W_NOSPLIT2;	/* XXX - W_NOCOMSUB? */
+  td.word = string;
+
+  expand_no_split_dollar_star = 1;
+  tlist = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
+  expand_no_split_dollar_star = oe;
+
+  if (tlist)
+    {
+      if (tlist->word)
+	{
+	  remove_quoted_nulls (tlist->word->word);
+	  tlist->word->flags &= ~W_HASQUOTEDNULL;
+	}
+      dequote_list (tlist);
+      ret = string_list (tlist);
+      dispose_words (tlist);
+    }
+
+  return (ret);
+}
+
+/* Expand the subscript in STRING, which is an array reference. To ensure we
+   only expand it once, we quote the characters that would start another
+   expansion and the bracket characters that are special to array subscripts. */
+static char *
+expand_array_subscript (string, sindex, quoted, flags)
+     char *string;
+     int *sindex;
+     int quoted, flags;
+{
+  char *ret, *exp, *t;
+  size_t slen;
+  int si, ni;
+
+  si = *sindex;
+  slen = STRLEN (string);
+
+  if (abstab[0] == '\1')
+    {
+      /* These are basically the characters that start shell expansions plus
+	 the characters that delimit subscripts. */
+      memset (abstab, '\0', sizeof (abstab));
+      abstab[LBRACK] = abstab[RBRACK] = 1;
+      abstab['$'] = abstab['`'] = abstab['~'] = 1;
+      abstab['\\'] = abstab['\''] = 1;
+    }
+
+  /* string[si] == LBRACK */
+  ni = skipsubscript (string, si, 0);
+  /* These checks mirror the ones in valid_array_subscript. The check for
+     (ni - si) == 1 checks for empty subscripts. We don't check that the
+     subscript is a separate word if we're parsing an arithmetic expression. */
+  if (ni >= slen || string[ni] != RBRACK || (ni - si) == 1 ||
+      (string[ni+1] != '\0' && (quoted & Q_ARITH) == 0))
+    {
+/* let's check and see what fails this check */
+itrace("expand_array_subscript: bad subscript string: `%s'", string+si);
+      ret = (char *)xmalloc (2);	/* badly-formed subscript */
+      ret[0] = string[si];
+      ret[1] = '\0';
+      *sindex = si + 1;
+      return ret;
+    }
+
+  /* STRING[ni] == RBRACK */
+  exp = substring (string, si+1, ni);
+  t = expand_subscript_string (exp, quoted & ~(Q_ARITH|Q_DOUBLE_QUOTES));
+  free (exp);
+  /* Only quote `@' and `*' if they are the only character in the subscript */
+  if (ALL_ELEMENT_SUB (t[0]) && t[1] == '\0')
+    abstab['*'] = abstab['@'] = 1;
+  else
+    abstab['*'] = abstab['@'] = 0;
+  exp = sh_backslash_quote (t, abstab, 0);
+  free (t);
+
+  slen = STRLEN (exp);
+  ret = xmalloc (slen + 2 + 1);
+  ret[0] ='[';
+  strcpy (ret + 1, exp);
+  ret[slen + 1] = ']';
+  ret[slen + 2] = '\0';
+
+  free (exp);
+  *sindex = ni + 1;
+
+  return ret;
+}
+#endif
 
 void
 invalidate_cached_quoted_dollar_at ()

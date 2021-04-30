@@ -1001,7 +1001,7 @@ builtin_bind_var_to_int (name, val)
 {
   SHELL_VAR *v;
 
-  v = bind_var_to_int (name, val, ASS_ALLOWALLSUB);	/* XXX */
+  v = bind_var_to_int (name, val, ASS_ALLOWALLSUB);
   return v;
 }
 

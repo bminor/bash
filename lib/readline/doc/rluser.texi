@@ -540,6 +540,19 @@ non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 The default is @samp{@@}.
 
+@item enable-active-region
+@vindex enable-active-region
+The @dfn{point} is the current cursor position, and @dfn{mark} refers
+to a saved cursor position (@pxref{Commands For Moving}).
+The text between the point and mark is referred to as the @dfn{region}.
+When this variable is set to @samp{On}, Readline allows certain commands
+to designate the region as @dfn{active}.
+When the region is active, Readline highlights the text in the region using
+the terminal's standout mode.
+The active region shows the text inserted by bracketed-paste and any
+matching text found by incremental and non-incremental history searches.
+The default is @samp{On}.
+
 @item enable-bracketed-paste
 @vindex enable-bracketed-paste
 When set to @samp{On}, Readline will configure the terminal in a way

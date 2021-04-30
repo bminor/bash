@@ -10108,3 +10108,24 @@ bashline.c
 	  pattern, make sure to set rl_filename_completion_desired, so we get
 	  quoting and appending -- we are completing a filename, after all.
 	  From a report from Manuel Boni <ziosombrero@gmail.com>
+
+lib/readline/bind.c
+	- enable-active-region: separate control of the active region and
+	  bracketed paste. Still set to the same default value as bracketed
+	  paste, and enabling bracketed paste enables the active region.
+	  Now you can enable bracketed paste and then turn off the active
+	  region.
+
+doc/bash.1,lib/readline/doc/{readline.3,rltech.texi}
+	- enable-active-region: document new bindable readline variable and
+	  its effects
+
+				   4/30
+				   ----
+command.h
+	- W_ARRAYREF: new flag, meaning the word is a valid array reference
+	  with subscript, replaces W_DOLLARSTAR, which was unused
+
+subst.c	
+	- expand_subscript_string,expand_array_subscript: new functions to
+	  parse and expand-and-quote array subscripts. For future use

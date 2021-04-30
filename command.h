@@ -82,7 +82,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_NOSPLIT2	(1 << 6)	/* Don't split word except for $@ expansion (using spaces) because context does not allow it. */
 #define W_TILDEEXP	(1 << 7)	/* Tilde expand this assignment word */
 #define W_DOLLARAT	(1 << 8)	/* UNUSED - $@ and its special handling */
-#define W_DOLLARSTAR	(1 << 9)	/* UNUSED - $* and its special handling */
+#define W_ARRAYREF	(1 << 9)	/* word is a valid array reference */
 #define W_NOCOMSUB	(1 << 10)	/* Don't perform command substitution on this word */
 #define W_ASSIGNRHS	(1 << 11)	/* Word is rhs of an assignment statement */
 #define W_NOTILDE	(1 << 12)	/* Don't perform tilde expansion on this word */

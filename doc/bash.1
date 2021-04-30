@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Mar 31 11:01:34 EDT 2021
+.\"	Last Change: Wed Apr 28 14:35:46 EDT 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 March 30" "GNU Bash 5.1"
+.TH BASH 1 "2021 April 28" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5864,6 +5864,17 @@ backslash escape sequences is available.
 Use the \e1 and \e2 escapes to begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
+.TP
+.B enable\-active\-region (On)
+The \fIpoint\fP is the current cursor position, and \fImark\fP refers  
+to a saved cursor position.   
+The text between the point and mark is referred to as the \fIregion\fP.  
+When this variable is set to \fIOn\fP, readline allows certain commands
+to designate the region as \fIactive\fP.  
+When the region is active, readline highlights the text in the region using
+the terminal's standout mode.
+The active region shows the text inserted by bracketed-paste and any
+matching text found by incremental and non-incremental history searches.
 .TP
 .B enable\-bracketed\-paste (On)
 When set to \fBOn\fP, readline will configure the terminal in a way
