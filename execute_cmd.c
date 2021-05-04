@@ -5556,10 +5556,16 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 #if defined (PROCESS_SUBSTITUTION)
 	  /* Try to remove named pipes that may have been created as the
 	     result of redirections. */
-	  unlink_fifo_list ();
+	  unlink_all_fifos ();
 #endif /* PROCESS_SUBSTITUTION */
 	  exit (EXECUTION_FAILURE);
 	}
+
+#if defined (PROCESS_SUBSTITUTION) && !defined (HAVE_DEV_FD)
+      /* This should only contain FIFOs created as part of redirection
+	 expansion. */
+      unlink_all_fifos ();
+#endif
 
       if (async)
 	interactive = old_interactive;
