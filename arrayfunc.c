@@ -564,12 +564,9 @@ assign_assoc_from_kvlist (var, nlist, h, flags)
 {
   WORD_LIST *list;
   char *akey, *aval, *k, *v;
-  int free_aval;
 
   for (list = nlist; list; list = list->next)
     {
-      free_aval = 0;
-
       k = list->word->word;
       v = list->next ? list->next->word->word : 0;
 
@@ -577,24 +574,22 @@ assign_assoc_from_kvlist (var, nlist, h, flags)
         list = list->next;
 
       akey = expand_assignment_string_to_string (k, 0);
-      aval = expand_assignment_string_to_string (v, 0);
-
       if (akey == 0 || *akey == 0)
 	{
 	  err_badarraysub (k);
 	  FREE (akey);
 	  continue;
 	}	      
+
+      aval = expand_assignment_string_to_string (v, 0);
       if (aval == 0)
 	{
 	  aval = (char *)xmalloc (1);
 	  aval[0] = '\0';	/* like do_assignment_internal */
-	  free_aval = 1;
 	}
 
       bind_assoc_var_internal (var, h, akey, aval, flags);
-      if (free_aval)
-	free (aval);
+      free (aval);
     }
 }
 

@@ -11673,6 +11673,8 @@ expand_compound_assignment_word (tlist, flags)
   free (value);
 
   value = string_list (l);
+  dispose_words (l);
+
   wlen = STRLEN (value);
 
   /* Now, let's rebuild the string */
