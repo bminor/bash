@@ -9723,7 +9723,7 @@ include/posixtime.h
 	- added some BSD convenience defines if they are not present
 
 parse.y,shell.h
-	- {save,restore}_parser_state: save amd restore shell_eof_token and
+	- {save,restore}_parser_state: save and restore shell_eof_token and
 	  pushed_string_list; change callers (e.g., xparse_dolparen) so they
 	  don't have to manage them
 
@@ -10129,3 +10129,25 @@ command.h
 subst.c	
 	- expand_subscript_string,expand_array_subscript: new functions to
 	  parse and expand-and-quote array subscripts. For future use
+
+				    5/3
+				    ---
+builtins/mapfile.def
+	- mapfile: if the delimiter is a newline, set unbuffered_read = 1
+	  for any file descriptor that isn't seekable and lseek sets errno
+	  to ESPIPE (pipes, FIFOs, maybe terminal devices). If it's not a
+	  newline, only allow buffered reads if the file descriptor is a
+	  regular file. Report from Koichi Murase <myoga.murase@gmail.com>
+
+builtins/read.def
+	- read_builtin: only set unbuffered_read = 1 if the input is coming
+	  from a pipe (which we can't seek on) or the input is a terminal and
+	  we want to read a specified number of characters or we're using a
+	  non-standard delimiter
+
+				    5/4
+				    ---
+
+builtins/mapfile.def
+	- mapfile: call zsyncfd before calling the callback. Suggested by
+	  Koichi Murase <myoga.murase@gmail.com>; we'll see how it goes

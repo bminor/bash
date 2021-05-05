@@ -15,6 +15,7 @@ a=7
 echo 'abcdefg|xyz' | {
 	read -d '|' a 
 	echo a = "${a-unset}"
+	cat -	# make sure we don't read too much
 }
 
 echo xyz 123 | {

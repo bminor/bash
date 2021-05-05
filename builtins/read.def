@@ -593,11 +593,15 @@ read_builtin (list)
   add_unwind_protect (xfree, input_string);
 
   check_read_timeout ();
+  /* These only matter if edit == 0 */
   if ((nchars > 0) && (input_is_tty == 0) && ignore_delim)	/* read -N */
     unbuffered_read = 2;
+#if 0
   else if ((nchars > 0) || (delim != '\n') || input_is_pipe)
+#else
+  else if (((nchars > 0 || delim != '\n') && input_is_tty) || input_is_pipe)
     unbuffered_read = 1;
-
+#endif
   if (prompt && edit == 0)
     {
       fprintf (stderr, "%s", prompt);

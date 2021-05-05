@@ -5582,7 +5582,11 @@ unlink_all_fifos ()
   for (i = 0; i < nfifo; i++)
     {
       fifo_list[i].proc = (pid_t)-1;
+#if defined (O_NONBLOCK)
       fd = open (fifo_list[i].file, O_RDWR|O_NONBLOCK);
+#else
+      fd = -1;
+#endif
       unlink_fifo (i);
       if (fd >= 0)
 	close (fd);
