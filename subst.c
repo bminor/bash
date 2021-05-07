@@ -3594,7 +3594,7 @@ expand_arith_string (string, quoted)
       if (EXP_CHAR (string[i]))
 	break;
       else if (string[i] == '\'' || string[i] == '\\' || string[i] == '"')
-	saw_quote = 1;
+	saw_quote = string[i];
       ADVANCE_CHAR (string, slen, i);
     }
 
@@ -3684,7 +3684,8 @@ cond_expand_word (w, special)
 
   expand_no_split_dollar_star = 1;
   w->flags |= W_NOSPLIT2;
-  l = call_expand_word_internal (w, 0, 0, (int *)0, (int *)0);
+  qflags = (special == 3) ? Q_ARITH : 0;
+  l = call_expand_word_internal (w, qflags, 0, (int *)0, (int *)0);
   expand_no_split_dollar_star = 0;
   if (l)
     {
@@ -6714,7 +6715,7 @@ array_length_reference (s)
   if (assoc_p (var))
     {
       t[len - 1] = '\0';
-      akey = expand_assignment_string_to_string (t, 0);	/* [ */
+      akey = expand_subscript_string (t, 0);	/* [ */
       t[len - 1] = RBRACK;
       if (akey == 0 || *akey == 0)
 	{
@@ -7526,7 +7527,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 {
   char *t, *temp1, *temp2;
   arrayind_t len;
-  int expok;
+  int expok, eflag;
 #if defined (ARRAY_VARS)
  ARRAY *a;
  HASH_TABLE *h;
@@ -7539,12 +7540,14 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
   else
     t = (char *)0;
 
-  temp1 = expand_arith_string (substr, Q_DOUBLE_QUOTES);	/* Q_ARITH? */
-#if 1 /* TAG: bash-5.2 */
-  *e1p = evalexp (temp1, EXP_EXPANDED, &expok);
+  temp1 = expand_arith_string (substr, Q_DOUBLE_QUOTES|Q_ARITH);
+#if 0 /* TAG: bash-5.2 */
+  eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
 #else
-  *e1p = evalexp (temp1, 0, &expok);		/* XXX - EXP_EXPANDED? */
+  eflag = 0;
 #endif
+
+  *e1p = evalexp (temp1, eflag, &expok);
   free (temp1);
   if (expok == 0)
     return (0);
@@ -7599,14 +7602,10 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
     {
       t++;
       temp2 = savestring (t);
-      temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES);	/* Q_ARITH? */
+      temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES|Q_ARITH);
       free (temp2);
       t[-1] = ':';
-#if 1 /* TAG: bash-5.2 */
-      *e2p = evalexp (temp1, EXP_EXPANDED, &expok);
-#else
-      *e2p = evalexp (temp1, 0, &expok);	/* XXX - EXP_EXPANDED? */
-#endif
+      *e2p = evalexp (temp1, eflag, &expok);
       free (temp1);
       if (expok == 0)
 	return (0);
@@ -9574,7 +9573,7 @@ param_expand (string, sindex, quoted, expanded_something,
      int *quoted_dollar_at_p, *had_quoted_null_p, pflags;
 {
   char *temp, *temp1, uerror[3], *savecmd;
-  int zindex, t_index, expok;
+  int zindex, t_index, expok, eflag;
   unsigned char c;
   intmax_t number;
   SHELL_VAR *var;
@@ -9952,7 +9951,12 @@ arithsub:
 	  /* No error messages. */
 	  savecmd = this_command_name;
 	  this_command_name = (char *)NULL;
-	  number = evalexp (temp1, EXP_EXPANDED, &expok);
+#if 0 /* TAG: bash-5.2 */
+	  eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
+#else
+	  eflag = 0;
+#endif
+	  number = evalexp (temp1, eflag, &expok);
 	  this_command_name = savecmd;
 	  free (temp);
 	  free (temp1);
@@ -10435,6 +10439,26 @@ add_string:
 	  }
 #endif /* PROCESS_SUBSTITUTION */
 
+#if defined (ARRAY_VARS)
+	case '[':		/*]*/
+#if 0	/* TAG:bash-5.2 */
+	  if (((quoted & Q_ARITH) == 0 && (word->flags & W_ARRAYREF) == 0) || (shell_compatibility_level <= 51))
+#else
+	  if (((quoted & Q_ARITH) == 0 && (word->flags & W_ARRAYREF) == 0))
+#endif
+	    {
+	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
+		goto add_ifs_character;
+	      else
+		goto add_character;
+	    }
+	  else
+	    {
+	      temp = expand_array_subscript (string, &sindex, quoted, word->flags);
+	      goto add_string;
+	    }
+#endif
+
 	case '=':
 	  /* Posix.2 section 3.6.1 says that tildes following `=' in words
 	     which are not assignment statements are not expanded.  If the
@@ -10708,6 +10732,7 @@ add_twochars:
 	  break;
 
 	case '"':
+	  /* XXX - revisit this */
 	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) && ((quoted & Q_ARITH) == 0))
 	    goto add_character;
 
@@ -10741,7 +10766,8 @@ add_twochars:
 
 	      temp_has_dollar_at = 0;	/* does this quoted (sub)string include $@? */
 	      /* Need to get W_HASQUOTEDNULL flag through this function. */
-	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, 0, &temp_has_dollar_at, (int *)NULL);
+	      /* XXX - preserve Q_ARITH here? */
+	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES|(quoted&Q_ARITH), 0, &temp_has_dollar_at, (int *)NULL);
 	      has_dollar_at += temp_has_dollar_at;
 
 	      if (list == &expand_word_error || list == &expand_word_fatal)
@@ -11074,6 +11100,8 @@ finished_with_string:
 	tword->flags |= W_NOGLOB;	/* XXX */
       if (word->flags & W_NOBRACE)
 	tword->flags |= W_NOBRACE;	/* XXX */
+      if (word->flags & W_ARRAYREF)
+	tword->flags |= W_ARRAYREF;
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 	tword->flags |= W_QUOTED;
       list = make_word_list (tword, (WORD_LIST *)NULL);
@@ -11182,6 +11210,8 @@ set_word_flags:
 	    tword->flags |= W_NOGLOB;
 	  if (word->flags & W_NOBRACE)
 	    tword->flags |= W_NOBRACE;
+	  if (word->flags & W_ARRAYREF)
+	    tword->flags |= W_ARRAYREF;
 	  list = make_word_list (tword, (WORD_LIST *)NULL);
 	}
     }

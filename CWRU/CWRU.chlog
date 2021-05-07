@@ -10151,3 +10151,60 @@ builtins/read.def
 builtins/mapfile.def
 	- mapfile: call zsyncfd before calling the callback. Suggested by
 	  Koichi Murase <myoga.murase@gmail.com>; we'll see how it goes
+
+				    5/5
+				    ---
+subst.h
+	- expand_subscript_string: extern declaration
+
+{arrayfunc,subst}.c
+	- expand_subscript_string: replace expand_assignment_string_to_string
+	  with calls to this when expanding array subscripts
+
+subst.c
+	- cond_expand_word: call expand_word_internal with Q_ARITH if `special'
+	  says we should quote for an arithmetic expression context
+	- expand_word_internal: call expand_array_subscript when we see `[' in
+	  arithmetic or array subscript contexts, make conditional on the
+	  compatibility level later
+	- expand_word_internal: make sure W_ARRAYREF makes it through this
+	  function and into the returned word
+
+				    5/6
+				    ---
+
+arrayfunc.c
+	- array_expand_index: call evalexp with a flag of 0 since we call
+	  expand_arith_string with Q_ARITH and we want evalexp to remove
+	  the quotes
+
+execute_cmd.c
+	- eval_arith_for_expr,execute_arith_command: now that Q_ARITH has an
+	  effect on array subscripts (it quotes the special expansion
+	  characters), call evalexp with 0 as the flags arg so quote removal
+	  is performed on this quoted argument. Make this conditional on the
+	  shell compatibility level later
+	- execute_cond_command: make sure to expand the argument to -v by
+	  calling cond_expand_node with Q_ARITH, and correspondingly turn off
+	  assoc_expand_once when calling unary_test with that argument, since
+	  we want it to be expanded again to remove the quotes
+	- execute_cond_command: expand the arguments to the arithmetic operators
+	  with Q_ARITH and pass TEST_ARITHEXP to binary_test to ensure that
+	  it lets evalexp expand the arguments to remove the quoting
+
+test.c
+	- arithcomp: if TEST_ARITHEXP is in FLAGS, call evalexp with a flag
+	  if 0 to force evalexp to expand the arguments to remove the quoting
+
+subst.c
+	- param_expand: since we call expand_arith_string with Q_ARITH, we need
+	  to call evalexp with 0 instead of EXP_EXPANDED for $((...)) expansion
+	- expand_word_internal: if we recursively call expand_word_internal to
+	  expand the contents of a double-quoted string, make sure we pass
+	  through Q_ARITH if it appears in QUOTED
+	- verify_substring_values: call expand_arith_string with Q_ARITH and
+	  correspondingly call evalexp with 0 instead of EXP_EXPANDED
+
+execute_cmd.c
+	- execute_cond_node: if -v is the operator, and the operand is a valid
+	  array reference, pass TEST_ARRAYEXP flag to unary_test

@@ -374,7 +374,7 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
     {
       sub[sublen-1] = '\0';
       if ((flags & ASS_NOEXPAND) == 0)
-	akey = expand_assignment_string_to_string (sub, 0);	/* [ */
+	akey = expand_subscript_string (sub, 0);	/* [ */
       else
 	akey = savestring (sub);
       sub[sublen-1] = ']';
@@ -579,7 +579,7 @@ assign_assoc_from_kvlist (var, nlist, h, flags)
       if (list->next)
         list = list->next;
 
-      akey = expand_assignment_string_to_string (k, 0);
+      akey = expand_subscript_string (k, 0);
       if (akey == 0 || *akey == 0)
 	{
 	  err_badarraysub (k);
@@ -587,7 +587,7 @@ assign_assoc_from_kvlist (var, nlist, h, flags)
 	  continue;
 	}	      
 
-      aval = expand_assignment_string_to_string (v, 0);
+      aval = expand_subscript_string (v, 0);
       if (aval == 0)
 	{
 	  aval = (char *)xmalloc (1);
@@ -614,7 +614,7 @@ expand_and_quote_kvpair_word (w)
 {
   char *t, *r;
 
-  t = w ? expand_assignment_string_to_string (w, 0) : 0;
+  t = w ? expand_subscript_string (w, 0) : 0;
   r = sh_single_quote (t ? t : "");
   free (t);
   return r;
@@ -740,7 +740,7 @@ assign_compound_array_list (var, nlist, flags)
 	    {
 	      /* This is not performed above, see expand_compound_array_assignment */
 	      w[len] = '\0';	/*[*/
-	      akey = expand_assignment_string_to_string (w+1, 0);
+	      akey = expand_subscript_string (w+1, 0);
 	      w[len] = ']';
 	      /* And we need to expand the value also, see below */
 	      if (akey == 0 || *akey == 0)
@@ -776,7 +776,7 @@ assign_compound_array_list (var, nlist, flags)
       /* See above; we need to expand the value here */
       if (assoc_p (var))
 	{
-	  val = expand_assignment_string_to_string (val, 0);
+	  val = expand_subscript_string (val, 0);
 	  if (val == 0)
 	    {
 	      val = (char *)xmalloc (1);
@@ -938,7 +938,7 @@ expand_and_quote_assoc_word (w, type)
     return (sh_single_quote (w));
 
   w[ind] = '\0';
-  t = expand_assignment_string_to_string (w+1, 0);
+  t = expand_subscript_string (w+1, 0);
   w[ind] = RBRACK;
   key = sh_single_quote (t ? t : "");
   free (t);
@@ -954,7 +954,7 @@ expand_and_quote_assoc_word (w, type)
     nword[i++] = w[ind++];
   nword[i++] = w[ind++];
 
-  t = expand_assignment_string_to_string (w+ind, 0);
+  t = expand_subscript_string (w+ind, 0);
   value = sh_single_quote (t ? t : "");
   free (t);
   nword = xrealloc (nword, wlen + 5 + STRLEN (value));
@@ -1070,7 +1070,7 @@ unbind_array_element (var, sub, flags)
 
   if (assoc_p (var))
     {
-      akey = (flags & VA_NOEXPAND) ? sub : expand_assignment_string_to_string (sub, 0);
+      akey = (flags & VA_NOEXPAND) ? sub : expand_subscript_string (sub, 0);
       if (akey == 0 || *akey == 0)
 	{
 	  builtin_error ("[%s]: %s", sub, _(bash_badsub_errmsg));
@@ -1218,7 +1218,7 @@ array_expand_index (var, s, len, flags)
      int flags;
 {
   char *exp, *t, *savecmd;
-  int expok;
+  int expok, eflag;
   arrayind_t val;
 
   exp = (char *)xmalloc (len);
@@ -1234,7 +1234,12 @@ array_expand_index (var, s, len, flags)
 #endif
   savecmd = this_command_name;
   this_command_name = (char *)NULL;
-  val = evalexp (t, EXP_EXPANDED, &expok);	/* XXX - was 0 but we expanded exp already */
+#if 0 /* TAG:bash-5.2 */
+  eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
+#else
+  eflag = 0;
+#endif
+  val = evalexp (t, eflag, &expok);	/* XXX - was 0 but we expanded exp already */
   this_command_name = savecmd;
   if (t != exp)
     free (t);
@@ -1435,7 +1440,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	{
 	  t[len - 1] = '\0';
 	  if ((flags & AV_NOEXPAND) == 0)
-	    akey = expand_assignment_string_to_string (t, 0);	/* [ */
+	    akey = expand_subscript_string (t, 0);	/* [ */
 	  else
 	    akey = savestring (t);
 	  t[len - 1] = ']';

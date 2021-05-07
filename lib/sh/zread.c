@@ -59,6 +59,8 @@ zread (fd, buf, len)
   ssize_t r;
 
   check_signals ();	/* check for signals before a blocking read */
+  /* should generalize into a mechanism where different parts of the shell can
+     `register' timeouts and have them checked here. */
   while (((r = read_builtin_timeout (fd)) < 0 || (r = read (fd, buf, len)) < 0) &&
 	     errno == EINTR)
     {

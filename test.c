@@ -339,12 +339,19 @@ arithcomp (s, t, op, flags)
   intmax_t l, r;
   int expok;
 
-  if (flags & TEST_ARITHEXP)
+  if (flags & TEST_ARITHEXP)		/* conditional command */
     {
-      l = evalexp (s, EXP_EXPANDED, &expok);
+      int eflag;
+
+#if 0 /* TAG:bash-5.2 */
+      eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
+#else
+      eflag = 0;
+#endif
+      l = evalexp (s, eflag, &expok);
       if (expok == 0)
 	return (FALSE);		/* should probably longjmp here */
-      r = evalexp (t, EXP_EXPANDED, &expok);
+      r = evalexp (t, eflag, &expok);
       if (expok == 0)
 	return (FALSE);		/* ditto */
     }
@@ -492,13 +499,13 @@ unary_operator ()
 	  if (legal_number (argv[pos], &r))
 	    {
 	      advance (0);
-	      return (unary_test (op, argv[pos - 1]));
+	      return (unary_test (op, argv[pos - 1], 0));
 	    }
 	  else
 	    return (FALSE);
 	}
       else
-	return (unary_test (op, "1"));
+	return (unary_test (op, "1", 0));
     }
 
   /* All of the unary operators take an argument, so we first call
@@ -506,12 +513,13 @@ unary_operator ()
      argument, and then advances pos right past it.  This means that
      pos - 1 is the location of the argument. */
   unary_advance ();
-  return (unary_test (op, argv[pos - 1]));
+  return (unary_test (op, argv[pos - 1], 0));
 }
 
 int
-unary_test (op, arg)
+unary_test (op, arg, flags)
      char *op, *arg;
+     int flags;
 {
   intmax_t r;
   struct stat stat_buf;
@@ -630,6 +638,8 @@ unary_test (op, arg)
 	  int rtype, ret, flags;
 
 	  /* Let's assume that this has already been expanded once. */
+	  /* XXX - TAG:bash-5.2 fix with corresponding fix to execute_cmd.c:
+	     execute_cond_node() that passes TEST_ARRAYEXP in FLAGS */
 	  flags = assoc_expand_once ? AV_NOEXPAND : 0;
 	  t = array_value (arg, 0, flags, &rtype, (arrayind_t *)0);
 	  ret = t ? TRUE : FALSE;

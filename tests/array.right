@@ -520,13 +520,11 @@ argv[1] = <y>
 <X> <X> <X> <X>
 ./array23.sub: line 22: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
 ./array23.sub: line 23: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-foo
-0
-foo
-foo
-foo
-6
-./array23.sub: line 34: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 24: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 26: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 30: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 33: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 34: $index: syntax error: operand expected (error token is "$index")
 ./array23.sub: line 35: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
 0
 0
@@ -743,10 +741,9 @@ argv[1] = <b>
 argv[2] = <a>
 argv[1] = <b+a>
 7
-./array27.sub: line 24: a[]]=7 : syntax error: invalid arithmetic operator (error token is "]=7 ")
+7
 declare -A A=([$'\t']="2" [" "]="2" )
-./array27.sub: line 36: ((: A[]]=2 : syntax error: invalid arithmetic operator (error token is "]=2 ")
-declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["@"]="2" )
+declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["]"]="2" ["@"]="2" )
 declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["]"]="2" ["@"]="2" )
 ./array27.sub: line 52: A[]]: bad array subscript
 declare -A A=([$'\t']="X" ["*"]="X" [" "]="X" ["@"]="X" )

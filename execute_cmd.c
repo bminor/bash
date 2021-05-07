@@ -3010,7 +3010,7 @@ eval_arith_for_expr (l, okp)
 {
   WORD_LIST *new;
   intmax_t expresult;
-  int r;
+  int r, eflag;
   char *expr, *temp;
 
   expr = l->next ? string_list (l) : l->word->word;
@@ -3037,9 +3037,15 @@ eval_arith_for_expr (l, okp)
       r = run_debug_trap ();
       /* In debugging mode, if the DEBUG trap returns a non-zero status, we
 	 skip the command. */
+#if 0	/* TAG:bash-5.2 */
+      eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
+#else
+      eflag = 0;
+#endif
+      
 #if defined (DEBUGGER)
       if (debugging_mode == 0 || r == EXECUTION_SUCCESS)
-	expresult = evalexp (new->word->word, EXP_EXPANDED, okp);
+	expresult = evalexp (new->word->word, eflag, okp);
       else
 	{
 	  expresult = 0;
@@ -3047,7 +3053,7 @@ eval_arith_for_expr (l, okp)
 	    *okp = 1;
 	}
 #else
-      expresult = evalexp (new->word->word, EXP_EXPANDED, okp);
+      expresult = evalexp (new->word->word, eflag, okp);
 #endif
       dispose_words (new);
     }
@@ -3744,7 +3750,7 @@ static int
 execute_arith_command (arith_command)
      ARITH_COM *arith_command;
 {
-  int expok, save_line_number, retval;
+  int expok, save_line_number, retval, eflag;
   intmax_t expresult;
   WORD_LIST *new;
   char *exp, *t;
@@ -3805,7 +3811,12 @@ execute_arith_command (arith_command)
 
   if (exp)
     {
-      expresult = evalexp (exp, EXP_EXPANDED, &expok);
+#if 0	/* TAG:bash-5.2 */
+      eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
+#else
+      eflag = 0;
+#endif
+      expresult = evalexp (exp, eflag, &expok);
       line_number = save_line_number;
       free (exp);
     }
@@ -3831,8 +3842,8 @@ static int
 execute_cond_node (cond)
      COND_COM *cond;
 {
-  int result, invert, patmatch, rmatch, mflags, ignore;
-  char *arg1, *arg2;
+  int result, invert, patmatch, rmatch, arith, mode, mflags, ignore;
+  char *arg1, *arg2, *op;
 #if 0
   char *t1, *t2;
 #endif
@@ -3863,41 +3874,67 @@ execute_cond_node (cond)
     }
   else if (cond->type == COND_UNARY)
     {
+      int oa, varop, varflag;
+
       if (ignore)
 	comsub_ignore_return++;
-      arg1 = cond_expand_word (cond->left->op, 0);
+      varop = STREQ (cond->op->word, "-v");
+#if defined (ARRAY_VARS)
+      varflag = (varop && valid_array_reference (cond->left->op->word, VA_NOEXPAND)) ? TEST_ARRAYEXP : 0;
+#else
+      varflag = 0;
+#endif
+      arg1 = cond_expand_word (cond->left->op, varop ? 3 : 0);
       if (ignore)
 	comsub_ignore_return--;
       if (arg1 == 0)
 	arg1 = nullstr;
       if (echo_command_at_execute)
 	xtrace_print_cond_term (cond->type, invert, cond->op, arg1, (char *)NULL);
-      result = unary_test (cond->op->word, arg1) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+      /* TAG:bash-5.2 fix up later with set_expand_once() */
+      oa = assoc_expand_once;
+#if 0
+      if (varop && shell_compatibility_level > 51)
+#else
+      if (varop)
+#endif
+	assoc_expand_once = 0;
+      result = unary_test (cond->op->word, arg1, varflag) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+      assoc_expand_once = oa;
       if (arg1 != nullstr)
 	free (arg1);
     }
   else if (cond->type == COND_BINARY)
     {
       rmatch = 0;
-      patmatch = (((cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
-		   (cond->op->word[0] == '!' || cond->op->word[0] == '=')) ||
-		  (cond->op->word[0] == '=' && cond->op->word[1] == '\0'));
+      op = cond->op->word;
+      mode = 0;
+      patmatch = (((op[1] == '=') && (op[2] == '\0') &&
+		   (op[0] == '!' || op[0] == '=')) ||
+		  (op[0] == '=' && op[1] == '\0'));
 #if defined (COND_REGEXP)
-      rmatch = (cond->op->word[0] == '=' && cond->op->word[1] == '~' &&
-		cond->op->word[2] == '\0');
+      rmatch = (op[0] == '=' && op[1] == '~' && op[2] == '\0');
 #endif
+      arith = STREQ (op, "-eq") || STREQ (op, "-ne") || STREQ (op, "-lt") ||
+	      STREQ (op, "-le") || STREQ (op, "-gt") || STREQ (op, "-ge");
+
+      if (arith)
+	mode = 3;
+      else if (rmatch && shell_compatibility_level > 31)
+	mode = 2;
+      else if (patmatch)
+	mode = 1;
 
       if (ignore)
 	comsub_ignore_return++;
-      arg1 = cond_expand_word (cond->left->op, 0);
+      arg1 = cond_expand_word (cond->left->op, arith ? mode : 0);
       if (ignore)
 	comsub_ignore_return--;
       if (arg1 == 0)
 	arg1 = nullstr;
       if (ignore)
 	comsub_ignore_return++;
-      arg2 = cond_expand_word (cond->right->op,
-			       (rmatch && shell_compatibility_level > 31) ? 2 : (patmatch ? 1 : 0));
+      arg2 = cond_expand_word (cond->right->op, mode);
       if (ignore)
 	comsub_ignore_return--;
       if (arg2 == 0)

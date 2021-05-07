@@ -184,6 +184,7 @@ extern WORD_LIST *expand_string PARAMS((char *, int));
 extern char *expand_string_to_string PARAMS((char *, int));
 extern char *expand_string_unsplit_to_string PARAMS((char *, int));
 extern char *expand_assignment_string_to_string PARAMS((char *, int));
+extern char *expand_subscript_string PARAMS((char *, int));
 
 /* Expand an arithmetic expression string */
 extern char *expand_arith_string PARAMS((char *, int));

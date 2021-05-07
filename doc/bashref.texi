@@ -1126,13 +1126,12 @@ done
 
 The arithmetic @var{expression} is evaluated according to the rules
 described below (@pxref{Shell Arithmetic}).
+The @var{expression} is expanded as if it were within double quotes,
+but double quote characters in @var{expression} are not special and
+are removed.
 If the value of the expression is non-zero, the return status is 0;
-otherwise the return status is 1.  This is exactly equivalent to
-@example
-let "@var{expression}"
-@end example
-@noindent
-@xref{Bash Builtins}, for a full description of the @code{let} builtin.
+otherwise the return status is 1. 
+
 
 @item [[@dots{}]]
 @rwindex [[

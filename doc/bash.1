@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Apr 28 14:35:46 EDT 2021
+.\"	Last Change: Wed May  5 16:28:46 EDT 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 April 28" "GNU Bash 5.1"
+.TH BASH 1 "2021 May 5" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -700,8 +700,10 @@ below under
 .SM
 .BR "ARITHMETIC EVALUATION" .
 If the value of the expression is non-zero, the return status is 0;
-otherwise the return status is 1.  This is exactly equivalent to
-\fBlet "\fIexpression\fP"\fR.
+otherwise the return status is 1.
+The \fIexpression\fP is expanded as if it were within double quotes,
+but double quote characters in \fIexpression\fP are not special and
+are removed.
 .TP
 \fB[[\fP \fIexpression\fP \fB]]\fP
 Return a status of 0 or 1 depending on the evaluation of

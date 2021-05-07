@@ -283,3 +283,12 @@ declare -A v3=(["1 2"]="3 4 5" ["\$xtra"]="xtra" )
 declare -A v1=(["20 40 80"]="new xtra" ["1 2"]="3 4 5" )
 declare -A v2=(["20 40 80"]="new xtra" ["1 2"]="3 4 5" )
 declare -A v3=(["1 2"]="3 4 5" ["\$xtra"]="new xtra" )
+declare -A assoc=(["*"]="star" ["!"]="bang" ["@"]="at" )
+at
+star
+declare -A a=(["@"]="at" )
+./assoc13.sub: line 22: ia[@]: bad array subscript
+declare -a ia
+declare -A a=(["@"]="at2" )
+declare -A a=(["@"]="    string" )
+declare -A a=(["*"]="star2" ["@"]="at" )
