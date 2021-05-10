@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2020 Free Software Foundation, Inc.
+Copyright (C) 1994-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -120,6 +120,7 @@ extern int debugging_mode;
 #if defined (ARRAY_VARS)
 extern int assoc_expand_once;
 extern int array_expand_once;
+int expand_once_flag;
 #endif
 
 #if defined (SYSLOG_HISTORY)
@@ -138,6 +139,10 @@ static int set_restricted_shell PARAMS((char *, int));
 #if defined (READLINE)
 static int shopt_enable_hostname_completion PARAMS((char *, int));
 static int shopt_set_complete_direxpand PARAMS((char *, int));
+#endif
+
+#if defined (ARRAY_VARS)
+static int set_assoc_expand PARAMS((char *, int));
 #endif
 
 static int shopt_set_debug_mode PARAMS((char *, int));
@@ -163,7 +168,7 @@ static struct {
 } shopt_vars[] = {
   { "autocd", &autocd, (shopt_set_func_t *)NULL },
 #if defined (ARRAY_VARS)
-  { "assoc_expand_once", &assoc_expand_once, (shopt_set_func_t *)NULL },
+  { "assoc_expand_once", &expand_once_flag, set_assoc_expand },
 #endif
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
@@ -362,7 +367,7 @@ reset_shopt_options ()
 #endif
 
 #if defined (ARRAY_VARS)
-  assoc_expand_once = 0;
+  expand_once_flag = assoc_expand_once = 0;
 #endif
 
 #if defined (HISTORY)
@@ -897,3 +902,17 @@ initialize_bashopts (no_bashopts)
   /* Set up the $BASHOPTS variable. */
   set_bashopts ();
 }
+
+#if defined (ARRAY_VARS)
+static int
+set_assoc_expand (option_name, mode)
+     char *option_name;
+     int mode;
+{
+#if 0 /* TAG: bash-5.2, fix shell_compatibility_level test */
+  if (shell_compatibility_level <= 51)
+#endif
+    assoc_expand_once = expand_once_flag;
+  return 0;
+}
+#endif

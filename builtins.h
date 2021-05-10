@@ -45,6 +45,7 @@
 #define ASSIGNMENT_BUILTIN 0x10	/* This builtin takes assignment statements. */
 #define POSIX_BUILTIN	0x20	/* This builtins is special in the Posix command search order. */
 #define LOCALVAR_BUILTIN   0x40	/* This builtin creates local variables */
+#define ARRAYREF_BUILTIN 0x80	/* This builtin takes array references as arguments */
 
 #define BASE_INDENT	4
 

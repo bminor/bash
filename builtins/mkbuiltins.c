@@ -72,7 +72,8 @@ extern char *strcpy ();
 #define BUILTIN_FLAG_SPECIAL	0x01
 #define BUILTIN_FLAG_ASSIGNMENT 0x02
 #define BUILTIN_FLAG_LOCALVAR	0x04
-#define BUILTIN_FLAG_POSIX_BUILTIN 0x08
+#define BUILTIN_FLAG_POSIX_BUILTIN	0x08
+#define BUILTIN_FLAG_ARRAYREF_ARG	0x10
 
 #define BASE_INDENT	4
 
@@ -173,11 +174,22 @@ char *posix_builtins[] =
   (char *)NULL
 };
 
+/* The builtin commands that can take array references as arguments and pay
+   attention to `assoc_expand_once'. These are the ones that don't assign
+   values, but need to avoid double expansions. */
+char *arrayvar_builtins[] =
+{
+  "declare", "let", "local", "printf", "read", "test", "[",
+  "typeset", "unset", "wait",		/*]*/
+  (char *)NULL
+};
+	
 /* Forward declarations. */
 static int is_special_builtin ();
 static int is_assignment_builtin ();
 static int is_localvar_builtin ();
 static int is_posix_builtin ();
+static int is_arrayvar_builtin ();
 
 #if !defined (HAVE_RENAME)
 static int rename ();
@@ -831,6 +843,8 @@ builtin_handler (self, defs, arg)
     new->flags |= BUILTIN_FLAG_LOCALVAR;
   if (is_posix_builtin (name))
     new->flags |= BUILTIN_FLAG_POSIX_BUILTIN;
+  if (is_arrayvar_builtin (name))
+    new->flags |= BUILTIN_FLAG_ARRAYREF_ARG;
 
   array_add ((char *)new, defs->builtins);
   building_builtin = 1;
@@ -1111,7 +1125,7 @@ char *structfile_header[] = {
   "/* This file is manufactured by ./mkbuiltins, and should not be",
   "   edited by hand.  See the source to mkbuiltins for details. */",
   "",
-  "/* Copyright (C) 1987-2015 Free Software Foundation, Inc.",
+  "/* Copyright (C) 1987-2021 Free Software Foundation, Inc.",
   "",
   "   This file is part of GNU Bash, the Bourne Again SHell.",
   "",
@@ -1250,12 +1264,13 @@ write_builtins (defs, structfile, externfile)
 		  else
 		    fprintf (structfile, "(sh_builtin_func_t *)0x0, ");
 
-		  fprintf (structfile, "%s%s%s%s%s, %s_doc,\n",
+		  fprintf (structfile, "%s%s%s%s%s%s, %s_doc,\n",
 		    "BUILTIN_ENABLED | STATIC_BUILTIN",
 		    (builtin->flags & BUILTIN_FLAG_SPECIAL) ? " | SPECIAL_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_ASSIGNMENT) ? " | ASSIGNMENT_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_LOCALVAR) ? " | LOCALVAR_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_POSIX_BUILTIN) ? " | POSIX_BUILTIN" : "",
+		    (builtin->flags & BUILTIN_FLAG_ARRAYREF_ARG) ? " | ARRAYREF_BUILTIN" : "",
 		    document_name (builtin));
 
 		  /* Don't translate short document summaries that are identical
@@ -1643,6 +1658,13 @@ is_posix_builtin (name)
      char *name;
 {
   return (_find_in_table (name, posix_builtins));
+}
+
+static int
+is_arrayvar_builtin (name)
+     char *name;
+{
+  return (_find_in_table (name, arrayvar_builtins));
 }
 
 #if !defined (HAVE_RENAME)

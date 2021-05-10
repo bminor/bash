@@ -1025,8 +1025,8 @@ quote_array_assignment_chars (list)
    expands from array VAR.  A subscript of `*' or `@' unsets the array. */
 /* If FLAGS&1 (VA_NOEXPAND) we don't expand the subscript; we just use it
    as-is. If FLAGS&VA_ONEWORD, we don't try to use skipsubscript to parse
-   the subscript, we just assume the subscript ends with a close bracket
-   and use the rest. */
+   the subscript, we just assume the subscript ends with a close bracket,
+   if one is present, and use what's inside the brackets. */
 int
 unbind_array_element (var, sub, flags)
      SHELL_VAR *var;
@@ -1055,9 +1055,7 @@ unbind_array_element (var, sub, flags)
     {
       if (array_p (var) || assoc_p (var))
 	{
-#if 0	/* TAG: bash-5.2 */
 	  if (flags & VA_ALLOWALL)
-#endif
 	    {
 	      unbind_variable (var->name);	/* XXX -- {array,assoc}_flush ? */
 	      return (0);
@@ -1083,6 +1081,27 @@ unbind_array_element (var, sub, flags)
     }
   else if (array_p (var))
     {
+      if (ALL_ELEMENT_SUB (sub[0]) && sub[1] == 0)
+	{
+	  /* We can go several ways here:
+		1) remove the array (backwards compatible)
+		2) empty the array (new behavior)
+		3) do nothing; treat the `@' or `*' as an expression and throw
+		   an error
+	  */
+	  /* Behavior 1 */
+	  if (shell_compatibility_level <= 51)
+	    {
+	      unbind_variable (name_cell (var));
+	      return 0;
+	    }
+	  else /* Behavior 2 */
+	    {
+	      array_flush (array_cell (var));
+	      return 0;
+	    }
+	  /* Fall through for behavior 3 */
+	}
       ind = array_expand_index (var, sub, len+1, 0);
       /* negative subscripts to indexed arrays count back from end */
       if (ind < 0)

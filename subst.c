@@ -10442,9 +10442,9 @@ add_string:
 #if defined (ARRAY_VARS)
 	case '[':		/*]*/
 #if 0	/* TAG:bash-5.2 */
-	  if (((quoted & Q_ARITH) == 0 && (word->flags & W_ARRAYREF) == 0) || (shell_compatibility_level <= 51))
+	  if ((quoted & Q_ARITH) == 0 || shell_compatibility_level <= 51)
 #else
-	  if (((quoted & Q_ARITH) == 0 && (word->flags & W_ARRAYREF) == 0))
+	  if ((quoted & Q_ARITH) == 0)
 #endif
 	    {
 	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)

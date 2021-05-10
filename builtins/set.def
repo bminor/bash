@@ -959,8 +959,15 @@ unset_builtin (list)
 #if defined (ARRAY_VARS)
       if (var && unset_array)
 	{
+	  int tvflags;
+
+	  tvflags = vflags;
+#if 0	/* TAG:bash-5.2 */
+	  if (shell_compatibility_level <= 51)
+	    tvflags |= VA_ALLOWALL;
+#endif
 	  /* Let unbind_array_element decide what to do with non-array vars */
-	  tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
+	  tem = unbind_array_element (var, t, tvflags);	/* XXX new third arg */
 	  if (tem == -2 && array_p (var) == 0 && assoc_p (var) == 0)
 	    {
 	      builtin_error (_("%s: not an array variable"), var->name);

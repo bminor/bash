@@ -10208,3 +10208,42 @@ subst.c
 execute_cmd.c
 	- execute_cond_node: if -v is the operator, and the operand is a valid
 	  array reference, pass TEST_ARRAYEXP flag to unary_test
+
+				    5/7
+				    ---
+builtins/common.[ch]
+	- set_expand_once: set array_expand_once to the value passed as the
+	  first argument, returning the original value
+
+builtins.h
+	- ARRAYREF_BUILTIN: new flag for shell builtins, means that the builtin
+	  can take array references, with subscripts, as arguments
+
+builtins/mkbuiltins.c
+	- set ARRAYREF_BUILTIN flag on builtins given in the arrayvar_builtins
+	  array
+
+execute_cmd.c
+	- execute_cond_node: use set_expand_once to set array_expand_once to 0
+	  before calling unary_test with -v (see change from 5/6)
+
+arrayfunc.c
+	- unbind_array_element: allow the caller to choose whether or not a
+	  subscript of `*' or `@' unsets the entire array by passing
+	  VA_ALLOWALL in FLAGS. Right now, since the unset builtin doesn't
+	  pass VA_ALLOWALL, those subscripts unset individual elements for
+	  associative arrays. We preserve the old behavior of unsetting
+	  indexed arrays for the time being with new indexed-array-specific
+	  code
+
+				    5/9
+				    ---
+
+builtins/shopt.def
+	- expand_once_flag: "assoc_expand_once" option now sets this flag,
+	  calls set_assoc_expand on change
+	- set_assoc_expand: sets assoc_expand_once to mirror expand_once_flag;
+	  placeholder for future changes
+
+builtins/common.h
+	- expand_once_flag: extern declaration

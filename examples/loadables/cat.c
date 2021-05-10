@@ -36,13 +36,24 @@ extern char *strerror ();
 extern char **make_builtin_argv ();
 
 static int
-fcopy(fd)
+fcopy(fd, fn)
 int	fd;
+char	*fn;
 {
 	char	buf[1024], *s;
 	int	n, w, e;
 
 	while (n = read(fd, buf, sizeof (buf))) {
+		if (n < 0) {
+			e = errno;
+			write(2, "cat: read error: ", 18);
+			write(2, fn, strlen(fn));
+			write(2, ": ", 2);
+			s = strerror(e);
+			write(2, s, strlen(s));
+			write(2, "\n", 1);
+			return 1;
+		}
 		w = write(1, buf, n);
 		if (w != n) {
 			e = errno;
@@ -65,7 +76,7 @@ char	**argv;
 	char	*s;
 
 	if (argc == 1)
-		return (fcopy(0));
+		return (fcopy(0, "standard input"));
 
 	for (i = r = 1; i < argc; i++) {
 		if (argv[i][0] == '-' && argv[i][1] == '\0')
@@ -82,7 +93,7 @@ char	**argv;
 				continue;
 			}
 		}
-		r = fcopy(fd);
+		r = fcopy(fd, argv[i]);
 		if (fd != 0)
 			close(fd);
 	}

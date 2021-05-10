@@ -138,6 +138,10 @@ extern sh_builtin_func_t *builtin_address PARAMS((char *));
 extern sh_builtin_func_t *find_special_builtin PARAMS((char *));
 extern void initialize_shell_builtins PARAMS((void));
 
+#if defined (ARRAY_VARS)
+extern int set_expand_once PARAMS((int, int));
+#endif
+
 /* Functions from exit.def */
 extern void bash_logout PARAMS((void));
 
@@ -242,6 +246,11 @@ extern int loop_level;
 
 /* variables from shift.def */
 extern int print_shift_error;
+
+/* variables from shopt.def */
+#if defined (ARRAY_VARS)
+extern int expand_once_flag;
+#endif
 
 /* variables from source.def */
 extern int source_searches_cwd;

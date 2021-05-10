@@ -62,9 +62,11 @@ key=@
 assoc[@]=at
 assoc[!]=bang
 
+# this should only unset the element with key `@'
 unset -v assoc[$key]
 typeset -p assoc
 
+# this doesn't work yet
 test -v assoc[$key]
 echo $?
 

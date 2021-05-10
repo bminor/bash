@@ -408,6 +408,12 @@ declare_internal (list, local_var)
 #else
       assoc_noexpand = 0;
 #endif
+      /* XXX - we allow unbalanced brackets if assoc_noexpand is set, we count
+	 brackets and make sure they match if assoc_noexpand is not set. So we
+	 need to make sure we're checking assoc_noexpand and expand_once_flag
+	 for backwards compatibility. We also use assoc_noexpand below when
+	 we call assign_array_element, so we need to make sure they're
+	 consistent in how they count brackets. */
       offset = assignment (name, assoc_noexpand ? 2 : 0);
       aflags = 0;
       created_var = 0;

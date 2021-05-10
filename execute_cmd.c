@@ -165,6 +165,7 @@ static int execute_while_or_until PARAMS((WHILE_COM *, int));
 static int execute_if_command PARAMS((IF_COM *));
 static int execute_null_command PARAMS((REDIRECT *, int, int, int));
 static void fix_assignment_words PARAMS((WORD_LIST *));
+static void fix_arrayref_words PARAMS((WORD_LIST *));
 static int execute_simple_command PARAMS((SIMPLE_COM *, int, int, int, struct fd_bitmap *));
 static int execute_builtin PARAMS((sh_builtin_func_t *, WORD_LIST *, int, int));
 static int execute_function PARAMS((SHELL_VAR *, WORD_LIST *, int, struct fd_bitmap *, int, int));
@@ -3891,16 +3892,20 @@ execute_cond_node (cond)
 	arg1 = nullstr;
       if (echo_command_at_execute)
 	xtrace_print_cond_term (cond->type, invert, cond->op, arg1, (char *)NULL);
-      /* TAG:bash-5.2 fix up later with set_expand_once() */
-      oa = assoc_expand_once;
+      /* TAG:bash-5.2 */
 #if 0
-      if (varop && shell_compatibility_level > 51)
+      if (varop && shell_compatibility_level > 51)		/* -v */
 #else
       if (varop)
 #endif
-	assoc_expand_once = 0;
+	oa = set_expand_once (0, 0);
       result = unary_test (cond->op->word, arg1, varflag) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
-      assoc_expand_once = oa;
+#if 0
+      if (varop && shell_compatibility_level > 51)		/* -v */
+#else
+      if (varop)
+#endif
+	assoc_expand_once = oa;
       if (arg1 != nullstr)
 	free (arg1);
     }
@@ -4218,6 +4223,48 @@ fix_assignment_words (words)
       }
 }
 
+#if defined (ARRAY_VARS)
+/* Set W_ARRAYREF on words that are valid array references to a builtin that
+   accepts them. This is intended to eventually comnletely take the place of
+   assoc_expand_once. */
+static void
+fix_arrayref_words (words)
+     WORD_LIST *words;
+{
+  WORD_LIST *w, *wcmd;
+  struct builtin *b;
+
+  if (words == 0)
+    return;
+
+  b = 0;
+
+  /* Skip over assignment statements preceding a command name */
+  wcmd = words;
+  for (wcmd = words; wcmd; wcmd = wcmd->next)
+    if ((wcmd->word->flags & W_ASSIGNMENT) == 0)
+      break;
+
+  /* Skip over `command' */
+  while (wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
+    wcmd = wcmd->next;
+
+  if (wcmd == 0)
+    return;
+
+  /* If it's not an array reference builtin, we have nothing to do. */
+  b = builtin_address_internal (wcmd->word->word, 0);
+  if (b == 0 || (b->flags & ARRAYREF_BUILTIN) == 0)
+    return;
+
+  for (w = wcmd->next; w; w = w->next)
+    {
+      if (w->word && w->word->word && valid_array_reference (w->word->word, VA_NOEXPAND))
+	w->word->flags |= W_ARRAYREF;
+    }
+}
+#endif
+
 #ifndef ISOPTION
 #  define ISOPTION(s, c)  (s[0] == '-' && s[1] == c && s[2] == 0)
 #endif
@@ -4428,6 +4475,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     {
       current_fds_to_close = fds_to_close;
       fix_assignment_words (simple_command->words);
+#if defined (ARRAY_VARS)
+      fix_arrayref_words (simple_command->words);
+#endif
       /* Pass the ignore return flag down to command substitutions */
       if (cmdflags & CMD_IGNORE_RETURN)	/* XXX */
 	comsub_ignore_return++;
