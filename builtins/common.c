@@ -980,6 +980,11 @@ builtin_bind_variable (name, value, flags)
   SHELL_VAR *v;
 
 #if defined (ARRAY_VARS)
+  /* Callers are responsible for calling this with array references that have
+     already undergone valid_array_reference checks.
+     Affected builtins: read, printf
+     To make this really work, needs additional downstream support, starting
+     with assign_array_element and array_variable_name. */
   if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
     v = bind_variable (name, value, flags);
   else

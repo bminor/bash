@@ -632,16 +632,22 @@ unary_test (op, arg, flags)
 
     case 'v':
 #if defined (ARRAY_VARS)
-      if (valid_array_reference (arg, 0))
+      if (valid_array_reference (arg, assoc_expand_once ? VA_NOEXPAND : 0))
 	{
 	  char *t;
-	  int rtype, ret, flags;
+	  int rtype, ret, aflags;
 
 	  /* Let's assume that this has already been expanded once. */
 	  /* XXX - TAG:bash-5.2 fix with corresponding fix to execute_cmd.c:
 	     execute_cond_node() that passes TEST_ARRAYEXP in FLAGS */
-	  flags = assoc_expand_once ? AV_NOEXPAND : 0;
-	  t = array_value (arg, 0, flags, &rtype, (arrayind_t *)0);
+	  
+	  aflags = assoc_expand_once ? AV_NOEXPAND : 0;
+#if 0
+	  /* TAG:bash-5.2 */
+	  if (shell_compatibility_level > 51)
+#endif
+	    aflags |= AV_ATSTARKEYS;
+	  t = array_value (arg, 0, aflags, &rtype, (arrayind_t *)0);
 	  ret = t ? TRUE : FALSE;
 	  if (rtype > 0)	/* subscript is * or @ */
 	    free (t);

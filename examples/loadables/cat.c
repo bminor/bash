@@ -54,6 +54,7 @@ char	*fn;
 			write(2, "\n", 1);
 			return 1;
 		}
+		QUIT;
 		w = write(1, buf, n);
 		if (w != n) {
 			e = errno;
@@ -63,6 +64,7 @@ char	*fn;
 			write(2, "\n", 1);
 			return 1;
 		}
+		QUIT;
 	}
 	return 0;
 }
@@ -79,6 +81,7 @@ char	**argv;
 		return (fcopy(0, "standard input"));
 
 	for (i = r = 1; i < argc; i++) {
+		QUIT;
 		if (argv[i][0] == '-' && argv[i][1] == '\0')
 			fd = 0;
 		else {
@@ -97,6 +100,7 @@ char	**argv;
 		if (fd != 0)
 			close(fd);
 	}
+	QUIT;
 	return (r);
 }
 
@@ -108,6 +112,7 @@ WORD_LIST *list;
 	int	c, r;
 
 	v = make_builtin_argv(list, &c);
+	QUIT;
 	r = cat_main(c, v);
 	free(v);
 

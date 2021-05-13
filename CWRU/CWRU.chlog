@@ -10247,3 +10247,68 @@ builtins/shopt.def
 
 builtins/common.h
 	- expand_once_flag: extern declaration
+
+				   5/10
+				   ----
+doc/{bash.1,bashref.texi}
+	- note that case patterns undergo quote removal. Reported by
+	  AlvinSeville7cf <alvinseville7cf@gmail.com>
+
+				   5/11
+				   ----
+
+builtins/bashgetopt.c
+	- list_optflags: flags associated with the word corresponding to
+	  list_optarg, assuming list_optarg is a separate argument
+
+builtins/bashgetopt.h
+	- list_optflags: extern declaration
+
+builtins/set.def
+	- unset_builtin: set VFLAGS each time through the loop, since we take
+	  whether or not the word has W_ARRAYREF set into account
+	- unset_builtin: don't pass VA_ALLOWALL to unbind_array_element for
+	  now
+
+test.c
+	- unary_test: in the -v case, use assoc_expand_once in the first call
+	  to valid_array_reference ()
+
+builtins/printf.def
+	- printf_builtin: only set VA_ONEWORD if the option argument to -v has
+	  W_ARRAYREF set (look at list_optflags)
+
+				   5/12
+				   ----
+
+subst.c
+	- expand_array_subscript: don't quote @ or * in the expanded subscript
+	  at all, even when they are the only character in the subscript. See
+	  how this works out -- it might uncover places where we need to allow
+	  `*' and `@' as subscripts where they are not allowed now
+
+expr.c
+	- expr_bind_variable: pass ASS_ALLOWALLSUB to bind_int_variable so we
+	  can allow (( A[@]=value )) when A is an existing associative array
+
+arrayfunc.h
+	- AV_ATSTARKEYS: new flag value, means to accept a[@] and a[*] but
+	  treat them as keys/expressions and not special values
+
+arrayfunc.c
+	- array_value_internal: check AV_ATSTARKEYS and don't treat them as
+	  ALL_ELEMENT_SUB values; they fall through to use as keys/indices
+
+test.c
+	- unary_test: if -v is passed an array reference, add AV_ATSTARKEYS to
+	  the flags passed to array_value so we treat @ and * as keys for an
+	  existing associative array
+
+				   5/13
+				   ----
+
+subst.c
+	- expand_cond_word: if SPECIAL == 3 (arithmetic expression), dequote the
+	  resulting WORD_LIST * as if special == 0, because we don't want to
+	  quote the list for pattern matching. Report from
+	  Adjudicator Darren <adjudicatordarren@protonmail.com>

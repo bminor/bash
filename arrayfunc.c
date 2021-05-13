@@ -1370,7 +1370,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
      int quoted, flags, *rtype;
      arrayind_t *indp;
 {
-  int len;
+  int len, isassoc;
   arrayind_t ind;
   char *akey;
   char *retval, *t, *temp;
@@ -1389,9 +1389,12 @@ array_value_internal (s, quoted, flags, rtype, indp)
   if (len == 0)
     return ((char *)NULL);	/* error message already printed */
 
+  isassoc = var && assoc_p (var);
   /* [ */
   akey = 0;
-  if (ALL_ELEMENT_SUB (t[0]) && t[1] == ']')
+  /* Backwards compatibility: we only change the behavior of A[@] and A[*]
+     for associative arrays, and the caller has to request it. */
+  if ((isassoc == 0 || (flags & AV_ATSTARKEYS) == 0) && ALL_ELEMENT_SUB (t[0]) && t[1] == ']')
     {
       if (rtype)
 	*rtype = (t[0] == '*') ? 1 : 2;

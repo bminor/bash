@@ -90,3 +90,14 @@ let assoc[$key]++
 declare -p assoc
 
 unset assoc
+
+typeset -A assoc
+at=@
+
+key='$(echo foo)'
+
+assoc[$key]=1
+declare -p assoc
+
+shopt -s assoc_expand_once
+test -v assoc["$key"] ; echo $?

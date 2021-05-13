@@ -23,6 +23,7 @@ key2='` echo >&2 foo`'
 key3='~'
 key4='7<(4+2)'
 key5='$( echo 2>& date)'
+key6='$(echo foo)'
 
 [[ -n assoc[$key] ]]
 declare -p assoc
@@ -100,6 +101,14 @@ echo "${aa[$key5]}"
 echo $?
 
 [[ -v aa[$key] ]]
+echo $?
+
+aa[$key6]=42
+# this still performs expansion
+test -v aa["$key6"]
+echo $?
+# should be an error
+test -v aa[$key6]
 echo $?
 
 unset aa key

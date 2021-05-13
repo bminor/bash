@@ -122,6 +122,13 @@ A=7
 [[ $IVAR -eq A ]]
 echo returns: $?
 
+[[ "$IVAR" -eq "7" ]]
+echo returns: $?
+
+A=7
+[[ "$IVAR" -eq "A" ]]
+echo returns: $?
+
 unset IVAR A
 
 # more pattern matching tests

@@ -33,12 +33,14 @@ extern int assoc_expand_once;
 extern int array_expand_once;
 
 /* Flags for array_value_internal and callers array_value/get_array_value */
-#define AV_ALLOWALL	0x001
+#define AV_ALLOWALL	0x001	/* treat a[@] like $@ and a[*] like $* */
 #define AV_QUOTED	0x002
 #define AV_USEIND	0x004
 #define AV_USEVAL	0x008	/* XXX - should move this */
 #define AV_ASSIGNRHS	0x010	/* no splitting, special case ${a[@]} */
 #define AV_NOEXPAND	0x020	/* don't run assoc subscripts through word expansion */
+#define AV_ONEWORD	0x040	/* not used yet */
+#define AV_ATSTARKEYS	0x080	/* accept a[@] and a[*] but use them as keys, not special values */
 
 /* Flags for valid_array_reference. Value 1 is reserved for skipsubscript().
    Also used by unbind_array_element, which is currently the only function
@@ -94,7 +96,11 @@ extern SHELL_VAR *array_variable_part PARAMS((const char *, int, char **, int *)
 #define AV_ALLOWALL	0
 #define AV_QUOTED	0
 #define AV_USEIND	0
+#define AV_USEVAL	0
 #define AV_ASSIGNRHS	0
+#define AV_NOEXPAND	0
+#define AV_ONEWORD	0
+#define AV_ATSTARKEYS	0
 
 #define VA_NOEXPAND	0
 #define VA_ONEWORD	0

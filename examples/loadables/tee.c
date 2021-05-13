@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -121,6 +121,7 @@ tee_builtin (list)
           fl = fl->next;
           fl->next = (FLIST *)NULL;
         }
+      QUIT;
     }
 
   while ((nr = read(0, buf, TEE_BUFSIZE)) > 0)
@@ -137,6 +138,7 @@ tee_builtin (list)
 		break;
 	      }
             bp += nw;
+            QUIT;
 	  }
 	while (n -= nw);
       }
@@ -156,7 +158,8 @@ tee_builtin (list)
       tee_flist = tee_flist->next;
       free (fl);
     }
-  
+
+  QUIT;  
   return (rval);
 }
 

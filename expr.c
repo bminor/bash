@@ -330,6 +330,7 @@ expr_bind_variable (lhs, rhs)
 
 #if defined (ARRAY_VARS)
   aflags = (assoc_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
+  aflags |= ASS_ALLOWALLSUB;		/* allow assoc[@]=value */
 #else
   aflags = 0;
 #endif

@@ -29,6 +29,7 @@
 #define GETOPT_HELP	-99
 
 extern char *list_optarg;
+extern int list_optflags;
 
 extern int list_optopt;
 extern int list_opttype;

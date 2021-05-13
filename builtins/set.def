@@ -835,7 +835,7 @@ unset_builtin (list)
   WORD_LIST *list;
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
-  int global_unset_func, global_unset_var, vflags, valid_id;
+  int global_unset_func, global_unset_var, vflags, base_vflags, valid_id;
   char *name, *tname;
 
   unset_function = unset_variable = unset_array = nameref = any_failed = 0;
@@ -872,9 +872,7 @@ unset_builtin (list)
   else if (unset_function && nameref)
     nameref = 0;
 
-#if defined (ARRAY_VARS)
-  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
-#endif
+  base_vflags = assoc_expand_once ? VA_NOEXPAND : 0;
 
   while (list)
     {
@@ -888,6 +886,16 @@ unset_builtin (list)
 
       unset_function = global_unset_func;
       unset_variable = global_unset_var;
+
+#if defined (ARRAY_VARS)
+      vflags = base_vflags;
+      /* Don't require assoc_expand_once if we have an argument that's already
+	 passed through valid_array_reference and been expanded once. That
+	 doesn't protect it from normal expansions like word splitting, so
+	 proper quoting is still required. */
+      if (list->word->flags & W_ARRAYREF)
+	vflags |= VA_ONEWORD|VA_NOEXPAND;
+#endif
 
 #if defined (ARRAY_VARS)
       unset_array = 0;
@@ -959,15 +967,12 @@ unset_builtin (list)
 #if defined (ARRAY_VARS)
       if (var && unset_array)
 	{
-	  int tvflags;
-
-	  tvflags = vflags;
 #if 0	/* TAG:bash-5.2 */
 	  if (shell_compatibility_level <= 51)
-	    tvflags |= VA_ALLOWALL;
+	    vflags |= VA_ALLOWALL;
 #endif
 	  /* Let unbind_array_element decide what to do with non-array vars */
-	  tem = unbind_array_element (var, t, tvflags);	/* XXX new third arg */
+	  tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
 	  if (tem == -2 && array_p (var) == 0 && assoc_p (var) == 0)
 	    {
 	      builtin_error (_("%s: not an array variable"), var->name);

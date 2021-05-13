@@ -66,11 +66,32 @@ assoc[!]=bang
 unset -v assoc[$key]
 typeset -p assoc
 
-# this doesn't work yet
+# this should check for assoc[@] and return 1
 test -v assoc[$key]
 echo $?
 
+# this should too
 [[ -v assoc[$key] ]]
 echo $?
 
-unset assoc
+unset assoc array
+
+declare -A assoc
+declare -a array
+
+assoc=([@]=at [!]=bang)
+declare -p assoc
+
+unset assoc[@]
+declare -p assoc
+
+array=(1 2 3)
+declare -p array
+
+# right now, this still unsets the entire array
+unset array[@]
+declare -p array
+
+BASH_COMPAT=51
+unset array[@]
+declare -p array

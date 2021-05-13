@@ -3696,6 +3696,13 @@ cond_expand_word (w, special)
 	  dequote_list (l);
 	  r = string_list (l);
 	}
+      else if (special == 3)		/* arithmetic expression, Q_ARITH */
+	{
+	  if (l->word)
+	    word_list_remove_quoted_nulls (l);	/* for now */
+	  dequote_list (l);
+	  r = string_list (l);
+	}
       else
 	{
 	  /* Need to figure out whether or not we should call dequote_escapes
@@ -10192,6 +10199,7 @@ expand_array_subscript (string, sindex, quoted, flags)
       abstab[LBRACK] = abstab[RBRACK] = 1;
       abstab['$'] = abstab['`'] = abstab['~'] = 1;
       abstab['\\'] = abstab['\''] = 1;
+      /* We don't quote `@' or `*' in the subscript at all. */
     }
 
   /* string[si] == LBRACK */
@@ -10215,11 +10223,6 @@ itrace("expand_array_subscript: bad subscript string: `%s'", string+si);
   exp = substring (string, si+1, ni);
   t = expand_subscript_string (exp, quoted & ~(Q_ARITH|Q_DOUBLE_QUOTES));
   free (exp);
-  /* Only quote `@' and `*' if they are the only character in the subscript */
-  if (ALL_ELEMENT_SUB (t[0]) && t[1] == '\0')
-    abstab['*'] = abstab['@'] = 1;
-  else
-    abstab['*'] = abstab['@'] = 0;
   exp = sh_backslash_quote (t, abstab, 0);
   free (t);
 

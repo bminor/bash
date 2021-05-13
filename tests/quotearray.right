@@ -44,7 +44,7 @@ declare -A assoc=(["\` echo >&2 foo\`"]="128" [0]="0" ["]"]="12" ["x],b[\$(echo 
 foo
 0
 0
-./quotearray1.sub: line 67: 0\],b\[1: syntax error: invalid arithmetic operator (error token is "\],b\[1")
+./quotearray1.sub: line 68: 0\],b\[1: syntax error: invalid arithmetic operator (error token is "\],b\[1")
 declare -a array
 0
 0
@@ -56,6 +56,9 @@ declare -A aa=(["\$( echo 2>& date)"]="foo" )
 foo
 0
 1
+1
+./quotearray1.sub: line 111: test: aa[$(echo: binary operator expected
+2
 declare -A a=([1]="1" [0]="0" [" "]="11" )
 7
 7
@@ -71,6 +74,8 @@ declare -A A=(["*"]="X" ["@"]="X" )
 declare -A A=(["*"]="X" ["@"]="X" )
 ./quotearray2.sub: line 89: let: assoc[x],b[$(echo: bad array subscript (error token is "b[$(echo")
 declare -A assoc
+declare -A assoc=(["\$(echo foo)"]="1" )
+0
 declare -A assoc=(["\$var"]="value" )
 declare -A assoc=(["\$var"]="value" )
 declare -A assoc=(["\$var"]="value" )
@@ -80,5 +85,37 @@ declare -A a=(["\$(echo foo)"]="1" )
 declare -A a=()
 declare -A a=(["\$(echo foo)"]="1" )
 declare -A assoc=(["!"]="bang" )
+1
+1
+declare -A assoc=(["!"]="bang" ["@"]="at" )
+declare -A assoc=(["!"]="bang" )
+declare -a array=([0]="1" [1]="2" [2]="3")
+./quotearray3.sub: line 93: declare: array: not found
+./quotearray3.sub: line 97: declare: array: not found
+declare -A assoc=(["*"]="star" ["!"]="bang" ["@"]="at" )
+declare -A assoc=(["*"]="star" ["!"]="bang" )
+declare -A assoc=(["!"]="bang" )
+./quotearray4.sub: line 41: declare: assoc: not found
+declare -A assoc=(["*"]="star" ["!"]="bang" ["@"]="at" )
+declare -A assoc=(["*"]="star" ["!"]="bang" )
+declare -A assoc=(["!"]="bang" )
+declare -A assoc=(["*"]="star" ["!"]="bang" )
+declare -A assoc=(["!"]="bang" )
+star bang at
+star bang at
+0
+0
 0
 1
+1
+declare -A assoc=(["*"]="star" ["!"]="bang" ["@"]="       key" )
+===
+1
+1
+declare -a array=([0]="1" [1]="2" [2]="3")
+1 2 3
+1 2 3
+0
+0
+./quotearray4.sub: line 115: array[@]: bad array subscript
+declare -a array=([0]="1" [1]="2" [2]="3")

@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2020 Free Software Foundation, Inc.
+Copyright (C) 1997-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -267,11 +267,14 @@ printf_builtin (list)
 	case 'v':
 	  vname = list_optarg;
 #if defined (ARRAY_VARS)
-	  arrayflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
-	  if (legal_identifier (vname) || valid_array_reference (vname, arrayflags))
+	  arrayflags = assoc_expand_once ? VA_NOEXPAND : 0;
+	  if (assoc_expand_once && (list_optflags & W_ARRAYREF))
+	    arrayflags |= VA_ONEWORD;	/* XXX - VA_NOEXPAND? */
+	  retval = legal_identifier (vname) || valid_array_reference (vname, arrayflags);
 #else
-	  if (legal_identifier (vname))
+	  retval = legal_identifier (vname);
 #endif
+	  if (retval)
 	    {
 	      vflag = 1;
 	      if (vbsize == 0)
