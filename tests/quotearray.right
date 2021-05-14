@@ -21,17 +21,17 @@ declare -A A=(["~"]="43" ["~0"]="43" )
 declare -a a=([0]="12" [1]="42")
 2
 2
-declare -Ai assoc=(["']"]="2" ["\$var"]="1" )
+declare -Ai assoc=(["']"]="3" ["\$var"]="1" )
 105
 declare -A assoc=(["\` echo >&2 foo\`"]="42" ["\$( echo >&2 bar)"]="63" )
-./quotearray.tests: line 139: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
-./quotearray.tests: line 143: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 140: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 144: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
 1
-./quotearray.tests: line 146: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 147: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
 1
-./quotearray.tests: line 149: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 150: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
 1
-./quotearray.tests: line 152: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 153: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
 1
 declare -A assoc
 0
@@ -57,8 +57,11 @@ foo
 0
 1
 1
-./quotearray1.sub: line 111: test: aa[$(echo: binary operator expected
+./quotearray1.sub: line 113: test: aa[$(echo: binary operator expected
 2
+[[ -v assoc[a] ]]; $?=0
+[[ -v assoc["] ]]; $?=0
+declare -A assoc=(["\""]="123" [a]="123" )
 declare -A a=([1]="1" [0]="0" [" "]="11" )
 7
 7
@@ -80,9 +83,9 @@ declare -A assoc=(["\$var"]="value" )
 declare -A assoc=(["\$var"]="value" )
 declare -A assoc=(["\$var"]="value" )
 declare -A assoc=()
-declare -A a=()
 declare -A a=(["\$(echo foo)"]="1" )
 declare -A a=()
+declare -A a=(["\$(echo foo)"]="1" )
 declare -A a=(["\$(echo foo)"]="1" )
 declare -A assoc=(["!"]="bang" )
 1
@@ -90,8 +93,13 @@ declare -A assoc=(["!"]="bang" )
 declare -A assoc=(["!"]="bang" ["@"]="at" )
 declare -A assoc=(["!"]="bang" )
 declare -a array=([0]="1" [1]="2" [2]="3")
-./quotearray3.sub: line 93: declare: array: not found
-./quotearray3.sub: line 97: declare: array: not found
+./quotearray3.sub: line 94: declare: array: not found
+./quotearray3.sub: line 98: declare: array: not found
+declare -A map=(["foo\$(uname >/dev/tty)bar"]="1" )
+1
+declare -A map=()
+$(DOESNOTEXIST)
+declare -A blah=()
 declare -A assoc=(["*"]="star" ["!"]="bang" ["@"]="at" )
 declare -A assoc=(["*"]="star" ["!"]="bang" )
 declare -A assoc=(["!"]="bang" )
@@ -119,3 +127,26 @@ declare -a array=([0]="1" [1]="2" [2]="3")
 0
 ./quotearray4.sub: line 115: array[@]: bad array subscript
 declare -a array=([0]="1" [1]="2" [2]="3")
+./quotearray5.sub: line 27: unset: `a[$(echo': not a valid identifier
+./quotearray5.sub: line 27: unset: `foo)]': not a valid identifier
+declare -A a=()
+declare -A a=()
+declare -A a=()
+-----
+declare -A a=(["\$(echo foo)"]="1" )
+declare -A a=()
+declare -A a=()
+declare -A a=()
+-----
+declare -A a=()
+declare -A a=()
+declare -A a=()
+----------
+declare -A a=([.]="v1" )
+declare -A a=([.]="v1" )
+-----
+declare -A a=([.]="v1" )
+declare -A a=([.]="v1" )
+-----
+declare -A a=([.]="v1" )
+declare -A a=([.]="v1" )

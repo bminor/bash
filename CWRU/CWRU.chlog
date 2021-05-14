@@ -10312,3 +10312,11 @@ subst.c
 	  resulting WORD_LIST * as if special == 0, because we don't want to
 	  quote the list for pattern matching. Report from
 	  Adjudicator Darren <adjudicatordarren@protonmail.com>
+
+				   5/14
+				   ----
+subst.c
+	- expand_array_subscript: add double quote (") to the list of characters
+	  that are backslash-quoted in subscripts after word expansion.
+	  skipsubscript treats them specially, so you have to quote them to
+	  do things like `key='"' ; array[$key]=1 ; [[ -v array[$key] ]]'

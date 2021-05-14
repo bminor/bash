@@ -119,6 +119,7 @@ declare -Ai assoc
 assoc[$var]=1
 assoc[$var]+=1
 ((assoc['$var']++))
+((assoc[$var]++))
 typeset -p assoc
 
 unset assoc
@@ -158,3 +159,6 @@ ${THIS_SH} ./quotearray3.sub
 
 # behavior of builtins with array subscripts @ and *
 ${THIS_SH} ./quotearray4.sub
+
+# behavior of unset with quoted and unquoted array arguments
+${THIS_SH} ./quotearray5.sub

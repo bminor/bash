@@ -33,6 +33,7 @@ unset 'assoc[$var]'
 declare -p assoc
 
 unset assoc
+shopt -u assoc_expand_once
 
 declare -A a
 a['$(echo foo)']=1
@@ -95,3 +96,22 @@ declare -p array
 BASH_COMPAT=51
 unset array[@]
 declare -p array
+
+declare -A map; key='foo$(uname >/dev/tty)bar'; map[$key]=1
+declare -p map
+echo ${map["$key"]}
+
+unset map["$key"]
+declare -p map
+unset map
+
+declare -A blah
+blah['$(DOESNOTEXIST)']=broken
+for i in "${!blah[@]}"; do echo "$i"; done
+
+for i in "${!blah[@]}"; do unset blah["$i"]; done
+declare -p blah
+unset blah
+
+
+

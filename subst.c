@@ -10199,6 +10199,7 @@ expand_array_subscript (string, sindex, quoted, flags)
       abstab[LBRACK] = abstab[RBRACK] = 1;
       abstab['$'] = abstab['`'] = abstab['~'] = 1;
       abstab['\\'] = abstab['\''] = 1;
+      abstab['"'] = 1;	/* XXX */
       /* We don't quote `@' or `*' in the subscript at all. */
     }
 
