@@ -2741,6 +2741,7 @@ wait_sigint_cleanup ()
 {
   queue_sigchld = 0;
   waiting_for_child = 0;
+  restore_sigint_handler ();
 }
 
 static void

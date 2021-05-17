@@ -151,7 +151,13 @@ wait_builtin (list)
 #if defined (ARRAY_VARS)
       int arrayflags;
 
+#if 0
       arrayflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+      if (assoc_expand_once && (list_optflags & W_ARRAYREF))
+	arrayflags |= VA_ONEWORD|VA_NOEXPAND;
+#else
+      arrayflags = 0;	/* not yet without builtin_bind_var_to_int support */
+#endif
       if (legal_identifier (vname) == 0 && valid_array_reference (vname, arrayflags) == 0)
 #else
       if (legal_identifier (vname) == 0)
@@ -180,6 +186,8 @@ wait_builtin (list)
       last_command_exit_signal = wait_signal_received;
       status = 128 + wait_signal_received;
       wait_sigint_cleanup ();
+      if (wflags & JWAIT_WAITING)
+	unset_waitlist ();
       WAIT_RETURN (status);
     }
 

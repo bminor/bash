@@ -56,6 +56,7 @@
 #define ASS_NOLONGJMP	0x0200	/* don't longjmp on fatal assignment error */
 #define ASS_NOINVIS	0x0400	/* don't resolve local invisible variables */
 #define ASS_ALLOWALLSUB	0x0800	/* allow * and @ as associative array keys */
+#define ASS_ONEWORD	0x1000	/* don't check array subscripts, assume higher level has done that */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */

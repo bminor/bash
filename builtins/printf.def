@@ -269,7 +269,7 @@ printf_builtin (list)
 #if defined (ARRAY_VARS)
 	  arrayflags = assoc_expand_once ? VA_NOEXPAND : 0;
 	  if (assoc_expand_once && (list_optflags & W_ARRAYREF))
-	    arrayflags |= VA_ONEWORD;	/* XXX - VA_NOEXPAND? */
+	    arrayflags |= VA_ONEWORD|VA_NOEXPAND;
 	  retval = legal_identifier (vname) || valid_array_reference (vname, arrayflags);
 #else
 	  retval = legal_identifier (vname);

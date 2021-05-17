@@ -2902,7 +2902,7 @@ For example, a\fB{\fPd,c,b\fB}\fPe expands into `ade ace abe'.
 .PP
 A sequence expression takes the form
 \fB{\fP\fIx\fP\fB..\fP\fIy\fP\fB[..\fP\fIincr\fP\fB]}\fP,
-where \fIx\fP and \fIy\fP are either integers or single characters,
+where \fIx\fP and \fIy\fP are either integers or single letters,
 and \fIincr\fP, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 \fIx\fP and \fIy\fP, inclusive.
@@ -2911,10 +2911,11 @@ same width.
 When either \fIx\fP or \fPy\fP begins with a zero, the shell
 attempts to force all generated terms to contain the same number of digits,
 zero-padding where necessary.
-When characters are supplied, the expression expands to each character
+When letters are supplied, the expression expands to each character
 lexicographically between \fIx\fP and \fIy\fP, inclusive,
 using the default C locale.
-Note that both \fIx\fP and \fIy\fP must be of the same type.
+Note that both \fIx\fP and \fIy\fP must be of the same type
+(integer or letter).
 When the increment is supplied, it is used as the difference between
 each term.  The default increment is 1 or \-1 as appropriate.
 .PP

@@ -2075,7 +2075,7 @@ ade ace abe
 @end example
 
 A sequence expression takes the form @code{@{@var{x}..@var{y}[..@var{incr}]@}},
-where @var{x} and @var{y} are either integers or single characters,
+where @var{x} and @var{y} are either integers or letters,
 and @var{incr}, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 @var{x} and @var{y}, inclusive.
@@ -2084,10 +2084,11 @@ same width.
 When either @var{x} or @var{y} begins with a zero, the shell
 attempts to force all generated terms to contain the same number of digits,
 zero-padding where necessary.
-When characters are supplied, the expression expands to each character
+When letters are supplied, the expression expands to each character
 lexicographically between @var{x} and @var{y}, inclusive,
 using the default C locale.
-Note that both @var{x} and @var{y} must be of the same type.
+Note that both @var{x} and @var{y} must be of the same type
+(integer or letter).
 When the increment is supplied, it is used as the difference between
 each term.  The default increment is 1 or -1 as appropriate.
 

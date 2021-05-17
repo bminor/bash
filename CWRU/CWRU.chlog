@@ -10320,3 +10320,41 @@ subst.c
 	  that are backslash-quoted in subscripts after word expansion.
 	  skipsubscript treats them specially, so you have to quote them to
 	  do things like `key='"' ; array[$key]=1 ; [[ -v array[$key] ]]'
+
+				   5/16
+				   ----
+
+builtins/wait.def
+	- wait_builtin: if we longjmp to wait_intr_buf, call unset_waitlist if
+	  we have called set_waitlist (wflags & JWAIT_WAITING). Fixes bug with
+	  wait -n interrupted by a trapped signal (not SIGINT) reported by
+	  Jonas Alfredsson <jonas.alfredsson@protonmail.com>
+
+jobs.c
+	- wait_sigint_cleanup: restore the old sigint handler before we longjmp
+	  out by calling restore_sigint_handler()
+
+				   5/17
+				   ----
+builtins/read.def
+	- bind_read_variable: now takes an additional argument, flags to pass
+	  to builtin_bind_variable; change callers
+	- SET_VFLAGS: set vflags and bindflags
+	- read_builtin: call SET_VFLAGS to set vflags and bindflags from each
+	  word before calling valid_array_reference and bind_read_variable
+
+builtins/common.c
+	- builtin_bind_variable: set vflags (for valid_array_reference) and
+	  bindflags (for bind_variable/assign_array_element) separately for
+	  clarity
+
+arrayfunc.c
+	- assign_array_element: sanity check: make sure that the suubscript
+	  returned by array_variable_name consumes the entire NAME, otherwise
+	  flag it as a subscript error. This keeps things like
+	  `KEY=' ]'; read assoc[$KEY] <<< hello' from assigning to incomplete
+	  subscripts
+
+builtins/printf.def
+	- printf_builtin: if LIST_OPTFLAGS includes W_ARRAYREF, set VA_NOEXPAND
+	  in VFLAGS

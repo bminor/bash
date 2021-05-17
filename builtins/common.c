@@ -971,6 +971,7 @@ builtin_help ()
 /*								    */
 /* **************************************************************** */
 
+/* Assign NAME=VALUE, passing FLAGS to the assignment functions. */
 SHELL_VAR *
 builtin_bind_variable (name, value, flags)
      char *name;
@@ -978,6 +979,7 @@ builtin_bind_variable (name, value, flags)
      int flags;
 {
   SHELL_VAR *v;
+  int vflags, bindflags;
 
 #if defined (ARRAY_VARS)
   /* Callers are responsible for calling this with array references that have
@@ -985,10 +987,17 @@ builtin_bind_variable (name, value, flags)
      Affected builtins: read, printf
      To make this really work, needs additional downstream support, starting
      with assign_array_element and array_variable_name. */
-  if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
+  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+  bindflags = flags | (assoc_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;
+  if (flags & ASS_NOEXPAND)
+    vflags |= VA_NOEXPAND;
+  if (flags & ASS_ONEWORD)
+    vflags |= VA_ONEWORD;
+
+  if (valid_array_reference (name, vflags) == 0)
     v = bind_variable (name, value, flags);
   else
-    v = assign_array_element (name, value, flags | (assoc_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB);
+    v = assign_array_element (name, value, bindflags);
 #else /* !ARRAY_VARS */
   v = bind_variable (name, value, flags);
 #endif /* !ARRAY_VARS */

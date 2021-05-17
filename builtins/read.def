@@ -128,7 +128,7 @@ static void set_eol_delim PARAMS((int));
 static void reset_eol_delim PARAMS((char *));
 static void set_readline_timeout PARAMS((sh_timer *t, time_t, long));
 #endif
-static SHELL_VAR *bind_read_variable PARAMS((char *, char *));
+static SHELL_VAR *bind_read_variable PARAMS((char *, char *, int));
 #if defined (HANDLE_MULTIBYTE)
 static int read_mbchar PARAMS((int, char *, int, int, int));
 #endif
@@ -190,6 +190,20 @@ read_builtin_timeout (fd)
   						: shtimer_select (read_timeout));
 }
 
+#if defined (ARRAY_VARS)
+#define SET_VFLAGS(wordflags) \
+  do { \
+    vflags = assoc_expand_once ?  VA_NOEXPAND : 0; \
+    bindflags = assoc_expand_once ? ASS_NOEXPAND : 0; \
+    if (assoc_expand_once && (wordflags & W_ARRAYREF)) \
+      vflags |= VA_ONEWORD|VA_NOEXPAND; \
+    if (vflags & VA_NOEXPAND) \
+      bindflags |= ASS_NOEXPAND; \
+    if (vflags & VA_ONEWORD) \
+      bindflags |= ASS_ONEWORD; \
+  } while (0)
+#endif
+
 /* Read the value of the shell variables whose names follow.
    The reading is done from the current input stream, whatever
    that may be.  Successive words of the input line are assigned
@@ -221,6 +235,7 @@ read_builtin (list)
   WORD_LIST *alist;
   int vflags;
 #endif
+  int bindflags;
 #if defined (READLINE)
   char *rlbuf, *itext;
   int rlind;
@@ -362,9 +377,11 @@ read_builtin (list)
   /* Convenience: check early whether or not the first of possibly several
      variable names is a valid identifier, and bail early if so. */
 #if defined (ARRAY_VARS)
-  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+  if (list)
+    SET_VFLAGS (list->word->flags);
   if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
+  bindflags = 0;
   if (list && legal_identifier (list->word->word) == 0)
 #endif
     {
@@ -952,6 +969,7 @@ assign_vars:
     {
       varname = list->word->word;
 #if defined (ARRAY_VARS)
+      SET_VFLAGS (list->word->flags);
       if (legal_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
 #else
       if (legal_identifier (varname) == 0)
@@ -975,16 +993,16 @@ assign_vars:
 	  if (t && saw_escape)
 	    {
 	      t1 = dequote_string (t);
-	      var = bind_read_variable (varname, t1);
+	      var = bind_read_variable (varname, t1, bindflags);
 	      free (t1);
 	    }
 	  else
-	    var = bind_read_variable (varname, t ? t : "");
+	    var = bind_read_variable (varname, t ? t : "", bindflags);
 	}
       else
 	{
 	  t = (char *)0;
-	  var = bind_read_variable (varname, "");
+	  var = bind_read_variable (varname, "", bindflags);
 	}
 
       FREE (t);
@@ -1000,6 +1018,7 @@ assign_vars:
 
   /* Now assign the rest of the line to the last variable argument. */
 #if defined (ARRAY_VARS)
+  SET_VFLAGS (list->word->flags);
   if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   if (legal_identifier (list->word->word) == 0)
@@ -1036,11 +1055,11 @@ assign_vars:
   if (saw_escape && input_string && *input_string)
     {
       t = dequote_string (input_string);
-      var = bind_read_variable (list->word->word, t);
+      var = bind_read_variable (list->word->word, t, bindflags);
       free (t);
     }
   else
-    var = bind_read_variable (list->word->word, input_string ? input_string : "");
+    var = bind_read_variable (list->word->word, input_string ? input_string : "", bindflags);
 
   if (var)
     {
@@ -1057,12 +1076,13 @@ assign_vars:
 }
 
 static SHELL_VAR *
-bind_read_variable (name, value)
+bind_read_variable (name, value, flags)
      char *name, *value;
+     int flags;
 {
   SHELL_VAR *v;
 
-  v = builtin_bind_variable (name, value, 0);
+  v = builtin_bind_variable (name, value, flags);
   return (v == 0 ? v
 		 : ((readonly_p (v) || noassign_p (v)) ? (SHELL_VAR *)NULL : v));
 }

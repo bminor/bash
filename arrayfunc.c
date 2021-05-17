@@ -344,7 +344,8 @@ assign_array_element (name, value, flags)
      (ASS_ALLOWALLSUB) we allow it. */
   if (((isassoc == 0 || (flags & (ASS_NOEXPAND|ASS_ALLOWALLSUB)) == 0) &&
 	(ALL_ELEMENT_SUB (sub[0]) && sub[1] == ']')) ||
-      (sublen <= 1))
+      (sublen <= 1) ||
+      (sub[sublen] != '\0'))		/* sanity check */
     {
       free (vname);
       err_badarraysub (name);

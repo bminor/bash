@@ -525,6 +525,7 @@ unary_test (op, arg, flags)
   struct stat stat_buf;
   struct timespec mtime, atime;
   SHELL_VAR *v;
+  int aflags;
      
   switch (op[1])
     {
@@ -632,16 +633,16 @@ unary_test (op, arg, flags)
 
     case 'v':
 #if defined (ARRAY_VARS)
-      if (valid_array_reference (arg, assoc_expand_once ? VA_NOEXPAND : 0))
+      aflags = assoc_expand_once ? AV_NOEXPAND : 0;
+      if (valid_array_reference (arg, aflags))
 	{
 	  char *t;
-	  int rtype, ret, aflags;
+	  int rtype, ret;
 
 	  /* Let's assume that this has already been expanded once. */
 	  /* XXX - TAG:bash-5.2 fix with corresponding fix to execute_cmd.c:
 	     execute_cond_node() that passes TEST_ARRAYEXP in FLAGS */
 	  
-	  aflags = assoc_expand_once ? AV_NOEXPAND : 0;
 #if 0
 	  /* TAG:bash-5.2 */
 	  if (shell_compatibility_level > 51)
