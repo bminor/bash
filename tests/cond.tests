@@ -33,6 +33,14 @@ echo returns: $?
 [[ ! x || x ]]
 echo returns: $?
 
+# ! toggles on and off rather than just setting an `invert result' flag
+# this differs from ksh93
+[[ ! 1 -eq 1 ]]; echo $?
+[[ ! ! 1 -eq 1 ]]; echo $?
+
+[[ ! ! ! 1 -eq 1 ]]; echo $?
+[[ ! ! ! ! 1 -eq 1 ]]; echo $?
+
 # parenthesized terms didn't work right until post-2.04
 [[ a ]]
 echo returns: $?

@@ -88,20 +88,18 @@ int
 should_suppress_fork (command)
      COMMAND *command;
 {
-#if 0 /* TAG: bash-5.2 */
   int subshell;
 
   subshell = subshell_environment & SUBSHELL_PROCSUB;	/* salt to taste */
-#endif
   return (startup_state == 2 && parse_and_execute_level == 1 &&
-	  running_trap == 0 &&
 	  *bash_input.location.string == '\0' &&
 	  parser_expanding_alias () == 0 &&
+	  running_trap == 0 &&
 	  command->type == cm_simple &&
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
 	  signal_is_trapped (ERROR_TRAP) == 0 &&
 	  any_signals_trapped () < 0 &&
-#if 0 /* TAG: bash-5.2 */
+#if 1 /* TAG: bash-5.2 */
 	  (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
 #else
 	  command->redirects == 0 && command->value.Simple->redirects == 0 &&
@@ -575,9 +573,9 @@ parse_string (string, from_file, flags, endp)
 
   code = should_jump_to_top_level = 0;
   oglobal = global_command;
-  ostring = string;
 
   with_input_from_string (string, from_file);
+  ostring = bash_input.location.string;
   while (*(bash_input.location.string))		/* XXX - parser_expanding_alias () ? */
     {
       command = (COMMAND *)NULL;

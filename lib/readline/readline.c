@@ -1549,3 +1549,12 @@ _rl_add_executing_keyseq (int key)
   RESIZE_KEYSEQ_BUFFER ();
  rl_executing_keyseq[rl_key_sequence_length++] = key;
 }
+
+/* `delete' the last character added to the executing key sequence. Use this
+   before calling rl_execute_next to avoid keys being added twice. */
+void
+_rl_del_executing_keyseq (void)
+{
+  if (rl_key_sequence_length > 0)
+    rl_key_sequence_length--;
+}

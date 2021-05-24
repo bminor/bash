@@ -956,11 +956,13 @@ void
 print_simple_command (simple_command)
      SIMPLE_COM *simple_command;
 {
-  command_print_word_list (simple_command->words, " ");
+  if (simple_command->words)
+    command_print_word_list (simple_command->words, " ");
 
   if (simple_command->redirects)
     {
-      cprintf (" ");
+      if (simple_command->words)
+	cprintf (" ");
       print_redirection_list (simple_command->redirects);
     }
 }

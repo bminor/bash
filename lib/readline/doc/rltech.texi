@@ -885,6 +885,15 @@ It takes a "translated" key sequence and should be used if the key sequence
 can include NUL.
 @end deftypefun
 
+@deftypefun {int} rl_trim_arg_from_keyseq (const char *keyseq, size_t len, Keymap map)
+If there is a numeric argument at the beginning of @var{keyseq}, possibly
+including digits, return the index of the first character in @var{keyseq}
+following the numeric argument.
+This can be used to skip over the numeric argument (which is available as
+@code{rl_numeric_arg} while traversing the key sequence that invoked the
+current command.
+@end deftypefun
+
 @deftypefun {char **} rl_invoking_keyseqs (rl_command_func_t *function)
 Return an array of strings representing the key sequences used to
 invoke @var{function} in the current keymap.

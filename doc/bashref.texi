@@ -1145,10 +1145,12 @@ Return a status of 0 or 1 depending on the evaluation of
 the conditional expression @var{expression}.
 Expressions are composed of the primaries described below in
 @ref{Bash Conditional Expressions}.
-Word splitting and filename expansion are not performed on the words
-between the @code{[[} and @code{]]}; tilde expansion, parameter and
+The words between the @code{[[} and @code{]]} do not undergo word splitting
+and filename expansion.
+The shell performs tilde expansion, parameter and
 variable expansion, arithmetic expansion, command substitution, process
-substitution, and quote removal are performed.
+substitution, and quote removal on those words
+(as if the words were enclosed in double quotes).
 Conditional operators such as @samp{-f} must be unquoted to be recognized
 as primaries.
 
@@ -1813,7 +1815,8 @@ If @var{value}
 is not given, the variable is assigned the null string.  All
 @var{value}s undergo tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote
-removal (detailed below).  If the variable has its @code{integer}
+removal (@pxref{Shell Parameter Expansion}).
+If the variable has its @code{integer}
 attribute set, then @var{value} 
 is evaluated as an arithmetic expression even if the @code{$((@dots{}))}
 expansion is not used (@pxref{Arithmetic Expansion}).
@@ -3491,6 +3494,9 @@ conditional and list constructs.
 All builtins return an exit status of 2 to indicate incorrect usage,
 generally invalid options or missing arguments.
 
+The exit status of the last command is available in the special
+parameter $? (@pxref{Special Parameters}).
+
 @node Signals
 @subsection Signals
 @cindex signal handling
@@ -3677,18 +3683,19 @@ The return status is zero.
 
 Read and execute commands from the @var{filename} argument in the
 current shell context.  If @var{filename} does not contain a slash,
-the @env{PATH} variable is used to find @var{filename}.
+the @env{PATH} variable is used to find @var{filename},
+but @var{filename} does not need to be executable.
 When Bash is not in @sc{posix} mode, the current directory is searched
 if @var{filename} is not found in @env{$PATH}.
 If any @var{arguments} are supplied, they become the positional
 parameters when @var{filename} is executed.  Otherwise the positional
 parameters are unchanged.
-If the @option{-T} option is enabled, @code{source} inherits any trap on
+If the @option{-T} option is enabled, @code{.} inherits any trap on
 @code{DEBUG}; if it is not, any @code{DEBUG} trap string is saved and
-restored around the call to @code{source}, and @code{source} unsets the
+restored around the call to @code{.}, and @code{.} unsets the
 @code{DEBUG} trap while it executes.
 If @option{-T} is not set, and the sourced file changes
-the @code{DEBUG} trap, the new value is retained when @code{source} completes.
+the @code{DEBUG} trap, the new value is retained when @code{.} completes.
 The return status is the exit status of the last command executed, or
 zero if no commands are executed.  If @var{filename} is not found, or
 cannot be read, the return status is non-zero.
@@ -4325,6 +4332,9 @@ When @var{shell-command} is executed, the shell sets the
 buffer and the @code{READLINE_POINT} and @code{READLINE_MARK} variables
 to the current location of the insertion point and the saved insertion
 point (the @var{mark}), respectively.
+The shell assigns any numeric argument the user supplied to the
+@code{READLINE_ARGUMENT} variable.
+If there was no argument, that variable is not set.
 If the executed command changes the value of any of @code{READLINE_LINE},
 @code{READLINE_POINT}, or @code{READLINE_MARK}, those new values will be
 reflected in the editing state.
@@ -5745,7 +5755,7 @@ builtin prints an error message when the shift count exceeds the
 number of positional parameters.
 
 @item sourcepath
-If set, the @code{source} builtin uses the value of @env{PATH}
+If set, the @code{.} (@code{source}) builtin uses the value of @env{PATH}
 to find the directory containing the file supplied as an argument.
 This option is enabled by default.
 
@@ -6546,6 +6556,11 @@ variable seeds the random number generator.
 If @env{RANDOM}
 is unset, it loses its special properties, even if it is
 subsequently reset.
+
+@item READLINE_ARGUMENT
+Any numeric argument given to a Readline command that was defined using
+@samp{bind -x} (@pxref{Bash Builtins}
+when it was invoked.
 
 @item READLINE_LINE
 The contents of the Readline line buffer, for use

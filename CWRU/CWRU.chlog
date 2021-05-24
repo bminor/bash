@@ -10358,3 +10358,96 @@ arrayfunc.c
 builtins/printf.def
 	- printf_builtin: if LIST_OPTFLAGS includes W_ARRAYREF, set VA_NOEXPAND
 	  in VFLAGS
+
+				   5/17
+				   ----
+
+lib/readline/complete.c
+	- compute_lcd_of_matches: move a couple of strlen calls out of a loop
+	  in calls to mbrtowc; performance improvement only. Report and fix
+	  from sparrowhawk996@gmail.com
+
+lib/readline/bind.c
+	- rl_trim_arg_from_keyseq: take a key sequence and its length and
+	  return the index into the key sequence following any initial numeric
+	  argument. Return -1 if there is no numeric argument (the caller is
+	  expected to make sure) or if the key sequence consists *only* of
+	  the numeric argument. The caller should use the remainder of the
+	  key sequence to look up the desired key binding.
+
+lib/readline/readline.h
+	- rl_trim_arg_from_keyseq: extern declaration
+
+bashline.c
+	- bash_execute_unix_command: if the argument count is > 1 or we have
+	  an explicit argument, call rl_trim_arg_from_keyseq to get past the
+	  numeric argument and deal with the rest of the key sequence. We still
+	  need a way to pass it to the invoked program or function. From
+	  a report from Jesper Nygards <jesper.nygards@gmail.com>
+
+				   5/18
+				   ----
+
+bashline.c
+	- bash_execute_unix_command: if the user supplied a numeric argument
+	  when invoking bash_execute_unix_command, pass it to the command in
+	  the READLINE_ARGUMENT variable
+
+lib/readline/readline.[ch]
+	- _rl_del_executing_keyseq: convenience function to `delete' the last
+	  character added to the executing key sequence. Intended to be used
+	  before calling rl_execute_next or similar functions that push input
+	  back to be re-read
+
+doc/{bash.1,bashref.texi}
+	- READLINE_ARGUMENT: documented new variable available for commands
+	  defined using `bind -x' keybindings
+
+lib/readline/doc/rltech.texi
+	- rl_trim_arg_from_keyseq: documented new function
+
+				   5/19
+				   ----
+
+builtins/evalstring.c
+	- should_suppress_fork: suppress the fork if we're in a process
+	  substitution subshell, in addition to being a simple command
+	  without redirections. From a report back in 10/2020 from
+	  Hyunho Cho <mug896@gmail.com>
+
+bashline.c
+	- command_word_completion_function: if we're trying to complete an
+	  absolute program (one containing a slash), don't run strcmp or
+	  strcasecmp on the return value from rl_filename_completion_function,
+	  since that duplicates work the filename completion function already
+	  does. From a report back in 1/2021 by awa54@cdak.net
+
+				   5/22
+				   ----
+parse.y
+	- CHECK_FOR_RESERVED_WORD: if we are returning an ESAC and unsetting
+	  PST_CASESTMT, decrement esacs_needed_count
+
+parse.y,shell.h
+	- sh_parser_state_t: save and restore esacs_needed_count and
+	  expecting_in_token in the shell parser state struct and
+	  save_parser_state/restore_parser_state
+
+print_cmd.c
+	- print_simple_command: don't bother to call command_print_word_list
+	  with an empty list
+	- print_simple_command: don't print a space before a redirection list
+	  if there weren't any command words to print
+
+				   5/24
+				   ----
+
+lib/sh/input_avail.c
+	- nchars_avail: make sure SET and OSET are declared on systems with
+	  select(2). Reported by Larkin Nickle <me@larbob.org>
+
+parse.y
+	- cond_term: if we read a `!' toggle CMD_INVERT_RETURN instead of
+	  setting it unconditionally. Report and patch from
+	  Vincent Menegaux <vincent.menegaux@gmail.com> via
+	  https://savannah.gnu.org/patch/?10070

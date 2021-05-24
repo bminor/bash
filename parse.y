@@ -2910,9 +2910,10 @@ static int open_brace_count;
 		break; /* Posix grammar rule 4 */ \
 	      if ((parser_state & PST_CASEPAT) && last_read_token == '(' && word_token_alist[i].token == ESAC) /*)*/ \
 		break; /* phantom Posix grammar rule 4 */ \
-	      if (word_token_alist[i].token == ESAC) \
+	      if (word_token_alist[i].token == ESAC) { \
 		parser_state &= ~(PST_CASEPAT|PST_CASESTMT); \
-	      else if (word_token_alist[i].token == CASE) \
+		esacs_needed_count--; \
+	      } else if (word_token_alist[i].token == CASE) \
 		parser_state |= PST_CASESTMT; \
 	      else if (word_token_alist[i].token == COND_END) \
 		parser_state &= ~(PST_CONDCMD|PST_CONDEXPR); \
@@ -4902,7 +4903,7 @@ cond_term ()
 	dispose_word (yylval.word);	/* not needed */
       term = cond_term ();
       if (term)
-	term->flags |= CMD_INVERT_RETURN;
+	term->flags ^= CMD_INVERT_RETURN;
     }
   else if (tok == WORD && yylval.word->word[0] == '-' && yylval.word->word[1] && yylval.word->word[2] == 0 && test_unop (yylval.word->word))
     {
@@ -6795,6 +6796,9 @@ save_parser_state (ps)
   ps->need_here_doc = need_here_doc;
   ps->here_doc_first_line = here_doc_first_line;
 
+  ps->esacs_needed = esacs_needed_count;
+  ps->expecting_in = expecting_in_token;
+
   if (need_here_doc == 0)
     ps->redir_stack[0] = 0;
   else
@@ -6856,6 +6860,9 @@ restore_parser_state (ps)
   echo_input_at_read = ps->echo_input_at_read;
   need_here_doc = ps->need_here_doc;
   here_doc_first_line = ps->here_doc_first_line;
+
+  esacs_needed_count = ps->esacs_needed;
+  expecting_in_token = ps->expecting_in;
 
 #if 0
   for (i = 0; i < HEREDOC_MAX; i++)

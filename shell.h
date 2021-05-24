@@ -205,6 +205,9 @@ typedef struct _sh_parser_state_t
   int need_here_doc;
   int here_doc_first_line;
 
+  int esacs_needed;
+  int expecting_in;
+
   /* structures affecting the parser */
   void *pushed_strings;
   REDIRECT *redir_stack[HEREDOC_MAX];

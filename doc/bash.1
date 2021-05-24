@@ -711,11 +711,12 @@ the conditional expression \fIexpression\fP.
 Expressions are composed of the primaries described below under
 .SM
 .BR "CONDITIONAL EXPRESSIONS" .
-Word splitting and pathname expansion are not performed on the words
-between the \fB[[\fP and \fB]]\fP; tilde expansion,
-parameter and variable expansion,
-arithmetic expansion, command substitution, process
-substitution, and quote removal are performed.
+The words between the \fB[[\fP and \fB]]\fP do not undergo word splitting
+and filename expansion.
+The shell performs tilde expansion, parameter and
+variable expansion, arithmetic expansion, command substitution, process
+substitution, and quote removal on those words
+(as if the words were enclosed in double quotes).
 Conditional operators such as \fB\-f\fP must be unquoted to be recognized
 as primaries.
 .if t .sp 0.5
@@ -1952,6 +1953,16 @@ If
 .B RANDOM
 is unset, it loses its special properties, even if it is
 subsequently reset.
+.TP
+.B READLINE_ARGUMENT
+Any numeric argument given to a Readline command that was defined using
+.if t \f(CWbind -x\fP
+.if n "bind -x"
+(see
+.SM
+.B "SHELL BUILTIN COMMANDS"
+below)
+when it was invoked.
 .TP
 .B READLINE_LINE
 The contents of the
@@ -5048,6 +5059,9 @@ while they execute.
 All builtins return an exit status of 2 to indicate incorrect usage,
 generally invalid options or missing arguments.
 .PP
+The exit status of the last command is available in the special
+parameter $?.
+.PP
 \fBBash\fP itself returns the exit status of the last command
 executed, unless a syntax error occurs, in which case it exits
 with a non-zero value.  See also the \fBexit\fP builtin
@@ -7478,7 +7492,8 @@ does not contain a slash, filenames in
 .SM
 .B PATH
 are used to find the directory containing
-.IR filename .
+.IR filename ,
+but \fIfilename\fP does not need to be executable.
 The file searched for in
 .SM
 .B PATH
@@ -7498,12 +7513,12 @@ is not searched.
 If any \fIarguments\fP are supplied, they become the positional
 parameters when \fIfilename\fP is executed.  Otherwise the positional
 parameters are unchanged.
-If the \fB\-T\fP option is enabled, \fBsource\fP inherits any trap on
+If the \fB\-T\fP option is enabled, \fB.\fP inherits any trap on
 \fBDEBUG\fP; if it is not, any \fBDEBUG\fP trap string is saved and
-restored around the call to \fBsource\fP, and \fBsource\fP unsets the
+restored around the call to \fB.\fP, and \fB.\fP unsets the
 \fBDEBUG\fP trap while it executes.
 If \fB\-T\fP is not set, and the sourced file changes
-the \fBDEBUG\fP trap, the new value is retained when \fBsource\fP completes.
+the \fBDEBUG\fP trap, the new value is retained when \fB.\fP completes.
 The return status is the status of the last command exited within
 the script (0 if no commands are executed), and false if
 .I filename
@@ -7633,6 +7648,11 @@ and
 .B READLINE_MARK
 variables to the current location of the insertion point and the saved
 insertion point (the mark), respectively.
+The shell assigns any numeric argument the user supplied to the     
+.SM
+.B READLINE_ARGUMENT
+variable.
+If there was no argument, that variable is not set.
 If the executed command changes the value of any of
 .SM
 .BR READLINE_LINE ,
@@ -10360,7 +10380,7 @@ number of positional parameters.
 .TP 8
 .B sourcepath
 If set, the
-\fBsource\fP (\fB.\fP) builtin uses the value of
+\fB.\fP (\fBsource\fP) builtin uses the value of
 .SM
 .B PATH
 to find the directory containing the file supplied as an argument.

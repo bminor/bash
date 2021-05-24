@@ -2301,10 +2301,16 @@ globword:
 
       if (absolute_program (hint))
 	{
+#if 0
 	  if (igncase == 0)
 	    match = strncmp (val, hint, hint_len) == 0;
 	  else
 	    match = strncasecmp (val, hint, hint_len) == 0;
+#else
+	  /* Why duplicate the comparison rl_filename_completion_function
+	     already performs? */
+	  match = 1;
+#endif
 
 	  /* If we performed tilde expansion, restore the original
 	     filename. */
@@ -4371,12 +4377,28 @@ bash_execute_unix_command (count, key)
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
   Keymap cmd_xmap;
+  const char *kseq;
+  size_t kslen;
+
+  kseq = rl_executing_keyseq;
+  kslen = rl_key_sequence_length;
+
+  /* If we have a numeric argument, chop it off the front of the key sequence */
+  if (count > 1 || rl_explicit_arg)
+    {
+      i = rl_trim_arg_from_keyseq (rl_executing_keyseq, rl_key_sequence_length, rl_get_keymap ());
+      if (i > 0)
+	{
+	 kseq = rl_executing_keyseq + i;
+	 kslen = rl_key_sequence_length - i;
+	}
+    }
 
   /* First, we need to find the right command to execute.  This is tricky,
      because we might have already indirected into another keymap, so we
      have to walk cmd_xmap using the entire key sequence. */
   cmd_xmap = get_cmd_xmap_from_keymap (rl_get_keymap ());
-  cmd = (char *)rl_function_of_keyseq_len (rl_executing_keyseq, rl_key_sequence_length, cmd_xmap, &type);
+  cmd = (char *)rl_function_of_keyseq_len (kseq, kslen, cmd_xmap, &type);
 
   if (type == ISKMAP && (type = ((Keymap) cmd)[ANYOTHERKEY].type) == ISMACR)
     cmd = (char*)((Keymap) cmd)[ANYOTHERKEY].function;
@@ -4413,6 +4435,14 @@ bash_execute_unix_command (count, key)
   v = bind_int_variable ("READLINE_MARK", value, 0);
   if (v)
     VSETATTR (v, att_exported);
+
+  if (count > 1 || rl_explicit_arg)
+    {
+      value = inttostr (count, ibuf, sizeof (ibuf));
+      v = bind_int_variable ("READLINE_ARGUMENT", value, 0);
+      if (v)
+        VSETATTR (v, att_exported);
+    }
   array_needs_making = 1;
 
   save_parser_state (&ps);
@@ -4435,6 +4465,7 @@ bash_execute_unix_command (count, key)
   check_unbind_variable ("READLINE_LINE");
   check_unbind_variable ("READLINE_POINT");
   check_unbind_variable ("READLINE_MARK");
+  check_unbind_variable ("READLINE_ARGUMENT");
   array_needs_making = 1;
 
   /* and restore the readline buffer and display after command execution. */

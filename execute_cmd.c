@@ -1477,6 +1477,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   /* If a command is asynchronous in a subshell (like ( foo ) & or
      the special case of an asynchronous GROUP command where the
+
      the subshell bit is turned on down in case cm_group: below),
      turn off `asynchronous', so that two subshells aren't spawned.
      XXX - asynchronous used to be set to 0 in this block, but that
@@ -1621,7 +1622,9 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   default_buffered_input = -1;
 #endif
 
-#if 0 /* TAG: bash-5.2 */
+#if 0
+  /* We can't optimize if one of the commands executed by the subshell sets
+     an exit trap. */
   if (user_subshell && command->type == cm_subshell)
     optimize_subshell_command (command->value.Subshell->command);
 #endif
