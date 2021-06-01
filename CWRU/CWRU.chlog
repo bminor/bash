@@ -10451,3 +10451,36 @@ parse.y
 	  setting it unconditionally. Report and patch from
 	  Vincent Menegaux <vincent.menegaux@gmail.com> via
 	  https://savannah.gnu.org/patch/?10070
+
+				   5/25
+				   ----
+doc/{bash.1,bashref.texi}
+	- test: add the ( $2 $3 ) case to the description of the four-argument
+	  behavior. Inspired by a discussion with Christoph Anton Mitterer
+	  <calestyo@scientia.net>
+
+				   5/27
+				   ----
+doc/bashref.texi
+	- replace most of the GNU parallel section with a reference to the
+	  tutorial on gnu.org
+
+lib/glob/glob.h
+	- GX_NEGATE: new flag; indicates whether the pattern is being negated
+	  as part of an extglob pattern. Not used yet
+
+lib/glob/glob.c
+	- extglob_skipname,wextglob_skipname: pass GX_NEGATE to the skipname
+	  functions if the pattern is being negated. Not checked yet
+
+				   5/28
+				   ----
+doc/{bash.1,bashref.texi}
+	- dotglob: add text to clarify that `.' and `..' have to be matched by
+	  a pattern beginning with `.' or -- and this is the sketchy part --
+	  that a pattern beginning with `.' has to be one of the patterns in
+	  an extended glob expression
+
+lib/glob/glob.c
+	- skipname,wskipname: perform the special checks for `.' only if the
+	  pattern is not being negated

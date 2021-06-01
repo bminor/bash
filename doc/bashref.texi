@@ -1487,117 +1487,9 @@ Parallel provides shorthand references to many of the most common operations
 the input source, and so on).  Parallel can replace @code{xargs} or feed
 commands from its input sources to several different instances of Bash.
 
-For a complete description, refer to the GNU Parallel documentation.  A few
-examples should provide a brief introduction to its use.
-
-For example, it is easy to replace @code{xargs} to gzip all html files in the
-current directory and its subdirectories:
-@example
-find . -type f -name '*.html' -print | parallel gzip
-@end example
-@noindent
-If you need to protect special characters such as newlines in file names,
-use find's @option{-print0} option and parallel's @option{-0} option.
-
-You can use Parallel to move files from the current directory when the
-number of files is too large to process with one @code{mv} invocation:
-@example
-printf '%s\n' * | parallel mv @{@} destdir
-@end example
-
-As you can see, the @{@} is replaced with each line read from standard input.
-While using @code{ls} will work in most instances, it is not sufficient to
-deal with all filenames. @code{printf} is a shell builtin, and therefore is
-not subject to the kernel's limit on the number of arguments to a program,
-so you can use @samp{*} (but see below about the @code{dotglob} shell option).
-If you need to accommodate special characters in filenames, you can use
-
-@example
-printf '%s\0' * | parallel -0 mv @{@} destdir
-@end example
-
-@noindent
-as alluded to above.
-
-This will run as many @code{mv} commands as there are files in the current
-directory.
-You can emulate a parallel @code{xargs} by adding the @option{-X} option:
-@example
-printf '%s\0' * | parallel -0 -X mv @{@} destdir
-@end example
-
-(You may have to modify the pattern if you have the @code{dotglob} option
-enabled.)
-
-GNU Parallel can replace certain common idioms that operate on lines read
-from a file (in this case, filenames listed one per line):
-@example
-	while IFS= read -r x; do
-		do-something1 "$x" "config-$x"
-		do-something2 < "$x"
-	done < file | process-output
-@end example
-
-@noindent
-with a more compact syntax reminiscent of lambdas:
-@example
-cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" |
-           process-output
-@end example
-
-Parallel provides a built-in mechanism to remove filename extensions, which
-lends itself to batch file transformations or renaming:
-@example
-ls *.gz | parallel -j+0 "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}"
-@end example
-@noindent
-This will recompress all files in the current directory with names ending
-in .gz using bzip2, running one job per CPU (-j+0) in parallel.
-(We use @code{ls} for brevity here; using @code{find} as above is more
-robust in the face of filenames containing unexpected characters.)
-Parallel can take arguments from the command line; the above can also be
-written as
-
-@example
-parallel "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}" ::: *.gz
-@end example
-
-If a command generates output, you may want to preserve the input order in
-the output.  For instance, the following command
-@example
-@{
-    echo foss.org.my ;
-    echo debian.org ;
-    echo freenetproject.org ;
-@} | parallel traceroute
-@end example
-@noindent
-will display as output the traceroute invocation that finishes first.
-Adding the @option{-k} option 
-@example
-@{
-    echo foss.org.my ;
-    echo debian.org ;
-    echo freenetproject.org ;
-@} | parallel -k traceroute
-@end example
-@noindent
-will ensure that the output of @code{traceroute foss.org.my} is displayed first.
-
-Finally, Parallel can be used to run a sequence of shell commands in parallel,
-similar to @samp{cat file | bash}.
-It is not uncommon to take a list of filenames, create a series of shell
-commands to operate on them, and feed that list of commands to a shell.
-Parallel can speed this up.  Assuming that @file{file} contains a list of
-shell commands, one per line,
-
-@example
-parallel -j 10 < file
-@end example
-
-@noindent
-will evaluate the commands using the shell (since no explicit command is
-supplied as an argument), in blocks of ten shell jobs at a time.
+For a complete description, refer to the GNU Parallel documentation, which
+is available at
+@url{https://www.gnu.org/software/parallel/parallel_tutorial.html}.
 
 @node Shell Functions
 @section Shell Functions
@@ -2769,9 +2661,12 @@ without regard to the case of alphabetic characters.
 When a pattern is used for filename expansion, the character @samp{.}
 at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option @code{dotglob} is set.
-The filenames @samp{.} and @samp{..} must always be matched explicitly,
+The filenames @samp{.} and @samp{..} must be matched
+by a pattern beginning with @samp{.} (for example, @samp{.?}),
+or a pattern beginning with @samp{.} must be one of the patterns in an
+extended pattern matching expression (see below),
 even if @code{dotglob} is set.
-In other cases, the @samp{.} character is not treated specially.
+When not matching filenames, the @samp{.} character is not treated specially.
 
 When matching a filename, the slash character must always be
 matched explicitly by a slash in the pattern, but in other matching
@@ -4096,10 +3991,20 @@ Otherwise, the expression is false.
 @end enumerate
 
 @item 4 arguments
+The following conditions are applied in the order listed.
+
+@enumerate
+@item
 If the first argument is @samp{!}, the result is the negation of
 the three-argument expression composed of the remaining arguments.
+@item
+If the first argument is exactly @samp{(} and the fourth argument is
+exactly @samp{)}, the result is the two-argument test of the second
+and third arguments.
+@item
 Otherwise, the expression is parsed and evaluated according to
 precedence using the rules listed above.
+@end enumerate
 
 @item 5 or more arguments
 The expression is parsed and evaluated according to precedence
@@ -4601,7 +4506,7 @@ each builtin with an indication of whether or not it is enabled.
 
 The @option{-f} option means to load the new builtin command @var{name}
 from shared object @var{filename}, on systems that support dynamic loading.
-Bash will use the value of the @enable{BASH_LOADABLES_PATH} variable as a
+Bash will use the value of the @env{BASH_LOADABLES_PATH} variable as a
 colon-separated list of directories in which to search for @var{filename}.
 The default is system-dependent.
 The @option{-d} option will delete a builtin loaded with @option{-f}.

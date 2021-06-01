@@ -3691,10 +3691,14 @@ The filenames
 .B ``.''
 and
 .B ``..''
-must always be matched explicitly, even if
+must always be matched
+by a pattern beginning with ``.'' (for example, ``.?''),
+or a pattern beginning with ``.'' must be one of the patterns in an
+extended pattern matching expression (see below),
+even if
 .B dotglob
 is set.
-In other cases, the
+When not matching pathnames, the
 .B ``.''
 character is not treated specially.
 When matching a pathname, the slash character must always be
@@ -10491,8 +10495,13 @@ argument.
 Otherwise, the expression is false.
 .TP
 4 arguments
+The following conditions are applied in the order listed.
 If the first argument is \fB!\fP, the result is the negation of
 the three-argument expression composed of the remaining arguments.
+the two-argument test using the second and third arguments.
+If the first argument is exactly \fB(\fP and the fourth argument is
+exactly \fB)\fP, the result is the two-argument test of the second
+and third arguments.
 Otherwise, the expression is parsed and evaluated according to
 precedence using the rules listed above.
 .TP

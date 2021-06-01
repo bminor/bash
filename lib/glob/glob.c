@@ -201,7 +201,7 @@ extglob_skipname (pat, dname, flags)
      int flags;
 {
   char *pp, *pe, *t, *se;
-  int n, r, negate, wild, nullpat;
+  int n, r, negate, wild, nullpat, xflags;
 
   negate = *pat == '!';
   wild = *pat == '*' || *pat == '?';
@@ -213,12 +213,17 @@ extglob_skipname (pat, dname, flags)
   if (pe == 0)
     return 0;
 
+  xflags = flags | ( negate ? GX_NEGATE : 0);
+
   /* if pe != se we have more of the pattern at the end of the extglob
      pattern. Check the easy case first ( */
   if (pe == se && *pe == 0 && pe[-1] == ')' && (t = strchr (pp, '|')) == 0)
     {
       pe[-1] = '\0';
-      r = XSKIPNAME (pp, dname, flags); /*(*/
+      /* This is where we check whether the pattern is being negated and
+	 match all files beginning with `.' if the pattern begins with a
+	 literal `.'. */
+      r = XSKIPNAME (pp, dname, xflags); /*(*/
       pe[-1] = ')';
       return r;
     }
@@ -238,7 +243,7 @@ extglob_skipname (pat, dname, flags)
 	t[-1] = n;	/* no-op for now */
       else
 	t[-1] = '\0';
-      r = XSKIPNAME (pp, dname, flags);
+      r = XSKIPNAME (pp, dname, xflags);
       t[-1] = n;
       if (r == 0)	/* if any pattern says not skip, we don't skip */
         return r;
@@ -284,15 +289,26 @@ skipname (pat, dname, flags)
 	DOT_OR_DOTDOT (dname))
     return 1;
 
+#if 0
+  /* This is where we check whether the pattern is being negated and
+     match all files beginning with `.' if the pattern begins with a
+     literal `.'. This is the negation of the next clause. */
+  else if ((flags & GX_NEGATE) && noglob_dot_filenames == 0 &&
+	dname[0] == '.' &&
+	(pat[0] == '.' || (pat[0] == '\\' && pat[1] == '.')))
+    return 0;
+#endif
+
   /* If a dot must be explicitly matched, check to see if they do. */
-  else if (noglob_dot_filenames && dname[0] == '.' && pat[0] != '.' &&
-	(pat[0] != '\\' || pat[1] != '.'))
+  else if (noglob_dot_filenames && dname[0] == '.' &&
+ 	   pat[0] != '.' && (pat[0] != '\\' || pat[1] != '.'))
     return 1;
 
   /* Special checks for `.'. The only things that can match `.' are ".",
      "\.", ".*", and "\.*". We don't try to match everything here, just
-     make sure that we don't let something obviously disqualifying by. */
-  else if (dname[0] == '.' && dname[1] == '\0')
+     make sure that we don't let something obviously disqualifying by.
+     We only do this if we're not negating the pattern. */
+  else if ((flags & GX_NEGATE) == 0 && dname[0] == '.' && dname[1] == '\0')
     {
       if (pat[0] != '.' && (pat[0] != '\\' || pat[1] != '.'))
 	return 1;
@@ -301,7 +317,21 @@ skipname (pat, dname, flags)
 	return 1;
     }
 
-  /* We don't currently have any additional special checks for `..' */
+#if 0
+  /* These are additional special checks for `..'. We let through "..",
+     "\..", ".\.", "\.\.", ".*", ".?", "\.*", and "\.?".
+     Disabled because it doesn't deal with things like `@(.).' at all. */
+  else if (dname[0] == '.' && dname[1] == '.' && dname[2] == '\0')
+    {
+      if (pat[0] != '.' && (pat[0] != '\\' || pat[1] != '.'))	/* [\]. */
+	return 1;
+      i = (pat[0] == '.') ? 1 : 2;
+      if (pat[i] && (pat[i] == '*' || pat[i] == '?') && pat[i+1] == '\0')
+	return 0;						/* [\].[*?] */
+      if (pat[i] != '.' && (pat[i] != '\\' || pat[i+1] != '.'))	/* [\].[\]. */
+	return 1;
+    }
+#endif
 
   return 0;
 }
@@ -325,17 +355,27 @@ wskipname (pat, dname, flags)
 	WDOT_OR_DOTDOT (dname))
     return 1;
 
+#if 0
+  /* This is where we check whether the pattern is being negated and
+     match all files beginning with `.' if the pattern begins with a
+     literal `.'. This is the negation of the next clause. */
+  else if ((flags & GX_NEGATE) && noglob_dot_filenames == 0 &&
+	dname[0] == L'.' &&
+	(pat[0] == L'.' || (pat[0] == L'\\' && pat[1] == L'.')))
+    return 0;
+#endif
+
   /* If a leading dot must be explicitly matched, check to see if the
      pattern and dirname both have one. */
   else if (noglob_dot_filenames && dname[0] == L'.' &&
-	pat[0] != L'.' &&
-	   (pat[0] != L'\\' || pat[1] != L'.'))
+	pat[0] != L'.' && (pat[0] != L'\\' || pat[1] != L'.'))
     return 1;
 
   /* Special checks for `.'. The only things that can match `.' are ".",
      "\.", ".*", and "\.*". We don't try to match everything here, just
-     make sure that we don't let something obviously disqualifying by. */
-  else if (dname[0] == L'.' && dname[1] == L'\0')
+     make sure that we don't let something obviously disqualifying by.
+     We only do this if we're not negating the pattern. */
+  else if ((flags & GX_NEGATE) == 0 && dname[0] == L'.' && dname[1] == L'\0')
     {
       if (pat[0] != L'.' && (pat[0] != L'\\' || pat[1] != L'.'))
 	return 1;
@@ -354,7 +394,7 @@ wextglob_skipname (pat, dname, flags)
 {
 #if EXTENDED_GLOB
   wchar_t *pp, *pe, *t, *se, n;
-  int r, negate, wild, nullpat;
+  int r, negate, wild, nullpat, xflags;
 
   negate = *pat == L'!';
   wild = *pat == L'*' || *pat == L'?';
@@ -366,12 +406,14 @@ wextglob_skipname (pat, dname, flags)
   if (pe == 0)
     return 0;
 
+  xflags = flags | ( negate ? GX_NEGATE : 0);
+
   /* if pe != se we have more of the pattern at the end of the extglob
      pattern. Check the easy case first ( */
   if (pe == se && *pe == L'\0' && pe[-1] == L')' && (t = wcschr (pp, L'|')) == 0)
     {
       pe[-1] = L'\0';
-      r = wskipname (pp, dname, flags); /*(*/
+      r = wskipname (pp, dname, xflags); /*(*/
       pe[-1] = L')';
       return r;
     }
@@ -389,7 +431,7 @@ wextglob_skipname (pat, dname, flags)
 	t[-1] = n;	/* no-op for now */
       else
 	t[-1] = L'\0';
-      r = wskipname (pp, dname, flags);
+      r = wskipname (pp, dname, xflags);
       t[-1] = n;
       if (r == 0)
 	return 0;
