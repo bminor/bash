@@ -289,6 +289,7 @@ typedef int QSFUNC ();
 #define PATHSEP(c)	(ISDIRSEP(c) || (c) == 0)
 
 #define DOT_OR_DOTDOT(s)	(s[0] == '.' && (s[1] == 0 || (s[1] == '.' && s[2] == 0)))
+
 #if defined (HANDLE_MULTIBYTE)
 #define WDOT_OR_DOTDOT(w)	(w[0] == L'.' && (w[1] == L'\0' || (w[1] == L'.' && w[2] == L'\0')))
 #endif

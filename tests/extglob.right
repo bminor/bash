@@ -124,3 +124,61 @@ a .. .b
 a .. .b
 . .. .b
 . .. .b
+dotglob: .a .foo bar
+@(.foo)
+.foo
+!(.foo)
+.a bar
+@(.foo|*)
+.a .foo bar
+!(.foo|*)
+!(.foo|*)
+@(*)
+.a .foo bar
+!(*)
+!(*)
+.*
+. .. .a .foo
+@(.*)
+. .. .a .foo
+!(.*)
+bar
+no dotglob: .a .foo bar
+@(.foo)
+.foo
+!(.foo)
+bar
+@(.foo|*)
+.foo bar
+!(.foo|*)
+!(.foo|*)
+!(bar).foo
+!(bar).foo
+*(bar).foo
+.foo
+?(bar).foo
+.foo
+.?
+.. .a
+@(.?)
+.. .a
+!(.?)
+bar
+dotglob: .a .foo bar
+@(?|.?)
+.. .a
+@(?|.*)
+. .. .a .foo
+? .*
+? . .. .a .foo
+*
+.a .foo bar
+no dotglob: .a .foo bar
+@(?|.?)
+.. .a
+@(?|.*)
+. .. .a .foo
+? .*
+? . .. .a .foo
+*
+bar

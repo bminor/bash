@@ -2661,10 +2661,8 @@ without regard to the case of alphabetic characters.
 When a pattern is used for filename expansion, the character @samp{.}
 at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option @code{dotglob} is set.
-The filenames @samp{.} and @samp{..} must be matched
-by a pattern beginning with @samp{.} (for example, @samp{.?}),
-or a pattern beginning with @samp{.} must be one of the patterns in an
-extended pattern matching expression (see below),
+In order to match the filenames @samp{.} and @samp{..},
+the pattern must begin with @samp{.} (for example, @samp{.?}),
 even if @code{dotglob} is set.
 When not matching filenames, the @samp{.} character is not treated specially.
 
@@ -2772,6 +2770,8 @@ If the @code{extglob} shell option is enabled using the @code{shopt}
 builtin, the shell recognizes several extended pattern matching operators.
 In the following description, a @var{pattern-list} is a list of one
 or more patterns separated by a @samp{|}.
+When matching filenames, the @code{dotglob} shell option determines
+the set of filenames that are tested, as described above.
 Composite patterns may be formed using one or more of the following
 sub-patterns:
 
@@ -3616,7 +3616,6 @@ cd [-L|[-P [-e]] [-@@] [@var{directory}]
 Change the current working directory to @var{directory}.
 If @var{directory} is not supplied, the value of the @env{HOME}
 shell variable is used.
-Any additional arguments following @var{directory} are ignored.
 If the shell variable
 @env{CDPATH} exists, it is used as a search path:
 each directory name in @env{CDPATH} is searched for

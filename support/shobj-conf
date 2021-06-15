@@ -241,8 +241,8 @@ osf*)
 
 aix4.[2-9]*-*gcc*|aix[5-9].*-*gcc*)		# lightly tested by jik@cisco.com
 	SHOBJ_CFLAGS=-fpic
-	SHOBJ_LD='ld'
-	SHOBJ_LDFLAGS='-bdynamic -bnoentry -bexpall'
+	SHOBJ_LD='${CC}'
+	SHOBJ_LDFLAGS='-Wl,-bdynamic -Wl,-bnoentry -Wl,-bexpall'
 	SHOBJ_XLDFLAGS='-G'
 
 	SHLIB_XLDFLAGS='-bM:SRE'

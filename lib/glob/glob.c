@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2020 Free Software Foundation, Inc.
+   Copyright (C) 1985-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
    
@@ -304,35 +304,6 @@ skipname (pat, dname, flags)
  	   pat[0] != '.' && (pat[0] != '\\' || pat[1] != '.'))
     return 1;
 
-  /* Special checks for `.'. The only things that can match `.' are ".",
-     "\.", ".*", and "\.*". We don't try to match everything here, just
-     make sure that we don't let something obviously disqualifying by.
-     We only do this if we're not negating the pattern. */
-  else if ((flags & GX_NEGATE) == 0 && dname[0] == '.' && dname[1] == '\0')
-    {
-      if (pat[0] != '.' && (pat[0] != '\\' || pat[1] != '.'))
-	return 1;
-      i = (pat[0] == '.') ? 1 : 2;
-      if (pat[i] && pat[i] != '*')
-	return 1;
-    }
-
-#if 0
-  /* These are additional special checks for `..'. We let through "..",
-     "\..", ".\.", "\.\.", ".*", ".?", "\.*", and "\.?".
-     Disabled because it doesn't deal with things like `@(.).' at all. */
-  else if (dname[0] == '.' && dname[1] == '.' && dname[2] == '\0')
-    {
-      if (pat[0] != '.' && (pat[0] != '\\' || pat[1] != '.'))	/* [\]. */
-	return 1;
-      i = (pat[0] == '.') ? 1 : 2;
-      if (pat[i] && (pat[i] == '*' || pat[i] == '?') && pat[i+1] == '\0')
-	return 0;						/* [\].[*?] */
-      if (pat[i] != '.' && (pat[i] != '\\' || pat[i+1] != '.'))	/* [\].[\]. */
-	return 1;
-    }
-#endif
-
   return 0;
 }
 
@@ -370,19 +341,6 @@ wskipname (pat, dname, flags)
   else if (noglob_dot_filenames && dname[0] == L'.' &&
 	pat[0] != L'.' && (pat[0] != L'\\' || pat[1] != L'.'))
     return 1;
-
-  /* Special checks for `.'. The only things that can match `.' are ".",
-     "\.", ".*", and "\.*". We don't try to match everything here, just
-     make sure that we don't let something obviously disqualifying by.
-     We only do this if we're not negating the pattern. */
-  else if ((flags & GX_NEGATE) == 0 && dname[0] == L'.' && dname[1] == L'\0')
-    {
-      if (pat[0] != L'.' && (pat[0] != L'\\' || pat[1] != L'.'))
-	return 1;
-      i = (pat[0] == L'.') ? 1 : 2;
-      if (pat[i] != L'\0' && pat[i] != L'*')
-	return 1;
-    }
 
   return 0;
 }
@@ -848,7 +806,7 @@ glob_vector (pat, dir, flags)
 
       /* Compute the flags that will be passed to strmatch().  We don't
 	 need to do this every time through the loop. */
-      mflags = (noglob_dot_filenames ? FNM_PERIOD : 0) | FNM_PATHNAME;
+      mflags = (noglob_dot_filenames ? FNM_PERIOD : FNM_DOTDOT) | FNM_PATHNAME;
 
 #ifdef FNM_CASEFOLD
       if (glob_ignore_case)

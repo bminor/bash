@@ -1598,7 +1598,7 @@ puts_face (const char *str, const char *face, int n)
   char cur_face;
 
   for (cur_face = FACE_NORMAL, i = 0; i < n; i++)
-    putc_face (str[i], face[i], &cur_face);
+    putc_face ((unsigned char) str[i], face[i], &cur_face);
   putc_face (EOF, FACE_NORMAL, &cur_face);
 }
 

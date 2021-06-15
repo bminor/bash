@@ -178,6 +178,7 @@ typedef struct _sh_parser_state_t
   /* input line state -- line number saved elsewhere */
   int input_line_terminator;
   int eof_encountered;
+  int eol_lookahead;
 
 #if defined (HANDLE_MULTIBYTE)
   /* Nothing right now for multibyte state, but might want something later. */

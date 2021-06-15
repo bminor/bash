@@ -10484,3 +10484,55 @@ doc/{bash.1,bashref.texi}
 lib/glob/glob.c
 	- skipname,wskipname: perform the special checks for `.' only if the
 	  pattern is not being negated
+
+				    6/3
+				    ---
+parse.y,shell.h
+	- eol_ungetc_lookahead: save and restore as part of the parser state
+	  included in {save,restore}_parser_state
+
+				    6/7
+				    ---
+lib/readline/display.c
+	- puts_face: make sure to cast each member of STR to unsigned char, so
+	  it's not misinterpreted as EOF, which putc_face does not display.
+	  Report and fix from Volodymyr Prodan <vovcat@gmail.com> in
+	  https://savannah.gnu.org/patch/?10076
+
+examples/shobj-conf
+	- aix*gcc: change SHOBJ_LD to ${CC}, prefix the SHOBJ_LDFLAGS flags
+	  with -Wl, so gcc will pass them to the linker. Report from
+	  lehel@maxer.hu in https://savannah.gnu.org/support/?110505
+
+				   6/11
+				   ----
+doc/{bash.1,bashref.texi}
+	- cd: additional arguments are not ignored; they raise an error.
+	  Report from Douglas McIlroy <douglas.mcilroy@dartmouth.edu>
+
+lib/glob/strmatch.h
+	- FNM_DOTDOT: enable special handling for `.' and `..': if FNM_PERIOD
+	  is not set, `.' and `..' at the start of a string or as a pathname
+	  component need to be matched by a `.' in the pattern and cannot be
+	  matched by `?', `*', or a bracket expression
+	
+lib/glob/glob.c
+	- glob_vector: pass FNM_DOTDOT to strmatch() if noglob_dot_filenames
+	  is not set to enable special handling of `.' and `..'. Prompted by a
+	  discussion with Nora Platiel <nplatiel@gmx.us>
+	- skipname,wskipname: remove special checks for `.' and (disabled)
+	  checks for `..'
+
+lib/glob/sm_loop.c
+	- GMATCH: implement special handling for FNM_DOTDOT and `.' and `..':
+	  make sure they can't be matched by any special glob characters at
+	  the start of the string or as a pathname component (if FNM_PATHNAME
+	  is set). This also means that !(pattern) won't return `.' or `..'
+	  if dotglob is set
+	- GMATCH,EXTMATCH: don't pass FNM_DOTDOT down to recursive calls, like
+	  FNM_PERIOD, once we process the first character in the string or
+	  pathname component
+
+lib/glob/smatch.c
+	- ISDIRSEP,PATHSEP,SDOT_OR_DOTDOT,PDOT_OR_DOTDOT: provide definitions
+	  for single-byte or wide character strings for sm_loop.c to use

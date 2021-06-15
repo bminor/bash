@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon May 10 10:12:31 EDT 2021
+.\"	Last Change: Tue Jun 15 09:39:48 EDT 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 May 10" "GNU Bash 5.1"
+.TH BASH 1 "2021 June 15" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3687,14 +3687,11 @@ at the start of a name or immediately following a slash
 must be matched explicitly, unless the shell option
 .B dotglob
 is set.
-The filenames
+In order to match the filenames
 .B ``.''
 and
-.B ``..''
-must always be matched
-by a pattern beginning with ``.'' (for example, ``.?''),
-or a pattern beginning with ``.'' must be one of the patterns in an
-extended pattern matching expression (see below),
+.BR ``..'' ,
+the pattern must begin with ``.'' (for example, ``.?''),
 even if
 .B dotglob
 is set.
@@ -3879,6 +3876,8 @@ If the \fBextglob\fP shell option is enabled using the \fBshopt\fP
 builtin, the shell recognizes several extended pattern matching operators.
 In the following description, a \fIpattern-list\fP is a list of one
 or more patterns separated by a \fB|\fP.
+When matching filenames, the \fBdotglob\fP shell option determines
+the set of filenames that are tested, as described above.
 Composite patterns may be formed using one or more of the following
 sub-patterns:
 .sp 1
@@ -3898,7 +3897,7 @@ Matches one or more occurrences of the given patterns
 Matches one of the given patterns
 .TP
 \fB!(\fP\^\fIpattern-list\^\fP\fB)\fP
-Matches anything except one of the given patterns
+Matches anything except one of the given patterns.
 .RE
 .PD
 .PP
@@ -7723,7 +7722,6 @@ if \fIdir\fP is not supplied, the value of the
 .SM
 .B HOME
 shell variable is the default.
-Any additional arguments following \fIdir\fP are ignored.
 The variable
 .SM
 .B CDPATH
