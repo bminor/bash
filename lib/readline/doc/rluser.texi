@@ -339,7 +339,8 @@ Although the Readline library comes with a set of Emacs-like
 keybindings installed by default, it is possible to use a different set
 of keybindings.
 Any user can customize programs that use Readline by putting
-commands in an @dfn{inputrc} file, conventionally in his home directory.
+commands in an @dfn{inputrc} file,
+conventionally in their home directory.
 The name of this
 @ifset BashFeatures
 file is taken from the value of the shell variable @env{INPUTRC}.  If
@@ -496,8 +497,9 @@ asked whether the list of possibilities should be displayed.
 If the number of possible completions is greater than or equal to this value,
 Readline will ask whether or not the user wishes to view them;
 otherwise, they are simply listed.
-This variable must be set to an integer value greater than or equal to 0.
-A negative value means Readline should never ask.
+This variable must be set to an integer value greater than or equal to zero.
+A zero value means Readline should never ask; negative values are
+treated as zero.
 The default limit is @code{100}.
 
 @item convert-meta

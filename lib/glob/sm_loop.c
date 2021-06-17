@@ -83,7 +83,6 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 
 #ifdef EXTENDED_GLOB
       /* EXTMATCH () will handle recursively calling GMATCH, so we can
-
 	 just return what EXTMATCH() returns. */
       if ((flags & FNM_EXTMATCH) && *p == L('(') &&
 	  (c == L('+') || c == L('*') || c == L('?') || c == L('@') || c == L('!'))) /* ) */

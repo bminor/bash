@@ -144,7 +144,6 @@ static int yy_readline_unget PARAMS((int));
 
 static int yy_string_get PARAMS((void));
 static int yy_string_unget PARAMS((int));
-static void rewind_input_string PARAMS((void));
 static int yy_stream_get PARAMS((void));
 static int yy_stream_unget PARAMS((int));
 
@@ -1611,7 +1610,7 @@ with_input_from_string (string, name)
    That is the true input location.  Rewind bash_input.location.string by
    that number of characters, so it points to the last character actually
    consumed by the parser. */
-static void
+void
 rewind_input_string ()
 {
   int xchars;

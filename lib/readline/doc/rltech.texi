@@ -1651,7 +1651,7 @@ main (int c, char **v)
 
 Signals are asynchronous events sent to a process by the Unix kernel,
 sometimes on behalf of another process.  They are intended to indicate
-exceptional events, like a user pressing the interrupt key on his terminal,
+exceptional events, like a user pressing the terminal's interrupt key,
 or a network connection being broken.  There is a class of signals that can
 be sent to the process currently reading input from the keyboard.  Since
 Readline changes the terminal attributes when it is called, it needs to
@@ -2199,9 +2199,10 @@ shell variables and hostnames.
 
 @deftypevar int rl_completion_query_items
 Up to this many items will be displayed in response to a
-possible-completions call.  After that, readline asks the user if she is sure
-she wants to see them all.  The default value is 100.  A negative value 
-indicates that Readline should never ask the user.
+possible-completions call.  After that, readline asks the user for
+confirmation before displaying them.
+The default value is 100.  A negative value 
+indicates that Readline should never ask for confirmation.
 @end deftypevar
 
 @deftypevar {int} rl_completion_append_character

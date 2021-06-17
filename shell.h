@@ -227,6 +227,9 @@ typedef struct _sh_input_line_state_t
 } sh_input_line_state_t;
 
 /* Let's try declaring these here. */
+extern void shell_ungets PARAMS((char *));
+extern void rewind_input_string PARAMS((void));
+
 extern char *parser_remaining_input PARAMS((void));
 
 extern sh_parser_state_t *save_parser_state PARAMS((sh_parser_state_t *));

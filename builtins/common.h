@@ -233,6 +233,8 @@ extern SHELL_VAR *builtin_bind_variable PARAMS((char *, char *, int));
 extern SHELL_VAR *builtin_bind_var_to_int PARAMS((char *, intmax_t));
 extern int builtin_unbind_variable PARAMS((const char *));
 
+extern int builtin_arrayref_flags PARAMS((WORD_DESC *, int));
+
 /* variables from evalfile.c */
 extern int sourcelevel;
 

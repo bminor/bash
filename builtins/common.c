@@ -1041,6 +1041,32 @@ builtin_unbind_variable (vname)
   return (unbind_variable (vname));
 }
 
+int
+builtin_arrayref_flags (w, baseflags)
+     WORD_DESC *w;
+     int baseflags;
+{
+  char *t;
+  int vflags;
+
+  vflags = baseflags;
+
+  /* Don't require assoc_expand_once if we have an argument that's already
+     passed through valid_array_reference and been expanded once. That
+     doesn't protect it from normal expansions like word splitting, so
+     proper quoting is still required. */
+  if (w->flags & W_ARRAYREF)
+    vflags |= VA_ONEWORD|VA_NOEXPAND;
+
+#  if 0
+  /* This is a little sketchier but handles quoted arguments. */
+  if (assoc_expand_once && (t =  strchr (w->word, '[')) && t[strlen(t) - 1] == ']')
+    vflags |= VA_ONEWORD|VA_NOEXPAND;
+#  endif
+
+  return vflags;
+}
+
 /* **************************************************************** */
 /*								    */
 /*	    External interface to manipulate shell options	    */

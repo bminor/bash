@@ -10536,3 +10536,26 @@ lib/glob/sm_loop.c
 lib/glob/smatch.c
 	- ISDIRSEP,PATHSEP,SDOT_OR_DOTDOT,PDOT_OR_DOTDOT: provide definitions
 	  for single-byte or wide character strings for sm_loop.c to use
+
+				   6/16
+				   ----
+
+doc/{bash.1,bashref.texi},lib/readline/doc/{rluser,rltech}.texi
+	- slight wording changes to rewrite gender-specific language. From a
+	  report by Vipul Kumar <kumar+bug-bash@onenetbeyond.org>, suggested
+	  language from G. Branden Robinson <g.branden.robinson@gmail.com>,
+	  Lawrence Velázquez <vq@larryv.me>,
+	  and Andrew Church <achurch+bash@achurch.org>
+
+builtins/fc.def
+	- fc_builtin: make sure an entry in the history list is non-null
+	  before trying to write it to stdout or the temporary file. From a
+	  report from Sibo Dong <sibo.dong@outlook.com>
+
+builtins/common.[ch]
+	- builtin_arrayref_flags: given a WORD_DESC * (which includes flags)
+	  and a base set of flags, return a set of flags to pass to
+	  valid_array_reference and similar functions
+
+builtins/set.def
+	- unset_builtin: call builtin_arrayref_flags to set vflags

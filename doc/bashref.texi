@@ -7843,8 +7843,8 @@ the shell spawned to execute the script.
 The restricted shell mode is only one component of a useful restricted
 environment. It should be accompanied by setting @env{PATH} to a value
 that allows execution of only a few verified commands (commands that
-allow shell escapes are particularly vulnerable), leaving the user
-in a non-writable directory other than his home directory after login,
+allow shell escapes are particularly vulnerable), changing the current
+directory to a non-writable directory other than @env{$HOME} after login,
 not allowing the restricted shell to execute shell scripts, and cleaning
 the environment of variables that cause some commands to modify their
 behavior (e.g., @env{VISUAL} or @env{PAGER}).

@@ -888,13 +888,7 @@ unset_builtin (list)
       unset_variable = global_unset_var;
 
 #if defined (ARRAY_VARS)
-      vflags = base_vflags;
-      /* Don't require assoc_expand_once if we have an argument that's already
-	 passed through valid_array_reference and been expanded once. That
-	 doesn't protect it from normal expansions like word splitting, so
-	 proper quoting is still required. */
-      if (list->word->flags & W_ARRAYREF)
-	vflags |= VA_ONEWORD|VA_NOEXPAND;
+      vflags = builtin_arrayref_flags (list->word, base_vflags);
 #endif
 
 #if defined (ARRAY_VARS)
