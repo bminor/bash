@@ -2792,6 +2792,17 @@ Matches one of the given patterns.
 Matches anything except one of the given patterns.
 @end table
 
+When matching filenames, the @code{dotglob} shell option determines
+the set of filenames that are tested:
+when @code{dotglob} is enabled, the set of filenames includes all files
+beginning with @samp{.}, but the filenames
+@samp{.} and @samp{..} must be matched by a
+pattern or sub-pattern that begins with a dot;
+when it is disabled, the set does not
+include any filenames beginning with ``.'' unless the pattern
+or sub-pattern begins with a @samp{.}.
+As above, @samp{.} only has a special meaning when matching filenames. 
+
 Complicated extended pattern matching against long strings is slow,
 especially when the patterns contain alternations and the strings
 contain multiple matches.

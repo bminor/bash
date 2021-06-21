@@ -10559,3 +10559,47 @@ builtins/common.[ch]
 
 builtins/set.def
 	- unset_builtin: call builtin_arrayref_flags to set vflags
+
+				   6/19
+				   ----
+
+parse.y
+	- parse_comsub: rewrite to recursively call the parser (yyparse()) and
+	  return a string constructed from the resulting parse tree. Probably
+	  will only work with bison. Error reporting is more accurate about
+	  line numbers and invalid tokens, and command substitution errors 
+	  are caught earlier, before expansion
+	- DOLPAREN: new token, never created by yylex; only ever set by
+	  parse_comsub and xparse_dolparen to indicate we're recursively
+	  calling the parser for a command substitution
+	- comsub: new grammar production that's triggered by DOLPAREN and
+	  parses a command substitution, returning a <command>. It's one of
+	  the possible end states for the top-level parser
+	- grammar: only call rewind_input_string if the shell's input is
+	  coming from a string
+	- shell_ungets: push a string back onto the shell input; only used by
+	  make_here_document for backwards compatibility -- allowing a here-
+	  document to be terminated by a token at the end of a command
+	  substitution
+	- yylex: don't need any more special handling when returning
+	  shell_eof_token, but we keep the clause for future work
+	- read_token_word: don't handle backslashes (leave them in the input
+	  stream) if we are reading a command substitution (PST_NOEXPAND)
+	- reserved_word_acceptable: allow reserved words after DOLPAREN
+	- report_syntax_error: better error handling if we hit EOF while
+	  looking for the ending right paren in a command substitution
+	- parse_string_to_word_list,parse_compound_assignment: make sure to
+	  turn off parse_comsub sentinel temporarily
+
+make_cmd.c
+	- make_here_document: backwards compatibility: if we end a here
+	  document on the same line as the end of a command substitution,
+	  allow the token to terminate the here document (without requiring
+	  a newline) and push the remainder of the line back for the parser
+	  to consume and terminate the command substitution
+
+builtins/evalstring.c
+	- parse_string: if we read shell_eof_token and use it to terminate a
+	  command, rewind the input string here before returning, instead of
+	  guessing where to rewind it in the caller
+

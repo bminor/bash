@@ -640,6 +640,15 @@ make_here_document (temp, lineno)
       if (STREQN (line, redir_word, redir_len) && line[redir_len] == '\n')
 	break;
 
+      /* Backwards compatibility here */
+      if (STREQN (line, redir_word, redir_len) && (parser_state & PST_EOFTOKEN) && shell_eof_token && strchr (line+redir_len, shell_eof_token))
+	{
+	  shell_ungets (line + redir_len);
+	  free (full_line);
+	  full_line = 0;
+	  break;
+	}
+
       len = strlen (line);
       if (len + document_index >= document_size)
 	{

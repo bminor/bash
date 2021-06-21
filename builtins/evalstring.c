@@ -635,7 +635,11 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	}
 
       if (current_token == yacc_EOF || current_token == shell_eof_token)
+	{
+	  if (current_token == shell_eof_token)
+	    rewind_input_string ();
 	  break;
+	}
     }
 
 out:

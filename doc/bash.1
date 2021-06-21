@@ -3876,8 +3876,6 @@ If the \fBextglob\fP shell option is enabled using the \fBshopt\fP
 builtin, the shell recognizes several extended pattern matching operators.
 In the following description, a \fIpattern-list\fP is a list of one
 or more patterns separated by a \fB|\fP.
-When matching filenames, the \fBdotglob\fP shell option determines
-the set of filenames that are tested, as described above.
 Composite patterns may be formed using one or more of the following
 sub-patterns:
 .sp 1
@@ -3900,6 +3898,16 @@ Matches one of the given patterns
 Matches anything except one of the given patterns
 .RE
 .PD
+.PP
+When matching filenames, the \fBdotglob\fP shell option determines
+the set of filenames that are tested:
+when \fBdotglob\fP is enabled, the set of filenames includes all files
+beginning with ``.'', but ``.'' and ``..'' must be matched by a
+pattern or sub-pattern that begins with a dot;
+when it is disabled, the set does not
+include any filenames beginning with ``.'' unless the pattern
+or sub-pattern begins with a ``.''.
+As above, ``.'' only has a special meaning when matching filenames.
 .PP
 Complicated extended pattern matching against long strings is slow,
 especially when the patterns contain alternations and the strings
