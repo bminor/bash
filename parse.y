@@ -2900,6 +2900,9 @@ yylex ()
       return (current_token);
     }
 
+  if (current_token < 0)
+    current_token = YYerror;
+
   return (current_token);
 }
 
@@ -4085,10 +4088,11 @@ itrace("parse_comsub: need_here_doc = %d after yyparse()?", need_here_doc);
     }
 
   if (current_token != shell_eof_token)
-{
+    {
 itrace("current_token (%d) != shell_eof_token (%c)", current_token, shell_eof_token);
-    token_to_read = current_token;
-}
+      token_to_read = current_token;
+      return (&matched_pair_error);
+    }
 
   restore_parser_state (&ps);
 
@@ -4161,6 +4165,8 @@ xparse_dolparen (base, string, indp, flags)
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
   shell_eof_token = ')';
+  if (flags & SX_COMPLETE)
+    parser_state |= PST_NOERROR;
 
   token_to_read = DOLPAREN;			/* let's trick the parser */
 
@@ -4219,7 +4225,8 @@ xparse_dolparen (base, string, indp, flags)
   if (base[*indp] != ')' && (flags & SX_NOLONGJMP) == 0)
     {
       /*(*/
-      parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), ')');
+      if ((flags & SX_NOERROR) == 0)
+	parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), ')');
       jump_to_top_level (DISCARD);
     }
 
@@ -5878,7 +5885,8 @@ int
 yyerror (msg)
      const char *msg;
 {
-  report_syntax_error ((char *)NULL);
+  if ((parser_state & PST_NOERROR) == 0)
+    report_syntax_error ((char *)NULL);
   reset_parser ();
   return (0);
 }

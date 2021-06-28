@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -71,6 +71,7 @@
 #define SX_WORD		0x0200	/* extracting word in ${param op word} */
 #define SX_COMPLETE	0x0400	/* extracting word for completion */
 #define SX_STRIPDQ	0x0800	/* strip double quotes when extracting double-quoted string */
+#define SX_NOERROR	0x1000	/* don't print parser error messages */
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */
@@ -314,6 +315,7 @@ extern char *cond_expand_word PARAMS((WORD_DESC *, int));
 #define SD_COMPLETE	0x100	/* skip_to_delim during completion */
 #define SD_HISTEXP	0x200	/* skip_to_delim during history expansion */
 #define SD_ARITHEXP	0x400	/* skip_to_delim during arithmetic expansion */
+#define SD_NOERROR	0x800	/* don't print error messages */
 
 extern int skip_to_delim PARAMS((char *, int, char *, int));
 

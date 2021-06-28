@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -88,6 +88,7 @@ extern int errno;
 #define SHELL_FD_BASE	10
 
 int expanding_redir;
+int varassign_redir_autoclose = 0;
 
 extern REDIRECT *redirection_undo_list;
 extern REDIRECT *exec_redirection_undo_list;
@@ -949,10 +950,15 @@ do_redirection_internal (redirect, flags, fnp)
 	      REDIRECTION_ERROR (redirector, r, fd);
 	    }
 
-	  if ((flags & RX_UNDOABLE) && (redirect->rflags & REDIR_VARASSIGN) == 0)
+	  if ((flags & RX_UNDOABLE) && ((redirect->rflags & REDIR_VARASSIGN) == 0 || varassign_redir_autoclose))
 	    {
-	      /* Only setup to undo it if the thing to undo is active. */
-	      if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
+	      /* Only setup to undo it if the thing to undo is active. We want
+		 to autoclose if we are doing a varassign redirection and the
+		 varredir_close shell option is set, and we can't test
+		 redirector in this case since we just assigned it above. */		 
+	      if (fd != redirector && (redirect->rflags & REDIR_VARASSIGN) && varassign_redir_autoclose)
+		r = add_undo_close_redirect (redirector);	      
+	      else if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
 		r = add_undo_redirect (redirector, ri, -1);
 	      else
 		r = add_undo_close_redirect (redirector);
@@ -1066,10 +1072,14 @@ do_redirection_internal (redirect, flags, fnp)
 
 	  if (flags & RX_ACTIVE)
 	    {
-	      if ((flags & RX_UNDOABLE) && (redirect->rflags & REDIR_VARASSIGN) == 0)
+	      if ((flags & RX_UNDOABLE) && ((redirect->rflags & REDIR_VARASSIGN) == 0 || varassign_redir_autoclose))
 	        {
-		  /* Only setup to undo it if the thing to undo is active. */
-		  if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
+		  /* Only setup to undo it if the thing to undo is active.
+		     Close if the right option is set and we are doing a
+		     varassign redirection. */
+		  if (fd != redirector && (redirect->rflags & REDIR_VARASSIGN) && varassign_redir_autoclose)
+		    r = add_undo_close_redirect (redirector);	      
+		  else if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
 		    r = add_undo_redirect (redirector, ri, -1);
 		  else
 		    r = add_undo_close_redirect (redirector);
@@ -1127,10 +1137,14 @@ do_redirection_internal (redirect, flags, fnp)
 
       if ((flags & RX_ACTIVE) && (redir_fd != redirector))
 	{
-	  if ((flags & RX_UNDOABLE) && (redirect->rflags & REDIR_VARASSIGN) == 0)
+	  if ((flags & RX_UNDOABLE) && ((redirect->rflags & REDIR_VARASSIGN) == 0 || varassign_redir_autoclose))
 	    {
-	      /* Only setup to undo it if the thing to undo is active. */
-	      if (fcntl (redirector, F_GETFD, 0) != -1)
+	      /* Only setup to undo it if the thing to undo is active.
+		 Close if the right option is set and we are doing a
+		 varassign redirection. */
+	      if ((redirect->rflags & REDIR_VARASSIGN) && varassign_redir_autoclose)
+		r = add_undo_close_redirect (redirector);	      
+	      else if (fcntl (redirector, F_GETFD, 0) != -1)
 		r = add_undo_redirect (redirector, ri, redir_fd);
 	      else
 		r = add_undo_close_redirect (redirector);
@@ -1219,7 +1233,6 @@ do_redirection_internal (redirect, flags, fnp)
 	    }
 
 	  r = 0;
-	  /* XXX - only if REDIR_VARASSIGN not set? */
 	  if (flags & RX_UNDOABLE)
 	    {
 	      if (fcntl (redirector, F_GETFD, 0) != -1)

@@ -10603,3 +10603,44 @@ builtins/evalstring.c
 	  command, rewind the input string here before returning, instead of
 	  guessing where to rewind it in the caller
 
+				   6/22
+				   ----
+
+redir.c
+	- do_redirection_internal: if VARASSIGN_REDIR_AUTOCLOSE is non-zero,
+	  add a redirect to automatically close {var}<fn and other styles of
+	  varassign redirection. It's zero by default
+
+builtins/shopt.def
+	- varredir_close: new shell option, mirrors the value of
+	  varassign_redir_autoclose. Suggested multiple times by multiple
+	  people
+
+doc/{bash.1,bashref.texi}
+	- varredir_close: document new shell option (the name is tentative)
+
+				   6/24
+				   ----
+
+parse.y
+	- yylex: if read_token returns a value < 0, return YYerror to the
+	  parser
+	- parse_comsub: if the current_token is not shell_eof_token when
+	  yyparse returns, return an error to read_token_word instead of
+	  trying to keep parsing. Fixes interactive-only (?) bug reported by
+	  Koichi Murase <myoga.murase@gmail.com>
+
+parser.h
+	- PST_NOERROR: don't print error messages in yyerror(), just reset
+	  the parser and return
+
+parse.y
+	- yyerror: if parser_state & PST_NOERROR, don't print an error message
+	- xparse_dolparen: if the flags includes SX_COMPLETE, add PST_NOERROR
+	  to parser_state, to inhibit error messages. Fixes bug with adding
+	  lines with incomplete command substitutions to the history list
+	  reported by Koichi Murase <myoga.murase@gmail.com>
+
+subst.c
+	- skip_matched_pair: make sure to pass the SX_COMPLETE flag to
+	  extract_delimited_string

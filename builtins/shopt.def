@@ -93,6 +93,7 @@ extern int lastpipe_opt;
 extern int inherit_errexit;
 extern int localvar_inherit;
 extern int localvar_unset;
+extern int varassign_redir_autoclose;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -249,6 +250,7 @@ static struct {
 #if defined (SYSLOG_HISTORY) && defined (SYSLOG_SHOPT)
   { "syslog_history", &syslog_history, (shopt_set_func_t *)NULL },
 #endif
+  { "varredir_close", &varassign_redir_autoclose, (shopt_set_func_t *)NULL },
   { "xpg_echo", &xpg_echo, (shopt_set_func_t *)NULL },
   { (char *)0, (int *)0, (shopt_set_func_t *)NULL }
 };
@@ -357,6 +359,7 @@ reset_shopt_options ()
   glob_ignore_case = match_ignore_case = 0;
   print_shift_error = 0;
   source_uses_path = promptvars = 1;
+  varassign_redir_autoclose = 0;
 
 #if defined (JOB_CONTROL)
   check_jobs_at_exit = 0;

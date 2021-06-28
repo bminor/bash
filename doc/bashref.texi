@@ -798,7 +798,7 @@ the time information.
 If the pipeline is not executed asynchronously (@pxref{Lists}), the
 shell waits for all commands in the pipeline to complete.
 
-Each command in a pipeline is executed in its own subshell, which is a
+Each command in a pipeline is executed in its own @dfn{subshell}, which is a
 separate process (@pxref{Command Execution Environment}).
 If the @code{lastpipe} option is enabled using the @code{shopt} builtin
 (@pxref{The Shopt Builtin}),
@@ -1368,11 +1368,11 @@ commands in the list may be redirected to a single stream.
 ( @var{list} )
 @end example
 
-Placing a list of commands between parentheses causes a subshell
-environment to be created (@pxref{Command Execution Environment}), and each
-of the commands in @var{list} to be executed in that subshell.  Since the
-@var{list} is executed in a subshell, variable assignments do not remain in
-effect after the subshell completes. 
+Placing a list of commands between parentheses forces the shell to create
+a subshell (@pxref{Command Execution Environment}), and each
+of the commands in @var{list} is executed in that subshell environment.
+Since the @var{list} is executed in a subshell, variable assignments do not
+remain in effect after the subshell completes. 
 
 @item @{@}
 @rwindex @{
@@ -1665,7 +1665,8 @@ The @option{-F} option to @code{declare} or @code{typeset}
 will list the function names only
 (and optionally the source file and line number, if the @code{extdebug}
 shell option is enabled).
-Functions may be exported so that subshells
+Functions may be exported so that child shell processes
+(those created when executing a separate shell invocation)
 automatically have them defined with the
 @option{-f} option to the @code{export} builtin
 (@pxref{Bourne Shell Builtins}).
@@ -1712,9 +1713,7 @@ If the variable has its @code{integer}
 attribute set, then @var{value} 
 is evaluated as an arithmetic expression even if the @code{$((@dots{}))}
 expansion is not used (@pxref{Arithmetic Expansion}).
-Word splitting is not performed, with the exception
-of @code{"$@@"} as explained below.
-Filename expansion is not performed.
+Word splitting and filename expansion are not performed.
 Assignment statements may also appear as arguments to the
 @code{alias}, 
 @code{declare}, @code{typeset}, @code{export}, @code{readonly},
@@ -1863,7 +1862,7 @@ builtin command, or those set by the shell itself
 
 @item $
 @vindex $$
-($$) Expands to the process @sc{id} of the shell.  In a @code{()} subshell, it
+($$) Expands to the process @sc{id} of the shell.  In a subshell, it
 expands to the process @sc{id} of the invoking shell, not the subshell.
 
 @item !
@@ -2844,6 +2843,8 @@ descriptor to close.
 If @{@var{varname}@} is supplied, the redirection persists beyond
 the scope of the command, allowing the shell programmer to manage
 the file descriptor's lifetime manually.
+The @code{varredir_close} shell option manages this behavior
+(@pxref{The Shopt Builtin}).
 
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is
@@ -3306,6 +3307,8 @@ shell's parent, and traps ignored by the shell are ignored
 A command invoked in this separate environment cannot affect the
 shell's execution environment.
 
+A @dfn{subshell} is a copy of the shell process.
+
 Command substitution, commands grouped with parentheses,
 and asynchronous commands are invoked in a
 subshell environment that is a duplicate of the shell environment,
@@ -3471,7 +3474,7 @@ are unset.
 
 A shell script may be made executable by using the @code{chmod} command
 to turn on the execute bit.  When Bash finds such a file while
-searching the @env{$PATH} for a command, it spawns a subshell to
+searching the @env{$PATH} for a command, it creates a subshell to
 execute it.  In other words, executing
 @example
 filename @var{arguments}
@@ -5673,6 +5676,11 @@ number of positional parameters.
 If set, the @code{.} (@code{source}) builtin uses the value of @env{PATH}
 to find the directory containing the file supplied as an argument.
 This option is enabled by default.
+
+@item varredir_close
+If set, the shell automatically closes file descriptors assigned using the
+@code{@{varname@}} redirection syntax (@pxref{Redirections}) instead of
+leaving them open when the command completes.
 
 @item xpg_echo
 If set, the @code{echo} builtin expands backslash-escape sequences

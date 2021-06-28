@@ -703,8 +703,8 @@ information.
    If the pipeline is not executed asynchronously (*note Lists::), the
 shell waits for all commands in the pipeline to complete.
 
-   Each command in a pipeline is executed in its own subshell, which is
-a separate process (*note Command Execution Environment::).  If the
+   Each command in a pipeline is executed in its own "subshell", which
+is a separate process (*note Command Execution Environment::).  If the
 'lastpipe' option is enabled using the 'shopt' builtin (*note The Shopt
 Builtin::), the last element of a pipeline may be run by the shell
 process when job control is not active.
@@ -1176,9 +1176,9 @@ list may be redirected to a single stream.
 '()'
           ( LIST )
 
-     Placing a list of commands between parentheses causes a subshell
-     environment to be created (*note Command Execution Environment::),
-     and each of the commands in LIST to be executed in that subshell.
+     Placing a list of commands between parentheses forces the shell to
+     create a subshell (*note Command Execution Environment::), and each
+     of the commands in LIST is executed in that subshell environment.
      Since the LIST is executed in a subshell, variable assignments do
      not remain in effect after the subshell completes.
 
@@ -1423,7 +1423,8 @@ been shadowed will become visible.
 the 'declare' ('typeset') builtin command (*note Bash Builtins::).  The
 '-F' option to 'declare' or 'typeset' will list the function names only
 (and optionally the source file and line number, if the 'extdebug' shell
-option is enabled).  Functions may be exported so that subshells
+option is enabled).  Functions may be exported so that child shell
+processes (those created when executing a separate shell invocation)
 automatically have them defined with the '-f' option to the 'export'
 builtin (*note Bourne Shell Builtins::).
 
@@ -1584,9 +1585,8 @@ only be referenced; assignment to them is not allowed.
      shell itself (such as the '-i' option).
 
 '$'
-     ($$) Expands to the process ID of the shell.  In a '()' subshell,
-     it expands to the process ID of the invoking shell, not the
-     subshell.
+     ($$) Expands to the process ID of the shell.  In a subshell, it
+     expands to the process ID of the invoking shell, not the subshell.
 
 '!'
      ($!)  Expands to the process ID of the job most recently placed
@@ -2382,6 +2382,14 @@ the following sub-patterns:
 '!(PATTERN-LIST)'
      Matches anything except one of the given patterns.
 
+   When matching filenames, the 'dotglob' shell option determines the
+set of filenames that are tested: when 'dotglob' is enabled, the set of
+filenames includes all files beginning with '.', but the filenames '.'
+and '..' must be matched by a pattern or sub-pattern that begins with a
+dot; when it is disabled, the set does not include any filenames
+beginning with "."  unless the pattern or sub-pattern begins with a '.'.
+As above, '.' only has a special meaning when matching filenames.
+
    Complicated extended pattern matching against long strings is slow,
 especially when the patterns contain alternations and the strings
 contain multiple matches.  Using separate matches against shorter
@@ -2421,7 +2429,8 @@ file descriptor greater than 10 and assign it to {VARNAME}.  If >&- or
 <&- is preceded by {VARNAME}, the value of VARNAME defines the file
 descriptor to close.  If {VARNAME} is supplied, the redirection persists
 beyond the scope of the command, allowing the shell programmer to manage
-the file descriptor's lifetime manually.
+the file descriptor's lifetime manually.  The 'varredir_close' shell
+option manages this behavior (*note The Shopt Builtin::).
 
    In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is '<', the
@@ -2805,6 +2814,8 @@ inherited from the shell.
    A command invoked in this separate environment cannot affect the
 shell's execution environment.
 
+   A "subshell" is a copy of the shell process.
+
    Command substitution, commands grouped with parentheses, and
 asynchronous commands are invoked in a subshell environment that is a
 duplicate of the shell environment, except that traps caught by the
@@ -2960,8 +2971,8 @@ parameters are unset.
 
    A shell script may be made executable by using the 'chmod' command to
 turn on the execute bit.  When Bash finds such a file while searching
-the '$PATH' for a command, it spawns a subshell to execute it.  In other
-words, executing
+the '$PATH' for a command, it creates a subshell to execute it.  In
+other words, executing
      filename ARGUMENTS
 is equivalent to executing
      bash filename ARGUMENTS
@@ -4870,6 +4881,12 @@ This builtin allows you to change additional shell optional behavior.
           If set, the '.' ('source') builtin uses the value of 'PATH' to
           find the directory containing the file supplied as an
           argument.  This option is enabled by default.
+
+     'varredir_close'
+          If set, the shell automatically closes file descriptors
+          assigned using the '{varname}' redirection syntax (*note
+          Redirections::) instead of leaving them open when the command
+          completes.
 
      'xpg_echo'
           If set, the 'echo' builtin expands backslash-escape sequences
@@ -11590,21 +11607,21 @@ D.3 Parameter and Variable Index
  [index ]
 * Menu:
 
-* !:                                     Special Parameters.  (line  56)
+* !:                                     Special Parameters.  (line  55)
 * #:                                     Special Parameters.  (line  39)
 * $:                                     Special Parameters.  (line  51)
-* $!:                                    Special Parameters.  (line  57)
+* $!:                                    Special Parameters.  (line  56)
 * $#:                                    Special Parameters.  (line  40)
 * $$:                                    Special Parameters.  (line  52)
 * $*:                                    Special Parameters.  (line  10)
 * $-:                                    Special Parameters.  (line  47)
-* $0:                                    Special Parameters.  (line  62)
+* $0:                                    Special Parameters.  (line  61)
 * $?:                                    Special Parameters.  (line  43)
 * $@:                                    Special Parameters.  (line  23)
 * $_:                                    Bash Variables.      (line  14)
 * *:                                     Special Parameters.  (line   9)
 * -:                                     Special Parameters.  (line  46)
-* 0:                                     Special Parameters.  (line  61)
+* 0:                                     Special Parameters.  (line  60)
 * ?:                                     Special Parameters.  (line  42)
 * @:                                     Special Parameters.  (line  22)
 * _:                                     Bash Variables.      (line  13)
@@ -12215,118 +12232,118 @@ Node: Shell Commands23773
 Node: Reserved Words24711
 Node: Simple Commands25467
 Node: Pipelines26121
-Node: Lists29078
-Node: Compound Commands30873
-Node: Looping Constructs31885
-Node: Conditional Constructs34380
-Node: Command Grouping48670
-Node: Coprocesses50145
-Node: GNU Parallel52808
-Node: Shell Functions53725
-Node: Shell Parameters60945
-Node: Positional Parameters65396
-Node: Special Parameters66298
-Node: Shell Expansions69522
-Node: Brace Expansion71649
-Node: Tilde Expansion74383
-Node: Shell Parameter Expansion77004
-Node: Command Substitution92133
-Node: Arithmetic Expansion93488
-Node: Process Substitution94420
-Node: Word Splitting95540
-Node: Filename Expansion97484
-Node: Pattern Matching100084
-Node: Quote Removal104202
-Node: Redirections104497
-Node: Executing Commands114071
-Node: Simple Command Expansion114741
-Node: Command Search and Execution116695
-Node: Command Execution Environment119073
-Node: Environment122059
-Node: Exit Status123722
-Node: Signals125506
-Node: Shell Scripts127473
-Node: Shell Builtin Commands130485
-Node: Bourne Shell Builtins132523
-Node: Bash Builtins153984
-Node: Modifying Shell Behavior184498
-Node: The Set Builtin184843
-Node: The Shopt Builtin195256
-Node: Special Builtins210217
-Node: Shell Variables211196
-Node: Bourne Shell Variables211633
-Node: Bash Variables213737
-Node: Bash Features246552
-Node: Invoking Bash247565
-Node: Bash Startup Files253578
-Node: Interactive Shells258681
-Node: What is an Interactive Shell?259091
-Node: Is this Shell Interactive?259740
-Node: Interactive Shell Behavior260555
-Node: Bash Conditional Expressions264068
-Node: Shell Arithmetic268710
-Node: Aliases271654
-Node: Arrays274267
-Node: The Directory Stack280276
-Node: Directory Stack Builtins281060
-Node: Controlling the Prompt285320
-Node: The Restricted Shell288285
-Node: Bash POSIX Mode290882
-Node: Shell Compatibility Mode302155
-Node: Job Control308811
-Node: Job Control Basics309271
-Node: Job Control Builtins314273
-Node: Job Control Variables319673
-Node: Command Line Editing320829
-Node: Introduction and Notation322500
-Node: Readline Interaction324123
-Node: Readline Bare Essentials325314
-Node: Readline Movement Commands327097
-Node: Readline Killing Commands328057
-Node: Readline Arguments329975
-Node: Searching331019
-Node: Readline Init File333205
-Node: Readline Init File Syntax334466
-Node: Conditional Init Constructs355746
-Node: Sample Init File359942
-Node: Bindable Readline Commands363066
-Node: Commands For Moving364270
-Node: Commands For History366321
-Node: Commands For Text371315
-Node: Commands For Killing374964
-Node: Numeric Arguments377997
-Node: Commands For Completion379136
-Node: Keyboard Macros383327
-Node: Miscellaneous Commands384014
-Node: Readline vi Mode389953
-Node: Programmable Completion390860
-Node: Programmable Completion Builtins398640
-Node: A Programmable Completion Example409335
-Node: Using History Interactively414582
-Node: Bash History Facilities415266
-Node: Bash History Builtins418271
-Node: History Interaction423279
-Node: Event Designators426899
-Node: Word Designators428253
-Node: Modifiers430013
-Node: Installing Bash431824
-Node: Basic Installation432961
-Node: Compilers and Options436219
-Node: Compiling For Multiple Architectures436960
-Node: Installation Names438653
-Node: Specifying the System Type439471
-Node: Sharing Defaults440187
-Node: Operation Controls440860
-Node: Optional Features441818
-Node: Reporting Bugs452618
-Node: Major Differences From The Bourne Shell453893
-Node: GNU Free Documentation License470743
-Node: Indexes495920
-Node: Builtin Index496374
-Node: Reserved Word Index503201
-Node: Variable Index505649
-Node: Function Index522141
-Node: Concept Index535925
+Node: Lists29080
+Node: Compound Commands30875
+Node: Looping Constructs31887
+Node: Conditional Constructs34382
+Node: Command Grouping48672
+Node: Coprocesses50150
+Node: GNU Parallel52813
+Node: Shell Functions53730
+Node: Shell Parameters61021
+Node: Positional Parameters65472
+Node: Special Parameters66374
+Node: Shell Expansions69588
+Node: Brace Expansion71715
+Node: Tilde Expansion74449
+Node: Shell Parameter Expansion77070
+Node: Command Substitution92199
+Node: Arithmetic Expansion93554
+Node: Process Substitution94486
+Node: Word Splitting95606
+Node: Filename Expansion97550
+Node: Pattern Matching100150
+Node: Quote Removal104758
+Node: Redirections105053
+Node: Executing Commands114713
+Node: Simple Command Expansion115383
+Node: Command Search and Execution117337
+Node: Command Execution Environment119715
+Node: Environment122750
+Node: Exit Status124413
+Node: Signals126197
+Node: Shell Scripts128164
+Node: Shell Builtin Commands131177
+Node: Bourne Shell Builtins133215
+Node: Bash Builtins154676
+Node: Modifying Shell Behavior185190
+Node: The Set Builtin185535
+Node: The Shopt Builtin195948
+Node: Special Builtins211158
+Node: Shell Variables212137
+Node: Bourne Shell Variables212574
+Node: Bash Variables214678
+Node: Bash Features247493
+Node: Invoking Bash248506
+Node: Bash Startup Files254519
+Node: Interactive Shells259622
+Node: What is an Interactive Shell?260032
+Node: Is this Shell Interactive?260681
+Node: Interactive Shell Behavior261496
+Node: Bash Conditional Expressions265009
+Node: Shell Arithmetic269651
+Node: Aliases272595
+Node: Arrays275208
+Node: The Directory Stack281217
+Node: Directory Stack Builtins282001
+Node: Controlling the Prompt286261
+Node: The Restricted Shell289226
+Node: Bash POSIX Mode291823
+Node: Shell Compatibility Mode303096
+Node: Job Control309752
+Node: Job Control Basics310212
+Node: Job Control Builtins315214
+Node: Job Control Variables320614
+Node: Command Line Editing321770
+Node: Introduction and Notation323441
+Node: Readline Interaction325064
+Node: Readline Bare Essentials326255
+Node: Readline Movement Commands328038
+Node: Readline Killing Commands328998
+Node: Readline Arguments330916
+Node: Searching331960
+Node: Readline Init File334146
+Node: Readline Init File Syntax335407
+Node: Conditional Init Constructs356687
+Node: Sample Init File360883
+Node: Bindable Readline Commands364007
+Node: Commands For Moving365211
+Node: Commands For History367262
+Node: Commands For Text372256
+Node: Commands For Killing375905
+Node: Numeric Arguments378938
+Node: Commands For Completion380077
+Node: Keyboard Macros384268
+Node: Miscellaneous Commands384955
+Node: Readline vi Mode390894
+Node: Programmable Completion391801
+Node: Programmable Completion Builtins399581
+Node: A Programmable Completion Example410276
+Node: Using History Interactively415523
+Node: Bash History Facilities416207
+Node: Bash History Builtins419212
+Node: History Interaction424220
+Node: Event Designators427840
+Node: Word Designators429194
+Node: Modifiers430954
+Node: Installing Bash432765
+Node: Basic Installation433902
+Node: Compilers and Options437160
+Node: Compiling For Multiple Architectures437901
+Node: Installation Names439594
+Node: Specifying the System Type440412
+Node: Sharing Defaults441128
+Node: Operation Controls441801
+Node: Optional Features442759
+Node: Reporting Bugs453559
+Node: Major Differences From The Bourne Shell454834
+Node: GNU Free Documentation License471684
+Node: Indexes496861
+Node: Builtin Index497315
+Node: Reserved Word Index504142
+Node: Variable Index506590
+Node: Function Index523082
+Node: Concept Index536866
 
 End Tag Table
 

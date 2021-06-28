@@ -1961,7 +1961,7 @@ skip_to_delim (string, start, delims, flags)
 	    CQ_RETURN(si);
 
 	  if (string[i+1] == LPAREN)
-	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
+	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND|completeflag); /* ) */
 	  else
 	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
