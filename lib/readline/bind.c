@@ -888,25 +888,30 @@ rl_function_of_keyseq_len (const char *keyseq, size_t len, Keymap map, int *type
 int
 rl_trim_arg_from_keyseq	(const char *keyseq, size_t len, Keymap map)
 {
-  register int i, parsing_digits;
+  register int i, j, parsing_digits;
   unsigned char ic;
+  Keymap map0;
 
   if (map == 0)
     map = _rl_keymap;
+  map0 = map;
 
   /* The digits following the initial one (e.g., the binding to digit-argument)
     or the optional `-' in a binding to digit-argument or universal-argument
     are not added to rl_executing_keyseq. This is basically everything read by
     rl_digit_loop. The parsing_digits logic is here in case they ever are. */
-  for (i = parsing_digits = 0; keyseq && i < len; i++)
+  for (i = j = parsing_digits = 0; keyseq && i < len; i++)
     {
       ic = keyseq[i];
 
       if (parsing_digits)
 	{
-	  if (_rl_digit_p (ic) == 0)
-	    return (i);
-	  continue;
+	  if (_rl_digit_p (ic))
+	    {
+	      j = i + 1;
+	      continue;
+	    }
+	  parsing_digits = 0;
 	}
 
       if (map[ic].type == ISKMAP)
@@ -918,13 +923,18 @@ rl_trim_arg_from_keyseq	(const char *keyseq, size_t len, Keymap map)
 	}
       if (map[ic].type == ISFUNC)
 	{
+#if defined (VI_MODE)
+	  if (map[ic].function != rl_digit_argument && map[ic].function != rl_universal_argument && map[ic].function != rl_vi_arg_digit)
+#else
 	  if (map[ic].function != rl_digit_argument && map[ic].function != rl_universal_argument)
-	    return -1;
+#endif
+	    return (j);
 
 	  /* We don't bother with a keyseq that is only a numeric argument */
 	  if (i + 1 == len)
 	    return -1;
 
+	  map = map0;
 	  parsing_digits = 1;
 
 	  /* This logic should be identical to rl_digit_loop */
@@ -934,13 +944,12 @@ rl_trim_arg_from_keyseq	(const char *keyseq, size_t len, Keymap map)
 	    {
 	      i++;
 	      parsing_digits = 2;
-	      continue;
 	    }
 	  if (map[ic].function == rl_digit_argument && ic == '-')
 	    {
 	      parsing_digits = 2;
-	      continue;
 	    }
+	  j = i + 1;
 	}
     }
 

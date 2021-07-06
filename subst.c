@@ -8454,7 +8454,8 @@ pat_subst (string, pat, rep, mflags)
   /* Now copy the unmatched portion of the input string */
   if (str && *str)
     {
-      RESIZE_MALLOCED_BUFFER (ret, rptr, STRLEN(str) + 1, rsize, 64);
+      l = send - str + 1;
+      RESIZE_MALLOCED_BUFFER (ret, rptr, l, rsize, 64);
       strcpy (ret + rptr, str);
     }
   else

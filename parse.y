@@ -2901,7 +2901,11 @@ yylex ()
     }
 
   if (current_token < 0)
+#if defined (YYERRCODE) && !defined (YYUNDEF)
+    current_token = YYERRCODE;
+#else
     current_token = YYerror;
+#endif
 
   return (current_token);
 }

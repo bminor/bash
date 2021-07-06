@@ -57,6 +57,7 @@ SHELL = @MAKE_SHELL@
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
+STYLE_CFLAGS = @STYLE_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@ @LOCAL_LDFLAGS@
 
@@ -68,7 +69,7 @@ LOCAL_DEFS = @LOCAL_DEFS@
 INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib -I$(BASHINCDIR) -I$(srcdir) $(INTL_INC)
 
 CCFLAGS = ${ADDON_CFLAGS} ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) \
-	  $(LOCAL_CFLAGS) $(CFLAGS) $(CPPFLAGS) 
+	  $(LOCAL_CFLAGS) $(STYLE_CFLAGS) $(CFLAGS) $(CPPFLAGS) 
 
 GCC_LINT_FLAGS = -Wall -Wshadow -Wpointer-arith -Wcast-qual \
 		 -Wcast-align -Wstrict-prototypes -Wconversion \

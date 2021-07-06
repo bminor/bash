@@ -10644,3 +10644,55 @@ parse.y
 subst.c
 	- skip_matched_pair: make sure to pass the SX_COMPLETE flag to
 	  extract_delimited_string
+
+				   6/28
+				   ----
+
+lib/readline/bind.c
+	- rl_trim_arg_from_keyseq: handle rl_vi_arg_digit if VI_MODE is
+	  defined. Report and fix from Koichi Murase <myoga.murase@gmail.com>
+	- rl_trim_arg_from_keyseq: rework to handle case where the digit
+	  argument is given as a discrete sequence of multiple rl_digit_argument
+	  commands (e.g, "M-1 M-2" instead of "M-1 2"). Report and fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+subst.c
+	- pat_subst: avoid calling RESIZE_MALLOCED_BUFFER with STRLEN(s) as an
+	  argument, since it ends up going into a loop. Report and fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+lib/sh/casemod.c
+	- cval: take the string length as an argument, to avoid having to call
+	  strlen every time (in HANDLE_MULTIBYTE mode). The caller already has
+	  this info. Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+builtins/complete.def
+	- print_cmd_name: single-quote the command name if it contains any
+	  shell metacharacters
+	- print_one_completion: call print_arg with a second arg of 1 if the
+	  function name contains shell metacharacters. Report and fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+				   6/30
+				   ----
+
+configure.ac
+	- substitute BASE_CFLAGS_FOR_BUILD and STYLE_CFLAGS into Makefile
+	  targets
+	- take STYLE_CFLAGS out of the CFLAGS_FOR_BUILD variable that gets
+	  substituted
+	- remove STYLE_CFLAGS from CFLAGS
+	- use `:+' expansion to set variables based on whether $GCC is set
+	  or null, since configure can do GCC=
+
+support/Makefile.in
+	- man2html: remove CCFLAGS_FOR_BUILD from the recipe, leaving only
+	  LDFLAGS_FOR_BUILD. Report from Jay K <jayk123@hotmail.com>
+	- gen-helpfiles: remove CCFLAGS_FOR_BUILD from the recipe, leaving
+	  only LDFLAGS_FOR_BUILD
+	- man2html: use $(STYLE_CFLAGS) in BASE_CCFLAGS variable for C file
+	  compilation options
+
+{,builtins}/Makefile.in, lib/{sh,readline,malloc,glob}/Makefile.in
+	- use STYLE_CFLAGS so specifying CFLAGS=-g to make doesn't clutter the
+	  output with warnings about parens and format strings

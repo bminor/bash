@@ -59,6 +59,7 @@ LIBBUILD = ${BUILD_DIR}/lib
 PROFILE_FLAGS = @PROFILE_FLAGS@
 CFLAGS = @CFLAGS@
 CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@ @CROSS_COMPILE@
+STYLE_CFLAGS = @STYLE_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 CPPFLAGS_FOR_BUILD = @CPPFLAGS_FOR_BUILD@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
@@ -92,7 +93,7 @@ HELPFILES_TARGET = @HELPFILES_TARGET@
 INCLUDES = -I. -I.. @RL_INCLUDE@ -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib -I$(srcdir) ${INTL_INC}
 
 BASE_CCFLAGS = ${PROFILE_FLAGS} $(DEFS) $(LOCAL_DEFS) $(SYSTEM_FLAGS) \
-	 ${INCLUDES} $(LOCAL_CFLAGS)
+	 ${INCLUDES} $(STYLE_CFLAGS) $(LOCAL_CFLAGS)
 
 CCFLAGS = ${ADDON_CFLAGS} $(BASE_CCFLAGS) $(CPPFLAGS) $(CFLAGS)
 
@@ -182,7 +183,7 @@ gen-helpfiles.o: gen-helpfiles.c
 	$(CC_FOR_BUILD) -c $(CCFLAGS_FOR_BUILD) $<
 
 gen-helpfiles:	tmpbuiltins.o gen-helpfiles.o
-	$(CC_FOR_BUILD) ${CCFLAGS_FOR_BUILD} $(LDFLAGS_FOR_BUILD) -o $@ gen-helpfiles.o tmpbuiltins.o $(LIBS_FOR_BUILD)
+	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ gen-helpfiles.o tmpbuiltins.o $(LIBS_FOR_BUILD)
 
 builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
 	@-if test -f builtins.c; then mv -f builtins.c old-builtins.c; fi
