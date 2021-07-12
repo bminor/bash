@@ -96,8 +96,7 @@ make_history_line_current (HIST_ENTRY *entry)
 #endif
 
   if (_rl_saved_line_for_history)
-    _rl_free_history_entry (_rl_saved_line_for_history);
-  _rl_saved_line_for_history = (HIST_ENTRY *)NULL;
+    _rl_free_saved_history_line ();
 }
 
 /* Search the history list for STRING starting at absolute history position

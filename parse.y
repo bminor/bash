@@ -989,8 +989,7 @@ comsub:		DOLPAREN compound_list ')'
 			{
 			  $$ = $2;
 			}
-	|
-		DOLPAREN newline_list ')'
+	|	DOLPAREN newline_list ')'
 			{
 			  $$ = (COMMAND *)NULL;
 			}

@@ -10696,3 +10696,20 @@ support/Makefile.in
 {,builtins}/Makefile.in, lib/{sh,readline,malloc,glob}/Makefile.in
 	- use STYLE_CFLAGS so specifying CFLAGS=-g to make doesn't clutter the
 	  output with warnings about parens and format strings
+
+				    7/9
+				    ---
+lib/readline/search.c
+	- make_history_line_current: call _rl_free_saved_history_line to clean
+	  up _rl_saved_line_from_history and get all the code that frees it
+	  into one place
+
+lib/readline/misc.c
+	- _rl_free_saved_history_line: if rl_undo_list points to the data
+	  member of _rl_saved_line_from_history, set it to NULL to avoid having
+ 	  it point to freed memory, since the next thing we do now is to free
+	  the undo list the data member points to
+	- _rl_start_using_history: call _rl_free_saved_history_line instead of
+	  calling _rl_free_history_entry directly. Fixes memory leak reported
+	  by Trung Dam <trungdam@yahoo.com>
+

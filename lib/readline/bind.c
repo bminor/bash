@@ -934,7 +934,6 @@ rl_trim_arg_from_keyseq	(const char *keyseq, size_t len, Keymap map)
 	  if (i + 1 == len)
 	    return -1;
 
-	  map = map0;
 	  parsing_digits = 1;
 
 	  /* This logic should be identical to rl_digit_loop */
@@ -949,6 +948,8 @@ rl_trim_arg_from_keyseq	(const char *keyseq, size_t len, Keymap map)
 	    {
 	      parsing_digits = 2;
 	    }
+
+	  map = map0;
 	  j = i + 1;
 	}
     }
