@@ -749,7 +749,7 @@ rl_redisplay (void)
   int hl_begin, hl_end;
   int mb_cur_max = MB_CUR_MAX;
 #if defined (HANDLE_MULTIBYTE)
-  wchar_t wc;
+  WCHAR_T wc;
   size_t wc_bytes;
   int wc_width;
   mbstate_t ps;
@@ -983,11 +983,11 @@ rl_redisplay (void)
       memset (&ps, 0, sizeof (mbstate_t));
       if (_rl_utf8locale && UTF8_SINGLEBYTE(rl_line_buffer[0]))
 	{
-	  wc = (wchar_t)rl_line_buffer[0];
+	  wc = (WCHAR_T)rl_line_buffer[0];
 	  wc_bytes = 1;
 	}
       else
-	wc_bytes = mbrtowc (&wc, rl_line_buffer, rl_end, &ps);
+	wc_bytes = MBRTOWC (&wc, rl_line_buffer, rl_end, &ps);
     }
   else
     wc_bytes = 1;
@@ -1158,12 +1158,12 @@ rl_redisplay (void)
 	  in += wc_bytes;
 	  if (_rl_utf8locale && UTF8_SINGLEBYTE(rl_line_buffer[in]))
 	    {
-	      wc = (wchar_t)rl_line_buffer[in];
+	      wc = (WCHAR_T)rl_line_buffer[in];
 	      wc_bytes = 1;
 	      memset (&ps, 0, sizeof (mbstate_t));	/* re-init state */
 	    }
 	  else
-	    wc_bytes = mbrtowc (&wc, rl_line_buffer + in, rl_end - in, &ps);
+	    wc_bytes = MBRTOWC (&wc, rl_line_buffer + in, rl_end - in, &ps);
 	}
       else
         in++;
@@ -1662,7 +1662,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 #if defined (HANDLE_MULTIBYTE)
       if (mb_cur_max > 1 && rl_byte_oriented == 0)
 	{
-	  wchar_t wc;
+	  WCHAR_T wc;
 	  mbstate_t ps;
 	  int oldwidth, newwidth;
 	  int oldbytes, newbytes;
@@ -1681,7 +1681,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 
 	  /* 1. how many screen positions does first char in old consume? */
 	  memset (&ps, 0, sizeof (mbstate_t));
-	  ret = mbrtowc (&wc, old, mb_cur_max, &ps);
+	  ret = MBRTOWC (&wc, old, mb_cur_max, &ps);
 	  oldbytes = ret;
 	  if (MB_INVALIDCH (ret))
 	    {
@@ -1697,7 +1697,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 
 	  /* 2. how many screen positions does the first char in new consume? */
 	  memset (&ps, 0, sizeof (mbstate_t));
-	  ret = mbrtowc (&wc, new, mb_cur_max, &ps);
+	  ret = MBRTOWC (&wc, new, mb_cur_max, &ps);
 	  newbytes = ret;
 	  if (MB_INVALIDCH (ret))
 	    {
@@ -1718,7 +1718,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 	    {
 	      int t;
 
-	      ret = mbrtowc (&wc, new+newbytes, mb_cur_max, &ps);
+	      ret = MBRTOWC (&wc, new+newbytes, mb_cur_max, &ps);
 	      if (MB_INVALIDCH (ret))
 		{
 		  newwidth += 1;
@@ -1740,7 +1740,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 	    {
 	      int t;
 
-	      ret = mbrtowc (&wc, old+oldbytes, mb_cur_max, &ps);
+	      ret = MBRTOWC (&wc, old+oldbytes, mb_cur_max, &ps);
 	      if (MB_INVALIDCH (ret))
 		{
 		  oldwidth += 1;
@@ -1952,14 +1952,14 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 #if defined (HANDLE_MULTIBYTE)
   if (mb_cur_max > 1 && rl_byte_oriented == 0 && _rl_utf8locale)
     {
-      wchar_t wc;
+      WCHAR_T wc;
       mbstate_t ps = { 0 };
       int t;
 
       /* If the first character in the difference is a zero-width character,
 	 assume it's a combining character and back one up so the two base
 	 characters no longer compare equivalently. */
-      t = mbrtowc (&wc, ofd, mb_cur_max, &ps);
+      t = MBRTOWC (&wc, ofd, mb_cur_max, &ps);
       if (t > 0 && UNICODE_COMBINING_CHAR (wc) && WCWIDTH (wc) == 0)
 	{
 	  old_offset = _rl_find_prev_mbchar (old, ofd - old, MB_FIND_ANY);
@@ -3466,7 +3466,7 @@ _rl_refresh_line (void)
 static int
 _rl_col_width (const char *str, int start, int end, int flags)
 {
-  wchar_t wc;
+  WCHAR_T wc;
   mbstate_t ps;
   int tmp, point, width, max;
 
@@ -3535,10 +3535,10 @@ _rl_col_width (const char *str, int start, int end, int flags)
       if (_rl_utf8locale && UTF8_SINGLEBYTE(str[point]))
 	{
 	  tmp = 1;
-	  wc = (wchar_t) str[point];
+	  wc = (WCHAR_T) str[point];
 	}
       else
-	tmp = mbrtowc (&wc, str + point, max, &ps);
+	tmp = MBRTOWC (&wc, str + point, max, &ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* In this case, the bytes are invalid or too short to compose a

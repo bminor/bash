@@ -10713,3 +10713,24 @@ lib/readline/misc.c
 	  calling _rl_free_history_entry directly. Fixes memory leak reported
 	  by Trung Dam <trungdam@yahoo.com>
 
+				   7/12
+				   ----
+lib/readline/search.c
+	- make_history_line_current: free rl_undo_list before replacing the
+	  current line with the line from history, since it is a private
+	  undo list from reading the search string
+
+lib/readline/rlmbutil.h
+	- Since wchar_t/mbrtowc/wcrtomb are limited to 16 bits on Windows
+	  with MSVC, start abstracting the differences using WCHAR_T/
+	  MBRTOWC/WCRTOMB
+
+				   7/13
+				   ----
+
+lib/readline/{complete,display,input,text,util,vi_mode}.c
+	- use WCHAR_T/MBRTOWC/WCRTOMB. Part of a set of Windows MSVC fixes
+	  from sparrowhawk996@gmail.com
+
+builtins/{enable,hash,help}.def
+	- enable_builtin: use sh_chkwrite after output to check for write errors

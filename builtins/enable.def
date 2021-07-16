@@ -178,6 +178,7 @@ enable_builtin (list)
 	filter |= SPECIAL;
 
       list_some_builtins (filter);
+      result = sh_chkwrite (EXECUTION_SUCCESS);
     }
 #if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
   else if (flags & FFLAG)

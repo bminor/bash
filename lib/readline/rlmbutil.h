@@ -82,6 +82,19 @@
 /************************************************/
 
 /*
+ * wchar_t doesn't work for 32-bit values on Windows using MSVC
+ */
+#ifdef WCHAR_T_BROKEN
+#  define WCHAR_T char32_t
+#  define MBRTOWC mbrtoc32
+#  define WCRTOMB c32rtomb
+#else	/* normal systems */
+#  define WCHAR_T wchar_t
+#  define MBRTOWC mbrtowc
+#  define WCRTOMB wcrtomb
+#endif
+
+/*
  * Flags for _rl_find_prev_mbchar and _rl_find_next_mbchar:
  *
  * MB_FIND_ANY		find any multibyte character
@@ -105,8 +118,8 @@ extern int _rl_read_mbstring (int, char *, int);
 
 extern int _rl_is_mbchar_matched (char *, int, int, char *, int);
 
-extern wchar_t _rl_char_value (char *, int);
-extern int _rl_walphabetic (wchar_t);
+extern WCHAR_T _rl_char_value (char *, int);
+extern int _rl_walphabetic (WCHAR_T);
 
 #define _rl_to_wupper(wc)	(iswlower (wc) ? towupper (wc) : (wc))
 #define _rl_to_wlower(wc)	(iswupper (wc) ? towlower (wc) : (wc))
@@ -127,7 +140,7 @@ extern int _rl_walphabetic (wchar_t);
    calls to a libc wcwidth() */
 static inline int
 _rl_wcwidth (wc)
-     wchar_t wc;
+     WCHAR_T wc;
 {
   switch (wc)
     {

@@ -84,6 +84,12 @@ static int _rl_nsearch_dispatch (_rl_search_cxt *, int);
 static void
 make_history_line_current (HIST_ENTRY *entry)
 {
+  /* At this point, rl_undo_list points to a private search string list. */
+  if (rl_undo_list && rl_undo_list != (UNDO_LIST *)entry->data)
+    rl_free_undo_list ();  
+
+  /* Now we create a new undo list with a single insert for this text.
+     WE DON'T CHANGE THE ORIGINAL HISTORY ENTRY UNDO LIST */
   _rl_replace_text (entry->line, 0, rl_end);
   _rl_fix_point (1);
 #if defined (VI_MODE)
@@ -95,6 +101,8 @@ make_history_line_current (HIST_ENTRY *entry)
     rl_free_undo_list ();
 #endif
 
+  /* This will need to free the saved undo list associated with the original
+     (pre-search) line buffer. */
   if (_rl_saved_line_for_history)
     _rl_free_saved_history_line ();
 }
