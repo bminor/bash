@@ -936,7 +936,8 @@ glob_vector (pat, dir, flags)
 	      nextname = (char *) malloc (D_NAMLEN (dp) + 1);
 	      if (nextlink == 0 || nextname == 0)
 		{
-		  FREE (nextlink);
+		  if (firstmalloc)
+		    FREE (nextlink);
 		  FREE (nextname);
 		  lose = 1;
 		  break;
@@ -1482,6 +1483,7 @@ only_filename:
 	    {
 	      if (free_dirname)
 		free (directory_name);
+	      free ((char *) result);
 	      return ((char **)&glob_error_return);
 	    }
 	}

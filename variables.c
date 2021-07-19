@@ -3616,6 +3616,7 @@ assign_in_env (word, flags)
       if (legal_identifier (name) == 0)
 	{
 	  sh_invalidid (name);
+	  free (name);
 	  return (0);
 	}
   

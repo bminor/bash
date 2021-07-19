@@ -2378,6 +2378,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   if (legal_identifier (name) == 0)
     {
       internal_error (_("`%s': not a valid identifier"), name);
+      free (name);
       return (invert ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
   else

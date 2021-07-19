@@ -8078,6 +8078,8 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
   if (valid_parameter_transform (xform) == 0)
     {
       this_command_name = oname;
+      if (vtype == VT_VARIABLE)
+	FREE (val);
 #if 0 /* TAG: bash-5.2 Martin Schulte <gnu@schrader-schulte.de> 10/2020 */
       return (interactive_shell ? &expand_param_error : &expand_param_fatal);
 #else

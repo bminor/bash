@@ -3274,6 +3274,8 @@ bash_directory_expansion (dirname)
       free (d);
       *dirname = nd;
     }
+  else
+    free (d);
 }
 
 /* If necessary, rewrite directory entry */

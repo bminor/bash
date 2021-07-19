@@ -10734,3 +10734,46 @@ lib/readline/{complete,display,input,text,util,vi_mode}.c
 
 builtins/{enable,hash,help}.def
 	- enable_builtin: use sh_chkwrite after output to check for write errors
+
+				   7/16
+				   ----
+arrayfunc.c
+	- quote_compound_array_word: free SUB and VALUE after assigning from
+	  sh_single_quote(). From a coverity report from
+	  Siteshwar Vashisht <svashisht@redhat.com>
+
+bashhist.c
+	- bash_remove_history_range: free DISCARD_LIST after freeing its
+	  elements
+
+bashline.c
+	- bash_directory_expansion: add code to free D as a separate branch,
+	  though it's never hit in practice
+
+builtins/trap.def
+	- showtrap: free T even if show_default == 1 if it's a non-default
+	  trap string
+
+				   7/17
+				   ----
+execute_cmd.c
+	- execute_coproc: free NAME on invalid identifier error
+
+lib/glob/glob.c
+	- glob_vector: make sure NEXTLINK is allocated using malloc before
+	  passing it to free()
+	- glob_filename: free RESULT before returning glob_error_return when
+	  there is only a filename
+
+print_cmd.c
+	- indirection_level_string: make sure we free PS4 after calling
+	  decode_prompt_string if *ps4 == 0
+
+subst.c
+	- parameter_brace_transform: if vtype == VT_VARIABLE, we need to free
+	  a non-null VAL
+
+variables.c
+	- assign_in_env: if NAME is not a valid shell identifier, free it
+	  after printing the error message and before returning. These are
+	  the rest of the fixes from Siteshwar Vashisht <svashisht@redhat.com>
