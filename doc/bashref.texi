@@ -1127,8 +1127,9 @@ done
 
 The arithmetic @var{expression} is evaluated according to the rules
 described below (@pxref{Shell Arithmetic}).
-The @var{expression} is expanded as if it were within double quotes,
-but double quote characters in @var{expression} are not special and
+The @var{expression} undergoes the same expansions
+as if it were within double quotes,
+but double quote characters in @var{expression} are not treated specially
 are removed.
 If the value of the expression is non-zero, the return status is 0;
 otherwise the return status is 1. 
@@ -1150,7 +1151,7 @@ and filename expansion.
 The shell performs tilde expansion, parameter and
 variable expansion, arithmetic expansion, command substitution, process
 substitution, and quote removal on those words
-(as if the words were enclosed in double quotes).
+(the expansions that would occur if the words were enclosed in double quotes).
 Conditional operators such as @samp{-f} must be unquoted to be recognized
 as primaries.
 
@@ -2539,8 +2540,10 @@ and the substitution of the result.  The format for arithmetic expansion is:
 $(( @var{expression} ))
 @end example
 
-The @var{expression} is treated as if it were within double quotes, but
-a double quote inside the parentheses is not treated specially.
+The @var{expression} undergoes the same expansions
+as if it were within double quotes,
+but double quote characters in @var{expression} are not treated specially
+and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.

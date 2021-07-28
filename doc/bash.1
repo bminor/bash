@@ -701,9 +701,11 @@ below under
 .BR "ARITHMETIC EVALUATION" .
 If the value of the expression is non-zero, the return status is 0;
 otherwise the return status is 1.
-The \fIexpression\fP is expanded as if it were within double quotes,
-but double quote characters in \fIexpression\fP are not special and
-are removed.
+The \fIexpression\fP
+undergoes the same expansions
+as if it were within double quotes,
+but double quote characters in \fIexpression\fP are not treated specially
+and are removed.
 .TP
 \fB[[\fP \fIexpression\fP \fB]]\fP
 Return a status of 0 or 1 depending on the evaluation of
@@ -716,7 +718,7 @@ and filename expansion.
 The shell performs tilde expansion, parameter and
 variable expansion, arithmetic expansion, command substitution, process
 substitution, and quote removal on those words
-(as if the words were enclosed in double quotes).
+(the expansions that would occur if the words were enclosed in double quotes).
 Conditional operators such as \fB\-f\fP must be unquoted to be recognized
 as primaries.
 .if t .sp 0.5
@@ -3519,8 +3521,10 @@ and the substitution of the result.  The format for arithmetic expansion is:
 .PP
 The
 .I expression
-is treated as if it were within double quotes, but a double quote
-inside the parentheses is not treated specially.
+undergoes the same expansions
+as if it were within double quotes,
+but double quote characters in \fIexpression\fP are not treated specially
+and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.

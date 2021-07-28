@@ -569,7 +569,7 @@ any_signals_trapped ()
   register int i;
 
   for (i = 1; i < NSIG; i++)
-    if (sigmodes[i] & SIG_TRAPPED)
+    if ((sigmodes[i] & SIG_TRAPPED) && (sigmodes[i] & SIG_IGNORED) == 0)
       return i;
   return -1;
 }

@@ -10777,3 +10777,21 @@ variables.c
 	- assign_in_env: if NAME is not a valid shell identifier, free it
 	  after printing the error message and before returning. These are
 	  the rest of the fixes from Siteshwar Vashisht <svashisht@redhat.com>
+
+				   7/22
+				   ----
+shell.c
+	- main: set dollar_vars[0] to shell_script_filename before calling
+	  run_startup_files() in the non-interactive case. Restore it after
+	  run_startup_files returns so we can get better error messages if
+	  we can't open a script file. Suggested by several people, originally
+	  by Marc Aurèle La France <tsi@tuyoix.net> back in 2/2021 (in a
+	  different form) and most recently by Tapani Tarvainen
+	  <bash@tapanitarvainen.fi>
+
+				   7/28
+				   ----
+trap.c
+	- any_signals_trapped: return that a signal is trapped only if it's
+	  not ignored. This is an additional opportunity for optimization,
+	  reported in https://bugzilla.redhat.com/show_bug.cgi?id=1981926

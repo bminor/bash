@@ -694,10 +694,24 @@ main (argc, argv, env)
   /* The startup files are run with `set -e' temporarily disabled. */
   if (locally_skip_execution == 0 && running_setuid == 0)
     {
+      char *t;
+
       old_errexit_flag = exit_immediately_on_error;
       exit_immediately_on_error = 0;
 
+      /* Temporarily set $0 while running startup files, then restore it so
+	 we get better error messages when trying to open script files. */
+      if (shell_script_filename)
+	{
+	  t = dollar_vars[0];
+	  dollar_vars[0] = exec_argv0 ? savestring (exec_argv0) : savestring (shell_script_filename);
+	}
       run_startup_files ();
+      if (shell_script_filename)
+	{
+	  free (dollar_vars[0]);
+	  dollar_vars[0] = t;
+	}
       exit_immediately_on_error += old_errexit_flag;
     }
 
