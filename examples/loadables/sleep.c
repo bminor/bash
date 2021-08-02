@@ -74,12 +74,19 @@ WORD_LIST	*list;
     	r = uconvert(list->word->word, &sec, &usec, &ep);
 	/* Maybe postprocess conversion failures here based on EP */
     		
-    	if (r) {
+	if (r) {
 		fsleep(sec, usec);
 		QUIT;
 		return(EXECUTION_SUCCESS);
-    	}
-
+	}
+	/*
+	 * A heuristic: if the conversion failed, but the argument appears to
+	 * contain a GNU-like interval specifier (e.g. "1m30s"), return the
+	 * right exit code to tell execute_builtin to try and execute a disk
+	 * command instead.
+	 */
+	if (strpbrk (list->word->word, "dhms"))
+		return(EX_DISKFALLBACK);
 	builtin_error("%s: bad sleep interval", list->word->word);
 	return (EXECUTION_FAILURE);
 }

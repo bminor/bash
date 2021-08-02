@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jun 16 09:50:34 EDT 2021
+.\"	Last Change: Fri Jul 30 15:05:43 EDT 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 June 16" "GNU Bash 5.1"
+.TH BASH 1 "2021 July 30" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8451,6 +8451,11 @@ If \fB\-a\fP is supplied, the list printed includes all builtins, with an
 indication of whether or not each is enabled.
 If \fB\-s\fP is supplied, the output is restricted to the POSIX
 \fIspecial\fP builtins.
+If no options are supplied and a \fIname\fP is not a shell builtin,
+\fBenable\fP will attempt to load \fIname\fP from a shared object named
+\fIname\fP, as if the command were
+.if t \f(CWenable \-f\fP \fIname name\fP .
+.if n ``enable -f \fIname name\fP .
 The return value is 0 unless a
 .I name
 is not a shell builtin or there is an error loading a new builtin

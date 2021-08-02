@@ -4532,6 +4532,11 @@ The @option{-s} option restricts @code{enable} to the @sc{posix} special
 builtins.  If @option{-s} is used with @option{-f}, the new builtin becomes
 a special builtin (@pxref{Special Builtins}).
 
+If no options are supplied and a @var{name} is not a shell builtin,
+@code{enable} will attempt to load @var{name} from a shared object named
+@var{name}, as if the command were
+@samp{enable -f @var{name} @var{name}}.
+
 The return status is zero unless a @var{name} is not a shell builtin
 or there is an error loading a new builtin from a shared object.
 

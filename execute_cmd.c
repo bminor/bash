@@ -4740,7 +4740,10 @@ run_builtin:
 		      executing_builtin = old_builtin;
 		      executing_command_builtin = old_command_builtin;
 		      builtin = 0;
-		      /* XXX - redirections will have to be performed again */
+
+		      /* The redirections have already been `undone', so this
+			 will have to do them again. But piping is forever. */
+		      pipe_in = pipe_out = -1;
 		      goto execute_from_filesystem;
 		    }
 		  result = builtin_status (result);
