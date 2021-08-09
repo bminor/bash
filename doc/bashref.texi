@@ -549,7 +549,7 @@ If the current locale is @code{C} or @code{POSIX},
 or if there are no translations available,
 the dollar sign is ignored, and the shell doesn't attempt to translate the
 string.
-Since this is a form of quoting, the string always remains double-quoted,
+Since this is a form of double quoting, the string remains double-quoted,
 whether or not it is translated and replaced.
 
 The rest of this section is a brief overview of how you use gettext to
@@ -4687,6 +4687,9 @@ corresponding @var{argument} in the same way as @code{echo -e}
 @item %q
 Causes @code{printf} to output the
 corresponding @var{argument} in a format that can be reused as shell input.
+@item %Q
+like @code{%q}, but applies any supplied precision to the @var{argument}
+before quoting it.
 @item %(@var{datefmt})T
 Causes @code{printf} to output the date-time string resulting from using
 @var{datefmt} as a format string for @code{strftime}(3).

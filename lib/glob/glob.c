@@ -956,7 +956,7 @@ glob_vector (pat, dir, flags)
   /* compat: if GX_ADDCURDIR, add the passed directory also.  Add an empty
      directory name as a placeholder if GX_NULLDIR (in which case the passed
      directory name is "."). */
-  if (add_current)
+  if (add_current && lose == 0)
     {
       sdlen = strlen (dir);
       nextname = (char *)malloc (sdlen + 1);
@@ -986,7 +986,7 @@ glob_vector (pat, dir, flags)
       lose |= name_vector == NULL;
     }
 
-  /* Have we run out of memory?	 */
+  /* Have we run out of memory or been interrupted? */
   if (lose)
     {
       tmplink = 0;

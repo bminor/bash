@@ -287,7 +287,7 @@ static char *parameter_list_remove_pattern PARAMS((int, char *, int, int));
 #ifdef ARRAY_VARS
 static char *array_remove_pattern PARAMS((SHELL_VAR *, char *, int, int, int));
 #endif
-static char *parameter_brace_remove_pattern PARAMS((char *, char *, int, char *, int, int, int));
+static char *parameter_brace_remove_pattern PARAMS((char *, char *, arrayind_t, char *, int, int, int));
 
 static char *string_var_assignment PARAMS((SHELL_VAR *, char *));
 #if defined (ARRAY_VARS)
@@ -300,7 +300,7 @@ static char *parameter_list_transform PARAMS((int, int, int));
 #if defined ARRAY_VARS
 static char *array_transform PARAMS((int, SHELL_VAR *, int, int));
 #endif
-static char *parameter_brace_transform PARAMS((char *, char *, int, char *, int, int, int, int));
+static char *parameter_brace_transform PARAMS((char *, char *, arrayind_t, char *, int, int, int, int));
 static int valid_parameter_transform PARAMS((char *));
 
 static char *process_substitute PARAMS((char *, int));
@@ -328,16 +328,16 @@ static char *skiparith PARAMS((char *, int));
 static int verify_substring_values PARAMS((SHELL_VAR *, char *, char *, int, intmax_t *, intmax_t *));
 static int get_var_and_type PARAMS((char *, char *, arrayind_t, int, int, SHELL_VAR **, char **));
 static char *mb_substring PARAMS((char *, int, int));
-static char *parameter_brace_substring PARAMS((char *, char *, int, char *, int, int, int));
+static char *parameter_brace_substring PARAMS((char *, char *, arrayind_t, char *, int, int, int));
 
 static int shouldexp_replacement PARAMS((char *));
 
 static char *pos_params_pat_subst PARAMS((char *, char *, char *, int));
 
-static char *parameter_brace_patsub PARAMS((char *, char *, int, char *, int, int, int));
+static char *parameter_brace_patsub PARAMS((char *, char *, arrayind_t, char *, int, int, int));
 
 static char *pos_params_casemod PARAMS((char *, char *, int, int));
-static char *parameter_brace_casemod PARAMS((char *, char *, int, int, char *, int, int, int));
+static char *parameter_brace_casemod PARAMS((char *, char *, arrayind_t, int, char *, int, int, int));
 
 static WORD_DESC *parameter_brace_expand PARAMS((char *, int *, int, int, int *, int *));
 static WORD_DESC *param_expand PARAMS((char *, int *, int, int *, int *, int *, int *, int));
@@ -2173,6 +2173,21 @@ char_is_quoted (string, eindex)
   oldjmp = no_longjmp_on_fatal_error;
   no_longjmp_on_fatal_error = 1;
   i = pass_next = 0;
+
+  /* If we have an open quoted string from a previous line, see if it's
+     closed before string[eindex], so we don't interpret that close quote
+     as starting a new quoted string. */
+  if (current_command_line_count > 0 && dstack.delimiter_depth > 0)
+    {
+      c = dstack.delimiters[dstack.delimiter_depth - 1];
+      if (c == '\'')
+	i = skip_single_quoted (string, slen, 0, 0);
+      else if (c == '"')
+	i = skip_double_quoted (string, slen, 0, SX_COMPLETE);
+      if (i > eindex)
+	CQ_RETURN (1);
+    }
+
   while (i <= eindex)
     {
       c = string[i];
@@ -5363,7 +5378,7 @@ array_remove_pattern (var, pattern, patspec, starsub, quoted)
 static char *
 parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flags)
      char *varname, *value;
-     int ind;
+     arrayind_t ind;
      char *patstr;
      int rtype, quoted, flags;
 {
@@ -8053,7 +8068,7 @@ valid_parameter_transform (xform)
 static char *
 parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, flags)
      char *varname, *value;
-     int ind;
+     arrayind_t ind;
      char *xform;
      int rtype, quoted, pflags, flags;
 {
@@ -8190,7 +8205,7 @@ mb_substring (string, s, e)
 static char *
 parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
      char *varname, *value;
-     int ind;
+     arrayind_t ind;
      char *substr;
      int quoted, pflags, flags;
 {
@@ -8512,7 +8527,7 @@ pos_params_pat_subst (string, pat, rep, mflags)
 static char *
 parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
      char *varname, *value;
-     int ind;
+     arrayind_t ind;
      char *patsub;
      int quoted, pflags, flags;
 {
@@ -8749,7 +8764,8 @@ pos_params_modcase (string, pat, modop, mflags)
 static char *
 parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, pflags, flags)
      char *varname, *value;
-     int ind, modspec;
+     arrayind_t ind;
+     int modspec;
      char *patspec;
      int quoted, pflags, flags;
 {

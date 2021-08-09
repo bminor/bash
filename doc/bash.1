@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jul 30 15:05:43 EDT 2021
+.\"	Last Change: Fri Aug  6 14:30:46 EDT 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 July 30" "GNU Bash 5.1"
+.TH BASH 1 "2021 August 6" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1223,7 +1223,7 @@ and \fBTEXTDOMAIN\fP shell variables.
 If the current locale is \fBC\fP or \fBPOSIX\fP,
 or if there are no translations available,
 the dollar sign is ignored.
-This is a form of quoting, so the string always remains double-quoted,
+This is a form of double quoting, so the string remains double-quoted,
 whether or not it is translated and replaced.
 .SH PARAMETERS
 A
@@ -9249,6 +9249,10 @@ in the same way as \fBecho \-e\fP.
 .B %q
 causes \fBprintf\fP to output the corresponding
 \fIargument\fP in a format that can be reused as shell input.
+.TP
+.B %Q
+like \fB%q\fP, but applies any supplied precision to the \fIargument\fP
+before quoting it.
 .TP
 .B %(\fIdatefmt\fP)T
 causes \fBprintf\fP to output the date-time string resulting from using

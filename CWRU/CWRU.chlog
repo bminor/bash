@@ -1643,3 +1643,35 @@ builtins/enable.def
 doc/{bash.1,bashref.texi}
 	- enable: document new behavior of `enable NAME' when NAME is not a
 	  current shell builtin
+
+				    8/3
+				    ---
+lib/glob/sm_loop.c
+	- GMATCH: check for interrupts or terminating signals each time through
+	  the loop and return FNM_NOMATCH immediately if received. Let the
+	  higher layers deal with interrupting the match and jumping out.
+	  Inspired by a report from andrej@podzimek.org
+
+				    8/6
+				    ---
+subst.c
+	- {parameter_brace_remove_pattern,parameter_brace_transform,
+	   parameter_brace_substring,parameter_brace_casemod,
+	   parameter_brace_patsub}: make sure the IND argument is of type
+	   arrayind_t to handle the full range of subscripts. Reported by
+	   felix@f-hauri.ch
+
+builtins/printf.def
+	- printf_builtin: take new format specifier: %Q. This acts like %q
+	  but applies any supplied precision to the original unquoted
+	  argument, then quotes that result and outputs the entire quoted
+	  string, preserving the original field width. Originally suggested
+	  back in 4/2020 by Sam Liddicott <sam@liddicott.com>
+
+subst.c
+	- char_is_quoted: check whether or not we are on the second or later
+	  line of a command with an unclosed quoted string from a previous
+	  line. If we are, see if it's closed before the character we're
+	  checking, so we don't interpret a closing quote as starting a new
+	  quoted string. Reported several times, most recently by
+	  Phi Debian <phi.debian@gmail.com> in 6/2021.

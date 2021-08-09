@@ -16,6 +16,8 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+extern int interrupt_state, terminating_signal;
+
 struct STRUCT
 {
   CHAR *pattern;
@@ -80,6 +82,9 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
       c = FOLD (c);
 
       sc = n < se ? *n : '\0';
+
+      if (interrupt_state || terminating_signal)
+	return FNM_NOMATCH;
 
 #ifdef EXTENDED_GLOB
       /* EXTMATCH () will handle recursively calling GMATCH, so we can
