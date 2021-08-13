@@ -119,6 +119,7 @@ extern int extended_glob;
 #endif
 
 extern int dump_translatable_strings, dump_po_strings;
+extern int singlequote_translations;
 
 #if !defined (errno)
 extern int errno;
@@ -3858,6 +3859,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		    }
 		  else
 		    {
+		      /* Should we quote CTLESC here? */
 		      nestret = ttrans;
 		      nestlen = ttranslen;
 		    }
@@ -3867,12 +3869,27 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		{
 		  /* Locale expand $"..." here. */
 		  /* PST_NOEXPAND */
-		  ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
+		  ttrans = locale_expand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
 		  free (nestret);
 
-		  nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
+		  /* If we're supposed to single-quote translated strings,
+		     check whether the translated result is different from
+		     the original and single-quote the string if it is. */
+		  if (singlequote_translations &&
+		        ((nestlen - 1) != ttranslen || STREQN (nestret, ttrans, ttranslen) == 0))
+		    {
+		      if ((rflags & P_DQUOTE) == 0)
+			nestret = sh_single_quote (ttrans);
+		      else if ((rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2) && (flags & P_DOLBRACE))
+			nestret = sh_single_quote (ttrans);
+		      else
+			/* single quotes aren't special, use backslash instead */
+			nestret = sh_backslash_quote_for_double_quotes (ttrans);
+		    }
+		  else
+		    nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
 		  free (ttrans);
-		  nestlen = ttranslen + 2;
+		  nestlen = strlen (nestret);
 		  retind -= 2;		/* back up before the $" */
 		}
 
@@ -4881,14 +4898,20 @@ read_token_word (character)
 		{
 		  /* PST_NOEXPAND */
 		  /* Try to locale-expand the converted string. */
-		  ttrans = localeexpand (ttok, 0, ttoklen - 1, first_line, &ttranslen);
+		  ttrans = locale_expand (ttok, 0, ttoklen - 1, first_line, &ttranslen);
 		  free (ttok);
 
-		  /* Add the double quotes back */
-		  ttok = sh_mkdoublequoted (ttrans, ttranslen, 0);
+		  /* Add the double quotes back (or single quotes if the user
+		     has set that option). */
+		  if (singlequote_translations &&
+		        ((ttoklen - 1) != ttranslen || STREQN (ttok, ttrans, ttranslen) == 0))
+		    ttok = sh_single_quote (ttrans);
+		  else
+		    ttok = sh_mkdoublequoted (ttrans, ttranslen, 0);
+
 		  free (ttrans);
-		  ttranslen += 2;
 		  ttrans = ttok;
+		  ttranslen = strlen (ttrans);
 		}
 
 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 1,

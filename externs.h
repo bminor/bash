@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -142,7 +142,7 @@ extern void set_default_lang PARAMS((void));
 extern char *get_locale_var PARAMS((char *));
 extern char *localetrans PARAMS((char *, int, int *));
 extern char *mk_msgstr PARAMS((char *, int *));
-extern char *localeexpand PARAMS((char *, int, int, int, int *));
+extern char *locale_expand PARAMS((char *, int, int, int, int *));
 #ifndef locale_decpoint
 extern int locale_decpoint PARAMS((void));
 #endif

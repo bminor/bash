@@ -546,11 +546,14 @@ translation, using the @code{LC_MESSAGES}, @code{TEXTDOMAINDIR},
 and @code{TEXTDOMAIN} shell variables, as explained below.
 See the gettext documentation for additional details not covered here.
 If the current locale is @code{C} or @code{POSIX},
-or if there are no translations available,
-the dollar sign is ignored, and the shell doesn't attempt to translate the
-string.
-Since this is a form of double quoting, the string remains double-quoted,
-whether or not it is translated and replaced.
+if there are no translations available,
+of if the string is not translated,
+the dollar sign is ignored.
+Since this is a form of double quoting, the string remains double-quoted
+by default, whether or not it is translated and replaced.
+If the @code{noexpand_translation} option is enabled
+using the @code{shopt} builtin (@pxref{The Shopt Builtin}),
+translated strings are single-quoted instead of double-quoted.
 
 The rest of this section is a brief overview of how you use gettext to
 create translations for strings in a shell script named @var{scriptname}.
@@ -5648,6 +5651,12 @@ performing matching while executing @code{case} or @code{[[}
 conditional commands (@pxref{Conditional Constructs},
 when performing pattern substitution word expansions,
 or when filtering possible completions as part of programmable completion.
+
+@item noexpand_translation
+If set, Bash
+encloses the translated results of $"..." quoting in single quotes
+instead of double quotes.
+If the string is not translated, this has no effect.
 
 @item nullglob
 If set, Bash allows filename patterns which match no

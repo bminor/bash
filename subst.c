@@ -189,6 +189,7 @@ int fail_glob_expansion;
 /* Extern functions and variables from different files. */
 extern struct fd_bitmap *current_fds_to_close;
 extern int wordexp_only;
+extern int singlequote_translations;
 
 #if defined (JOB_CONTROL) && defined (PROCESS_SUBSTITUTION)
 extern PROCESS *last_procsub_child;
@@ -3808,9 +3809,13 @@ expand_string_dollar_quote (string, flags)
 	    {
 	      news = ++sindex;
 	      t = string_extract_double_quoted (string, &news, SX_COMPLETE);
-	      trans = localeexpand (t, 0, news-sindex, 0, &translen);
+	      trans = locale_expand (t, 0, news-sindex, 0, &translen);
 	      free (t);
-	      t = sh_mkdoublequoted (trans, translen, 0);
+	      if (singlequote_translations &&
+		    ((news-sindex-1) != translen || STREQN (t, trans, translen) == 0))
+		t = sh_single_quote (trans);
+	      else
+		t = sh_mkdoublequoted (trans, translen, 0);
 	      sindex = news;
 	    }
 	  free (trans);

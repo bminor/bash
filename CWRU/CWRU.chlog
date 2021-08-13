@@ -1675,3 +1675,19 @@ subst.c
 	  checking, so we don't interpret a closing quote as starting a new
 	  quoted string. Reported several times, most recently by
 	  Phi Debian <phi.debian@gmail.com> in 6/2021.
+
+				    8/9
+				    ---
+parse.y,subst.c
+	- locale_expand: if the variable SINGLEQUOTE_TRANSLATIONS is non-zero,
+	  single-quote the translated result of $"..." (if it's different from
+	  the untranslated string)
+
+builtins/shopt.def
+	- noexpand_translation: new option to expose the value of
+	  SINGLEQUOTE_TRANSLATIONS
+
+				   8/10
+				   ----
+doc/{bash.1,bashref.texi}
+	- noexpand_translation: add description of new option

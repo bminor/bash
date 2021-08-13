@@ -47,6 +47,8 @@ int locale_utf8locale;
 int locale_mb_cur_max;	/* value of MB_CUR_MAX for current locale (LC_CTYPE) */
 int locale_shiftstates = 0;
 
+int singlequote_translations = 0;	/* single-quote output of $"..." */
+
 extern int dump_translatable_strings, dump_po_strings;
 
 /* The current locale when the program begins */
@@ -512,7 +514,7 @@ mk_msgstr (string, foundnlp)
    by the caller.  The length of the translated string is returned in LENP,
    if non-null. */
 char *
-localeexpand (string, start, end, lineno, lenp)
+locale_expand (string, start, end, lineno, lenp)
      char *string;
      int start, end, lineno, *lenp;
 {
