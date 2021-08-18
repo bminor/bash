@@ -1173,7 +1173,7 @@ builtins/common.c
 	  clarity
 
 arrayfunc.c
-	- assign_array_element: sanity check: make sure that the suubscript
+	- assign_array_element: sanity check: make sure that the subscript
 	  returned by array_variable_name consumes the entire NAME, otherwise
 	  flag it as a subscript error. This keeps things like
 	  `KEY=' ]'; read assoc[$KEY] <<< hello' from assigning to incomplete
@@ -1691,3 +1691,21 @@ builtins/shopt.def
 				   ----
 doc/{bash.1,bashref.texi}
 	- noexpand_translation: add description of new option
+
+				   8/16
+				   ----
+builtins/printf.def
+	- printf_builtin: initialize retval after parsing arguments, since we
+	  use it for the `v' option. Bug report from Keith Thompson
+	  <Keith.S.Thompson@gmail.com>
+
+lib/sh/unicode.c
+	- u32tocesc: fix typo that returned \uXXXXXXXX instead of \UXXXXXXXX.
+	  From https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=992257 by
+	  <nabijaczleweli@nabijaczleweli.xyz>
+
+				   8/17
+				   ----
+siglist.c
+	- include command.h before general.h for PARAMS and prototypes. Report
+	  from Osipov, Michael (LDA IT PLM) <michael.osipov@siemens.com>

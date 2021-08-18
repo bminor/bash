@@ -257,8 +257,6 @@ printf_builtin (list)
 #endif
 
   conversion_error = 0;
-  retval = EXECUTION_SUCCESS;
-
   vflag = 0;
 
   reset_internal_getopt ();
@@ -319,6 +317,7 @@ printf_builtin (list)
 
   format = list->word->word;
   tw = 0;
+  retval = EXECUTION_SUCCESS;
 
   garglist = orig_arglist = list->next;
 
