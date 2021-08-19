@@ -374,7 +374,8 @@ enable_hostname_completion (on_or_off)
      int on_or_off;
 {
   int old_value;
-  char *at, *nv, *nval;
+  char *nv, *nval;
+  const char *at;
 
   old_value = perform_hostname_completion;
 
@@ -434,7 +435,7 @@ enable_hostname_completion (on_or_off)
 	  strcpy (nval + 1, rl_completer_word_break_characters);
         }
 
-      free (rl_completer_word_break_characters);
+      free ((void *)rl_completer_word_break_characters);
       rl_completer_word_break_characters = nval;
     }
 
@@ -3814,7 +3815,7 @@ bash_complete_filename_internal (what_to_do)
   rl_completion_func_t *orig_attempt_func;
   rl_icppfunc_t *orig_dir_func;
   rl_compignore_func_t *orig_ignore_func;
-  /*const*/ char *orig_rl_completer_word_break_characters;
+  const char *orig_rl_completer_word_break_characters;
   int r;
 
   orig_func = rl_completion_entry_function;

@@ -2,7 +2,7 @@
 
    Modified by Chet Ramey for Readline.
 
-   Copyright (C) 1985, 1988, 1990-1991, 1995-2010, 2012, 2015, 2017, 2019
+   Copyright (C) 1985, 1988, 1990-1991, 1995-2021
    Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -239,8 +239,10 @@ _rl_print_color_indicator (const char *f)
       else if (S_ISSOCK (mode))
         colored_filetype = C_SOCK;
 #endif
+#if defined (S_ISBLK)
       else if (S_ISBLK (mode))
         colored_filetype = C_BLK;
+#endif
       else if (S_ISCHR (mode))
         colored_filetype = C_CHR;
       else

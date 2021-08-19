@@ -1709,3 +1709,41 @@ lib/sh/unicode.c
 siglist.c
 	- include command.h before general.h for PARAMS and prototypes. Report
 	  from Osipov, Michael (LDA IT PLM) <michael.osipov@siemens.com>
+
+				   8/18
+				   ----
+lib/readline/colors.c
+	- S_ISBLK: make sure it's defined before we use it, like in complete.c
+
+lib/readline/complete.c,{bashline,variables}.c
+	- minor changes to prep for making rl_completer_word_break_characters
+	  `const'
+
+subst.[ch],pcomplete.c
+	- split_at_delims: the DELIMS argument is now `const'; change callers
+
+lib/readline/rlmbutil.h
+	- _rl_wcwidth: add function prototype for inline function declaration
+
+lib/readline/bind.c
+	- _rl_get_keyname: print keys greater than 160 (which are valid UTF-8)
+	  as octal escape sequences
+
+lib/readline/text.c
+	- do_lowercase_version: return 99999 to prevent the linker from
+	  combining it with _rl_null_function and optimizing away the separate
+	  copy. That messes with function pointer comparisons. Part of this
+	  batch of fixes from sparrowhawk996@gmail.com
+
+				   8/19
+				   ----
+complete.c,readline.c,readline.h
+	- rl_completer_word_break_characters: now const char * like
+	  rl_basic_word_break_characters; element of eadline state struct
+	  used to save it also const. THIS IS AN API CHANGE
+
+bashline.c
+	- orig_rl_completer_word_break_characters: now const char * like
+	  rl_completer_word_break_characters
+
+

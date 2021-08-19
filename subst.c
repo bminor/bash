@@ -2288,7 +2288,7 @@ WORD_LIST *
 split_at_delims (string, slen, delims, sentinel, flags, nwp, cwp)
      char *string;
      int slen;
-     char *delims;
+     const char *delims;
      int sentinel, flags;
      int *nwp, *cwp;
 {
@@ -2305,7 +2305,7 @@ split_at_delims (string, slen, delims, sentinel, flags, nwp, cwp)
       return ((WORD_LIST *)NULL);
     }
 
-  d = (delims == 0) ? ifs_value : delims;
+  d = (delims == 0) ? ifs_value : (char *)delims;
   ifs_split = delims == 0;
 
   /* Make d2 the non-whitespace characters in delims */

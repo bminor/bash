@@ -326,7 +326,7 @@ extern int skip_to_histexp PARAMS((char *, int, char *, int));
 #if defined (READLINE)
 extern int char_is_quoted PARAMS((char *, int));
 extern int unclosed_pair PARAMS((char *, int, char *));
-extern WORD_LIST *split_at_delims PARAMS((char *, int, char *, int, int, int *, int *));
+extern WORD_LIST *split_at_delims PARAMS((char *, int, const char *, int, int, int *, int *));
 #endif
 
 /* Variables used to keep track of the characters in IFS. */

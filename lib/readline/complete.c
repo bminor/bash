@@ -304,7 +304,7 @@ const char *rl_basic_quote_characters = "\"'";
 /* The list of characters that signal a break between words for
    rl_complete_internal.  The default list is the contents of
    rl_basic_word_break_characters.  */
-/*const*/ char *rl_completer_word_break_characters = (/*const*/ char *)NULL;
+const char *rl_completer_word_break_characters = 0;
 
 /* Hook function to allow an application to set the completion word
    break characters before readline breaks up the line.  Allows
@@ -1078,7 +1078,8 @@ char
 _rl_find_completion_word (int *fp, int *dp)
 {
   int scan, end, found_quote, delimiter, pass_next, isbrk;
-  char quote_char, *brkchars;
+  char quote_char;
+  const char *brkchars;
 
   end = rl_point;
   found_quote = delimiter = 0;

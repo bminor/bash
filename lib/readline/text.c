@@ -1135,7 +1135,7 @@ rl_newline (int count, int key)
 int
 rl_do_lowercase_version (int ignore1, int ignore2)
 {
-  return 0;
+  return 99999;		/* prevent from being combined with _rl_null_function */
 }
 
 /* This is different from what vi does, so the code's not shared.  Emacs
