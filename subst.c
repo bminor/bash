@@ -7915,6 +7915,7 @@ string_transform (xc, v, s)
 	ret = string_var_assignment (v, s);
 	break;
       case 'K':
+      case 'k':
 	ret = sh_quote_reusable (s, 0);
 	break;
       /* Transformations that modify the variable's value */
@@ -8008,7 +8009,7 @@ array_transform (xc, var, starsub, quoted)
 {
   ARRAY *a;
   HASH_TABLE *h;
-  int itype;
+  int itype, qflags;
   char *ret;
   WORD_LIST *list;
   SHELL_VAR *v;
@@ -8035,6 +8036,23 @@ array_transform (xc, var, starsub, quoted)
   a = (v && array_p (v)) ? array_cell (v) : 0;
   h = (v && assoc_p (v)) ? assoc_cell (v) : 0;
 
+  /* XXX - for now */
+  if (xc == 'k')
+    {
+      if (v == 0)
+	return ((char *)NULL);
+      list = array_p (v) ? array_to_kvpair_list (a) : assoc_to_kvpair_list (h);
+      qflags = quoted;
+      /* If we are expanding in a context where word splitting will not be
+	 performed, treat as quoted.  This changes how $* will be expanded. */
+      if (itype == '*' && expand_no_split_dollar_star && ifs_is_null)
+	qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
+
+      ret = string_list_pos_params (itype, list, qflags, 0);
+      dispose_words (list);
+      return ret;
+    }
+
   list = a ? array_to_word_list (a) : (h ? assoc_to_word_list (h) : 0);
   if (list == 0)
    return ((char *)NULL);
@@ -8058,6 +8076,7 @@ valid_parameter_transform (xform)
     case 'a':		/* expand to a string with just attributes */
     case 'A':		/* expand as an assignment statement with attributes */
     case 'K':		/* expand assoc array to list of key/value pairs */
+    case 'k':		/* XXX - for now */
     case 'E':		/* expand like $'...' */
     case 'P':		/* expand like prompt string */
     case 'Q':		/* quote reusably */

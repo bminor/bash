@@ -288,3 +288,44 @@ declare -a ia
 declare -A a=(["@"]="at2" )
 declare -A a=(["@"]="    string" )
 declare -A a=(["*"]="star2" ["@"]="at" )
+declare -A assoc=([hello]="world" ["key with spaces"]="value with spaces" [foo]="bar" [one]="1" )
+argv[1] = <world>
+argv[2] = <value with spaces>
+argv[3] = <bar>
+argv[4] = <1>
+argv[1] = <hello>
+argv[2] = <world>
+argv[3] = <key with spaces>
+argv[4] = <value with spaces>
+argv[5] = <foo>
+argv[6] = <bar>
+argv[7] = <one>
+argv[8] = <1>
+argv[1] = <world value with spaces bar 1>
+argv[1] = <hello world key with spaces value with spaces foo bar one 1>
+argv[1] = <hello>
+argv[2] = <world>
+argv[3] = <key with spaces>
+argv[4] = <value with spaces>
+argv[5] = <one>
+argv[6] = <1>
+argv[7] = <foo>
+argv[8] = <bar>
+argv[1] = <'hello'>
+argv[2] = <'world'>
+argv[3] = <'key with spaces'>
+argv[4] = <'value with spaces'>
+argv[5] = <'one'>
+argv[6] = <'1'>
+argv[7] = <'foo'>
+argv[8] = <'bar'>
+argv[1] = <'hello'>
+argv[2] = <'world'>
+argv[3] = <'key with spaces'>
+argv[4] = <'value with spaces'>
+argv[5] = <'one'>
+argv[6] = <'1'>
+argv[7] = <'foo'>
+argv[8] = <'bar'>
+declare -A clone=([hello]="world" ["key with spaces"]="value with spaces" [foo]="bar" [one]="1" )
+declare -A posparams=([hello]="world" ["key with spaces"]="value with spaces" [foo]="bar" [one]="1" )

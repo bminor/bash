@@ -267,6 +267,13 @@ sh_readonly (s)
 }
 
 void
+sh_noassign (s)
+     const char *s;
+{
+  internal_error (_("%s: cannot assign"), s);	/* XXX */
+}
+
+void
 sh_erange (s, desc)
      char *s, *desc;
 {

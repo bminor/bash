@@ -3580,7 +3580,16 @@ bash_directory_completion_hook (dirname)
 	 subsequent directory checks don't fail. */
       if (temp2 == 0 && dircomplete_spelling && dircomplete_expand)
 	{
+	  size_t l1, l2;
+
 	  temp2 = dirspell (temp1);
+	  l2 = STRLEN (temp2);
+	  /* Don't take matches if they are shorter than the original path */
+	  if (temp2 && l2 < strlen (temp1) && STREQN (temp1, temp2, l2))
+	    {
+	      free (temp2);
+	      temp2 = 0;
+	    }
 	  if (temp2)
 	    {
 	      free (temp1);

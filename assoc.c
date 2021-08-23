@@ -7,7 +7,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 2008,2009,2011-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2011-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -542,6 +542,30 @@ assoc_keys_to_word_list (h)
      HASH_TABLE *h;
 {
   return (assoc_to_word_list_internal (h, 1));
+}
+
+WORD_LIST *
+assoc_to_kvpair_list (h)
+     HASH_TABLE *h;
+{
+  WORD_LIST *list;
+  int i;
+  BUCKET_CONTENTS *tlist;
+  char *k, *v;
+
+  if (h == 0 || assoc_empty (h))
+    return((WORD_LIST *)NULL);
+  list = (WORD_LIST *)NULL;
+  
+  for (i = 0; i < h->nbuckets; i++)
+    for (tlist = hash_items (i, h); tlist; tlist = tlist->next)
+      {
+      	k = (char *)tlist->key;
+      	v = (char *)tlist->data;
+	list = make_word_list (make_bare_word (k), list);
+	list = make_word_list (make_bare_word (v), list);
+      }
+  return (REVERSE_LIST(list, WORD_LIST *));
 }
 
 char *

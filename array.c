@@ -793,6 +793,27 @@ ARRAY	*a;
 	return (REVERSE_LIST(list, WORD_LIST *));
 }
 
+WORD_LIST *
+array_to_kvpair_list(a)
+ARRAY	*a;
+{
+	WORD_LIST	*list;
+	ARRAY_ELEMENT	*ae;
+	char		*k, *v;
+
+	if (a == 0 || array_empty(a))
+		return((WORD_LIST *)NULL);
+	list = (WORD_LIST *)NULL;
+	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
+		k = itos(element_index(ae));
+		v = element_value(ae);
+		list = make_word_list (make_bare_word(k), list);
+		list = make_word_list (make_bare_word(v), list);
+		free(k);
+	}
+	return (REVERSE_LIST(list, WORD_LIST *));
+}
+
 ARRAY *
 array_assign_list (array, list)
 ARRAY	*array;

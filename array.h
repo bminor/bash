@@ -80,6 +80,7 @@ extern char	*array_reference PARAMS((ARRAY *, arrayind_t));
 extern WORD_LIST *array_to_word_list PARAMS((ARRAY *));
 extern ARRAY *array_from_word_list PARAMS((WORD_LIST *));
 extern WORD_LIST *array_keys_to_word_list PARAMS((ARRAY *));
+extern WORD_LIST *array_to_kvpair_list PARAMS((ARRAY *));
 
 extern ARRAY *array_assign_list PARAMS((ARRAY *, WORD_LIST *));
 

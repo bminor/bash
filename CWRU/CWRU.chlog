@@ -1746,4 +1746,33 @@ bashline.c
 	- orig_rl_completer_word_break_characters: now const char * like
 	  rl_completer_word_break_characters
 
+				   8/20
+				   ----
+bashline.c
+	- bash_directory_completion_hook: if direxpand and dirspell are both
+	  set while trying to complete an absolute pathname as a command, don't
+	  take a spell-corrected directory name that is shorter than the
+	  original hint. https://bugzilla.redhat.com/show_bug.cgi?id=1782809
 
+builtins/common.[ch]
+	- sh_noassign: convenience function to print an error message when a
+	  user attempts an assignment to a "noassign" variable. Not used yet
+
+assoc.[ch]
+	- assoc_to_kvpair_list: new function, returns a WORD_LIST containing
+	  key-value pairs as separate words
+
+array.[ch]
+	- array_to_kvpair_list: new function, returns a WORD_LIST containing
+	  index-value pairs as separate words
+
+subst.c
+	- string_transform: handle '@k' transform like '@K'
+	- valid_parameter_transform: 'k' is a valid transform operator
+	- array_transform: handle '@k' transformation by calling one of
+	  array_to_kvpair_list or assoc_to_kvpair_list and treating the
+	  result as if expanding the array depending on whether the index is
+	  `@' or `*' with the usual meanings
+
+doc/{bash.1,bashref.texi}
+	- document new '@k' parameter transformation operator

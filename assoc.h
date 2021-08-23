@@ -60,6 +60,7 @@ extern char *assoc_to_assign PARAMS((HASH_TABLE *, int));
 
 extern WORD_LIST *assoc_to_word_list PARAMS((HASH_TABLE *));
 extern WORD_LIST *assoc_keys_to_word_list PARAMS((HASH_TABLE *));
+extern WORD_LIST *assoc_to_kvpair_list PARAMS((HASH_TABLE *));
 
 extern char *assoc_to_string PARAMS((HASH_TABLE *, char *, int));
 #endif /* _ASSOC_H_ */
