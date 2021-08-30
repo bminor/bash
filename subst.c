@@ -8332,7 +8332,7 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
 /*								*/
 /****************************************************************/
 
-#if 0	/* TAG: bash-5.2? */
+#if 0	/* TAG: bash-5.2 */
 static int
 shouldexp_replacement (s)
      char *s;
@@ -8374,7 +8374,7 @@ pat_subst (string, pat, rep, mflags)
 
   mtype = mflags & MATCH_TYPEMASK;
 
-#if 0	/* TAG: bash-5.2? */
+#if 0	/* TAG: bash-5.2 */
   rxpand = (rep && *rep) ? shouldexp_replacement (rep) : 0;
 #else
   rxpand = 0;

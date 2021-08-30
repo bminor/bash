@@ -351,6 +351,30 @@ rl_unix_filename_rubout (int count, int key)
       while (count--)
 	{
 	  c = rl_line_buffer[rl_point - 1];
+
+	  /* First move backwards through whitespace */
+	  while (rl_point && whitespace (c))
+	    {
+	      rl_point--;
+	      c = rl_line_buffer[rl_point - 1];
+	    }
+
+	  /* Consume one or more slashes. */
+	  if (c == '/')
+	    {
+	      int i;
+
+	      i = rl_point - 1;
+	      while (i > 0 && c == '/')
+		c = rl_line_buffer[--i];
+	      if (i == 0 || whitespace (c))
+		{
+		  rl_point = i + whitespace (c);
+		  continue;	/* slashes only */
+		}
+	      c = '/';
+	    }
+
 	  while (rl_point && (whitespace (c) || c == '/'))
 	    {
 	      rl_point--;
