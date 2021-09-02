@@ -109,6 +109,7 @@ extern int yyparse PARAMS((void));
 extern int return_EOF PARAMS((void));
 extern void push_token PARAMS((int));
 extern char *xparse_dolparen PARAMS((char *, char *, int *, int));
+extern COMMAND *parse_string_to_command PARAMS((char *, int));
 extern void reset_parser PARAMS((void));
 extern void reset_readahead_token PARAMS((void));
 extern WORD_LIST *parse_string_to_word_list PARAMS((char *, int, const char *));

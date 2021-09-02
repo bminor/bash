@@ -45,6 +45,7 @@
 
 #include "shell.h"
 #include "parser.h"
+#include "redir.h"
 #include "flags.h"
 #include "jobs.h"
 #include "execute_cmd.h"
@@ -306,6 +307,7 @@ static int valid_parameter_transform PARAMS((char *));
 
 static char *process_substitute PARAMS((char *, int));
 
+static char *optimize_cat_file PARAMS((REDIRECT *, int, int, int *));
 static char *read_comsub PARAMS((int, int, int, int *));
 
 #ifdef ARRAY_VARS
@@ -6281,12 +6283,32 @@ process_substitute (string, open_for_read_in_child)
 /*				   */
 /***********************************/
 
+#define COMSUB_PIPEBUF	4096
+
+static char *
+optimize_cat_file (r, quoted, flags, flagp)
+     REDIRECT *r;
+     int quoted, flags, *flagp;
+{
+  char *ret;
+  int fd;
+
+  fd = open_redir_file (r, (char **)0);
+  if (fd < 0)
+    return &expand_param_error;
+
+  ret = read_comsub (fd, quoted, flags, flagp);
+  close (fd);
+
+  return ret;
+}
+
 static char *
 read_comsub (fd, quoted, flags, rflag)
      int fd, quoted, flags;
      int *rflag;
 {
-  char *istring, buf[512], *bufp;
+  char *istring, buf[COMSUB_PIPEBUF], *bufp;
   int istring_index, c, tflag, skip_ctlesc, skip_ctlnul;
   int mb_cur_max;
   size_t istring_size;
@@ -6431,15 +6453,38 @@ command_substitute (string, quoted, flags)
 
   /* Don't fork () if there is no need to.  In the case of no command to
      run, just return NULL. */
-#if 1
   for (s = string; s && *s && (shellblank (*s) || *s == '\n'); s++)
     ;
   if (s == 0 || *s == 0)
     return ((WORD_DESC *)NULL);
-#else
-  if (!string || !*string || (string[0] == '\n' && !string[1]))
-    return ((WORD_DESC *)NULL);
-#endif
+
+  if (*s == '<' && (s[1] != '<' && s[1] != '>' && s[1] != '&'))
+    {
+      COMMAND *cmd;
+
+      cmd = parse_string_to_command (string, 0);	/* XXX - flags */
+      if (cmd && can_optimize_cat_file (cmd))
+	{
+	  tflag = 0;
+	  istring = optimize_cat_file (cmd->value.Simple->redirects, quoted, flags, &tflag);
+	  if (istring == &expand_param_error)
+	    {
+	      last_command_exit_value = EXECUTION_FAILURE;
+	      istring = 0;
+	    }
+	  else
+	    last_command_exit_value = EXECUTION_SUCCESS;	/* compat */
+	  last_command_subst_pid = dollar_dollar_pid;
+
+	  dispose_command (cmd);	  
+	  ret = alloc_word_desc ();
+	  ret->word = istring;
+	  ret->flags = tflag;
+
+	  return ret;
+	}
+      dispose_command (cmd);
+    }
 
   if (wordexp_only && read_but_dont_execute)
     {

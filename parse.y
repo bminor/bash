@@ -200,7 +200,7 @@ static void print_offending_line PARAMS((void));
 static void report_syntax_error PARAMS((char *));
 
 static void handle_eof_input_unit PARAMS((void));
-static void prompt_again PARAMS((void));
+static void prompt_again PARAMS((int));
 #if 0
 static void reset_readline_prompt PARAMS((void));
 #endif
@@ -1873,7 +1873,7 @@ typedef struct string_saver {
 #if defined (ALIAS)
   alias_t *expander;   /* alias that caused this line to be pushed. */
 #endif
-  size_t saved_line_size, saved_line_index;
+  size_t saved_line_size, saved_line_index, saved_line_len;
   int saved_line_terminator;
   int flags;
 } STRING_SAVER;
@@ -1899,6 +1899,7 @@ push_string (s, expand, ap)
   temp->expand_alias = expand;
   temp->saved_line = shell_input_line;
   temp->saved_line_size = shell_input_line_size;
+  temp->saved_line_len = shell_input_line_len;
   temp->saved_line_index = shell_input_line_index;
   temp->saved_line_terminator = shell_input_line_terminator;
   temp->flags = 0;
@@ -1916,7 +1917,7 @@ push_string (s, expand, ap)
 #endif
 
   shell_input_line = s;
-  shell_input_line_size = STRLEN (s);
+  shell_input_line_size = shell_input_line_len = STRLEN (s);
   shell_input_line_index = 0;
   shell_input_line_terminator = '\0';
 #if 0
@@ -1941,6 +1942,7 @@ pop_string ()
   shell_input_line = pushed_string_list->saved_line;
   shell_input_line_index = pushed_string_list->saved_line_index;
   shell_input_line_size = pushed_string_list->saved_line_size;
+  shell_input_line_len = pushed_string_list->saved_line_len;
   shell_input_line_terminator = pushed_string_list->saved_line_terminator;
 
   if (pushed_string_list->expand_alias)
@@ -2152,8 +2154,8 @@ read_secondary_line (remove_quoted_newline)
   int n, c;
 
   prompt_string_pointer = &ps2_prompt;
-  if (SHOULD_PROMPT())
-    prompt_again ();
+  if (SHOULD_PROMPT ())
+    prompt_again (0);
   ret = read_a_line (remove_quoted_newline);
 #if defined (HISTORY)
   if (ret && remember_on_history && (parser_state & PST_HEREDOC))
@@ -2554,7 +2556,7 @@ shell_getc (remove_quoted_newline)
 	  shell_input_line_size = 0;
 	  prompt_string_pointer = &current_prompt_string;
 	  if (SHOULD_PROMPT ())
-	    prompt_again ();
+	    prompt_again (0);
 	  goto restart_read;
 	}
 
@@ -2662,7 +2664,7 @@ pop_alias:
   if MBTEST(uc == '\\' && remove_quoted_newline && shell_input_line[shell_input_line_index] == '\n')
     {
 	if (SHOULD_PROMPT ())
-	  prompt_again ();
+	  prompt_again (0);
 	line_number++;
 
 	/* What do we do here if we're expanding an alias whose definition
@@ -2886,7 +2888,7 @@ yylex ()
       /* Avoid printing a prompt if we're not going to read anything, e.g.
 	 after resetting the parser with read_token (RESET). */
       if (token_to_read == 0 && SHOULD_PROMPT ())
-	prompt_again ();
+	prompt_again (0);
     }
 
   two_tokens_ago = token_before_that;
@@ -3698,7 +3700,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 
       /* Possible reprompting. */
       if (ch == '\n' && SHOULD_PROMPT ())
-	prompt_again ();
+	prompt_again (0);
 
       /* Don't bother counting parens or doing anything else if in a comment
 	 or part of a case statement */
@@ -4190,7 +4192,7 @@ xparse_dolparen (base, string, indp, flags)
 
   token_to_read = DOLPAREN;			/* let's trick the parser */
 
-  nc = parse_string (string, "command substitution", sflags, &ep);
+  nc = parse_string (string, "command substitution", sflags, (COMMAND **)NULL, &ep);
 
   /* Should we save and restore the bison/yacc lookahead token (yychar) here?
      Or only if it's not YYEMPTY? */
@@ -4262,6 +4264,72 @@ xparse_dolparen (base, string, indp, flags)
     ret = substring (ostring, 0, nc - 1);
 
   return ret;
+}
+
+/* Recursively call the parser to parse the string from a $(...) command
+   substitution to a COMMAND *. This is called from command_substitute() and
+   has the same parser state constraints as xparse_dolparen(). */
+COMMAND *
+parse_string_to_command (string, flags)
+     char *string;
+     int flags;
+{
+  sh_parser_state_t ps;
+  sh_input_line_state_t ls;
+  int nc, sflags;
+  size_t slen;
+  char *ret, *ep;
+  COMMAND *cmd;
+
+  if (*string == 0)
+    return (COMMAND *)NULL;
+
+  ep = string;
+  slen = STRLEN (string);
+
+/*itrace("parse_string_to_command: size = %d shell_input_line = `%s' string=`%s'", shell_input_line_size, shell_input_line, string);*/
+
+  sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
+  if (flags & SX_NOLONGJMP)
+    sflags |= SEVAL_NOLONGJMP;
+
+  save_parser_state (&ps);
+  save_input_line_state (&ls);
+
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
+  pushed_string_list = (STRING_SAVER *)NULL;
+#endif
+  if (flags & SX_COMPLETE)
+    parser_state |= PST_NOERROR;
+
+  cmd = 0;
+  nc = parse_string (string, "command substitution", sflags, &cmd, &ep);
+
+  reset_parser ();
+  /* reset_parser() clears shell_input_line and associated variables, including
+     parser_state, so we want to reset things, then restore what we need. */
+  restore_input_line_state (&ls);
+  restore_parser_state (&ps);
+
+  /* If parse_string returns < 0, we need to jump to top level with the
+     negative of the return value. We abandon the rest of this input line
+     first */
+  if (nc < 0)
+    {
+      clear_shell_input_line ();	/* XXX */
+      if ((flags & SX_NOLONGJMP) == 0)
+        jump_to_top_level (-nc);	/* XXX */
+    }
+
+  /* Need to check how many characters parse_string() consumed, make sure it's
+     the entire string. */
+  if (nc < slen)
+    {
+      dispose_command (cmd);
+      return (COMMAND *)NULL;
+    }
+
+  return cmd;
 }
 
 #if defined (DPAREN_ARITHMETIC) || defined (ARITH_FOR_COMMAND)
@@ -4439,7 +4507,7 @@ cond_skip_newlines ()
   while ((cond_token = read_token (READ)) == '\n')
     {
       if (SHOULD_PROMPT ())
-	prompt_again ();
+	prompt_again (0);
     }
   return (cond_token);
 }
@@ -5023,7 +5091,7 @@ got_escaped_character:
 
     next_character:
       if (character == '\n' && SHOULD_PROMPT ())
-	prompt_again ();
+	prompt_again (0);
 
       /* We want to remove quoted newlines (that is, a \<newline> pair)
 	 unless we are within single quotes or pass_next_character is
@@ -5374,7 +5442,8 @@ history_delimiting_chars (line)
 /* Issue a prompt, or prepare to issue a prompt when the next character
    is read. */
 static void
-prompt_again ()
+prompt_again (force)
+     int force;
 {
   char *temp_prompt;
 
@@ -6150,7 +6219,7 @@ handle_eof_input_unit ()
 	      last_read_token = current_token = '\n';
 	      /* Reset the prompt string to be $PS1. */
 	      prompt_string_pointer = (char **)NULL;
-	      prompt_again ();
+	      prompt_again (0);
 	      return;
 	    }
 	}
@@ -6314,7 +6383,7 @@ parse_compound_assignment (retlenp)
       if (tok == '\n')			/* Allow newlines in compound assignments */
 	{
 	  if (SHOULD_PROMPT ())
-	    prompt_again ();
+	    prompt_again (0);
 	  continue;
 	}
       if (tok != WORD && tok != ASSIGNMENT_WORD)

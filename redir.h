@@ -37,4 +37,7 @@ extern int do_redirections PARAMS((REDIRECT *, int));
 extern char *redirection_expand PARAMS((WORD_DESC *));
 extern int stdin_redirects PARAMS((REDIRECT *));
 
+/* in builtins/evalstring.c for now, could move later */
+extern int open_redir_file PARAMS((REDIRECT *, char **));
+
 #endif /* _REDIR_H_ */

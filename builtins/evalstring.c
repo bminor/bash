@@ -173,6 +173,19 @@ optimize_shell_function (command)
     }  
 }
 
+int
+can_optimize_cat_file (command)
+     COMMAND *command;
+{
+  return (command->type == cm_simple && !command->redirects &&
+	    (command->flags & CMD_TIME_PIPELINE) == 0 &&
+	    command->value.Simple->words == 0 &&
+	    command->value.Simple->redirects &&
+	    command->value.Simple->redirects->next == 0 &&
+	    command->value.Simple->redirects->instruction == r_input_direction &&
+	    command->value.Simple->redirects->redirector.dest == 0);
+}
+
 /* How to force parse_and_execute () to clean up after itself. */
 void
 parse_and_execute_cleanup (old_running_trap)
@@ -471,13 +484,7 @@ parse_and_execute (string, from_file, flags)
 	      if (startup_state == 2 &&
 		  (subshell_environment & SUBSHELL_COMSUB) &&
 		  *bash_input.location.string == '\0' &&
-		  command->type == cm_simple && !command->redirects &&
-		  (command->flags & CMD_TIME_PIPELINE) == 0 &&
-		  command->value.Simple->words == 0 &&
-		  command->value.Simple->redirects &&
-		  command->value.Simple->redirects->next == 0 &&
-		  command->value.Simple->redirects->instruction == r_input_direction &&
-		  command->value.Simple->redirects->redirector.dest == 0)
+		  can_optimize_cat_file (command))
 		{
 		  int r;
 		  r = cat_file (command->value.Simple->redirects);
@@ -541,10 +548,11 @@ parse_and_execute (string, from_file, flags)
    command substitutions during parsing to obey Posix rules about finding
    the end of the command and balancing parens. */
 int
-parse_string (string, from_file, flags, endp)
+parse_string (string, from_file, flags, cmdp, endp)
      char *string;
      const char *from_file;
      int flags;
+     COMMAND **cmdp;
      char **endp;
 {
   int code, nc;
@@ -619,7 +627,10 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	  
       if (parse_command () == 0)
 	{
-	  dispose_command (global_command);
+	  if (cmdp)
+	    *cmdp = global_command;
+	  else
+	    dispose_command (global_command);
 	  global_command = (COMMAND *)NULL;
 	}
       else
@@ -665,12 +676,10 @@ out:
   return (nc);
 }
 
-/* Handle a $( < file ) command substitution.  This expands the filename,
-   returning errors as appropriate, then just cats the file to the standard
-   output. */
-static int
-cat_file (r)
+int
+open_redir_file (r, fnp)
      REDIRECT *r;
+     char **fnp;
 {
   char *fn;
   int fd, rval;
@@ -696,8 +705,29 @@ cat_file (r)
     {
       file_error (fn);
       free (fn);
+      if (fnp)
+	*fnp = 0;
       return -1;
     }
+
+  if (fnp)
+    *fnp = fn;
+  return fd;
+}
+
+/* Handle a $( < file ) command substitution.  This expands the filename,
+   returning errors as appropriate, then just cats the file to the standard
+   output. */
+static int
+cat_file (r)
+     REDIRECT *r;
+{
+  char *fn;
+  int fd, rval;
+
+  fd = open_redir_file (r, &fn);
+  if (fd < 0)
+    return -1;
 
   rval = zcatfd (fd, 1, fn);
 

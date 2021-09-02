@@ -40,7 +40,7 @@ do { \
     builtin_help (); \
     return (EX_USAGE)
 
-/* Flag values for parse_and_execute () */
+/* Flag values for parse_and_execute () and parse_string () */
 #define SEVAL_NONINT	0x001
 #define SEVAL_INTERACT	0x002
 #define SEVAL_NOHIST	0x004
@@ -213,9 +213,10 @@ extern WORD_LIST *get_directory_stack PARAMS((int));
 extern int parse_and_execute PARAMS((char *, const char *, int));
 extern int evalstring PARAMS((char *, const char *, int));
 extern void parse_and_execute_cleanup PARAMS((int));
-extern int parse_string PARAMS((char *, const char *, int, char **));
+extern int parse_string PARAMS((char *, const char *, int, COMMAND **, char **));
 extern int should_suppress_fork PARAMS((COMMAND *));
 extern int can_optimize_connection PARAMS((COMMAND *));
+extern int can_optimize_cat_file PARAMS((COMMAND *));
 extern void optimize_fork PARAMS((COMMAND *));
 extern void optimize_subshell_command PARAMS((COMMAND *));
 extern void optimize_shell_function PARAMS((COMMAND *));

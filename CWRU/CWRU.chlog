@@ -1784,3 +1784,52 @@ lib/readline/kill.c
 	  or more slashes. The old code went too far and deleted the previous
 	  word as well. From dabe@dabe.com
 
+				   8/31
+				   ----
+parse.y
+	- STRING_SAVER: now save and restore shell_input_line_len; not sure
+	  why it wasn't done before; fix push_string and pop_string accordingly
+	- prompt_again: now takes a parameter FORCE; not used yet (every
+	  caller passes 0), needs more thought
+
+builtins/evalstring.h
+	- open_redir_file: broke code that expands the redirection and opens
+	  the resultant filename into a new function, called from cat_file
+
+redir.h
+	- open_redir_file: extern declaration here for now
+
+builtins/evalstring.c
+	- parse_string: takes a new argument: COMMAND **cmdp; if non-null, saves
+	  the parsed command to *cmdp and lets the caller manage it itself.
+	  global_command is still not modified. Changed callers in parse.y
+
+				    9/1
+				    ---
+parse.y
+	- parse_string_to_command: stripped-down version of xparse_dolparen
+	  that takes a string, runs it through the parser, and returns the
+	  resultant COMMAND *; uses parse_string with the new argument
+
+externs.h
+	- parse_string_to_command: extern declaration
+
+builtins/evalstring.c
+	- can_optimize_cat_file: new function, takes a COMMAND * argument and
+	  returns true if the command can be optimized like $(<file); changed
+	  parse_and_execute to call it
+
+subst.c
+	- optimize_cat_file: new function, optimizes $(<file) without creating
+	  a new process. Uses redir_open to open the redirection file, after
+	  expansion, and calls read_comsub to read from it directly
+	- read_comsub: now reads into a 4096 byte buffer (COMSUB_PIPEBUF)
+	- command_substitute: if the string begins with a `<' and isn't followed
+	  by any of "<>&", see if we can optimize the command and call
+	  optimize_cat_file to do it if we can. 
+
+
+
+
+
+
