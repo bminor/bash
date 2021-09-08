@@ -52,13 +52,16 @@ extern char *realloc ();
 
 #else /* not HAVE_CONFIG_H */
 
-#ifdef STDC_HEADERS
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#include <string.h>
 #else
 char *getenv ();
 char *malloc ();
 char *realloc ();
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
 #endif
 
 /* Do this after the include, in case string.h prototypes bcopy.  */

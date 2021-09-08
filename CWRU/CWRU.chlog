@@ -1828,8 +1828,71 @@ subst.c
 	  by any of "<>&", see if we can optimize the command and call
 	  optimize_cat_file to do it if we can. 
 
+				    9/2
+				    ---
+configure.ac,config.h.in,lib/sh/setlinebuf.c
+	- SETVBUF_REVERSED: remove all references
 
+configure.ac,aclocal.m4
+	- AC_OUTPUT: move created files and commands to AC_CONFIG_FILES and
+	  AC_CONFIG_COMMANDS; call AC_OUTPUT without any arguments
+	- require autoconf version 2.63
+	- AC_HELP_STRING -> AS_HELP_STRING
+	- replace references to $ac_cv_prog_gcc with $GCC
+	- AC_C_LONG_DOUBLE -> AC_TYPE_LONG_DOUBLE
+	- enable-alt-array-implementation: new configure option, placeholder
+	  for later
 
+unwind_prot.c
+	- stddef.h: include if HAVE_STDDEF_H is defined, not STDC_HEADERS
 
+bashansi.h
+	- memory.h: don't include any more; assume <string.h> has all the
+	  necessary defines
+
+aclocal.m4
+	- AC_HEADER_STDC: remove AC_REQUIRE calls to this; change tests to use
+	  appropriate checks instead of STDC_HEADERS
+
+				    9/3
+				    ---
+configure.ac,config.h.in
+	- AC_TYPE_SIGNAL,BASH_TYPE_SIGHANDLER: remove calls, remove mention of
+	  RETSIGTYPE and VOID_SIGHANDLER
+	- AC_USE_SYSTEM_EXTENSIONS: use this instead of AC_ISC_POSIX (which is
+	  well and truly obsolete) and AC_MINIX (which just calls it anyway).
+	  All the right defines are already present
+	- AC_HEADER_TIME: removed
+	- AC_HEADER_STDC: removed
+	- AC_DECL_SYS_SIGLIST: replaced with BASH_DECL_SYS_SIGLIST
+	- BASH_FUNC_CTYPE_NONASCII: removed
+
+sig.h,lib/readline/signals.c
+	- RETSIGTYPE -> void, SIGHANDLER_RETURN -> return
+
+include/posixtime.h
+	- don't bother with TIME_WITH_SYS_TIME, just include <sys/times.h> if
+	  we have it and include <time.h> unconditionally
+
+include/chartypes.h,lib/readline/chardefs.h
+	- IN_CTYPE_DOMAIN: no longer uses STDC_HEADERS define, checks against
+	  CHAR_MAX for non-C89 systems, still a no-op on C89 systems
+
+lib/readline/chardefs.h
+	- memory.h: don't include, no need for STDC_HEADERS; assume the mem*
+	  functions are defined in <string.h> as in C89
+	- now that we assume IN_CTYPE_DOMAIN bounds its argument to unsigned
+	  chars, we don't need NON_NEGATIVE checks at all
+
+lib/readline/chardefs.h,util.c
+	- ALPHABETIC -> _rl_alphabetic_p
+
+				    9/8
+				    ---
+
+lib/sh/strftime.c
+	- include <posixtime.h> after reworking above; include <sys/types.h>
+	  unconditionally in case it defines time_t. From a report by
+	  Ori Sky Farrell <bash@ori.mx>
 
 

@@ -72,7 +72,7 @@ static const char * const pathname_alphabetic_chars = "/-_=~.#$";
 int
 rl_alphabetic (int c)
 {
-  if (ALPHABETIC (c))
+  if (_rl_alphabetic_p (c))
     return (1);
 
   return (_rl_allow_pathname_alphabetic_chars &&

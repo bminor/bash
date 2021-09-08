@@ -72,13 +72,14 @@ dnl
 dnl BASH_CHECK_TYPE(TYPE, HEADERS, DEFAULT[, VALUE-IF-FOUND])
 AC_DEFUN(BASH_CHECK_TYPE,
 [
-AC_REQUIRE([AC_HEADER_STDC])dnl
 AC_REQUIRE([BASH_HEADER_INTTYPES])
 AC_MSG_CHECKING(for $1)
 AC_CACHE_VAL(bash_cv_type_$1,
 [AC_EGREP_CPP($1, [#include <sys/types.h>
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_STDDEF_H
 #include <stddef.h>
 #endif
 #if HAVE_INTTYPES_H
@@ -106,12 +107,11 @@ dnl AC_CHECK_DECL
 dnl
 AC_DEFUN(BASH_CHECK_DECL,
 [
-AC_REQUIRE([AC_HEADER_STDC])
 AC_REQUIRE([BASH_HEADER_INTTYPES])
 AC_CACHE_CHECK([for declaration of $1], bash_cv_decl_$1,
 [AC_TRY_LINK(
 [
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #  include <stdlib.h>
 #endif
 #if HAVE_INTTYPES_H
@@ -216,8 +216,19 @@ AC_DEFINE(HAVE_UNDER_SYS_SIGLIST)
 fi
 ])
 
+dnl this defines HAVE_DECL_SYS_SIGLIST
+AC_DEFUN([BASH_DECL_SYS_SIGLIST],
+[AC_CHECK_DECLS([sys_siglist],,,
+[#include <signal.h>
+/* NetBSD declares sys_siglist in unistd.h.  */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+])
+])
+
 AC_DEFUN(BASH_SYS_SIGLIST,
-[AC_REQUIRE([AC_DECL_SYS_SIGLIST])
+[AC_REQUIRE([BASH_DECL_SYS_SIGLIST])
 AC_MSG_CHECKING([for sys_siglist in system C library])
 AC_CACHE_VAL(bash_cv_sys_siglist,
 [AC_TRY_RUN([
@@ -645,12 +656,13 @@ fi
 # We should check for putenv before calling this
 AC_DEFUN(BASH_FUNC_STD_PUTENV,
 [
-AC_REQUIRE([AC_HEADER_STDC])
 AC_REQUIRE([AC_C_PROTOTYPES])
 AC_CACHE_CHECK([for standard-conformant putenv declaration], bash_cv_std_putenv,
 [AC_TRY_LINK([
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_STDDEF_H
 #include <stddef.h>
 #endif
 #ifndef __STDC__
@@ -675,12 +687,13 @@ fi
 # We should check for unsetenv before calling this
 AC_DEFUN(BASH_FUNC_STD_UNSETENV,
 [
-AC_REQUIRE([AC_HEADER_STDC])
 AC_REQUIRE([AC_C_PROTOTYPES])
 AC_CACHE_CHECK([for standard-conformant unsetenv declaration], bash_cv_std_unsetenv,
 [AC_TRY_LINK([
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_STDDEF_H
 #include <stddef.h>
 #endif
 #ifndef __STDC__
@@ -2060,7 +2073,7 @@ dnl
 
 
 AC_DEFUN([AM_PATH_LISPDIR],
- [AC_ARG_WITH(lispdir, AC_HELP_STRING([--with-lispdir], [override the default lisp directory]),
+ [AC_ARG_WITH(lispdir, AS_HELP_STRING([--with-lispdir], [override the default lisp directory]),
   [ lispdir="$withval" 
     AC_MSG_CHECKING([where .elc files should go])
     AC_MSG_RESULT([$lispdir])],

@@ -59,15 +59,12 @@
  */
 #include <config.h>
 
+#include <sys/types.h>
+
 #include <stdio.h>
 #include <ctype.h>
-#include <time.h>
+#include <posixtime.h>
 #include <errno.h>
-
-#if defined(TM_IN_SYS_TIME)
-#include <sys/types.h>
-#include <sys/time.h>
-#endif
 
 #include <stdlib.h>
 #include <string.h>

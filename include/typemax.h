@@ -79,6 +79,10 @@
 #  define UINT_MAX	((unsigned int) ~(unsigned int)0)
 #endif
 
+#ifndef UCHAR_MAX
+#  define UCHAR_MAX	255
+#endif
+
 /* workaround for gcc bug in versions < 2.7 */
 #if defined (HAVE_LONG_LONG) && __GNUC__ == 2 && __GNUC_MINOR__ < 7
 static const unsigned long long int maxquad = ULLONG_MAX;

@@ -592,7 +592,7 @@ $(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
 	ls -l $(Program)
 	-$(SIZE) $(Program)
 
-.build:	$(SOURCES) config.h Makefile version.h $(VERSPROG)
+.build:	$(SOURCES) config.h Makefile $(DEFDIR)/builtext.h version.h $(VERSPROG)
 	@echo
 	@echo "	  ***********************************************************"
 	@echo "	  *                                                         *"
@@ -742,7 +742,7 @@ syntax.c:	mksyntax${EXEEXT} $(srcdir)/syntax.h
 	$(RM) $@
 	./mksyntax$(EXEEXT) -o $@
 
-$(BUILTINS_LIBRARY): $(BUILTIN_DEFS) $(BUILTIN_C_SRC) config.h ${BASHINCDIR}/memalloc.h  version.h $(DEFDIR)/builtext.h
+$(BUILTINS_LIBRARY): $(DEFDIR)/builtext.h $(BUILTIN_DEFS) $(BUILTIN_C_SRC) config.h ${BASHINCDIR}/memalloc.h  version.h
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) DEBUG=${DEBUG} targets ) || exit 1
 
 # these require special rules to circumvent make builtin rules
