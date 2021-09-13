@@ -20,11 +20,11 @@
 
 #include <config.h>
 
-#if defined (HAVE_LONG_LONG) && !defined (HAVE_STRTOLL)
+#if defined (HAVE_LONG_LONG_INT) && !HAVE_STRTOLL
 
 #define QUAD		1
 #undef HAVE_STRTOL
 
 #include "strtol.c"
 
-#endif /* HAVE_LONG_LONG && !HAVE_STRTOLL */
+#endif /* HAVE_LONG_LONG_INT && !HAVE_STRTOLL */

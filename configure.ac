@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.1, version 5.028])dnl
+AC_REVISION([for Bash 5.1, version 5.031])dnl
 
 define(bashvers, 5.1)
 define(relstatus, maint)
@@ -29,8 +29,7 @@ define(relstatus, maint)
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
 dnl make sure we are using a recent autoconf version
-dnl we could consider making this 2.68 or 2.69
-AC_PREREQ(2.63)
+AC_PREREQ(2.69)
 
 AC_CONFIG_SRCDIR(shell.h)
 dnl where to find install.sh, config.sub, and config.guess
@@ -430,7 +429,6 @@ fi
 
 dnl test for Unix variants
 AC_USE_SYSTEM_EXTENSIONS
-
 AC_SYS_LARGEFILE
 
 dnl BEGIN changes for cross-building (currently cygwin, minGW, and
@@ -820,15 +818,12 @@ if test "$ac_cv_func_vprintf" = no && test "$ac_cv_func__doprnt" = "yes"; then
   AC_LIBOBJ(vprint)
 fi
 
-dnl signal stuff
-dnl AC_TYPE_SIGNAL
-
 dnl checks for certain version-specific system calls and libc functions
 AC_CHECK_FUNC(__setostype, AC_DEFINE(HAVE_SETOSTYPE))
 AC_CHECK_FUNC(wait3, AC_DEFINE(HAVE_WAIT3))
 
 dnl checks for missing libc functions
-AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
+AC_CHECK_FUNC(mkfifo, AC_DEFINE(HAVE_MKFIFO), AC_DEFINE(MKFIFO_MISSING))
 
 dnl checks for system calls
 AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getentropy getgroups \
@@ -864,8 +859,6 @@ AC_CHECK_DECLS([confstr])
 AC_CHECK_DECLS([printf])
 AC_CHECK_DECLS([sbrk])
 AC_CHECK_DECLS([setregid])
-dnl AC_CHECK_DECLS[(setresuid])
-dnl AC_CHECK_DECLS[(setresgid])
 AC_CHECK_DECLS([strcpy])
 AC_CHECK_DECLS([strsignal])
 
@@ -875,12 +868,13 @@ dnl Extra test to detect the horribly broken HP/UX 11.00 strtold(3)
 AC_CHECK_DECLS([strtold], [
     AC_MSG_CHECKING([for broken strtold])
     AC_CACHE_VAL(bash_cv_strtold_broken,
-	[AC_TRY_COMPILE(
-	    [#include <stdlib.h>],
-	    [long double r; char *foo, bar; r = strtold(foo, &bar);],
-	    bash_cv_strtold_broken=no, bash_cv_strtold_broken=yes,
-	    [AC_MSG_WARN(cannot check for broken strtold if cross-compiling, defaulting to no)])
-	]
+	[AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM(
+		[[#include <stdlib.h>]],
+		[[long double r; char *foo, bar; r = strtold(foo, &bar);]]
+	)],
+	[bash_cv_strtold_broken=no],[bash_cv_strtold_broken=yes])
+        ]
     )
     AC_MSG_RESULT($bash_cv_strtold_broken)
     if test "$bash_cv_strtold_broken" = "yes" ; then
@@ -888,12 +882,12 @@ AC_CHECK_DECLS([strtold], [
     fi
 ])
 
-BASH_CHECK_DECL(strtoimax)
-BASH_CHECK_DECL(strtol)
-BASH_CHECK_DECL(strtoll)
-BASH_CHECK_DECL(strtoul)
-BASH_CHECK_DECL(strtoull)
-BASH_CHECK_DECL(strtoumax)
+AC_CHECK_DECLS(strtoimax)
+AC_CHECK_DECLS(strtol)
+AC_CHECK_DECLS(strtoll)
+AC_CHECK_DECLS(strtoul)
+AC_CHECK_DECLS(strtoull)
+AC_CHECK_DECLS(strtoumax)
 
 AC_FUNC_MKTIME
 
@@ -963,8 +957,8 @@ AC_TYPE_UINTPTR_T
 AC_CHECK_TYPE(ssize_t, int)
 AC_CHECK_TYPE(time_t, long)
 
-BASH_TYPE_LONG_LONG
-BASH_TYPE_UNSIGNED_LONG_LONG
+AC_TYPE_LONG_LONG_INT
+AC_TYPE_UNSIGNED_LONG_LONG_INT
 
 BASH_TYPE_SIG_ATOMIC_T
 
@@ -1013,17 +1007,17 @@ BASH_SYS_SIGLIST
 BASH_UNDER_SYS_SIGLIST
 
 dnl various system types
-dnl BASH_TYPE_SIGHANDLER
 BASH_CHECK_TYPE(clock_t, [#include <sys/times.h>], long)
 BASH_CHECK_TYPE(sigset_t, [#include <signal.h>], int)
-BASH_CHECK_TYPE(sig_atomic_t, [#include <signal.h>], int)
-BASH_CHECK_TYPE(quad_t, , long, HAVE_QUAD_T)
-BASH_CHECK_TYPE(intmax_t, , $bash_cv_type_long_long)
-BASH_CHECK_TYPE(uintmax_t, , $bash_cv_type_unsigned_long_long)
 if test "$ac_cv_header_sys_socket_h" = "yes"; then
 BASH_CHECK_TYPE(socklen_t, [#include <sys/socket.h>], [unsigned int], HAVE_SOCKLEN_T)
 fi
+
+AC_CHECK_TYPE(quad_t, AC_DEFINE([HAVE_QUAD_T], [1]), [], )
 BASH_TYPE_RLIMIT
+
+AC_TYPE_INTMAX_T
+AC_TYPE_UINTMAX_T
 
 AC_CHECK_SIZEOF(intmax_t, 8)
 

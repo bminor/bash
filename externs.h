@@ -212,7 +212,7 @@ extern void dprintf PARAMS((int, const char *, ...))  __attribute__((__format__ 
 extern char *fmtulong PARAMS((unsigned long int, int, char *, size_t, int));
 
 /* Declarations for functions defined in lib/sh/fmtulong.c */
-#if defined (HAVE_LONG_LONG)
+#if defined (HAVE_LONG_LONG_INT)
 extern char *fmtullong PARAMS((unsigned long long int, int, char *, size_t, int));
 #endif
 
@@ -441,7 +441,7 @@ extern long strtol PARAMS((const char *, char **, int));
 #endif
 
 /* declarations for functions defined in lib/sh/strtoll.c */
-#if defined (HAVE_LONG_LONG) && !HAVE_DECL_STRTOLL
+#if defined (HAVE_LONG_LONG_INT) && !HAVE_DECL_STRTOLL
 extern long long strtoll PARAMS((const char *, char **, int));
 #endif
 
@@ -451,7 +451,7 @@ extern unsigned long strtoul PARAMS((const char *, char **, int));
 #endif
 
 /* declarations for functions defined in lib/sh/strtoull.c */
-#if defined (HAVE_LONG_LONG) && !HAVE_DECL_STRTOULL
+#if defined (HAVE_UNSIGNED_LONG_LONG_INT) && !HAVE_DECL_STRTOULL
 extern unsigned long long strtoull PARAMS((const char *, char **, int));
 #endif
 

@@ -1895,4 +1895,98 @@ lib/sh/strftime.c
 	  unconditionally in case it defines time_t. From a report by
 	  Ori Sky Farrell <bash@ori.mx>
 
+				    9/9
+				    ---
+lib/readline/search.c
+	- rl_history_search_internal: set rl_undo_list to NULL after calling
+	  rl_maybe_save_line, since it will be restored one way or another
+	  after the search completes, and we don't want it to be freed twice
+	- rl_history_search_internal: leave the current history offset at the
+	  position of the last matching history entry. This means that things
+ 	  like ^P will start back from that history entry, ^N will move
+	  forward from there, and operate-and-get-next will work like it does
+	  with incremental searches. Reported by Vandrus Zoltán
+	  <vandrus.zoltan@gmail.com>
 
+				   9/10
+				   ----
+aclocal.m4
+	- BASH_C_LONG_LONG: removed
+	- BASH_TYPE_LONG_DOUBLE: removed
+	- BASH_TYPE_LONG_LONG,BASH_TYPE_UNSIGNED_LONG_LONG: removed
+	- BASH_FUNC_CTYPE_NONASCII: removed
+	- BASH_SYS_SIGNAL_VINTAGE,BASH_SYS_REINSTALL_SIGHANDLERS: don't
+	  require AC_TYPE_SIGNAL, use void instead of RETSIGTYPE
+	- BASH_TYPE_SIGHANDLER: removed
+
+configure.ac,aclocal.m4,config.h.in
+	- BASH_TYPE_LONG_LONG: removed, call AC_TYPE_LONG_LONG_INT directly,
+	  change #define to HAVE_LONG_LONG_INT
+	- BASH_TYPE_UNSIGNED_LONG_LONG: removed, call AC_TYPE_UNSIGNED_LONG_LONG_INT
+	  directly, change #define to HAVE_UNSIGNED_LONG_LONG_INT
+
+externs.h,include/typemax.h,lib/sh/{fmtullong,snprintf,strtoimax,strtoll,
+strtoull,strtoumax}.c
+	- HAVE_LONG_LONG -> HAVE_LONG_LONG_INT
+	- HAVE_UNSIGNED_LONG_LONG -> HAVE_UNSIGNED_LONG_LONG_INT
+
+configure.ac
+	- AC_TRY_COMPILE -> AC_COMPILE_IFELSE
+	- BASH_CHECK_TYPE (intmax_t) -> AC_TYPE_INTMAX_T
+	- BASH_CHECK_TYPE (uintmax_t) -> AC_TYPE_UINTMAX_T
+	- BASH_CHECK_TYPE (sig_atomic_t): removed
+
+aclocal.m4
+	- BASH_FUNC_STRSIGNAL: changed to use AC_LINK_IFELSE
+	- BASH_FUNC_LSTAT: changed to use AC_LINK_IFELSE
+	- BASH_FUNC_SBRK: changed to use AC_LINK_IFELSE and AC_RUN_IFELSE,
+	  fixed typo
+	- BASH_CHECK_SPEED_T: changed to use AC_COMPILE_IFELSE
+	- BASH_TYPE_SIG_ATOMIC_T: use BASH_CHECK_TYPE instead of AC_CHECK_TYPE
+	- BASH_STRUCT_DIRENT: new macro, like _AC_STRUCT_DIRENT but public and
+	  sets a different bash-specific shell variable
+	- BASH_STRUCT_DIRENT_D_{INO,FILENO,NAMLEN}: call BASH_STRUCT_DIRENT
+	  with a different first argument instead of using inline code and
+	  AC_TRY_COMPILE
+
+				   9/11
+				   ----
+[prayers for the victims of 9/11/2001]
+
+aclocal.m4
+	- BASH_CHECK_DECL: just call AC_CHECK_DECLS and use the default
+	  includes, which includes the files we used to specify
+	- BASH_FUNC_INET_ATON: changed to use AC_LINK_IFELSE
+	- BASH_STRUCT_WEXITSTATUS_OFFSET: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_OPENDIR_CHECK: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_ULIMIT_MAXFDS: changed to use AC_RUN_IFELSE
+	- BASH_UNDER_SYS_SIGLIST: changed to use AC_RUN_IFELSE
+	- BASH_SYS_SIGLIST: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_DUP2_CLOEXEC_CHECK: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_GETENV: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_GETCWD: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_FNMATCH_EXTMATCH: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_POSIX_SETJMP: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_STRCOLL: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_PRINTF_A_FORMAT: changed to use AC_RUN_IFELSE
+	- BASH_SYS_PGRP_SYNC: changed to use AC_RUN_IFELSE
+	- BASH_SYS_SIGNAL_VINTAGE: changed to use AC_RUN_IFELSE
+	- BASH_SYS_NAMED_PIPES: changed to use AC_RUN_IFELSE
+	- BASH_CHECK_RTSIGS: changed to use AC_RUN_IFELSE
+	- BASH_CHECK_MULTIBYTE: changed to use AC_RUN_IFELSE
+	- RL_LIB_READLINE_VERSION: changed to use AC_RUN_IFELSE
+	- BASH_CHECK_WCONTINUED: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_SNPRINTF: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_VSNPRINTF: changed to use AC_RUN_IFELSE
+	- BASH_FUNC_FNMATCH_EQUIV_FALLBACK: changed to use AC_RUN_IFELSE
+	- BASH_DECL_PRINTF: changed to use AC_RUN_IFELSE
+	- BASH_TYPE_RLIMIT: rewrote to avoid quad_t, now uses AC_COMPILE_IFELSE
+	  to determine whether rlim_t is available, otherwise determines the
+	  value of RLIMTYPE based on sizeof(rlim.rlim_cur): int, long, or
+	  long long
+	- BASH_SIZEOF_RLIMIT,BASH_SIZEOF_QUAD_T: helper macros for
+	  BASH_TYPE_RLIMIT in the case that rlim_t is not present
+
+configure.ac
+	- BASH_CHECK_DECL -> AC_CHECK_DECLS
+	- quad_t: use AC_CHECK_TYPE (new style) instead of BASH_CHECK_TYPE

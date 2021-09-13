@@ -3483,8 +3483,10 @@ are unset.
 
 A shell script may be made executable by using the @code{chmod} command
 to turn on the execute bit.  When Bash finds such a file while
-searching the @env{$PATH} for a command, it creates a subshell to
-execute it.  In other words, executing
+searching the @env{$PATH} for a command, it creates a
+new instance of itself
+to execute it.
+In other words, executing
 @example
 filename @var{arguments}
 @end example

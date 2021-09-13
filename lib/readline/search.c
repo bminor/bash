@@ -526,6 +526,9 @@ rl_history_search_internal (int count, int dir)
   char *t;
 
   rl_maybe_save_line ();
+  /* This will either be restored from the saved line or set from the
+     found history line. */
+  rl_undo_list = 0;
   temp = (HIST_ENTRY *)NULL;
 
   /* Search COUNT times through the history for a line matching
@@ -578,6 +581,11 @@ rl_history_search_internal (int count, int dir)
 
   /* Copy the line we found into the current line buffer. */
   make_history_line_current (temp);
+
+  /* Make sure we set the current history position to the last line found so
+     we can do things like operate-and-get-next from here. This is similar to
+     how incremental search behaves. */
+  history_set_pos (rl_history_search_pos);	/* XXX */
 
   /* decide where to put rl_point -- need to change this for pattern search */
   if (rl_history_search_flags & ANCHORED_SEARCH)
