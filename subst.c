@@ -6252,7 +6252,7 @@ process_substitute (string, open_for_read_in_child)
 
   if (result == ERREXIT)
     rc = last_command_exit_value;
-  else if (result == EXITPROG)
+  else if (result == EXITPROG || result == EXITBLTIN)
     rc = last_command_exit_value;
   else if (result)
     rc = EXECUTION_FAILURE;
@@ -6665,7 +6665,7 @@ command_substitute (string, quoted, flags)
 
       if (result == ERREXIT)
 	rc = last_command_exit_value;
-      else if (result == EXITPROG)
+      else if (result == EXITPROG || result == EXITBLTIN)
 	rc = last_command_exit_value;
       else if (result)
 	rc = EXECUTION_FAILURE;

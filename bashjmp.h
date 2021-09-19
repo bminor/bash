@@ -42,5 +42,6 @@ extern int no_longjmp_on_fatal_error;
 #define EXITPROG	3	/* Unconditionally exit the program now. */
 #define ERREXIT		4	/* Exit due to error condition */	
 #define SIGEXIT		5	/* Exit due to fatal terminating signal */
+#define EXITBLTIN	6	/* Exit due to the exit builtin. */
 
 #endif /* _BASHJMP_H_ */

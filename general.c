@@ -686,6 +686,12 @@ check_binary_file (sample, sample_len)
   if (sample_len >= 4 && sample[0] == 0x7f && sample[1] == 'E' && sample[2] == 'L' && sample[3] == 'F')
     return 1;
 
+  /* Generally we check the first line for NULs. If the first line looks like
+     a `#!' interpreter specifier, we just look for NULs anywhere in the
+     buffer. */
+  if (sample[0] == '#' && sample[1] == '!')
+    return (memchr (sample, '\0', sample_len) != NULL);
+
   for (i = 0; i < sample_len; i++)
     {
       c = sample[i];

@@ -613,10 +613,18 @@ char *
 expand_and_quote_kvpair_word (w)
      char *w;
 {
-  char *t, *r;
+  char *r, *s, *t;
 
   t = w ? expand_subscript_string (w, 0) : 0;
+#if 0	/* TAG:bash-5.2 */
+  s = (t && strchr (t, CTLESC)) ? quote_escapes (t) : t;
+  r = sh_single_quote (s ? s : "");
+  if (s != t)
+    free (s);
+#else
   r = sh_single_quote (t ? t : "");
+#endif
+
   free (t);
   return r;
 }
@@ -892,10 +900,10 @@ quote_compound_array_word (w, type)
   int ind, wlen, i;
 
   if (w[0] != LBRACK)
-    return (sh_single_quote (w));
+    return (sh_single_quote (w));	/* XXX - quote CTLESC */
   ind = skipsubscript (w, 0, 0);
   if (w[ind] != RBRACK)
-    return (sh_single_quote (w));
+    return (sh_single_quote (w));	/* XXX - quote CTLESC */
 
   wlen = strlen (w);
   w[ind] = '\0';
@@ -912,7 +920,14 @@ quote_compound_array_word (w, type)
   if (w[ind] == '+')
     nword[i++] = w[ind++];
   nword[i++] = w[ind++];
+#if 0	/* TAG:bash-5.2 */
+  t = (strchr (w+ind, CTLESC)) ? quote_escapes (w+ind) : w+ind;
+  value = sh_single_quote (t);
+  if (t != w+ind)
+   free (t);
+#else
   value = sh_single_quote (w + ind);
+#endif
   strcpy (nword + i, value);
 
   return nword;
@@ -930,14 +945,14 @@ expand_and_quote_assoc_word (w, type)
      char *w;
      int type;
 {
-  char *nword, *key, *value, *t;
+  char *nword, *key, *value, *s, *t;
   int ind, wlen, i;
 
   if (w[0] != LBRACK)
-    return (sh_single_quote (w));     
+    return (sh_single_quote (w));	/* XXX - quote_escapes */
   ind = skipsubscript (w, 0, 0);
   if (w[ind] != RBRACK)
-    return (sh_single_quote (w));
+    return (sh_single_quote (w));	/* XXX - quote_escapes */
 
   w[ind] = '\0';
   t = expand_subscript_string (w+1, 0);
@@ -957,7 +972,14 @@ expand_and_quote_assoc_word (w, type)
   nword[i++] = w[ind++];
 
   t = expand_subscript_string (w+ind, 0);
+#if 0	/* TAG:bash-5.2 */
+  s = (t && strchr (t, CTLESC)) ? quote_escapes (t) : t;
+  value = sh_single_quote (s ? s : "");
+  if (s != t)
+    free (s);
+#else
   value = sh_single_quote (t ? t : "");
+#endif
   free (t);
   nword = xrealloc (nword, wlen + 5 + STRLEN (value));
   strcpy (nword + i, value);
@@ -977,7 +999,7 @@ quote_compound_array_list (list, type)
      WORD_LIST *list;
      int type;
 {
-  char *t;
+  char *s, *t;
   WORD_LIST *l;
 
   for (l = list; l; l = l->next)
@@ -985,7 +1007,16 @@ quote_compound_array_list (list, type)
       if (l->word == 0 || l->word->word == 0)
 	continue;	/* should not happen, but just in case... */
       if ((l->word->flags & W_ASSIGNMENT) == 0)
-	t = sh_single_quote (l->word->word);
+	{
+#if 0	/* TAG:bash-5.2 */
+	  s = (strchr (l->word->word, CTLESC)) ? quote_escapes (l->word->word) : l->word->word;
+	  t = sh_single_quote (s);
+	  if (s != l->word->word)
+	    free (s);
+#else
+	  t = sh_single_quote (l->word->word);
+#endif
+	}
       else 
 	t = quote_compound_array_word (l->word->word, type);
       free (l->word->word);

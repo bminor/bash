@@ -1990,3 +1990,55 @@ aclocal.m4
 configure.ac
 	- BASH_CHECK_DECL -> AC_CHECK_DECLS
 	- quad_t: use AC_CHECK_TYPE (new style) instead of BASH_CHECK_TYPE
+
+				   
+				   9/14
+				   ----
+execute_cmd.c
+	- time_command: if we longjmp back to the top_level we saved, make sure
+	  we're in the same subshell environment before printing the timing
+	  stats. We could have longjmped back from a child process of the
+	  command or pipeline we want to time. From a report by
+	  Sergej Alikov <sergej@alikov.com>
+	- time_command: restore command->flags even if we longjmp back
+
+general.c
+	- check_binary_file: if the first line of the ENOEXEC file starts with
+	  a `#!', check the rest of the buffer for NULs to determine whether
+	  this is a binary file. Since we only check the first line, a #! line
+	  followed by binary data could be confused for a shell script
+
+				   9/16
+				   ----
+bashjmp.h
+	- EXITBLTIN: new longjmp `code' value: used by the exit builtin
+
+{execute_cmd,shell,subst,trap}.c,builtins/evalstring.c
+	- treat EXITBLTIN exactly the same as EXITPROG (for now)
+
+builtins/exit.def
+	- exit_builtin: jump_to_top_level with value EXITBLTIN
+
+builtins/evalstring.c
+	- parse_and_execute: EXITBLTIN has its own case, with the same contents
+	  as EXITPROG
+
+				   9/17
+				   ----
+builtins/evalstring.c
+	- parse_and_execute: change EXITBLTIN case to avoid running the
+	  unwind-protect stack to the `pe_dispose' tag (which has the effect
+	  of running all the unwind-protects installed by the commands in
+	  the string) if we're executing in a function and EXIT is trapped.
+	  This has the effect of running the EXIT trap in the function context,
+	  which is what we do when we're not in parse_and_execute (eval,
+	  bash -c, command substitution, etc.)
+
+				   9/18
+				   ----
+arrayfunc.c
+	- expand_and_quote_kvpair_word,quote_compound_array_word,
+	  expand_and_quote_assoc_word,quote_compound_array_list: make sure
+	  the value has CTLESC characters doubled even when being single-
+	  quoted, since that's what the parser does with standalone assignment
+	  statements. From https://savannah.gnu.org/support/?110538

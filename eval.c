@@ -93,6 +93,7 @@ reader_loop ()
 	    case FORCE_EOF:
 	    case ERREXIT:
 	    case EXITPROG:
+	    case EXITBLTIN:
 	      current_command = (COMMAND *)NULL;
 	      if (exit_immediately_on_error)
 		variable_context = 0;	/* not in a function */

@@ -628,7 +628,7 @@ main (argc, argv, env)
   code = setjmp_sigs (top_level);
   if (code)
     {
-      if (code == EXITPROG || code == ERREXIT)
+      if (code == EXITPROG || code == ERREXIT || code == EXITBLTIN)
 	exit_shell (last_command_exit_value);
       else
 	{
@@ -1366,6 +1366,7 @@ run_wordexp (words)
 	  return last_command_exit_value = 127;
 	case ERREXIT:
 	case EXITPROG:
+	case EXITBLTIN:
 	  return last_command_exit_value;
 	case DISCARD:
 	  return last_command_exit_value = 1;
@@ -1444,6 +1445,7 @@ run_one_command (command)
 	  return last_command_exit_value = 127;
 	case ERREXIT:
 	case EXITPROG:
+	case EXITBLTIN:
 	  return last_command_exit_value;
 	case DISCARD:
 	  return last_command_exit_value = 1;

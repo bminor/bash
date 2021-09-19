@@ -981,7 +981,7 @@ run_exit_trap ()
 	}
       else if (code == ERREXIT)
 	retval = last_command_exit_value;
-      else if (code == EXITPROG)
+      else if (code == EXITPROG || code == EXITBLTIN)
 	retval = last_command_exit_value;
       else if (function_code != 0)
         retval = return_catch_value;

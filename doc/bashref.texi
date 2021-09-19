@@ -3166,7 +3166,11 @@ and quote removal before being assigned to the variable.
 @end enumerate
 
 If no command name results, the variable assignments affect the current
-shell environment.  Otherwise, the variables are added to the environment
+shell environment.
+In the case of such a command (one that consists only of assignment
+statements and redirections), assignment statements are performed before
+redirections.
+Otherwise, the variables are added to the environment
 of the executed command and do not affect the current shell environment.
 If any of the assignments attempts to assign a value to a readonly variable,
 an error occurs, and the command exits with a non-zero status.

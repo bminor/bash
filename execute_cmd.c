@@ -1324,6 +1324,7 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   int cpu;
   char *time_format;
   volatile procenv_t save_top_level;
+  volatile int old_subshell;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   struct timeval real, user, sys;
@@ -1353,6 +1354,7 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #  endif
 #endif
 
+  old_subshell = subshell_environment;
   posix_time = command && (command->flags & CMD_TIME_POSIX);
 
   nullcmd = (command == 0) || (command->type == cm_simple && command->value.Simple->words == 0 && command->value.Simple->redirects == 0);
@@ -1373,11 +1375,16 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
   code = setjmp_nosigs (top_level);
   if (code == NOT_JUMPED)
-    {
-      rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
-      command->flags = old_flags;
-    }
+    rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
   COPY_PROCENV (save_top_level, top_level);
+
+  command->flags = old_flags;
+
+  /* If we're jumping in a different subshell environment than we started,
+     don't bother printing timing stats, just keep longjmping back to the
+     original top level. */
+  if (code != NOT_JUMPED && subshell_environment && subshell_environment != old_subshell)
+    sh_longjmp (top_level, code);
 
   rs = us = ss = 0;
   rsf = usf = ssf = cpu = 0;
@@ -1682,7 +1689,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   /* If we're going to exit the shell, we don't want to invert the return
      status. */
-  if (result == EXITPROG)
+  if (result == EXITPROG || result == EXITBLTIN)
     invert = 0, return_code = last_command_exit_value;
   else if (result)
     return_code = (last_command_exit_value == EXECUTION_SUCCESS) ? EXECUTION_FAILURE : last_command_exit_value;
@@ -5365,7 +5372,7 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
       if (return_catch_flag && builtin == return_builtin)
         funcvalue = setjmp_nosigs (return_catch);
 
-      if (result == EXITPROG)
+      if (result == EXITPROG || result == EXITBLTIN)
 	subshell_exit (last_command_exit_value);
       else if (result)
 	subshell_exit (EXECUTION_FAILURE);
@@ -6011,7 +6018,7 @@ shell_execve (command, args, env)
      If so, the format of the line is "#! interpreter [argument]".
      A single argument is allowed.  The BSD kernel restricts
      the length of the entire line to 32 characters (32 bytes
-     being the size of the BSD exec header), but we allow 80
+     being the size of the BSD exec header), but we allow up to 128
      characters. */
   if (sample_len > 0)
     {

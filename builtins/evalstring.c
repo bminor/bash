@@ -375,6 +375,25 @@ parse_and_execute (string, from_file, flags)
 	      should_jump_to_top_level = 1;
 	      goto out;
 
+	    case EXITBLTIN:
+	      if (command)
+		{
+		  if (variable_context && signal_is_trapped (0))
+		    {
+		      /* Let's make sure we run the exit trap in the function
+			 context, as we do when not running parse_and_execute.
+			 The pe_dispose unwind frame comes before any unwind-
+			 protects installed by the string we're evaluating, so
+			 it will undo the current function scope. */
+		      dispose_command (command);
+		      discard_unwind_frame ("pe_dispose");
+		    }
+		  else
+		    run_unwind_frame ("pe_dispose");
+		}
+	      should_jump_to_top_level = 1;
+	      goto out;
+
 	    case DISCARD:
 	      if (command)
 		run_unwind_frame ("pe_dispose");
@@ -608,6 +627,7 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	    case FORCE_EOF:
 	    case ERREXIT:
 	    case EXITPROG:
+	    case EXITBLTIN:
 	    case DISCARD:		/* XXX */
 	      if (command)
 		dispose_command (command);
