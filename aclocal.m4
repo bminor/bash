@@ -107,13 +107,13 @@ dnl
 AC_DEFUN(BASH_DECL_UNDER_SYS_SIGLIST,
 [AC_MSG_CHECKING([for _sys_siglist in signal.h or unistd.h])
 AC_CACHE_VAL(bash_cv_decl_under_sys_siglist,
-[AC_TRY_COMPILE([
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <signal.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif], [ char *msg = _sys_siglist[2]; ],
-  bash_cv_decl_under_sys_siglist=yes, bash_cv_decl_under_sys_siglist=no,
+#endif]], [[ char *msg = _sys_siglist[2]; ]])],
+  [bash_cv_decl_under_sys_siglist=yes], [bash_cv_decl_under_sys_siglist=no],
   [AC_MSG_WARN(cannot check for _sys_siglist[] if cross compiling -- defaulting to no)])])dnl
 AC_MSG_RESULT($bash_cv_decl_under_sys_siglist)
 if test $bash_cv_decl_under_sys_siglist = yes; then
@@ -914,12 +914,10 @@ AC_DEFUN(BASH_STRUCT_ST_BLOCKS,
 [
 AC_MSG_CHECKING([for struct stat.st_blocks])
 AC_CACHE_VAL(bash_cv_struct_stat_st_blocks,
-[AC_TRY_COMPILE(
-[
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/stat.h>
-],
-[
+]], [[
 int
 main()
 {
@@ -927,7 +925,7 @@ static struct stat a;
 if (a.st_blocks) return 0;
 return 0;
 }
-], bash_cv_struct_stat_st_blocks=yes, bash_cv_struct_stat_st_blocks=no)
+]])], [bash_cv_struct_stat_st_blocks=yes], [bash_cv_struct_stat_st_blocks=no])
 ])
 AC_MSG_RESULT($bash_cv_struct_stat_st_blocks)
 if test "$bash_cv_struct_stat_st_blocks" = "yes"; then
@@ -1122,16 +1120,47 @@ if test $bash_cv_struct_timezone = yes; then
 fi
 ])
 
+AC_DEFUN(BASH_CHECK_WINSIZE_IOCTL,
+[AC_CACHE_VAL(bash_cv_struct_winsize_ioctl,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <sys/ioctl.h>
+]],
+[[
+struct winsize x;
+if (sizeof (x) > 0) return (0);
+]] )], [bash_cv_struct_winsize_ioctl=yes], [bash_cv_struct_winsize_ioctl=no])
+])
+])
+
+AC_DEFUN(BASH_CHECK_WINSIZE_TERMIOS,
+[AC_CACHE_VAL(bash_cv_struct_winsize_termios,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <sys/termios.h>
+]],
+[[
+struct winsize x;
+if (sizeof (x) > 0) return (0);
+]] )], [bash_cv_struct_winsize_termios=yes], [bash_cv_struct_winsize_termios=no])
+])
+])
+
 AC_DEFUN(BASH_STRUCT_WINSIZE,
 [AC_MSG_CHECKING(for struct winsize in sys/ioctl.h and termios.h)
 AC_CACHE_VAL(bash_cv_struct_winsize_header,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/ioctl.h>], [struct winsize x;],
-  bash_cv_struct_winsize_header=ioctl_h,
-  [AC_TRY_COMPILE([#include <sys/types.h>
-#include <termios.h>], [struct winsize x;],
-  bash_cv_struct_winsize_header=termios_h, bash_cv_struct_winsize_header=other)
-])])
+[
+BASH_CHECK_WINSIZE_IOCTL
+BASH_CHECK_WINSIZE_TERMIOS
+
+if test $bash_cv_struct_winsize_ioctl = yes; then
+  bash_cv_struct_winsize_header=ioctl_h
+elif test $bash_cv_struct_winsize_termios = yes; then
+  bash_cv_struct_winsize_header=termios_h
+else
+  bash_cv_struct_winsize_header=other
+fi
+])
 if test $bash_cv_struct_winsize_header = ioctl_h; then
   AC_MSG_RESULT(sys/ioctl.h)
   AC_DEFINE(STRUCT_WINSIZE_IN_SYS_IOCTL)
@@ -1314,7 +1343,7 @@ AC_DEFUN(BASH_SYS_JOB_CONTROL_MISSING,
 [AC_REQUIRE([BASH_SYS_SIGNAL_VINTAGE])
 AC_MSG_CHECKING(for presence of necessary job control definitions)
 AC_CACHE_VAL(bash_cv_job_control_missing,
-[AC_TRY_COMPILE([
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -1355,7 +1384,8 @@ AC_CACHE_VAL(bash_cv_job_control_missing,
 #error
 #endif
 
-], , bash_cv_job_control_missing=present, bash_cv_job_control_missing=missing
+]], [[ int x; ]] )],
+[bash_cv_job_control_missing=present], [bash_cv_job_control_missing=missing]
 )])
 AC_MSG_RESULT($bash_cv_job_control_missing)
 if test $bash_cv_job_control_missing = missing; then
@@ -1441,9 +1471,11 @@ AC_DEFINE_UNQUOTED(DEFAULT_MAIL_DIRECTORY, "$bash_cv_mail_dir")
 AC_DEFUN(BASH_HAVE_TIOCGWINSZ,
 [AC_MSG_CHECKING(for TIOCGWINSZ in sys/ioctl.h)
 AC_CACHE_VAL(bash_cv_tiocgwinsz_in_ioctl,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/ioctl.h>], [int x = TIOCGWINSZ;],
-  bash_cv_tiocgwinsz_in_ioctl=yes,bash_cv_tiocgwinsz_in_ioctl=no)])
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <sys/ioctl.h>]], [[int x = TIOCGWINSZ;]] )],
+  [bash_cv_tiocgwinsz_in_ioctl=yes], [bash_cv_tiocgwinsz_in_ioctl=no]
+)])
 AC_MSG_RESULT($bash_cv_tiocgwinsz_in_ioctl)
 if test $bash_cv_tiocgwinsz_in_ioctl = yes; then   
 AC_DEFINE(GWINSZ_IN_SYS_IOCTL)
@@ -1453,9 +1485,11 @@ fi
 AC_DEFUN(BASH_HAVE_TIOCSTAT,
 [AC_MSG_CHECKING(for TIOCSTAT in sys/ioctl.h)
 AC_CACHE_VAL(bash_cv_tiocstat_in_ioctl,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/ioctl.h>], [int x = TIOCSTAT;],
-  bash_cv_tiocstat_in_ioctl=yes,bash_cv_tiocstat_in_ioctl=no)])
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <sys/ioctl.h>]], [[int x = TIOCSTAT;]] )],
+  [bash_cv_tiocstat_in_ioctl=yes], [bash_cv_tiocstat_in_ioctl=no]
+)])
 AC_MSG_RESULT($bash_cv_tiocstat_in_ioctl)
 if test $bash_cv_tiocstat_in_ioctl = yes; then   
 AC_DEFINE(TIOCSTAT_IN_SYS_IOCTL)
@@ -1465,9 +1499,11 @@ fi
 AC_DEFUN(BASH_HAVE_FIONREAD,
 [AC_MSG_CHECKING(for FIONREAD in sys/ioctl.h)
 AC_CACHE_VAL(bash_cv_fionread_in_ioctl,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/ioctl.h>], [int x = FIONREAD;],
-  bash_cv_fionread_in_ioctl=yes,bash_cv_fionread_in_ioctl=no)])
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <sys/ioctl.h>]], [[int x = FIONREAD;]] )],
+  [bash_cv_fionread_in_ioctl=yes], [bash_cv_fionread_in_ioctl=no]
+)])
 AC_MSG_RESULT($bash_cv_fionread_in_ioctl)
 if test $bash_cv_fionread_in_ioctl = yes; then   
 AC_DEFINE(FIONREAD_IN_SYS_IOCTL)
@@ -1557,33 +1593,41 @@ if test $bash_cv_dev_stdin = "present"; then
 fi
 ])
 
+
+AC_DEFUN(BASH_CHECK_RLIMIT,
+[AC_CACHE_VAL(bash_cv_rlimit,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <sys/resource.h>
+]],
+[[
+  int f;
+  f = RLIMIT_DATA;
+]] )],
+[bash_cv_rlimit=yes], [bash_cv_rlimit=no]
+)])
+])
+
 dnl
 dnl Check if HPUX needs _KERNEL defined for RLIMIT_* definitions
 dnl
 AC_DEFUN(BASH_CHECK_KERNEL_RLIMIT,
 [AC_MSG_CHECKING([whether $host_os needs _KERNEL for RLIMIT defines])
 AC_CACHE_VAL(bash_cv_kernel_rlimit,
-[AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/resource.h>
-],
-[
-  int f;
-  f = RLIMIT_DATA;
-],
-[bash_cv_kernel_rlimit=no],
-[AC_TRY_COMPILE([
+[BASH_CHECK_RLIMIT
+if test $bash_cv_rlimit = no; then
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #define _KERNEL
 #include <sys/resource.h>
 #undef _KERNEL
-],
-[
-	int f;
-        f = RLIMIT_DATA;
-], [bash_cv_kernel_rlimit=yes], [bash_cv_kernel_rlimit=no]
-)]
-)])
+]],
+[[
+  int f;
+  f = RLIMIT_DATA;
+]] )], [bash_cv_kernel_rlimit=yes], [bash_cv_kernel_rlimit=no] )
+fi
+])
 AC_MSG_RESULT($bash_cv_kernel_rlimit)
 if test $bash_cv_kernel_rlimit = yes; then
 AC_DEFINE(RLIMIT_NEEDS_KERNEL)
@@ -1598,14 +1642,15 @@ dnl sizeof(off_t) is > 4.
 dnl
 AC_DEFUN(BASH_CHECK_OFF_T_64,
 [AC_CACHE_CHECK(for 64-bit off_t, bash_cv_off_t_64,
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <sys/types.h>
-],[
+]],[[
 switch (0) case 0: case (sizeof (off_t) <= 4):;
-], bash_cv_off_t_64=no, bash_cv_off_t_64=yes))
+]] )], [bash_cv_off_t_64=no], [bash_cv_off_t_64=yes]
+))
 if test $bash_cv_off_t_64 = yes; then
         AC_DEFINE(HAVE_OFF_T_64)
 fi])
@@ -1692,37 +1737,39 @@ fi
 
 dnl check for wchar_t in <wchar.h>
 AC_CACHE_CHECK([for wchar_t in wchar.h], bash_cv_type_wchar_t,
-[AC_TRY_COMPILE(
-[#include <wchar.h>
-],
-[
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+[#include <wchar.h>]],
+[[
         wchar_t foo;
         foo = 0;
-], bash_cv_type_wchar_t=yes, bash_cv_type_wchar_t=no)])
+]] )], [bash_cv_type_wchar_t=yes], [bash_cv_type_wchar_t=no]
+)])
 if test $bash_cv_type_wchar_t = yes; then
         AC_DEFINE(HAVE_WCHAR_T, 1, [systems should define this type here])
 fi
 
 dnl check for wctype_t in <wctype.h>
 AC_CACHE_CHECK([for wctype_t in wctype.h], bash_cv_type_wctype_t,
-[AC_TRY_COMPILE(
-[#include <wctype.h>],
-[
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+[#include <wctype.h>]],
+[[
         wctype_t foo;
         foo = 0;
-], bash_cv_type_wctype_t=yes, bash_cv_type_wctype_t=no)])
+]] )], [bash_cv_type_wctype_t=yes], [bash_cv_type_wctype_t=no]
+)])
 if test $bash_cv_type_wctype_t = yes; then
         AC_DEFINE(HAVE_WCTYPE_T, 1, [systems should define this type here])
 fi
 
 dnl check for wint_t in <wctype.h>
 AC_CACHE_CHECK([for wint_t in wctype.h], bash_cv_type_wint_t,
-[AC_TRY_COMPILE(
-[#include <wctype.h>],
-[
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+[#include <wctype.h>]],
+[[
         wint_t foo;
         foo = 0;
-], bash_cv_type_wint_t=yes, bash_cv_type_wint_t=no)])
+]] )], [bash_cv_type_wint_t=yes], [bash_cv_type_wint_t=no]
+)])
 if test $bash_cv_type_wint_t = yes; then
         AC_DEFINE(HAVE_WINT_T, 1, [systems should define this type here])
 fi

@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.1, version 5.031])dnl
+AC_REVISION([for Bash 5.1, version 5.033])dnl
 
 define(bashvers, 5.1)
 define(relstatus, maint)
@@ -751,7 +751,7 @@ AC_C_VOLATILE
 AC_C_RESTRICT
 
 dnl initialize GNU gettext
-AM_GNU_GETTEXT([no-libtool], [need-ngettext], [lib/intl])
+BASH_GNU_GETTEXT([no-libtool], [need-ngettext], [lib/intl])
 
 dnl header files
 AC_HEADER_DIRENT

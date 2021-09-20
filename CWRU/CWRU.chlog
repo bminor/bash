@@ -2042,3 +2042,20 @@ arrayfunc.c
 	  the value has CTLESC characters doubled even when being single-
 	  quoted, since that's what the parser does with standalone assignment
 	  statements. From https://savannah.gnu.org/support/?110538
+
+				   9/19
+				   ----
+aclocal.m4
+	- AC_TRY_COMPILE -> AC_COMPILE_IFELSE (AC_TRY_LINK calls left to
+	  modify to avoid obsolete warnings)
+	- BASH_STRUCT_WINSIZE: broke out checks for separate headers into new
+	  macros, call them and work with the results; needed to avoid two
+	  calls to AC_TRY_COMPILE
+	- BASH_CHECK_KERNEL_RLIMIT: avoid multiple calls to AC_TRY_COMPILE by
+	  breaking basic test for RLIMIT_ defines into a separate test and
+	  calling the HPUX-specific _KERNEL test only if that fails
+
+m4/gettext.m4,configure.ac
+	- AM_GNU_GETTEXT -> BASH_GNU_GETTEXT: remove deprecation warning, since
+	  [no-libtool] is how we use this; rename to avoid someone's local
+	  copy from overriding ours
