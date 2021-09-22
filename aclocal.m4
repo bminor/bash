@@ -211,11 +211,15 @@ dnl Check for sys_errlist[] and sys_nerr, check for declaration
 AC_DEFUN(BASH_SYS_ERRLIST,
 [AC_MSG_CHECKING([for sys_errlist and sys_nerr])
 AC_CACHE_VAL(bash_cv_sys_errlist,
-[AC_TRY_LINK([#include <errno.h>],
-[extern char *sys_errlist[];
- extern int sys_nerr;
- char *msg = sys_errlist[sys_nerr - 1];],
-    bash_cv_sys_errlist=yes, bash_cv_sys_errlist=no)])dnl
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <errno.h>
+]],[[
+extern char *sys_errlist[];
+extern int sys_nerr;
+char *msg = sys_errlist[sys_nerr - 1];
+]] )],
+[bash_cv_sys_errlist=yes], [bash_cv_sys_errlist=no]
+)])
 AC_MSG_RESULT($bash_cv_sys_errlist)
 if test $bash_cv_sys_errlist = yes; then
 AC_DEFINE(HAVE_SYS_ERRLIST)
@@ -595,7 +599,7 @@ AC_DEFUN(BASH_FUNC_STD_PUTENV,
 [
 AC_REQUIRE([AC_C_PROTOTYPES])
 AC_CACHE_CHECK([for standard-conformant putenv declaration], bash_cv_std_putenv,
-[AC_TRY_LINK([
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -612,9 +616,8 @@ extern int putenv (char *);
 #else
 extern int putenv ();
 #endif
-],
-[return (putenv == 0);],
-bash_cv_std_putenv=yes, bash_cv_std_putenv=no
+]], [[return (putenv == 0);]] )],
+[bash_cv_std_putenv=yes], [bash_cv_std_putenv=no]
 )])
 if test $bash_cv_std_putenv = yes; then
 AC_DEFINE(HAVE_STD_PUTENV)
@@ -626,7 +629,7 @@ AC_DEFUN(BASH_FUNC_STD_UNSETENV,
 [
 AC_REQUIRE([AC_C_PROTOTYPES])
 AC_CACHE_CHECK([for standard-conformant unsetenv declaration], bash_cv_std_unsetenv,
-[AC_TRY_LINK([
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -643,9 +646,8 @@ extern int unsetenv (const char *);
 #else
 extern int unsetenv ();
 #endif
-],
-[return (unsetenv == 0);],
-bash_cv_std_unsetenv=yes, bash_cv_std_unsetenv=no
+]], [[return (unsetenv == 0);]] )],
+[bash_cv_std_unsetenv=yes], [bash_cv_std_unsetenv=no]
 )])
 if test $bash_cv_std_unsetenv = yes; then
 AC_DEFINE(HAVE_STD_UNSETENV)
@@ -706,7 +708,7 @@ fi
 
 dnl
 dnl This needs BASH_CHECK_SOCKLIB, but since that's not called on every
-dnl system, we can't use AC_PREREQ
+dnl system, we can't use AC_PREREQ. Only called if we need the socket library
 dnl
 AC_DEFUN(BASH_FUNC_GETHOSTBYNAME,
 [if test "X$bash_cv_have_gethostbyname" = "X"; then
@@ -716,11 +718,14 @@ AC_MSG_CHECKING(for gethostbyname in socket library)
 _bash_needmsg=
 fi
 AC_CACHE_VAL(bash_cv_have_gethostbyname,
-[AC_TRY_LINK([#include <netdb.h>],
-[ struct hostent *hp;
-  hp = gethostbyname("localhost");
-], bash_cv_have_gethostbyname=yes, bash_cv_have_gethostbyname=no)]
-)
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <netdb.h>
+]], [[
+struct hostent *hp;
+hp = gethostbyname("localhost");
+]] )],
+[bash_cv_have_gethostbyname=yes], [bash_cv_have_gethostbyname=no]
+)])
 if test "X$_bash_needmsg" = Xyes; then
     AC_MSG_CHECKING(for gethostbyname in socket library)
 fi
@@ -1172,34 +1177,68 @@ else
 fi
 ])
 
-dnl Check type of signal routines (posix, 4.2bsd, 4.1bsd or v7)
-AC_DEFUN(BASH_SYS_SIGNAL_VINTAGE,
-[AC_MSG_CHECKING(for type of signal functions)
-AC_CACHE_VAL(bash_cv_signal_vintage,
-[
-  AC_TRY_LINK([#include <signal.h>],[
+AC_DEFUN(BASH_HAVE_POSIX_SIGNALS,
+[AC_CACHE_VAL(bash_cv_posix_signals,
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <signal.h>
+]], [[
     sigset_t ss;
     struct sigaction sa;
     sigemptyset(&ss); sigsuspend(&ss);
     sigaction(SIGINT, &sa, (struct sigaction *) 0);
     sigprocmask(SIG_BLOCK, &ss, (sigset_t *) 0);
-  ], bash_cv_signal_vintage=posix,
-  [
-    AC_TRY_LINK([#include <signal.h>], [
-	int mask = sigmask(SIGINT);
-	sigsetmask(mask); sigblock(mask); sigpause(mask);
-    ], bash_cv_signal_vintage=4.2bsd,
-    [
-      AC_TRY_LINK([
-	#include <signal.h>
-	void foo() { }], [
-		int mask = sigmask(SIGINT);
-		sigset(SIGINT, foo); sigrelse(SIGINT);
-		sighold(SIGINT); sigpause(SIGINT);
-        ], bash_cv_signal_vintage=svr3, bash_cv_signal_vintage=v7
-    )]
-  )]
-)
+]] )],
+[bash_cv_posix_signals=yes], [bash_cv_posix_signals=no]
+)])
+])
+
+AC_DEFUN(BASH_HAVE_BSD_SIGNALS,
+[AC_CACHE_VAL(bash_cv_bsd_signals,
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <signal.h>
+]], [[
+int mask = sigmask(SIGINT);
+sigsetmask(mask); sigblock(mask); sigpause(mask);
+]] )],
+[bash_cv_bsd_signals=yes], [bash_cv_bsd_signals=no]
+)])
+])
+
+AC_DEFUN(BASH_HAVE_SYSV_SIGNALS,
+[AC_CACHE_VAL(bash_cv_sysv_signals,
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <signal.h>
+void foo() { }
+]], [[
+int mask = sigmask(SIGINT);
+sigset(SIGINT, foo); sigrelse(SIGINT);
+sighold(SIGINT); sigpause(SIGINT);
+]] )],
+[bash_cv_sysv_signals=yes], [bash_cv_sysv_signals=no]
+)])
+])
+
+dnl Check type of signal routines (posix, 4.2bsd, 4.1bsd or v7)
+AC_DEFUN(BASH_SYS_SIGNAL_VINTAGE,
+[AC_MSG_CHECKING(for type of signal functions)
+AC_CACHE_VAL(bash_cv_signal_vintage,
+[
+BASH_HAVE_POSIX_SIGNALS
+if test $bash_cv_posix_signals = yes; then
+  bash_cv_signal_vintage=posix
+else
+  BASH_HAVE_BSD_SIGNALS
+  if test $bash_cv_bsd_signals = yes; then
+    bash_cv_signal_vintage=4.2bsd
+  else
+    BASH_HAVE_SYSV_SIGNALS
+    if test $bash_cv_sysv_signals = yes; then
+      bash_cv_signal_vintage=svr3
+    else
+      bash_cv_signal_vintage=v7
+    fi
+  fi
+fi
 ])
 AC_MSG_RESULT($bash_cv_signal_vintage)
 if test "$bash_cv_signal_vintage" = posix; then
@@ -1726,14 +1765,7 @@ fi
 
 AC_CHECK_FUNCS(iswlower iswupper towlower towupper iswctype)
 
-AC_CACHE_CHECK([for nl_langinfo and CODESET], bash_cv_langinfo_codeset,
-[AC_TRY_LINK(
-[#include <langinfo.h>],
-[char* cs = nl_langinfo(CODESET);],
-bash_cv_langinfo_codeset=yes, bash_cv_langinfo_codeset=no)])
-if test $bash_cv_langinfo_codeset = yes; then
-  AC_DEFINE(HAVE_LANGINFO_CODESET)
-fi
+AC_REQUIRE([AM_LANGINFO_CODESET])
 
 dnl check for wchar_t in <wchar.h>
 AC_CACHE_CHECK([for wchar_t in wchar.h], bash_cv_type_wchar_t,

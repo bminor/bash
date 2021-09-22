@@ -853,6 +853,55 @@ int	*countp;
 		*countp = i;
 	return (ret);
 }
+
+ARRAY *
+array_from_argv(a, vec, count)
+ARRAY	*a;
+char	**vec;
+int	count;
+{
+  arrayind_t	i;
+  ARRAY_ELEMENT	*ae;
+  char	*t;
+
+  if (a == 0 || array_num_elements (a) == 0)
+    {
+      for (i = 0; i < count; i++)
+	array_insert (a, i, t);
+      return a;
+    }
+
+  /* Fast case */
+  if (array_num_elements (a) == count && count == 1)
+    {
+      ae = element_forw (a->head);
+      t = vec[0] ? savestring (vec[0]) : 0;
+      ARRAY_ELEMENT_REPLACE (ae, t);
+    }
+  else if (array_num_elements (a) <= count)
+    {
+      /* modify in array_num_elements members in place, then add */
+      ae = a->head;
+      for (i = 0; i < array_num_elements (a); i++)
+	{
+	  ae = element_forw (ae);
+	  t = vec[0] ? savestring (vec[0]) : 0;
+	  ARRAY_ELEMENT_REPLACE (ae, t);
+	}
+      /* add any more */
+      for ( ; i < count; i++)
+	array_insert (a, i, vec[i]);
+    }
+  else
+    {
+      /* deleting elements.  it's faster to rebuild the array. */	  
+      array_flush (a);
+      for (i = 0; i < count; i++)
+	array_insert (a, i, vec[i]);
+    }
+
+  return a;
+}
 	
 /*
  * Return a string that is the concatenation of the elements in A from START

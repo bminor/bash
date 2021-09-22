@@ -16452,38 +16452,7 @@ then :
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for nl_langinfo and CODESET" >&5
-printf %s "checking for nl_langinfo and CODESET... " >&6; }
-if test ${bash_cv_langinfo_codeset+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <langinfo.h>
-int
-main (void)
-{
-char* cs = nl_langinfo(CODESET);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  bash_cv_langinfo_codeset=yes
-else $as_nop
-  bash_cv_langinfo_codeset=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $bash_cv_langinfo_codeset" >&5
-printf "%s\n" "$bash_cv_langinfo_codeset" >&6; }
-if test $bash_cv_langinfo_codeset = yes; then
-  printf "%s\n" "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
 
-fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for wchar_t in wchar.h" >&5
 printf %s "checking for wchar_t in wchar.h... " >&6; }
@@ -17010,12 +16979,15 @@ then :
 else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+
 #include <netdb.h>
+
 int
 main (void)
 {
- struct hostent *hp;
-  hp = gethostbyname("localhost");
+
+struct hostent *hp;
+hp = gethostbyname("localhost");
 
   ;
   return 0;
@@ -17026,10 +16998,10 @@ then :
   bash_cv_have_gethostbyname=yes
 else $as_nop
   bash_cv_have_gethostbyname=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-
 fi
 
 if test "X$_bash_needmsg" = Xyes; then
@@ -18276,9 +18248,15 @@ then :
   printf %s "(cached) " >&6
 else $as_nop
 
+if test ${bash_cv_posix_signals+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+
 #include <signal.h>
+
 int
 main (void)
 {
@@ -18295,18 +18273,34 @@ main (void)
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
+  bash_cv_posix_signals=yes
+else $as_nop
+  bash_cv_posix_signals=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+
+
+if test $bash_cv_posix_signals = yes; then
   bash_cv_signal_vintage=posix
+else
+  if test ${bash_cv_bsd_signals+y}
+then :
+  printf %s "(cached) " >&6
 else $as_nop
-
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+
 #include <signal.h>
+
 int
 main (void)
 {
 
-	int mask = sigmask(SIGINT);
-	sigsetmask(mask); sigblock(mask); sigpause(mask);
+int mask = sigmask(SIGINT);
+sigsetmask(mask); sigblock(mask); sigpause(mask);
 
   ;
   return 0;
@@ -18314,21 +18308,36 @@ main (void)
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  bash_cv_signal_vintage=4.2bsd
+  bash_cv_bsd_signals=yes
 else $as_nop
+  bash_cv_bsd_signals=no
 
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+
+
+  if test $bash_cv_bsd_signals = yes; then
+    bash_cv_signal_vintage=4.2bsd
+  else
+    if test ${bash_cv_sysv_signals+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-	#include <signal.h>
-	void foo() { }
+#include <signal.h>
+void foo() { }
+
 int
 main (void)
 {
 
-		int mask = sigmask(SIGINT);
-		sigset(SIGINT, foo); sigrelse(SIGINT);
-		sighold(SIGINT); sigpause(SIGINT);
+int mask = sigmask(SIGINT);
+sigset(SIGINT, foo); sigrelse(SIGINT);
+sighold(SIGINT); sigpause(SIGINT);
 
   ;
   return 0;
@@ -18336,21 +18345,23 @@ main (void)
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  bash_cv_signal_vintage=svr3
+  bash_cv_sysv_signals=yes
 else $as_nop
-  bash_cv_signal_vintage=v7
+  bash_cv_sysv_signals=no
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
 
+
+    if test $bash_cv_sysv_signals = yes; then
+      bash_cv_signal_vintage=svr3
+    else
+      bash_cv_signal_vintage=v7
+    fi
+  fi
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
 
 fi
 
@@ -18376,13 +18387,17 @@ then :
 else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
+
 #include <errno.h>
+
 int
 main (void)
 {
+
 extern char *sys_errlist[];
- extern int sys_nerr;
- char *msg = sys_errlist[sys_nerr - 1];
+extern int sys_nerr;
+char *msg = sys_errlist[sys_nerr - 1];
+
   ;
   return 0;
 }
@@ -18392,10 +18407,12 @@ then :
   bash_cv_sys_errlist=yes
 else $as_nop
   bash_cv_sys_errlist=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 fi
+
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $bash_cv_sys_errlist" >&5
 printf "%s\n" "$bash_cv_sys_errlist" >&6; }
 if test $bash_cv_sys_errlist = yes; then

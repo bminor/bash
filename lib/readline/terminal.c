@@ -420,7 +420,7 @@ static const struct _tc_string tc_strings[] =
   { "kH", &_rl_term_kH },	/* home down ?? */
   { "kI", &_rl_term_kI },	/* insert */
   { "kN", &_rl_term_kN },	/* page down */
-  { "kN", &_rl_term_kP },	/* page up */
+  { "kP", &_rl_term_kP },	/* page up */
   { "kd", &_rl_term_kd },
   { "ke", &_rl_term_ke },	/* end keypad mode */
   { "kh", &_rl_term_kh },	/* home */

@@ -893,7 +893,7 @@ AC_FUNC_MKTIME
 
 dnl
 dnl Checks for lib/intl and related code (uses some of the output from
-dnl AM_GNU_GETTEXT)
+dnl BASH_GNU_GETTEXT)
 dnl
 
 AC_CHECK_HEADERS([argz.h errno.h fcntl.h malloc.h stdio_ext.h])

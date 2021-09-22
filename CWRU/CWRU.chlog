@@ -2059,3 +2059,30 @@ m4/gettext.m4,configure.ac
 	- AM_GNU_GETTEXT -> BASH_GNU_GETTEXT: remove deprecation warning, since
 	  [no-libtool] is how we use this; rename to avoid someone's local
 	  copy from overriding ours
+
+				   9/20
+				   ----
+aclocal.m4
+	- BASH_CHECK_MULTIBYTE: take out code that checks for nl_langinfo(CODESET)
+	  since that's already provided by AM_LANGINFO_CODESET, which is
+	  called by BASH_GNU_GETTEXT. We AC_REQUIRE it here, though, to avoid
+	  problems from future changes
+	- BASH_SYS_SIGNAL_VINTAGE: broke the code that checks for the different
+	  signal vintages into different AC_DEFUNed macros, changed
+	  BASH_SYS_SIGNAL_VINTAGE to stitch them together with shell code
+	  testing the cached variables
+	- AC_TRY_LINK -> AC_LINK_IFELSE: there are no more autoconf warnings
+
+				   9/21
+				   ----
+array.[ch]
+	- array_from_argv: new convenience function
+
+array.h
+	- num_elements: now an arrayind_t, since that's the type of indices, it
+	  makes sense to allow that many elements
+
+				   9/22
+				   ----
+lib/readline/terminal.c
+	- rl_term_kP: fix typo. Fix from Koichi Murase <myoga.murase@gmail.com>

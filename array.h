@@ -31,7 +31,7 @@ enum atype {array_indexed, array_assoc};	/* not used */
 
 typedef struct array {
 	arrayind_t	max_index;
-	int		num_elements;
+	arrayind_t	num_elements;
 	struct array_element *head;
 	struct array_element *lastref;
 } ARRAY;
@@ -85,6 +85,7 @@ extern WORD_LIST *array_to_kvpair_list PARAMS((ARRAY *));
 extern ARRAY *array_assign_list PARAMS((ARRAY *, WORD_LIST *));
 
 extern char **array_to_argv PARAMS((ARRAY *, int *));
+extern ARRAY *array_from_argv PARAMS((ARRAY *, char **, int));
 
 extern char *array_to_kvpair PARAMS((ARRAY *, int));
 extern char *array_to_assign PARAMS((ARRAY *, int));
