@@ -6291,16 +6291,26 @@ set_pipestatus_array (ps, nproc)
   /* Fast case */
   if (array_num_elements (a) == nproc && nproc == 1)
     {
+#ifndef ALT_ARRAY_IMPLEMENTATION
       ae = element_forw (a->head);
+#else
+      ae = a->elements[0];
+#endif
       ARRAY_ELEMENT_REPLACE (ae, itos (ps[0]));
     }
   else if (array_num_elements (a) <= nproc)
     {
       /* modify in array_num_elements members in place, then add */
+#ifndef ALT_ARRAY_IMPLEMENTATION
       ae = a->head;
+#endif
       for (i = 0; i < array_num_elements (a); i++)
 	{
+#ifndef ALT_ARRAY_IMPLEMENTATION
 	  ae = element_forw (ae);
+#else
+	  ae = a->elements[i];
+#endif
 	  ARRAY_ELEMENT_REPLACE (ae, itos (ps[i]));
 	}
       /* add any more */
@@ -6312,6 +6322,7 @@ set_pipestatus_array (ps, nproc)
     }
   else
     {
+#ifndef ALT_ARRAY_IMPLEMENTATION
       /* deleting elements.  it's faster to rebuild the array. */	  
       array_flush (a);
       for (i = 0; i < nproc; i++)
@@ -6319,6 +6330,24 @@ set_pipestatus_array (ps, nproc)
 	  t = inttostr (ps[i], tbuf, sizeof (tbuf));
 	  array_insert (a, i, t);
 	}
+#else
+      /* deleting elements. replace the first NPROC, free the rest */
+      for (i = 0; i < nproc; i++)
+	{
+	  ae = a->elements[i];
+	  ARRAY_ELEMENT_REPLACE (ae, itos (ps[i]));
+	}
+      for ( ; i <= array_max_index (a); i++)
+	{
+	  array_dispose_element (a->elements[i]);
+	  a->elements[i] = (ARRAY_ELEMENT *)NULL;
+	}
+
+      /* bookkeeping usually taken care of by array_insert */
+      set_max_index (a, nproc - 1);
+      set_first_index (a, 0);
+      set_num_elements (a, nproc);
+#endif /* ALT_ARRAY_IMPLEMENTATION */
     }
 }
 

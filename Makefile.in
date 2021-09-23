@@ -483,12 +483,14 @@ JOBS_O = @JOBS_O@
 SIGLIST_O = @SIGLIST_O@
 SIGNAMES_O = @SIGNAMES_O@
 
+ARRAY_O = @ARRAY_O@
+
 # Matching object files.
 OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
 	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
 	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
 	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
-	   alias.o array.o arrayfunc.o assoc.o braces.o bracecomp.o bashhist.o \
+	   alias.o $(ARRAY_O) arrayfunc.o assoc.o braces.o bracecomp.o bashhist.o \
 	   bashline.o $(SIGLIST_O) list.o stringlib.o locale.o findcmd.o redir.o \
 	   pcomplete.o pcomplib.o syntax.o xmalloc.o $(SIGNAMES_O)
 
@@ -995,6 +997,7 @@ hashtest:	hashlib.c
 # Files that depend on the definitions in config-top.h, which are not meant
 # to be changed
 array.o: $(srcdir)/config-top.h
+array2.o: $(srcdir)/config-top.h
 bashhist.o: $(srcdir)/config-top.h
 shell.o: $(srcdir)/config-top.h
 input.o: $(srcdir)/config-top.h
@@ -1258,6 +1261,13 @@ array.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 array.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
 array.o: $(BASHINCDIR)/ocache.h $(BASHINCDIR)/chartypes.h
 array.o: $(DEFSRC)/common.h
+array2.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+array2.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
+array2.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h
+array2.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
+array2.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
+array2.o: $(BASHINCDIR)/ocache.h $(BASHINCDIR)/chartypes.h
+array2.o: $(DEFSRC)/common.h
 arrayfunc.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 arrayfunc.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
 arrayfunc.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h

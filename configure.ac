@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.1, version 5.033])dnl
+AC_REVISION([for Bash 5.1, version 5.034])dnl
 
 define(bashvers, 5.1)
 define(relstatus, maint)
@@ -183,6 +183,9 @@ opt_globascii_default=yes
 opt_function_import=yes
 opt_dev_fd_stat_broken=no
 opt_alt_array_impl=no
+
+dnl modified by alternate array implementation option
+ARRAY_O=array.o
 
 dnl options that affect how bash is compiled and linked
 opt_static_link=no
@@ -358,6 +361,7 @@ AC_DEFINE(DEV_FD_STAT_BROKEN)
 fi
 if test $opt_alt_array_impl = yes; then
 AC_DEFINE(ALT_ARRAY_IMPLEMENTATION)
+ARRAY_O=array2.o
 fi
 
 if test $opt_memscramble = yes; then
@@ -395,6 +399,8 @@ AC_SUBST(MALLOC_LIB)
 AC_SUBST(MALLOC_LIBRARY)
 AC_SUBST(MALLOC_LDFLAGS)
 AC_SUBST(MALLOC_DEP)
+
+AC_SUBST(ARRAY_O)
 
 AC_SUBST(htmldir)
 
