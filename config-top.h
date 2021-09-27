@@ -114,7 +114,7 @@
 
 /* Define if you want the case-toggling operators (~[~]) and the
    `capcase' variable attribute (declare -c). */
-/* TAG: bash-5.2 disable */
+/* TAG: bash-5.2 disable? */
 #define CASEMOD_TOGGLECASE
 #define CASEMOD_CAPCASE
 

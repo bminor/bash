@@ -2086,3 +2086,22 @@ array.h
 				   ----
 lib/readline/terminal.c
 	- rl_term_kP: fix typo. Fix from Koichi Murase <myoga.murase@gmail.com>
+
+				   9/25
+				   ----
+lib/readline/display.c
+	- rl_clear_visible_line: call _rl_clear_to_eol with _rl_screenwidth as
+	  the argument so we clear out the entire line even if the terminal
+	  doesn't have a clear-to-eol sequence; make sure to add a call to
+	  rl_cr after that so we know we're always in column 0
+	- _rl_redisplay_after_sigwinch: just call rl_clear_visible_line instead	
+	  of erasing the last line of the display
+	- _rl_redisplay_after_sigwinch: if the prompt is longer than the screen
+	  width, make sure to call _rl_reset_prompt to recalculate the
+	  local_prompt_newlines array. Should fix issue from
+	  https://savannah.gnu.org/support/index.php?110543
+
+redir.c
+	- do_redirection_internal: if given [N]<&WORD- or [N]>&WORD- and WORD
+	  expands to null, make it identical to <&- or >&- and close file
+	  descriptor N (default 0). From a discussion back in 5/2021

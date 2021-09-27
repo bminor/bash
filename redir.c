@@ -808,8 +808,6 @@ do_redirection_internal (redirect, flags, fnp)
 	 continue. */
       redirectee_word = redirection_expand (redirectee);
 
-#if 0
-      /* TAG:bash-5.2 */
       /* XXX - what to do with [N]<&$w- where w is unset or null?  ksh93
 	       turns it into [N]<&- or [N]>&- and closes N. */
       if ((ri == r_move_input_word || ri == r_move_output_word) && redirectee_word == 0)
@@ -818,9 +816,7 @@ do_redirection_internal (redirect, flags, fnp)
 	  rd.dest = 0;
 	  new_redirect = make_redirection (sd, r_close_this, rd, 0);
 	}
-      else
-#endif
-      if (redirectee_word == 0)
+      else if (redirectee_word == 0)
 	return (AMBIGUOUS_REDIRECT);
       else if (redirectee_word[0] == '-' && redirectee_word[1] == '\0')
 	{

@@ -2588,7 +2588,8 @@ rl_clear_visible_line (void)
   for (curr_line = _rl_last_v_pos; curr_line >= 0; curr_line--)
     {
       _rl_move_vert (curr_line);
-      _rl_clear_to_eol (0);
+      _rl_clear_to_eol (_rl_screenwidth);
+      _rl_cr ();		/* in case we use space_to_eol() */
     }
 
   return 0;
@@ -3372,26 +3373,15 @@ _rl_redisplay_after_sigwinch (void)
      screen line. */
   if (_rl_term_cr)
     {
-      _rl_move_vert (_rl_vis_botlin);
-
-      _rl_cr ();
-      _rl_last_c_pos = 0;
-
-#if !defined (__MSDOS__)
-      if (_rl_term_clreol)
-	tputs (_rl_term_clreol, 1, _rl_output_character_function);
-      else
-#endif
-	{
-	  space_to_eol (_rl_screenwidth);
-	  _rl_cr ();
-	}
-
+      rl_clear_visible_line ();
       if (_rl_last_v_pos > 0)
 	_rl_move_vert (0);
     }
   else
     rl_crlf ();
+
+  if (_rl_screenwidth < prompt_visible_length)
+    _rl_reset_prompt ();		/* update local_prompt_newlines array */
 
   /* Redraw only the last line of a multi-line prompt. */
   t = strrchr (rl_display_prompt, '\n');

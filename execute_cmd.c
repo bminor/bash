@@ -367,7 +367,7 @@ executing_line_number ()
 	return currently_executing_command->value.ArithFor->line;
 #endif
 
-	return line_number;
+      return line_number;
     }
   else
     return line_number;
