@@ -11,14 +11,31 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Issues with CTLESC characters in array subscripts and values. Bash-5.1 and
+# earlier didn't quote them correctly and therefore halved the number of
+# CTLESCs.
+
+declare -a var
 var=( $'\x01\x01\x01\x01' )
 declare -p var
+declare -A v2
+v2=( $'\x01' ab$'\x01'c )
+declare -p v2
 
 pv()
 {
 	local -a foo
 	foo=( "${var[@]}" )
 	declare -p foo
+}
+pv
+
+unset -f pv
+pv()
+{
+        local -A foo
+        eval foo=\( "${v2[@]@k}" \)
+        declare -p foo
 }
 pv
 
@@ -49,6 +66,21 @@ pv3
 pv4()
 {
 	local -A foo=( [v]="${var[@]}" )
+	declare -p foo
+}
+pv4
+
+unset -f pv3 pv4
+pv3()
+{
+	local -A foo=( $'\x01' "${v2[@]}" )
+	declare -p foo
+}
+pv3
+
+pv4()
+{
+	local -A foo=( [$'\x01']="${v2[@]}" )
 	declare -p foo
 }
 pv4

@@ -329,3 +329,26 @@ argv[7] = <'foo'>
 argv[8] = <'bar'>
 declare -A clone=([hello]="world" ["key with spaces"]="value with spaces" [foo]="bar" [one]="1" )
 declare -A posparams=([hello]="world" ["key with spaces"]="value with spaces" [foo]="bar" [one]="1" )
+declare -A var=([$'\001']=$'\001\001\001\001' )
+declare -A v2=([$'\001']=$'\001\001\001\001' )
+argv[1] = <^A>
+argv[2] = <^A^A^A^A>
+declare -A foo=([$'\001']=$'\001\001\001\001' )
+declare -A var=([$'\001']=$'\001\001\001\001' )
+argv[1] = <^A>
+argv[2] = <^A^A^A^A>
+declare -A foo=([$'\001']=$'\001\001\001\001' )
+declare -A var=([$'\001']=$'\001\001\001\001' )
+argv[1] = <^A>
+argv[2] = <^A^A^A^A>
+declare -A foo=([$'\001']=$'\001\001\001\001' )
+declare -a var=([0]=$'\001\001\001\001')
+argv[1] = <$'\001\001\001\001'>
+declare -a foo=([0]=$'\001\001\001\001')
+declare -a var=([0]=$'\001\001\001\001')
+argv[1] = <$'\001\001\001\001'>
+declare -a foo=([0]=$'\001\001\001\001')
+declare -A var=([two]=$'ab\001cd' [one]=$'\001\001\001\001' )
+declare -A foo=([two]=$'ab\001cd' [one]=$'\001\001\001\001' )
+declare -A foo=([$'\001']=$'ab\001cd' )
+declare -A foo=([$'\001']=$'\001\001\001\001' )

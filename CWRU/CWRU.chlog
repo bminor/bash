@@ -2105,3 +2105,25 @@ redir.c
 	- do_redirection_internal: if given [N]<&WORD- or [N]>&WORD- and WORD
 	  expands to null, make it identical to <&- or >&- and close file
 	  descriptor N (default 0). From a discussion back in 5/2021
+
+				   9/27
+				   ----
+arrayfunc.c
+	- expand_compound_array_assignment: since we run the string through
+	  the parser to turn it into a list (so we can make sure all shell
+	  metacharacters are properly quoted), we need to remove the CTLESC
+	  the parser uses to quote CTLESC and CTLNUL in *unquoted* words.
+	  The rest of the code assumes this has been done, and assumes that
+	  any CTLESC characters passed to expansion are part of the original
+	  word and should themselves be quoted, doubling the number of CTLESCs
+
+				   9/28
+				   ----
+arrayfunc.c
+	- expand_and_quote_kvpair_word,quote_compound_array_word,
+	  expand_and_quote_assoc_word,quote_compound_array_list: if we are
+	  single-quoting associative array subscripts and associative and
+	  indexed array values, we need to quote CTLESC characters, because
+	  that's how they come out of the parser and how the assignment
+	  statement code expects to see them.
+	  Fixes https://savannah.gnu.org/support/index.php?110538
