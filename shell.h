@@ -85,6 +85,7 @@ extern int EOF_Reached;
 #define MATCH_QUOTED	0x020
 #define MATCH_ASSIGNRHS	0x040
 #define MATCH_STARSUB	0x080
+#define MATCH_EXPREP	0x100	/* for pattern substitution, expand replacement */
 
 /* Some needed external declarations. */
 extern char **shell_environment;

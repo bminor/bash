@@ -3903,8 +3903,7 @@ execute_cond_node (cond)
 	arg1 = nullstr;
       if (echo_command_at_execute)
 	xtrace_print_cond_term (cond->type, invert, cond->op, arg1, (char *)NULL);
-      /* TAG:bash-5.2 */
-#if 0
+#if 0	/* TAG:bash-5.2 */
       if (varop && shell_compatibility_level > 51)		/* -v */
 #else
       if (varop)
@@ -5615,12 +5614,9 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   if (command)
     {
       /* If we're optimizing out the fork (implicit `exec'), decrement the
-	 shell level like `exec' would do. */
-#if 0 /* TAG: bash-5.2 psmith 10/11/2020 */
+	 shell level like `exec' would do. Don't do this if we are already
+	 in a pipeline environment, assuming it's already been done. */
       if (nofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE && (subshell_environment & SUBSHELL_PIPE) == 0)
-#else
-      if (nofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE)
-#endif
 	adjust_shell_level (-1);
 
       maybe_make_export_env ();

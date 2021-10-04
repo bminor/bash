@@ -141,7 +141,7 @@ do_chop(line, delim)
   int length;
 
   length = strlen (line);
-  if (length && line[length-1] == delim) 
+  if (length && (unsigned char)line[length-1] == delim) 
     line[length-1] = '\0';
 }
 

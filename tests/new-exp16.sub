@@ -1,0 +1,31 @@
+HOME=/homes/chet
+string=abcdefg
+set -- a b c
+
+# verify existing behavior
+echo ${string/abc/~}
+echo "${string/abc/~}"
+echo ${string/abc/"~"}
+
+echo ${string/abc/$notthere}
+echo "${string/abc/$notthere}"
+echo "${string/abc/"$notthere"}"
+
+echo ${string//?/\$\'&\' } 
+
+echo ${string//?/\& } 
+echo "${string//?/\& }"
+echo ${string//?/"& "}
+echo ${string//?/"\& "}
+
+echo "${string//?/"a "}"
+echo "${string//?/"$# "}"
+
+echo ${string/abc/& }
+echo "${string/abc/& }"
+echo ${string/abc/"& "}
+
+echo ${string/abc/\& }
+echo "${string/abc/\& }"
+echo ${string/abc/"\& "}
+echo ${string/abc/\\& }

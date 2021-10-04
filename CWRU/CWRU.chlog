@@ -2126,4 +2126,60 @@ arrayfunc.c
 	  indexed array values, we need to quote CTLESC characters, because
 	  that's how they come out of the parser and how the assignment
 	  statement code expects to see them.
-	  Fixes https://savannah.gnu.org/support/index.php?110538
+    	  Fixes https://savannah.gnu.org/support/index.php?110538
+
+				   9/29
+				   ----
+subst.c
+	- parameter_brace_transform: invalid transformation operators are now
+	  fatal errors in non-interactive shells, as with the other word
+	  expansions. Reported by Martin Schulte <gnu@schrader-schulte.de> in
+	  https://lists.gnu.org/archive/html/bug-bash/2020-10/msg00026.html
+
+execute_cmd.c
+	- execute_disk_command: if we're optimizing out the fork (nofork) and
+	  not directly in a pipeline (pipe_in == pipe_out == NO_PIPE), only
+	  modify shell_level if subshell_environment says we're not already in
+	  a pipeline. Reported by Paul Smith <psmith@gnu.org> 10/11/2020
+	  against GNU make
+
+evalstring.c
+	- should_suppress_fork: remove #if 1 for code that tries to suppress
+	  the fork in a process substitution subshell
+
+				   9/30
+				   ----
+builtins/mapfile.def
+	- do_chop: make sure we're comparing unsigned chars when checking
+	  whether the delim is the last character on the line. Reported by
+	  Greg Wooledge <greg@wooledge.org>
+
+				   10/1
+				   ----
+lib/readline/rltty.c
+	- rl_deprep_terminal: if we're not echoing to the terminal
+	  (_rl_echoing_p == 0), and we just output the bracketed paste end
+	  sequence, output a newline to compensate for the \r at the end of
+	  BRACK_PASTE_FINI, since redisplay didn't do it for us. Reported by
+	  Siteshwar Vashisht <svashisht@redhat.com>
+
+shell.h
+	- MATCH_EXPREP: new matching flag, understood only by pattern
+	  substitution; means to expand unquoted `&' in the replacement
+	  STRING to the match of PATTERN
+
+subst.c
+	- shouldexp_replacement: uncommented
+	- pat_subst: we expand & in the replacement string if MATCH_EXPREP
+	  appears in MFLAGS
+	- parameter_brace_patsub: push call to shouldexp_replacement out here,
+	  after the replacement string is expanded; set MATCH_EXPREP if there
+	  is an unquoted `&' (by backslash) in the expanded replacement
+	  string
+
+doc/{bash.1,bashref.texi}
+	- pattern substitution: overhauled the description, moved each of the
+	  possible forms to be tags in the tagged paragraph. The description
+	  now specifies the expansions that the replacement string undergoes
+	- pattern substitution: documented new behavior of unquoted & in the
+	  replacement string

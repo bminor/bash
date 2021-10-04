@@ -1827,17 +1827,32 @@ EEXXPPAANNSSIIOONN
               turn, and the expansion is the resultant list.
 
        ${_p_a_r_a_m_e_t_e_r//_p_a_t_t_e_r_n//_s_t_r_i_n_g}
+       ${_p_a_r_a_m_e_t_e_r////_p_a_t_t_e_r_n//_s_t_r_i_n_g}
+       ${_p_a_r_a_m_e_t_e_r//##_p_a_t_t_e_r_n//_s_t_r_i_n_g}
+       ${_p_a_r_a_m_e_t_e_r//%%_p_a_t_t_e_r_n//_s_t_r_i_n_g}
               PPaatttteerrnn ssuubbssttiittuuttiioonn.  The _p_a_t_t_e_r_n is expanded to produce a pat-
-              tern  just  as  in pathname expansion, _P_a_r_a_m_e_t_e_r is expanded and
+              tern  just  as in pathname expansion.  _P_a_r_a_m_e_t_e_r is expanded and
               the longest match of _p_a_t_t_e_r_n against its value is replaced  with
-              _s_t_r_i_n_g.   The match is performed using the rules described under
-              PPaatttteerrnn MMaattcchhiinngg below.  If _p_a_t_t_e_r_n begins with //,  all  matches
-              of  _p_a_t_t_e_r_n  are  replaced with _s_t_r_i_n_g.  Normally only the first
-              match is replaced.  If _p_a_t_t_e_r_n begins with ##, it must  match  at
-              the  beginning  of  the expanded value of _p_a_r_a_m_e_t_e_r.  If _p_a_t_t_e_r_n
-              begins with %%, it must match at the end of the expanded value of
-              _p_a_r_a_m_e_t_e_r.   If  _s_t_r_i_n_g  is null, matches of _p_a_t_t_e_r_n are deleted
-              and the // following _p_a_t_t_e_r_n may be omitted.  If the  nnooccaasseemmaattcchh
+              _s_t_r_i_n_g.   _s_t_r_i_n_g  undergoes tilde expansion, parameter and vari-
+              able expansion, arithmetic expansion, command and  process  sub-
+              stitution,  and quote removal.  The match is performed using the
+              rules described under PPaatttteerrnn MMaattcchhiinngg below.  In the first form
+              above,  only  the  first  match  is  replaced.  If there are two
+              slashes  separating  _p_a_r_a_m_e_t_e_r  and  _p_a_t_t_e_r_n  (the  second  form
+              above),  all  matches  of  _p_a_t_t_e_r_n are replaced with _s_t_r_i_n_g.  If
+              _p_a_t_t_e_r_n is preceded by ## (the third form above), it  must  match
+              at the beginning of the expanded value of _p_a_r_a_m_e_t_e_r.  If _p_a_t_t_e_r_n
+              is preceded by %% (the fourth form above), it must match  at  the
+              end  of  the  expanded  value of _p_a_r_a_m_e_t_e_r.  If the expansion of
+              _s_t_r_i_n_g is null, matches of _p_a_t_t_e_r_n are deleted.   If  _s_t_r_i_n_g  is
+              null, matches of _p_a_t_t_e_r_n are deleted and the // following _p_a_t_t_e_r_n
+              may be omitted.  Any unquoted instances of && in _s_t_r_i_n_g  are  re-
+              placed  with the matching portion of _p_a_t_t_e_r_n.  Backslash is used
+              to quote && in _s_t_r_i_n_g; users should take care if _s_t_r_i_n_g  is  dou-
+              ble-quoted  to avoid unwanted interactions between the backslash
+              and double-quoting.  Pattern substitution performs the check for
+              &&  before  expanding  _s_t_r_i_n_g to catch backslashes escaping the &&
+              before they are removed by the expansion.   If  the  nnooccaasseemmaattcchh
               shell  option  is enabled, the match is performed without regard
               to the case of alphabetic characters.  If _p_a_r_a_m_e_t_e_r is @@  or  **,
               the substitution operation is applied to each positional parame-
@@ -2695,11 +2710,13 @@ SSIIMMPPLLEE CCOOMMMMAANNDD EEXXPPAANNSSIIOONN
               able.
 
        If no command name results, the variable assignments affect the current
-       shell environment.  Otherwise, the variables are added to the  environ-
-       ment  of the executed command and do not affect the current shell envi-
-       ronment.  If any of the assignments attempts to assign  a  value  to  a
-       readonly  variable,  an error occurs, and the command exits with a non-
-       zero status.
+       shell environment.  In the case of such a command  (one  that  consists
+       only  of assignment statements and redirections), assignment statements
+       are performed before redirections.  Otherwise, the variables are  added
+       to  the  environment of the executed command and do not affect the cur-
+       rent shell environment.  If any of the assignments attempts to assign a
+       value  to  a  readonly variable, an error occurs, and the command exits
+       with a non-zero status.
 
        If no command name results, redirections are performed, but do not  af-
        fect  the  current  shell  environment.  A redirection error causes the
@@ -6517,4 +6534,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.1                    2021 August 23                         BASH(1)
+GNU Bash 5.1                    2021 October 1                         BASH(1)

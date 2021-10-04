@@ -7686,7 +7686,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 	 from end of positional parameters? */
 #if 1
       if ((vtype == VT_ARRAYVAR || vtype == VT_POSPARMS) && *e2p < 0)
-#else /* TAG: bash-5.2 */
+#else /* XXX - postponed; this isn't really a valuable feature */
       if (vtype == VT_ARRAYVAR && *e2p < 0)
 #endif
 	{
@@ -8164,11 +8164,7 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
       this_command_name = oname;
       if (vtype == VT_VARIABLE)
 	FREE (val);
-#if 0 /* TAG: bash-5.2 Martin Schulte <gnu@schrader-schulte.de> 10/2020 */
       return (interactive_shell ? &expand_param_error : &expand_param_fatal);
-#else
-      return &expand_param_error;
-#endif
     }
 
   starsub = vtype & VT_STARSUB;
@@ -8377,7 +8373,6 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
 /*								*/
 /****************************************************************/
 
-#if 0	/* TAG: bash-5.2 */
 static int
 shouldexp_replacement (s)
      char *s;
@@ -8395,6 +8390,12 @@ shouldexp_replacement (s)
 	  sindex++;
 	  if (s[sindex] == 0)
 	    return 0;
+	  /* We want to remove this backslash because we treat it as special
+	     in this context. THIS ASSUMES THE STRING IS PROCESSED BY
+	     strcreplace() OR EQUIVALENT that handles removing backslashes
+	     preceding the special character. */
+	  if (s[sindex] == '&')
+	    return 1;
 	}
       else if (c == '&')
 	return 1;
@@ -8402,7 +8403,6 @@ shouldexp_replacement (s)
     }
   return 0;
 }
-#endif
 
 char *
 pat_subst (string, pat, rep, mflags)
@@ -8418,12 +8418,7 @@ pat_subst (string, pat, rep, mflags)
     return (savestring (""));
 
   mtype = mflags & MATCH_TYPEMASK;
-
-#if 0	/* TAG: bash-5.2 */
-  rxpand = (rep && *rep) ? shouldexp_replacement (rep) : 0;
-#else
-  rxpand = 0;
-#endif
+  rxpand = mflags & MATCH_EXPREP;
 
   /* Special cases:
    * 	1.  A null pattern with mtype == MATCH_BEG means to prefix STRING
@@ -8672,6 +8667,15 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
 	rep = expand_string_if_necessary (rep, quoted, expand_string_unsplit);
       else
 	rep = expand_string_to_string_internal (rep, quoted, expand_string_unsplit);
+
+      /* Check whether or not to replace `&' in the replacement string after
+	 expanding it, since we want to treat backslashes quoting the `&'
+	 consistently. The replacement string already undergoes quote removal
+	 above, so users need to make sure any desired backslash makes it
+	 through that. */
+      if (rep && *rep && shouldexp_replacement (rep))
+	mflags |= MATCH_EXPREP;
+
     }
 
   /* ksh93 doesn't allow the match specifier to be a part of the expanded

@@ -2156,6 +2156,12 @@ If @var{parameter} is unset or null, the expansion of
 @var{word} is substituted.  Otherwise, the value of
 @var{parameter} is substituted.
 
+@example
+$ v=123
+$ echo $@{v-unset@}
+123
+@end example
+
 @item $@{@var{parameter}:=@var{word}@}
 If @var{parameter}
 is unset or null, the expansion of @var{word}
@@ -2163,6 +2169,13 @@ is assigned to @var{parameter}.
 The value of @var{parameter} is then substituted. 
 Positional parameters and special parameters may not be assigned to
 in this way.
+
+@example
+$ var=
+$ : $@{var:=DEFAULT@}
+$ echo $var
+DEFAULT
+@end example
 
 @item $@{@var{parameter}:?@var{word}@}
 If @var{parameter}
@@ -2172,10 +2185,22 @@ is not present) is written to the standard error and the shell, if it
 is not interactive, exits.  Otherwise, the value of @var{parameter} is
 substituted.
 
+@example
+$ var=
+$ : $@{var:?var is unset or null@}
+bash: var: var is unset or null
+@end example
+
 @item $@{@var{parameter}:+@var{word}@}
 If @var{parameter}
 is null or unset, nothing is substituted, otherwise the expansion of
 @var{word} is substituted.
+
+@example
+$ var=123
+$ echo $@{var:+var is set and not null@}
+var is set and not null
+@end example
 
 @item $@{@var{parameter}:@var{offset}@}
 @itemx $@{@var{parameter}:@var{offset}:@var{length}@}
@@ -2389,21 +2414,78 @@ the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 
 @item $@{@var{parameter}/@var{pattern}/@var{string}@} 
-
+@itemx $@{@var{parameter}//@var{pattern}/@var{string}@} 
+@itemx $@{@var{parameter}/#@var{pattern}/@var{string}@} 
+@itemx $@{@var{parameter}/%@var{pattern}/@var{string}@} 
 The @var{pattern} is expanded to produce a pattern just as in
 filename expansion.
 @var{Parameter} is expanded and the longest match of @var{pattern}
 against its value is replaced with @var{string}.
+@var{string} undergoes tilde expansion, parameter and variable expansion,
+arithmetic expansion, command and process substitution, and quote removal.
 The match is performed according to the rules described below
 (@pxref{Pattern Matching}).
-If @var{pattern} begins with @samp{/}, all matches of @var{pattern} are
-replaced with @var{string}.  Normally only the first match is replaced.
-If @var{pattern} begins with @samp{#}, it must match at the beginning
-of the expanded value of @var{parameter}.
-If @var{pattern} begins with @samp{%}, it must match at the end
-of the expanded value of @var{parameter}.
-If @var{string} is null, matches of @var{pattern} are deleted
+
+In the first form above, only the first match is replaced.
+If there are two slashes separating @var{parameter} and @var{pattern}
+(the second form above), all matches of @var{pattern} are
+replaced with @var{string}.
+If @var{pattern} is preceded by @samp{#} (the third form above),
+it must match at the beginning of the expanded value of @var{parameter}.
+If @var{pattern} is preceded by @samp{%} (the fourth form above),
+it must match at the end of the expanded value of @var{parameter}.
+If the expansion of @var{string} is null,
+matches of @var{pattern} are deleted.
+If @var{string} is null,
+matches of @var{pattern} are deleted
 and the @samp{/} following @var{pattern} may be omitted.
+
+Any unquoted instances of @samp{&} in @var{string} are replaced with the
+matching portion of @var{pattern}.
+This is intended to duplicate a common @code{sed} idiom.
+Backslash is used to quote @samp{&} in @var{string}; the backslash is removed
+in order to permit a literal @samp{&} in the replacement string.
+Pattern substitution performs the check for @samp{&} after expanding
+@var{string},
+so users should take care to quote backslashes intended to escape
+the @samp{&} and inhibit replacement so they survive any quote removal
+performed by the expansion of @var{string}.
+For instance,
+
+@example
+var=abcdef
+echo $@{var/abc/& @}
+echo "$@{var/abc/& @}"
+echo $@{var/abc/"& "@}
+@end example
+
+@noindent
+will display three lines of "abc def", while
+
+@example
+var=abcdef
+echo $@{var/abc/\& @}
+echo "$@{var/abc/\& @}"
+echo $@{var/abc/"\& "@}
+@end example
+
+@noindent
+will display two lines of "abc def" and a third line of "& def".
+The first two are replaced because the backslash is removed by quote
+removal performed during the expansion of @var{string}
+(the expansion is performed in a
+context that doesn't take any enclosing double quotes into account, as
+with other word expansions).
+In the third case, the double quotes affect the expansion
+of @samp{\&}, and, because @samp{&} is not one of the characters for
+which backslash is special in double quotes,
+the backslash survives the expansion, inhibits the replacement,
+but is removed because it is treated specially.
+One could use @samp{\\&}, unquoted, as the replacement string to achive
+the same effect.
+It should rarely be necessary to enclose only @var{string} in double
+quotes.
+
 If the @code{nocasematch} shell option   
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case   
@@ -2426,6 +2508,7 @@ filename expansion.
 Each character in the expanded value of @var{parameter} is tested against
 @var{pattern}, and, if it matches the pattern, its case is converted.
 The pattern should not attempt to match more than one character.
+
 The @samp{^} operator converts lowercase letters matching @var{pattern}
 to uppercase; the @samp{,} operator converts matching uppercase letters
 to lowercase.
@@ -2434,6 +2517,7 @@ expanded value; the @samp{^} and @samp{,} expansions match and convert only
 the first character in the expanded value.
 If @var{pattern} is omitted, it is treated like a @samp{?}, which matches
 every character.
+
 If @var{parameter} is @samp{@@} or @samp{*},
 the case modification operation is applied to each positional
 parameter in turn, and the expansion is the resultant list.

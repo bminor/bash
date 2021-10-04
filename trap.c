@@ -1455,7 +1455,7 @@ signal_in_progress (sig)
   return (sigmodes[sig] & SIG_INPROGRESS);
 }
 
-#if 0 /* TAG: bash-5.2 */
+#if 0 /* unused */
 int
 block_trapped_signals (maskp, omaskp)
      sigset_t *maskp;

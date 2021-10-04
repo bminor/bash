@@ -99,11 +99,7 @@ should_suppress_fork (command)
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
 	  signal_is_trapped (ERROR_TRAP) == 0 &&
 	  any_signals_trapped () < 0 &&
-#if 1 /* TAG: bash-5.2 */
 	  (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
-#else
-	  command->redirects == 0 && command->value.Simple->redirects == 0 &&
-#endif
 	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
 }
