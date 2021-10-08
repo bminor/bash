@@ -2183,3 +2183,48 @@ doc/{bash.1,bashref.texi}
 	  now specifies the expansions that the replacement string undergoes
 	- pattern substitution: documented new behavior of unquoted & in the
 	  replacement string
+
+				   10/4
+				   ----
+shell.c
+	- include <malloc/shmalloc.h> if we're debugging malloc (MALLOC_DEBUG)
+	  so we can get an extern declaration of trace_malloc_stats
+
+				   10/5
+				   ----
+subst.c
+	- expand_subscript_string: allocate new memory for td.word, copying
+	  STRING, in case it gets freed on error by expand_word_internal.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+lib/malloc/malloc.c
+	- malloc_usable_size: return the allocated size instead of the chunk
+	  size, since writing over the bounds checking will cause fatal errors.
+	  Reported by Julien Moutinho <julm+bash@sourcephile.fr>, fix from
+	  Dominique Martinet <asmadeus@codewreck.org>
+
+arrayfunc.c
+	- unbind_array_elememnt: pass (flags&VA_NOEXPAND) to skipsubscript(),
+	  instead of unconditionally passing 1 if we're operating on an
+	  associative array. This is consistent with how valid_array_reference
+	  determines the length of the subscript.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+				   10/6
+				   ----
+
+subst.c
+	- skip_to_delim: add a new value for FLAGS. If FLAGS&2, we assume that
+	  START is one character after the opening OPEN. If not, we assume that
+	  START is at OPEN, and needs to be incremented past it. Part of fix
+	  from Koichi Murase <myoga.murase@gmail.com>
+
+arrayfunc.c
+	- unbind_array_element: make sure to pass FLAGS to skipsubscript with
+	  bit 2 set, since we are passed a SUB index that's one past the
+	  opening bracket. Rest of fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+	- array_variable_name: make sure we pass (FLAGS&1) to skipsubscript, so
+	  we don't inadvertently pass a value with bit 2 set, which would
+	  cause an off-by-one error in subscript parsing
+

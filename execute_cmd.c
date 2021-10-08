@@ -4235,8 +4235,7 @@ fix_assignment_words (words)
 
 #if defined (ARRAY_VARS)
 /* Set W_ARRAYREF on words that are valid array references to a builtin that
-   accepts them. This is intended to eventually comnletely take the place of
-   assoc_expand_once. */
+   accepts them. This is intended to completely replace assoc_expand_once. */
 static void
 fix_arrayref_words (words)
      WORD_LIST *words;

@@ -1074,7 +1074,11 @@ unbind_array_element (var, sub, flags)
   if (var && assoc_p (var) && (flags&VA_ONEWORD))
     len = strlen (sub) - 1;
   else
+#if 0
     len = skipsubscript (sub, 0, (flags&VA_NOEXPAND) || (var && assoc_p(var)));	/* XXX */
+#else
+    len = skipsubscript (sub, 0, (flags&VA_NOEXPAND) | 2);	/* XXX */
+#endif
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
@@ -1330,7 +1334,7 @@ array_variable_name (s, flags, subp, lenp)
       return ((char *)NULL);
     }
   ind = t - s;
-  ni = skipsubscript (s, ind, flags);	/* XXX - was 0 not flags */
+  ni = skipsubscript (s, ind, flags&1);	/* XXX - was 0 not flags */
   if (ni <= ind + 1 || s[ni] != ']')
     {
       err_badarraysub (s);

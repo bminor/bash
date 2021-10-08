@@ -72,6 +72,8 @@ extern int get_tty_state PARAMS((void));
 
 #if defined (USING_BASH_MALLOC) && defined (DEBUG) && !defined (DISABLE_MALLOC_WRAPPERS)
 #  include <malloc/shmalloc.h>
+#elif defined (MALLOC_DEBUG) && defined (USING_BASH_MALLOC)
+#  include <malloc/shmalloc.h>
 #endif
 
 #if defined (HISTORY)

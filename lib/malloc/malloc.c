@@ -1344,27 +1344,25 @@ malloc_usable_size (mem)
 {
   register union mhead *p;
   register char *ap;
-  register int maxbytes;
-
 
   if ((ap = (char *)mem) == 0)
     return 0;
 
   /* Find the true start of the memory block to discover which bin */
   p = (union mhead *) ap - 1;
+
   if (p->mh_alloc == ISMEMALIGN)
     {
       ap -= p->mh_nbytes;
       p = (union mhead *) ap - 1;
     }
 
-  /* XXX - should we return 0 if ISFREE? */
-  maxbytes = binsize(p->mh_index);
-
-  /* So the usable size is the maximum number of bytes in the bin less the
-     malloc overhead */
-  maxbytes -= MOVERHEAD + MSLOP;
-  return (maxbytes);
+  /* return 0 if ISFREE */
+  if (p->mh_alloc == ISFREE)
+    return 0;
+  
+  /* Since we use bounds checking, the usable size is the last requested size. */
+  return (p->mh_nbytes);
 }
 
 #if !defined (NO_VALLOC)

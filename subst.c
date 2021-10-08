@@ -1737,12 +1737,14 @@ unquote_bang (string)
 
 #define CQ_RETURN(x) do { no_longjmp_on_fatal_error = oldjmp; return (x); } while (0)
 
-/* This function assumes s[i] == open; returns with s[ret] == close; used to
-   parse array subscripts.  FLAGS & 1 means to not attempt to skip over
-   matched pairs of quotes or backquotes, or skip word expansions; it is
-   intended to be used after expansion has been performed and during final
-   assignment parsing (see arrayfunc.c:assign_compound_array_list()) or
-   during execution by a builtin which has already undergone word expansion. */
+/* When FLAGS & 2 == 0, this function assumes STRING[I] == OPEN; when
+   FLAGS & 2 != 0, it assumes STRING[I] points to one character past OPEN;
+   returns with STRING[RET] == close; used to parse array subscripts.
+   FLAGS & 1 means not to attempt to skip over matched pairs of quotes or
+   backquotes, or skip word expansions; it is intended to be used after
+   expansion has been performed and during final assignment parsing (see
+   arrayfunc.c:assign_compound_array_list()) or during execution by a builtin
+   which has already undergone word expansion. */
 static int
 skip_matched_pair (string, start, open, close, flags)
      const char *string;
@@ -1757,7 +1759,10 @@ skip_matched_pair (string, start, open, close, flags)
   oldjmp = no_longjmp_on_fatal_error;
   no_longjmp_on_fatal_error = 1;
 
-  i = start + 1;		/* skip over leading bracket */
+  /* Move to the first character after a leading OPEN. If FLAGS&2, we assume
+    that START already points to that character. If not, we need to skip over
+    it here. */
+  i = (flags & 2) ? start : start + 1;
   count = 1;
   pass_next = backq = 0;
   ss = (char *)string;
@@ -1838,9 +1843,11 @@ skip_matched_pair (string, start, open, close, flags)
 }
 
 #if defined (ARRAY_VARS)
-/* Flags has 1 as a reserved value, since skip_matched_pair uses it for
+/* FLAGS has 1 as a reserved value, since skip_matched_pair uses it for
    skipping over quoted strings and taking the first instance of the
-   closing character. */
+   closing character. FLAGS & 2 means that STRING[START] points one
+   character past the open bracket; FLAGS & 2 == 0 means that STRING[START]
+   points to the open bracket. skip_matched_pair knows how to deal with this. */
 int
 skipsubscript (string, start, flags)
      const char *string;
@@ -10246,7 +10253,7 @@ expand_subscript_string (string, quoted)
   ret = (char *)NULL;
 
   td.flags = W_NOPROCSUB|W_NOTILDE|W_NOSPLIT2;	/* XXX - W_NOCOMSUB? */
-  td.word = string;
+  td.word = savestring (string);		/* in case it's freed on error */
 
   expand_no_split_dollar_star = 1;
   tlist = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
@@ -10264,6 +10271,7 @@ expand_subscript_string (string, quoted)
       dispose_words (tlist);
     }
 
+  free (td.word);
   return (ret);
 }
 
