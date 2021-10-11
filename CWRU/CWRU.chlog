@@ -2228,3 +2228,54 @@ arrayfunc.c
 	  we don't inadvertently pass a value with bit 2 set, which would
 	  cause an off-by-one error in subscript parsing
 
+				   10/8
+				   ----
+trap.c
+	- restore_traps: inverse of reset_signal_handlers. This understands
+	  how reset_signal_handlers changes the signal disposition while
+	  leaving the trap string in place, and knows how to restore flags
+	  and state based on that preserved trap string and whether or not
+	  the signal is "special" to the shell.
+
+builtins/exec.def
+	- exec_builtin: instead of using restore_original_signals to completely
+	  cancel the traps, call reset_signal_handlers so the trap strings are
+	  preserved. Then if the exec fails (and we're not exiting) we can
+	  look at the trap strings and see how to restore the trap state.
+	  This calls restore_traps after reinitializing the shell signal
+	  handlers, using the trap strings saved by reset_signal_handlers.
+	  Fixes issue with not exiting after a failed exec clearing the EXIT
+	  trap reported by Mark March <march@systempad.org>, using the
+	  approach suggested by Robert Elz <kre@munnari.OZ.AU>
+
+subst.c
+	- expand_declaration_argument: when parsing options that modify
+	  attributes that affect how the value is handled (i, c, u, etc.),
+	  make sure to create an option string and call make_internal_declare
+	  with options that start with a `+' so the attribute is off when
+	  the assignment is performed and changes how the value is expanded.
+	  From a report by Léa Gris <lea.gris@noiraude.net>
+
+lib/readline/complete.c
+	- rl_display_match_list: even if _rl_completion_prefix_display_length
+	  is set to a non-zero value, pass the common prefix length to
+	  fnprint if we've turned on colored completion prefixes; passes
+	  through to fnprint via print_filename
+	- fnprint: add the ellipsis if prefix_bytes exceeds the
+	  _rl_completion_prefix_display_length, add explicit check for
+	  prefix_bytes being longer since print_filename passes it through
+	  if colored-completion-prefix is set. This means that while
+	  completion-prefix-display-length still has precedence over
+	  colored-completion-prefix, it doesn't override it if both are set
+	  and the common prefix length is shorter than
+	  completion-prefix-display-length. From a report by
+	  Christoph Anton Mitterer <calestyo@scientia.net>
+
+				   10/10
+				   -----
+parse.y
+	- parse_dparen: if the last token is FOR, increment word_top and assign
+	  word_lineno like for other for loops. Fixes bug with LINENO after
+	  arithmetic for commands reported by
+	  Tom Coleman <thomas.james.coleman@gmail.com>
+

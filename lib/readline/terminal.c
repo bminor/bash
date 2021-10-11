@@ -386,8 +386,12 @@ _rl_sigwinch_resize_terminal (void)
 void
 rl_resize_terminal (void)
 {
+  int width, height;
+
+  width = _rl_screenwidth;
+  height = _rl_screenheight;
   _rl_get_screen_size (fileno (rl_instream), 1);
-  if (_rl_echoing_p)
+  if (_rl_echoing_p && (width != _rl_screenwidth || height != _rl_screenheight))
     {
       if (CUSTOM_REDISPLAY_FUNC ())
 	rl_forced_update_display ();

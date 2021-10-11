@@ -12132,10 +12132,13 @@ expand_declaration_argument (tlist, wcmd)
   memset (omap, '\0', sizeof (omap));
   for (l = wcmd->next; l != tlist; l = l->next)
     {
-      if (l->word->word[0] != '-')
+      int optchar;
+
+      if (l->word->word[0] != '-' && l->word->word[0] != '+')
 	break;	/* non-option argument */
       if (l->word->word[0] == '-' && l->word->word[1] == '-' && l->word->word[2] == 0)
 	break;	/* -- signals end of options */
+      optchar = l->word->word[0];
       for (oind = 1; l->word->word[oind]; oind++)
 	switch (l->word->word[oind])
 	  {
@@ -12147,7 +12150,7 @@ expand_declaration_argument (tlist, wcmd)
 	    case 'c':
 	      omap[l->word->word[oind]] = 1;
 	      if (opti == 0)
-		opts[opti++] = '-';
+		opts[opti++] = optchar;
 	      break;
 	    default:
 	      break;

@@ -835,7 +835,8 @@ fnprint (const char *to_print, int prefix_bytes, const char *real_pathname)
     colored_stat_start (real_pathname);
 #endif
 
-  if (prefix_bytes && _rl_completion_prefix_display_length > 0)
+  if (prefix_bytes && _rl_completion_prefix_display_length > 0 &&
+      prefix_bytes > _rl_completion_prefix_display_length)
     {
       char ellipsis;
 
@@ -1548,7 +1549,7 @@ rl_display_match_list (char **matches, int len, int max)
 
       if (common_length > _rl_completion_prefix_display_length && common_length > ELLIPSIS_LEN)
 	max -= common_length - ELLIPSIS_LEN;
-      else
+      else if (_rl_colored_completion_prefix <= 0)
 	common_length = sind = 0;
     }
 #if defined (COLOR_SUPPORT)

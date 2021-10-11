@@ -83,6 +83,7 @@ static void free_trap_string (int);
 static void reset_signal (int);
 static void restore_signal (int);
 static void reset_or_restore_signal_handlers (sh_resetsig_func_t *);
+static void reinit_trap (int);
 
 static void trap_if_untrapped (int, char *);
 
@@ -1363,6 +1364,77 @@ void
 restore_original_signals ()
 {
   reset_or_restore_signal_handlers (restore_signal);
+}
+
+/* Change the flags associated with signal SIG without changing the trap
+   string. The string is TRAP_LIST[SIG] if we need it. */
+static void
+reinit_trap (sig)
+     int sig;
+{
+  sigmodes[sig] |= SIG_TRAPPED;
+  if (trap_list[sig] == (char *)IGNORE_SIG)
+    sigmodes[sig] |= SIG_IGNORED;
+  else
+    sigmodes[sig] &= ~SIG_IGNORED;
+  if (sigmodes[sig] & SIG_INPROGRESS)
+    sigmodes[sig] |= SIG_CHANGED;
+}
+
+/* Undo the effects of reset_signal_handlers(), which unsets the traps but
+   leaves the trap strings in place. This understands how reset_signal_handlers
+   works. */
+void
+restore_traps ()
+{
+  char *trapstr;
+  int i;
+
+  /* Take care of the exit trap first. If TRAP_LIST[0] is non-null, the trap
+     has been set. */
+  trapstr = trap_list[EXIT_TRAP];
+  if (trapstr)
+    reinit_trap (EXIT_TRAP);
+
+  /* Then DEBUG, RETURN, and ERROR. TRAP_LIST[N] == 0 if these signals are
+     not trapped. This knows what reset_signal_handlers does for these traps */
+  trapstr = trap_list[DEBUG_TRAP];
+  if (trapstr && function_trace_mode == 0)
+    reinit_trap (DEBUG_TRAP);
+  trapstr = trap_list[RETURN_TRAP];
+  if (trapstr && function_trace_mode == 0)
+    reinit_trap (RETURN_TRAP);
+  trapstr = trap_list[ERROR_TRAP];
+  if (trapstr && error_trace_mode == 0)
+    reinit_trap (ERROR_TRAP);
+
+  /* And finally all the `real' signals. reset_signal_handlers just changes the
+     signal handler for these signals, leaving the trap value in place. We
+     intuit what to do based on that value. We assume that signals marked as
+     SIG_SPECIAL are reinitialized by initialize_signals (), so we don't
+     change the signal handler unless the signal is supposed to be ignored. */
+  for (i = 1; i < NSIG; i++)
+    {
+      trapstr = trap_list[i];
+      if (sigmodes[i] & SIG_SPECIAL)
+	{
+	  if (trapstr && trapstr != (char *)DEFAULT_SIG)
+	    reinit_trap (i);
+	  if (trapstr == (char *)IGNORE_SIG && (sigmodes[i] & SIG_NO_TRAP) == 0)
+	    set_signal_handler (i, SIG_IGN);
+	}
+      else if (trapstr == (char *)IGNORE_SIG)
+	{
+	  reinit_trap (i);
+	  if ((sigmodes[i] & SIG_NO_TRAP) == 0)
+	    set_signal_handler (i, SIG_IGN);
+	}
+      else if (trapstr != (char *)DEFAULT_SIG)
+        /* set_signal duplicates the string argument before freeing it. */
+	set_signal (i, trapstr);
+
+      pending_traps[i] = 0;	/* XXX */
+    }
 }
 
 /* If a trap handler exists for signal SIG, then call it; otherwise just

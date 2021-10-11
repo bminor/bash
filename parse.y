@@ -4348,7 +4348,9 @@ parse_dparen (c)
 #if defined (ARITH_FOR_COMMAND)
   if (last_read_token == FOR)
     {
-      arith_for_lineno = line_number;
+      if (word_top < MAX_CASE_NEST)
+	word_top++;
+      arith_for_lineno = word_lineno[word_top] = line_number;
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)
 	{
