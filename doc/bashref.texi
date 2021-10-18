@@ -8861,7 +8861,14 @@ Optionally, type @samp{make tests} to run the Bash test suite.
 
 @item
 Type @samp{make install} to install @code{bash} and @code{bashbug}.
-This will also install the manual pages and Info file.
+This will also install the manual pages and Info file, message translation
+files, some supplemental documentation, a number of example loadable
+builtin commands, and a set of header files for developing loadable
+builtins.
+You may need additional privileges to install @code{bash} to your
+desired destination, so @samp{sudo make install} might be required.
+More information about controlling the locations where @code{bash} and
+other files are installed is below (@pxref{Installation Names}).
 
 @end enumerate
 
@@ -8869,7 +8876,7 @@ The @code{configure} shell script attempts to guess correct
 values for various system-dependent variables used during
 compilation.  It uses those values to create a @file{Makefile} in
 each directory of the package (the top directory, the
-@file{builtins}, @file{doc}, and @file{support} directories,
+@file{builtins}, @file{doc}, @file{po}, and @file{support} directories,
 each directory under @file{lib}, and several others).  It also creates a
 @file{config.h} file containing system-dependent definitions. 
 Finally, it creates a shell script named @code{config.status} that you
@@ -8914,10 +8921,10 @@ to do them, and mail diffs or instructions to
 considered for the next release.
 
 The file @file{configure.ac} is used to create @code{configure}
-by a program called Autoconf.  You only need
-@file{configure.ac} if you want to change it or regenerate
-@code{configure} using a newer version of Autoconf.  If
-you do this, make sure you are using Autoconf version 2.50 or
+by a program called Autoconf.
+You only need @file{configure.ac} if you want to change it or regenerate
+@code{configure} using a newer version of Autoconf.
+If you do this, make sure you are using Autoconf version 2.69 or
 newer.
 
 You can remove the program binaries and object files from the
@@ -8988,18 +8995,49 @@ directories for other architectures.
 @section Installation Names
 
 By default, @samp{make install} will install into
-@file{/usr/local/bin}, @file{/usr/local/man}, etc.  You can
-specify an installation prefix other than @file{/usr/local} by
+@file{/usr/local/bin}, @file{/usr/local/man}, etc.;
+that is, the @dfn{installation prefix} defaults to @file{/usr/local}.
+You can specify an installation prefix other than @file{/usr/local} by
 giving @code{configure} the option @option{--prefix=@var{PATH}},
-or by specifying a value for the @env{DESTDIR} @samp{make}
-variable when running @samp{make install}.
+or by specifying a value for the @env{prefix} @samp{make}
+variable when running @samp{make install}
+(e.g., @samp{make install prefix=@var{PATH}}).
+The @env{prefix} variable provides a default for @env{exec_prefix} and
+other variables used when installing bash.
 
 You can specify separate installation prefixes for
 architecture-specific files and architecture-independent files. 
 If you give @code{configure} the option
 @option{--exec-prefix=@var{PATH}}, @samp{make install} will use
 @var{PATH} as the prefix for installing programs and libraries.
-Documentation and other data files will still use the regular prefix. 
+Documentation and other data files will still use the regular prefix.
+
+If you would like to change the installation locations for a single run,
+you can specify these variables as arguments to @code{make}:
+@samp{make install exec_prefix=/} will install @code{bash} and
+@code{bashbug} into @file{/bin} instead of the default @file{/usr/local/bin}.
+
+If you want to see the files bash will install and where it will install
+them without changing anything on your system, specify the variable
+@env{DESTDIR} as an argument to @code{make}. Its value should be the
+absolute directory path you'd like to use as the root of your sample
+installation tree. For example,
+
+@example
+mkdir /fs1/bash-install
+make install DESTDIR=/fs1/bash-install
+@end example
+
+@noindent
+will install @code{bash} into @file{/fs1/bash-install/usr/local/bin/bash},
+the documentation into directories within
+@file{/fs1/bash-install/usr/local/share}, the example loadable builtins into
+@file{/fs1/bash-install/usr/local/lib/bash}, and so on.
+You can use the usual @env{exec_prefix} and @env{prefix} variables to alter
+the directory paths beneath the value of @env{DESTDIR}.
+
+The GNU Makefile standards provide a more complete description of these
+variables and their effects.
 
 @node Specifying the System Type
 @section Specifying the System Type
@@ -9157,7 +9195,9 @@ The @samp{minimal-config} option can be used to disable all of
 the following options, but it is processed first, so individual
 options may be enabled using @samp{enable-@var{feature}}. 
 
-All of the following options except for @samp{disabled-builtins},
+All of the following options except for
+@samp{alt-array-implementation},
+@samp{disabled-builtins},
 @samp{direxpand-default},
 @samp{strict-posix-default},
 and
@@ -9169,6 +9209,11 @@ necessary support.
 @item --enable-alias
 Allow alias expansion and include the @code{alias} and @code{unalias}
 builtins (@pxref{Aliases}).
+
+@item --enable-alt-array-implementation
+This builds bash using an alternate implementation of arrays
+(@pxref{Arrays}) that provides faster access at the expense of using
+more memory (sometimes many times more, depending on how sparse an array is).
 
 @item --enable-arith-for-command
 Include support for the alternate form of the @code{for} command

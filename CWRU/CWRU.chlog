@@ -2279,3 +2279,34 @@ parse.y
 	  arithmetic for commands reported by
 	  Tom Coleman <thomas.james.coleman@gmail.com>
 
+				   10/11
+				   -----
+execute_cmd.c
+	- shell_execve: if execve fails with ENOENT, but executable_file()
+	  succeeds, display a slightly more descriptive error message. Prompted
+	  by a report from Andrea Monaco <andrea.monaco@autistici.org>
+
+stringlib.c
+	- strcreplace: allow backslash to escape a backslash, since we allow it
+	  to escape a `&'
+
+				   10/14
+				   -----
+pcomplib.c
+	- COMPLETE_HASH_BUCKETS: double to 512
+
+stringlib.c
+	- strcreplace: the last argument is now a flags argument. 1 has its
+	  previous meaning (glob); 2 means to allow backslash to escape a
+	  backslash (as added on 10/11)
+
+subst.c
+	- pat_subst: call strcreplace with 2 as the flags value
+
+				   10/15
+				   -----
+doc/bashref.texi
+	- updates to Installation section
+
+doc/{mkposix,mkinst,mkrbash},doc/Makefile.in
+	- changes to allow scripts to be run outside the source directory

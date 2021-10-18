@@ -4,10 +4,26 @@
 #	    of the texinfo manual
 #
 
+# defaults for doing this in the source tree
+SRCDIR=.
+TOPDIR=..
+
 NODE="Bash POSIX Mode"
 TEXI=bashref.texi
 TMPINFO=temp.info
 TMPOUT=POSIX.tmp
+
+prog=${0##*/}
+USAGE="usage: $prog [-s srcdir] [-t topdir] [output-file]"
+while getopts s:t: opt
+do
+	case "$opt" in
+	s)	SRCDIR=$OPTARG TEXI=${OPTARG}/bashref.texi ;;
+	t)	TOPDIR=$OPTARG ;;
+	*)	echo "$USAGE" >&2 ; exit 2 ;;
+	esac
+done
+shift $(( $OPTIND - 1 ))
 
 OUT=${1:-POSIX}
 
@@ -15,7 +31,8 @@ trap 'rm -f $TMPOUT $TMPINFO $OUT; trap '' 0; exit 1' 1 2 3 6 15
 trap 'rm -f $TMPOUT $TMPINFO' 0
 
 # create an info file without paragraph indentation
-makeinfo --no-split -I../lib/readline/doc --paragraph-indent 0 -o $TMPINFO $TEXI
+RLDIR=${TOPDIR}/lib/readline/doc
+makeinfo --no-split -I${RLDIR} --paragraph-indent 0 -o $TMPINFO $TEXI
 
 # write out the text from the `Bash POSIX Mode' node to $TMPOUT
 info --file $TMPINFO --node "$NODE" --subnodes --output $TMPOUT

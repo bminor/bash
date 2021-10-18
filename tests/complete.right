@@ -1,41 +1,49 @@
 complete -f -X '!*.+(ps|PS)' gs
-complete -c nice
 complete -e printenv
-complete -c gdb
 complete -f -X '!*.texi*' texi2html
-complete -j -P '%' fg
 complete -g groupmod
-complete -f -X '!*.dvi' dvips
-complete -f -X '!*.texi*' texi2dvi
 complete -v -S '=' typeset
-complete -f .
 complete -c nohup
 complete -a unalias
 complete -g groupdel
 complete -A hostname telnet
-complete -v -S '=' declare
-complete -v -S '=' export
 complete -v -S '=' local
 complete -v -S '=' readonly
 complete -o bashdefault -o filenames -o nospace -F _comp_cd cd
-complete -f -X '!*.dvi' xdvi
 complete -c type
 complete -f ln
 complete -f -X '!*.+(gz|tgz)' gunzip
 complete -f -X '!*.texi*' makeinfo
-complete -u su
 complete -j -P '%' jobs
-complete -o dirnames -o filenames -o nospace -d popd
-complete -A signal trap
 complete -o dirnames -o filenames -o nospace -d pushd
 complete -f -X '!*.pdf' acroread
 complete -v unset
 complete -f -X '!*.+(ps|PS)' ghostview
-complete -j -W '$(ps -x | tail +2 | cut -c1-5)' -P '%' wait
 complete -A hostname rsh
 complete -c exec
-complete -f -X '!*.Z' zmore
 complete -A signal kill
+complete -c eval
+complete -f chown
+complete -f gzip
+complete -W '"${GROUPS[@]}"' newgrp
+complete -A shopt shopt
+complete -A hostname ftp
+complete -A hostname rlogin
+complete -v getopts
+complete -c nice
+complete -c gdb
+complete -j -P '%' fg
+complete -f -X '!*.dvi' dvips
+complete -f -X '!*.texi*' texi2dvi
+complete -f .
+complete -v -S '=' declare
+complete -v -S '=' export
+complete -f -X '!*.dvi' xdvi
+complete -u su
+complete -o dirnames -o filenames -o nospace -d popd
+complete -A signal trap
+complete -j -W '$(ps -x | tail +2 | cut -c1-5)' -P '%' wait
+complete -f -X '!*.Z' zmore
 complete -j -P '%' disown
 complete -f -X '!*.+(ps|PS)' gs
 complete -f -X '!*.+(ps|PS)' gv
@@ -45,19 +53,11 @@ complete -A stopped -P '%' bg
 complete -f cat
 complete -d mkdir
 complete -A helptopic help
-complete -c eval
-complete -f chown
 complete -v read
 complete -c -k time
 complete -f -X '!*.Z' zcat
-complete -f gzip
-complete -W '"${GROUPS[@]}"' newgrp
 complete -f -X '!*.Z' uncompress
 complete -d rmdir
-complete -A shopt shopt
-complete -A hostname ftp
 complete -f more
-complete -A hostname rlogin
-complete -v getopts
 complete -f -X '!*.+(gz|tgz)' gzcat
 ./complete.tests: line 123: complete: notthere: no completion specification

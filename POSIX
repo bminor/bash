@@ -101,7 +101,11 @@ The following list is what's changed when 'POSIX mode' is in effect:
 
   25. A non-interactive shell exits with an error status if a variable
      assignment error occurs in an assignment statement preceding a
-     special builtin, but not with any other simple command.
+     special builtin, but not with any other simple command.  For any
+     other simple command, the shell aborts execution of that command,
+     and execution continues at the top level ("the shell shall not
+     perform any further processing of the command in which the error
+     occurred").
 
   26. A non-interactive shell exits with an error status if the
      iteration variable in a 'for' statement or the selection variable
@@ -185,14 +189,14 @@ The following list is what's changed when 'POSIX mode' is in effect:
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  48. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
+  48. When the 'cd' builtin is invoked in logical mode, and the pathname
      constructed from '$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, 'cd' will fail
-     instead of falling back to PHYSICAL mode.
+     instead of falling back to physical mode.
 
   49. When the 'cd' builtin cannot change a directory because the length
      of the pathname constructed from '$PWD' and the directory name
-     supplied as an argument exceeds PATH_MAX when all symbolic links
+     supplied as an argument exceeds 'PATH_MAX' when all symbolic links
      are expanded, 'cd' will fail instead of attempting to use only the
      supplied directory name.
 

@@ -4,11 +4,27 @@
 #	      texinfo manual
 #
 
+# defaults for doing this in the source tree
+SRCDIR=.
+TOPDIR=..
+
 NODE="Installing Bash"
 SUBNODE="Basic Installation"
 TEXI=bashref.texi
 TMPINFO=temp.info
 TMPOUT=INSTALL.tmp
+
+prog=${0##*/}
+USAGE="usage: $prog [-s srcdir] [-t topdir] [output-file]"
+while getopts s:t: opt
+do
+	case "$opt" in
+	s)	SRCDIR=$OPTARG TEXI=${OPTARG}/bashref.texi ;;
+	t)	TOPDIR=$OPTARG ;;
+	*)	echo "$USAGE" >&2 ; exit 2 ;;
+	esac
+done
+shift $(( $OPTIND - 1 ))
 
 OUT=${1:-INSTALL}
 
@@ -16,7 +32,8 @@ trap 'rm -f $TMPOUT $TMPINFO $OUT; trap '' 0; exit 1' 1 2 3 6 15
 trap 'rm -f $TMPOUT $TMPINFO' 0
 
 # create an info file without paragraph indentation
-makeinfo --no-split --no-number-sections -I../lib/readline/doc --paragraph-indent 0 -o $TMPINFO $TEXI
+RLDIR=${TOPDIR}/lib/readline/doc
+makeinfo --no-split --no-number-sections -I${RLDIR} --paragraph-indent 0 -o $TMPINFO $TEXI
 
 # write out the text from the `Installing Bash' node to INSTALL.tmp
 info --file $TMPINFO --node "$NODE" --subnodes --output $TMPOUT

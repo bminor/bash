@@ -8484,7 +8484,7 @@ pat_subst (string, pat, rep, mflags)
 	  for (x = 0; x < mlen; x++)
 	    mstr[x] = s[x];
 	  mstr[mlen] = '\0';
-	  rstr = strcreplace (rep, '&', mstr, 0);
+	  rstr = strcreplace (rep, '&', mstr, 2);
 	  free (mstr);
 	  rslen = strlen (rstr);
         }

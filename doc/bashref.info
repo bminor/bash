@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.8 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.1, 1 October 2021).
+Bash shell (version 5.1, 15 October 2021).
 
-   This is Edition 5.1, last updated 1 October 2021, of 'The GNU Bash
+   This is Edition 5.1, last updated 15 October 2021, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.1.
 
    Copyright (C) 1988-2021 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.1, 1 October 2021).  The Bash home page is
+Bash shell (version 5.1, 15 October 2021).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.1, last updated 1 October 2021, of 'The GNU Bash
+   This is Edition 5.1, last updated 15 October 2021, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.1.
 
    Bash contains features that appear in other popular shells, and some
@@ -2078,10 +2078,13 @@ omitted, the operator tests only for existence.
 
      Any unquoted instances of '&' in STRING are replaced with the
      matching portion of PATTERN.  This is intended to duplicate a
-     common 'sed' idiom.  Backslash is used to quote '&' in STRING;
-     users should take care if STRING is double-quoted to avoid unwanted
-     interactions between the backslash and double-quoting.  For
-     instance,
+     common 'sed' idiom.  Backslash is used to quote '&' in STRING; the
+     backslash is removed in order to permit a literal '&' in the
+     replacement string.  Pattern substitution performs the check for
+     '&' after expanding STRING, so users should take care to quote
+     backslashes intended to escape the '&' and inhibit replacement so
+     they survive any quote removal performed by the expansion of
+     STRING.  For instance,
 
           var=abcdef
           echo ${var/abc/& }
@@ -2095,16 +2098,18 @@ omitted, the operator tests only for existence.
           echo "${var/abc/\& }"
           echo ${var/abc/"\& "}
 
-     will display two lines of "& def" and a third line of "\& def".
-     This is because '&' is not one of the characters for which
-     backslash is special in double quotes, and the expansion of STRING
-     is performed in a context that doesn't take the enclosing double
-     quotes into account.  It should rarely be necessary to enclose only
-     STRING in double quotes.
-
-     Pattern substitution performs the check for '&' before expanding
-     STRING to catch backslashes escaping the '&' before they are
-     removed by the expansion.
+     will display two lines of "abc def" and a third line of "& def".
+     The first two are replaced because the backslash is removed by
+     quote removal performed during the expansion of STRING (the
+     expansion is performed in a context that doesn't take any enclosing
+     double quotes into account, as with other word expansions).  In the
+     third case, the double quotes affect the expansion of '\&', and,
+     because '&' is not one of the characters for which backslash is
+     special in double quotes, the backslash survives the expansion,
+     inhibits the replacement, but is removed because it is treated
+     specially.  One could use '\\&', unquoted, as the replacement
+     string to achive the same effect.  It should rarely be necessary to
+     enclose only STRING in double quotes.
 
      If the 'nocasematch' shell option (see the description of 'shopt'
      in *note The Shopt Builtin::) is enabled, the match is performed
@@ -10184,20 +10189,28 @@ These are installation instructions for Bash.
   3. Optionally, type 'make tests' to run the Bash test suite.
 
   4. Type 'make install' to install 'bash' and 'bashbug'.  This will
-     also install the manual pages and Info file.
+     also install the manual pages and Info file, message translation
+     files, some supplemental documentation, a number of example
+     loadable builtin commands, and a set of header files for developing
+     loadable builtins.  You may need additional privileges to install
+     'bash' to your desired destination, so 'sudo make install' might be
+     required.  More information about controlling the locations where
+     'bash' and other files are installed is below (*note Installation
+     Names::).
 
    The 'configure' shell script attempts to guess correct values for
 various system-dependent variables used during compilation.  It uses
 those values to create a 'Makefile' in each directory of the package
-(the top directory, the 'builtins', 'doc', and 'support' directories,
-each directory under 'lib', and several others).  It also creates a
-'config.h' file containing system-dependent definitions.  Finally, it
-creates a shell script named 'config.status' that you can run in the
-future to recreate the current configuration, a file 'config.cache' that
-saves the results of its tests to speed up reconfiguring, and a file
-'config.log' containing compiler output (useful mainly for debugging
-'configure').  If at some point 'config.cache' contains results you
-don't want to keep, you may remove or edit it.
+(the top directory, the 'builtins', 'doc', 'po', and 'support'
+directories, each directory under 'lib', and several others).  It also
+creates a 'config.h' file containing system-dependent definitions.
+Finally, it creates a shell script named 'config.status' that you can
+run in the future to recreate the current configuration, a file
+'config.cache' that saves the results of its tests to speed up
+reconfiguring, and a file 'config.log' containing compiler output
+(useful mainly for debugging 'configure').  If at some point
+'config.cache' contains results you don't want to keep, you may remove
+or edit it.
 
    To find out more about the options and arguments that the 'configure'
 script understands, type
@@ -10228,7 +10241,7 @@ considered for the next release.
    The file 'configure.ac' is used to create 'configure' by a program
 called Autoconf.  You only need 'configure.ac' if you want to change it
 or regenerate 'configure' using a newer version of Autoconf.  If you do
-this, make sure you are using Autoconf version 2.50 or newer.
+this, make sure you are using Autoconf version 2.69 or newer.
 
    You can remove the program binaries and object files from the source
 code directory by typing 'make clean'.  To also remove the files that
@@ -10296,16 +10309,43 @@ File: bashref.info,  Node: Installation Names,  Next: Specifying the System Type
 =======================
 
 By default, 'make install' will install into '/usr/local/bin',
-'/usr/local/man', etc.  You can specify an installation prefix other
-than '/usr/local' by giving 'configure' the option '--prefix=PATH', or
-by specifying a value for the 'DESTDIR' 'make' variable when running
-'make install'.
+'/usr/local/man', etc.; that is, the "installation prefix" defaults to
+'/usr/local'.  You can specify an installation prefix other than
+'/usr/local' by giving 'configure' the option '--prefix=PATH', or by
+specifying a value for the 'prefix' 'make' variable when running 'make
+install' (e.g., 'make install prefix=PATH').  The 'prefix' variable
+provides a default for 'exec_prefix' and other variables used when
+installing bash.
 
    You can specify separate installation prefixes for
 architecture-specific files and architecture-independent files.  If you
 give 'configure' the option '--exec-prefix=PATH', 'make install' will
 use PATH as the prefix for installing programs and libraries.
 Documentation and other data files will still use the regular prefix.
+
+   If you would like to change the installation locations for a single
+run, you can specify these variables as arguments to 'make': 'make
+install exec_prefix=/' will install 'bash' and 'bashbug' into '/bin'
+instead of the default '/usr/local/bin'.
+
+   If you want to see the files bash will install and where it will
+install them without changing anything on your system, specify the
+variable 'DESTDIR' as an argument to 'make'.  Its value should be the
+absolute directory path you'd like to use as the root of your sample
+installation tree.  For example,
+
+     mkdir /fs1/bash-install
+     make install DESTDIR=/fs1/bash-install
+
+will install 'bash' into '/fs1/bash-install/usr/local/bin/bash', the
+documentation into directories within
+'/fs1/bash-install/usr/local/share', the example loadable builtins into
+'/fs1/bash-install/usr/local/lib/bash', and so on.  You can use the
+usual 'exec_prefix' and 'prefix' variables to alter the directory paths
+beneath the value of 'DESTDIR'.
+
+   The GNU Makefile standards provide a more complete description of
+these variables and their effects.
 
 
 File: bashref.info,  Node: Specifying the System Type,  Next: Sharing Defaults,  Prev: Installation Names,  Up: Installing Bash
@@ -10460,14 +10500,20 @@ compiled, linked, and installed, rather than changing run-time features.
 following options, but it is processed first, so individual options may
 be enabled using 'enable-FEATURE'.
 
-   All of the following options except for 'disabled-builtins',
-'direxpand-default', 'strict-posix-default', and 'xpg-echo-default' are
-enabled by default, unless the operating system does not provide the
-necessary support.
+   All of the following options except for 'alt-array-implementation',
+'disabled-builtins', 'direxpand-default', 'strict-posix-default', and
+'xpg-echo-default' are enabled by default, unless the operating system
+does not provide the necessary support.
 
 '--enable-alias'
      Allow alias expansion and include the 'alias' and 'unalias'
      builtins (*note Aliases::).
+
+'--enable-alt-array-implementation'
+     This builds bash using an alternate implementation of arrays (*note
+     Arrays::) that provides faster access at the expense of using more
+     memory (sometimes many times more, depending on how sparse an array
+     is).
 
 '--enable-arith-for-command'
      Include support for the alternate form of the 'for' command that
@@ -12292,138 +12338,138 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top893
-Node: Introduction2809
-Node: What is Bash?3025
-Node: What is a shell?4139
-Node: Definitions6677
-Node: Basic Shell Features9628
-Node: Shell Syntax10847
-Node: Shell Operation11873
-Node: Quoting13166
-Node: Escape Character14470
-Node: Single Quotes14955
-Node: Double Quotes15303
-Node: ANSI-C Quoting16581
-Node: Locale Translation17891
-Node: Creating Internationalized Scripts19202
-Node: Comments23319
-Node: Shell Commands23937
-Node: Reserved Words24875
-Node: Simple Commands25631
-Node: Pipelines26285
-Node: Lists29244
-Node: Compound Commands31039
-Node: Looping Constructs32051
-Node: Conditional Constructs34546
-Node: Command Grouping48890
-Node: Coprocesses50368
-Node: GNU Parallel53031
-Node: Shell Functions53948
-Node: Shell Parameters61239
-Node: Positional Parameters65627
-Node: Special Parameters66529
-Node: Shell Expansions69743
-Node: Brace Expansion71870
-Node: Tilde Expansion74604
-Node: Shell Parameter Expansion77225
-Node: Command Substitution94537
-Node: Arithmetic Expansion95892
-Node: Process Substitution96860
-Node: Word Splitting97980
-Node: Filename Expansion99924
-Node: Pattern Matching102524
-Node: Quote Removal107132
-Node: Redirections107427
-Node: Executing Commands117087
-Node: Simple Command Expansion117757
-Node: Command Search and Execution119867
-Node: Command Execution Environment122245
-Node: Environment125280
-Node: Exit Status126943
-Node: Signals128727
-Node: Shell Scripts130694
-Node: Shell Builtin Commands133721
-Node: Bourne Shell Builtins135759
-Node: Bash Builtins157220
-Node: Modifying Shell Behavior188037
-Node: The Set Builtin188382
-Node: The Shopt Builtin198795
-Node: Special Builtins214224
-Node: Shell Variables215203
-Node: Bourne Shell Variables215640
-Node: Bash Variables217744
-Node: Bash Features250559
-Node: Invoking Bash251572
-Node: Bash Startup Files257585
-Node: Interactive Shells262688
-Node: What is an Interactive Shell?263098
-Node: Is this Shell Interactive?263747
-Node: Interactive Shell Behavior264562
-Node: Bash Conditional Expressions268075
-Node: Shell Arithmetic272717
-Node: Aliases275661
-Node: Arrays278274
-Node: The Directory Stack284283
-Node: Directory Stack Builtins285067
-Node: Controlling the Prompt289327
-Node: The Restricted Shell292292
-Node: Bash POSIX Mode294889
-Node: Shell Compatibility Mode306162
-Node: Job Control312818
-Node: Job Control Basics313278
-Node: Job Control Builtins318280
-Node: Job Control Variables323680
-Node: Command Line Editing324836
-Node: Introduction and Notation326507
-Node: Readline Interaction328130
-Node: Readline Bare Essentials329321
-Node: Readline Movement Commands331104
-Node: Readline Killing Commands332064
-Node: Readline Arguments333982
-Node: Searching335026
-Node: Readline Init File337212
-Node: Readline Init File Syntax338473
-Node: Conditional Init Constructs359753
-Node: Sample Init File363949
-Node: Bindable Readline Commands367073
-Node: Commands For Moving368277
-Node: Commands For History370328
-Node: Commands For Text375322
-Node: Commands For Killing378971
-Node: Numeric Arguments382004
-Node: Commands For Completion383143
-Node: Keyboard Macros387334
-Node: Miscellaneous Commands388021
-Node: Readline vi Mode393960
-Node: Programmable Completion394867
-Node: Programmable Completion Builtins402647
-Node: A Programmable Completion Example413342
-Node: Using History Interactively418589
-Node: Bash History Facilities419273
-Node: Bash History Builtins422278
-Node: History Interaction427286
-Node: Event Designators430906
-Node: Word Designators432260
-Node: Modifiers434020
-Node: Installing Bash435831
-Node: Basic Installation436968
-Node: Compilers and Options440226
-Node: Compiling For Multiple Architectures440967
-Node: Installation Names442660
-Node: Specifying the System Type443478
-Node: Sharing Defaults444194
-Node: Operation Controls444867
-Node: Optional Features445825
-Node: Reporting Bugs456625
-Node: Major Differences From The Bourne Shell457900
-Node: GNU Free Documentation License474750
-Node: Indexes499927
-Node: Builtin Index500381
-Node: Reserved Word Index507208
-Node: Variable Index509656
-Node: Function Index526148
-Node: Concept Index539932
+Node: Top895
+Node: Introduction2813
+Node: What is Bash?3029
+Node: What is a shell?4143
+Node: Definitions6681
+Node: Basic Shell Features9632
+Node: Shell Syntax10851
+Node: Shell Operation11877
+Node: Quoting13170
+Node: Escape Character14474
+Node: Single Quotes14959
+Node: Double Quotes15307
+Node: ANSI-C Quoting16585
+Node: Locale Translation17895
+Node: Creating Internationalized Scripts19206
+Node: Comments23323
+Node: Shell Commands23941
+Node: Reserved Words24879
+Node: Simple Commands25635
+Node: Pipelines26289
+Node: Lists29248
+Node: Compound Commands31043
+Node: Looping Constructs32055
+Node: Conditional Constructs34550
+Node: Command Grouping48894
+Node: Coprocesses50372
+Node: GNU Parallel53035
+Node: Shell Functions53952
+Node: Shell Parameters61243
+Node: Positional Parameters65631
+Node: Special Parameters66533
+Node: Shell Expansions69747
+Node: Brace Expansion71874
+Node: Tilde Expansion74608
+Node: Shell Parameter Expansion77229
+Node: Command Substitution95023
+Node: Arithmetic Expansion96378
+Node: Process Substitution97346
+Node: Word Splitting98466
+Node: Filename Expansion100410
+Node: Pattern Matching103010
+Node: Quote Removal107618
+Node: Redirections107913
+Node: Executing Commands117573
+Node: Simple Command Expansion118243
+Node: Command Search and Execution120353
+Node: Command Execution Environment122731
+Node: Environment125766
+Node: Exit Status127429
+Node: Signals129213
+Node: Shell Scripts131180
+Node: Shell Builtin Commands134207
+Node: Bourne Shell Builtins136245
+Node: Bash Builtins157706
+Node: Modifying Shell Behavior188523
+Node: The Set Builtin188868
+Node: The Shopt Builtin199281
+Node: Special Builtins214710
+Node: Shell Variables215689
+Node: Bourne Shell Variables216126
+Node: Bash Variables218230
+Node: Bash Features251045
+Node: Invoking Bash252058
+Node: Bash Startup Files258071
+Node: Interactive Shells263174
+Node: What is an Interactive Shell?263584
+Node: Is this Shell Interactive?264233
+Node: Interactive Shell Behavior265048
+Node: Bash Conditional Expressions268561
+Node: Shell Arithmetic273203
+Node: Aliases276147
+Node: Arrays278760
+Node: The Directory Stack284769
+Node: Directory Stack Builtins285553
+Node: Controlling the Prompt289813
+Node: The Restricted Shell292778
+Node: Bash POSIX Mode295375
+Node: Shell Compatibility Mode306648
+Node: Job Control313304
+Node: Job Control Basics313764
+Node: Job Control Builtins318766
+Node: Job Control Variables324166
+Node: Command Line Editing325322
+Node: Introduction and Notation326993
+Node: Readline Interaction328616
+Node: Readline Bare Essentials329807
+Node: Readline Movement Commands331590
+Node: Readline Killing Commands332550
+Node: Readline Arguments334468
+Node: Searching335512
+Node: Readline Init File337698
+Node: Readline Init File Syntax338959
+Node: Conditional Init Constructs360239
+Node: Sample Init File364435
+Node: Bindable Readline Commands367559
+Node: Commands For Moving368763
+Node: Commands For History370814
+Node: Commands For Text375808
+Node: Commands For Killing379457
+Node: Numeric Arguments382490
+Node: Commands For Completion383629
+Node: Keyboard Macros387820
+Node: Miscellaneous Commands388507
+Node: Readline vi Mode394446
+Node: Programmable Completion395353
+Node: Programmable Completion Builtins403133
+Node: A Programmable Completion Example413828
+Node: Using History Interactively419075
+Node: Bash History Facilities419759
+Node: Bash History Builtins422764
+Node: History Interaction427772
+Node: Event Designators431392
+Node: Word Designators432746
+Node: Modifiers434506
+Node: Installing Bash436317
+Node: Basic Installation437454
+Node: Compilers and Options441176
+Node: Compiling For Multiple Architectures441917
+Node: Installation Names443610
+Node: Specifying the System Type445719
+Node: Sharing Defaults446435
+Node: Operation Controls447108
+Node: Optional Features448066
+Node: Reporting Bugs459159
+Node: Major Differences From The Bourne Shell460434
+Node: GNU Free Documentation License477284
+Node: Indexes502461
+Node: Builtin Index502915
+Node: Reserved Word Index509742
+Node: Variable Index512190
+Node: Function Index528682
+Node: Concept Index542466
 
 End Tag Table
 

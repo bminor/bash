@@ -327,18 +327,18 @@ faq.mail: FAQ faq.headers.mail faq.version
 	cat faq.headers.mail faq.version FAQ > $@
 
 inst:	bashref.texi
-	$(SHELL) ./mkinstall
-	cmp -s INSTALL ../INSTALL || mv INSTALL ../INSTALL
+	$(SHELL) ${srcdir}/mkinstall -t ${topdir} -s ${srcdir}
+	cmp -s INSTALL ${topdir}/INSTALL || mv INSTALL ${topdir}/INSTALL
 	$(RM) INSTALL
 
 posix:	bashref.texi
-	$(SHELL) ./mkposix
-	cmp -s POSIX ../POSIX || mv POSIX ../POSIX
+	$(SHELL) ${srcdir}/mkposix -t ${topdir} -s ${srcdir}
+	cmp -s POSIX ${topdir}/POSIX || mv POSIX ${topdir}/POSIX
 	$(RM) POSIX
 
 rbash:	bashref.texi
-	$(SHELL) ./mkrbash
-	cmp -s RBASH ../RBASH || mv RBASH ../RBASH
+	$(SHELL) ${srcdir}/mkrbash -t ${topdir} -s ${srcdir}
+	cmp -s RBASH ${topdir}/RBASH || mv RBASH ${topdir}/RBASH
 	$(RM) RBASH
 
 xdist: everything inst posix rbash
