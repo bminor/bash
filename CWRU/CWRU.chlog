@@ -2310,3 +2310,17 @@ doc/bashref.texi
 
 doc/{mkposix,mkinst,mkrbash},doc/Makefile.in
 	- changes to allow scripts to be run outside the source directory
+
+				   10/18
+				   -----
+subst.c
+	- patsub_replacement: controls whether pattern substitution expands `&'
+	  in the replacement string. Initialized to 1 by default
+
+				   10/19
+				   -----
+doc/{bash.1,bashref.texi}
+	- document bash's WCE SIGINT behavior when job control is not enabled
+	  and the shell receives a SIGINT while waiting for the foreground
+	  command to complete. Added at Red Hat's request. A complete
+	  discussion is at https://www.cons.org/cracauer/sigint.html

@@ -187,6 +187,10 @@ int allow_null_glob_expansion;
 /* Non-zero means to throw an error when globbing fails to match anything. */
 int fail_glob_expansion;
 
+/* If non-zero, perform `&' substitution on the replacement string in the
+   pattern substitution word expansion. */
+int patsub_replacement = 1;
+
 /* Extern functions and variables from different files. */
 extern struct fd_bitmap *current_fds_to_close;
 extern int wordexp_only;
@@ -8680,7 +8684,7 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
 	 consistently. The replacement string already undergoes quote removal
 	 above, so users need to make sure any desired backslash makes it
 	 through that. */
-      if (rep && *rep && shouldexp_replacement (rep))
+      if (patsub_replacement && rep && *rep && shouldexp_replacement (rep))
 	mflags |= MATCH_EXPREP;
 
     }
