@@ -2440,7 +2440,8 @@ If @var{string} is null,
 matches of @var{pattern} are deleted
 and the @samp{/} following @var{pattern} may be omitted.
 
-Any unquoted instances of @samp{&} in @var{string} are replaced with the
+If the @code{patsub_replacement} shell option is enabled using @code{shopt},
+any unquoted instances of @samp{&} in @var{string} are replaced with the
 matching portion of @var{pattern}.
 This is intended to duplicate a common @code{sed} idiom.
 Backslash is used to quote @samp{&} in @var{string}; the backslash is removed
@@ -5785,6 +5786,13 @@ If the string is not translated, this has no effect.
 @item nullglob
 If set, Bash allows filename patterns which match no
 files to expand to a null string, rather than themselves.
+
+@item patsub_replacement
+If set, Bash
+expands occurrences of @samp{&} in the replacement string of pattern
+substitution to the text matched by the pattern, as described
+above (@pxref{Shell Parameter Expansion}).
+This option is enabled by default.
 
 @item progcomp
 If set, the programmable completion facilities

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Oct 19 11:34:57 EDT 2021
+.\"	Last Change: Mon Oct 25 11:23:10 EDT 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 October 19" "GNU Bash 5.1"
+.TH BASH 1 "2021 October 25" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3367,7 +3367,8 @@ matches of \fIpattern\fP are deleted.
 If \fIstring\fP is null,
 matches of \fIpattern\fP are deleted
 and the \fB/\fP following \fIpattern\fP may be omitted.
-Any unquoted instances of \fB&\fP in \fIstring\fP are replaced with the
+If the \fBpatsub_replacement\fP shell option is enabled using \fBshopt\fP,
+any unquoted instances of \fB&\fP in \fIstring\fP are replaced with the
 matching portion of \fIpattern\fP.
 Backslash is used to quote \fB&\fP in \fIstring\fP; the backslash is removed
 in order to permit a literal \fB&\fP in the replacement string.
@@ -10480,6 +10481,13 @@ files (see
 .B Pathname Expansion
 above)
 to expand to a null string, rather than themselves.
+.TP 8
+.B patsub_replacement
+If set, \fBbash\fP
+expands occurrences of \fB&\fP in the replacement string of pattern
+substitution to the text matched by the pattern, as described
+under \fBParameter Expansion\fP above.
+This option is enabled by default.
 .TP 8
 .B progcomp
 If set, the programmable completion facilities (see

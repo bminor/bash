@@ -95,6 +95,7 @@ extern int localvar_inherit;
 extern int localvar_unset;
 extern int varassign_redir_autoclose;
 extern int singlequote_translations;
+extern int patsub_replacement;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -237,6 +238,7 @@ static struct {
   { "nocasematch", &match_ignore_case, (shopt_set_func_t *)NULL },
   { "noexpand_translation", &singlequote_translations, (shopt_set_func_t *)NULL },
   { "nullglob",	&allow_null_glob_expansion, (shopt_set_func_t *)NULL },
+  { "patsub_replacement", &patsub_replacement, (shopt_set_func_t *)NULL },
 #if defined (PROGRAMMABLE_COMPLETION)
   { "progcomp", &prog_completion_enabled, (shopt_set_func_t *)NULL },
 #  if defined (ALIAS)
@@ -363,6 +365,7 @@ reset_shopt_options ()
   source_uses_path = promptvars = 1;
   varassign_redir_autoclose = 0;
   singlequote_translations = 0;
+  patsub_replacement = 1;
 
 #if defined (JOB_CONTROL)
   check_jobs_at_exit = 0;
