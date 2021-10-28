@@ -96,6 +96,7 @@ rl_insert_text (const char *string)
 
   for (i = rl_end; i >= rl_point; i--)
     rl_line_buffer[i + l] = rl_line_buffer[i];
+
   strncpy (rl_line_buffer + rl_point, string, l);
 
   /* Remember how to undo this if we aren't undoing something. */
@@ -1539,7 +1540,10 @@ rl_transpose_words (int count, int key)
 {
   char *word1, *word2;
   int w1_beg, w1_end, w2_beg, w2_end;
-  int orig_point = rl_point;
+  int orig_point, orig_end;
+
+  orig_point = rl_point;
+  orig_end = rl_end;
 
   if (!count)
     return 0;
@@ -1583,6 +1587,7 @@ rl_transpose_words (int count, int key)
   /* This is exactly correct since the text before this point has not
      changed in length. */
   rl_point = w2_end;
+  rl_end = orig_end;		/* just make sure */
 
   /* I think that does it. */
   rl_end_undo_group ();

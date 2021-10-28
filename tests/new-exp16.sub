@@ -27,6 +27,8 @@ echo "${string/abc/"$notthere"}"
 
 echo ${string//?/\$\'&\' } 
 
+shopt -s patsub_replacement
+
 echo ${string//?/\& } 
 echo "${string//?/\& }"
 echo ${string//?/"& "}
@@ -43,3 +45,19 @@ echo ${string/abc/\& }
 echo "${string/abc/\& }"
 echo ${string/abc/"\& "}
 echo ${string/abc/\\& }
+
+rep='\\&'
+
+echo "${string/abc/&}"
+echo ${string/abc/\&}
+echo "${string/abc/\\&}"
+echo "${string/abc/"\\&"}"
+echo ${string/abc/"$rep"}
+
+shopt -u patsub_replacement
+
+echo "${string/abc/&}"
+echo ${string/abc/\&}
+echo "${string/abc/\\&}"
+echo "${string/abc/"\\&"}"
+echo ${string/abc/"$rep"}

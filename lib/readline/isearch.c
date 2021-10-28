@@ -273,6 +273,8 @@ _rl_isearch_fini (_rl_search_cxt *cxt)
   last_isearch_string = cxt->search_string;
   last_isearch_string_len = cxt->search_string_index;
   cxt->search_string = 0;
+  cxt->search_string_size = 0;
+  cxt->search_string_index = 0;
 
   if (cxt->last_found_line < cxt->save_line)
     rl_get_previous_history (cxt->save_line - cxt->last_found_line, 0);
@@ -687,8 +689,9 @@ opcode_dispatch:
 	  cxt->search_string_size += pastelen + 2;
 	  cxt->search_string = (char *)xrealloc (cxt->search_string, cxt->search_string_size);
 	}
-      strcpy (cxt->search_string + cxt->search_string_index, paste);
+      memcpy (cxt->search_string + cxt->search_string_index, paste, pastelen);
       cxt->search_string_index += pastelen;
+      cxt->search_string[cxt->search_string_index] = '\0';
       free (paste);
       break;
 

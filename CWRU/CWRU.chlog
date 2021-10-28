@@ -2334,3 +2334,36 @@ builtins/shopt.def
 
 doc/{bash.1,bashref.texi}
 	- patsub_replacement: document new shopt option
+
+				   10/26
+				   -----
+lib/readline/display.c
+	- expand_prompt: group runs of invisible characters at the right edge
+	  of the screen with the previous physical characters when setting
+	  local_prompt_newlines, since that's how update_line() expects to
+	  get it. Fix from sparrowhawk996@gmail.com.
+
+lib/readline/macro.c
+	- rl_end_kbd_macro: make sure current_macro_index is > 0 after
+	  subtracting the key sequence length, clamp it to 0 before writing
+	  the ending NULL. From a fuzzing report by
+	  Tillmann Osswald <tosswald@ernw.de>
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: in the bracketed paste case, don't assume the
+	  pasted text is null-terminated, so use memcpy instead of strcpy for
+	  the length of the pasted text, then make sure the search string is
+	  null-terminated. From a fuzzing report by
+	  Tillmann Osswald <tosswald@ernw.de>
+
+lib/readline/text.c
+	- rl_transpose_words: make sure to preserve the value of rl_end from
+	  the beginning to the end of the function. From a fuzzing report by
+	  Tillmann Osswald <tosswald@ernw.de>
+
+lib/readline/vi_mode.c
+	- rl_vi_delete_to,rl_vi_change_to,rl_vi_yank_to: if we are redoing a
+	  command (_rl_vi_redoing == 1), save the old _rl_vimvcxt, allocate a
+	  new one, and restore the old one before returning. Prevents some
+	  pointer aliasing problems. From a fuzzing report by
+	  Tillmann Osswald <tosswald@ernw.de>

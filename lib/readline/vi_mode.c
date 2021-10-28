@@ -1372,8 +1372,15 @@ int
 rl_vi_delete_to (int count, int key)
 {
   int c, r;
+  _rl_vimotion_cxt *savecxt;
 
-  if (_rl_vimvcxt)
+  savecxt = 0;
+  if (_rl_vi_redoing)
+    {
+      savecxt = _rl_vimvcxt;
+      _rl_vimvcxt = _rl_mvcxt_alloc (VIM_DELETE, key);
+    }
+  else if (_rl_vimvcxt)
     _rl_mvcxt_init (_rl_vimvcxt, VIM_DELETE, key);
   else
     _rl_vimvcxt = _rl_mvcxt_alloc (VIM_DELETE, key);
@@ -1416,7 +1423,7 @@ rl_vi_delete_to (int count, int key)
     }
 
   _rl_mvcxt_dispose (_rl_vimvcxt);
-  _rl_vimvcxt = 0;
+  _rl_vimvcxt = savecxt;
 
   return r;
 }
@@ -1464,8 +1471,15 @@ int
 rl_vi_change_to (int count, int key)
 {
   int c, r;
+  _rl_vimotion_cxt *savecxt;
 
-  if (_rl_vimvcxt)
+  savecxt = 0;
+  if (_rl_vi_redoing)
+    {
+      savecxt = _rl_vimvcxt;
+      _rl_vimvcxt = _rl_mvcxt_alloc (VIM_CHANGE, key);
+    }
+  else if (_rl_vimvcxt)
     _rl_mvcxt_init (_rl_vimvcxt, VIM_CHANGE, key);
   else
     _rl_vimvcxt = _rl_mvcxt_alloc (VIM_CHANGE, key);
@@ -1507,7 +1521,7 @@ rl_vi_change_to (int count, int key)
     }
 
   _rl_mvcxt_dispose (_rl_vimvcxt);
-  _rl_vimvcxt = 0;
+  _rl_vimvcxt = savecxt;
 
   return r;
 }
@@ -1536,8 +1550,15 @@ int
 rl_vi_yank_to (int count, int key)
 {
   int c, r;
+  _rl_vimotion_cxt *savecxt;
 
-  if (_rl_vimvcxt)
+  savecxt = 0;
+  if (_rl_vi_redoing)
+    {
+      savecxt = _rl_vimvcxt;
+      _rl_vimvcxt = _rl_mvcxt_alloc (VIM_YANK, key);
+    }
+  else if (_rl_vimvcxt)
     _rl_mvcxt_init (_rl_vimvcxt, VIM_YANK, key);
   else
     _rl_vimvcxt = _rl_mvcxt_alloc (VIM_YANK, key);
@@ -1579,7 +1600,7 @@ rl_vi_yank_to (int count, int key)
     }
 
   _rl_mvcxt_dispose (_rl_vimvcxt);
-  _rl_vimvcxt = 0;
+  _rl_vimvcxt = savecxt;
 
   return r;
 }
