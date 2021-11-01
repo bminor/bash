@@ -1565,6 +1565,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (running_trap > 0)
     {
       run_trap_cleanup (running_trap - 1);
+itrace("execute_in_subshell: setting running_trap = 0");
       running_trap = 0;		/* XXX - maybe leave this */
     }
 
@@ -4235,7 +4236,8 @@ fix_assignment_words (words)
 
 #if defined (ARRAY_VARS)
 /* Set W_ARRAYREF on words that are valid array references to a builtin that
-   accepts them. This is intended to completely replace assoc_expand_once. */
+   accepts them. This is intended to completely replace assoc_expand_once in
+   time. */
 static void
 fix_arrayref_words (words)
      WORD_LIST *words;

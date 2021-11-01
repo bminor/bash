@@ -4079,9 +4079,10 @@ expand_string_for_rhs (string, quoted, op, pflags, dollar_at_p, expanded_p)
 #else
     td.flags |= W_ASSIGNRHS|W_NOASSNTILDE;		/* expand b in ${a=b} like assignment */
 #endif
-  td.word = string;
+  td.word = savestring (string);
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
   expand_no_split_dollar_star = old_nosplit;
+  free (td.word);
 
   return (tresult);
 }
@@ -4103,9 +4104,10 @@ expand_string_for_pat (string, quoted, dollar_at_p, expanded_p)
   oexp = expand_no_split_dollar_star;
   expand_no_split_dollar_star = 1;
   td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
-  td.word = string;
+  td.word = savestring (string);
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
   expand_no_split_dollar_star = oexp;
+  free (td.word);
 
   return (tresult);
 }
@@ -10309,7 +10311,7 @@ expand_array_subscript (string, sindex, quoted, flags)
 
   /* string[si] == LBRACK */
   ni = skipsubscript (string, si, 0);
-  /* These checks mirror the ones in valid_array_subscript. The check for
+  /* These checks mirror the ones in valid_array_reference. The check for
      (ni - si) == 1 checks for empty subscripts. We don't check that the
      subscript is a separate word if we're parsing an arithmetic expression. */
   if (ni >= slen || string[ni] != RBRACK || (ni - si) == 1 ||

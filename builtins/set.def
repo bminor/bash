@@ -894,12 +894,8 @@ unset_builtin (list)
 #if defined (ARRAY_VARS)
       unset_array = 0;
       /* XXX valid array reference second arg was 0 */
-      if (!unset_function && nameref == 0 && valid_array_reference (name, vflags))
-	{
-	  t = strchr (name, '[');
-	  *t++ = '\0';
-	  unset_array++;
-	}
+      if (!unset_function && nameref == 0 && tokenize_array_reference (name, vflags, &t))
+	unset_array = 1;
 #endif
       /* Get error checking out of the way first.  The low-level functions
 	 just perform the unset, relying on the caller to verify. */
@@ -987,9 +983,16 @@ unset_builtin (list)
 #if defined (ARRAY_VARS)
 	      if (valid_array_reference (nameref_cell (var), 0))
 		{
+		  int len;
+
 		  tname = savestring (nameref_cell (var));
-		  if (var = array_variable_part (tname, 0, &t, (int *)0))
-		    tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
+		  if (var = array_variable_part (tname, 0, &t, &len))
+		    {
+		      /* change to what unbind_array_element now expects */
+		      if (t[len - 1] == ']')
+			t[len - 1] = 0;
+		      tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
+		    }
 		  free (tname);
 		}
 	      else

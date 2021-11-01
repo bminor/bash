@@ -992,7 +992,7 @@ builtin_bind_variable (name, value, flags)
   /* Callers are responsible for calling this with array references that have
      already undergone valid_array_reference checks.
      Affected builtins: read, printf
-     To make this really work, needs additional downstream support, starting
+     To make this *really* work, needs additional downstream support, starting
      with assign_array_element and array_variable_name. */
   vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
   bindflags = flags | (assoc_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;

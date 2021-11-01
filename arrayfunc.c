@@ -1064,27 +1064,13 @@ unbind_array_element (var, sub, flags)
      char *sub;
      int flags;
 {
-  int len;
   arrayind_t ind;
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  /* If the caller tells us to treat the entire `sub' as one word, we don't
-     bother to call skipsubscript. */
-  if (var && assoc_p (var) && (flags&VA_ONEWORD))
-    len = strlen (sub) - 1;
-  else
-#if 0
-    len = skipsubscript (sub, 0, (flags&VA_NOEXPAND) || (var && assoc_p(var)));	/* XXX */
-#else
-    len = skipsubscript (sub, 0, (flags&VA_NOEXPAND) | 2);	/* XXX */
-#endif
-  if (sub[len] != ']' || len == 0)
-    {
-      builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
-      return -1;
-    }
-  sub[len] = '\0';
+  /* Assume that the caller (unset_builtin) passes us a null-terminated SUB,
+     so we don't have to use VA_ONEWORD or parse the subscript again with
+     skipsubscript(). */
 
   if (ALL_ELEMENT_SUB (sub[0]) && sub[1] == 0)
     {
@@ -1137,7 +1123,7 @@ unbind_array_element (var, sub, flags)
 	    }
 	  /* Fall through for behavior 3 */
 	}
-      ind = array_expand_index (var, sub, len+1, 0);
+      ind = array_expand_index (var, sub, strlen (sub) + 1, 0);
       /* negative subscripts to indexed arrays count back from end */
       if (ind < 0)
 	ind = array_max_index (array_cell (var)) + 1 + ind;
@@ -1153,7 +1139,7 @@ unbind_array_element (var, sub, flags)
   else	/* array_p (var) == 0 && assoc_p (var) == 0 */
     {
       akey = this_command_name;
-      ind = array_expand_index (var, sub, len+1, 0);
+      ind = array_expand_index (var, sub, strlen (sub) + 1, 0);
       this_command_name = akey;
       if (ind == 0)
 	{
@@ -1215,11 +1201,20 @@ print_assoc_assignment (var, quoted)
 
 /* Return 1 if NAME is a properly-formed array reference v[sub]. */
 
+/* Return 1 if NAME is a properly-formed array reference v[sub]. */
+
+/* When NAME is a properly-formed array reference and a non-null argument SUBP
+   is supplied, '[' and ']' that enclose the subscript are replaced by '\0',
+   and the pointer to the subscript in NAME is assigned to *SUBP, so that NAME
+   and SUBP can be later used as the array name and the subscript,
+   respectively.  When SUBP is the null pointer, the original string NAME will
+   not be modified. */
 /* We need to reserve 1 for FLAGS, which we pass to skipsubscript. */
 int
-valid_array_reference (name, flags)
-     const char *name;
+tokenize_array_reference (name, flags, subp)
+     char *name;
      int flags;
+     char **subp;
 {
   char *t;
   int r, len, isassoc;
@@ -1253,14 +1248,32 @@ valid_array_reference (name, flags)
 	 existing associative arrays, using isassoc */
       for (r = 1; r < len; r++)
 	if (whitespace (t[r]) == 0)
-	  return 1;
-      return 0;
-#else
+	  break;
+      if (r == len)
+	return 0; /* Fail if the subscript contains only whitespaces. */
+#endif
+
+      if (subp)
+	{
+	  t[0] = t[len] = '\0';
+	  *subp = t + 1;
+	}
+
       /* This allows blank subscripts */
       return 1;
-#endif
     }
   return 0;
+}
+
+/* Return 1 if NAME is a properly-formed array reference v[sub]. */
+
+/* We need to reserve 1 for FLAGS, which we pass to skipsubscript. */
+int
+valid_array_reference (name, flags)
+     const char *name;
+     int flags;
+{
+  return tokenize_array_reference ((char *)name, flags, (char **)NULL);
 }
 
 /* Expand the array index beginning at S and extending LEN characters. */

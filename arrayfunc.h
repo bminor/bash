@@ -1,6 +1,6 @@
 /* arrayfunc.h -- declarations for miscellaneous array functions in arrayfunc.c */
 
-/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -83,6 +83,8 @@ extern void print_assoc_assignment PARAMS((SHELL_VAR *, int));
 
 extern arrayind_t array_expand_index PARAMS((SHELL_VAR *, char *, int, int));
 extern int valid_array_reference PARAMS((const char *, int));
+extern int tokenize_array_reference PARAMS((char *, int, char **));
+
 extern char *array_value PARAMS((const char *, int, int, int *, arrayind_t *));
 extern char *get_array_value PARAMS((const char *, int, int *, arrayind_t *));
 

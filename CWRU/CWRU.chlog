@@ -2367,3 +2367,36 @@ lib/readline/vi_mode.c
 	  new one, and restore the old one before returning. Prevents some
 	  pointer aliasing problems. From a fuzzing report by
 	  Tillmann Osswald <tosswald@ernw.de>
+
+				   10/29
+				   -----
+arrayfunc.c
+	- tokenize_array_reference: take valid_array_reference and add a third
+	  argument (char **SUBP), which, if non-NULL, gets the null-terminated
+	  subscript parsed from the NAME argument. If it's NULL, the caller
+	  gets the old valid_array_reference behavior. Fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+	- valid_array_reference: just call tokenize_array_reference with a
+	  NULL third argument
+	- unbind_array_element: assume the caller (unset_builtin) passes a
+	  null-terminated SUB that's already been validated by a call to
+	  tokenize_array_reference so we don't need to call skipsubscript() or
+	  check VA_ONEWORD. Fix from Koichi Murase <myoga.murase@gmail.com>
+
+arrayfunc.h
+	- tokenize_array_reference: extern declaration
+
+builtins/set.def
+	- unset_builtin: use tokenize_array_reference to figure out T and pass
+	  that to unbind_array_element. Fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+	- unset_builtin: pass non-null argument to array_variable_part to get
+	  the length of the subscript (T), then cut off any final `]' before
+	  passing it to unbind_array_element, since that's what it now
+	  expects
+
+subst.c
+	- expand_string_for_rhs,expand_string_for_pat: assign td.word from
+	  newly-allocated memory in case it gets freed on error during the
+	  call to call_expand_word_internal(); free it manually when that
+	  call returns
