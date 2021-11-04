@@ -3,6 +3,8 @@ dnl Bash specific tests
 dnl
 dnl Some derived from PDKSH 5.1.3 autoconf tests
 dnl
+dnl Copyright (C) 1987-2021 Free Software Foundation, Inc.
+dnl
 
 dnl
 dnl Check for <inttypes.h>.  This is separated out so that it can be
@@ -781,21 +783,30 @@ exit (1);
 #else
 
 int code;
-sigset_t set, oset;
+sigset_t set, oset, nset;
 sigjmp_buf xx;
 
 /* get the mask */
 sigemptyset(&set);
 sigemptyset(&oset);
-sigprocmask(SIG_BLOCK, (sigset_t *)NULL, &set);
+
 sigprocmask(SIG_BLOCK, (sigset_t *)NULL, &oset);
+/* paranoia -- make sure SIGINT is not blocked */
+sigdelset (&oset, SIGINT);
+sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
 
 /* save it */
 code = sigsetjmp(xx, 1);
 if (code)
-  exit(0);	/* could get sigmask and compare to oset here. */
+{
+  sigprocmask(SIG_BLOCK, (sigset_t *)NULL, &nset);
+  /* could compare nset to oset here, but we just look for SIGINT */
+  if (sigismember (&nset, SIGINT))
+    exit(1);
+  exit(0);
+}
 
-/* change it */
+/* change it so that SIGINT is blocked */
 sigaddset(&set, SIGINT);
 sigprocmask(SIG_BLOCK, &set, (sigset_t *)NULL);
 
@@ -805,8 +816,12 @@ exit(1);
 #endif
 }
 ]])], [bash_cv_func_sigsetjmp=present], [bash_cv_func_sigsetjmp=missing],
-    [AC_MSG_WARN(cannot check for sigsetjmp/siglongjmp if cross-compiling -- defaulting to missing)
-     bash_cv_func_sigsetjmp=missing]
+    [AC_MSG_WARN(cannot check for sigsetjmp/siglongjmp if cross-compiling -- defaulting to $bash_cv_posix_signals)
+     if test "$bash_cv_posix_signals" = "yes" ; then
+	bash_cv_func_sigsetjmp=present
+     else
+	bash_cv_func_sigsetjmp=missing
+     fi]
 )])
 AC_MSG_RESULT($bash_cv_func_sigsetjmp)
 if test $bash_cv_func_sigsetjmp = present; then

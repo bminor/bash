@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -328,9 +328,9 @@ get_next_path_element (path_list, path_index_pointer)
 /* Look for PATHNAME in $PATH.  Returns either the hashed command
    corresponding to PATHNAME or the first instance of PATHNAME found
    in $PATH.  If (FLAGS&CMDSRCH_HASH) is non-zero, insert the instance of
-   PATHNAME found in $PATH into the command hash table.  If (FLAGS&CMDSRCH_STDPATH)
-   is non-zero, we are running in a `command -p' environment and should use
-   the Posix standard path.
+   PATHNAME found in $PATH into the command hash table.
+   If (FLAGS&CMDSRCH_STDPATH) is non-zero, we are running in a `command -p'
+   environment and should use the Posix standard path.
    Returns a newly-allocated string. */
 char *
 search_for_command (pathname, flags)
@@ -351,7 +351,7 @@ search_for_command (pathname, flags)
   /* Don't waste time trying to find hashed data for a pathname
      that is already completely specified or if we're using a command-
      specific value for PATH. */
-  if (temp_path == 0 && absolute_program (pathname) == 0)
+  if (temp_path == 0 && (flags & CMDSRCH_STDPATH) == 0 && absolute_program (pathname) == 0)
     hashed_file = phash_search (pathname);
 
   /* If a command found in the hash table no longer exists, we need to
@@ -390,7 +390,7 @@ search_for_command (pathname, flags)
 	{
 	  /* If we found the full pathname the same as the command name, the
 	     command probably doesn't exist.  Don't put it into the hash
-	     table. */
+	     table unless it's an executable file in the current directory. */
 	  if (STREQ (command, pathname))
 	    {
 	      st = file_status (command);
@@ -536,6 +536,8 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
 
   /* Remember the location of "." in the path, in all its forms
      (as long as they begin with a `.', e.g. `./.') */
+  /* We could also do this or something similar for all relative pathnames
+     found while searching PATH. */
   if (dot_found_in_search == 0 && *xpath == '.')
     dot_found_in_search = same_file (".", xpath, dotinfop, (struct stat *)NULL);
 

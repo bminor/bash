@@ -20107,9 +20107,13 @@ then :
 else $as_nop
   if test "$cross_compiling" = yes
 then :
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: cannot check for sigsetjmp/siglongjmp if cross-compiling -- defaulting to missing" >&5
-printf "%s\n" "$as_me: WARNING: cannot check for sigsetjmp/siglongjmp if cross-compiling -- defaulting to missing" >&2;}
-     bash_cv_func_sigsetjmp=missing
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: cannot check for sigsetjmp/siglongjmp if cross-compiling -- defaulting to $bash_cv_posix_signals" >&5
+printf "%s\n" "$as_me: WARNING: cannot check for sigsetjmp/siglongjmp if cross-compiling -- defaulting to $bash_cv_posix_signals" >&2;}
+     if test "$bash_cv_posix_signals" = "yes" ; then
+	bash_cv_func_sigsetjmp=present
+     else
+	bash_cv_func_sigsetjmp=missing
+     fi
 
 else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -20131,21 +20135,30 @@ exit (1);
 #else
 
 int code;
-sigset_t set, oset;
+sigset_t set, oset, nset;
 sigjmp_buf xx;
 
 /* get the mask */
 sigemptyset(&set);
 sigemptyset(&oset);
-sigprocmask(SIG_BLOCK, (sigset_t *)NULL, &set);
+
 sigprocmask(SIG_BLOCK, (sigset_t *)NULL, &oset);
+/* paranoia -- make sure SIGINT is not blocked */
+sigdelset (&oset, SIGINT);
+sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
 
 /* save it */
 code = sigsetjmp(xx, 1);
 if (code)
-  exit(0);	/* could get sigmask and compare to oset here. */
+{
+  sigprocmask(SIG_BLOCK, (sigset_t *)NULL, &nset);
+  /* could compare nset to oset here, but we just look for SIGINT */
+  if (sigismember (&nset, SIGINT))
+    exit(1);
+  exit(0);
+}
 
-/* change it */
+/* change it so that SIGINT is blocked */
 sigaddset(&set, SIGINT);
 sigprocmask(SIG_BLOCK, &set, (sigset_t *)NULL);
 

@@ -280,6 +280,23 @@ static int connection_count;
    can save and restore it. */
 int line_number_for_err_trap;
 
+/* A convenience macro to avoid resetting line_number_for_err_trap while
+   running the ERR trap. */
+#define SET_LINE_NUMBER(v) \
+do { \
+  line_number = v; \
+  if (signal_in_progress (ERROR_TRAP) == 0 && running_trap != (ERROR_TRAP + 1)) \
+    line_number_for_err_trap = line_number; \
+} while (0)
+
+/* This can't be in executing_line_number() because that's used for LINENO
+   and we want LINENO to reflect the line number of commands run during
+   the ERR trap. Right now this is only used to push to BASH_LINENO. */
+#define GET_LINE_NUMBER() \
+  (signal_in_progress (ERROR_TRAP) && running_trap == ERROR_TRAP+1) \
+    ? line_number_for_err_trap \
+    : executing_line_number ()
+
 /* A sort of function nesting level counter */
 int funcnest = 0;
 int funcnest_max = 0;
@@ -628,7 +645,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	 control and call execute_command () on the command again. */
       save_line_number = line_number;
       if (command->type == cm_subshell)
-	line_number_for_err_trap = line_number = command->value.Subshell->line;	/* XXX - save value? */
+	SET_LINE_NUMBER (command->value.Subshell->line);	/* XXX - save value? */
 	/* Otherwise we defer setting line_number */
       tcmd = make_command_string (command);
       fork_flags = asynchronous ? FORK_ASYNC : 0;
@@ -842,7 +859,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	if (command->flags & CMD_STDIN_REDIR)
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
 
-	line_number_for_err_trap = line_number = command->value.Simple->line;
+	SET_LINE_NUMBER (command->value.Simple->line);
 	exec_result =
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
 				  asynchronous, fds_to_close);
@@ -1042,7 +1059,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	command->value.Cond->flags |= CMD_IGNORE_RETURN;
 #endif
 
-      line_number_for_err_trap = save_line_number = line_number;
+      line_number_for_err_trap = save_line_number = line_number;	/* XXX */
 #if defined (DPAREN_ARITHMETIC)
       if (command->type == cm_arith)
 	exec_result = execute_arith_command (command->value.Arith);
@@ -2751,7 +2768,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       invert = (command->flags & CMD_INVERT_RETURN) != 0;
       ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
 
-      line_number_for_err_trap = line_number;	/* XXX - save value? */
+      SET_LINE_NUMBER (line_number);	/* XXX - save value? */
       exec_result = execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 
       if (asynchronous)
@@ -3772,7 +3789,7 @@ execute_arith_command (arith_command)
 
   save_line_number = line_number;
   this_command_name = "((";	/* )) */
-  line_number_for_err_trap = line_number = arith_command->line;
+  SET_LINE_NUMBER (arith_command->line);
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell && sourcelevel == 0)
     {
@@ -4015,7 +4032,7 @@ execute_cond_command (cond_command)
   save_line_number = line_number;
 
   this_command_name = "[[";
-  line_number_for_err_trap = line_number = cond_command->line;
+  SET_LINE_NUMBER (cond_command->line);
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell && sourcelevel == 0)
     {
@@ -5023,7 +5040,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
      struct fd_bitmap *fds_to_close;
      int async, subshell;
 {
-  int return_val, result;
+  int return_val, result, lineno;
   COMMAND *tc, *fc, *save_current;
   char *debug_trap, *error_trap, *return_trap;
 #if defined (ARRAY_VARS)
@@ -5151,7 +5168,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   array_push ((ARRAY *)funcname_a, this_shell_function->name);
 
   array_push ((ARRAY *)bash_source_a, sfile);
-  t = itos (executing_line_number ());
+  lineno = GET_LINE_NUMBER ();
+  t = itos (lineno);
   array_push ((ARRAY *)bash_lineno_a, t);
   free (t);
 #endif
@@ -5609,6 +5627,10 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
     }
 #endif /* RESTRICTED_SHELL */
 
+  /* If we want to change this so `command -p' (CMD_STDPATH) does not insert
+     any pathname it finds into the hash table, it should read
+     command = search_for_command (pathname, stdpath ? CMDSRCH_STDPATH : CMDSRCH_HASH);
+  */
   command = search_for_command (pathname, CMDSRCH_HASH|(stdpath ? CMDSRCH_STDPATH : 0));
   QUIT;
 

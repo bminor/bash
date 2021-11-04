@@ -2400,3 +2400,44 @@ subst.c
 	  newly-allocated memory in case it gets freed on error during the
 	  call to call_expand_word_internal(); free it manually when that
 	  call returns
+
+				   11/1
+				   ----
+findcmd.c
+	- search_for_command: if FLAGS includes CMDSRCH_STDPATH, don't look in
+	  the hash table for the command name. Prompted by a report from
+	  Roger Morris <roger.morris@gmail.com>
+
+aclocal.m4
+	- BASH_FUNC_POSIX_SETJMP: add a check by fetching the signal mask
+	  after the siglongjmp and making sure that SIGINT is not blocked,
+	  indicating we restored the original signal mask
+
+				   11/2
+				   ----
+subst.c
+	- expand_string_assignment: make sure to add W_TILDEEXP to the flags so
+	  expand_word_internal performs the right tilde expansion on tildes
+	  following an unquoted colon. Report from Anders Kaseorg
+	  <andersk@mit.edu>
+
+
+				   11/3
+				   ----
+aclocal.m4
+	- BASH_FUNC_POSIX_SETJMP: if cross-compiling, default to `present' if
+	  we've determined we have posix signal functions
+
+				   11/4
+				   ----
+execute_cmd.c
+	- SET_LINE_NUMBER: set line_number, but don't set line_number_for_err_trap
+	  if we're already running the ERR trap
+	- GET_LINE_NUMBER: evaluates to line_number_for_err_trap if we're
+	  running the ERR trap and executing_line_number() otherwise
+	- execute_function: use GET_LINE_NUMBER to push the value for the line
+	  number into the BASH_LINENO array
+	- execute_command_internal,execute_arith_command,execute_cond_command:
+	  use SET_LINE_NUMBER to avoid overwriting line_number_for_err trap
+	  while executing the ERR trap. Tentative fix for `caller' problem
+	  reported by Quinn Grier <quinn@quinngrier.com>
