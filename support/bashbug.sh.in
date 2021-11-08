@@ -7,7 +7,7 @@
 # chet@cwru.edu and, optionally, to bash-testers@cwru.edu.
 # Other versions send mail to bug-bash@gnu.org.
 #
-# Copyright (C) 1996-2020 Free Software Foundation, Inc.
+# Copyright (C) 1996-2021 Free Software Foundation, Inc.
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by

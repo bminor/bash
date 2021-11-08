@@ -67,6 +67,7 @@ declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="t
 declare -a b=([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")
 declare -ar c
 declare -a d=([1]="test test")
+declare -a e=()
 declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")
 ./array.tests: line 135: unset: ps1: not an array variable
 ./array.tests: line 139: declare: c: cannot destroy array variables in this way
@@ -84,6 +85,7 @@ declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="t
 declare -a b=([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")
 declare -ar c
 declare -a d=([1]="test test")
+declare -a e=()
 declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")
 declare -a rv=([0]="this" [1]="is" [2]="a" [3]="test" [4]="of" [5]="read" [6]="using" [7]="arrays")
 abde
@@ -494,7 +496,7 @@ x b c
 declare -a a=([1]="2" [2]="3" [3]="4")
 abcd
 unset
-./array21.sub: line 30: typeset: a: not found
+declare -a a=()
 declare -A A=([four]="4" [two]="2" [three]="3" [one]="1" )
 declare -a a=()
 declare -A A=()

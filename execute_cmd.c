@@ -1579,10 +1579,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   /* We are in a subshell, so forget that we are running a trap handler or
      that the signal handler has changed (we haven't changed it!) */
+  /* XXX - maybe do this for `real' signals and not ERR/DEBUG/RETURN/EXIT
+     traps? */
   if (running_trap > 0)
     {
       run_trap_cleanup (running_trap - 1);
-itrace("execute_in_subshell: setting running_trap = 0");
       running_trap = 0;		/* XXX - maybe leave this */
     }
 

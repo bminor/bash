@@ -2441,3 +2441,11 @@ execute_cmd.c
 	  use SET_LINE_NUMBER to avoid overwriting line_number_for_err trap
 	  while executing the ERR trap. Tentative fix for `caller' problem
 	  reported by Quinn Grier <quinn@quinngrier.com>
+
+configure.ac,patchlevel.h
+	- set bash version to 5.2-devel, meaning shell_compatibility_level = 52,
+	  which required updating tests (array.tests, array21.sub,
+	  quotearray3.sub, new-exp10.sub, history2.sub). The first three are
+	  because bash-5.2 flushes an indexed array but does not unset the
+	  variable when given `unset a[@]' or `unset[*]' (that is, it acts
+	  like `a=()' instead of `unset a').
