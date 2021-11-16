@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Oct 25 11:23:10 EDT 2021
+.\"	Last Change: Mon Nov 15 17:08:12 EST 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 October 25" "GNU Bash 5.1"
+.TH BASH 1 "2021 November 15" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5914,6 +5914,9 @@ If set to \fBOn\fP, when listing completions, readline displays the
 common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the \fBLS_COLORS\fP
 environment variable.
+If there is a color definition in \fB$LS_COLORS\fP for the custom suffix
+"readline-colored-completion-prefix", readline uses this color for
+the common prefix instead of its default.
 .TP
 .B colored\-stats (Off)
 If set to \fBOn\fP, readline displays possible completions using different

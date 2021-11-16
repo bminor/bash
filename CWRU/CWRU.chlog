@@ -2449,3 +2449,31 @@ configure.ac,patchlevel.h
 	  because bash-5.2 flushes an indexed array but does not unset the
 	  variable when given `unset a[@]' or `unset[*]' (that is, it acts
 	  like `a=()' instead of `unset a').
+
+				   11/8
+				   ----
+doc/Makefile.in
+	- bash.info: use `makeinfo -o' instead of calling infopost.sh to edit
+	  the filename, since the tags table includes absolute byte offsets to
+	  nodes. From https://savannah.gnu.org/support/?110557
+
+				   11/15
+				   -----
+examples/loadables/realpath.c
+	- add -a NAME argument to put canonicalized pathnames into an indexed
+	  array instead of displaying them on stdout. Suggested by
+	  felix@f-hauri.ch
+
+lib/readline/colors.c
+	- _rl_custom_readline_prefix: new function, looks in $LS_COLORS for a
+	  custom extension (*.readline-colored-completion-prefix) and uses that,
+	  if found, as the default color for the common prefix displayed when
+	  `colored-completion-prefix' is set. Suggested by
+	  Christoph Anton Mitterer <calestyo@scientia.net>
+	- _rl_print_prefix_color: try the return value from _rl_custom_readline_prefix
+	  before defaulting to the C_PREFIX (C_SOCK) color. Suggested by
+	  Christoph Anton Mitterer <calestyo@scientia.net>
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- readline-colored-completion-prefix: document new custom suffix for
+	  readline's colored-completion-prefix color

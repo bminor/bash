@@ -73,6 +73,8 @@
 static bool is_colored (enum indicator_no type);
 static void restore_default_color (void);
 
+#define RL_COLOR_PREFIX_EXTENSION	"readline-colored-completion-prefix"
+
 COLOR_EXT_TYPE *_rl_color_ext_list = 0;
 
 /* Output a color indicator (which may contain nulls).  */
@@ -110,13 +112,28 @@ _rl_set_normal_color (void)
     }
 }
 
+static struct bin_str *
+_rl_custom_readline_prefix (void)
+{
+  size_t len;
+  COLOR_EXT_TYPE *ext;
+
+  len = strlen (RL_COLOR_PREFIX_EXTENSION);
+  for (ext = _rl_color_ext_list; ext; ext = ext->next)
+    if (ext->ext.len == len && STREQ (ext->ext.string, RL_COLOR_PREFIX_EXTENSION))
+      return (&ext->seq);
+  return (NULL);
+}
+
 bool
 _rl_print_prefix_color (void)
 {
   struct bin_str *s;
 
   /* What do we want to use for the prefix? Let's try cyan first, see colors.h */
-  s = &_rl_color_indicator[C_PREFIX];
+  s = _rl_custom_readline_prefix ();
+  if (s == 0)
+    s = &_rl_color_indicator[C_PREFIX];
   if (s->string != NULL)
     {
       if (is_colored (C_NORM))

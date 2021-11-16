@@ -1,9 +1,11 @@
 /*
  * realpath -- canonicalize pathnames, resolving symlinks
  *
- * usage: realpath [-csv] pathname [pathname...]
+ * usage: realpath [-csv] [-a name] pathname [pathname...]
  *
- * options:	-c	check whether or not each resolved path exists
+ * options:	-a name	assign each canonicalized pathname to indexed array
+ *			variable NAME
+ *		-c	check whether or not each resolved path exists
  *		-s	no output, exit status determines whether path is valid
  *		-v	produce verbose output
  *
@@ -19,7 +21,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -64,19 +66,35 @@ int
 realpath_builtin(list)
 WORD_LIST	*list;
 {
-	int	opt, cflag, vflag, sflag, es;
+	int	opt, cflag, vflag, sflag, aflag, es;
 	char	*r, realbuf[PATH_MAX], *p;
 	struct stat sb;
+#if defined (ARRAY_VARS)
+	arrayind_t	ind;
+	char	*aname;
+	SHELL_VAR	*v;
+#endif
 
 	if (list == 0) {
 		builtin_usage();
 		return (EX_USAGE);
 	}
 
-	vflag = cflag = sflag = 0;
+	vflag = cflag = sflag = aflag = 0;
+#if defined (ARRAY_VARS)
+	aname = NULL;
+	v = NULL;
+	ind = 0;
+#endif
 	reset_internal_getopt();
-	while ((opt = internal_getopt (list, "csv")) != -1) {
+	while ((opt = internal_getopt (list, "a:csv")) != -1) {
 		switch (opt) {
+#if defined (ARRAY_VARS)
+		case 'a':
+			aflag = 1;
+			aname = list_optarg;
+			break;
+#endif
 		case 'c':
 			cflag = 1;
 			break;
@@ -100,6 +118,29 @@ WORD_LIST	*list;
 		return (EX_USAGE);
 	}
 
+#if defined (ARRAY_VARS)
+	if (aflag && legal_identifier (aname) == 0) {
+		sh_invalidid(aname);
+		return (EXECUTION_FAILURE);
+	}
+	if (aname && builtin_unbind_variable (aname) == -2)
+		return (EXECUTION_FAILURE);
+	if (aname) {
+		v = find_or_make_array_variable (aname, 1);
+		if (v == 0 || readonly_p (v) || noassign_p (v)) {
+			if (v && readonly_p (v))
+				err_readonly (aname);
+			return (EXECUTION_FAILURE);
+		} else if (array_p (v) == 0) {
+			builtin_error ("%s: not an indexed array", aname);
+			return (EXECUTION_FAILURE);
+		}
+		if (invisible_p (v))
+			VUNSETATTR (v, att_invisible);
+		array_flush (array_cell (v));
+	}
+#endif
+
 	for (es = EXECUTION_SUCCESS; list; list = list->next) {
 		p = list->word->word;
 		r = sh_realpath(p, realbuf);
@@ -116,9 +157,14 @@ WORD_LIST	*list;
 			continue;
 		}
 		if (sflag == 0) {
-			if (vflag)
-				printf ("%s -> ", p);
-			printf("%s\n", realbuf);
+			if (aflag) {
+				bind_array_element (v, ind, realbuf, 0);
+				ind++;
+			} else {
+				if (vflag)
+					printf ("%s -> ", p);
+				printf("%s\n", realbuf);
+			}
 		}
 	}
 	return es;

@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jun 16 09:49:37 EDT 2021
+.\"	Last Change: Mon Nov 15 17:06:54 EST 2021
 .\"
-.TH READLINE 3 "2021 June 16" "GNU Readline 8.1"
+.TH READLINE 3 "2021 November 15" "GNU Readline 8.1"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -359,6 +359,9 @@ If set to \fBOn\fP, when listing completions, readline displays the
 common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the \fBLS_COLORS\fP
 environment variable.
+If there is a color definition in \fB$LS_COLORS\fP for the custom suffix
+"readline-colored-completion-prefix", readline uses this color for
+the common prefix instead of its default.
 .TP
 .B colored\-stats (Off)
 If set to \fBOn\fP, readline displays possible completions using different

@@ -1,5 +1,5 @@
 dnl
-dnl Configure script for bash-5.1
+dnl Configure script for bash-5.2
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
