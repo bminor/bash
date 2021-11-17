@@ -6493,10 +6493,8 @@ parse_string_to_word_list (s, flags, whom)
   old_expand_aliases = expand_aliases;
 
   push_stream (1);
-#if 0 /* TAG: bash-5.2 Alex fxmbsw7 Ratchev <fxmbsw7@gmail.com> 11/17/2020 */
   if (ea = expanding_alias ())
     parser_save_alias ();
-#endif
   last_read_token = WORD;		/* WORD to allow reserved words here */
   current_command_line_count = 0;
   echo_input_at_read = expand_aliases = 0;
@@ -6531,10 +6529,8 @@ parse_string_to_word_list (s, flags, whom)
   last_read_token = '\n';
   pop_stream ();
 
-#if 0 /* TAG: bash-5.2 */
   if (ea)
     parser_restore_alias ();
-#endif
 
 #if defined (HISTORY)
   remember_on_history = old_remember_on_history;
