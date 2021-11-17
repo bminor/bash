@@ -575,6 +575,8 @@ make_child (command, flags)
 	last_asynchronous_pid = getpid ();
 #endif
 
+      subshell_environment |= SUBSHELL_IGNTRAP;
+
       default_tty_job_signals ();
     }
   else

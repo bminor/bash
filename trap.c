@@ -481,6 +481,32 @@ trap_handler (sig)
       SIGRETURN (0);
     }
 
+  /* This means we're in a subshell, but have not yet reset the handler for
+     trapped signals. We're not supposed to execute the trap in this situation;
+     we should restore the original signal and resend the signal to ourselves
+     to preserve the Posix "signal traps that are not being ignored shall be
+     set to the default action" semantics. */
+  if ((subshell_environment & SUBSHELL_IGNTRAP) && trap_list[sig] != (char *)IGNORE_SIG)
+    {
+      sigset_t mask;
+
+      /* Paranoia */
+      if (original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER)
+	original_signals[sig] = SIG_DFL;
+
+      restore_signal (sig);
+
+      /* Make sure we let the signal we just caught through */
+      sigemptyset (&mask);
+      sigprocmask (SIG_SETMASK, (sigset_t *)NULL, &mask);
+      sigdelset (&mask, sig);
+      sigprocmask (SIG_SETMASK, &mask, (sigset_t *)NULL);
+
+      kill (getpid (), sig);
+
+      SIGRETURN (0);
+    }
+
   if ((sig >= NSIG) ||
       (trap_list[sig] == (char *)DEFAULT_SIG) ||
       (trap_list[sig] == (char *)IGNORE_SIG))

@@ -1547,6 +1547,9 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   clear_pending_traps ();
   reset_signal_handlers ();
   subshell_environment |= SUBSHELL_RESETTRAP;
+  /* Note that signal handlers have been reset, so we should no longer
+    reset the handler and resend trapped signals to ourselves. */
+  subshell_environment &= ~SUBSHELL_IGNTRAP;
 
   /* We are in a subshell, so forget that we are running a trap handler or
      that the signal handler has changed (we haven't changed it!) */
@@ -4320,7 +4323,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  already_forked = 1;
 	  cmdflags |= CMD_NO_FORK;
 
-	  subshell_environment = SUBSHELL_FORK;		/* XXX */
+	  /* We redo some of what make_child() does with SUBSHELL_IGNTRAP */
+	  subshell_environment = SUBSHELL_FORK|SUBSHELL_IGNTRAP;	/* XXX */
 	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
 	    subshell_environment |= SUBSHELL_PIPE;
 	  if (async)
@@ -4574,6 +4578,7 @@ run_builtin:
 	     trap strings if we run trap to change a signal disposition. */
 	  reset_signal_handlers ();
 	  subshell_environment |= SUBSHELL_RESETTRAP;
+	  subshell_environment &= ~SUBSHELL_IGNTRAP;
 
 	  if (async)
 	    {
@@ -5514,6 +5519,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       reset_terminating_signals ();	/* XXX */
       /* Cancel traps, in trap.c. */
       restore_original_signals ();
+      subshell_environment &= ~SUBSHELL_IGNTRAP;
 
 #if defined (JOB_CONTROL)
       FREE (p);
