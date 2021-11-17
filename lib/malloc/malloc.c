@@ -1286,13 +1286,12 @@ malloc_usable_size (mem)
       p = (union mhead *) ap - 1;
     }
 
-  /* XXX - should we return 0 if ISFREE? */
-  maxbytes = binsize(p->mh_index);
-
-  /* So the usable size is the maximum number of bytes in the bin less the
-     malloc overhead */
-  maxbytes -= MOVERHEAD + MSLOP;
-  return (maxbytes);
+  /* return 0 if ISFREE */
+  if (p->mh_alloc == ISFREE)
+    return 0;
+  
+  /* Since we use bounds checking, the usable size is the last requested size. */
+  return (p->mh_nbytes);
 }
 
 #if !defined (NO_VALLOC)
