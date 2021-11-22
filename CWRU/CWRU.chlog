@@ -2477,3 +2477,28 @@ lib/readline/colors.c
 lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
 	- readline-colored-completion-prefix: document new custom suffix for
 	  readline's colored-completion-prefix color
+
+				   11/16
+				   -----
+doc/{bash.1,bashref.texi},builtins/set.def
+	- set: modify usage synopsis slightly, based on
+	  https://bugzilla.redhat.com/show_bug.cgi?id=2022324
+
+builtins/set.def
+	- unset_builtin: add shell compatibility level check <= bash-5.1 to
+	  force `unset a[@]' to unset array variable `a', like in previous
+	  versions, instead of unsetting associative array element `@' or
+	  removing all elements of an indexed array without unsetting the
+	  variable itself
+
+builtins/common.c
+	- set_expand_once: now a no-op if the shell compatibility level is
+	  <= bash-5.1, preserving the previous versions' behavior for [[ -v
+	  (dependent on assoc_expand_once instead of forcing it)
+
+subst.c
+	- parameter_brace_expand_rhs: make sure that the final value assigned
+	  is always returned from ${a:=b}, even when `a' has a variable
+	  attribute that modifies the value on assignment. Reported back on
+	  1/20/2021 by oguzismailuysal@gmail.com; bash-5.2 tag removed
+

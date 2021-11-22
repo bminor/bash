@@ -3922,18 +3922,10 @@ execute_cond_node (cond)
 	arg1 = nullstr;
       if (echo_command_at_execute)
 	xtrace_print_cond_term (cond->type, invert, cond->op, arg1, (char *)NULL);
-#if 0	/* TAG:bash-5.2 */
-      if (varop && shell_compatibility_level > 51)		/* -v */
-#else
       if (varop)
-#endif
-	oa = set_expand_once (0, 0);
+	oa = set_expand_once (0, 0);	/* no-op for compatibility levels <= 51 */
       result = unary_test (cond->op->word, arg1, varflag) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
-#if 0
-      if (varop && shell_compatibility_level > 51)		/* -v */
-#else
       if (varop)
-#endif
 	assoc_expand_once = oa;
       if (arg1 != nullstr)
 	free (arg1);

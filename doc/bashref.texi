@@ -5171,8 +5171,8 @@ parameters, or to display the names and values of shell variables.
 @item set
 @btindex set
 @example
-set [--abefhkmnptuvxBCEHPT] [-o @var{option-name}] [@var{argument} @dots{}]
-set [+abefhkmnptuvxBCEHPT] [+o @var{option-name}] [@var{argument} @dots{}]
+set [-abefhkmnptuvxBCEHPT] [-o @var{option-name}] [--] [-] [@var{argument} @dots{}]
+set [+abefhkmnptuvxBCEHPT] [+o @var{option-name}] [--] [-] [@var{argument} @dots{}]
 @end example
 
 If no options or arguments are supplied, @code{set} displays the names
@@ -7221,9 +7221,11 @@ A failed @code{exec} will not cause the shell to exit
 Parser syntax errors will not cause the shell to exit.
 
 @item
-Simple spelling correction for directory arguments to the @code{cd}
-builtin is enabled by default (see the description of the @code{cdspell}
+If the @code{cdspell} shell option is enabled, the shell will attempt
+simple spelling correction for directory arguments to the @code{cd}
+builtin (see the description of the @code{cdspell}
 option to the @code{shopt} builtin in @ref{The Shopt Builtin}).
+The @code{cdspell} option is only effective in interactive shells.
 
 @item
 The shell will check the value of the @env{TMOUT} variable and exit

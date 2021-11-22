@@ -7396,14 +7396,12 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
   if (vname != name)
     free (vname);
 
-#if 0 /* TAG:bash-5.2 oguzismailuysal@gmail.com 01/20/2021 */
   /* "In all cases, the final value of parameter shall be substituted." */
   if (shell_compatibility_level > 51)
     {
       FREE (t1);
       t1 = value_cell (v);
     }
-#endif
 
   /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
 
@@ -7416,10 +7414,6 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
      because the operator is `='), we can forget we saw a quoted null. */
   if (w->word && w->word[0] && QUOTED_NULL (w->word) == 0)
     w->flags &= ~W_SAWQUOTEDNULL;
-
-#if 1 /* TAG:bash-5.2 */
-  free (t1);
-#endif
 
   /* If we convert a null string into a quoted null, make sure the caller
      knows it. */

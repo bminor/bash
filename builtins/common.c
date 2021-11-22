@@ -1088,9 +1088,7 @@ set_expand_once (nval, uwp)
   int oa;
 
   oa = assoc_expand_once;
-#if 0	/* TAG:bash-5.2 */
   if (shell_compatibility_level > 51)
-#endif
     {
       if (uwp)
 	unwind_protect_int (assoc_expand_once);

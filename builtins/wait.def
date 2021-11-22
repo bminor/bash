@@ -111,7 +111,8 @@ int
 wait_builtin (list)
      WORD_LIST *list;
 {
-  int status, code, opt, nflag, wflags;
+  int status, code, opt, nflag;
+  volatile int wflags;
   char *vname;
   SHELL_VAR *pidvar;
   struct procstat pstat;

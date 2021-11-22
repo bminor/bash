@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 25 October 2021).
+the Bash shell (version 5.1, 16 November 2021).
 
-This is Edition 5.1, last updated 25 October 2021,
+This is Edition 5.1, last updated 16 November 2021,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.1.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 25 October 2021).
+the Bash shell (version 5.1, 16 November 2021).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.1, last updated 25 October 2021,
+<p>This is Edition 5.1, last updated 16 November 2021,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.1.
 </p>
@@ -5788,8 +5788,8 @@ parameters, or to display the names and values of shell variables.
 <dl compact="compact">
 <dt id='index-set'><span><code>set</code><a href='#index-set' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example">set [--abefhkmnptuvxBCEHPT] [-o <var>option-name</var>] [<var>argument</var> &hellip;]
-set [+abefhkmnptuvxBCEHPT] [+o <var>option-name</var>] [<var>argument</var> &hellip;]
+<pre class="example">set [-abefhkmnptuvxBCEHPT] [-o <var>option-name</var>] [--] [-] [<var>argument</var> &hellip;]
+set [+abefhkmnptuvxBCEHPT] [+o <var>option-name</var>] [--] [-] [<var>argument</var> &hellip;]
 </pre></div>
 
 <p>If no options or arguments are supplied, <code>set</code> displays the names
@@ -10263,6 +10263,9 @@ is &lsquo;<samp>off</samp>&rsquo;.
 common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the <code>LS_COLORS</code>
 environment variable.
+If there is a color definition in <code>LS_COLORS</code> for the custom suffix
+&lsquo;<samp>readline-colored-completion-prefix</samp>&rsquo;, Readline uses this color for
+the common prefix instead of its default.
 The default is &lsquo;<samp>off</samp>&rsquo;.
 </p>
 </dd>
