@@ -104,7 +104,7 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
 	  tty pathchk tee head mkdir rmdir mkfifo mktemp printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid setpgid seq rm \
-	  accept csv cut stat
+	  accept csv cut stat getconf
 OTHERPROG = necho hello cat pushd asort
 
 all:	$(SHOBJ_STATUS)
@@ -191,6 +191,9 @@ head:	head.o
 
 printenv:	printenv.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ printenv.o $(SHOBJ_LIBS)
+
+getconf:	getconf.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ getconf.o $(SHOBJ_LIBS)
 
 id:	id.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ id.o $(SHOBJ_LIBS)
@@ -295,6 +298,7 @@ truefalse.o: truefalse.c
 accept.o: accept.c
 sleep.o: sleep.c
 finfo.o: finfo.c
+getconf.o: getconf.c getconf.h
 logname.o: logname.c
 basename.o: basename.c
 dirname.o: dirname.c

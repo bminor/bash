@@ -3068,11 +3068,7 @@ eval_arith_for_expr (l, okp)
       r = run_debug_trap ();
       /* In debugging mode, if the DEBUG trap returns a non-zero status, we
 	 skip the command. */
-#if 0	/* TAG:bash-5.2 */
       eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
-#else
-      eflag = 0;
-#endif
       
 #if defined (DEBUGGER)
       if (debugging_mode == 0 || r == EXECUTION_SUCCESS)
@@ -3842,11 +3838,7 @@ execute_arith_command (arith_command)
 
   if (exp)
     {
-#if 0	/* TAG:bash-5.2 */
       eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
-#else
-      eflag = 0;
-#endif
       expresult = evalexp (exp, eflag, &expok);
       line_number = save_line_number;
       free (exp);

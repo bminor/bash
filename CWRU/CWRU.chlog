@@ -2448,7 +2448,8 @@ configure.ac,patchlevel.h
 	  quotearray3.sub, new-exp10.sub, history2.sub). The first three are
 	  because bash-5.2 flushes an indexed array but does not unset the
 	  variable when given `unset a[@]' or `unset[*]' (that is, it acts
-	  like `a=()' instead of `unset a').
+	  like `a=()' instead of `unset a'); the other two are because the
+	  version number changed
 
 				   11/8
 				   ----
@@ -2501,4 +2502,45 @@ subst.c
 	  is always returned from ${a:=b}, even when `a' has a variable
 	  attribute that modifies the value on assignment. Reported back on
 	  1/20/2021 by oguzismailuysal@gmail.com; bash-5.2 tag removed
+
+				   11/22
+				   -----
+doc/{bashref.texi,bash.1}
+	- unset: change the description of `unset name[@]' (unset name[*])
+	  to reflect the new behavior (unset associative array subscripts or
+	  remove all elements from an indexed array) and the difference from
+	  previous versions
+	- set: document -r for restricted shell mode
+	- restricted shell: change occurrences of `set +o restricted' to
+	  `shopt -u restricted_shell'. From a report from
+	  Jin Xiang <jxiang.sd@gmail.com>
+	- read: note that read -t0 may return 0 if a subsequent read will
+	  return EOF. From a suggestion by Dale R. Worley
+	  <worley@alum.mit.edu>
+
+execute_cmd.c
+	- execute_arith_command,eval_arith_for_expr: don't pass EXP_EXPANDED
+	  to evalexp if shell_compatibility_level > 5.1, assuming that the
+	  expression has been quoted by Q_ARITH handling
+
+test.c
+	- test_arithcomp: if we're being called by the conditional command
+	  code and treating the arguments to the arithmetic operators as
+	  expressions, don't pass EXP_EXPANDED to evalexp if the shell
+	  compatibility level is > 5.1, assuming that the expression has been
+	  quoted by Q_ARITH handling
+
+				   11/29
+				   -----
+examples/loadables/getconf.[ch]
+	- getconf: new implementation of loadable builtin, based on glibc
+	  getconf
+
+examples/loadables/sleep.c
+	- parse_gnutimefmt: parse GNU interval format (2m30s), returning
+	  seconds and microseconds like uconvert
+	- sleep: use parse_gnutimefmt if uconvert can't parse the format right
+	  away and "dhms" appears in the format string. Don't return
+	  EX_DISKFALLBACK under any circumstances
+
 

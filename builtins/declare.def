@@ -404,7 +404,7 @@ declare_internal (list, local_var)
       name = savestring (list->word->word);
       wflags = list->word->flags;
 #if defined (ARRAY_VARS)
-      assoc_noexpand = (assoc_expand_once || expand_once_flag) && (wflags & W_ASSIGNMENT);
+      assoc_noexpand = assoc_expand_once && (wflags & W_ASSIGNMENT);
 #else
       assoc_noexpand = 0;
 #endif

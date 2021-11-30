@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Nov 16 09:55:55 EST 2021
+.\"	Last Change: Mon Nov 22 09:58:49 EST 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 November 16" "GNU Bash 5.1"
+.TH BASH 1 "2021 November 22" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2828,9 +2828,15 @@ destroys the array element at index \fIsubscript\fP,
 for both indexed and associative arrays.
 Negative subscripts to indexed arrays are interpreted as described above.
 Unsetting the last element of an array variable does not unset the variable.
-\fBunset\fP \fIname\fP, where \fIname\fP is an array, or
+\fBunset\fP \fIname\fP, where \fIname\fP is an array,
+removes the entire array.
 \fBunset\fP \fIname\fP[\fIsubscript\fP], where
-\fIsubscript\fP is \fB*\fP or \fB@\fP, removes the entire array.
+\fIsubscript\fP is \fB*\fP or \fB@\fP, behaves differently depending on
+whether \fIname\fP is an indexed or associative array.
+If \fIname\fP is an associative array, this unsets the element with
+subscript \fB*\fP or \fB@\fP.
+If \fIname\fP is an indexed array, unset removes all of the elements but
+does not remove the array itself.
 .PP
 When using a variable name with a subscript as an argument to a command,
 such as with \fBunset\fP, without using the word expansion syntax
@@ -9562,8 +9568,10 @@ from regular files.
 If \fBread\fP times out, \fBread\fP saves any partial input read into
 the specified variable \fIname\fP.
 If \fItimeout\fP is 0, \fBread\fP returns immediately, without trying to
-read any data.  The exit status is 0 if input is available on
-the specified file descriptor, non-zero otherwise.
+read any data.
+The exit status is 0 if input is available on the specified file descriptor,
+or the read will return EOF,
+non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 .TP
 .B \-u \fIfd\fP
@@ -9935,6 +9943,10 @@ If the \fB\-p\fP option is supplied at startup, the effective user id is
 not reset.
 Turning this option off causes the effective user
 and group ids to be set to the real user and group ids.
+.TP 8
+.B \-r
+Enable restricted shell mode.
+This option cannot be unset once it has been set.
 .TP 8
 .B \-t
 Exit after reading and executing one command.
@@ -10512,7 +10524,8 @@ expansion, and quote removal after being expanded as described in
 above.  This option is enabled by default.
 .TP 8
 .B restricted_shell
-The shell sets this option if it is started in restricted mode (see
+The shell sets this option if it is started in restricted mode
+(see
 .SM
 .B "RESTRICTED SHELL"
 below).
@@ -11335,6 +11348,16 @@ output that can be reused as input. Bash-5.1 suppresses that message
 when the \fB\-l\fP option is supplied.
 .RE
 .PD
+.TP
+\fBcompat51\fP
+.PD 0
+.RS
+.IP \(bu
+The \fBunset\fP builtin treats attempts to unset array subscripts \fB@\fP
+and \fB*\fP differently depending on whether the array is indexed or
+associative, and differently than in previous versions.
+.RE
+.PD
 .\" bash_builtins
 .if \n(zZ=1 .ig zZ
 .SH "RESTRICTED SHELL"
@@ -11419,7 +11442,7 @@ option to the
 builtin command
 .IP \(bu
 turning off restricted mode with
-\fBset +r\fP or \fBset +o restricted\fP.
+\fBset +r\fP or \fBshopt -u restricted_shell\fP.
 .PP
 These restrictions are enforced after any startup files are read.
 .PP

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2021 November 16<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2021 November 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -3566,9 +3566,15 @@ destroys the array element at index <I>subscript</I>,
 for both indexed and associative arrays.
 Negative subscripts to indexed arrays are interpreted as described above.
 Unsetting the last element of an array variable does not unset the variable.
-<B>unset</B> <I>name</I>, where <I>name</I> is an array, or
+<B>unset</B> <I>name</I>, where <I>name</I> is an array,
+removes the entire array.
 <B>unset</B> <I>name</I>[<I>subscript</I>], where
-<I>subscript</I> is <B>*</B> or <B>@</B>, removes the entire array.
+<I>subscript</I> is <B>*</B> or <B>@</B>, behaves differently depending on
+whether <I>name</I> is an indexed or associative array.
+If <I>name</I> is an associative array, this unsets the element with
+subscript <B>*</B> or <B>@</B>.
+If <I>name</I> is an indexed array, unset removes all of the elements but
+does not remove the array itself.
 <P>
 
 When using a variable name with a subscript as an argument to a command,
@@ -12021,8 +12027,10 @@ from regular files.
 If <B>read</B> times out, <B>read</B> saves any partial input read into
 the specified variable <I>name</I>.
 If <I>timeout</I> is 0, <B>read</B> returns immediately, without trying to
-read any data.  The exit status is 0 if input is available on
-the specified file descriptor, non-zero otherwise.
+read any data.
+The exit status is 0 if input is available on the specified file descriptor,
+or the read will return EOF,
+non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 <DT><B>-u </B><I>fd</I>
 
@@ -12503,6 +12511,11 @@ If the <B>-p</B> option is supplied at startup, the effective user id is
 not reset.
 Turning this option off causes the effective user
 and group ids to be set to the real user and group ids.
+<DT><B>-r</B>
+
+<DD>
+Enable restricted shell mode.
+This option cannot be unset once it has been set.
 <DT><B>-t</B>
 
 <DD>
@@ -13245,7 +13258,8 @@ above.  This option is enabled by default.
 <DT><B>restricted_shell</B>
 
 <DD>
-The shell sets this option if it is started in restricted mode (see
+The shell sets this option if it is started in restricted mode
+(see
 <FONT SIZE=-1><B>RESTRICTED SHELL</B>
 
 </FONT>
@@ -14262,6 +14276,17 @@ when the <B>-l</B> option is supplied.
 </DL></DL>
 
 
+<DT><B>compat51</B><DD>
+
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>*<DD>
+The <B>unset</B> builtin treats attempts to unset array subscripts <B>@</B>
+and <B>*</B> differently depending on whether the array is indexed or
+associative, and differently than in previous versions.
+</DL></DL>
+
+
 
 
 </DL>
@@ -14373,7 +14398,7 @@ option to the
 builtin command
 <DT>*<DD>
 turning off restricted mode with
-<B>set +r</B> or <B>set +o restricted</B>.
+<B>set +r</B> or <B>shopt -u restricted_shell</B>.
 </DL>
 <P>
 
@@ -14563,7 +14588,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.1<TH ALIGN=CENTER width=33%>2021 November 16<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2021 November 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14670,6 +14695,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 16 November 2021 10:03:07 EST
+Time: 22 November 2021 11:02:25 EST
 </BODY>
 </HTML>

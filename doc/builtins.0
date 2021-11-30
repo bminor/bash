@@ -1078,115 +1078,116 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      the  specified  variable _n_a_m_e.  If _t_i_m_e_o_u_t is 0, rreeaadd re-
                      turns immediately, without trying to read any data.   The
                      exit  status  is 0 if input is available on the specified
-                     file descriptor, non-zero otherwise.  The exit status  is
-                     greater than 128 if the timeout is exceeded.
+                     file descriptor, or the read will  return  EOF,  non-zero
+                     otherwise.   The  exit  status is greater than 128 if the
+                     timeout is exceeded.
               --uu _f_d  Read input from file descriptor _f_d.
 
-              If  no _n_a_m_e_s are supplied, the line read, without the ending de-
-              limiter but otherwise unmodified, is assigned  to  the  variable
-              RREEPPLLYY.   The  exit status is zero, unless end-of-file is encoun-
-              tered, rreeaadd times out (in which case the status is greater  than
-              128),  a variable assignment error (such as assigning to a read-
+              If no _n_a_m_e_s are supplied, the line read, without the ending  de-
+              limiter  but  otherwise  unmodified, is assigned to the variable
+              RREEPPLLYY.  The exit status is zero, unless end-of-file  is  encoun-
+              tered,  rreeaadd times out (in which case the status is greater than
+              128), a variable assignment error (such as assigning to a  read-
               only variable) occurs, or an invalid file descriptor is supplied
               as the argument to --uu.
 
        rreeaaddoonnllyy [--aaAAff] [--pp] [_n_a_m_e[=_w_o_r_d] ...]
-              The  given  _n_a_m_e_s are marked readonly; the values of these _n_a_m_e_s
-              may not be changed by subsequent assignment.  If the  --ff  option
-              is  supplied,  the  functions  corresponding to the _n_a_m_e_s are so
-              marked.  The --aa option restricts the variables  to  indexed  ar-
-              rays;  the  --AA option restricts the variables to associative ar-
+              The given _n_a_m_e_s are marked readonly; the values of  these  _n_a_m_e_s
+              may  not  be changed by subsequent assignment.  If the --ff option
+              is supplied, the functions corresponding to  the  _n_a_m_e_s  are  so
+              marked.   The  --aa  option restricts the variables to indexed ar-
+              rays; the --AA option restricts the variables to  associative  ar-
               rays.  If both options are supplied, --AA takes precedence.  If no
-              _n_a_m_e  arguments  are  given,  or if the --pp option is supplied, a
+              _n_a_m_e arguments are given, or if the --pp  option  is  supplied,  a
               list of all readonly names is printed.  The other options may be
-              used  to  restrict the output to a subset of the set of readonly
-              names.  The --pp option causes output to be displayed in a  format
-              that  may be reused as input.  If a variable name is followed by
-              =_w_o_r_d, the value of the variable is set  to  _w_o_r_d.   The  return
-              status  is 0 unless an invalid option is encountered, one of the
+              used to restrict the output to a subset of the set  of  readonly
+              names.   The --pp option causes output to be displayed in a format
+              that may be reused as input.  If a variable name is followed  by
+              =_w_o_r_d,  the  value  of  the variable is set to _w_o_r_d.  The return
+              status is 0 unless an invalid option is encountered, one of  the
               _n_a_m_e_s is not a valid shell variable name, or --ff is supplied with
               a _n_a_m_e that is not a function.
 
        rreettuurrnn [_n]
-              Causes  a function to stop executing and return the value speci-
-              fied by _n to its caller.  If _n is omitted, the return status  is
-              that  of the last command executed in the function body.  If rree--
+              Causes a function to stop executing and return the value  speci-
+              fied  by _n to its caller.  If _n is omitted, the return status is
+              that of the last command executed in the function body.  If  rree--
               ttuurrnn is executed by a trap handler, the last command used to de-
-              termine  the status is the last command executed before the trap
-              handler.  If rreettuurrnn is executed during a DDEEBBUUGG  trap,  the  last
-              command  used  to  determine the status is the last command exe-
-              cuted by the trap handler before rreettuurrnn was invoked.  If  rreettuurrnn
-              is  used outside a function, but during execution of a script by
-              the ..  (ssoouurrccee) command, it causes the shell to  stop  executing
-              that  script  and return either _n or the exit status of the last
-              command executed within the script as the  exit  status  of  the
+              termine the status is the last command executed before the  trap
+              handler.   If  rreettuurrnn  is executed during a DDEEBBUUGG trap, the last
+              command used to determine the status is the  last  command  exe-
+              cuted  by the trap handler before rreettuurrnn was invoked.  If rreettuurrnn
+              is used outside a function, but during execution of a script  by
+              the  ..   (ssoouurrccee) command, it causes the shell to stop executing
+              that script and return either _n or the exit status of  the  last
+              command  executed  within  the  script as the exit status of the
               script.  If _n is supplied, the return value is its least signif-
-              icant 8 bits.  The return status is non-zero if rreettuurrnn  is  sup-
-              plied  a non-numeric argument, or is used outside a function and
-              not during execution of a script by .. or  ssoouurrccee.   Any  command
+              icant  8  bits.  The return status is non-zero if rreettuurrnn is sup-
+              plied a non-numeric argument, or is used outside a function  and
+              not  during  execution  of a script by .. or ssoouurrccee.  Any command
               associated with the RREETTUURRNN trap is executed before execution re-
               sumes after the function or script.
 
        sseett [--aabbeeffhhkkmmnnppttuuvvxxBBCCEEHHPPTT] [--oo _o_p_t_i_o_n_-_n_a_m_e] [----] [--] [_a_r_g ...]
        sseett [++aabbeeffhhkkmmnnppttuuvvxxBBCCEEHHPPTT] [++oo _o_p_t_i_o_n_-_n_a_m_e] [----] [--] [_a_r_g ...]
-              Without options, display the name and value of each shell  vari-
-              able  in a format that can be reused as input for setting or re-
+              Without  options, display the name and value of each shell vari-
+              able in a format that can be reused as input for setting or  re-
               setting the currently-set variables.  Read-only variables cannot
-              be  reset.  In _p_o_s_i_x _m_o_d_e, only shell variables are listed.  The
-              output is sorted according to the current locale.  When  options
-              are  specified,  they  set or unset shell attributes.  Any argu-
-              ments remaining after option processing are  treated  as  values
+              be reset.  In _p_o_s_i_x _m_o_d_e, only shell variables are listed.   The
+              output  is sorted according to the current locale.  When options
+              are specified, they set or unset shell  attributes.   Any  argu-
+              ments  remaining  after  option processing are treated as values
               for the positional parameters and are assigned, in order, to $$11,
-              $$22, ......  $$_n.  Options, if specified, have  the  following  mean-
+              $$22,  ......   $$_n.   Options, if specified, have the following mean-
               ings:
               --aa      Each variable or function that is created or modified is
-                      given the export attribute and marked for export to  the
+                      given  the export attribute and marked for export to the
                       environment of subsequent commands.
-              --bb      Report  the status of terminated background jobs immedi-
+              --bb      Report the status of terminated background jobs  immedi-
                       ately, rather than before the next primary prompt.  This
                       is effective only when job control is enabled.
-              --ee      Exit  immediately  if a _p_i_p_e_l_i_n_e (which may consist of a
-                      single _s_i_m_p_l_e _c_o_m_m_a_n_d), a _l_i_s_t, or  a  _c_o_m_p_o_u_n_d  _c_o_m_m_a_n_d
+              --ee      Exit immediately if a _p_i_p_e_l_i_n_e (which may consist  of  a
+                      single  _s_i_m_p_l_e  _c_o_m_m_a_n_d),  a _l_i_s_t, or a _c_o_m_p_o_u_n_d _c_o_m_m_a_n_d
                       (see SSHHEELLLL GGRRAAMMMMAARR above), exits with a non-zero status.
-                      The shell does not exit if the  command  that  fails  is
-                      part  of  the command list immediately following a wwhhiillee
-                      or uunnttiill keyword, part of the test following the  iiff  or
-                      eelliiff  reserved  words, part of any command executed in a
-                      &&&& or |||| list except the command following the final  &&&&
+                      The  shell  does  not  exit if the command that fails is
+                      part of the command list immediately following  a  wwhhiillee
+                      or  uunnttiill  keyword, part of the test following the iiff or
+                      eelliiff reserved words, part of any command executed  in  a
+                      &&&&  or |||| list except the command following the final &&&&
                       or ||||, any command in a pipeline but the last, or if the
-                      command's return value is being inverted with !!.   If  a
-                      compound  command  other  than a subshell returns a non-
-                      zero status because a command failed while --ee was  being
-                      ignored,  the  shell  does  not exit.  A trap on EERRRR, if
-                      set, is executed before the shell  exits.   This  option
+                      command's  return  value is being inverted with !!.  If a
+                      compound command other than a subshell  returns  a  non-
+                      zero  status because a command failed while --ee was being
+                      ignored, the shell does not exit.  A  trap  on  EERRRR,  if
+                      set,  is  executed  before the shell exits.  This option
                       applies to the shell environment and each subshell envi-
-                      ronment separately (see  CCOOMMMMAANNDD  EEXXEECCUUTTIIOONN  EENNVVIIRROONNMMEENNTT
+                      ronment  separately  (see  CCOOMMMMAANNDD EEXXEECCUUTTIIOONN EENNVVIIRROONNMMEENNTT
                       above), and may cause subshells to exit before executing
                       all the commands in the subshell.
 
-                      If a compound command or shell function  executes  in  a
-                      context  where --ee is being ignored, none of the commands
-                      executed within the compound command  or  function  body
-                      will  be  affected  by the --ee setting, even if --ee is set
-                      and a command returns a failure status.  If  a  compound
-                      command  or  shell function sets --ee while executing in a
-                      context where --ee is ignored, that setting will not  have
-                      any  effect  until  the  compound command or the command
+                      If  a  compound  command or shell function executes in a
+                      context where --ee is being ignored, none of the  commands
+                      executed  within  the  compound command or function body
+                      will be affected by the --ee setting, even if  --ee  is  set
+                      and  a  command returns a failure status.  If a compound
+                      command or shell function sets --ee while executing  in  a
+                      context  where --ee is ignored, that setting will not have
+                      any effect until the compound  command  or  the  command
                       containing the function call completes.
               --ff      Disable pathname expansion.
-              --hh      Remember the location of commands as they are looked  up
+              --hh      Remember  the location of commands as they are looked up
                       for execution.  This is enabled by default.
-              --kk      All  arguments  in the form of assignment statements are
-                      placed in the environment for a command, not just  those
+              --kk      All arguments in the form of assignment  statements  are
+                      placed  in the environment for a command, not just those
                       that precede the command name.
-              --mm      Monitor  mode.   Job control is enabled.  This option is
-                      on by default for interactive  shells  on  systems  that
-                      support  it  (see JJOOBB CCOONNTTRROOLL above).  All processes run
+              --mm      Monitor mode.  Job control is enabled.  This  option  is
+                      on  by  default  for  interactive shells on systems that
+                      support it (see JJOOBB CCOONNTTRROOLL above).  All  processes  run
                       in a separate process group.  When a background job com-
                       pletes, the shell prints a line containing its exit sta-
                       tus.
               --nn      Read commands but do not execute them.  This may be used
-                      to  check a shell script for syntax errors.  This is ig-
+                      to check a shell script for syntax errors.  This is  ig-
                       nored by interactive shells.
               --oo _o_p_t_i_o_n_-_n_a_m_e
                       The _o_p_t_i_o_n_-_n_a_m_e can be one of the following:
@@ -1194,10 +1195,10 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                               Same as --aa.
                       bbrraacceeeexxppaanndd
                               Same as --BB.
-                      eemmaaccss   Use an emacs-style command line  editing  inter-
+                      eemmaaccss   Use  an  emacs-style command line editing inter-
                               face.  This is enabled by default when the shell
                               is interactive, unless the shell is started with
-                              the  ----nnooeeddiittiinngg  option.  This also affects the
+                              the ----nnooeeddiittiinngg option.  This also  affects  the
                               editing interface used for rreeaadd --ee.
                       eerrrreexxiitt Same as --ee.
                       eerrrrttrraaccee
@@ -1211,8 +1212,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                               HHIISSTTOORRYY.  This option is on by default in inter-
                               active shells.
                       iiggnnoorreeeeooff
-                              The effect is as  if  the  shell  command  ``IG-
-                              NOREEOF=10''  had been executed (see SShheellll VVaarrii--
+                              The  effect  is  as  if  the shell command ``IG-
+                              NOREEOF=10'' had been executed (see SShheellll  VVaarrii--
                               aabblleess above).
                       kkeeyywwoorrdd Same as --kk.
                       mmoonniittoorr Same as --mm.
@@ -1227,40 +1228,42 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       pphhyyssiiccaall
                               Same as --PP.
                       ppiippeeffaaiill
-                              If set, the return value of a  pipeline  is  the
-                              value  of  the  last (rightmost) command to exit
-                              with a non-zero status, or zero if all  commands
-                              in  the pipeline exit successfully.  This option
+                              If  set,  the  return value of a pipeline is the
+                              value of the last (rightmost)  command  to  exit
+                              with  a non-zero status, or zero if all commands
+                              in the pipeline exit successfully.  This  option
                               is disabled by default.
-                      ppoossiixx   Change the behavior of bbaasshh  where  the  default
-                              operation  differs  from  the  POSIX standard to
-                              match the standard (_p_o_s_i_x _m_o_d_e).  See  SSEEEE  AALLSSOO
+                      ppoossiixx   Change  the  behavior  of bbaasshh where the default
+                              operation differs from  the  POSIX  standard  to
+                              match  the  standard (_p_o_s_i_x _m_o_d_e).  See SSEEEE AALLSSOO
                               below for a reference to a document that details
                               how posix mode affects bash's behavior.
                       pprriivviilleeggeedd
                               Same as --pp.
                       vveerrbboossee Same as --vv.
-                      vvii      Use a vi-style command line  editing  interface.
+                      vvii      Use  a  vi-style command line editing interface.
                               This also affects the editing interface used for
                               rreeaadd --ee.
                       xxttrraaccee  Same as --xx.
                       If --oo is supplied with no _o_p_t_i_o_n_-_n_a_m_e, the values of the
-                      current  options are printed.  If ++oo is supplied with no
-                      _o_p_t_i_o_n_-_n_a_m_e, a series of sseett commands  to  recreate  the
-                      current  option  settings  is  displayed on the standard
+                      current options are printed.  If ++oo is supplied with  no
+                      _o_p_t_i_o_n_-_n_a_m_e,  a  series  of sseett commands to recreate the
+                      current option settings is  displayed  on  the  standard
                       output.
-              --pp      Turn on _p_r_i_v_i_l_e_g_e_d mode.  In this  mode,  the  $$EENNVV  and
-                      $$BBAASSHH__EENNVV  files  are not processed, shell functions are
-                      not inherited from the environment, and  the  SSHHEELLLLOOPPTTSS,
-                      BBAASSHHOOPPTTSS,  CCDDPPAATTHH, and GGLLOOBBIIGGNNOORREE variables, if they ap-
-                      pear in the environment, are ignored.  If the  shell  is
-                      started  with the effective user (group) id not equal to
-                      the real user (group) id, and the --pp option is not  sup-
+              --pp      Turn  on  _p_r_i_v_i_l_e_g_e_d  mode.   In this mode, the $$EENNVV and
+                      $$BBAASSHH__EENNVV files are not processed, shell  functions  are
+                      not  inherited  from the environment, and the SSHHEELLLLOOPPTTSS,
+                      BBAASSHHOOPPTTSS, CCDDPPAATTHH, and GGLLOOBBIIGGNNOORREE variables, if they  ap-
+                      pear  in  the environment, are ignored.  If the shell is
+                      started with the effective user (group) id not equal  to
+                      the  real user (group) id, and the --pp option is not sup-
                       plied, these actions are taken and the effective user id
-                      is set to the real user id.  If the --pp  option  is  sup-
-                      plied  at  startup,  the effective user id is not reset.
-                      Turning this option off causes the  effective  user  and
+                      is  set  to  the real user id.  If the --pp option is sup-
+                      plied at startup, the effective user id  is  not  reset.
+                      Turning  this  option  off causes the effective user and
                       group ids to be set to the real user and group ids.
+              --rr      Enable restricted shell mode.  This option cannot be un-
+                      set once it has been set.
               --tt      Exit after reading and executing one command.
               --uu      Treat unset variables and parameters other than the spe-
                       cial parameters "@" and "*" as an error when  performing
@@ -2056,6 +2059,12 @@ SSHHEELLLL CCOOMMPPAATTIIBBIILLIITTYY MMOODDEE
                      fect, even when producing output that can  be  reused  as
                      input.  Bash-5.1  suppresses that message when the --ll op-
                      tion is supplied.
+
+       ccoommppaatt5511
+              +o      The uunnsseett builtin treats attempts  to  unset  array  sub-
+                     scripts  @@ and ** differently depending on whether the ar-
+                     ray is indexed or associative, and  differently  than  in
+                     previous versions.
 
 SSEEEE AALLSSOO
        bash(1), sh(1)

@@ -4,11 +4,11 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 16 November 2021).
+the Bash shell (version 5.2, 22 November 2021).
 
-This is Edition 5.1, last updated 16 November 2021,
+This is Edition 5.2, last updated 22 November 2021,
 of The GNU Bash Reference Manual,
-for Bash, Version 5.1.
+for Bash, Version 5.2.
 
 Copyright (C) 1988-2021 Free Software Foundation, Inc.
 
@@ -77,12 +77,12 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 16 November 2021).
+the Bash shell (version 5.2, 22 November 2021).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.1, last updated 16 November 2021,
+<p>This is Edition 5.2, last updated 22 November 2021,
 of <cite>The GNU Bash Reference Manual</cite>,
-for <code>Bash</code>, Version 5.1.
+for <code>Bash</code>, Version 5.2.
 </p>
 <p>Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -5518,8 +5518,10 @@ from regular files.
 If <code>read</code> times out, <code>read</code> saves any partial input read into
 the specified variable <var>name</var>.
 If <var>timeout</var> is 0, <code>read</code> returns immediately, without trying to
-read any data.  The exit status is 0 if input is available on
-the specified file descriptor, non-zero otherwise.
+read any data.
+The exit status is 0 if input is available on the specified file descriptor,
+or the read will return EOF,
+non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 </p>
 </dd>
@@ -6010,6 +6012,11 @@ If the <samp>-p</samp> option is supplied at startup, the effective user id is
 not reset.
 Turning this option off causes the effective user
 and group ids to be set to the real user and group ids.
+</p>
+</dd>
+<dt><span><code>-r</code></span></dt>
+<dd><p>Enable restricted shell mode.
+This option cannot be unset once it has been set.
 </p>
 </dd>
 <dt><span><code>-t</code></span></dt>
@@ -8109,9 +8116,11 @@ status will not cause the shell to exit (see <a href="#Bash-POSIX-Mode">Bash POS
 
 </li><li> Parser syntax errors will not cause the shell to exit.
 
-</li><li> Simple spelling correction for directory arguments to the <code>cd</code>
-builtin is enabled by default (see the description of the <code>cdspell</code>
+</li><li> If the <code>cdspell</code> shell option is enabled, the shell will attempt
+simple spelling correction for directory arguments to the <code>cd</code>
+builtin (see the description of the <code>cdspell</code>
 option to the <code>shopt</code> builtin in <a href="#The-Shopt-Builtin">The Shopt Builtin</a>).
+The <code>cdspell</code> option is only effective in interactive shells.
 
 </li><li> The shell will check the value of the <code>TMOUT</code> variable and exit
 if a command is not read within the specified number of seconds after
@@ -8654,8 +8663,14 @@ destroys the array element at index <var>subscript</var>.
 Negative subscripts to indexed arrays are interpreted as described above.
 Unsetting the last element of an array variable does not unset the variable.
 <code>unset <var>name</var></code>, where <var>name</var> is an array, removes the
-entire array.  A subscript of &lsquo;<samp>*</samp>&rsquo; or &lsquo;<samp>@</samp>&rsquo; also removes the
 entire array.
+<code>unset <var>name</var>[<var>subscript</var>]</code> behaves differently
+depending on the array type when given a
+subscript of &lsquo;<samp>*</samp>&rsquo; or &lsquo;<samp>@</samp>&rsquo;.
+When <var>name</var> is an associative array, it removes the element with key
+&lsquo;<samp>*</samp>&rsquo; or &lsquo;<samp>@</samp>&rsquo;.
+If <var>name</var> is an indexed array, <code>unset</code> removes all of the elements,
+but does not remove the array itself.
 </p>
 <p>When using a variable name with a subscript as an argument to a command,
 such as with <code>unset</code>, without using the word expansion syntax
@@ -9009,7 +9024,7 @@ option to the <code>hash</code> builtin command.
 <samp>-f</samp> and <samp>-d</samp> options to the <code>enable</code> builtin.
 </li><li> Using the <code>enable</code> builtin command to enable disabled shell builtins.
 </li><li> Specifying the <samp>-p</samp> option to the <code>command</code> builtin.
-</li><li> Turning off restricted mode with &lsquo;<samp>set +r</samp>&rsquo; or &lsquo;<samp>set +o restricted</samp>&rsquo;.
+</li><li> Turning off restricted mode with &lsquo;<samp>set +r</samp>&rsquo; or &lsquo;<samp>shopt -u restricted_shell</samp>&rsquo;.
 </li></ul>
 
 <p>These restrictions are enforced after any startup files are read.
@@ -9463,6 +9478,14 @@ so seeding the random number generator by assigning a value to
 printed an informational message to that effect, even when producing
 output that can be reused as input. Bash-5.1 suppresses that message
 when the <samp>-l</samp> option is supplied.
+</li></ul>
+
+</dd>
+<dt><span><code>compat51 (set using BASH_COMPAT)</code></span></dt>
+<dd><ul>
+<li> The <code>unset</code> builtin treats attempts to unset array subscripts &lsquo;<samp>@</samp>&rsquo;
+and &lsquo;<samp>*</samp>&rsquo; differently depending on whether the array is indexed or
+associative, and differently than in previous versions.
 </li></ul>
 </dd>
 </dl>

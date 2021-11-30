@@ -79,6 +79,12 @@
 #  define UINT_MAX	((unsigned int) ~(unsigned int)0)
 #endif
 
+#ifndef SHRT_MAX
+#  define SHRT_MAX	TYPE_MAXIMUM(short)
+#  define SHRT_MIN	TYPE_MINIMUM(short)
+#  define USHRT_MAX	((unsigned short) ~(unsigned short)0)
+#endif
+
 #ifndef UCHAR_MAX
 #  define UCHAR_MAX	255
 #endif
@@ -106,11 +112,11 @@ static const unsigned long long int maxquad = ULLONG_MAX;
 #endif
 
 #ifndef SSIZE_MAX
-#  define SSIZE_MAX	32767		/* POSIX minimum max */
+#  define SSIZE_MAX	INT_MAX
 #endif
 
 #ifndef SIZE_MAX
-#  define SIZE_MAX	65535		/* POSIX minimum max */
+#  define SIZE_MAX	((size_t) ~(size_t)0)
 #endif
 
 #ifndef sh_imaxabs

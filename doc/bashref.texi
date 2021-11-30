@@ -4937,8 +4937,10 @@ from regular files.
 If @code{read} times out, @code{read} saves any partial input read into
 the specified variable @var{name}.
 If @var{timeout} is 0, @code{read} returns immediately, without trying to
-read any data.  The exit status is 0 if input is available on
-the specified file descriptor, non-zero otherwise.
+read any data.
+The exit status is 0 if input is available on the specified file descriptor,
+or the read will return EOF,
+non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 
 @item -u @var{fd}
@@ -5358,6 +5360,10 @@ If the @option{-p} option is supplied at startup, the effective user id is
 not reset.
 Turning this option off causes the effective user
 and group ids to be set to the real user and group ids.
+
+@item -r
+Enable restricted shell mode.
+This option cannot be unset once it has been set.
 
 @item -t
 Exit after reading and executing one command.
@@ -7698,8 +7704,14 @@ destroys the array element at index @var{subscript}.
 Negative subscripts to indexed arrays are interpreted as described above.
 Unsetting the last element of an array variable does not unset the variable.
 @code{unset @var{name}}, where @var{name} is an array, removes the
-entire array.  A subscript of @samp{*} or @samp{@@} also removes the
 entire array.
+@code{unset @var{name}[@var{subscript}]} behaves differently
+depending on the array type when given a
+subscript of @samp{*} or @samp{@@}.
+When @var{name} is an associative array, it removes the element with key
+@samp{*} or @samp{@@}.
+If @var{name} is an indexed array, @code{unset} removes all of the elements,
+but does not remove the array itself.
 
 When using a variable name with a subscript as an argument to a command,
 such as with @code{unset}, without using the word expansion syntax
@@ -8004,7 +8016,7 @@ Using the @code{enable} builtin command to enable disabled shell builtins.
 @item
 Specifying the @option{-p} option to the @code{command} builtin.
 @item
-Turning off restricted mode with @samp{set +r} or @samp{set +o restricted}.
+Turning off restricted mode with @samp{set +r} or @samp{shopt -u restricted_shell}.
 @end itemize
 
 These restrictions are enforced after any startup files are read.
@@ -8522,6 +8534,14 @@ If the command hash table is empty, Bash versions prior to bash-5.1
 printed an informational message to that effect, even when producing
 output that can be reused as input. Bash-5.1 suppresses that message
 when the @option{-l} option is supplied.
+@end itemize
+
+@item compat51 (set using BASH_COMPAT)
+@itemize @bullet
+@item
+The @code{unset} builtin treats attempts to unset array subscripts @samp{@@}
+and @samp{*} differently depending on whether the array is indexed or
+associative, and differently than in previous versions.
 @end itemize
 @end table
 
