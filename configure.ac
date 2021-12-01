@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.036])dnl
+AC_REVISION([for Bash 5.2, version 5.038])dnl
 
 define(bashvers, 5.2)
 define(relstatus, devel)
@@ -183,6 +183,7 @@ opt_globascii_default=yes
 opt_function_import=yes
 opt_dev_fd_stat_broken=no
 opt_alt_array_impl=no
+opt_translatable_strings=yes
 
 dnl modified by alternate array implementation option
 ARRAY_O=array.o
@@ -206,6 +207,7 @@ if test $opt_minimal_config = yes; then
 	opt_net_redirs=no opt_progcomp=no opt_separate_help=no
 	opt_multibyte=yes opt_cond_regexp=no opt_coproc=no
 	opt_casemod_attrs=no opt_casemod_expansions=no opt_extglob_default=no
+	opt_translatable_strings=no
 	opt_globascii_default=yes
 fi
 
@@ -245,6 +247,7 @@ AC_ARG_ENABLE(select, AS_HELP_STRING([--enable-select], [include select command]
 AC_ARG_ENABLE(separate-helpfiles, AS_HELP_STRING([--enable-separate-helpfiles], [use external files for help builtin documentation]), opt_separate_help=$enableval)
 AC_ARG_ENABLE(single-help-strings, AS_HELP_STRING([--enable-single-help-strings], [store help documentation as a single string to ease translation]), opt_single_longdoc_strings=$enableval)
 AC_ARG_ENABLE(strict-posix-default, AS_HELP_STRING([--enable-strict-posix-default], [configure bash to be posix-conformant by default]), opt_strict_posix=$enableval)
+AC_ARG_ENABLE(translatable-strings, AS_HELP_STRING([--enable-translatable-strings], [include support for $"..." translatable strings]), opt_translatable_strings=$enableval)
 AC_ARG_ENABLE(usg-echo-default, AS_HELP_STRING([--enable-usg-echo-default], [a synonym for --enable-xpg-echo-default]), opt_xpg_echo=$enableval)
 AC_ARG_ENABLE(xpg-echo-default, AS_HELP_STRING([--enable-xpg-echo-default], [make the echo builtin expand escape sequences by default]), opt_xpg_echo=$enableval)
 
@@ -362,6 +365,9 @@ fi
 if test $opt_alt_array_impl = yes; then
 AC_DEFINE(ALT_ARRAY_IMPLEMENTATION)
 ARRAY_O=array2.o
+fi
+if test $opt_translatable_strings = yes; then
+AC_DEFINE(TRANSLATABLE_STRINGS)
 fi
 
 if test $opt_memscramble = yes; then

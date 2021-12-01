@@ -91,7 +91,7 @@ parse_gnutimefmt (char *string, long *sp, long *up)
 
 		/* multiply the accumulated value by the multiplier */
 		t = accumusec * mult;
-		accumsec = accumsec * mult + t / 1000000;
+		accumsec = accumsec * mult + (t / 1000000);
 		accumusec = t % 1000000;
 
 		/* add to running total */

@@ -872,7 +872,9 @@ unset_builtin (list)
   else if (unset_function && nameref)
     nameref = 0;
 
+#if defined (ARRAY_VARS)
   base_vflags = assoc_expand_once ? VA_NOEXPAND : 0;
+#endif
 
   while (list)
     {

@@ -311,7 +311,7 @@ sh_backslash_quote (string, table, flags)
   return (result);
 }
 
-#if defined (PROMPT_STRING_DECODE)
+#if defined (PROMPT_STRING_DECODE) || defined (TRANSLATABLE_STRINGS)
 /* Quote characters that get special treatment when in double quotes in STRING
    using backslashes.  Return a new string. */
 char *

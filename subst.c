@@ -3802,7 +3802,11 @@ expand_string_dollar_quote (string, flags)
 
 	case '$':
 	  peekc = string[++sindex];
+#if defined (TRANSLATABLE_STRINGS)
 	  if (peekc != '\'' && peekc != '"')
+#else
+	  if (peekc != '\'')
+#endif
 	    {
 	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 16);
 	      ret[retind++] = c;
@@ -3818,6 +3822,7 @@ expand_string_dollar_quote (string, flags)
 	      t = sh_single_quote (trans);
 	      sindex = news;
 	    }
+#if defined (TRANSLATABLE_STRINGS)
 	  else
 	    {
 	      news = ++sindex;
@@ -3831,6 +3836,7 @@ expand_string_dollar_quote (string, flags)
 		t = sh_mkdoublequoted (trans, translen, 0);
 	      sindex = news;
 	    }
+#endif /* TRANSLATABLE_STRINGS */
 	  free (trans);
 	  trans = t;
 	  translen = strlen (trans);

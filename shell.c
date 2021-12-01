@@ -222,8 +222,10 @@ int no_line_editing = 0;	/* non-zero -> don't do fancy line editing. */
 #else
 int no_line_editing = 1;	/* can't have line editing without readline */
 #endif
+#if defined (TRANSLATABLE_STRINGS)
 int dump_translatable_strings;	/* Dump strings in $"...", don't execute. */
 int dump_po_strings;		/* Dump strings in $"..." in po format */
+#endif
 int wordexp_only = 0;		/* Do word expansion only */
 int protected_mode = 0;		/* No command substitution with --wordexp */
 
@@ -248,8 +250,10 @@ static const struct {
 #if defined (DEBUGGER)
   { "debugger", Int, &debugging_mode, (char **)0x0 },
 #endif
+#if defined (TRANSLATABLE_STRINGS)
   { "dump-po-strings", Int, &dump_po_strings, (char **)0x0 },
   { "dump-strings", Int, &dump_translatable_strings, (char **)0x0 },
+#endif
   { "help", Int, &want_initial_help, (char **)0x0 },
   { "init-file", Charp, (int *)0x0, &bashrc_file },
   { "login", Int, &make_login_shell, (char **)0x0 },
@@ -498,11 +502,13 @@ main (argc, argv, env)
 
   set_login_shell ("login_shell", login_shell != 0);
 
+#if defined (TRANSLATABLE_STRINGS)
   if (dump_po_strings)
     dump_translatable_strings = 1;
 
   if (dump_translatable_strings)
     read_but_dont_execute = 1;
+#endif
 
   if (running_setuid && privileged_mode == 0)
     disable_priv_mode ();
@@ -955,7 +961,9 @@ parse_shell_options (argv, arg_start, arg_end)
 	      break;
 
 	    case 'D':
+#if defined (TRANSLATABLE_STRINGS)
 	      dump_translatable_strings = 1;
+#endif
 	      break;
 
 	    default:

@@ -400,6 +400,7 @@ reset_locale_vars ()
   return 1;
 }
 
+#if defined (TRANSLATABLE_STRINGS)
 /* Translate the contents of STRING, a $"..." quoted string, according
    to the current locale.  In the `C' or `POSIX' locale, or if gettext()
    is not available, the passed string is returned unchanged.  The
@@ -567,6 +568,7 @@ locale_expand (string, start, end, lineno, lenp)
       return (temp);
     }
 }
+#endif
 
 /* Set every character in the <blank> character class to be a shell break
    character for the lexical analyzer when the locale changes. */

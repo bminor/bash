@@ -118,8 +118,10 @@ typedef void *alias_t;
 extern int extended_glob;
 #endif
 
+#if defined (TRANSLATABLE_STRINGS)
 extern int dump_translatable_strings, dump_po_strings;
 extern int singlequote_translations;
+#endif /* TRANSLATABLE_STRINGS */
 
 #if !defined (errno)
 extern int errno;
@@ -152,11 +154,9 @@ static int shell_getc PARAMS((int));
 static void shell_ungetc PARAMS((int));
 static void discard_until PARAMS((int));
 
-#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
 static void push_string PARAMS((char *, int, alias_t *));
 static void pop_string PARAMS((void));
 static void free_string_list PARAMS((void));
-#endif
 
 static char *read_a_line PARAMS((int));
 
@@ -1848,8 +1848,6 @@ restore_token_state (ts)
  *	everything between a `;;' and the next `)' or `esac'
  */
 
-#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
-
 #define END_OF_ALIAS 0
 
 /*
@@ -1945,10 +1943,12 @@ pop_string ()
   shell_input_line_len = pushed_string_list->saved_line_len;
   shell_input_line_terminator = pushed_string_list->saved_line_terminator;
 
+#if defined (ALIAS)
   if (pushed_string_list->expand_alias)
     parser_state |= PST_ALEXPNEXT;
   else
     parser_state &= ~PST_ALEXPNEXT;
+#endif
 
   t = pushed_string_list;
   pushed_string_list = pushed_string_list->next;
@@ -1981,8 +1981,6 @@ free_string_list ()
     }
   pushed_string_list = (STRING_SAVER *)NULL;
 }
-
-#endif /* ALIAS || DPAREN_ARITHMETIC */
 
 void
 free_pushed_string_input ()
@@ -2650,7 +2648,9 @@ next_alias_char:
 #endif
 
 pop_alias:
-  /* This case works for PSH_DPAREN as well */
+#endif /* ALIAS || DPAREN_ARITHMETIC */
+  /* This case works for PSH_DPAREN as well as the shell_ungets() case that uses
+     push_string */
   if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE)
     {
       parser_state &= ~PST_ENDALIAS;
@@ -2659,7 +2659,6 @@ pop_alias:
       if (uc)
 	shell_input_line_index++;
     }
-#endif /* ALIAS || DPAREN_ARITHMETIC */
 
   if MBTEST(uc == '\\' && remove_quoted_newline && shell_input_line[shell_input_line_index] == '\n')
     {
@@ -3867,6 +3866,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		    }
 		  retind -= 2;		/* back up before the $' */
 		}
+#if defined (TRANSLATABLE_STRINGS)
 	      else if MBTEST((tflags & LEX_WASDOL) && ch == '"' && (extended_quote || (rflags & P_DQUOTE) == 0))
 		{
 		  /* Locale expand $"..." here. */
@@ -3894,6 +3894,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  nestlen = strlen (nestret);
 		  retind -= 2;		/* back up before the $" */
 		}
+#endif /* TRANSLATABLE_STRINGS */
 
 	      APPEND_NESTRET ();
 	      FREE (nestret);
@@ -4938,7 +4939,11 @@ read_token_word (character)
 	      goto next_character;
 	    }
 	  /* This handles $'...' and $"..." new-style quoted strings. */
+#if defined (TRANSLATABLE_STRINGS)
 	  else if MBTEST(character == '$' && (peek_char == '\'' || peek_char == '"'))
+#else
+	  else if MBTEST(character == '$' && peek_char == '\'')
+#endif
 	    {
 	      int first_line;
 
@@ -4964,6 +4969,7 @@ read_token_word (character)
 		  ttranslen = strlen (ttok);
 		  ttrans = ttok;
 		}
+#if defined (TRANSLATABLE_STRINGS)
 	      else
 		{
 		  /* PST_NOEXPAND */
@@ -4983,6 +4989,7 @@ read_token_word (character)
 		  ttrans = ttok;
 		  ttranslen = strlen (ttrans);
 		}
+#endif /* TRANSLATABLE_STRINGS */
 
 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 1,
 				      token_buffer_size,

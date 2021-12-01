@@ -2543,4 +2543,38 @@ examples/loadables/sleep.c
 	  away and "dhms" appears in the format string. Don't return
 	  EX_DISKFALLBACK under any circumstances
 
+				   11/30
+				   -----
 
+builtins/wait.def
+	- wait_builtin: refer to unset_waitlist only if JOB_CONTROL is enabled.
+	  Report from Joel Ebel <jbebel@google.com>
+
+parse.y,builtins/set.def
+	- changes for minimal config restrictions
+
+configure.ac,config.h.in
+	- --enable-translatable-strings: new configuration option to allow
+	  $"..." support to be compiled in or out; not included in the minimal
+	  shell configuration
+
+shell.c
+	- main: don't include any of the dump-strings options if
+	  TRANSLATABLE_STRINGS is not defined
+
+lib/sh/shquote.c
+	- sh_backslash_quote_for_double_quotes: needed for translatable strings
+
+parse.y
+	- support for translating $"..." strings now conditional on
+	  TRANSLATABLE_STRINGS
+
+locale.c
+	- locale_expand: now conditional on TRANSLATABLE_STRINGS
+
+subst.c
+	- expand_string_dollar_quote: support for $"..." now conditional on
+	  TRANSLATABLE_STRINGS
+
+doc/bashref.texi
+	- --enable-translatable-strings: document new configuration option
