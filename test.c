@@ -639,10 +639,7 @@ unary_test (op, arg, flags)
 	  /* XXX - TAG:bash-5.2 fix with corresponding fix to execute_cmd.c:
 	     execute_cond_node() that passes TEST_ARRAYEXP in FLAGS */
 
-#if 0
-	  /* TAG:bash-5.2 */
 	  if (shell_compatibility_level > 51)
-#endif
 	    /* Allow associative arrays to use `test -v array[@]' to look for
 	       a key named `@'. */
 	    aflags |= AV_ATSTARKEYS;

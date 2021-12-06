@@ -552,6 +552,27 @@ compat50 (set using BASH_COMPAT)
 	  suppresses that message if -l is supplied
 
 compat51 (set using BASH_COMPAT)
+	- The `unset' builtin will unset the array a given an argument like
+	  `a[@]'. Bash-5.2 will unset an element with key `@' (associative
+	  arrays) or remove all the elements without unsetting the array
+	  (indexed arrays)
+	- arithmetic commands ( ((...)) ) and the expressions in an arithmetic
+	  for statement can be expanded more than once
+	- expressions used as arguments to arithmetic operators in the [[
+	  conditional command can be expanded more than once
+	- the expressions in substring parameter brace expansion can be
+	  expanded more than once
+	- the expressions in the $(( ... )) word expansion can be expanded
+	  more than once
+	- arithmetic expressions used as indexed array subscripts can be
+	  expanded more than once;
+	- `test -v', when given an argument of A[@], where A is an existing
+	  associative array, will return true if the array has any set
+	  elements. Bash-5.2 will look for a key named `@';
+	- the ${param[:]=value} word expansion will return VALUE, before any
+	  variable-specific transformations have been performed (e.g.,
+	  converting to lowercase). Bash-5.2 will return the final value
+	  assigned to the variable, as POSIX specifies
 
 -------------------------------------------------------------------------------
 

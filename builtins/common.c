@@ -1088,7 +1088,7 @@ set_expand_once (nval, uwp)
   int oa;
 
   oa = assoc_expand_once;
-  if (shell_compatibility_level > 51)
+  if (shell_compatibility_level > 51)	/* XXX - internal */
     {
       if (uwp)
 	unwind_protect_int (assoc_expand_once);

@@ -7627,11 +7627,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
     t = (char *)0;
 
   temp1 = expand_arith_string (substr, Q_DOUBLE_QUOTES|Q_ARITH);
-#if 0 /* TAG: bash-5.2 */
   eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
-#else
-  eflag = 0;
-#endif
 
   *e1p = evalexp (temp1, eflag, &expok);
   free (temp1);
@@ -10064,11 +10060,8 @@ arithsub:
 	  /* No error messages. */
 	  savecmd = this_command_name;
 	  this_command_name = (char *)NULL;
-#if 0 /* TAG: bash-5.2 */
+
 	  eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
-#else
-	  eflag = 0;
-#endif
 	  number = evalexp (temp1, eflag, &expok);
 	  this_command_name = savecmd;
 	  free (temp);
@@ -10552,11 +10545,7 @@ add_string:
 
 #if defined (ARRAY_VARS)
 	case '[':		/*]*/
-#if 0	/* TAG:bash-5.2 */
 	  if ((quoted & Q_ARITH) == 0 || shell_compatibility_level <= 51)
-#else
-	  if ((quoted & Q_ARITH) == 0)
-#endif
 	    {
 	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
 		goto add_ifs_character;

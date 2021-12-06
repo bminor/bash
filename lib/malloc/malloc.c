@@ -242,6 +242,12 @@ typedef union _malloc_guard {
 #  define MMAP_THRESHOLD	(8 * SIZEOF_LONG)
 #endif
 
+/* We don't try to decipher the differences between the Linux-style and
+   BSD-style implementations of mremap here; we use the Linux one. */
+#if USE_MMAP == 1 && defined (HAVE_MREMAP) && defined (MREMAP_MAYMOVE)
+#  define USE_MREMAP 1
+#endif
+
 /* usable bins from STARTBUCK..NBUCKETS-1 */
 
 #define NBUCKETS	28
@@ -1083,7 +1089,7 @@ free_return:
 #endif
 }
 
-#if USE_MMAP == 1 && defined (HAVE_MREMAP)
+#if USE_MREMAP == 1
 /* Assume the caller (internal_realloc) has already performed the sanity and
    overflow tests. Basically we kill the old guard information, determine the
    new size, call mremap with the new size, and add the bookkeeping and guard
@@ -1240,9 +1246,9 @@ internal_realloc (mem, n, file, line, flags)
   _mstats.nrcopy++;
 #endif
 
+#if USE_MREMAP == 1
   /* If we are using mmap and have mremap, we use it here. Make sure that
      the old size and new size are above the threshold where we use mmap */
-#if USE_MMAP == 1 && defined (HAVE_MREMAP)
   if (nbytes > p->mh_nbytes)
     newunits = nunits;
   else
@@ -1258,7 +1264,7 @@ internal_realloc (mem, n, file, line, flags)
         return 0;
     }
   else
-#endif
+#endif /* USE_MREMAP */
     {
   if ((m = internal_malloc (n, file, line, MALLOC_INTERNAL|MALLOC_NOTRACE|MALLOC_NOREG)) == 0)
     return 0;

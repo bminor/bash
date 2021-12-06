@@ -8539,9 +8539,35 @@ when the @option{-l} option is supplied.
 @item compat51 (set using BASH_COMPAT)
 @itemize @bullet
 @item
-The @code{unset} builtin treats attempts to unset array subscripts @samp{@@}
-and @samp{*} differently depending on whether the array is indexed or
-associative, and differently than in previous versions.
+The @code{unset} builtin will unset the array @code{a} given an argument like
+@samp{a[@@]}.
+Bash-5.2 will unset an element with key @samp{@@} (associative arrays)
+or remove all the elements without unsetting the array (indexed arrays)
+@item
+arithmetic commands ( ((...)) ) and the expressions in an arithmetic for
+statement can be expanded more than once
+@item
+expressions used as arguments to arithmetic operators in the @code{[[}
+conditional command can be expanded more than once
+@item
+the expressions in substring parameter brace expansion can be
+expanded more than once
+@item
+the expressions in the $(( ... )) word expansion can be expanded
+more than once
+@item
+arithmetic expressions used as indexed array subscripts can be
+expanded more than once
+@item
+@code{test -v}, when given an argument of @samp{A[@@]}, where @var{A} is
+an existing associative array, will return true if the array has any set
+elements.
+Bash-5.2 will look for and report on a key named @samp{@@}
+@item
+the $@{@var{parameter}[:]=@var{value}@} word expansion will return
+@var{value}, before any variable-specific transformations have been
+performed (e.g., converting to lowercase).
+Bash-5.2 will return the final value assigned to the variable.
 @end itemize
 @end table
 

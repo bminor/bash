@@ -2578,3 +2578,32 @@ subst.c
 
 doc/bashref.texi
 	- --enable-translatable-strings: document new configuration option
+
+				   12/2
+				   ----
+subst.c
+	- verify_substring_values: now that the default compatibility level is
+	  52, and the Q_ARITH code is enabled, make the EXP_EXPANDED flag for
+	  evalexp() dependent on the compatibility level
+	- param_expand: arithmetic substitution: make EXP_EXPANDED flag
+	  for evalexp() dependent on the compatibility level
+	- expand_word_internal: don't call expand_array_subscript if the
+	  shell compatibility level is 51 or below (Q_ARITH)
+
+test.c
+	- test_unop: if the shell compatibility level is > 51, using [@] with
+	  an existing associative array will report on a key of `@'
+
+arrayfunc.c
+	- array_expand_index: if the compatibility level is > 51, Q_ARITH is
+	  used and we don't pass EXP_EXPANDED to evalexp()
+
+COMPAT,doc/bashref.texi
+	- shell compatibility mode: document effects of setting the
+	  compatibility mode to 51
+
+				   12/3
+				   ----
+lib/malloc/malloc.c
+	- mremap: only use if MREMAP_MAYMOVE is defined, since we use the Linux
+	  version of the function signature

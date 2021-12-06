@@ -1301,11 +1301,7 @@ array_expand_index (var, s, len, flags)
 #endif
   savecmd = this_command_name;
   this_command_name = (char *)NULL;
-#if 0 /* TAG:bash-5.2 */
   eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
-#else
-  eflag = 0;
-#endif
   val = evalexp (t, eflag, &expok);	/* XXX - was 0 but we expanded exp already */
   this_command_name = savecmd;
   if (t != exp)
