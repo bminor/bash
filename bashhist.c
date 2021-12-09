@@ -892,7 +892,7 @@ bash_add_history (line)
 		(current_command_line_count > 2)
 	 don't add a newline here. This will also take care of the literal_history
 	 case if the other conditions are met. */
-      if ((parser_state & PST_HEREDOC) && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
+      if ((parser_state & PST_HEREDOC) && here_doc_first_line == 0 && line[strlen (line) - 1] == '\n')
 	chars_to_add = "";
       else if (current_command_line_count == current_command_line_comment+1)
 	chars_to_add = "\n";

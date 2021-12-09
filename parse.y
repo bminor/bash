@@ -4064,10 +4064,13 @@ parse_comsub (qc, open, close, lenp, flags)
 
   /* Posix interp 217 says arithmetic expressions have precedence, so
      assume $(( introduces arithmetic expansion and parse accordingly. */
-  peekc = shell_getc (0);
-  shell_ungetc (peekc);
-  if (peekc == '(')
-    return (parse_matched_pair (qc, open, close, lenp, 0));
+  if (open == '(')		/*)*/
+    {
+      peekc = shell_getc (0);
+      shell_ungetc (peekc);
+      if (peekc == '(')		/*)*/
+	return (parse_matched_pair (qc, open, close, lenp, 0));
+    }
 
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
 

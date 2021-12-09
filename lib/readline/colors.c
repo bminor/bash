@@ -120,7 +120,7 @@ _rl_custom_readline_prefix (void)
 
   len = strlen (RL_COLOR_PREFIX_EXTENSION);
   for (ext = _rl_color_ext_list; ext; ext = ext->next)
-    if (ext->ext.len == len && STREQ (ext->ext.string, RL_COLOR_PREFIX_EXTENSION))
+    if (ext->ext.len == len && STREQN (ext->ext.string, RL_COLOR_PREFIX_EXTENSION, len))
       return (&ext->seq);
   return (NULL);
 }

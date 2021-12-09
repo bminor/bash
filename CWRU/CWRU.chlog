@@ -2607,3 +2607,18 @@ COMPAT,doc/bashref.texi
 lib/malloc/malloc.c
 	- mremap: only use if MREMAP_MAYMOVE is defined, since we use the Linux
 	  version of the function signature
+
+				   12/6
+				   ----
+bashhist.c
+	- bash_add_history: if we're parsing a here-document (PST_HEREDOC), only
+	  suppress adding the newline between lines if we're not at the first
+	  line of the here-document (here_doc_first_line!= 0). From a report
+	  by S0AndS0 <strangerthanbland@gmail.com>
+
+				   12/8
+				   ----
+lib/readline/colors.c
+	- _rl_custom_readline_prefix: use STREQN to check for the extension
+	  string in $LS_COLORS, since it's not necessarily null-terminated.
+	  From https://savannah.gnu.org/patch/?10158
