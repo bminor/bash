@@ -2622,3 +2622,21 @@ lib/readline/colors.c
 	- _rl_custom_readline_prefix: use STREQN to check for the extension
 	  string in $LS_COLORS, since it's not necessarily null-terminated.
 	  From https://savannah.gnu.org/patch/?10158
+
+				   12/10
+				   -----
+variables.c
+	- set_int_value,set_string_value: broke common code for setting int
+	  and string dynamic variable values out into separate functions;
+	  changed all callers to use them where appropriate. set_int_value
+	  takes a flags argument saying whether or not to force the integer
+	  attribute on
+	- assign_random: store the value assigned as the variable value so
+	  things like RANDOM=42; RANDOM+=7 generate consistent sequences
+	  like in ksh93
+	- assign_seconds: store the value assigned as the variable value so
+	  things like SECONDS=42 ; SECONDS+=7 generate what's expected
+
+doc/Makefile.in
+	- changes to allow man pages that include others (.so FN) to be built
+	  outside the source tree

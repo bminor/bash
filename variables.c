@@ -199,6 +199,9 @@ static SHELL_VAR *init_dynamic_array_var PARAMS((char *, sh_var_value_func_t *, 
 static SHELL_VAR *init_dynamic_assoc_var PARAMS((char *, sh_var_value_func_t *, sh_var_assign_func_t *, int));
 #endif
 
+static inline SHELL_VAR *set_int_value (SHELL_VAR *, intmax_t, int);
+static inline SHELL_VAR *set_string_value (SHELL_VAR *, const char *, int);
+
 static SHELL_VAR *assign_seconds PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
 static SHELL_VAR *get_seconds PARAMS((SHELL_VAR *));
 static SHELL_VAR *init_seconds_var PARAMS((void));
@@ -1275,6 +1278,39 @@ init_dynamic_assoc_var (name, getfunc, setfunc, attrs)
 }
 #endif
 
+/* Set the string value of VAR to the string representation of VALUE.
+   Right now this takes an INTMAX_T because that's what itos needs. If
+   FLAGS&1, we force the integer attribute on. */
+static inline SHELL_VAR *
+set_int_value (SHELL_VAR *var, intmax_t value, int flags)
+{
+  char *p;
+
+  p = itos (value);
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  if (flags & 1)
+    VSETATTR (var, att_integer);
+  return (var);
+}
+
+static inline SHELL_VAR *
+set_string_value (SHELL_VAR *var, const char *value, int flags)
+{
+  char *p;
+
+  if (value && *value)
+    p = savestring (value);
+  else
+    {
+      p = (char *)xmalloc (1);
+      p[0] = '\0';
+    }
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  return (var);
+}
+
 /* The value of $SECONDS.  This is the number of seconds since shell
    invocation, or, the number of seconds since the last assignment + the
    value of the last assignment. */
@@ -1297,7 +1333,7 @@ assign_seconds (self, value, unused, key)
   seconds_value_assigned = expok ? nval : 0;
   gettimeofday (&shellstart, NULL);
   shell_start_time = shellstart.tv_sec;
-  return (self);
+  return (set_int_value (self, nval, integer_p (self) != 0));
 }
 
 static SHELL_VAR *
@@ -1305,18 +1341,11 @@ get_seconds (var)
      SHELL_VAR *var;
 {
   time_t time_since_start;
-  char *p;
   struct timeval tv;
 
   gettimeofday(&tv, NULL);
   time_since_start = tv.tv_sec - shell_start_time;
-  p = itos(seconds_value_assigned + time_since_start);
-
-  FREE (value_cell (var));
-
-  VSETATTR (var, att_integer);
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, seconds_value_assigned + time_since_start, 1));
 }
 
 static SHELL_VAR *
@@ -1358,7 +1387,7 @@ assign_random (self, value, unused, key)
   sbrand (seedval);
   if (subshell_environment)
     seeded_subshell = getpid ();
-  return (self);
+  return (set_int_value (self, seedval, integer_p (self) != 0));
 }
 
 int
@@ -1386,16 +1415,9 @@ get_random (var)
      SHELL_VAR *var;
 {
   int rv;
-  char *p;
 
   rv = get_random_number ();
-  p = itos (rv);
-
-  FREE (value_cell (var));
-
-  VSETATTR (var, att_integer);
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, rv, 1));
 }
 
 static SHELL_VAR *
@@ -1403,16 +1425,9 @@ get_urandom (var)
      SHELL_VAR *var;
 {
   u_bits32_t rv;
-  char *p;
 
   rv = get_urandom32 ();
-  p = itos (rv);
-
-  FREE (value_cell (var));
-
-  VSETATTR (var, att_integer);
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, rv, 1));
 }
 
 static SHELL_VAR *
@@ -1435,14 +1450,10 @@ static SHELL_VAR *
 get_lineno (var)
      SHELL_VAR *var;
 {
-  char *p;
   int ln;
 
   ln = executing_line_number ();
-  p = itos (ln);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, ln, 0));
 }
 
 static SHELL_VAR *
@@ -1464,12 +1475,7 @@ static SHELL_VAR *
 get_subshell (var)
      SHELL_VAR *var;
 {
-  char *p;
-
-  p = itos (subshell_level);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, subshell_level, 0));
 }
 
 static SHELL_VAR *
@@ -1477,14 +1483,9 @@ get_epochseconds (var)
      SHELL_VAR *var;
 {
   intmax_t now;
-  char *p;
 
   now = NOW;
-  p = itos (now);
-
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, now, 0));
 }
 
 static SHELL_VAR *
@@ -1492,7 +1493,6 @@ get_epochrealtime (var)
      SHELL_VAR *var;
 {
   char buf[32];
-  char *p;
   struct timeval tv;
 
   gettimeofday (&tv, NULL);
@@ -1500,10 +1500,7 @@ get_epochrealtime (var)
 					   locale_decpoint (),
 					   (unsigned)tv.tv_usec);
 
-  p = savestring (buf);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_string_value (var, buf, 0));
 }
 
 static SHELL_VAR *
@@ -1511,27 +1508,16 @@ get_bashpid (var)
      SHELL_VAR *var;
 {
   int pid;
-  char *p;
 
   pid = getpid ();
-  p = itos (pid);
-
-  FREE (value_cell (var));
-  VSETATTR (var, att_integer);	/* XXX - was also att_readonly */
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, pid, 1));
 }
 
 static SHELL_VAR *
 get_bash_argv0 (var)
      SHELL_VAR *var;
 {
-  char *p;
-
-  p = savestring (dollar_vars[0]);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return var;
+  return (set_string_value (var, dollar_vars[0], 0));
 }
 
 static char *static_shell_name = 0;
@@ -1576,16 +1562,8 @@ get_bash_command (var)
 {
   char *p;
 
-  if (the_printed_command_except_trap)
-    p = savestring (the_printed_command_except_trap);
-  else
-    {
-      p = (char *)xmalloc (1);
-      p[0] = '\0';
-    }
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  p = the_printed_command_except_trap ? the_printed_command_except_trap : "";
+  return (set_string_value (var, p, 0));
 }
 
 #if defined (HISTORY)
@@ -1593,7 +1571,6 @@ static SHELL_VAR *
 get_histcmd (var)
      SHELL_VAR *var;
 {
-  char *p;
   int n;
 
   /* Do the same adjustment here we do in parse.y:prompt_history_number,
@@ -1604,10 +1581,7 @@ get_histcmd (var)
      already been saved to history and the history number incremented.
      Right now we use EXECUTING as the determinant. */
   n = history_number () - executing;
-  p = itos (n);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, n, 0));
 }
 #endif
 
@@ -1621,10 +1595,7 @@ get_comp_wordbreaks (var)
   if (rl_completer_word_break_characters == 0 && bash_readline_initialized == 0)
     enable_hostname_completion (perform_hostname_completion);
 
-  FREE (value_cell (var));
-  var_setvalue (var, savestring (rl_completer_word_break_characters));
-
-  return (var);
+  return (set_string_value (var, rl_completer_word_break_characters, 0));
 }
 
 /* When this function returns, rl_completer_word_break_characters points to
@@ -1860,13 +1831,8 @@ get_funcname (self)
      SHELL_VAR *self;
 {
 #if ! defined (ARRAY_VARS)
-  char *t;
   if (variable_context && this_shell_function)
-    {
-      FREE (value_cell (self));
-      t = savestring (this_shell_function->name);
-      var_setvalue (self, t);
-    }
+    return (set_string_value (self, this_shell_function->name, 0));
 #endif
   return (self);
 }

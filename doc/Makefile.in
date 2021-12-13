@@ -107,11 +107,11 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/fdl.texi $(srcdir)/version.texi
 
 .1.ps:
 	$(RM) $@
-	-${GROFF} -man $< > $@
+	-${GROFF} -I${srcdir} -man $< > $@
 
 .1.0:
 	$(RM) $@
-	-${NROFF} -man $< > $@
+	-${NROFF} -I${srcdir} -man $< > $@
 
 .1.html:
 	$(RM) $@
@@ -127,11 +127,11 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/fdl.texi $(srcdir)/version.texi
 
 .3.ps:
 	$(RM) $@
-	-${GROFF} -man $< > $@
+	-${GROFF} -I${srcdir} -man $< > $@
 
 .3.0:
 	$(RM) $@
-	-${NROFF} -man $< > $@
+	-${NROFF} -I${srcdir} -man $< > $@
 
 .3.html:
 	$(RM) $@

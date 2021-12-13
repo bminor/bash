@@ -7,6 +7,7 @@
  *			variable NAME
  *		-c	check whether or not each resolved path exists
  *		-s	no output, exit status determines whether path is valid
+ *		-S	strip . and .. from the pathname only, no symlink resolution
  *		-v	produce verbose output
  *
  *
@@ -63,11 +64,10 @@ extern int	errno;
 extern char	*sh_realpath();
 
 int
-realpath_builtin(list)
-WORD_LIST	*list;
+realpath_builtin(WORD_LIST *list)
 {
-	int	opt, cflag, vflag, sflag, aflag, es;
-	char	*r, realbuf[PATH_MAX], *p;
+	int	opt, cflag, vflag, sflag, Sflag, aflag, es;
+	char	*r, realbuf[PATH_MAX], *p, *newpath;
 	struct stat sb;
 #if defined (ARRAY_VARS)
 	arrayind_t	ind;
@@ -80,14 +80,14 @@ WORD_LIST	*list;
 		return (EX_USAGE);
 	}
 
-	vflag = cflag = sflag = aflag = 0;
+	vflag = cflag = sflag = aflag = Sflag = 0;
 #if defined (ARRAY_VARS)
 	aname = NULL;
 	v = NULL;
 	ind = 0;
 #endif
 	reset_internal_getopt();
-	while ((opt = internal_getopt (list, "a:csv")) != -1) {
+	while ((opt = internal_getopt (list, "a:Scsv")) != -1) {
 		switch (opt) {
 #if defined (ARRAY_VARS)
 		case 'a':
@@ -100,6 +100,9 @@ WORD_LIST	*list;
 			break;
 		case 's':
 			sflag = 1;
+			break;
+		case 'S':
+			Sflag = 1;
 			break;
 		case 'v':
 			vflag = 1;
@@ -143,14 +146,20 @@ WORD_LIST	*list;
 
 	for (es = EXECUTION_SUCCESS; list; list = list->next) {
 		p = list->word->word;
-		r = sh_realpath(p, realbuf);
+		if (Sflag) {
+			/* sh_canonpath doesn't convert to absolute pathnames */
+			newpath = make_absolute(p, get_string_value("PWD"));
+			r = sh_canonpath(newpath, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+			free(newpath);
+		} else
+			r = sh_realpath(p, realbuf);
 		if (r == 0) {
 			es = EXECUTION_FAILURE;
 			if (sflag == 0)
 				builtin_error("%s: cannot resolve: %s", p, strerror(errno));
 			continue;
 		}
-		if (cflag && (stat(realbuf, &sb) < 0)) {
+		if (cflag && (stat(r, &sb) < 0)) {
 			es = EXECUTION_FAILURE;
 			if (sflag == 0)
 				builtin_error("%s: %s", p, strerror(errno));
@@ -158,14 +167,16 @@ WORD_LIST	*list;
 		}
 		if (sflag == 0) {
 			if (aflag) {
-				bind_array_element (v, ind, realbuf, 0);
+				bind_array_element (v, ind, r, 0);
 				ind++;
 			} else {
 				if (vflag)
 					printf ("%s -> ", p);
-				printf("%s\n", realbuf);
+				printf("%s\n", r);
 			}
 		}
+		if (Sflag)
+			free (r);
 	}
 	return es;
 }
@@ -174,10 +185,14 @@ char *realpath_doc[] = {
 	"Display pathname in canonical form.",
 	"",
 	"Display the canonicalized version of each PATHNAME argument, resolving",
-	"symbolic links.  The -c option checks whether or not each resolved name",
-	"exists.  The -s option produces no output; the exit status determines the",
-	"validity of each PATHNAME.  The -v option produces verbose output.  The",
-	"exit status is 0 if each PATHNAME was resolved; non-zero otherwise.",
+	"symbolic links.",
+	"If the -S option is supplied, canonicalize . and .. pathname components",
+	"without resolving symbolic links.",
+	"The -c option checks whether or not each resolved name exists.",
+	"The -s option produces no output; the exit status determines the",
+	"validity of each PATHNAME.",
+	"The -v option produces verbose output.",
+	"The exit status is 0 if each PATHNAME was resolved; non-zero otherwise.",
 	(char *)NULL
 };
 
@@ -186,6 +201,6 @@ struct builtin realpath_struct = {
 	realpath_builtin,	/* function implementing the builtin */
 	BUILTIN_ENABLED,	/* initial flags for builtin */
 	realpath_doc,		/* array of long documentation strings */
-	"realpath [-csv] pathname [pathname...]",	/* usage synopsis */
+	"realpath [-Scsv] pathname [pathname...]",	/* usage synopsis */
 	0			/* reserved for internal use */
 };
