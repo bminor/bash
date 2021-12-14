@@ -2640,3 +2640,25 @@ variables.c
 doc/Makefile.in
 	- changes to allow man pages that include others (.so FN) to be built
 	  outside the source tree
+
+				   12/13
+				   -----
+arrayfunc.c
+	- assign_array_element_internal: take an additional argument: char **NVALP.
+	  If non-null, it gets the value eventually assigned to the array
+	  element
+	- assign_array_element: take an additional NVALP argument; pass it to
+	  assign_array_element_internal
+
+arrayfunc.h
+	- assign_array_element: new extern function declaration
+
+{subst,variables}.c,builtins/{common.c,declare.def}
+	- assign_array_element: change callers
+
+subst.c
+	- parameter_brace_expand_rhs: for the ${param:=value}, use the value
+	  returned by assign_array_element in NVALP as the return value, since
+	  it's the value ultimately assigned to the variable after possible
+	  modification (e.g., arithmetic evaluation). Reported by
+	  oguzismailuysal@gmail.com after flawed fix applied 11/16

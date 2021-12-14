@@ -56,7 +56,7 @@ extern char *make_array_variable_value PARAMS((SHELL_VAR *, arrayind_t, char *, 
 
 extern SHELL_VAR *bind_array_variable PARAMS((char *, arrayind_t, char *, int));
 extern SHELL_VAR *bind_array_element PARAMS((SHELL_VAR *, arrayind_t, char *, int));
-extern SHELL_VAR *assign_array_element PARAMS((char *, char *, int));
+extern SHELL_VAR *assign_array_element PARAMS((char *, char *, int, char **));
 
 extern SHELL_VAR *bind_assoc_variable PARAMS((SHELL_VAR *, char *, char *, char *, int));
 

@@ -3308,7 +3308,7 @@ do_assignment_internal (word, expand)
 	  ASSIGN_RETURN (0);
 	}
       aflags |= ASS_ALLOWALLSUB;	/* allow a[@]=value for existing associative arrays */
-      entry = assign_array_element (name, value, aflags);
+      entry = assign_array_element (name, value, aflags, (char **)0);
       if (entry == 0)
 	ASSIGN_RETURN (0);
     }
@@ -7227,8 +7227,8 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 {
   WORD_DESC *w;
   WORD_LIST *l, *tl;
-  char *t, *t1, *temp, *vname;
-  int l_hasdollat, sindex;
+  char *t, *t1, *temp, *vname, *newval;
+  int l_hasdollat, sindex, arrayref;
   SHELL_VAR *v;
 
 /*itrace("parameter_brace_expand_rhs: %s:%s pflags = %d", name, value, pflags);*/
@@ -7374,9 +7374,13 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 	}
     }
     
+  arrayref = 0;
 #if defined (ARRAY_VARS)
   if (valid_array_reference (vname, 0))
-    v = assign_array_element (vname, t1, 0);
+    {
+      v = assign_array_element (vname, t1, ASS_ALLOWALLSUB, &newval);
+      arrayref = 1;
+    }
   else
 #endif /* ARRAY_VARS */
   v = bind_variable (vname, t1, 0);
@@ -7399,15 +7403,19 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 
   stupidly_hack_special_variables (vname);
 
-  if (vname != name)
-    free (vname);
-
   /* "In all cases, the final value of parameter shall be substituted." */
   if (shell_compatibility_level > 51)
     {
       FREE (t1);
+#if defined (ARRAY_VARS)
+      t1 = arrayref ? newval : get_variable_value (v);
+#else
       t1 = value_cell (v);
+#endif
     }
+
+  if (vname != name)
+    free (vname);
 
   /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
 

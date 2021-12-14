@@ -53,7 +53,7 @@ int assoc_expand_once = 0;
 int array_expand_once = 0;
 
 static SHELL_VAR *bind_array_var_internal PARAMS((SHELL_VAR *, arrayind_t, char *, char *, int));
-static SHELL_VAR *assign_array_element_internal PARAMS((SHELL_VAR *, char *, char *, char *, int, char *, int));
+static SHELL_VAR *assign_array_element_internal PARAMS((SHELL_VAR *, char *, char *, char *, int, char *, int, char **));
 
 static void assign_assoc_from_kvlist PARAMS((SHELL_VAR *, WORD_LIST *, HASH_TABLE *, int));
 
@@ -322,9 +322,10 @@ bind_assoc_variable (entry, name, key, value, flags)
    assign VALUE to that array element by calling bind_array_variable().
    Flags are ASS_ assignment flags */
 SHELL_VAR *
-assign_array_element (name, value, flags)
+assign_array_element (name, value, flags, nvalp)
      char *name, *value;
      int flags;
+     char **nvalp;
 {
   char *sub, *vname;
   int sublen, isassoc;
@@ -352,14 +353,14 @@ assign_array_element (name, value, flags)
       return ((SHELL_VAR *)NULL);
     }
 
-  entry = assign_array_element_internal (entry, name, vname, sub, sublen, value, flags);
+  entry = assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, nvalp);
 
   free (vname);
   return entry;
 }
 
 static SHELL_VAR *
-assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
+assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, nvalp)
      SHELL_VAR *entry;
      char *name;		/* only used for error messages */
      char *vname;
@@ -367,9 +368,11 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
      int sublen;
      char *value;
      int flags;
+     char **nvalp;
 {
   char *akey;
   arrayind_t ind;
+  char *newval;
 
   if (entry && assoc_p (entry))
     {
@@ -386,6 +389,7 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
 	  return ((SHELL_VAR *)NULL);
 	}
       entry = bind_assoc_variable (entry, vname, akey, value, flags);
+      newval = entry ? assoc_reference (assoc_cell (entry), akey) : 0;
     }
   else
     {
@@ -399,7 +403,13 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
 	  return ((SHELL_VAR *)NULL);
 	}
       entry = bind_array_variable (vname, ind, value, flags);
+      newval = entry ? array_reference (array_cell (entry), ind) : 0;
     }
+
+  /* If the caller asks, return the (possibly modified) final value assigned.
+     This saves subseqent lookups. */
+  if (nvalp)
+    *nvalp = newval;
 
   return (entry);
 }

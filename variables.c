@@ -2495,7 +2495,7 @@ get_variable_value (var)
 /* Return the string value of a variable.  Return NULL if the variable
    doesn't exist.  Don't cons a new string.  This is a potential memory
    leak if the variable is found in the temporary environment, but doesn't
-   leak in practice.  Since    functions and variables have separate name
+   leak in practice.  Since functions and variables have separate name
    spaces, returns NULL if var_name is a shell function only. */
 char *
 get_string_value (var_name)
@@ -3111,7 +3111,7 @@ bind_variable_internal (name, value, table, hflags, aflags)
 	     assign_array_element will eventually do it itself based on
 	     newval and aflags. */
 	     
-	  entry = assign_array_element (newval, value, aflags|ASS_NAMEREF);
+	  entry = assign_array_element (newval, value, aflags|ASS_NAMEREF, (char **)0);
 	  if (entry == 0)
 	    return entry;
 	}
@@ -3268,7 +3268,7 @@ bind_variable (name, value, flags)
 			return (bind_variable_internal (nv->name, value, nvc->table, 0, flags));
 #if defined (ARRAY_VARS)
 		      else if (valid_array_reference (nameref_cell (nv), 0))
-			return (assign_array_element (nameref_cell (nv), value, flags));
+			return (assign_array_element (nameref_cell (nv), value, flags, (char **)0));
 		      else
 #endif
 		      return (bind_variable_internal (nameref_cell (nv), value, nvc->table, 0, flags));
@@ -3433,7 +3433,7 @@ bind_int_variable (lhs, rhs, flags)
 
 #if defined (ARRAY_VARS)
   if (isarr)
-    v = assign_array_element (lhs, rhs, flags);
+    v = assign_array_element (lhs, rhs, flags, (char **)0);
   else if (implicitarray)
     v = bind_array_variable (lhs, 0, rhs, 0);	/* XXX - check on flags */
   else
