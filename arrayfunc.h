@@ -23,6 +23,29 @@
 
 /* Must include variables.h before including this file. */
 
+/* An object to encapsulate the state of an array element. It can describe
+   an array assignment A[KEY]=VALUE or a[IND]=VALUE depending on TYPE, or
+   for passing array subscript references around, where VALUE would be
+   ${a[IND]} or ${A[KEY]}.  This is not dependent on ARRAY_VARS so we can
+   use it in function parameters. */
+
+/* values for `type' field */
+#define ARRAY_INVALID	-1
+#define ARRAY_SCALAR	0
+#define ARRAY_INDEXED	1
+#define ARRAY_ASSOC	2
+
+/* KEY will contain allocated memory if called through the assign_array_element
+   code path because of how assoc_insert works. */
+typedef struct element_state
+{
+  short type;			/* assoc or indexed, says which fields are valid */  
+  short subtype;		/* `*', `@', or something else */
+  arrayind_t ind;
+  char *key;			/* can be allocated memory */
+  char *value;
+} array_eltstate_t;
+
 #if defined (ARRAY_VARS)
 
 /* This variable means to not expand associative array subscripts more than
@@ -56,7 +79,7 @@ extern char *make_array_variable_value PARAMS((SHELL_VAR *, arrayind_t, char *, 
 
 extern SHELL_VAR *bind_array_variable PARAMS((char *, arrayind_t, char *, int));
 extern SHELL_VAR *bind_array_element PARAMS((SHELL_VAR *, arrayind_t, char *, int));
-extern SHELL_VAR *assign_array_element PARAMS((char *, char *, int, char **));
+extern SHELL_VAR *assign_array_element PARAMS((char *, char *, int, array_eltstate_t *));
 
 extern SHELL_VAR *bind_assoc_variable PARAMS((SHELL_VAR *, char *, char *, char *, int));
 
@@ -85,13 +108,16 @@ extern arrayind_t array_expand_index PARAMS((SHELL_VAR *, char *, int, int));
 extern int valid_array_reference PARAMS((const char *, int));
 extern int tokenize_array_reference PARAMS((char *, int, char **));
 
-extern char *array_value PARAMS((const char *, int, int, int *, arrayind_t *));
-extern char *get_array_value PARAMS((const char *, int, int *, arrayind_t *));
+extern char *array_value PARAMS((const char *, int, int, array_eltstate_t *));
+extern char *get_array_value PARAMS((const char *, int, array_eltstate_t *));
 
 extern char *array_keys PARAMS((char *, int, int));
 
 extern char *array_variable_name PARAMS((const char *, int, char **, int *));
 extern SHELL_VAR *array_variable_part PARAMS((const char *, int, char **, int *));
+
+extern void init_eltstate (array_eltstate_t *);
+extern void flush_eltstate (array_eltstate_t *);
 
 #else
 

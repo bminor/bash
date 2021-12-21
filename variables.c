@@ -1442,7 +1442,7 @@ assign_lineno (var, value, unused, key)
   if (value == 0 || *value == '\0' || legal_number (value, &new_value) == 0)
     new_value = 0;
   line_number = line_number_base = new_value;
-  return var;
+  return (set_int_value (var, line_number, integer_p (var) != 0));
 }
 
 /* Function which returns the current line number. */
@@ -3110,8 +3110,8 @@ bind_variable_internal (name, value, table, hflags, aflags)
 	     We don't need to call make_variable_value here, since
 	     assign_array_element will eventually do it itself based on
 	     newval and aflags. */
-	     
-	  entry = assign_array_element (newval, value, aflags|ASS_NAMEREF, (char **)0);
+
+	  entry = assign_array_element (newval, value, aflags|ASS_NAMEREF, (array_eltstate_t *)0);
 	  if (entry == 0)
 	    return entry;
 	}
@@ -3268,7 +3268,7 @@ bind_variable (name, value, flags)
 			return (bind_variable_internal (nv->name, value, nvc->table, 0, flags));
 #if defined (ARRAY_VARS)
 		      else if (valid_array_reference (nameref_cell (nv), 0))
-			return (assign_array_element (nameref_cell (nv), value, flags, (char **)0));
+			return (assign_array_element (nameref_cell (nv), value, flags, (array_eltstate_t *)0));
 		      else
 #endif
 		      return (bind_variable_internal (nameref_cell (nv), value, nvc->table, 0, flags));
@@ -3433,7 +3433,7 @@ bind_int_variable (lhs, rhs, flags)
 
 #if defined (ARRAY_VARS)
   if (isarr)
-    v = assign_array_element (lhs, rhs, flags, (char **)0);
+    v = assign_array_element (lhs, rhs, flags, (array_eltstate_t *)0);
   else if (implicitarray)
     v = bind_array_variable (lhs, 0, rhs, 0);	/* XXX - check on flags */
   else

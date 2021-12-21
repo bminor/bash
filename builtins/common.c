@@ -1004,7 +1004,7 @@ builtin_bind_variable (name, value, flags)
   if (valid_array_reference (name, vflags) == 0)
     v = bind_variable (name, value, flags);
   else
-    v = assign_array_element (name, value, bindflags, (char **)0);
+    v = assign_array_element (name, value, bindflags, (array_eltstate_t *)0);
 #else /* !ARRAY_VARS */
   v = bind_variable (name, value, flags);
 #endif /* !ARRAY_VARS */

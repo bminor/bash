@@ -633,7 +633,8 @@ unary_test (op, arg, flags)
       if (valid_array_reference (arg, aflags))
 	{
 	  char *t;
-	  int rtype, ret;
+	  int ret;
+	  array_eltstate_t es;
 
 	  /* Let's assume that this has already been expanded once. */
 	  /* XXX - TAG:bash-5.2 fix with corresponding fix to execute_cmd.c:
@@ -642,11 +643,13 @@ unary_test (op, arg, flags)
 	  if (shell_compatibility_level > 51)
 	    /* Allow associative arrays to use `test -v array[@]' to look for
 	       a key named `@'. */
-	    aflags |= AV_ATSTARKEYS;
-	  t = array_value (arg, 0, aflags, &rtype, (arrayind_t *)0);
+	    aflags |= AV_ATSTARKEYS;	/* XXX */
+	  init_eltstate (&es);
+	  t = get_array_value (arg, aflags|AV_ALLOWALL, &es);
 	  ret = t ? TRUE : FALSE;
-	  if (rtype > 0)	/* subscript is * or @ */
+	  if (es.subtype > 0)	/* subscript is * or @ */
 	    free (t);
+	  flush_eltstate (&es);
 	  return ret;
 	}
       else if (legal_number (arg, &r))		/* -v n == is $n set? */

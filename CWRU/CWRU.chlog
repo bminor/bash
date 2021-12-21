@@ -2662,3 +2662,78 @@ subst.c
 	  it's the value ultimately assigned to the variable after possible
 	  modification (e.g., arithmetic evaluation). Reported by
 	  oguzismailuysal@gmail.com after flawed fix applied 11/16
+
+				   12/14
+				   -----
+arrayfunc.h
+	- array_eltstate_t: an object that encapsulates an array element's
+	  state (type, index, key, value) whether it's an indexed or
+	  associative array
+
+arrayfunc.c
+	- {init,flush}_eltstate: new functions to initialize and flush any
+	  allocated memory from array_eltstate_t objects. No allocation/
+	  deallocation functions yet; the only use is with a static instance
+	- assign_array_element_internal: take an array_eltstate_t * instead of
+	  a char ** as the final argument, so we can return keys/indices and
+	  values depending on the type of array; populates it with the
+	  appropriate values
+	- assign_array_element: take array_eltstate_t * as final argument
+	  instead of a char **; pass it to assign_array_element_internal
+
+{subst,variables}.c,builtins/{common.c,declare.def}
+	- assign_array_element: change callers to modify final argument
+
+				   12/15
+				   -----
+arrayfunc.c
+	- array_value_internal: now takes an array_eltstate_t * as the final
+	  argument; there is no more `rtype' argument in favor of the
+	  `subtype' member; returns the appropriate values in its members
+	- array_value: changed to pass array_eltstate_t to array_value_internal,
+	  saves and fetches its `ind' member into *indp; saves `subtype'
+	  member into *rtype
+	- get_arrary_value: changed to take array_eltstate_t as third argument,
+	  passes it to array_value_internal
+
+{redir,expr}.c
+	- get_array_value: changed callers; initializing the array_eltstate_t
+	  argument as necessary
+
+test.c
+	- test_builtin: changed to use get_array_value, adding AV_ALLOWALL to
+	  the flags, since it didn't use any QUOTED argument. Pass
+	  array_eltstate_t * as final argument and get subtype from it (the
+	  only thing we're interested in, to deallocate memory)
+
+				   12/16
+				   -----
+arrayfunc.c
+	- array_value: now takes a final argument of array_eltstate_t *, which
+	  it passes to array_value_internal; no more rtype and indp args.
+	  Callers are responsible for marshalling values into estatep
+
+arrayfunc.h
+	- array_value: changed function signature
+
+subst.c
+	- get_var_and_type,parameter_brace_expand_word: changed calls to
+	  array_value to use array_eltstate_t argument and initialize it
+	  appropriately. Copy values back from it to the parameters we need
+	  to modify
+
+variables.c
+	- assign_lineno: call set_int_value to store the value, like with
+	  RANDOM and SECONDS (from 12/10)
+
+				   12/17
+				   -----
+{eval,execute_cmd}.c
+	- when bypassing a parsed command because read_but_dont_execute is
+	  set, don't modify last_command_exit_value. From a report by
+	  Robert Elz <kre@munnari.OZ.AU>
+
+parse.y
+	- parse_comsub: make sure the first call to shell_getc to check whether
+	  or not it's an arithmetic expansion skips a quoted newline. From a
+	  report by Robert Elz <kre@munnari.OZ.AU>

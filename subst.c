@@ -3308,7 +3308,7 @@ do_assignment_internal (word, expand)
 	  ASSIGN_RETURN (0);
 	}
       aflags |= ASS_ALLOWALLSUB;	/* allow a[@]=value for existing associative arrays */
-      entry = assign_array_element (name, value, aflags, (char **)0);
+      entry = assign_array_element (name, value, aflags, (array_eltstate_t *)0);
       if (entry == 0)
 	ASSIGN_RETURN (0);
     }
@@ -6935,8 +6935,8 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
   char *temp, *tt;
   intmax_t arg_index;
   SHELL_VAR *var;
-  int atype, rflags;
-  arrayind_t ind;
+  int rflags;
+  array_eltstate_t es;
 
   ret = 0;
   temp = 0;
@@ -6972,6 +6972,10 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
   else if (valid_array_reference (name, 0))
     {
 expand_arrayref:
+      init_eltstate (&es);
+      if (indp)
+	es.ind = *indp;
+      
       var = array_variable_part (name, 0, &tt, (int *)0);
       /* These are the cases where word splitting will not be performed */
       if (pflags & PF_ASSIGNRHS)
@@ -6980,12 +6984,12 @@ expand_arrayref:
 	    {
 	      /* Only treat as double quoted if array variable */
 	      if (var && (array_p (var) || assoc_p (var)))
-		temp = array_value (name, quoted|Q_DOUBLE_QUOTES, AV_ASSIGNRHS, &atype, &ind);
+		temp = array_value (name, quoted|Q_DOUBLE_QUOTES, AV_ASSIGNRHS, &es);
 	      else		
-		temp = array_value (name, quoted, 0, &atype, &ind);
+		temp = array_value (name, quoted, 0, &es);
 	    }
 	  else
-	    temp = array_value (name, quoted, 0, &atype, &ind);
+	    temp = array_value (name, quoted, 0, &es);
 	}
       /* Posix interp 888 */
       else if (pflags & PF_NOSPLIT2)
@@ -6996,30 +7000,30 @@ expand_arrayref:
 #else
 	  if (tt[0] == '@' && tt[1] == RBRACK && var && quoted == 0 && ifs_is_set && ifs_is_null == 0 && ifs_firstc != ' ')
 #endif
-	    temp = array_value (name, Q_DOUBLE_QUOTES, AV_ASSIGNRHS, &atype, &ind);
+	    temp = array_value (name, Q_DOUBLE_QUOTES, AV_ASSIGNRHS, &es);
 	  else if (tt[0] == '@' && tt[1] == RBRACK)
-	    temp = array_value (name, quoted, 0, &atype, &ind);
+	    temp = array_value (name, quoted, 0, &es);
 	  else if (tt[0] == '*' && tt[1] == RBRACK && expand_no_split_dollar_star && ifs_is_null)
-	    temp = array_value (name, Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT, 0, &atype, &ind);
+	    temp = array_value (name, Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT, 0, &es);
 	  else if (tt[0] == '*' && tt[1] == RBRACK)
-	    temp = array_value (name, quoted, 0, &atype, &ind);
+	    temp = array_value (name, quoted, 0, &es);
 	  else
-	    temp = array_value (name, quoted, 0, &atype, &ind);
+	    temp = array_value (name, quoted, 0, &es);
 	}	  	  
       else if (tt[0] == '*' && tt[1] == RBRACK && expand_no_split_dollar_star && ifs_is_null)
-	temp = array_value (name, Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT, 0, &atype, &ind);
+	temp = array_value (name, Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT, 0, &es);
       else
-	temp = array_value (name, quoted, 0, &atype, &ind);
-      if (atype == 0 && temp)
+	temp = array_value (name, quoted, 0, &es);
+      if (es.subtype == 0 && temp)
 	{
 	  temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 		    ? quote_string (temp)
 		    : quote_escapes (temp);
 	  rflags |= W_ARRAYIND;
 	  if (indp)
-	    *indp = ind;
-	} 		  
-      else if (atype == 1 && temp && QUOTED_NULL (temp) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+	    *indp = es.ind;
+	}
+      else if (es.subtype == 1 && temp && QUOTED_NULL (temp) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	rflags |= W_HASQUOTEDNULL;
     }
 #endif
@@ -7230,6 +7234,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
   char *t, *t1, *temp, *vname, *newval;
   int l_hasdollat, sindex, arrayref;
   SHELL_VAR *v;
+  array_eltstate_t es;
 
 /*itrace("parameter_brace_expand_rhs: %s:%s pflags = %d", name, value, pflags);*/
   /* If the entire expression is between double quotes, we want to treat
@@ -7378,8 +7383,10 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 #if defined (ARRAY_VARS)
   if (valid_array_reference (vname, 0))
     {
-      v = assign_array_element (vname, t1, ASS_ALLOWALLSUB, &newval);
+      init_eltstate (&es);
+      v = assign_array_element (vname, t1, ASS_ALLOWALLSUB, &es);
       arrayref = 1;
+      newval = es.value;
     }
   else
 #endif /* ARRAY_VARS */
@@ -7408,7 +7415,13 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
     {
       FREE (t1);
 #if defined (ARRAY_VARS)
-      t1 = arrayref ? newval : get_variable_value (v);
+      if (arrayref)
+	{
+	  t1 = newval;
+	  flush_eltstate (&es);
+	}
+      else
+        t1 = get_variable_value (v);
 #else
       t1 = value_cell (v);
 #endif
@@ -7744,7 +7757,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
    by VARNAME (value of a variable or a reference to an array element).
    QUOTED is the standard description of quoting state, using Q_* defines.
    FLAGS is currently a set of flags to pass to array_value.  If IND is
-   non-null and not INTMAX_MIN, and FLAGS includes AV_USEIND, IND is
+   not INTMAX_MIN, and FLAGS includes AV_USEIND, IND is
    passed to array_value so the array index is not computed again.
    If this returns VT_VARIABLE, the caller assumes that CTLESC and CTLNUL
    characters in the value are quoted with CTLESC and takes appropriate
@@ -7761,6 +7774,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
   char *temp, *vname;
   SHELL_VAR *v;
   arrayind_t lind;
+  array_eltstate_t es;
 
   want_indir = *varname == '!' &&
     (legal_variable_starter ((unsigned char)varname[1]) || DIGIT (varname[1])
@@ -7792,6 +7806,9 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
       /* If we want to signal array_value to use an already-computed index,
 	 set LIND to that index */
       lind = (ind != INTMAX_MIN && (flags & AV_USEIND)) ? ind : 0;
+      init_eltstate (&es);
+      es.ind = lind;
+
       if (v && invisible_p (v))
 	{
 	  vtype = VT_ARRAYMEMBER;
@@ -7811,7 +7828,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	  else
 	    {
 	      vtype = VT_ARRAYMEMBER;
-	      *valp = array_value (vname, Q_DOUBLE_QUOTES, flags, (int *)NULL, &lind);
+	      *valp = array_value (vname, Q_DOUBLE_QUOTES, flags, &es);
 	    }
 	  *varp = v;
 	}
@@ -7828,8 +7845,9 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	{
 	  vtype = VT_ARRAYMEMBER;
 	  *varp = v;
-	  *valp = array_value (vname, Q_DOUBLE_QUOTES, flags, (int *)NULL, &lind);
+	  *valp = array_value (vname, Q_DOUBLE_QUOTES, flags, &es);
 	}
+      flush_eltstate (&es);
     }
   else if ((v = find_variable (vname)) && (invisible_p (v) == 0) && (assoc_p (v) || array_p (v)))
     {

@@ -4066,7 +4066,7 @@ parse_comsub (qc, open, close, lenp, flags)
      assume $(( introduces arithmetic expansion and parse accordingly. */
   if (open == '(')		/*)*/
     {
-      peekc = shell_getc (0);
+      peekc = shell_getc (1);
       shell_ungetc (peekc);
       if (peekc == '(')		/*)*/
 	return (parse_matched_pair (qc, open, close, lenp, 0));

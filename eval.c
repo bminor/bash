@@ -140,7 +140,7 @@ reader_loop ()
 	{
 	  if (interactive_shell == 0 && read_but_dont_execute)
 	    {
-	      set_exit_status (EXECUTION_SUCCESS);
+	      set_exit_status (last_command_exit_value);
 	      dispose_command (global_command);
 	      global_command = (COMMAND *)NULL;
 	    }

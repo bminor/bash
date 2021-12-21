@@ -1149,6 +1149,7 @@ expr_streval (tok, e, lvalue)
 #if defined (ARRAY_VARS)
   arrayind_t ind;
   int tflag, aflag;
+  array_eltstate_t es;
 #endif
 
 /*itrace("expr_streval: %s: noeval = %d expanded=%d", tok, noeval, already_expanded);*/
@@ -1203,13 +1204,16 @@ expr_streval (tok, e, lvalue)
     }
 
 #if defined (ARRAY_VARS)
-  ind = -1;
+  init_eltstate (&es);
+  es.ind = -1;
   /* If the second argument to get_array_value doesn't include AV_ALLOWALL,
      we don't allow references like array[@].  In this case, get_array_value
      is just like get_variable_value in that it does not return newly-allocated
      memory or quote the results.  AFLAG is set above and is either AV_NOEXPAND
      or 0. */
-  value = (e == ']') ? get_array_value (tok, aflag, (int *)NULL, &ind) : get_variable_value (v);
+  value = (e == ']') ? get_array_value (tok, aflag, &es) : get_variable_value (v);
+  ind = es.ind;
+  flush_eltstate (&es);
 #else
   value = get_variable_value (v);
 #endif

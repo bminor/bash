@@ -53,14 +53,14 @@ int assoc_expand_once = 0;
 int array_expand_once = 0;
 
 static SHELL_VAR *bind_array_var_internal PARAMS((SHELL_VAR *, arrayind_t, char *, char *, int));
-static SHELL_VAR *assign_array_element_internal PARAMS((SHELL_VAR *, char *, char *, char *, int, char *, int, char **));
+static SHELL_VAR *assign_array_element_internal PARAMS((SHELL_VAR *, char *, char *, char *, int, char *, int, array_eltstate_t *));
 
 static void assign_assoc_from_kvlist PARAMS((SHELL_VAR *, WORD_LIST *, HASH_TABLE *, int));
 
 static char *quote_assign PARAMS((const char *));
 static void quote_array_assignment_chars PARAMS((WORD_LIST *));
 static char *quote_compound_array_word PARAMS((char *, int));
-static char *array_value_internal PARAMS((const char *, int, int, int *, arrayind_t *));
+static char *array_value_internal PARAMS((const char *, int, int, array_eltstate_t *));
 
 /* Standard error message to use when encountering an invalid array subscript */
 const char * const bash_badsub_errmsg = N_("bad array subscript");
@@ -318,14 +318,33 @@ bind_assoc_variable (entry, name, key, value, flags)
   return (bind_assoc_var_internal (entry, assoc_cell (entry), key, value, flags));
 }
 
+inline void
+init_eltstate (array_eltstate_t *estatep)
+{
+  if (estatep)
+    {
+      estatep->type = ARRAY_INVALID;
+      estatep->subtype = 0;
+      estatep->key = estatep->value = 0;
+      estatep->ind = INTMAX_MIN;
+    }
+}
+
+inline void
+flush_eltstate (array_eltstate_t *estatep)
+{
+  if (estatep)
+    FREE (estatep->key);
+}
+
 /* Parse NAME, a lhs of an assignment statement of the form v[s], and
    assign VALUE to that array element by calling bind_array_variable().
    Flags are ASS_ assignment flags */
 SHELL_VAR *
-assign_array_element (name, value, flags, nvalp)
+assign_array_element (name, value, flags, estatep)
      char *name, *value;
      int flags;
-     char **nvalp;
+     array_eltstate_t *estatep;
 {
   char *sub, *vname;
   int sublen, isassoc;
@@ -353,14 +372,14 @@ assign_array_element (name, value, flags, nvalp)
       return ((SHELL_VAR *)NULL);
     }
 
-  entry = assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, nvalp);
+  entry = assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, estatep);
 
   free (vname);
   return entry;
 }
 
 static SHELL_VAR *
-assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, nvalp)
+assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, estatep)
      SHELL_VAR *entry;
      char *name;		/* only used for error messages */
      char *vname;
@@ -368,11 +387,13 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, nv
      int sublen;
      char *value;
      int flags;
-     char **nvalp;
+     array_eltstate_t *estatep;
 {
-  char *akey;
+  char *akey, *nkey;
   arrayind_t ind;
   char *newval;
+
+  /* rely on the caller to initialize estatep */
 
   if (entry && assoc_p (entry))
     {
@@ -388,8 +409,15 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, nv
 	  FREE (akey);
 	  return ((SHELL_VAR *)NULL);
 	}
+      if (estatep)
+	nkey = savestring (akey);	/* assoc_insert/assoc_replace frees akey */
       entry = bind_assoc_variable (entry, vname, akey, value, flags);
-      newval = entry ? assoc_reference (assoc_cell (entry), akey) : 0;
+      if (estatep)
+	{
+	  estatep->type = ARRAY_ASSOC;
+	  estatep->key = nkey;
+	  estatep->value = entry ? assoc_reference (assoc_cell (entry), nkey) : 0;
+	}
     }
   else
     {
@@ -403,13 +431,13 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, nv
 	  return ((SHELL_VAR *)NULL);
 	}
       entry = bind_array_variable (vname, ind, value, flags);
-      newval = entry ? array_reference (array_cell (entry), ind) : 0;
+      if (estatep)
+	{
+	  estatep->type = ARRAY_INDEXED;
+	  estatep->ind = ind;
+	  estatep->value = entry ? array_reference (array_cell (entry), ind) : 0;
+	}
     }
-
-  /* If the caller asks, return the (possibly modified) final value assigned.
-     This saves subseqent lookups. */
-  if (nvalp)
-    *nvalp = newval;
 
   return (entry);
 }
@@ -1419,12 +1447,12 @@ array_variable_part (s, flags, subp, lenp)
    is non-null it gets 1 if the array reference is name[*], 2 if the
    reference is name[@], and 0 otherwise. */
 static char *
-array_value_internal (s, quoted, flags, rtype, indp)
+array_value_internal (s, quoted, flags, estatep)
      const char *s;
-     int quoted, flags, *rtype;
-     arrayind_t *indp;
+     int quoted, flags;
+     array_eltstate_t *estatep;
 {
-  int len, isassoc;
+  int len, isassoc, subtype;
   arrayind_t ind;
   char *akey;
   char *retval, *t, *temp;
@@ -1446,38 +1474,50 @@ array_value_internal (s, quoted, flags, rtype, indp)
   isassoc = var && assoc_p (var);
   /* [ */
   akey = 0;
+  subtype = 0;
+  if (estatep)
+    estatep->value = (char *)NULL;
+
   /* Backwards compatibility: we only change the behavior of A[@] and A[*]
      for associative arrays, and the caller has to request it. */
   if ((isassoc == 0 || (flags & AV_ATSTARKEYS) == 0) && ALL_ELEMENT_SUB (t[0]) && t[1] == ']')
     {
-      if (rtype)
-	*rtype = (t[0] == '*') ? 1 : 2;
+      if (estatep)
+	estatep->subtype = (t[0] == '*') ? 1 : 2;
       if ((flags & AV_ALLOWALL) == 0)
 	{
 	  err_badarraysub (s);
 	  return ((char *)NULL);
 	}
-      else if (var == 0 || value_cell (var) == 0)	/* XXX - check for invisible_p(var) ? */
+      else if (var == 0 || value_cell (var) == 0)
 	return ((char *)NULL);
       else if (invisible_p (var))
 	return ((char *)NULL);
       else if (array_p (var) == 0 && assoc_p (var) == 0)
-	l = add_string_to_list (value_cell (var), (WORD_LIST *)NULL);
+        {
+          if (estatep)
+	    estatep->type = ARRAY_SCALAR;
+	  l = add_string_to_list (value_cell (var), (WORD_LIST *)NULL);
+        }
       else if (assoc_p (var))
 	{
+	  if (estatep)
+	    estatep->type = ARRAY_ASSOC;
 	  l = assoc_to_word_list (assoc_cell (var));
 	  if (l == (WORD_LIST *)NULL)
 	    return ((char *)NULL);
 	}
       else
 	{
+	  if (estatep)
+	    estatep->type = ARRAY_ASSOC;
 	  l = array_to_word_list (array_cell (var));
 	  if (l == (WORD_LIST *)NULL)
 	    return ((char *) NULL);
 	}
 
-      /* Caller of array_value takes care of inspecting rtype and duplicating
-	 retval if rtype == 0, so this is not a memory leak */
+      /* Caller of array_value takes care of inspecting estatep->subtype and
+         duplicating retval if subtype == 0, so this is not a memory leak */
       if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	{
 	  temp = string_list_dollar_star (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);
@@ -1491,11 +1531,11 @@ array_value_internal (s, quoted, flags, rtype, indp)
     }
   else
     {
-      if (rtype)
-	*rtype = 0;
+      if (estatep)
+	estatep->subtype = 0;
       if (var == 0 || array_p (var) || assoc_p (var) == 0)
 	{
-	  if ((flags & AV_USEIND) == 0 || indp == 0)
+	  if ((flags & AV_USEIND) == 0 || estatep == 0)
 	    {
 	      ind = array_expand_index (var, t, len, flags);
 	      if (ind < 0)
@@ -1506,16 +1546,24 @@ array_value_internal (s, quoted, flags, rtype, indp)
 		  if (ind < 0)
 		    INDEX_ERROR();
 		}
-	      if (indp)
-		*indp = ind;
+	      if (estatep)
+		estatep->ind = ind;
 	    }
-	  else if (indp)
-	    ind = *indp;
+	  else if (estatep && (flags & AV_USEIND))
+	    ind = estatep->ind;
+	  if (estatep && var)
+	    estatep->type = array_p (var) ? ARRAY_INDEXED : ARRAY_SCALAR;
 	}
       else if (assoc_p (var))
 	{
+if (flags & AV_USEIND)
+  itrace("array_value_internal: %s: assoc var with AV_USEIND: %s", dollar_vars[0], s);
 	  t[len - 1] = '\0';
-	  if ((flags & AV_NOEXPAND) == 0)
+	  if (estatep)
+	    estatep->type = ARRAY_ASSOC;
+	  if ((flags & AV_USEIND) && estatep && estatep->key)
+	    akey = savestring (estatep->key);
+	  else if ((flags & AV_NOEXPAND) == 0)
 	    akey = expand_subscript_string (t, 0);	/* [ */
 	  else
 	    akey = savestring (t);
@@ -1526,26 +1574,34 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	      INDEX_ERROR();
 	    }
 	}
-     
-      if (var == 0 || value_cell (var) == 0)	/* XXX - check invisible_p(var) ? */
+
+      if (var == 0 || value_cell (var) == 0)
 	{
-          FREE (akey);
+	  FREE (akey);
 	  return ((char *)NULL);
 	}
       else if (invisible_p (var))
 	{
-          FREE (akey);
+	  FREE (akey);
 	  return ((char *)NULL);
 	}
       if (array_p (var) == 0 && assoc_p (var) == 0)
-	return (ind == 0 ? value_cell (var) : (char *)NULL);
+	retval = (ind == 0) ? value_cell (var) : (char *)NULL;
       else if (assoc_p (var))
         {
 	  retval = assoc_reference (assoc_cell (var), akey);
-	  free (akey);
+	  if (estatep && estatep->key && (flags & AV_USEIND))
+	    free (akey);		/* duplicated estatep->key */
+	  else if (estatep)
+	    estatep->key = akey;	/* XXX - caller must manage */
+	  else				/* not saving it anywhere */
+	    free (akey);
         }
       else
 	retval = array_reference (array_cell (var), ind);
+
+      if (estatep)
+	estatep->value = retval;
     }
 
   return retval;
@@ -1554,12 +1610,15 @@ array_value_internal (s, quoted, flags, rtype, indp)
 /* Return a string containing the elements described by the array and
    subscript contained in S, obeying quoting for subscripts * and @. */
 char *
-array_value (s, quoted, flags, rtype, indp)
+array_value (s, quoted, flags, estatep)
      const char *s;
-     int quoted, flags, *rtype;
-     arrayind_t *indp;
+     int quoted, flags;
+     array_eltstate_t *estatep;
 {
-  return (array_value_internal (s, quoted, flags|AV_ALLOWALL, rtype, indp));
+  char *retval;
+
+  retval = array_value_internal (s, quoted, flags|AV_ALLOWALL, estatep);
+  return retval;
 }
 
 /* Return the value of the array indexing expression S as a single string.
@@ -1567,12 +1626,15 @@ array_value (s, quoted, flags, rtype, indp)
    is used by other parts of the shell such as the arithmetic expression
    evaluator in expr.c. */
 char *
-get_array_value (s, flags, rtype, indp)
+get_array_value (s, flags, estatep)
      const char *s;
-     int flags, *rtype;
-     arrayind_t *indp;
+     int flags;
+     array_eltstate_t *estatep;
 {
-  return (array_value_internal (s, 0, flags, rtype, indp));
+  char *retval;
+
+  retval = array_value_internal (s, 0, flags, estatep);
+  return retval;
 }
 
 char *

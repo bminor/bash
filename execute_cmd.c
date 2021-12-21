@@ -588,7 +588,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   if (breaking || continuing)
     return (last_command_exit_value);
-  if (command == 0 || read_but_dont_execute)
+  if (read_but_dont_execute)
+    return (last_command_exit_value);
+  if (command == 0)
     return (EXECUTION_SUCCESS);
 
   QUIT;

@@ -1509,7 +1509,7 @@ redir_varvalue (redir)
   /* get_variable_value handles references to array variables without
      subscripts */
   if (vr && (array_p (v) || assoc_p (v)))
-    val = get_array_value (w, 0, (int *)NULL, (arrayind_t *)0);
+    val = get_array_value (w, 0, (array_eltstate_t *)NULL);
   else
 #endif
   val = get_variable_value (v);
