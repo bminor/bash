@@ -48,6 +48,7 @@
 #include "unwind_prot.h"
 #include "sig.h"
 #include "quit.h"
+#include "bashintl.h"	/* for _() */
 #include "error.h"	/* for internal_warning */
 #include "ocache.h"
 
@@ -282,7 +283,7 @@ unwind_frame_discard_internal (tag, ignore)
     }
 
   if (found == 0)
-    internal_warning ("unwind_frame_discard: %s: frame not found", tag);
+    internal_warning (_("unwind_frame_discard: %s: frame not found"), tag);
 }
 
 /* Restore the value of a variable, based on the contents of SV.
@@ -328,7 +329,7 @@ unwind_frame_run_internal (tag, ignore)
       uwpfree (elt);
     }
   if (tag && found == 0)
-    internal_warning ("unwind_frame_run: %s: frame not found", tag);
+    internal_warning (_("unwind_frame_run: %s: frame not found"), tag);
 }
 
 static void

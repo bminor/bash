@@ -311,9 +311,7 @@ run_pending_traps ()
 
   if (running_trap > 0)
     {
-#if defined (DEBUG)
-      internal_warning ("run_pending_traps: recursive invocation while running trap for signal %d", running_trap-1);
-#endif
+      internal_debug ("run_pending_traps: recursive invocation while running trap for signal %d", running_trap-1);
 #if defined (SIGWINCH)
       if (running_trap == SIGWINCH+1 && pending_traps[SIGWINCH])
 	return;			/* no recursive SIGWINCH trap invocations */
@@ -475,9 +473,7 @@ trap_handler (sig)
 
   if ((sigmodes[sig] & SIG_TRAPPED) == 0)
     {
-#if defined (DEBUG)
-      internal_warning ("trap_handler: signal %d: signal not trapped", sig);
-#endif
+      internal_debug ("trap_handler: signal %d: signal not trapped", sig);
       SIGRETURN (0);
     }
 

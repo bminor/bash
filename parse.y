@@ -2071,12 +2071,7 @@ read_a_line (remove_quoted_newline)
 
       /* Ignore null bytes in input. */
       if (c == 0)
-	{
-#if 0
-	  internal_warning ("read_a_line: ignored null byte in input");
-#endif
-	  continue;
-	}
+	continue;
 
       /* If there is no more input, then we return NULL. */
       if (c == EOF)
@@ -2405,9 +2400,6 @@ shell_getc (remove_quoted_newline)
 
 	  if (c == '\0')
 	    {
-#if 0
-	      internal_warning ("shell_getc: ignored null byte in input");
-#endif
 	      /* If we get EOS while parsing a string, treat it as EOF so we
 		 don't just keep looping. Happens very rarely */
 	      if (bash_input.type == st_string)
@@ -2769,9 +2761,8 @@ shell_ungets (s)
     {
       /* Harder case: pushing back input string that's longer than what we've
 	 consumed from shell_input_line so far. */
-#ifdef DEBUG
-itrace("shell_ungets: not at end of shell_input_line");
-#endif
+      INTERNAL_DEBUG (("shell_ungets: not at end of shell_input_line"));
+
       chars_left = shell_input_line_len - shell_input_line_index;
       if (shell_input_line_size <= (slen + chars_left))
 	RESIZE_MALLOCED_BUFFER (shell_input_line, shell_input_line_index, chars_left + slen + 1, shell_input_line_size, 64);
@@ -3411,9 +3402,7 @@ read_token (command)
      we are eval'ing a string that is an incomplete command), return EOF */
   if (character == '\0' && bash_input.type == st_string && expanding_alias() == 0)
     {
-#if defined (DEBUG)
-itrace("shell_getc: bash_input.location.string = `%s'", bash_input.location.string);
-#endif
+      INTERNAL_DEBUG (("shell_getc: bash_input.location.string = `%s'", bash_input.location.string));
       EOF_Reached = 1;
       return (yacc_EOF);
     }
@@ -4096,11 +4085,11 @@ parse_comsub (qc, open, close, lenp, flags)
 
   r = yyparse ();
 
-  if (need_here_doc)
-{
-itrace("parse_comsub: need_here_doc = %d after yyparse()?", need_here_doc);
-    gather_here_documents ();
-}
+  if (need_here_doc > 0)
+    {
+      internal_debug("command substitution: %d unterminated here-document%s", need_here_doc, (need_here_doc == 1) ? "" : "s");
+      gather_here_documents ();
+    }
 
   parsed_command = global_command;
 
@@ -4115,7 +4104,7 @@ itrace("parse_comsub: need_here_doc = %d after yyparse()?", need_here_doc);
 
   if (current_token != shell_eof_token)
     {
-itrace("current_token (%d) != shell_eof_token (%c)", current_token, shell_eof_token);
+INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, shell_eof_token));
       token_to_read = current_token;
       return (&matched_pair_error);
     }

@@ -1556,8 +1556,6 @@ array_value_internal (s, quoted, flags, estatep)
 	}
       else if (assoc_p (var))
 	{
-if (flags & AV_USEIND)
-  itrace("array_value_internal: %s: assoc var with AV_USEIND: %s", dollar_vars[0], s);
 	  t[len - 1] = '\0';
 	  if (estatep)
 	    estatep->type = ARRAY_ASSOC;

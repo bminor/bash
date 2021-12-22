@@ -1837,9 +1837,7 @@ cpl_delete (pid)
   if (p == 0)
     return 0;		/* not found */
 
-#if defined (DEBUG)
-  itrace("cpl_delete: deleting %d", pid);
-#endif
+  INTERNAL_DEBUG (("cpl_delete: deleting %d", pid));
 
   /* Housekeeping in the border cases. */
   if (p == coproc_list.head)
@@ -1870,11 +1868,7 @@ cpl_reap ()
       if (p->coproc->c_flags & COPROC_DEAD)
 	{
 	  coproc_list.ncoproc--;	/* keep running count, fix up pointers later */
-
-#if defined (DEBUG)
-	  itrace("cpl_reap: deleting %d", p->coproc->c_pid);
-#endif
-
+	  INTERNAL_DEBUG (("cpl_reap: deleting %d", p->coproc->c_pid));
 	  coproc_dispose (p->coproc);
 	  cpe_dispose (p);
 	}

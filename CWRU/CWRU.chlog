@@ -2737,3 +2737,55 @@ parse.y
 	- parse_comsub: make sure the first call to shell_getc to check whether
 	  or not it's an arithmetic expansion skips a quoted newline. From a
 	  report by Robert Elz <kre@munnari.OZ.AU>
+
+				   12/21
+				   -----
+subst.c
+	- parameter_brace_remove_pattern,parameter_brace_patsub,parameter_brace_casemod,
+	  parameter_brace_transform,parameter_brace_substring: now take an
+	  array_eltstate_t * argument in place of the arrayind_t argument, pass
+	  it to get_var_and_type; this generalizes the indexed array behavior
+	  of expanding array subscripts once to associative arrays via an
+	  eventual call to array_value_internal with a non-null KEY member
+	- get_var_and_type: now takes an array_eltstate_t * argument in place
+	  of the arrayind_t argument; use it in calls to array_value so we
+	  can only expand array subscripts once whether they are indexed or
+	  associative arrays
+	- parameter_brace_expand_word: take an array_eltstate_t * argument in
+	  place of the arrayind_t * argument; pass it to array_value; use a
+	  static version (which we init and flush) if the argument passed is
+	  NULL so we can get the right state passed back and forth
+	- parameter_brace_expand: pass a pointer to a static array_eltstate_t
+	  to parameter_brace_expand_word, and use that in the various calls to
+	  parameter_brace_XXX functions that perform specific expansions in
+	  place of the old arrayind_t argument; make sure to flush it before
+	  returning, even on errors
+
+				   12/22
+				   -----
+{trap,variables}.c
+	- internal_warning: calls changed to use translatable strings
+	  consistently
+
+error.[ch]
+	- internal_debug: new function, prints a message like internal_warning,
+	  no-op if DEBUG is not defined
+	- INTERNAL_DEBUG: macro that expands to internal_debug when DEBUG is
+	  defined, and nothing otherwise
+
+{jobs,trap}.c
+	- changed some internal_warning and internal_inform calls to use
+	  internal_debug, since they were active only when DEBUG is defined
+
+parse.y
+	- parse_comsub: add internal_debug call when a command substitution
+	  ends with unterminated here-documents
+
+builtins/common.c
+	- number_of_args: unconditionally return posparam_count
+
+{jobs,execute_cmd,subst}.c,parse.y,builtins/{command.def,evalstring.c}
+	- INTERNAL_DEBUG: use instead of calls to itrace protected by #ifdef
+	  DEBUG
+
+

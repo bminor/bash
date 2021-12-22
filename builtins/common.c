@@ -458,7 +458,7 @@ shift_args (times)
 int
 number_of_args ()
 {
-#ifdef DEBUG
+#if 0
   register WORD_LIST *list;
   int n;
 
@@ -469,9 +469,9 @@ number_of_args ()
 
 if (n != posparam_count)
   itrace("number_of_args: n (%d) != posparam_count (%d)", n, posparam_count);
-#endif
-
+#else
   return posparam_count;
+#endif
 }
 
 static int changed_dollar_vars;

@@ -614,9 +614,8 @@ parse_string (string, from_file, flags, cmdp, endp)
 
       if (code)
 	{
-#if defined (DEBUG)
-itrace("parse_string: longjmp executed: code = %d", code);
-#endif
+	  INTERNAL_DEBUG(("parse_string: longjmp executed: code = %d", code));
+
 	  should_jump_to_top_level = 0;
 	  switch (code)
 	    {

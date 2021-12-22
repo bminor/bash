@@ -2815,7 +2815,7 @@ make_local_array_variable (name, flags)
      scope and discard anything that's invalid. */
   if (localvar_inherit && assoc_p (var))
     {
-      internal_warning ("%s: cannot inherit value from incompatible type", name);
+      internal_warning (_("%s: cannot inherit value from incompatible type"), name);
       VUNSETATTR (var, att_assoc);
       dispose_variable_value (var);
       array = array_create ();
@@ -2871,7 +2871,7 @@ make_local_assoc_variable (name, flags)
      scope and discard anything that's invalid. */
   if (localvar_inherit && array_p (var))
     {
-      internal_warning ("%s: cannot inherit value from incompatible type", name);
+      internal_warning (_("%s: cannot inherit value from incompatible type"), name);
       VUNSETATTR (var, att_array);
       dispose_variable_value (var);
       hash = assoc_create (ASSOC_HASH_BUCKETS);

@@ -296,6 +296,32 @@ internal_inform (format, va_alist)
 
 void
 #if defined (PREFER_STDARG)
+internal_debug (const char *format, ...)
+#else
+internal_debug (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+#ifdef DEBUG
+  va_list args;
+
+  error_prolog (1);
+  fprintf (stderr, _("DEBUG warning: "));
+
+  SH_VA_START (args, format);
+
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+
+  va_end (args);
+#else
+  return;
+#endif
+}
+
+void
+#if defined (PREFER_STDARG)
 sys_error (const char *format, ...)
 #else
 sys_error (format, va_alist)
