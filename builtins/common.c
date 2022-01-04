@@ -990,10 +990,7 @@ builtin_bind_variable (name, value, flags)
 
 #if defined (ARRAY_VARS)
   /* Callers are responsible for calling this with array references that have
-     already undergone valid_array_reference checks.
-     Affected builtins: read, printf
-     To make this *really* work, needs additional downstream support, starting
-     with assign_array_element and array_variable_name. */
+     already undergone valid_array_reference checks (read, printf). */
   vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
   bindflags = flags | (assoc_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;
   if (flags & ASS_NOEXPAND)
@@ -1016,13 +1013,14 @@ builtin_bind_variable (name, value, flags)
 }
 
 SHELL_VAR *
-builtin_bind_var_to_int (name, val)
+builtin_bind_var_to_int (name, val, flags)
      char *name;
      intmax_t val;
+     int flags;
 {
   SHELL_VAR *v;
 
-  v = bind_var_to_int (name, val, ASS_ALLOWALLSUB);
+  v = bind_var_to_int (name, val, flags|ASS_ALLOWALLSUB);
   return v;
 }
 

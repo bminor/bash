@@ -1161,12 +1161,12 @@ expr_streval (tok, e, lvalue)
   initial_depth = expr_depth;
 
 #if defined (ARRAY_VARS)
-  tflag = assoc_expand_once && already_expanded;	/* for a start */
+  tflag = (assoc_expand_once && already_expanded) ? AV_NOEXPAND : 0;	/* for a start */
 #endif
 
   /* [[[[[ */
 #if defined (ARRAY_VARS)
-  aflag = (tflag) ? AV_NOEXPAND : 0;
+  aflag = tflag;	/* use a different variable for now */
   v = (e == ']') ? array_variable_part (tok, tflag, (char **)0, (int *)0) : find_variable (tok);
 #else
   v = find_variable (tok);

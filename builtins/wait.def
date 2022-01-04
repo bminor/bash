@@ -111,7 +111,7 @@ int
 wait_builtin (list)
      WORD_LIST *list;
 {
-  int status, code, opt, nflag;
+  int status, code, opt, nflag, vflags, bindflags;
   volatile int wflags;
   char *vname;
   SHELL_VAR *pidvar;
@@ -119,7 +119,7 @@ wait_builtin (list)
 
   USE_VAR(list);
 
-  nflag = wflags = 0;
+  nflag = wflags = vflags = 0;
   vname = NULL;
   pidvar = (SHELL_VAR *)NULL;
   reset_internal_getopt ();
@@ -136,6 +136,7 @@ wait_builtin (list)
 	  break;
 	case 'p':
 	  vname = list_optarg;
+	  vflags = list_optflags;	  
 	  break;	
 #endif
 	CASE_HELPOPT;
@@ -152,15 +153,10 @@ wait_builtin (list)
 #if defined (ARRAY_VARS)
       int arrayflags;
 
-#if 0
-      arrayflags = assoc_expand_once ? VA_NOEXPAND : 0;
-      if (assoc_expand_once && (list_optflags & W_ARRAYREF))
-	arrayflags |= VA_ONEWORD|VA_NOEXPAND;
-#else
-      arrayflags = 0;	/* not yet without builtin_bind_var_to_int support */
-#endif
+      SET_VFLAGS (vflags, arrayflags, bindflags);
       if (legal_identifier (vname) == 0 && valid_array_reference (vname, arrayflags) == 0)
 #else
+      bindflags = 0;
       if (legal_identifier (vname) == 0)
 #endif
 	{
@@ -225,7 +221,7 @@ wait_builtin (list)
 
       status = wait_for_any_job (wflags, &pstat);
       if (vname && status >= 0)
-	builtin_bind_var_to_int (vname, pstat.pid);
+	builtin_bind_var_to_int (vname, pstat.pid, bindflags);
 
       if (status < 0)
 	status = 127;
@@ -241,7 +237,7 @@ wait_builtin (list)
     {
       wait_for_background_pids (&pstat);
       if (vname)
-	builtin_bind_var_to_int (vname, pstat.pid);
+	builtin_bind_var_to_int (vname, pstat.pid, bindflags);
       WAIT_RETURN (EXECUTION_SUCCESS);
     }
 

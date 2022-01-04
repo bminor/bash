@@ -232,7 +232,7 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern sh_builtin_func_t *last_shell_builtin;
 
 extern SHELL_VAR *builtin_bind_variable PARAMS((char *, char *, int));
-extern SHELL_VAR *builtin_bind_var_to_int PARAMS((char *, intmax_t));
+extern SHELL_VAR *builtin_bind_var_to_int PARAMS((char *, intmax_t, int));
 extern int builtin_unbind_variable PARAMS((const char *));
 
 extern int builtin_arrayref_flags PARAMS((WORD_DESC *, int));
@@ -262,5 +262,20 @@ extern int source_uses_path;
 
 /* variables from wait.def */
 extern int wait_intr_flag;
+
+/* common code to set flags for valid_array_reference and builtin_bind_variable */
+#if defined (ARRAY_VARS)
+#define SET_VFLAGS(wordflags, vflags, bindflags) \
+  do { \
+    vflags = assoc_expand_once ?  VA_NOEXPAND : 0; \
+    bindflags = assoc_expand_once ? ASS_NOEXPAND : 0; \
+    if (assoc_expand_once && (wordflags & W_ARRAYREF)) \
+      vflags |= VA_ONEWORD|VA_NOEXPAND; \
+    if (vflags & VA_NOEXPAND) \
+      bindflags |= ASS_NOEXPAND; \
+    if (vflags & VA_ONEWORD) \
+      bindflags |= ASS_ONEWORD; \
+  } while (0)
+#endif
 
 #endif /* !__COMMON_H */

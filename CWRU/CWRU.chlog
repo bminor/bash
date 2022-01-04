@@ -2815,3 +2815,51 @@ subst.c
 		unset A[$rkey]
 	  work because the unset builtin sees the W_ARRAYREF flag on its
 	  argument
+
+				   12/29
+				   -----
+builtins/common.h
+	- SET_VFLAGS: take a set of word flags, and set flags for use with
+	  valid_array_reference (vflags) and assign_array_element/bind_int_variable
+	  (bindflags) based on those flags and the setting of assoc_expand_once
+	  (moved from read.def and generalized)
+
+arrayfunc.c
+	- array_variable_name: now exclusively takes AV_xxx flags; understands
+	  how to translate AV_NOEXPAND to the right flag for skipsubscript;
+	  understands AV_ONEWORD and AV_NOEXPAND
+	- array_variable_part: just passes the FLAGS arg to array_variable_name
+	- assign_array_element: translates ASS_ flags to AV_ flags for
+	  array_variable_name
+	- array_value_internal: now just passes flags straight through to
+	  array_variable_part (which sends them to array_variable_name)
+
+builtins/common.[ch]
+	- builtin_bind_var_to_int: now takes a new FLAGS third argument; passes
+	  it to bind_var_to_int
+
+builtins/printf.def
+	- printf_builtin: use SET_VFLAGS to set flags for builtin_bind_variable
+	  (bindflags); makes things like
+		declare -A A; key=']' ; printf -v A[$key] "foo"
+	  work without a subscript error as long as assoc_expand_once is defined
+
+builtins/read.def
+	- read_builtin: use new common version of SET_VFLAGS instead of
+	  private version; changed to use new calling sequence; makes things like
+		declare -A A; key=']' ; read A[$key] <<<"foo"
+	  work without a subscript error as long as assoc_expand_once is defined
+
+builtins/wait.def
+	- wait_builtin: use SET_VFLAGS for variable name with -p option
+	- wait_builtin: call builtin_bind_var_to_int with new bindflags third
+	  argument
+
+expr.c
+	- expr_streval: just pass TFLAG (AV_xxx flags) straight through to
+	  array_variable_part
+
+variables.c
+	- bind_int_variable: translate the assignment flags (ASS_xxx) to
+	  VA_xxx flags for valid_array_reference calls (ASS_ONEWORD); translate
+	  assignment flags to AV_xxx flags for array_variable_part

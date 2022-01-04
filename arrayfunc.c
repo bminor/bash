@@ -347,10 +347,15 @@ assign_array_element (name, value, flags, estatep)
      array_eltstate_t *estatep;
 {
   char *sub, *vname;
-  int sublen, isassoc;
+  int sublen, isassoc, avflags;
   SHELL_VAR *entry;
 
-  vname = array_variable_name (name, (flags & ASS_NOEXPAND) != 0, &sub, &sublen);
+  avflags = 0;
+  if (flags & ASS_NOEXPAND)
+    avflags |= AV_NOEXPAND;
+  if (flags & ASS_ONEWORD)
+    avflags |= AV_ONEWORD;
+  vname = array_variable_name (name, avflags, &sub, &sublen);
 
   if (vname == 0)
     return ((SHELL_VAR *)NULL);
@@ -1374,7 +1379,7 @@ array_variable_name (s, flags, subp, lenp)
      int *lenp;
 {
   char *t, *ret;
-  int ind, ni;
+  int ind, ni, ssflags;
 
   t = mbschr (s, '[');
   if (t == 0)
@@ -1386,7 +1391,15 @@ array_variable_name (s, flags, subp, lenp)
       return ((char *)NULL);
     }
   ind = t - s;
-  ni = skipsubscript (s, ind, flags&1);	/* XXX - was 0 not flags */
+  if ((flags & (AV_NOEXPAND|AV_ONEWORD)) == (AV_NOEXPAND|AV_ONEWORD))
+    ni = strlen (s) - 1;
+  else
+    {
+      ssflags = 0;
+      if (flags & AV_NOEXPAND)
+	ssflags |= 1;
+      ni = skipsubscript (s, ind, ssflags);
+    }
   if (ni <= ind + 1 || s[ni] != ']')
     {
       err_badarraysub (s);
@@ -1464,7 +1477,7 @@ array_value_internal (s, quoted, flags, estatep)
   WORD_LIST *l;
   SHELL_VAR *var;
 
-  var = array_variable_part (s, (flags&AV_NOEXPAND) ? 1 : 0, &t, &len);	/* XXX */
+  var = array_variable_part (s, flags, &t, &len);	/* XXX */
 
   /* Expand the index, even if the variable doesn't exist, in case side
      effects are needed, like ${w[i++]} where w is unset. */

@@ -151,7 +151,7 @@ extern int errno;
       if (vflag) \
 	{ \
 	  SHELL_VAR *v; \
-	  v = builtin_bind_variable  (vname, vbuf, 0); \
+	  v = builtin_bind_variable  (vname, vbuf, bindflags); \
 	  stupidly_hack_special_variables (vname); \
 	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
 	    return (EXECUTION_FAILURE); \
@@ -232,6 +232,7 @@ static int conversion_error;
 
 /* printf -v var support */
 static int vflag = 0;
+static int bindflags = 0;
 static char *vbuf, *vname;
 static size_t vbsize;
 static int vblen;
@@ -266,10 +267,9 @@ printf_builtin (list)
 	{
 	case 'v':
 	  vname = list_optarg;
+	  bindflags = 0;
 #if defined (ARRAY_VARS)
-	  arrayflags = assoc_expand_once ? VA_NOEXPAND : 0;
-	  if (assoc_expand_once && (list_optflags & W_ARRAYREF))
-	    arrayflags |= VA_ONEWORD|VA_NOEXPAND;
+	  SET_VFLAGS (list_optflags, arrayflags, bindflags);
 	  retval = legal_identifier (vname) || valid_array_reference (vname, arrayflags);
 #else
 	  retval = legal_identifier (vname);

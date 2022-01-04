@@ -190,20 +190,6 @@ read_builtin_timeout (fd)
   						: shtimer_select (read_timeout));
 }
 
-#if defined (ARRAY_VARS)
-#define SET_VFLAGS(wordflags) \
-  do { \
-    vflags = assoc_expand_once ?  VA_NOEXPAND : 0; \
-    bindflags = assoc_expand_once ? ASS_NOEXPAND : 0; \
-    if (assoc_expand_once && (wordflags & W_ARRAYREF)) \
-      vflags |= VA_ONEWORD|VA_NOEXPAND; \
-    if (vflags & VA_NOEXPAND) \
-      bindflags |= ASS_NOEXPAND; \
-    if (vflags & VA_ONEWORD) \
-      bindflags |= ASS_ONEWORD; \
-  } while (0)
-#endif
-
 /* Read the value of the shell variables whose names follow.
    The reading is done from the current input stream, whatever
    that may be.  Successive words of the input line are assigned
@@ -378,7 +364,7 @@ read_builtin (list)
      variable names is a valid identifier, and bail early if so. */
 #if defined (ARRAY_VARS)
   if (list)
-    SET_VFLAGS (list->word->flags);
+    SET_VFLAGS (list->word->flags, vflags, bindflags);
   if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   bindflags = 0;
@@ -969,7 +955,7 @@ assign_vars:
     {
       varname = list->word->word;
 #if defined (ARRAY_VARS)
-      SET_VFLAGS (list->word->flags);
+      SET_VFLAGS (list->word->flags, vflags, bindflags);
       if (legal_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
 #else
       if (legal_identifier (varname) == 0)
@@ -1018,7 +1004,7 @@ assign_vars:
 
   /* Now assign the rest of the line to the last variable argument. */
 #if defined (ARRAY_VARS)
-  SET_VFLAGS (list->word->flags);
+  SET_VFLAGS (list->word->flags, vflags, bindflags);
   if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   if (legal_identifier (list->word->word) == 0)

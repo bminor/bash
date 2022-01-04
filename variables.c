@@ -3401,16 +3401,24 @@ bind_int_variable (lhs, rhs, flags)
      int flags;
 {
   register SHELL_VAR *v;
-  int isint, isarr, implicitarray, vflags;
+  int isint, isarr, implicitarray, vflags, avflags;
 
   isint = isarr = implicitarray = 0;
 #if defined (ARRAY_VARS)
   /* Don't rely on VA_NOEXPAND being 1, set it explicitly */
   vflags = (flags & ASS_NOEXPAND) ? VA_NOEXPAND : 0;
+  if (flags & ASS_ONEWORD)
+    vflags |= VA_ONEWORD;
   if (valid_array_reference (lhs, vflags))
     {
       isarr = 1;
-      v = array_variable_part (lhs, (flags & ASS_NOEXPAND) != 0, (char **)0, (int *)0);
+      avflags = 0;
+      /* Common code to translate between assignment and reference flags. */
+      if (flags & ASS_NOEXPAND)
+	avflags |= AV_NOEXPAND;
+      if (flags & ASS_ONEWORD)
+	avflags |= AV_ONEWORD;
+      v = array_variable_part (lhs, avflags, (char **)0, (int *)0);
     }
   else if (legal_identifier (lhs) == 0)
     {
