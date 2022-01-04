@@ -3825,6 +3825,7 @@ expand_string_assignment (string, quoted)
 #else
   td.flags = W_ASSIGNRHS;
 #endif
+  td.flags |= (W_NOGLOB|W_TILDEEXP);
   td.word = savestring (string);
   value = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
   FREE (td.word);
