@@ -2863,3 +2863,42 @@ variables.c
 	- bind_int_variable: translate the assignment flags (ASS_xxx) to
 	  VA_xxx flags for valid_array_reference calls (ASS_ONEWORD); translate
 	  assignment flags to AV_xxx flags for array_variable_part
+
+				   12/30
+				   -----
+subst.c
+	- parameter_brace_expand: when expanding an indirect variable, extend
+	  the special case for array[@] and array[*] (set -u/no positional
+	  parameters, obeying the baroque quoting rules) to the value of the
+	  indirection. Report amd fix from konsolebox <konsolebox@gmail.com>
+
+				   12/31
+				   -----
+parse.y
+	- compound_list: when parsing a compound_list production, collect any
+	  pending here-documents after reading a newline, not after reading
+	  any command terminator. Fixes interactive-only prompting bug
+	  reported back in 8/2021 by Hyunho Cho <mug896@gmail.com>
+
+				 1/1/2022
+				 --------
+bashline.c
+	- set_filename_quote_chars: break code that modifies
+	  rl_filename_quote_characters based on whether DIRNAME needs to be
+	  expanded from bash_directory_completion_hook into its own function
+	- bash_check_expchar: break code that checks whether DIRNAME will be
+	  word expanded from bash_directory_completion_hook into its own
+	  function 
+	- bashline_reset,attempt_shell_completion: make sure complete_fullquote
+	  is set to 1 (as it is by default) in case a completion modifies it
+	- bash_quote_filename: if we are completing (but not expanding --
+	  direxpand is unset) and backslash-quoting a filename with expansion
+	  characters as determined by bash_check_expchar, make sure
+	  filename_bstab is set not to include the expansion char (and any
+	  following char and closer) and set complete_fullquote to 0 so
+	  sh_backslash_quote uses filename_bstab. Fixes the longstanding issue
+	  of quoting a `$', for instance, if the rest of the filename contains
+	  any characters that need quoting in filenames. This assumes that the
+	  filename is unquoted (*QCP == 0) so the word will be expanded and is
+	  not part of the filename (if needed, we can use file_exists to check
+	  whether the expansion characters are actually part of the filename)

@@ -1119,7 +1119,7 @@ pattern:	WORD
 compound_list:	newline_list list0
 			{
 			  $$ = $2;
-			  if (need_here_doc)
+			  if (need_here_doc && last_read_token == '\n')
 			    gather_here_documents ();
 			 }
 	|	newline_list list1

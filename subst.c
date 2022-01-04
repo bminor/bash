@@ -9352,6 +9352,11 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	 to return the index we're supposed to be using. */
       if (tdesc && tdesc->flags)
 	tdesc->flags &= ~W_ARRAYIND;
+
+      /* If the indir expansion contains $@/$*, extend the special treatment
+	 of the case of no positional parameters and `set -u' to it. */
+      if (contains_dollar_at && *contains_dollar_at)
+	all_element_arrayref = 1;
     }
   else
     {

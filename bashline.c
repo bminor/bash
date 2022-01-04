@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -192,6 +192,8 @@ static int return_zero PARAMS((const char *));
 
 static char *bash_dequote_filename PARAMS((char *, int));
 static char *quote_word_break_chars PARAMS((char *));
+static int bash_check_expchar PARAMS((char *, int, int *, int *));
+static void set_filename_quote_chars PARAMS((int, int, int));
 static void set_filename_bstab PARAMS((const char *));
 static char *bash_quote_filename PARAMS((char *, int, char *));
 
@@ -674,6 +676,8 @@ bashline_reset ()
   rl_attempted_completion_function = attempt_shell_completion;
   rl_completion_entry_function = NULL;
   rl_ignore_some_completions_function = filename_completion_ignore;
+
+  complete_fullquote = 1;
   rl_filename_quote_characters = default_filename_quote_characters;
   set_filename_bstab (rl_filename_quote_characters);
 
@@ -1575,6 +1579,7 @@ attempt_shell_completion (text, start, end)
   matches = (char **)NULL;
   rl_ignore_some_completions_function = filename_completion_ignore;
 
+  complete_fullquote = 1;		/* full filename quoting by default */
   rl_filename_quote_characters = default_filename_quote_characters;
   set_filename_bstab (rl_filename_quote_characters);
   set_directory_hook ();
@@ -3458,38 +3463,7 @@ bash_directory_completion_hook (dirname)
   return_value = should_expand_dirname = nextch = closer = 0;
   local_dirname = *dirname;
 
-  if (t = mbschr (local_dirname, '$'))
-    {
-      should_expand_dirname = '$';
-      nextch = t[1];
-      /* Deliberately does not handle the deprecated $[...] arithmetic
-	 expansion syntax */
-      if (nextch == '(')
-	closer = ')';
-      else if (nextch == '{')
-	closer = '}';
-      else
-	nextch = 0;
-
-      if (closer)
-	{
-	  int p;
-	  char delims[2];
-
-	  delims[0] = closer; delims[1] = 0;
-	  p = skip_to_delim (t, 1, delims, SD_NOJMP|SD_COMPLETE);
-	  if (t[p] != closer)
-	    should_expand_dirname = 0;
-	}
-    }
-  else if (local_dirname[0] == '~')
-    should_expand_dirname = '~';
-  else
-    {
-      t = mbschr (local_dirname, '`');
-      if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
-	should_expand_dirname = '`';
-    }
+  should_expand_dirname = bash_check_expchar (local_dirname, 1, &nextch, &closer);
 
   if (should_expand_dirname && directory_exists (local_dirname, 1))
     should_expand_dirname = 0;
@@ -3508,24 +3482,8 @@ bash_directory_completion_hook (dirname)
 	  free (new_dirname);
 	  dispose_words (wl);
 	  local_dirname = *dirname;
-	  /* XXX - change rl_filename_quote_characters here based on
-	     should_expand_dirname/nextch/closer.  This is the only place
-	     custom_filename_quote_characters is modified. */
-	  if (rl_filename_quote_characters && *rl_filename_quote_characters)
-	    {
-	      int i, j, c;
-	      i = strlen (default_filename_quote_characters);
-	      custom_filename_quote_characters = xrealloc (custom_filename_quote_characters, i+1);
-	      for (i = j = 0; c = default_filename_quote_characters[i]; i++)
-		{
-		  if (c == should_expand_dirname || c == nextch || c == closer)
-		    continue;
-		  custom_filename_quote_characters[j++] = c;
-		}
-	      custom_filename_quote_characters[j] = '\0';
-	      rl_filename_quote_characters = custom_filename_quote_characters;
-	      set_filename_bstab (rl_filename_quote_characters);
-	    }
+
+	  set_filename_quote_chars (should_expand_dirname, nextch, closer);
 	}
       else
 	{
@@ -4194,6 +4152,95 @@ quote_word_break_chars (text)
   return ret;
 }
 
+/* Return a character in DIRNAME that will cause shell expansion to be
+   performed. If NEXTP is non-null, *NEXTP gets the expansion character that
+   follows RET (e.g., '{' or `(' for `$'). If CLOSERP is non-null, *CLOSERP
+   gets the character that should close <RET><NEXTP>. If NEED_CLOSER is non-
+   zero, any expansion pair that isn't closed causes this function to
+   return 0, which indicates that we didn't find an expansion character. It's
+   used in case DIRNAME is going to be expanded. If DIRNAME is just going to
+   be quoted, NEED_CLOSER will be 0. */
+static int
+bash_check_expchar (dirname, need_closer, nextp, closerp)
+     char *dirname;
+     int need_closer;
+     int *nextp, *closerp;
+{
+  char *t;
+  int ret, n, c;
+
+  ret = n = c = 0;
+  if (t = mbschr (dirname, '$'))
+    {
+      ret = '$';
+      n = t[1];
+      /* Deliberately does not handle the deprecated $[...] arithmetic
+	 expansion syntax */
+      if (n == '(')
+	c = ')';
+      else if (n == '{')
+	c = '}';
+      else
+	n = 0;
+
+      if (c && need_closer)		/* XXX */
+	{
+	  int p;
+	  char delims[2];
+
+	  delims[0] = c; delims[1] = 0;
+	  p = skip_to_delim (t, 1, delims, SD_NOJMP|SD_COMPLETE);
+	  if (t[p] != c)
+	    ret = 0;
+	}
+    }
+  else if (dirname[0] == '~')
+    ret = '~';
+  else
+    {
+      t = mbschr (dirname, '`');
+      if (t)
+	{
+	  if (need_closer == 0)
+	    ret = '`';
+	  else if (unclosed_pair (dirname, strlen (dirname), "`") == 0)
+	    ret = '`';
+	}
+    }
+
+  if (nextp)
+    *nextp = n;
+  if (closerp)
+    *closerp = c;
+
+  return ret;
+}
+
+/* Make sure EXPCHAR and, if non-zero, NEXTCH and CLOSER are not in the set
+   of characters to be backslash-escaped. This is the only place
+   custom_filename_quote_characters is modified. */
+static void
+set_filename_quote_chars (expchar, nextch, closer)
+     int expchar, nextch, closer;
+{
+  int i, j, c;
+
+  if (rl_filename_quote_characters && *rl_filename_quote_characters)
+    {
+      i = strlen (default_filename_quote_characters);
+      custom_filename_quote_characters = xrealloc (custom_filename_quote_characters, i+1);
+      for (i = j = 0; c = default_filename_quote_characters[i]; i++)
+	{
+	  if (c == expchar || c == nextch || c == closer)
+	    continue;
+	  custom_filename_quote_characters[j++] = c;
+	}
+      custom_filename_quote_characters[j] = '\0';
+      rl_filename_quote_characters = custom_filename_quote_characters;
+      set_filename_bstab (rl_filename_quote_characters);
+    }
+}
+
 /* Use characters in STRING to populate the table of characters that should
    be backslash-quoted.  The table will be used for sh_backslash_quote from
    this file. */
@@ -4222,6 +4269,7 @@ bash_quote_filename (s, rtype, qcp)
 {
   char *rtext, *mtext, *ret;
   int rlen, cs;
+  int expchar, nextch, closer;
 
   rtext = (char *)NULL;
 
@@ -4239,7 +4287,17 @@ bash_quote_filename (s, rtype, qcp)
      the word being completed contains newlines, since those are not
      quoted correctly using backslashes (a backslash-newline pair is
      special to the shell parser). */
-  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && mbschr (s, '\n'))
+  expchar = nextch = closer = 0;
+  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && dircomplete_expand == 0 &&
+      (expchar = bash_check_expchar (s, 0, &nextch, &closer)))
+    {
+      /* Usually this will have been set by bash_directory_completion_hook, but
+	 there are rare cases where it will not be. */
+      if (rl_filename_quote_characters != custom_filename_quote_characters)
+	set_filename_quote_chars (expchar, nextch, closer);
+      complete_fullquote = 0;
+    }
+  else if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && mbschr (s, '\n'))
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
     cs = COMPLETE_DQUOTE;
