@@ -6242,7 +6242,7 @@ read_comsub (fd, quoted, flags, rflag)
 	  /* read a multibyte character from buf */
 	  /* punt on the hard case for now */
 	  memset (&ps, '\0', sizeof (mbstate_t));
-	  mblen = mbrtowc (&wc, bufp-1, bufn+1, &ps);
+	  mblen = mbrtowc (&wc, bufp-1, bufn, &ps);
 	  if (MB_INVALIDCH (mblen) || mblen == 0 || mblen == 1)
 	    istring[istring_index++] = c;
 	  else
