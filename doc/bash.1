@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Nov 22 09:58:49 EST 2021
+.\"	Last Change: Sun Dec 26 16:02:07 EST 2021
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 November 22" "GNU Bash 5.2"
+.TH BASH 1 "2021 December 26" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -714,7 +714,7 @@ Expressions are composed of the primaries described below under
 .SM
 .BR "CONDITIONAL EXPRESSIONS" .
 The words between the \fB[[\fP and \fB]]\fP do not undergo word splitting
-and filename expansion.
+and pathname expansion.
 The shell performs tilde expansion, parameter and
 variable expansion, arithmetic expansion, command substitution, process
 substitution, and quote removal on those words
@@ -3742,6 +3742,14 @@ the pattern must begin with ``.'' (for example, ``.?''),
 even if
 .B dotglob
 is set.
+If the
+.B globskipdots
+shell option is enabled, the filenames
+.B ``.''
+and
+.BR ``..''
+are never matched, even if the pattern begins with a
+.BR ``.'' .
 When not matching pathnames, the
 .B ``.''
 character is not treated specially.
@@ -3759,6 +3767,7 @@ below under
 for a description of the
 .BR nocaseglob ,
 .BR nullglob ,
+.BR globskipdots ,
 .BR failglob ,
 and
 .B dotglob
@@ -10360,6 +10369,15 @@ will not collate between
 and
 .BR B ,
 and upper-case and lower-case ASCII characters will collate together.
+.TP 8
+.B globskipdots
+If set, pathname expansion will never match the filenames
+.B ``.''
+and
+.BR ``..'' ,
+even if the pattern begins with a
+.BR ``.'' .
+This option is enabled by default.
 .TP 8
 .B globstar
 If set, the pattern \fB**\fP used in a pathname expansion context will

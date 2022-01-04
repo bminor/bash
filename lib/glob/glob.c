@@ -103,7 +103,7 @@ int glob_ignore_case = 0;
 /* Global variable controlling whether globbing ever returns . or ..
    regardless of the pattern. If set to 1, no glob pattern will ever
    match `.' or `..'. Disabled by default. */
-int glob_always_skip_dot_and_dotdot = 0;
+int glob_always_skip_dot_and_dotdot = 1;
 
 /* Global variable to return to signify an error in globbing. */
 char *glob_error_return;

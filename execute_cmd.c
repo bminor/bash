@@ -4268,7 +4268,7 @@ fix_arrayref_words (words)
 
   for (w = wcmd->next; w; w = w->next)
     {
-      if (w->word && w->word->word && valid_array_reference (w->word->word, VA_NOEXPAND))
+      if (w->word && w->word->word && valid_array_reference (w->word->word, 0))
 	w->word->flags |= W_ARRAYREF;
     }
 }

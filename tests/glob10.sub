@@ -12,24 +12,21 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-declare -A assoc=(hello world "key with spaces" "value with spaces" one 1 foo bar)
-declare -p assoc
+# test basic behavior of globskipdots
+TDIR=/tmp/dotglob-$$
 
-recho "${assoc[@]}"
-recho "${assoc[@]@k}"
+{ mkdir $TDIR && cd $TDIR; } || exit 1
 
-recho "${assoc[*]}"
-recho "${assoc[*]@k}"
+touch a b aa bb .a .b .aa .bb
 
-set -- hello world "key with spaces" "value with spaces" one 1 foo bar
-recho "${@}"
-recho "${@@K}"
-recho "${@@k}"
+echo *
+shopt -s dotglob
+echo *
 
-declare -A clone
-eval clone=\( "${assoc[@]@K}" \)
-declare -p clone
+shopt -s globskipdots
+echo .*
+shopt -u globskipdots
+echo .*
 
-declare -A posparams
-eval posparams=\( "${@@K}" \)
-declare -p posparams
+cd $OLDPWD
+rm -rf $TDIR

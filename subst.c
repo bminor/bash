@@ -1819,7 +1819,7 @@ skip_matched_pair (string, start, open, close, flags)
 			  : skip_double_quoted (ss, slen, ++i, 0);
 	  /* no increment, the skip functions increment past the closing quote. */
 	}
-      else if ((flags&1) == 0 && c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
+      else if ((flags & 1) == 0 && c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
 	{
 	  si = i + 2;
 	  if (string[si] == '\0')
@@ -11608,6 +11608,12 @@ word_list_split (list)
 	  w->word[0] = '\0';
 	  tresult = make_word_list (w, (WORD_LIST *)NULL);
 	}
+#if defined (ARRAY_VARS)
+      /* pass W_ARRAYREF through for words that are not split and are
+	 identical to the original word. */
+      if (tresult && tresult->next == 0 && t->next == 0 && (t->word->flags & W_ARRAYREF) && STREQ (t->word->word, tresult->word->word))
+	tresult->word->flags |= W_ARRAYREF;
+#endif
       if (result == 0)
         result = e = tresult;
       else

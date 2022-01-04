@@ -2788,4 +2788,30 @@ builtins/common.c
 	- INTERNAL_DEBUG: use instead of calls to itrace protected by #ifdef
 	  DEBUG
 
+				   12/26
+				   -----
+lib/glob/glob.c
+	- glob_always_skip_dot_and_dotdot: initialize to 1 (enabled)
 
+builtins/shopt.def
+	- globskipdots: new shell option, exposes glob_always_skip_dot_and_dotdot
+
+doc/{bash.1,bashref.texi}
+	- globskipdots: document new shell option
+
+execute_cmd.c
+	- fix_arrayref_words: call valid_array_reference with 0 for third arg
+	  because the words have not undergone any word expansions yet and
+	  the quotes are still present. This makes things like
+		A=[\[]=set
+		unset A[\[]
+	  work
+
+subst.c
+	- word_list_split: if a word undergoes word splitting but is not
+	  changed, preserve any W_ARRAYREF flag into the new word. This makes
+	  things like
+		rkey=']'
+		unset A[$rkey]
+	  work because the unset builtin sees the W_ARRAYREF flag on its
+	  argument

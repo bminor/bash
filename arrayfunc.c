@@ -1255,7 +1255,7 @@ tokenize_array_reference (name, flags, subp)
      char **subp;
 {
   char *t;
-  int r, len, isassoc;
+  int r, len, isassoc, ssflags;
   SHELL_VAR *entry;
 
   t = mbschr (name, '[');	/* ] */
@@ -1270,10 +1270,15 @@ tokenize_array_reference (name, flags, subp)
       if (r == 0)
 	return 0;
 
+      ssflags = 0;
       if (isassoc && ((flags & (VA_NOEXPAND|VA_ONEWORD)) == (VA_NOEXPAND|VA_ONEWORD)))
 	len = strlen (t) - 1;
       else if (isassoc)
-	len = skipsubscript (t, 0, flags&VA_NOEXPAND);	/* VA_NOEXPAND must be 1 */
+	{
+	  if (flags & VA_NOEXPAND)
+	    ssflags |= 1;
+	  len = skipsubscript (t, 0, ssflags);
+	}
       else
 	/* Check for a properly-terminated non-null subscript. */
 	len = skipsubscript (t, 0, 0);		/* arithmetic expression */

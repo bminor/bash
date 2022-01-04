@@ -12,6 +12,7 @@ cd $TESTDIR || {
 
 LC_CTYPE=C LC_COLLATE=C
 shopt -s extglob dotglob
+shopt -u globskipdots		# XXX - backwards compatibility
 touch .foo bar .a
 
 echo dotglob: .a .foo bar

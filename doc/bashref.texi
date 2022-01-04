@@ -2757,6 +2757,9 @@ must be matched explicitly, unless the shell option @code{dotglob} is set.
 In order to match the filenames @samp{.} and @samp{..},
 the pattern must begin with @samp{.} (for example, @samp{.?}),
 even if @code{dotglob} is set.
+If the @code{globskipdots} shell option is enabled, the filenames
+@samp{.} and @samp{..} are never matched, even if the pattern begins
+with a @samp{.}.
 When not matching filenames, the @samp{.} character is not treated specially.
 
 When matching a filename, the slash character must always be
@@ -2766,6 +2769,7 @@ below (@pxref{Pattern Matching}).
 
 See the description of @code{shopt} in @ref{The Shopt Builtin},
 for a description of the @code{nocaseglob}, @code{nullglob},
+@code{globskipdots},
 @code{failglob}, and @code{dotglob} options.
 
 The @env{GLOBIGNORE}
@@ -5691,6 +5695,12 @@ comparisons.  That is, the current locale's collating sequence
 is not taken into account, so
 @samp{b} will not collate between @samp{A} and @samp{B},
 and upper-case and lower-case ASCII characters will collate together.   
+
+@item globskipdots
+If set, filename expansion will never match the filenames
+@samp{.} and @samp{..},
+even if the pattern begins with a @samp{.}.
+This option is enabled by default.
 
 @item globstar
 If set, the pattern @samp{**} used in a filename expansion context will
