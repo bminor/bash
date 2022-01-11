@@ -1739,7 +1739,7 @@ lib/readline/text.c
 				   ----
 complete.c,readline.c,readline.h
 	- rl_completer_word_break_characters: now const char * like
-	  rl_basic_word_break_characters; element of eadline state struct
+	  rl_basic_word_break_characters; element of readline state struct
 	  used to save it also const. THIS IS AN API CHANGE
 
 bashline.c
@@ -2613,7 +2613,7 @@ lib/malloc/malloc.c
 bashhist.c
 	- bash_add_history: if we're parsing a here-document (PST_HEREDOC), only
 	  suppress adding the newline between lines if we're not at the first
-	  line of the here-document (here_doc_first_line!= 0). From a report
+	  line of the here-document (here_doc_first_line != 0). From a report
 	  by S0AndS0 <strangerthanbland@gmail.com>
 
 				   12/8
@@ -2902,3 +2902,15 @@ bashline.c
 	  filename is unquoted (*QCP == 0) so the word will be expanded and is
 	  not part of the filename (if needed, we can use file_exists to check
 	  whether the expansion characters are actually part of the filename)
+
+				    1/7
+				    ---
+examples/loadables/accept.c
+	- new -b bindaddr option to bind to a specific IP address
+	- move setsockopt calls before bind() to avoid TIME_WAIT issues. Fixes
+	  from Dzogovic Vehbo <dzove855@gmail.com>
+
+				   1/10
+				   ----
+configure.ac
+	- bumped version to 5.2-alpha.

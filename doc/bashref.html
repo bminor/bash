@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 22 November 2021).
+the Bash shell (version 5.2, 26 December 2021).
 
-This is Edition 5.2, last updated 22 November 2021,
+This is Edition 5.2, last updated 26 December 2021,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 22 November 2021).
+the Bash shell (version 5.2, 26 December 2021).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 22 November 2021,
+<p>This is Edition 5.2, last updated 26 December 2021,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -3192,6 +3192,9 @@ must be matched explicitly, unless the shell option <code>dotglob</code> is set.
 In order to match the filenames &lsquo;<samp>.</samp>&rsquo; and &lsquo;<samp>..</samp>&rsquo;,
 the pattern must begin with &lsquo;<samp>.</samp>&rsquo; (for example, &lsquo;<samp>.?</samp>&rsquo;),
 even if <code>dotglob</code> is set.
+If the <code>globskipdots</code> shell option is enabled, the filenames
+&lsquo;<samp>.</samp>&rsquo; and &lsquo;<samp>..</samp>&rsquo; are never matched, even if the pattern begins
+with a &lsquo;<samp>.</samp>&rsquo;.
 When not matching filenames, the &lsquo;<samp>.</samp>&rsquo; character is not treated specially.
 </p>
 <p>When matching a filename, the slash character must always be
@@ -3201,6 +3204,7 @@ below (see <a href="#Pattern-Matching">Pattern Matching</a>).
 </p>
 <p>See the description of <code>shopt</code> in <a href="#The-Shopt-Builtin">The Shopt Builtin</a>,
 for a description of the <code>nocaseglob</code>, <code>nullglob</code>,
+<code>globskipdots</code>,
 <code>failglob</code>, and <code>dotglob</code> options.
 </p>
 <p>The <code>GLOBIGNORE</code>
@@ -6025,7 +6029,9 @@ This option cannot be unset once it has been set.
 </dd>
 <dt><span><code>-u</code></span></dt>
 <dd><p>Treat unset variables and parameters other than the special parameters
-&lsquo;<samp>@</samp>&rsquo; or &lsquo;<samp>*</samp>&rsquo; as an error when performing parameter expansion.
+&lsquo;<samp>@</samp>&rsquo; or &lsquo;<samp>*</samp>&rsquo;,
+or array variables subscripted with &lsquo;<samp>@</samp>&rsquo; or &lsquo;<samp>*</samp>&rsquo;,
+as an error when performing parameter expansion.
 An error message will be written to the standard error, and a non-interactive
 shell will exit.
 </p>
@@ -6376,6 +6382,13 @@ comparisons.  That is, the current locale&rsquo;s collating sequence
 is not taken into account, so
 &lsquo;<samp>b</samp>&rsquo; will not collate between &lsquo;<samp>A</samp>&rsquo; and &lsquo;<samp>B</samp>&rsquo;,
 and upper-case and lower-case ASCII characters will collate together.   
+</p>
+</dd>
+<dt><span><code>globskipdots</code></span></dt>
+<dd><p>If set, filename expansion will never match the filenames
+&lsquo;<samp>.</samp>&rsquo; and &lsquo;<samp>..</samp>&rsquo;,
+even if the pattern begins with a &lsquo;<samp>.</samp>&rsquo;.
+This option is enabled by default.
 </p>
 </dd>
 <dt><span><code>globstar</code></span></dt>
@@ -7502,12 +7515,11 @@ with &lsquo;<samp>bind -x</samp>&rsquo; (see <a href="#Bash-Builtins">Bash Built
 </p>
 </dd>
 <dt id='index-SECONDS'><span><code>SECONDS</code><a href='#index-SECONDS' class='copiable-anchor'> &para;</a></span></dt>
-<dd><p>This variable expands to the number of seconds since the
-shell was started.  Assignment to this variable resets
-the count to the value assigned, and the expanded value
-becomes the value assigned plus the number of seconds
+<dd><p>This variable expands to the number of seconds since the shell was started. 
+Assignment to this variable resets the count to the value assigned, and the
+expanded value becomes the value assigned plus the number of seconds
 since the assignment.
-The number of seconds at shell invocation and the current time is always
+The number of seconds at shell invocation and the current time are always
 determined by querying the system clock.
 If <code>SECONDS</code>
 is unset, it loses its special properties,
@@ -7989,8 +8001,9 @@ Next: <a href="#Is-this-Shell-Interactive_003f" accesskey="n" rel="next">Is this
 <span id="What-is-an-Interactive-Shell_003f-1"></span><h4 class="subsection">6.3.1 What is an Interactive Shell?</h4>
 
 <p>An interactive shell
-is one started without non-option arguments, unless <samp>-s</samp> is
-specified, without specifying the <samp>-c</samp> option, and
+is one started without non-option arguments
+(unless <samp>-s</samp> is specified)
+and without specifying the <samp>-c</samp> option,
 whose input and error output are both
 connected to terminals (as determined by <code>isatty(3)</code>),
 or one started with the <samp>-i</samp> option.
@@ -9483,9 +9496,28 @@ when the <samp>-l</samp> option is supplied.
 </dd>
 <dt><span><code>compat51 (set using BASH_COMPAT)</code></span></dt>
 <dd><ul>
-<li> The <code>unset</code> builtin treats attempts to unset array subscripts &lsquo;<samp>@</samp>&rsquo;
-and &lsquo;<samp>*</samp>&rsquo; differently depending on whether the array is indexed or
-associative, and differently than in previous versions.
+<li> The <code>unset</code> builtin will unset the array <code>a</code> given an argument like
+&lsquo;<samp>a[@]</samp>&rsquo;.
+Bash-5.2 will unset an element with key &lsquo;<samp>@</samp>&rsquo; (associative arrays)
+or remove all the elements without unsetting the array (indexed arrays)
+</li><li> arithmetic commands ( ((...)) ) and the expressions in an arithmetic for
+statement can be expanded more than once
+</li><li> expressions used as arguments to arithmetic operators in the <code>[[</code>
+conditional command can be expanded more than once
+</li><li> the expressions in substring parameter brace expansion can be
+expanded more than once
+</li><li> the expressions in the $(( ... )) word expansion can be expanded
+more than once
+</li><li> arithmetic expressions used as indexed array subscripts can be
+expanded more than once
+</li><li> <code>test -v</code>, when given an argument of &lsquo;<samp>A[@]</samp>&rsquo;, where <var>A</var> is
+an existing associative array, will return true if the array has any set
+elements.
+Bash-5.2 will look for and report on a key named &lsquo;<samp>@</samp>&rsquo;
+</li><li> the ${<var>parameter</var>[:]=<var>value</var>} word expansion will return
+<var>value</var>, before any variable-specific transformations have been
+performed (e.g., converting to lowercase).
+Bash-5.2 will return the final value assigned to the variable.
 </li></ul>
 </dd>
 </dl>
@@ -13709,6 +13741,11 @@ literals.
 </dd>
 <dt><span><code>--enable-strict-posix-default</code></span></dt>
 <dd><p>Make Bash <small>POSIX</small>-conformant by default (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>).
+</p>
+</dd>
+<dt><span><code>--enable-translatable-strings</code></span></dt>
+<dd><p>Enable support for <code>$&quot;<var>string</var>&quot;</code> translatable strings
+(see <a href="#Locale-Translation">Locale-Specific Translation</a>).
 </p>
 </dd>
 <dt><span><code>--enable-usg-echo-default</code></span></dt>

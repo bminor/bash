@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2021 November 22<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2021 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -368,7 +368,7 @@ An <I>interactive</I> shell is one started without non-option arguments
 and without the
 <B>-c</B>
 
-option
+option,
 whose standard input and error are
 both connected to terminals (as determined by
 <I>isatty</I>(3)),
@@ -941,7 +941,7 @@ Expressions are composed of the primaries described below under
 
 </FONT>
 The words between the <B>[[</B> and <B>]]</B> do not undergo word splitting
-and filename expansion.
+and pathname expansion.
 The shell performs tilde expansion, parameter and
 variable expansion, arithmetic expansion, command substitution, process
 substitution, and quote removal on those words
@@ -2557,15 +2557,15 @@ builtin command when no arguments are supplied.
 
 <DD>
 Each time this parameter is
-referenced, the number of seconds since shell invocation is returned.  If a
-value is assigned to
+referenced, it expands to the number of seconds since shell invocation.
+If a value is assigned to
 <FONT SIZE=-1><B>SECONDS</B>,
 
 </FONT>
 the value returned upon subsequent
 references is
 the number of seconds since the assignment plus the value assigned.
-The number of seconds at shell invocation and the current time is always
+The number of seconds at shell invocation and the current time are always
 determined by querying the system clock.
 If
 <FONT SIZE=-1><B>SECONDS</B>
@@ -4681,6 +4681,18 @@ even if
 <B>dotglob</B>
 
 is set.
+If the
+<B>globskipdots</B>
+
+shell option is enabled, the filenames
+<B>``.''</B>
+
+and
+<B>``..''</B>
+
+are never matched, even if the pattern begins with a
+<B>``.''</B>.
+
 When not matching pathnames, the
 <B>``.''</B>
 
@@ -4703,6 +4715,8 @@ for a description of the
 <B>nocaseglob</B>,
 
 <B>nullglob</B>,
+
+<B>globskipdots</B>,
 
 <B>failglob</B>,
 
@@ -12524,7 +12538,9 @@ Exit after reading and executing one command.
 
 <DD>
 Treat unset variables and parameters other than the special
-parameters &quot;@&quot; and &quot;*&quot; as an error when performing
+parameters &quot;@&quot; and &quot;*&quot;,
+or array variables subscripted with &quot;@&quot; or &quot;*&quot;,
+as an error when performing
 parameter expansion.  If expansion is attempted on an
 unset variable or parameter, the shell prints an error message, and,
 if not interactive, exits with a non-zero status.
@@ -13046,6 +13062,19 @@ and
 <B>B</B>,
 
 and upper-case and lower-case ASCII characters will collate together.
+<DT><B>globskipdots</B>
+
+<DD>
+If set, pathname expansion will never match the filenames
+<B>``.''</B>
+
+and
+<B>``..''</B>,
+
+even if the pattern begins with a
+<B>``.''</B>.
+
+This option is enabled by default.
 <DT><B>globstar</B>
 
 <DD>
@@ -14588,7 +14617,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2021 November 22<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2021 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14694,7 +14723,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from bash.1.<BR>
-Time: 22 November 2021 11:02:25 EST
+This document was created by man2html from /usr/local/src/bash/bash-20220105/doc/bash.1.<BR>
+Time: 11 January 2022 15:02:14 EST
 </BODY>
 </HTML>
