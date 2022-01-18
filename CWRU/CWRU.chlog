@@ -2914,3 +2914,31 @@ examples/loadables/accept.c
 				   ----
 configure.ac
 	- bumped version to 5.2-alpha.
+
+				   1/16
+				   ----
+
+tests/{unicode1,glob2,intl2}.sub, tests/run-intl
+	- minor changes to add warnings for missing locales that cause test
+	  failures
+
+				   1/17
+				   ----
+parse.y
+	- history_delimiting_chars: if we have a blank line by the time we
+	  hit the end of the tests, return a semicolon for the first blank
+	  line to avoid running lines of a multi-line command together.
+	  Fixes bug reported by Joakim Lindblad <joakim@cb.uu.se>
+
+subst.c
+	- expand_string_for_patsub: expand the replacement string for pattern
+	  substitution assuming that it will eventually be passed to
+	  strcreplace to replace `&' with the matched portion of the string.
+	  This calls expand_string_for_pat(), which leaves the string quoted
+	  and does not perform word splitting, then calls
+	  quote_string_for_repl to post-process the expanded string.
+	- quote_string_for_repl: perform quote removal on passed string while
+	  replacing CTLESC escaping a `&' or a backslash with a backslash. The
+	  result must be passed to strcreplace
+	- parameter_brace_patsub: call expand_string_for_patsub if
+	  patsub_replacement is set to quote 

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun Dec 26 16:02:07 EST 2021
+.\"	Last Change: Mon Jan 17 17:27:05 EST 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 December 26" "GNU Bash 5.2"
+.TH BASH 1 "2022 January 17" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2021 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2021 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2022 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2022 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -3373,18 +3373,27 @@ matches of \fIpattern\fP are deleted.
 If \fIstring\fP is null,
 matches of \fIpattern\fP are deleted
 and the \fB/\fP following \fIpattern\fP may be omitted.
+.sp 1
 If the \fBpatsub_replacement\fP shell option is enabled using \fBshopt\fP,
 any unquoted instances of \fB&\fP in \fIstring\fP are replaced with the
 matching portion of \fIpattern\fP.
-Backslash is used to quote \fB&\fP in \fIstring\fP; the backslash is removed
+.sp 1
+Quoting any part of \fIstring\fP inhibits replacement in the
+expansion of the quoted portion, including replacement strings stored
+in shell variables.
+Backslash will escape \fB&\fP in \fIstring\fP; the backslash is removed
 in order to permit a literal \fB&\fP in the replacement string.
-Users should take care
-if \fIstring\fP is double-quoted to avoid unwanted interactions between
-the backslash and double-quoting.
-Pattern substitution performs the check for \fB&\fP after expanding
-\fIstring\fP; shell programmers should quote backslashes intended to escape
-the \fB&\fP and inhibit replacement so they survive any quote removal
-performed by the expansion of \fIstring\fP.
+Backslash can also be used to escape a backslash; \fB\e\e\fP results in
+a literal backslash in the replacement.
+Users should take care if \fIstring\fP is double-quoted to avoid
+unwanted interactions between the backslash and double-quoting, since
+backslash has special meaning within double quotes.
+Pattern substitution performs the check for unquoted \fB&\fP after
+expanding \fIstring\fP;
+shell programmers should quote any occurrences of \fB&\fP
+they want to be taken literally in the replacement
+and ensure any instances of \fB&\fP they want to be replaced are unquoted.
+.sp 1
 If the
 .B nocasematch
 shell option is enabled, the match is performed without regard to the case

@@ -9,7 +9,7 @@ SSYYNNOOPPSSIISS
        bbaasshh [options] [command_string | file]
 
 CCOOPPYYRRIIGGHHTT
-       Bash is Copyright (C) 1989-2021 by the Free Software Foundation, Inc.
+       Bash is Copyright (C) 1989-2022 by the Free Software Foundation, Inc.
 
 DDEESSCCRRIIPPTTIIOONN
        BBaasshh  is  an  sshh-compatible  command language interpreter that executes
@@ -1849,24 +1849,34 @@ EEXXPPAANNSSIIOONN
               end of the expanded value of _p_a_r_a_m_e_t_e_r.   If  the  expansion  of
               _s_t_r_i_n_g  is  null,  matches of _p_a_t_t_e_r_n are deleted.  If _s_t_r_i_n_g is
               null, matches of _p_a_t_t_e_r_n are deleted and the // following _p_a_t_t_e_r_n
-              may  be  omitted.  If the ppaattssuubb__rreeppllaacceemmeenntt shell option is en-
-              abled using sshhoopptt, any unquoted instances of && in _s_t_r_i_n_g are re-
-              placed  with the matching portion of _p_a_t_t_e_r_n.  Backslash is used
-              to quote && in _s_t_r_i_n_g; the backslash is removed in order to  per-
-              mit  a  literal  && in the replacement string.  Users should take
-              care if _s_t_r_i_n_g is double-quoted to avoid  unwanted  interactions
-              between  the backslash and double-quoting.  Pattern substitution
-              performs the check for && after expanding _s_t_r_i_n_g; shell  program-
-              mers  should  quote backslashes intended to escape the && and in-
-              hibit replacement so they survive any quote removal performed by
-              the expansion of _s_t_r_i_n_g.  If the nnooccaasseemmaattcchh shell option is en-
-              abled, the match is performed without regard to the case of  al-
-              phabetic  characters.   If _p_a_r_a_m_e_t_e_r is @@ or **, the substitution
-              operation is applied to each positional parameter in  turn,  and
-              the  expansion  is the resultant list.  If _p_a_r_a_m_e_t_e_r is an array
-              variable subscripted with @@ or **, the substitution operation  is
-              applied  to  each member of the array in turn, and the expansion
-              is the resultant list.
+              may be omitted.
+
+              If  the  ppaattssuubb__rreeppllaacceemmeenntt shell option is enabled using sshhoopptt,
+              any unquoted instances of && in  _s_t_r_i_n_g  are  replaced  with  the
+              matching portion of _p_a_t_t_e_r_n.
+
+              Quoting any part of _s_t_r_i_n_g inhibits replacement in the expansion
+              of the quoted portion, including replacement strings  stored  in
+              shell  variables.   Backslash will escape && in _s_t_r_i_n_g; the back-
+              slash is removed in order to permit a literal && in the  replace-
+              ment  string.  Backslash can also be used to escape a backslash;
+              \\\\ results in a literal backslash  in  the  replacement.   Users
+              should  take  care  if _s_t_r_i_n_g is double-quoted to avoid unwanted
+              interactions between the  backslash  and  double-quoting,  since
+              backslash  has  special  meaning  within double quotes.  Pattern
+              substitution performs the check for unquoted &&  after  expanding
+              _s_t_r_i_n_g; shell programmers should quote any occurrences of && they
+              want to be taken literally in the replacement and ensure any in-
+              stances of && they want to be replaced are unquoted.
+
+              If  the  nnooccaasseemmaattcchh  shell option is enabled, the match is per-
+              formed without regard to the case of alphabetic characters.   If
+              _p_a_r_a_m_e_t_e_r  is  @@  or **, the substitution operation is applied to
+              each positional parameter in turn, and the expansion is the  re-
+              sultant  list.   If  _p_a_r_a_m_e_t_e_r  is an array variable subscripted
+              with @@ or **, the substitution operation is applied to each  mem-
+              ber  of  the  array  in turn, and the expansion is the resultant
+              list.
 
        ${_p_a_r_a_m_e_t_e_r^^_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r^^^^_p_a_t_t_e_r_n}
@@ -6597,4 +6607,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.2                   2021 December 26                        BASH(1)
+GNU Bash 5.2                    2022 January 17                        BASH(1)

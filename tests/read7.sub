@@ -13,6 +13,9 @@
 #
 # test behavior of native readline timeouts
 
+# turn off bracketed paste to avoid spurious output
+bind 'set enable-bracketed-paste off' 2>/dev/null
+
 read -t 0.00001 -e var
 estat=$?
 if [ $estat -gt 128 ]; then

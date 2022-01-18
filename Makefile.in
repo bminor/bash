@@ -588,7 +588,7 @@ LOADABLES_DIR = ${top_builddir}/examples/loadables
 .made: $(Program) bashbug $(SDIR)/man2html$(EXEEXT)
 	@echo "$(Program) last made for a $(Machine) running $(OS)" >.made
 
-$(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
+$(Program): $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP) .build
 	$(RM) $@
 	$(PURIFY) $(CC) $(BUILTINS_LDFLAGS) $(LIBRARY_LDFLAGS) $(LDFLAGS) -o $(Program) $(OBJECTS) $(LIBS)
 	ls -l $(Program)

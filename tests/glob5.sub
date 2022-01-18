@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+[ $UID -eq 0 ] && { echo "glob5.sub: the test suite should not be run as root" >&2 ; }
+
 ORIGD=$PWD
 : ${TMPDIR:=/var/tmp}
 

@@ -5433,8 +5433,11 @@ history_delimiting_chars (line)
 	return (" ");
     }
 
+  /* Assume that by this point we are reading lines in a multi-line command.
+     If we have multiple consecutive blank lines we want to return only one
+     semicolon. */
   if (line_isblank (line))
-    return ("");
+    return (current_command_line_count > 1 && last_read_token == '\n' && token_before_that != '\n') ? "; " : "";
 
   return ("; ");
 }

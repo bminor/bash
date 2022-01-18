@@ -341,6 +341,7 @@ static int shouldexp_replacement PARAMS((char *));
 
 static char *pos_params_pat_subst PARAMS((char *, char *, char *, int));
 
+static char *expand_string_for_patsub PARAMS((char *, int));
 static char *parameter_brace_patsub PARAMS((char *, char *, array_eltstate_t *, char *, int, int, int));
 
 static char *pos_params_casemod PARAMS((char *, char *, int, int));
@@ -3601,6 +3602,104 @@ expand_assignment_string_to_string (string, quoted)
      int quoted;
 {
   return (expand_string_to_string_internal (string, quoted, expand_string_assignment));
+}
+
+/* Kind of like a combination of dequote_string and quote_string_for_globbing;
+   try to remove CTLESC quoting characters and convert CTLESC escaping a `&'
+   or a backslash into a backslash. The output of this function must eventually
+   be processed by strcreplace(). */
+static char *
+quote_string_for_repl (string, flags)
+     char *string;
+     int flags;
+{
+  size_t slen;
+  char *result, *t;
+  const char *s, *send;
+  DECLARE_MBSTATE;
+
+  slen = strlen (string);
+  send = string + slen;
+
+  result = (char *)xmalloc (slen * 2 + 1);
+
+  if (string[0] == CTLESC && string[1] == 0)
+    {
+      result[0] = CTLESC;
+      result[1] = '\0';
+      return (result);
+    }
+
+  /* This is awkward. We want to translate CTLESC-\ to \\ if we will
+     eventually send this string through strcreplace(), which we will do
+     only if shouldexp_replacement() determines that there is something
+     to replace. We can either make sure to escape backslashes here and
+     have shouldexp_replacement() signal that we should send the string to
+     strcreplace() if it sees an escaped backslash, or we can scan the
+     string before copying it and turn CTLESC-\ into \\ only if we encounter
+     a CTLESC-& or a &. This does the former and changes shouldexp_replacement().
+     If we double the backslashes  here, we'll get doubled backslashes in any
+     result that doesn't get passed to strcreplace(). */
+
+  for (s = string, t = result; *s; )
+    {
+      /* This function's result has to be processed by strcreplace() */
+      if (*s == CTLESC && (s[1] == '&' || s[1] == '\\'))
+        {
+          *t++ = '\\';
+          s++;
+          *t++ = *s++;
+          continue;
+        }
+      /* Dequote it */
+      if (*s == CTLESC)
+        {
+	  s++;
+	  if (*s == '\0')
+	    break;
+        }
+      COPY_CHAR_P (t, s, send);
+    }
+
+  *t = '\0';
+  return (result);
+}
+	
+/* This does not perform word splitting on the WORD_LIST it returns and
+   it treats $* as if it were quoted. It dequotes the WORD_LIST, adds
+   backslash escapes before CTLESC-quoted backslash and `& if 
+   patsub_replacement is enabled. */
+static char *
+expand_string_for_patsub (string, quoted)
+     char *string;
+     int quoted;
+{
+  WORD_LIST *value;
+  char *ret, *t;
+
+  if (string == 0 || *string == '\0')
+    return (char *)NULL;
+
+  value = expand_string_for_pat (string, quoted, (int *)0, (int *)0);
+
+  if (value && value->word)
+    {
+      remove_quoted_nulls (value->word->word);	/* XXX */
+      value->word->flags &= ~W_HASQUOTEDNULL;
+    }
+
+  if (value)
+    {
+      t = (value->next) ? string_list (value) : value->word->word;
+      ret = quote_string_for_repl (t, quoted);
+      if (t != value->word->word)
+	free (t);
+      dispose_words (value);
+    }
+  else
+    ret = (char *)NULL;
+
+  return (ret);
 }
 
 char *
@@ -8432,6 +8531,8 @@ shouldexp_replacement (s)
 	     preceding the special character. */
 	  if (s[sindex] == '&')
 	    return 1;
+	  if (s[sindex] == '\\')
+	    return 1;
 	}
       else if (c == '&')
 	return 1;
@@ -8696,8 +8797,10 @@ parameter_brace_patsub (varname, value, estatep, patsub, quoted, pflags, flags)
 	 the entire expansion is double-quoted because the parser and string
 	 extraction functions treated quotes in the replacement string as
 	 special.  THIS IS NOT BACKWARDS COMPATIBLE WITH BASH-4.2. */
-      if (shell_compatibility_level > 42)
+      if (shell_compatibility_level > 42 && patsub_replacement == 0)
 	rep = expand_string_if_necessary (rep, quoted & ~(Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT), expand_string_unsplit);
+      else if (shell_compatibility_level > 42 && patsub_replacement)
+	rep = expand_string_for_patsub (rep, quoted & ~(Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT));
       /* This is the bash-4.2 code. */      
       else if ((mflags & MATCH_QUOTED) == 0)
 	rep = expand_string_if_necessary (rep, quoted, expand_string_unsplit);
@@ -8706,9 +8809,7 @@ parameter_brace_patsub (varname, value, estatep, patsub, quoted, pflags, flags)
 
       /* Check whether or not to replace `&' in the replacement string after
 	 expanding it, since we want to treat backslashes quoting the `&'
-	 consistently. The replacement string already undergoes quote removal
-	 above, so users need to make sure any desired backslash makes it
-	 through that. */
+	 consistently. */
       if (patsub_replacement && rep && *rep && shouldexp_replacement (rep))
 	mflags |= MATCH_EXPREP;
 

@@ -109,7 +109,14 @@ fr_FR_ISO_8859_1=(
  [0x00fb]=$'\373' [0x00fc]=$'\374' [0x00fd]=$'\375' [0x00fe]=$'\376'	
 )
 
-TestCodePage fr_FR.ISO8859-1 fr_FR_ISO_8859_1
+# this locale causes problems all over the place
+if locale -a | grep -i '^fr_FR\.ISO8859.*1' >/dev/null ; then
+	TestCodePage fr_FR.ISO8859-1 fr_FR_ISO_8859_1
+else
+	echo "unicode1.sub: warning: you do not have the fr_FR.ISO8859-1 locale installed;" >&2
+	echo "unicode1.sub: that will cause some of these tests to fail." >&2
+fi
+
 
 zh_TW_BIG5=(
  [0x00f6]=$'\366' [0x00f7]=$'\367' [0x00f8]=$'\370' [0x00f9]=$'\371' [0x00fa]=$'\372'

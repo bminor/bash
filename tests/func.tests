@@ -11,6 +11,12 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# since we look at functions below, remove all functions now 
+funcs=$(compgen -A function)
+if [ -n "$funcs" ]; then
+        unset -f $funcs
+fi
+
 a()
 {
 	x=$((x - 1))

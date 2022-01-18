@@ -2444,46 +2444,67 @@ If the @code{patsub_replacement} shell option is enabled using @code{shopt},
 any unquoted instances of @samp{&} in @var{string} are replaced with the
 matching portion of @var{pattern}.
 This is intended to duplicate a common @code{sed} idiom.
-Backslash is used to quote @samp{&} in @var{string}; the backslash is removed
+
+Quoting any part of @var{string} inhibits replacement in the
+expansion of the quoted portion, including replacement strings stored
+in shell variables.
+Backslash will escape @samp{&} in @var{string}; the backslash is removed
 in order to permit a literal @samp{&} in the replacement string.
-Pattern substitution performs the check for @samp{&} after expanding
-@var{string},
-so users should take care to quote backslashes intended to escape
-the @samp{&} and inhibit replacement so they survive any quote removal
-performed by the expansion of @var{string}.
+Users should take care if @var{string} is double-quoted to avoid
+unwanted interactions between the backslash and double-quoting, since
+backslash has special meaning within double quotes.
+Pattern substitution performs the check for unquoted @samp{&} after
+expanding @var{string},
+so users should ensure to properly quote any occurrences of @samp{&}
+they want to be taken literally in the replacement
+and ensure any instances of @samp{&} they want to be replaced are unquoted.
+
 For instance,
 
 @example
 var=abcdef
+rep='& '
 echo $@{var/abc/& @}
 echo "$@{var/abc/& @}"
-echo $@{var/abc/"& "@}
+echo $@{var/abc/$rep@}
+echo "$@{var/abc/$rep@}"
 @end example
 
 @noindent
-will display three lines of "abc def", while
+will display four lines of "abc def", while
 
 @example
 var=abcdef
+rep='& '
 echo $@{var/abc/\& @}
 echo "$@{var/abc/\& @}"
-echo $@{var/abc/"\& "@}
+echo $@{var/abc/"& "@}
+echo $@{var/abc/"$rep"@}
 @end example
 
 @noindent
-will display two lines of "abc def" and a third line of "& def".
-The first two are replaced because the backslash is removed by quote
-removal performed during the expansion of @var{string}
-(the expansion is performed in a
-context that doesn't take any enclosing double quotes into account, as
-with other word expansions).
-In the third case, the double quotes affect the expansion
-of @samp{\&}, and, because @samp{&} is not one of the characters for
-which backslash is special in double quotes,
-the backslash survives the expansion, inhibits the replacement,
-but is removed because it is treated specially.
-One could use @samp{\\&}, unquoted, as the replacement string to achive
-the same effect.
+will display four lines of "& def".
+Like the pattern removal operators, double quotes surrounding the
+replacement string quote the expanded characters, while double quotes
+enclosing the entire parameter substitution do not, since
+the expansion is performed in a
+context that doesn't take any enclosing double quotes into account.
+
+Since backslash can escape @samp{&}, it can also escape a backslash in
+the replacement string.
+This means that @samp{\\} will insert a literal
+backslash into the replacement, so these two @code{echo} commands
+
+@example
+var=abcdef
+rep='\\&xyz'
+echo $@{var/abc/\\&xyz@}
+echo $@{var/abc/$rep@}
+@end example
+
+@noindent
+will both output @samp{\abcxyzdef}.
+
 It should rarely be necessary to enclose only @var{string} in double
 quotes.
 
