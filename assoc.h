@@ -1,7 +1,7 @@
 /* assoc.h -- definitions for the interface exported by assoc.c that allows
    the rest of the shell to manipulate associative array variables. */
 
-/* Copyright (C) 2008,2009-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -60,6 +60,7 @@ extern char *assoc_to_assign PARAMS((HASH_TABLE *, int));
 
 extern WORD_LIST *assoc_to_word_list PARAMS((HASH_TABLE *));
 extern WORD_LIST *assoc_keys_to_word_list PARAMS((HASH_TABLE *));
+extern WORD_LIST *assoc_to_kvpair_list PARAMS((HASH_TABLE *));
 
 extern char *assoc_to_string PARAMS((HASH_TABLE *, char *, int));
 #endif /* _ASSOC_H_ */

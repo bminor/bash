@@ -1,6 +1,6 @@
 /* bashjmp.h -- wrapper for setjmp.h with necessary bash definitions. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -42,5 +42,6 @@ extern int no_longjmp_on_fatal_error;
 #define EXITPROG	3	/* Unconditionally exit the program now. */
 #define ERREXIT		4	/* Exit due to error condition */	
 #define SIGEXIT		5	/* Exit due to fatal terminating signal */
+#define EXITBLTIN	6	/* Exit due to the exit builtin. */
 
 #endif /* _BASHJMP_H_ */

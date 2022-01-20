@@ -1,6 +1,6 @@
 /* bashansi.h -- Typically included information required by picky compilers. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,9 +22,6 @@
 #define _BASHANSI_H_
 
 #if defined (HAVE_STRING_H)
-#  if ! defined (STDC_HEADERS) && defined (HAVE_MEMORY_H)
-#    include <memory.h>
-#  endif
 #  include <string.h>
 #endif /* !HAVE_STRING_H */
 

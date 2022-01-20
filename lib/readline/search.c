@@ -1,6 +1,6 @@
 /* search.c - code for non-incremental searching in emacs and vi modes. */
 
-/* Copyright (C) 1992-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -55,11 +55,6 @@
 
 _rl_search_cxt *_rl_nscxt = 0;
 
-extern HIST_ENTRY *_rl_saved_line_for_history;
-
-/* Functions imported from the rest of the library. */
-extern void _rl_free_history_entry PARAMS((HIST_ENTRY *));
-
 static char *noninc_search_string = (char *) NULL;
 static int noninc_history_pos;
 
@@ -72,16 +67,16 @@ static int rl_history_search_flags;
 static char *history_search_string;
 static int history_string_size;
 
-static void make_history_line_current PARAMS((HIST_ENTRY *));
-static int noninc_search_from_pos PARAMS((char *, int, int, int, int *));
-static int noninc_dosearch PARAMS((char *, int, int));
-static int noninc_search PARAMS((int, int));
-static int rl_history_search_internal PARAMS((int, int));
-static void rl_history_search_reinit PARAMS((int));
+static void make_history_line_current (HIST_ENTRY *);
+static int noninc_search_from_pos (char *, int, int, int, int *);
+static int noninc_dosearch (char *, int, int);
+static int noninc_search (int, int);
+static int rl_history_search_internal (int, int);
+static void rl_history_search_reinit (int);
 
-static _rl_search_cxt *_rl_nsearch_init PARAMS((int, int));
-static void _rl_nsearch_abort PARAMS((_rl_search_cxt *));
-static int _rl_nsearch_dispatch PARAMS((_rl_search_cxt *, int));
+static _rl_search_cxt *_rl_nsearch_init (int, int);
+static void _rl_nsearch_abort (_rl_search_cxt *);
+static int _rl_nsearch_dispatch (_rl_search_cxt *, int);
 
 /* Make the data from the history entry ENTRY be the contents of the
    current line.  This doesn't do anything with rl_point; the caller
@@ -89,6 +84,12 @@ static int _rl_nsearch_dispatch PARAMS((_rl_search_cxt *, int));
 static void
 make_history_line_current (HIST_ENTRY *entry)
 {
+  /* At this point, rl_undo_list points to a private search string list. */
+  if (rl_undo_list && rl_undo_list != (UNDO_LIST *)entry->data)
+    rl_free_undo_list ();  
+
+  /* Now we create a new undo list with a single insert for this text.
+     WE DON'T CHANGE THE ORIGINAL HISTORY ENTRY UNDO LIST */
   _rl_replace_text (entry->line, 0, rl_end);
   _rl_fix_point (1);
 #if defined (VI_MODE)
@@ -100,9 +101,10 @@ make_history_line_current (HIST_ENTRY *entry)
     rl_free_undo_list ();
 #endif
 
+  /* This will need to free the saved undo list associated with the original
+     (pre-search) line buffer. */
   if (_rl_saved_line_for_history)
-    _rl_free_history_entry (_rl_saved_line_for_history);
-  _rl_saved_line_for_history = (HIST_ENTRY *)NULL;
+    _rl_free_saved_history_line ();
 }
 
 /* Search the history list for STRING starting at absolute history position
@@ -264,11 +266,11 @@ static void
 _rl_nsearch_abort (_rl_search_cxt *cxt)
 {
   rl_maybe_unsave_line ();
-  rl_clear_message ();
   rl_point = cxt->save_point;
   rl_mark = cxt->save_mark;
-  _rl_fix_point (1);
   rl_restore_prompt ();
+  rl_clear_message ();
+  _rl_fix_point (1);
 
   RL_UNSETSTATE (RL_STATE_NSEARCH);
 }
@@ -524,6 +526,9 @@ rl_history_search_internal (int count, int dir)
   char *t;
 
   rl_maybe_save_line ();
+  /* This will either be restored from the saved line or set from the
+     found history line. */
+  rl_undo_list = 0;
   temp = (HIST_ENTRY *)NULL;
 
   /* Search COUNT times through the history for a line matching
@@ -576,6 +581,11 @@ rl_history_search_internal (int count, int dir)
 
   /* Copy the line we found into the current line buffer. */
   make_history_line_current (temp);
+
+  /* Make sure we set the current history position to the last line found so
+     we can do things like operate-and-get-next from here. This is similar to
+     how incremental search behaves. */
+  history_set_pos (rl_history_search_pos);	/* XXX */
 
   /* decide where to put rl_point -- need to change this for pattern search */
   if (rl_history_search_flags & ANCHORED_SEARCH)

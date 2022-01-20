@@ -92,16 +92,16 @@ a ab
 a ab
 a ab
 a
-. ..
-. .. a.log
+*(.)
+a.log
 *(foo)
 *(foo|bar)
 a.log
 ?(foo)
 a.log
 a.log
-. ..
-. ..
+*(foo).*
+*(foo|bar).*
 a.log
 a.log
 .x .y .z
@@ -114,3 +114,71 @@ a b c
 .x .y .z a b c
 .x .y .z a b c
 *
+.b a
+.b a
+a .b
+.b
+.b
+.b a
+.b a
+a .b
+.b
+.b
+dotglob: .a .foo bar
+@(.foo)
+.foo
+!(.foo)
+.a bar
+@(.foo|*)
+.a .foo bar
+!(.foo|*)
+!(.foo|*)
+@(*)
+.a .foo bar
+!(*)
+!(*)
+.*
+. .. .a .foo
+@(.*)
+. .. .a .foo
+!(.*)
+bar
+no dotglob: .a .foo bar
+@(.foo)
+.foo
+!(.foo)
+bar
+@(.foo|*)
+.foo bar
+!(.foo|*)
+!(.foo|*)
+!(bar).foo
+!(bar).foo
+*(bar).foo
+.foo
+?(bar).foo
+.foo
+.?
+.. .a
+@(.?)
+.. .a
+!(.?)
+bar
+dotglob: .a .foo bar
+@(?|.?)
+.. .a
+@(?|.*)
+. .. .a .foo
+? .*
+? . .. .a .foo
+*
+.a .foo bar
+no dotglob: .a .foo bar
+@(?|.?)
+.. .a
+@(?|.*)
+. .. .a .foo
+? .*
+? . .. .a .foo
+*
+bar

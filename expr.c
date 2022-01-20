@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -330,6 +330,7 @@ expr_bind_variable (lhs, rhs)
 
 #if defined (ARRAY_VARS)
   aflags = (assoc_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
+  aflags |= ASS_ALLOWALLSUB;		/* allow assoc[@]=value */
 #else
   aflags = 0;
 #endif
@@ -340,7 +341,7 @@ expr_bind_variable (lhs, rhs)
 }
 
 #if defined (ARRAY_VARS)
-/* This is similar to the logic in arrayfunc.c:valid_array_subscript when
+/* This is similar to the logic in arrayfunc.c:valid_array_reference when
    you pass VA_NOEXPAND. */
 static int
 expr_skipsubscript (vp, cp)
@@ -1148,6 +1149,7 @@ expr_streval (tok, e, lvalue)
 #if defined (ARRAY_VARS)
   arrayind_t ind;
   int tflag, aflag;
+  array_eltstate_t es;
 #endif
 
 /*itrace("expr_streval: %s: noeval = %d expanded=%d", tok, noeval, already_expanded);*/
@@ -1159,12 +1161,12 @@ expr_streval (tok, e, lvalue)
   initial_depth = expr_depth;
 
 #if defined (ARRAY_VARS)
-  tflag = assoc_expand_once && already_expanded;	/* for a start */
+  tflag = (assoc_expand_once && already_expanded) ? AV_NOEXPAND : 0;	/* for a start */
 #endif
 
   /* [[[[[ */
 #if defined (ARRAY_VARS)
-  aflag = (tflag) ? AV_NOEXPAND : 0;
+  aflag = tflag;	/* use a different variable for now */
   v = (e == ']') ? array_variable_part (tok, tflag, (char **)0, (int *)0) : find_variable (tok);
 #else
   v = find_variable (tok);
@@ -1202,13 +1204,16 @@ expr_streval (tok, e, lvalue)
     }
 
 #if defined (ARRAY_VARS)
-  ind = -1;
+  init_eltstate (&es);
+  es.ind = -1;
   /* If the second argument to get_array_value doesn't include AV_ALLOWALL,
      we don't allow references like array[@].  In this case, get_array_value
      is just like get_variable_value in that it does not return newly-allocated
      memory or quote the results.  AFLAG is set above and is either AV_NOEXPAND
      or 0. */
-  value = (e == ']') ? get_array_value (tok, aflag, (int *)NULL, &ind) : get_variable_value (v);
+  value = (e == ']') ? get_array_value (tok, aflag, &es) : get_variable_value (v);
+  ind = es.ind;
+  flush_eltstate (&es);
 #else
   value = get_variable_value (v);
 #endif

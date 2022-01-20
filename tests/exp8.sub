@@ -19,7 +19,8 @@ recho $var
 declare -p var
 recho $(declare -p var)
 
-declare -p var | sed -n l
+echo "var=$var" | sed -n l
+echo "declare -- var=\"$var\"" | sed -n l
 
 recho ${var@Q}
 recho ${var@P}

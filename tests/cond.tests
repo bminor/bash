@@ -33,6 +33,14 @@ echo returns: $?
 [[ ! x || x ]]
 echo returns: $?
 
+# ! toggles on and off rather than just setting an `invert result' flag
+# this differs from ksh93
+[[ ! 1 -eq 1 ]]; echo $?
+[[ ! ! 1 -eq 1 ]]; echo $?
+
+[[ ! ! ! 1 -eq 1 ]]; echo $?
+[[ ! ! ! ! 1 -eq 1 ]]; echo $?
+
 # parenthesized terms didn't work right until post-2.04
 [[ a ]]
 echo returns: $?
@@ -122,6 +130,13 @@ A=7
 [[ $IVAR -eq A ]]
 echo returns: $?
 
+[[ "$IVAR" -eq "7" ]]
+echo returns: $?
+
+A=7
+[[ "$IVAR" -eq "A" ]]
+echo returns: $?
+
 unset IVAR A
 
 # more pattern matching tests
@@ -206,6 +221,9 @@ del=$'\177'
 [[ bar == *$bs"$del"* ]] || echo ok 3
 [[ "" == "$foo" ]] && echo ok 4
 [[ "$del" == "${foo,,}" ]] || echo ok 5
+
+# allow reserved words after a conditional command just because
+if [[ str ]] then [[ str ]] fi
 
 ${THIS_SH} ./cond-regexp1.sub
 

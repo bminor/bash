@@ -57,6 +57,11 @@ unset -f func
 declare -fr func
 declare -f +r func
 
+# cannot use declare -f in combination with other attributes
+a() { echo a; }
+declare -f -a a
+declare -f -i b c
+
 XPATH=$PATH
 declare -r XPATH
 unset -v XPATH

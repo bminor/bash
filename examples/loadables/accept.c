@@ -30,6 +30,7 @@
 #include "bashtypes.h"
 #include <errno.h>
 #include <time.h>
+#include <limits.h>
 #include "typemax.h"
 
 #include <sys/socket.h>
@@ -44,11 +45,10 @@ int
 accept_builtin (list)
      WORD_LIST *list;
 {
-  WORD_LIST *l;
   SHELL_VAR *v;
   intmax_t iport;
   int opt;
-  char *tmoutarg, *fdvar, *rhostvar, *rhost;
+  char *tmoutarg, *fdvar, *rhostvar, *rhost, *bindaddr;
   unsigned short uport;
   int servsock, clisock;
   struct sockaddr_in server, client;
@@ -56,13 +56,16 @@ accept_builtin (list)
   struct timeval timeval;
   struct linger linger = { 0, 0 };
 
-  rhostvar = tmoutarg = fdvar = rhost = (char *)NULL;
+  rhostvar = tmoutarg = fdvar = rhost = bindaddr = (char *)NULL;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "r:t:v:")) != -1)
+  while ((opt = internal_getopt (list, "b:r:t:v:")) != -1)
     {
       switch (opt)
 	{
+	case 'b':
+	  bindaddr = list_optarg;
+	  break;
 	case 'r':
 	  rhostvar = list_optarg;
 	  break;
@@ -125,7 +128,17 @@ accept_builtin (list)
   memset ((char *)&server, 0, sizeof (server));
   server.sin_family = AF_INET;
   server.sin_port = htons(uport);
-  server.sin_addr.s_addr = htonl(INADDR_ANY);
+  server.sin_addr.s_addr = bindaddr ? inet_addr (bindaddr) : htonl(INADDR_ANY);
+
+  if (server.sin_addr.s_addr == INADDR_NONE)
+    {
+      builtin_error ("invalid address: %s", strerror (errno));
+      return (EXECUTION_FAILURE);
+    }
+
+  opt = 1;
+  setsockopt (servsock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof (opt));
+  setsockopt (servsock, SOL_SOCKET, SO_LINGER, (void *)&linger, sizeof (linger));
 
   if (bind (servsock, (struct sockaddr *)&server, sizeof (server)) < 0)
     {
@@ -133,10 +146,6 @@ accept_builtin (list)
       close (servsock);
       return (EXECUTION_FAILURE);
     }
-
-  opt = 1;
-  setsockopt (servsock, SOL_SOCKET, SO_REUSEADDR, (void *)&opt, sizeof (opt));
-  setsockopt (servsock, SOL_SOCKET, SO_LINGER, (void *)&linger, sizeof (linger));
 
   if (listen (servsock, 1) < 0)
     {
@@ -154,12 +163,12 @@ accept_builtin (list)
 
       opt = select (servsock+1, &iofds, 0, 0, &timeval);
       if (opt < 0)
-        builtin_error ("select failure: %s", strerror (errno));
+	builtin_error ("select failure: %s", strerror (errno));
       if (opt <= 0)
-        {
-          close (servsock);
-          return (EXECUTION_FAILURE);
-        }
+	{
+	  close (servsock);
+	  return (EXECUTION_FAILURE);
+	}
     }
 
   clientlen = sizeof (client);
@@ -193,7 +202,7 @@ accept_bind_variable (varname, intval)
   char ibuf[INT_STRLEN_BOUND (int) + 1], *p;
 
   p = fmtulong (intval, 10, ibuf, sizeof (ibuf), 0);
-  v = builtin_bind_variable (varname, p, 0);
+  v = builtin_bind_variable (varname, p, 0);		/* XXX */
   if (v == 0 || readonly_p (v) || noassign_p (v))
     builtin_error ("%s: cannot set variable", varname);
   return (v != 0);
@@ -205,6 +214,8 @@ char *accept_doc[] = {
 	"This builtin allows a bash script to act as a TCP/IP server.",
 	"",
 	"Options, if supplied, have the following meanings:",
+	"    -b address    use ADDRESS as the IP address to listen on; the",
+	"                  default is INADDR_ANY",
 	"    -t timeout    wait TIMEOUT seconds for a connection. TIMEOUT may",
 	"                  be a decimal number including a fractional portion",
 	"    -v varname    store the numeric file descriptor of the connected",
@@ -229,6 +240,6 @@ struct builtin accept_struct = {
 	accept_builtin,		/* function implementing the builtin */
 	BUILTIN_ENABLED,	/* initial flags for builtin */
 	accept_doc,		/* array of long documentation strings. */
-	"accept [-t timeout] [-v varname] [-r addrvar ] port",		/* usage synopsis; becomes short_doc */
+	"accept [-b address] [-t timeout] [-v varname] [-r addrvar ] port",		/* usage synopsis; becomes short_doc */
 	0			/* reserved for internal use */
 };

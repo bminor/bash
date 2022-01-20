@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -320,7 +320,7 @@ extern char *make_variable_value PARAMS((SHELL_VAR *, char *, int));
 
 extern SHELL_VAR *bind_variable_value PARAMS((SHELL_VAR *, char *, int));
 extern SHELL_VAR *bind_int_variable PARAMS((char *, char *, int));
-extern SHELL_VAR *bind_var_to_int PARAMS((char *, intmax_t));
+extern SHELL_VAR *bind_var_to_int PARAMS((char *, intmax_t, int));
 
 extern int assign_in_env PARAMS((WORD_DESC *, int));
 

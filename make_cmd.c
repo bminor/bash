@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -251,10 +251,7 @@ make_arith_for_expr (s)
   if (s == 0 || *s == '\0')
     return ((WORD_LIST *)NULL);
   wd = make_word (s);
-  wd->flags |= W_NOGLOB|W_NOSPLIT|W_QUOTED|W_DQUOTE;	/* no word splitting or globbing */
-#if defined (PROCESS_SUBSTITUTION)
-  wd->flags |= W_NOPROCSUB;	/* no process substitution */
-#endif
+  wd->flags |= W_NOGLOB|W_NOSPLIT|W_QUOTED|W_NOTILDE|W_NOPROCSUB;	/* no word splitting or globbing */
   result = make_word_list (wd, (WORD_LIST *)NULL);
   return result;
 }
@@ -575,7 +572,7 @@ make_here_document (temp, lineno)
 
   kill_leading = temp->instruction == r_deblank_reading_until;
 
-  document = (char *)NULL;
+  full_line = document = (char *)NULL;
   document_index = document_size = 0;
 
   /* Quote removal is the only expansion performed on the delimiter
@@ -628,17 +625,29 @@ make_here_document (temp, lineno)
 	     check the word before stripping the whitespace.  This
 	     is a hack, though. */
 	  if (STREQN (line, redir_word, redir_len) && line[redir_len] == '\n')
-	    goto document_done;
+	    break;
 
 	  while (*line == '\t')
 	    line++;
 	}
 
       if (*line == 0)
-	continue;
+	{
+	  free (full_line);
+	  continue;
+	}
 
       if (STREQN (line, redir_word, redir_len) && line[redir_len] == '\n')
-	goto document_done;
+	break;
+
+      /* Backwards compatibility here */
+      if (STREQN (line, redir_word, redir_len) && (parser_state & PST_EOFTOKEN) && shell_eof_token && strchr (line+redir_len, shell_eof_token))
+	{
+	  shell_ungets (line + redir_len);
+	  free (full_line);
+	  full_line = 0;
+	  break;
+	}
 
       len = strlen (line);
       if (len + document_index >= document_size)
@@ -651,10 +660,14 @@ make_here_document (temp, lineno)
 	 being an empty string before the call to strlen. */
       FASTCOPY (line, document + document_index, len);
       document_index += len;
+
+      free (full_line);
     }
 
   if (full_line == 0)
     internal_warning (_("here-document at line %d delimited by end-of-file (wanted `%s')"), lineno, redir_word);
+
+  FREE (full_line);
 
 document_done:
   if (document)

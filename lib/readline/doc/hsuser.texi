@@ -214,8 +214,9 @@ end of the history, and an index of @samp{-1} refers to the current
 @code{history -d} command.
 
 @item -d @var{start}-@var{end}
-Delete the history entries between positions @var{start} and @var{end},
-inclusive.  Positive and negative values for @var{start} and @var{end}
+Delete the range of history entries between positions @var{start} and
+@var{end}, inclusive.
+Positive and negative values for @var{start} and @var{end}
 are interpreted as described above.
 
 @item -a
@@ -249,6 +250,11 @@ When any of the @option{-w}, @option{-r}, @option{-a}, or @option{-n} options is
 used, if @var{filename}
 is given, then it is used as the history file.  If not, then
 the value of the @env{HISTFILE} variable is used.
+
+The return value is 0 unless an invalid option is encountered, an
+error occurs while reading or writing the history file, an invalid
+@var{offset} or range is supplied as an argument to @option{-d}, or the
+history expansion supplied as an argument to @option{-p} fails.
 
 @end table
 @end ifset

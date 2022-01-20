@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2020 Free Software Foundation, Inc.
+Copyright (C) 1997-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,6 +40,8 @@ printf interprets:
 
   %b	expand backslash escape sequences in the corresponding argument
   %q	quote the argument in a way that can be reused as shell input
+  %Q	like %q, but apply any precision to the unquoted argument before
+		quoting
   %(fmt)T	output the date-time string resulting from using FMT as a format
 	        string for strftime(3)
 
@@ -149,7 +151,7 @@ extern int errno;
       if (vflag) \
 	{ \
 	  SHELL_VAR *v; \
-	  v = builtin_bind_variable  (vname, vbuf, 0); \
+	  v = builtin_bind_variable  (vname, vbuf, bindflags); \
 	  stupidly_hack_special_variables (vname); \
 	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
 	    return (EXECUTION_FAILURE); \
@@ -183,6 +185,10 @@ extern int errno;
 
 #define SKIP1 "#'-+ 0"
 #define LENMODS "hjlLtz"
+
+#ifndef TIMELEN_MAX
+#  define TIMELEN_MAX 128
+#endif
 
 extern time_t shell_start_time;
 
@@ -226,6 +232,7 @@ static int conversion_error;
 
 /* printf -v var support */
 static int vflag = 0;
+static int bindflags = 0;
 static char *vbuf, *vname;
 static size_t vbsize;
 static int vblen;
@@ -241,7 +248,7 @@ printf_builtin (list)
 {
   int ch, fieldwidth, precision;
   int have_fieldwidth, have_precision;
-  char convch, thisch, nextch, *format, *modstart, *fmt, *start;
+  char convch, thisch, nextch, *format, *modstart, *precstart, *fmt, *start;
 #if defined (HANDLE_MULTIBYTE)
   char mbch[25];		/* 25 > MB_LEN_MAX, plus can handle 4-byte UTF-8 and large Unicode characters*/
   int mbind, mblen;
@@ -251,8 +258,6 @@ printf_builtin (list)
 #endif
 
   conversion_error = 0;
-  retval = EXECUTION_SUCCESS;
-
   vflag = 0;
 
   reset_internal_getopt ();
@@ -262,12 +267,14 @@ printf_builtin (list)
 	{
 	case 'v':
 	  vname = list_optarg;
+	  bindflags = 0;
 #if defined (ARRAY_VARS)
-	  arrayflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
-	  if (legal_identifier (vname) || valid_array_reference (vname, arrayflags))
+	  SET_VFLAGS (list_optflags, arrayflags, bindflags);
+	  retval = legal_identifier (vname) || valid_array_reference (vname, arrayflags);
 #else
-	  if (legal_identifier (vname))
+	  retval = legal_identifier (vname);
 #endif
+	  if (retval)
 	    {
 	      vflag = 1;
 	      if (vbsize == 0)
@@ -310,6 +317,7 @@ printf_builtin (list)
 
   format = list->word->word;
   tw = 0;
+  retval = EXECUTION_SUCCESS;
 
   garglist = orig_arglist = list->next;
 
@@ -331,6 +339,7 @@ printf_builtin (list)
 	{
 	  precision = fieldwidth = 0;
 	  have_fieldwidth = have_precision = 0;
+	  precstart = 0;
 
 	  if (*fmt == '\\')
 	    {
@@ -404,6 +413,8 @@ printf_builtin (list)
 		  if (*fmt == '-')
 #endif
 		    fmt++;
+		  if (DIGIT (*fmt))
+		    precstart = fmt;
 		  while (DIGIT (*fmt))
 		    fmt++;
 		}
@@ -449,7 +460,7 @@ printf_builtin (list)
 
 	    case '(':
 	      {
-		char *timefmt, timebuf[128], *t;
+		char *timefmt, timebuf[TIMELEN_MAX], *t;
 		int n;
 		intmax_t arg;
 		time_t secs;
@@ -531,7 +542,7 @@ printf_builtin (list)
 		if (var && *var)
 		  {
 		    if (legal_identifier (var))
-		      bind_var_to_int (var, tw);
+		      bind_var_to_int (var, tw, 0);
 		    else
 		      {
 			sh_invalidid (var);
@@ -573,12 +584,27 @@ printf_builtin (list)
 	      }
 
 	    case 'q':		/* print with shell quoting */
+	    case 'Q':
 	      {
 		char *p, *xp;
-		int r;
+		int r, mpr;
+		size_t slen;
 
 		r = 0;
 		p = getstr ();
+		/* Decode precision and apply it to the unquoted string. */
+		if (convch == 'Q' && precstart)
+		  {
+		    mpr = *precstart++ - '0';
+		    while (DIGIT (*precstart))
+		      mpr = (mpr * 10) + (*precstart++ - '0');
+		    /* Error if precision > INT_MAX here? */
+		    precision = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
+		    slen = strlen (p);
+		    /* printf precision works in bytes. */
+		    if (precision < slen)
+		      p[precision] = '\0';
+		  }
 		if (p && *p == 0)	/* XXX - getstr never returns null */
 		  xp = savestring ("''");
 		else if (ansic_shouldquote (p))
@@ -587,6 +613,12 @@ printf_builtin (list)
 		  xp = sh_backslash_quote (p, 0, 3);
 		if (xp)
 		  {
+		    if (convch == 'Q')
+		      {
+			slen = strlen (xp);
+			if (slen > precision)
+			  precision = slen;
+		      }		    
 		    /* Use printstr to get fieldwidth and precision right. */
 		    r = printstr (start, xp, strlen (xp), fieldwidth, precision);
 		    if (r < 0)
@@ -760,7 +792,7 @@ printstr (fmt, string, len, fieldwidth, precision)
       fw = (mfw < 0 || mfw > INT_MAX) ? INT_MAX : mfw;
     }
 
-  /* get precision, if present */
+  /* get precision, if present. doesn't handle negative precisions */
   if (*fmt == '.')
     {
       fmt++;
@@ -776,6 +808,8 @@ printstr (fmt, string, len, fieldwidth, precision)
 	    mpr = (mpr * 10) + (*fmt++ - '0');
 	  /* Error if precision > INT_MAX here? */
 	  pr = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
+	  if (pr < precision && precision < INT_MAX)
+	    pr = precision;		/* XXX */
 	}
       else
 	pr = 0;		/* "a null digit string is treated as zero" */

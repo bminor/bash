@@ -68,6 +68,11 @@ extern int errno;
 extern int shell_tty;
 
 #if defined (READLINE)
+/* Let's not call readline, forcing readline to initialize the termcap/terminfo
+   variables it needs, unless we have to. */
+extern int interactive_shell;
+extern int no_line_editing;
+extern int bash_readline_initialized;
 extern void rl_set_screen_size PARAMS((int, int));
 #endif
 extern void sh_set_lines_and_columns PARAMS((int, int));
@@ -87,12 +92,13 @@ get_new_window_size (from_sig, rp, cp)
     {
       sh_set_lines_and_columns (win.ws_row, win.ws_col);
 #if defined (READLINE)
-      rl_set_screen_size (win.ws_row, win.ws_col);
+      if ((interactive_shell && no_line_editing == 0) || bash_readline_initialized)
+	rl_set_screen_size (win.ws_row, win.ws_col);
+#endif
       if (rp)
 	*rp = win.ws_row;
       if (cp)
 	*cp = win.ws_col;
-#endif
     }
 #endif
 }

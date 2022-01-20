@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1296,7 +1296,7 @@ command_line_to_word_list (line, llen, sentinel, nwp, cwp)
      int llen, sentinel, *nwp, *cwp;
 {
   WORD_LIST *ret;
-  char *delims;
+  const char *delims;
 
 #if 0
   delims = "()<>;&| \t\n";	/* shell metacharacters break words */

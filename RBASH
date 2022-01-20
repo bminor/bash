@@ -29,7 +29,8 @@ with the exception that the following are disallowed or not performed:
    * Using the 'enable' builtin command to enable disabled shell
      builtins.
    * Specifying the '-p' option to the 'command' builtin.
-   * Turning off restricted mode with 'set +r' or 'set +o restricted'.
+   * Turning off restricted mode with 'set +r' or 'shopt -u
+     restricted_shell'.
 
 These restrictions are enforced after any startup files are read.
 
@@ -40,10 +41,10 @@ spawned to execute the script.
 The restricted shell mode is only one component of a useful restricted
 environment.  It should be accompanied by setting 'PATH' to a value that
 allows execution of only a few verified commands (commands that allow
-shell escapes are particularly vulnerable), leaving the user in a
-non-writable directory other than his home directory after login, not
-allowing the restricted shell to execute shell scripts, and cleaning the
-environment of variables that cause some commands to modify their
+shell escapes are particularly vulnerable), changing the current
+directory to a non-writable directory other than '$HOME' after login,
+not allowing the restricted shell to execute shell scripts, and cleaning
+the environment of variables that cause some commands to modify their
 behavior (e.g., 'VISUAL' or 'PAGER').
 
 Modern systems provide more secure ways to implement a restricted

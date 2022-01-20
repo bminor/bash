@@ -40,6 +40,13 @@ declare -p A
 
 unset A
 declare -A A
+for k in ']' '*' '@' $'\t' ' '; do
+   A[$k]=2
+done
+declare -p A
+
+unset A
+declare -A A
 
 for k in $'\t' ' ' ']' '*' '@'; do
    read "A[$k]" <<< X
@@ -69,4 +76,3 @@ for k in ']' '*' '@'; do
    declare "A[$k]=X"
 done
 declare -p A
-

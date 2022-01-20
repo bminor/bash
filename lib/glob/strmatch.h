@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -47,6 +47,7 @@
 #define FNM_EXTMATCH	(1 << 5) /* Use ksh-like extended matching. */
 
 #define FNM_FIRSTCHAR	(1 << 6) /* Match only the first character */
+#define FNM_DOTDOT	(1 << 7) /* force `.' and `..' to match explicitly even if FNM_PERIOD not supplied. */
 
 /* Value returned by `strmatch' if STRING does not match PATTERN.  */
 #undef FNM_NOMATCH

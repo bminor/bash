@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -290,7 +290,7 @@ bind_builtin (list)
 
       if (nlen < olen)	/* fewer bind -x bindings */
 	for (d = olen - nlen, i = 0; i < olen && d > 0; i++)
-	  if (nlen == 0 || strvec_search (nbindings, obindings[i]) >= 0)
+	  if (nlen == 0 || strvec_search (nbindings, obindings[i]) < 0)
 	    {
 	      unbind_unix_command (obindings[i]);
 	      d--;

@@ -1,6 +1,6 @@
 /* quit.h -- How to handle SIGINT gracefully. */
 
-/* Copyright (C) 1993-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,12 +36,6 @@ extern volatile sig_atomic_t terminating_signal;
   do { \
     if (terminating_signal) termsig_handler (terminating_signal); \
     if (interrupt_state) throw_to_top_level (); \
-  } while (0)
-
-#define CHECK_ALRM \
-  do { \
-    if (sigalrm_seen) \
-      sh_longjmp (alrmbuf, 1); \
   } while (0)
 
 #define SETINTERRUPT interrupt_state = 1

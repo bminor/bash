@@ -168,10 +168,9 @@ after bar: var=global
 ./varenv13.sub: line 16: `var[0]': not a valid identifier
 ./varenv13.sub: line 16: `var[@]': not a valid identifier
 ./varenv13.sub: line 14: declare: var: not found
-./varenv13.sub: line 25: var[@]: bad array subscript
-declare -A var=([0]="X" )
+declare -A var=([0]="X" ["@"]="Y" )
 help
-./varenv13.sub: line 34: `var[0]': not a valid identifier
+./varenv13.sub: line 35: `var[0]': not a valid identifier
 1
 declare -A var=([0]="X" )
 declare -A var=([Y]="Y" )
@@ -265,6 +264,14 @@ ignoreeof      	off
 ignoreeof      	on
 10
 match 1
+trap -- 'echo trap:$FUNCNAME' EXIT
+trap:f
+trap -- 'echo trap:$FUNCNAME' EXIT
+trap:f
+trap -- 'echo trap:$FUNCNAME' EXIT
+trap:f
+trap -- 'echo trap:$FUNCNAME' EXIT
+trap:f
 a=z
 a=b
 a=z

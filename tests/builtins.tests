@@ -15,7 +15,9 @@
 set +p
 set +o posix
 
-ulimit -c 0 2>/dev/null
+ulimit -S -c 0 2>/dev/null
+ulimit -c -S -- 1000 2>/dev/null
+ulimit -c 2>/dev/null
 
 # check that break breaks loops
 for i in a b c; do echo $i; break; echo bad-$i; done

@@ -65,3 +65,19 @@ declare -p ref ${!ref} var
 declare +t ref
 ref=X
 declare -p ref ${!ref} var
+
+unset -n ref
+unset var
+
+arr=(1 2 3)
+
+indir='arr[@]'
+declare -n ref='arr[@]'
+
+recho "${!indir}"
+recho ${!indir}
+
+recho "$ref"
+recho $ref
+
+recho "${!indir}$ref"

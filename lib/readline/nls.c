@@ -1,6 +1,6 @@
 /* nls.c -- skeletal internationalization code. */
 
-/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -54,7 +54,7 @@
 #include "rlshell.h"
 #include "rlprivate.h"
 
-static int utf8locale PARAMS((char *));
+static int utf8locale (char *);
 
 #if !defined (HAVE_SETLOCALE)    
 /* A list of legal values for the LANG or LC_CTYPE environment variables.
@@ -78,12 +78,12 @@ static char *legal_lang_values[] =
   0
 };
 
-static char *normalize_codeset PARAMS((char *));
+static char *normalize_codeset (char *);
 #endif /* !HAVE_SETLOCALE */
 
-static char *find_codeset PARAMS((char *, size_t *));
+static char *find_codeset (char *, size_t *);
 
-static char *_rl_get_locale_var PARAMS((const char *));
+static char *_rl_get_locale_var (const char *);
 
 static char *
 _rl_get_locale_var (const char *v)

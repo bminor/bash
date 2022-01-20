@@ -1,6 +1,6 @@
 /* version.c -- distribution and version numbers. */
 
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,7 +43,7 @@ const char * const release_status = (char *)0;
 #endif
 const char * const sccs_version = SCCSVERSION;
 
-const char * const bash_copyright = N_("Copyright (C) 2020 Free Software Foundation, Inc.");
+const char * const bash_copyright = N_("Copyright (C) 2022 Free Software Foundation, Inc.");
 const char * const bash_license = N_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
 
 /* If == 31, shell compatible with bash-3.1, == 32 with bash-3.2, and so on */

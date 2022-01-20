@@ -1,7 +1,7 @@
 This file is trap.def, from which is created trap.c.
 It implements the builtin "trap" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -250,7 +250,9 @@ showtrap (i, show_default)
      int i, show_default;
 {
   char *t, *p, *sn;
+  int free_t;
 
+  free_t = 1;
   p = trap_list[i];
   if (p == (char *)DEFAULT_SIG && signal_is_hard_ignored (i) == 0)
     {
@@ -258,6 +260,7 @@ showtrap (i, show_default)
 	t = "-";
       else
 	return;
+      free_t = 0;
     }
   else if (signal_is_hard_ignored (i))
     t = (char *)NULL;
@@ -279,7 +282,7 @@ showtrap (i, show_default)
   else
     printf ("trap -- %s %s\n", t ? t : "''", sn);
 
-  if (show_default == 0)
+  if (free_t)
     FREE (t);
 }
 

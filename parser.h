@@ -1,7 +1,7 @@
 /* parser.h -- Everything you wanted to know about the parser, but were
    afraid to ask. */
 
-/* Copyright (C) 1995-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,6 +48,8 @@
 #define PST_REDIRLIST	0x080000	/* parsing a list of redirections preceding a simple command name */
 #define PST_COMMENT	0x100000	/* parsing a shell comment; used by aliases */
 #define PST_ENDALIAS	0x200000	/* just finished expanding and consuming an alias */
+#define PST_NOEXPAND	0x400000	/* don't expand anything in read_token_word; for command substitution */
+#define PST_NOERROR	0x800000	/* don't print error messages in yyerror */
 
 /* Definition of the delimiter stack.  Needed by parse.y and bashhist.c. */
 struct dstack {

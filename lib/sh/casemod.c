@@ -47,7 +47,7 @@
 #define _to_wlower(wc)	(iswupper (wc) ? towlower (wc) : (wc))
 
 #if !defined (HANDLE_MULTIBYTE)
-#  define cval(s, i)	((s)[(i)])
+#  define cval(s, i, l)	((s)[(i)])
 #  define iswalnum(c)	(isalnum(c))
 #  define TOGGLE(x)	(ISUPPER (x) ? tolower ((unsigned char)x) : (TOUPPER (x)))
 #else
@@ -75,18 +75,16 @@ extern char *substring PARAMS((char *, int, int));
 
 #if defined (HANDLE_MULTIBYTE)
 static wchar_t
-cval (s, i)
+cval (s, i, l)
      char *s;
-     int i;
+     int i, l;
 {
   size_t tmp;
   wchar_t wc;
-  int l;
   mbstate_t mps;  
 
   if (MB_CUR_MAX == 1 || is_basic (s[i]))
     return ((wchar_t)s[i]);
-  l = strlen (s);
   if (i >= (l - 1))
     return ((wchar_t)s[i]);
   memset (&mps, 0, sizeof (mbstate_t));
@@ -143,7 +141,7 @@ sh_modcase (string, pat, flags)
   inword = 0;
   while (start < end)
     {
-      wc = cval ((char *)string, start);
+      wc = cval ((char *)string, start, end);
 
       if (iswalnum (wc) == 0)
 	inword = 0;

@@ -49,6 +49,14 @@ foo bar
 
 unalias foo bar baz
 
+# post bash-5.1 problems with compound array assignment during multiline
+# alias expansion
+alias foo='a=() b=""
+for i in 1; do echo hi; done'
+foo
+
+unalias foo
+
 ${THIS_SH} ./alias1.sub
 ${THIS_SH} ./alias2.sub
 ${THIS_SH} ./alias3.sub

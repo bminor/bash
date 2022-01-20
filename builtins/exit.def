@@ -1,7 +1,7 @@
 This file is exit.def, from which is created exit.c.
 It implements the builtins "exit", and "logout" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -151,7 +151,7 @@ exit_or_logout (list)
   last_command_exit_value = exit_value;
 
   /* Exit the program. */
-  jump_to_top_level (EXITPROG);
+  jump_to_top_level (EXITBLTIN);
   /*NOTREACHED*/
 }
 

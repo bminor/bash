@@ -227,15 +227,16 @@ argv[2] = <Y>
 argv[1] = <XY^AY>
 argv[1] = <x^Ay^?z>
 argv[1] = <x^Ay^?z>
-declare -- var="xyz"
+declare -- var=$'x\001y\177z'
 argv[1] = <declare>
 argv[2] = <-->
-argv[3] = <var="x^Ay^?z">
+argv[3] = <var=$'x\001y\177z'>
+var=x\001y\177z$
 declare -- var="x\001y\177z"$
 argv[1] = <$'x\001y\177z'>
 argv[1] = <x^Ay^?z>
 var=$'x\001y\177z'
-./exp8.sub: line 29: xyz: syntax error: invalid arithmetic operator (error token is "z")
+./exp8.sub: line 30: xyz: syntax error: invalid arithmetic operator (error token is "z")
 declare -a array=()
 declare -a array=([0]=$'x\001y\177z')
 argv[1] = <x^Ay^?z>
@@ -408,3 +409,11 @@ cdefg
 abcdefg
 abcde
 abcdefg
+foo
+declare -- a="foo"
+7
+declare -i a="7"
+42
+declare -- a="42"
+FOO
+declare -u A="FOO"

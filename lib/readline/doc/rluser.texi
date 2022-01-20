@@ -339,7 +339,8 @@ Although the Readline library comes with a set of Emacs-like
 keybindings installed by default, it is possible to use a different set
 of keybindings.
 Any user can customize programs that use Readline by putting
-commands in an @dfn{inputrc} file, conventionally in his home directory.
+commands in an @dfn{inputrc} file,
+conventionally in their home directory.
 The name of this
 @ifset BashFeatures
 file is taken from the value of the shell variable @env{INPUTRC}.  If
@@ -444,6 +445,9 @@ If set to @samp{on}, when listing completions, Readline displays the
 common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the @env{LS_COLORS}
 environment variable.
+If there is a color definition in @env{LS_COLORS} for the custom suffix
+@samp{readline-colored-completion-prefix}, Readline uses this color for
+the common prefix instead of its default.
 The default is @samp{off}.
 
 @item colored-stats
@@ -496,8 +500,9 @@ asked whether the list of possibilities should be displayed.
 If the number of possible completions is greater than or equal to this value,
 Readline will ask whether or not the user wishes to view them;
 otherwise, they are simply listed.
-This variable must be set to an integer value greater than or equal to 0.
-A negative value means Readline should never ask.
+This variable must be set to an integer value greater than or equal to zero.
+A zero value means Readline should never ask; negative values are
+treated as zero.
 The default limit is @code{100}.
 
 @item convert-meta
@@ -539,6 +544,19 @@ Use the @samp{\1} and @samp{\2} escapes to begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 The default is @samp{@@}.
+
+@item enable-active-region
+@vindex enable-active-region
+The @dfn{point} is the current cursor position, and @dfn{mark} refers
+to a saved cursor position (@pxref{Commands For Moving}).
+The text between the point and mark is referred to as the @dfn{region}.
+When this variable is set to @samp{On}, Readline allows certain commands
+to designate the region as @dfn{active}.
+When the region is active, Readline highlights the text in the region using
+the terminal's standout mode.
+The active region shows the text inserted by bracketed-paste and any
+matching text found by incremental and non-incremental history searches.
+The default is @samp{On}.
 
 @item enable-bracketed-paste
 @vindex enable-bracketed-paste
@@ -1332,6 +1350,11 @@ for editing.
 A numeric argument, if supplied, specifies the history entry to use instead
 of the current line.
 
+@item fetch-history ()
+With a numeric argument, fetch that entry from the history list
+and make it the current line.
+Without an argument, move back to the first entry in the history list.
+
 @end ftable
 
 @node Commands For Text
@@ -1772,6 +1795,11 @@ the output is formatted in such a way that it can be made part
 of an @var{inputrc} file.  This command is unbound by default.
 
 @ifset BashFeatures
+@item spell-correct-word (C-x s)
+Perform spelling correction on the current word, treating it as a directory
+or filename, in the same way as the @code{cdspell} shell option.
+Word boundaries are the same as those used by @code{shell-forward-word}.
+
 @item glob-complete-word (M-g)
 The word before point is treated as a pattern for pathname expansion,
 with an asterisk implicitly appended.  This pattern is used to

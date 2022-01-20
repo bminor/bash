@@ -79,11 +79,13 @@ file_head (fp, cnt)
     {
       while ((ch = getc (fp)) != EOF)
 	{
+	  QUIT;
 	  if (putchar (ch) == EOF)
 	    {
 	      builtin_error ("write error: %s", strerror (errno));
 	      return EXECUTION_FAILURE;
 	    }
+	  QUIT;
 	  if (ch == '\n')
 	    break;
 	}
@@ -141,6 +143,7 @@ head_builtin (list)
 	  printf ("%s==> %s <==\n", opt ? "" : "\n", l->word->word);
 	  opt = 0;
 	}
+      QUIT;
       rval = file_head (fp, nline);
       fclose (fp);
     }

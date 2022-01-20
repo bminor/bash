@@ -23,11 +23,11 @@ SUFFIX=`${THIS_SH} -c 'echo $(( $RANDOM + $BASHPID ))'`
 BASH_TSTOUT=${TMPDIR}/bashtst-$SUFFIX	# for now
 export BASH_TSTOUT
 
-trap 'rm -f $BASH_TSTOUT' 0 1 2 3 15
+trap 'rm -f $BASH_TSTOUT ; exit' 1 2 3 15
+trap 'rm -f $BASH_TSTOUT' 0
 
 PATH=.:$PATH	# just to get recho/zecho/printenv if not run via `make tests'
 export PATH
-
 
 # unset BASH_ENV only if it is set
 [ "${BASH_ENV+set}" = "set" ] && unset BASH_ENV

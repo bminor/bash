@@ -455,6 +455,11 @@ If non-zero, this is the address of a function to call if a read system
 call is interrupted when Readline is reading terminal input.
 @end deftypevar
 
+@deftypevar {rl_hook_func_t *} rl_timeout_event_hook
+If non-zero, this is the address of a function to call if Readline times
+out while reading input.
+@end deftypevar
+
 @deftypevar {rl_hook_func_t *} rl_input_available_hook
 If non-zero, Readline will use this function's return value when it needs
 to determine whether or not there is available input on the current input
@@ -588,6 +593,10 @@ the current call to @code{readline()}.
 @item RL_STATE_DONE
 Readline has read a key sequence bound to @code{accept-line}
 and is about to return the line to the caller.
+@item RL_STATE_TIMEOUT
+Readline has timed out (it did not receive a line or specified number of
+characters before the timeout duration specified by @code{rl_set_timeout}
+elapsed) and is returning that status to the caller.
 @end table
 
 @end deftypevar
@@ -876,6 +885,15 @@ It takes a "translated" key sequence and should be used if the key sequence
 can include NUL.
 @end deftypefun
 
+@deftypefun {int} rl_trim_arg_from_keyseq (const char *keyseq, size_t len, Keymap map)
+If there is a numeric argument at the beginning of @var{keyseq}, possibly
+including digits, return the index of the first character in @var{keyseq}
+following the numeric argument.
+This can be used to skip over the numeric argument (which is available as
+@code{rl_numeric_arg} while traversing the key sequence that invoked the
+current command.
+@end deftypefun
+
 @deftypefun {char **} rl_invoking_keyseqs (rl_command_func_t *function)
 Return an array of strings representing the key sequences used to
 invoke @var{function} in the current keymap.
@@ -1063,8 +1081,9 @@ It returns the number of visible characters on the last line of the
 Applications may indicate that the prompt contains characters that take
 up no physical screen space when displayed by bracketing a sequence of
 such characters with the special markers @code{RL_PROMPT_START_IGNORE}
-and @code{RL_PROMPT_END_IGNORE} (declared in @file{readline.h}).  This may
-be used to embed terminal-specific escape sequences in prompts.
+and @code{RL_PROMPT_END_IGNORE} (declared in @file{readline.h} as
+@samp{\001} and @samp{\002}, respectively).
+This may be used to embed terminal-specific escape sequences in prompts.
 @end deftypefun
 
 @deftypefun int rl_set_prompt (const char *prompt)
@@ -1149,6 +1168,27 @@ assigned to @code{rl_event_hook}.  @var{u} must be greater than or equal
 to zero (a zero-length timeout is equivalent to a poll).
 The default waiting period is one-tenth of a second.
 Returns the old timeout value.
+@end deftypefun
+
+@deftypefun int rl_set_timeout (unsigned int secs, unsigned int usecs)
+Set a timeout for subsequent calls to @code{readline()}. If Readline does
+not read a complete line, or the number of characters specified by
+@code{rl_num_chars_to_read}, before the duration specfied by @var{secs}
+(in seconds) and @var{usecs} (microseconds), it returns and sets
+@code{RL_STATE_TIMEOUT} in @code{rl_readline_state}.
+Passing 0 for @code{secs} and @code{usecs} cancels any previously set
+timeout; the convenience macro @code{rl_clear_timeout()} is shorthand
+for this.
+Returns 0 if the timeout is set successfully.
+@end deftypefun
+
+@deftypefun int rl_timeout_remaining (unsigned int *secs, unsigned int *usecs)
+Return the number of seconds and microseconds remaining in the current
+timeout duration in @code{*secs} and @code{*usecs}, respectively.
+Returns -1 on error or when there is no timeout set, 0 when the timeout has
+expired (leaving @code{*secs} and @code{*usecs} unchanged), and 1 if the
+timeout has not expired. If @code{secs} and @code{usecs} are @code{NULL},
+the return value indicates whether the timeout has expired.
 @end deftypefun
 
 @node Terminal Management
@@ -1611,7 +1651,7 @@ main (int c, char **v)
 
 Signals are asynchronous events sent to a process by the Unix kernel,
 sometimes on behalf of another process.  They are intended to indicate
-exceptional events, like a user pressing the interrupt key on his terminal,
+exceptional events, like a user pressing the terminal's interrupt key,
 or a network connection being broken.  There is a class of signals that can
 be sent to the process currently reading input from the keyboard.  Since
 Readline changes the terminal attributes when it is called, it needs to
@@ -2159,9 +2199,10 @@ shell variables and hostnames.
 
 @deftypevar int rl_completion_query_items
 Up to this many items will be displayed in response to a
-possible-completions call.  After that, readline asks the user if she is sure
-she wants to see them all.  The default value is 100.  A negative value 
-indicates that Readline should never ask the user.
+possible-completions call.  After that, readline asks the user for
+confirmation before displaying them.
+The default value is 100.  A negative value 
+indicates that Readline should never ask for confirmation.
 @end deftypevar
 
 @deftypevar {int} rl_completion_append_character

@@ -1,6 +1,6 @@
 /* pcomplib.c - library functions for programmable completion. */
 
-/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,7 +37,7 @@
 #include "shell.h"
 #include "pcomplete.h"
 
-#define COMPLETE_HASH_BUCKETS	256	/* must be power of two */
+#define COMPLETE_HASH_BUCKETS	512	/* must be power of two */
 
 #define STRDUP(x)	((x) ? savestring (x) : (char *)NULL)
 

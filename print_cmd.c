@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -440,7 +440,10 @@ indirection_level_string ()
     change_flag ('x', FLAG_ON);
 
   if (ps4 == 0 || *ps4 == '\0')
-    return (indirection_string);
+    {
+      FREE (ps4);
+      return (indirection_string);
+    }
 
 #if defined (HANDLE_MULTIBYTE)
   ps4_len = strnlen (ps4, MB_CUR_MAX);
@@ -956,11 +959,13 @@ void
 print_simple_command (simple_command)
      SIMPLE_COM *simple_command;
 {
-  command_print_word_list (simple_command->words, " ");
+  if (simple_command->words)
+    command_print_word_list (simple_command->words, " ");
 
   if (simple_command->redirects)
     {
-      cprintf (" ");
+      if (simple_command->words)
+	cprintf (" ");
       print_redirection_list (simple_command->redirects);
     }
 }

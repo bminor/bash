@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -72,35 +72,34 @@ extern int errno;
 #include "rlshell.h"
 #include "xmalloc.h"
 
+#if defined (COLOR_SUPPORT)
+#  include "parse-colors.h"
+#endif
+
 #ifndef RL_LIBRARY_VERSION
-#  define RL_LIBRARY_VERSION "8.0"
+#  define RL_LIBRARY_VERSION "8.1"
 #endif
 
 #ifndef RL_READLINE_VERSION
-#  define RL_READLINE_VERSION	0x0800
+#  define RL_READLINE_VERSION	0x0801
 #endif
-
-extern void _rl_free_history_entry PARAMS((HIST_ENTRY *));
-
-#if defined (COLOR_SUPPORT)
-extern void _rl_parse_colors PARAMS((void));		/* XXX */
-#endif
-
 
 /* Forward declarations used in this file. */
-static char *readline_internal PARAMS((void));
-static void readline_initialize_everything PARAMS((void));
+static char *readline_internal (void);
+static void readline_initialize_everything (void);
 
-static void bind_arrow_keys_internal PARAMS((Keymap));
-static void bind_arrow_keys PARAMS((void));
+static void run_startup_hooks (void);
 
-static void bind_bracketed_paste_prefix PARAMS((void));
+static void bind_arrow_keys_internal (Keymap);
+static void bind_arrow_keys (void);
 
-static void readline_default_bindings PARAMS((void));
-static void reset_default_bindings PARAMS((void));
+static void bind_bracketed_paste_prefix (void);
 
-static int _rl_subseq_result PARAMS((int, Keymap, int, int));
-static int _rl_subseq_getchar PARAMS((int));
+static void readline_default_bindings (void);
+static void reset_default_bindings (void);
+
+static int _rl_subseq_result (int, Keymap, int, int);
+static int _rl_subseq_getchar (int);
 
 /* **************************************************************** */
 /*								    */
@@ -403,6 +402,16 @@ readline (const char *prompt)
   return (value);
 }
 
+static void
+run_startup_hooks (void)
+{
+  if (rl_startup_hook)
+    (*rl_startup_hook) ();
+
+  if (_rl_internal_startup_hook)
+    (*_rl_internal_startup_hook) ();
+}
+
 #if defined (READLINE_CALLBACKS)
 #  define STATIC_CALLBACK
 #else
@@ -422,11 +431,7 @@ readline_internal_setup (void)
   if (_rl_enable_meta & RL_ISSTATE (RL_STATE_TERMPREPPED))
     _rl_enable_meta_key ();
 
-  if (rl_startup_hook)
-    (*rl_startup_hook) ();
-
-  if (_rl_internal_startup_hook)
-    (*_rl_internal_startup_hook) ();
+  run_startup_hooks ();
 
   rl_deactivate_mark ();
 
@@ -511,6 +516,11 @@ readline_internal_teardown (int eof)
 void
 _rl_internal_char_cleanup (void)
 {
+  if (_rl_keep_mark_active)
+    _rl_keep_mark_active = 0;
+  else if (rl_mark_active_p ())
+    rl_deactivate_mark ();
+
 #if defined (VI_MODE)
   /* In vi mode, when you exit insert mode, the cursor moves back
      over the previous character.  We explicitly check for that here. */
@@ -567,6 +577,15 @@ readline_internal_charloop (void)
 	{
 	  (*rl_redisplay_function) ();
 	  _rl_want_redisplay = 0;
+
+	  /* If we longjmped because of a timeout, handle it here. */
+	  if (RL_ISSTATE (RL_STATE_TIMEOUT))
+	    {
+	      RL_SETSTATE (RL_STATE_DONE);
+	      rl_done = 1;
+	      return 1;
+	    }
+
 	  /* If we get here, we're not being called from something dispatched
 	     from _rl_callback_read_char(), which sets up its own value of
 	     _rl_top_level (saving and restoring the old, of course), so
@@ -667,11 +686,6 @@ readline_internal_charloop (void)
 	 a prefix command, so nothing has changed yet. */
       if (rl_pending_input == 0 && lk == _rl_last_command_was_kill)
 	_rl_last_command_was_kill = 0;
-
-      if (_rl_keep_mark_active)
-        _rl_keep_mark_active = 0;
-      else if (rl_mark_active_p ())
-        rl_deactivate_mark ();
 
       _rl_internal_char_cleanup ();
 
@@ -1143,6 +1157,9 @@ _rl_subseq_result (int r, Keymap map, int key, int got_subseq)
 int
 rl_initialize (void)
 {
+  /* Initialize the timeout first to get the precise start time. */
+  _rl_timeout_init ();
+
   /* If we have never been called before, initialize the
      terminal and data structures. */
   if (rl_initialized == 0)
@@ -1282,8 +1299,8 @@ readline_initialize_everything (void)
 
   /* If the completion parser's default word break characters haven't
      been set yet, then do so now. */
-  if (rl_completer_word_break_characters == (char *)NULL)
-    rl_completer_word_break_characters = (char *)rl_basic_word_break_characters;
+  if (rl_completer_word_break_characters == 0)
+    rl_completer_word_break_characters = rl_basic_word_break_characters;
 
 #if defined (COLOR_SUPPORT)
   if (_rl_colored_stats || _rl_colored_completion_prefix)
@@ -1531,4 +1548,13 @@ _rl_add_executing_keyseq (int key)
 {
   RESIZE_KEYSEQ_BUFFER ();
  rl_executing_keyseq[rl_key_sequence_length++] = key;
+}
+
+/* `delete' the last character added to the executing key sequence. Use this
+   before calling rl_execute_next to avoid keys being added twice. */
+void
+_rl_del_executing_keyseq (void)
+{
+  if (rl_key_sequence_length > 0)
+    rl_key_sequence_length--;
 }

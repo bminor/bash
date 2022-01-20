@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#if defined (HAVE_LONG_LONG) && !defined (HAVE_STRTOULL)
+#if defined (HAVE_UNSIGNED_LONG_LONG_INT) && !HAVE_STRTOULL
 
 #define QUAD		1
 #define	UNSIGNED	1
@@ -28,4 +28,4 @@
 
 #include "strtol.c"
 
-#endif /* HAVE_LONG_LONG && !HAVE_STRTOULL */
+#endif /* HAVE_UNSIGNED_LONG_LONG_INT && !HAVE_STRTOULL */

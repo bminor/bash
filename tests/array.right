@@ -67,6 +67,7 @@ declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="t
 declare -a b=([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")
 declare -ar c
 declare -a d=([1]="test test")
+declare -a e=()
 declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")
 ./array.tests: line 135: unset: ps1: not an array variable
 ./array.tests: line 139: declare: c: cannot destroy array variables in this way
@@ -84,6 +85,7 @@ declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="t
 declare -a b=([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")
 declare -ar c
 declare -a d=([1]="test test")
+declare -a e=()
 declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")
 declare -a rv=([0]="this" [1]="is" [2]="a" [3]="test" [4]="of" [5]="read" [6]="using" [7]="arrays")
 abde
@@ -381,6 +383,8 @@ strlen(4four) = 5
 1 2 0 3
 1 2 0 3
 1 2 0 3
+declare -ai arr=([0]="2" [1]="4" [2]="6")
+declare -a arr=([0]="hello" [1]="world")
 foo index 1: ok
 foo index 2: ok
 foo: implicit reference to element 0: ok
@@ -492,8 +496,8 @@ x b c
 declare -a a=([1]="2" [2]="3" [3]="4")
 abcd
 unset
-./array21.sub: line 30: typeset: a: not found
-./array21.sub: line 33: typeset: A: not found
+declare -a a=()
+declare -A A=([four]="4" [two]="2" [three]="3" [one]="1" )
 declare -a a=()
 declare -A A=()
 declare -a foo=([0]="1" [1]="(4 5 6)" [2]="3")
@@ -520,13 +524,11 @@ argv[1] = <y>
 <X> <X> <X> <X>
 ./array23.sub: line 22: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
 ./array23.sub: line 23: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-foo
-0
-foo
-foo
-foo
-6
-./array23.sub: line 34: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 24: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 26: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 30: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 33: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 34: $index: syntax error: operand expected (error token is "$index")
 ./array23.sub: line 35: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
 0
 0
@@ -743,23 +745,43 @@ argv[1] = <b>
 argv[2] = <a>
 argv[1] = <b+a>
 7
-./array27.sub: line 24: a[]]=7 : syntax error: invalid arithmetic operator (error token is "]=7 ")
+7
 declare -A A=([$'\t']="2" [" "]="2" )
-./array27.sub: line 36: ((: A[]]=2 : syntax error: invalid arithmetic operator (error token is "]=2 ")
-declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["@"]="2" )
-./array27.sub: line 45: A[]]: bad array subscript
+declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["]"]="2" ["@"]="2" )
+declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["]"]="2" ["@"]="2" )
+./array27.sub: line 52: read: `A[]]': not a valid identifier
 declare -A A=([$'\t']="X" ["*"]="X" [" "]="X" ["@"]="X" )
-./array27.sub: line 53: A[]]: bad array subscript
+./array27.sub: line 60: printf: `A[]]': not a valid identifier
 declare -A A=([$'\t']="X" ["*"]="X" [" "]="X" ["@"]="X" )
-./array27.sub: line 61: declare: `A[]]=X': not a valid identifier
+./array27.sub: line 68: declare: `A[]]=X': not a valid identifier
 declare -A A=(["*"]="X" ["@"]="X" )
-./array27.sub: line 69: declare: `A[]]=X': not a valid identifier
-./array27.sub: line 69: A[*]: bad array subscript
-./array27.sub: line 69: A[@]: bad array subscript
-declare -A A
+./array27.sub: line 76: declare: `A[]]=X': not a valid identifier
+declare -A A=(["*"]="X" ["@"]="X" )
 declare -a bug4=([0]="" [1]="5" [2]="" [3]="1" [4]="")
 declare -a bug=([0]="" [1]="5" [2]="" [3]="1" [4]="")
 declare -a bug2=([0]="")
 declare -a bug3=([0]="" [1]="5" [2]="" [3]="1" [4]="")
 declare -a not_bug=([0]="no" [1]="nulls")
 declare -a workaround=([0]="")
+declare -a var=([0]=$'\001\001\001\001')
+declare -A v2=([$'\001']=$'ab\001c' )
+declare -a foo=([0]=$'\001\001\001\001')
+declare -A foo=([$'\001']=$'ab\001c' )
+declare -a foo=([0]=$'\001\001\001\001')
+declare -a foo=([0]=$'\001\001\001\001')
+declare -A foo=([v]=$'\001\001\001\001' )
+declare -A foo=([v]=$'\001\001\001\001' )
+declare -A foo=([$'\001']=$'ab\001c' )
+declare -A foo=([$'\001']=$'ab\001c' )
+foo
+declare -a a=([42]="foo")
+foo
+declare -a a=([42]="foo")
+7
+declare -ai a=([42]="7")
+42
+declare -ai a=([42]="42")
+FOO
+declare -Au A=([Darwin]="FOO" )
+FOO
+declare -Au A=(["@"]="FOO" )

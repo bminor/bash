@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -450,6 +450,8 @@ fc_builtin (list)
   for (i = reverse ? histend : histbeg; reverse ? i >= histbeg : i <= histend; reverse ? i-- : i++)
     {
       QUIT;
+      if (hlist[i] == 0)
+	continue;
       if (numbering)
 	fprintf (stream, "%d", i + history_base);
       if (listing)
@@ -459,7 +461,8 @@ fc_builtin (list)
 	  else
 	    fprintf (stream, "\t%c", histdata (i) ? '*' : ' ');
 	}
-      fprintf (stream, "%s\n", histline (i));
+      if (histline (i))
+	fprintf (stream, "%s\n", histline (i));
     }
 
   if (listing)

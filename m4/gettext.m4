@@ -1,5 +1,5 @@
 # gettext.m4 serial 69 (gettext-0.19.9)
-dnl Copyright (C) 1995-2014, 2016, 2018-2019 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2014, 2016, 2018-2019, 2021 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -16,10 +16,12 @@ dnl They are *not* in the public domain.
 dnl Authors:
 dnl   Ulrich Drepper <drepper@cygnus.com>, 1995-2000.
 dnl   Bruno Haible <haible@clisp.cons.org>, 2000-2006, 2008-2010.
+dnl
+dnl Modified for bash use by Chet Ramey <chet.ramey@case.edu>, 2021
 
 dnl Macro to add for using GNU gettext.
 
-dnl Usage: AM_GNU_GETTEXT([INTLSYMBOL], [NEEDSYMBOL], [INTLDIR]).
+dnl Usage: BASH_GNU_GETTEXT([INTLSYMBOL], [NEEDSYMBOL], [INTLDIR]).
 dnl INTLSYMBOL can be one of 'external', 'no-libtool', 'use-libtool'. The
 dnl    default (if it is not specified or empty) is 'no-libtool'.
 dnl    INTLSYMBOL should be 'external' for packages with no intl directory,
@@ -54,14 +56,12 @@ dnl GNU format catalogs when building on a platform with an X/Open gettext),
 dnl but we keep it in order not to force irrelevant filename changes on the
 dnl maintainers.
 dnl
-AC_DEFUN([AM_GNU_GETTEXT],
+AC_DEFUN([BASH_GNU_GETTEXT],
 [
   dnl Argument checking.
   ifelse([$1], [], , [ifelse([$1], [external], , [ifelse([$1], [no-libtool], , [ifelse([$1], [use-libtool], ,
     [errprint([ERROR: invalid first argument to AM_GNU_GETTEXT
 ])])])])])
-  ifelse(ifelse([$1], [], [old])[]ifelse([$1], [no-libtool], [old]), [old],
-    [AC_DIAGNOSE([obsolete], [Use of AM_GNU_GETTEXT without [external] argument is deprecated.])])
   ifelse([$2], [], , [ifelse([$2], [need-ngettext], , [ifelse([$2], [need-formatstring-macros], ,
     [errprint([ERROR: invalid second argument to AM_GNU_GETTEXT
 ])])])])

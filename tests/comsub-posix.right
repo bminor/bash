@@ -5,11 +5,14 @@ ab
 
 abcd
 abcd
+mnop
+qrst
 sh_352.26ax
 sh_352.26ay
 sh_352.25a sh_352.25b
 sh_352.27 ) ) )
 abc
+def
 here doc with )
 )
 bad' syntax
@@ -56,8 +59,8 @@ here-doc with \()
 here-doc terminated with a parenthesis
 ' # or a single back- or doublequote
 line terminated with a backslash
-./comsub-posix1.sub: command substitution: line 2: syntax error near unexpected token `)'
-./comsub-posix1.sub: command substitution: line 2: ` if x; then echo foo )'
+./comsub-posix1.sub: line 1: syntax error near unexpected token `)'
+./comsub-posix1.sub: line 1: `echo $( if x; then echo foo )'
 after
 swap32_posix is a function
 swap32_posix () 
@@ -74,5 +77,18 @@ swap32_posix ()
                 ));
     done
 }
+./comsub-posix5.sub: line 37: syntax error near unexpected token `done'
+./comsub-posix5.sub: line 37: `: $(case x in x) ;; x) done esac)'
+./comsub-posix5.sub: line 38: syntax error near unexpected token `done'
+./comsub-posix5.sub: line 38: `: $(case x in x) ;; x) done ;; esac)'
+./comsub-posix5.sub: line 39: syntax error near unexpected token `esac'
+./comsub-posix5.sub: line 39: `: $(case x in x) (esac) esac)'
+bash: -c: line 1: syntax error near unexpected token `in'
+bash: -c: line 1: `: $(case x in esac|in) foo;; esac)'
+bash: -c: line 1: syntax error near unexpected token `done'
+bash: -c: line 1: `: $(case x in x) ;; x) done)'
 yes
+
+
+
 ab cde

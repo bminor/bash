@@ -48,12 +48,7 @@ sh_setlinebuf (stream)
 #endif
 
 #if defined (HAVE_SETVBUF)
-
-#  if defined (SETVBUF_REVERSED)
-  return (setvbuf (stream, _IOLBF, local_linebuf, LBUF_BUFSIZE));
-#  else /* !SETVBUF_REVERSED */
   return (setvbuf (stream, local_linebuf, _IOLBF, LBUF_BUFSIZE));
-#  endif /* !SETVBUF_REVERSED */
 # else /* !HAVE_SETVBUF */
 
   setlinebuf (stream);

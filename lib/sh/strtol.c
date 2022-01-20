@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#if !defined (HAVE_STRTOL)
+#if !HAVE_STRTOL
 
 #include <chartypes.h>
 #include <errno.h>

@@ -70,7 +70,7 @@
 #endif
 
 #if defined(DRIVER) && !defined(HAVE_CONFIG_H)
-#define HAVE_LONG_LONG
+#define HAVE_LONG_LONG_INT
 #define HAVE_LONG_DOUBLE
 #ifdef __linux__
 #define HAVE_PRINTF_A_FORMAT
@@ -286,7 +286,7 @@ static void floating PARAMS((struct DATA *, double));
 static void exponent PARAMS((struct DATA *, double));
 #endif
 static void number PARAMS((struct DATA *, unsigned long, int));
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 static void lnumber PARAMS((struct DATA *, unsigned long long, int));
 #endif
 static void pointer PARAMS((struct DATA *, unsigned long));
@@ -767,7 +767,7 @@ number(p, d, base)
   FREE (t);
 }
 
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 /*
  * identical to number() but works for `long long'
  */
@@ -1262,7 +1262,7 @@ vsnprintf_internal(data, string, length, format, args)
   long double ld;	/* for later */
 #endif
   unsigned long ul;
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_UNSIGNED_LONG_LONG_INT
   unsigned long long ull;
 #endif
   int state, i, c, n;
@@ -1486,7 +1486,7 @@ conv_break:
 		/* FALLTHROUGH */
 	      case 'u':
 		STAR_ARGS(data);
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 		if (data->flags & PF_LONGLONG)
 		  {
 		    ull = GETARG (unsigned long long);
@@ -1506,7 +1506,7 @@ conv_break:
 	      case 'd':  /* decimal */
 	      case 'i':
 		STAR_ARGS(data);
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 		if (data->flags & PF_LONGLONG)
 		  {
 		    ull = GETARG (long long);
@@ -1522,7 +1522,7 @@ conv_break:
 		break;
 	      case 'o':  /* octal */
 		STAR_ARGS(data);
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 		if (data->flags & PF_LONGLONG)
 		  {
 		    ull = GETARG (unsigned long long);
@@ -1539,7 +1539,7 @@ conv_break:
 	      case 'x': 
 	      case 'X':  /* hexadecimal */
 		STAR_ARGS(data);
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 		if (data->flags & PF_LONGLONG)
 		  {
 		    ull = GETARG (unsigned long long);
@@ -1602,7 +1602,7 @@ conv_break:
 		state = 0;
 		break;
 	      case 'n':
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 		if (data->flags & PF_LONGLONG)
 		  *(GETARG (long long *)) = data->counter;
 		else
@@ -2082,7 +2082,7 @@ main()
   printf("<%s>\n", holder);
   printf("<%s>\n\n", h);
 
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
   printf ("<%%llu> LLONG_MAX+1\n");
   i = snprintf(holder, 100, "%llu", (unsigned long long)(LLONG_MAX)+1);
   i = asprintf(&h, "%llu", (unsigned long long)(LLONG_MAX)+1);

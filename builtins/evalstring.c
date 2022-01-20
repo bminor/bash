@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -88,24 +88,18 @@ int
 should_suppress_fork (command)
      COMMAND *command;
 {
-#if 0 /* TAG: bash-5.2 */
   int subshell;
 
   subshell = subshell_environment & SUBSHELL_PROCSUB;	/* salt to taste */
-#endif
   return (startup_state == 2 && parse_and_execute_level == 1 &&
-	  running_trap == 0 &&
 	  *bash_input.location.string == '\0' &&
 	  parser_expanding_alias () == 0 &&
+	  running_trap == 0 &&
 	  command->type == cm_simple &&
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
 	  signal_is_trapped (ERROR_TRAP) == 0 &&
 	  any_signals_trapped () < 0 &&
-#if 0 /* TAG: bash-5.2 */
 	  (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
-#else
-	  command->redirects == 0 && command->value.Simple->redirects == 0 &&
-#endif
 	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
 }
@@ -173,6 +167,19 @@ optimize_shell_function (command)
       fc->value.Connection->second->flags |= CMD_NO_FORK;
       fc->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
     }  
+}
+
+int
+can_optimize_cat_file (command)
+     COMMAND *command;
+{
+  return (command->type == cm_simple && !command->redirects &&
+	    (command->flags & CMD_TIME_PIPELINE) == 0 &&
+	    command->value.Simple->words == 0 &&
+	    command->value.Simple->redirects &&
+	    command->value.Simple->redirects->next == 0 &&
+	    command->value.Simple->redirects->instruction == r_input_direction &&
+	    command->value.Simple->redirects->redirector.dest == 0);
 }
 
 /* How to force parse_and_execute () to clean up after itself. */
@@ -364,6 +371,25 @@ parse_and_execute (string, from_file, flags)
 	      should_jump_to_top_level = 1;
 	      goto out;
 
+	    case EXITBLTIN:
+	      if (command)
+		{
+		  if (variable_context && signal_is_trapped (0))
+		    {
+		      /* Let's make sure we run the exit trap in the function
+			 context, as we do when not running parse_and_execute.
+			 The pe_dispose unwind frame comes before any unwind-
+			 protects installed by the string we're evaluating, so
+			 it will undo the current function scope. */
+		      dispose_command (command);
+		      discard_unwind_frame ("pe_dispose");
+		    }
+		  else
+		    run_unwind_frame ("pe_dispose");
+		}
+	      should_jump_to_top_level = 1;
+	      goto out;
+
 	    case DISCARD:
 	      if (command)
 		run_unwind_frame ("pe_dispose");
@@ -473,13 +499,7 @@ parse_and_execute (string, from_file, flags)
 	      if (startup_state == 2 &&
 		  (subshell_environment & SUBSHELL_COMSUB) &&
 		  *bash_input.location.string == '\0' &&
-		  command->type == cm_simple && !command->redirects &&
-		  (command->flags & CMD_TIME_PIPELINE) == 0 &&
-		  command->value.Simple->words == 0 &&
-		  command->value.Simple->redirects &&
-		  command->value.Simple->redirects->next == 0 &&
-		  command->value.Simple->redirects->instruction == r_input_direction &&
-		  command->value.Simple->redirects->redirector.dest == 0)
+		  can_optimize_cat_file (command))
 		{
 		  int r;
 		  r = cat_file (command->value.Simple->redirects);
@@ -543,10 +563,11 @@ parse_and_execute (string, from_file, flags)
    command substitutions during parsing to obey Posix rules about finding
    the end of the command and balancing parens. */
 int
-parse_string (string, from_file, flags, endp)
+parse_string (string, from_file, flags, cmdp, endp)
      char *string;
      const char *from_file;
      int flags;
+     COMMAND **cmdp;
      char **endp;
 {
   int code, nc;
@@ -575,9 +596,9 @@ parse_string (string, from_file, flags, endp)
 
   code = should_jump_to_top_level = 0;
   oglobal = global_command;
-  ostring = string;
 
   with_input_from_string (string, from_file);
+  ostring = bash_input.location.string;
   while (*(bash_input.location.string))		/* XXX - parser_expanding_alias () ? */
     {
       command = (COMMAND *)NULL;
@@ -593,15 +614,15 @@ parse_string (string, from_file, flags, endp)
 
       if (code)
 	{
-#if defined (DEBUG)
-itrace("parse_string: longjmp executed: code = %d", code);
-#endif
+	  INTERNAL_DEBUG(("parse_string: longjmp executed: code = %d", code));
+
 	  should_jump_to_top_level = 0;
 	  switch (code)
 	    {
 	    case FORCE_EOF:
 	    case ERREXIT:
 	    case EXITPROG:
+	    case EXITBLTIN:
 	    case DISCARD:		/* XXX */
 	      if (command)
 		dispose_command (command);
@@ -621,7 +642,10 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	  
       if (parse_command () == 0)
 	{
-	  dispose_command (global_command);
+	  if (cmdp)
+	    *cmdp = global_command;
+	  else
+	    dispose_command (global_command);
 	  global_command = (COMMAND *)NULL;
 	}
       else
@@ -637,7 +661,11 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	}
 
       if (current_token == yacc_EOF || current_token == shell_eof_token)
+	{
+	  if (current_token == shell_eof_token)
+	    rewind_input_string ();
 	  break;
+	}
     }
 
 out:
@@ -663,12 +691,10 @@ out:
   return (nc);
 }
 
-/* Handle a $( < file ) command substitution.  This expands the filename,
-   returning errors as appropriate, then just cats the file to the standard
-   output. */
-static int
-cat_file (r)
+int
+open_redir_file (r, fnp)
      REDIRECT *r;
+     char **fnp;
 {
   char *fn;
   int fd, rval;
@@ -694,8 +720,29 @@ cat_file (r)
     {
       file_error (fn);
       free (fn);
+      if (fnp)
+	*fnp = 0;
       return -1;
     }
+
+  if (fnp)
+    *fnp = fn;
+  return fd;
+}
+
+/* Handle a $( < file ) command substitution.  This expands the filename,
+   returning errors as appropriate, then just cats the file to the standard
+   output. */
+static int
+cat_file (r)
+     REDIRECT *r;
+{
+  char *fn;
+  int fd, rval;
+
+  fd = open_redir_file (r, &fn);
+  if (fd < 0)
+    return -1;
 
   rval = zcatfd (fd, 1, fn);
 

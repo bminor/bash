@@ -57,6 +57,7 @@ SHELL = @MAKE_SHELL@
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
+STYLE_CFLAGS = @STYLE_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@ @LOCAL_LDFLAGS@
 
@@ -68,7 +69,7 @@ LOCAL_DEFS = @LOCAL_DEFS@
 INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib -I$(BASHINCDIR) -I$(srcdir) $(INTL_INC)
 
 CCFLAGS = ${ADDON_CFLAGS} ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) \
-	  $(LOCAL_CFLAGS) $(CFLAGS) $(CPPFLAGS) 
+	  $(LOCAL_CFLAGS) $(STYLE_CFLAGS) $(CFLAGS) $(CPPFLAGS) 
 
 GCC_LINT_FLAGS = -Wall -Wshadow -Wpointer-arith -Wcast-qual \
 		 -Wcast-align -Wstrict-prototypes -Wconversion \
@@ -93,7 +94,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
 	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
 	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
-	   utf8.c random.c gettimeofday.c
+	   utf8.c random.c gettimeofday.c timers.c
 
 # The header files for this library.
 HSOURCES = 
@@ -108,7 +109,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
 	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o \
-	  utf8.o random.o gettimeofday.o wcsnwidth.o ${LIBOBJS}
+	  utf8.o random.o gettimeofday.o timers.o wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -197,6 +198,7 @@ strtoul.o: strtoul.c
 strtoull.o: strtoull.c
 strtoumax.o: strtoumax.c
 strtrans.o: strtrans.c
+timers.o: timers.c
 times.o: times.c
 timeval.o: timeval.c
 tmpfile.o: tmpfile.c
@@ -277,6 +279,7 @@ strtoul.o: ${BUILD_DIR}/config.h
 strtoull.o: ${BUILD_DIR}/config.h
 strtoumax.o: ${BUILD_DIR}/config.h
 strtrans.o: ${BUILD_DIR}/config.h
+timers.o: ${BUILD_DIR}/config.h
 times.o: ${BUILD_DIR}/config.h
 timeval.o: ${BUILD_DIR}/config.h
 tmpfile.o: ${BUILD_DIR}/config.h ${topdir}/config-top.h 
@@ -619,6 +622,14 @@ fnxform.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
 
 shmbchar.o: ${BASHINCDIR}/shmbchar.h
 shmbchar.o: ${BASHINCDIR}/shmbutil.h
+
+timers.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+timers.o: ${BASHINCDIR}/stdc.h
+timers.o: ${topdir}/xmalloc.h ${topdir}/sig.h
+timers.o: ${BASHINCDIR}/posixtime.h ${BASHINCDIR}/stat-time.h
+timers.o: ${BASHINCDIR}/posixselect.h
+timers.o: ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+timers.o: ${BASHINCDIR}/timer.h
 
 unicode.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 unicode.o: ${BASHINCDIR}/stdc.h

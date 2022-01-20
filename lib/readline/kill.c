@@ -1,6 +1,6 @@
 /* kill.c -- kill ring management. */
 
-/* Copyright (C) 1994-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -70,10 +70,10 @@ static int rl_kill_index;
 /* How many slots we have in the kill ring. */
 static int rl_kill_ring_length;
 
-static int _rl_copy_to_kill_ring PARAMS((char *, int));
-static int region_kill_internal PARAMS((int));
-static int _rl_copy_word_as_kill PARAMS((int, int));
-static int rl_yank_nth_arg_internal PARAMS((int, int, int));
+static int _rl_copy_to_kill_ring (char *, int);
+static int region_kill_internal (int);
+static int _rl_copy_word_as_kill (int, int);
+static int rl_yank_nth_arg_internal (int, int, int);
 
 /* How to say that you only want to save a certain amount
    of kill material. */
@@ -351,6 +351,30 @@ rl_unix_filename_rubout (int count, int key)
       while (count--)
 	{
 	  c = rl_line_buffer[rl_point - 1];
+
+	  /* First move backwards through whitespace */
+	  while (rl_point && whitespace (c))
+	    {
+	      rl_point--;
+	      c = rl_line_buffer[rl_point - 1];
+	    }
+
+	  /* Consume one or more slashes. */
+	  if (c == '/')
+	    {
+	      int i;
+
+	      i = rl_point - 1;
+	      while (i > 0 && c == '/')
+		c = rl_line_buffer[--i];
+	      if (i == 0 || whitespace (c))
+		{
+		  rl_point = i + whitespace (c);
+		  continue;	/* slashes only */
+		}
+	      c = '/';
+	    }
+
 	  while (rl_point && (whitespace (c) || c == '/'))
 	    {
 	      rl_point--;

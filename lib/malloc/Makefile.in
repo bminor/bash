@@ -1,6 +1,6 @@
 # Skeleton Makefile for the GNU malloc code
 #
-# Copyright (C) 1996-2009 Free Software Foundation, Inc.
+# Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ PROFILE_FLAGS = @PROFILE_FLAGS@
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
+STYLE_CFLAGS = @STYLE_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 
@@ -56,7 +57,7 @@ LIBINTL_H = @LIBINTL_H@
 INCLUDES = -I. -I../.. -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib $(INTL_INC)
 
 CCFLAGS = ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) \
-	  $(CFLAGS) $(MALLOC_CFLAGS) $(CPPFLAGS)
+	  $(CFLAGS) $(MALLOC_CFLAGS) $(STYLE_CFLAGS) $(CPPFLAGS)
 
 .c.o:
 	$(CC) $(CCFLAGS) -c $<

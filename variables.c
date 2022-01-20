@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -198,6 +198,9 @@ static SHELL_VAR *get_self PARAMS((SHELL_VAR *));
 static SHELL_VAR *init_dynamic_array_var PARAMS((char *, sh_var_value_func_t *, sh_var_assign_func_t *, int));
 static SHELL_VAR *init_dynamic_assoc_var PARAMS((char *, sh_var_value_func_t *, sh_var_assign_func_t *, int));
 #endif
+
+static inline SHELL_VAR *set_int_value (SHELL_VAR *, intmax_t, int);
+static inline SHELL_VAR *set_string_value (SHELL_VAR *, const char *, int);
 
 static SHELL_VAR *assign_seconds PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
 static SHELL_VAR *get_seconds PARAMS((SHELL_VAR *));
@@ -663,6 +666,8 @@ initialize_shell_variables (env, privmode)
 
   /* Get the user's real and effective user ids. */
   uidset ();
+
+  temp_var = set_if_not ("BASH_LOADABLES_PATH", DEFAULT_LOADABLE_BUILTINS_PATH);
 
   temp_var = find_variable ("BASH_XTRACEFD");
   if (temp_var && imported_p (temp_var))
@@ -1273,6 +1278,39 @@ init_dynamic_assoc_var (name, getfunc, setfunc, attrs)
 }
 #endif
 
+/* Set the string value of VAR to the string representation of VALUE.
+   Right now this takes an INTMAX_T because that's what itos needs. If
+   FLAGS&1, we force the integer attribute on. */
+static inline SHELL_VAR *
+set_int_value (SHELL_VAR *var, intmax_t value, int flags)
+{
+  char *p;
+
+  p = itos (value);
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  if (flags & 1)
+    VSETATTR (var, att_integer);
+  return (var);
+}
+
+static inline SHELL_VAR *
+set_string_value (SHELL_VAR *var, const char *value, int flags)
+{
+  char *p;
+
+  if (value && *value)
+    p = savestring (value);
+  else
+    {
+      p = (char *)xmalloc (1);
+      p[0] = '\0';
+    }
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  return (var);
+}
+
 /* The value of $SECONDS.  This is the number of seconds since shell
    invocation, or, the number of seconds since the last assignment + the
    value of the last assignment. */
@@ -1295,7 +1333,7 @@ assign_seconds (self, value, unused, key)
   seconds_value_assigned = expok ? nval : 0;
   gettimeofday (&shellstart, NULL);
   shell_start_time = shellstart.tv_sec;
-  return (self);
+  return (set_int_value (self, nval, integer_p (self) != 0));
 }
 
 static SHELL_VAR *
@@ -1303,18 +1341,11 @@ get_seconds (var)
      SHELL_VAR *var;
 {
   time_t time_since_start;
-  char *p;
   struct timeval tv;
 
   gettimeofday(&tv, NULL);
   time_since_start = tv.tv_sec - shell_start_time;
-  p = itos(seconds_value_assigned + time_since_start);
-
-  FREE (value_cell (var));
-
-  VSETATTR (var, att_integer);
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, seconds_value_assigned + time_since_start, 1));
 }
 
 static SHELL_VAR *
@@ -1356,7 +1387,7 @@ assign_random (self, value, unused, key)
   sbrand (seedval);
   if (subshell_environment)
     seeded_subshell = getpid ();
-  return (self);
+  return (set_int_value (self, seedval, integer_p (self) != 0));
 }
 
 int
@@ -1384,16 +1415,9 @@ get_random (var)
      SHELL_VAR *var;
 {
   int rv;
-  char *p;
 
   rv = get_random_number ();
-  p = itos (rv);
-
-  FREE (value_cell (var));
-
-  VSETATTR (var, att_integer);
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, rv, 1));
 }
 
 static SHELL_VAR *
@@ -1401,16 +1425,9 @@ get_urandom (var)
      SHELL_VAR *var;
 {
   u_bits32_t rv;
-  char *p;
 
   rv = get_urandom32 ();
-  p = itos (rv);
-
-  FREE (value_cell (var));
-
-  VSETATTR (var, att_integer);
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, rv, 1));
 }
 
 static SHELL_VAR *
@@ -1425,7 +1442,7 @@ assign_lineno (var, value, unused, key)
   if (value == 0 || *value == '\0' || legal_number (value, &new_value) == 0)
     new_value = 0;
   line_number = line_number_base = new_value;
-  return var;
+  return (set_int_value (var, line_number, integer_p (var) != 0));
 }
 
 /* Function which returns the current line number. */
@@ -1433,14 +1450,10 @@ static SHELL_VAR *
 get_lineno (var)
      SHELL_VAR *var;
 {
-  char *p;
   int ln;
 
   ln = executing_line_number ();
-  p = itos (ln);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, ln, 0));
 }
 
 static SHELL_VAR *
@@ -1462,12 +1475,7 @@ static SHELL_VAR *
 get_subshell (var)
      SHELL_VAR *var;
 {
-  char *p;
-
-  p = itos (subshell_level);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, subshell_level, 0));
 }
 
 static SHELL_VAR *
@@ -1475,14 +1483,9 @@ get_epochseconds (var)
      SHELL_VAR *var;
 {
   intmax_t now;
-  char *p;
 
   now = NOW;
-  p = itos (now);
-
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, now, 0));
 }
 
 static SHELL_VAR *
@@ -1490,7 +1493,6 @@ get_epochrealtime (var)
      SHELL_VAR *var;
 {
   char buf[32];
-  char *p;
   struct timeval tv;
 
   gettimeofday (&tv, NULL);
@@ -1498,10 +1500,7 @@ get_epochrealtime (var)
 					   locale_decpoint (),
 					   (unsigned)tv.tv_usec);
 
-  p = savestring (buf);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_string_value (var, buf, 0));
 }
 
 static SHELL_VAR *
@@ -1509,27 +1508,16 @@ get_bashpid (var)
      SHELL_VAR *var;
 {
   int pid;
-  char *p;
 
   pid = getpid ();
-  p = itos (pid);
-
-  FREE (value_cell (var));
-  VSETATTR (var, att_integer);	/* XXX - was also att_readonly */
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, pid, 1));
 }
 
 static SHELL_VAR *
 get_bash_argv0 (var)
      SHELL_VAR *var;
 {
-  char *p;
-
-  p = savestring (dollar_vars[0]);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return var;
+  return (set_string_value (var, dollar_vars[0], 0));
 }
 
 static char *static_shell_name = 0;
@@ -1574,16 +1562,8 @@ get_bash_command (var)
 {
   char *p;
 
-  if (the_printed_command_except_trap)
-    p = savestring (the_printed_command_except_trap);
-  else
-    {
-      p = (char *)xmalloc (1);
-      p[0] = '\0';
-    }
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  p = the_printed_command_except_trap ? the_printed_command_except_trap : "";
+  return (set_string_value (var, p, 0));
 }
 
 #if defined (HISTORY)
@@ -1591,7 +1571,6 @@ static SHELL_VAR *
 get_histcmd (var)
      SHELL_VAR *var;
 {
-  char *p;
   int n;
 
   /* Do the same adjustment here we do in parse.y:prompt_history_number,
@@ -1602,10 +1581,7 @@ get_histcmd (var)
      already been saved to history and the history number incremented.
      Right now we use EXECUTING as the determinant. */
   n = history_number () - executing;
-  p = itos (n);
-  FREE (value_cell (var));
-  var_setvalue (var, p);
-  return (var);
+  return (set_int_value (var, n, 0));
 }
 #endif
 
@@ -1619,10 +1595,7 @@ get_comp_wordbreaks (var)
   if (rl_completer_word_break_characters == 0 && bash_readline_initialized == 0)
     enable_hostname_completion (perform_hostname_completion);
 
-  FREE (value_cell (var));
-  var_setvalue (var, savestring (rl_completer_word_break_characters));
-
-  return (var);
+  return (set_string_value (var, rl_completer_word_break_characters, 0));
 }
 
 /* When this function returns, rl_completer_word_break_characters points to
@@ -1636,7 +1609,7 @@ assign_comp_wordbreaks (self, value, unused, key)
 {
   if (rl_completer_word_break_characters &&
       rl_completer_word_break_characters != rl_basic_word_break_characters)
-    free (rl_completer_word_break_characters);
+    free ((void *)rl_completer_word_break_characters);
 
   rl_completer_word_break_characters = savestring (value);
   return self;
@@ -1858,13 +1831,8 @@ get_funcname (self)
      SHELL_VAR *self;
 {
 #if ! defined (ARRAY_VARS)
-  char *t;
   if (variable_context && this_shell_function)
-    {
-      FREE (value_cell (self));
-      t = savestring (this_shell_function->name);
-      var_setvalue (self, t);
-    }
+    return (set_string_value (self, this_shell_function->name, 0));
 #endif
   return (self);
 }
@@ -2527,7 +2495,7 @@ get_variable_value (var)
 /* Return the string value of a variable.  Return NULL if the variable
    doesn't exist.  Don't cons a new string.  This is a potential memory
    leak if the variable is found in the temporary environment, but doesn't
-   leak in practice.  Since    functions and variables have separate name
+   leak in practice.  Since functions and variables have separate name
    spaces, returns NULL if var_name is a shell function only. */
 char *
 get_string_value (var_name)
@@ -2847,7 +2815,7 @@ make_local_array_variable (name, flags)
      scope and discard anything that's invalid. */
   if (localvar_inherit && assoc_p (var))
     {
-      internal_warning ("%s: cannot inherit value from incompatible type", name);
+      internal_warning (_("%s: cannot inherit value from incompatible type"), name);
       VUNSETATTR (var, att_assoc);
       dispose_variable_value (var);
       array = array_create ();
@@ -2903,7 +2871,7 @@ make_local_assoc_variable (name, flags)
      scope and discard anything that's invalid. */
   if (localvar_inherit && array_p (var))
     {
-      internal_warning ("%s: cannot inherit value from incompatible type", name);
+      internal_warning (_("%s: cannot inherit value from incompatible type"), name);
       VUNSETATTR (var, att_array);
       dispose_variable_value (var);
       hash = assoc_create (ASSOC_HASH_BUCKETS);
@@ -3136,8 +3104,14 @@ bind_variable_internal (name, value, table, hflags, aflags)
 	      VUNSETATTR (tentry, att_nameref);
 	    }
 	  free (tname);
-          /* XXX - should it be aflags? */
-	  entry = assign_array_element (newval, make_variable_value (entry, value, aflags), aflags|ASS_NAMEREF);
+
+	  /* entry == nameref variable; tentry == array variable;
+	     newval == x[2]; value = bar
+	     We don't need to call make_variable_value here, since
+	     assign_array_element will eventually do it itself based on
+	     newval and aflags. */
+
+	  entry = assign_array_element (newval, value, aflags|ASS_NAMEREF, (array_eltstate_t *)0);
 	  if (entry == 0)
 	    return entry;
 	}
@@ -3294,7 +3268,7 @@ bind_variable (name, value, flags)
 			return (bind_variable_internal (nv->name, value, nvc->table, 0, flags));
 #if defined (ARRAY_VARS)
 		      else if (valid_array_reference (nameref_cell (nv), 0))
-			return (assign_array_element (nameref_cell (nv), value, flags));
+			return (assign_array_element (nameref_cell (nv), value, flags, (array_eltstate_t *)0));
 		      else
 #endif
 		      return (bind_variable_internal (nameref_cell (nv), value, nvc->table, 0, flags));
@@ -3427,14 +3401,24 @@ bind_int_variable (lhs, rhs, flags)
      int flags;
 {
   register SHELL_VAR *v;
-  int isint, isarr, implicitarray;
+  int isint, isarr, implicitarray, vflags, avflags;
 
   isint = isarr = implicitarray = 0;
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (lhs, (flags & ASS_NOEXPAND) != 0))
+  /* Don't rely on VA_NOEXPAND being 1, set it explicitly */
+  vflags = (flags & ASS_NOEXPAND) ? VA_NOEXPAND : 0;
+  if (flags & ASS_ONEWORD)
+    vflags |= VA_ONEWORD;
+  if (valid_array_reference (lhs, vflags))
     {
       isarr = 1;
-      v = array_variable_part (lhs, (flags & ASS_NOEXPAND) != 0, (char **)0, (int *)0);
+      avflags = 0;
+      /* Common code to translate between assignment and reference flags. */
+      if (flags & ASS_NOEXPAND)
+	avflags |= AV_NOEXPAND;
+      if (flags & ASS_ONEWORD)
+	avflags |= AV_ONEWORD;
+      v = array_variable_part (lhs, avflags, (char **)0, (int *)0);
     }
   else if (legal_identifier (lhs) == 0)
     {
@@ -3457,7 +3441,7 @@ bind_int_variable (lhs, rhs, flags)
 
 #if defined (ARRAY_VARS)
   if (isarr)
-    v = assign_array_element (lhs, rhs, flags);
+    v = assign_array_element (lhs, rhs, flags, (array_eltstate_t *)0);
   else if (implicitarray)
     v = bind_array_variable (lhs, 0, rhs, 0);	/* XXX - check on flags */
   else
@@ -3478,14 +3462,15 @@ bind_int_variable (lhs, rhs, flags)
 }
 
 SHELL_VAR *
-bind_var_to_int (var, val)
+bind_var_to_int (var, val, flags)
      char *var;
      intmax_t val;
+     int flags;
 {
   char ibuf[INT_STRLEN_BOUND (intmax_t) + 1], *p;
 
   p = fmtulong (val, 10, ibuf, sizeof (ibuf), 0);
-  return (bind_int_variable (var, p, 0));
+  return (bind_int_variable (var, p, flags));
 }
 
 /* Do a function binding to a variable.  You pass the name and
@@ -3605,6 +3590,7 @@ assign_in_env (word, flags)
       if (legal_identifier (name) == 0)
 	{
 	  sh_invalidid (name);
+	  free (name);
 	  return (0);
 	}
   
@@ -5670,7 +5656,7 @@ pop_args ()
   GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
   GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
 
-  ce = array_shift (bash_argc_a, 1, 0);
+  ce = array_unshift_element (bash_argc_a);
   if (ce == 0 || legal_number (element_value (ce), &i) == 0)
     i = 0;
 
@@ -6279,19 +6265,27 @@ set_pipestatus_array (ps, nproc)
   /* Fast case */
   if (array_num_elements (a) == nproc && nproc == 1)
     {
+#ifndef ALT_ARRAY_IMPLEMENTATION
       ae = element_forw (a->head);
-      free (element_value (ae));
-      set_element_value (ae, itos (ps[0]));
+#else
+      ae = a->elements[0];
+#endif
+      ARRAY_ELEMENT_REPLACE (ae, itos (ps[0]));
     }
   else if (array_num_elements (a) <= nproc)
     {
       /* modify in array_num_elements members in place, then add */
+#ifndef ALT_ARRAY_IMPLEMENTATION
       ae = a->head;
+#endif
       for (i = 0; i < array_num_elements (a); i++)
 	{
+#ifndef ALT_ARRAY_IMPLEMENTATION
 	  ae = element_forw (ae);
-	  free (element_value (ae));
-	  set_element_value (ae, itos (ps[i]));
+#else
+	  ae = a->elements[i];
+#endif
+	  ARRAY_ELEMENT_REPLACE (ae, itos (ps[i]));
 	}
       /* add any more */
       for ( ; i < nproc; i++)
@@ -6302,13 +6296,32 @@ set_pipestatus_array (ps, nproc)
     }
   else
     {
+#ifndef ALT_ARRAY_IMPLEMENTATION
       /* deleting elements.  it's faster to rebuild the array. */	  
       array_flush (a);
-      for (i = 0; ps[i] != -1; i++)
+      for (i = 0; i < nproc; i++)
 	{
 	  t = inttostr (ps[i], tbuf, sizeof (tbuf));
 	  array_insert (a, i, t);
 	}
+#else
+      /* deleting elements. replace the first NPROC, free the rest */
+      for (i = 0; i < nproc; i++)
+	{
+	  ae = a->elements[i];
+	  ARRAY_ELEMENT_REPLACE (ae, itos (ps[i]));
+	}
+      for ( ; i <= array_max_index (a); i++)
+	{
+	  array_dispose_element (a->elements[i]);
+	  a->elements[i] = (ARRAY_ELEMENT *)NULL;
+	}
+
+      /* bookkeeping usually taken care of by array_insert */
+      set_max_index (a, nproc - 1);
+      set_first_index (a, 0);
+      set_num_elements (a, nproc);
+#endif /* ALT_ARRAY_IMPLEMENTATION */
     }
 }
 

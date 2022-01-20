@@ -3,7 +3,7 @@
 /* I can't stand it anymore!  Please can't we just write the
    whole Unix system in lisp or something? */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,7 +35,7 @@
 #  include <unistd.h>
 #endif
 
-#if STDC_HEADERS
+#if defined (HAVE_STDDEF_H)
 #  include <stddef.h>
 #endif
 
@@ -48,6 +48,7 @@
 #include "unwind_prot.h"
 #include "sig.h"
 #include "quit.h"
+#include "bashintl.h"	/* for _() */
 #include "error.h"	/* for internal_warning */
 #include "ocache.h"
 
@@ -282,7 +283,7 @@ unwind_frame_discard_internal (tag, ignore)
     }
 
   if (found == 0)
-    internal_warning ("unwind_frame_discard: %s: frame not found", tag);
+    internal_warning (_("unwind_frame_discard: %s: frame not found"), tag);
 }
 
 /* Restore the value of a variable, based on the contents of SV.
@@ -328,7 +329,7 @@ unwind_frame_run_internal (tag, ignore)
       uwpfree (elt);
     }
   if (tag && found == 0)
-    internal_warning ("unwind_frame_run: %s: frame not found", tag);
+    internal_warning (_("unwind_frame_run: %s: frame not found"), tag);
 }
 
 static void

@@ -1,6 +1,6 @@
 /* terminal.c -- controlling the terminal with termcap. */
 
-/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2021 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -73,11 +73,11 @@
 #  include <windows.h>
 #  include <wincon.h>
 
-static void _win_get_screensize PARAMS((int *, int *));
+static void _win_get_screensize (int *, int *);
 #endif
 
 #if defined (__EMX__)
-static void _emx_get_screensize PARAMS((int *, int *));
+static void _emx_get_screensize (int *, int *);
 #endif
 
 /* If the calling application sets this to a non-zero value, readline will
@@ -177,6 +177,10 @@ static char *_rl_term_kD;
 /* Insert key */
 static char *_rl_term_kI;
 
+/* Page up and page down keys */
+static char *_rl_term_kP;
+static char *_rl_term_kN;
+
 /* Cursor control */
 static char *_rl_term_vs;	/* very visible */
 static char *_rl_term_ve;	/* normal */
@@ -194,7 +198,7 @@ static char *_rl_term_ve;	/* normal */
 #endif
 #define TGETFLAG(cap)	(tgetflag (cap) == TGETFLAG_SUCCESS)
 
-static void bind_termcap_arrow_keys PARAMS((Keymap));
+static void bind_termcap_arrow_keys (Keymap);
 
 /* Variables that hold the screen dimensions, used by the display code. */
 int _rl_screenwidth, _rl_screenheight, _rl_screenchars;
@@ -382,8 +386,12 @@ _rl_sigwinch_resize_terminal (void)
 void
 rl_resize_terminal (void)
 {
+  int width, height;
+
+  width = _rl_screenwidth;
+  height = _rl_screenheight;
   _rl_get_screen_size (fileno (rl_instream), 1);
-  if (_rl_echoing_p)
+  if (_rl_echoing_p && (width != _rl_screenwidth || height != _rl_screenheight))
     {
       if (CUSTOM_REDISPLAY_FUNC ())
 	rl_forced_update_display ();
@@ -415,6 +423,8 @@ static const struct _tc_string tc_strings[] =
   { "kD", &_rl_term_kD },	/* delete */
   { "kH", &_rl_term_kH },	/* home down ?? */
   { "kI", &_rl_term_kI },	/* insert */
+  { "kN", &_rl_term_kN },	/* page down */
+  { "kP", &_rl_term_kP },	/* page up */
   { "kd", &_rl_term_kd },
   { "ke", &_rl_term_ke },	/* end keypad mode */
   { "kh", &_rl_term_kh },	/* home */
@@ -478,6 +488,7 @@ _rl_init_terminal_io (const char *terminal_name)
   _rl_term_goto = _rl_term_pc = _rl_term_ip = (char *)NULL;
   _rl_term_ks = _rl_term_ke =_rl_term_vs = _rl_term_ve = (char *)NULL;
   _rl_term_kh = _rl_term_kH = _rl_term_at7 = _rl_term_kI = (char *)NULL;
+  _rl_term_kN = _rl_term_kP = (char *)NULL;
   _rl_term_so = _rl_term_se = (char *)NULL;
 #if defined(HACK_TERMCAP_MOTION)
   _rl_term_forward_char = (char *)NULL;
@@ -540,6 +551,7 @@ _rl_init_terminal_io (const char *terminal_name)
       _rl_term_ku = _rl_term_kd = _rl_term_kl = _rl_term_kr = (char *)NULL;
       _rl_term_kh = _rl_term_kH = _rl_term_kI = _rl_term_kD = (char *)NULL;
       _rl_term_ks = _rl_term_ke = _rl_term_at7 = (char *)NULL;
+      _rl_term_kN = _rl_term_kP = (char *)NULL;
       _rl_term_mm = _rl_term_mo = (char *)NULL;
       _rl_term_ve = _rl_term_vs = (char *)NULL;
       _rl_term_forward_char = (char *)NULL;
@@ -628,6 +640,9 @@ bind_termcap_arrow_keys (Keymap map)
 
   rl_bind_keyseq_if_unbound (_rl_term_kD, rl_delete);
   rl_bind_keyseq_if_unbound (_rl_term_kI, rl_overwrite_mode);	/* Insert */
+
+  rl_bind_keyseq_if_unbound (_rl_term_kN, rl_history_search_forward);	/* Page Down */
+  rl_bind_keyseq_if_unbound (_rl_term_kP, rl_history_search_backward);	/* Page Up */
 
   _rl_keymap = xkeymap;
 }

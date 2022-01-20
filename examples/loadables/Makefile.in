@@ -58,6 +58,7 @@ host_os = @host_os@
 host_cpu = @host_cpu@
 host_vendor = @host_vendor@
 
+STYLE_CFLAGS = @STYLE_CFLAGS@
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
 DEFS = @DEFS@
@@ -76,7 +77,7 @@ INTL_BUILDDIR = ${LIBBUILD}/intl
 INTL_INC = @INTL_INC@
 LIBINTL_H = @LIBINTL_H@
 
-CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) $(CPPFLAGS) $(CFLAGS)
+CCFLAGS = $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) $(CPPFLAGS) $(CFLAGS) $(STYLE_CFLAGS)
 
 #
 # These values are generated for configure by ${topdir}/support/shobj-conf.
@@ -103,8 +104,8 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
 	  tty pathchk tee head mkdir rmdir mkfifo mktemp printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid setpgid seq rm \
-	  accept csv cut
-OTHERPROG = necho hello cat pushd stat asort
+	  accept csv cut stat getconf
+OTHERPROG = necho hello cat pushd asort
 
 all:	$(SHOBJ_STATUS)
 
@@ -190,6 +191,9 @@ head:	head.o
 
 printenv:	printenv.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ printenv.o $(SHOBJ_LIBS)
+
+getconf:	getconf.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ getconf.o $(SHOBJ_LIBS)
 
 id:	id.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ id.o $(SHOBJ_LIBS)
@@ -294,6 +298,7 @@ truefalse.o: truefalse.c
 accept.o: accept.c
 sleep.o: sleep.c
 finfo.o: finfo.c
+getconf.o: getconf.c getconf.h
 logname.o: logname.c
 basename.o: basename.c
 dirname.o: dirname.c
