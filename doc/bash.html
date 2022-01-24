@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2021 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 January 17<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -54,7 +54,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2021 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2022 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -4215,18 +4215,27 @@ matches of <I>pattern</I> are deleted.
 If <I>string</I> is null,
 matches of <I>pattern</I> are deleted
 and the <B>/</B> following <I>pattern</I> may be omitted.
+<P>
 If the <B>patsub_replacement</B> shell option is enabled using <B>shopt</B>,
 any unquoted instances of <B>&amp;</B> in <I>string</I> are replaced with the
 matching portion of <I>pattern</I>.
-Backslash is used to quote <B>&amp;</B> in <I>string</I>; the backslash is removed
+<P>
+Quoting any part of <I>string</I> inhibits replacement in the
+expansion of the quoted portion, including replacement strings stored
+in shell variables.
+Backslash will escape <B>&amp;</B> in <I>string</I>; the backslash is removed
 in order to permit a literal <B>&amp;</B> in the replacement string.
-Users should take care
-if <I>string</I> is double-quoted to avoid unwanted interactions between
-the backslash and double-quoting.
-Pattern substitution performs the check for <B>&amp;</B> after expanding
-<I>string</I>; shell programmers should quote backslashes intended to escape
-the <B>&amp;</B> and inhibit replacement so they survive any quote removal
-performed by the expansion of <I>string</I>.
+Backslash can also be used to escape a backslash; <B>\\</B> results in
+a literal backslash in the replacement.
+Users should take care if <I>string</I> is double-quoted to avoid
+unwanted interactions between the backslash and double-quoting, since
+backslash has special meaning within double quotes.
+Pattern substitution performs the check for unquoted <B>&amp;</B> after
+expanding <I>string</I>;
+shell programmers should quote any occurrences of <B>&amp;</B>
+they want to be taken literally in the replacement
+and ensure any instances of <B>&amp;</B> they want to be replaced are unquoted.
+<P>
 If the
 <B>nocasematch</B>
 
@@ -14617,7 +14626,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2021 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 January 17<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14723,7 +14732,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20220105/doc/bash.1.<BR>
-Time: 11 January 2022 15:02:14 EST
+This document was created by man2html from bash.1.<BR>
+Time: 18 January 2022 10:57:39 EST
 </BODY>
 </HTML>

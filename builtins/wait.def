@@ -235,8 +235,8 @@ wait_builtin (list)
      currently active background processes. */
   if (list == 0)
     {
-      wait_for_background_pids (&pstat);
-      if (vname)
+      opt = wait_for_background_pids (&pstat);
+      if (vname && opt)
 	builtin_bind_var_to_int (vname, pstat.pid, bindflags);
       WAIT_RETURN (EXECUTION_SUCCESS);
     }

@@ -2942,3 +2942,52 @@ subst.c
 	  result must be passed to strcreplace
 	- parameter_brace_patsub: call expand_string_for_patsub if
 	  patsub_replacement is set to quote 
+
+				   1/18
+				   ----
+subst.c
+	- read_comsub: make istring_index a size_t to avoid overflow with very
+	  large values of istring_size.
+	  From https://savannah.gnu.org/support/index.php?110596
+	- expand_word_internal: make istring_index a size_t
+
+				   1/20
+				   ----
+buitins/cd.def
+	- add a description of `cd -' to the help text. Suggested by
+	  Rob Landley <rob@landley.net>
+
+				   1/21
+				   ----
+lib/glob/glob.c
+	- glob_vector: if we allocate NEXTLINK using malloc, and free it due to
+	  some allocation failure, reset FIRSTMALLOC to avoid duplicate frees
+	  later on
+
+subst.[ch]
+	- sub_append_string: the INDX parameter is now a size_t to avoid
+	  overflow
+
+parse.y
+	- decode_prompt_string: RESULT_INDEX is now a size_t to pass to
+	  sub_append_string
+
+jobs.[ch],nojobs.c
+	- wait_for_background_pids: now returns the number of jobs/processes
+	  reaped
+
+builtins/wait.def
+	- wait_builtin: if -p pid supplied without -n, make sure we do something
+	  useful if no job/pid arguments are supplied and there are no jobs.
+	  Reported by Oguz <oguzismailuysal@gmail.com>
+
+builtins/read.def
+	- read_builtin: if we have a timeout, use SIGALRM instead of select
+	  when in posix mode, since we use read instead of zread. Fixes bug
+	  reported by Andreas Schwab <schwab@linux-m68k.org>
+
+subst.c
+	- expand_string_dollar_quote: handle single-quoted and double-quoted
+	  strings that might include $' and $" without attempting translation;
+	  do more error checking for unterminated $' and $" that leaves those
+	  characters unmodified

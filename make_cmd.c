@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -632,10 +632,7 @@ make_here_document (temp, lineno)
 	}
 
       if (*line == 0)
-	{
-	  free (full_line);
-	  continue;
-	}
+	continue;
 
       if (STREQN (line, redir_word, redir_len) && line[redir_len] == '\n')
 	break;
@@ -644,7 +641,6 @@ make_here_document (temp, lineno)
       if (STREQN (line, redir_word, redir_len) && (parser_state & PST_EOFTOKEN) && shell_eof_token && strchr (line+redir_len, shell_eof_token))
 	{
 	  shell_ungets (line + redir_len);
-	  free (full_line);
 	  full_line = 0;
 	  break;
 	}
@@ -660,14 +656,10 @@ make_here_document (temp, lineno)
 	 being an empty string before the call to strlen. */
       FASTCOPY (line, document + document_index, len);
       document_index += len;
-
-      free (full_line);
     }
 
   if (full_line == 0)
     internal_warning (_("here-document at line %d delimited by end-of-file (wanted `%s')"), lineno, redir_word);
-
-  FREE (full_line);
 
 document_done:
   if (document)

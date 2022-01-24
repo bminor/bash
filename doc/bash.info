@@ -1,9 +1,9 @@
 This is bash.info, produced by makeinfo version 6.8 from bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.2, 26 December 2021).
+Bash shell (version 5.2, 17 January 2022).
 
-   This is Edition 5.2, last updated 26 December 2021, of 'The GNU Bash
+   This is Edition 5.2, last updated 17 January 2022, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.2.
 
    Copyright (C) 1988-2021 Free Software Foundation, Inc.
@@ -26,10 +26,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.2, 26 December 2021).  The Bash home page is
+Bash shell (version 5.2, 17 January 2022).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.2, last updated 26 December 2021, of 'The GNU Bash
+   This is Edition 5.2, last updated 17 January 2022, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.2.
 
    Bash contains features that appear in other popular shells, and some
@@ -2078,38 +2078,58 @@ omitted, the operator tests only for existence.
      If the 'patsub_replacement' shell option is enabled using 'shopt',
      any unquoted instances of '&' in STRING are replaced with the
      matching portion of PATTERN.  This is intended to duplicate a
-     common 'sed' idiom.  Backslash is used to quote '&' in STRING; the
-     backslash is removed in order to permit a literal '&' in the
-     replacement string.  Pattern substitution performs the check for
-     '&' after expanding STRING, so users should take care to quote
-     backslashes intended to escape the '&' and inhibit replacement so
-     they survive any quote removal performed by the expansion of
-     STRING.  For instance,
+     common 'sed' idiom.
+
+     Quoting any part of STRING inhibits replacement in the expansion of
+     the quoted portion, including replacement strings stored in shell
+     variables.  Backslash will escape '&' in STRING; the backslash is
+     removed in order to permit a literal '&' in the replacement string.
+     Users should take care if STRING is double-quoted to avoid unwanted
+     interactions between the backslash and double-quoting, since
+     backslash has special meaning within double quotes.  Pattern
+     substitution performs the check for unquoted '&' after expanding
+     STRING, so users should ensure to properly quote any occurrences of
+     '&' they want to be taken literally in the replacement and ensure
+     any instances of '&' they want to be replaced are unquoted.
+
+     For instance,
 
           var=abcdef
+          rep='& '
           echo ${var/abc/& }
           echo "${var/abc/& }"
-          echo ${var/abc/"& "}
+          echo ${var/abc/$rep}
+          echo "${var/abc/$rep}"
 
-     will display three lines of "abc def", while
+     will display four lines of "abc def", while
 
           var=abcdef
+          rep='& '
           echo ${var/abc/\& }
           echo "${var/abc/\& }"
-          echo ${var/abc/"\& "}
+          echo ${var/abc/"& "}
+          echo ${var/abc/"$rep"}
 
-     will display two lines of "abc def" and a third line of "& def".
-     The first two are replaced because the backslash is removed by
-     quote removal performed during the expansion of STRING (the
-     expansion is performed in a context that doesn't take any enclosing
-     double quotes into account, as with other word expansions).  In the
-     third case, the double quotes affect the expansion of '\&', and,
-     because '&' is not one of the characters for which backslash is
-     special in double quotes, the backslash survives the expansion,
-     inhibits the replacement, but is removed because it is treated
-     specially.  One could use '\\&', unquoted, as the replacement
-     string to achive the same effect.  It should rarely be necessary to
-     enclose only STRING in double quotes.
+     will display four lines of "& def".  Like the pattern removal
+     operators, double quotes surrounding the replacement string quote
+     the expanded characters, while double quotes enclosing the entire
+     parameter substitution do not, since the expansion is performed in
+     a context that doesn't take any enclosing double quotes into
+     account.
+
+     Since backslash can escape '&', it can also escape a backslash in
+     the replacement string.  This means that '\\' will insert a literal
+     backslash into the replacement, so these two 'echo' commands
+
+          var=abcdef
+          rep='\\&xyz'
+          echo ${var/abc/\\&xyz}
+          echo ${var/abc/$rep}
+
+     will both output '\abcxyzdef'.
+
+     It should rarely be necessary to enclose only STRING in double
+     quotes.
 
      If the 'nocasematch' shell option (see the description of 'shopt'
      in *note The Shopt Builtin::) is enabled, the match is performed
@@ -12422,138 +12442,138 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top894
-Node: Introduction2811
-Node: What is Bash?3024
-Node: What is a shell?4135
-Node: Definitions6670
-Node: Basic Shell Features9618
-Node: Shell Syntax10834
-Node: Shell Operation11857
-Node: Quoting13147
-Node: Escape Character14448
-Node: Single Quotes14930
-Node: Double Quotes15275
-Node: ANSI-C Quoting16550
-Node: Locale Translation17857
-Node: Creating Internationalized Scripts19165
-Node: Comments23279
-Node: Shell Commands23894
-Node: Reserved Words24829
-Node: Simple Commands25582
-Node: Pipelines26233
-Node: Lists29189
-Node: Compound Commands30981
-Node: Looping Constructs31990
-Node: Conditional Constructs34482
-Node: Command Grouping48823
-Node: Coprocesses50298
-Node: GNU Parallel52958
-Node: Shell Functions53872
-Node: Shell Parameters61160
-Node: Positional Parameters65545
-Node: Special Parameters66444
-Node: Shell Expansions69655
-Node: Brace Expansion71779
-Node: Tilde Expansion74510
-Node: Shell Parameter Expansion77128
-Node: Command Substitution94991
-Node: Arithmetic Expansion96343
-Node: Process Substitution97308
-Node: Word Splitting98425
-Node: Filename Expansion100366
-Node: Pattern Matching103112
-Node: Quote Removal107717
-Node: Redirections108009
-Node: Executing Commands117666
-Node: Simple Command Expansion118333
-Node: Command Search and Execution120440
-Node: Command Execution Environment122815
-Node: Environment125847
-Node: Exit Status127507
-Node: Signals129288
-Node: Shell Scripts132734
-Node: Shell Builtin Commands135758
-Node: Bourne Shell Builtins137793
-Node: Bash Builtins159251
-Node: Modifying Shell Behavior190104
-Node: The Set Builtin190446
-Node: The Shopt Builtin201044
-Node: Special Builtins216953
-Node: Shell Variables217929
-Node: Bourne Shell Variables218363
-Node: Bash Variables220464
-Node: Bash Features253277
-Node: Invoking Bash254287
-Node: Bash Startup Files260297
-Node: Interactive Shells265397
-Node: What is an Interactive Shell?265804
-Node: Is this Shell Interactive?266450
-Node: Interactive Shell Behavior267262
-Node: Bash Conditional Expressions270888
-Node: Shell Arithmetic275527
-Node: Aliases278468
-Node: Arrays281078
-Node: The Directory Stack287322
-Node: Directory Stack Builtins288103
-Node: Controlling the Prompt292360
-Node: The Restricted Shell295322
-Node: Bash POSIX Mode297929
-Node: Shell Compatibility Mode309199
-Node: Job Control317225
-Node: Job Control Basics317682
-Node: Job Control Builtins322681
-Node: Job Control Variables328078
-Node: Command Line Editing329231
-Node: Introduction and Notation330899
-Node: Readline Interaction332519
-Node: Readline Bare Essentials333707
-Node: Readline Movement Commands335487
-Node: Readline Killing Commands336444
-Node: Readline Arguments338359
-Node: Searching339400
-Node: Readline Init File341583
-Node: Readline Init File Syntax342841
-Node: Conditional Init Constructs364326
-Node: Sample Init File368519
-Node: Bindable Readline Commands371640
-Node: Commands For Moving372841
-Node: Commands For History374889
-Node: Commands For Text379880
-Node: Commands For Killing383526
-Node: Numeric Arguments386556
-Node: Commands For Completion387692
-Node: Keyboard Macros391880
-Node: Miscellaneous Commands392564
-Node: Readline vi Mode398500
-Node: Programmable Completion399404
-Node: Programmable Completion Builtins407181
-Node: A Programmable Completion Example417873
-Node: Using History Interactively423117
-Node: Bash History Facilities423798
-Node: Bash History Builtins426800
-Node: History Interaction431805
-Node: Event Designators435422
-Node: Word Designators436773
-Node: Modifiers438530
-Node: Installing Bash440338
-Node: Basic Installation441472
-Node: Compilers and Options445191
-Node: Compiling For Multiple Architectures445929
-Node: Installation Names447619
-Node: Specifying the System Type449725
-Node: Sharing Defaults450438
-Node: Operation Controls451108
-Node: Optional Features452063
-Node: Reporting Bugs463278
-Node: Major Differences From The Bourne Shell464550
-Node: GNU Free Documentation License481397
-Node: Indexes506571
-Node: Builtin Index507022
-Node: Reserved Word Index513846
-Node: Variable Index516291
-Node: Function Index532780
-Node: Concept Index546561
+Node: Top892
+Node: Introduction2807
+Node: What is Bash?3020
+Node: What is a shell?4131
+Node: Definitions6666
+Node: Basic Shell Features9614
+Node: Shell Syntax10830
+Node: Shell Operation11853
+Node: Quoting13143
+Node: Escape Character14444
+Node: Single Quotes14926
+Node: Double Quotes15271
+Node: ANSI-C Quoting16546
+Node: Locale Translation17853
+Node: Creating Internationalized Scripts19161
+Node: Comments23275
+Node: Shell Commands23890
+Node: Reserved Words24825
+Node: Simple Commands25578
+Node: Pipelines26229
+Node: Lists29185
+Node: Compound Commands30977
+Node: Looping Constructs31986
+Node: Conditional Constructs34478
+Node: Command Grouping48819
+Node: Coprocesses50294
+Node: GNU Parallel52954
+Node: Shell Functions53868
+Node: Shell Parameters61156
+Node: Positional Parameters65541
+Node: Special Parameters66440
+Node: Shell Expansions69651
+Node: Brace Expansion71775
+Node: Tilde Expansion74506
+Node: Shell Parameter Expansion77124
+Node: Command Substitution95458
+Node: Arithmetic Expansion96810
+Node: Process Substitution97775
+Node: Word Splitting98892
+Node: Filename Expansion100833
+Node: Pattern Matching103579
+Node: Quote Removal108184
+Node: Redirections108476
+Node: Executing Commands118133
+Node: Simple Command Expansion118800
+Node: Command Search and Execution120907
+Node: Command Execution Environment123282
+Node: Environment126314
+Node: Exit Status127974
+Node: Signals129755
+Node: Shell Scripts133201
+Node: Shell Builtin Commands136225
+Node: Bourne Shell Builtins138260
+Node: Bash Builtins159718
+Node: Modifying Shell Behavior190571
+Node: The Set Builtin190913
+Node: The Shopt Builtin201511
+Node: Special Builtins217420
+Node: Shell Variables218396
+Node: Bourne Shell Variables218830
+Node: Bash Variables220931
+Node: Bash Features253744
+Node: Invoking Bash254754
+Node: Bash Startup Files260764
+Node: Interactive Shells265864
+Node: What is an Interactive Shell?266271
+Node: Is this Shell Interactive?266917
+Node: Interactive Shell Behavior267729
+Node: Bash Conditional Expressions271355
+Node: Shell Arithmetic275994
+Node: Aliases278935
+Node: Arrays281545
+Node: The Directory Stack287789
+Node: Directory Stack Builtins288570
+Node: Controlling the Prompt292827
+Node: The Restricted Shell295789
+Node: Bash POSIX Mode298396
+Node: Shell Compatibility Mode309666
+Node: Job Control317692
+Node: Job Control Basics318149
+Node: Job Control Builtins323148
+Node: Job Control Variables328545
+Node: Command Line Editing329698
+Node: Introduction and Notation331366
+Node: Readline Interaction332986
+Node: Readline Bare Essentials334174
+Node: Readline Movement Commands335954
+Node: Readline Killing Commands336911
+Node: Readline Arguments338826
+Node: Searching339867
+Node: Readline Init File342050
+Node: Readline Init File Syntax343308
+Node: Conditional Init Constructs364793
+Node: Sample Init File368986
+Node: Bindable Readline Commands372107
+Node: Commands For Moving373308
+Node: Commands For History375356
+Node: Commands For Text380347
+Node: Commands For Killing383993
+Node: Numeric Arguments387023
+Node: Commands For Completion388159
+Node: Keyboard Macros392347
+Node: Miscellaneous Commands393031
+Node: Readline vi Mode398967
+Node: Programmable Completion399871
+Node: Programmable Completion Builtins407648
+Node: A Programmable Completion Example418340
+Node: Using History Interactively423584
+Node: Bash History Facilities424265
+Node: Bash History Builtins427267
+Node: History Interaction432272
+Node: Event Designators435889
+Node: Word Designators437240
+Node: Modifiers438997
+Node: Installing Bash440805
+Node: Basic Installation441939
+Node: Compilers and Options445658
+Node: Compiling For Multiple Architectures446396
+Node: Installation Names448086
+Node: Specifying the System Type450192
+Node: Sharing Defaults450905
+Node: Operation Controls451575
+Node: Optional Features452530
+Node: Reporting Bugs463745
+Node: Major Differences From The Bourne Shell465017
+Node: GNU Free Documentation License481864
+Node: Indexes507038
+Node: Builtin Index507489
+Node: Reserved Word Index514313
+Node: Variable Index516758
+Node: Function Index533247
+Node: Concept Index547028
 
 End Tag Table
 

@@ -1,6 +1,6 @@
 /* jobs.h -- structures and definitions used by the jobs.c file. */
 
-/* Copyright (C) 1993-2019  Free Software Foundation, Inc.
+/* Copyright (C) 1993-2022  Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -279,7 +279,7 @@ extern int job_exit_status PARAMS((int));
 extern int job_exit_signal PARAMS((int));
 
 extern int wait_for_single_pid PARAMS((pid_t, int));
-extern void wait_for_background_pids PARAMS((struct procstat *));
+extern int wait_for_background_pids PARAMS((struct procstat *));
 extern int wait_for PARAMS((pid_t, int));
 extern int wait_for_job PARAMS((int, int, struct procstat *));
 extern int wait_for_any_job PARAMS((int, struct procstat *));

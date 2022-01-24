@@ -342,7 +342,7 @@ extern char *sh_double_quote PARAMS((const char *));
 extern char *sh_mkdoublequoted PARAMS((const char *, int, int));
 extern char *sh_un_double_quote PARAMS((char *));
 extern char *sh_backslash_quote PARAMS((char *, const char *, int));
-extern char *sh_backslash_quote_for_double_quotes PARAMS((char *));
+extern char *sh_backslash_quote_for_double_quotes PARAMS((char *, int));
 extern char *sh_quote_reusable PARAMS((char *, int));
 extern int sh_contains_shell_metas PARAMS((const char *));
 extern int sh_contains_quotes PARAMS((const char *));

@@ -54,11 +54,11 @@
 \entry{expansion, tilde}{25}{expansion, tilde}
 \entry{parameter expansion}{26}{parameter expansion}
 \entry{expansion, parameter}{26}{expansion, parameter}
-\entry{command substitution}{33}{command substitution}
+\entry{command substitution}{34}{command substitution}
 \entry{expansion, arithmetic}{34}{expansion, arithmetic}
 \entry{arithmetic expansion}{34}{arithmetic expansion}
 \entry{process substitution}{34}{process substitution}
-\entry{word splitting}{34}{word splitting}
+\entry{word splitting}{35}{word splitting}
 \entry{expansion, filename}{35}{expansion, filename}
 \entry{expansion, pathname}{35}{expansion, pathname}
 \entry{filename expansion}{35}{filename expansion}
@@ -70,10 +70,10 @@
 \entry{command execution}{42}{command execution}
 \entry{command search}{42}{command search}
 \entry{execution environment}{42}{execution environment}
-\entry{environment}{43}{environment}
+\entry{environment}{44}{environment}
 \entry{exit status}{44}{exit status}
-\entry{signal handling}{44}{signal handling}
-\entry{shell script}{45}{shell script}
+\entry{signal handling}{45}{signal handling}
+\entry{shell script}{46}{shell script}
 \entry{special builtin}{76}{special builtin}
 \entry{login shell}{92}{login shell}
 \entry{interactive shell}{92}{interactive shell}

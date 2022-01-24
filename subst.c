@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -738,16 +738,15 @@ unquoted_substring (substr, string)
 INLINE char *
 sub_append_string (source, target, indx, size)
      char *source, *target;
-     int *indx;
+     size_t *indx;
      size_t *size;
 {
   if (source)
     {
-      int n;
-      size_t srclen;
+      size_t n, srclen;
 
       srclen = STRLEN (source);
-      if (srclen >= (int)(*size - *indx))
+      if (srclen >= (*size - *indx))
 	{
 	  n = srclen + *indx;
 	  n = (n + DEFAULT_ARRAY_SIZE) - (n % DEFAULT_ARRAY_SIZE);
@@ -771,7 +770,7 @@ char *
 sub_append_number (number, target, indx, size)
      intmax_t number;
      char *target;
-     int *indx;
+     size_t *indx;
      size_t *size;
 {
   char *temp;
@@ -3861,8 +3860,8 @@ expand_string_dollar_quote (string, flags)
      char *string;
      int flags;
 {
-  size_t slen;
-  int sindex, c, translen, retind, retsize, peekc, news;
+  size_t slen, retind, retsize;
+  int sindex, c, translen, peekc, news;
   char *ret, *trans, *send, *t;
   DECLARE_MBSTATE;
 
@@ -3891,6 +3890,25 @@ expand_string_dollar_quote (string, flags)
 	    COPY_CHAR_I (ret, retind, string, send, sindex);
 	  break;
 
+	case '\'':
+	case '"':
+	  if (c == '\'')
+	    news = skip_single_quoted (string, slen, ++sindex, SX_COMPLETE);
+	  else
+	    news = skip_double_quoted (string, slen, ++sindex, SX_COMPLETE);
+	  translen = news - sindex - 1;
+	  RESIZE_MALLOCED_BUFFER (ret, retind, translen + 3, retsize, 64);
+	  ret[retind++] = c;
+	  if (translen > 0)
+	    {
+	      strncpy (ret + retind, string + sindex, translen);
+	      retind += translen;
+	    }
+	  if (news > sindex && string[news - 1] == c)
+	    ret[retind++] = c;
+	  sindex = news;
+	  break;
+
 	case CTLESC:
 	  RESIZE_MALLOCED_BUFFER (ret, retind, locale_mb_cur_max + 2, retsize, 64);
 	  if (flags)
@@ -3907,14 +3925,30 @@ expand_string_dollar_quote (string, flags)
 	  if (peekc != '\'')
 #endif
 	    {
-	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 16);
+	      RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 16);
 	      ret[retind++] = c;
+	      break;
+	    }
+	  if (string[sindex + 1] == '\0')	/* don't bother */	
+	    {
+	      RESIZE_MALLOCED_BUFFER (ret, retind, 3, retsize, 16);
+	      ret[retind++] = c;
+	      ret[retind++] = peekc;
+	      sindex++;
 	      break;
 	    }
 	  if (peekc == '\'')
 	    {
 	      /* We overload SX_COMPLETE below */
 	      news = skip_single_quoted (string, slen, ++sindex, SX_COMPLETE);
+	      /* Check for unclosed string and don't bother if so */
+	      if (news > sindex && string[news] == '\0' && string[news-1] != peekc)
+		{
+		  RESIZE_MALLOCED_BUFFER (ret, retind, 3, retsize, 16);
+		  ret[retind++] = c;
+		  ret[retind++] = peekc;
+		  continue;
+		}
 	      t = substring (string, sindex, news - 1);
 	      trans = ansiexpand (t, 0, news-sindex-1, &translen);
 	      free (t);
@@ -3926,6 +3960,15 @@ expand_string_dollar_quote (string, flags)
 	    {
 	      news = ++sindex;
 	      t = string_extract_double_quoted (string, &news, SX_COMPLETE);
+	      /* Check for unclosed string and don't bother if so */
+	      if (news > sindex && string[news] == '\0' && string[news-1] != peekc)
+		{
+		  RESIZE_MALLOCED_BUFFER (ret, retind, 3, retsize, 16);
+		  ret[retind++] = c;
+		  ret[retind++] = peekc;
+		  free (t);
+		  continue;
+		}
 	      trans = locale_expand (t, 0, news-sindex, 0, &translen);
 	      free (t);
 	      if (singlequote_translations &&
@@ -6426,8 +6469,9 @@ read_comsub (fd, quoted, flags, rflag)
      int *rflag;
 {
   char *istring, buf[COMSUB_PIPEBUF], *bufp;
-  int istring_index, c, tflag, skip_ctlesc, skip_ctlnul;
+  int c, tflag, skip_ctlesc, skip_ctlnul;
   int mb_cur_max;
+  size_t istring_index;
   size_t istring_size;
   ssize_t bufn;
   int nullbyte;
@@ -10553,7 +10597,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   size_t istring_size;
 
   /* Index into ISTRING. */
-  int istring_index;
+  size_t istring_index;
 
   /* Temporary string storage. */
   char *temp, *temp1;

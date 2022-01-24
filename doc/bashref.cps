@@ -17,7 +17,7 @@
 \entry{command expansion}{41}
 \entry{command history}{151}
 \entry{command search}{42}
-\entry{command substitution}{33}
+\entry{command substitution}{34}
 \entry{command timing}{10}
 \entry{commands, compound}{11}
 \entry{commands, conditional}{12}
@@ -38,7 +38,7 @@
 \entry{directory stack}{101}
 \initial {E}
 \entry{editing command lines}{117}
-\entry{environment}{43}
+\entry{environment}{44}
 \entry{evaluation, arithmetic}{97}
 \entry{event designators}{154}
 \entry{execution environment}{42}
@@ -118,11 +118,11 @@
 \initial {S}
 \entry{shell arithmetic}{97}
 \entry{shell function}{19}
-\entry{shell script}{45}
+\entry{shell script}{46}
 \entry{shell variable}{21}
 \entry{shell, interactive}{93}
 \entry{signal}{4}
-\entry{signal handling}{44}
+\entry{signal handling}{45}
 \entry{special builtin}{4, 76}
 \entry{startup files}{92}
 \entry{string translations}{7}
@@ -136,6 +136,6 @@
 \entry{variables, readline}{120}
 \initial {W}
 \entry{word}{4}
-\entry{word splitting}{34}
+\entry{word splitting}{35}
 \initial {Y}
 \entry{yanking text}{118}

@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2136,14 +2136,12 @@ read_a_line (remove_quoted_newline)
    the secondary prompt.  This is used to read the lines of a here
    document.  REMOVE_QUOTED_NEWLINE is non-zero if we should remove
    newlines quoted with backslashes while reading the line.  It is
-   non-zero unless the delimiter of the here document was quoted.
-   If it is zero, we don't perform $'...' and $"..." expansion because
-   we treat the lines as if they are between double quotes. */
+   non-zero unless the delimiter of the here document was quoted. */
 char *
 read_secondary_line (remove_quoted_newline)
      int remove_quoted_newline;
 {
-  char *ret, *t;
+  char *ret;
   int n, c;
 
   prompt_string_pointer = &ps2_prompt;
@@ -2163,23 +2161,7 @@ read_secondary_line (remove_quoted_newline)
       maybe_add_history (ret);
     }
 #endif /* HISTORY */
-  if (ret == 0)
-    return ret;
-  if (remove_quoted_newline == 0)
-    return (savestring (ret));
-
-  t = ret;
-  while (t = strchr (t, '$'))
-    {
-      if (t[1] == '\'' || t[1] == '"')
-	break;
-      else
-	t++;
-    }
-  if (t == 0)
-    return (savestring (ret));
-  t = expand_string_dollar_quote (ret, 1);
-  return t;
+  return ret;
 }
 
 /* **************************************************************** */
@@ -3875,7 +3857,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 			nestret = sh_single_quote (ttrans);
 		      else
 			/* single quotes aren't special, use backslash instead */
-			nestret = sh_backslash_quote_for_double_quotes (ttrans);
+			nestret = sh_backslash_quote_for_double_quotes (ttrans, 0);
 		    }
 		  else
 		    nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
@@ -5577,7 +5559,7 @@ decode_prompt_string (string)
   int last_exit_value, last_comsub_pid;
 #if defined (PROMPT_STRING_DECODE)
   size_t result_size;
-  int result_index;
+  size_t result_index;
   int c, n, i;
   char *temp, *t_host, octal_string[4];
   struct tm *tm;  
@@ -5714,7 +5696,7 @@ decode_prompt_string (string)
 		/* Make sure that expand_prompt_string is called with a
 		   second argument of Q_DOUBLE_QUOTES if we use this
 		   function here. */
-		temp = sh_backslash_quote_for_double_quotes (timebuf);
+		temp = sh_backslash_quote_for_double_quotes (timebuf, 0);
 	      else
 		temp = savestring (timebuf);
 	      goto add_string;
@@ -5730,7 +5712,7 @@ decode_prompt_string (string)
 	      temp = base_pathname (shell_name);
 	      /* Try to quote anything the user can set in the file system */
 	      if (promptvars || posixly_correct)
-		temp = sh_backslash_quote_for_double_quotes (temp);
+		temp = sh_backslash_quote_for_double_quotes (temp, 0);
 	      else
 		temp = savestring (temp);
 	      goto add_string;
@@ -5807,7 +5789,7 @@ decode_prompt_string (string)
 		  /* Make sure that expand_prompt_string is called with a
 		     second argument of Q_DOUBLE_QUOTES if we use this
 		     function here. */
-		  temp = sh_backslash_quote_for_double_quotes (t_string);
+		  temp = sh_backslash_quote_for_double_quotes (t_string, 0);
 		else
 		  temp = savestring (t_string);
 
@@ -5829,7 +5811,7 @@ decode_prompt_string (string)
 		/* Make sure that expand_prompt_string is called with a
 		   second argument of Q_DOUBLE_QUOTES if we use this
 		   function here. */
-		temp = sh_backslash_quote_for_double_quotes (t_host);
+		temp = sh_backslash_quote_for_double_quotes (t_host, 0);
 	      else
 		temp = savestring (t_host);
 	      free (t_host);

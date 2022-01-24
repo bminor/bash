@@ -315,8 +315,9 @@ sh_backslash_quote (string, table, flags)
 /* Quote characters that get special treatment when in double quotes in STRING
    using backslashes.  Return a new string. */
 char *
-sh_backslash_quote_for_double_quotes (string)
+sh_backslash_quote_for_double_quotes (string, flags)
      char *string;
+     int flags;
 {
   unsigned char c;
   char *result, *r, *s, *send;

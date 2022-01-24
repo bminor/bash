@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -79,7 +79,7 @@ $SHORT_DOC cd [-L|[-P [-e]] [-@]] [dir]
 Change the shell working directory.
 
 Change the current directory to DIR.  The default DIR is the value of the
-HOME shell variable.
+HOME shell variable. If DIR is "-", it is converted to $OLDPWD.
 
 The variable CDPATH defines the search path for the directory containing
 DIR.  Alternative directory names in CDPATH are separated by a colon (:).
