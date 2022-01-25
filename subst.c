@@ -263,10 +263,11 @@ static int do_assignment_internal PARAMS((const WORD_DESC *, int));
 static char *string_extract_verbatim PARAMS((char *, size_t, int *, char *, int));
 static char *string_extract PARAMS((char *, int *, char *, int));
 static char *string_extract_double_quoted PARAMS((char *, int *, int));
-static inline char *string_extract_single_quoted PARAMS((char *, int *));
+static inline char *string_extract_single_quoted PARAMS((char *, int *, int));
 static inline int skip_single_quoted PARAMS((const char *, size_t, int, int));
 static int skip_double_quoted PARAMS((char *, size_t, int, int));
 static char *extract_delimited_string PARAMS((char *, int *, char *, char *, char *, int));
+static char *extract_heredoc_dolbrace_string PARAMS((char *, int *, int, int));
 static char *extract_dollar_brace_string PARAMS((char *, int *, int, int));
 static int skip_matched_pair PARAMS((const char *, int, int, int, int));
 
@@ -1090,22 +1091,38 @@ skip_double_quoted (string, slen, sind, flags)
 /* Extract the contents of STRING as if it is enclosed in single quotes.
    SINDEX, when passed in, is the offset of the character immediately
    following the opening single quote; on exit, SINDEX is left pointing after
-   the closing single quote. */
+   the closing single quote. ALLOWESC allows the single quote to be quoted by
+   a backslash; it's not used yet. */
 static inline char *
-string_extract_single_quoted (string, sindex)
+string_extract_single_quoted (string, sindex, allowesc)
      char *string;
      int *sindex;
+     int allowesc;
 {
   register int i;
   size_t slen;
   char *t;
+  int pass_next;
   DECLARE_MBSTATE;
 
   /* Don't need slen for ADVANCE_CHAR unless multibyte chars possible. */
   slen = (MB_CUR_MAX > 1) ? strlen (string + *sindex) + *sindex : 0;
   i = *sindex;
-  while (string[i] && string[i] != '\'')
-    ADVANCE_CHAR (string, slen, i);
+  pass_next = 0;
+  while (string[i])
+    {
+      if (pass_next)
+	{
+	  pass_next = 0;
+	  ADVANCE_CHAR (string, slen, i);
+	  continue;
+	}
+      if (allowesc && string[i] == '\\')
+	pass_next++;
+      else if (string[i] == '\'')
+        break;
+      ADVANCE_CHAR (string, slen, i);
+    }
 
   t = substring (string, *sindex, i);
 
@@ -1162,7 +1179,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 
   if ((flags & SX_NOCTLESC) && charlist[0] == '\'' && charlist[1] == '\0')
     {
-      temp = string_extract_single_quoted (string, sindex);
+      temp = string_extract_single_quoted (string, sindex, 0);
       --*sindex;	/* leave *sindex at separator character */
       return temp;
     }
@@ -1501,6 +1518,265 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
   return (result);
 }
 
+/* A simplified version of extract_dollar_brace_string that exists to handle
+   $'...' and $"..." quoting in here-documents, since the here-document read
+   path doesn't. It's separate because we don't want to mess with the fast
+   common path. We already know we're going to allocate and return a new
+   string and quoted == Q_HERE_DOCUMENT. We might be able to cut it down
+   some more, but extracting strings and adding them as we go adds complexity. */
+static char *
+extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
+     char *string;
+     int *sindex, quoted, flags;
+{
+  register int i, c;
+  size_t slen, tlen, result_index, result_size;
+  int pass_character, nesting_level, si, dolbrace_state;
+  char *result, *t, *send;
+  DECLARE_MBSTATE;
+
+  pass_character = 0;
+  nesting_level = 1;
+  slen = strlen (string + *sindex) + *sindex;
+  send = string + slen;
+
+  result_size = slen;
+  result_index = 0;
+  result = xmalloc (result_size + 1);
+
+  /* This function isn't called if this condition is not true initially. */
+  dolbrace_state = DOLBRACE_QUOTE;
+
+  i = *sindex;
+  while (c = string[i])
+    {
+      if (pass_character)
+	{
+	  pass_character = 0;
+	  RESIZE_MALLOCED_BUFFER (result, result_index, locale_mb_cur_max + 1, result_size, 64);
+	  COPY_CHAR_I (result, result_index, string, send, i);
+	  continue;
+	}
+
+      /* CTLESCs and backslashes quote the next character. */
+      if (c == CTLESC || c == '\\')
+	{
+	  pass_character++;
+	  RESIZE_MALLOCED_BUFFER (result, result_index, 2, result_size, 64);
+	  result[result_index++] = c;
+	  i++;
+	  continue;
+	}
+
+      /* The entire reason we have this separate function right here. */
+      if (c == '$' && string[i+1] == '\'')
+	{
+	  char *ttrans;
+	  int ttranslen;
+
+	  si = i + 2;
+	  t = string_extract_single_quoted (string, &si, 1);	/* XXX */
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
+	  tlen = si - i - 2;	/* -2 since si is one after the close quote */
+	  ttrans = ansiexpand (t, 0, tlen, &ttranslen);
+	  free (t);
+
+	  /* needed to correctly quote any embedded single quotes. */
+	  t = sh_single_quote (ttrans);
+	  tlen = strlen (t);
+	  free (ttrans);
+
+	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 1, result_size, 64);
+	  strncpy (result + result_index, t, tlen);
+	  result_index += tlen;
+	  free (t);
+	  i = si;
+	  continue;
+	}
+
+#if defined (TRANSLATABLE_STRINGS)
+      if (c == '$' && string[i+1] == '"')
+	{
+	  char *ttrans;
+	  int ttranslen;
+
+	  si = i + 2;
+	  t = string_extract_double_quoted (string, &si, flags);	/* XXX */
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
+	  tlen = si - i - 2;	/* -2 since si is one after the close quote */
+	  ttrans = locale_expand (t, 0, tlen, line_number, &ttranslen);
+	  free (t);
+
+	  t = singlequote_translations ? sh_single_quote (ttrans) : sh_mkdoublequoted (ttrans, ttranslen, 0);
+	  tlen = strlen (t);
+	  free (ttrans);
+
+	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 1, result_size, 64);
+	  strncpy (result + result_index, t, tlen);
+	  result_index += tlen;
+	  free (t);
+	  i = si;
+	  continue;
+	}
+#endif /* TRANSLATABLE_STRINGS */
+
+      if (c == '$' && string[i+1] == LBRACE)
+	{
+	  nesting_level++;
+	  RESIZE_MALLOCED_BUFFER (result, result_index, 3, result_size, 64);
+	  result[result_index++] = c;
+	  result[result_index++] = string[i+1];
+	  i += 2;
+	  if (dolbrace_state == DOLBRACE_QUOTE || dolbrace_state == DOLBRACE_WORD)
+	    dolbrace_state = DOLBRACE_PARAM;
+	  continue;
+	}
+
+      if (c == RBRACE)
+	{
+	  nesting_level--;
+	  if (nesting_level == 0)
+	    break;
+	  RESIZE_MALLOCED_BUFFER (result, result_index, 2, result_size, 64);
+	  result[result_index++] = c;
+	  i++;
+	  continue;
+	}
+
+      /* Pass the contents of old-style command substitutions through
+	 verbatim. */
+      if (c == '`')
+	{
+	  si = i + 1;
+	  t = string_extract (string, &si, "`", flags);	/* already know (flags & SX_NOALLOC) == 0) */
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
+	  tlen = si - i - 1;
+	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 3, result_size, 64);
+	  result[result_index++] = c;
+	  strncpy (result + result_index, t, tlen);
+	  result_index += tlen;
+	  result[result_index++] = string[si];
+	  free (t);
+	  i = si + 1;
+	  continue;
+	}
+
+      /* Pass the contents of new-style command substitutions and
+	 arithmetic substitutions through verbatim. */
+      if (string[i] == '$' && string[i+1] == LPAREN)
+	{
+	  si = i + 2;
+	  t = extract_command_subst (string, &si, flags);
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
+	  tlen = si - i - 1;
+	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
+	  result[result_index++] = c;
+	  result[result_index++] = LPAREN;
+	  strncpy (result + result_index, t, tlen);
+	  result_index += tlen;
+	  result[result_index++] = string[si];
+	  free (t);
+	  i = si + 1;
+	  continue;
+	}
+
+#if defined (PROCESS_SUBSTITUTION)
+      /* Technically this should only work at the start of a word */
+      if ((string[i] == '<' || string[i] == '>') && string[i+1] == LPAREN)
+	{
+	  si = i + 2;
+	  t = extract_process_subst (string, (string[i] == '<' ? "<(" : ">)"), &si, flags);
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
+	  tlen = si - i - 1;
+	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
+	  result[result_index++] = c;
+	  result[result_index++] = LPAREN;
+	  strncpy (result + result_index, t, tlen);
+	  result_index += tlen;
+	  result[result_index++] = string[si];
+	  free (t);
+	  i = si + 1;
+	  continue;
+	}
+#endif
+
+      if (c == '\'' && posixly_correct && shell_compatibility_level > 42 && dolbrace_state != DOLBRACE_QUOTE)
+	{
+	  COPY_CHAR_I (result, result_index, string, send, i);
+	  continue;
+	}
+
+      /* Pass the contents of single and double-quoted strings through verbatim. */
+      if (c == '"' || c == '\'')
+	{
+	  si = i + 1;
+	  if (c == '"')
+	    t = string_extract_double_quoted (string, &si, flags);
+	  else
+	    t = string_extract_single_quoted (string, &si, 0);
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
+	  tlen = si - i - 2;	/* -2 since si is one after the close quote */
+	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 3, result_size, 64);
+	  result[result_index++] = c;
+	  strncpy (result + result_index, t, tlen);
+	  result_index += tlen;
+	  result[result_index++] = string[si - 1];
+	  free (t);
+	  i = si;
+	  continue;
+	}
+
+      /* copy this character, which was not special. */
+      COPY_CHAR_I (result, result_index, string, send, i);
+
+      /* This logic must agree with parse.y:parse_matched_pair, since they
+	 share the same defines. */
+      if (dolbrace_state == DOLBRACE_PARAM && c == '%' && (i - *sindex) > 1)
+	dolbrace_state = DOLBRACE_QUOTE;
+      else if (dolbrace_state == DOLBRACE_PARAM && c == '#' && (i - *sindex) > 1)
+        dolbrace_state = DOLBRACE_QUOTE;
+      else if (dolbrace_state == DOLBRACE_PARAM && c == '/' && (i - *sindex) > 1)
+        dolbrace_state = DOLBRACE_QUOTE2;	/* XXX */
+      else if (dolbrace_state == DOLBRACE_PARAM && c == '^' && (i - *sindex) > 1)
+        dolbrace_state = DOLBRACE_QUOTE;
+      else if (dolbrace_state == DOLBRACE_PARAM && c == ',' && (i - *sindex) > 1)
+        dolbrace_state = DOLBRACE_QUOTE;
+      /* This is intended to handle all of the [:]op expansions and the substring/
+	 length/pattern removal/pattern substitution expansions. */
+      else if (dolbrace_state == DOLBRACE_PARAM && strchr ("#%^,~:-=?+/", c) != 0)
+	dolbrace_state = DOLBRACE_OP;
+      else if (dolbrace_state == DOLBRACE_OP && strchr ("#%^,~:-=?+/", c) == 0)
+	dolbrace_state = DOLBRACE_WORD;
+    }
+
+  if (c == 0 && nesting_level)
+    {
+      free (result);
+      if (no_longjmp_on_fatal_error == 0)
+	{			/* { */
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  report_error (_("bad substitution: no closing `%s' in %s"), "}", string);
+	  exp_jump_to_top_level (DISCARD);
+	}
+      else
+	{
+	  *sindex = i;
+	  return ((char *)NULL);
+	}
+    }
+
+  *sindex = i;
+  result[result_index] = '\0';
+
+  return (result);
+}
+
 /* Extract a parameter expansion expression within ${ and } from STRING.
    Obey the Posix.2 rules for finding the ending `}': count braces while
    skipping over enclosed quoted strings and command substitutions.
@@ -1520,10 +1796,6 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
   char *result, *t;
   DECLARE_MBSTATE;
 
-  pass_character = 0;
-  nesting_level = 1;
-  slen = strlen (string + *sindex) + *sindex;
-
   /* The handling of dolbrace_state needs to agree with the code in parse.y:
      parse_matched_pair().  The different initial value is to handle the
      case where this function is called to parse the word in
@@ -1531,6 +1803,13 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
   dolbrace_state = (flags & SX_WORD) ? DOLBRACE_WORD : DOLBRACE_PARAM;
   if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && (flags & SX_POSIXEXP))
     dolbrace_state = DOLBRACE_QUOTE;
+
+  if (quoted == Q_HERE_DOCUMENT && dolbrace_state == DOLBRACE_QUOTE && (flags & SX_NOALLOC) == 0)
+    return (extract_heredoc_dolbrace_string (string, sindex, quoted, flags));
+
+  pass_character = 0;
+  nesting_level = 1;
+  slen = strlen (string + *sindex) + *sindex;
 
   i = *sindex;
   while (c = string[i])
@@ -1554,6 +1833,8 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	{
 	  nesting_level++;
 	  i += 2;
+	  if (dolbrace_state == DOLBRACE_QUOTE || dolbrace_state == DOLBRACE_WORD)
+	    dolbrace_state = DOLBRACE_PARAM;
 	  continue;
 	}
 
@@ -3939,6 +4220,7 @@ expand_string_dollar_quote (string, flags)
 	    }
 	  if (peekc == '\'')
 	    {
+	      /* SX_COMPLETE is the  equivalent of ALLOWESC here */
 	      /* We overload SX_COMPLETE below */
 	      news = skip_single_quoted (string, slen, ++sindex, SX_COMPLETE);
 	      /* Check for unclosed string and don't bother if so */
@@ -11228,7 +11510,7 @@ add_twochars:
 	    goto add_character;
 
 	  t_index = ++sindex;
-	  temp = string_extract_single_quoted (string, &sindex);
+	  temp = string_extract_single_quoted (string, &sindex, 0);
 
 	  /* If the entire STRING was surrounded by single quotes,
 	     then the string is wholly quoted. */
@@ -11578,7 +11860,7 @@ string_quote_removal (string, quoted)
 	      break;
 	    }
 	  tindex = sindex + 1;
-	  temp = string_extract_single_quoted (string, &tindex);
+	  temp = string_extract_single_quoted (string, &tindex, 0);
 	  if (temp)
 	    {
 	      strcpy (r, temp);

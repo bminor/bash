@@ -2990,4 +2990,29 @@ subst.c
 	- expand_string_dollar_quote: handle single-quoted and double-quoted
 	  strings that might include $' and $" without attempting translation;
 	  do more error checking for unterminated $' and $" that leaves those
-	  characters unmodified
+	  characters unmodified. This is for use by readline's various line
+	  expansion functions (shell_expand_line)
+
+				   1/23
+				   ----
+parse.y,make_cmd.c
+	- revert change that unconditionally processes $'...' and $"..." in
+	  here-document bodies; there are only a couple of cases where they
+	  should be processed in a double-quote environment
+
+				   1/24
+				   ----
+
+subst.c
+	- extract_dollar_brace_string: if we see another `${' on the rhs of
+	  the operator, reset the dolbrace_state to DOLBRACE_PARAM while we
+	  read this new ${...} string
+	- extract_heredoc_dolbrace_string: new function, variant of
+	  extract_dollar_brace_string, to process the WORD in ${PARAM OP WORD}
+	  while processing here-document data. It's complicated by the
+	  requirement to add to the result string as we go along, since we
+	  need to change the contents of the input string with ansi expansion
+	  or locale translation.
+	- string_extract_single_quoted: take a new third argument: ALLOWESC.
+	  This allows backslash to escape an embedded single quote, needed by
+	  extract_heredoc_dolbrace_string to process $'...'; changed callers

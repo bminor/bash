@@ -2848,10 +2848,6 @@ history_and_alias_expand_line (count, ignore)
   new_line = history_expand_line_internal (rl_line_buffer);
 #endif
 
-  t = expand_string_dollar_quote (new_line ? new_line : rl_line_buffer, 0);
-  FREE (new_line);
-  new_line = t;
-
 #if defined (ALIAS)
   if (new_line)
     {
