@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -85,6 +85,24 @@ restore_lastcom (x)
 }
 
 int
+should_optimize_fork (command, subshell)
+     COMMAND *command;
+     int subshell;
+{
+  return (running_trap == 0 &&
+      command->type == cm_simple &&
+      signal_is_trapped (EXIT_TRAP) == 0 &&
+      signal_is_trapped (ERROR_TRAP) == 0 &&
+      any_signals_trapped () < 0 &&
+      (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
+      ((command->flags & CMD_TIME_PIPELINE) == 0) &&
+      ((command->flags & CMD_INVERT_RETURN) == 0));
+}
+
+/* This has extra tests to account for STARTUP_STATE == 2, which is for
+   -c command but has been extended to command and process substitution
+   (basically any time you call parse_and_execute in a subshell). */
+int
 should_suppress_fork (command)
      COMMAND *command;
 {
@@ -94,14 +112,7 @@ should_suppress_fork (command)
   return (startup_state == 2 && parse_and_execute_level == 1 &&
 	  *bash_input.location.string == '\0' &&
 	  parser_expanding_alias () == 0 &&
-	  running_trap == 0 &&
-	  command->type == cm_simple &&
-	  signal_is_trapped (EXIT_TRAP) == 0 &&
-	  signal_is_trapped (ERROR_TRAP) == 0 &&
-	  any_signals_trapped () < 0 &&
-	  (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
-	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
-	  ((command->flags & CMD_INVERT_RETURN) == 0));
+	  should_optimize_fork (command, subshell));
 }
 
 int
@@ -115,13 +126,14 @@ can_optimize_connection (command)
 }
 
 void
-optimize_fork (command)
+optimize_connection_fork (command)
      COMMAND *command;
 {
   if (command->type == cm_connection &&
       (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
       (command->value.Connection->second->flags & CMD_TRY_OPTIMIZING) &&
-      should_suppress_fork (command->value.Connection->second))
+      ((startup_state == 2 && should_suppress_fork (command->value.Connection->second)) ||
+       ((subshell_environment & SUBSHELL_PAREN) && should_optimize_fork (command->value.Connection->second, 0))))
     {
       command->value.Connection->second->flags |= CMD_NO_FORK;
       command->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
@@ -132,21 +144,19 @@ void
 optimize_subshell_command (command)
      COMMAND *command;
 {
-  if (running_trap == 0 &&
-      command->type == cm_simple &&
-      signal_is_trapped (EXIT_TRAP) == 0 &&
-      signal_is_trapped (ERROR_TRAP) == 0 &&
-      any_signals_trapped () < 0 &&
-      command->redirects == 0 && command->value.Simple->redirects == 0 &&
-      ((command->flags & CMD_TIME_PIPELINE) == 0) &&
-      ((command->flags & CMD_INVERT_RETURN) == 0))
+  if (should_optimize_fork (command, 0))
     {
       command->flags |= CMD_NO_FORK;
       command->value.Simple->flags |= CMD_NO_FORK;
     }
   else if (command->type == cm_connection &&
-	   (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR))
-    optimize_subshell_command (command->value.Connection->second);
+	   (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
+	   command->value.Connection->second->type == cm_simple &&
+	   parser_expanding_alias () == 0)
+    {	   
+      command->value.Connection->second->flags |= CMD_TRY_OPTIMIZING;
+      command->value.Connection->second->value.Simple->flags |= CMD_TRY_OPTIMIZING;
+    }
 }
 
 void

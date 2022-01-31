@@ -44,7 +44,7 @@ typedef char *histdata_t;
 
 /* Let's not step on anyone else's define for now, since we don't use this yet. */
 #ifndef HS_HISTORY_VERSION
-#  define HS_HISTORY_VERSION 0x0801	/* History 8.1 */
+#  define HS_HISTORY_VERSION 0x0802	/* History 8.2 */
 #endif
 
 /* The structure used to store a history entry. */

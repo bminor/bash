@@ -471,6 +471,10 @@ extern char *ansic_quote PARAMS((char *, int, int *));
 extern int ansic_shouldquote PARAMS((const char *));
 extern char *ansiexpand PARAMS((char *, int, int, int *));
 
+/* declarations for functions defined in lib/sh/strvis.c */
+extern int charvis PARAMS((const char *, size_t *, char *, size_t *));
+extern char *sh_strvis PARAMS((const char *));
+
 /* declarations for functions defined in lib/sh/timeval.c.  No prototypes
    so we don't have to count on having a definition of struct timeval in
    scope when this file is included. */

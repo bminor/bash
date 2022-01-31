@@ -3009,10 +3009,48 @@ subst.c
 	  read this new ${...} string
 	- extract_heredoc_dolbrace_string: new function, variant of
 	  extract_dollar_brace_string, to process the WORD in ${PARAM OP WORD}
-	  while processing here-document data. It's complicated by the
+	  while expanding lines of here-document data. It's complicated by the
 	  requirement to add to the result string as we go along, since we
 	  need to change the contents of the input string with ansi expansion
 	  or locale translation.
 	- string_extract_single_quoted: take a new third argument: ALLOWESC.
 	  This allows backslash to escape an embedded single quote, needed by
 	  extract_heredoc_dolbrace_string to process $'...'; changed callers
+
+				   1/25
+				   ----
+parse.y
+	- parse_matched_pair: ansi-expand $'...' in WORD for ${PARAM OP WORD}
+	  and single-quote the result if dolbrace_state == DOLBRACE_QUOTE
+	  (posix pattern removal operators) even if extended_quote == 0
+
+subst.c
+	- extract_heredoc_dolbrace_string: add logic to align with parse.y:
+	  parse_matched_pair and its $'...' expansion, including handling
+	  extended_quote
+
+				   1/27
+				   ----
+builtins/evalstring.c
+	- should_optimize_fork: broke conditions for optimizing away the fork
+	  for a simple command out of optimize_fork into new function, call
+	  from should_suppress_fork and optimize_subshell_command. Call from
+	  optimize_fork if (subshell_environment & SUBSHELL_PAREN), relying
+	  on fact that CMD_TRY_OPTIMIZING is only set in a couple of specific
+	  conditions
+	- optimize_fork: call should_suppress_fork only if startup_state == 2;
+	  it does the extra checks for that specific case
+	- optimize_fork: call should_optimize_fork if we're in a (list)
+	  subshell (subshell_environment & SUBSHELL_PAREN)
+	- optimize_subshell_command: set CMD_TRY_OPTIMIZING on the right side
+	  of a `&&', `||', or `;' list as long as it's a simple command so
+	  we can check with optimize_fork() when it's time to execute it
+
+execute_cmd.c
+	- execute_in_subshell: call optimize_subshell_command for (list)
+	  subshells to either set CMD_NO_FORK for simple commands or set
+	  CMD_TRY_OPTIMIZING for likely candidates for later optimization
+
+builtins/common.h,builtins/evalstring.c
+	- optimize_fork: renamed to optimize_connection_fork; changed callers
+

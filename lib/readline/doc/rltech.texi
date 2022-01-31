@@ -1184,10 +1184,13 @@ Returns 0 if the timeout is set successfully.
 
 @deftypefun int rl_timeout_remaining (unsigned int *secs, unsigned int *usecs)
 Return the number of seconds and microseconds remaining in the current
-timeout duration in @code{*secs} and @code{*usecs}, respectively.
-Returns -1 on error or when there is no timeout set, 0 when the timeout has
-expired (leaving @code{*secs} and @code{*usecs} unchanged), and 1 if the
-timeout has not expired. If @code{secs} and @code{usecs} are @code{NULL},
+timeout duration in @var{*secs} and @var{*usecs}, respectively.
+Both @var{*secs} and @var{*usecs} must be non-NULL to return any values.
+The return value is -1 on error or when there is no timeout set,
+0 when the timeout has expired (leaving @var{*secs} and @var{*usecs}
+unchanged),
+and 1 if the timeout has not expired.
+If either of @var{secs} and @var{usecs} is @code{NULL},
 the return value indicates whether the timeout has expired.
 @end deftypefun
 

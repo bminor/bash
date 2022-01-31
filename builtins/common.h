@@ -1,6 +1,6 @@
 /* common.h -- extern declarations for functions defined in common.c. */
 
-/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -217,7 +217,7 @@ extern int parse_string PARAMS((char *, const char *, int, COMMAND **, char **))
 extern int should_suppress_fork PARAMS((COMMAND *));
 extern int can_optimize_connection PARAMS((COMMAND *));
 extern int can_optimize_cat_file PARAMS((COMMAND *));
-extern void optimize_fork PARAMS((COMMAND *));
+extern void optimize_connection_fork PARAMS((COMMAND *));
 extern void optimize_subshell_command PARAMS((COMMAND *));
 extern void optimize_shell_function PARAMS((COMMAND *));
 

@@ -2,7 +2,7 @@
 # Makefile for the Bash library
 #
 #
-# Copyright (C) 1998-2020 Free Software Foundation, Inc.
+# Copyright (C) 1998-2022 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
 	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
 	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
-	   utf8.c random.c gettimeofday.c timers.c
+	   strvis.c utf8.c random.c gettimeofday.c timers.c
 
 # The header files for this library.
 HSOURCES = 
@@ -108,7 +108,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  strtrans.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
-	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o \
+	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o strvis.o \
 	  utf8.o random.o gettimeofday.o timers.o wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
@@ -198,6 +198,7 @@ strtoul.o: strtoul.c
 strtoull.o: strtoull.c
 strtoumax.o: strtoumax.c
 strtrans.o: strtrans.c
+strvis.o: strvis.c
 timers.o: timers.c
 times.o: times.c
 timeval.o: timeval.c
@@ -279,6 +280,7 @@ strtoul.o: ${BUILD_DIR}/config.h
 strtoull.o: ${BUILD_DIR}/config.h
 strtoumax.o: ${BUILD_DIR}/config.h
 strtrans.o: ${BUILD_DIR}/config.h
+strvis.o: ${BUILD_DIR}/config.h
 timers.o: ${BUILD_DIR}/config.h
 times.o: ${BUILD_DIR}/config.h
 timeval.o: ${BUILD_DIR}/config.h
@@ -511,6 +513,11 @@ strtrans.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 strtrans.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
 strtrans.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 #strtrans.o: ${BUILD_DIR}/version.h
+
+strvis.o: ${topdir}/bashansi.h
+strvis.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
+strvis.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
+strvis.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 
 times.o: ${BASHINCDIR}/systimes.h
 times.o: ${BASHINCDIR}/posixtime.h

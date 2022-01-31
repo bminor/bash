@@ -195,6 +195,7 @@ int patsub_replacement = 1;
 extern struct fd_bitmap *current_fds_to_close;
 extern int wordexp_only;
 extern int singlequote_translations;
+extern int extended_quote;
 
 #if defined (JOB_CONTROL) && defined (PROCESS_SUBSTITUTION)
 extern PROCESS *last_procsub_child;
@@ -1523,7 +1524,9 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
    path doesn't. It's separate because we don't want to mess with the fast
    common path. We already know we're going to allocate and return a new
    string and quoted == Q_HERE_DOCUMENT. We might be able to cut it down
-   some more, but extracting strings and adding them as we go adds complexity. */
+   some more, but extracting strings and adding them as we go adds complexity.
+   This needs to match the logic in parse.y:parse_matched_pair so we get
+   consistent behavior between here-documents and double-quoted strings. */
 static char *
 extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
      char *string;
@@ -1574,6 +1577,15 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  char *ttrans;
 	  int ttranslen;
 
+	  if ((posixly_correct || extended_quote == 0) && dolbrace_state != DOLBRACE_QUOTE && dolbrace_state != DOLBRACE_QUOTE2)
+	    {
+	      RESIZE_MALLOCED_BUFFER (result, result_index, 3, result_size, 64);
+	      result[result_index++] = '$';
+	      result[result_index++] = '\'';
+	      i += 2;
+	      continue;
+	    }
+
 	  si = i + 2;
 	  t = string_extract_single_quoted (string, &si, 1);	/* XXX */
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
@@ -1583,9 +1595,18 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  free (t);
 
 	  /* needed to correctly quote any embedded single quotes. */
-	  t = sh_single_quote (ttrans);
-	  tlen = strlen (t);
-	  free (ttrans);
+	  if (dolbrace_state == DOLBRACE_QUOTE || dolbrace_state == DOLBRACE_QUOTE2)
+	    {
+	      t = sh_single_quote (ttrans);
+	      tlen = strlen (t);
+	      free (ttrans);
+	    }
+	  else if (extended_quote) /* dolbrace_state == DOLBRACE_PARAM */
+	    {
+	      /* This matches what parse.y:parse_matched_pair() does */
+	      t = ttrans;
+	      tlen = strlen (t);
+	    }
 
 	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 1, result_size, 64);
 	  strncpy (result + result_index, t, tlen);
@@ -1629,7 +1650,7 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  result[result_index++] = c;
 	  result[result_index++] = string[i+1];
 	  i += 2;
-	  if (dolbrace_state == DOLBRACE_QUOTE || dolbrace_state == DOLBRACE_WORD)
+	  if (dolbrace_state == DOLBRACE_QUOTE || dolbrace_state == DOLBRACE_QUOTE2 || dolbrace_state == DOLBRACE_WORD)
 	    dolbrace_state = DOLBRACE_PARAM;
 	  continue;
 	}

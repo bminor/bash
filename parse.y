@@ -3805,7 +3805,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	      pop_delimiter (dstack);
 	      CHECK_NESTRET_ERROR ();
 
-	      if MBTEST((tflags & LEX_WASDOL) && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0))
+	      if MBTEST((tflags & LEX_WASDOL) && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0 || dolbrace_state == DOLBRACE_QUOTE || dolbrace_state == DOLBRACE_QUOTE2))
 		{
 		  /* Translate $'...' here. */
 		  /* PST_NOEXPAND */
@@ -3817,12 +3817,22 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		     make sure we single-quote the results of the ansi
 		     expansion because quote removal should remove them later */
 		  /* FLAG POSIX INTERP 221 */
-		  if ((shell_compatibility_level > 42) && (rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2) && (flags & P_DOLBRACE))
+		  if ((shell_compatibility_level > 42) && (rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2 || dolbrace_state == DOLBRACE_QUOTE) && (flags & P_DOLBRACE))
 		    {
 		      nestret = sh_single_quote (ttrans);
 		      free (ttrans);
 		      nestlen = strlen (nestret);
 		    }
+#if 0 /* TAG:bash-5.3 */
+		  /* This single-quotes PARAM in ${PARAM OP WORD} when PARAM
+		     contains a $'...' even when extended_quote is set. */
+		  else if ((rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_PARAM) && (flags & P_DOLBRACE))
+		    {
+		      nestret = sh_single_quote (ttrans);
+		      free (ttrans);
+		      nestlen = strlen (nestret);
+		    }
+#endif
 		  else if ((rflags & P_DQUOTE) == 0)
 		    {
 		      nestret = sh_single_quote (ttrans);
