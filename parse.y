@@ -4071,6 +4071,13 @@ parse_comsub (qc, open, close, lenp, flags)
   need_here_doc = 0;
   esacs_needed_count = expecting_in_token = 0;
 
+  /* We want to expand aliases on this pass if we're in posix mode, since the
+     standard says you have to take aliases into account when looking for the
+     terminating right paren. Otherwise, we defer until execution time for
+     backwards compatibility. */
+  if (expand_aliases)
+    expand_aliases = posixly_correct != 0;
+
   current_token = '\n';				/* XXX */
 
   token_to_read = DOLPAREN;			/* let's trick the parser */
@@ -4174,6 +4181,13 @@ xparse_dolparen (base, string, indp, flags)
   shell_eof_token = ')';
   if (flags & SX_COMPLETE)
     parser_state |= PST_NOERROR;
+
+  /* Don't expand aliases on this pass at all. Either parse_comsub() does it
+     at parse time, in which case this string already has aliases expanded,
+     or command_substitute() does it in the child process executing the
+     command substitution and we want to defer it completely until then. The
+     old value will be restored by restore_parser_state(). */
+  expand_aliases = 0;
 
   token_to_read = DOLPAREN;			/* let's trick the parser */
 
@@ -4286,6 +4300,8 @@ parse_string_to_command (string, flags)
 #endif
   if (flags & SX_COMPLETE)
     parser_state |= PST_NOERROR;
+
+  expand_aliases = 0;
 
   cmd = 0;
   nc = parse_string (string, "command substitution", sflags, &cmd, &ep);

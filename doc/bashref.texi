@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2021 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2022 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -8114,6 +8114,13 @@ Alias expansion is always enabled, even in non-interactive shells.
 @item
 Reserved words appearing in a context where reserved words are recognized
 do not undergo alias expansion.
+
+@item
+Alias expansion is performed when initially parsing a command substitution.
+The default mode generally defers it, when enabled, until the command
+substitution is executed. This means that command substitution will not
+expand aliases that are defined after the command substitution is initially
+parsed (e.g., as part of a function definition).
 
 @item
 The @sc{posix} @env{PS1} and @env{PS2} expansions of @samp{!} to

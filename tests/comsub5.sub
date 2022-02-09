@@ -13,9 +13,11 @@
 #
 
 # this is a new feature: expanding aliases when initially parsing command
-# substitutions
+# substitutions. required by posix, so enabled in posix mode. default mode
+# stays backwards compatible.
 
 shopt -s expand_aliases
+set -o posix
 
 alias switch=case
 

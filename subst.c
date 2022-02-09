@@ -7112,6 +7112,11 @@ command_substitute (string, quoted, flags)
 
       remove_quoted_escapes (string);
 
+      /* We want to expand aliases on this pass if we are not in posix mode
+	 for backwards compatibility. */
+      if (expand_aliases)
+        expand_aliases = posixly_correct == 0;
+
       startup_state = 2;	/* see if we can avoid a fork */
       parse_and_execute_level = 0;
 

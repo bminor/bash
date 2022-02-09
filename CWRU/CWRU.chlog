@@ -3054,3 +3054,36 @@ execute_cmd.c
 builtins/common.h,builtins/evalstring.c
 	- optimize_fork: renamed to optimize_connection_fork; changed callers
 
+				   1/31
+				   ----
+include/shmbutil.h
+	- COPY_CHAR_I,SCOPY_CHAR_I: add check for locale_utf8locale and
+	  (c & 0x80) as in other macros
+
+lib/sh/shquote.c
+	- sh_backslash_quote_for_double_quotes: rewrote to use array indexing
+	  and COPY_CHAR_I to make it easier to drop in future calls to
+	  charvis() to make `unsafe' characters visible if FLAGS == 1
+
+				    2/1
+				    ---
+parse.y
+	- parse_comsub: if we are currently expanding aliases, temporarily
+	  turn off alias expansion if we are not in posix mode so we defer
+	  alias expansion until command_substitute(). Fixes double-expansion
+	  bug reported by Martijn Dekker <martijn@inlv.org> and aligns with
+	  https://www.austingroupbugs.net/view.php?id=1342
+	- xparse_dolparen: turn off alias expansion entirely while running the
+	  parser: either we do it in parse_comsub (posix mode) or in
+	  command_substitute (default mode)
+	- parse_string_to_command: ditto
+
+subst.c
+	- command_substitute: if we are expanding aliases, temporarily turn
+	  off alias expansion if we are in posix mode, since we already
+	  performed it in parse_comsub() and are using the command string
+	  reconstituted from the parse result
+
+doc/bashref.texi
+	- bash posix mode: add description of alias expansion and command
+	  substitution parsing and execution

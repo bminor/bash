@@ -318,9 +318,11 @@ extern int locale_utf8locale;	/* XXX */
 	    size_t mblength; \
 	    int _k; \
 \
-	    _k = is_basic (*((_src) + (_si))); \
+	    _k = is_basic ((_src)[(_si)]); \
 	    if (_k) \
 	      mblength = 1; \
+	    else if (locale_utf8locale && ((_src)[(_si)] & 0x80) == 0) \
+	      mblength = (_src)[(_si)] != 0; \
 	    else \
 	      {\
 		state_bak = state; \
@@ -361,9 +363,11 @@ extern int locale_utf8locale;	/* XXX */
 	    size_t mblength; \
 	    int _i; \
 \
-	    _i = is_basic (*((_src) + (_si))); \
+	    _i = is_basic ((_src)[(_si)]); \
 	    if (_i) \
 	      mblength = 1; \
+	    else if (locale_utf8locale && ((_src)[(_si)] & 0x80) == 0) \
+	      mblength = (_src)[(_si)] != 0; \
 	    else \
 	      { \
 		state_bak = state; \
