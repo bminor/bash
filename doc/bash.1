@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Jan 17 17:27:05 EST 2022
+.\"	Last Change: Sat Feb  5 18:20:32 EST 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 January 17" "GNU Bash 5.2"
+.TH BASH 1 "2022 February 5" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1308,7 +1308,7 @@ to a shell variable or array index, the += operator can be used to
 append to or add to the variable's previous value.
 This includes arguments to builtin commands such as \fBdeclare\fP that
 accept assignment statements (\fIdeclaration\fP commands).
-When += is applied to a variable for which the \fIinteger\fP attribute has been
+When += is applied to a variable for which the \fBinteger\fP attribute has been
 set, \fIvalue\fP is evaluated as an arithmetic expression and added to the
 variable's current value, which is also evaluated.
 When += is applied to an array variable using compound assignment (see
@@ -2084,7 +2084,7 @@ below.
 The value is used to set the shell's compatibility level.
 See
 .SM
-.B SHELL COMPATIBILITY MODE
+.B "SHELL COMPATIBILITY MODE"
 below for a description of the various compatibility
 levels and their effects.
 The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
@@ -2097,7 +2097,7 @@ compatibility level to the default for the current version.
 The valid values correspond to the compatibility levels
 described below under
 .SM
-.BR BSHELL COMPATIBILITY MODE .
+.BR "SHELL COMPATIBILITY MODE" .
 For example, 4.2 and 42 are valid values that correspond
 to the \fBcompat42\fP \fBshopt\fP option
 and set the compatibility level to 42.
@@ -11180,8 +11180,8 @@ specifies a non-existent process or job, the return status is
 127.  Otherwise, the return status is the exit status of the last
 process or job waited for.
 .SH "SHELL COMPATIBILITY MODE"
-Bash-4.0 introduced the concept of a `shell compatibility level', specified
-as a set of options to the shopt builtin
+Bash-4.0 introduced the concept of a \fIshell compatibility level\fP,
+specified as a set of options to the shopt builtin (
 .BR compat31 ,
 .BR compat32 ,
 .BR compat40 ,

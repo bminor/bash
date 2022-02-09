@@ -1983,6 +1983,8 @@ typedef int _rl_sv_func_t (const char *);
 #define V_INT		2
 
 /* Forward declarations */
+static int sv_region_start_color (const char *);
+static int sv_region_end_color (const char *);
 static int sv_bell_style (const char *);
 static int sv_combegin (const char *);
 static int sv_dispprefix (const char *);
@@ -2002,6 +2004,8 @@ static const struct {
   int flags;
   _rl_sv_func_t *set_func;
 } string_varlist[] = {
+  { "active-region-end-color", V_STRING, sv_region_end_color },
+  { "active-region-start-color", V_STRING, sv_region_start_color },
   { "bell-style",	V_STRING,	sv_bell_style },
   { "comment-begin",	V_STRING,	sv_combegin },
   { "completion-display-width", V_INT,	sv_compwidth },
@@ -2217,6 +2221,40 @@ sv_seqtimeout (const char *value)
 	nval = 0;
     }
   _rl_keyseq_timeout = nval;
+  return 0;
+}
+
+static int
+sv_region_start_color (const char *value)
+{
+  int len;
+
+  free (_rl_active_region_start_color);
+  if (value && *value)
+    {
+      _rl_active_region_start_color = (char *)xmalloc (2 * strlen (value) + 1);
+      rl_translate_keyseq (value, _rl_active_region_start_color, &len);
+      _rl_active_region_start_color[len] = '\0';
+    }
+  else
+    _rl_active_region_start_color = NULL;
+  return 0;
+}
+
+static int
+sv_region_end_color (const char *value)
+{
+  int len;
+
+  free (_rl_active_region_end_color);
+  if (value && *value)
+    {
+      _rl_active_region_end_color = (char *)xmalloc (2 * strlen (value) + 1);
+      rl_translate_keyseq (value, _rl_active_region_end_color, &len);
+      _rl_active_region_end_color[len] = '\0';
+    }
+  else
+    _rl_active_region_end_color = NULL;
   return 0;
 }
 

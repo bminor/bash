@@ -3087,3 +3087,55 @@ subst.c
 doc/bashref.texi
 	- bash posix mode: add description of alias expansion and command
 	  substitution parsing and execution
+
+				    2/4
+				    ---
+lib/readline/rltty.c
+	- rl_deprep_terminal: set _rl_last_c_pos to 0 after outputting
+	  BRACK_PASTE_FINI, since the last character in that is \r. Partially
+	  address issue raised by Markus Schwarzenberg <markus.schwarzenberg@freenet.de>
+	  in https://lists.gnu.org/archive/html/bug-bash/2022-02/msg00056.html
+
+				    2/5
+				    ---
+doc/{bash.1,bashref.texi}
+	- minor typo fixes from Helge Kreutzmann <debian@helgefjell.de>
+
+				    2/7
+				    ---
+{arrayfunc,variables}.c
+	- ARRAY_EXPORT: changes to encode array and assoc variables using a
+	  scheme similar to shell functions so we can export arrays and
+	  differentiate them from scalar variables and differentiate array
+	  and assoc variables. Still not enabled by default.
+
+variables.c
+	- mk_env_string: third argument is now the variable's attributes or 0,
+	  with all the attributes we can export arrays
+
+lib/readline/bind.c
+	- active-region-start-color,active-region-end-color: new bindable
+	  string variables, one to set the active region color (instead of
+	  standout mode) and one to turn it off (instead of the "se" terminal
+	  capability). They set _rl_active_region_start_color and
+	  _rl_active_region_end_color variables via functions
+
+lib/readline/display.c
+	- putc_face: if setting standout mode, check for both the start color
+	  and end color variables and output the start color string. If turning
+	  off standout mode (normal face), output the end color string. Both
+	  varibables must be set
+
+lib/readline/{readline.c,rlprivate.h}
+	- declarations for _rl_active_region_start_color and
+	  _rl_active_region_end_color
+
+				    2/8
+				    ---
+bashline.c
+	- initialize_readline: add bindable name `vi-edit-and-execute-command'
+
+shell.c
+	- subshell_exit: make sure to set last_command_exit_value before
+	  calling the exit trap. Fixes bug reported by Greg Edwards
+	  <gedwards@ddn.com>

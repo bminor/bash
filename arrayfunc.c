@@ -379,6 +379,14 @@ assign_array_element (name, value, flags, estatep)
 
   entry = assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, estatep);
 
+#if ARRAY_EXPORT
+  if (entry && exported_p (entry))
+    {
+      INVALIDATE_EXPORTSTR (entry);
+      array_needs_making = 1;
+    }
+#endif
+
   free (vname);
   return entry;
 }

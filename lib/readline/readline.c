@@ -323,6 +323,9 @@ int _rl_show_mode_in_prompt = 0;
 int _rl_enable_bracketed_paste = BRACKETED_PASTE_DEFAULT;
 int _rl_enable_active_region = BRACKETED_PASTE_DEFAULT;
 
+char *_rl_active_region_start_color = NULL;
+char *_rl_active_region_end_color = NULL;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */

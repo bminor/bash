@@ -1064,6 +1064,7 @@ subshell_exit (s)
 
   /* Do trap[0] if defined.  Allow it to override the exit status
      passed to us. */
+  last_command_exit_value = s;
   if (signal_is_trapped (0))
     s = run_exit_trap ();
 

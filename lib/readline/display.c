@@ -1595,9 +1595,19 @@ putc_face (int c, int face, char *cur_face)
       if (face != FACE_NORMAL && face != FACE_STANDOUT)
 	return;
       if (face == FACE_STANDOUT && cf == FACE_NORMAL)
-        _rl_standout_on ();
+	{
+	  if (_rl_active_region_start_color && _rl_active_region_end_color)
+	    tputs (_rl_active_region_start_color, 1, _rl_output_character_function);
+	  else
+	    _rl_standout_on ();
+	}
       if (face == FACE_NORMAL && cf == FACE_STANDOUT)
-        _rl_standout_off ();
+	{
+	  if (_rl_active_region_start_color && _rl_active_region_end_color)
+	    tputs (_rl_active_region_end_color, 1, _rl_output_character_function);
+	  else
+            _rl_standout_off ();
+	}
       *cur_face = face;
     }
   if (c != EOF)

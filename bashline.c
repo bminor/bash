@@ -490,6 +490,9 @@ initialize_readline ()
 
   rl_add_defun ("display-shell-version", display_shell_version, -1);
   rl_add_defun ("edit-and-execute-command", emacs_edit_and_execute_command, -1);
+#if defined (VI_MODE)
+  rl_add_defun ("vi-edit-and-execute-command", vi_edit_and_execute_command, -1);
+#endif
 
 #if defined (BRACE_COMPLETION)
   rl_add_defun ("complete-into-braces", bash_brace_completion, -1);

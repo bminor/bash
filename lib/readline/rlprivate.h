@@ -551,6 +551,8 @@ extern int _rl_echo_control_chars;
 extern int _rl_show_mode_in_prompt;
 extern int _rl_enable_bracketed_paste;
 extern int _rl_enable_active_region;
+extern char *_rl_active_region_start_color;
+extern char *_rl_active_region_end_color;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;
