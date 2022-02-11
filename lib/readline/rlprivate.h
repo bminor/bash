@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -415,6 +415,9 @@ extern void _rl_control_keypad (int);
 extern void _rl_set_cursor (int, int);
 extern void _rl_standout_on (void);
 extern void _rl_standout_off (void);
+extern int _rl_reset_region_color (int, const char *);
+extern void _rl_region_color_on (void);
+extern void _rl_region_color_off (void);
 
 /* text.c */
 extern void _rl_fix_point (int);

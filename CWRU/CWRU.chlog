@@ -3124,7 +3124,7 @@ lib/readline/display.c
 	- putc_face: if setting standout mode, check for both the start color
 	  and end color variables and output the start color string. If turning
 	  off standout mode (normal face), output the end color string. Both
-	  varibables must be set
+	  variables must be set
 
 lib/readline/{readline.c,rlprivate.h}
 	- declarations for _rl_active_region_start_color and
@@ -3139,3 +3139,33 @@ shell.c
 	- subshell_exit: make sure to set last_command_exit_value before
 	  calling the exit trap. Fixes bug reported by Greg Edwards
 	  <gedwards@ddn.com>
+
+				    2/9
+				    ---
+lib/readline/{terminal.c,rlprivate.h}
+	- _rl_region_color_on,_rl_region_color_off: functions to output the
+	  _rl_active_region_start_color and _rl_active_region_end_color
+	- _rl_reset_region_color: function to encapsulate setting the region
+	  color to an arbitrary string, including doing memory management
+
+lib/readline/display.c
+	- putc_face: call _rl_region_color_on and _rl_region_color_off instead
+	  of _rl_standout_on and _rl_standout_off
+
+lib/readline/terminal.c
+	- _rl_init_terminal_io: initialize _rl_active_region_start_color and
+	  _rl_active_region_end_color from _rl_term_so and _rl_term_se,
+	  respectively; reset every time the terminal is changed
+	- _rl_init_terminal_io: turn off the active region for a dumb terminal
+
+lib/readline/bind.c
+	- sv_region_{start,end}_color: call _rl_reset_region_color with the
+	  appropriate value for WHICH
+
+				   2/10
+				   ----
+lib/readline/doc/{rluser.texi,readline.3},doc/bash.1
+	- active-region-start-color,active-region-end-color: documented new
+	  bindable readline variables
+	- enable-active-region: document using active-region-start-color to
+	  highlight the text in the region

@@ -1,0 +1,22 @@
+recho $( echo a$'\01)'b )
+recho $( echo ab )
+recho $( echo \ )
+recho $( echo \\ )
+
+LC_CTYPE=C
+od -c <<EOF
+a$'\01'b
+ab
+EOF
+
+od -c <<EOF
+${none-a$'\01'b}
+${none-ab}
+EOF
+
+V=Aa$'\01'b
+od -c <<EOF
+${V%a$'\01'b}
+${V%ab}
+EOF
+

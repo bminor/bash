@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Feb  5 18:20:32 EST 2022
+.\"	Last Change: Thu Feb 10 11:04:52 EST 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 February 5" "GNU Bash 5.2"
+.TH BASH 1 "2022 February 10" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5918,6 +5918,30 @@ The variables and their default values are:
 .PP
 .PD 0
 .TP
+.B active-region-start-color   
+A string variable that controls the text color and background when displaying
+the text in the active region (see the description of
+\fBenable\-active\-region\fP below).
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal before displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that puts the terminal in standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be \f(CW\ee[01;33m\fP.
+.TP
+.B active-region-end-color     
+A string variable that "undoes" the effects of \fBactive-region-start-color\fP 
+and restores "normal" terminal display appearance after displaying text
+in the active region.
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal after displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that restores the terminal from standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be \f(CW\ee[0m\fP.
+.TP
 .B bell\-style (audible)
 Controls what happens when readline wants to ring the terminal bell.
 If set to \fBnone\fP, readline never rings the bell.  If set to
@@ -6037,6 +6061,8 @@ The text between the point and mark is referred to as the \fIregion\fP.
 When this variable is set to \fIOn\fP, readline allows certain commands
 to designate the region as \fIactive\fP.  
 When the region is active, readline highlights the text in the region using
+the value of the \fBactive\-region\-start\-color\fP, which defaults to the
+string that enables
 the terminal's standout mode.
 The active region shows the text inserted by bracketed-paste and any
 matching text found by incremental and non-incremental history searches.

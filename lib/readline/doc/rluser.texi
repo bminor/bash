@@ -9,7 +9,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2020 Free Software Foundation, Inc.
+Copyright (C) 1988--2022 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -419,6 +419,32 @@ variables.
 @cindex variables, readline
 @table @code
 
+@item active-region-start-color
+@vindex active-region-start-color
+A string variable that controls the text color and background when displaying
+the text in the active region (see the description of
+@code{enable-active-region} below).
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal before displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that puts the terminal in standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be @samp{\e[01;33m}.
+
+@item active-region-end-color
+@vindex active-region-end-color
+A string variable that "undoes" the effects of @code{active-region-start-color}
+and restores "normal" terminal display appearance after displaying text
+in the active region.
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal after displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that restores the terminal from standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be @samp{\e[0m}.
+
 @item bell-style
 @vindex bell-style
 Controls what happens when Readline wants to ring the terminal bell.
@@ -553,6 +579,8 @@ The text between the point and mark is referred to as the @dfn{region}.
 When this variable is set to @samp{On}, Readline allows certain commands
 to designate the region as @dfn{active}.
 When the region is active, Readline highlights the text in the region using
+the value of the @code{active-region-start-color}, which defaults to the
+string that enables
 the terminal's standout mode.
 The active region shows the text inserted by bracketed-paste and any
 matching text found by incremental and non-incremental history searches.

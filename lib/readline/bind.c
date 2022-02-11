@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -2227,35 +2227,13 @@ sv_seqtimeout (const char *value)
 static int
 sv_region_start_color (const char *value)
 {
-  int len;
-
-  free (_rl_active_region_start_color);
-  if (value && *value)
-    {
-      _rl_active_region_start_color = (char *)xmalloc (2 * strlen (value) + 1);
-      rl_translate_keyseq (value, _rl_active_region_start_color, &len);
-      _rl_active_region_start_color[len] = '\0';
-    }
-  else
-    _rl_active_region_start_color = NULL;
-  return 0;
+  return (_rl_reset_region_color (0, value));
 }
 
 static int
 sv_region_end_color (const char *value)
 {
-  int len;
-
-  free (_rl_active_region_end_color);
-  if (value && *value)
-    {
-      _rl_active_region_end_color = (char *)xmalloc (2 * strlen (value) + 1);
-      rl_translate_keyseq (value, _rl_active_region_end_color, &len);
-      _rl_active_region_end_color[len] = '\0';
-    }
-  else
-    _rl_active_region_end_color = NULL;
-  return 0;
+  return (_rl_reset_region_color (1, value));
 }
 
 static int
