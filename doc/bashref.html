@@ -4,13 +4,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 17 January 2022).
+the Bash shell (version 5.2, 5 February 2022).
 
-This is Edition 5.2, last updated 17 January 2022,
+This is Edition 5.2, last updated 5 February 2022,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
-Copyright (C) 1988-2021 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 17 January 2022).
+the Bash shell (version 5.2, 5 February 2022).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 17 January 2022,
+<p>This is Edition 5.2, last updated 5 February 2022,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -9122,6 +9122,12 @@ example, <code>SIGTSTP</code>.
 </li><li> Reserved words appearing in a context where reserved words are recognized
 do not undergo alias expansion.
 
+</li><li> Alias expansion is performed when initially parsing a command substitution.
+The default mode generally defers it, when enabled, until the command
+substitution is executed. This means that command substitution will not
+expand aliases that are defined after the command substitution is initially
+parsed (e.g., as part of a function definition).
+
 </li><li> The <small>POSIX</small> <code>PS1</code> and <code>PS2</code> expansions of &lsquo;<samp>!</samp>&rsquo; to
 the history number and &lsquo;<samp>!!</samp>&rsquo; to &lsquo;<samp>!</samp>&rsquo; are enabled,
 and parameter expansion is performed on the values of <code>PS1</code> and
@@ -9358,8 +9364,8 @@ Previous: <a href="#Bash-POSIX-Mode" accesskey="p" rel="prev">Bash POSIX Mode</a
 <span id="index-Compatibility-Level"></span>
 <span id="index-Compatibility-Mode"></span>
 
-<p>Bash-4.0 introduced the concept of a &lsquo;shell compatibility level&rsquo;, specified
-as a set of options to the shopt builtin
+<p>Bash-4.0 introduced the concept of a <em>shell compatibility level</em>,
+specified as a set of options to the shopt builtin
 (<code>compat31</code>,
 <code>compat32</code>,
 <code>compat40</code>,
@@ -10313,6 +10319,32 @@ variables.
 </p>
 <span id="index-variables_002c-readline"></span>
 <dl compact="compact">
+<dt id='index-active_002dregion_002dstart_002dcolor'><span><code>active-region-start-color</code><a href='#index-active_002dregion_002dstart_002dcolor' class='copiable-anchor'> &para;</a></span></dt>
+<dd><p>A string variable that controls the text color and background when displaying
+the text in the active region (see the description of
+<code>enable-active-region</code> below).
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal before displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that puts the terminal in standout mode,
+as obtained from the terminal&rsquo;s terminfo description.
+A sample value might be &lsquo;<samp>\e[01;33m</samp>&rsquo;.
+</p>
+</dd>
+<dt id='index-active_002dregion_002dend_002dcolor'><span><code>active-region-end-color</code><a href='#index-active_002dregion_002dend_002dcolor' class='copiable-anchor'> &para;</a></span></dt>
+<dd><p>A string variable that &quot;undoes&quot; the effects of <code>active-region-start-color</code>
+and restores &quot;normal&quot; terminal display appearance after displaying text
+in the active region.
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal after displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that restores the terminal from standout mode,
+as obtained from the terminal&rsquo;s terminfo description.
+A sample value might be &lsquo;<samp>\e[0m</samp>&rsquo;.
+</p>
+</dd>
 <dt id='index-bell_002dstyle'><span><code>bell-style</code><a href='#index-bell_002dstyle' class='copiable-anchor'> &para;</a></span></dt>
 <dd><p>Controls what happens when Readline wants to ring the terminal bell.
 If set to &lsquo;<samp>none</samp>&rsquo;, Readline never rings the bell.  If set to
@@ -10446,6 +10478,8 @@ The text between the point and mark is referred to as the <em>region</em>.
 When this variable is set to &lsquo;<samp>On</samp>&rsquo;, Readline allows certain commands
 to designate the region as <em>active</em>.
 When the region is active, Readline highlights the text in the region using
+the value of the <code>active-region-start-color</code>, which defaults to the
+string that enables
 the terminal&rsquo;s standout mode.
 The active region shows the text inserted by bracketed-paste and any
 matching text found by incremental and non-incremental history searches.
@@ -15149,6 +15183,8 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td></td><td valign="top"><a href="#index-_005f"><code>_</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Variable-Index_vr_letter-A">A</th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-active_002dregion_002dend_002dcolor"><code>active-region-end-color</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-active_002dregion_002dstart_002dcolor"><code>active-region-start-color</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-auto_005fresume"><code>auto_resume</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Job-Control-Variables">Job Control Variables</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Variable-Index_vr_letter-B">B</th><td></td><td></td></tr>

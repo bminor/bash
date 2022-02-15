@@ -715,7 +715,7 @@ PPAARRAAMMEETTEERRSS
        or  add  to  the variable's previous value.  This includes arguments to
        builtin commands such as  ddeeccllaarree  that  accept  assignment  statements
        (_d_e_c_l_a_r_a_t_i_o_n commands).  When += is applied to a variable for which the
-       _i_n_t_e_g_e_r attribute has been set, _v_a_l_u_e is evaluated as an arithmetic ex-
+       iinntteeggeerr attribute has been set, _v_a_l_u_e is evaluated as an arithmetic ex-
        pression and added to the variable's current value, which is also eval-
        uated.  When += is applied to an array variable using compound  assign-
        ment  (see  AArrrraayyss  below), the variable's value is not unset (as it is
@@ -1120,8 +1120,8 @@ PPAARRAAMMEETTEERRSS
               value  that  is  not  one of the valid compatibility levels, the
               shell prints an error message and sets the  compatibility  level
               to the default for the current version.  The valid values corre-
-              spond to the compatibility levels described below under  BBSSHHEELLLL--
-              COMPATIBILITYMMOODDEE.   For  example,  4.2  and 42 are valid values
+              spond to the compatibility levels described  below  under  SSHHEELLLL
+              CCOOMMPPAATTIIBBIILLIITTYY  MMOODDEE.   For  example, 4.2 and 42 are valid values
               that correspond to the ccoommppaatt4422 sshhoopptt option and set the compat-
               ibility level to 42.  The current version is also a valid value.
        BBAASSHH__EENNVV
@@ -3276,75 +3276,98 @@ RREEAADDLLIINNEE
        sitive), and "1" are equivalent to OOnn.  All other values are equivalent
        to OOffff.  The variables and their default values are:
 
+       aaccttiivvee--rreeggiioonn--ssttaarrtt--ccoolloorr
+              A  string  variable  that controls the text color and background
+              when displaying the text in the active region (see the  descrip-
+              tion  of eennaabbllee--aaccttiivvee--rreeggiioonn below).  This string must not take
+              up any physical character positions on the display, so it should
+              consist  only of terminal escape sequences.  It is output to the
+              terminal before displaying the text in the active region.   This
+              variable  is  reset  to  the default value whenever the terminal
+              type changes.  The default value is the  string  that  puts  the
+              terminal  in standout mode, as obtained from the terminal's ter-
+              minfo description.  A sample value might be "\e[01;33m".
+       aaccttiivvee--rreeggiioonn--eenndd--ccoolloorr
+              A string  variable  that  "undoes"  the  effects  of  aaccttiivvee--rree--
+              ggiioonn--ssttaarrtt--ccoolloorr  and restores "normal" terminal display appear-
+              ance after displaying text in the active  region.   This  string
+              must  not  take  up any physical character positions on the dis-
+              play, so it should consist only of  terminal  escape  sequences.
+              It  is  output  to the terminal after displaying the text in the
+              active region.  This variable is  reset  to  the  default  value
+              whenever  the  terminal  type changes.  The default value is the
+              string that restores the terminal from  standout  mode,  as  ob-
+              tained from the terminal's terminfo description.  A sample value
+              might be "\e[0m".
        bbeellll--ssttyyllee ((aauuddiibbllee))
-              Controls  what  happens when readline wants to ring the terminal
+              Controls what happens when readline wants to ring  the  terminal
               bell.  If set to nnoonnee, readline never rings the bell.  If set to
-              vviissiibbllee,  readline  uses a visible bell if one is available.  If
+              vviissiibbllee, readline uses a visible bell if one is  available.   If
               set to aauuddiibbllee, readline attempts to ring the terminal's bell.
        bbiinndd--ttttyy--ssppeecciiaall--cchhaarrss ((OOnn))
-              If set to OOnn, readline attempts to bind the  control  characters
+              If  set  to OOnn, readline attempts to bind the control characters
               treated specially by the kernel's terminal driver to their read-
               line equivalents.
        bblliinnkk--mmaattcchhiinngg--ppaarreenn ((OOffff))
               If set to OOnn, readline attempts to briefly move the cursor to an
               opening parenthesis when a closing parenthesis is inserted.
        ccoolloorreedd--ccoommpplleettiioonn--pprreeffiixx ((OOffff))
-              If  set  to  OOnn, when listing completions, readline displays the
+              If set to OOnn, when listing completions,  readline  displays  the
               common prefix of the set of possible completions using a differ-
-              ent  color.   The  color definitions are taken from the value of
+              ent color.  The color definitions are taken from  the  value  of
               the LLSS__CCOOLLOORRSS environment variable.  If there is a color defini-
-              tion  in $$LLSS__CCOOLLOORRSS for the custom suffix "readline-colored-com-
-              pletion-prefix", readline uses this color for the common  prefix
+              tion in $$LLSS__CCOOLLOORRSS for the custom suffix  "readline-colored-com-
+              pletion-prefix",  readline uses this color for the common prefix
               instead of its default.
        ccoolloorreedd--ssttaattss ((OOffff))
-              If  set to OOnn, readline displays possible completions using dif-
-              ferent colors to indicate their file type.   The  color  defini-
-              tions  are  taken  from  the  value of the LLSS__CCOOLLOORRSS environment
+              If set to OOnn, readline displays possible completions using  dif-
+              ferent  colors  to  indicate their file type.  The color defini-
+              tions are taken from the  value  of  the  LLSS__CCOOLLOORRSS  environment
               variable.
        ccoommmmeenntt--bbeeggiinn ((````##''''))
-              The string that is inserted  when  the  readline  iinnsseerrtt--ccoommmmeenntt
+              The  string  that  is  inserted when the readline iinnsseerrtt--ccoommmmeenntt
               command is executed.  This command is bound to MM--## in emacs mode
               and to ## in vi command mode.
        ccoommpplleettiioonn--ddiissppllaayy--wwiiddtthh ((--11))
-              The number of screen columns used to  display  possible  matches
-              when  performing completion.  The value is ignored if it is less
-              than 0 or greater than the terminal screen width.  A value of  0
-              will  cause  matches  to be displayed one per line.  The default
+              The  number  of  screen columns used to display possible matches
+              when performing completion.  The value is ignored if it is  less
+              than  0 or greater than the terminal screen width.  A value of 0
+              will cause matches to be displayed one per  line.   The  default
               value is -1.
        ccoommpplleettiioonn--iiggnnoorree--ccaassee ((OOffff))
               If set to OOnn, readline performs filename matching and completion
               in a case-insensitive fashion.
        ccoommpplleettiioonn--mmaapp--ccaassee ((OOffff))
-              If  set  to  OOnn, and ccoommpplleettiioonn--iiggnnoorree--ccaassee is enabled, readline
-              treats hyphens (_-) and underscores (__) as equivalent  when  per-
+              If set to OOnn, and ccoommpplleettiioonn--iiggnnoorree--ccaassee  is  enabled,  readline
+              treats  hyphens  (_-) and underscores (__) as equivalent when per-
               forming case-insensitive filename matching and completion.
        ccoommpplleettiioonn--pprreeffiixx--ddiissppllaayy--lleennggtthh ((00))
-              The  length in characters of the common prefix of a list of pos-
-              sible completions that is displayed without modification.   When
-              set  to  a  value greater than zero, common prefixes longer than
-              this value are replaced with an ellipsis when displaying  possi-
+              The length in characters of the common prefix of a list of  pos-
+              sible  completions that is displayed without modification.  When
+              set to a value greater than zero, common  prefixes  longer  than
+              this  value are replaced with an ellipsis when displaying possi-
               ble completions.
        ccoommpplleettiioonn--qquueerryy--iitteemmss ((110000))
-              This  determines when the user is queried about viewing the num-
-              ber of possible completions generated  by  the  ppoossssiibbllee--ccoommppllee--
-              ttiioonnss  command.  It may be set to any integer value greater than
-              or equal to zero.  If the  number  of  possible  completions  is
-              greater  than  or  equal to the value of this variable, readline
-              will ask whether or not the user wishes to view them;  otherwise
-              they  are  simply  listed  on  the terminal.  A zero value means
+              This determines when the user is queried about viewing the  num-
+              ber  of  possible  completions generated by the ppoossssiibbllee--ccoommppllee--
+              ttiioonnss command.  It may be set to any integer value greater  than
+              or  equal  to  zero.   If  the number of possible completions is
+              greater than or equal to the value of  this  variable,  readline
+              will  ask whether or not the user wishes to view them; otherwise
+              they are simply listed on the  terminal.   A  zero  value  means
               readline should never ask; negative values are treated as zero.
        ccoonnvveerrtt--mmeettaa ((OOnn))
-              If set to OOnn, readline will convert characters with  the  eighth
+              If  set  to OOnn, readline will convert characters with the eighth
               bit set to an ASCII key sequence by stripping the eighth bit and
-              prefixing an escape character (in effect, using  escape  as  the
-              _m_e_t_a  _p_r_e_f_i_x).   The  default is _O_n, but readline will set it to
+              prefixing  an  escape  character (in effect, using escape as the
+              _m_e_t_a _p_r_e_f_i_x).  The default is _O_n, but readline will  set  it  to
               _O_f_f if the locale contains eight-bit characters.
        ddiissaabbllee--ccoommpplleettiioonn ((OOffff))
               If set to OOnn, readline will inhibit word completion.  Completion
-              characters  will  be  inserted into the line as if they had been
+              characters will be inserted into the line as if  they  had  been
               mapped to sseellff--iinnsseerrtt.
        eecchhoo--ccoonnttrrooll--cchhaarraacctteerrss ((OOnn))
-              When set to OOnn, on operating systems that indicate they  support
+              When  set to OOnn, on operating systems that indicate they support
               it, readline echoes a character corresponding to a signal gener-
               ated from the keyboard.
        eeddiittiinngg--mmooddee ((eemmaaccss))
@@ -3352,24 +3375,25 @@ RREEAADDLLIINNEE
               ilar to _E_m_a_c_s or _v_i.  eeddiittiinngg--mmooddee can be set to either eemmaaccss or
               vvii.
        eemmaaccss--mmooddee--ssttrriinngg ((@@))
-              If the _s_h_o_w_-_m_o_d_e_-_i_n_-_p_r_o_m_p_t variable is enabled, this  string  is
+              If  the  _s_h_o_w_-_m_o_d_e_-_i_n_-_p_r_o_m_p_t variable is enabled, this string is
               displayed immediately before the last line of the primary prompt
               when emacs editing mode is active.  The value is expanded like a
-              key  binding,  so the standard set of meta- and control prefixes
-              and backslash escape sequences is available.  Use the \1 and  \2
-              escapes  to  begin and end sequences of non-printing characters,
-              which can be used to embed a terminal control sequence into  the
+              key binding, so the standard set of meta- and  control  prefixes
+              and  backslash escape sequences is available.  Use the \1 and \2
+              escapes to begin and end sequences of  non-printing  characters,
+              which  can be used to embed a terminal control sequence into the
               mode string.
        eennaabbllee--aaccttiivvee--rreeggiioonn ((OOnn))
-              The  _p_o_i_n_t  is the current cursor position, and _m_a_r_k refers to a
-              saved cursor position.  The text between the point and  mark  is
-              referred  to  as  the  _r_e_g_i_o_n.  When this variable is set to _O_n,
-              readline allows certain commands to designate the region as  _a_c_-
-              _t_i_v_e.   When  the region is active, readline highlights the text
-              in the region using the terminal's standout  mode.   The  active
-              region shows the text inserted by bracketed-paste and any match-
-              ing  text  found  by  incremental  and  non-incremental  history
-              searches.
+              The _p_o_i_n_t is the current cursor position, and _m_a_r_k refers  to  a
+              saved  cursor  position.  The text between the point and mark is
+              referred to as the _r_e_g_i_o_n.  When this variable  is  set  to  _O_n,
+              readline  allows certain commands to designate the region as _a_c_-
+              _t_i_v_e.  When the region is active, readline highlights  the  text
+              in  the region using the value of the aaccttiivvee--rreeggiioonn--ssttaarrtt--ccoolloorr,
+              which defaults to the string that enables the terminal's  stand-
+              out  mode.   The active region shows the text inserted by brack-
+              eted-paste and any matching text found by incremental  and  non-
+              incremental history searches.
        eennaabbllee--bbrraacckkeetteedd--ppaassttee ((OOnn))
               When  set  to  OOnn, readline will configure the terminal in a way
               that will enable it to insert each paste into the editing buffer
@@ -6335,14 +6359,14 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               exit status of the last process or job waited for.
 
 SSHHEELLLL CCOOMMPPAATTIIBBIILLIITTYY MMOODDEE
-       Bash-4.0 introduced the concept of a `shell compatibility level', spec-
-       ified as a set of options to the shopt builtin ccoommppaatt3311, ccoommppaatt3322, ccoomm--
-       ppaatt4400,  ccoommppaatt4411,  and so on).  There is only one current compatibility
-       level -- each option is mutually exclusive.  The compatibility level is
-       intended  to allow users to select behavior from previous versions that
-       is incompatible with newer versions while they migrate scripts  to  use
-       current  features  and  behavior. It's intended to be a temporary solu-
-       tion.
+       Bash-4.0  introduced the concept of a _s_h_e_l_l _c_o_m_p_a_t_i_b_i_l_i_t_y _l_e_v_e_l, speci-
+       fied as a set of options to the shopt  builtin  (  ccoommppaatt3311,  ccoommppaatt3322,
+       ccoommppaatt4400,  ccoommppaatt4411, and so on).  There is only one current compatibil-
+       ity level -- each option  is  mutually  exclusive.   The  compatibility
+       level  is intended to allow users to select behavior from previous ver-
+       sions that is incompatible  with  newer  versions  while  they  migrate
+       scripts  to  use  current  features and behavior. It's intended to be a
+       temporary solution.
 
        This section does not mention behavior that is standard for a  particu-
        lar  version  (e.g., setting ccoommppaatt3322 means that quoting the rhs of the
@@ -6607,4 +6631,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.2                    2022 January 17                        BASH(1)
+GNU Bash 5.2                   2022 February 10                        BASH(1)

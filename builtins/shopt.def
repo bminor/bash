@@ -646,8 +646,13 @@ set_compatibility_level (option_name, mode)
      char *option_name;
      int mode;
 {
-  int ind;
+  int ind, oldval;
   char *rhs;
+
+  /* If we're unsetting one of the compatibility options, make sure the
+     current value is in the range of the compatNN space. */
+  if (mode == 0)
+    oldval = shell_compatibility_level;
 
   /* If we're setting something, redo some of the work we did above in
      toggle_shopt().  Unset everything and reset the appropriate option
@@ -676,6 +681,8 @@ set_compatibility_level (option_name, mode)
     shell_compatibility_level = 43;
   else if (shopt_compat44)
     shell_compatibility_level = 44;
+  else if (oldval > 44 && shell_compatibility_level < DEFAULT_COMPAT_LEVEL)
+    ;
   else
     shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
 
@@ -698,6 +705,8 @@ set_compatibility_opts ()
   switch (shell_compatibility_level)
     {
       case DEFAULT_COMPAT_LEVEL:
+      case 51:			/* completeness */
+      case 50:
 	break;
       case 44:
 	shopt_compat44 = 1; break;

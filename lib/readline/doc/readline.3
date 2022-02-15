@@ -339,7 +339,7 @@ The variables and their default values are:
 .PP
 .PD 0
 .TP
-.B active-region-start-color
+.B active\-region\-start\-color
 A string variable that controls the text color and background when displaying
 the text in the active region (see the description of
 \fBenable\-active\-region\fP below).
@@ -349,10 +349,10 @@ It is output to the terminal before displaying the text in the active region.
 This variable is reset to the default value whenever the terminal type changes.
 The default value is the string that puts the terminal in standout mode,
 as obtained from the terminal's terminfo description.
-A sample value might be \f(CW\ee[01;33m\fP.
+A sample value might be \f(CW"\ee[01;33m"\fP.
 .TP
-.B active-region-end-color
-A string variable that "undoes" the effects of \fBactive-region-start-color\fP
+.B active\-region\-end\-color
+A string variable that "undoes" the effects of \fBactive\-region\-start\-color\fP
 and restores "normal" terminal display appearance after displaying text
 in the active region.
 This string must not take up any physical character positions on the display,
@@ -361,7 +361,7 @@ It is output to the terminal after displaying the text in the active region.
 This variable is reset to the default value whenever the terminal type changes.
 The default value is the string that restores the terminal from standout mode,
 as obtained from the terminal's terminfo description.
-A sample value might be \f(CW\ee[0m\fP.
+A sample value might be \f(CW"\ee[0m\fP".
 .TP
 .B bell\-style (audible)
 Controls what happens when readline wants to ring the terminal bell.

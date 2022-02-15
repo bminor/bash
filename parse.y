@@ -3399,7 +3399,7 @@ read_token (command)
       character = '\n';	/* this will take the next if statement and return. */
     }
 
-  if (character == '\n')
+  if MBTEST(character == '\n')
     {
       /* If we're about to return an unquoted newline, we can go and collect
 	 the text of any pending here document. */
@@ -3440,7 +3440,7 @@ read_token (command)
       else
 	peek_char = shell_getc (1);
 
-      if (character == peek_char)
+      if MBTEST(character == peek_char)
 	{
 	  switch (character)
 	    {
@@ -3669,7 +3669,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	}
 
       /* Possible reprompting. */
-      if (ch == '\n' && SHOULD_PROMPT ())
+      if MBTEST(ch == '\n' && SHOULD_PROMPT ())
 	prompt_again (0);
 
       /* Don't bother counting parens or doing anything else if in a comment
@@ -3680,7 +3680,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
 	  ret[retind++] = ch;
 
-	  if (ch == '\n')
+	  if MBTEST(ch == '\n')
 	    tflags &= ~LEX_INCOMMENT;
 
 	  continue;
@@ -3696,7 +3696,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	{
 	  tflags &= ~LEX_PASSNEXT;
 	  /* XXX - PST_NOEXPAND? */
-	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
+	  if MBTEST(qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
 	    {
 	      if (retind > 0)
 		retind--;	/* swallow previously-added backslash */
@@ -4807,7 +4807,7 @@ read_token_word (character)
 
 	  /* Backslash-newline is ignored in all cases except
 	     when quoted with single quotes. */
-	  if (peek_char == '\n')
+	  if MBTEST(peek_char == '\n')
 	    {
 	      character = '\n';
 	      goto next_character;
@@ -4817,7 +4817,7 @@ read_token_word (character)
 	      shell_ungetc (peek_char);
 
 	      /* If the next character is to be quoted, note it now. */
-	      if (cd == 0 || cd == '`' ||
+	      if MBTEST(cd == 0 || cd == '`' ||
 		  (cd == '"' && peek_char >= 0 && (sh_syntaxtab[peek_char] & CBSDQUOTE)))
 		pass_next_character++;
 
@@ -4902,7 +4902,7 @@ read_token_word (character)
 
       /* If the delimiter character is not single quote, parse some of
 	 the shell expansions that must be read as a single word. */
-      if (shellexp (character))
+      if MBTEST(shellexp (character))
 	{
 	  peek_char = shell_getc (1);
 	  /* $(...), <(...), >(...), $((...)), ${...}, and $[...] constructs */
@@ -5082,7 +5082,7 @@ read_token_word (character)
 	}
 
 got_character:
-      if (character == CTLESC || character == CTLNUL)
+      if MBTEST(character == CTLESC || character == CTLNUL)
 	{
 	  RESIZE_MALLOCED_BUFFER (token, token_index, 2, token_buffer_size,
 				  TOKEN_DEFAULT_GROW_SIZE);
@@ -5196,7 +5196,7 @@ got_token:
   yylval.word = the_word;
 
   /* should we check that quoted == 0 as well? */
-  if (token[0] == '{' && token[token_index-1] == '}' &&
+  if MBTEST(token[0] == '{' && token[token_index-1] == '}' &&
       (character == '<' || character == '>'))
     {
       /* can use token; already copied to the_word */

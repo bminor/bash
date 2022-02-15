@@ -3169,3 +3169,18 @@ lib/readline/doc/{rluser.texi,readline.3},doc/bash.1
 	  bindable readline variables
 	- enable-active-region: document using active-region-start-color to
 	  highlight the text in the region
+
+				   2/11
+				   ----
+parse.y
+	- read_token,read_token_word: make sure characters read by shell_getc
+	  are protected by appropriate calls to MBTEST when testing for shell
+	  metacharacters and operators
+
+				   2/14
+				   ----
+builtins/shopt.def
+	- set_compatibility_level: if the current compatibility level is outside
+	  the range of the compatNN options, just leave it alone when
+	  unsetting one of the options (which by definition was already
+	  unset). Fixes issue reported by Mihai Moldovan <ionic@ionic.de>

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 January 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 February 10<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1680,7 +1680,7 @@ to a shell variable or array index, the += operator can be used to
 append to or add to the variable's previous value.
 This includes arguments to builtin commands such as <B>declare</B> that
 accept assignment statements (<I>declaration</I> commands).
-When += is applied to a variable for which the <I>integer</I> attribute has been
+When += is applied to a variable for which the <B>integer</B> attribute has been
 set, <I>value</I> is evaluated as an arithmetic expression and added to the
 variable's current value, which is also evaluated.
 When += is applied to an array variable using compound assignment (see
@@ -2660,7 +2660,7 @@ compatibility levels, the shell prints an error message and sets the
 compatibility level to the default for the current version.
 The valid values correspond to the compatibility levels
 described below under
-<FONT SIZE=-1><B>BSHELL</B>COMPATIBILITY<B>MODE</B>.
+<FONT SIZE=-1><B>SHELL COMPATIBILITY MODE</B>.
 
 </FONT>
 For example, 4.2 and 42 are valid values that correspond
@@ -7536,6 +7536,32 @@ The variables and their default values are:
 
 
 <DL COMPACT>
+<DT><B>active-region-start-color   </B>
+
+<DD>
+A string variable that controls the text color and background when displaying
+the text in the active region (see the description of
+<B>enable-active-region</B> below).
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal before displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that puts the terminal in standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be <TT>&quot;\e[01;33m&quot;</TT>.
+<DT><B>active-region-end-color     </B>
+
+<DD>
+A string variable that &quot;undoes&quot; the effects of <B>active-region-start-color</B> 
+and restores &quot;normal&quot; terminal display appearance after displaying text
+in the active region.
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal after displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that restores the terminal from standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be <TT>&quot;\e[0m&quot;</TT>.
 <DT><B>bell-style (audible)</B>
 
 <DD>
@@ -7679,6 +7705,8 @@ The text between the point and mark is referred to as the <I>region</I>.
 When this variable is set to <I>On</I>, readline allows certain commands
 to designate the region as <I>active</I>.  
 When the region is active, readline highlights the text in the region using
+the value of the <B>active-region-start-color</B>, which defaults to the
+string that enables
 the terminal's standout mode.
 The active region shows the text inserted by bracketed-paste and any
 matching text found by incremental and non-incremental history searches.
@@ -14088,8 +14116,8 @@ process or job waited for.
 <A NAME="lbDC">&nbsp;</A>
 <H3>SHELL COMPATIBILITY MODE</H3>
 
-Bash-4.0 introduced the concept of a `shell compatibility level', specified
-as a set of options to the shopt builtin
+Bash-4.0 introduced the concept of a <I>shell compatibility level</I>,
+specified as a set of options to the shopt builtin (
 <B>compat31</B>,
 
 <B>compat32</B>,
@@ -14626,7 +14654,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 January 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 February 10<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14733,6 +14761,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 18 January 2022 10:57:39 EST
+Time: 11 February 2022 09:18:02 EST
 </BODY>
 </HTML>
