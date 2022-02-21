@@ -1,6 +1,6 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -562,6 +562,10 @@ extern int rl_mark;
    line and should return it. */
 extern int rl_done;
 
+/* Flag to indicate that readline has read an EOF character or read has
+   returned 0 or error, and is returning a NULL line as a result. */
+extern int rl_eof_found;
+
 /* If set to a character value, that will be the next keystroke read. */
 extern int rl_pending_input;
 
@@ -917,7 +921,8 @@ extern int rl_persistent_signal_handlers;
 #define RL_STATE_REDISPLAYING	0x1000000	/* updating terminal display */
 
 #define RL_STATE_DONE		0x2000000	/* done; accepted line */
-#define RL_STATE_TIMEOUT	0x4000000
+#define RL_STATE_TIMEOUT	0x4000000	/* done; timed out */
+#define RL_STATE_EOF		0x8000000	/* done; got eof on read */
 
 #define RL_SETSTATE(x)		(rl_readline_state |= (x))
 #define RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))

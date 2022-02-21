@@ -3184,3 +3184,64 @@ builtins/shopt.def
 	  the range of the compatNN options, just leave it alone when
 	  unsetting one of the options (which by definition was already
 	  unset). Fixes issue reported by Mihai Moldovan <ionic@ionic.de>
+
+				   2/16
+				   ----
+lib/readline/search.c
+	- rl_history_search_{pos,len,flags}: rename to have a leading `_'
+	- _rl_history_search_pos: no longer static so other parts of readline
+	  can see it
+
+lib/readline/rlprivate.h
+	- _rl_history_search_pos: extern declaration
+
+lib/readline/readline.c
+	- readline_internal_teardown: don't run the undo list against the
+	  current history entry if the non-incremental search functions have
+	  set _rl_history_search_pos to it, since it doesn't reflect the
+	  current contents of the line buffer. Fixes issue reported by
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+lib/readline/misc.c
+	- _rl_start_using_history: initialize _rl_history_search_pos to
+	  something invalid so it doesn't match where_history()
+
+				   2/17
+				   ----
+lib/readline/callback.c
+	- rl_callback_read_char: make sure _rl_eof_found is set to the value
+	  of eof before calling the deprep terminal function, so it can do
+	  different things based on whether the input code read EOF (or the
+	  user entered the EOF character). From a gdb discussion started by
+	  Andrew Burgess <aburgess@redhat.com> (still more to do, since this
+	  is not part of the public API)
+
+				   2/18
+				   ----
+lib/readline/readline.h
+	- RL_STATE_EOF: new readline state value; set when readline reads an
+	  EOF character on an empty line or a read returns an error
+	- rl_eof_found: new public variable
+
+lib/readline/rprivate.h
+	- _rl_eof_found: renamed to rl_eof_found, so not declared here
+
+lib/readline/{callback,readline}.c
+	- RL_STATE_EOF: set appropriately when readline gets an EOF. Suggested
+	  by Andrew Burgess <aburgess@redhat.com>
+	- RL_STATE_EOF: make sure it's not set when readline starts
+	- rl_eof_found: set appropriately when readline gets an EOF
+
+lib/readline/{callback,readline,rltty}.c
+	- rl_eof_found: new name for _rl_eof_found
+
+lib/readline/doc/rltech.texi
+	- RL_STATE_EOF: document
+
+				   2/19
+				   ----
+parse.y
+	- parse_comsub: turn off parser state flags we don't want to inherit
+	  into this call to the parser (PST_REGEXP, PST_EXTPAT, PST_CONDCMD,
+	  PST_CONDEXPR for now). Fixes bug reported by konsolebox
+	  <konsolebox@gmail.com>

@@ -3419,7 +3419,7 @@ read_token (command)
     goto tokword;
 
   /* Shell meta-characters. */
-  if MBTEST(shellmeta (character) && ((parser_state & PST_DBLPAREN) == 0))
+  if MBTEST(shellmeta (character))
     {
 #if defined (ALIAS)
       /* Turn off alias tokenization iff this character sequence would
@@ -4061,6 +4061,10 @@ parse_comsub (qc, open, close, lenp, flags)
   save_parser_state (&ps);
 
   pushed_string_list = (STRING_SAVER *)NULL;
+
+  /* State flags we don't want to persist into command substitutions. */
+  parser_state &= ~(PST_REGEXP|PST_EXTPAT|PST_CONDCMD|PST_CONDEXPR);
+  /* State flags we want to set for this run through the parser. */
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN|PST_NOEXPAND;
 
   shell_eof_token = close;

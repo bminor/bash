@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -164,6 +164,9 @@ int rl_end;
 /* Make this non-zero to return the current input_line. */
 int rl_done;
 
+/* If non-zero when readline_internal returns, it means we found EOF */
+int rl_eof_found = 0;
+
 /* The last function executed by readline. */
 rl_command_func_t *rl_last_func = (rl_command_func_t *)NULL;
 
@@ -216,9 +219,6 @@ int _rl_eof_char = CTRL ('D');
 
 /* Non-zero makes this the next keystroke to read. */
 int rl_pending_input = 0;
-
-/* If non-zero when readline_internal returns, it means we found EOF */
-int _rl_eof_found = 0;
 
 /* Pointer to a useful terminal name. */
 const char *rl_terminal_name = (const char *)NULL;
@@ -479,11 +479,17 @@ readline_internal_teardown (int eof)
 
   RL_CHECK_SIGNALS ();
 
+  if (eof)
+    RL_SETSTATE (RL_STATE_EOF);		/* XXX */
+
   /* Restore the original of this history line, iff the line that we
      are editing was originally in the history, AND the line has changed. */
   entry = current_history ();
 
-  if (entry && rl_undo_list)
+  /* We don't want to do this if we executed functions that call
+     history_set_pos to set the history offset to the line containing the
+     non-incremental search string. */
+  if (entry && rl_undo_list && _rl_history_search_pos != where_history ())
     {
       temp = savestring (the_line);
       rl_revert_line (1, 0);
@@ -615,6 +621,7 @@ readline_internal_charloop (void)
 	  RL_SETSTATE(RL_STATE_DONE);
 	  return (rl_done = 1);
 #else
+	  RL_SETSTATE(RL_STATE_EOF);
 	  eof_found = 1;
 	  break;
 #endif
@@ -655,6 +662,7 @@ readline_internal_charloop (void)
 	  RL_SETSTATE(RL_STATE_DONE);
 	  return (rl_done = 1);
 #else
+	  RL_SETSTATE(RL_STATE_EOF);
 	  eof_found = 1;
 	  break;
 #endif
@@ -717,8 +725,8 @@ static char *
 readline_internal (void)
 {
   readline_internal_setup ();
-  _rl_eof_found = readline_internal_charloop ();
-  return (readline_internal_teardown (_rl_eof_found));
+  rl_eof_found = readline_internal_charloop ();
+  return (readline_internal_teardown (rl_eof_found));
 }
 
 void
@@ -1178,7 +1186,7 @@ rl_initialize (void)
 
   /* We aren't done yet.  We haven't even gotten started yet! */
   rl_done = 0;
-  RL_UNSETSTATE(RL_STATE_DONE);
+  RL_UNSETSTATE(RL_STATE_DONE|RL_STATE_TIMEOUT|RL_STATE_EOF);
 
   /* Tell the history routines what is going on. */
   _rl_start_using_history ();

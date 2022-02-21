@@ -323,6 +323,14 @@ and point define a @emph{region}.
 @deftypevar int rl_done
 Setting this to a non-zero value causes Readline to return the current
 line immediately.
+Readline will set this variable when it has read a key sequence bound
+to @code{accept-line} and is about to return the line to the caller.
+@end deftypevar
+
+@deftypevar int rl_eof_found
+Readline will set this variable when it has read an EOF character (e.g., the
+stty @samp{EOF} character) on an empty line or encountered a read error and
+is about to return a NULL line to the caller.
 @end deftypevar
 
 @deftypevar int rl_num_chars_to_read
@@ -597,6 +605,9 @@ and is about to return the line to the caller.
 Readline has timed out (it did not receive a line or specified number of
 characters before the timeout duration specified by @code{rl_set_timeout}
 elapsed) and is returning that status to the caller.
+@item RL_STATE_EOF
+Readline has read an EOF character (e.g., the stty @samp{EOF} character)
+or encountered a read error and is about to return a NULL line to the caller.
 @end table
 
 @end deftypevar

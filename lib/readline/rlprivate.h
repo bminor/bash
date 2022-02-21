@@ -563,7 +563,6 @@ extern FILE *_rl_in_stream;
 extern FILE *_rl_out_stream;
 extern int _rl_last_command_was_kill;
 extern int _rl_eof_char;
-extern int _rl_eof_found;
 extern procenv_t _rl_top_level;
 extern _rl_keyseq_cxt *_rl_kscxt;
 extern int _rl_keyseq_timeout;
@@ -574,6 +573,7 @@ extern rl_hook_func_t *_rl_internal_startup_hook;
 
 /* search.c */
 extern _rl_search_cxt *_rl_nscxt;
+extern int _rl_history_search_pos;
 
 /* signals.c */
 extern int volatile _rl_caught_signal;
