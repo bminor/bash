@@ -3245,3 +3245,44 @@ parse.y
 	  into this call to the parser (PST_REGEXP, PST_EXTPAT, PST_CONDCMD,
 	  PST_CONDEXPR for now). Fixes bug reported by konsolebox
 	  <konsolebox@gmail.com>
+
+				   2/23
+				   ----
+findcmd.c,builtins/hash.def
+	- replace calls to is_directory with file_isdir, which only performs a
+	  stat and doesn't do the eaccess call to check for an executable file
+
+findcmd.c
+	- find_in_path_element: takes a new RFLAGSP argument, an int * where
+	  the status flags for the returned pathname are returned; saves
+	  additional calls to stat/eaccess
+	- search_for_command: get the returned flags from
+	  find_user_command_in_path so we don't need any additional calls to
+	  file_status after we find the command in $PATH
+
+				   2/24
+				   ----
+doc/{bash.1,bashref.texi}
+	- FUNCTIONS: some small changes to the description of local variables
+	  and dynamic scoping, with emphasis on how that affects `unset'
+	  behavior. Inspired by a discussion with
+	  Christoph Anton Mitterer <calestyo@scientia.net>
+
+				   2/25
+				   ----
+examples/loadables/realpath.c
+	- renamed -s option to -q to align with other versions
+	- perform array assignment for `-a varname' even if -q option supplied	
+	- renamed -S option to -s for Linux compatibility
+
+				   2/28
+				   ----
+lib/readline/misc.c
+	- _rl_free_saved_history_line: call rl_free_undo_list, saving and
+	  setting rl_undo_list to the saved history line's data, so the right
+	  call to _hs_replace_history_data happens and we don't end up with
+	  a pointer aliasing problem. Fixes core dump reported by 
+	  Andreas Schwab <schwab@linux-m68k.org>, but does not make his
+	  scenario equivalent to incremental search
+
+	  

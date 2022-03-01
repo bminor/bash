@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Feb 10 11:04:52 EST 2022
+.\"	Last Change: Thu Feb 24 14:43:14 EST 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 February 10" "GNU Bash 5.2"
+.TH BASH 1 "2022 February 24" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4495,11 +4495,22 @@ been enabled.
 .PP
 Variables local to the function may be declared with the
 .B local
-builtin command.  Ordinarily, variables and their values
+builtin command (\fIlocal variables\fP).
+Ordinarily, variables and their values
 are shared between the function and its caller.
 If a variable is declared \fBlocal\fP, the variable's visible scope
 is restricted to that function and its children (including the functions
 it calls).
+.PP
+In the following description, the \fIcurrent scope\fP is a currently-
+executing function.
+Previous scopes consist of that function's caller and so on,
+back to the "global" scope, where the shell is not executing
+any shell function.
+Consequently, a local variable at the current scope is a variable
+declared using the \fBlocal\fP or \fBdeclare\fP builtins in the
+function that is currently executing.
+.PP
 Local variables "shadow" variables with the same name declared at
 previous scopes.
 For instance, a local variable declared in a function
@@ -4530,11 +4541,13 @@ variable is local to the current scope, \fBunset\fP will unset it;
 otherwise the unset will refer to the variable found in any calling scope
 as described above.
 If a variable at the current local scope is unset, it will remain so
+(appearing as unset)
 until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
 scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a
-variable with that name that had been shadowed will become visible.
+variable with that name that had been shadowed will become visible
+(see below how the \fBlocalvar_unset\fP shell option changes this behavior).
 .PP
 The \fBFUNCNEST\fP variable, if set to a numeric value greater
 than 0, defines a maximum function nesting level.  Function

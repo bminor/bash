@@ -1600,9 +1600,21 @@ return status is the exit status of the last command executed
 before the @code{return}.
 
 Variables local to the function may be declared with the
-@code{local} builtin.  These variables are visible only to
+@code{local} builtin (@dfn{local variables}).
+Ordinarily, variables and their values
+are shared between a function and its caller.
+These variables are visible only to
 the function and the commands it invokes.  This is particularly
 important when a shell function calls other functions.
+
+In the following description, the @dfn{current scope} is a currently-
+executing function.
+Previous scopes consist of that function's caller and so on,
+back to the "global" scope, where the shell is not executing
+any shell function.
+Consequently, a local variable at the current local scope is a variable
+declared using the @code{local} or @code{declare} builtins in the
+function that is currently executing.
 
 Local variables "shadow" variables with the same name declared at
 previous scopes.  For instance, a local variable declared in a function
@@ -1656,11 +1668,13 @@ variable is local to the current scope, @code{unset} will unset it;
 otherwise the unset will refer to the variable found in any calling scope 
 as described above.
 If a variable at the current local scope is unset, it will remain so
+(appearing as unset)
 until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
 scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a   
-variable with that name that had been shadowed will become visible.
+variable with that name that had been shadowed will become visible
+(see below how @code{localvar_unset}shell option changes this behavior).
 
 Function names and definitions may be listed with the
 @option{-f} option to the @code{declare} (@code{typeset})

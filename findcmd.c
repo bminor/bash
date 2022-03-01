@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,8 +54,8 @@ extern int errno;
 /* Static functions defined and used in this file. */
 static char *_find_user_command_internal PARAMS((const char *, int));
 static char *find_user_command_internal PARAMS((const char *, int));
-static char *find_user_command_in_path PARAMS((const char *, char *, int));
-static char *find_in_path_element PARAMS((const char *, char *, int, int, struct stat *));
+static char *find_user_command_in_path PARAMS((const char *, char *, int, int *));
+static char *find_in_path_element PARAMS((const char *, char *, int, int, struct stat *, int *));
 static char *find_absolute_program PARAMS((const char *, int));
 
 static char *get_next_path_element PARAMS((char *, int *));
@@ -274,7 +274,7 @@ _find_user_command_internal (name, flags)
   if (path_list == 0 || *path_list == '\0')
     return (savestring (name));
 
-  cmd = find_user_command_in_path (name, path_list, flags);
+  cmd = find_user_command_in_path (name, path_list, flags, (int *)0);
 
   return (cmd);
 }
@@ -384,7 +384,7 @@ search_for_command (pathname, flags)
       else
 	path_list = 0;
 
-      command = find_user_command_in_path (pathname, path_list, FS_EXEC_PREFERRED|FS_NODIRS);
+      command = find_user_command_in_path (pathname, path_list, FS_EXEC_PREFERRED|FS_NODIRS, &st);
 
       if (command && hashing_enabled && temp_path == 0 && (flags & CMDSRCH_HASH))
 	{
@@ -393,7 +393,6 @@ search_for_command (pathname, flags)
 	     table unless it's an executable file in the current directory. */
 	  if (STREQ (command, pathname))
 	    {
-	      st = file_status (command);
 	      if (st & FS_EXECABLE)
 	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	    }
@@ -401,7 +400,6 @@ search_for_command (pathname, flags)
 	     to the hash table. */
 	  else if (posixly_correct || check_hashed_filenames)
 	    {
-	      st = file_status (command);
 	      if (st & FS_EXECABLE)
 	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	    }
@@ -469,8 +467,7 @@ user_command_matches (name, flags, state)
 	  if (path_element == 0)
 	    break;
 
-	  match = find_in_path_element (name, path_element, flags, name_len, &dotinfo);
-
+	  match = find_in_path_element (name, path_element, flags, name_len, &dotinfo, (int *)0);
 	  free (path_element);
 
 	  if (match == 0)
@@ -523,11 +520,12 @@ find_absolute_program (name, flags)
 }
 
 static char *
-find_in_path_element (name, path, flags, name_len, dotinfop)
+find_in_path_element (name, path, flags, name_len, dotinfop, rflagsp)
      const char *name;
      char *path;
      int flags, name_len;
      struct stat *dotinfop;
+     int *rflagsp;
 {
   int status;
   char *full_path, *xpath;
@@ -547,6 +545,9 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
 
   if (xpath != path)
     free (xpath);
+
+  if (rflagsp)
+    *rflagsp = status;
 
   if ((status & FS_EXISTS) == 0)
     {
@@ -606,18 +607,21 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
       FS_NODIRS:		Don't find any directories.
 */
 static char *
-find_user_command_in_path (name, path_list, flags)
+find_user_command_in_path (name, path_list, flags, rflagsp)
      const char *name;
      char *path_list;
-     int flags;
+     int flags, *rflagsp;
 {
   char *full_path, *path;
-  int path_index, name_len;
+  int path_index, name_len, rflags;
   struct stat dotinfo;
 
   /* We haven't started looking, so we certainly haven't seen
      a `.' as the directory path yet. */
   dot_found_in_search = 0;
+
+  if (rflagsp)
+    *rflagsp = 0;
 
   if (absolute_program (name))
     {
@@ -645,12 +649,12 @@ find_user_command_in_path (name, path_list, flags)
 
       /* Side effects: sets dot_found_in_search, possibly sets
 	 file_to_lose_on. */
-      full_path = find_in_path_element (name, path, flags, name_len, &dotinfo);
+      full_path = find_in_path_element (name, path, flags, name_len, &dotinfo, &rflags);
       free (path);
 
-      /* This should really be in find_in_path_element, but there isn't the
-	 right combination of flags. */
-      if (full_path && is_directory (full_path))
+      /* We use the file status flag bits to check whether full_path is a
+	 directory, which we reject here. */
+      if (full_path && (rflags & FS_DIRECTORY))
 	{
 	  free (full_path);
 	  continue;
@@ -658,6 +662,8 @@ find_user_command_in_path (name, path_list, flags)
 
       if (full_path)
 	{
+	  if (rflagsp)
+	    *rflagsp = rflags;
 	  FREE (file_to_lose_on);
 	  return (full_path);
 	}
@@ -669,7 +675,7 @@ find_user_command_in_path (name, path_list, flags)
      search would accept a non-executable as a last resort.  If the
      caller specified FS_NODIRS, and file_to_lose_on is a directory,
      return NULL. */
-  if (file_to_lose_on && (flags & FS_NODIRS) && is_directory (file_to_lose_on))
+  if (file_to_lose_on && (flags & FS_NODIRS) && file_isdir (file_to_lose_on))
     {
       free (file_to_lose_on);
       file_to_lose_on = (char *)NULL;
@@ -686,5 +692,5 @@ find_in_path (name, path_list, flags)
      char *path_list;
      int flags;
 {
-  return (find_user_command_in_path (name, path_list, flags));
+  return (find_user_command_in_path (name, path_list, flags, (int *)0));
 }

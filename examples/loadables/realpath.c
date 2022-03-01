@@ -1,13 +1,13 @@
 /*
  * realpath -- canonicalize pathnames, resolving symlinks
  *
- * usage: realpath [-csv] [-a name] pathname [pathname...]
+ * usage: realpath [-cqsv] [-a name] pathname [pathname...]
  *
  * options:	-a name	assign each canonicalized pathname to indexed array
  *			variable NAME
  *		-c	check whether or not each resolved path exists
- *		-s	no output, exit status determines whether path is valid
- *		-S	strip . and .. from the pathname only, no symlink resolution
+ *		-q	no output, exit status determines whether path is valid
+ *		-s	strip . and .. from the pathname only, no symlink resolution
  *		-v	produce verbose output
  *
  *
@@ -22,7 +22,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009,2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2021,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -66,7 +66,7 @@ extern char	*sh_realpath();
 int
 realpath_builtin(WORD_LIST *list)
 {
-	int	opt, cflag, vflag, sflag, Sflag, aflag, es;
+	int	opt, cflag, vflag, qflag, sflag, aflag, es;
 	char	*r, realbuf[PATH_MAX], *p, *newpath;
 	struct stat sb;
 #if defined (ARRAY_VARS)
@@ -80,14 +80,14 @@ realpath_builtin(WORD_LIST *list)
 		return (EX_USAGE);
 	}
 
-	vflag = cflag = sflag = aflag = Sflag = 0;
+	vflag = cflag = qflag = aflag = sflag = 0;
 #if defined (ARRAY_VARS)
 	aname = NULL;
 	v = NULL;
 	ind = 0;
 #endif
 	reset_internal_getopt();
-	while ((opt = internal_getopt (list, "a:Scsv")) != -1) {
+	while ((opt = internal_getopt (list, "a:cqsv")) != -1) {
 		switch (opt) {
 #if defined (ARRAY_VARS)
 		case 'a':
@@ -98,11 +98,11 @@ realpath_builtin(WORD_LIST *list)
 		case 'c':
 			cflag = 1;
 			break;
+		case 'q':
+			qflag = 1;
+			break;
 		case 's':
 			sflag = 1;
-			break;
-		case 'S':
-			Sflag = 1;
 			break;
 		case 'v':
 			vflag = 1;
@@ -146,7 +146,7 @@ realpath_builtin(WORD_LIST *list)
 
 	for (es = EXECUTION_SUCCESS; list; list = list->next) {
 		p = list->word->word;
-		if (Sflag) {
+		if (sflag) {
 			/* sh_canonpath doesn't convert to absolute pathnames */
 			newpath = make_absolute(p, get_string_value("PWD"));
 			r = sh_canonpath(newpath, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
@@ -155,27 +155,26 @@ realpath_builtin(WORD_LIST *list)
 			r = sh_realpath(p, realbuf);
 		if (r == 0) {
 			es = EXECUTION_FAILURE;
-			if (sflag == 0)
+			if (qflag == 0)
 				builtin_error("%s: cannot resolve: %s", p, strerror(errno));
 			continue;
 		}
 		if (cflag && (stat(r, &sb) < 0)) {
 			es = EXECUTION_FAILURE;
-			if (sflag == 0)
+			if (qflag == 0)
 				builtin_error("%s: %s", p, strerror(errno));
 			continue;
 		}
-		if (sflag == 0) {
-			if (aflag) {
-				bind_array_element (v, ind, r, 0);
-				ind++;
-			} else {
-				if (vflag)
-					printf ("%s -> ", p);
-				printf("%s\n", r);
-			}
+		if (aflag) {
+			bind_array_element (v, ind, r, 0);
+			ind++;
 		}
-		if (Sflag)
+		if (qflag == 0) {
+			if (vflag)
+				printf ("%s -> ", p);
+			printf("%s\n", r);
+		}
+		if (sflag)
 			free (r);
 	}
 	return es;
@@ -186,11 +185,13 @@ char *realpath_doc[] = {
 	"",
 	"Display the canonicalized version of each PATHNAME argument, resolving",
 	"symbolic links.",
-	"If the -S option is supplied, canonicalize . and .. pathname components",
-	"without resolving symbolic links.",
+	"The -a option stores each canonicalized PATHNAME argument into the indexed",
+	"array VARNAME.",
 	"The -c option checks whether or not each resolved name exists.",
-	"The -s option produces no output; the exit status determines the",
-	"validity of each PATHNAME.",
+	"The -q option produces no output; the exit status determines the",
+	"validity of each PATHNAME, but any array assignment is still performed.",
+	"If the -s option is supplied, canonicalize . and .. pathname components",
+	"without resolving symbolic links.",
 	"The -v option produces verbose output.",
 	"The exit status is 0 if each PATHNAME was resolved; non-zero otherwise.",
 	(char *)NULL
@@ -201,6 +202,6 @@ struct builtin realpath_struct = {
 	realpath_builtin,	/* function implementing the builtin */
 	BUILTIN_ENABLED,	/* initial flags for builtin */
 	realpath_doc,		/* array of long documentation strings */
-	"realpath [-Scsv] pathname [pathname...]",	/* usage synopsis */
+	"realpath [-a varname] [-cqsv] pathname [pathname...]",	/* usage synopsis */
 	0			/* reserved for internal use */
 };

@@ -88,6 +88,11 @@ make_history_line_current (HIST_ENTRY *entry)
   if (rl_undo_list && rl_undo_list != (UNDO_LIST *)entry->data)
     rl_free_undo_list ();  
 
+  /* This will need to free the saved undo list associated with the original
+     (pre-search) line buffer. */
+  if (_rl_saved_line_for_history)
+    _rl_free_saved_history_line ();
+
   /* Now we create a new undo list with a single insert for this text.
      WE DON'T CHANGE THE ORIGINAL HISTORY ENTRY UNDO LIST */
   _rl_replace_text (entry->line, 0, rl_end);
@@ -100,11 +105,6 @@ make_history_line_current (HIST_ENTRY *entry)
        current editing buffer. */
     rl_free_undo_list ();
 #endif
-
-  /* This will need to free the saved undo list associated with the original
-     (pre-search) line buffer. */
-  if (_rl_saved_line_for_history)
-    _rl_free_saved_history_line ();
 }
 
 /* Search the history list for STRING starting at absolute history position

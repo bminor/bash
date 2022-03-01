@@ -691,31 +691,6 @@ initialize_shell_variables (env, privmode)
     rl_prefer_env_winsize = 1;
 #endif /* READLINE && STRICT_POSIX */
 
-     /*
-      * 24 October 2001
-      *
-      * I'm tired of the arguing and bug reports.  Bash now leaves SSH_CLIENT
-      * and SSH2_CLIENT alone.  I'm going to rely on the shell_level check in
-      * isnetconn() to avoid running the startup files more often than wanted.
-      * That will, of course, only work if the user's login shell is bash, so
-      * I've made that behavior conditional on SSH_SOURCE_BASHRC being defined
-      * in config-top.h.
-      */
-#if 0
-  temp_var = find_variable ("SSH_CLIENT");
-  if (temp_var && imported_p (temp_var))
-    {
-      VUNSETATTR (temp_var, att_exported);
-      array_needs_making = 1;
-    }
-  temp_var = find_variable ("SSH2_CLIENT");
-  if (temp_var && imported_p (temp_var))
-    {
-      VUNSETATTR (temp_var, att_exported);
-      array_needs_making = 1;
-    }
-#endif
-
   /* Get the user's real and effective user ids. */
   uidset ();
 

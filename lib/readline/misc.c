@@ -50,6 +50,7 @@
 #include "history.h"
 
 #include "rlprivate.h"
+#include "histlib.h"
 #include "rlshell.h"
 #include "xmalloc.h"
 
@@ -381,6 +382,8 @@ rl_maybe_save_line (void)
 int
 _rl_free_saved_history_line (void)
 {
+  UNDO_LIST *orig;
+
   if (_rl_saved_line_for_history)
     {
       if (rl_undo_list && rl_undo_list == (UNDO_LIST *)_rl_saved_line_for_history->data)
@@ -390,7 +393,12 @@ _rl_free_saved_history_line (void)
 	 callers that know this is _rl_saved_line_for_history can know that
 	 it's an undo list. */
       if (_rl_saved_line_for_history->data)
-	_rl_free_undo_list ((UNDO_LIST *)_rl_saved_line_for_history->data);
+	{
+	  orig = rl_undo_list;
+	  rl_undo_list = _rl_saved_line_for_history->data;
+	  rl_free_undo_list ();
+	  rl_undo_list = orig;
+	}
       _rl_free_history_entry (_rl_saved_line_for_history);
       _rl_saved_line_for_history = (HIST_ENTRY *)NULL;
     }
