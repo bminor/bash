@@ -492,8 +492,10 @@ matching text found by incremental and non-incremental history searches.
 When set to \fBOn\fP, readline will configure the terminal in a way
 that will enable it to insert each paste into the editing buffer as a
 single string of characters, instead of treating each character as if
-it had been read from the keyboard.  This can prevent pasted characters
-from being interpreted as editing commands.
+it had been read from the keyboard
+and executing any editing commands
+bound to key sequences appearing in the pasted text.
+This will prevent pasted characters from being interpreted as editing commands.
 .TP
 .B enable\-keypad (Off)
 When set to \fBOn\fP, readline will try to enable the application

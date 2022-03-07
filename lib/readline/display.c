@@ -439,7 +439,15 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 	     to add them, since update_line expects them to be counted before
 	     wrapping the line. */
 	  if (can_add_invis)
-	    local_prompt_newlines[newlines] = r - ret;
+	    {
+	      local_prompt_newlines[newlines] = r - ret;
+	      /* If we're adding to the number of invisible characters on the
+		 first line of the prompt, but we've already set the number of
+		 invisible characters on that line, we need to adjust the
+		 counter. */
+	      if (invflset && newlines == 1)
+		invfl = ninvis;
+	    }
 	  if (p != (igstart + 1))
 	    last = r - ret - 1;
 	  continue;

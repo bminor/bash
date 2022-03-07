@@ -472,7 +472,7 @@ extern int ansic_shouldquote PARAMS((const char *));
 extern char *ansiexpand PARAMS((char *, int, int, int *));
 
 /* declarations for functions defined in lib/sh/strvis.c */
-extern int charvis PARAMS((const char *, size_t *, char *, size_t *));
+extern int sh_charvis PARAMS((const char *, size_t *, size_t, char *, size_t *));
 extern char *sh_strvis PARAMS((const char *));
 
 /* declarations for functions defined in lib/sh/timeval.c.  No prototypes

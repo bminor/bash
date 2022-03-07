@@ -39,6 +39,8 @@
 extern char *ansic_quote PARAMS((char *, int, int *));
 extern int ansic_shouldquote PARAMS((const char *));
 
+extern int sh_charvis PARAMS((const char *, size_t *, size_t, char *, size_t *));
+
 /* Default set of characters that should be backslash-quoted in strings */
 static const char bstab[256] =
   {
@@ -314,7 +316,8 @@ sh_backslash_quote (string, table, flags)
 #if defined (PROMPT_STRING_DECODE) || defined (TRANSLATABLE_STRINGS)
 /* Quote characters that get special treatment when in double quotes in STRING
    using backslashes. If FLAGS == 1, also make `unsafe' characters visible by
-   translating them to a standard ^X/M-X representation (not yet implemented).
+   translating them to a standard ^X/M-X representation by calling sh_charvis,
+   which handles multibyte characters as well.
    Return a new string. */
 char *
 sh_backslash_quote_for_double_quotes (string, flags)
@@ -330,7 +333,8 @@ sh_backslash_quote_for_double_quotes (string, flags)
   slen = strlen (string);
   send = string + slen;
   mb_cur_max = MB_CUR_MAX;
-  result = (char *)xmalloc ((flags == 1 ? 3 : 2) * slen + 1);
+  /* Max is 4*string length (backslash + three-character visible representation) */
+  result = (char *)xmalloc (4 * slen + 1);
 
   for (rind = sind = 0; c = string[sind]; sind++)
     {
@@ -338,6 +342,14 @@ sh_backslash_quote_for_double_quotes (string, flags)
 
       if ((sh_syntaxtab[c] & CBSDQUOTE) && c != '\n')
 	result[rind++] = '\\';
+
+      if (flags & 1)
+	{
+	  sh_charvis (string, &sind, slen, result, &rind);
+	  sind--;		/* sh_charvis consumes an extra character */
+	  continue;
+	}
+
       /* I should probably use the CSPECL flag for these in sh_syntaxtab[] */
       else if (c == CTLESC || c == CTLNUL)
 	result[rind++] = CTLESC;		/* could be '\\'? */

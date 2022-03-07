@@ -93,6 +93,8 @@ make_history_line_current (HIST_ENTRY *entry)
   if (_rl_saved_line_for_history)
     _rl_free_saved_history_line ();
 
+  rl_maybe_save_line ();
+
   /* Now we create a new undo list with a single insert for this text.
      WE DON'T CHANGE THE ORIGINAL HISTORY ENTRY UNDO LIST */
   _rl_replace_text (entry->line, 0, rl_end);
@@ -193,6 +195,7 @@ noninc_dosearch (char *string, int dir, int flags)
     history_set_pos (oldpos);
 
   make_history_line_current (entry);
+  _rl_free_saved_history_line ();
 
   if (_rl_enable_active_region && ((flags & SF_PATTERN) == 0) && ind > 0 && ind < rl_end)
     {
@@ -585,6 +588,7 @@ rl_history_search_internal (int count, int dir)
   /* Make sure we set the current history position to the last line found so
      we can do things like operate-and-get-next from here. This is similar to
      how incremental search behaves. */
+  rl_maybe_replace_line ();
   history_set_pos (_rl_history_search_pos);	/* XXX */
 
   /* decide where to put rl_point -- need to change this for pattern search */

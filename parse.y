@@ -5742,9 +5742,9 @@ decode_prompt_string (string)
 	      temp = base_pathname (shell_name);
 	      /* Try to quote anything the user can set in the file system */
 	      if (promptvars || posixly_correct)
-		temp = sh_backslash_quote_for_double_quotes (temp, 0);
+		temp = sh_backslash_quote_for_double_quotes (temp, 1);
 	      else
-		temp = savestring (temp);
+		temp = sh_strvis (temp);
 	      goto add_string;
 
 	    case 'v':
@@ -5819,9 +5819,9 @@ decode_prompt_string (string)
 		  /* Make sure that expand_prompt_string is called with a
 		     second argument of Q_DOUBLE_QUOTES if we use this
 		     function here. */
-		  temp = sh_backslash_quote_for_double_quotes (t_string, 0);
+		  temp = sh_backslash_quote_for_double_quotes (t_string, 1);
 		else
-		  temp = savestring (t_string);
+		  temp = sh_strvis (t_string);
 
 		goto add_string;
 	      }

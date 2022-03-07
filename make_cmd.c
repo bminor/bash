@@ -575,9 +575,16 @@ make_here_document (temp, lineno)
   full_line = document = (char *)NULL;
   document_index = document_size = 0;
 
+  delim_unquoted = (temp->redirectee.filename->flags & W_QUOTED) == 0;
+
   /* Quote removal is the only expansion performed on the delimiter
      for here documents, making it an extremely special case. */
-  redir_word = string_quote_removal (temp->redirectee.filename->word, 0);
+  /* "If any part of word is quoted, the delimiter shall be formed by
+     performing quote removal on word." */
+  if (delim_unquoted == 0)
+    redir_word = string_quote_removal (temp->redirectee.filename->word, 0);
+  else
+    redir_word = savestring (temp->redirectee.filename->word);
 
   /* redirection_expand will return NULL if the expansion results in
      multiple words or no words.  Check for that here, and just abort
@@ -604,7 +611,6 @@ make_here_document (temp, lineno)
   /* If the here-document delimiter was quoted, the lines should
      be read verbatim from the input.  If it was not quoted, we
      need to perform backslash-quoted newline removal. */
-  delim_unquoted = (temp->redirectee.filename->flags & W_QUOTED) == 0;
   while (full_line = read_secondary_line (delim_unquoted))
     {
       register char *line;

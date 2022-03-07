@@ -3285,4 +3285,59 @@ lib/readline/misc.c
 	  Andreas Schwab <schwab@linux-m68k.org>, but does not make his
 	  scenario equivalent to incremental search
 
-	  
+				    3/1
+				    ---
+lib/readline/search.c
+	- make_history_line_current: save the current line before replacing it
+	  with the found history entry using rl_maybe_save_line
+	- noninc_dosearch: we don't want the saved history line, so free it
+	  after calling make_history_line_current
+	- _rl_history_search_internal: call rl_maybe_replace_line after making
+	  changes to the line buffer with make_history_line_current so we can
+	  save the undo list we constructed before we set the history position
+
+				    3/2
+				    ---
+lib/readline/display.c
+	- expand_prompt: add missing piece to patch from 10/26/2021: if we are
+	  recalculating the number of invisible characters on the first line
+	  of the prompt, we need to update INVFL, even if we already set it
+	  when we hit the number of physical characters. This ends up being
+	  assigned to prompt_invis_chars_first_line, and is used in several
+	  subsequent calculations. Reported by
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- enable-bracketed-paste: add some language making it clearer that
+	  bracketed paste prevents the pasted text from being interpreted as
+	  editing commands. Suggested by Karl O. Pinc <kop@karlpinc.com>
+
+				    3/4
+				    ---
+make_cmd.c
+	- make_here_document: perform quote removal on the here-doc delimiter
+	  only if it's marked as quoted, which prevents quotes from inside a
+	  command substitution from being removed (they're supposed to begin a
+	  new quoting context) when the word itself isn't flagged as quoted
+	  (which means the body of the here-document gets expanded). You can't
+	  perform quote removal *and* expand the here-document lines. From an
+	  austin-group discussion back in early February
+
+lib/sh/strvis.c
+	- charvis -> sh_charvis; change caller
+	- sh_charvis: now take an additional SLEN argument to avoid having to
+	  compute the string length every time; change callers
+	- sh_charvis: add a utf-8 locale-specific check before calling
+	  COPY_CHAR_I (in practice, doesn't make any real difference)
+
+lib/sh/shquote.c
+	- sh_backslash_quote_for_double_quotes: if FLAGS&1, call sh_charvis on
+	  every character to get the visible representation after possibly
+	  adding a quoting backslash
+
+parse.y
+	- decode_prompt_string: make sure the expansion of \w, \W, and \s
+	  are all run through sh_backslash_quote_for_double_quotes with the
+	  `make visible' flag or through sh_strvis if we're not running the
+	  prompt string through word expansions. Fixes issue reported by
+	  Josh Harcome <joshharc@gmail.com> back in mid-January
