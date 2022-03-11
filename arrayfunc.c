@@ -504,6 +504,8 @@ find_or_make_array_variable (name, flags)
       report_error (_("%s: cannot convert indexed to associative array"), name);
       return ((SHELL_VAR *)NULL);
     }
+  else if (flags & 2)
+    var = assoc_p (var) ? var : convert_var_to_assoc (var);
   else if (array_p (var) == 0 && assoc_p (var) == 0)
     var = convert_var_to_array (var);
 

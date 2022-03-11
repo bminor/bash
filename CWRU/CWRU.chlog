@@ -3341,3 +3341,21 @@ parse.y
 	  `make visible' flag or through sh_strvis if we're not running the
 	  prompt string through word expansions. Fixes issue reported by
 	  Josh Harcome <joshharc@gmail.com> back in mid-January
+
+				   3/10
+				   ----
+arrayfunc.c
+	- convert_var_to_array: if we're being asked to create an associative
+	  array (flags & 2), and we have an existing variable that is not an
+	  assoc array (and not an existing indexed array), call
+	  convert_var_to_assoc to make it one
+
+				   3/11
+				   ----
+jobs.c
+	- wait_for: don't call get_tty_state() if readline is dispatching
+	  (RL_STATE_DISPATCHING) with the terminal settings changed
+	  (RL_STATE_TERMPREPPED), the same way we don't if we are running a
+	  command for programmable completion. Fixes bug with SIGINT reverting
+	  to the saved readline terminal settings reported by
+	  Markus Napierkowski <markus.napierkowski@cyberus-technology.de>

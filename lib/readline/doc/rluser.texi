@@ -588,13 +588,12 @@ The default is @samp{On}.
 
 @item enable-bracketed-paste
 @vindex enable-bracketed-paste
-When set to @samp{On}, Readline will configure the terminal in a way
-that will enable it to insert each paste into the editing buffer as a
-single string of characters, instead of treating each character as if
-it had been read from the keyboard
-and executing any editing commands
-bound to key sequences appearing in the pasted text.
-This will prevent pasted characters from being interpreted as editing commands.
+When set to @samp{On}, Readline configures the terminal to insert each
+paste into the editing buffer as a single string of characters, instead
+of treating each character as if it had been read from the keyboard.
+This is called putting the terminal into @dfn{bracketed paste mode};
+it prevents Readline from executing any editing commands bound to key
+sequences appearing in the pasted text.
 The default is @samp{On}.
 
 @item enable-keypad

@@ -3117,8 +3117,8 @@ if (job == NO_JOB)
 	  else
 #if defined (READLINE)
 	    /* We don't want to do this if we are running a process during
-	       programmable completion. */
-	    if (RL_ISSTATE (RL_STATE_COMPLETING) == 0)
+	       programmable completion or a command bound to `bind -x'. */
+	    if (RL_ISSTATE (RL_STATE_COMPLETING|RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) == 0)
 #endif
 	    get_tty_state ();
 

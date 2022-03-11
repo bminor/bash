@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Feb 10 10:58:32 EST 2022
+.\"	Last Change: Fri Mar 11 10:14:10 EST 2022
 .\"
-.TH READLINE 3 "2022 February 10" "GNU Readline 8.2"
+.TH READLINE 3 "2022 March 11" "GNU Readline 8.2"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -489,13 +489,11 @@ The active region shows the text inserted by bracketed-paste and any
 matching text found by incremental and non-incremental history searches.
 .TP
 .B enable\-bracketed\-paste (On)
-When set to \fBOn\fP, readline will configure the terminal in a way
-that will enable it to insert each paste into the editing buffer as a
-single string of characters, instead of treating each character as if
-it had been read from the keyboard
-and executing any editing commands
-bound to key sequences appearing in the pasted text.
-This will prevent pasted characters from being interpreted as editing commands.
+When set to \fBOn\fP, readline configures the terminal to insert each
+paste into the editing buffer as a single string of characters, instead
+of treating each character as if it had been read from the keyboard.
+This prevents readline from executing any editing commands bound to key
+sequences appearing in the pasted text.
 .TP
 .B enable\-keypad (Off)
 When set to \fBOn\fP, readline will try to enable the application
