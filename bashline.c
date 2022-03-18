@@ -4288,10 +4288,11 @@ bash_quote_filename (s, rtype, qcp)
      special to the shell parser). */
   expchar = nextch = closer = 0;
   if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && dircomplete_expand == 0 &&
-      (expchar = bash_check_expchar (s, 0, &nextch, &closer)))
+      (expchar = bash_check_expchar (s, 0, &nextch, &closer)) &&
+      file_exists (s) == 0)
     {
-      /* Usually this will have been set by bash_directory_completion_hook, but
-	 there are rare cases where it will not be. */
+      /* Usually this will have been set by bash_directory_completion_hook,
+      	 but there are cases where it will not be. */
       if (rl_filename_quote_characters != custom_filename_quote_characters)
 	set_filename_quote_chars (expchar, nextch, closer);
       complete_fullquote = 0;
@@ -4339,6 +4340,7 @@ bash_quote_filename (s, rtype, qcp)
 
   /* We may need to quote additional characters: those that readline treats
      as word breaks that are not quoted by backslash_quote. */
+  /* XXX - test complete_fullquote here? */
   if (rtext && cs == COMPLETE_BSQUOTE)
     {
       mtext = quote_word_break_chars (rtext);

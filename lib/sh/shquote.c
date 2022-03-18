@@ -39,8 +39,6 @@
 extern char *ansic_quote PARAMS((char *, int, int *));
 extern int ansic_shouldquote PARAMS((const char *));
 
-extern int sh_charvis PARAMS((const char *, size_t *, size_t, char *, size_t *));
-
 /* Default set of characters that should be backslash-quoted in strings */
 static const char bstab[256] =
   {
@@ -315,59 +313,46 @@ sh_backslash_quote (string, table, flags)
 
 #if defined (PROMPT_STRING_DECODE) || defined (TRANSLATABLE_STRINGS)
 /* Quote characters that get special treatment when in double quotes in STRING
-   using backslashes. If FLAGS == 1, also make `unsafe' characters visible by
-   translating them to a standard ^X/M-X representation by calling sh_charvis,
-   which handles multibyte characters as well.
-   Return a new string. */
+   using backslashes. FLAGS is reserved for future use. Return a new string. */
 char *
 sh_backslash_quote_for_double_quotes (string, flags)
      char *string;
      int flags;
 {
   unsigned char c;
-  char *result, *send;
-  size_t slen, sind, rind;
+  char *result, *r, *s, *send;
+  size_t slen;
   int mb_cur_max;
   DECLARE_MBSTATE;
  
   slen = strlen (string);
   send = string + slen;
   mb_cur_max = MB_CUR_MAX;
-  /* Max is 4*string length (backslash + three-character visible representation) */
-  result = (char *)xmalloc (4 * slen + 1);
+  result = (char *)xmalloc (2 * slen + 1);
 
-  for (rind = sind = 0; c = string[sind]; sind++)
+  for (r = result, s = string; s && (c = *s); s++)
     {
       /* Backslash-newline disappears within double quotes, so don't add one. */
-
       if ((sh_syntaxtab[c] & CBSDQUOTE) && c != '\n')
-	result[rind++] = '\\';
-
-      if (flags & 1)
-	{
-	  sh_charvis (string, &sind, slen, result, &rind);
-	  sind--;		/* sh_charvis consumes an extra character */
-	  continue;
-	}
-
+	*r++ = '\\';
       /* I should probably use the CSPECL flag for these in sh_syntaxtab[] */
       else if (c == CTLESC || c == CTLNUL)
-	result[rind++] = CTLESC;		/* could be '\\'? */
+	*r++ = CTLESC;		/* could be '\\'? */
 
 #if defined (HANDLE_MULTIBYTE)
       if ((locale_utf8locale && (c & 0x80)) ||
 	  (locale_utf8locale == 0 && mb_cur_max > 1 && is_basic (c) == 0))
 	{
-	  COPY_CHAR_I (result, rind, string, send, sind);
-	  sind--;	/* compensate for auto-increment in loop above */
+	  COPY_CHAR_P (r, s, send);
+	  s--;		/* compensate for auto-increment in loop above */
 	  continue;
 	}
 #endif
 
-      result[rind++] = c;
+      *r++ = c;
     }
 
-  result[rind] = '\0';
+  *r = '\0';
   return (result);
 }
 #endif /* PROMPT_STRING_DECODE */

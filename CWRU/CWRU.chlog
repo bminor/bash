@@ -3330,18 +3330,6 @@ lib/sh/strvis.c
 	- sh_charvis: add a utf-8 locale-specific check before calling
 	  COPY_CHAR_I (in practice, doesn't make any real difference)
 
-lib/sh/shquote.c
-	- sh_backslash_quote_for_double_quotes: if FLAGS&1, call sh_charvis on
-	  every character to get the visible representation after possibly
-	  adding a quoting backslash
-
-parse.y
-	- decode_prompt_string: make sure the expansion of \w, \W, and \s
-	  are all run through sh_backslash_quote_for_double_quotes with the
-	  `make visible' flag or through sh_strvis if we're not running the
-	  prompt string through word expansions. Fixes issue reported by
-	  Josh Harcome <joshharc@gmail.com> back in mid-January
-
 				   3/10
 				   ----
 arrayfunc.c
@@ -3359,3 +3347,20 @@ jobs.c
 	  command for programmable completion. Fixes bug with SIGINT reverting
 	  to the saved readline terminal settings reported by
 	  Markus Napierkowski <markus.napierkowski@cyberus-technology.de>
+
+parse.y
+	- decode_prompt_string: make sure the expansion of \w, \W, and \s
+	  are all run through sh_strvis before calling
+	  sh_backslash_quote_for_double_quotes or just through sh_strvis if
+	  we're not running the prompt string through word expansions.
+	  Fixes issue reported by Josh Harcome <joshharc@gmail.com> back
+	  in mid-January
+
+				   3/16
+				   ----
+bashline.c
+	- bash_quote_filename: if we have a word to complete that contains
+	  characters that introduce a word expansion, make sure the passed
+	  string does *not* exist as a filename before removing those
+	  characters from the set that must be backslash-quoted. See change
+	  from 1/1/2022
