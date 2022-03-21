@@ -3364,3 +3364,25 @@ bashline.c
 	  string does *not* exist as a filename before removing those
 	  characters from the set that must be backslash-quoted. See change
 	  from 1/1/2022
+
+				   3/18
+				   ----
+lib/readline/search.c
+	- make_history_line_current: don't free rl_undo_list or
+	  _rl_saved_line_for_history; don't unconditionally save the history
+	  line. This reverts some of the changes to support setting the
+	  history position in history-search-backward
+	- rl_history_search_internal: only free the saved history line if we
+	  were the ones who created it
+
+				   3/21
+				   ----
+lib/readline/nls.c
+	- xmalloc.h: include for systems without setlocale(), so xfree has a
+	  prototype. Report and fix from András Kucsma <r0maikx02b@gmail.com>
+
+lib/readline/search.c
+	- _rl_history_search_internal: use previous-history/next-history to
+	  move to the found history line instead of directly calling
+	  history_set_pos. This makes the behavior more similar to incremental
+	  search

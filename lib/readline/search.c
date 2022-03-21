@@ -84,17 +84,6 @@ static int _rl_nsearch_dispatch (_rl_search_cxt *, int);
 static void
 make_history_line_current (HIST_ENTRY *entry)
 {
-  /* At this point, rl_undo_list points to a private search string list. */
-  if (rl_undo_list && rl_undo_list != (UNDO_LIST *)entry->data)
-    rl_free_undo_list ();  
-
-  /* This will need to free the saved undo list associated with the original
-     (pre-search) line buffer. */
-  if (_rl_saved_line_for_history)
-    _rl_free_saved_history_line ();
-
-  rl_maybe_save_line ();
-
   /* Now we create a new undo list with a single insert for this text.
      WE DON'T CHANGE THE ORIGINAL HISTORY ENTRY UNDO LIST */
   _rl_replace_text (entry->line, 0, rl_end);
@@ -107,6 +96,8 @@ make_history_line_current (HIST_ENTRY *entry)
        current editing buffer. */
     rl_free_undo_list ();
 #endif
+
+    /* XXX - free the saved line for history here? */
 }
 
 /* Search the history list for STRING starting at absolute history position
@@ -195,6 +186,7 @@ noninc_dosearch (char *string, int dir, int flags)
     history_set_pos (oldpos);
 
   make_history_line_current (entry);
+  /* make_history_line_current used to do this. */
   _rl_free_saved_history_line ();
 
   if (_rl_enable_active_region && ((flags & SF_PATTERN) == 0) && ind > 0 && ind < rl_end)
@@ -525,9 +517,11 @@ static int
 rl_history_search_internal (int count, int dir)
 {
   HIST_ENTRY *temp;
-  int ret, oldpos, newcol;
+  int ret, oldpos, newcol, had_saved_line, origpos;
   char *t;
 
+  origpos = where_history ();
+  had_saved_line = _rl_saved_line_for_history != 0;
   rl_maybe_save_line ();
   /* This will either be restored from the saved line or set from the
      found history line. */
@@ -563,6 +557,7 @@ rl_history_search_internal (int count, int dir)
   /* If we didn't find anything at all, return. */
   if (temp == 0)
     {
+      /* XXX - check had_saved_line here? */
       rl_maybe_unsave_line ();
       rl_ding ();
       /* If you don't want the saved history line (last match) to show up
@@ -585,11 +580,17 @@ rl_history_search_internal (int count, int dir)
   /* Copy the line we found into the current line buffer. */
   make_history_line_current (temp);
 
+  /* Free the saved history line corresponding to the search string */
+  if (had_saved_line == 0)
+    _rl_free_saved_history_line ();
+
   /* Make sure we set the current history position to the last line found so
      we can do things like operate-and-get-next from here. This is similar to
      how incremental search behaves. */
-  rl_maybe_replace_line ();
-  history_set_pos (_rl_history_search_pos);	/* XXX */
+  if (_rl_history_search_pos < origpos)
+    rl_get_previous_history (origpos - _rl_history_search_pos, 0);
+  else
+    rl_get_next_history (_rl_history_search_pos - origpos, 0);
 
   /* decide where to put rl_point -- need to change this for pattern search */
   if (_rl_history_search_flags & ANCHORED_SEARCH)
