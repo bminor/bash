@@ -7422,6 +7422,13 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, estatep)
 
       ret = param_expand (tt, &sindex, quoted, (int *)NULL, (int *)NULL,
 			  (int *)NULL, (int *)NULL, pflags);
+
+      /* Make sure we note that we saw a quoted null string and pass the flag back
+	 to the caller in addition to the value. */
+      if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) && STR_DOLLAR_AT_STAR (name) &&
+	  ret && ret->word && QUOTED_NULL (ret->word))
+	ret->flags |= W_HASQUOTEDNULL;
+
       free (tt);
     }
 #if defined (ARRAY_VARS)
@@ -7475,8 +7482,13 @@ expand_arrayref:
 	  if (estatep)
 	    *estatep = es;	/* structure copy */
 	}
+      /* Note that array[*] and array[@] expanded to a quoted null string by
+	 returning the W_HASQUOTEDNULL flag to the caller in addition to TEMP. */
       else if (es.subtype == 1 && temp && QUOTED_NULL (temp) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	rflags |= W_HASQUOTEDNULL;
+      else if (es.subtype == 2 && temp && QUOTED_NULL (temp) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+	rflags |= W_HASQUOTEDNULL;
+
       if (estatep == 0)
 	flush_eltstate (&es);
     }
@@ -10123,6 +10135,14 @@ bad_substitution:
 	}
       else	/* VAR not set or VAR is NULL. */
 	{
+	  /* If we're freeing a quoted null here, we need to remember we saw
+	     it so we can restore it later if needed, or the caller can note it.
+	     The check against `+' doesn't really matter, since the other cases
+	     don't use or return TFLAG, but it's good for clarity. */
+	  if (c == '+' && temp && QUOTED_NULL (temp) &&
+	      (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+	    tflag |= W_HASQUOTEDNULL;
+
 	  FREE (temp);
 	  temp = (char *)NULL;
 	  if (c == '=' && var_is_special)
@@ -10947,7 +10967,9 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 
   DECLARE_MBSTATE;
 
-  /* OK, let's see if we can optimize a common idiom: "$@" */
+  /* OK, let's see if we can optimize a common idiom: "$@". This needs to make sure
+     that all of the flags callers care about (e.g., W_HASQUOTEDNULL) are set in
+     list->flags. */
   if (STREQ (word->word, "\"$@\"") &&
       (word->flags == (W_HASDOLLAR|W_QUOTED)) &&
       dollar_vars[1])		/* XXX - check IFS here as well? */
@@ -11677,7 +11699,11 @@ finished_with_string:
 
   if (*istring == '\0')
     {
+#if 0
       if (quoted_dollar_at == 0 && (had_quoted_null || quoted_state == PARTIALLY_QUOTED))
+#else
+      if (had_quoted_null || (quoted_dollar_at == 0 && quoted_state == PARTIALLY_QUOTED))
+#endif
 	{
 	  istring[0] = CTLNUL;
 	  istring[1] = '\0';

@@ -517,6 +517,7 @@ static int
 rl_history_search_internal (int count, int dir)
 {
   HIST_ENTRY *temp;
+  UNDO_LIST *origlist;
   int ret, oldpos, newcol, had_saved_line, origpos;
   char *t;
 
@@ -584,13 +585,23 @@ rl_history_search_internal (int count, int dir)
   if (had_saved_line == 0)
     _rl_free_saved_history_line ();
 
+#if HISTORY_SEARCH_SETS_HISTPOS
+  /* XXX - can't make this work the way I want it to yet. Too much assumes
+     that rl_undo_list corresponds to the current history entry's undo list,
+     especially the stuff in maybe_save_line and especially maybe_replace_line.
+     Leaving it commented out for now. */
+
   /* Make sure we set the current history position to the last line found so
      we can do things like operate-and-get-next from here. This is similar to
      how incremental search behaves. */
+  origlist = rl_undo_list;
+  rl_undo_list = 0;	/* XXX - was (UNDO_LIST *)temp->data */
   if (_rl_history_search_pos < origpos)
     rl_get_previous_history (origpos - _rl_history_search_pos, 0);
   else
     rl_get_next_history (_rl_history_search_pos - origpos, 0);
+  rl_undo_list = origlist;
+#endif
 
   /* decide where to put rl_point -- need to change this for pattern search */
   if (_rl_history_search_flags & ANCHORED_SEARCH)

@@ -1538,7 +1538,7 @@ array_value_internal (s, quoted, flags, estatep)
       else
 	{
 	  if (estatep)
-	    estatep->type = ARRAY_ASSOC;
+	    estatep->type = ARRAY_INDEXED;
 	  l = array_to_word_list (array_cell (var));
 	  if (l == (WORD_LIST *)NULL)
 	    return ((char *) NULL);

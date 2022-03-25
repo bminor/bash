@@ -240,6 +240,9 @@ char *_rl_comment_begin;
 /* Keymap holding the function currently being executed. */
 Keymap rl_executing_keymap;
 
+/* The function currently being executed. */
+rl_command_func_t *_rl_executing_func;
+
 /* Keymap we're currently using to dispatch. */
 Keymap _rl_dispatching_keymap;
 
@@ -489,10 +492,10 @@ readline_internal_teardown (int eof)
   /* We don't want to do this if we executed functions that call
      history_set_pos to set the history offset to the line containing the
      non-incremental search string. */
-#if 1	/* XXX */
-  if (entry && rl_undo_list)
-#else
+#if HISTORY_SEARCH_SETS_HISTPOS
   if (entry && rl_undo_list && _rl_history_search_pos != where_history ())
+#else
+  if (entry && rl_undo_list)
 #endif
     {
       temp = savestring (the_line);
@@ -682,6 +685,8 @@ readline_internal_charloop (void)
 
 	  rl_executing_keymap = _rl_command_to_execute->map;
 	  rl_executing_key = _rl_command_to_execute->key;
+
+	  _rl_executing_func = _rl_command_to_execute->func;
 
 	  rl_dispatching = 1;
 	  RL_SETSTATE(RL_STATE_DISPATCHING);
@@ -903,6 +908,8 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
 
 	  rl_executing_keymap = map;
 	  rl_executing_key = key;
+
+	  _rl_executing_func = func;
 
 	  RESIZE_KEYSEQ_BUFFER();
 	  rl_executing_keyseq[rl_key_sequence_length++] = key;

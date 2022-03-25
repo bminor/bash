@@ -381,6 +381,8 @@ extern void _rl_end_executing_keyseq (void);
 extern void _rl_add_executing_keyseq (int);
 extern void _rl_del_executing_keyseq (void);
 
+extern rl_command_func_t *_rl_executing_func;
+
 /* rltty.c */
 extern int _rl_disable_tty_signals (void);
 extern int _rl_restore_tty_signals (void);

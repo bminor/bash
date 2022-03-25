@@ -3386,3 +3386,41 @@ lib/readline/search.c
 	  move to the found history line instead of directly calling
 	  history_set_pos. This makes the behavior more similar to incremental
 	  search
+	- rl_history_search_internal: make sure to set rl_undo_list to the
+	  current history undo list around the calls to rl_get_previous_history
+	  or rl_get_next_history, in order to fool the call to
+	  maybe_replace_line they make
+
+lib/readline/readline.c
+	- _rl_executing_func: the currently-executing readline command function
+
+lib/readline/rlprivate.h
+	- _rl_executing_func: extern declaration
+
+lib/readline/search.c
+	- _rl_history_search_internal: removed (commented out) code that sets
+	  the current history entry to the found history entry, too much
+	  assumes that the current undo list should be applied to the current
+	  history entry (where_history())
+
+				   3/23
+				   ----
+subst.c
+	- parameter_brace_expand_word: if we have double-quoted ${*} or ${@},
+	  make sure we are setting W_HASQUOTEDNULL in the flags we return to the
+	  caller if we are returning QUOTED_NULL(word)
+	- parameter_brace_expand_word: if we have a double-quoted associative array
+	  reference using `*' or `@', make sure we are setting W_HASQUOTEDNULL in the flags
+	  we return to the caller if we are returning QUOTED_NULL(word)
+	- parameter_brace_expand: if we're using the `[:]+' word expansion operator,
+	  we need to note a quoted null string and pass the W_QUOTEDNULL flag
+	  back to the caller
+	- expand_word_internal: make sure to return a QUOTED_NULL (word[0] == CTLNUL)
+	  back to the caller if HAD_QUOTED_NULL is set, regardless of whether or
+	  not we see a quoted dollar at. Fix for bug reported by
+	  Andreas Luik <andreas.luik@innovative-navigation.de>
+
+arrayfunc.c
+	- array_value_internal: fix typo and set estatep->type to ARRAY_INDEXED for
+	  indexed arrays
+
