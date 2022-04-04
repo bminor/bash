@@ -3424,3 +3424,17 @@ arrayfunc.c
 	- array_value_internal: fix typo and set estatep->type to ARRAY_INDEXED for
 	  indexed arrays
 
+				   3/31
+				   ----
+lib/readline/{history.c,histlib.h}
+	- _hs_at_end_of_history: convenience function to tell whether or not the
+	  current history position is at the end of the history list
+
+				    4/1
+				    ---
+lib/readline/search.c
+	- make_history_line_current: don't free rl_undo_list if it is equal to
+	  _rl_saved_line_for_history->data, since we will need to restore it later
+	 if we got it from a history entry. Fixes issue dating back to 7/2021 and
+	 changes to _rl_free_saved_line_for_history, current issue reported by
+	 Andreas Schwab <schwab@linux-m68k.org>

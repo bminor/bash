@@ -388,17 +388,23 @@ _rl_free_saved_history_line (void)
     {
       if (rl_undo_list && rl_undo_list == (UNDO_LIST *)_rl_saved_line_for_history->data)
 	rl_undo_list = 0;
+
       /* Have to free this separately because _rl_free_history entry can't:
 	 it doesn't know whether or not this has application data. Only the
 	 callers that know this is _rl_saved_line_for_history can know that
 	 it's an undo list. */
+#if defined (HISTORY_SEARCH_SETS_HISTPOS)
       if (_rl_saved_line_for_history->data)
 	{
 	  orig = rl_undo_list;
-	  rl_undo_list = _rl_saved_line_for_history->data;
+	  rl_undo_list = (UNDO_LIST *)_rl_saved_line_for_history->data;
 	  rl_free_undo_list ();
 	  rl_undo_list = orig;
 	}
+#else
+      if (_rl_saved_line_for_history->data)
+	_rl_free_undo_list ((UNDO_LIST *)_rl_saved_line_for_history->data);
+#endif
       _rl_free_history_entry (_rl_saved_line_for_history);
       _rl_saved_line_for_history = (HIST_ENTRY *)NULL;
     }
