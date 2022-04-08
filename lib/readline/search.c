@@ -84,14 +84,12 @@ static int _rl_nsearch_dispatch (_rl_search_cxt *, int);
 static void
 make_history_line_current (HIST_ENTRY *entry)
 {
-#if !defined (HISTORY_SEARCH_SETS_HISTPOS)
   UNDO_LIST *xlist;
 
   xlist = _rl_saved_line_for_history ? (UNDO_LIST *)_rl_saved_line_for_history->data : 0;
   /* At this point, rl_undo_list points to a private search string list. */
   if (rl_undo_list && rl_undo_list != (UNDO_LIST *)entry->data && rl_undo_list != xlist)
     rl_free_undo_list ();
-#endif
 
   /* Now we create a new undo list with a single insert for this text.
      WE DON'T CHANGE THE ORIGINAL HISTORY ENTRY UNDO LIST */
@@ -106,7 +104,6 @@ make_history_line_current (HIST_ENTRY *entry)
     rl_free_undo_list ();
 #endif
 
-#if !defined (HISTORY_SEARCH_SETS_HISTPOS)
   /* This will need to free the saved undo list associated with the original
      (pre-search) line buffer.
      XXX - look at _rl_free_saved_history_line and consider calling it if
@@ -115,7 +112,6 @@ make_history_line_current (HIST_ENTRY *entry)
   if (_rl_saved_line_for_history)
     _rl_free_history_entry (_rl_saved_line_for_history);
   _rl_saved_line_for_history = (HIST_ENTRY *)NULL;
-#endif
 }
 
 /* Search the history list for STRING starting at absolute history position
@@ -204,10 +200,6 @@ noninc_dosearch (char *string, int dir, int flags)
     history_set_pos (oldpos);
 
   make_history_line_current (entry);
-#if !defined (HISTORY_SEARCH_SETS_HISTPOS)
-  /* make_history_line_current used to do this. */
-  _rl_free_saved_history_line ();
-#endif
 
   if (_rl_enable_active_region && ((flags & SF_PATTERN) == 0) && ind > 0 && ind < rl_end)
     {
@@ -538,20 +530,11 @@ rl_history_search_internal (int count, int dir)
 {
   HIST_ENTRY *temp;
   int ret, oldpos, newcol;
-  UNDO_LIST *origlist;
-  int had_saved_line, origpos;
+  int had_saved_line;
   char *t;
 
-#if defined (HISTORY_SEARCH_SETS_HISTPOS)
-  origpos = where_history ();
   had_saved_line = _rl_saved_line_for_history != 0;
   rl_maybe_save_line ();
-  /* This will either be restored from the saved line or set from the
-     found history line. */
-  rl_undo_list = 0;
-#else
-  rl_maybe_save_line ();
-#endif
   temp = (HIST_ENTRY *)NULL;
 
   /* Search COUNT times through the history for a line matching
@@ -605,28 +588,6 @@ rl_history_search_internal (int count, int dir)
 
   /* Copy the line we found into the current line buffer. */
   make_history_line_current (temp);
-
-  /* XXX - can't make this work the way I want it to yet. Too much assumes
-     that rl_undo_list corresponds to the current history entry's undo list,
-     especially the stuff in maybe_save_line and especially maybe_replace_line.
-     Leaving it commented out for now. */
-
-#if defined (HISTORY_SEARCH_SETS_HISTPOS)
-  /* Free the saved history line corresponding to the search string */
-  if (had_saved_line == 0)
-    _rl_free_saved_history_line ();
-
-  /* Make sure we set the current history position to the last line found so
-     we can do things like operate-and-get-next from here. This is similar to
-     how incremental search behaves. */
-  origlist = rl_undo_list;
-  rl_undo_list = 0;	/* XXX - was (UNDO_LIST *)temp->data */
-  if (_rl_history_search_pos < origpos)
-    rl_get_previous_history (origpos - _rl_history_search_pos, 0);
-  else
-    rl_get_next_history (_rl_history_search_pos - origpos, 0);
-  rl_undo_list = origlist;
-#endif
 
   /* decide where to put rl_point -- need to change this for pattern search */
   if (_rl_history_search_flags & ANCHORED_SEARCH)

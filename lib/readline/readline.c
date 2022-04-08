@@ -492,12 +492,8 @@ readline_internal_teardown (int eof)
   /* We don't want to do this if we executed functions that call
      history_set_pos to set the history offset to the line containing the
      non-incremental search string. */
-#if defined (HISTORY_SEARCH_SETS_HISTPOS)
-  if (entry && rl_undo_list && _rl_history_search_pos != where_history ())
-#else
   if (entry && rl_undo_list)
-#endif
-    {
+   {
       temp = savestring (the_line);
       rl_revert_line (1, 0);
       entry = replace_history_entry (where_history (), the_line, (histdata_t)NULL);

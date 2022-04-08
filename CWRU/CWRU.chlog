@@ -3407,34 +3407,45 @@ lib/readline/search.c
 				   ----
 subst.c
 	- parameter_brace_expand_word: if we have double-quoted ${*} or ${@},
-	  make sure we are setting W_HASQUOTEDNULL in the flags we return to the
-	  caller if we are returning QUOTED_NULL(word)
-	- parameter_brace_expand_word: if we have a double-quoted associative array
-	  reference using `*' or `@', make sure we are setting W_HASQUOTEDNULL in the flags
-	  we return to the caller if we are returning QUOTED_NULL(word)
-	- parameter_brace_expand: if we're using the `[:]+' word expansion operator,
-	  we need to note a quoted null string and pass the W_QUOTEDNULL flag
-	  back to the caller
-	- expand_word_internal: make sure to return a QUOTED_NULL (word[0] == CTLNUL)
-	  back to the caller if HAD_QUOTED_NULL is set, regardless of whether or
-	  not we see a quoted dollar at. Fix for bug reported by
-	  Andreas Luik <andreas.luik@innovative-navigation.de>
+	  make sure we are setting W_HASQUOTEDNULL in the flags we return to
+	  the caller if we are returning QUOTED_NULL(word)
+	- parameter_brace_expand_word: if we have a double-quoted associative
+	  array reference using `*' or `@', make sure we are setting
+	  W_HASQUOTEDNULL in the flags we return to the caller if we are
+	  returning QUOTED_NULL(word)
+	- parameter_brace_expand: if we're using the `[:]+' word expansion
+	  operator, we need to note a quoted null string and pass the
+	  W_QUOTEDNULL flag back to the caller
+	- expand_word_internal: make sure to return a QUOTED_NULL
+	  (word[0] == CTLNUL) back to the caller if HAD_QUOTED_NULL is set,
+	  regardless of whether or not we see a quoted dollar at. Fix for bug
+	  reported by Andreas Luik <andreas.luik@innovative-navigation.de>
 
 arrayfunc.c
-	- array_value_internal: fix typo and set estatep->type to ARRAY_INDEXED for
-	  indexed arrays
+	- array_value_internal: fix typo and set estatep->type to ARRAY_INDEXED
+	  for indexed arrays
 
 				   3/31
 				   ----
 lib/readline/{history.c,histlib.h}
-	- _hs_at_end_of_history: convenience function to tell whether or not the
-	  current history position is at the end of the history list
+	- _hs_at_end_of_history: convenience function to tell whether or not
+	  the current history position is at the end of the history list
 
 				    4/1
 				    ---
 lib/readline/search.c
 	- make_history_line_current: don't free rl_undo_list if it is equal to
-	  _rl_saved_line_for_history->data, since we will need to restore it later
-	 if we got it from a history entry. Fixes issue dating back to 7/2021 and
-	 changes to _rl_free_saved_line_for_history, current issue reported by
-	 Andreas Schwab <schwab@linux-m68k.org>
+	  _rl_saved_line_for_history->data, since we will need to restore it
+	 later if we got it from a history entry. Fixes issue dating back to
+	 7/2021 and changes to _rl_free_saved_line_for_history, current issue
+	 reported by Andreas Schwab <schwab@linux-m68k.org>
+
+				    4/5
+				    ---
+lib/readline/{complete,histfile,histsearch,isearch,terminal}.c
+	- xfree: use instead of free
+
+				    4/7
+				    ---
+configure.ac
+	- bumped version to bash-5.2-beta

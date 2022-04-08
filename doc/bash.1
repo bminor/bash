@@ -3176,7 +3176,7 @@ ${\fIparameter\fP\fB:\fP\fIoffset\fP\fB:\fP\fIlength\fP}
 \fBSubstring Expansion\fP.
 Expands to up to \fIlength\fP characters of the value of \fIparameter\fP
 starting at the character specified by \fIoffset\fP.
-If \fIparameter\fP is \fB@\fP, an indexed array subscripted by
+If \fIparameter\fP is \fB@\fP or \fB*\fP, an indexed array subscripted by
 \fB@\fP or \fB*\fP, or an associative array name, the results differ as
 described below.
 If \fIlength\fP is omitted, expands to the substring of the value of
@@ -3199,8 +3199,8 @@ a number of characters, and the expansion is the characters between
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the \fB:-\fP expansion.
 .sp 1
-If \fIparameter\fP is \fB@\fP, the result is \fIlength\fP positional
-parameters beginning at \fIoffset\fP.
+If \fIparameter\fP is \fB@\fP or \fB*\fP, the result is \fIlength\fP
+positional parameters beginning at \fIoffset\fP.
 A negative \fIoffset\fP is taken relative to one greater than the greatest
 positional parameter, so an offset of \-1 evaluates to the last positional
 parameter.

@@ -824,7 +824,7 @@ _rl_reset_region_color (int which, const char *value)
 
   if (which == 0)
     {
-      free (_rl_active_region_start_color);
+      xfree (_rl_active_region_start_color);
       if (value && *value)
 	{
 	  _rl_active_region_start_color = (char *)xmalloc (2 * strlen (value) + 1);
@@ -836,7 +836,7 @@ _rl_reset_region_color (int which, const char *value)
     }
   else
     {
-      free (_rl_active_region_end_color);
+      xfree (_rl_active_region_end_color);
       if (value && *value)
 	{
 	  _rl_active_region_end_color = (char *)xmalloc (2 * strlen (value) + 1);

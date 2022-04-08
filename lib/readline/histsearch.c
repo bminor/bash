@@ -248,7 +248,7 @@ _hs_history_patsearch (const char *string, int direction, int flags)
   ret = history_search_internal (pat, direction, flags|PATTERN_SEARCH);
 
   if (pat != string)
-    free (pat);
+    xfree (pat);
   return ret;
 }
 	

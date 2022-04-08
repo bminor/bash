@@ -2221,7 +2221,7 @@ var is set and not null
 This is referred to as Substring Expansion.
 It expands to up to @var{length} characters of the value of @var{parameter}
 starting at the character specified by @var{offset}.
-If @var{parameter} is @samp{@@}, an indexed array subscripted by
+If @var{parameter} is @samp{@@} or @samp{*}, an indexed array subscripted by
 @samp{@@} or @samp{*}, or an associative array name, the results differ as
 described below.
 If @var{length} is omitted, it expands to the substring of the value of
@@ -2298,8 +2298,8 @@ $ echo ${array[0]: -7:-2}
 bcdef
 @end verbatim
 
-If @var{parameter} is @samp{@@}, the result is @var{length} positional
-parameters beginning at @var{offset}.
+If @var{parameter} is @samp{@@} or @samp{*}, the result is @var{length}
+positional parameters beginning at @var{offset}.
 A negative @var{offset} is taken relative to one greater than the greatest
 positional parameter, so an offset of -1 evaluates to the last positional
 parameter.

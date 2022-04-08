@@ -536,7 +536,7 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
     *vlp = physchars;
 
   if (nprompt != pmt)
-    free (nprompt);
+    xfree (nprompt);
 
   return ret;
 }
