@@ -3449,3 +3449,30 @@ lib/readline/{complete,histfile,histsearch,isearch,terminal}.c
 				    ---
 configure.ac
 	- bumped version to bash-5.2-beta
+
+[bash-5.2-beta frozen]
+
+				    4/8
+				    ---
+lib/readline/input.c
+	- _rl_orig_sigset: need extern declaration if HAVE_SELECT is defined.
+	  From https://savannah.gnu.org/support/?110634
+
+examples/loadables/seq.c
+	- PRIdMAX: redefine if PRI_MACROS_BROKEN is defined.
+	  From https://savannah.gnu.org/support/index.php?110635
+
+				   4/11
+				   ----
+configure.ac
+	- BASH_FUNC_STRTOIMAX: replace strtoimax if the system doesn't provide
+	  a declaration in a standard header file. Uses new m4/strtoimax.m4.
+	  From https://savannah.gnu.org/support/index.php?110633
+
+builtins/printf.def
+	- getdouble: new function, parses string into `double' using strtod
+	- printf_builtin: check for the `L' length modifier and use long
+	  doubles for the floating point conversion specifiers. If it's not
+	  supplied, use `double' when in posix mode (as posix specifies) and
+	  long double (if it's available, double if not) in default mode.
+	  From a report from Paul Eggert <eggert@cs.ucla.edu>

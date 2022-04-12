@@ -110,11 +110,11 @@ fr_FR_ISO_8859_1=(
 )
 
 # this locale causes problems all over the place
-if locale -a | grep -i '^fr_FR\.ISO8859.*1' >/dev/null ; then
+if locale -a | grep -i '^fr_FR\.ISO8859.*1$' >/dev/null ; then
 	TestCodePage fr_FR.ISO8859-1 fr_FR_ISO_8859_1
 else
 	echo "unicode1.sub: warning: you do not have the fr_FR.ISO8859-1 locale installed;" >&2
-	echo "unicode1.sub: that will cause some of these tests to fail." >&2
+	echo "unicode1.sub: that will cause some of these tests to be skipped." >&2
 fi
 
 
