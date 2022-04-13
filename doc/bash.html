@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2021 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 March 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -54,7 +54,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2021 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2022 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -1680,7 +1680,7 @@ to a shell variable or array index, the += operator can be used to
 append to or add to the variable's previous value.
 This includes arguments to builtin commands such as <B>declare</B> that
 accept assignment statements (<I>declaration</I> commands).
-When += is applied to a variable for which the <I>integer</I> attribute has been
+When += is applied to a variable for which the <B>integer</B> attribute has been
 set, <I>value</I> is evaluated as an arithmetic expression and added to the
 variable's current value, which is also evaluated.
 When += is applied to an array variable using compound assignment (see
@@ -2660,7 +2660,7 @@ compatibility levels, the shell prints an error message and sets the
 compatibility level to the default for the current version.
 The valid values correspond to the compatibility levels
 described below under
-<FONT SIZE=-1><B>BSHELL</B>COMPATIBILITY<B>MODE</B>.
+<FONT SIZE=-1><B>SHELL COMPATIBILITY MODE</B>.
 
 </FONT>
 For example, 4.2 and 42 are valid values that correspond
@@ -3503,6 +3503,14 @@ interpreted as relative to one greater than the maximum index of
 array, and an index of -1 references the last element.
 <P>
 
+The += operator will append to an array variable when assigning
+using the compound assignment syntax; see
+<FONT SIZE=-1><B>PARAMETERS</B>
+
+</FONT>
+above.
+<P>
+
 Any element of an array may be referenced using
 ${<I>name</I>[<I>subscript</I>]}.  The braces are required to avoid
 conflicts with pathname expansion.  If
@@ -3995,7 +4003,7 @@ is substituted.
 <B>Substring Expansion</B>.
 Expands to up to <I>length</I> characters of the value of <I>parameter</I>
 starting at the character specified by <I>offset</I>.
-If <I>parameter</I> is <B>@</B>, an indexed array subscripted by
+If <I>parameter</I> is <B>@</B> or <B>*</B>, an indexed array subscripted by
 <B>@</B> or <B>*</B>, or an associative array name, the results differ as
 described below.
 If <I>length</I> is omitted, expands to the substring of the value of
@@ -4018,8 +4026,8 @@ a number of characters, and the expansion is the characters between
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the <B>:-</B> expansion.
 <P>
-If <I>parameter</I> is <B>@</B>, the result is <I>length</I> positional
-parameters beginning at <I>offset</I>.
+If <I>parameter</I> is <B>@</B> or <B>*</B>, the result is <I>length</I>
+positional parameters beginning at <I>offset</I>.
 A negative <I>offset</I> is taken relative to one greater than the greatest
 positional parameter, so an offset of -1 evaluates to the last positional
 parameter.
@@ -4215,18 +4223,27 @@ matches of <I>pattern</I> are deleted.
 If <I>string</I> is null,
 matches of <I>pattern</I> are deleted
 and the <B>/</B> following <I>pattern</I> may be omitted.
+<P>
 If the <B>patsub_replacement</B> shell option is enabled using <B>shopt</B>,
 any unquoted instances of <B>&amp;</B> in <I>string</I> are replaced with the
 matching portion of <I>pattern</I>.
-Backslash is used to quote <B>&amp;</B> in <I>string</I>; the backslash is removed
+<P>
+Quoting any part of <I>string</I> inhibits replacement in the
+expansion of the quoted portion, including replacement strings stored
+in shell variables.
+Backslash will escape <B>&amp;</B> in <I>string</I>; the backslash is removed
 in order to permit a literal <B>&amp;</B> in the replacement string.
-Users should take care
-if <I>string</I> is double-quoted to avoid unwanted interactions between
-the backslash and double-quoting.
-Pattern substitution performs the check for <B>&amp;</B> after expanding
-<I>string</I>; shell programmers should quote backslashes intended to escape
-the <B>&amp;</B> and inhibit replacement so they survive any quote removal
-performed by the expansion of <I>string</I>.
+Backslash can also be used to escape a backslash; <B>\\</B> results in
+a literal backslash in the replacement.
+Users should take care if <I>string</I> is double-quoted to avoid
+unwanted interactions between the backslash and double-quoting, since
+backslash has special meaning within double quotes.
+Pattern substitution performs the check for unquoted <B>&amp;</B> after
+expanding <I>string</I>;
+shell programmers should quote any occurrences of <B>&amp;</B>
+they want to be taken literally in the replacement
+and ensure any instances of <B>&amp;</B> they want to be replaced are unquoted.
+<P>
 If the
 <B>nocasematch</B>
 
@@ -5684,11 +5701,24 @@ been enabled.
 Variables local to the function may be declared with the
 <B>local</B>
 
-builtin command.  Ordinarily, variables and their values
+builtin command (<I>local variables</I>).
+Ordinarily, variables and their values
 are shared between the function and its caller.
 If a variable is declared <B>local</B>, the variable's visible scope
 is restricted to that function and its children (including the functions
 it calls).
+<P>
+
+In the following description, the <I>current scope</I> is a currently-
+executing function.
+Previous scopes consist of that function's caller and so on,
+back to the &quot;global&quot; scope, where the shell is not executing
+any shell function.
+Consequently, a local variable at the current scope is a variable
+declared using the <B>local</B> or <B>declare</B> builtins in the
+function that is currently executing.
+<P>
+
 Local variables &quot;shadow&quot; variables with the same name declared at
 previous scopes.
 For instance, a local variable declared in a function
@@ -5722,11 +5752,13 @@ variable is local to the current scope, <B>unset</B> will unset it;
 otherwise the unset will refer to the variable found in any calling scope
 as described above.
 If a variable at the current local scope is unset, it will remain so
+(appearing as unset)
 until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
 scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a
-variable with that name that had been shadowed will become visible.
+variable with that name that had been shadowed will become visible
+(see below how the <B>localvar_unset</B> shell option changes this behavior).
 <P>
 
 The <B>FUNCNEST</B> variable, if set to a numeric value greater
@@ -7527,6 +7559,32 @@ The variables and their default values are:
 
 
 <DL COMPACT>
+<DT><B>active-region-start-color   </B>
+
+<DD>
+A string variable that controls the text color and background when displaying
+the text in the active region (see the description of
+<B>enable-active-region</B> below).
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal before displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that puts the terminal in standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be <TT>&quot;\e[01;33m&quot;</TT>.
+<DT><B>active-region-end-color     </B>
+
+<DD>
+A string variable that &quot;undoes&quot; the effects of <B>active-region-start-color</B> 
+and restores &quot;normal&quot; terminal display appearance after displaying text
+in the active region.
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal after displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that restores the terminal from standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be <TT>&quot;\e[0m&quot;</TT>.
 <DT><B>bell-style (audible)</B>
 
 <DD>
@@ -7670,17 +7728,19 @@ The text between the point and mark is referred to as the <I>region</I>.
 When this variable is set to <I>On</I>, readline allows certain commands
 to designate the region as <I>active</I>.  
 When the region is active, readline highlights the text in the region using
+the value of the <B>active-region-start-color</B>, which defaults to the
+string that enables
 the terminal's standout mode.
 The active region shows the text inserted by bracketed-paste and any
 matching text found by incremental and non-incremental history searches.
 <DT><B>enable-bracketed-paste (On)</B>
 
 <DD>
-When set to <B>On</B>, readline will configure the terminal in a way
-that will enable it to insert each paste into the editing buffer as a
-single string of characters, instead of treating each character as if
-it had been read from the keyboard.  This can prevent pasted characters
-from being interpreted as editing commands.
+When set to <B>On</B>, readline configures the terminal to insert each
+paste into the editing buffer as a single string of characters, instead
+of treating each character as if it had been read from the keyboard.
+This prevents readline from executing any editing commands bound to key
+sequences appearing in the pasted text.
 <DT><B>enable-keypad (Off)</B>
 
 <DD>
@@ -14079,8 +14139,8 @@ process or job waited for.
 <A NAME="lbDC">&nbsp;</A>
 <H3>SHELL COMPATIBILITY MODE</H3>
 
-Bash-4.0 introduced the concept of a `shell compatibility level', specified
-as a set of options to the shopt builtin
+Bash-4.0 introduced the concept of a <I>shell compatibility level</I>,
+specified as a set of options to the shopt builtin (
 <B>compat31</B>,
 
 <B>compat32</B>,
@@ -14617,7 +14677,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2021 December 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 March 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14723,7 +14783,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20220105/doc/bash.1.<BR>
-Time: 11 January 2022 15:02:14 EST
+This document was created by man2html from bash.1.<BR>
+Time: 08 April 2022 15:46:17 EDT
 </BODY>
 </HTML>

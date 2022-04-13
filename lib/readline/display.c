@@ -1,6 +1,6 @@
 /* display.c -- readline redisplay facility. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library    
    for reading lines of text with interactive input and history editing.
@@ -439,7 +439,15 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 	     to add them, since update_line expects them to be counted before
 	     wrapping the line. */
 	  if (can_add_invis)
-	    local_prompt_newlines[newlines] = r - ret;
+	    {
+	      local_prompt_newlines[newlines] = r - ret;
+	      /* If we're adding to the number of invisible characters on the
+		 first line of the prompt, but we've already set the number of
+		 invisible characters on that line, we need to adjust the
+		 counter. */
+	      if (invflset && newlines == 1)
+		invfl = ninvis;
+	    }
 	  if (p != (igstart + 1))
 	    last = r - ret - 1;
 	  continue;
@@ -528,7 +536,7 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
     *vlp = physchars;
 
   if (nprompt != pmt)
-    free (nprompt);
+    xfree (nprompt);
 
   return ret;
 }
@@ -1595,9 +1603,9 @@ putc_face (int c, int face, char *cur_face)
       if (face != FACE_NORMAL && face != FACE_STANDOUT)
 	return;
       if (face == FACE_STANDOUT && cf == FACE_NORMAL)
-        _rl_standout_on ();
+	_rl_region_color_on ();
       if (face == FACE_NORMAL && cf == FACE_STANDOUT)
-        _rl_standout_off ();
+	_rl_region_color_off ();
       *cur_face = face;
     }
   if (c != EOF)

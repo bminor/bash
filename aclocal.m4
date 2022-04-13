@@ -990,7 +990,8 @@ elif test $bash_cv_termcap_lib = libc; then
 TERMCAP_LIB=
 TERMCAP_DEP=
 else
-TERMCAP_LIB=-lcurses
+# we assume ncurses is installed somewhere the linker can find it
+TERMCAP_LIB=-lncurses
 TERMCAP_DEP=
 fi
 ])

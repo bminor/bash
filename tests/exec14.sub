@@ -45,3 +45,20 @@ $THIS_SH -c '$binecho c && $binecho d && echo e'
 $THIS_SH -c 'trap "echo WORKS" EXIT ; $binecho x ; $binecho y ; $binecho z'
 
 ${THIS_SH} -c 'echo w ; { echo x ; $binecho y; }; $binecho z'
+
+echo =====
+
+( trap "echo WORKS && rm $TMPDIR/x$$" EXIT && touch $TMPDIR/x$$ )
+( trap "echo WORKS && rm $TMPDIR/x$$" EXIT && touch $TMPDIR/x$$ ; $binecho done )
+
+( echo a && { $binecho b && $binecho c ; } && echo d )
+( echo a && { $binecho b && $binecho c ; } && echo d ; $binecho e )
+
+( echo A && $binecho B )
+( $binecho c && echo d )
+
+( $binecho c && $binecho d && echo e )
+
+( trap "echo WORKS" EXIT ; $binecho x ; $binecho y ; $binecho z )
+
+( echo w ; { echo x ; $binecho y; }; $binecho z )

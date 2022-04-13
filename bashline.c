@@ -490,6 +490,9 @@ initialize_readline ()
 
   rl_add_defun ("display-shell-version", display_shell_version, -1);
   rl_add_defun ("edit-and-execute-command", emacs_edit_and_execute_command, -1);
+#if defined (VI_MODE)
+  rl_add_defun ("vi-edit-and-execute-command", vi_edit_and_execute_command, -1);
+#endif
 
 #if defined (BRACE_COMPLETION)
   rl_add_defun ("complete-into-braces", bash_brace_completion, -1);
@@ -2848,10 +2851,6 @@ history_and_alias_expand_line (count, ignore)
   new_line = history_expand_line_internal (rl_line_buffer);
 #endif
 
-  t = expand_string_dollar_quote (new_line ? new_line : rl_line_buffer, 0);
-  FREE (new_line);
-  new_line = t;
-
 #if defined (ALIAS)
   if (new_line)
     {
@@ -4289,10 +4288,11 @@ bash_quote_filename (s, rtype, qcp)
      special to the shell parser). */
   expchar = nextch = closer = 0;
   if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && dircomplete_expand == 0 &&
-      (expchar = bash_check_expchar (s, 0, &nextch, &closer)))
+      (expchar = bash_check_expchar (s, 0, &nextch, &closer)) &&
+      file_exists (s) == 0)
     {
-      /* Usually this will have been set by bash_directory_completion_hook, but
-	 there are rare cases where it will not be. */
+      /* Usually this will have been set by bash_directory_completion_hook,
+      	 but there are cases where it will not be. */
       if (rl_filename_quote_characters != custom_filename_quote_characters)
 	set_filename_quote_chars (expchar, nextch, closer);
       complete_fullquote = 0;
@@ -4340,6 +4340,7 @@ bash_quote_filename (s, rtype, qcp)
 
   /* We may need to quote additional characters: those that readline treats
      as word breaks that are not quoted by backslash_quote. */
+  /* XXX - test complete_fullquote here? */
   if (rtext && cs == COMPLETE_BSQUOTE)
     {
       mtext = quote_word_break_chars (rtext);

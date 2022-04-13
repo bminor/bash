@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2021 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2022 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -1600,9 +1600,21 @@ return status is the exit status of the last command executed
 before the @code{return}.
 
 Variables local to the function may be declared with the
-@code{local} builtin.  These variables are visible only to
+@code{local} builtin (@dfn{local variables}).
+Ordinarily, variables and their values
+are shared between a function and its caller.
+These variables are visible only to
 the function and the commands it invokes.  This is particularly
 important when a shell function calls other functions.
+
+In the following description, the @dfn{current scope} is a currently-
+executing function.
+Previous scopes consist of that function's caller and so on,
+back to the "global" scope, where the shell is not executing
+any shell function.
+Consequently, a local variable at the current local scope is a variable
+declared using the @code{local} or @code{declare} builtins in the
+function that is currently executing.
 
 Local variables "shadow" variables with the same name declared at
 previous scopes.  For instance, a local variable declared in a function
@@ -1656,11 +1668,13 @@ variable is local to the current scope, @code{unset} will unset it;
 otherwise the unset will refer to the variable found in any calling scope 
 as described above.
 If a variable at the current local scope is unset, it will remain so
+(appearing as unset)
 until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
 scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a   
-variable with that name that had been shadowed will become visible.
+variable with that name that had been shadowed will become visible
+(see below how @code{localvar_unset}shell option changes this behavior).
 
 Function names and definitions may be listed with the
 @option{-f} option to the @code{declare} (@code{typeset})
@@ -2207,7 +2221,7 @@ var is set and not null
 This is referred to as Substring Expansion.
 It expands to up to @var{length} characters of the value of @var{parameter}
 starting at the character specified by @var{offset}.
-If @var{parameter} is @samp{@@}, an indexed array subscripted by
+If @var{parameter} is @samp{@@} or @samp{*}, an indexed array subscripted by
 @samp{@@} or @samp{*}, or an associative array name, the results differ as
 described below.
 If @var{length} is omitted, it expands to the substring of the value of
@@ -2284,8 +2298,8 @@ $ echo ${array[0]: -7:-2}
 bcdef
 @end verbatim
 
-If @var{parameter} is @samp{@@}, the result is @var{length} positional
-parameters beginning at @var{offset}.
+If @var{parameter} is @samp{@@} or @samp{*}, the result is @var{length}
+positional parameters beginning at @var{offset}.
 A negative @var{offset} is taken relative to one greater than the greatest
 positional parameter, so an offset of -1 evaluates to the last positional
 parameter.
@@ -2444,46 +2458,67 @@ If the @code{patsub_replacement} shell option is enabled using @code{shopt},
 any unquoted instances of @samp{&} in @var{string} are replaced with the
 matching portion of @var{pattern}.
 This is intended to duplicate a common @code{sed} idiom.
-Backslash is used to quote @samp{&} in @var{string}; the backslash is removed
+
+Quoting any part of @var{string} inhibits replacement in the
+expansion of the quoted portion, including replacement strings stored
+in shell variables.
+Backslash will escape @samp{&} in @var{string}; the backslash is removed
 in order to permit a literal @samp{&} in the replacement string.
-Pattern substitution performs the check for @samp{&} after expanding
-@var{string},
-so users should take care to quote backslashes intended to escape
-the @samp{&} and inhibit replacement so they survive any quote removal
-performed by the expansion of @var{string}.
+Users should take care if @var{string} is double-quoted to avoid
+unwanted interactions between the backslash and double-quoting, since
+backslash has special meaning within double quotes.
+Pattern substitution performs the check for unquoted @samp{&} after
+expanding @var{string},
+so users should ensure to properly quote any occurrences of @samp{&}
+they want to be taken literally in the replacement
+and ensure any instances of @samp{&} they want to be replaced are unquoted.
+
 For instance,
 
 @example
 var=abcdef
+rep='& '
 echo $@{var/abc/& @}
 echo "$@{var/abc/& @}"
-echo $@{var/abc/"& "@}
+echo $@{var/abc/$rep@}
+echo "$@{var/abc/$rep@}"
 @end example
 
 @noindent
-will display three lines of "abc def", while
+will display four lines of "abc def", while
 
 @example
 var=abcdef
+rep='& '
 echo $@{var/abc/\& @}
 echo "$@{var/abc/\& @}"
-echo $@{var/abc/"\& "@}
+echo $@{var/abc/"& "@}
+echo $@{var/abc/"$rep"@}
 @end example
 
 @noindent
-will display two lines of "abc def" and a third line of "& def".
-The first two are replaced because the backslash is removed by quote
-removal performed during the expansion of @var{string}
-(the expansion is performed in a
-context that doesn't take any enclosing double quotes into account, as
-with other word expansions).
-In the third case, the double quotes affect the expansion
-of @samp{\&}, and, because @samp{&} is not one of the characters for
-which backslash is special in double quotes,
-the backslash survives the expansion, inhibits the replacement,
-but is removed because it is treated specially.
-One could use @samp{\\&}, unquoted, as the replacement string to achive
-the same effect.
+will display four lines of "& def".
+Like the pattern removal operators, double quotes surrounding the
+replacement string quote the expanded characters, while double quotes
+enclosing the entire parameter substitution do not, since
+the expansion is performed in a
+context that doesn't take any enclosing double quotes into account.
+
+Since backslash can escape @samp{&}, it can also escape a backslash in
+the replacement string.
+This means that @samp{\\} will insert a literal
+backslash into the replacement, so these two @code{echo} commands
+
+@example
+var=abcdef
+rep='\\&xyz'
+echo $@{var/abc/\\&xyz@}
+echo $@{var/abc/$rep@}
+@end example
+
+@noindent
+will both output @samp{\abcxyzdef}.
+
 It should rarely be necessary to enclose only @var{string} in double
 quotes.
 
@@ -7666,6 +7701,9 @@ interpreted as relative to one greater than the maximum index of
 @var{name}, so negative indices count back from the end of the
 array, and an index of -1 references the last element.
 
+The @samp{+=} operator will append to an array variable when assigning
+using the compound assignment syntax; see @ref{Shell Parameters} above.
+
 Any element of an array may be referenced using
 @code{$@{@var{name}[@var{subscript}]@}}.
 The braces are required to avoid
@@ -8095,6 +8133,13 @@ Reserved words appearing in a context where reserved words are recognized
 do not undergo alias expansion.
 
 @item
+Alias expansion is performed when initially parsing a command substitution.
+The default mode generally defers it, when enabled, until the command
+substitution is executed. This means that command substitution will not
+expand aliases that are defined after the command substitution is initially
+parsed (e.g., as part of a function definition).
+
+@item
 The @sc{posix} @env{PS1} and @env{PS2} expansions of @samp{!} to
 the history number and @samp{!!} to @samp{!} are enabled,
 and parameter expansion is performed on the values of @env{PS1} and
@@ -8385,8 +8430,8 @@ the @option{--enable-strict-posix-default} to @code{configure} when building
 @cindex Compatibility Level
 @cindex Compatibility Mode
 
-Bash-4.0 introduced the concept of a `shell compatibility level', specified
-as a set of options to the shopt builtin
+Bash-4.0 introduced the concept of a @dfn{shell compatibility level},
+specified as a set of options to the shopt builtin
 (@code{compat31},
 @code{compat32},
 @code{compat40},

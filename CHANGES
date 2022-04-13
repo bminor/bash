@@ -1,3 +1,78 @@
+This document details the changes between this version, bash-5.2-beta, and
+the previous version, bash-5.2-alpha.
+
+1. Changes to Bash
+
+a. Fixed a problem with command-oriented history and multi-line commands that
+   caused embedded blank lines to be run together.
+
+b. Changed the way `&' is quoted when performing pattern substitution and
+   `patsub_replacement' is enabled.
+
+c. Fixed some integer overflows when expanding strings or reading the output
+   of command substitution larger than 2GB.
+
+d. `wait -p' without the `-n' option now does something useful if there are no
+   jobs.
+
+e. Fixed an issue with read timeouts in posix mode.
+
+f. Changed here-document processing to process $'...' and $"..." only when they
+   appear in the WORD portion of ${PARAM OP WORD} in the here-document body
+   and the body is being expanded.
+
+g. Changed alias expansion in command substitution to be posix-conformant
+   (performed while initially parsing the command substitution) when in posix
+   mode.
+
+h. Bash optimizes away more forks in subshells.
+
+i. Here-document construction now performs quote removal on the here-document
+   delimiter only if it's marked as quoted, which prevents quote characters in
+   command substitutions from being removed.
+
+j. Prompt string expansion now gives invisible characters in the expansion of
+   the \w, \W, and \s escape sequences a visible representation to avoid
+   problems with redisplay.
+
+k. Fixed a problem with SIGINT during the execution of a command bound with
+   `bind -x' affecting the saved terminal settings.
+
+l. Fixed an inconsistency with how $@ expands in a construct like ${@:+set}
+   or ${array[@]:+set} in the presence of null positional parameters or
+   array elements.
+
+2. Changes to Readline
+
+a. Prevent some display problems when running a command as the result of a
+   trap or one bound using `bind -x' and the command generates output.
+
+b. Fixed an issue with multi-line prompt strings that have one or more
+   invisible characters at the end of a physical line.
+
+c. Fixed an issue that caused a history line's undo list to be cleared when
+   it should not have been.
+
+3. New Features in Bash
+
+a. There is a new bindable readline command name: `vi-edit-and-execute-command'.
+
+4. New Features in Readline
+
+a. Two new bindable string variables: active-region-start-color and
+   active-region-end-color. The first sets the color used to display the
+   active region; the second turns it off. If set, these are used in place
+   of terminal standout mode.
+
+b. New readline state (RL_STATE_EOF) and application-visible variable
+   (rl_eof_found) to allow applications to detect when readline reads EOF
+   before calling the deprep-terminal hook.
+
+c. There is a new configuration option: --with-shared-termcap-library, which
+   forces linking the shared readline library with the shared termcap (or
+   curses/ncurses/termlib) library so applications don't have to do it.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.2-alpha, and
 the previous version, bash-5.1-release.
 
@@ -313,10 +388,7 @@ g. There is a new option: `enable-active-region'. This separates control of
 h. rl_completer_word_break_characters is now `const char *' like
    rl_basic_word_break_characters.
 
-i. The non-incremental history searches now leave the current history offset
-   at the position of the last matching history entry, like incremental search.
-
-j. Readline looks in $LS_COLORS for a custom filename extension
+i. Readline looks in $LS_COLORS for a custom filename extension
    (*.readline-colored-completion-prefix) and uses that as the default color
    for the common prefix displayed when `colored-completion-prefix' is set.
 

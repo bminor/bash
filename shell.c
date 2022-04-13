@@ -1064,6 +1064,7 @@ subshell_exit (s)
 
   /* Do trap[0] if defined.  Allow it to override the exit status
      passed to us. */
+  last_command_exit_value = s;
   if (signal_is_trapped (0))
     s = run_exit_trap ();
 
@@ -1127,6 +1128,7 @@ run_startup_files ()
 #endif
   int sourced_login, run_by_ssh;
 
+#if 1	/* TAG:bash-5.3 andrew.gregory.8@gmail.com 2/21/2022 */
   /* get the rshd/sshd case out of the way first. */
   if (interactive_shell == 0 && no_rc == 0 && login_shell == 0 &&
       act_like_sh == 0 && command_execution_string)
@@ -1137,10 +1139,15 @@ run_startup_files ()
 #else
       run_by_ssh = 0;
 #endif
+#endif
 
       /* If we were run by sshd or we think we were run by rshd, execute
 	 ~/.bashrc if we are a top-level shell. */
+#if 1	/* TAG:bash-5.3 */
       if ((run_by_ssh || isnetconn (fileno (stdin))) && shell_level < 2)
+#else
+      if (isnetconn (fileno (stdin) && shell_level < 2)
+#endif
 	{
 #ifdef SYS_BASHRC
 #  if defined (__OPENNT)

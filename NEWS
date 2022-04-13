@@ -97,6 +97,9 @@ bb. Array references using `@' and `*' that are the value of nameref variables
     (declare -n ref='v[@]' ; echo $ref) no longer cause the shell to exit if
     set -u is enabled and the array (v) is unset.
 
+cc. There is a new bindable readline command name:
+    `vi-edit-and-execute-command'.
+
 2. New Features in Readline
 
 a. There is now an HS_HISTORY_VERSION containing the version number of the
@@ -129,12 +132,22 @@ g. There is a new option: `enable-active-region'. This separates control of
 h. rl_completer_word_break_characters is now `const char *' like
    rl_basic_word_break_characters.
 
-i. The non-incremental history searches now leave the current history offset
-   at the position of the last matching history entry, like incremental search.
-
-j. Readline looks in $LS_COLORS for a custom filename extension
+i. Readline looks in $LS_COLORS for a custom filename extension
    (*.readline-colored-completion-prefix) and uses that as the default color
    for the common prefix displayed when `colored-completion-prefix' is set.
+
+j. Two new bindable string variables: active-region-start-color and
+   active-region-end-color. The first sets the color used to display the
+   active region; the second turns it off. If set, these are used in place
+   of terminal standout mode.
+
+k. New readline state (RL_STATE_EOF) and application-visible variable
+   (rl_eof_found) to allow applications to detect when readline reads EOF
+   before calling the deprep-terminal hook.
+
+l. There is a new configuration option: --with-shared-termcap-library, which
+   forces linking the shared readline library with the shared termcap (or
+   curses/ncurses/termlib) library so applications don't have to do it.
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-5.1 since

@@ -1981,7 +1981,7 @@ compare_match (char *text, const char *match)
     {
       temp = (*rl_filename_dequoting_function) (text, rl_completion_quote_character);
       r = strcmp (temp, match);
-      free (temp);
+      xfree (temp);
       return r;
     }      
   return (strcmp (text, match));

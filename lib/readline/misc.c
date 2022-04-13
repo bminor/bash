@@ -1,6 +1,6 @@
 /* misc.c -- miscellaneous bindable readline functions. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -50,6 +50,7 @@
 #include "history.h"
 
 #include "rlprivate.h"
+#include "histlib.h"
 #include "rlshell.h"
 #include "xmalloc.h"
 
@@ -308,6 +309,7 @@ _rl_start_using_history (void)
   if (_rl_saved_line_for_history)
     _rl_free_saved_history_line ();
   _rl_saved_line_for_history = (HIST_ENTRY *)NULL;
+  _rl_history_search_pos = -99;		/* some random invalid history position */
 }
 
 /* Free the contents (and containing structure) of a HIST_ENTRY. */
@@ -380,6 +382,8 @@ rl_maybe_save_line (void)
 int
 _rl_free_saved_history_line (void)
 {
+  UNDO_LIST *orig;
+
   if (_rl_saved_line_for_history)
     {
       if (rl_undo_list && rl_undo_list == (UNDO_LIST *)_rl_saved_line_for_history->data)

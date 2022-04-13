@@ -11,21 +11,26 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# this locale causes problems all over the place
-unset LC_ALL LC_NUMERIC
-if locale -a | grep -i '^de_DE\.UTF.*8' >/dev/null ; then
-	export LANG=de_DE.UTF-8
-else
-	echo "intl2.sub: warning: you do not have the de_DE.UTF-8 locale installed;" >&2
-	echo "intl2.sub: that will cause some of these tests to fail." >&2
-fi
+. test-glue-functions
 
-printf '%.4f\n' 1
+recho $( echo a$'\01)'b )
+recho $( echo ab )
+recho $( echo \ )
+recho $( echo \\ )
 
-LANG=C printf '%.4f\n' 1
-LANG=C /usr/bin/printf '%.4f\n' 1
+LC_CTYPE=C
+od -c <<EOF | _intl_normalize_spaces
+a$'\01'b
+ab
+EOF
 
-env LANG=C printf '%.4f\n' 1
-(LANG=C; printf '%.4f\n' 1)
+od -c <<EOF | _intl_normalize_spaces
+${none-a$'\01'b}
+${none-ab}
+EOF
 
-printf '%.4f\n' 1
+V=Aa$'\01'b
+od -c <<EOF | _intl_normalize_spaces
+${V%a$'\01'b}
+${V%ab}
+EOF

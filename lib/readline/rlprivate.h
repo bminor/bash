@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -381,6 +381,8 @@ extern void _rl_end_executing_keyseq (void);
 extern void _rl_add_executing_keyseq (int);
 extern void _rl_del_executing_keyseq (void);
 
+extern rl_command_func_t *_rl_executing_func;
+
 /* rltty.c */
 extern int _rl_disable_tty_signals (void);
 extern int _rl_restore_tty_signals (void);
@@ -415,6 +417,9 @@ extern void _rl_control_keypad (int);
 extern void _rl_set_cursor (int, int);
 extern void _rl_standout_on (void);
 extern void _rl_standout_off (void);
+extern int _rl_reset_region_color (int, const char *);
+extern void _rl_region_color_on (void);
+extern void _rl_region_color_off (void);
 
 /* text.c */
 extern void _rl_fix_point (int);
@@ -551,6 +556,8 @@ extern int _rl_echo_control_chars;
 extern int _rl_show_mode_in_prompt;
 extern int _rl_enable_bracketed_paste;
 extern int _rl_enable_active_region;
+extern char *_rl_active_region_start_color;
+extern char *_rl_active_region_end_color;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;
@@ -558,7 +565,6 @@ extern FILE *_rl_in_stream;
 extern FILE *_rl_out_stream;
 extern int _rl_last_command_was_kill;
 extern int _rl_eof_char;
-extern int _rl_eof_found;
 extern procenv_t _rl_top_level;
 extern _rl_keyseq_cxt *_rl_kscxt;
 extern int _rl_keyseq_timeout;
@@ -569,6 +575,7 @@ extern rl_hook_func_t *_rl_internal_startup_hook;
 
 /* search.c */
 extern _rl_search_cxt *_rl_nscxt;
+extern int _rl_history_search_pos;
 
 /* signals.c */
 extern int volatile _rl_caught_signal;

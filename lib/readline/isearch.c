@@ -679,7 +679,7 @@ opcode_dispatch:
       paste = _rl_bracketed_text (&pastelen);
       if (paste == 0 || *paste == 0)
 	{
-	  free (paste);
+	  xfree (paste);
 	  break;
 	}
       if (_rl_enable_active_region)
@@ -692,7 +692,7 @@ opcode_dispatch:
       memcpy (cxt->search_string + cxt->search_string_index, paste, pastelen);
       cxt->search_string_index += pastelen;
       cxt->search_string[cxt->search_string_index] = '\0';
-      free (paste);
+      xfree (paste);
       break;
 
     /* Add character to search string and continue search. */

@@ -59,3 +59,8 @@ echo abcde | {
 
 read -e -t .0001 a <<<abcde
 echo $a
+
+set -o posix
+read -t 0.1 a </dev/tty
+echo $a
+

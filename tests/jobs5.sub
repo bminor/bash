@@ -64,3 +64,8 @@ unset wpid
 jobs
 wait -n -p wpid
 echo $wpid $?
+
+# make sure wait -p var does something useful without the -n option
+jobs
+wait -p wpid
+declare -p wpid

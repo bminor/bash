@@ -1,6 +1,6 @@
 /* history.h -- the names of functions that you can call in history. */
 
-/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -44,7 +44,7 @@ typedef char *histdata_t;
 
 /* Let's not step on anyone else's define for now, since we don't use this yet. */
 #ifndef HS_HISTORY_VERSION
-#  define HS_HISTORY_VERSION 0x0801	/* History 8.1 */
+#  define HS_HISTORY_VERSION 0x0802	/* History 8.2 */
 #endif
 
 /* The structure used to store a history entry. */

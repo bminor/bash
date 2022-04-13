@@ -342,7 +342,7 @@ extern char *sh_double_quote PARAMS((const char *));
 extern char *sh_mkdoublequoted PARAMS((const char *, int, int));
 extern char *sh_un_double_quote PARAMS((char *));
 extern char *sh_backslash_quote PARAMS((char *, const char *, int));
-extern char *sh_backslash_quote_for_double_quotes PARAMS((char *));
+extern char *sh_backslash_quote_for_double_quotes PARAMS((char *, int));
 extern char *sh_quote_reusable PARAMS((char *, int));
 extern int sh_contains_shell_metas PARAMS((const char *));
 extern int sh_contains_quotes PARAMS((const char *));
@@ -470,6 +470,10 @@ extern char *ansicstr PARAMS((char *, int, int, int *, int *));
 extern char *ansic_quote PARAMS((char *, int, int *));
 extern int ansic_shouldquote PARAMS((const char *));
 extern char *ansiexpand PARAMS((char *, int, int, int *));
+
+/* declarations for functions defined in lib/sh/strvis.c */
+extern int sh_charvis PARAMS((const char *, size_t *, size_t, char *, size_t *));
+extern char *sh_strvis PARAMS((const char *));
 
 /* declarations for functions defined in lib/sh/timeval.c.  No prototypes
    so we don't have to count on having a definition of struct timeval in

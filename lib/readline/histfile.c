@@ -310,7 +310,7 @@ read_history_range (const char *filename, int from, int to)
 
   if (file_size == 0)
     {
-      free (input);
+      xfree (input);
       close (file);
       return 0;	/* don't waste time if we don't have to */
     }

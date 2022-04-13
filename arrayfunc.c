@@ -379,6 +379,14 @@ assign_array_element (name, value, flags, estatep)
 
   entry = assign_array_element_internal (entry, name, vname, sub, sublen, value, flags, estatep);
 
+#if ARRAY_EXPORT
+  if (entry && exported_p (entry))
+    {
+      INVALIDATE_EXPORTSTR (entry);
+      array_needs_making = 1;
+    }
+#endif
+
   free (vname);
   return entry;
 }
@@ -496,6 +504,8 @@ find_or_make_array_variable (name, flags)
       report_error (_("%s: cannot convert indexed to associative array"), name);
       return ((SHELL_VAR *)NULL);
     }
+  else if (flags & 2)
+    var = assoc_p (var) ? var : convert_var_to_assoc (var);
   else if (array_p (var) == 0 && assoc_p (var) == 0)
     var = convert_var_to_array (var);
 
@@ -1528,7 +1538,7 @@ array_value_internal (s, quoted, flags, estatep)
       else
 	{
 	  if (estatep)
-	    estatep->type = ARRAY_ASSOC;
+	    estatep->type = ARRAY_INDEXED;
 	  l = array_to_word_list (array_cell (var));
 	  if (l == (WORD_LIST *)NULL)
 	    return ((char *) NULL);

@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1650,12 +1650,12 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   default_buffered_input = -1;
 #endif
 
-#if 0
-  /* We can't optimize if one of the commands executed by the subshell sets
-     an exit trap. */
+  /* We can't optimize away forks if one of the commands executed by the
+     subshell sets an exit trap, so we set CMD_NO_FORK for simple commands
+     and set CMD_TRY_OPTIMIZING for simple commands on the right side of an
+     and-or or `;' list to test for optimizing forks when they are executed. */
   if (user_subshell && command->type == cm_subshell)
     optimize_subshell_command (command->value.Subshell->command);
-#endif
 
   /* Do redirections, then dispose of them before recursive call. */
   if (command->redirects)
@@ -2753,7 +2753,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif
 
       QUIT;
-      optimize_fork (command);			/* XXX */
+      optimize_connection_fork (command);			/* XXX */
       exec_result = execute_command_internal (command->value.Connection->second,
 				      asynchronous, pipe_in, pipe_out,
 				      fds_to_close);
@@ -2826,7 +2826,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  ((command->value.Connection->connector == OR_OR) &&
 	   (exec_result != EXECUTION_SUCCESS)))
 	{
-	  optimize_fork (command);
+	  optimize_connection_fork (command);
 
 	  second = command->value.Connection->second;
 	  if (ignore_return && second)

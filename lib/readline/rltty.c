@@ -1,7 +1,7 @@
 /* rltty.c -- functions to prepare and restore the terminal for readline's
    use. */
 
-/* Copyright (C) 1992-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -692,7 +692,9 @@ rl_deprep_terminal (void)
   if (terminal_prepped & TPX_BRACKPASTE)
     {
       fprintf (rl_outstream, BRACK_PASTE_FINI);
-      if (_rl_eof_found && (RL_ISSTATE (RL_STATE_TIMEOUT) == 0))
+      /* Since the last character in BRACK_PASTE_FINI is \r */
+      _rl_last_c_pos = 0;
+      if (rl_eof_found && (RL_ISSTATE (RL_STATE_TIMEOUT) == 0))
  	fprintf (rl_outstream, "\n");
       else if (_rl_echoing_p == 0)
  	fprintf (rl_outstream, "\n");

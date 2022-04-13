@@ -818,8 +818,7 @@ glob_vector (pat, dir, flags)
 
       add_current = ((flags & (GX_ALLDIRS|GX_ADDCURDIR)) == (GX_ALLDIRS|GX_ADDCURDIR));
 
-      /* Scan the directory, finding all names that match.
-	 For each name that matches, allocate a struct globval
+      /* Scan the directory, finding all names that match	 For each name that matches, allocate a struct globval
 	 on the stack and store the name in it.
 	 Chain those structs together; lastlink is the front of the chain.  */
       while (1)
@@ -901,6 +900,9 @@ glob_vector (pat, dir, flags)
 	      nextname = (char *) malloc (sdlen + 1);
 	      if (nextlink == 0 || nextname == 0)
 		{
+		  if (firstmalloc && firstmalloc == nextlink)
+		    firstmalloc = 0;
+		  /* If we reset FIRSTMALLOC we can free this here. */
 		  FREE (nextlink);
 		  FREE (nextname);
 		  free (subdir);
@@ -936,8 +938,18 @@ glob_vector (pat, dir, flags)
 	      nextname = (char *) malloc (D_NAMLEN (dp) + 1);
 	      if (nextlink == 0 || nextname == 0)
 		{
+		  /* We free NEXTLINK here, since it won't be added to the
+		     LASTLINK chain. If we used malloc, and it returned non-
+		     NULL, firstmalloc will be set to something valid. If it's
+		     NEXTLINK, reset it before we free NEXTLINK to avoid
+		     duplicate frees. If not, it will be taken care of by the
+		     loop below with TMPLINK. */
 		  if (firstmalloc)
-		    FREE (nextlink);
+		    {
+		      if (firstmalloc == nextlink)
+			firstmalloc = 0;
+		      FREE (nextlink);
+		    }
 		  FREE (nextname);
 		  lose = 1;
 		  break;

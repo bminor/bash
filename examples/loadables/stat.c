@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2016 Free Software Foundation, Inc.
+   Copyright (C) 2016,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -390,6 +390,12 @@ stat_builtin (list)
 	}
     }
 
+  if (legal_identifier (aname) == 0)
+    {
+      sh_invalidid (aname);
+      return (EXECUTION_FAILURE);
+    }
+
   list = loptend;
   if (list == 0)
     {
@@ -397,6 +403,10 @@ stat_builtin (list)
       return (EX_USAGE);
     }
 
+
+#if 0
+  unbind_variable (aname);
+#endif
   fname = list->word->word;
 
   if (getstat (fname, flags, &st) < 0)
@@ -405,8 +415,7 @@ stat_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
-  unbind_variable (aname);
-  v = make_new_assoc_variable (aname);
+  v = find_or_make_array_variable (aname, 3);
   if (v == 0)
     {
       builtin_error ("%s: cannot create variable", aname);
@@ -430,9 +439,10 @@ char *stat_doc[] = {
 	"",
 	"Take a filename and load the status information returned by a",
 	"stat(2) call on that file into the associative array specified",
-	"by the -A option.  The default array name is STAT.  If the -L",
-	"option is supplied, stat does not resolve symbolic links and",
-	"reports information about the link itself.  The -l option results",
+	"by the -A option.  The default array name is STAT.",
+	"",
+	"If the -L option is supplied, stat does not resolve symbolic links",
+	"and reports information about the link itself.  The -l option results",
 	"in longer-form listings for some of the fields. When -l is used,",
 	"the -F option supplies a format string passed to strftime(3) to",
 	"display the file time information.",

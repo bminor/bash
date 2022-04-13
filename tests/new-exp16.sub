@@ -16,6 +16,8 @@ HOME=/homes/chet
 string=abcdefg
 set -- a b c
 
+shopt -u patsub_replacement
+
 # verify existing behavior
 echo ${string/abc/~}
 echo "${string/abc/~}"
@@ -28,6 +30,11 @@ echo "${string/abc/"$notthere"}"
 echo ${string//?/\$\'&\' } 
 
 shopt -s patsub_replacement
+
+echo ${string//?/\$\'&\' } 
+
+echo ${string//?/& } 
+echo "${string//?/& }"
 
 echo ${string//?/\& } 
 echo "${string//?/\& }"
@@ -51,7 +58,9 @@ rep='\\&'
 echo "${string/abc/&}"
 echo ${string/abc/\&}
 echo "${string/abc/\\&}"
+echo ${string/abc/"\\&"}
 echo "${string/abc/"\\&"}"
+echo ${string/abc/$rep}
 echo ${string/abc/"$rep"}
 
 shopt -u patsub_replacement
@@ -61,3 +70,34 @@ echo ${string/abc/\&}
 echo "${string/abc/\\&}"
 echo "${string/abc/"\\&"}"
 echo ${string/abc/"$rep"}
+
+shopt -s patsub_replacement
+
+repl='x&y'
+r2='x\&y'
+var='letssee'
+
+pat=ss
+
+echo ${var//$pat/"$repl"}
+echo "${var//$pat/"$repl"}"
+echo ${var//$pat/$repl}
+echo "${var//$pat/$repl}"
+
+echo ${var//$pat/"$r2"}
+echo "${var//$pat/"$r2"}"
+echo ${var//$pat/$r2}
+echo "${var//$pat/$r2}"
+
+r2='\\&'
+r3='\&'
+
+echo ${var//$pat/\\\&}
+echo ${var//$pat/\\$r2}
+echo ${var//$pat/\\&}
+echo ${var//$pat/$r2}
+
+echo ${var//$pat/"\&"}
+echo ${var//$pat/"$r3"}
+echo ${var//$pat/"&"}
+echo ${var//$pat/$r3}

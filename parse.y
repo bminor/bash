@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2136,14 +2136,12 @@ read_a_line (remove_quoted_newline)
    the secondary prompt.  This is used to read the lines of a here
    document.  REMOVE_QUOTED_NEWLINE is non-zero if we should remove
    newlines quoted with backslashes while reading the line.  It is
-   non-zero unless the delimiter of the here document was quoted.
-   If it is zero, we don't perform $'...' and $"..." expansion because
-   we treat the lines as if they are between double quotes. */
+   non-zero unless the delimiter of the here document was quoted. */
 char *
 read_secondary_line (remove_quoted_newline)
      int remove_quoted_newline;
 {
-  char *ret, *t;
+  char *ret;
   int n, c;
 
   prompt_string_pointer = &ps2_prompt;
@@ -2163,23 +2161,7 @@ read_secondary_line (remove_quoted_newline)
       maybe_add_history (ret);
     }
 #endif /* HISTORY */
-  if (ret == 0)
-    return ret;
-  if (remove_quoted_newline == 0)
-    return (savestring (ret));
-
-  t = ret;
-  while (t = strchr (t, '$'))
-    {
-      if (t[1] == '\'' || t[1] == '"')
-	break;
-      else
-	t++;
-    }
-  if (t == 0)
-    return (savestring (ret));
-  t = expand_string_dollar_quote (ret, 1);
-  return t;
+  return ret;
 }
 
 /* **************************************************************** */
@@ -3417,7 +3399,7 @@ read_token (command)
       character = '\n';	/* this will take the next if statement and return. */
     }
 
-  if (character == '\n')
+  if MBTEST(character == '\n')
     {
       /* If we're about to return an unquoted newline, we can go and collect
 	 the text of any pending here document. */
@@ -3437,7 +3419,7 @@ read_token (command)
     goto tokword;
 
   /* Shell meta-characters. */
-  if MBTEST(shellmeta (character) && ((parser_state & PST_DBLPAREN) == 0))
+  if MBTEST(shellmeta (character))
     {
 #if defined (ALIAS)
       /* Turn off alias tokenization iff this character sequence would
@@ -3458,7 +3440,7 @@ read_token (command)
       else
 	peek_char = shell_getc (1);
 
-      if (character == peek_char)
+      if MBTEST(character == peek_char)
 	{
 	  switch (character)
 	    {
@@ -3687,7 +3669,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	}
 
       /* Possible reprompting. */
-      if (ch == '\n' && SHOULD_PROMPT ())
+      if MBTEST(ch == '\n' && SHOULD_PROMPT ())
 	prompt_again (0);
 
       /* Don't bother counting parens or doing anything else if in a comment
@@ -3698,7 +3680,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
 	  ret[retind++] = ch;
 
-	  if (ch == '\n')
+	  if MBTEST(ch == '\n')
 	    tflags &= ~LEX_INCOMMENT;
 
 	  continue;
@@ -3714,7 +3696,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	{
 	  tflags &= ~LEX_PASSNEXT;
 	  /* XXX - PST_NOEXPAND? */
-	  if (qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
+	  if MBTEST(qc != '\'' && ch == '\n')	/* double-quoted \<newline> disappears. */
 	    {
 	      if (retind > 0)
 		retind--;	/* swallow previously-added backslash */
@@ -3823,7 +3805,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	      pop_delimiter (dstack);
 	      CHECK_NESTRET_ERROR ();
 
-	      if MBTEST((tflags & LEX_WASDOL) && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0))
+	      if MBTEST((tflags & LEX_WASDOL) && ch == '\'' && (extended_quote || (rflags & P_DQUOTE) == 0 || dolbrace_state == DOLBRACE_QUOTE || dolbrace_state == DOLBRACE_QUOTE2))
 		{
 		  /* Translate $'...' here. */
 		  /* PST_NOEXPAND */
@@ -3835,12 +3817,22 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		     make sure we single-quote the results of the ansi
 		     expansion because quote removal should remove them later */
 		  /* FLAG POSIX INTERP 221 */
-		  if ((shell_compatibility_level > 42) && (rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2) && (flags & P_DOLBRACE))
+		  if ((shell_compatibility_level > 42) && (rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2 || dolbrace_state == DOLBRACE_QUOTE) && (flags & P_DOLBRACE))
 		    {
 		      nestret = sh_single_quote (ttrans);
 		      free (ttrans);
 		      nestlen = strlen (nestret);
 		    }
+#if 0 /* TAG:bash-5.3 */
+		  /* This single-quotes PARAM in ${PARAM OP WORD} when PARAM
+		     contains a $'...' even when extended_quote is set. */
+		  else if ((rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_PARAM) && (flags & P_DOLBRACE))
+		    {
+		      nestret = sh_single_quote (ttrans);
+		      free (ttrans);
+		      nestlen = strlen (nestret);
+		    }
+#endif
 		  else if ((rflags & P_DQUOTE) == 0)
 		    {
 		      nestret = sh_single_quote (ttrans);
@@ -3875,7 +3867,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 			nestret = sh_single_quote (ttrans);
 		      else
 			/* single quotes aren't special, use backslash instead */
-			nestret = sh_backslash_quote_for_double_quotes (ttrans);
+			nestret = sh_backslash_quote_for_double_quotes (ttrans, 0);
 		    }
 		  else
 		    nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
@@ -4069,6 +4061,10 @@ parse_comsub (qc, open, close, lenp, flags)
   save_parser_state (&ps);
 
   pushed_string_list = (STRING_SAVER *)NULL;
+
+  /* State flags we don't want to persist into command substitutions. */
+  parser_state &= ~(PST_REGEXP|PST_EXTPAT|PST_CONDCMD|PST_CONDEXPR);
+  /* State flags we want to set for this run through the parser. */
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN|PST_NOEXPAND;
 
   shell_eof_token = close;
@@ -4078,6 +4074,13 @@ parse_comsub (qc, open, close, lenp, flags)
 
   need_here_doc = 0;
   esacs_needed_count = expecting_in_token = 0;
+
+  /* We want to expand aliases on this pass if we're in posix mode, since the
+     standard says you have to take aliases into account when looking for the
+     terminating right paren. Otherwise, we defer until execution time for
+     backwards compatibility. */
+  if (expand_aliases)
+    expand_aliases = posixly_correct != 0;
 
   current_token = '\n';				/* XXX */
 
@@ -4182,6 +4185,13 @@ xparse_dolparen (base, string, indp, flags)
   shell_eof_token = ')';
   if (flags & SX_COMPLETE)
     parser_state |= PST_NOERROR;
+
+  /* Don't expand aliases on this pass at all. Either parse_comsub() does it
+     at parse time, in which case this string already has aliases expanded,
+     or command_substitute() does it in the child process executing the
+     command substitution and we want to defer it completely until then. The
+     old value will be restored by restore_parser_state(). */
+  expand_aliases = 0;
 
   token_to_read = DOLPAREN;			/* let's trick the parser */
 
@@ -4294,6 +4304,8 @@ parse_string_to_command (string, flags)
 #endif
   if (flags & SX_COMPLETE)
     parser_state |= PST_NOERROR;
+
+  expand_aliases = 0;
 
   cmd = 0;
   nc = parse_string (string, "command substitution", sflags, &cmd, &ep);
@@ -4799,7 +4811,7 @@ read_token_word (character)
 
 	  /* Backslash-newline is ignored in all cases except
 	     when quoted with single quotes. */
-	  if (peek_char == '\n')
+	  if MBTEST(peek_char == '\n')
 	    {
 	      character = '\n';
 	      goto next_character;
@@ -4809,7 +4821,7 @@ read_token_word (character)
 	      shell_ungetc (peek_char);
 
 	      /* If the next character is to be quoted, note it now. */
-	      if (cd == 0 || cd == '`' ||
+	      if MBTEST(cd == 0 || cd == '`' ||
 		  (cd == '"' && peek_char >= 0 && (sh_syntaxtab[peek_char] & CBSDQUOTE)))
 		pass_next_character++;
 
@@ -4894,7 +4906,7 @@ read_token_word (character)
 
       /* If the delimiter character is not single quote, parse some of
 	 the shell expansions that must be read as a single word. */
-      if (shellexp (character))
+      if MBTEST(shellexp (character))
 	{
 	  peek_char = shell_getc (1);
 	  /* $(...), <(...), >(...), $((...)), ${...}, and $[...] constructs */
@@ -5074,7 +5086,7 @@ read_token_word (character)
 	}
 
 got_character:
-      if (character == CTLESC || character == CTLNUL)
+      if MBTEST(character == CTLESC || character == CTLNUL)
 	{
 	  RESIZE_MALLOCED_BUFFER (token, token_index, 2, token_buffer_size,
 				  TOKEN_DEFAULT_GROW_SIZE);
@@ -5188,7 +5200,7 @@ got_token:
   yylval.word = the_word;
 
   /* should we check that quoted == 0 as well? */
-  if (token[0] == '{' && token[token_index-1] == '}' &&
+  if MBTEST(token[0] == '{' && token[token_index-1] == '}' &&
       (character == '<' || character == '>'))
     {
       /* can use token; already copied to the_word */
@@ -5433,8 +5445,11 @@ history_delimiting_chars (line)
 	return (" ");
     }
 
+  /* Assume that by this point we are reading lines in a multi-line command.
+     If we have multiple consecutive blank lines we want to return only one
+     semicolon. */
   if (line_isblank (line))
-    return ("");
+    return (current_command_line_count > 1 && last_read_token == '\n' && token_before_that != '\n') ? "; " : "";
 
   return ("; ");
 }
@@ -5574,7 +5589,7 @@ decode_prompt_string (string)
   int last_exit_value, last_comsub_pid;
 #if defined (PROMPT_STRING_DECODE)
   size_t result_size;
-  int result_index;
+  size_t result_index;
   int c, n, i;
   char *temp, *t_host, octal_string[4];
   struct tm *tm;  
@@ -5711,7 +5726,7 @@ decode_prompt_string (string)
 		/* Make sure that expand_prompt_string is called with a
 		   second argument of Q_DOUBLE_QUOTES if we use this
 		   function here. */
-		temp = sh_backslash_quote_for_double_quotes (timebuf);
+		temp = sh_backslash_quote_for_double_quotes (timebuf, 0);
 	      else
 		temp = savestring (timebuf);
 	      goto add_string;
@@ -5727,9 +5742,14 @@ decode_prompt_string (string)
 	      temp = base_pathname (shell_name);
 	      /* Try to quote anything the user can set in the file system */
 	      if (promptvars || posixly_correct)
-		temp = sh_backslash_quote_for_double_quotes (temp);
+		{
+		  char *t;
+		  t = sh_strvis (temp);
+		  temp = sh_backslash_quote_for_double_quotes (t, 0);
+		  free (t);
+		}
 	      else
-		temp = savestring (temp);
+		temp = sh_strvis (temp);
 	      goto add_string;
 
 	    case 'v':
@@ -5804,9 +5824,14 @@ decode_prompt_string (string)
 		  /* Make sure that expand_prompt_string is called with a
 		     second argument of Q_DOUBLE_QUOTES if we use this
 		     function here. */
-		  temp = sh_backslash_quote_for_double_quotes (t_string);
+		  {
+		    char *t;
+		    t = sh_strvis (t_string);
+		    temp = sh_backslash_quote_for_double_quotes (t, 0);
+		    free (t);
+		  }
 		else
-		  temp = savestring (t_string);
+		  temp = sh_strvis (t_string);
 
 		goto add_string;
 	      }
@@ -5826,7 +5851,7 @@ decode_prompt_string (string)
 		/* Make sure that expand_prompt_string is called with a
 		   second argument of Q_DOUBLE_QUOTES if we use this
 		   function here. */
-		temp = sh_backslash_quote_for_double_quotes (t_host);
+		temp = sh_backslash_quote_for_double_quotes (t_host, 0);
 	      else
 		temp = savestring (t_host);
 	      free (t_host);

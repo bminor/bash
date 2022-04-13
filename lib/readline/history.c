@@ -165,6 +165,13 @@ history_set_pos (int pos)
   history_offset = pos;
   return (1);
 }
+
+/* Are we currently at the end of the history list? */
+int
+_hs_at_end_of_history (void)
+{
+  return (the_history == 0 || history_offset == history_length);
+}
  
 /* Return the current history array.  The caller has to be careful, since this
    is the actual array of data, and could be bashed or made corrupt easily.

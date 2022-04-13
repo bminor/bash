@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun Dec 26 16:02:07 EST 2021
+.\"	Last Change: Fri Mar 11 10:16:50 EST 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2021 December 26" "GNU Bash 5.2"
+.TH BASH 1 "2022 March 11" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2021 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2021 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2022 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2022 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -1308,7 +1308,7 @@ to a shell variable or array index, the += operator can be used to
 append to or add to the variable's previous value.
 This includes arguments to builtin commands such as \fBdeclare\fP that
 accept assignment statements (\fIdeclaration\fP commands).
-When += is applied to a variable for which the \fIinteger\fP attribute has been
+When += is applied to a variable for which the \fBinteger\fP attribute has been
 set, \fIvalue\fP is evaluated as an arithmetic expression and added to the
 variable's current value, which is also evaluated.
 When += is applied to an array variable using compound assignment (see
@@ -2084,7 +2084,7 @@ below.
 The value is used to set the shell's compatibility level.
 See
 .SM
-.B SHELL COMPATIBILITY MODE
+.B "SHELL COMPATIBILITY MODE"
 below for a description of the various compatibility
 levels and their effects.
 The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
@@ -2097,7 +2097,7 @@ compatibility level to the default for the current version.
 The valid values correspond to the compatibility levels
 described below under
 .SM
-.BR BSHELL COMPATIBILITY MODE .
+.BR "SHELL COMPATIBILITY MODE" .
 For example, 4.2 and 42 are valid values that correspond
 to the \fBcompat42\fP \fBshopt\fP option
 and set the compatibility level to 42.
@@ -2774,6 +2774,12 @@ interpreted as relative to one greater than the maximum index of
 \fIname\fP, so negative indices count back from the end of the
 array, and an index of \-1 references the last element.
 .PP
+The += operator will append to an array variable when assigning
+using the compound assignment syntax; see
+.SM
+.B PARAMETERS
+above.
+.PP
 Any element of an array may be referenced using
 ${\fIname\fP[\fIsubscript\fP]}.  The braces are required to avoid
 conflicts with pathname expansion.  If
@@ -3170,7 +3176,7 @@ ${\fIparameter\fP\fB:\fP\fIoffset\fP\fB:\fP\fIlength\fP}
 \fBSubstring Expansion\fP.
 Expands to up to \fIlength\fP characters of the value of \fIparameter\fP
 starting at the character specified by \fIoffset\fP.
-If \fIparameter\fP is \fB@\fP, an indexed array subscripted by
+If \fIparameter\fP is \fB@\fP or \fB*\fP, an indexed array subscripted by
 \fB@\fP or \fB*\fP, or an associative array name, the results differ as
 described below.
 If \fIlength\fP is omitted, expands to the substring of the value of
@@ -3193,8 +3199,8 @@ a number of characters, and the expansion is the characters between
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the \fB:-\fP expansion.
 .sp 1
-If \fIparameter\fP is \fB@\fP, the result is \fIlength\fP positional
-parameters beginning at \fIoffset\fP.
+If \fIparameter\fP is \fB@\fP or \fB*\fP, the result is \fIlength\fP
+positional parameters beginning at \fIoffset\fP.
 A negative \fIoffset\fP is taken relative to one greater than the greatest
 positional parameter, so an offset of \-1 evaluates to the last positional
 parameter.
@@ -3373,18 +3379,27 @@ matches of \fIpattern\fP are deleted.
 If \fIstring\fP is null,
 matches of \fIpattern\fP are deleted
 and the \fB/\fP following \fIpattern\fP may be omitted.
+.sp 1
 If the \fBpatsub_replacement\fP shell option is enabled using \fBshopt\fP,
 any unquoted instances of \fB&\fP in \fIstring\fP are replaced with the
 matching portion of \fIpattern\fP.
-Backslash is used to quote \fB&\fP in \fIstring\fP; the backslash is removed
+.sp 1
+Quoting any part of \fIstring\fP inhibits replacement in the
+expansion of the quoted portion, including replacement strings stored
+in shell variables.
+Backslash will escape \fB&\fP in \fIstring\fP; the backslash is removed
 in order to permit a literal \fB&\fP in the replacement string.
-Users should take care
-if \fIstring\fP is double-quoted to avoid unwanted interactions between
-the backslash and double-quoting.
-Pattern substitution performs the check for \fB&\fP after expanding
-\fIstring\fP; shell programmers should quote backslashes intended to escape
-the \fB&\fP and inhibit replacement so they survive any quote removal
-performed by the expansion of \fIstring\fP.
+Backslash can also be used to escape a backslash; \fB\e\e\fP results in
+a literal backslash in the replacement.
+Users should take care if \fIstring\fP is double-quoted to avoid
+unwanted interactions between the backslash and double-quoting, since
+backslash has special meaning within double quotes.
+Pattern substitution performs the check for unquoted \fB&\fP after
+expanding \fIstring\fP;
+shell programmers should quote any occurrences of \fB&\fP
+they want to be taken literally in the replacement
+and ensure any instances of \fB&\fP they want to be replaced are unquoted.
+.sp 1
 If the
 .B nocasematch
 shell option is enabled, the match is performed without regard to the case
@@ -4486,11 +4501,22 @@ been enabled.
 .PP
 Variables local to the function may be declared with the
 .B local
-builtin command.  Ordinarily, variables and their values
+builtin command (\fIlocal variables\fP).
+Ordinarily, variables and their values
 are shared between the function and its caller.
 If a variable is declared \fBlocal\fP, the variable's visible scope
 is restricted to that function and its children (including the functions
 it calls).
+.PP
+In the following description, the \fIcurrent scope\fP is a currently-
+executing function.
+Previous scopes consist of that function's caller and so on,
+back to the "global" scope, where the shell is not executing
+any shell function.
+Consequently, a local variable at the current scope is a variable
+declared using the \fBlocal\fP or \fBdeclare\fP builtins in the
+function that is currently executing.
+.PP
 Local variables "shadow" variables with the same name declared at
 previous scopes.
 For instance, a local variable declared in a function
@@ -4521,11 +4547,13 @@ variable is local to the current scope, \fBunset\fP will unset it;
 otherwise the unset will refer to the variable found in any calling scope
 as described above.
 If a variable at the current local scope is unset, it will remain so
+(appearing as unset)
 until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
 scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a
-variable with that name that had been shadowed will become visible.
+variable with that name that had been shadowed will become visible
+(see below how the \fBlocalvar_unset\fP shell option changes this behavior).
 .PP
 The \fBFUNCNEST\fP variable, if set to a numeric value greater
 than 0, defines a maximum function nesting level.  Function
@@ -5909,6 +5937,30 @@ The variables and their default values are:
 .PP
 .PD 0
 .TP
+.B active\-region\-start\-color   
+A string variable that controls the text color and background when displaying
+the text in the active region (see the description of
+\fBenable\-active\-region\fP below).
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal before displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that puts the terminal in standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be \f(CW"\ee[01;33m"\fP.
+.TP
+.B active\-region\-end\-color     
+A string variable that "undoes" the effects of \fBactive\-region\-start\-color\fP 
+and restores "normal" terminal display appearance after displaying text
+in the active region.
+This string must not take up any physical character positions on the display,
+so it should consist only of terminal escape sequences.
+It is output to the terminal after displaying the text in the active region.
+This variable is reset to the default value whenever the terminal type changes.
+The default value is the string that restores the terminal from standout mode,
+as obtained from the terminal's terminfo description.
+A sample value might be \f(CW"\ee[0m"\fP.
+.TP
 .B bell\-style (audible)
 Controls what happens when readline wants to ring the terminal bell.
 If set to \fBnone\fP, readline never rings the bell.  If set to
@@ -6028,16 +6080,18 @@ The text between the point and mark is referred to as the \fIregion\fP.
 When this variable is set to \fIOn\fP, readline allows certain commands
 to designate the region as \fIactive\fP.  
 When the region is active, readline highlights the text in the region using
+the value of the \fBactive\-region\-start\-color\fP, which defaults to the
+string that enables
 the terminal's standout mode.
 The active region shows the text inserted by bracketed-paste and any
 matching text found by incremental and non-incremental history searches.
 .TP
 .B enable\-bracketed\-paste (On)
-When set to \fBOn\fP, readline will configure the terminal in a way
-that will enable it to insert each paste into the editing buffer as a
-single string of characters, instead of treating each character as if
-it had been read from the keyboard.  This can prevent pasted characters
-from being interpreted as editing commands.
+When set to \fBOn\fP, readline configures the terminal to insert each
+paste into the editing buffer as a single string of characters, instead
+of treating each character as if it had been read from the keyboard.
+This prevents readline from executing any editing commands bound to key
+sequences appearing in the pasted text.
 .TP
 .B enable\-keypad (Off)
 When set to \fBOn\fP, readline will try to enable the application
@@ -11171,8 +11225,8 @@ specifies a non-existent process or job, the return status is
 127.  Otherwise, the return status is the exit status of the last
 process or job waited for.
 .SH "SHELL COMPATIBILITY MODE"
-Bash-4.0 introduced the concept of a `shell compatibility level', specified
-as a set of options to the shopt builtin
+Bash-4.0 introduced the concept of a \fIshell compatibility level\fP,
+specified as a set of options to the shopt builtin (
 .BR compat31 ,
 .BR compat32 ,
 .BR compat40 ,

@@ -171,6 +171,7 @@ ere_char (c)
   return (0);
 }
 
+/* This is only used to determine whether to backslash-quote a character. */
 int
 glob_char_p (s)
      const char *s;

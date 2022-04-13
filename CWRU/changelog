@@ -2914,3 +2914,538 @@ examples/loadables/accept.c
 				   ----
 configure.ac
 	- bumped version to 5.2-alpha.
+
+				   1/16
+				   ----
+
+tests/{unicode1,glob2,intl2}.sub, tests/run-intl
+	- minor changes to add warnings for missing locales that cause test
+	  failures
+
+				   1/17
+				   ----
+parse.y
+	- history_delimiting_chars: if we have a blank line by the time we
+	  hit the end of the tests, return a semicolon for the first blank
+	  line to avoid running lines of a multi-line command together.
+	  Fixes bug reported by Joakim Lindblad <joakim@cb.uu.se>
+
+subst.c
+	- expand_string_for_patsub: expand the replacement string for pattern
+	  substitution assuming that it will eventually be passed to
+	  strcreplace to replace `&' with the matched portion of the string.
+	  This calls expand_string_for_pat(), which leaves the string quoted
+	  and does not perform word splitting, then calls
+	  quote_string_for_repl to post-process the expanded string.
+	- quote_string_for_repl: perform quote removal on passed string while
+	  replacing CTLESC escaping a `&' or a backslash with a backslash. The
+	  result must be passed to strcreplace
+	- parameter_brace_patsub: call expand_string_for_patsub if
+	  patsub_replacement is set to quote 
+
+				   1/18
+				   ----
+subst.c
+	- read_comsub: make istring_index a size_t to avoid overflow with very
+	  large values of istring_size.
+	  From https://savannah.gnu.org/support/index.php?110596
+	- expand_word_internal: make istring_index a size_t
+
+				   1/20
+				   ----
+buitins/cd.def
+	- add a description of `cd -' to the help text. Suggested by
+	  Rob Landley <rob@landley.net>
+
+				   1/21
+				   ----
+lib/glob/glob.c
+	- glob_vector: if we allocate NEXTLINK using malloc, and free it due to
+	  some allocation failure, reset FIRSTMALLOC to avoid duplicate frees
+	  later on
+
+subst.[ch]
+	- sub_append_string: the INDX parameter is now a size_t to avoid
+	  overflow
+
+parse.y
+	- decode_prompt_string: RESULT_INDEX is now a size_t to pass to
+	  sub_append_string
+
+jobs.[ch],nojobs.c
+	- wait_for_background_pids: now returns the number of jobs/processes
+	  reaped
+
+builtins/wait.def
+	- wait_builtin: if -p pid supplied without -n, make sure we do something
+	  useful if no job/pid arguments are supplied and there are no jobs.
+	  Reported by Oguz <oguzismailuysal@gmail.com>
+
+builtins/read.def
+	- read_builtin: if we have a timeout, use SIGALRM instead of select
+	  when in posix mode, since we use read instead of zread. Fixes bug
+	  reported by Andreas Schwab <schwab@linux-m68k.org>
+
+subst.c
+	- expand_string_dollar_quote: handle single-quoted and double-quoted
+	  strings that might include $' and $" without attempting translation;
+	  do more error checking for unterminated $' and $" that leaves those
+	  characters unmodified. This is for use by readline's various line
+	  expansion functions (shell_expand_line)
+
+				   1/23
+				   ----
+parse.y,make_cmd.c
+	- revert change that unconditionally processes $'...' and $"..." in
+	  here-document bodies; there are only a couple of cases where they
+	  should be processed in a double-quote environment
+
+				   1/24
+				   ----
+
+subst.c
+	- extract_dollar_brace_string: if we see another `${' on the rhs of
+	  the operator, reset the dolbrace_state to DOLBRACE_PARAM while we
+	  read this new ${...} string
+	- extract_heredoc_dolbrace_string: new function, variant of
+	  extract_dollar_brace_string, to process the WORD in ${PARAM OP WORD}
+	  while expanding lines of here-document data. It's complicated by the
+	  requirement to add to the result string as we go along, since we
+	  need to change the contents of the input string with ansi expansion
+	  or locale translation.
+	- string_extract_single_quoted: take a new third argument: ALLOWESC.
+	  This allows backslash to escape an embedded single quote, needed by
+	  extract_heredoc_dolbrace_string to process $'...'; changed callers
+
+				   1/25
+				   ----
+parse.y
+	- parse_matched_pair: ansi-expand $'...' in WORD for ${PARAM OP WORD}
+	  and single-quote the result if dolbrace_state == DOLBRACE_QUOTE
+	  (posix pattern removal operators) even if extended_quote == 0
+
+subst.c
+	- extract_heredoc_dolbrace_string: add logic to align with parse.y:
+	  parse_matched_pair and its $'...' expansion, including handling
+	  extended_quote
+
+				   1/27
+				   ----
+builtins/evalstring.c
+	- should_optimize_fork: broke conditions for optimizing away the fork
+	  for a simple command out of optimize_fork into new function, call
+	  from should_suppress_fork and optimize_subshell_command. Call from
+	  optimize_fork if (subshell_environment & SUBSHELL_PAREN), relying
+	  on fact that CMD_TRY_OPTIMIZING is only set in a couple of specific
+	  conditions
+	- optimize_fork: call should_suppress_fork only if startup_state == 2;
+	  it does the extra checks for that specific case
+	- optimize_fork: call should_optimize_fork if we're in a (list)
+	  subshell (subshell_environment & SUBSHELL_PAREN)
+	- optimize_subshell_command: set CMD_TRY_OPTIMIZING on the right side
+	  of a `&&', `||', or `;' list as long as it's a simple command so
+	  we can check with optimize_fork() when it's time to execute it
+
+execute_cmd.c
+	- execute_in_subshell: call optimize_subshell_command for (list)
+	  subshells to either set CMD_NO_FORK for simple commands or set
+	  CMD_TRY_OPTIMIZING for likely candidates for later optimization
+
+builtins/common.h,builtins/evalstring.c
+	- optimize_fork: renamed to optimize_connection_fork; changed callers
+
+				   1/31
+				   ----
+include/shmbutil.h
+	- COPY_CHAR_I,SCOPY_CHAR_I: add check for locale_utf8locale and
+	  (c & 0x80) as in other macros
+
+lib/sh/shquote.c
+	- sh_backslash_quote_for_double_quotes: rewrote to use array indexing
+	  and COPY_CHAR_I to make it easier to drop in future calls to
+	  charvis() to make `unsafe' characters visible if FLAGS == 1
+
+				    2/1
+				    ---
+parse.y
+	- parse_comsub: if we are currently expanding aliases, temporarily
+	  turn off alias expansion if we are not in posix mode so we defer
+	  alias expansion until command_substitute(). Fixes double-expansion
+	  bug reported by Martijn Dekker <martijn@inlv.org> and aligns with
+	  https://www.austingroupbugs.net/view.php?id=1342
+	- xparse_dolparen: turn off alias expansion entirely while running the
+	  parser: either we do it in parse_comsub (posix mode) or in
+	  command_substitute (default mode)
+	- parse_string_to_command: ditto
+
+subst.c
+	- command_substitute: if we are expanding aliases, temporarily turn
+	  off alias expansion if we are in posix mode, since we already
+	  performed it in parse_comsub() and are using the command string
+	  reconstituted from the parse result
+
+doc/bashref.texi
+	- bash posix mode: add description of alias expansion and command
+	  substitution parsing and execution
+
+				    2/4
+				    ---
+lib/readline/rltty.c
+	- rl_deprep_terminal: set _rl_last_c_pos to 0 after outputting
+	  BRACK_PASTE_FINI, since the last character in that is \r. Partially
+	  address issue raised by Markus Schwarzenberg <markus.schwarzenberg@freenet.de>
+	  in https://lists.gnu.org/archive/html/bug-bash/2022-02/msg00056.html
+
+				    2/5
+				    ---
+doc/{bash.1,bashref.texi}
+	- minor typo fixes from Helge Kreutzmann <debian@helgefjell.de>
+
+				    2/7
+				    ---
+{arrayfunc,variables}.c
+	- ARRAY_EXPORT: changes to encode array and assoc variables using a
+	  scheme similar to shell functions so we can export arrays and
+	  differentiate them from scalar variables and differentiate array
+	  and assoc variables. Still not enabled by default.
+
+variables.c
+	- mk_env_string: third argument is now the variable's attributes or 0,
+	  with all the attributes we can export arrays
+
+lib/readline/bind.c
+	- active-region-start-color,active-region-end-color: new bindable
+	  string variables, one to set the active region color (instead of
+	  standout mode) and one to turn it off (instead of the "se" terminal
+	  capability). They set _rl_active_region_start_color and
+	  _rl_active_region_end_color variables via functions
+
+lib/readline/display.c
+	- putc_face: if setting standout mode, check for both the start color
+	  and end color variables and output the start color string. If turning
+	  off standout mode (normal face), output the end color string. Both
+	  variables must be set
+
+lib/readline/{readline.c,rlprivate.h}
+	- declarations for _rl_active_region_start_color and
+	  _rl_active_region_end_color
+
+				    2/8
+				    ---
+bashline.c
+	- initialize_readline: add bindable name `vi-edit-and-execute-command'
+
+shell.c
+	- subshell_exit: make sure to set last_command_exit_value before
+	  calling the exit trap. Fixes bug reported by Greg Edwards
+	  <gedwards@ddn.com>
+
+				    2/9
+				    ---
+lib/readline/{terminal.c,rlprivate.h}
+	- _rl_region_color_on,_rl_region_color_off: functions to output the
+	  _rl_active_region_start_color and _rl_active_region_end_color
+	- _rl_reset_region_color: function to encapsulate setting the region
+	  color to an arbitrary string, including doing memory management
+
+lib/readline/display.c
+	- putc_face: call _rl_region_color_on and _rl_region_color_off instead
+	  of _rl_standout_on and _rl_standout_off
+
+lib/readline/terminal.c
+	- _rl_init_terminal_io: initialize _rl_active_region_start_color and
+	  _rl_active_region_end_color from _rl_term_so and _rl_term_se,
+	  respectively; reset every time the terminal is changed
+	- _rl_init_terminal_io: turn off the active region for a dumb terminal
+
+lib/readline/bind.c
+	- sv_region_{start,end}_color: call _rl_reset_region_color with the
+	  appropriate value for WHICH
+
+				   2/10
+				   ----
+lib/readline/doc/{rluser.texi,readline.3},doc/bash.1
+	- active-region-start-color,active-region-end-color: documented new
+	  bindable readline variables
+	- enable-active-region: document using active-region-start-color to
+	  highlight the text in the region
+
+				   2/11
+				   ----
+parse.y
+	- read_token,read_token_word: make sure characters read by shell_getc
+	  are protected by appropriate calls to MBTEST when testing for shell
+	  metacharacters and operators
+
+				   2/14
+				   ----
+builtins/shopt.def
+	- set_compatibility_level: if the current compatibility level is outside
+	  the range of the compatNN options, just leave it alone when
+	  unsetting one of the options (which by definition was already
+	  unset). Fixes issue reported by Mihai Moldovan <ionic@ionic.de>
+
+				   2/16
+				   ----
+lib/readline/search.c
+	- rl_history_search_{pos,len,flags}: rename to have a leading `_'
+	- _rl_history_search_pos: no longer static so other parts of readline
+	  can see it
+
+lib/readline/rlprivate.h
+	- _rl_history_search_pos: extern declaration
+
+lib/readline/readline.c
+	- readline_internal_teardown: don't run the undo list against the
+	  current history entry if the non-incremental search functions have
+	  set _rl_history_search_pos to it, since it doesn't reflect the
+	  current contents of the line buffer. Fixes issue reported by
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+lib/readline/misc.c
+	- _rl_start_using_history: initialize _rl_history_search_pos to
+	  something invalid so it doesn't match where_history()
+
+				   2/17
+				   ----
+lib/readline/callback.c
+	- rl_callback_read_char: make sure _rl_eof_found is set to the value
+	  of eof before calling the deprep terminal function, so it can do
+	  different things based on whether the input code read EOF (or the
+	  user entered the EOF character). From a gdb discussion started by
+	  Andrew Burgess <aburgess@redhat.com> (still more to do, since this
+	  is not part of the public API)
+
+				   2/18
+				   ----
+lib/readline/readline.h
+	- RL_STATE_EOF: new readline state value; set when readline reads an
+	  EOF character on an empty line or a read returns an error
+	- rl_eof_found: new public variable
+
+lib/readline/rprivate.h
+	- _rl_eof_found: renamed to rl_eof_found, so not declared here
+
+lib/readline/{callback,readline}.c
+	- RL_STATE_EOF: set appropriately when readline gets an EOF. Suggested
+	  by Andrew Burgess <aburgess@redhat.com>
+	- RL_STATE_EOF: make sure it's not set when readline starts
+	- rl_eof_found: set appropriately when readline gets an EOF
+
+lib/readline/{callback,readline,rltty}.c
+	- rl_eof_found: new name for _rl_eof_found
+
+lib/readline/doc/rltech.texi
+	- RL_STATE_EOF: document
+
+				   2/19
+				   ----
+parse.y
+	- parse_comsub: turn off parser state flags we don't want to inherit
+	  into this call to the parser (PST_REGEXP, PST_EXTPAT, PST_CONDCMD,
+	  PST_CONDEXPR for now). Fixes bug reported by konsolebox
+	  <konsolebox@gmail.com>
+
+				   2/23
+				   ----
+findcmd.c,builtins/hash.def
+	- replace calls to is_directory with file_isdir, which only performs a
+	  stat and doesn't do the eaccess call to check for an executable file
+
+findcmd.c
+	- find_in_path_element: takes a new RFLAGSP argument, an int * where
+	  the status flags for the returned pathname are returned; saves
+	  additional calls to stat/eaccess
+	- search_for_command: get the returned flags from
+	  find_user_command_in_path so we don't need any additional calls to
+	  file_status after we find the command in $PATH
+
+				   2/24
+				   ----
+doc/{bash.1,bashref.texi}
+	- FUNCTIONS: some small changes to the description of local variables
+	  and dynamic scoping, with emphasis on how that affects `unset'
+	  behavior. Inspired by a discussion with
+	  Christoph Anton Mitterer <calestyo@scientia.net>
+
+				   2/25
+				   ----
+examples/loadables/realpath.c
+	- renamed -s option to -q to align with other versions
+	- perform array assignment for `-a varname' even if -q option supplied	
+	- renamed -S option to -s for Linux compatibility
+
+				   2/28
+				   ----
+lib/readline/misc.c
+	- _rl_free_saved_history_line: call rl_free_undo_list, saving and
+	  setting rl_undo_list to the saved history line's data, so the right
+	  call to _hs_replace_history_data happens and we don't end up with
+	  a pointer aliasing problem. Fixes core dump reported by 
+	  Andreas Schwab <schwab@linux-m68k.org>, but does not make his
+	  scenario equivalent to incremental search
+
+				    3/1
+				    ---
+lib/readline/search.c
+	- make_history_line_current: save the current line before replacing it
+	  with the found history entry using rl_maybe_save_line
+	- noninc_dosearch: we don't want the saved history line, so free it
+	  after calling make_history_line_current
+	- _rl_history_search_internal: call rl_maybe_replace_line after making
+	  changes to the line buffer with make_history_line_current so we can
+	  save the undo list we constructed before we set the history position
+
+				    3/2
+				    ---
+lib/readline/display.c
+	- expand_prompt: add missing piece to patch from 10/26/2021: if we are
+	  recalculating the number of invisible characters on the first line
+	  of the prompt, we need to update INVFL, even if we already set it
+	  when we hit the number of physical characters. This ends up being
+	  assigned to prompt_invis_chars_first_line, and is used in several
+	  subsequent calculations. Reported by
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- enable-bracketed-paste: add some language making it clearer that
+	  bracketed paste prevents the pasted text from being interpreted as
+	  editing commands. Suggested by Karl O. Pinc <kop@karlpinc.com>
+
+				    3/4
+				    ---
+make_cmd.c
+	- make_here_document: perform quote removal on the here-doc delimiter
+	  only if it's marked as quoted, which prevents quotes from inside a
+	  command substitution from being removed (they're supposed to begin a
+	  new quoting context) when the word itself isn't flagged as quoted
+	  (which means the body of the here-document gets expanded). You can't
+	  perform quote removal *and* expand the here-document lines. From an
+	  austin-group discussion back in early February
+
+lib/sh/strvis.c
+	- charvis -> sh_charvis; change caller
+	- sh_charvis: now take an additional SLEN argument to avoid having to
+	  compute the string length every time; change callers
+	- sh_charvis: add a utf-8 locale-specific check before calling
+	  COPY_CHAR_I (in practice, doesn't make any real difference)
+
+				   3/10
+				   ----
+arrayfunc.c
+	- convert_var_to_array: if we're being asked to create an associative
+	  array (flags & 2), and we have an existing variable that is not an
+	  assoc array (and not an existing indexed array), call
+	  convert_var_to_assoc to make it one
+
+				   3/11
+				   ----
+jobs.c
+	- wait_for: don't call get_tty_state() if readline is dispatching
+	  (RL_STATE_DISPATCHING) with the terminal settings changed
+	  (RL_STATE_TERMPREPPED), the same way we don't if we are running a
+	  command for programmable completion. Fixes bug with SIGINT reverting
+	  to the saved readline terminal settings reported by
+	  Markus Napierkowski <markus.napierkowski@cyberus-technology.de>
+
+parse.y
+	- decode_prompt_string: make sure the expansion of \w, \W, and \s
+	  are all run through sh_strvis before calling
+	  sh_backslash_quote_for_double_quotes or just through sh_strvis if
+	  we're not running the prompt string through word expansions.
+	  Fixes issue reported by Josh Harcome <joshharc@gmail.com> back
+	  in mid-January
+
+				   3/16
+				   ----
+bashline.c
+	- bash_quote_filename: if we have a word to complete that contains
+	  characters that introduce a word expansion, make sure the passed
+	  string does *not* exist as a filename before removing those
+	  characters from the set that must be backslash-quoted. See change
+	  from 1/1/2022
+
+				   3/18
+				   ----
+lib/readline/search.c
+	- make_history_line_current: don't free rl_undo_list or
+	  _rl_saved_line_for_history; don't unconditionally save the history
+	  line. This reverts some of the changes to support setting the
+	  history position in history-search-backward
+	- rl_history_search_internal: only free the saved history line if we
+	  were the ones who created it
+
+				   3/21
+				   ----
+lib/readline/nls.c
+	- xmalloc.h: include for systems without setlocale(), so xfree has a
+	  prototype. Report and fix from András Kucsma <r0maikx02b@gmail.com>
+
+lib/readline/search.c
+	- _rl_history_search_internal: use previous-history/next-history to
+	  move to the found history line instead of directly calling
+	  history_set_pos. This makes the behavior more similar to incremental
+	  search
+	- rl_history_search_internal: make sure to set rl_undo_list to the
+	  current history undo list around the calls to rl_get_previous_history
+	  or rl_get_next_history, in order to fool the call to
+	  maybe_replace_line they make
+
+lib/readline/readline.c
+	- _rl_executing_func: the currently-executing readline command function
+
+lib/readline/rlprivate.h
+	- _rl_executing_func: extern declaration
+
+lib/readline/search.c
+	- _rl_history_search_internal: removed (commented out) code that sets
+	  the current history entry to the found history entry, too much
+	  assumes that the current undo list should be applied to the current
+	  history entry (where_history())
+
+				   3/23
+				   ----
+subst.c
+	- parameter_brace_expand_word: if we have double-quoted ${*} or ${@},
+	  make sure we are setting W_HASQUOTEDNULL in the flags we return to
+	  the caller if we are returning QUOTED_NULL(word)
+	- parameter_brace_expand_word: if we have a double-quoted associative
+	  array reference using `*' or `@', make sure we are setting
+	  W_HASQUOTEDNULL in the flags we return to the caller if we are
+	  returning QUOTED_NULL(word)
+	- parameter_brace_expand: if we're using the `[:]+' word expansion
+	  operator, we need to note a quoted null string and pass the
+	  W_QUOTEDNULL flag back to the caller
+	- expand_word_internal: make sure to return a QUOTED_NULL
+	  (word[0] == CTLNUL) back to the caller if HAD_QUOTED_NULL is set,
+	  regardless of whether or not we see a quoted dollar at. Fix for bug
+	  reported by Andreas Luik <andreas.luik@innovative-navigation.de>
+
+arrayfunc.c
+	- array_value_internal: fix typo and set estatep->type to ARRAY_INDEXED
+	  for indexed arrays
+
+				   3/31
+				   ----
+lib/readline/{history.c,histlib.h}
+	- _hs_at_end_of_history: convenience function to tell whether or not
+	  the current history position is at the end of the history list
+
+				    4/1
+				    ---
+lib/readline/search.c
+	- make_history_line_current: don't free rl_undo_list if it is equal to
+	  _rl_saved_line_for_history->data, since we will need to restore it
+	 later if we got it from a history entry. Fixes issue dating back to
+	 7/2021 and changes to _rl_free_saved_line_for_history, current issue
+	 reported by Andreas Schwab <schwab@linux-m68k.org>
+
+				    4/5
+				    ---
+lib/readline/{complete,histfile,histsearch,isearch,terminal}.c
+	- xfree: use instead of free
+
+				    4/7
+				    ---
+configure.ac
+	- bumped version to bash-5.2-beta

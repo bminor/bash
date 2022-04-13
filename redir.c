@@ -468,6 +468,7 @@ here_document_to_fd (redirectee, ri)
     {
       if (pipe (herepipe) < 0)
 	{
+	  /* XXX - goto use_tempfile; ? */
 	  r = errno;
 	  if (document != redirectee->word)
 	    free (document);

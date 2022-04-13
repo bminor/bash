@@ -90,6 +90,18 @@
 #define BASHFUNC_SUFFIX		"%%"
 #define BASHFUNC_SUFFLEN	2	/* == strlen(BASHFUNC_SUFFIX) */
 
+#if ARRAY_EXPORT
+#define BASHARRAY_PREFIX	"BASH_ARRAY_"
+#define BASHARRAY_PREFLEN	11
+#define BASHARRAY_SUFFIX	"%%"
+#define BASHARRAY_SUFFLEN	2
+
+#define BASHASSOC_PREFIX	"BASH_ASSOC_"
+#define BASHASSOC_PREFLEN	11
+#define BASHASSOC_SUFFIX	"%%"	/* needs to be the same as BASHARRAY_SUFFIX */
+#define BASHASSOC_SUFFLEN	2
+#endif
+
 /* flags for find_variable_internal */
 
 #define FV_FORCETEMPENV		0x01
@@ -432,14 +444,54 @@ initialize_shell_variables (env, privmode)
 #if defined (ARRAY_VARS)
 #  if ARRAY_EXPORT
       /* Array variables may not yet be exported. */
-      if (*string == '(' && string[1] == '[' && string[strlen (string) - 1] == ')')
+      if (STREQN (BASHARRAY_PREFIX, name, BASHARRAY_PREFLEN) &&
+	  STREQN (BASHARRAY_SUFFIX, name + char_index - BASHARRAY_SUFFLEN, BASHARRAY_SUFFLEN) &&
+	  *string == '(' && string[1] == '[' && string[strlen (string) - 1] == ')')
 	{
+	  size_t namelen;
+	  char *tname;		/* desired imported array variable name */
+
+	  namelen = char_index - BASHARRAY_PREFLEN - BASHARRAY_SUFFLEN;
+
+	  tname = name + BASHARRAY_PREFLEN;	/* start of variable name */
+	  tname[namelen] = '\0';		/* now tname == varname */
+	  
 	  string_length = 1;
 	  temp_string = extract_array_assignment_list (string, &string_length);
-	  temp_var = assign_array_from_string (name, temp_string, 0);
+	  temp_var = assign_array_from_string (tname, temp_string, 0);
 	  FREE (temp_string);
-	  VSETATTR (temp_var, (att_exported | att_imported));
-	  array_needs_making = 1;
+	  if (temp_var)
+	    {
+	      VSETATTR (temp_var, (att_exported | att_imported));
+	      array_needs_making = 1;
+	    }
+	}
+      else if (STREQN (BASHASSOC_PREFIX, name, BASHASSOC_PREFLEN) &&
+	  STREQN (BASHASSOC_SUFFIX, name + char_index - BASHASSOC_SUFFLEN, BASHASSOC_SUFFLEN) &&
+	  *string == '(' && string[1] == '[' && string[strlen (string) - 1] == ')')
+	{
+	  size_t namelen;
+	  char *tname;		/* desired imported assoc variable name */
+
+	  namelen = char_index - BASHASSOC_PREFLEN - BASHASSOC_SUFFLEN;
+
+	  tname = name + BASHASSOC_PREFLEN;	/* start of variable name */
+	  tname[namelen] = '\0';		/* now tname == varname */
+
+	  /* need to make sure it exists as an associative array first */
+	  temp_var = find_or_make_array_variable (tname, 2);
+	  if (temp_var)
+	    {
+	      string_length = 1;
+	      temp_string = extract_array_assignment_list (string, &string_length);
+	      temp_var = assign_array_var_from_string (temp_var, temp_string, 0);
+	    }
+	  FREE (temp_string);
+	  if (temp_var)
+	    {
+	      VSETATTR (temp_var, (att_exported | att_imported));
+	      array_needs_making = 1;
+	    }
 	}
       else
 #  endif /* ARRAY_EXPORT */
@@ -638,31 +690,6 @@ initialize_shell_variables (env, privmode)
   if (interactive_shell && posixly_correct && no_line_editing == 0)
     rl_prefer_env_winsize = 1;
 #endif /* READLINE && STRICT_POSIX */
-
-     /*
-      * 24 October 2001
-      *
-      * I'm tired of the arguing and bug reports.  Bash now leaves SSH_CLIENT
-      * and SSH2_CLIENT alone.  I'm going to rely on the shell_level check in
-      * isnetconn() to avoid running the startup files more often than wanted.
-      * That will, of course, only work if the user's login shell is bash, so
-      * I've made that behavior conditional on SSH_SOURCE_BASHRC being defined
-      * in config-top.h.
-      */
-#if 0
-  temp_var = find_variable ("SSH_CLIENT");
-  if (temp_var && imported_p (temp_var))
-    {
-      VUNSETATTR (temp_var, att_exported);
-      array_needs_making = 1;
-    }
-  temp_var = find_variable ("SSH2_CLIENT");
-  if (temp_var && imported_p (temp_var))
-    {
-      VUNSETATTR (temp_var, att_exported);
-      array_needs_making = 1;
-    }
-#endif
 
   /* Get the user's real and effective user ids. */
   uidset ();
@@ -4694,15 +4721,21 @@ flush_temporary_env ()
 /* **************************************************************** */
 
 static inline char *
-mk_env_string (name, value, isfunc)
+mk_env_string (name, value, attributes)
      const char *name, *value;
-     int isfunc;
+     int attributes;
 {
   size_t name_len, value_len;
   char	*p, *q, *t;
+  int isfunc, isarray;
 
   name_len = strlen (name);
   value_len = STRLEN (value);
+
+  isfunc = attributes & att_function;
+#if defined (ARRAY_VARS) && defined (ARRAY_EXPORT)
+  isarray = attributes & (att_array|att_assoc);
+#endif
 
   /* If we are exporting a shell function, construct the encoded function
      name. */
@@ -4717,6 +4750,39 @@ mk_env_string (name, value, isfunc)
       memcpy (q, BASHFUNC_SUFFIX, BASHFUNC_SUFFLEN);
       q += BASHFUNC_SUFFLEN;
     }
+#if defined (ARRAY_VARS) && defined (ARRAY_EXPORT)
+  else if (isarray && value)
+    {
+      if (attributes & att_assoc)
+	p = (char *)xmalloc (BASHASSOC_PREFLEN + name_len + BASHASSOC_SUFFLEN + value_len + 2);
+      else
+	p = (char *)xmalloc (BASHARRAY_PREFLEN + name_len + BASHARRAY_SUFFLEN + value_len + 2);
+      q = p;
+      if (attributes & att_assoc)
+	{
+	  memcpy (q, BASHASSOC_PREFIX, BASHASSOC_PREFLEN);
+	  q += BASHASSOC_PREFLEN;
+	}
+      else
+	{
+	  memcpy (q, BASHARRAY_PREFIX, BASHARRAY_PREFLEN);
+	  q += BASHARRAY_PREFLEN;
+	}
+      memcpy (q, name, name_len);
+      q += name_len;
+      /* These are actually the same currently */
+      if (attributes & att_assoc)
+        {
+	  memcpy (q, BASHASSOC_SUFFIX, BASHASSOC_SUFFLEN);
+	  q += BASHARRAY_SUFFLEN;
+        }
+      else
+        {
+	  memcpy (q, BASHARRAY_SUFFIX, BASHARRAY_SUFFLEN);
+	  q += BASHARRAY_SUFFLEN;
+        }
+    }
+#endif  
   else
     {
       p = (char *)xmalloc (2 + name_len + value_len);
@@ -4781,6 +4847,12 @@ valid_exportstr (v)
 }
 #endif
 
+#if defined (ARRAY_VARS)
+#  define USE_EXPORTSTR (value == var->exportstr && array_p (var) == 0 && assoc_p (var) == 0)
+#else
+#  define USE_EXPORTSTR (value == var->exportstr)
+#endif
+
 static char **
 make_env_array_from_var_list (vars)
      SHELL_VAR **vars;
@@ -4790,8 +4862,6 @@ make_env_array_from_var_list (vars)
   char **list, *value;
 
   list = strvec_create ((1 + strvec_len ((char **)vars)));
-
-#define USE_EXPORTSTR (value == var->exportstr)
 
   for (i = 0, list_index = 0; var = vars[i]; i++)
     {
@@ -4819,11 +4889,11 @@ make_env_array_from_var_list (vars)
 	continue;	/* XXX array vars cannot yet be exported */
 #  endif /* ARRAY_EXPORT */
       else if (assoc_p (var))
-#  if 0
+#  if ARRAY_EXPORT
 	value = assoc_to_assign (assoc_cell (var), 0);
 #  else
 	continue;	/* XXX associative array vars cannot yet be exported */
-#  endif
+#  endif /* ARRAY_EXPORT */
 #endif
       else
 	value = value_cell (var);
@@ -4833,18 +4903,17 @@ make_env_array_from_var_list (vars)
 	  /* Gee, I'd like to get away with not using savestring() if we're
 	     using the cached exportstr... */
 	  list[list_index] = USE_EXPORTSTR ? savestring (value)
-					   : mk_env_string (var->name, value, function_p (var));
+					   : mk_env_string (var->name, value, var->attributes);
+
 	  if (USE_EXPORTSTR == 0)
 	    SAVE_EXPORTSTR (var, list[list_index]);
 
 	  list_index++;
 #undef USE_EXPORTSTR
 
-#if 0	/* not yet */
-#if defined (ARRAY_VARS)
+#if defined (ARRAY_VARS) && defined (ARRAY_EXPORT)
 	  if (array_p (var) || assoc_p (var))
 	    free (value);
-#endif
 #endif
 	}
     }

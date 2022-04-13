@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2644,16 +2644,16 @@ wait_for_single_pid (pid, flags)
 }
 
 /* Wait for all of the background processes started by this shell to finish. */
-void
+int
 wait_for_background_pids (ps)
      struct procstat *ps;
 {
   register int i, r;
-  int any_stopped, check_async;
+  int any_stopped, check_async, njobs;
   sigset_t set, oset;
   pid_t pid;
 
-  for (any_stopped = 0, check_async = 1;;)
+  for (njobs = any_stopped = 0, check_async = 1;;)
     {
       BLOCK_CHILD (set, oset);
 
@@ -2698,6 +2698,7 @@ wait_for_background_pids (ps)
 	  check_async = 0;
 	  mark_all_jobs_as_dead ();
 	}
+      njobs++;
     }
 
 #if defined (PROCESS_SUBSTITUTION)
@@ -2709,6 +2710,8 @@ wait_for_background_pids (ps)
   mark_dead_jobs_as_notified (1);
   cleanup_dead_jobs ();
   bgp_clear ();
+
+  return njobs;
 }
 
 /* Make OLD_SIGINT_HANDLER the SIGINT signal handler. */
@@ -3114,8 +3117,8 @@ if (job == NO_JOB)
 	  else
 #if defined (READLINE)
 	    /* We don't want to do this if we are running a process during
-	       programmable completion. */
-	    if (RL_ISSTATE (RL_STATE_COMPLETING) == 0)
+	       programmable completion or a command bound to `bind -x'. */
+	    if (RL_ISSTATE (RL_STATE_COMPLETING|RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) == 0)
 #endif
 	    get_tty_state ();
 

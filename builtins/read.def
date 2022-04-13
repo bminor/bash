@@ -471,7 +471,7 @@ read_builtin (list)
       read_timeout->flags = SHTIMER_LONGJMP;
 
 #if defined (HAVE_SELECT)
-      read_timeout->flags |= edit ? SHTIMER_ALARM : SHTIMER_SELECT;
+      read_timeout->flags |= (edit || posixly_correct) ? SHTIMER_ALARM : SHTIMER_SELECT;
 #else
       read_timeout->flags |= SHTIMER_ALARM;
 #endif
