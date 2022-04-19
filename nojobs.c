@@ -664,7 +664,7 @@ wait_for_single_pid (pid, flags)
   if (pstatus == PROC_BAD)
     {
       internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
-      return (127);
+      return (257);
     }
 
   if (pstatus != PROC_STILL_ALIVE)

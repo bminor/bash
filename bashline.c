@@ -4341,7 +4341,7 @@ bash_quote_filename (s, rtype, qcp)
   /* We may need to quote additional characters: those that readline treats
      as word breaks that are not quoted by backslash_quote. */
   /* XXX - test complete_fullquote here? */
-  if (rtext && cs == COMPLETE_BSQUOTE)
+  if (rtext && cs == COMPLETE_BSQUOTE && rl_completer_word_break_characters)
     {
       mtext = quote_word_break_chars (rtext);
       free (rtext);

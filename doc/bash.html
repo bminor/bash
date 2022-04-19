@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 February 10<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 March 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -3503,6 +3503,14 @@ interpreted as relative to one greater than the maximum index of
 array, and an index of -1 references the last element.
 <P>
 
+The += operator will append to an array variable when assigning
+using the compound assignment syntax; see
+<FONT SIZE=-1><B>PARAMETERS</B>
+
+</FONT>
+above.
+<P>
+
 Any element of an array may be referenced using
 ${<I>name</I>[<I>subscript</I>]}.  The braces are required to avoid
 conflicts with pathname expansion.  If
@@ -3995,7 +4003,7 @@ is substituted.
 <B>Substring Expansion</B>.
 Expands to up to <I>length</I> characters of the value of <I>parameter</I>
 starting at the character specified by <I>offset</I>.
-If <I>parameter</I> is <B>@</B>, an indexed array subscripted by
+If <I>parameter</I> is <B>@</B> or <B>*</B>, an indexed array subscripted by
 <B>@</B> or <B>*</B>, or an associative array name, the results differ as
 described below.
 If <I>length</I> is omitted, expands to the substring of the value of
@@ -4018,8 +4026,8 @@ a number of characters, and the expansion is the characters between
 Note that a negative offset must be separated from the colon by at least
 one space to avoid being confused with the <B>:-</B> expansion.
 <P>
-If <I>parameter</I> is <B>@</B>, the result is <I>length</I> positional
-parameters beginning at <I>offset</I>.
+If <I>parameter</I> is <B>@</B> or <B>*</B>, the result is <I>length</I>
+positional parameters beginning at <I>offset</I>.
 A negative <I>offset</I> is taken relative to one greater than the greatest
 positional parameter, so an offset of -1 evaluates to the last positional
 parameter.
@@ -5693,11 +5701,24 @@ been enabled.
 Variables local to the function may be declared with the
 <B>local</B>
 
-builtin command.  Ordinarily, variables and their values
+builtin command (<I>local variables</I>).
+Ordinarily, variables and their values
 are shared between the function and its caller.
 If a variable is declared <B>local</B>, the variable's visible scope
 is restricted to that function and its children (including the functions
 it calls).
+<P>
+
+In the following description, the <I>current scope</I> is a currently-
+executing function.
+Previous scopes consist of that function's caller and so on,
+back to the &quot;global&quot; scope, where the shell is not executing
+any shell function.
+Consequently, a local variable at the current scope is a variable
+declared using the <B>local</B> or <B>declare</B> builtins in the
+function that is currently executing.
+<P>
+
 Local variables &quot;shadow&quot; variables with the same name declared at
 previous scopes.
 For instance, a local variable declared in a function
@@ -5731,11 +5752,13 @@ variable is local to the current scope, <B>unset</B> will unset it;
 otherwise the unset will refer to the variable found in any calling scope
 as described above.
 If a variable at the current local scope is unset, it will remain so
+(appearing as unset)
 until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
 scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a
-variable with that name that had been shadowed will become visible.
+variable with that name that had been shadowed will become visible
+(see below how the <B>localvar_unset</B> shell option changes this behavior).
 <P>
 
 The <B>FUNCNEST</B> variable, if set to a numeric value greater
@@ -7713,11 +7736,11 @@ matching text found by incremental and non-incremental history searches.
 <DT><B>enable-bracketed-paste (On)</B>
 
 <DD>
-When set to <B>On</B>, readline will configure the terminal in a way
-that will enable it to insert each paste into the editing buffer as a
-single string of characters, instead of treating each character as if
-it had been read from the keyboard.  This can prevent pasted characters
-from being interpreted as editing commands.
+When set to <B>On</B>, readline configures the terminal to insert each
+paste into the editing buffer as a single string of characters, instead
+of treating each character as if it had been read from the keyboard.
+This prevents readline from executing any editing commands bound to key
+sequences appearing in the pasted text.
 <DT><B>enable-keypad (Off)</B>
 
 <DD>
@@ -14654,7 +14677,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 February 10<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 March 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14761,6 +14784,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 11 February 2022 09:18:02 EST
+Time: 08 April 2022 15:46:17 EDT
 </BODY>
 </HTML>

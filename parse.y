@@ -2832,7 +2832,7 @@ push_token (x)
 static char *token = (char *)NULL;
 
 /* Current size of the token buffer. */
-static int token_buffer_size;
+static size_t token_buffer_size;
 
 /* Command to read_token () explaining what we want it to do. */
 #define READ 0
@@ -4218,7 +4218,8 @@ xparse_dolparen (base, string, indp, flags)
       clear_shell_input_line ();	/* XXX */
       if (bash_input.type != st_string)	/* paranoia */
 	parser_state &= ~(PST_CMDSUBST|PST_EOFTOKEN);
-      jump_to_top_level (-nc);	/* XXX */
+      if ((flags & SX_NOLONGJMP) == 0)
+	jump_to_top_level (-nc);	/* XXX */
     }
 
   /* Need to find how many characters parse_string() consumed, update
@@ -6382,7 +6383,8 @@ parse_compound_assignment (retlenp)
      int *retlenp;
 {
   WORD_LIST *wl, *rl;
-  int tok, orig_line_number, orig_token_size, orig_last_token, assignok;
+  int tok, orig_line_number, orig_last_token, assignok;
+  size_t orig_token_size;
   int orig_parser_state;
   char *saved_token, *ret;
 

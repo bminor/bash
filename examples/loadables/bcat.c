@@ -44,6 +44,7 @@ char	*fn;
 	int	n, w, e;
 
 	while (n = read(fd, buf, sizeof (buf))) {
+		QUIT;
 		if (n < 0) {
 			e = errno;
 			write(2, "cat: read error: ", 18);
@@ -54,8 +55,8 @@ char	*fn;
 			write(2, "\n", 1);
 			return 1;
 		}
-		QUIT;
 		w = write(1, buf, n);
+		QUIT;
 		if (w != n) {
 			e = errno;
 			write(2, "cat: write error: ", 18);
@@ -64,7 +65,6 @@ char	*fn;
 			write(2, "\n", 1);
 			return 1;
 		}
-		QUIT;
 	}
 	return 0;
 }

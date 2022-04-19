@@ -884,16 +884,18 @@ gen_action_completions (cs, text)
    TEXT as a match prefix, or just go without?  Currently, the code does not
    use TEXT, just globs CS->globpat and returns the results.  If we do decide
    to use TEXT, we should call quote_string_for_globbing before the call to
-   glob_filename. */
+   glob_filename (in which case we could use shell_glob_filename). */
 static STRINGLIST *
 gen_globpat_matches (cs, text)
       COMPSPEC *cs;
       const char *text;
 {
   STRINGLIST *sl;
+  int gflags;
 
   sl = strlist_create (0);
-  sl->list = glob_filename (cs->globpat, 0);
+  gflags = glob_star ? GX_GLOBSTAR : 0;
+  sl->list = glob_filename (cs->globpat, gflags);
   if (GLOB_FAILED (sl->list))
     sl->list = (char **)NULL;
   if (sl->list)

@@ -1,4 +1,4 @@
-This file is wait.def, from which is created wait.c.
+'This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
 Copyright (C) 1987-2021 Free Software Foundation, Inc.
@@ -236,8 +236,12 @@ wait_builtin (list)
   if (list == 0)
     {
       opt = wait_for_background_pids (&pstat);
+#if 0
+      /* Compatibility with NetBSD sh: don't set VNAME since it doesn't
+	 correspond to the return status. */
       if (vname && opt)
 	builtin_bind_var_to_int (vname, pstat.pid, bindflags);
+#endif
       WAIT_RETURN (EXECUTION_SUCCESS);
     }
 
@@ -255,8 +259,11 @@ wait_builtin (list)
 	    {
 	      pid = (pid_t)pid_value;
 	      status = wait_for_single_pid (pid, wflags|JWAIT_PERROR);
-	      pstat.pid = pid;
-	      pstat.status = status;
+	      /* status > 256 means pid error */
+	      pstat.pid = (status > 256) ? NO_PID : pid;
+	      pstat.status = (status > 256) ? 127 : status;
+	      if (status > 256)
+		status = 127;
 	    }
 	  else
 	    {
@@ -312,6 +319,9 @@ wait_builtin (list)
 
       list = list->next;
     }
+
+  if (vname && pstat.pid != NO_PID)
+    builtin_bind_var_to_int (vname, pstat.pid, bindflags);
 
   WAIT_RETURN (status);
 }

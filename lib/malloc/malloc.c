@@ -597,6 +597,7 @@ _malloc_unblock_signals (setp, osetp)
 #endif
 }
 
+#if defined (USE_LESSCORE)
 /* Return some memory to the system by reducing the break.  This is only
    called with NU > pagebucket, so we're always assured of giving back
    more than one page of memory. */  
@@ -617,6 +618,7 @@ lesscore (nu)			/* give system back some memory */
   _mstats.nlesscore[nu]++;
 #endif
 }
+#endif /* USE_LESSCORE */
 
 /* Ask system for more memory; add to NEXTF[NU].  BUSY[NU] must be set to 1. */  
 static void
@@ -1024,11 +1026,9 @@ internal_free (mem, file, line, flags)
     }
 #endif
 
-#if GLIBC21
-  if (nunits >= LESSCORE_MIN && ((char *)p + binsize(nunits) == sbrk (0)))
-#else
+#if defined (USE_LESSCORE)
+  /* We take care of the mmap case and munmap above */
   if (nunits >= LESSCORE_MIN && ((char *)p + binsize(nunits) == memtop))
-#endif
     {
       /* If above LESSCORE_FRC, give back unconditionally.  This should be set
 	 high enough to be infrequently encountered.  If between LESSCORE_MIN
@@ -1041,6 +1041,7 @@ internal_free (mem, file, line, flags)
 	  goto free_return;
 	}
     }
+#endif /* USE_LESSCORE */
 
 #ifdef MEMSCRAMBLE
   if (p->mh_nbytes)

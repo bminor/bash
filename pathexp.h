@@ -21,13 +21,10 @@
 #if !defined (_PATHEXP_H_)
 #define _PATHEXP_H_
 
-#if defined (USE_POSIX_GLOB_LIBRARY)
-#  define GLOB_FAILED(glist)	!(glist)
-#else /* !USE_POSIX_GLOB_LIBRARY */
-#  define GLOB_FAILED(glist)	(glist) == (char **)&glob_error_return
+#define GLOB_FAILED(glist)	(glist) == (char **)&glob_error_return
+
 extern int noglob_dot_filenames;
 extern char *glob_error_return;
-#endif /* !USE_POSIX_GLOB_LIBRARY */
 
 /* Flag values for quote_string_for_globbing */
 #define QGLOB_CVTNULL	0x01	/* convert QUOTED_NULL strings to '\0' */

@@ -2606,7 +2606,7 @@ wait_for_single_pid (pid, flags)
     {
       if (flags & JWAIT_PERROR)
 	internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
-      return (127);
+      return (257);
     }
 
   alive = 0;
@@ -2690,7 +2690,7 @@ wait_for_background_pids (ps)
       if (ps)
 	{
 	  ps->pid = pid;
-	  ps->status = (r < 0) ? 127 : r;
+	  ps->status = (r < 0 || r > 256) ? 127 : r;
 	}
       if (r == -1 && errno == ECHILD)
 	{

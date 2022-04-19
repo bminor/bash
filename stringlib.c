@@ -146,7 +146,8 @@ strsub (string, pat, rep, global)
      char *string, *pat, *rep;
      int global;
 {
-  int patlen, replen, templen, tempsize, repl, i;
+  size_t patlen, replen, templen, tempsize, i;
+  int repl;
   char *temp, *r;
 
   patlen = strlen (pat);
@@ -189,7 +190,7 @@ strcreplace (string, c, text, flags)
      int flags;
 {
   char *ret, *p, *r, *t;
-  int len, rlen, ind, tlen;
+  size_t len, rlen, ind, tlen;
   int do_glob, escape_backslash;
 
   do_glob = flags & 1;
