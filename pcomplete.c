@@ -414,6 +414,7 @@ init_itemlist_from_varlist (itp, svfunc)
     sl->list[i] = savestring (vlist[i]->name);
   sl->list[sl->list_len = n] = (char *)NULL;
   itp->slist = sl;
+  free (vlist);
 }
 
 static int

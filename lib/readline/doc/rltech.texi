@@ -2368,6 +2368,7 @@ history list.
 #include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
+#include <locale.h>
 
 #if defined (HAVE_STRING_H)
 #  include <string.h>
@@ -2447,6 +2448,8 @@ main (argc, argv)
      char **argv;
 @{
   char *line, *s;
+
+  setlocale (LC_ALL, "");
 
   progname = argv[0];
 

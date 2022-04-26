@@ -2870,7 +2870,7 @@ subst.c
 	- parameter_brace_expand: when expanding an indirect variable, extend
 	  the special case for array[@] and array[*] (set -u/no positional
 	  parameters, obeying the baroque quoting rules) to the value of the
-	  indirection. Report amd fix from konsolebox <konsolebox@gmail.com>
+	  indirection. Report and fix from konsolebox <konsolebox@gmail.com>
 
 				   12/31
 				   -----
@@ -3556,3 +3556,18 @@ lib/sh/zmapfd.c
 lib/sh/zgetline.c
 	- zgetline: use size_t instead of int for local length and indexing
 	  variables
+
+				   4/20
+				   ----
+pcomplete.c
+	- init_itemlist_from_varlist: free VLIST after assigning it from
+	  *SVFUNC and after we get the variable names and values out of it.
+	  Report from Robert E. Griffith <bobg@junga.com>
+
+				   4/25
+				   ----
+redir.c
+	- here_document_to_fd: if the shell compatibility level is bash-5.0 or
+	  earlier, use tempfiles for all here-documents and here-strings. From
+	  a bug-bash discussion started by Sam Liddicott <sam@liddicott.com>
+

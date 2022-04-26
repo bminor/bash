@@ -19,10 +19,14 @@
 
 #include <signal.h>
 
-#if 0	/* LINUX */
+#if 1	/* LINUX */
 #include <pty.h>
 #else
 #include <util.h>
+#endif
+
+#ifdef HAVE_LOCALE_H
+#  include <locale.h>
 #endif
 
 #ifdef READLINE_LIBRARY
@@ -46,6 +50,13 @@ sigint (s)
   close (slavefd);
   printf ("\n");
   exit (0);
+}
+
+void
+sigwinch (s)
+     int s;
+{
+  rl_resize_terminal ();
 }
 
 static int 
@@ -308,6 +319,11 @@ int
 main()
 {
   int val;
+
+#ifdef HAVE_SETLOCALE
+  setlocale (LC_ALL, "");
+#endif
+
   val = openpty (&masterfd, &slavefd, NULL, NULL, NULL);
   if (val == -1)
     return -1;
@@ -316,6 +332,9 @@ main()
   if (val == -1)
     return -1;
 
+  signal (SIGWINCH, sigwinch);
+  signal (SIGINT, sigint);
+
   val = init_readline (slavefd, slavefd);
   if (val == -1)
     return -1;
@@ -323,8 +342,6 @@ main()
   val = tty_cbreak (STDIN_FILENO);
   if (val == -1)
     return -1;
-
-  signal (SIGINT, sigint);
 
   val = main_loop ();
 

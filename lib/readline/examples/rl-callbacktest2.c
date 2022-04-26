@@ -10,6 +10,7 @@
 
 #include <signal.h>
 
+#include <locale.h>
 #include <stdio.h>
 
 /* Standard readline include files. */
@@ -124,6 +125,8 @@ int
 main (int c, char **v)
 {
   char *p;
+
+  setlocale (LC_ALL, "");
 
   running = 1;
   rl_catch_signals = 1;

@@ -460,7 +460,10 @@ here_document_to_fd (redirectee, ri)
       return fd;
     }
 
-#if defined (HEREDOC_PIPESIZE)
+  if (shell_compatibility_level <= 50)
+    goto use_tempfile;
+
+#if HEREDOC_PIPESIZE
   /* Try to use a pipe internal to this process if the document is shorter
      than the system's pipe capacity (computed at build time). We want to
      write the entire document without write blocking. */
