@@ -3571,3 +3571,23 @@ redir.c
 	  earlier, use tempfiles for all here-documents and here-strings. From
 	  a bug-bash discussion started by Sam Liddicott <sam@liddicott.com>
 
+				   4/26
+				   ----
+parse.y
+	- parse_comsub: non-interactive shells exit on a syntax error while
+	  parsing the command substitution
+	- parse_comsub: unset additional PARSER_STATE flags before calling
+	  yyparse(). Inspired by https://bugs.gentoo.org/837203; unsetting
+	  PST_COMPASSIGN is the fix for that bug
+	- parse_string_to_word_list: use save_parser_state/restore_parser_state
+	  instead of saving pieces of the shell state in individual variables
+	- parse_compound_assignment: use save_parser_state/restore_parser_state
+	  instead of saving pieces of the shell state in individual variables
+	- parse_compound_assignment: unset additional PARSER_STATE flags before
+	  calling read_token(); set esacs_needed_count and expecting_in_token
+	  to 0 like in parse_comsub() since read_token can use them
+
+				   4/27
+				   ----
+lib/sh/strvis.c
+	- strivs: changes to handle being compiled without multibyte support

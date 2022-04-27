@@ -4063,7 +4063,12 @@ parse_comsub (qc, open, close, lenp, flags)
   pushed_string_list = (STRING_SAVER *)NULL;
 
   /* State flags we don't want to persist into command substitutions. */
-  parser_state &= ~(PST_REGEXP|PST_EXTPAT|PST_CONDCMD|PST_CONDEXPR);
+  parser_state &= ~(PST_REGEXP|PST_EXTPAT|PST_CONDCMD|PST_CONDEXPR|PST_COMPASSIGN);
+  /* Could do PST_CASESTMT too, but that also affects history. Setting
+     expecting_in_token below should take care of the parsing requirements.
+     Unsetting PST_REDIRLIST isn't strictly necessary because of how we set
+     token_to_read below, but we do it anyway. */
+  parser_state &= ~(PST_CASEPAT|PST_ALEXPNEXT|PST_SUBSHELL|PST_REDIRLIST);
   /* State flags we want to set for this run through the parser. */
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN|PST_NOEXPAND;
 
@@ -4102,7 +4107,14 @@ parse_comsub (qc, open, close, lenp, flags)
   else if (r != 0)
     {
       /* parser_error (start_lineno, _("could not parse command substitution")); */
-      jump_to_top_level (DISCARD);      
+      /* Non-interactive shells exit on parse error in a command substitution. */
+      if (last_command_exit_value == 0)
+	last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (last_command_exit_value);
+      if (interactive_shell == 0)
+	jump_to_top_level (FORCE_EOF);	/* This is like reader_loop() */
+      else
+	jump_to_top_level (DISCARD);
     }
 
   if (current_token != shell_eof_token)
@@ -6285,31 +6297,26 @@ parse_string_to_word_list (s, flags, whom)
      const char *whom;
 {
   WORD_LIST *wl;
-  int tok, orig_current_token, orig_line_number, orig_input_terminator;
-  int orig_line_count, orig_parser_state;
-  int old_echo_input, old_expand_aliases, ea;
-#if defined (HISTORY)
-  int old_remember_on_history, old_history_expansion_inhibited;
-#endif
+  int tok, orig_current_token, orig_line_number;
+  int orig_parser_state;
+  sh_parser_state_t ps;
+  int ea;
 
 #if defined (HISTORY)
-  old_remember_on_history = remember_on_history;
-#  if defined (BANG_HISTORY)
-  old_history_expansion_inhibited = history_expansion_inhibited;
-#  endif
   bash_history_disable ();
 #endif
 
   orig_line_number = line_number;
-  orig_line_count = current_command_line_count;
-  orig_input_terminator = shell_input_line_terminator;
-  old_echo_input = echo_input_at_read;
-  old_expand_aliases = expand_aliases;
+  save_parser_state (&ps);
 
   push_stream (1);
   if (ea = expanding_alias ())
     parser_save_alias ();
-  last_read_token = WORD;		/* WORD to allow reserved words here */
+
+  /* WORD to avoid parsing reserved words as themselves and just parse them as
+     WORDs. */
+  last_read_token = WORD;
+
   current_command_line_count = 0;
   echo_input_at_read = expand_aliases = 0;
 
@@ -6318,9 +6325,11 @@ parse_string_to_word_list (s, flags, whom)
 
   if (flags & 1)
     {
-      orig_parser_state = parser_state;
-      parser_state |= PST_COMPASSIGN|PST_REPARSE;
+      orig_parser_state = parser_state;		/* XXX - not needed? */
+      /* State flags we don't want to persist into compound assignments. */
       parser_state &= ~PST_NOEXPAND;	/* parse_comsub sentinel */
+      /* State flags we want to set for this run through the tokenizer. */
+      parser_state |= PST_COMPASSIGN|PST_REPARSE;
     }
 
   while ((tok = read_token (READ)) != yacc_EOF)
@@ -6350,21 +6359,10 @@ parse_string_to_word_list (s, flags, whom)
   if (ea)
     parser_restore_alias ();
 
-#if defined (HISTORY)
-  remember_on_history = old_remember_on_history;
-#  if defined (BANG_HISTORY)
-  history_expansion_inhibited = old_history_expansion_inhibited;
-#  endif /* BANG_HISTORY */
-#endif /* HISTORY */
-
-  echo_input_at_read = old_echo_input;
-  expand_aliases = old_expand_aliases;
-
-  current_command_line_count = orig_line_count;
-  shell_input_line_terminator = orig_input_terminator;
+  restore_parser_state (&ps);
 
   if (flags & 1)
-    parser_state = orig_parser_state;
+    parser_state = orig_parser_state;	/* XXX - not needed? */
 
   if (wl == &parse_string_error)
     {
@@ -6383,28 +6381,30 @@ parse_compound_assignment (retlenp)
      int *retlenp;
 {
   WORD_LIST *wl, *rl;
-  int tok, orig_line_number, orig_last_token, assignok;
-  size_t orig_token_size;
-  int orig_parser_state;
-  char *saved_token, *ret;
+  int tok, orig_line_number, assignok;
+  sh_parser_state_t ps;
+  char *ret;
 
-  saved_token = token;
-  orig_token_size = token_buffer_size;
   orig_line_number = line_number;
-  orig_last_token = last_read_token;
-  orig_parser_state = parser_state;
+  save_parser_state (&ps);
 
-  last_read_token = WORD;	/* WORD to allow reserved words here */
+  /* WORD to avoid parsing reserved words as themselves and just parse them as
+     WORDs. Plus it means we won't be in a command position and so alias
+     expansion won't happen. */
+  last_read_token = WORD;
 
   token = (char *)NULL;
   token_buffer_size = 0;
+  wl = (WORD_LIST *)NULL;	/* ( */
 
   assignok = parser_state&PST_ASSIGNOK;		/* XXX */
 
-  wl = (WORD_LIST *)NULL;	/* ( */
-  orig_parser_state = parser_state;
-  parser_state &= ~PST_NOEXPAND;
+  /* State flags we don't want to persist into compound assignments. */
+  parser_state &= ~(PST_NOEXPAND|PST_CONDCMD|PST_CONDEXPR|PST_REGEXP|PST_EXTPAT);
+  /* State flags we want to set for this run through the tokenizer. */
   parser_state |= PST_COMPASSIGN;
+
+  esacs_needed_count = expecting_in_token = 0;
 
   while ((tok = read_token (READ)) != ')')
     {
@@ -6429,11 +6429,7 @@ parse_compound_assignment (retlenp)
       wl = make_word_list (yylval.word, wl);
     }
 
-  FREE (token);
-  token = saved_token;
-  token_buffer_size = orig_token_size;
-
-  parser_state = orig_parser_state;
+  restore_parser_state (&ps);
 
   if (wl == &parse_string_error)
     {
@@ -6444,8 +6440,6 @@ parse_compound_assignment (retlenp)
       else
 	jump_to_top_level (DISCARD);
     }
-
-  last_read_token = orig_last_token;		/* XXX - was WORD? */
 
   if (wl)
     {

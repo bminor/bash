@@ -61,7 +61,6 @@ here-doc terminated with a parenthesis
 line terminated with a backslash
 ./comsub-posix1.sub: line 1: syntax error near unexpected token `)'
 ./comsub-posix1.sub: line 1: `echo $( if x; then echo foo )'
-after
 swap32_posix is a function
 swap32_posix () 
 { 
@@ -77,16 +76,23 @@ swap32_posix ()
                 ));
     done
 }
-./comsub-posix5.sub: line 37: syntax error near unexpected token `done'
-./comsub-posix5.sub: line 37: `: $(case x in x) ;; x) done esac)'
-./comsub-posix5.sub: line 38: syntax error near unexpected token `done'
-./comsub-posix5.sub: line 38: `: $(case x in x) ;; x) done ;; esac)'
-./comsub-posix5.sub: line 39: syntax error near unexpected token `esac'
-./comsub-posix5.sub: line 39: `: $(case x in x) (esac) esac)'
+bash: -c: line 1: syntax error near unexpected token `done'
+bash: -c: line 1: `: $(case x in x) ;; x) done esac)'
+bash: -c: line 1: syntax error near unexpected token `done'
+bash: -c: line 1: `: $(case x in x) ;; x) done ;; esac)'
+bash: -c: line 1: syntax error near unexpected token `esac'
+bash: -c: line 1: `: $(case x in x) (esac) esac)'
 bash: -c: line 1: syntax error near unexpected token `in'
 bash: -c: line 1: `: $(case x in esac|in) foo;; esac)'
 bash: -c: line 1: syntax error near unexpected token `done'
 bash: -c: line 1: `: $(case x in x) ;; x) done)'
+case: -c: line 3: syntax error near unexpected token `esac'
+case: -c: line 3: `$( esac ; bar=foo ; echo "$bar")) echo bad 2;;'
+ok 2
+inside outside
+ok 3
+syntax-error: -c: line 2: syntax error near unexpected token `done'
+syntax-error: -c: line 2: `: $(case x in x) ;; x) done ;; esac)'
 yes
 
 
