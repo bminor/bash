@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.040])dnl
+AC_REVISION([for Bash 5.2, version 5.041])dnl
 
 define(bashvers, 5.2)
 define(relstatus, beta)
@@ -1316,6 +1316,7 @@ AC_CONFIG_FILES([Makefile builtins/Makefile lib/readline/Makefile \
 		 lib/tilde/Makefile doc/Makefile support/Makefile \
 		 po/Makefile.in examples/loadables/Makefile \
 		 examples/loadables/Makefile.inc \
+		 examples/loadables/Makefile.sample \
 		 examples/loadables/perl/Makefile \
 		 support/bash.pc support/bashbug.sh])
 

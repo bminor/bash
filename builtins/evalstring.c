@@ -426,7 +426,7 @@ parse_and_execute (string, from_file, flags)
 	      break;
 	    }
 	}
-	  
+
       if (parse_command () == 0)
 	{
 	  if ((flags & SEVAL_PARSEONLY) || (interactive_shell == 0 && read_but_dont_execute))
@@ -561,6 +561,8 @@ parse_and_execute (string, from_file, flags)
       throw_to_top_level ();
     }
 
+  CHECK_TERMSIG;
+
   if (should_jump_to_top_level)
     jump_to_top_level (code);
 
@@ -594,7 +596,6 @@ parse_string (string, from_file, flags, cmdp, endp)
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, (sigset_t *)&ps_sigmask);
 #endif
 
-/*itrace("parse_string: `%s'", string);*/
   /* Reset the line number if the caller wants us to.  If we don't reset the
      line number, we have to subtract one, because we will add one just
      before executing the next command (resetting the line number sets it to

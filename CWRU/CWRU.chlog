@@ -3590,4 +3590,27 @@ parse.y
 				   4/27
 				   ----
 lib/sh/strvis.c
-	- strivs: changes to handle being compiled without multibyte support
+	- sh_charvis: changes to handle being compiled without multibyte support
+
+				   4/29
+				   ----
+lib/readline/callback.c
+	- rl_callback_read_char: don't set rl_eof_found unless eof is > 0,
+	  since it can be -3 if we need to read more input in a multi-key
+	  sequence. Report from Andrew Burgess <aburgess@redhat.com>
+
+examples/loadables/Makefile.sample.in
+	- new file, containing the rules to build the example shared object
+	- includes Makefile.inc from wherever it's installed. Suggested by
+	  Robert E. Griffith <bobg@junga.com>
+
+examples/loadables/Makefile.inc.in
+	- remove rules that create the example shared object
+
+				   4/30
+				   ----
+builtins/evalstring.c
+	- parse_and_execute: check for terminating signals before returning,
+	  after any longjmp, to improve responsiveness and fix the -c code
+	  path before running any exit trap. Report from
+	  Emanuele Torre <torreemanuele6@gmail.com>

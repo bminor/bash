@@ -249,7 +249,7 @@ pushd.c:	${topdir}/builtins/pushd.def
 
 pushd.o:	pushd.c
 	$(RM) $@
-	$(SHOBJ_CC) -DHAVE_CONFIG_H -DPUSHD_AND_POPD -DLOADABLE_BUILTIN $(SHOBJ_CFLAGS) $(CFLAGS) $(CPPFLAGS) $(INC) -c -o $@ $<
+	$(SHOBJ_CC) -Wno-format-security -DHAVE_CONFIG_H -DPUSHD_AND_POPD -DLOADABLE_BUILTIN $(SHOBJ_CFLAGS) $(CFLAGS) $(CPPFLAGS) $(INC) -c -o $@ $<
 
 pushd:	pushd.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ pushd.o $(SHOBJ_LIBS)
@@ -262,7 +262,7 @@ mostlyclean:	clean
 	-( cd perl && ${MAKE} ${MFLAGS} $@ )
 
 distclean maintainer-clean: clean
-	$(RM) Makefile Makefile.inc pushd.c
+	$(RM) Makefile Makefile.inc Makefile.sample pushd.c
 	-( cd perl && ${MAKE} ${MFLAGS} $@ )
 
 installdirs:
@@ -270,6 +270,7 @@ installdirs:
 
 install-dev:	installdirs
 	@$(INSTALL_DATA) Makefile.inc $(DESTDIR)$(loadablesdir)/Makefile.inc
+	@$(INSTALL_DATA) Makefile.sample $(DESTDIR)$(loadablesdir)/Makefile.sample
 	@$(INSTALL_DATA) $(srcdir)/loadables.h $(DESTDIR)$(loadablesdir)/loadables.h
 	@( cd $(BUILD_DIR) && ${MAKE} ${MFLAGS} DESTDIR="$(DESTDIR)" install-headers)
 
@@ -281,7 +282,8 @@ install-supported:	all installdirs install-dev
 	done
 
 uninstall-dev:
-	-$(RM) $(DESTDIR)$(loadablesdir)/Makefile.inc $(DESTDIR)$(loadablesdir)/loadables.h
+	-$(RM) $(DESTDIR)$(loadablesdir)/Makefile.inc $(DESTDIR)$(loadablesdir)/Makefile.sample
+	-$(RM) $(DESTDIR)$(loadablesdir)/loadables.h
 	-( cd $(BUILD_DIR) && ${MAKE} ${MFLAGS} DESTDIR="$(DESTDIR)" uninstall-headers)
 
 uninstall-supported:	uninstall-dev
