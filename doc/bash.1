@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon May  2 09:00:07 EDT 2022
+.\"	Last Change: Tue May 17 09:34:43 EDT 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 May 2" "GNU Bash 5.2"
+.TH BASH 1 "2022 May 17" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -420,12 +420,14 @@ No other startup files are read.
 .PP
 .B Bash
 attempts to determine when it is being run with its standard input
-connected to a network connection, as when executed by the remote shell
-daemon, usually \fIrshd\fP, or the secure shell daemon \fIsshd\fP.
+connected to a network connection, as when executed by
+the historical remote shell daemon, usually \fIrshd\fP,
+or the secure shell daemon \fIsshd\fP.
 If
 .B bash
-determines it is being run in this fashion, it reads and executes
-commands from \fI~/.bashrc\fP, if that file exists and is readable.
+determines it is being run non-interactively in this fashion,
+it reads and executes commands from \fI~/.bashrc\fP,
+if that file exists and is readable.
 It will not do this if invoked as \fBsh\fP.
 The
 .B \-\-norc
@@ -589,8 +591,9 @@ The
 variable may be used to specify the format of
 the time information.
 .PP
-Each command in a multi-command
-pipeline is executed in a \fIsubshell\fP, which is a
+Each command in a multi-command pipeline,
+where pipes are created,
+is executed in a \fIsubshell\fP, which is a
 separate process.
 See
 .SM
@@ -10641,12 +10644,16 @@ by default.
 Suspend the execution of this shell until it receives a
 .SM
 .B SIGCONT
-signal.  A login shell cannot be suspended; the
+signal.  A login shell,
+or a shell without job control enabled,
+cannot be suspended; the
 .B \-f
 option can be used to override this and force the suspension.
-The return status is 0 unless the shell is a login shell and
+The return status is 0 unless the shell is a login shell
+or job control is not enabled
+and
 .B \-f
-is not supplied, or if job control is not enabled.
+is not supplied.
 .TP
 \fBtest\fP \fIexpr\fP
 .PD 0

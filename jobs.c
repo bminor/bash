@@ -3695,7 +3695,7 @@ kill_pid (pid, sig, group)
 	    result = killpg (pid, sig);
 	  /* If we're killing using job control notification, for example,
 	     without job control active, we have to do things ourselves. */
-	  else if (jobs[job]->pgrp == shell_pgrp)
+	  else if (jobs[job]->pgrp == shell_pgrp)	/* XXX - IS_JOBCONTROL(job) == 0? */
 	    {
 	      p = jobs[job]->pipe;
 	      do

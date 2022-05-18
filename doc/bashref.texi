@@ -801,8 +801,9 @@ the time information.
 If the pipeline is not executed asynchronously (@pxref{Lists}), the
 shell waits for all commands in the pipeline to complete.
 
-Each command in a multi-command
-pipeline is executed in its own @dfn{subshell}, which is a
+Each command in a multi-command pipeline,
+where pipes are created,
+is executed in its own @dfn{subshell}, which is a
 separate process (@pxref{Command Execution Environment}).
 If the @code{lastpipe} option is enabled using the @code{shopt} builtin
 (@pxref{The Shopt Builtin}),
@@ -7104,10 +7105,12 @@ No other startup files are read.
 @subsubheading Invoked by remote shell daemon
 
 Bash attempts to determine when it is being run with its standard input
-connected to a network connection, as when executed by the remote shell
-daemon, usually @code{rshd}, or the secure shell daemon @code{sshd}.
-If Bash determines it is being run in
-this fashion, it reads and executes commands from @file{~/.bashrc}, if that
+connected to a network connection, as when executed by
+the historical remote shell daemon, usually @code{rshd},
+or the secure shell daemon @code{sshd}.
+If Bash
+determines it is being run non-interactively in this fashion,
+it reads and executes commands from @file{~/.bashrc}, if that
 file exists and is readable.
 It will not do this if invoked as @code{sh}.
 The @option{--norc} option may be used to inhibit this behavior, and the
@@ -8914,8 +8917,16 @@ suspend [-f]
 
 Suspend the execution of this shell until it receives a
 @code{SIGCONT} signal.
-A login shell cannot be suspended; the @option{-f}
+A login shell,
+or a shell without job control enabled,
+cannot be suspended; the @option{-f}
 option can be used to override this and force the suspension.
+The return status is 0 unless the shell is a login shell
+or job control is not enabled
+and
+@option{-f}
+is not supplied.
+
 @end table
 
 When job control is not active, the @code{kill} and @code{wait}
