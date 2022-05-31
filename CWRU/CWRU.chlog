@@ -3624,3 +3624,23 @@ builtins/suspend.def
 
 doc/{bash.1,bashref.texi}
 	- suspend: updated description to include expanded -f behavior
+
+				   5/25
+				   ----
+builtins/mkbuiltins.c
+	- -includefile: new argument, specifies extern filename to insert
+	  into the #include statement in the structfile (builtins.c) and
+	  the filename in the comment in the extern file (builtext.h).
+	  From Alexander Kanavin <alex.kanavin@gmail.com> via
+	  https://savannah.gnu.org/patch/?10210
+
+builtins/Makefile.in
+	- builtins.c: change call to mkbuiltins to add -includefile option
+	- builtins.c: change recipe to run all the commands in the same shell
+	  invocation
+	- builtins.c: change recipe to specify new filenames in the call to
+	  mkbuiltins and move them onto builtins.c/builtext.h if the new ones
+	  are different; make the new filenames use the current make recipe
+	  shell pid in the filename ($$RECPID).
+	  Inspired by Alexander Kanavin <alex.kanavin@gmail.com> via
+	  https://savannah.gnu.org/patch/?10210

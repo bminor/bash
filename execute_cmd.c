@@ -2515,9 +2515,6 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   prev = pipe_in;
   cmd = command;
 
-if (asynchronous)
-  itrace("execute_pipeline: asynchronous = 1");
-
   while (cmd && cmd->type == cm_connection &&
 	 cmd->value.Connection && cmd->value.Connection->connector == '|')
     {

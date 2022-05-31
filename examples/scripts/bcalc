@@ -34,14 +34,30 @@ init()
 	coproc BC { bc -q 2>&1; }
 	# set scale
 	printf "scale = 10\n" >&${BC[1]}
+	# bash automatically sets BC_PID to the coproc pid; we store it so we
+	# can be sure to use it even after bash reaps the coproc and unsets
+	# the variables
+	coproc_pid=$BC_PID
 }
 
 # not strictly necessary; the pipes will be closed when the program exits
+# but we can use it in reset() below
 fini()
 {
 	eval exec "${BC[1]}>&- ${BC[0]}<&-"
 }
 
+reset()
+{
+	fini	# close the old pipes
+
+	sleep 1
+	kill -1 $coproc_pid >/dev/null 2>&1	# make sure the coproc is dead
+	unset coproc_pid
+
+	init		
+}
+	
 # set a read timeout of a half second to avoid synchronization problems
 calc()
 {
@@ -71,6 +87,7 @@ do
 	case "$EQN" in
 	'')		continue ;;
 	exit|quit)	break ;;
+	reset)		reset ; continue ;;
 	esac
 
 	# save to the history list
