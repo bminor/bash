@@ -3644,3 +3644,29 @@ builtins/Makefile.in
 	  shell pid in the filename ($$RECPID).
 	  Inspired by Alexander Kanavin <alex.kanavin@gmail.com> via
 	  https://savannah.gnu.org/patch/?10210
+
+				    6/2
+				    ---
+builtins/common.c
+	- builtin_find_indexed_array: new function, factored common code out
+	  of mapfile and read builtins to find an in-scope indexed array or
+	  create one 
+
+builtins/common.h
+	- builtin_find_indexed_array: extern declaration
+
+builtins/{mapfile,read}.def
+	- change callers to use builtin_find_indexed_array
+
+variables.c
+	- unbind_global_variable, unbind_global_variable_noref: new functions
+	  that remove variables from the global_variables table
+
+lib/sh/shmatch.c
+	- sh_regmatch: use unbind_global_variable_noref to make sure we act on
+	  the copy of BASH_REMATCH in the global scope all the time, ignoring
+	  any local variables that might exist. Tentative fix for memory leak
+	  report from Emanuele Torre <torreemanuele6@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- BASH_REMATCH: add caveat about making it a local variable

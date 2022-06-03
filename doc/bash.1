@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue May 17 09:34:43 EDT 2022
+.\"	Last Change: Fri Jun  3 10:47:26 EDT 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 May 17" "GNU Bash 5.2"
+.TH BASH 1 "2022 June 3" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -791,6 +791,11 @@ indices. The element of
 .B BASH_REMATCH
 with index \fIn\fP is the portion of the
 string matching the \fIn\fPth parenthesized subexpression.
+Bash sets
+.SM
+.B BASH_REMATCH
+in the global scope; declaring it as a local variable will lead to
+unexpected results.
 .if t .sp 0.5
 .if n .sp 1
 Expressions may be combined using the following operators, listed

@@ -1335,6 +1335,11 @@ expression are saved in the remaining @code{BASH_REMATCH} indices.
 The element of @code{BASH_REMATCH} with index @var{n} is the portion of the
 string matching the @var{n}th parenthesized subexpression.
 
+Bash sets
+@code{BASH_REMATCH}
+in the global scope; declaring it as a local variable will lead to
+unexpected results.
+
 Expressions may be combined using the following operators, listed
 in decreasing order of precedence:
 
