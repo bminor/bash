@@ -3670,3 +3670,14 @@ lib/sh/shmatch.c
 
 doc/{bash.1,bashref.texi}
 	- BASH_REMATCH: add caveat about making it a local variable
+
+				    6/6
+				    ---
+print_cmd.c
+	- print_redirection: if the redirectee for r_duplicating_output_word
+	  (r_duplicating_input_word) is 1 (0), don't print it; only print a
+	  non-default file descriptor number
+	- print_redirection_list: remove the code that tries to temporarily
+	  translate a >&word redirection to >&word now that we won't print a
+	  non-default file descriptor number. Fixes issue with `declare -f' and
+	  function export reported by Namikaze Minato <lloydsensei@gmail.com>

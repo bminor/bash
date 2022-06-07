@@ -100,6 +100,7 @@ sh_regmatch (string, pattern, flags)
   unbind_global_variable_noref ("BASH_REMATCH");
   rematch = make_new_array_variable ("BASH_REMATCH");
 #else
+  /* TAG:bash-5.3 */
   rematch = builtin_find_indexed_array ("BASH_REMATCH", 1);
 #endif
   amatch = rematch ? array_cell (rematch) : (ARRAY *)0;
