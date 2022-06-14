@@ -1057,6 +1057,7 @@ builtin_find_indexed_array (array_name, flags)
   return entry;
 }
 #endif /* ARRAY_VARS */	
+
 /* Like check_unbind_variable, but for use by builtins (only matters for
    error messages). */
 int

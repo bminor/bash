@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 May 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 June 3<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -556,13 +556,15 @@ No other startup files are read.
 <B>Bash</B>
 
 attempts to determine when it is being run with its standard input
-connected to a network connection, as when executed by the remote shell
-daemon, usually <I>rshd</I>, or the secure shell daemon <I>sshd</I>.
+connected to a network connection, as when executed by
+the historical remote shell daemon, usually <I>rshd</I>,
+or the secure shell daemon <I>sshd</I>.
 If
 <B>bash</B>
 
-determines it is being run in this fashion, it reads and executes
-commands from <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>, if that file exists and is readable.
+determines it is being run non-interactively in this fashion,
+it reads and executes commands from <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>,
+if that file exists and is readable.
 It will not do this if invoked as <B>sh</B>.
 The
 <B>--norc</B>
@@ -1026,6 +1028,12 @@ indices. The element of
 </FONT>
 with index <I>n</I> is the portion of the
 string matching the <I>n</I>th parenthesized subexpression.
+Bash sets
+<FONT SIZE=-1><B>BASH_REMATCH</B>
+
+</FONT>
+in the global scope; declaring it as a local variable will lead to
+unexpected results.
 <P>
 
 
@@ -13400,14 +13408,18 @@ Suspend the execution of this shell until it receives a
 <FONT SIZE=-1><B>SIGCONT</B>
 
 </FONT>
-signal.  A login shell cannot be suspended; the
+signal.  A login shell,
+or a shell without job control enabled,
+cannot be suspended; the
 <B>-f</B>
 
 option can be used to override this and force the suspension.
-The return status is 0 unless the shell is a login shell and
+The return status is 0 unless the shell is a login shell
+or job control is not enabled
+and
 <B>-f</B>
 
-is not supplied, or if job control is not enabled.
+is not supplied.
 <DT><B>test</B> <I>expr</I><DD>
 
 <DT><B>[</B> <I>expr</I> <B>]</B><DD>
@@ -14681,7 +14693,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 May 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 June 3<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14787,7 +14799,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from bash.1.<BR>
-Time: 04 May 2022 15:11:14 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20220609/doc/bash.1.<BR>
+Time: 13 June 2022 11:04:39 EDT
 </BODY>
 </HTML>

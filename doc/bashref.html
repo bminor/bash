@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 17 May 2022).
+the Bash shell (version 5.2, 3 June 2022).
 
-This is Edition 5.2, last updated 17 May 2022,
+This is Edition 5.2, last updated 3 June 2022,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 17 May 2022).
+the Bash shell (version 5.2, 3 June 2022).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 17 May 2022,
+<p>This is Edition 5.2, last updated 3 June 2022,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -1653,6 +1653,11 @@ Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the remaining <code>BASH_REMATCH</code> indices.
 The element of <code>BASH_REMATCH</code> with index <var>n</var> is the portion of the
 string matching the <var>n</var>th parenthesized subexpression.
+</p>
+<p>Bash sets
+<code>BASH_REMATCH</code>
+in the global scope; declaring it as a local variable will lead to
+unexpected results.
 </p>
 <p>Expressions may be combined using the following operators, listed
 in decreasing order of precedence:
