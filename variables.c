@@ -2370,7 +2370,7 @@ find_global_variable (name)
 
   var = var_lookup (name, global_variables);
   if (var && nameref_p (var))
-    var = find_variable_nameref (var);
+    var = find_variable_nameref (var);	/* XXX - find_global_variable_noref? */
 
   if (var == 0)
     return ((SHELL_VAR *)NULL);
@@ -3840,6 +3840,34 @@ unbind_variable_noref (name)
   return 0;
 }
 
+int
+unbind_global_variable (name)
+     const char *name;
+{
+  SHELL_VAR *v, *nv;
+  int r;
+
+  v = var_lookup (name, global_variables);
+  /* This starts at the current scope, just like find_global_variable; should we
+     use find_global_variable_nameref here? */
+  nv = (v && nameref_p (v)) ? find_variable_nameref (v) : (SHELL_VAR *)NULL;
+
+  r = nv ? makunbound (nv->name, shell_variables) : makunbound (name, global_variables);
+  return r;
+}
+
+int
+unbind_global_variable_noref (name)
+     const char *name;
+{
+  SHELL_VAR *v;
+
+  v = var_lookup (name, global_variables);
+  if (v)
+    return makunbound (name, global_variables);
+  return 0;
+}
+ 
 int
 check_unbind_variable (name)
      const char *name;

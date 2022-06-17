@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.039])dnl
+AC_REVISION([for Bash 5.2, version 5.041])dnl
 
 define(bashvers, 5.2)
-define(relstatus, beta)
+define(relstatus, rc1)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -713,6 +713,8 @@ AC_SUBST(SIZE)
 m4_include([m4/stat-time.m4])
 m4_include([m4/timespec.m4])
 
+m4_include([m4/strtoimax.m4])
+
 dnl include files for gettext
 
 m4_include([m4/codeset.m4])
@@ -859,7 +861,7 @@ AC_CHECK_FUNCS(arc4random)
 
 AC_REPLACE_FUNCS(getcwd memset)
 AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
-AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)
+AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoumax)
 AC_REPLACE_FUNCS(dprintf)
 AC_REPLACE_FUNCS(strchrnul)
 AC_REPLACE_FUNCS(strdup)
@@ -894,7 +896,6 @@ AC_CHECK_DECLS([strtold], [
     fi
 ])
 
-AC_CHECK_DECLS(strtoimax)
 AC_CHECK_DECLS(strtol)
 AC_CHECK_DECLS(strtoll)
 AC_CHECK_DECLS(strtoul)
@@ -1067,6 +1068,8 @@ BASH_FUNC_POSIX_SETJMP
 BASH_FUNC_STRCOLL
 BASH_FUNC_SNPRINTF
 BASH_FUNC_VSNPRINTF
+
+BASH_FUNC_STRTOIMAX
 
 dnl If putenv or unsetenv is not present, set the right define so the
 dnl prototype and declaration in lib/sh/getenv.c will be standard-conformant
@@ -1313,6 +1316,7 @@ AC_CONFIG_FILES([Makefile builtins/Makefile lib/readline/Makefile \
 		 lib/tilde/Makefile doc/Makefile support/Makefile \
 		 po/Makefile.in examples/loadables/Makefile \
 		 examples/loadables/Makefile.inc \
+		 examples/loadables/Makefile.sample \
 		 examples/loadables/perl/Makefile \
 		 support/bash.pc support/bashbug.sh])
 

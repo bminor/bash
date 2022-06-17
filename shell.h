@@ -173,7 +173,7 @@ typedef struct _sh_parser_state_t
   int *token_state;
 
   char *token;
-  int token_buffer_size;
+  size_t token_buffer_size;
   int eof_token;
 
   /* input line state -- line number saved elsewhere */

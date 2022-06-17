@@ -215,13 +215,16 @@ static uintmax_t getuintmax PARAMS((void));
 
 #if defined (HAVE_LONG_DOUBLE) && HAVE_DECL_STRTOLD && !defined(STRTOLD_BROKEN)
 typedef long double floatmax_t;
+#  define USE_LONG_DOUBLE 1
 #  define FLOATMAX_CONV	"L"
 #  define strtofltmax	strtold
 #else
 typedef double floatmax_t;
+#  define USE_LONG_DOUBLE 0
 #  define FLOATMAX_CONV	""
 #  define strtofltmax	strtod
 #endif
+static double getdouble PARAMS((void));
 static floatmax_t getfloatmax PARAMS((void));
 
 static intmax_t asciicode PARAMS((void));
@@ -247,7 +250,7 @@ printf_builtin (list)
      WORD_LIST *list;
 {
   int ch, fieldwidth, precision;
-  int have_fieldwidth, have_precision;
+  int have_fieldwidth, have_precision, use_Lmod;
   char convch, thisch, nextch, *format, *modstart, *precstart, *fmt, *start;
 #if defined (HANDLE_MULTIBYTE)
   char mbch[25];		/* 25 > MB_LEN_MAX, plus can handle 4-byte UTF-8 and large Unicode characters*/
@@ -422,8 +425,12 @@ printf_builtin (list)
 
 	  /* skip possible format modifiers */
 	  modstart = fmt;
+	  use_Lmod = 0;
 	  while (*fmt && strchr (LENMODS, *fmt))
-	    fmt++;
+	    {
+	      use_Lmod |= USE_LONG_DOUBLE && *fmt == 'L';
+	      fmt++;
+	    }
 	    
 	  if (*fmt == 0)
 	    {
@@ -694,11 +701,24 @@ printf_builtin (list)
 #endif
 	      {
 		char *f;
-		floatmax_t p;
 
-		p = getfloatmax ();
-		f = mklong (start, FLOATMAX_CONV, sizeof(FLOATMAX_CONV) - 1);
-		PF (f, p);
+	      	if (use_Lmod || posixly_correct == 0)
+		  {
+		    floatmax_t p;
+
+		    p = getfloatmax ();
+		    f = mklong (start, "L", 1);
+		    PF (f, p);
+		  }
+		else		/* posixly_correct */
+		  {
+		    double p;
+
+		    p = getdouble ();
+		    f = mklong (start, "", 0);
+		    PF (f, p);
+		  }
+
 		break;
 	      }
 
@@ -1239,6 +1259,33 @@ getuintmax ()
       /* Same POSIX.2 conversion error requirements as getintmax(). */
       ret = 0;
 #endif
+      conversion_error = 1;
+    }
+  else if (errno == ERANGE)
+    printf_erange (garglist->word->word);
+
+  garglist = garglist->next;
+  return (ret);
+}
+
+static double
+getdouble ()
+{
+  double ret;
+  char *ep;
+
+  if (garglist == 0)
+    return (0);
+
+  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+    return asciicode ();
+
+  errno = 0;
+  ret = strtod (garglist->word->word, &ep);
+
+  if (*ep)
+    {
+      sh_invalidnum (garglist->word->word);
       conversion_error = 1;
     }
   else if (errno == ERANGE)

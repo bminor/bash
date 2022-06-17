@@ -1,3 +1,55 @@
+This document details the changes between this version, bash-5.2-rc1, and
+the previous version, bash-5.2-beta.
+
+1. Changes to Bash
+
+a. Changes to `wait -p' and how it sets the variable name in the presence of
+   valid and invalid PID arguments.
+
+b. Fixed a bug that caused compgen to dump core if the completion engine was
+   not initialized.
+
+c. Fixed a memory leak in the variable name programmable completion code.
+
+d. Here-documents and here-strings use tempfiles if the shell compatibility
+   level is 50 or lower.
+
+e. Non-interactive shells exit on a syntax error encountered while parsing a
+   command substitution.
+
+f. Fixed a bug with inherited parser state while parsing a command substitution.
+
+g. Fixed a bug that caused the shell not to check for terminating signals
+   after executing the command_string supplied with `-c' and before executing
+   the exit trap.
+
+h. Changes to avoid a make race condition while generating builtins.c.
+
+i. Make it explicit that BASH_REMATCH is always a global variable, and that
+   local copies are (currently) ignored.
+
+j. Fixed a bug that caused an ambiguous redirection (>&word) to be printed
+   incorrectly (>&word) if no file descriptor was supplied.
+
+2. Changes to Readline
+
+a. Fixed a bug that caused rl_eof_found to be set prematurely while reading a
+   multi-character key sequence in callback mode.
+
+3. New Features in Bash
+
+a. In posix mode, the `printf' builtin checks for the `L' length modifier and
+   uses long double for floating point conversion specifiers if it's present,
+   double otherwise.
+
+b. The `globbing' completion code now takes the `globstar' option into account.
+
+c. `suspend -f' now forces the shell to suspend even if job control is not
+   currently enabled.
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.2-beta, and
 the previous version, bash-5.2-alpha.
 
@@ -291,10 +343,10 @@ h. The `unset' builtin now attempts to treat arguments as array subscripts
 i. There is a default value for $BASH_LOADABLES_PATH in config-top.h.
 
 j. Associative array assignment and certain instances of referencing (e.g.,
-   `test -v' now allow `@' and `*' to be used as keys.
+   `test -v') now allow `@' and `*' to be used as keys.
 
-k. Bash attempts to expand indexed array subscripts only once when executing
-   shell constructs and word expansions.
+k. Bash attempts to expand indexed and associative array subscripts only
+   once when executing shell constructs and word expansions.
 
 l. The `unset' builtin allows a subscript of `@' or `*' to unset a key with
    that value for associative arrays instead of unsetting the entire array

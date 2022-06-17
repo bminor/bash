@@ -2655,7 +2655,11 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
           lstdin = wait_for (lastpid, 0);
         }
       else
-        lstdin = wait_for_single_pid (lastpid, 0);		/* checks bgpids list */
+	{
+	  lstdin = wait_for_single_pid (lastpid, 0);		/* checks bgpids list */
+	  if (lstdin > 256)		/* error sentinel */
+	    lstdin = 127;
+	}
 #else
       lstdin = wait_for (lastpid, 0);
 #endif

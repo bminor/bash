@@ -54,7 +54,7 @@ zmapfd (fd, ostr, fn)
   int rval;
   char lbuf[ZBUFSIZ];
   char *result;
-  int rsize, rind;
+  size_t rsize, rind;
 
   rval = 0;
   result = (char *)xmalloc (rsize = ZBUFSIZ);

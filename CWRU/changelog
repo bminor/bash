@@ -2870,7 +2870,7 @@ subst.c
 	- parameter_brace_expand: when expanding an indirect variable, extend
 	  the special case for array[@] and array[*] (set -u/no positional
 	  parameters, obeying the baroque quoting rules) to the value of the
-	  indirection. Report amd fix from konsolebox <konsolebox@gmail.com>
+	  indirection. Report and fix from konsolebox <konsolebox@gmail.com>
 
 				   12/31
 				   -----
@@ -3449,3 +3449,240 @@ lib/readline/{complete,histfile,histsearch,isearch,terminal}.c
 				    ---
 configure.ac
 	- bumped version to bash-5.2-beta
+
+[bash-5.2-beta frozen]
+
+				    4/8
+				    ---
+lib/readline/input.c
+	- _rl_orig_sigset: need extern declaration if HAVE_SELECT is defined.
+	  From https://savannah.gnu.org/support/?110634
+
+examples/loadables/seq.c
+	- PRIdMAX: redefine if PRI_MACROS_BROKEN is defined.
+	  From https://savannah.gnu.org/support/index.php?110635
+
+				   4/11
+				   ----
+configure.ac
+	- BASH_FUNC_STRTOIMAX: replace strtoimax if the system doesn't provide
+	  a declaration in a standard header file. Uses new m4/strtoimax.m4.
+	  From https://savannah.gnu.org/support/index.php?110633
+
+builtins/printf.def
+	- getdouble: new function, parses string into `double' using strtod
+	- printf_builtin: check for the `L' length modifier and use long
+	  doubles for the floating point conversion specifiers. If it's not
+	  supplied, use `double' when in posix mode (as posix specifies) and
+	  long double (if it's available, double if not) in default mode.
+	  From a report from Paul Eggert <eggert@cs.ucla.edu>
+
+				   4/12
+				   ----
+lib/sh/oslib.c
+	- bzero: update function signature to modern BSD version
+
+				   4/14
+				   ----
+lib/sh/oslib.c
+	- bcopy, gethostname, mkfifo: update function signatures to modern
+	  versions
+
+				   4/15
+				   ----
+jobs.c,nojobs.c
+	- wait_for_single_pid: if the pid or job argument is invalid -- isn't
+	  a child of this shell -- return 257, which is out of the range of
+	  valid 8-bit status values
+
+execute_cmd.c
+	- execute_pipeline: if wait_for_single_pid returns > 256, set it to
+	  127 (invalid process)
+
+jobs.c
+	- wait_for_background_pids: if wait_for_single_pid returns > 256, set
+	  the status we return in PS to 127 (what it was before)
+
+builtins/wait.def
+	- wait_builtin: if wait_for_single_pid returns > 256, treat it as an
+	  error and set pstat.pid to NO_PID
+	- wait_builtin: if -p supplied, and we get to the end of the argument
+	  list with PSTAT.PID != NO_PID (which we assume means that the return
+	  value is set from PSTAT.STATUS), set the variable name to PSTAT.PID.
+	  From a report by Robert Elz <kre@munnari.OZ.AU>
+	- wait_builtin: for compatibility with the netbsd sh, leave the variable
+	  name specified with `-p' unset if there are no PID arguments.
+	  From a report by Robert Elz <kre@munnari.OZ.AU>
+
+				   4/17
+				   ----
+parse.y
+	- xparse_dolparen: if (flags & SX_NOLONGJMP), don't call
+	  jump_to_top_level() on errors
+
+bashline.c
+	- bash_quote_filename: don't call quote_word_break_chars() unless we
+	  have word break chars initialized. Fixes bug reported by
+	  Sam James <sam@gentoo.org>
+
+				   4/18
+				   ----
+pcomplete.c
+	- gen_globpat_matches: call glob_filename with the GX_GLOBSTAR flag if
+	  the `globstar' shell option is enabled. From a report by
+	  Steve <bash@lonetwin.net>
+
+lib/malloc/malloc.c
+	- internal_free: remove the GLIBC21 code (!)
+	- internal_free: make the code that tests against memtop and calls
+	  lesscore depend on USE_LESSCORE being defined, which it is by
+	  default
+
+lib/malloc/imalloc.h
+	- USE_LESSCORE: define
+
+parse.y,shell.h
+	- token_buffer_size and its corresponding saved value in the shell's
+	  parser state are now size_t instead of int
+
+stringlib.c
+	- strsub,strcreplace: use size_t instead of int for local length and
+	  indexing variables
+
+lib/sh/zmapfd.c
+	- zmapfd: use size_t instead of int for local length and indexing
+	  variables
+
+lib/sh/zgetline.c
+	- zgetline: use size_t instead of int for local length and indexing
+	  variables
+
+				   4/20
+				   ----
+pcomplete.c
+	- init_itemlist_from_varlist: free VLIST after assigning it from
+	  *SVFUNC and after we get the variable names and values out of it.
+	  Report from Robert E. Griffith <bobg@junga.com>
+
+				   4/25
+				   ----
+redir.c
+	- here_document_to_fd: if the shell compatibility level is bash-5.0 or
+	  earlier, use tempfiles for all here-documents and here-strings. From
+	  a bug-bash discussion started by Sam Liddicott <sam@liddicott.com>
+
+				   4/26
+				   ----
+parse.y
+	- parse_comsub: non-interactive shells exit on a syntax error while
+	  parsing the command substitution
+	- parse_comsub: unset additional PARSER_STATE flags before calling
+	  yyparse(). Inspired by https://bugs.gentoo.org/837203; unsetting
+	  PST_COMPASSIGN is the fix for that bug
+	- parse_string_to_word_list: use save_parser_state/restore_parser_state
+	  instead of saving pieces of the shell state in individual variables
+	- parse_compound_assignment: use save_parser_state/restore_parser_state
+	  instead of saving pieces of the shell state in individual variables
+	- parse_compound_assignment: unset additional PARSER_STATE flags before
+	  calling read_token(); set esacs_needed_count and expecting_in_token
+	  to 0 like in parse_comsub() since read_token can use them
+
+				   4/27
+				   ----
+lib/sh/strvis.c
+	- sh_charvis: changes to handle being compiled without multibyte support
+
+				   4/29
+				   ----
+lib/readline/callback.c
+	- rl_callback_read_char: don't set rl_eof_found unless eof is > 0,
+	  since it can be -3 if we need to read more input in a multi-key
+	  sequence. Report from Andrew Burgess <aburgess@redhat.com>
+
+examples/loadables/Makefile.sample.in
+	- new file, containing the rules to build the example shared object
+	- includes Makefile.inc from wherever it's installed. Suggested by
+	  Robert E. Griffith <bobg@junga.com>
+
+examples/loadables/Makefile.inc.in
+	- remove rules that create the example shared object
+
+				   4/30
+				   ----
+builtins/evalstring.c
+	- parse_and_execute: check for terminating signals before returning,
+	  after any longjmp, to improve responsiveness and fix the -c code
+	  path before running any exit trap. Report from
+	  Emanuele Torre <torreemanuele6@gmail.com>
+
+				   5/17
+				   ----
+builtins/suspend.def
+	- suspend_builtin: the -f option now forces a suspend even if job
+	  control is not enabled. Inspired by a discussion with
+	  Robert Elz <kre@munnari.OZ.AU>
+
+doc/{bash.1,bashref.texi}
+	- suspend: updated description to include expanded -f behavior
+
+				   5/25
+				   ----
+builtins/mkbuiltins.c
+	- -includefile: new argument, specifies extern filename to insert
+	  into the #include statement in the structfile (builtins.c) and
+	  the filename in the comment in the extern file (builtext.h).
+	  From Alexander Kanavin <alex.kanavin@gmail.com> via
+	  https://savannah.gnu.org/patch/?10210
+
+builtins/Makefile.in
+	- builtins.c: change call to mkbuiltins to add -includefile option
+	- builtins.c: change recipe to run all the commands in the same shell
+	  invocation
+	- builtins.c: change recipe to specify new filenames in the call to
+	  mkbuiltins and move them onto builtins.c/builtext.h if the new ones
+	  are different; make the new filenames use the current make recipe
+	  shell pid in the filename ($$RECPID).
+	  Inspired by Alexander Kanavin <alex.kanavin@gmail.com> via
+	  https://savannah.gnu.org/patch/?10210
+
+				    6/2
+				    ---
+builtins/common.c
+	- builtin_find_indexed_array: new function, factored common code out
+	  of mapfile and read builtins to find an in-scope indexed array or
+	  create one 
+
+builtins/common.h
+	- builtin_find_indexed_array: extern declaration
+
+builtins/{mapfile,read}.def
+	- change callers to use builtin_find_indexed_array
+
+variables.c
+	- unbind_global_variable, unbind_global_variable_noref: new functions
+	  that remove variables from the global_variables table
+
+lib/sh/shmatch.c
+	- sh_regmatch: use unbind_global_variable_noref to make sure we act on
+	  the copy of BASH_REMATCH in the global scope all the time, ignoring
+	  any local variables that might exist. Tentative fix for memory leak
+	  report from Emanuele Torre <torreemanuele6@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- BASH_REMATCH: add caveat about making it a local variable
+
+				    6/6
+				    ---
+print_cmd.c
+	- print_redirection: if the redirectee for r_duplicating_output_word
+	  (r_duplicating_input_word) is 1 (0), don't print it; only print a
+	  non-default file descriptor number
+	- print_redirection_list: remove the code that tries to temporarily
+	  translate a >&word redirection to >&word now that we won't print a
+	  non-default file descriptor number. Fixes issue with `declare -f' and
+	  function export reported by Namikaze Minato <lloydsensei@gmail.com>
+
+				   6/13
+				   ----
+configure.ac
+	- bumped version to bash-5.2-rc1

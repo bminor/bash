@@ -68,7 +68,8 @@ zgetline (fd, lineptr, n, delim, unbuffered_read)
      int delim;
      int unbuffered_read;
 {
-  int nr, retval;
+  int retval;
+  size_t nr;
   char *line, c;
 
   if (lineptr == 0 || n == 0 || (*lineptr == 0 && *n != 0))

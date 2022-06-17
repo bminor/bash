@@ -1024,6 +1024,40 @@ builtin_bind_var_to_int (name, val, flags)
   return v;
 }
 
+#if defined (ARRAY_VARS)
+SHELL_VAR *
+builtin_find_indexed_array (array_name, flags)
+     char *array_name;
+     int flags;
+{
+  SHELL_VAR *entry;
+
+  if ((flags & 2) && legal_identifier (array_name) == 0)
+    {
+      sh_invalidid (array_name);
+      return (SHELL_VAR *)NULL;
+    }
+
+  entry = find_or_make_array_variable (array_name, 1);
+  /* With flags argument & 1, find_or_make_array_variable checks for readonly
+     and noassign variables and prints error messages. */
+  if (entry == 0)
+    return entry;
+  else if (array_p (entry) == 0)
+    {
+      builtin_error (_("%s: not an indexed array"), array_name);
+      return (SHELL_VAR *)NULL;
+    }
+  else if (invisible_p (entry))
+    VUNSETATTR (entry, att_invisible);	/* no longer invisible */
+
+  if (flags & 1)
+    array_flush (array_cell (entry));
+
+  return entry;
+}
+#endif /* ARRAY_VARS */	
+
 /* Like check_unbind_variable, but for use by builtins (only matters for
    error messages). */
 int

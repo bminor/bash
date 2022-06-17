@@ -32,6 +32,11 @@
 
 #define MALLOC_WRAPFUNCS
 
+/* If defined, as it is by default, use the lesscore() function to attempt
+   to reduce the top of the heap when freeing memory blocks larger than a
+   defined threshold. */
+#define USE_LESSCORE
+
 /* Generic pointer type. */
 #ifndef PTR_T
 #  if defined (__STDC__)

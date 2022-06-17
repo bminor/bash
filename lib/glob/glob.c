@@ -121,7 +121,7 @@ void wcdequote_pathname PARAMS((wchar_t *));
 static void wdequote_pathname PARAMS((char *));
 static void dequote_pathname PARAMS((char *));
 #else
-#  define dequote_pathname udequote_pathname
+#  define dequote_pathname(p) udequote_pathname(p)
 #endif
 static int glob_testdir PARAMS((char *, int));
 static char **glob_dir_to_array PARAMS((char *, char **, int));

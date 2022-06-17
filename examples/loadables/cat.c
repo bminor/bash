@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@ fcopy(fd, fn)
 int	fd;
 char	*fn;
 {
-	char	buf[1024], *s;
+	char	buf[4096], *s;
 	int	n, w, e;
 
 	while (n = read(fd, buf, sizeof (buf))) {

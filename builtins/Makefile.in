@@ -1,6 +1,6 @@
 # This Makefile for building libbuiltins.a is in -*- text -*- for Emacs.
 #
-# Copyright (C) 1996-2021 Free Software Foundation, Inc.
+# Copyright (C) 1996-2022 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -186,20 +186,22 @@ gen-helpfiles:	tmpbuiltins.o gen-helpfiles.o
 	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ gen-helpfiles.o tmpbuiltins.o $(LIBS_FOR_BUILD)
 
 builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
-	@-if test -f builtins.c; then mv -f builtins.c old-builtins.c; fi
-	@-if test -f builtext.h; then mv -f builtext.h old-builtext.h; fi
-	./$(MKBUILTINS) -externfile builtext.h -structfile builtins.c \
-	    -noproduction $(DIRECTDEFINE) $(HELPDIRDEFINE) $(HELPSTRINGS) $(DEFSRC)
-	@-if cmp -s old-builtext.h builtext.h 2>/dev/null; then \
-		mv old-builtext.h builtext.h; \
-	 else \
-		$(RM) old-builtext.h; \
-	 fi
-	@-if cmp -s old-builtins.c builtins.c 2>/dev/null; then \
-		mv old-builtins.c builtins.c; \
-	 else \
-		$(RM) old-builtins.c; \
-	 fi
+	@RECPID=$$$$ ; \
+	NEW_BUILTEXT=builtext-$$RECPID.h NEW_BUILTINS=builtins-$$RECPID.c ; \
+	./$(MKBUILTINS) -externfile $$NEW_BUILTEXT \
+	    -includefile builtext.h \
+	    -structfile $$NEW_BUILTINS \
+	    -noproduction $(DIRECTDEFINE) $(HELPDIRDEFINE) $(HELPSTRINGS) $(DEFSRC) ; \
+	if cmp -s $$NEW_BUILTEXT builtext.h 2>/dev/null; then \
+		$(RM) $$NEW_BUILTEXT; \
+	else \
+		mv $$NEW_BUILTEXT builtext.h; \
+	fi ; \
+	if cmp -s $$NEW_BUILTINS builtins.c 2>/dev/null; then \
+		$(RM) $$NEW_BUILTINS ; \
+	else \
+		mv $$NEW_BUILTINS builtins.c; \
+	fi
 
 helpdoc:	gen-helpfiles
 	./gen-helpfiles ${HELPDIRDEFINE}

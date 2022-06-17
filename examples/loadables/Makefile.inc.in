@@ -1,7 +1,7 @@
 #
 # Sample makefile for bash loadable builtin development
 #
-# Copyright (C) 2015 Free Software Foundation, Inc.     
+# Copyright (C) 2015-2022 Free Software Foundation, Inc.     
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -99,10 +99,3 @@ INC = -I$(headersdir) -I$(headersdir)/include -I$(headersdir)/builtins
 
 .c.o:
 	$(SHOBJ_CC) $(SHOBJ_CFLAGS) $(CCFLAGS) $(INC) -c -o $@ $<
-
-all:	example
-
-example:	example.o
-	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ example.o $(SHOBJ_LIBS)
-
-example.o: example.c

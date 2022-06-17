@@ -167,8 +167,8 @@ getdtablesize ()
 #  endif
 void
 bcopy (s,d,n)
-     char *d, *s;
-     int n;
+     void *d, *s;
+     size_t n;
 {
   FASTCOPY (s, d, n);
 }
@@ -180,8 +180,8 @@ bcopy (s,d,n)
 #  endif
 void
 bzero (s, n)
-     char *s;
-     int n;
+     void *s; 
+     size_t n;
 {
   register int i;
   register char *r;
@@ -197,7 +197,7 @@ bzero (s, n)
 int
 gethostname (name, namelen)
      char *name;
-     int namelen;
+     size_t namelen;
 {
   int i;
   struct utsname ut;
@@ -214,7 +214,7 @@ gethostname (name, namelen)
 int
 gethostname (name, namelen)
      char *name;
-     int namelen;
+     size_t namelen;
 {
   strncpy (name, "unknown", namelen);
   name[namelen] = '\0';
@@ -237,7 +237,7 @@ killpg (pgrp, sig)
 int
 mkfifo (path, mode)
      char *path;
-     int mode;
+     mode_t mode;
 {
 #if defined (S_IFIFO)
   return (mknod (path, (mode | S_IFIFO), 0));

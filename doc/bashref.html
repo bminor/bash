@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 24 February 2022).
+the Bash shell (version 5.2, 3 June 2022).
 
-This is Edition 5.2, last updated 24 February 2022,
+This is Edition 5.2, last updated 3 June 2022,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 24 February 2022).
+the Bash shell (version 5.2, 3 June 2022).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 24 February 2022,
+<p>This is Edition 5.2, last updated 3 June 2022,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -1104,7 +1104,9 @@ the time information.
 <p>If the pipeline is not executed asynchronously (see <a href="#Lists">Lists of Commands</a>), the
 shell waits for all commands in the pipeline to complete.
 </p>
-<p>Each command in a pipeline is executed in its own <em>subshell</em>, which is a
+<p>Each command in a multi-command pipeline,
+where pipes are created,
+is executed in its own <em>subshell</em>, which is a
 separate process (see <a href="#Command-Execution-Environment">Command Execution Environment</a>).
 If the <code>lastpipe</code> option is enabled using the <code>shopt</code> builtin
 (see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>),
@@ -1651,6 +1653,11 @@ Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the remaining <code>BASH_REMATCH</code> indices.
 The element of <code>BASH_REMATCH</code> with index <var>n</var> is the portion of the
 string matching the <var>n</var>th parenthesized subexpression.
+</p>
+<p>Bash sets
+<code>BASH_REMATCH</code>
+in the global scope; declaring it as a local variable will lead to
+unexpected results.
 </p>
 <p>Expressions may be combined using the following operators, listed
 in decreasing order of precedence:
@@ -3307,7 +3314,9 @@ then any character not enclosed is matched.  A &lsquo;<samp>-</samp>&rsquo;
 may be matched by including it as the first or last character
 in the set.  A &lsquo;<samp>]</samp>&rsquo; may be matched by including it as the first
 character in the set.
-The sorting order of characters in range expressions is determined by
+The sorting order of characters in range expressions,
+and the characters included in the range,
+are determined by
 the current locale and the values of the
 <code>LC_COLLATE</code> and <code>LC_ALL</code> shell variables, if set.
 </p>
@@ -7987,10 +7996,12 @@ No other startup files are read.
 <span id="Invoked-by-remote-shell-daemon"></span><h4 class="subsubheading">Invoked by remote shell daemon</h4>
 
 <p>Bash attempts to determine when it is being run with its standard input
-connected to a network connection, as when executed by the remote shell
-daemon, usually <code>rshd</code>, or the secure shell daemon <code>sshd</code>.
-If Bash determines it is being run in
-this fashion, it reads and executes commands from <samp>~/.bashrc</samp>, if that
+connected to a network connection, as when executed by
+the historical remote shell daemon, usually <code>rshd</code>,
+or the secure shell daemon <code>sshd</code>.
+If Bash
+determines it is being run non-interactively in this fashion,
+it reads and executes commands from <samp>~/.bashrc</samp>, if that
 file exists and is readable.
 It will not do this if invoked as <code>sh</code>.
 The <samp>--norc</samp> option may be used to inhibit this behavior, and the
@@ -9347,6 +9358,11 @@ has been set.
 If Bash receives a trapped signal while executing <code>read</code>, the trap
 handler executes and <code>read</code> returns an exit status greater than 128.
 
+</li><li> The <code>printf</code> builting uses <code>double</code> (via <code>strtod</code>) to convert
+arguments corresponding to floating point conversion specifiers, instead of
+<code>long double</code> if it&rsquo;s available. The &lsquo;<samp>L</samp>&rsquo; length modifier forces
+<code>printf</code> to use <code>long double</code> if it&rsquo;s available.
+
 </li><li> Bash removes an exited background process&rsquo;s status from the list of such
 statuses after the <code>wait</code> builtin is used to obtain it.
 
@@ -9860,9 +9876,17 @@ argument restricts operation to running jobs.
 
 <p>Suspend the execution of this shell until it receives a
 <code>SIGCONT</code> signal.
-A login shell cannot be suspended; the <samp>-f</samp>
+A login shell,
+or a shell without job control enabled,
+cannot be suspended; the <samp>-f</samp>
 option can be used to override this and force the suspension.
-</p></dd>
+The return status is 0 unless the shell is a login shell
+or job control is not enabled
+and
+<samp>-f</samp>
+is not supplied.
+</p>
+</dd>
 </dl>
 
 <p>When job control is not active, the <code>kill</code> and <code>wait</code>

@@ -69,7 +69,11 @@ sh_charvis (s, sindp, slen, ret, rindp)
   ri = *rindp;
   c = s[*sindp];
 
+#if defined (HANDLE_MULTIBYTE)
   send = (locale_mb_cur_max > 1) ? s + slen : 0;
+#else
+  send = 0;
+#endif
 
   if (SAFECHAR (c))
     {
@@ -88,10 +92,12 @@ sh_charvis (s, sindp, slen, ret, rindp)
       ret[ri++] = UNCTRL (c);
       si++;
     }
+#if defined (HANDLE_MULTIBYTE)
   else if (locale_utf8locale && (c & 0x80))
     COPY_CHAR_I (ret, ri, s, send, si);
   else if (locale_mb_cur_max > 1 && is_basic (c) == 0)
     COPY_CHAR_I (ret, ri, s, send, si);
+#endif
   else if (META_CHAR (c))
     {
       ret[ri++] = 'M';

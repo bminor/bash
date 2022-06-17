@@ -550,6 +550,9 @@ compat50 (set using BASH_COMPAT)
 	  printed an informational message to that effect even when writing
 	  output in a format that can be reused as input (-l). Bash-5.1
 	  suppresses that message if -l is supplied
+	- Bash-5.1 and later use pipes for here-documents and here-strings if
+	  they are smaller than the pipe capacity. If the shell compatibility
+	  level is set to 50 or lower, it reverts to using temporary files.
 
 compat51 (set using BASH_COMPAT)
 	- The `unset' builtin will unset the array a given an argument like
@@ -560,6 +563,10 @@ compat51 (set using BASH_COMPAT)
 	  for statement can be expanded more than once
 	- expressions used as arguments to arithmetic operators in the [[
 	  conditional command can be expanded more than once
+	- indexed and associative array subscripts used as arguments to the
+	  operators in the [[ conditional command (e.g., `[[ -v') can be
+	  expanded more than once. Bash-5.2 behaves as if the
+	  `assoc_expand_once' option were enabled.
 	- the expressions in substring parameter brace expansion can be
 	  expanded more than once
 	- the expressions in the $(( ... )) word expansion can be expanded

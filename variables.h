@@ -328,6 +328,8 @@ extern int unbind_variable PARAMS((const char *));
 extern int check_unbind_variable PARAMS((const char *));
 extern int unbind_nameref PARAMS((const char *));
 extern int unbind_variable_noref PARAMS((const char *));
+extern int unbind_global_variable PARAMS((const char *));
+extern int unbind_global_variable_noref PARAMS((const char *));
 extern int unbind_func PARAMS((const char *));
 extern int unbind_function_def PARAMS((const char *));
 extern int delete_var PARAMS((const char *, VAR_CONTEXT *));

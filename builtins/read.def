@@ -869,28 +869,14 @@ assign_vars:
      an assign them to `arrayname' in turn. */
   if (arrayname)
     {
-      if (legal_identifier (arrayname) == 0)
-	{
-	  sh_invalidid (arrayname);
-	  free (input_string);
-	  return (EXECUTION_FAILURE);
-	}
-
-      var = find_or_make_array_variable (arrayname, 1);
+      /* pass 1 for flags arg to clear the existing array + 2 to check for a
+	 valid identifier. */
+      var = builtin_find_indexed_array (arrayname, 3);
       if (var == 0)
 	{
 	  free (input_string);
 	  return EXECUTION_FAILURE;	/* readonly or noassign */
 	}
-      if (assoc_p (var))
-	{
-          builtin_error (_("%s: cannot convert associative to indexed array"), arrayname);
-	  free (input_string);
-	  return EXECUTION_FAILURE;	/* existing associative array */
-	}
-      else if (invisible_p (var))
-	VUNSETATTR (var, att_invisible);
-      array_flush (array_cell (var));
 
       alist = list_string (input_string, ifs_chars, 0);
       if (alist)

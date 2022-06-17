@@ -34,9 +34,9 @@
 : $(case x in x) (echo esac) esac)
 
 # these errors should be caught sooner
-: $(case x in x) ;; x) done esac)
-: $(case x in x) ;; x) done ;; esac)
-: $(case x in x) (esac) esac)
+${THIS_SH} -c ': $(case x in x) ;; x) done esac)' bash
+${THIS_SH} -c ': $(case x in x) ;; x) done ;; esac)' bash
+${THIS_SH} -c ': $(case x in x) (esac) esac)' bash
 
 # these are not errors
 : $(case x in x) ;; x) eval done ;; esac)

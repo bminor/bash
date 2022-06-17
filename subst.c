@@ -4095,7 +4095,9 @@ remove_backslashes (string)
    to the != or == operator, and should be treated as a pattern.  In
    this case, we quote the string specially for the globbing code.  If
    SPECIAL is 2, this is an rhs argument for the =~ operator, and should
-   be quoted appropriately for regcomp/regexec.  The caller is responsible
+   be quoted appropriately for regcomp/regexec.  If SPECIAL is 3, this is
+   an array subscript and should be quoted after expansion so it's only
+   expanded once (Q_ARITH). The caller is responsible
    for removing the backslashes if the unquoted word is needed later. In
    any case, since we don't perform word splitting, we need to do quoted
    null character removal. */

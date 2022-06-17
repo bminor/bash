@@ -2,7 +2,7 @@
  * shmatch.c -- shell interface to posix regular expression matching.
  */
 
-/* Copyright (C) 2003-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,6 +40,10 @@
 #include "externs.h"
 
 extern int glob_ignore_case, match_ignore_case;
+
+#if defined (ARRAY_VARS)
+extern SHELL_VAR *builtin_find_indexed_array (char *, int);
+#endif
 
 int
 sh_regmatch (string, pattern, flags)
@@ -92,11 +96,16 @@ sh_regmatch (string, pattern, flags)
   /* Store the parenthesized subexpressions in the array BASH_REMATCH.
      Element 0 is the portion that matched the entire regexp.  Element 1
      is the part that matched the first subexpression, and so on. */
-  unbind_variable_noref ("BASH_REMATCH");
+#if 1
+  unbind_global_variable_noref ("BASH_REMATCH");
   rematch = make_new_array_variable ("BASH_REMATCH");
-  amatch = array_cell (rematch);
+#else
+  /* TAG:bash-5.3 */
+  rematch = builtin_find_indexed_array ("BASH_REMATCH", 1);
+#endif
+  amatch = rematch ? array_cell (rematch) : (ARRAY *)0;
 
-  if (matches && (flags & SHMAT_SUBEXP) && result == EXECUTION_SUCCESS && subexp_str)
+  if (matches && amatch && (flags & SHMAT_SUBEXP) && result == EXECUTION_SUCCESS && subexp_str)
     {
       for (subexp_ind = 0; subexp_ind <= regex.re_nsub; subexp_ind++)
 	{

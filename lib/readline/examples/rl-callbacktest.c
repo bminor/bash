@@ -7,8 +7,12 @@
 #include <sys/types.h>
 #include <sys/select.h>
 
+#include <signal.h>
+
 #include <errno.h>
 #include <stdio.h>
+
+#include <locale.h>
 
 /* Standard readline include files. */
 #if defined (READLINE_LIBRARY)
@@ -22,9 +26,18 @@
 extern int errno;
 
 static void cb_linehandler (char *);
+static void signandler (int);
 
-int running;
+int running, sigwinch_received;
 const char *prompt = "rltest$ ";
+
+/* Handle SIGWINCH and window size changes when readline is not active and
+   reading a character. */
+static void
+sighandler (int sig)
+{
+  sigwinch_received = 1;
+}
 
 /* Callback function called for each line when accept-line executed, EOF
    seen, or EOF character read.  This sets a flag and returns; it could
@@ -60,6 +73,11 @@ main (int c, char **v)
   fd_set fds;
   int r;
 
+  setlocale (LC_ALL, "");
+
+  /* Handle SIGWINCH */
+  signal (SIGWINCH, sighandler);
+  
   /* Install the line handler. */
   rl_callback_handler_install (prompt, cb_linehandler);
 
@@ -80,6 +98,13 @@ main (int c, char **v)
 	  rl_callback_handler_remove ();
 	  break;
 	}
+      if (sigwinch_received)
+	{
+	  rl_resize_terminal ();
+	  sigwinch_received = 0;
+	}
+      if (r < 0)
+	continue;
 
       if (FD_ISSET (fileno (rl_instream), &fds))
 	rl_callback_read_char ();

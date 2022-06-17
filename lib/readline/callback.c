@@ -279,8 +279,11 @@ rl_callback_read_char (void)
 	}
 
       /* Make sure application hooks can see whether we saw EOF. */
-      if (rl_eof_found = eof)
-	RL_SETSTATE(RL_STATE_EOF);
+      if (eof > 0)
+	{
+	  rl_eof_found = eof;
+	  RL_SETSTATE(RL_STATE_EOF);
+	}
 
       if (rl_done)
 	{
