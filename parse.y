@@ -4186,6 +4186,7 @@ xparse_dolparen (base, string, indp, flags)
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
   if (flags & SX_NOLONGJMP)
     sflags |= SEVAL_NOLONGJMP;
+
   save_parser_state (&ps);
   save_input_line_state (&ls);
 
@@ -4609,6 +4610,7 @@ cond_term ()
       tleft = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
 
       /* binop */
+      /* tok = cond_skip_newlines (); ? */
       tok = read_token (READ);
       if (tok == WORD && test_binop (yylval.word->word))
 	{
@@ -6302,12 +6304,12 @@ parse_string_to_word_list (s, flags, whom)
   sh_parser_state_t ps;
   int ea;
 
+  orig_line_number = line_number;
+  save_parser_state (&ps);
+
 #if defined (HISTORY)
   bash_history_disable ();
 #endif
-
-  orig_line_number = line_number;
-  save_parser_state (&ps);
 
   push_stream (1);
   if (ea = expanding_alias ())

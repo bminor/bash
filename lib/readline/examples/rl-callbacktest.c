@@ -12,9 +12,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#ifdef HAVE_LOCALE_H
-#  include <locale.h>
-#endif
+#include <locale.h>
 
 /* Standard readline include files. */
 #if defined (READLINE_LIBRARY)

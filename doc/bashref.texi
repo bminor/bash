@@ -8464,7 +8464,7 @@ behavior. It's intended to be a temporary solution.
 This section does not mention behavior that is standard for a particular
 version (e.g., setting @code{compat32} means that quoting the rhs of the regexp
 matching operator quotes special regexp characters in the word, which is
-default behavior in bash-3.2 and above). 
+default behavior in bash-3.2 and subsequent versions). 
 
 If a user enables, say, @code{compat32}, it may affect the behavior of other
 compatibility levels up to and including the current compatibility level.
@@ -8896,6 +8896,10 @@ terminate before returning its status, intead of returning when it changes
 status.
 If neither @var{jobspec} nor @var{pid} specifies an active child process
 of the shell, the return status is 127.
+If @code{wait} is interrupted by a signal, the return status will be greater
+than 128, as described above (@pxref{Signals}).
+Otherwise, the return status is the exit  status
+of the last process or job waited for.
 
 @item disown
 @btindex disown

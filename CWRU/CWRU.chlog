@@ -3686,3 +3686,34 @@ print_cmd.c
 				   ----
 configure.ac
 	- bumped version to bash-5.2-rc1
+
+				   6/15
+				   ----
+parse.y
+	- parse_string_to_word_list: save the parser state before any state-
+	  changing functions like bash_history_disable(). Reported by
+	  Clark Wang <dearvoid@gmail.com>
+
+				   6/16
+				   ----
+doc/bash.1
+	- play tricks with the value of the zZ number register to refer to
+	  `bash(1)' instead of `above' or `below' when creating the builtins
+	  man page
+
+				   6/17
+				   ----
+doc/{bash.1,bashref.texi}
+	- wait: note that wait will return > 128 if interrupted by a signal.
+	  Reported by AA <aathan_github@memeplex.com>
+
+execute_cmd.c
+	- {execute_cond_node,execute_arith_command,eval_arith_for_expr}: make
+	  sure to reset this_command_name after running any DEBUG trap so the
+	  DEBUG trap doesn't overwrite it.
+	  Reported by Emanuele Torre <torreemanuele6@gmail.com>.
+	- execute_select_command: set this_command_name to NULL after running
+	  any DEBUG trap like execute_for_command does
+
+
+	
