@@ -11258,7 +11258,7 @@ add_string:
 	  {
 	    t_index = sindex++;
 
-	    temp = string_extract (string, &sindex, "`", SX_REQMATCH);
+	    temp = string_extract (string, &sindex, "`", (word->flags & W_COMPLETE) ? SX_COMPLETE : SX_REQMATCH);
 	    /* The test of sindex against t_index is to allow bare instances of
 	       ` to pass through, for backwards compatibility. */
 	    if (temp == &extract_string_error || temp == &extract_string_fatal)

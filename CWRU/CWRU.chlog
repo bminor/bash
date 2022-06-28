@@ -3715,5 +3715,19 @@ execute_cmd.c
 	- execute_select_command: set this_command_name to NULL after running
 	  any DEBUG trap like execute_for_command does
 
+				   6/23
+				   ----
+test.c
+	- three_arguments: when given [ ! ! arg ], make sure to advance POS
+	  after calling two_arguments to avoid a `too many arguments' error.
+	  Report from Steffen Nurpmeso <steffen@sdaoden.eu>
 
-	
+				   6/27
+				   ----
+subst.c
+	- expand_word_internal: when expanding backquoted command substitution,
+	  call string_extract with the SX_REQMATCH flag (closing backquote
+	  required) only if the word flags don't contain W_COMPLETE,
+	  indicating that we're doing this for completion, probably to
+	  determine whether or not to append something to the word. Fixes bug
+	  reported by Emanuele Torre <torreemanuele6@gmail.com>.

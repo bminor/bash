@@ -250,7 +250,7 @@ printf_builtin (list)
      WORD_LIST *list;
 {
   int ch, fieldwidth, precision;
-  int have_fieldwidth, have_precision, use_Lmod;
+  int have_fieldwidth, have_precision, use_Lmod, altform;
   char convch, thisch, nextch, *format, *modstart, *precstart, *fmt, *start;
 #if defined (HANDLE_MULTIBYTE)
   char mbch[25];		/* 25 > MB_LEN_MAX, plus can handle 4-byte UTF-8 and large Unicode characters*/
@@ -341,7 +341,7 @@ printf_builtin (list)
       for (fmt = format; *fmt; fmt++)
 	{
 	  precision = fieldwidth = 0;
-	  have_fieldwidth = have_precision = 0;
+	  have_fieldwidth = have_precision = altform = 0;
 	  precstart = 0;
 
 	  if (*fmt == '\\')
@@ -379,9 +379,11 @@ printf_builtin (list)
 	      continue;
 	    }
 
-	  /* found format specification, skip to field width */
+	  /* Found format specification, skip to field width. We check for
+	     alternate form for possible later use. */
 	  for (; *fmt && strchr(SKIP1, *fmt); ++fmt)
-	    ;
+	    if (*fmt == '#')
+	      altform++;
 
 	  /* Skip optional field width. */
 	  if (*fmt == '*')
