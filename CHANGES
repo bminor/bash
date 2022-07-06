@@ -321,7 +321,10 @@ b. There is a new internal timer framework used for read builtin timeouts.
 
 c. Rewrote the command substitution parsing code to call the parser recursively
    and rebuild the command string from the parsed command. This allows better
-   syntax checking and catches errors much earlier.
+   syntax checking and catches errors much earlier. Along with this, if
+   command substitution parsing completes with here-documents remaining to be
+   read, the shell prints a warning message and reads the here-document bodies
+   from the current input stream.
 
 d. The `ulimit' builtin now treats an operand remaining after all of the options
    and arguments are parsed as an argument to the last command specified by

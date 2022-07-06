@@ -2738,6 +2738,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
     /* Just call execute command on both sides. */
     case ';':
+    case '\n':		/* special case, happens in command substitutions */
       if (ignore_return)
 	{
 	  if (command->value.Connection->first)

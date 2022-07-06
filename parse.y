@@ -1154,7 +1154,12 @@ list1:		list1 AND_AND newline_list list1
 	|	list1 ';' newline_list list1
 			{ $$ = command_connect ($1, $4, ';'); }
 	|	list1 '\n' newline_list list1
-			{ $$ = command_connect ($1, $4, ';'); }
+			{
+			  if (parser_state & PST_CMDSUBST)
+			    $$ = command_connect ($1, $4, '\n');
+			  else
+			    $$ = command_connect ($1, $4, ';');
+			}
 	|	pipeline_command
 			{ $$ = $1; }
 	;
@@ -1188,7 +1193,7 @@ simple_list:	simple_list1
 			    gather_here_documents ();
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-itrace("LEGACY: parser: command substitution simple_list1 -> simple_list");
+INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 -> simple_list"));
 			      global_command = $1;
 			      eof_encountered = 0;
 			      if (bash_input.type == st_string)
@@ -1206,7 +1211,7 @@ itrace("LEGACY: parser: command substitution simple_list1 -> simple_list");
 			    gather_here_documents ();
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-itrace("LEGACY: parser: command substitution simple_list1 '&' -> simple_list");
+INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 '&' -> simple_list"));
 			      global_command = $1;
 			      eof_encountered = 0;
 			      if (bash_input.type == st_string)
@@ -1221,7 +1226,7 @@ itrace("LEGACY: parser: command substitution simple_list1 '&' -> simple_list");
 			    gather_here_documents ();
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-itrace("LEGACY: parser: command substitution simple_list1 ';' -> simple_list");
+INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 ';' -> simple_list"));
 			      global_command = $1;
 			      eof_encountered = 0;
 			      if (bash_input.type == st_string)
@@ -4095,8 +4100,8 @@ parse_comsub (qc, open, close, lenp, flags)
 
   if (need_here_doc > 0)
     {
-      internal_debug("command substitution: %d unterminated here-document%s", need_here_doc, (need_here_doc == 1) ? "" : "s");
-      gather_here_documents ();
+      internal_warning ("command substitution: %d unterminated here-document%s", need_here_doc, (need_here_doc == 1) ? "" : "s");
+      gather_here_documents ();	/* XXX check compatibility level? */
     }
 
   parsed_command = global_command;
@@ -4126,7 +4131,7 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
 
   restore_parser_state (&ps);
 
-  tcmd = make_command_string (parsed_command);		/* returns static memory */
+  tcmd = print_comsub (parsed_command);		/* returns static memory */
   retlen = strlen (tcmd);
   if (tcmd[0] == '(')			/* ) need a space to prevent arithmetic expansion */
     retlen++;

@@ -3731,3 +3731,21 @@ subst.c
 	  indicating that we're doing this for completion, probably to
 	  determine whether or not to append something to the word. Fixes bug
 	  reported by Emanuele Torre <torreemanuele6@gmail.com>.
+
+				    7/5
+				    ---
+execute_cmd.c
+	- execute_connection: treat a connector of '\n' the same as ';'
+
+print_cmd.c
+	- print_comsub: new function, sets flag noting we are printing a
+	  command substitution and calls make_command_string
+	- make_command_string_internal: add '\n' to the ';' case; print command
+	  list with newline connector appropriately
+parse.y
+	- parse_comsub: call print_comsub instead of make_command_string
+	- list1 production (part of compound_list): if a list is separated by
+	  newlines, and the parser is parsing a command substitution, make
+	  the connection command with a '\n' connector. Makes the text
+	  output of parse_comsub closer to the original source text. From a
+	  report from Martijn Dekker <martijn@inlv.org>
