@@ -114,6 +114,16 @@ typedef void *alias_t;
 #  define MBTEST(x)	((x))
 #endif
 
+#define EXTEND_SHELL_INPUT_LINE_PROPERTY() \
+do { \
+    if (shell_input_line_len + 2 > shell_input_line_propsize) \
+      { \
+	shell_input_line_propsize = shell_input_line_len + 2; \
+	shell_input_line_property = (char *)xrealloc (shell_input_line_property, \
+				    shell_input_line_propsize); \
+      } \
+} while (0)
+
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
 #endif
@@ -2555,21 +2565,12 @@ shell_getc (remove_quoted_newline)
 	    shell_input_line[shell_input_line_len] = '\n';
 	  shell_input_line[shell_input_line_len + 1] = '\0';
 
-#if 0
-	  set_line_mbstate ();		/* XXX - this is wasteful */
-#else
-#  if defined (HANDLE_MULTIBYTE)
+#if defined (HANDLE_MULTIBYTE)
 	  /* This is kind of an abstraction violation, but there's no need to
 	     go through the entire shell_input_line again with a call to
 	     set_line_mbstate(). */
-	  if (shell_input_line_len + 2 > shell_input_line_propsize)
-	    {
-	      shell_input_line_propsize = shell_input_line_len + 2;
-	      shell_input_line_property = (char *)xrealloc (shell_input_line_property,
-							    shell_input_line_propsize);
-	    }
+	  EXTEND_SHELL_INPUT_LINE_PROPERTY();
 	  shell_input_line_property[shell_input_line_len] = 1;
-#  endif
 #endif
 	}
     }
@@ -2622,6 +2623,21 @@ next_alias_char:
       (current_delimiter (dstack) != '\'' && current_delimiter (dstack) != '"'))
     {
       parser_state |= PST_ENDALIAS;
+      /* We need to do this to make sure last_shell_getc_is_singlebyte returns
+	 true, since we are returning a single-byte space. */
+      if (shell_input_line_index == shell_input_line_len && last_shell_getc_is_singlebyte == 0)
+	{
+#if 0
+	  EXTEND_SHELL_INPUT_LINE_PROPERTY();
+	  shell_input_line_property[shell_input_line_len++] = 1;
+	  /* extend shell_input_line to accommodate the shell_ungetc that
+	     read_token_word() will perform, since we're extending the index */
+	  RESIZE_MALLOCED_BUFFER (shell_input_line, shell_input_line_index, 2, shell_input_line_size, 16);
+          shell_input_line[++shell_input_line_index] = '\0';	/* XXX */
+#else
+	  shell_input_line_property[shell_input_line_index - 1] = 1;
+#endif
+	}
       return ' ';	/* END_ALIAS */
     }
 #endif

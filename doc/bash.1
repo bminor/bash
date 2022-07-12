@@ -864,21 +864,24 @@ that is executed, or false if any of the expressions is invalid.
 .TP
 \fBselect\fP \fIname\fP [ \fBin\fP \fIword\fP ] ; \fBdo\fP \fIlist\fP ; \fBdone\fP
 The list of words following \fBin\fP is expanded, generating a list
-of items.  The set of expanded words is printed on the standard
+of items, and the set of expanded words is printed on the standard
 error, each preceded by a number.  If the \fBin\fP
 \fIword\fP is omitted, the positional parameters are printed (see
 .SM
 .B PARAMETERS
-below).  The
+below).
+.B select
+then displays the
 .SM
 .B PS3
-prompt is then displayed and a line read from the standard input.
+prompt and reads a line from the standard input.
 If the line consists of a number corresponding to one of
 the displayed words, then the value of
 .I name
-is set to that word.  If the line is empty, the words and prompt
-are displayed again.  If EOF is read, the command completes.  Any
-other value read causes
+is set to that word.
+If the line is empty, the words and prompt are displayed again.
+If EOF is read, the \fBselect\fP command completes and returns 1.
+Any other value read causes
 .I name
 to be set to null.  The line read is saved in the variable
 .SM
@@ -8220,6 +8223,7 @@ Names of all shell variables.  May also be specified as \fB\-v\fP.
 \fB\-C\fP \fIcommand\fP
 \fIcommand\fP is executed in a subshell environment, and its output is
 used as the possible completions.
+Arguments are passed as with the \fB\-F\fP option.
 .TP 8
 \fB\-F\fP \fIfunction\fP
 The shell function \fIfunction\fP is executed in the current shell

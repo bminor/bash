@@ -3749,3 +3749,31 @@ parse.y
 	  the connection command with a '\n' connector. Makes the text
 	  output of parse_comsub closer to the original source text. From a
 	  report from Martijn Dekker <martijn@inlv.org>
+
+				    7/6
+				    ---
+doc/bash.1,lib/readline/doc/rluser.texi
+	- complete: add note about arguments passed to command specified by
+	  `complete -C'; suggested by Mark Chandler <mcp@synq.so>
+
+builtins/setattr.def
+	- show_local_var_attributes: special-case `local -', since there is
+	  no `declare -' equivalent.
+	  Reported by Emanuele Torre <torreemanuele6@gmail.com>.
+	- show_all_var_attributes: use `local -' when printing a variable named
+	  `-' at the current non-zero variable context
+
+parse.y
+	- shell_getc: if we are at the end of an alias, returning a space,
+	  make sure we mark the previous character as single-byte by modifying
+	  shell_input_line_property so the space we return is properly
+	  recognized. This would fail before if the last character of the
+	  alias was a multi-byte character. Reported by
+	  Vangelis Natsios <vnatsios@gmail.com>
+
+				   7/12
+				   ----
+lib/readline/isearch.c
+	- rl_display_search: don't call rl_redisplay_function before returning;
+	  rl_message already calls it. Reported by
+	  Frédéric Moulins <frederic@moulins.org>

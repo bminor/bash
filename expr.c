@@ -139,8 +139,8 @@
 #define COMMA	','
 
 /* This should be the function corresponding to the operator with the
-   highest precedence. */
-#define EXP_HIGHEST	expcomma
+   lowest precedence. */
+#define EXP_LOWEST	expcomma
 
 #ifndef MAX_INT_LEN
 #  define MAX_INT_LEN 32
@@ -472,8 +472,9 @@ subexpr (expr)
 
   readtok ();
 
-  val = EXP_HIGHEST ();
+  val = EXP_LOWEST ();
 
+  /*TAG:bash-5.3 make it clear that these are arithmetic syntax errors */
   if (curtok != 0)
     evalerror (_("syntax error in expression"));
 
@@ -639,7 +640,7 @@ expcond ()
       if (curtok == 0 || curtok == COL)
 	evalerror (_("expression expected"));
 
-      val1 = EXP_HIGHEST ();
+      val1 = EXP_LOWEST ();
 
       if (set_noeval)
 	noeval--;
@@ -1051,7 +1052,7 @@ exp0 ()
     {
       /* XXX - save curlval here?  Or entire expression context? */
       readtok ();
-      val = EXP_HIGHEST ();
+      val = EXP_LOWEST ();
 
       if (curtok != RPAR) /* ( */
 	evalerror (_("missing `)'"));
@@ -1446,9 +1447,14 @@ readtok ()
 	c = POWER;
       else if ((c == '-' || c == '+') && c1 == c && curtok == STR)
 	c = (c == '-') ? POSTDEC : POSTINC;
+#if STRICT_ARITH_PARSING
+      else if ((c == '-' || c == '+') && c1 == c && curtok == NUM)
+#else
       else if ((c == '-' || c == '+') && c1 == c && curtok == NUM && (lasttok == PREINC || lasttok == PREDEC))
+#endif
 	{
 	  /* This catches something like --FOO++ */
+	  /* TAG:bash-5.3 add gettext calls here or make this a separate function */
 	  if (c == '-')
 	    evalerror ("--: assignment requires lvalue");
 	  else
@@ -1465,7 +1471,7 @@ readtok ()
 	    c = (c == '-') ? PREDEC : PREINC;
 	  else
 	    /* Could force parsing as preinc or predec and throw an error */
-#if 0
+#if STRICT_ARITH_PARSING
 	    {
 	      /* Posix says unary plus and minus have higher priority than
 		 preinc and predec. */
@@ -1541,7 +1547,7 @@ strlong (num)
   register char *s;
   register unsigned char c;
   int base, foundbase;
-  intmax_t val;
+  intmax_t val, pval;
 
   s = num;
 
@@ -1559,6 +1565,10 @@ strlong (num)
 	{
 	  base = 16;
 	  s++;
+#if STRICT_ARITH_PARSING
+	  if (*s == 0)
+	    evalerror (_("invalid number"));
+#endif	    
 	}
       else
 	base = 8;
@@ -1602,7 +1612,14 @@ strlong (num)
 	  if (c >= base)
 	    evalerror (_("value too great for base"));
 
+#ifdef CHECK_OVERFLOW
+	  pval = val;
 	  val = (val * base) + c;
+	  if (val < 0 || val < pval)	/* overflow */
+	    return INTMAX_MAX;
+#else
+	  val = (val * base) + c;
+#endif
 	}
       else
 	break;
