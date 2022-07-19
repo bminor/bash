@@ -1200,7 +1200,7 @@ simple_list:	simple_list1
 			{
 			  $$ = $1;
 			  if (need_here_doc)
-			    gather_here_documents ();
+			    gather_here_documents ();	/* XXX */
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
 INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 -> simple_list"));
@@ -1218,7 +1218,7 @@ INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 -> simple_li
 			  else
 			    $$ = command_connect ($1, (COMMAND *)NULL, '&');
 			  if (need_here_doc)
-			    gather_here_documents ();
+			    gather_here_documents (); /* XXX */
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
 INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 '&' -> simple_list"));
@@ -1233,7 +1233,7 @@ INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 '&' -> simpl
 			{
 			  $$ = $1;
 			  if (need_here_doc)
-			    gather_here_documents ();
+			    gather_here_documents ();	/* XXX */
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
 INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 ';' -> simple_list"));

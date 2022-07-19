@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -329,6 +329,8 @@ static int set_context PARAMS((SHELL_VAR *));
 static void push_func_var PARAMS((PTR_T));
 static void push_builtin_var PARAMS((PTR_T));
 static void push_exported_var PARAMS((PTR_T));
+
+static void delete_local_contexts PARAMS((VAR_CONTEXT *));
 
 /* This needs to be looked at again. */
 static inline void push_posix_tempvar_internal PARAMS((SHELL_VAR *, int));
@@ -5427,10 +5429,8 @@ pop_var_context ()
     internal_error (_("pop_var_context: no global_variables context"));
 }
 
-/* Delete the HASH_TABLEs for all variable contexts beginning at VCXT, and
-   all of the VAR_CONTEXTs except GLOBAL_VARIABLES. */
-void
-delete_all_contexts (vcxt)
+static void
+delete_local_contexts (vcxt)
      VAR_CONTEXT *vcxt;
 {
   VAR_CONTEXT *v, *t;
@@ -5439,10 +5439,28 @@ delete_all_contexts (vcxt)
     {
       t = v->down;
       dispose_var_context (v);
-    }    
+    }
+}
 
+/* Delete the HASH_TABLEs for all variable contexts beginning at VCXT, and
+   all of the VAR_CONTEXTs except GLOBAL_VARIABLES. */
+void
+delete_all_contexts (vcxt)
+     VAR_CONTEXT *vcxt;
+{
+  delete_local_contexts (vcxt);
   delete_all_variables (global_variables->table);
   shell_variables = global_variables;
+}
+
+/* Reset the context so we are not executing in a shell function. Only call
+   this if you are getting ready to exit the shell. */
+void
+reset_local_contexts ()
+{
+  delete_local_contexts (shell_variables);
+  shell_variables = global_variables;
+  variable_context = 0;
 }
 
 /* **************************************************************** */

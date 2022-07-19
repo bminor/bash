@@ -3777,3 +3777,39 @@ lib/readline/isearch.c
 	- rl_display_search: don't call rl_redisplay_function before returning;
 	  rl_message already calls it. Reported by
 	  Frédéric Moulins <frederic@moulins.org>
+
+configure.ac
+	- bumped version to bash-5.2-rc2
+
+				   7/18
+				   ----
+jobs.c
+	- set_job_control: don't bother calling tcgetpgrp if shell_tty < 0,
+	  since it will just fail
+
+variables.c
+	- reset_local_contexts: new function, delete all context tables
+	  associated with shell functions and set variable_context to 0.
+	  Called when we want to stop executing in a shell function without
+	  going through the pop_context chain with its side effects
+
+variables.h
+	- reset_local_contexts: extern declaration
+
+builtins/evalstring.c
+	- parse_and_execute: call reset_local_contexts instead of setting
+	  variable_context to 0
+
+eval.c
+	- reader_loop: call reset_local_contexts in cases where the shell has
+	  longjmped for a fatal error and errexit is enabled (ERREXIT), but
+	  not for other cases, and especially not for the exit builtin,
+	  instead of just setting variable_context to 0. Fixes issue originally
+	  reported by Robert Stoll <robert.stoll@tegonal.com>
+
+subst.c
+	- pat_subst: implement sed-like behavior when presented with a null
+	  pattern that's anchored at the start or end of the string, or when
+	  presented with a null string: process the replacement string for `&'
+	  and `\&' and substitute in the result as before. Patch from
+	  Koichi Murase <myoga.murase@gmail.com>

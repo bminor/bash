@@ -8930,37 +8930,34 @@ pat_subst (string, pat, rep, mflags)
    *	    STRING and return the result.
    *	3.  A null STRING with a matching pattern means to append REP to
    *	    STRING and return the result.
-   * These don't understand or process `&' in the replacement string.
+   *
+   * These process `&' in the replacement string, like `sed' does when
+   * presented with a BRE of `^' or `$'.
    */
   if ((pat == 0 || *pat == 0) && (mtype == MATCH_BEG || mtype == MATCH_END))
     {
-      replen = STRLEN (rep);
+      rstr = (mflags & MATCH_EXPREP) ? strcreplace (rep, '&', "", 2) : rep;
+      rslen = STRLEN (rstr);
       l = STRLEN (string);
-      ret = (char *)xmalloc (replen + l + 2);
-      if (replen == 0)
+      ret = (char *)xmalloc (rslen + l + 2);
+      if (rslen == 0)
 	strcpy (ret, string);
       else if (mtype == MATCH_BEG)
 	{
-	  strcpy (ret, rep);
-	  strcpy (ret + replen, string);
+	  strcpy (ret, rstr);
+	  strcpy (ret + rslen, string);
 	}
       else
 	{
 	  strcpy (ret, string);
-	  strcpy (ret + l, rep);
+	  strcpy (ret + l, rstr);
 	}
+      if (rstr != rep)
+	free (rstr);
       return (ret);
     }
   else if (*string == 0 && (match_pattern (string, pat, mtype, &s, &e) != 0))
-    {
-      replen = STRLEN (rep);
-      ret = (char *)xmalloc (replen + 1);
-      if (replen == 0)
-	ret[0] = '\0';
-      else
-	strcpy (ret, rep);
-      return (ret);
-    }
+    return ((mflags & MATCH_EXPREP) ? strcreplace (rep, '&', "", 2) : savestring (rep));
 
   ret = (char *)xmalloc (rsize = 64);
   ret[0] = '\0';

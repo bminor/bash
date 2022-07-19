@@ -4963,7 +4963,7 @@ set_job_control (arg)
   old = job_control;
   job_control = arg;
 
-  if (terminal_pgrp == NO_PID)
+  if (terminal_pgrp == NO_PID && shell_tty >= 0)
     terminal_pgrp = tcgetpgrp (shell_tty);
 
   /* If we're turning on job control we're going to want to know the shell's
