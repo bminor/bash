@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jun  3 10:47:26 EDT 2022
+.\"	Last Change: Thu Jun 16 17:10:54 EDT 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 June 3" "GNU Bash 5.2"
+.TH BASH 1 "2022 June 16" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -864,21 +864,24 @@ that is executed, or false if any of the expressions is invalid.
 .TP
 \fBselect\fP \fIname\fP [ \fBin\fP \fIword\fP ] ; \fBdo\fP \fIlist\fP ; \fBdone\fP
 The list of words following \fBin\fP is expanded, generating a list
-of items.  The set of expanded words is printed on the standard
+of items, and the set of expanded words is printed on the standard
 error, each preceded by a number.  If the \fBin\fP
 \fIword\fP is omitted, the positional parameters are printed (see
 .SM
 .B PARAMETERS
-below).  The
+below).
+.B select
+then displays the
 .SM
 .B PS3
-prompt is then displayed and a line read from the standard input.
+prompt and reads a line from the standard input.
 If the line consists of a number corresponding to one of
 the displayed words, then the value of
 .I name
-is set to that word.  If the line is empty, the words and prompt
-are displayed again.  If EOF is read, the command completes.  Any
-other value read causes
+is set to that word.
+If the line is empty, the words and prompt are displayed again.
+If EOF is read, the \fBselect\fP command completes and returns 1.
+Any other value read causes
 .I name
 to be set to null.  The line read is saved in the variable
 .SM
@@ -8083,7 +8086,9 @@ If any of \fB\-D\fP, \fB\-E\fP, or \fB\-I\fP are supplied, any other
 specified by the option.
 .sp 1
 The process of applying these completion specifications when word completion
-is attempted is described above under \fBProgrammable Completion\fP.
+is attempted is described
+.ie \n(zZ=1 in \fIbash(1)\fP.
+.el above under \fBProgrammable Completion\fP.
 .sp 1
 Other options, if specified, have the following meanings.
 The arguments to the \fB\-G\fP, \fB\-W\fP, and \fB\-X\fP options
@@ -8218,6 +8223,7 @@ Names of all shell variables.  May also be specified as \fB\-v\fP.
 \fB\-C\fP \fIcommand\fP
 \fIcommand\fP is executed in a subshell environment, and its output is
 used as the possible completions.
+Arguments are passed as with the \fB\-F\fP option.
 .TP 8
 \fB\-F\fP \fIfunction\fP
 The shell function \fIfunction\fP is executed in the current shell
@@ -8371,12 +8377,14 @@ to give variables attributes:
 .B \-a
 Each \fIname\fP is an indexed array variable (see
 .B Arrays
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 .TP
 .B \-A
 Each \fIname\fP is an associative array variable (see
 .B Arrays
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 .TP
 .B \-f
 Use function names only.
@@ -8385,7 +8393,9 @@ Use function names only.
 The variable is treated as an integer; arithmetic evaluation (see
 .SM
 .B "ARITHMETIC EVALUATION"
-above) is performed when the variable is assigned a value.
+.ie \n(zZ=1 in \fIbash(1)\fP)
+.el above)
+is performed when the variable is assigned a value.
 .TP
 .B \-l
 When the variable is assigned a value, all upper-case characters are
@@ -8448,7 +8458,9 @@ an attempt is made to assign a value to a readonly variable,
 an attempt is made to assign a value to an array variable without
 using the compound assignment syntax (see
 .B Arrays
-above), one of the \fInames\fP is not a valid shell variable name,
+.ie \n(zZ=1 in \fIbash(1)\fP),
+.el above),
+one of the \fInames\fP is not a valid shell variable name,
 an attempt is made to turn off readonly status for a readonly variable,
 an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with \fB\-f\fP.
@@ -9233,7 +9245,8 @@ Each
 is an arithmetic expression to be evaluated (see
 .SM
 .B "ARITHMETIC EVALUATION"
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 If the last
 .I arg
 evaluates to 0,
@@ -9544,7 +9557,10 @@ invalid option is supplied.
 \fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-i\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-N\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option,
-split into words as described above under \fBWord Splitting\fP,
+split into words as described
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
+under \fBWord Splitting\fP,
 and the first word
 is assigned to the first
 .IR name ,
@@ -9560,7 +9576,10 @@ The characters in
 .SM
 .B IFS
 are used to split the line into words using the same rules the shell
-uses for expansion (described above under \fBWord Splitting\fP).
+uses for expansion (described
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
+under \fBWord Splitting\fP).
 The backslash character (\fB\e\fP) may be used to remove any special
 meaning for the next character read and for line continuation.
 Options, if supplied, have the following meanings:
@@ -9589,7 +9608,9 @@ is coming from a terminal,
 (see
 .SM
 .B READLINE
-above) is used to obtain the line.
+.ie \n(zZ=1 in \fIbash(1)\fP)
+.el above)
+is used to obtain the line.
 Readline uses the current (or default, if line editing was not previously
 active) editing settings, but uses Readline's default filename completion.
 .TP
@@ -9779,7 +9800,9 @@ or a \fIcompound command\fP
 (see
 .SM
 .B SHELL GRAMMAR
-above), exits with a non-zero status.
+.ie \n(zZ=1 in \fIbash(1)\fP),
+.el above),
+exits with a non-zero status.
 The shell does not exit if the
 command that fails is part of the command list immediately following a
 .B while
@@ -9807,7 +9830,9 @@ This option applies to the shell environment and each subshell environment
 separately (see
 .SM
 .B "COMMAND EXECUTION ENVIRONMENT"
-above), and may cause
+.ie \n(zZ=1 in \fIbash(1)\fP),
+.el above),
+and may cause
 subshells to exit before executing all the commands in the subshell.
 .if t .sp 0.5
 .if n .sp 1
@@ -9839,7 +9864,8 @@ by default for interactive shells on systems that support
 it (see
 .SM
 .B JOB CONTROL
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 All processes run in a separate process group.
 When a background job completes, the shell prints a line
 containing its exit status.
@@ -9890,7 +9916,10 @@ Same as
 .BR \-H .
 .TP 8
 .B history
-Enable command history, as described above under
+Enable command history, as described
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
+under
 .SM
 .BR HISTORY .
 This option is on by default in interactive shells.
@@ -9902,7 +9931,8 @@ The effect is as if the shell command
 had been executed
 (see
 .B Shell Variables
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 .TP 8
 .B keyword
 Same as
@@ -9957,7 +9987,9 @@ from the POSIX standard to match the standard (\fIposix mode\fP).
 See
 .SM
 .B "SEE ALSO"
-below for a reference to a document that details how posix mode affects
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el below
+for a reference to a document that details how posix mode affects
 bash's behavior.
 .TP 8
 .B privileged
@@ -10049,7 +10081,9 @@ or associated word list.
 .B \-B
 The shell performs brace expansion (see
 .B Brace Expansion
-above).  This is on by default.
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
+This is on by default.
 .TP 8
 .B \-C
 If set,
@@ -10242,8 +10276,9 @@ the exit to be deferred until a second exit is attempted without an
 intervening command (see
 .SM
 .B "JOB CONTROL"
-above).  The shell always
-postpones exiting if any jobs are stopped.
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
+The shell always postpones exiting if any jobs are stopped.
 .TP 8
 .B checkwinsize
 If set, \fBbash\fP checks the window size after each external (non-builtin)
@@ -10262,7 +10297,10 @@ attempts to save all lines of a multiple-line
 command in the same history entry.  This allows
 easy re-editing of multi-line commands.
 This option is enabled by default, but only has an effect if command
-history is enabled, as described above under
+history is enabled, as described
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
+under
 .SM
 .BR HISTORY .
 .PD 0
@@ -10287,7 +10325,8 @@ These control aspects of the shell's compatibility mode
 (see
 .SM
 .B "SHELL COMPATIBILITY MODE"
-below).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el below).
 .TP 8
 .B complete_fullquote
 If set,
@@ -10346,7 +10385,10 @@ builtin command.  An interactive shell does not exit if
 fails.
 .TP 8
 .B expand_aliases
-If set, aliases are expanded as described above under
+If set, aliases are expanded as described
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
+under
 .SM
 .BR ALIASES .
 This option is enabled by default for interactive shells.
@@ -10380,7 +10422,9 @@ a call to \fBreturn\fP.
 and
 .SM
 .B BASH_ARGV
-are updated as described in their descriptions above.
+are updated as described in their descriptions
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 .TP
 .B 5.
 Function tracing is enabled: command substitution, shell functions, and
@@ -10394,7 +10438,10 @@ subshells invoked with \fB(\fP \fIcommand\fP \fB)\fP inherit the
 .RE
 .TP 8
 .B extglob
-If set, the extended pattern matching features described above under
+If set, the extended pattern matching features described
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
+under
 \fBPathname Expansion\fP are enabled.
 .TP 8
 .B extquote
@@ -10416,7 +10463,9 @@ the ignored words are the only possible completions.
 See
 .SM
 \fBSHELL VARIABLES\fP
-above for a description of
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
+for a description of
 .SM
 .BR FIGNORE .
 This option is enabled by default.
@@ -10425,7 +10474,9 @@ This option is enabled by default.
 If set, range expressions used in pattern matching bracket expressions (see
 .SM
 .B Pattern Matching
-above) behave as if in the traditional C locale when performing
+.ie \n(zZ=1 in \fIbash(1)\fP)
+.el above)
+behave as if in the traditional C locale when performing
 comparisons.  That is, the current locale's collating sequence
 is not taken into account, so
 .B b
@@ -10483,7 +10534,8 @@ word containing a \fB@\fP is being completed (see
 under
 .SM
 .B READLINE
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 This is enabled by default.
 .TP 8
 .B huponexit
@@ -10504,7 +10556,9 @@ to cause that word and all remaining characters on that
 line to be ignored in an interactive shell (see
 .SM
 .B COMMENTS
-above).  This option is enabled by default.
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
+This option is enabled by default.
 .TP 8
 .B lastpipe
 If set, and job control is not active, the shell runs the last command of
@@ -10531,7 +10585,8 @@ at the current function scope.
 The shell sets this option if it is started as a login shell (see
 .SM
 .B "INVOCATION"
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 The value may not be changed.
 .TP 8
 .B mailwarn
@@ -10556,7 +10611,8 @@ If set,
 matches filenames in a case\-insensitive fashion when performing pathname
 expansion (see
 .B Pathname Expansion
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 .TP 8
 .B nocasematch
 If set,
@@ -10579,19 +10635,25 @@ If set,
 allows patterns which match no
 files (see
 .B Pathname Expansion
-above)
+.ie \n(zZ=1 in \fIbash(1)\fP)
+.el above)
 to expand to a null string, rather than themselves.
 .TP 8
 .B patsub_replacement
 If set, \fBbash\fP
 expands occurrences of \fB&\fP in the replacement string of pattern
 substitution to the text matched by the pattern, as described
-under \fBParameter Expansion\fP above.
+under \fBParameter Expansion\fP
+.ie \n(zZ=1 in \fIbash(1)\fP.
+.el above.
 This option is enabled by default.
 .TP 8
 .B progcomp
 If set, the programmable completion facilities (see
-\fBProgrammable Completion\fP above) are enabled.
+\fBProgrammable Completion\fP
+.ie \n(zZ=1 in \fIbash(1)\fP)
+.el above)
+are enabled.
 This option is enabled by default.
 .TP 8
 .B progcomp_alias
@@ -10606,14 +10668,17 @@ parameter expansion, command substitution, arithmetic
 expansion, and quote removal after being expanded as described in
 .SM
 .B PROMPTING
-above.  This option is enabled by default.
+.ie \n(zZ=1 in \fIbash(1)\fP.
+.el above.
+This option is enabled by default.
 .TP 8
 .B restricted_shell
 The shell sets this option if it is started in restricted mode
 (see
 .SM
 .B "RESTRICTED SHELL"
-below).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el below).
 The value may not be changed.
 This is not reset when the startup files are executed, allowing
 the startup files to discover whether or not a shell is restricted.
@@ -10637,7 +10702,9 @@ If set, the shell automatically closes file descriptors assigned using the
 \fI{varname}\fP redirection syntax (see
 .SM
 .B REDIRECTION
-above) instead of leaving them open when the command completes.
+.ie \n(zZ=1 in \fIbash(1)\fP)
+.el above)
+instead of leaving them open when the command completes.
 .TP 8
 .B xpg_echo
 If set, the \fBecho\fP builtin expands backslash-escape sequences
@@ -10668,8 +10735,10 @@ Return a status of 0 (true) or 1 (false) depending on
 the evaluation of the conditional expression
 .IR expr .
 Each operator and operand must be a separate argument.
-.if \n(zZ=0 Expressions are composed of the primaries described above under
-.if \n(zZ=1 Expressions are composed of the primaries described in the \fBbash\fP manual page under
+Expressions are composed of the primaries described 
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
+under
 .SM
 .BR "CONDITIONAL EXPRESSIONS" .
 \fBtest\fP does not accept any options, nor does it accept and ignore
@@ -10722,7 +10791,9 @@ The expression is true if and only if the argument is not null.
 2 arguments
 If the first argument is \fB!\fP, the expression is true if and
 only if the second argument is null.
-If the first argument is one of the unary conditional operators listed above
+If the first argument is one of the unary conditional operators listed
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
 under
 .SM
 .BR "CONDITIONAL EXPRESSIONS" ,
@@ -10732,7 +10803,9 @@ is false.
 .TP
 3 arguments
 The following conditions are applied in the order listed.
-If the second argument is one of the binary conditional operators listed above
+If the second argument is one of the binary conditional operators listed
+.ie \n(zZ=1 in \fIbash(1)\fP
+.el above
 under
 .SM
 .BR "CONDITIONAL EXPRESSIONS" ,
@@ -10837,7 +10910,8 @@ is executed before every \fIsimple command\fP, \fIfor\fP command,
 command, and before the first command executes in a shell function (see
 .SM
 .B SHELL GRAMMAR
-above).
+.ie \n(zZ=1 in \fIbash(1)\fP).
+.el above).
 Refer to the description of the \fBextdebug\fP option to the
 \fBshopt\fP builtin for details of its effect on the \fBDEBUG\fP trap.
 If a
@@ -11236,8 +11310,13 @@ forces \fBwait\fP to wait for \fIid\fP to terminate before returning
 its status, instead of returning when it changes status.
 If
 .I id
-specifies a non-existent process or job, the return status is
-127.  Otherwise, the return status is the exit status of the last
+specifies a non-existent process or job, the return status is 127.
+If \fBwait\fP is interrupted by a signal, the return status will be greater
+than 128, as described under
+.B SIGNALS
+.ie \n(zZ=1 in \fIbash(1)\fP.
+.el above.
+Otherwise, the return status is the exit status of the last
 process or job waited for.
 .SH "SHELL COMPATIBILITY MODE"
 Bash-4.0 introduced the concept of a \fIshell compatibility level\fP,
@@ -11257,7 +11336,7 @@ behavior. It's intended to be a temporary solution.
 This section does not mention behavior that is standard for a particular
 version (e.g., setting \fBcompat32\fP means that quoting the rhs of the regexp
 matching operator quotes special regexp characters in the word, which is
-default behavior in bash-3.2 and above). 
+default behavior in bash-3.2 and subsequent versions). 
 .PP
 If a user enables, say, \fBcompat32\fP, it may affect the behavior of other
 compatibility levels up to and including the current compatibility level.

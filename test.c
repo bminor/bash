@@ -804,6 +804,7 @@ three_arguments ()
     {
       advance (1);
       value = !two_arguments ();
+      pos = argc;
     }
   else if (argv[pos][0] == '(' && argv[pos+2][0] == ')')
     {

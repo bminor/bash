@@ -114,6 +114,16 @@ typedef void *alias_t;
 #  define MBTEST(x)	((x))
 #endif
 
+#define EXTEND_SHELL_INPUT_LINE_PROPERTY() \
+do { \
+    if (shell_input_line_len + 2 > shell_input_line_propsize) \
+      { \
+	shell_input_line_propsize = shell_input_line_len + 2; \
+	shell_input_line_property = (char *)xrealloc (shell_input_line_property, \
+				    shell_input_line_propsize); \
+      } \
+} while (0)
+
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
 #endif
@@ -1154,7 +1164,12 @@ list1:		list1 AND_AND newline_list list1
 	|	list1 ';' newline_list list1
 			{ $$ = command_connect ($1, $4, ';'); }
 	|	list1 '\n' newline_list list1
-			{ $$ = command_connect ($1, $4, ';'); }
+			{
+			  if (parser_state & PST_CMDSUBST)
+			    $$ = command_connect ($1, $4, '\n');
+			  else
+			    $$ = command_connect ($1, $4, ';');
+			}
 	|	pipeline_command
 			{ $$ = $1; }
 	;
@@ -1185,10 +1200,10 @@ simple_list:	simple_list1
 			{
 			  $$ = $1;
 			  if (need_here_doc)
-			    gather_here_documents ();
+			    gather_here_documents ();	/* XXX */
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-itrace("LEGACY: parser: command substitution simple_list1 -> simple_list");
+INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 -> simple_list"));
 			      global_command = $1;
 			      eof_encountered = 0;
 			      if (bash_input.type == st_string)
@@ -1203,10 +1218,10 @@ itrace("LEGACY: parser: command substitution simple_list1 -> simple_list");
 			  else
 			    $$ = command_connect ($1, (COMMAND *)NULL, '&');
 			  if (need_here_doc)
-			    gather_here_documents ();
+			    gather_here_documents (); /* XXX */
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-itrace("LEGACY: parser: command substitution simple_list1 '&' -> simple_list");
+INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 '&' -> simple_list"));
 			      global_command = $1;
 			      eof_encountered = 0;
 			      if (bash_input.type == st_string)
@@ -1218,10 +1233,10 @@ itrace("LEGACY: parser: command substitution simple_list1 '&' -> simple_list");
 			{
 			  $$ = $1;
 			  if (need_here_doc)
-			    gather_here_documents ();
+			    gather_here_documents ();	/* XXX */
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-itrace("LEGACY: parser: command substitution simple_list1 ';' -> simple_list");
+INTERNAL_DEBUG (("LEGACY: parser: command substitution simple_list1 ';' -> simple_list"));
 			      global_command = $1;
 			      eof_encountered = 0;
 			      if (bash_input.type == st_string)
@@ -2550,21 +2565,12 @@ shell_getc (remove_quoted_newline)
 	    shell_input_line[shell_input_line_len] = '\n';
 	  shell_input_line[shell_input_line_len + 1] = '\0';
 
-#if 0
-	  set_line_mbstate ();		/* XXX - this is wasteful */
-#else
-#  if defined (HANDLE_MULTIBYTE)
+#if defined (HANDLE_MULTIBYTE)
 	  /* This is kind of an abstraction violation, but there's no need to
 	     go through the entire shell_input_line again with a call to
 	     set_line_mbstate(). */
-	  if (shell_input_line_len + 2 > shell_input_line_propsize)
-	    {
-	      shell_input_line_propsize = shell_input_line_len + 2;
-	      shell_input_line_property = (char *)xrealloc (shell_input_line_property,
-							    shell_input_line_propsize);
-	    }
+	  EXTEND_SHELL_INPUT_LINE_PROPERTY();
 	  shell_input_line_property[shell_input_line_len] = 1;
-#  endif
 #endif
 	}
     }
@@ -2617,6 +2623,21 @@ next_alias_char:
       (current_delimiter (dstack) != '\'' && current_delimiter (dstack) != '"'))
     {
       parser_state |= PST_ENDALIAS;
+      /* We need to do this to make sure last_shell_getc_is_singlebyte returns
+	 true, since we are returning a single-byte space. */
+      if (shell_input_line_index == shell_input_line_len && last_shell_getc_is_singlebyte == 0)
+	{
+#if 0
+	  EXTEND_SHELL_INPUT_LINE_PROPERTY();
+	  shell_input_line_property[shell_input_line_len++] = 1;
+	  /* extend shell_input_line to accommodate the shell_ungetc that
+	     read_token_word() will perform, since we're extending the index */
+	  RESIZE_MALLOCED_BUFFER (shell_input_line, shell_input_line_index, 2, shell_input_line_size, 16);
+          shell_input_line[++shell_input_line_index] = '\0';	/* XXX */
+#else
+	  shell_input_line_property[shell_input_line_index - 1] = 1;
+#endif
+	}
       return ' ';	/* END_ALIAS */
     }
 #endif
@@ -4095,8 +4116,8 @@ parse_comsub (qc, open, close, lenp, flags)
 
   if (need_here_doc > 0)
     {
-      internal_debug("command substitution: %d unterminated here-document%s", need_here_doc, (need_here_doc == 1) ? "" : "s");
-      gather_here_documents ();
+      internal_warning ("command substitution: %d unterminated here-document%s", need_here_doc, (need_here_doc == 1) ? "" : "s");
+      gather_here_documents ();	/* XXX check compatibility level? */
     }
 
   parsed_command = global_command;
@@ -4126,7 +4147,7 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
 
   restore_parser_state (&ps);
 
-  tcmd = make_command_string (parsed_command);		/* returns static memory */
+  tcmd = print_comsub (parsed_command);		/* returns static memory */
   retlen = strlen (tcmd);
   if (tcmd[0] == '(')			/* ) need a space to prevent arithmetic expansion */
     retlen++;
@@ -4186,6 +4207,7 @@ xparse_dolparen (base, string, indp, flags)
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
   if (flags & SX_NOLONGJMP)
     sflags |= SEVAL_NOLONGJMP;
+
   save_parser_state (&ps);
   save_input_line_state (&ls);
 
@@ -4609,6 +4631,7 @@ cond_term ()
       tleft = make_cond_node (COND_TERM, yylval.word, (COND_COM *)NULL, (COND_COM *)NULL);
 
       /* binop */
+      /* tok = cond_skip_newlines (); ? */
       tok = read_token (READ);
       if (tok == WORD && test_binop (yylval.word->word))
 	{
@@ -6302,12 +6325,12 @@ parse_string_to_word_list (s, flags, whom)
   sh_parser_state_t ps;
   int ea;
 
+  orig_line_number = line_number;
+  save_parser_state (&ps);
+
 #if defined (HISTORY)
   bash_history_disable ();
 #endif
-
-  orig_line_number = line_number;
-  save_parser_state (&ps);
 
   push_stream (1);
   if (ea = expanding_alias ())

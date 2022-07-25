@@ -363,12 +363,14 @@ parse_and_execute (string, from_file, flags)
 		 these circumstances.  Don't bother with cleanup here because
 		 we don't want to run the function execution cleanup stuff
 		 that will cause pop_context and other functions to run.
+		 We call reset_local_contexts() instead, which just frees
+		 context memory.
 		 XXX - change that if we want the function context to be
 		 unwound. */
 	      if (exit_immediately_on_error && variable_context)
 	        {
 	          discard_unwind_frame ("pe_dispose");
-		  variable_context = 0;	/* not in a function */
+	          reset_local_contexts (); /* not in a function */
 	        }
 	      should_jump_to_top_level = 1;
 	      goto out;

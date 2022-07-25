@@ -363,7 +363,11 @@ show_all_var_attributes (v, nodefs)
 
   for (i = any_failed = 0; var = variable_list[i]; i++)
     {
-      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      /* There is no equivalent `declare -'. */
+      if (variable_context && var->context == variable_context && STREQ (var->name, "-"))
+	printf ("local -\n");
+      else  
+	show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       if (any_failed = sh_chkwrite (any_failed))
         break;
     }
@@ -387,7 +391,11 @@ show_local_var_attributes (v, nodefs)
 
   for (i = any_failed = 0; var = variable_list[i]; i++)
     {
-      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      /* There is no equivalent `declare -'. */
+      if (STREQ (var->name, "-"))
+	printf ("local -\n");
+      else  
+	show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       if (any_failed = sh_chkwrite (any_failed))
         break;
     }

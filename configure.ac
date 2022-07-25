@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.041])dnl
+AC_REVISION([for Bash 5.2, version 5.043])dnl
 
 define(bashvers, 5.2)
-define(relstatus, rc1)
+define(relstatus, rc2)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -497,7 +497,7 @@ dnl these must come after the test for cc/gcc
 if test "$opt_profiling" = "yes"; then
 	PROFILE_FLAGS=-pg
 	case "$host_os" in
-	solaris2*|linux*)	;;
+	solaris2*|linux*|darwin*)	;;
 	*)		opt_static_link=yes ;;
 	esac
 	DEBUG= MALLOC_DEBUG=

@@ -36,6 +36,7 @@ extern intmax_t evalexp PARAMS((char *, int, int *));
 #define FUNC_EXTERNAL	0x02
 
 extern char *make_command_string PARAMS((COMMAND *));
+extern char *print_comsub PARAMS((COMMAND *));
 extern char *named_function_string PARAMS((char *, COMMAND *, int));
 
 extern void print_command PARAMS((COMMAND *));

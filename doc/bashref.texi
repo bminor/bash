@@ -1096,16 +1096,16 @@ select @var{name} [in @var{words} @dots{}]; do @var{commands}; done
 @end example
 
 The list of words following @code{in} is expanded, generating a list
-of items.  The set of expanded words is printed on the standard
+of items, and the set of expanded words is printed on the standard
 error output stream, each preceded by a number.  If the
 @samp{in @var{words}} is omitted, the positional parameters are printed,
 as if @samp{in "$@@"} had been specified.
-The @env{PS3} prompt is then displayed and a line is read from the
-standard input.
+@code{select} then displays the @env{PS3}
+prompt and reads a line from the standard input.
 If the line consists of a number corresponding to one of the displayed
 words, then the value of @var{name} is set to that word.
 If the line is empty, the words and prompt are displayed again.
-If @code{EOF} is read, the @code{select} command completes.
+If @code{EOF} is read, the @code{select} command completes and returns 1.
 Any other value read causes @var{name} to be set to null.
 The line read is saved in the variable @env{REPLY}.
 
@@ -8464,7 +8464,7 @@ behavior. It's intended to be a temporary solution.
 This section does not mention behavior that is standard for a particular
 version (e.g., setting @code{compat32} means that quoting the rhs of the regexp
 matching operator quotes special regexp characters in the word, which is
-default behavior in bash-3.2 and above). 
+default behavior in bash-3.2 and subsequent versions). 
 
 If a user enables, say, @code{compat32}, it may affect the behavior of other
 compatibility levels up to and including the current compatibility level.
@@ -8896,6 +8896,10 @@ terminate before returning its status, intead of returning when it changes
 status.
 If neither @var{jobspec} nor @var{pid} specifies an active child process
 of the shell, the return status is 127.
+If @code{wait} is interrupted by a signal, the return status will be greater
+than 128, as described above (@pxref{Signals}).
+Otherwise, the return status is the exit  status
+of the last process or job waited for.
 
 @item disown
 @btindex disown

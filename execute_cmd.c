@@ -2738,6 +2738,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
     /* Just call execute command on both sides. */
     case ';':
+    case '\n':		/* special case, happens in command substitutions */
       if (ignore_return)
 	{
 	  if (command->value.Connection->first)
@@ -3055,7 +3056,6 @@ eval_arith_for_expr (l, okp)
     {
       if (echo_command_at_execute)
 	xtrace_print_arith_cmd (new);
-      this_command_name = "((";		/* )) for expression error messages */
 
       command_string_index = 0;
       print_arith_command (new);
@@ -3069,6 +3069,7 @@ eval_arith_for_expr (l, okp)
       /* In debugging mode, if the DEBUG trap returns a non-zero status, we
 	 skip the command. */
       eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
+      this_command_name = "((";		/* )) for expression error messages */
       
 #if defined (DEBUGGER)
       if (debugging_mode == 0 || r == EXECUTION_SUCCESS)
@@ -3422,6 +3423,8 @@ execute_select_command (select_command)
   if (debugging_mode && retval != EXECUTION_SUCCESS)
     return (EXECUTION_SUCCESS);
 #endif
+
+  this_command_name = (char *)0;
 
   loop_level++;
   identifier = select_command->name->word;
@@ -3819,6 +3822,7 @@ execute_arith_command (arith_command)
     }
 #endif
 
+  this_command_name = "((";	/* )) */
   t = (char *)NULL;
   new = arith_command->exp;
   exp = (new->next) ? (t = string_list (new)) : new->word->word;
@@ -4016,7 +4020,6 @@ execute_cond_command (cond_command)
 
   save_line_number = line_number;
 
-  this_command_name = "[[";
   SET_LINE_NUMBER (cond_command->line);
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell && sourcelevel == 0)
@@ -4047,6 +4050,8 @@ execute_cond_command (cond_command)
       return (EXECUTION_SUCCESS);
     }
 #endif
+
+  this_command_name = "[[";	/* ]] */
 
 #if 0
   debug_print_cond_command (cond_command);

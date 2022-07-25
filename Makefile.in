@@ -627,7 +627,6 @@ valgrind:
 gcov:
 	${MAKE} ${MFLAGS} CFLAGS=-g ADDON_CFLAGS='${GCOV_XCFLAGS}' ADDON_LDFLAGS='${GCOV_XLDFLAGS}' .made
 
-
 # have to make this separate because making tests depend on $(PROGRAM)
 asan-tests: asan  $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests

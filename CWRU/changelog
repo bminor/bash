@@ -3686,3 +3686,138 @@ print_cmd.c
 				   ----
 configure.ac
 	- bumped version to bash-5.2-rc1
+
+[bash-5.2-rc1 released]
+
+				   6/15
+				   ----
+parse.y
+	- parse_string_to_word_list: save the parser state before any state-
+	  changing functions like bash_history_disable(). Reported by
+	  Clark Wang <dearvoid@gmail.com>
+
+				   6/16
+				   ----
+doc/bash.1
+	- play tricks with the value of the zZ number register to refer to
+	  `bash(1)' instead of `above' or `below' when creating the builtins
+	  man page
+
+				   6/17
+				   ----
+doc/{bash.1,bashref.texi}
+	- wait: note that wait will return > 128 if interrupted by a signal.
+	  Reported by AA <aathan_github@memeplex.com>
+
+execute_cmd.c
+	- {execute_cond_node,execute_arith_command,eval_arith_for_expr}: make
+	  sure to reset this_command_name after running any DEBUG trap so the
+	  DEBUG trap doesn't overwrite it.
+	  Reported by Emanuele Torre <torreemanuele6@gmail.com>.
+	- execute_select_command: set this_command_name to NULL after running
+	  any DEBUG trap like execute_for_command does
+
+				   6/23
+				   ----
+test.c
+	- three_arguments: when given [ ! ! arg ], make sure to advance POS
+	  after calling two_arguments to avoid a `too many arguments' error.
+	  Report from Steffen Nurpmeso <steffen@sdaoden.eu>
+
+				   6/27
+				   ----
+subst.c
+	- expand_word_internal: when expanding backquoted command substitution,
+	  call string_extract with the SX_REQMATCH flag (closing backquote
+	  required) only if the word flags don't contain W_COMPLETE,
+	  indicating that we're doing this for completion, probably to
+	  determine whether or not to append something to the word. Fixes bug
+	  reported by Emanuele Torre <torreemanuele6@gmail.com>.
+
+				    7/5
+				    ---
+execute_cmd.c
+	- execute_connection: treat a connector of '\n' the same as ';'
+
+print_cmd.c
+	- print_comsub: new function, sets flag noting we are printing a
+	  command substitution and calls make_command_string
+	- make_command_string_internal: add '\n' to the ';' case; print command
+	  list with newline connector appropriately
+
+parse.y
+	- parse_comsub: call print_comsub instead of make_command_string
+	- list1 production (part of compound_list): if a list is separated by
+	  newlines, and the parser is parsing a command substitution, make
+	  the connection command with a '\n' connector. Makes the text
+	  output of parse_comsub closer to the original source text. From a
+	  report from Martijn Dekker <martijn@inlv.org>
+
+				    7/6
+				    ---
+doc/bash.1,lib/readline/doc/rluser.texi
+	- complete: add note about arguments passed to command specified by
+	  `complete -C'; suggested by Mark Chandler <mcp@synq.so>
+
+builtins/setattr.def
+	- show_local_var_attributes: special-case `local -', since there is
+	  no `declare -' equivalent.
+	  Reported by Emanuele Torre <torreemanuele6@gmail.com>.
+	- show_all_var_attributes: use `local -' when printing a variable named
+	  `-' at the current non-zero variable context
+
+parse.y
+	- shell_getc: if we are at the end of an alias, returning a space,
+	  make sure we mark the previous character as single-byte by modifying
+	  shell_input_line_property so the space we return is properly
+	  recognized. This would fail before if the last character of the
+	  alias was a multi-byte character. Reported by
+	  Vangelis Natsios <vnatsios@gmail.com>
+
+				   7/12
+				   ----
+lib/readline/isearch.c
+	- rl_display_search: don't call rl_redisplay_function before returning;
+	  rl_message already calls it. Reported by
+	  Frédéric Moulins <frederic@moulins.org>
+
+configure.ac
+	- bumped version to bash-5.2-rc2
+
+				   7/18
+				   ----
+jobs.c
+	- set_job_control: don't bother calling tcgetpgrp if shell_tty < 0,
+	  since it will just fail
+
+variables.c
+	- reset_local_contexts: new function, delete all context tables
+	  associated with shell functions and set variable_context to 0.
+	  Called when we want to stop executing in a shell function without
+	  going through the pop_context chain with its side effects
+
+variables.h
+	- reset_local_contexts: extern declaration
+
+builtins/evalstring.c
+	- parse_and_execute: call reset_local_contexts instead of setting
+	  variable_context to 0
+
+eval.c
+	- reader_loop: call reset_local_contexts in cases where the shell has
+	  longjmped for a fatal error and errexit is enabled (ERREXIT), but
+	  not for other cases, and especially not for the exit builtin,
+	  instead of just setting variable_context to 0. Fixes issue originally
+	  reported by Robert Stoll <robert.stoll@tegonal.com>
+
+subst.c
+	- pat_subst: implement sed-like behavior when presented with a null
+	  pattern that's anchored at the start or end of the string, or when
+	  presented with a null string: process the replacement string for `&'
+	  and `\&' and substitute in the result as before. Patch from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+				   7/20
+				   ----
+
+[bash-5.2-rc2 frozen]

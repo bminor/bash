@@ -194,7 +194,10 @@ rl_display_search (char *search_string, int flags, int where)
 
   rl_message ("%s", message);
   xfree (message);
+#if 0
+  /* rl_message calls this */
   (*rl_redisplay_function) ();
+#endif
 }
 
 static _rl_search_cxt *
