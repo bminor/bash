@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2017,2018,2019 Free Software Foundation, Inc.
+   Copyright (C) 2017-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -102,7 +102,7 @@ static const struct
 #  define ALLFLAGS (O_APPEND|O_ASYNC|O_SYNC|O_NONBLOCK|O_FSYNC|O_DSYNC|\
 	O_RSYNC|O_ALT_IO|O_DIRECT|O_NOATIME|O_NOSIGPIPE)
 
-/* An unsed bit in the file status flags word we can use to pass around the
+/* An unused bit in the file status flags word we can use to pass around the
    state of close-on-exec. */
 # define O_CLOEXEC      ((~ALLFLAGS) ^ ((~ALLFLAGS) & ((~ALLFLAGS) - 1)))
 #endif

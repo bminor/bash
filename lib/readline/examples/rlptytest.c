@@ -224,7 +224,7 @@ static enum { RESET, TCBREAK } ttystate = RESET;
  *
  * fd    - The file descriptor of the terminal
  * 
- * Returns: 0 on sucess, -1 on error
+ * Returns: 0 on success, -1 on error
  */
 int tty_cbreak(int fd){
    struct termios buf;

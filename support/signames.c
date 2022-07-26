@@ -84,9 +84,9 @@ initialize_signames ()
      names first.  This allows (for example) SIGABRT to overwrite SIGLOST. */
 
   /* POSIX 1003.1b-1993 real time signals, but take care of incomplete
-     implementations. Acoording to the standard, both, SIGRTMIN and
+     implementations. According to the standard, both SIGRTMIN and
      SIGRTMAX must be defined, SIGRTMIN must be strictly less than
-     SIGRTMAX, and the difference must be at least 7, that is, there
+     SIGRTMAX, and the difference must be at least 7; that is, there
      must be at least eight distinct real time signals. */
 
   /* The generated signal names are SIGRTMIN, SIGRTMIN+1, ...,

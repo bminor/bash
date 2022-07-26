@@ -1,3 +1,42 @@
+This document details the changes between this version, bash-5.2-rc2, and
+the previous version, bash-5.2-rc1.
+
+1. Changes to Bash
+
+a. Fixed a bug that could disable history saving after a compound array
+   assignment in an interactive shell.
+
+b. Fixed a bug that could cause incorrect error messages when running a DEBUG
+   trap during a conditional or arithmetic command.
+
+c. Fixed a bug that caused test to print an error message when given ! ! arg
+   as arguments.
+
+d. Fixed a bug that resulted in incorrect error messages when completing a
+   backquoted command substitution.
+
+e. Changed command substitution parsing to reproduce the original text more
+   closely when reconsituting the command string from the parsed command.
+
+f. Fixed a bug that could cause an EXIT trap to use the wrong variable context
+   when the errexit option is set.
+
+g. Fixed a bug that could cause the parser to incorrectly delimit a token when
+   an alias expansion ended with a multibyte character.
+
+2. Changes to Readline
+
+3. New Features in Bash
+
+a. Since there is no `declare -' equivalent of `local -', make sure to use
+   `local -' in the output of `local -p'.
+
+b. Null anchored matches in pattern substitution now process `&' in the
+   replacement string, like sed.
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.2-rc1, and
 the previous version, bash-5.2-beta.
 

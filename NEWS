@@ -112,6 +112,9 @@ ee. The `globbing' completion code now takes the `globstar' option into account.
 ff. `suspend -f' now forces the shell to suspend even if job control is not
    currently enabled.
 
+gg. Since there is no `declare -' equivalent of `local -', make sure to use
+    `local -' in the output of `local -p'.
+
 2. New Features in Readline
 
 a. There is now an HS_HISTORY_VERSION containing the version number of the
@@ -1080,7 +1083,7 @@ l.  There is a new configuration option (in config-top.h) that forces bash to
 m.  A new variable $BASHOPTS to export shell options settable using `shopt' to
     child processes.
 
-n.  There is a new confgure option that forces the extglob option to be
+n.  There is a new configure option that forces the extglob option to be
     enabled by default.
 
 o.  New variable $BASH_XTRACEFD; when set to an integer bash will write xtrace
@@ -1127,7 +1130,7 @@ d.  New bindable function: skip-csi-sequence.  Can be used as a default to
     to bind all keys.
 
 e.  New application-settable function: rl_filename_rewrite_hook.  Can be used
-    to rewite or modify filenames read from the file system before they are
+    to rewrite or modify filenames read from the file system before they are
     compared to the word to be completed.
 
 f.  New bindable variable: skip-completed-text, active when completing in the
