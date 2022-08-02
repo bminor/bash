@@ -579,7 +579,14 @@ compat51 (set using BASH_COMPAT)
 	- the ${param[:]=value} word expansion will return VALUE, before any
 	  variable-specific transformations have been performed (e.g.,
 	  converting to lowercase). Bash-5.2 will return the final value
-	  assigned to the variable, as POSIX specifies
+	  assigned to the variable, as POSIX specifies;
+	- Parsing command substitutions will act as if extended glob is
+	  enabled, so that parsing a command substitution containing an extglob
+	  pattern (say, as part of a shell function) will not fail. This
+	  assumes the intent is to enable extglob before the command is
+	  executed and word expansions are performed. It will fail at word
+	  expansion time if extglob hasn't been enabled by the time the
+	  command is executed.
 
 -------------------------------------------------------------------------------
 

@@ -523,7 +523,7 @@ restore_signal_mask (set)
 #ifdef DEBUG
 /* A debugging function that can be called from gdb, for instance. */
 void
-open_files ()
+open_files (void)
 {
   register int i;
   int f, fd_table_size;
@@ -2265,7 +2265,7 @@ coproc_setvars (cp)
 {
   SHELL_VAR *v;
   char *namevar, *t;
-  int l;
+  size_t l;
   WORD_DESC w;
 #if defined (ARRAY_VARS)
   arrayind_t ind;

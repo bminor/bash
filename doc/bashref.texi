@@ -2933,6 +2933,12 @@ Matches one of the given patterns.
 Matches anything except one of the given patterns.
 @end table
 
+The @code{extglob} option changes the behavior of the parser, since the
+parentheses are normally treated as operators with syntactic meaning.
+To ensure that extended matching patterns are parsed correctly, make sure
+that @code{extglob} is enabled before parsing constructs containing the
+patterns, including shell functions and command substitutions.
+
 When matching filenames, the @code{dotglob} shell option determines
 the set of filenames that are tested:
 when @code{dotglob} is enabled, the set of filenames includes all files
@@ -8642,6 +8648,15 @@ the $@{@var{parameter}[:]=@var{value}@} word expansion will return
 @var{value}, before any variable-specific transformations have been
 performed (e.g., converting to lowercase).
 Bash-5.2 will return the final value assigned to the variable.
+@item
+Parsing command substitutions will behave as if extended glob
+(@pxref{The Shopt Builtin})
+is enabled, so that parsing a command substitution containing an extglob
+pattern (say, as part of a shell function) will not fail.
+This assumes the intent is to enable extglob before the command is executed
+and word expansions are performed.
+It will fail at word expansion time if extglob hasn't been
+enabled by the time the command is executed.
 @end itemize
 @end table
 

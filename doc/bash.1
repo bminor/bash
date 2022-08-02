@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Jun 16 17:10:54 EDT 2022
+.\"	Last Change: Fri Jul 29 08:59:32 EDT 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 June 16" "GNU Bash 5.2"
+.TH BASH 1 "2022 July 29" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3983,6 +3983,12 @@ Matches one of the given patterns
 Matches anything except one of the given patterns
 .RE
 .PD
+.PP
+The\fBextglob\fP option changes the behavior of the parser, since the
+parentheses are normally treated as operators with syntactic meaning.
+To ensure that extended matching patterns are parsed correctly, make sure
+that \fBextglob\fP is enabled before parsing constructs containing the
+patterns, including shell functions and command substitutions.
 .PP
 When matching filenames, the \fBdotglob\fP shell option determines
 the set of filenames that are tested:

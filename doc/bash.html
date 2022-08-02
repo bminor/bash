@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 June 3<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 July 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1112,24 +1112,28 @@ The return value is the exit status of the last command in <I>list</I>
 that is executed, or false if any of the expressions is invalid.
 <DT><B>select</B> <I>name</I> [ <B>in</B> <I>word</I> ] ; <B>do</B> <I>list</I> ; <B>done</B><DD>
 The list of words following <B>in</B> is expanded, generating a list
-of items.  The set of expanded words is printed on the standard
+of items, and the set of expanded words is printed on the standard
 error, each preceded by a number.  If the <B>in</B>
 <I>word</I> is omitted, the positional parameters are printed (see
 <FONT SIZE=-1><B>PARAMETERS</B>
 
 </FONT>
-below).  The
+below).
+<B>select</B>
+
+then displays the
 <FONT SIZE=-1><B>PS3</B>
 
 </FONT>
-prompt is then displayed and a line read from the standard input.
+prompt and reads a line from the standard input.
 If the line consists of a number corresponding to one of
 the displayed words, then the value of
 <I>name</I>
 
-is set to that word.  If the line is empty, the words and prompt
-are displayed again.  If EOF is read, the command completes.  Any
-other value read causes
+is set to that word.
+If the line is empty, the words and prompt are displayed again.
+If EOF is read, the <B>select</B> command completes and returns 1.
+Any other value read causes
 <I>name</I>
 
 to be set to null.  The line read is saved in the variable
@@ -4988,6 +4992,13 @@ Matches anything except one of the given patterns
 </DL></DL>
 
 
+<P>
+
+The<B>extglob</B> option changes the behavior of the parser, since the
+parentheses are normally treated as operators with syntactic meaning.
+To ensure that extended matching patterns are parsed correctly, make sure
+that <B>extglob</B> is enabled before parsing constructs containing the
+patterns, including shell functions and command substitutions.
 <P>
 
 When matching filenames, the <B>dotglob</B> shell option determines
@@ -10217,7 +10228,9 @@ If any of <B>-D</B>, <B>-E</B>, or <B>-I</B> are supplied, any other
 specified by the option.
 <P>
 The process of applying these completion specifications when word completion
-is attempted is described above under <B>Programmable Completion</B>.
+is attempted is described
+
+above under <B>Programmable Completion</B>.
 <P>
 Other options, if specified, have the following meanings.
 The arguments to the <B>-G</B>, <B>-W</B>, and <B>-X</B> options
@@ -10388,6 +10401,7 @@ Names of all shell variables.  May also be specified as <B>-v</B>.
 <DT><B>-C</B> <I>command</I><DD>
 <I>command</I> is executed in a subshell environment, and its output is
 used as the possible completions.
+Arguments are passed as with the <B>-F</B> option.
 <DT><B>-F</B> <I>function</I><DD>
 The shell function <I>function</I> is executed in the current shell
 environment.
@@ -10556,12 +10570,14 @@ to give variables attributes:
 Each <I>name</I> is an indexed array variable (see
 <B>Arrays</B>
 
+
 above).
 <DT><B>-A</B>
 
 <DD>
 Each <I>name</I> is an associative array variable (see
 <B>Arrays</B>
+
 
 above).
 <DT><B>-f</B>
@@ -10575,7 +10591,9 @@ The variable is treated as an integer; arithmetic evaluation (see
 <FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
 
 </FONT>
-above) is performed when the variable is assigned a value.
+
+above)
+is performed when the variable is assigned a value.
 <DT><B>-l</B>
 
 <DD>
@@ -10650,7 +10668,9 @@ an attempt is made to assign a value to an array variable without
 using the compound assignment syntax (see
 <B>Arrays</B>
 
-above), one of the <I>names</I> is not a valid shell variable name,
+
+above),
+one of the <I>names</I> is not a valid shell variable name,
 an attempt is made to turn off readonly status for a readonly variable,
 an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with <B>-f</B>.
@@ -11619,6 +11639,7 @@ is an arithmetic expression to be evaluated (see
 <FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
 
 </FONT>
+
 above).
 If the last
 <I>arg</I>
@@ -11995,7 +12016,10 @@ invalid option is supplied.
 <DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-i</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-N</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
 <I>fd</I> supplied as an argument to the <B>-u</B> option,
-split into words as described above under <B>Word Splitting</B>,
+split into words as described
+
+above
+under <B>Word Splitting</B>,
 and the first word
 is assigned to the first
 <I>name</I>,
@@ -12015,7 +12039,10 @@ The characters in
 
 </FONT>
 are used to split the line into words using the same rules the shell
-uses for expansion (described above under <B>Word Splitting</B>).
+uses for expansion (described
+
+above
+under <B>Word Splitting</B>).
 The backslash character (<B>\</B>) may be used to remove any special
 meaning for the next character read and for line continuation.
 Options, if supplied, have the following meanings:
@@ -12052,7 +12079,9 @@ is coming from a terminal,
 <FONT SIZE=-1><B>READLINE</B>
 
 </FONT>
-above) is used to obtain the line.
+
+above)
+is used to obtain the line.
 Readline uses the current (or default, if line editing was not previously
 active) editing settings, but uses Readline's default filename completion.
 <DT><B>-i </B><I>text</I>
@@ -12278,7 +12307,9 @@ or a <I>compound command</I>
 <FONT SIZE=-1><B>SHELL GRAMMAR</B>
 
 </FONT>
-above), exits with a non-zero status.
+
+above),
+exits with a non-zero status.
 The shell does not exit if the
 command that fails is part of the command list immediately following a
 <B>while</B>
@@ -12314,7 +12345,9 @@ separately (see
 <FONT SIZE=-1><B>COMMAND EXECUTION ENVIRONMENT</B>
 
 </FONT>
-above), and may cause
+
+above),
+and may cause
 subshells to exit before executing all the commands in the subshell.
 <P>
 
@@ -12352,6 +12385,7 @@ it (see
 <FONT SIZE=-1><B>JOB CONTROL</B>
 
 </FONT>
+
 above).
 All processes run in a separate process group.
 When a background job completes, the shell prints a line
@@ -12423,7 +12457,10 @@ Same as
 <DT><B>history</B>
 
 <DD>
-Enable command history, as described above under
+Enable command history, as described
+
+above
+under
 <FONT SIZE=-1><B>HISTORY</B>.
 
 </FONT>
@@ -12437,6 +12474,7 @@ The effect is as if the shell command
 had been executed
 (see
 <B>Shell Variables</B>
+
 
 above).
 <DT><B>keyword</B>
@@ -12516,7 +12554,9 @@ See
 <FONT SIZE=-1><B>SEE ALSO</B>
 
 </FONT>
-below for a reference to a document that details how posix mode affects
+
+below
+for a reference to a document that details how posix mode affects
 bash's behavior.
 <DT><B>privileged</B>
 
@@ -12637,7 +12677,9 @@ or associated word list.
 The shell performs brace expansion (see
 <B>Brace Expansion</B>
 
-above).  This is on by default.
+
+above).
+This is on by default.
 <DT><B>-C</B>
 
 <DD>
@@ -12888,8 +12930,9 @@ intervening command (see
 <FONT SIZE=-1><B>JOB CONTROL</B>
 
 </FONT>
-above).  The shell always
-postpones exiting if any jobs are stopped.
+
+above).
+The shell always postpones exiting if any jobs are stopped.
 <DT><B>checkwinsize</B>
 
 <DD>
@@ -12913,7 +12956,10 @@ attempts to save all lines of a multiple-line
 command in the same history entry.  This allows
 easy re-editing of multi-line commands.
 This option is enabled by default, but only has an effect if command
-history is enabled, as described above under
+history is enabled, as described
+
+above
+under
 <FONT SIZE=-1><B>HISTORY</B>.
 
 </FONT>
@@ -12948,6 +12994,7 @@ These control aspects of the shell's compatibility mode
 <FONT SIZE=-1><B>SHELL COMPATIBILITY MODE</B>
 
 </FONT>
+
 below).
 <DT><B>complete_fullquote</B>
 
@@ -13024,7 +13071,10 @@ fails.
 <DT><B>expand_aliases</B>
 
 <DD>
-If set, aliases are expanded as described above under
+If set, aliases are expanded as described
+
+above
+under
 <FONT SIZE=-1><B>ALIASES</B>.
 
 </FONT>
@@ -13067,7 +13117,9 @@ and
 <FONT SIZE=-1><B>BASH_ARGV</B>
 
 </FONT>
-are updated as described in their descriptions above.
+are updated as described in their descriptions
+
+above).
 <DT><B>5.</B>
 
 <DD>
@@ -13085,7 +13137,10 @@ subshells invoked with <B>(</B> <I>command</I> <B>)</B> inherit the
 <DT><B>extglob</B>
 
 <DD>
-If set, the extended pattern matching features described above under
+If set, the extended pattern matching features described
+
+above
+under
 <B>Pathname Expansion</B> are enabled.
 <DT><B>extquote</B>
 
@@ -13110,7 +13165,9 @@ cause words to be ignored when performing word completion even if
 the ignored words are the only possible completions.
 See
 <FONT SIZE=-1><B>SHELL VARIABLES</B></FONT>
-above for a description of
+
+above
+for a description of
 <FONT SIZE=-1><B>FIGNORE</B>.
 
 </FONT>
@@ -13122,7 +13179,9 @@ If set, range expressions used in pattern matching bracket expressions (see
 <FONT SIZE=-1><B>Pattern Matching</B>
 
 </FONT>
-above) behave as if in the traditional C locale when performing
+
+above)
+behave as if in the traditional C locale when performing
 comparisons.  That is, the current locale's collating sequence
 is not taken into account, so
 <B>b</B>
@@ -13199,6 +13258,7 @@ under
 <FONT SIZE=-1><B>READLINE</B>
 
 </FONT>
+
 above).
 This is enabled by default.
 <DT><B>huponexit</B>
@@ -13226,7 +13286,9 @@ line to be ignored in an interactive shell (see
 <FONT SIZE=-1><B>COMMENTS</B>
 
 </FONT>
-above).  This option is enabled by default.
+
+above).
+This option is enabled by default.
 <DT><B>lastpipe</B>
 
 <DD>
@@ -13260,6 +13322,7 @@ The shell sets this option if it is started as a login shell (see
 <FONT SIZE=-1><B>INVOCATION</B>
 
 </FONT>
+
 above).
 The value may not be changed.
 <DT><B>mailwarn</B>
@@ -13293,6 +13356,7 @@ matches filenames in a case-insensitive fashion when performing pathname
 expansion (see
 <B>Pathname Expansion</B>
 
+
 above).
 <DT><B>nocasematch</B>
 
@@ -13323,6 +13387,7 @@ allows patterns which match no
 files (see
 <B>Pathname Expansion</B>
 
+
 above)
 to expand to a null string, rather than themselves.
 <DT><B>patsub_replacement</B>
@@ -13331,13 +13396,18 @@ to expand to a null string, rather than themselves.
 If set, <B>bash</B>
 expands occurrences of <B>&amp;</B> in the replacement string of pattern
 substitution to the text matched by the pattern, as described
-under <B>Parameter Expansion</B> above.
+under <B>Parameter Expansion</B>
+
+above.
 This option is enabled by default.
 <DT><B>progcomp</B>
 
 <DD>
 If set, the programmable completion facilities (see
-<B>Programmable Completion</B> above) are enabled.
+<B>Programmable Completion</B>
+
+above)
+are enabled.
 This option is enabled by default.
 <DT><B>progcomp_alias</B>
 
@@ -13355,7 +13425,9 @@ expansion, and quote removal after being expanded as described in
 <FONT SIZE=-1><B>PROMPTING</B>
 
 </FONT>
-above.  This option is enabled by default.
+
+above.
+This option is enabled by default.
 <DT><B>restricted_shell</B>
 
 <DD>
@@ -13364,6 +13436,7 @@ The shell sets this option if it is started in restricted mode
 <FONT SIZE=-1><B>RESTRICTED SHELL</B>
 
 </FONT>
+
 below).
 The value may not be changed.
 This is not reset when the startup files are executed, allowing
@@ -13394,7 +13467,9 @@ If set, the shell automatically closes file descriptors assigned using the
 <FONT SIZE=-1><B>REDIRECTION</B>
 
 </FONT>
-above) instead of leaving them open when the command completes.
+
+above)
+instead of leaving them open when the command completes.
 <DT><B>xpg_echo</B>
 
 <DD>
@@ -13428,8 +13503,10 @@ the evaluation of the conditional expression
 <I>expr</I>.
 
 Each operator and operand must be a separate argument.
-Expressions are composed of the primaries described above under
+Expressions are composed of the primaries described 
 
+above
+under
 <FONT SIZE=-1><B>CONDITIONAL EXPRESSIONS</B>.
 
 </FONT>
@@ -13491,7 +13568,9 @@ The expression is true if and only if the argument is not null.
 <DT>2 arguments<DD>
 If the first argument is <B>!</B>, the expression is true if and
 only if the second argument is null.
-If the first argument is one of the unary conditional operators listed above
+If the first argument is one of the unary conditional operators listed
+
+above
 under
 <FONT SIZE=-1><B>CONDITIONAL EXPRESSIONS</B>,
 
@@ -13501,7 +13580,9 @@ If the first argument is not a valid unary conditional operator, the expression
 is false.
 <DT>3 arguments<DD>
 The following conditions are applied in the order listed.
-If the second argument is one of the binary conditional operators listed above
+If the second argument is one of the binary conditional operators listed
+
+above
 under
 <FONT SIZE=-1><B>CONDITIONAL EXPRESSIONS</B>,
 
@@ -13631,6 +13712,7 @@ command, and before the first command executes in a shell function (see
 <FONT SIZE=-1><B>SHELL GRAMMAR</B>
 
 </FONT>
+
 above).
 Refer to the description of the <B>extdebug</B> option to the
 <B>shopt</B> builtin for details of its effect on the <B>DEBUG</B> trap.
@@ -14148,8 +14230,14 @@ its status, instead of returning when it changes status.
 If
 <I>id</I>
 
-specifies a non-existent process or job, the return status is
-127.  Otherwise, the return status is the exit status of the last
+specifies a non-existent process or job, the return status is 127.
+If <B>wait</B> is interrupted by a signal, the return status will be greater
+than 128, as described under
+<B>SIGNALS</B>
+
+
+above.
+Otherwise, the return status is the exit status of the last
 process or job waited for.
 </DL>
 <A NAME="lbDC">&nbsp;</A>
@@ -14177,7 +14265,7 @@ behavior. It's intended to be a temporary solution.
 This section does not mention behavior that is standard for a particular
 version (e.g., setting <B>compat32</B> means that quoting the rhs of the regexp
 matching operator quotes special regexp characters in the word, which is
-default behavior in bash-3.2 and above). 
+default behavior in bash-3.2 and subsequent versions). 
 <P>
 
 If a user enables, say, <B>compat32</B>, it may affect the behavior of other
@@ -14693,7 +14781,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 June 3<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 July 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14799,7 +14887,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20220609/doc/bash.1.<BR>
-Time: 13 June 2022 11:04:39 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20220727/doc/bash.1.<BR>
+Time: 29 July 2022 09:05:42 EDT
 </BODY>
 </HTML>

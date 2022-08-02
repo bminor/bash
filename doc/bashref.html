@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 3 June 2022).
+the Bash shell (version 5.2, 29 July 2022).
 
-This is Edition 5.2, last updated 3 June 2022,
+This is Edition 5.2, last updated 29 July 2022,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 3 June 2022).
+the Bash shell (version 5.2, 29 July 2022).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 3 June 2022,
+<p>This is Edition 5.2, last updated 29 July 2022,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -1418,16 +1418,16 @@ It has almost the same syntax as the <code>for</code> command:
 </pre></div>
 
 <p>The list of words following <code>in</code> is expanded, generating a list
-of items.  The set of expanded words is printed on the standard
+of items, and the set of expanded words is printed on the standard
 error output stream, each preceded by a number.  If the
 &lsquo;<samp>in <var>words</var></samp>&rsquo; is omitted, the positional parameters are printed,
 as if &lsquo;<samp>in &quot;$@&quot;</samp>&rsquo; had been specified.
-The <code>PS3</code> prompt is then displayed and a line is read from the
-standard input.
+<code>select</code> then displays the <code>PS3</code>
+prompt and reads a line from the standard input.
 If the line consists of a number corresponding to one of the displayed
 words, then the value of <var>name</var> is set to that word.
 If the line is empty, the words and prompt are displayed again.
-If <code>EOF</code> is read, the <code>select</code> command completes.
+If <code>EOF</code> is read, the <code>select</code> command completes and returns 1.
 Any other value read causes <var>name</var> to be set to null.
 The line read is saved in the variable <code>REPLY</code>.
 </p>
@@ -3382,6 +3382,12 @@ sub-patterns:
 </p></dd>
 </dl>
 
+<p>The <code>extglob</code> option changes the behavior of the parser, since the
+parentheses are normally treated as operators with syntactic meaning.
+To ensure that extended matching patterns are parsed correctly, make sure
+that <code>extglob</code> is enabled before parsing constructs containing the
+patterns, including shell functions and command substitutions.
+</p>
 <p>When matching filenames, the <code>dotglob</code> shell option determines
 the set of filenames that are tested:
 when <code>dotglob</code> is enabled, the set of filenames includes all files
@@ -9358,7 +9364,7 @@ has been set.
 If Bash receives a trapped signal while executing <code>read</code>, the trap
 handler executes and <code>read</code> returns an exit status greater than 128.
 
-</li><li> The <code>printf</code> builting uses <code>double</code> (via <code>strtod</code>) to convert
+</li><li> The <code>printf</code> builtin uses <code>double</code> (via <code>strtod</code>) to convert
 arguments corresponding to floating point conversion specifiers, instead of
 <code>long double</code> if it&rsquo;s available. The &lsquo;<samp>L</samp>&rsquo; length modifier forces
 <code>printf</code> to use <code>long double</code> if it&rsquo;s available.
@@ -9414,7 +9420,7 @@ behavior. It&rsquo;s intended to be a temporary solution.
 <p>This section does not mention behavior that is standard for a particular
 version (e.g., setting <code>compat32</code> means that quoting the rhs of the regexp
 matching operator quotes special regexp characters in the word, which is
-default behavior in bash-3.2 and above). 
+default behavior in bash-3.2 and subsequent versions). 
 </p>
 <p>If a user enables, say, <code>compat32</code>, it may affect the behavior of other
 compatibility levels up to and including the current compatibility level.
@@ -9577,6 +9583,14 @@ Bash-5.2 will look for and report on a key named &lsquo;<samp>@</samp>&rsquo;
 <var>value</var>, before any variable-specific transformations have been
 performed (e.g., converting to lowercase).
 Bash-5.2 will return the final value assigned to the variable.
+</li><li> Parsing command substitutions will behave as if extended glob
+(see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>)
+is enabled, so that parsing a command substitution containing an extglob
+pattern (say, as part of a shell function) will not fail.
+This assumes the intent is to enable extglob before the command is executed
+and word expansions are performed.
+It will fail at word expansion time if extglob hasn&rsquo;t been
+enabled by the time the command is executed.
 </li></ul>
 </dd>
 </dl>
@@ -9846,10 +9860,14 @@ The variable will be unset initially, before any assignment.
 This is useful only when the <samp>-n</samp> option is supplied.
 Supplying the <samp>-f</samp> option, when job control is enabled,
 forces <code>wait</code> to wait for each <var>pid</var> or <var>jobspec</var> to
-terminate before returning its status, intead of returning when it changes
+terminate before returning its status, instead of returning when it changes
 status.
 If neither <var>jobspec</var> nor <var>pid</var> specifies an active child process
 of the shell, the return status is 127.
+If <code>wait</code> is interrupted by a signal, the return status will be greater
+than 128, as described above (see <a href="#Signals">Signals</a>).
+Otherwise, the return status is the exit  status
+of the last process or job waited for.
 </p>
 </dd>
 <dt id='index-disown'><span><code>disown</code><a href='#index-disown' class='copiable-anchor'> &para;</a></span></dt>
@@ -12425,6 +12443,7 @@ completions:
 <dt><span><code>-C <var>command</var></code></span></dt>
 <dd><p><var>command</var> is executed in a subshell environment, and its output is
 used as the possible completions.
+Arguments are passed as with the <samp>-F</samp> option.
 </p>
 </dd>
 <dt><span><code>-F <var>function</var></code></span></dt>
@@ -13588,7 +13607,7 @@ the installed version of Readline in subdirectories of that directory
 </dd>
 <dt><span><code>--with-libintl-prefix[=<var>PREFIX</var>]</code></span></dt>
 <dd><p>Define this to make Bash link with a locally-installed version of the
-libintl library instead ofthe version in <samp>lib/intl</samp>.
+libintl library instead of the version in <samp>lib/intl</samp>.
 </p>
 </dd>
 <dt><span><code>--with-libiconv-prefix[=<var>PREFIX</var>]</code></span></dt>

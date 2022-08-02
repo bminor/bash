@@ -3821,3 +3821,27 @@ subst.c
 				   ----
 
 [bash-5.2-rc2 frozen]
+
+				   7/27
+				   ----
+parse.y
+	- reset_parser: set need_here_doc, esacs_needed_count, expecting_in_token
+	  all to 0, since jumping back to a top-level parse needs that
+	- parse_comsub: make sure to reset expand_aliases and shell_eof_token
+	  if we're not going to exit immediately out of this function
+
+				   7/28
+				   ----
+parse.y
+	- parse_comsub: if the compatibility level is <= 51, set extglob while
+	  parsing the command substitution, so bad pattern errors can still be
+	  caught but valid patterns are let through and can be evaluated at
+	  runtime, when extglob may have been set. If it isn't set, it will
+	  still be a parser error when the command substitution is executed.
+	  Fixes report from Sam James <sam@gentoo.org> about gentoo scripts.
+	- reset_parser: set extended_glob from global_extglob if the parser
+	  state includes PST_CMDSUBST
+	- xparse_dolparen: set global_extglob but don't modify extended_glob,
+	  so parse errors can be caught before forking a child for command
+	  substitution, as part of word expansion, but after extglob may have
+	  been set by command execution (e.g., in a shell function)
