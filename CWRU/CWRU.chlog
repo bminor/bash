@@ -3845,3 +3845,16 @@ parse.y
 	  so parse errors can be caught before forking a child for command
 	  substitution, as part of word expansion, but after extglob may have
 	  been set by command execution (e.g., in a shell function)
+
+				    8/5
+				    ---
+[bump version to bash-5.2-rc3]
+
+				    8/6
+				    ---
+trap.c
+	- run_pending_traps: move code from evalstring() so we call
+	  parse_and_execute() directly and handle any `return' invocations so
+	  we can restore the value of running_trap. Otherwise, if we longjmp
+	  past this function, we will think we're running a trap after we
+	  finish. Prompted by post from Koichi Murase <myoga.murase@gmail.com>
