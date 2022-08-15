@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Mar 11 10:14:10 EST 2022
+.\"	Last Change: Fri Aug 12 11:12:23 EDT 2022
 .\"
-.TH READLINE 3 "2022 March 11" "GNU Readline 8.2"
+.TH READLINE 3 "2022 August 12" "GNU Readline 8.2"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -445,6 +445,8 @@ by stripping the eighth bit and prefixing it with an
 escape character (in effect, using escape as the \fImeta prefix\fP).
 The default is \fIOn\fP, but readline will set it to \fIOff\fP if the
 locale contains eight-bit characters.
+This variable is dependent on the \fBLC_CTYPE\fP locale category, and 
+may change if the locale is changed.
 .TP
 .B disable\-completion (Off)
 If set to \fBOn\fP, readline will inhibit word completion.  Completion 
@@ -538,6 +540,8 @@ regardless of what the terminal claims it can support.  The name
 is a synonym for this variable.
 The default is \fIOff\fP, but readline will set it to \fIOn\fP if the 
 locale contains eight-bit characters.
+This variable is dependent on the \fBLC_CTYPE\fP locale category, and 
+may change if the locale is changed.
 .TP
 .B isearch\-terminators (``C\-[ C\-J'')
 The string of characters that should terminate an incremental
@@ -601,6 +605,8 @@ eighth bit set directly rather than as a meta-prefixed escape
 sequence.
 The default is \fIOff\fP, but readline will set it to \fIOn\fP if the
 locale contains eight-bit characters.
+This variable is dependent on the \fBLC_CTYPE\fP locale category, and
+may change if the locale is changed.
 .TP
 .B page\-completions (On)
 If set to \fBOn\fP, readline uses an internal \fImore\fP-like pager

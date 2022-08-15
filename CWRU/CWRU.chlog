@@ -3858,3 +3858,33 @@ trap.c
 	  we can restore the value of running_trap. Otherwise, if we longjmp
 	  past this function, we will think we're running a trap after we
 	  finish. Prompted by post from Koichi Murase <myoga.murase@gmail.com>
+
+				    8/9
+				    ---
+
+lib/readline/nls.c
+	- _rl_current_locale: private variable, stores the value of the
+	  LC_CTYPE locale category, as determined by _rl_init_locale; set
+	  to allocated memory in _rl_init_locale()
+	- _rl_set_localevars: new function, code from _rl_init_eightbit that
+	  checks the current locale (passed as an argument) and sets the
+	  various locale-aware variables based on it. It accepts a second
+	  argument: FORCE. If non-zero, it means to restore the default "C"
+	  locale values if the locale is "C" or "POSIX", now that this
+	  function can be called multiple times
+	- _rl_init_eightbit: now just calls _rl_init_locale and
+	  _rl_set_localevars
+	- _rl_reset_locale: new function, checks whether our the locale has
+	  changed since we last called _rl_init_locale to set our internal
+	  idea of its value. If it has changed, call _rl_set_localevars with
+	  the new locale and a FORCE argument of 1 to change the
+	  locale-dependent variables.
+
+lib/readline/rlprivate.h
+	- _rl_reset_locale: extern declaration
+
+lib/readline/readline.c
+	- rl_initialize: call _rl_reset_locale instead of _rl_init_locale so
+	  the internal readline variables get set when we move from a non-
+	  multibyte locale ("C") to a multibyte one ("en_US.UTF-8"). Report
+	  from Alan Coopersmith <alan.coopersmith@oracle.com>

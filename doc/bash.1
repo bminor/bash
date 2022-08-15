@@ -6063,6 +6063,8 @@ by stripping the eighth bit and prefixing an
 escape character (in effect, using escape as the \fImeta prefix\fP).
 The default is \fIOn\fP, but readline will set it to \fIOff\fP if the
 locale contains eight-bit characters.
+This variable is dependent on the \fBLC_CTYPE\fP locale category, and 
+may change if the locale is changed.
 .TP
 .B disable\-completion (Off)
 If set to \fBOn\fP, readline will inhibit word completion.  Completion
@@ -6157,6 +6159,8 @@ regardless of what the terminal claims it can support.  The name
 is a synonym for this variable.
 The default is \fIOff\fP, but readline will set it to \fIOn\fP if the
 locale contains eight-bit characters.
+This variable is dependent on the \fBLC_CTYPE\fP locale category, and 
+may change if the locale is changed.
 .TP
 .B isearch\-terminators (``C\-[C\-J'')
 The string of characters that should terminate an incremental
@@ -6220,6 +6224,8 @@ eighth bit set directly rather than as a meta-prefixed escape
 sequence.
 The default is \fIOff\fP, but readline will set it to \fIOn\fP if the
 locale contains eight-bit characters.
+This variable is dependent on the \fBLC_CTYPE\fP locale category, and 
+may change if the locale is changed.
 .TP
 .B page\-completions (On)
 If set to \fBOn\fP, readline uses an internal \fImore\fP-like pager

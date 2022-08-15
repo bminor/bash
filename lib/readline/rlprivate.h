@@ -364,6 +364,7 @@ extern void _rl_revert_all_lines (void);
 /* nls.c */
 extern char *_rl_init_locale (void);
 extern int _rl_init_eightbit (void);
+extern void _rl_reset_locale (void);
 
 /* parens.c */
 extern void _rl_enable_paren_matching (int);

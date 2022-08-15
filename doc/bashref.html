@@ -10494,9 +10494,12 @@ The default limit is <code>100</code>.
 <dd><p>If set to &lsquo;<samp>on</samp>&rsquo;, Readline will convert characters with the
 eighth bit set to an <small>ASCII</small> key sequence by stripping the eighth
 bit and prefixing an <tt class="key">ESC</tt> character, converting them to a
-meta-prefixed key sequence.  The default value is &lsquo;<samp>on</samp>&rsquo;, but
+meta-prefixed key sequence.
+The default value is &lsquo;<samp>on</samp>&rsquo;, but
 will be set to &lsquo;<samp>off</samp>&rsquo; if the locale is one that contains
 eight-bit characters.
+This variable is dependent on the <code>LC_CTYPE</code> locale category, and
+may change if the locale is changed.
 </p>
 </dd>
 <dt id='index-disable_002dcompletion'><span><code>disable-completion</code><a href='#index-disable_002dcompletion' class='copiable-anchor'> &para;</a></span></dt>
@@ -10608,6 +10611,8 @@ regardless of what the terminal claims it can support.  The
 default value is &lsquo;<samp>off</samp>&rsquo;, but Readline will set it to &lsquo;<samp>on</samp>&rsquo; if the 
 locale contains eight-bit characters.
 The name <code>meta-flag</code> is a synonym for this variable.
+This variable is dependent on the <code>LC_CTYPE</code> locale category, and
+may change if the locale is changed.
 </p>
 </dd>
 <dt id='index-isearch_002dterminators'><span><code>isearch-terminators</code><a href='#index-isearch_002dterminators' class='copiable-anchor'> &para;</a></span></dt>
@@ -10692,6 +10697,8 @@ eighth bit set directly rather than as a meta-prefixed escape
 sequence.
 The default is &lsquo;<samp>off</samp>&rsquo;, but Readline will set it to &lsquo;<samp>on</samp>&rsquo; if the
 locale contains eight-bit characters.
+This variable is dependent on the <code>LC_CTYPE</code> locale category, and
+may change if the locale is changed.
 </p>
 </dd>
 <dt id='index-page_002dcompletions'><span><code>page-completions</code><a href='#index-page_002dcompletions' class='copiable-anchor'> &para;</a></span></dt>
@@ -10808,7 +10815,7 @@ what you find most comfortable.
 to a string that is inserted when the key is pressed (a <var>macro</var>).
 </p>
 <p>The <code>bind&nbsp;<span class="nolinebreak">-p</span></code><!-- /@w --> command displays Readline function names and
-bindings in a format that can put directly into an initialization file.
+bindings in a format that can be put directly into an initialization file.
 See <a href="#Bash-Builtins">Bash Builtin Commands</a>.
 </p>
 <dl compact="compact">
