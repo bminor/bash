@@ -163,3 +163,7 @@ k. New readline state (RL_STATE_EOF) and application-visible variable
 l. There is a new configuration option: --with-shared-termcap-library, which
    forces linking the shared readline library with the shared termcap (or
    curses/ncurses/termlib) library so applications don't have to do it.
+
+m. Readline now checks for changes to locale settings (LC_ALL/LC_CTYPE/LANG)
+   each time it is called, and modifies the appropriate locale-specific display
+   and key binding variables when the locale changes.

@@ -1,3 +1,27 @@
+This document details the changes between this version, bash-5.2-rc3, and
+the previous version, bash-5.2-rc2.
+
+1. Changes to Bash
+
+a. Added a compatibility mode feature that causes the parser to parse command
+   substitutions as if extglob were enabled. If it is enabled before execution,
+   parse at execution will succeed. If not, the subsequent execution parse will
+   fail.
+
+b. Fixed an issue with handling a `return' executed in a trap action if the
+   trap is executed while running in a shell function.
+
+2. Changes to Readline
+
+3. New Features in Bash
+
+4. New Features in Readline
+
+a. Readline now checks for changes to locale settings (LC_ALL/LC_CTYPE/LANG)
+   each time it is called, and modifies the appropriate locale-specific display
+   and key binding variables when the locale changes.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.2-rc2, and
 the previous version, bash-5.2-rc1.
 

@@ -3888,3 +3888,20 @@ lib/readline/readline.c
 	  the internal readline variables get set when we move from a non-
 	  multibyte locale ("C") to a multibyte one ("en_US.UTF-8"). Report
 	  from Alan Coopersmith <alan.coopersmith@oracle.com>
+
+				   8/16
+				   ----
+lib/sh/setlinebuf.c
+	- sh_setlinebuf: allocate buffers for line-buffering stdout and stderr
+	  only once, the first time it is requested. Only allocate memory if
+	  we're using setvbuf (we usually are). Double the buffer size to 2016
+	  if we're using the bash malloc. Otherwise, let stdio handle it.
+
+				   8/17
+				   ----
+builtins/exec.def
+	- exec_builtin: make sure to initialize orig_job_control in case the
+	  command is not found by search_for_command. Report and fix from
+	  Xiami <i@f2light.com>
+
+	  
