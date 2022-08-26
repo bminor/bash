@@ -109,7 +109,7 @@ exec_name_should_ignore (name)
 
 /* Return some flags based on information about this file.
    The EXISTS bit is non-zero if the file is found.
-   The EXECABLE bit is non-zero the file is executble.
+   The EXECABLE bit is non-zero the file is executable.
    Zero is returned if the file is not found. */
 int
 file_status (name)

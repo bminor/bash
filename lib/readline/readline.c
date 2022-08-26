@@ -1186,7 +1186,7 @@ rl_initialize (void)
       RL_SETSTATE(RL_STATE_INITIALIZED);
     }
   else
-    (void)_rl_init_locale ();	/* check current locale */
+    _rl_reset_locale ();	/* check current locale and set locale variables */
 
   /* Initialize the current line information. */
   _rl_init_line_state ();

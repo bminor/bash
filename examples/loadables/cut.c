@@ -417,7 +417,9 @@ cutfile (v, list, ops)
       while ((n = zgetline (fd, &line, &llen, '\n', unbuffered_read)) != -1)
 	{
 	  QUIT;
-	  cutline (v, line, ops);		/* can modify line */
+	  if (line[n] == '\n')
+	    line[n] = '\0';		/* cutline expects no newline terminator */
+	  cutline (v, line, ops);	/* can modify line */
 	}
       if (fd > 0)
 	close (fd);

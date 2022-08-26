@@ -304,7 +304,7 @@ make_command_string_internal (command)
 		if (deferred_heredocs == 0)
 		  {
 		    if (was_heredoc == 0)
-		      cprintf (s);		/* inside_function_def? */
+		      cprintf ("%s", s);	/* inside_function_def? */
 		    else
 		      was_heredoc = 0;
 		  }

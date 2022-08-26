@@ -297,11 +297,13 @@ void
 run_pending_traps ()
 {
   register int sig;
-  int old_exit_value, x;
-  int old_running;
+  int x;
+  volatile int old_exit_value, old_running;
   WORD_LIST *save_subst_varlist;
   HASH_TABLE *save_tempenv;
   sh_parser_state_t pstate;
+  volatile int save_return_catch_flag, function_code;
+  procenv_t save_return_catch;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -341,9 +343,7 @@ run_pending_traps ()
 	 while (pending_traps[sig]--) instead of the if statement. */
       if (pending_traps[sig])
 	{
-	  if (running_trap == sig+1)
-	    /*continue*/;
-
+	  /* XXX - set last_command_exit_value = trap_saved_exit_value here? */
 	  running_trap = sig + 1;
 
 	  if (sig == SIGINT)
@@ -419,7 +419,6 @@ run_pending_traps ()
 	    }
 	  else
 	    {
-	      /* XXX - should we use save_parser_state/restore_parser_state? */
 	      save_parser_state (&pstate);
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
@@ -432,7 +431,23 @@ run_pending_traps ()
 	      /* XXX - set pending_traps[sig] = 0 here? */
 	      pending_traps[sig] = 0;
 	      evalnest++;
-	      evalstring (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+
+	      function_code = 0;
+	      save_return_catch_flag = return_catch_flag;
+	      if (return_catch_flag)
+		{
+		  COPY_PROCENV (return_catch, save_return_catch);
+		  function_code = setjmp_nosigs (return_catch);
+		}
+
+	      if (function_code == 0)
+		x = parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+	      else
+		{
+		  parse_and_execute_cleanup (sig + 1);	/* XXX - could use -1 */
+		  x = return_catch_value;
+		}
+
 	      evalnest--;
 #if defined (JOB_CONTROL)
 	      restore_pipeline (1);
@@ -441,6 +456,19 @@ run_pending_traps ()
 	      subst_assign_varlist = save_subst_varlist;
 	      restore_parser_state (&pstate);
 	      temporary_env = save_tempenv;
+
+	      if (save_return_catch_flag)
+		{
+		  return_catch_flag = save_return_catch_flag;
+		  return_catch_value = x;
+		  COPY_PROCENV (save_return_catch, return_catch);
+		  if (function_code)
+		    {
+		      running_trap = old_running;		/* XXX */
+		      /* caller will set last_command_exit_value */
+		      sh_longjmp (return_catch, 1);
+		    }
+		}
 	    }
 
 	  pending_traps[sig] = 0;	/* XXX - move before evalstring? */

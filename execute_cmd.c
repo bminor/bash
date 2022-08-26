@@ -523,7 +523,7 @@ restore_signal_mask (set)
 #ifdef DEBUG
 /* A debugging function that can be called from gdb, for instance. */
 void
-open_files ()
+open_files (void)
 {
   register int i;
   int f, fd_table_size;
@@ -2265,7 +2265,7 @@ coproc_setvars (cp)
 {
   SHELL_VAR *v;
   char *namevar, *t;
-  int l;
+  size_t l;
   WORD_DESC w;
 #if defined (ARRAY_VARS)
   arrayind_t ind;
@@ -3918,11 +3918,15 @@ execute_cond_node (cond)
 	arg1 = nullstr;
       if (echo_command_at_execute)
 	xtrace_print_cond_term (cond->type, invert, cond->op, arg1, (char *)NULL);
+#if defined (ARRAY_VARS)
       if (varop)
 	oa = set_expand_once (0, 0);	/* no-op for compatibility levels <= 51 */
+#endif
       result = unary_test (cond->op->word, arg1, varflag) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+#if defined (ARRAY_VARS)
       if (varop)
 	assoc_expand_once = oa;
+#endif
       if (arg1 != nullstr)
 	free (arg1);
     }

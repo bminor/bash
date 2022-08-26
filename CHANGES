@@ -1,3 +1,27 @@
+This document details the changes between this version, bash-5.2-rc3, and
+the previous version, bash-5.2-rc2.
+
+1. Changes to Bash
+
+a. Added a compatibility mode feature that causes the parser to parse command
+   substitutions as if extglob were enabled. If it is enabled before execution,
+   parse at execution will succeed. If not, the subsequent execution parse will
+   fail.
+
+b. Fixed an issue with handling a `return' executed in a trap action if the
+   trap is executed while running in a shell function.
+
+2. Changes to Readline
+
+3. New Features in Bash
+
+4. New Features in Readline
+
+a. Readline now checks for changes to locale settings (LC_ALL/LC_CTYPE/LANG)
+   each time it is called, and modifies the appropriate locale-specific display
+   and key binding variables when the locale changes.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.2-rc2, and
 the previous version, bash-5.2-rc1.
 
@@ -444,7 +468,7 @@ z. The new `--enable-translatable-strings' option to `configure' allows $"..."
    support to be compiled in or out.
 
 aa. The new `globskipdots' shell option forces pathname expansion never to
-    return `.' or `..' unless explicitly matched.
+    return `.' or `..' unless explicitly matched. It is enabled by default.
 
 bb. Array references using `@' and `*' that are the value of nameref variables
     (declare -n ref='v[@]' ; echo $ref) no longer cause the shell to exit if
@@ -4513,7 +4537,7 @@ l.  There is a new configuration option (in config-top.h) that forces bash to
 m.  A new variable $BASHOPTS to export shell options settable using `shopt' to
     child processes.
 
-n.  There is a new confgure option that forces the extglob option to be
+n.  There is a new configure option that forces the extglob option to be
     enabled by default.
 
 o.  New variable $BASH_XTRACEFD; when set to an integer bash will write xtrace
@@ -4554,7 +4578,7 @@ d.  New bindable function: skip-csi-sequence.  Can be used as a default to
     to bind all keys.
 
 e.  New application-settable function: rl_filename_rewrite_hook.  Can be used
-    to rewite or modify filenames read from the file system before they are
+    to rewrite or modify filenames read from the file system before they are
     compared to the word to be completed.
 
 f.  New bindable variable: skip-completed-text, active when completing in the
@@ -4636,7 +4660,7 @@ and the previous version, bash-4.0-beta2.
 1.  Changes to Bash
 
 a.  Fixed a bug that caused parsing errors when a $()-style command
-    substitution was follwed immediately by a quoted newline.
+    substitution was followed immediately by a quoted newline.
 
 b.  Fixed a bug that caused extended shell globbing patterns beginning with
     `*(' to not work when used with pattern substitution word expansions.
@@ -9572,7 +9596,7 @@ gg. `alias' and `unalias' now print error messages when passed an argument
     not interactive, as POSIX.2 specifies.
 
 hh. `alias' and `alias -p' now return a status of 0 when no aliases are
-    defined, as POSIX.2 specifes.
+    defined, as POSIX.2 specifies.
 
 ii. `cd -' now prints the pathname of the new working directory if the shell
     is interactive.

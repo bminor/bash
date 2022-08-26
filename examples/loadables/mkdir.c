@@ -228,7 +228,7 @@ char *mkdir_doc[] = {
 	"a symbolic mode is used, the operations are interpreted relative to",
 	"an initial mode of \"a=rwx\".  The -p option causes any required",
 	"intermediate directories in PATH to be created.  The directories",
-	"are created with permssion bits of rwxrwxrwx as modified by the current",
+	"are created with permission bits of rwxrwxrwx as modified by the current",
 	"umask, plus write and search permissions for the owner.  mkdir",
 	"returns 0 if the directories are created successfully, and non-zero",
 	"if an error occurs.",

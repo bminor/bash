@@ -8627,7 +8627,7 @@ valid_parameter_transform (xform)
     case 'P':		/* expand like prompt string */
     case 'Q':		/* quote reusably */
     case 'U':		/* transform to uppercase */
-    case 'u':		/* tranform by capitalizing */
+    case 'u':		/* transform by capitalizing */
     case 'L':		/* transform to lowercase */
       return 1;
     default:

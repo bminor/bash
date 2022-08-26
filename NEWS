@@ -94,7 +94,7 @@ z. The new `--enable-translatable-strings' option to `configure' allows $"..."
    support to be compiled in or out.
 
 aa. The new `globskipdots' shell option forces pathname expansion never to
-    return `.' or `..' unless explicitly matched.
+    return `.' or `..' unless explicitly matched. It is enabled by default.
 
 bb. Array references using `@' and `*' that are the value of nameref variables
     (declare -n ref='v[@]' ; echo $ref) no longer cause the shell to exit if
@@ -163,6 +163,10 @@ k. New readline state (RL_STATE_EOF) and application-visible variable
 l. There is a new configuration option: --with-shared-termcap-library, which
    forces linking the shared readline library with the shared termcap (or
    curses/ncurses/termlib) library so applications don't have to do it.
+
+m. Readline now checks for changes to locale settings (LC_ALL/LC_CTYPE/LANG)
+   each time it is called, and modifies the appropriate locale-specific display
+   and key binding variables when the locale changes.
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-5.1 since
@@ -1083,7 +1087,7 @@ l.  There is a new configuration option (in config-top.h) that forces bash to
 m.  A new variable $BASHOPTS to export shell options settable using `shopt' to
     child processes.
 
-n.  There is a new confgure option that forces the extglob option to be
+n.  There is a new configure option that forces the extglob option to be
     enabled by default.
 
 o.  New variable $BASH_XTRACEFD; when set to an integer bash will write xtrace
@@ -1130,7 +1134,7 @@ d.  New bindable function: skip-csi-sequence.  Can be used as a default to
     to bind all keys.
 
 e.  New application-settable function: rl_filename_rewrite_hook.  Can be used
-    to rewite or modify filenames read from the file system before they are
+    to rewrite or modify filenames read from the file system before they are
     compared to the word to be completed.
 
 f.  New bindable variable: skip-completed-text, active when completing in the

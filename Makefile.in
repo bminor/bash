@@ -176,7 +176,8 @@ GCC_LINT_FLAGS = -O -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wno-parentheses 
 		 -Wcast-align -Wstrict-prototypes -Wconversion -Wformat \
 		 -Wformat-nonliteral -Wmissing-braces -Wuninitialized \
 		 -Wmissing-declarations  -Winline \
-		 -Wmissing-prototypes -Wtraditional -Wredundant-decls -pedantic
+		 -Wmissing-prototypes -Wtraditional -Wredundant-decls \
+		 -Wformat-security -pedantic
 
 GCC_LINT_CFLAGS = $(BASE_CCFLAGS) $(CPPFLAGS) $(GCC_LINT_FLAGS)
 
@@ -615,7 +616,7 @@ strip:	$(Program) .made
 	-$(SIZE) $(Program)
 
 lint:
-	${MAKE} ${MFLAGS} CFLAGS='${GCC_LINT_FLAGS}' .made
+	${MAKE} ${MFLAGS} ADDON_CFLAGS='${GCC_LINT_FLAGS}' .made
 
 asan:
 	${MAKE} ${MFLAGS} ADDON_CFLAGS='${ASAN_XCFLAGS}' ADDON_LDFLAGS='${ASAN_XLDFLAGS}' .made

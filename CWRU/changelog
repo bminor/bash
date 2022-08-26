@@ -3821,3 +3821,87 @@ subst.c
 				   ----
 
 [bash-5.2-rc2 frozen]
+
+				   7/27
+				   ----
+parse.y
+	- reset_parser: set need_here_doc, esacs_needed_count, expecting_in_token
+	  all to 0, since jumping back to a top-level parse needs that
+	- parse_comsub: make sure to reset expand_aliases and shell_eof_token
+	  if we're not going to exit immediately out of this function
+
+				   7/28
+				   ----
+parse.y
+	- parse_comsub: if the compatibility level is <= 51, set extglob while
+	  parsing the command substitution, so bad pattern errors can still be
+	  caught but valid patterns are let through and can be evaluated at
+	  runtime, when extglob may have been set. If it isn't set, it will
+	  still be a parser error when the command substitution is executed.
+	  Fixes report from Sam James <sam@gentoo.org> about gentoo scripts.
+	- reset_parser: set extended_glob from global_extglob if the parser
+	  state includes PST_CMDSUBST
+	- xparse_dolparen: set global_extglob but don't modify extended_glob,
+	  so parse errors can be caught before forking a child for command
+	  substitution, as part of word expansion, but after extglob may have
+	  been set by command execution (e.g., in a shell function)
+
+				    8/5
+				    ---
+[bump version to bash-5.2-rc3]
+
+				    8/6
+				    ---
+trap.c
+	- run_pending_traps: move code from evalstring() so we call
+	  parse_and_execute() directly and handle any `return' invocations so
+	  we can restore the value of running_trap. Otherwise, if we longjmp
+	  past this function, we will think we're running a trap after we
+	  finish. Prompted by post from Koichi Murase <myoga.murase@gmail.com>
+
+				    8/9
+				    ---
+
+lib/readline/nls.c
+	- _rl_current_locale: private variable, stores the value of the
+	  LC_CTYPE locale category, as determined by _rl_init_locale; set
+	  to allocated memory in _rl_init_locale()
+	- _rl_set_localevars: new function, code from _rl_init_eightbit that
+	  checks the current locale (passed as an argument) and sets the
+	  various locale-aware variables based on it. It accepts a second
+	  argument: FORCE. If non-zero, it means to restore the default "C"
+	  locale values if the locale is "C" or "POSIX", now that this
+	  function can be called multiple times
+	- _rl_init_eightbit: now just calls _rl_init_locale and
+	  _rl_set_localevars
+	- _rl_reset_locale: new function, checks whether our the locale has
+	  changed since we last called _rl_init_locale to set our internal
+	  idea of its value. If it has changed, call _rl_set_localevars with
+	  the new locale and a FORCE argument of 1 to change the
+	  locale-dependent variables.
+
+lib/readline/rlprivate.h
+	- _rl_reset_locale: extern declaration
+
+lib/readline/readline.c
+	- rl_initialize: call _rl_reset_locale instead of _rl_init_locale so
+	  the internal readline variables get set when we move from a non-
+	  multibyte locale ("C") to a multibyte one ("en_US.UTF-8"). Report
+	  from Alan Coopersmith <alan.coopersmith@oracle.com>
+
+				   8/16
+				   ----
+lib/sh/setlinebuf.c
+	- sh_setlinebuf: allocate buffers for line-buffering stdout and stderr
+	  only once, the first time it is requested. Only allocate memory if
+	  we're using setvbuf (we usually are). Double the buffer size to 2016
+	  if we're using the bash malloc. Otherwise, let stdio handle it.
+
+				   8/17
+				   ----
+builtins/exec.def
+	- exec_builtin: make sure to initialize orig_job_control in case the
+	  command is not found by search_for_command. Report and fix from
+	  Xiami <i@f2light.com>
+
+	  

@@ -2933,6 +2933,12 @@ Matches one of the given patterns.
 Matches anything except one of the given patterns.
 @end table
 
+The @code{extglob} option changes the behavior of the parser, since the
+parentheses are normally treated as operators with syntactic meaning.
+To ensure that extended matching patterns are parsed correctly, make sure
+that @code{extglob} is enabled before parsing constructs containing the
+patterns, including shell functions and command substitutions.
+
 When matching filenames, the @code{dotglob} shell option determines
 the set of filenames that are tested:
 when @code{dotglob} is enabled, the set of filenames includes all files
@@ -8410,7 +8416,7 @@ If Bash receives a trapped signal while executing @code{read}, the trap
 handler executes and @code{read} returns an exit status greater than 128.
 
 @item
-The @code{printf} builting uses @code{double} (via @code{strtod}) to convert
+The @code{printf} builtin uses @code{double} (via @code{strtod}) to convert
 arguments corresponding to floating point conversion specifiers, instead of
 @code{long double} if it's available. The @samp{L} length modifier forces
 @code{printf} to use @code{long double} if it's available.
@@ -8642,6 +8648,15 @@ the $@{@var{parameter}[:]=@var{value}@} word expansion will return
 @var{value}, before any variable-specific transformations have been
 performed (e.g., converting to lowercase).
 Bash-5.2 will return the final value assigned to the variable.
+@item
+Parsing command substitutions will behave as if extended glob
+(@pxref{The Shopt Builtin})
+is enabled, so that parsing a command substitution containing an extglob
+pattern (say, as part of a shell function) will not fail.
+This assumes the intent is to enable extglob before the command is executed
+and word expansions are performed.
+It will fail at word expansion time if extglob hasn't been
+enabled by the time the command is executed.
 @end itemize
 @end table
 
@@ -8892,7 +8907,7 @@ The variable will be unset initially, before any assignment.
 This is useful only when the @option{-n} option is supplied.
 Supplying the @option{-f} option, when job control is enabled,
 forces @code{wait} to wait for each @var{pid} or @var{jobspec} to
-terminate before returning its status, intead of returning when it changes
+terminate before returning its status, instead of returning when it changes
 status.
 If neither @var{jobspec} nor @var{pid} specifies an active child process
 of the shell, the return status is 127.
@@ -9329,7 +9344,7 @@ the installed version of Readline in subdirectories of that directory
 
 @item --with-libintl-prefix[=@var{PREFIX}]
 Define this to make Bash link with a locally-installed version of the
-libintl library instead ofthe version in @file{lib/intl}.
+libintl library instead of the version in @file{lib/intl}.
 
 @item --with-libiconv-prefix[=@var{PREFIX}]
 Define this to make Bash look for libiconv in @var{PREFIX} instead of the
