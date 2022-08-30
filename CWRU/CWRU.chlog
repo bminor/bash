@@ -3904,4 +3904,13 @@ builtins/exec.def
 	  command is not found by search_for_command. Report and fix from
 	  Xiami <i@f2light.com>
 
-	  
+[bash-5.2-rc3 frozen]
+
+				   8/27
+				   ----
+parse.y
+	- parse_comsub: restore extended_glob to a local copy (local_extglob)
+	  only if we changed it; a safer way to do it. Fixes extglob change
+	  issue reported by Kerin Millar <kfm@plushkava.net>
+	- cond_term: restore extended_glob to a local copy; safer than using
+	  global_extglob, which we will reserve for error recovery

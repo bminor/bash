@@ -4063,7 +4063,7 @@ parse_comsub (qc, open, close, lenp, flags)
      int *lenp, flags;
 {
   int peekc, r;
-  int start_lineno;
+  int start_lineno, local_extglob;
   char *ret, *tcmd;
   int retlen;
   sh_parser_state_t ps;
@@ -4114,9 +4114,11 @@ parse_comsub (qc, open, close, lenp, flags)
   if (expand_aliases)
     expand_aliases = posixly_correct != 0;
 #if defined (EXTENDED_GLOB)
-  global_extglob = extended_glob;
   if (shell_compatibility_level <= 51)
-    extended_glob = 1;
+    {
+      local_extglob = global_extglob = extended_glob;
+      extended_glob = 1;
+    }
 #endif
 
   current_token = '\n';				/* XXX */
@@ -4131,7 +4133,8 @@ parse_comsub (qc, open, close, lenp, flags)
     }
 
 #if defined (EXTENDED_GLOB)
-  extended_glob = global_extglob;
+  if (shell_compatibility_level <= 51)
+    extended_glob = local_extglob;
 #endif
 
   parsed_command = global_command;
@@ -4259,7 +4262,7 @@ xparse_dolparen (base, string, indp, flags)
      old value will be restored by restore_parser_state(). */
   expand_aliases = 0;
 #if defined (EXTENDED_GLOB)
-  global_extglob = extended_glob;
+  global_extglob = extended_glob;		/* for reset_parser() */
 #endif
 
   token_to_read = DOLPAREN;			/* let's trick the parser */
@@ -4597,7 +4600,7 @@ cond_term ()
 {
   WORD_DESC *op;
   COND_COM *term, *tleft, *tright;
-  int tok, lineno;
+  int tok, lineno, local_extglob;
   char *etext;
 
   /* Read a token.  It can be a left paren, a `!', a unary operator, or a
@@ -4711,11 +4714,12 @@ cond_term ()
 	}
 
       /* rhs */
+      local_extglob = extended_glob;
       if (parser_state & PST_EXTPAT)
 	extended_glob = 1;
       tok = read_token (READ);
       if (parser_state & PST_EXTPAT)
-	extended_glob = global_extglob;
+	extended_glob = local_extglob;
       parser_state &= ~(PST_REGEXP|PST_EXTPAT);
 
       if (tok == WORD)
