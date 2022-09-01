@@ -4063,10 +4063,11 @@ parse_comsub (qc, open, close, lenp, flags)
      int *lenp, flags;
 {
   int peekc, r;
-  int start_lineno, local_extglob;
+  int start_lineno, local_extglob, was_extpat;
   char *ret, *tcmd;
   int retlen;
   sh_parser_state_t ps;
+  STRING_SAVER *saved_strings;
   COMMAND *saved_global, *parsed_command;
 
   /* Posix interp 217 says arithmetic expressions have precedence, so
@@ -4086,7 +4087,7 @@ parse_comsub (qc, open, close, lenp, flags)
 
   save_parser_state (&ps);
 
-  pushed_string_list = (STRING_SAVER *)NULL;
+  was_extpat = (parser_state & PST_EXTPAT);
 
   /* State flags we don't want to persist into command substitutions. */
   parser_state &= ~(PST_REGEXP|PST_EXTPAT|PST_CONDCMD|PST_CONDEXPR|PST_COMPASSIGN);
@@ -4098,6 +4099,8 @@ parse_comsub (qc, open, close, lenp, flags)
   /* State flags we want to set for this run through the parser. */
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN|PST_NOEXPAND;
 
+  /* leave pushed_string_list alone, since we might need to consume characters
+     from it to satisfy this command substitution (in some perverse case). */
   shell_eof_token = close;
 
   saved_global = global_command;		/* might not be necessary */
@@ -4114,7 +4117,9 @@ parse_comsub (qc, open, close, lenp, flags)
   if (expand_aliases)
     expand_aliases = posixly_correct != 0;
 #if defined (EXTENDED_GLOB)
-  if (shell_compatibility_level <= 51)
+  /* If (parser_state & PST_EXTPAT), we're parsing an extended pattern for a
+     conditional command and have already set global_extglob appropriately. */
+  if (shell_compatibility_level <= 51 && was_extpat == 0)
     {
       local_extglob = global_extglob = extended_glob;
       extended_glob = 1;
@@ -4133,7 +4138,7 @@ parse_comsub (qc, open, close, lenp, flags)
     }
 
 #if defined (EXTENDED_GLOB)
-  if (shell_compatibility_level <= 51)
+  if (shell_compatibility_level <= 51 && was_extpat == 0)
     extended_glob = local_extglob;
 #endif
 
@@ -4161,7 +4166,7 @@ parse_comsub (qc, open, close, lenp, flags)
 	  shell_eof_token = ps.eof_token;
 	  expand_aliases = ps.expand_aliases;
 
-	  jump_to_top_level (DISCARD);
+	  jump_to_top_level (DISCARD);	/* XXX - return (&matched_pair_error)? */
 	}
     }
 
@@ -4180,7 +4185,12 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
       return (&matched_pair_error);
     }
 
+  /* We don't want to restore the old pushed string list, since we might have
+     used it to consume additional input from an alias while parsing this
+     command substitution. */
+  saved_strings = pushed_string_list;
   restore_parser_state (&ps);
+  pushed_string_list = saved_strings;
 
   tcmd = print_comsub (parsed_command);		/* returns static memory */
   retlen = strlen (tcmd);

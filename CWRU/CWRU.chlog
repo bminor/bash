@@ -3914,3 +3914,21 @@ parse.y
 	  issue reported by Kerin Millar <kfm@plushkava.net>
 	- cond_term: restore extended_glob to a local copy; safer than using
 	  global_extglob, which we will reserve for error recovery
+
+				   8/30
+				   ----
+parse.y
+	- parse_comsub: don't clear the pushed string list; we might need it to
+	  consume additional input to satisfy this command substitution. When
+	  we restore the parser state, don't restore the pushed string list in
+	  case we used it. From
+	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1018727
+	- parse_comsub: don't modify extended_glob if parser_state includes
+	  PST_EXTPAT, in which case we've already set extended_glob and
+	  global_extglob appropriately. Only matters in compatibility mode.
+
+				   8/31
+				   ----
+subst.c
+	- parameter_brace_transform: make sure we return an error if *xform
+	  is '\0'. Report from Ivan Kapranov <koltiradw@yandex.ru>

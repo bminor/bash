@@ -11,26 +11,30 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+DATE='Mon Aug 29 20:03:02 EDT 2022'
+shopt -s expand_aliases
 
-# test the other uses of the 'K' transform operator and its sibling 'k'
-# the associative array tests are performed separately, since that was the
-# original motivation for this feature
-foo=string
-bar='value with spaces'
+alias foo='echo $(echo $DATE)'
+alias foo1='echo $(echo $DATE)    '
 
-set -- 'a b' 'c d' 'e f'
+foo
+echo post foo
 
-echo ${foo@K}
-echo ${foo@k}
-echo ${bar@K}
-echo ${bar@k}
+foo1
+echo post foo1
 
-echo ${@@K}
-echo "${@@K}"
+alias comsub0='echo $(echo $DATE'
+comsub0)
+comsub0		) after
 
-foo=( zero one two three )
-echo ${foo[@]@K}
+alias math0='echo $(( 4+3 )'
+math0)
 
-foo=( 'zero z' 'one o' 'two t' 'three t' )
-echo ${foo[@]@K}
-recho "${foo[@]@k}"
+alias x='VAR=$(echo hey)'
+x
+foo
+
+echo $VAR after x
+
+alias math1='echo $( date )'
+math1)
