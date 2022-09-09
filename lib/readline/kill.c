@@ -559,7 +559,7 @@ rl_yank_pop (int count, int key)
 int
 rl_vi_yank_pop (int count, int key)
 {
-  int l, n;
+  int l, n, origpoint;
 
   if (((rl_last_func != rl_vi_yank_pop) && (rl_last_func != rl_vi_put)) ||
       !rl_kill_ring)
@@ -569,11 +569,21 @@ rl_vi_yank_pop (int count, int key)
     }
 
   l = strlen (rl_kill_ring[rl_kill_index]);
+#if 0 /* TAG:readline-8.3 8/29/2022 matteopaolini1995@gmail.com */
+  origpoint = rl_point;
+  n = rl_point - l + 1;
+#else
   n = rl_point - l;
+#endif
   if (n >= 0 && STREQN (rl_line_buffer + n, rl_kill_ring[rl_kill_index], l))
     {
+#if 0 /* TAG:readline-8.3 */
+      rl_delete_text (n, n + l);		/* remember vi cursor positioning */
+      rl_point = origpoint - l;
+#else
       rl_delete_text (n, rl_point);
       rl_point = n;
+#endif
       rl_kill_index--;
       if (rl_kill_index < 0)
 	rl_kill_index = rl_kill_ring_length - 1;
