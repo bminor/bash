@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 July 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 September 19<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2507,7 +2507,7 @@ subsequently reset.
 <DT><B>READLINE_ARGUMENT</B>
 
 <DD>
-Any numeric argument given to a Readline command that was defined using
+Any numeric argument given to a readline command that was defined using
 <TT>bind -x</TT>
 
 (see
@@ -4361,7 +4361,7 @@ format that can be reused as input.
 
 <DD>
 The expansion is a string that is the value of <I>parameter</I> with backslash
-escape sequences expanded as with the <B>$'...'</B> quoting mechanism.
+escape sequences expanded as with the <B>$aq...aq</B> quoting mechanism.
 <DT><B>P</B>
 
 <DD>
@@ -8209,15 +8209,15 @@ Words are delimited by non-quoted shell metacharacters.
 <DD>
 Attempt to move point to the same physical screen column on the previous
 physical screen line. This will not have the desired effect if the current
-Readline line does not take up more than one physical line or if point is not
+readline line does not take up more than one physical line or if point is not
 greater than the length of the prompt plus the screen width.
 <DT><B>next-screen-line</B>
 
 <DD>
 Attempt to move point to the same physical screen column on the next
 physical screen line. This will not have the desired effect if the current
-Readline line does not take up more than one physical line or if the length
-of the current Readline line is not greater than the length of the prompt
+readline line does not take up more than one physical line or if the length
+of the current readline line is not greater than the length of the prompt
 plus the screen width.
 <DT><B>clear-display (M-C-l)</B>
 
@@ -8432,7 +8432,7 @@ The character indicating end-of-file as set, for example, by
 <TT>stty</TT>.
 
 If this character is read when there are no characters
-on the line, and point is at the beginning of the line, Readline
+on the line, and point is at the beginning of the line, readline
 interprets it as the end of input and returns
 <FONT SIZE=-1><B>EOF</B>.
 
@@ -8852,12 +8852,12 @@ the saved position, and the old cursor position is saved as the mark.
 
 <DD>
 A character is read and point is moved to the next occurrence of that
-character.  A negative count searches for previous occurrences.
+character.  A negative argument searches for previous occurrences.
 <DT><B>character-search-backward (M-C-])</B>
 
 <DD>
 A character is read and point is moved to the previous occurrence of that
-character.  A negative count searches for subsequent occurrences.
+character.  A negative argument searches for subsequent occurrences.
 <DT><B>skip-csi-sequence</B>
 
 <DD>
@@ -9782,8 +9782,8 @@ The file searched for in
 
 </FONT>
 need not be executable.
-When <B>bash</B> is not in <I>posix mode</I>, the current directory is
-searched if no file is found in
+When <B>bash</B> is not in <I>posix mode</I>, it searches
+the current directory if no file is found in
 <FONT SIZE=-1><B>PATH</B>.
 
 </FONT>
@@ -12089,7 +12089,7 @@ is coming from a terminal,
 above)
 is used to obtain the line.
 Readline uses the current (or default, if line editing was not previously
-active) editing settings, but uses Readline's default filename completion.
+active) editing settings, but uses readline's default filename completion.
 <DT><B>-i </B><I>text</I>
 
 <DD>
@@ -14408,7 +14408,7 @@ are not special within double-quoted word expansions
 <DT>*<DD>
 the shell does not print a warning message if an attempt is made to
 use a quoted compound assignment as an argument to declare
-(declare -a foo='(1 2)'). Later versions warn that this usage is
+(e.g., declare -a foo=aq(1 2)aq). Later versions warn that this usage is
 deprecated
 <DT>*<DD>
 word expansion errors are considered non-fatal errors that cause the
@@ -14787,7 +14787,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 July 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 September 19<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14893,7 +14893,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20220811/doc/bash.1.<BR>
-Time: 12 August 2022 11:28:52 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20220907/doc/bash.1.<BR>
+Time: 19 September 2022 12:02:51 EDT
 </BODY>
 </HTML>

@@ -78,7 +78,7 @@ fi
 dirmode=755
 filmode=644
 
-while read fname type mode
+while read fname type mode rest
 do
 	[ -z "$fname" ] && continue
 
@@ -92,7 +92,13 @@ do
 	F)	cp $SRCDIR/$fname $newdir/$fname ;;
 	s)	ln -s $mode $newdir/$fname ; mode= ;;		# symlink
 	l)	ln $mode $newdir/$fname ; mode= ;;		# hard link
+	c)	cp $SRCDIR/$mode $newdir/$fname ; mode=$filmode ;;	# copy to new name
 	*)	echo "unknown file type $type" 1>&2 ;;
+	esac
+
+	# allow trailing comments
+	case "$mode" in
+	\#*)	mode= ;;
 	esac
 
 	if [ -n "$mode" ]; then

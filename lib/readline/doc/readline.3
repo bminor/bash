@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Aug 12 11:12:23 EDT 2022
+.\"	Last Change: Mon Sep 19 11:11:22 EDT 2022
 .\"
-.TH READLINE 3 "2022 August 12" "GNU Readline 8.2"
+.TH READLINE 3 "2022 September 19" "GNU Readline 8.2"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -850,14 +850,14 @@ composed of alphanumeric characters (letters and digits).
 .B previous\-screen\-line
 Attempt to move point to the same physical screen column on the previous
 physical screen line. This will not have the desired effect if the current
-Readline line does not take up more than one physical line or if point is not
+readline line does not take up more than one physical line or if point is not
 greater than the length of the prompt plus the screen width.
 .TP
 .B next\-screen\-line
 Attempt to move point to the same physical screen column on the next
 physical screen line. This will not have the desired effect if the current
-Readline line does not take up more than one physical line or if the length
-of the current Readline line is not greater than the length of the prompt
+readline line does not take up more than one physical line or if the length
+of the current readline line is not greater than the length of the prompt
 plus the screen width.
 .TP
 .B clear\-display (M\-C\-l)
@@ -990,7 +990,7 @@ The character indicating end-of-file as set, for example, by
 .if t \f(CWstty\fP.
 .if n ``stty''.
 If this character is read when there are no characters
-on the line, and point is at the beginning of the line, Readline
+on the line, and point is at the beginning of the line, readline
 interprets it as the end of input and returns
 .SM
 .BR EOF .
@@ -1259,11 +1259,11 @@ the saved position, and the old cursor position is saved as the mark.
 .TP
 .B character\-search (C\-])
 A character is read and point is moved to the next occurrence of that
-character.  A negative count searches for previous occurrences.
+character.  A negative argument searches for previous occurrences.
 .TP
 .B character\-search\-backward (M\-C\-])
 A character is read and point is moved to the previous occurrence of that
-character.  A negative count searches for subsequent occurrences.
+character.  A negative argument searches for subsequent occurrences.
 .TP
 .B skip\-csi\-sequence
 Read enough characters to consume a multi-key sequence such as those

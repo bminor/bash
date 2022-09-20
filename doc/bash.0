@@ -1063,7 +1063,7 @@ PPAARRAAMMEETTEERRSS
               unset, it loses its special properties, even  if  it  is  subse-
               quently reset.
        RREEAADDLLIINNEE__AARRGGUUMMEENNTT
-              Any  numeric  argument  given to a Readline command that was de-
+              Any  numeric  argument  given to a readline command that was de-
               fined using "bind -x" (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below) when it
               was invoked.
        RREEAADDLLIINNEE__LLIINNEE
@@ -3710,14 +3710,14 @@ RREEAADDLLIINNEE
        pprreevviioouuss--ssccrreeeenn--lliinnee
               Attempt  to move point to the same physical screen column on the
               previous physical screen line. This will not  have  the  desired
-              effect  if  the current Readline line does not take up more than
+              effect  if  the current readline line does not take up more than
               one physical line or if point is not greater than the length  of
               the prompt plus the screen width.
        nneexxtt--ssccrreeeenn--lliinnee
               Attempt  to move point to the same physical screen column on the
               next physical screen line. This will not have the desired effect
-              if  the  current  Readline  line  does not take up more than one
-              physical line or if the length of the current Readline  line  is
+              if  the  current  readline  line  does not take up more than one
+              physical line or if the length of the current readline  line  is
               not greater than the length of the prompt plus the screen width.
        cclleeaarr--ddiissppllaayy ((MM--CC--ll))
               Clear  the  screen  and,  if possible, the terminal's scrollback
@@ -3837,7 +3837,7 @@ RREEAADDLLIINNEE
               The  character  indicating  end-of-file  as set, for example, by
               ``stty''.  If this character is read when there are  no  charac-
               ters  on  the  line,  and point is at the beginning of the line,
-              Readline interprets it as the end of input and returns EEOOFF.
+              readline interprets it as the end of input and returns EEOOFF.
        ddeelleettee--cchhaarr ((CC--dd))
               Delete the character at point.  If this function is bound to the
               same character as the tty EEOOFF character, as CC--dd commonly is, see
@@ -4072,12 +4072,12 @@ RREEAADDLLIINNEE
               as the mark.
        cchhaarraacctteerr--sseeaarrcchh ((CC--]]))
               A character is read and point is moved to the next occurrence of
-              that  character.   A negative count searches for previous occur-
-              rences.
+              that  character.   A negative argument searches for previous oc-
+              currences.
        cchhaarraacctteerr--sseeaarrcchh--bbaacckkwwaarrdd ((MM--CC--]]))
               A character is read and point is moved to  the  previous  occur-
-              rence  of  that character.  A negative count searches for subse-
-              quent occurrences.
+              rence  of that character.  A negative argument searches for sub-
+              sequent occurrences.
        sskkiipp--ccssii--sseeqquueennccee
               Read enough characters to consume a multi-key sequence  such  as
               those  defined for keys like Home and End.  Such sequences begin
@@ -4481,7 +4481,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               filenames  in  PPAATTHH  are  used  to find the directory containing
               _f_i_l_e_n_a_m_e, but _f_i_l_e_n_a_m_e does not need to be executable.  The file
               searched  for  in PPAATTHH need not be executable.  When bbaasshh is not
-              in _p_o_s_i_x _m_o_d_e, the current directory is searched if no  file  is
+              in _p_o_s_i_x _m_o_d_e, it searches the current directory if no  file  is
               found  in  PPAATTHH.   If the ssoouurrcceeppaatthh option to the sshhoopptt builtin
               command is turned off, the PPAATTHH is not searched.  If  any  _a_r_g_u_-
               _m_e_n_t_s  are  supplied, they become the positional parameters when
@@ -5484,7 +5484,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --ee     If the standard input is coming from a terminal, rreeaaddlliinnee
                      (see RREEAADDLLIINNEE above) is used to obtain the  line.   Read-
                      line  uses  the  current (or default, if line editing was
-                     not previously active) editing settings, but  uses  Read-
+                     not previously active) editing settings, but  uses  read-
                      line's default filename completion.
               --ii _t_e_x_t
                      If  rreeaaddlliinnee  is  being  used  to  read the line, _t_e_x_t is
@@ -6478,8 +6478,8 @@ SSHHEELLLL CCOOMMPPAATTIIBBIILLIITTYY MMOODDEE
        ccoommppaatt4433
               +o      the shell does not print a warning message if an  attempt
                      is  made  to use a quoted compound assignment as an argu-
-                     ment to declare (declare -a foo='(1 2)'). Later  versions
-                     warn that this usage is deprecated
+                     ment to declare (e.g., declare  -a  foo='(1  2)').  Later
+                     versions warn that this usage is deprecated
               +o      word  expansion  errors  are  considered non-fatal errors
                      that cause the current command to  fail,  even  in  posix
                      mode  (the  default behavior is to make them fatal errors
@@ -6661,4 +6661,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.2                     2022 July 29                          BASH(1)
+GNU Bash 5.2                   2022 September 19                       BASH(1)

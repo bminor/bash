@@ -179,7 +179,7 @@ empty line.
 @end table
 
 @noindent
-(Depending on your configuration, the @key{Backspace} key be set to
+(Depending on your configuration, the @key{Backspace} key might be set to
 delete the character to the left of the cursor and the @key{DEL} key set
 to delete the character underneath the cursor, like @kbd{C-d}, rather
 than the character to the left of the cursor.)
@@ -246,7 +246,7 @@ words, to the end of the next word.
 Word boundaries are the same as those used by @kbd{M-f}.
 
 @item M-@key{DEL}
-Kill from the cursor the start of the current word, or, if between
+Kill from the cursor to the start of the current word, or, if between
 words, to the start of the previous word.
 Word boundaries are the same as those used by @kbd{M-b}.
 
@@ -552,7 +552,7 @@ been mapped to @code{self-insert}.  The default is @samp{off}.
 @item echo-control-characters
 @vindex echo-control-characters
 When set to @samp{on}, on operating systems that indicate they support it,
-readline echoes a character corresponding to a signal generated from the
+Readline echoes a character corresponding to a signal generated from the
 keyboard.  The default is @samp{on}.
 
 @item editing-mode
@@ -755,7 +755,7 @@ The default is @samp{off}.
 If set to @samp{on}, Readline will undo all changes to history lines
 before returning when @code{accept-line} is executed.  By default,
 history lines may be modified and retain individual undo lists across
-calls to @code{readline}.  The default is @samp{off}.
+calls to @code{readline()}.  The default is @samp{off}.
 
 @item show-all-if-ambiguous
 @vindex show-all-if-ambiguous
@@ -787,7 +787,7 @@ The default value is @samp{off}.
 @vindex skip-completed-text
 If set to @samp{on}, this alters the default completion behavior when
 inserting a single match into the line.  It's only active when
-performing completion in the middle of a word.  If enabled, readline
+performing completion in the middle of a word.  If enabled, Readline
 does not insert characters from the completion that match characters
 after point in the word being completed, so portions of the word
 following the cursor are not duplicated.
@@ -847,7 +847,7 @@ interpreted as part of the key name.
 The name of the key can be expressed in different ways, depending on
 what you find most comfortable.
 
-In addition to command names, readline allows keys to be bound
+In addition to command names, Readline allows keys to be bound
 to a string that is inserted when the key is pressed (a @var{macro}).
 
 @ifset BashFeatures
@@ -1728,7 +1728,7 @@ Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
 
 @item print-last-kbd-macro ()
-Print the last keboard macro defined in a format suitable for the
+Print the last keyboard macro defined in a format suitable for the
 @var{inputrc} file.
 
 @end ftable
@@ -1781,11 +1781,11 @@ the saved position, and the old cursor position is saved as the mark.
 
 @item character-search (C-])
 A character is read and point is moved to the next occurrence of that
-character.  A negative count searches for previous occurrences.
+character.  A negative argument searches for previous occurrences.
 
 @item character-search-backward (M-C-])
 A character is read and point is moved to the previous occurrence
-of that character.  A negative count searches for subsequent
+of that character.  A negative argument searches for subsequent
 occurrences.
 
 @item skip-csi-sequence ()
@@ -1793,7 +1793,7 @@ Read enough characters to consume a multi-key sequence such as those
 defined for keys like Home and End.  Such sequences begin with a
 Control Sequence Indicator (CSI), usually ESC-[.  If this sequence is
 bound to "\e[", keys producing such sequences will have no effect
-unless explicitly bound to a readline command, instead of inserting
+unless explicitly bound to a Readline command, instead of inserting
 stray characters into the editing buffer.  This is unbound by default,
 but usually bound to ESC-[.
 
@@ -2467,7 +2467,7 @@ via @var{CDPATH}: Readline can't tell those completions are directories).
 The @option{-o nospace} option tells Readline to not append a space
 character to the directory name, in case we want to append to it.
 The @option{-o bashdefault} option brings in the rest of the "Bash default"
-completions -- possible completion that Bash adds to the default Readline
+completions -- possible completions that Bash adds to the default Readline
 set.  These include things like command name completion, variable completion
 for words beginning with @samp{$} or @samp{$@{}, completions containing pathname
 expansion patterns (@pxref{Filename Expansion}), and so on.

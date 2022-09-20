@@ -246,10 +246,10 @@ the history list as a single entry.
 
 @end table
 
-When any of the @option{-w}, @option{-r}, @option{-a}, or @option{-n} options is
-used, if @var{filename}
-is given, then it is used as the history file.  If not, then
-the value of the @env{HISTFILE} variable is used.
+If a @var{filename} argument is supplied
+when any of the @option{-w}, @option{-r}, @option{-a}, or @option{-n} options
+is used, Bash uses @var{filename} as the history file.
+If not, then the value of the @env{HISTFILE} variable is used.
 
 The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
@@ -513,7 +513,7 @@ substituted, or, if no previous history substitutions took place,
 the last @var{string}
 in a !?@var{string}@code{[?]}
 search.
-If @var{new} is is null, each matching @var{old} is deleted.
+If @var{new} is null, each matching @var{old} is deleted.
 The final delimiter is optional if it is the last
 character on the input line.
 

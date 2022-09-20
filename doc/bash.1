@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jul 29 08:59:32 EDT 2022
+.\"	Last Change: Mon Sep 19 11:13:21 EDT 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 July 29" "GNU Bash 5.2"
+.TH BASH 1 "2022 September 19" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1975,7 +1975,7 @@ is unset, it loses its special properties, even if it is
 subsequently reset.
 .TP
 .B READLINE_ARGUMENT
-Any numeric argument given to a Readline command that was defined using
+Any numeric argument given to a readline command that was defined using
 .if t \f(CWbind -x\fP
 .if n "bind -x"
 (see
@@ -3501,7 +3501,7 @@ format that can be reused as input.
 .TP
 .B E
 The expansion is a string that is the value of \fIparameter\fP with backslash
-escape sequences expanded as with the \fB$'...'\fP quoting mechanism.
+escape sequences expanded as with the \fB$\(aq...\(aq\fP quoting mechanism.
 .TP
 .B P
 The expansion is a string that is the result of expanding the value of
@@ -6479,14 +6479,14 @@ Words are delimited by non-quoted shell metacharacters.
 .B previous\-screen\-line
 Attempt to move point to the same physical screen column on the previous
 physical screen line. This will not have the desired effect if the current
-Readline line does not take up more than one physical line or if point is not
+readline line does not take up more than one physical line or if point is not
 greater than the length of the prompt plus the screen width.
 .TP
 .B next\-screen\-line
 Attempt to move point to the same physical screen column on the next
 physical screen line. This will not have the desired effect if the current
-Readline line does not take up more than one physical line or if the length
-of the current Readline line is not greater than the length of the prompt
+readline line does not take up more than one physical line or if the length
+of the current readline line is not greater than the length of the prompt
 plus the screen width.
 .TP
 .B clear\-display (M\-C\-l)
@@ -6659,7 +6659,7 @@ The character indicating end-of-file as set, for example, by
 .if t \f(CWstty\fP.
 .if n ``stty''.
 If this character is read when there are no characters
-on the line, and point is at the beginning of the line, Readline
+on the line, and point is at the beginning of the line, readline
 interprets it as the end of input and returns
 .SM
 .BR EOF .
@@ -6984,11 +6984,11 @@ the saved position, and the old cursor position is saved as the mark.
 .TP
 .B character\-search (C\-])
 A character is read and point is moved to the next occurrence of that
-character.  A negative count searches for previous occurrences.
+character.  A negative argument searches for previous occurrences.
 .TP
 .B character\-search\-backward (M\-C\-])
 A character is read and point is moved to the previous occurrence of that
-character.  A negative count searches for subsequent occurrences.
+character.  A negative argument searches for subsequent occurrences.
 .TP
 .B skip\-csi\-sequence
 Read enough characters to consume a multi-key sequence such as those
@@ -7717,8 +7717,8 @@ The file searched for in
 .SM
 .B PATH
 need not be executable.
-When \fBbash\fP is not in \fIposix mode\fP, the current directory is
-searched if no file is found in
+When \fBbash\fP is not in \fIposix mode\fP, it searches
+the current directory if no file is found in
 .SM
 .BR PATH .
 If the
@@ -9624,7 +9624,7 @@ is coming from a terminal,
 .el above)
 is used to obtain the line.
 Readline uses the current (or default, if line editing was not previously
-active) editing settings, but uses Readline's default filename completion.
+active) editing settings, but uses readline's default filename completion.
 .TP
 .B \-i \fItext\fP
 If
@@ -11468,7 +11468,7 @@ are not special within double-quoted word expansions
 .IP \(bu
 the shell does not print a warning message if an attempt is made to
 use a quoted compound assignment as an argument to declare
-(declare -a foo='(1 2)'). Later versions warn that this usage is
+(e.g., declare -a foo=\(aq(1 2)\(aq). Later versions warn that this usage is
 deprecated
 .IP \(bu
 word expansion errors are considered non-fatal errors that cause the

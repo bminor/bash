@@ -2879,7 +2879,7 @@ the current locale and the values of the
 For example, in the default C locale, @samp{[a-dx-z]} is equivalent to
 @samp{[abcdxyz]}.  Many locales sort characters in dictionary order, and in
 these locales @samp{[a-dx-z]} is typically not equivalent to @samp{[abcdxyz]};
-it might be equivalent to @samp{[aBbCcDdxXyYz]}, for example.  To obtain
+it might be equivalent to @samp{[aBbCcDdxYyZz]}, for example.  To obtain
 the traditional interpretation of ranges in bracket expressions, you can
 force the use of the C locale by setting the @env{LC_COLLATE} or
 @env{LC_ALL} environment variable to the value @samp{C}, or enable the
@@ -3779,7 +3779,7 @@ Read and execute commands from the @var{filename} argument in the
 current shell context.  If @var{filename} does not contain a slash,
 the @env{PATH} variable is used to find @var{filename},
 but @var{filename} does not need to be executable.
-When Bash is not in @sc{posix} mode, the current directory is searched
+When Bash is not in @sc{posix} mode, it searches the current directory
 if @var{filename} is not found in @env{$PATH}.
 If any @var{arguments} are supplied, they become the positional
 parameters when @var{filename} is executed.  Otherwise the positional
@@ -5653,7 +5653,7 @@ versions through 4.2.
 @item direxpand
 If set, Bash
 replaces directory names with the results of word expansion when performing
-filename completion.  This changes the contents of the readline editing
+filename completion.  This changes the contents of the Readline editing
 buffer.
 If not set, Bash attempts to preserve what the user typed.
 
@@ -6332,7 +6332,7 @@ starts with value @samp{t}, it assumes that the shell is running in an
 Emacs shell buffer and disables line editing.
 
 @item ENV
-Expanded and executed similarlty to @code{BASH_ENV}
+Expanded and executed similarly to @code{BASH_ENV}
 (@pxref{Bash Startup Files})
 when an interactive shell is invoked in
 @sc{posix} Mode (@pxref{Bash POSIX Mode}).
@@ -7148,7 +7148,7 @@ the same, but the effective user id is not reset.
 @menu
 * What is an Interactive Shell?::	What determines whether a shell is Interactive.
 * Is this Shell Interactive?::	How to tell if a shell is interactive.
-* Interactive Shell Behavior::	What changes in a interactive shell?
+* Interactive Shell Behavior::	What changes in an interactive shell?
 @end menu
 
 @node What is an Interactive Shell?
@@ -8281,7 +8281,7 @@ While variable indirection is available, it may not be applied to the
 @samp{#} and @samp{?} special parameters.
 
 @item
-When expanding the @samp{*} special parameter in a pattern context where the
+Expanding the @samp{*} special parameter in a pattern context where the
 expansion is double-quoted does not treat the @code{$*} as if it were
 double-quoted.
 
@@ -8570,7 +8570,7 @@ are not special within double-quoted word expansions
 @item
 the shell does not print a warning message if an attempt is made to
 use a quoted compound assignment as an argument to declare
-(declare -a foo='(1 2)'). Later versions warn that this usage is
+(e.g., declare -a foo='(1 2)'). Later versions warn that this usage is
 deprecated
 @item
 word expansion errors are considered non-fatal errors that cause the
@@ -9158,7 +9158,7 @@ supply the @option{--srcdir=PATH} argument to tell @code{configure} where the
 source files are.  @code{configure} automatically checks for the
 source code in the directory that @code{configure} is in and in `..'.
 
-If you have to use a @code{make} that does not supports the @code{VPATH}
+If you have to use a @code{make} that does not support the @code{VPATH}
 variable, you can compile Bash for one architecture at a
 time in the source code directory.  After you have installed
 Bash for one architecture, use @samp{make distclean} before
@@ -9231,7 +9231,7 @@ variables and their effects.
 @section Specifying the System Type
 
 There may be some features @code{configure} can not figure out
-automatically, but need to determine by the type of host Bash
+automatically, but needs to determine by the type of host Bash
 will run on.  Usually @code{configure} can figure that
 out, but if it prints a message saying it can not guess the host
 type, give it the @option{--host=TYPE} option.  @samp{TYPE} can
@@ -9969,7 +9969,7 @@ The @code{ERR} trap is not inherited by shell functions unless the
 The @code{trap} builtin (@pxref{Bourne Shell Builtins}) allows a
 @code{RETURN} pseudo-signal specification, similar to
 @code{EXIT} and @code{DEBUG}.
-Commands specified with an @code{RETURN} trap are executed before
+Commands specified with a @code{RETURN} trap are executed before
 execution resumes after a shell function or a shell script executed with
 @code{.} or @code{source} returns.
 The @code{RETURN} trap is not inherited by shell functions unless the

@@ -34,7 +34,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               filenames in PPAATTHH are used  to  find  the  directory  containing
               _f_i_l_e_n_a_m_e, but _f_i_l_e_n_a_m_e does not need to be executable.  The file
               searched for in PPAATTHH need not be executable.  When bbaasshh  is  not
-              in  _p_o_s_i_x  _m_o_d_e, the current directory is searched if no file is
+              in  _p_o_s_i_x  _m_o_d_e, it searches the current directory if no file is
               found in PPAATTHH.  If the ssoouurrcceeppaatthh option to  the  sshhoopptt  builtin
               command  is  turned off, the PPAATTHH is not searched.  If any _a_r_g_u_-
               _m_e_n_t_s are supplied, they become the positional  parameters  when
@@ -1037,7 +1037,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      (see RREEAADDLLIINNEE in _b_a_s_h_(_1_)) is used  to  obtain  the  line.
                      Readline  uses  the  current (or default, if line editing
                      was not previously active)  editing  settings,  but  uses
-                     Readline's default filename completion.
+                     readline's default filename completion.
               --ii _t_e_x_t
                      If  rreeaaddlliinnee  is  being  used  to  read the line, _t_e_x_t is
                      placed into the editing buffer before editing begins.
@@ -2031,8 +2031,8 @@ SSHHEELLLL CCOOMMPPAATTIIBBIILLIITTYY MMOODDEE
        ccoommppaatt4433
               +o      the  shell does not print a warning message if an attempt
                      is made to use a quoted compound assignment as  an  argu-
-                     ment  to declare (declare -a foo='(1 2)'). Later versions
-                     warn that this usage is deprecated
+                     ment  to  declare  (e.g.,  declare -a foo='(1 2)'). Later
+                     versions warn that this usage is deprecated
               +o      word expansion errors  are  considered  non-fatal  errors
                      that  cause  the  current  command to fail, even in posix
                      mode (the default behavior is to make them  fatal  errors
