@@ -397,7 +397,7 @@ replace_history_entry (int which, const char *line, histdata_t data)
 
   temp->line = savestring (line);
   temp->data = data;
-  temp->timestamp = savestring (old_value->timestamp);
+  temp->timestamp = old_value->timestamp ? savestring (old_value->timestamp) : 0;
   the_history[which] = temp;
 
   return (old_value);
