@@ -1,6 +1,6 @@
 /* bashhist.c -- bash interface to the GNU history library. */
 
-/* Copyright (C) 1993-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -374,8 +374,11 @@ bash_delete_history_range (first, last)
   HIST_ENTRY **discard_list;
 
   discard_list = remove_history_range (first, last);
-  for (i = 0; discard_list && discard_list[i]; i++)
+  if (discard_list == 0)
+    return 0;
+  for (i = 0; discard_list[i]; i++)
     free_history_entry (discard_list[i]);
+  free (discard_list);
   history_lines_this_session -= i;
 
   return 1;
@@ -653,6 +656,8 @@ shell_comment (line)
   char *p;
   int n;
 
+  if (dstack.delimiter_depth != 0 || (parser_state & PST_HEREDOC))
+    return 0;
   if (line == 0)
     return 0;
   for (p = line; p && *p && whitespace (*p); p++)
@@ -757,7 +762,7 @@ maybe_add_history (line)
   int is_comment;
 
   hist_last_line_added = 0;
-  is_comment = (parser_state & PST_HEREDOC) ? 0 : shell_comment (line);
+  is_comment = shell_comment (line);
 
   /* Don't use the value of history_control to affect the second
      and subsequent lines of a multi-line command (old code did
@@ -874,7 +879,7 @@ bash_add_history (line)
   add_it = 1;
   if (command_oriented_history && current_command_line_count > 1)
     {
-      is_comment = (parser_state & PST_HEREDOC) ? 0 : shell_comment (line);
+      is_comment = shell_comment (line);
 
       /* The second and subsequent lines of a here document have the trailing
 	 newline preserved.  We don't want to add extra newlines here, but we
@@ -887,7 +892,7 @@ bash_add_history (line)
 		(current_command_line_count > 2)
 	 don't add a newline here. This will also take care of the literal_history
 	 case if the other conditions are met. */
-      if ((parser_state & PST_HEREDOC) && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
+      if ((parser_state & PST_HEREDOC) && here_doc_first_line == 0 && line[strlen (line) - 1] == '\n')
 	chars_to_add = "";
       else if (current_command_line_count == current_command_line_comment+1)
 	chars_to_add = "\n";

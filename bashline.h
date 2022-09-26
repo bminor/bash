@@ -53,7 +53,7 @@ extern int unbind_unix_command PARAMS((char *));
 
 extern char **bash_default_completion PARAMS((const char *, int, int, int, int));
 
-void set_directory_hook PARAMS((void));
+extern void set_directory_hook PARAMS((void));
 
 /* Used by programmable completion code. */
 extern char *command_word_completion_function PARAMS((const char *, int));

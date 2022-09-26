@@ -1,6 +1,6 @@
 /* typemax.h -- encapsulate max values for long, long long, etc. */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,7 +54,7 @@
         : ((((t) 1 << (TYPE_WIDTH (t) - 2)) - 1) * 2 + 1)))
 #endif
 
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 #  ifndef LLONG_MAX
 #    define LLONG_MAX   TYPE_MAXIMUM(long long int)
 #    define LLONG_MIN	TYPE_MINIMUM(long long int)
@@ -79,8 +79,18 @@
 #  define UINT_MAX	((unsigned int) ~(unsigned int)0)
 #endif
 
+#ifndef SHRT_MAX
+#  define SHRT_MAX	TYPE_MAXIMUM(short)
+#  define SHRT_MIN	TYPE_MINIMUM(short)
+#  define USHRT_MAX	((unsigned short) ~(unsigned short)0)
+#endif
+
+#ifndef UCHAR_MAX
+#  define UCHAR_MAX	255
+#endif
+
 /* workaround for gcc bug in versions < 2.7 */
-#if defined (HAVE_LONG_LONG) && __GNUC__ == 2 && __GNUC_MINOR__ < 7
+#if defined (HAVE_LONG_LONG_INT) && __GNUC__ == 2 && __GNUC_MINOR__ < 7
 static const unsigned long long int maxquad = ULLONG_MAX;
 #  undef ULLONG_MAX
 #  define ULLONG_MAX maxquad
@@ -102,11 +112,11 @@ static const unsigned long long int maxquad = ULLONG_MAX;
 #endif
 
 #ifndef SSIZE_MAX
-#  define SSIZE_MAX	32767		/* POSIX minimum max */
+#  define SSIZE_MAX	INT_MAX
 #endif
 
 #ifndef SIZE_MAX
-#  define SIZE_MAX	65535		/* POSIX minimum max */
+#  define SIZE_MAX	((size_t) ~(size_t)0)
 #endif
 
 #ifndef sh_imaxabs

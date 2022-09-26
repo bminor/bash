@@ -62,3 +62,12 @@ declare bar
 declare -p foo bar
 declare +n foo
 declare -p foo bar
+
+# but when we add the nameref attribute, we remove other attributes
+
+declare -i ivar
+ivar=4+4
+echo $ivar
+
+declare -n ivar=foo
+declare -p ivar

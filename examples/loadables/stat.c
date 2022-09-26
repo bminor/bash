@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2016 Free Software Foundation, Inc.
+   Copyright (C) 2016,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -71,6 +71,13 @@ static char *arraysubs[] =
     "size", "atime", "mtime", "ctime", "blksize", "blocks", "link", "perms",
     0
   };
+
+#define DEFTIMEFMT	"%a %b %e %k:%M:%S %Z %Y"
+#ifndef TIMELEN_MAX
+#  define TIMELEN_MAX 128
+#endif
+
+static char *stattime (time_t, const char *);
 
 static int
 getstat (fname, flags, sp)
@@ -253,24 +260,33 @@ statmode(mode)
 }
 
 static char *
-stattime (t)
+stattime (t, timefmt)
      time_t t;
+     const char *timefmt;
 {
   char *tbuf, *ret;
+  const char *fmt;
   size_t tlen;
+  struct tm *tm;
 
-  tbuf = ctime (&t);
-  tlen = strlen (tbuf);
-  ret = savestring (tbuf);
-  ret[tlen-1] = '\0';
+  fmt = timefmt ? timefmt : DEFTIMEFMT;
+  tm = localtime (&t);
+
+  ret = xmalloc (TIMELEN_MAX);
+
+  tlen = strftime (ret, TIMELEN_MAX, fmt, tm);
+  if (tlen == 0)
+    tlen = strftime (ret, TIMELEN_MAX, DEFTIMEFMT, tm);
+
   return ret;
 }
 
 static char *
-statval (which, fname, flags, sp)
+statval (which, fname, flags, fmt, sp)
      int which;
      char *fname;
      int flags;
+     char *fmt;
      struct stat *sp;
 {
   int temp;
@@ -296,11 +312,11 @@ statval (which, fname, flags, sp)
     case ST_SIZE:
       return itos (sp->st_size);
     case ST_ATIME:
-      return ((flags & 2) ? stattime (sp->st_atime) : itos (sp->st_atime));
+      return ((flags & 2) ? stattime (sp->st_atime, fmt) : itos (sp->st_atime));
     case ST_MTIME:
-      return ((flags & 2) ? stattime (sp->st_mtime) : itos (sp->st_mtime));
+      return ((flags & 2) ? stattime (sp->st_mtime, fmt) : itos (sp->st_mtime));
     case ST_CTIME:
-      return ((flags & 2) ? stattime (sp->st_ctime) : itos (sp->st_ctime));
+      return ((flags & 2) ? stattime (sp->st_ctime, fmt) : itos (sp->st_ctime));
     case ST_BLKSIZE:
       return itos (sp->st_blksize);
     case ST_BLOCKS:
@@ -316,11 +332,12 @@ statval (which, fname, flags, sp)
 }
 
 static int
-loadstat (vname, var, fname, flags, sp)
+loadstat (vname, var, fname, flags, fmt, sp)
      char *vname;
      SHELL_VAR *var;
      char *fname;
      int flags;
+     char *fmt;
      struct stat *sp;
 {
   int i;
@@ -330,7 +347,7 @@ loadstat (vname, var, fname, flags, sp)
   for (i = 0; arraysubs[i]; i++)
     {
       key = savestring (arraysubs[i]);
-      value = statval (i, fname, flags, sp);
+      value = statval (i, fname, flags, fmt, sp);
       v = bind_assoc_variable (var, vname, key, value, ASS_FORCE);
     }
   return 0;
@@ -341,15 +358,16 @@ stat_builtin (list)
      WORD_LIST *list;
 {
   int opt, flags;
-  char *aname, *fname;
+  char *aname, *fname, *timefmt;
   struct stat st;
   SHELL_VAR *v;
 
   aname = "STAT";
   flags = 0;
+  timefmt = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "A:Ll")) != -1)
+  while ((opt = internal_getopt (list, "A:F:Ll")) != -1)
     {
       switch (opt)
 	{
@@ -362,11 +380,20 @@ stat_builtin (list)
 	case 'l':
 	  flags |= 2;
 	  break;
+	case 'F':
+	  timefmt = list_optarg;
+	  break;
 	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
 	}
+    }
+
+  if (legal_identifier (aname) == 0)
+    {
+      sh_invalidid (aname);
+      return (EXECUTION_FAILURE);
     }
 
   list = loptend;
@@ -376,6 +403,10 @@ stat_builtin (list)
       return (EX_USAGE);
     }
 
+
+#if 0
+  unbind_variable (aname);
+#endif
   fname = list->word->word;
 
   if (getstat (fname, flags, &st) < 0)
@@ -384,14 +415,13 @@ stat_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
-  unbind_variable (aname);
-  v = make_new_assoc_variable (aname);
+  v = find_or_make_array_variable (aname, 3);
   if (v == 0)
     {
       builtin_error ("%s: cannot create variable", aname);
       return (EXECUTION_FAILURE);
     }
-  if (loadstat (aname, v, fname, flags, &st) < 0)
+  if (loadstat (aname, v, fname, flags, timefmt, &st) < 0)
     {
       builtin_error ("%s: cannot assign file status information", aname);
       unbind_variable (aname);
@@ -409,11 +439,15 @@ char *stat_doc[] = {
 	"",
 	"Take a filename and load the status information returned by a",
 	"stat(2) call on that file into the associative array specified",
-	"by the -A option.  The default array name is STAT.  If the -L",
-	"option is supplied, stat does not resolve symbolic links and",
-	"reports information about the link itself.  The -l option results",
-	"in longer-form listings for some of the fields. The exit status is 0",
-	"unless the stat fails or assigning the array is unsuccessful.",
+	"by the -A option.  The default array name is STAT.",
+	"",
+	"If the -L option is supplied, stat does not resolve symbolic links",
+	"and reports information about the link itself.  The -l option results",
+	"in longer-form listings for some of the fields. When -l is used,",
+	"the -F option supplies a format string passed to strftime(3) to",
+	"display the file time information.",
+	"The exit status is 0 unless the stat fails or assigning the array",
+	"is unsuccessful.",
 	(char *)NULL
 };
 

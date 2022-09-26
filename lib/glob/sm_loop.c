@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -15,6 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+extern int interrupt_state, terminating_signal;
 
 struct STRUCT
 {
@@ -81,6 +83,9 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 
       sc = n < se ? *n : '\0';
 
+      if (interrupt_state || terminating_signal)
+	return FNM_NOMATCH;
+
 #ifdef EXTENDED_GLOB
       /* EXTMATCH () will handle recursively calling GMATCH, so we can
 	 just return what EXTMATCH() returns. */
@@ -90,7 +95,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	  int lflags;
 	  /* If we're not matching the start of the string, we're not
 	     concerned about the special cases for matching `.' */
-	  lflags = (n == string) ? flags : (flags & ~FNM_PERIOD);
+	  lflags = (n == string) ? flags : (flags & ~(FNM_PERIOD|FNM_DOTDOT));
 	  return (EXTMATCH (c, n, se, p, pe, lflags));
 	}
 #endif /* EXTENDED_GLOB */
@@ -109,6 +114,15 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	       string or if it is the first character following a slash and
 	       we are matching a pathname. */
 	    return FNM_NOMATCH;
+
+	  /* `?' cannot match `.' or `..' if it is the first character of the
+	     string or if it is the first character following a slash and
+	     we are matching a pathname. */
+	  if ((flags & FNM_DOTDOT) &&
+	      ((n == string && SDOT_OR_DOTDOT(n)) ||
+	       ((flags & FNM_PATHNAME) && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
+	    return FNM_NOMATCH;
+
 	  break;
 
 	case L('\\'):		/* backslash escape removes special meaning */
@@ -145,6 +159,14 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	    /* `*' cannot match a `.' if it is the first character of the
 	       string or if it is the first character following a slash and
 	       we are matching a pathname. */
+	    return FNM_NOMATCH;
+
+	  /* `*' cannot match `.' or `..' if it is the first character of the
+	     string or if it is the first character following a slash and
+	     we are matching a pathname. */
+	  if ((flags & FNM_DOTDOT) &&
+	      ((n == string && SDOT_OR_DOTDOT(n)) ||
+	       ((flags & FNM_PATHNAME) && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
 	    return FNM_NOMATCH;
 
 	  if (p == pe)
@@ -288,7 +310,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 		  continue;
 
 		/* Otherwise, we just recurse. */
-		if (GMATCH (n, se, p, pe, &end, flags & ~FNM_PERIOD) == 0)
+		if (GMATCH (n, se, p, pe, &end, flags & ~(FNM_PERIOD|FNM_DOTDOT)) == 0)
 		  {
 		    if (end.pattern == NULL)
 		      return (0);
@@ -320,6 +342,14 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	    if ((flags & FNM_PERIOD) && sc == L('.') &&
 		(n == string || ((flags & FNM_PATHNAME) && n[-1] == L('/'))))
 	      return (FNM_NOMATCH);
+
+	    /* `?' cannot match `.' or `..' if it is the first character of the
+	       string or if it is the first character following a slash and
+	       we are matching a pathname. */
+	    if ((flags & FNM_DOTDOT) &&
+		((n == string && SDOT_OR_DOTDOT(n)) ||
+		((flags & FNM_PATHNAME) && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
+	      return FNM_NOMATCH;
 
 	    p = BRACKMATCH (p, sc, flags);
 	    if (p == 0)
@@ -843,7 +873,7 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 	      if (m1)
 		{
 		  /* if srest > s, we are not at start of string */
-		  xflags = (srest > s) ? (flags & ~FNM_PERIOD) : flags;
+		  xflags = (srest > s) ? (flags & ~(FNM_PERIOD|FNM_DOTDOT)) : flags;
 		  m2 = (GMATCH (srest, se, prest, pe, NULL, xflags) == 0) ||
 			(s != srest && GMATCH (srest, se, p - 1, pe, NULL, xflags) == 0);
 		}
@@ -873,7 +903,7 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 	  for ( ; srest <= se; srest++)
 	    {
 	      /* if srest > s, we are not at start of string */
-	      xflags = (srest > s) ? (flags & ~FNM_PERIOD) : flags;
+	      xflags = (srest > s) ? (flags & ~(FNM_PERIOD|FNM_DOTDOT)) : flags;
 	      if (GMATCH (s, srest, psub, pnext - 1, NULL, flags) == 0 &&
 		  GMATCH (srest, se, prest, pe, NULL, xflags) == 0)
 		return (0);
@@ -899,12 +929,17 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 
 	  /* If nothing matched, but the string starts with a period and we
 	     need to match periods explicitly, don't return this as a match,
-	     even for negation. Might need to do this only if srest == s. */
-	  if (m1 == 0 && *s == '.' && (flags & FNM_PERIOD))
+	     even for negation. */
+	  if (m1 == 0 && (flags & FNM_PERIOD) && *s == '.')
+	    return (FNM_NOMATCH);
+
+	  if (m1 == 0 && (flags & FNM_DOTDOT) &&
+	      (SDOT_OR_DOTDOT (s) ||
+	       ((flags & FNM_PATHNAME) && s[-1] == L('/') && PDOT_OR_DOTDOT(s))))
 	    return (FNM_NOMATCH);
 
 	  /* if srest > s, we are not at start of string */
-	  xflags = (srest > s) ? (flags & ~FNM_PERIOD) : flags;
+	  xflags = (srest > s) ? (flags & ~(FNM_PERIOD|FNM_DOTDOT)) : flags;
 	  if (m1 == 0 && GMATCH (srest, se, prest, pe, NULL, xflags) == 0)
 	    return (0);
 	}
@@ -939,4 +974,8 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 #undef MEMCHR
 #undef COLLEQUIV
 #undef RANGECMP
+#undef ISDIRSEP
+#undef PATHSEP
+#undef PDOT_OR_DOTDOT
+#undef SDOT_OR_DOTDOT
 #undef L

@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -71,6 +71,8 @@ extern int get_tty_state PARAMS((void));
 #include "findcmd.h"
 
 #if defined (USING_BASH_MALLOC) && defined (DEBUG) && !defined (DISABLE_MALLOC_WRAPPERS)
+#  include <malloc/shmalloc.h>
+#elif defined (MALLOC_DEBUG) && defined (USING_BASH_MALLOC)
 #  include <malloc/shmalloc.h>
 #endif
 
@@ -220,8 +222,10 @@ int no_line_editing = 0;	/* non-zero -> don't do fancy line editing. */
 #else
 int no_line_editing = 1;	/* can't have line editing without readline */
 #endif
+#if defined (TRANSLATABLE_STRINGS)
 int dump_translatable_strings;	/* Dump strings in $"...", don't execute. */
 int dump_po_strings;		/* Dump strings in $"..." in po format */
+#endif
 int wordexp_only = 0;		/* Do word expansion only */
 int protected_mode = 0;		/* No command substitution with --wordexp */
 
@@ -246,8 +250,10 @@ static const struct {
 #if defined (DEBUGGER)
   { "debugger", Int, &debugging_mode, (char **)0x0 },
 #endif
+#if defined (TRANSLATABLE_STRINGS)
   { "dump-po-strings", Int, &dump_po_strings, (char **)0x0 },
   { "dump-strings", Int, &dump_translatable_strings, (char **)0x0 },
+#endif
   { "help", Int, &want_initial_help, (char **)0x0 },
   { "init-file", Charp, (int *)0x0, &bashrc_file },
   { "login", Int, &make_login_shell, (char **)0x0 },
@@ -496,11 +502,13 @@ main (argc, argv, env)
 
   set_login_shell ("login_shell", login_shell != 0);
 
+#if defined (TRANSLATABLE_STRINGS)
   if (dump_po_strings)
     dump_translatable_strings = 1;
 
   if (dump_translatable_strings)
     read_but_dont_execute = 1;
+#endif
 
   if (running_setuid && privileged_mode == 0)
     disable_priv_mode ();
@@ -628,7 +636,7 @@ main (argc, argv, env)
   code = setjmp_sigs (top_level);
   if (code)
     {
-      if (code == EXITPROG || code == ERREXIT)
+      if (code == EXITPROG || code == ERREXIT || code == EXITBLTIN)
 	exit_shell (last_command_exit_value);
       else
 	{
@@ -694,10 +702,24 @@ main (argc, argv, env)
   /* The startup files are run with `set -e' temporarily disabled. */
   if (locally_skip_execution == 0 && running_setuid == 0)
     {
+      char *t;
+
       old_errexit_flag = exit_immediately_on_error;
       exit_immediately_on_error = 0;
 
+      /* Temporarily set $0 while running startup files, then restore it so
+	 we get better error messages when trying to open script files. */
+      if (shell_script_filename)
+	{
+	  t = dollar_vars[0];
+	  dollar_vars[0] = exec_argv0 ? savestring (exec_argv0) : savestring (shell_script_filename);
+	}
       run_startup_files ();
+      if (shell_script_filename)
+	{
+	  free (dollar_vars[0]);
+	  dollar_vars[0] = t;
+	}
       exit_immediately_on_error += old_errexit_flag;
     }
 
@@ -939,7 +961,9 @@ parse_shell_options (argv, arg_start, arg_end)
 	      break;
 
 	    case 'D':
+#if defined (TRANSLATABLE_STRINGS)
 	      dump_translatable_strings = 1;
+#endif
 	      break;
 
 	    default:
@@ -1040,6 +1064,7 @@ subshell_exit (s)
 
   /* Do trap[0] if defined.  Allow it to override the exit status
      passed to us. */
+  last_command_exit_value = s;
   if (signal_is_trapped (0))
     s = run_exit_trap ();
 
@@ -1103,6 +1128,7 @@ run_startup_files ()
 #endif
   int sourced_login, run_by_ssh;
 
+#if 1	/* TAG:bash-5.3 andrew.gregory.8@gmail.com 2/21/2022 */
   /* get the rshd/sshd case out of the way first. */
   if (interactive_shell == 0 && no_rc == 0 && login_shell == 0 &&
       act_like_sh == 0 && command_execution_string)
@@ -1113,10 +1139,15 @@ run_startup_files ()
 #else
       run_by_ssh = 0;
 #endif
+#endif
 
       /* If we were run by sshd or we think we were run by rshd, execute
 	 ~/.bashrc if we are a top-level shell. */
+#if 1	/* TAG:bash-5.3 */
       if ((run_by_ssh || isnetconn (fileno (stdin))) && shell_level < 2)
+#else
+      if (isnetconn (fileno (stdin) && shell_level < 2)
+#endif
 	{
 #ifdef SYS_BASHRC
 #  if defined (__OPENNT)
@@ -1352,6 +1383,7 @@ run_wordexp (words)
 	  return last_command_exit_value = 127;
 	case ERREXIT:
 	case EXITPROG:
+	case EXITBLTIN:
 	  return last_command_exit_value;
 	case DISCARD:
 	  return last_command_exit_value = 1;
@@ -1430,6 +1462,7 @@ run_one_command (command)
 	  return last_command_exit_value = 127;
 	case ERREXIT:
 	case EXITPROG:
+	case EXITBLTIN:
 	  return last_command_exit_value;
 	case DISCARD:
 	  return last_command_exit_value = 1;

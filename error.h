@@ -50,6 +50,9 @@ extern void internal_error PARAMS((const char *, ...))  __attribute__((__format_
 /* Report an internal warning. */
 extern void internal_warning PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
+/* Report an internal warning for debugging purposes. */
+extern void internal_debug PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
+
 /* Report an internal informational notice. */
 extern void internal_inform PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
@@ -69,5 +72,11 @@ extern char *command_errstr PARAMS((int));
 extern void err_badarraysub PARAMS((const char *));
 extern void err_unboundvar PARAMS((const char *));
 extern void err_readonly PARAMS((const char *));
+
+#ifdef DEBUG
+#  define INTERNAL_DEBUG(x)	internal_debug x
+#else
+#  define INTERNAL_DEBUG(x)
+#endif
 
 #endif /* !_ERROR_H_ */

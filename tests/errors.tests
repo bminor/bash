@@ -57,6 +57,11 @@ unset -f func
 declare -fr func
 declare -f +r func
 
+# cannot use declare -f in combination with other attributes
+a() { echo a; }
+declare -f -a a
+declare -f -i b c
+
 XPATH=$PATH
 declare -r XPATH
 unset -v XPATH
@@ -176,9 +181,9 @@ declare -p unset
 # iteration variable in a for statement being readonly
 for VAR in 1 2 3 ; do echo $VAR; done
 
-# parser errors
-: $( for z in 1 2 3; do )
-: $( for z in 1 2 3; done )
+# parser errors; caught early so we have to run them in subshells
+${THIS_SH} -c ': $( for z in 1 2 3; do )' comsub
+${THIS_SH} -c ': $( for z in 1 2 3; done )' comsub
 
 # various `cd' errors
 ( unset HOME ; cd )
@@ -287,6 +292,7 @@ ${THIS_SH} ./errors7.sub
 ${THIS_SH} -o posix ./errors7.sub
 
 ${THIS_SH} ./errors8.sub
+${THIS_SH} ./errors9.sub
 
 ${THIS_SH} -c 'return ; echo after return' bash
 ${THIS_SH} -o posix -c 'return ; echo after return' bash

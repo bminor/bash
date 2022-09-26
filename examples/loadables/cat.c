@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -36,13 +36,25 @@ extern char *strerror ();
 extern char **make_builtin_argv ();
 
 static int
-fcopy(fd)
+fcopy(fd, fn)
 int	fd;
+char	*fn;
 {
-	char	buf[1024], *s;
+	char	buf[4096], *s;
 	int	n, w, e;
 
 	while (n = read(fd, buf, sizeof (buf))) {
+		if (n < 0) {
+			e = errno;
+			write(2, "cat: read error: ", 18);
+			write(2, fn, strlen(fn));
+			write(2, ": ", 2);
+			s = strerror(e);
+			write(2, s, strlen(s));
+			write(2, "\n", 1);
+			return 1;
+		}
+		QUIT;
 		w = write(1, buf, n);
 		if (w != n) {
 			e = errno;
@@ -52,6 +64,7 @@ int	fd;
 			write(2, "\n", 1);
 			return 1;
 		}
+		QUIT;
 	}
 	return 0;
 }
@@ -65,9 +78,10 @@ char	**argv;
 	char	*s;
 
 	if (argc == 1)
-		return (fcopy(0));
+		return (fcopy(0, "standard input"));
 
 	for (i = r = 1; i < argc; i++) {
+		QUIT;
 		if (argv[i][0] == '-' && argv[i][1] == '\0')
 			fd = 0;
 		else {
@@ -82,10 +96,11 @@ char	**argv;
 				continue;
 			}
 		}
-		r = fcopy(fd);
+		r = fcopy(fd, argv[i]);
 		if (fd != 0)
 			close(fd);
 	}
+	QUIT;
 	return (r);
 }
 
@@ -97,6 +112,7 @@ WORD_LIST *list;
 	int	c, r;
 
 	v = make_builtin_argv(list, &c);
+	QUIT;
 	r = cat_main(c, v);
 	free(v);
 

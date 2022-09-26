@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -56,6 +56,7 @@
 #include "shmbutil.h"
 #include "trap.h"
 #include "flags.h"
+#include "timer.h"
 
 #if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
 #  include <mbstr.h>		/* mbschr */
@@ -141,6 +142,8 @@ static int bash_kill_shellword PARAMS((int, int));
 static int bash_backward_kill_shellword PARAMS((int, int));
 static int bash_transpose_shellwords PARAMS((int, int));
 
+static int bash_spell_correct_shellword PARAMS((int, int));
+
 /* Helper functions for Readline. */
 static char *restore_tilde PARAMS((char *, char *));
 static char *maybe_restore_tilde PARAMS((char *, char *));
@@ -189,6 +192,8 @@ static int return_zero PARAMS((const char *));
 
 static char *bash_dequote_filename PARAMS((char *, int));
 static char *quote_word_break_chars PARAMS((char *));
+static int bash_check_expchar PARAMS((char *, int, int *, int *));
+static void set_filename_quote_chars PARAMS((int, int, int));
 static void set_filename_bstab PARAMS((const char *));
 static char *bash_quote_filename PARAMS((char *, int, char *));
 
@@ -225,6 +230,7 @@ static char **prog_complete_matches;
 
 extern int no_symbolic_links;
 extern STRING_INT_ALIST word_token_alist[];
+extern sh_timer *read_timeout;
 
 /* SPECIFIC_COMPLETION_FUNCTIONS specifies that we have individual
    completion functions which indicate what type of completion should be
@@ -370,7 +376,8 @@ enable_hostname_completion (on_or_off)
      int on_or_off;
 {
   int old_value;
-  char *at, *nv, *nval;
+  char *nv, *nval;
+  const char *at;
 
   old_value = perform_hostname_completion;
 
@@ -430,7 +437,7 @@ enable_hostname_completion (on_or_off)
 	  strcpy (nval + 1, rl_completer_word_break_characters);
         }
 
-      free (rl_completer_word_break_characters);
+      free ((void *)rl_completer_word_break_characters);
       rl_completer_word_break_characters = nval;
     }
 
@@ -468,6 +475,9 @@ initialize_readline ()
   rl_add_defun ("shell-backward-kill-word", bash_backward_kill_shellword, -1);
   rl_add_defun ("shell-transpose-words", bash_transpose_shellwords, -1);
 
+  rl_add_defun ("spell-correct-word", bash_spell_correct_shellword, -1);
+  rl_bind_key_if_unbound_in_map ('s', bash_spell_correct_shellword, emacs_ctlx_keymap);
+
 #ifdef ALIAS
   rl_add_defun ("alias-expand-line", alias_expand_line, -1);
 #  ifdef BANG_HISTORY
@@ -480,6 +490,9 @@ initialize_readline ()
 
   rl_add_defun ("display-shell-version", display_shell_version, -1);
   rl_add_defun ("edit-and-execute-command", emacs_edit_and_execute_command, -1);
+#if defined (VI_MODE)
+  rl_add_defun ("vi-edit-and-execute-command", vi_edit_and_execute_command, -1);
+#endif
 
 #if defined (BRACE_COMPLETION)
   rl_add_defun ("complete-into-braces", bash_brace_completion, -1);
@@ -666,6 +679,8 @@ bashline_reset ()
   rl_attempted_completion_function = attempt_shell_completion;
   rl_completion_entry_function = NULL;
   rl_ignore_some_completions_function = filename_completion_ignore;
+
+  complete_fullquote = 1;
   rl_filename_quote_characters = default_filename_quote_characters;
   set_filename_bstab (rl_filename_quote_characters);
 
@@ -1028,6 +1043,8 @@ posix_edit_macros (count, key)
   char alias_name[3], *alias_value, *macro;
 
   c = rl_read_key ();
+  if (c <= 0)
+    return 0;
   alias_name[0] = '_';
   alias_name[1] = c;
   alias_name[2] = '\0';
@@ -1320,6 +1337,55 @@ bash_transpose_shellwords (count, key)
   return 0;
 }
 
+/* Directory name spelling correction on the current word (not shellword).
+   COUNT > 1 is not exactly correct yet. */
+static int
+bash_spell_correct_shellword (count, key)
+     int count, key;
+{
+  int opoint, wbeg, wend;
+  char *text, *newdir;
+
+  opoint = rl_point;
+  while (count)
+    {
+      bash_backward_shellword (1, key);
+      wbeg = rl_point;
+      bash_forward_shellword (1, key);
+      wend = rl_point;
+
+      if (wbeg > wend)
+	break;
+
+      text = rl_copy_text (wbeg, wend);
+
+      newdir = dirspell (text);
+      if (newdir)
+	{
+	  rl_begin_undo_group ();
+	  rl_delete_text (wbeg, wend);
+	  rl_point = wbeg;
+	  if (*newdir)
+	    rl_insert_text (newdir);
+	  rl_mark = wbeg;
+	  rl_end_undo_group ();
+	}
+
+      free (text);
+      free (newdir);
+
+      if (rl_point >= rl_end)
+	break;
+
+      count--;
+
+      if (count)
+	bash_forward_shellword (1, key);		/* XXX */
+    }
+
+  return 0;
+}
+
 /* **************************************************************** */
 /*								    */
 /*			How To Do Shell Completion		    */
@@ -1516,6 +1582,7 @@ attempt_shell_completion (text, start, end)
   matches = (char **)NULL;
   rl_ignore_some_completions_function = filename_completion_ignore;
 
+  complete_fullquote = 1;		/* full filename quoting by default */
   rl_filename_quote_characters = default_filename_quote_characters;
   set_filename_bstab (rl_filename_quote_characters);
   set_directory_hook ();
@@ -1560,7 +1627,7 @@ attempt_shell_completion (text, start, end)
       in_command_position++;
 
       if (check_redir (ti) == 1)
-	in_command_position = 0;
+	in_command_position = -1;	/* sentinel that we're not the first word on the line */
     }
   else
     {
@@ -1569,7 +1636,7 @@ attempt_shell_completion (text, start, end)
 	 assignments. */
     }
 
-  if (in_command_position && invalid_completion (text, ti))
+  if (in_command_position > 0 && invalid_completion (text, ti))
     {
       rl_attempted_completion_over = 1;
       return ((char **)NULL);
@@ -1577,9 +1644,9 @@ attempt_shell_completion (text, start, end)
 
   /* Check that we haven't incorrectly flagged a closed command substitution
      as indicating we're in a command position. */
-  if (in_command_position && ti >= 0 && rl_line_buffer[ti] == '`' &&
+  if (in_command_position > 0 && ti >= 0 && rl_line_buffer[ti] == '`' &&
 	*text != '`' && unclosed_pair (rl_line_buffer, end, "`") == 0)
-    in_command_position = 0;
+    in_command_position = -1;	/* not following a command separator */
 
   /* Special handling for command substitution.  If *TEXT is a backquote,
      it can be the start or end of an old-style command substitution, or
@@ -1587,8 +1654,8 @@ attempt_shell_completion (text, start, end)
      succeed.  Don't bother if readline found a single quote and we are
      completing on the substring.  */
   if (*text == '`' && rl_completion_quote_character != '\'' &&
-	(in_command_position || (unclosed_pair (rl_line_buffer, start, "`") &&
-				 unclosed_pair (rl_line_buffer, end, "`"))))
+	(in_command_position > 0 || (unclosed_pair (rl_line_buffer, start, "`") &&
+				     unclosed_pair (rl_line_buffer, end, "`"))))
     matches = rl_completion_matches (text, command_subst_completion_function);
 
 #if defined (PROGRAMMABLE_COMPLETION)
@@ -1596,7 +1663,7 @@ attempt_shell_completion (text, start, end)
   have_progcomps = prog_completion_enabled && (progcomp_size () > 0);
   iw_compspec = progcomp_search (INITIALWORD);
   if (matches == 0 &&
-      (in_command_position == 0 || text[0] == '\0' || (in_command_position && iw_compspec)) &&
+      (in_command_position == 0 || text[0] == '\0' || (in_command_position > 0 && iw_compspec)) &&
       current_prompt_string == ps1_prompt)
     {
       int s, e, s1, e1, os, foundcs;
@@ -1718,7 +1785,7 @@ attempt_shell_completion (text, start, end)
   if (matches == 0)
     {
       dflags = 0;
-      if (in_command_position)
+      if (in_command_position > 0)
 	dflags |= DEFCOMP_CMDPOS;
       matches = bash_default_completion (text, start, end, qc, dflags);
     }
@@ -1872,10 +1939,17 @@ executable_completion (filename, searching_path)
      const char *filename;
      int searching_path;
 {
-  char *f;
+  char *f, c;
   int r;
 
+  /* This gets an unquoted filename, so we need to quote special characters
+     in the filename before the completion hook gets it. */
+#if 0
   f = savestring (filename);
+#else
+  c = 0;
+  f = bash_quote_filename ((char *)filename, SINGLE_MATCH, &c);
+#endif
   bash_directory_completion_hook (&f);
   
   r = searching_path ? executable_file (f) : executable_or_directory (f);
@@ -1926,6 +2000,8 @@ command_word_completion_function (hint_text, state)
 
       temp = rl_variable_value ("completion-ignore-case");
       igncase = RL_BOOLEAN_VARIABLE_VALUE (temp);
+
+      old_glob_ignore_case = glob_ignore_case;
 
       if (glob_matches)
 	{
@@ -2112,6 +2188,8 @@ globword:
     {
       if (state == 0)
 	{
+	  rl_filename_completion_desired = 1;
+
 	  glob_ignore_case = igncase;
 	  glob_matches = shell_glob_filename (hint, 0);
 	  glob_ignore_case = old_glob_ignore_case;
@@ -2232,10 +2310,16 @@ globword:
 
       if (absolute_program (hint))
 	{
+#if 0
 	  if (igncase == 0)
 	    match = strncmp (val, hint, hint_len) == 0;
 	  else
 	    match = strncasecmp (val, hint, hint_len) == 0;
+#else
+	  /* Why duplicate the comparison rl_filename_completion_function
+	     already performs? */
+	  match = 1;
+#endif
 
 	  /* If we performed tilde expansion, restore the original
 	     filename. */
@@ -2760,7 +2844,7 @@ static int
 history_and_alias_expand_line (count, ignore)
      int count, ignore;
 {
-  char *new_line;
+  char *new_line, *t;
 
   new_line = 0;
 #if defined (BANG_HISTORY)
@@ -2798,7 +2882,7 @@ static int
 shell_expand_line (count, ignore)
      int count, ignore;
 {
-  char *new_line;
+  char *new_line, *t;
   WORD_LIST *expanded_string;
   WORD_DESC *w;
 
@@ -2806,6 +2890,10 @@ shell_expand_line (count, ignore)
 #if defined (BANG_HISTORY)
   new_line = history_expand_line_internal (rl_line_buffer);
 #endif
+
+  t = expand_string_dollar_quote (new_line ? new_line : rl_line_buffer, 0);
+  FREE (new_line);
+  new_line = t;
 
 #if defined (ALIAS)
   if (new_line)
@@ -3191,6 +3279,8 @@ bash_directory_expansion (dirname)
       free (d);
       *dirname = nd;
     }
+  else
+    free (d);
 }
 
 /* If necessary, rewrite directory entry */
@@ -3372,38 +3462,7 @@ bash_directory_completion_hook (dirname)
   return_value = should_expand_dirname = nextch = closer = 0;
   local_dirname = *dirname;
 
-  if (t = mbschr (local_dirname, '$'))
-    {
-      should_expand_dirname = '$';
-      nextch = t[1];
-      /* Deliberately does not handle the deprecated $[...] arithmetic
-	 expansion syntax */
-      if (nextch == '(')
-	closer = ')';
-      else if (nextch == '{')
-	closer = '}';
-      else
-	nextch = 0;
-
-      if (closer)
-	{
-	  int p;
-	  char delims[2];
-
-	  delims[0] = closer; delims[1] = 0;
-	  p = skip_to_delim (t, 1, delims, SD_NOJMP|SD_COMPLETE);
-	  if (t[p] != closer)
-	    should_expand_dirname = 0;
-	}
-    }
-  else if (local_dirname[0] == '~')
-    should_expand_dirname = '~';
-  else
-    {
-      t = mbschr (local_dirname, '`');
-      if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
-	should_expand_dirname = '`';
-    }
+  should_expand_dirname = bash_check_expchar (local_dirname, 1, &nextch, &closer);
 
   if (should_expand_dirname && directory_exists (local_dirname, 1))
     should_expand_dirname = 0;
@@ -3422,24 +3481,8 @@ bash_directory_completion_hook (dirname)
 	  free (new_dirname);
 	  dispose_words (wl);
 	  local_dirname = *dirname;
-	  /* XXX - change rl_filename_quote_characters here based on
-	     should_expand_dirname/nextch/closer.  This is the only place
-	     custom_filename_quote_characters is modified. */
-	  if (rl_filename_quote_characters && *rl_filename_quote_characters)
-	    {
-	      int i, j, c;
-	      i = strlen (default_filename_quote_characters);
-	      custom_filename_quote_characters = xrealloc (custom_filename_quote_characters, i+1);
-	      for (i = j = 0; c = default_filename_quote_characters[i]; i++)
-		{
-		  if (c == should_expand_dirname || c == nextch || c == closer)
-		    continue;
-		  custom_filename_quote_characters[j++] = c;
-		}
-	      custom_filename_quote_characters[j] = '\0';
-	      rl_filename_quote_characters = custom_filename_quote_characters;
-	      set_filename_bstab (rl_filename_quote_characters);
-	    }
+
+	  set_filename_quote_chars (should_expand_dirname, nextch, closer);
 	}
       else
 	{
@@ -3494,7 +3537,16 @@ bash_directory_completion_hook (dirname)
 	 subsequent directory checks don't fail. */
       if (temp2 == 0 && dircomplete_spelling && dircomplete_expand)
 	{
+	  size_t l1, l2;
+
 	  temp2 = dirspell (temp1);
+	  l2 = STRLEN (temp2);
+	  /* Don't take matches if they are shorter than the original path */
+	  if (temp2 && l2 < strlen (temp1) && STREQN (temp1, temp2, l2))
+	    {
+	      free (temp2);
+	      temp2 = 0;
+	    }
 	  if (temp2)
 	    {
 	      free (temp1);
@@ -3729,7 +3781,7 @@ bash_complete_filename_internal (what_to_do)
   rl_completion_func_t *orig_attempt_func;
   rl_icppfunc_t *orig_dir_func;
   rl_compignore_func_t *orig_ignore_func;
-  /*const*/ char *orig_rl_completer_word_break_characters;
+  const char *orig_rl_completer_word_break_characters;
   int r;
 
   orig_func = rl_completion_entry_function;
@@ -4099,6 +4151,95 @@ quote_word_break_chars (text)
   return ret;
 }
 
+/* Return a character in DIRNAME that will cause shell expansion to be
+   performed. If NEXTP is non-null, *NEXTP gets the expansion character that
+   follows RET (e.g., '{' or `(' for `$'). If CLOSERP is non-null, *CLOSERP
+   gets the character that should close <RET><NEXTP>. If NEED_CLOSER is non-
+   zero, any expansion pair that isn't closed causes this function to
+   return 0, which indicates that we didn't find an expansion character. It's
+   used in case DIRNAME is going to be expanded. If DIRNAME is just going to
+   be quoted, NEED_CLOSER will be 0. */
+static int
+bash_check_expchar (dirname, need_closer, nextp, closerp)
+     char *dirname;
+     int need_closer;
+     int *nextp, *closerp;
+{
+  char *t;
+  int ret, n, c;
+
+  ret = n = c = 0;
+  if (t = mbschr (dirname, '$'))
+    {
+      ret = '$';
+      n = t[1];
+      /* Deliberately does not handle the deprecated $[...] arithmetic
+	 expansion syntax */
+      if (n == '(')
+	c = ')';
+      else if (n == '{')
+	c = '}';
+      else
+	n = 0;
+
+      if (c && need_closer)		/* XXX */
+	{
+	  int p;
+	  char delims[2];
+
+	  delims[0] = c; delims[1] = 0;
+	  p = skip_to_delim (t, 1, delims, SD_NOJMP|SD_COMPLETE);
+	  if (t[p] != c)
+	    ret = 0;
+	}
+    }
+  else if (dirname[0] == '~')
+    ret = '~';
+  else
+    {
+      t = mbschr (dirname, '`');
+      if (t)
+	{
+	  if (need_closer == 0)
+	    ret = '`';
+	  else if (unclosed_pair (dirname, strlen (dirname), "`") == 0)
+	    ret = '`';
+	}
+    }
+
+  if (nextp)
+    *nextp = n;
+  if (closerp)
+    *closerp = c;
+
+  return ret;
+}
+
+/* Make sure EXPCHAR and, if non-zero, NEXTCH and CLOSER are not in the set
+   of characters to be backslash-escaped. This is the only place
+   custom_filename_quote_characters is modified. */
+static void
+set_filename_quote_chars (expchar, nextch, closer)
+     int expchar, nextch, closer;
+{
+  int i, j, c;
+
+  if (rl_filename_quote_characters && *rl_filename_quote_characters)
+    {
+      i = strlen (default_filename_quote_characters);
+      custom_filename_quote_characters = xrealloc (custom_filename_quote_characters, i+1);
+      for (i = j = 0; c = default_filename_quote_characters[i]; i++)
+	{
+	  if (c == expchar || c == nextch || c == closer)
+	    continue;
+	  custom_filename_quote_characters[j++] = c;
+	}
+      custom_filename_quote_characters[j] = '\0';
+      rl_filename_quote_characters = custom_filename_quote_characters;
+      set_filename_bstab (rl_filename_quote_characters);
+    }
+}
+
 /* Use characters in STRING to populate the table of characters that should
    be backslash-quoted.  The table will be used for sh_backslash_quote from
    this file. */
@@ -4127,6 +4268,7 @@ bash_quote_filename (s, rtype, qcp)
 {
   char *rtext, *mtext, *ret;
   int rlen, cs;
+  int expchar, nextch, closer;
 
   rtext = (char *)NULL;
 
@@ -4144,7 +4286,18 @@ bash_quote_filename (s, rtype, qcp)
      the word being completed contains newlines, since those are not
      quoted correctly using backslashes (a backslash-newline pair is
      special to the shell parser). */
-  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && mbschr (s, '\n'))
+  expchar = nextch = closer = 0;
+  if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && dircomplete_expand == 0 &&
+      (expchar = bash_check_expchar (s, 0, &nextch, &closer)) &&
+      file_exists (s) == 0)
+    {
+      /* Usually this will have been set by bash_directory_completion_hook,
+      	 but there are cases where it will not be. */
+      if (rl_filename_quote_characters != custom_filename_quote_characters)
+	set_filename_quote_chars (expchar, nextch, closer);
+      complete_fullquote = 0;
+    }
+  else if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && mbschr (s, '\n'))
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
     cs = COMPLETE_DQUOTE;
@@ -4187,7 +4340,8 @@ bash_quote_filename (s, rtype, qcp)
 
   /* We may need to quote additional characters: those that readline treats
      as word breaks that are not quoted by backslash_quote. */
-  if (rtext && cs == COMPLETE_BSQUOTE)
+  /* XXX - test complete_fullquote here? */
+  if (rtext && cs == COMPLETE_BSQUOTE && rl_completer_word_break_characters)
     {
       mtext = quote_word_break_chars (rtext);
       free (rtext);
@@ -4294,12 +4448,28 @@ bash_execute_unix_command (count, key)
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
   Keymap cmd_xmap;
+  const char *kseq;
+  size_t kslen;
+
+  kseq = rl_executing_keyseq;
+  kslen = rl_key_sequence_length;
+
+  /* If we have a numeric argument, chop it off the front of the key sequence */
+  if (count > 1 || rl_explicit_arg)
+    {
+      i = rl_trim_arg_from_keyseq (rl_executing_keyseq, rl_key_sequence_length, rl_get_keymap ());
+      if (i > 0)
+	{
+	 kseq = rl_executing_keyseq + i;
+	 kslen = rl_key_sequence_length - i;
+	}
+    }
 
   /* First, we need to find the right command to execute.  This is tricky,
      because we might have already indirected into another keymap, so we
      have to walk cmd_xmap using the entire key sequence. */
   cmd_xmap = get_cmd_xmap_from_keymap (rl_get_keymap ());
-  cmd = (char *)rl_function_of_keyseq_len (rl_executing_keyseq, rl_key_sequence_length, cmd_xmap, &type);
+  cmd = (char *)rl_function_of_keyseq_len (kseq, kslen, cmd_xmap, &type);
 
   if (type == ISKMAP && (type = ((Keymap) cmd)[ANYOTHERKEY].type) == ISMACR)
     cmd = (char*)((Keymap) cmd)[ANYOTHERKEY].function;
@@ -4336,6 +4506,14 @@ bash_execute_unix_command (count, key)
   v = bind_int_variable ("READLINE_MARK", value, 0);
   if (v)
     VSETATTR (v, att_exported);
+
+  if (count > 1 || rl_explicit_arg)
+    {
+      value = inttostr (count, ibuf, sizeof (ibuf));
+      v = bind_int_variable ("READLINE_ARGUMENT", value, 0);
+      if (v)
+        VSETATTR (v, att_exported);
+    }
   array_needs_making = 1;
 
   save_parser_state (&ps);
@@ -4358,6 +4536,7 @@ bash_execute_unix_command (count, key)
   check_unbind_variable ("READLINE_LINE");
   check_unbind_variable ("READLINE_POINT");
   check_unbind_variable ("READLINE_MARK");
+  check_unbind_variable ("READLINE_ARGUMENT");
   array_needs_making = 1;
 
   /* and restore the readline buffer and display after command execution. */
@@ -4625,21 +4804,29 @@ bash_event_hook ()
     sig = terminating_signal;
   else if (interrupt_state)
     sig = SIGINT;
-  else if (sigalrm_seen)
+  else if (read_timeout && read_timeout->alrmflag)
     sig = SIGALRM;
+  else if (RL_ISSTATE (RL_STATE_TIMEOUT))		/* just in case */
+    {
+      sig = SIGALRM;
+      if (read_timeout)
+	read_timeout->alrmflag = 1;
+    }
   else
     sig = first_pending_trap ();
 
   /* If we're going to longjmp to top_level, make sure we clean up readline.
      check_signals will call QUIT, which will eventually longjmp to top_level,
-     calling run_interrupt_trap along the way.  The check for sigalrm_seen is
-     to clean up the read builtin's state. */
-  if (terminating_signal || interrupt_state || sigalrm_seen)
+     calling run_interrupt_trap along the way.  The check against read_timeout
+     is so we can clean up the read builtin's state. */
+  if (terminating_signal || interrupt_state || (read_timeout && read_timeout->alrmflag))
     rl_cleanup_after_signal ();
   bashline_reset_event_hook ();
 
+  RL_UNSETSTATE (RL_STATE_TIMEOUT);			/* XXX */
+
   /* posix mode SIGINT during read -e. We only get here if SIGINT is trapped. */
-  if (posixly_correct && this_shell_builtin == read_builtin && sig == 2)
+  if (posixly_correct && this_shell_builtin == read_builtin && sig == SIGINT)
     {
       last_command_exit_value = 128|SIGINT;
       throw_to_top_level ();

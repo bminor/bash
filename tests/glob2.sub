@@ -13,6 +13,14 @@
 #
 . ./test-glue-functions
 
+# this locale causes problems all over the place
+if locale -a | grep -i '^zh_HK\.big5hkscs' >/dev/null ; then
+        :
+else
+        echo "glob2.sub: warning: you do not have the zh_HK.big5hkscs locale installed;" >&2
+        echo "glob2.sub: warning: that will cause some of these tests to fail." >&2
+fi
+
 var='ab\'
 
 case $var in

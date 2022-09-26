@@ -39,9 +39,9 @@
    element of array variable CSV, starting at index 0. The format of LINE is
    as described in RFC 4180. */
 static int
-csvsplit (csv, line)
+csvsplit (csv, line, dstring)
      SHELL_VAR *csv;
-     char *line;
+     char *line, *dstring;
 {
   arrayind_t ind;
   char *field, *prev, *buf, *xbuf;
@@ -67,7 +67,7 @@ csvsplit (csv, line)
 		buf[b++] = *field++;	/* skip double quote */
 	      else if (qstate == DQUOTE && *field == '"')
 	        qstate = NQUOTE;
-	      else if (qstate == NQUOTE && *field == ',')
+	      else if (qstate == NQUOTE && *field == *dstring)
 		break;
 	      else
 		/* This copies any text between a closing double quote and the
@@ -80,7 +80,7 @@ csvsplit (csv, line)
       else
 	{
 	  buf = prev;
-	  field = prev + strcspn (prev, ",");
+	  field = prev + strcspn (prev, dstring);
 	}
 
       delim = *field;
@@ -91,10 +91,10 @@ csvsplit (csv, line)
 
       *field = delim;
 
-      if (delim == ',')
+      if (delim == *dstring)
 	prev = field + 1;
     }
-  while (delim == ',');
+  while (delim == *dstring);
 
   if (xbuf)
     free (xbuf);
@@ -165,7 +165,7 @@ csv_builtin (list)
   if (csvstring == 0 || *csvstring == 0)
     return (EXECUTION_SUCCESS);
 
-  opt = csvsplit (v, csvstring);
+  opt = csvsplit (v, csvstring, ",");
   /* Maybe do something with OPT here, it's the number of fields */
 
   return (rval);

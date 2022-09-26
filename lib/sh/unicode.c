@@ -145,7 +145,7 @@ u32tocesc (wc, s)
   if (wc < 0x10000)
     l = sprintf (s, "\\u%04X", wc);
   else
-    l = sprintf (s, "\\u%08X", wc);
+    l = sprintf (s, "\\U%08X", wc);
   return l;
 }
 

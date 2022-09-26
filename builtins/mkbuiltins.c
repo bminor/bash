@@ -1,7 +1,7 @@
 /* mkbuiltins.c - Create builtins.c, builtext.h, and builtdoc.c from
    a single source file called builtins.def. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -72,7 +72,8 @@ extern char *strcpy ();
 #define BUILTIN_FLAG_SPECIAL	0x01
 #define BUILTIN_FLAG_ASSIGNMENT 0x02
 #define BUILTIN_FLAG_LOCALVAR	0x04
-#define BUILTIN_FLAG_POSIX_BUILTIN 0x08
+#define BUILTIN_FLAG_POSIX_BUILTIN	0x08
+#define BUILTIN_FLAG_ARRAYREF_ARG	0x10
 
 #define BASE_INDENT	4
 
@@ -111,6 +112,12 @@ char *struct_filename = (char *)NULL;
 
 /* The name of the external declaration file. */
 char *extern_filename = (char *)NULL;
+
+/* The name of the include file to write into the structure file, if it's
+   different from extern_filename. */
+char *include_filename = (char *)NULL;
+
+/* The name of the include file to put into the generated struct filename. */
 
 /* Here is a structure for manipulating arrays of data. */
 typedef struct {
@@ -173,11 +180,22 @@ char *posix_builtins[] =
   (char *)NULL
 };
 
+/* The builtin commands that can take array references as arguments and pay
+   attention to `assoc_expand_once'. These are the ones that don't assign
+   values, but need to avoid double expansions. */
+char *arrayvar_builtins[] =
+{
+  "declare", "let", "local", "printf", "read", "test", "[",
+  "typeset", "unset", "wait",		/*]*/
+  (char *)NULL
+};
+	
 /* Forward declarations. */
 static int is_special_builtin ();
 static int is_assignment_builtin ();
 static int is_localvar_builtin ();
 static int is_posix_builtin ();
+static int is_arrayvar_builtin ();
 
 #if !defined (HAVE_RENAME)
 static int rename ();
@@ -229,6 +247,8 @@ main (argc, argv)
 
       if (strcmp (arg, "-externfile") == 0)
 	extern_filename = argv[arg_index++];
+      else if (strcmp (arg, "-includefile") == 0)
+	include_filename = argv[arg_index++];
       else if (strcmp (arg, "-structfile") == 0)
 	struct_filename = argv[arg_index++];
       else if (strcmp (arg, "-noproduction") == 0)
@@ -271,6 +291,9 @@ main (argc, argv)
 	  exit (2);
 	}
     }
+
+  if (include_filename == 0)
+    include_filename = extern_filename;
 
   /* If there are no files to process, just quit now. */
   if (arg_index == argc)
@@ -831,6 +854,8 @@ builtin_handler (self, defs, arg)
     new->flags |= BUILTIN_FLAG_LOCALVAR;
   if (is_posix_builtin (name))
     new->flags |= BUILTIN_FLAG_POSIX_BUILTIN;
+  if (is_arrayvar_builtin (name))
+    new->flags |= BUILTIN_FLAG_ARRAYREF_ARG;
 
   array_add ((char *)new, defs->builtins);
   building_builtin = 1;
@@ -1111,7 +1136,7 @@ char *structfile_header[] = {
   "/* This file is manufactured by ./mkbuiltins, and should not be",
   "   edited by hand.  See the source to mkbuiltins for details. */",
   "",
-  "/* Copyright (C) 1987-2015 Free Software Foundation, Inc.",
+  "/* Copyright (C) 1987-2022 Free Software Foundation, Inc.",
   "",
   "   This file is part of GNU Bash, the Bourne Again SHell.",
   "",
@@ -1173,7 +1198,7 @@ write_file_headers (structfile, externfile)
 	fprintf (structfile, "%s\n", structfile_header[i]);
 
       fprintf (structfile, "#include \"%s\"\n",
-	       extern_filename ? extern_filename : "builtext.h");
+	       include_filename ? include_filename : "builtext.h");
 
       fprintf (structfile, "#include \"bashintl.h\"\n");
 
@@ -1183,7 +1208,7 @@ write_file_headers (structfile, externfile)
   if (externfile)
     fprintf (externfile,
 	     "/* %s - The list of builtins found in libbuiltins.a. */\n",
-	     extern_filename ? extern_filename : "builtext.h");
+	     include_filename ? include_filename : "builtext.h");
 }
 
 /* Write out any necessary closing information for
@@ -1250,12 +1275,13 @@ write_builtins (defs, structfile, externfile)
 		  else
 		    fprintf (structfile, "(sh_builtin_func_t *)0x0, ");
 
-		  fprintf (structfile, "%s%s%s%s%s, %s_doc,\n",
+		  fprintf (structfile, "%s%s%s%s%s%s, %s_doc,\n",
 		    "BUILTIN_ENABLED | STATIC_BUILTIN",
 		    (builtin->flags & BUILTIN_FLAG_SPECIAL) ? " | SPECIAL_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_ASSIGNMENT) ? " | ASSIGNMENT_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_LOCALVAR) ? " | LOCALVAR_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_POSIX_BUILTIN) ? " | POSIX_BUILTIN" : "",
+		    (builtin->flags & BUILTIN_FLAG_ARRAYREF_ARG) ? " | ARRAYREF_BUILTIN" : "",
 		    document_name (builtin));
 
 		  /* Don't translate short document summaries that are identical
@@ -1643,6 +1669,13 @@ is_posix_builtin (name)
      char *name;
 {
   return (_find_in_table (name, posix_builtins));
+}
+
+static int
+is_arrayvar_builtin (name)
+     char *name;
+{
+  return (_find_in_table (name, arrayvar_builtins));
 }
 
 #if !defined (HAVE_RENAME)

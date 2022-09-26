@@ -1,3 +1,17 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 # first, let's start with the basics
 
 recho "$@"
@@ -245,6 +259,11 @@ ${THIS_SH} ./dollar-at-star8.sub
 # more tests of the expansions of $@ and $* (and their array equivalents)
 # with different values for IFS
 ${THIS_SH} ./dollar-at-star9.sub
+
+# tests for expansions of "$*" and "$@" and their array equivalents when $1 == ''
+# and we're using the POSIX word expansions
+${THIS_SH} ./dollar-at-star10.sub
+${THIS_SH} ./dollar-at-star11.sub
 
 # tests for special expansion of "$*" and "${array[*]}" when used with other
 # expansions -- bugs through bash-2.05b

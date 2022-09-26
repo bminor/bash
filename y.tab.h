@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.6.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -100,11 +100,13 @@ extern int yydebug;
     LESS_GREATER = 301,            /* LESS_GREATER  */
     GREATER_BAR = 302,             /* GREATER_BAR  */
     BAR_AND = 303,                 /* BAR_AND  */
-    yacc_EOF = 304                 /* yacc_EOF  */
+    DOLPAREN = 304,                /* DOLPAREN  */
+    yacc_EOF = 305                 /* yacc_EOF  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
 /* Token kinds.  */
+#define YYEMPTY -2
 #define YYEOF 0
 #define YYerror 256
 #define YYUNDEF 257
@@ -154,13 +156,14 @@ extern int yydebug;
 #define LESS_GREATER 301
 #define GREATER_BAR 302
 #define BAR_AND 303
-#define yacc_EOF 304
+#define DOLPAREN 304
+#define yacc_EOF 305
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 328 "/Users/chet/src/bash/src/parse.y"
+#line 338 "/usr/local/src/chet/src/bash/src/parse.y"
 
   WORD_DESC *word;		/* the word that we read. */
   int number;			/* the number that we read. */
@@ -170,7 +173,7 @@ union YYSTYPE
   ELEMENT element;
   PATTERN_LIST *pattern;
 
-#line 174 "y.tab.h"
+#line 177 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -181,6 +184,8 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_Y_TAB_H_INCLUDED  */

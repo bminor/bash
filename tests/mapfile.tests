@@ -52,6 +52,11 @@ for (( i = 0 ; i < ${#E[@]} ; i++ )); do
     echo "${E[${i}]}"
 done
 
-${THIS_SH} ./mapfile1.sub
+unset -v s array
+s=$'a\xffb\xffc\xff'
+mapfile -t -d $'\xff' array <<<"$s"
+declare -p array
+unset -v s array
 
+${THIS_SH} ./mapfile1.sub
 ${THIS_SH} ./mapfile2.sub

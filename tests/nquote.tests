@@ -128,6 +128,15 @@ unset mytab
 recho "${mytab:-$'\t'}"
 recho "$( args $'A\tB' )"
 
+# tests for $'...' not being expanded when inside double quotes
+recho $'a\tb\tc'
+recho "$'a\tb\tc'"
+
+# tests for $'...' being expanded in command substitution, and when
+echo "$(echo $'\t\t\101\104\n\105')"
+
 ${THIS_SH} ./nquote1.sub
 ${THIS_SH} ./nquote2.sub
 ${THIS_SH} ./nquote3.sub
+${THIS_SH} ./nquote4.sub
+${THIS_SH} ./nquote5.sub

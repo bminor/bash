@@ -322,10 +322,12 @@ printf "%u\n" $n
 echo $(( 16#$(printf "%x\n" $n) ))
 echo $(( 16#$(printf "%X\n" $n) ))
 
+# allow reserved words after an arithmetic command just because
+if ((expr)) then ((expr)) fi
+
 # these are errors
 foo=1
 echo $(( 'foo' ))
-
 
 # causes longjmp botches through bash-2.05b
 a[b[c]d]=e

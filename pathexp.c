@@ -42,12 +42,7 @@ static int glob_name_is_acceptable PARAMS((const char *));
 static void ignore_globbed_names PARAMS((char **, sh_ignore_func_t *));
 static char *split_ignorespec PARAMS((char *, int *));
 	       
-#if defined (USE_POSIX_GLOB_LIBRARY)
-#  include <glob.h>
-typedef int posix_glob_errfunc_t PARAMS((const char *, int));
-#else
-#  include <glob/glob.h>
-#endif
+#include <glob/glob.h>
 
 /* Control whether * matches .files in globbing. */
 int glob_dot_filenames;
@@ -171,6 +166,7 @@ ere_char (c)
   return (0);
 }
 
+/* This is only used to determine whether to backslash-quote a character. */
 int
 glob_char_p (s)
      const char *s;
@@ -412,54 +408,6 @@ shell_glob_filename (pathname, qflags)
      const char *pathname;
      int qflags;
 {
-#if defined (USE_POSIX_GLOB_LIBRARY)
-  register int i;
-  char *temp, **results;
-  glob_t filenames;
-  int glob_flags;
-
-  temp = quote_string_for_globbing (pathname, QGLOB_FILENAME|qflags);
-
-  filenames.gl_offs = 0;
-
-#  if defined (GLOB_PERIOD)
-  glob_flags = glob_dot_filenames ? GLOB_PERIOD : 0;
-#  else
-  glob_flags = 0;
-#  endif /* !GLOB_PERIOD */
-
-  glob_flags |= (GLOB_ERR | GLOB_DOOFFS);
-
-  i = glob (temp, glob_flags, (posix_glob_errfunc_t *)NULL, &filenames);
-
-  free (temp);
-
-  if (i == GLOB_NOSPACE || i == GLOB_ABORTED)
-    return ((char **)NULL);
-  else if (i == GLOB_NOMATCH)
-    filenames.gl_pathv = (char **)NULL;
-  else if (i != 0)		/* other error codes not in POSIX.2 */
-    filenames.gl_pathv = (char **)NULL;
-
-  results = filenames.gl_pathv;
-
-  if (results && ((GLOB_FAILED (results)) == 0))
-    {
-      if (should_ignore_glob_matches ())
-	ignore_glob_matches (results);
-      if (results && results[0])
-	strvec_sort (results, 1);		/* posix sort */
-      else
-	{
-	  FREE (results);
-	  results = (char **)NULL;
-	}
-    }
-
-  return (results);
-
-#else /* !USE_POSIX_GLOB_LIBRARY */
-
   char *temp, **results;
   int gflags, quoted_pattern;
 
@@ -484,7 +432,6 @@ shell_glob_filename (pathname, qflags)
     }
 
   return (results);
-#endif /* !USE_POSIX_GLOB_LIBRARY */
 }
 
 /* Stuff for GLOBIGNORE. */

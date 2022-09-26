@@ -21,7 +21,9 @@ printf "<%s>" "${x@A}" ; echo
 x="ab 'cd' ef"
 printf "<%s> " "${x@Q}" ; echo 
 
-printf "<%s>" "${x@C}"
+# this needs to be run in a subshell because invalid transformation operators
+# are now treated as substitution errors, fatal in non-interactive shells
+${THIS_SH} -c 'x=abcdef ; printf "<%s>" "${x@C}"' bash
 
 # if unquoted, normal word splitting happens
 set -- ab 'cd ef' '' gh
@@ -111,3 +113,6 @@ declare -A foo
 echo ${foo@a}
 
 declare -p foo
+
+V=42
+echo ${V@}	# error

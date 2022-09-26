@@ -275,14 +275,34 @@ argv[2] = <b>
 [  abc    def  ghi  jkl /  abc    def  ghi  jkl ]
 [  abc    def  ghi  jkl ]
 [  abc    def  ghi  jkl /  abc    def  ghi  jkl /  abc    def  ghi  jkl ]
-5: notOK
+1: OK
+2: $'not'
+3: OK
+4: OK
+5: tOK
 OK
 OK
-5: $'not\ttoo\nbad'
+$'not'
+OK
+tOK
+6: $'not\ttoo\nbad'
+OKa	'	b
+OKa	'	b
+7: OK
+8: OKa	'	b
+9: OKa	"	b
+10: OKa	"	b
+tOK
+tOK
+tOK
+tOK
+./posixexp7.sub: line 69: ${'x1'%'t'}: bad substitution
+./posixexp7.sub: line 70: ${'x1'%'t'}: bad substitution
+./posixexp7.sub: line 73: ${'x1'%'t'}: bad substitution
+./posixexp7.sub: line 74: ${'x1'%'t'}: bad substitution
 "A"
 A
 argv[1] = <"A">
 argv[1] = <A>
 argv[1] = <A>
 ./posixexp.tests: line 97: unexpected EOF while looking for matching `}'
-./posixexp.tests: line 98: syntax error: unexpected end of file

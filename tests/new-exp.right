@@ -617,7 +617,7 @@ c Sub = 0 2 4 8
 <>
 <>
 <'ab '\''cd'\'' ef'> 
-./new-exp10.sub: line 24: ${x@C}: bad substitution
+bash: line 1: ${x@C}: bad substitution
 <'ab'> <'cd ef'> <''> <'gh'> 
 <'ab' 'cd ef' '' 'gh'> 
 <'ab'> <'cd> <ef'> <''> <'gh'> 
@@ -625,7 +625,7 @@ c Sub = 0 2 4 8
 <'ab cd'> 
 <'4'> <'ab cd'> 
 <> 
-argv[1] = <host(2)[5.1]$ >
+argv[1] = <host(2)[5.2]$ >
 < 	
 >
 <' \t\n'>
@@ -648,6 +648,7 @@ i
 declare -i foo
 A
 declare -A foo
+./new-exp10.sub: line 118: ${V@}: bad substitution
 abcxxxdef
 abcÃ¥def
 ḅć
@@ -703,11 +704,21 @@ aaa bbb
 a bbb
 aaa bb
 'string'
+'string'
+'value with spaces'
 'value with spaces'
 'a b' 'c d' 'e f'
 'a b' 'c d' 'e f'
 0 "zero" 1 "one" 2 "two" 3 "three"
 0 "zero z" 1 "one o" 2 "two t" 3 "three t"
+argv[1] = <0>
+argv[2] = <zero z>
+argv[3] = <1>
+argv[4] = <one o>
+argv[5] = <2>
+argv[6] = <two t>
+argv[7] = <3>
+argv[8] = <three t>
 declare -a foo=()
 ai
 declare -ai foo
@@ -719,6 +730,65 @@ a
 a
 a
 a
+/homes/chetdefg
+/homes/chetdefg
+~defg
+defg
+defg
+defg
+$'&' $'&' $'&' $'&' $'&' $'&' $'&'
+$'a' $'b' $'c' $'d' $'e' $'f' $'g'
+a b c d e f g
+a b c d e f g 
+& & & & & & &
+& & & & & & & 
+& & & & & & &
+\& \& \& \& \& \& \&
+a a a a a a a 
+3 3 3 3 3 3 3 
+abc defg
+abc defg
+& defg
+& defg
+& defg
+\& defg
+\abc defg
+abcdefg
+&defg
+\abcdefg
+\&defg
+\&defg
+\abcdefg
+\\&defg
+&defg
+&defg
+\&defg
+\&defg
+\\&defg
+letx&yee
+letx&yee
+letxssyee
+letxssyee
+letx\&yee
+letx\&yee
+letx&yee
+letx&yee
+let\&ee
+let\\ssee
+let\ssee
+let\ssee
+let\&ee
+let\&ee
+let&ee
+let&ee
+twoone
+&twoone
+onetwo
+one&two
+two
+&two
+otwone
+&twone
 argv[1] = </>
 argv[1] = </>
 

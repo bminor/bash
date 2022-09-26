@@ -51,8 +51,8 @@ AC_DEFUN([gl_THREADLIB_EARLY_BODY],
     [m4_divert_text([DEFAULTS], [gl_use_threads_default=no])],
     [m4_divert_text([DEFAULTS], [gl_use_threads_default=])])
   AC_ARG_ENABLE([threads],
-AC_HELP_STRING([--enable-threads={posix|solaris|pth|windows}], [specify multithreading API])m4_ifdef([gl_THREADLIB_DEFAULT_NO], [], [
-AC_HELP_STRING([--disable-threads], [build without multithread safety])]),
+AS_HELP_STRING([--enable-threads={posix|solaris|pth|windows}], [specify multithreading API])m4_ifdef([gl_THREADLIB_DEFAULT_NO], [], [
+AS_HELP_STRING([--disable-threads], [build without multithread safety])]),
     [gl_use_threads=$enableval],
     [if test -n "$gl_use_threads_default"; then
        gl_use_threads="$gl_use_threads_default"
@@ -94,7 +94,7 @@ changequote([,])dnl
     # need special flags to disable these optimizations. For example, the
     # definition of 'errno' in <errno.h>.
     case "$host_os" in
-      aix* | freebsd*) CPPFLAGS="$CPPFLAGS -D_THREAD_SAFE" ;;
+      aix* | freebsd* | midnightbsd*) CPPFLAGS="$CPPFLAGS -D_THREAD_SAFE" ;;
       solaris*) CPPFLAGS="$CPPFLAGS -D_REENTRANT" ;;
     esac
   fi

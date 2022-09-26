@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -643,6 +643,9 @@ stop_pipeline (async, deferred)
 
       the_pipeline = (PROCESS *)NULL;
       newjob->pgrp = pipeline_pgrp;
+
+      /* Invariant: if the shell is executing a command substitution,
+	 pipeline_pgrp == shell_pgrp. Other parts of the shell assume this. */
       if (pipeline_pgrp != shell_pgrp)
 	pipeline_pgrp = 0;
 
@@ -832,9 +835,7 @@ bgp_add (pid, status)
   /* XXX - what if psi == *bucket? */
   if (psi == *bucket)
     {
-#ifdef DEBUG
-      internal_warning ("hashed pid %d (pid %d) collides with bgpids.head, skipping", psi, pid);
-#endif
+      internal_debug ("hashed pid %d (pid %d) collides with bgpids.head, skipping", psi, pid);
       bgpids.storage[psi].pid = NO_PID;		/* make sure */
       psi = bgp_getindex ();			/* skip to next one */
     }
@@ -911,7 +912,7 @@ bgp_delete (pid)
   if (psi == NO_PIDSTAT)
     return 0;		/* not found */
 
-#if defined (DEBUG)
+#if 0
   itrace("bgp_delete: deleting %d", pid);
 #endif
 
@@ -1220,12 +1221,10 @@ cleanup_dead_jobs ()
   /* XXX could use js.j_firstj and js.j_lastj here */
   for (i = 0; i < js.j_jobslots; i++)
     {
-#if defined (DEBUG)
       if (i < js.j_firstj && jobs[i])
-	itrace("cleanup_dead_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	INTERNAL_DEBUG (("cleanup_dead_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj));
       if (i > js.j_lastj && jobs[i])
-	itrace("cleanup_dead_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
-#endif
+	INTERNAL_DEBUG(("cleanup_dead_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
 
       if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i))
 	delete_job (i, 0);
@@ -1272,16 +1271,12 @@ delete_old_job (pid)
   job = find_job (pid, 0, &p);
   if (job != NO_JOB)
     {
-#ifdef DEBUG
-      itrace ("delete_old_job: found pid %d in job %d with state %d", pid, job, jobs[job]->state);
-#endif
+      INTERNAL_DEBUG (("delete_old_job: found pid %d in job %d with state %d", pid, job, jobs[job]->state));
       if (JOBSTATE (job) == JDEAD)
 	delete_job (job, DEL_NOBGPID);
       else
 	{
-#ifdef DEBUG
-	  internal_warning (_("forked pid %d appears in running job %d"), pid, job+1);
-#endif
+	  internal_debug (_("forked pid %d appears in running job %d"), pid, job+1);
 	  if (p)
 	    p->pid = 0;
 	}
@@ -1429,9 +1424,7 @@ delete_job (job_index, dflags)
       js.j_ndead--;
       if (js.c_reaped < 0)
 	{
-#ifdef DEBUG
-	  itrace("delete_job (%d pgrp %d): js.c_reaped (%d) < 0 ndel = %d js.j_ndead = %d", job_index, temp->pgrp, js.c_reaped, ndel, js.j_ndead);
-#endif
+	  INTERNAL_DEBUG (("delete_job (%d pgrp %d): js.c_reaped (%d) < 0 ndel = %d js.j_ndead = %d", job_index, temp->pgrp, js.c_reaped, ndel, js.j_ndead));
 	  js.c_reaped = 0;
 	}
     }
@@ -1503,10 +1496,8 @@ add_process (name, pid)
   p = find_process (pid, 0, &j);
   if (p)
     {
-#  ifdef DEBUG
       if (j == NO_JOB)
-	internal_warning ("add_process: process %5ld (%s) in the_pipeline", (long)p->pid, p->command);
-#  endif
+	internal_debug ("add_process: process %5ld (%s) in the_pipeline", (long)p->pid, p->command);
       if (PALIVE (p))
 	internal_warning (_("add_process: pid %5ld (%s) marked as still alive"), (long)p->pid, p->command);
       p->running = PS_RECYCLED;		/* mark as recycled */
@@ -1618,12 +1609,11 @@ map_over_jobs (func, arg1, arg2)
   /* XXX could use js.j_firstj here */
   for (i = result = 0; i < js.j_jobslots; i++)
     {
-#if defined (DEBUG)
       if (i < js.j_firstj && jobs[i])
-	itrace("map_over_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	INTERNAL_DEBUG (("map_over_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj));
       if (i > js.j_lastj && jobs[i])
-	itrace("map_over_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
-#endif
+	INTERNAL_DEBUG (("map_over_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
+
       if (jobs[i])
 	{
 	  result = (*func)(jobs[i], arg1, arg2, i);
@@ -1782,12 +1772,11 @@ find_job (pid, alive_only, procp)
   /* XXX could use js.j_firstj here, and should check js.j_lastj */
   for (i = 0; i < js.j_jobslots; i++)
     {
-#if defined (DEBUG)
       if (i < js.j_firstj && jobs[i])
-	itrace("find_job: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	INTERNAL_DEBUG (("find_job: job %d non-null before js.j_firstj (%d)", i, js.j_firstj));
       if (i > js.j_lastj && jobs[i])
-	itrace("find_job: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
-#endif
+	INTERNAL_DEBUG (("find_job: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
+
       if (jobs[i])
 	{
 	  p = jobs[i]->pipe;
@@ -2617,7 +2606,7 @@ wait_for_single_pid (pid, flags)
     {
       if (flags & JWAIT_PERROR)
 	internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
-      return (127);
+      return (257);
     }
 
   alive = 0;
@@ -2655,16 +2644,16 @@ wait_for_single_pid (pid, flags)
 }
 
 /* Wait for all of the background processes started by this shell to finish. */
-void
+int
 wait_for_background_pids (ps)
      struct procstat *ps;
 {
   register int i, r;
-  int any_stopped, check_async;
+  int any_stopped, check_async, njobs;
   sigset_t set, oset;
   pid_t pid;
 
-  for (any_stopped = 0, check_async = 1;;)
+  for (njobs = any_stopped = 0, check_async = 1;;)
     {
       BLOCK_CHILD (set, oset);
 
@@ -2672,12 +2661,11 @@ wait_for_background_pids (ps)
       /* XXX could use js.j_firstj and js.j_lastj here */
       for (i = 0; i < js.j_jobslots; i++)
 	{
-#if defined (DEBUG)
 	  if (i < js.j_firstj && jobs[i])
-	    itrace("wait_for_background_pids: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	    INTERNAL_DEBUG (("wait_for_background_pids: job %d non-null before js.j_firstj (%d)", i, js.j_firstj));
 	  if (i > js.j_lastj && jobs[i])
-	    itrace("wait_for_background_pids: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
-#endif
+	    INTERNAL_DEBUG (("wait_for_background_pids: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
+
 	  if (jobs[i] && STOPPED (i))
 	    {
 	      builtin_warning ("job %d[%d] stopped", i+1, find_last_pid (i, 0));
@@ -2702,7 +2690,7 @@ wait_for_background_pids (ps)
       if (ps)
 	{
 	  ps->pid = pid;
-	  ps->status = (r < 0) ? 127 : r;
+	  ps->status = (r < 0 || r > 256) ? 127 : r;
 	}
       if (r == -1 && errno == ECHILD)
 	{
@@ -2710,6 +2698,7 @@ wait_for_background_pids (ps)
 	  check_async = 0;
 	  mark_all_jobs_as_dead ();
 	}
+      njobs++;
     }
 
 #if defined (PROCESS_SUBSTITUTION)
@@ -2721,6 +2710,8 @@ wait_for_background_pids (ps)
   mark_dead_jobs_as_notified (1);
   cleanup_dead_jobs ();
   bgp_clear ();
+
+  return njobs;
 }
 
 /* Make OLD_SIGINT_HANDLER the SIGINT signal handler. */
@@ -2738,6 +2729,7 @@ wait_sigint_cleanup ()
 {
   queue_sigchld = 0;
   waiting_for_child = 0;
+  restore_sigint_handler ();
 }
 
 static void
@@ -2936,11 +2928,7 @@ wait_for (pid, flags)
 
       temp_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
       if (temp_sigint_handler == wait_sigint_handler)
-	{
-#if defined (DEBUG)
-	  internal_warning ("wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = %d", running_trap);
-#endif
-	}
+	internal_debug ("wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = %d", running_trap);
       else
 	old_sigint_handler = temp_sigint_handler;
       waiting_for_child = 0;
@@ -3129,8 +3117,8 @@ if (job == NO_JOB)
 	  else
 #if defined (READLINE)
 	    /* We don't want to do this if we are running a process during
-	       programmable completion. */
-	    if (RL_ISSTATE (RL_STATE_COMPLETING) == 0)
+	       programmable completion or a command bound to `bind -x'. */
+	    if (RL_ISSTATE (RL_STATE_COMPLETING|RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) == 0)
 #endif
 	    get_tty_state ();
 
@@ -3707,7 +3695,7 @@ kill_pid (pid, sig, group)
 	    result = killpg (pid, sig);
 	  /* If we're killing using job control notification, for example,
 	     without job control active, we have to do things ourselves. */
-	  else if (jobs[job]->pgrp == shell_pgrp)
+	  else if (jobs[job]->pgrp == shell_pgrp)	/* XXX - IS_JOBCONTROL(job) == 0? */
 	    {
 	      p = jobs[job]->pipe;
 	      do
@@ -4536,6 +4524,7 @@ debug_print_pgrps ()
 	 (long)original_pgrp, (long)shell_pgrp, (long)terminal_pgrp);
   itrace("tcgetpgrp(%d) -> %ld, getpgid(0) -> %ld",
 	 shell_tty, (long)tcgetpgrp (shell_tty), (long)getpgid(0));
+  itrace("pipeline_pgrp -> %ld", (long)pipeline_pgrp);
 }
 #endif
 
@@ -4707,9 +4696,7 @@ maybe_give_terminal_to (opgrp, npgrp, flags)
     }
   else if (tpgrp != opgrp)
     {
-#if defined (DEBUG)
-      internal_warning ("%d: maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d new pgrp = %d in_background = %d", (int)getpid(), tpgrp, opgrp, npgrp, running_in_background);
-#endif
+      internal_debug ("%d: maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d new pgrp = %d in_background = %d", (int)getpid(), tpgrp, opgrp, npgrp, running_in_background);
       return -1;
     }
   else
@@ -4738,12 +4725,11 @@ delete_all_jobs (running_only)
       /* XXX could use js.j_firstj here */
       for (i = 0; i < js.j_jobslots; i++)
 	{
-#if defined (DEBUG)
 	  if (i < js.j_firstj && jobs[i])
-	    itrace("delete_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	    INTERNAL_DEBUG (("delete_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj));
 	  if (i > js.j_lastj && jobs[i])
-	    itrace("delete_all_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
-#endif
+	    INTERNAL_DEBUG (("delete_all_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
+
 	  if (jobs[i] && (running_only == 0 || (running_only && RUNNING(i))))
 	    /* We don't want to add any of these pids to bgpids.  If running_only
 	       is non-zero, we don't want to add running jobs to the list.
@@ -4799,12 +4785,11 @@ count_all_jobs ()
   /* XXX could use js.j_firstj here */
   for (i = n = 0; i < js.j_jobslots; i++)
     {
-#if defined (DEBUG)
       if (i < js.j_firstj && jobs[i])
-	itrace("count_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	INTERNAL_DEBUG (("count_all_jobs: job %d non-null before js.j_firstj (%d)", i, js.j_firstj));
       if (i > js.j_lastj && jobs[i])
-	itrace("count_all_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
-#endif
+	INTERNAL_DEBUG (("count_all_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
+
       if (jobs[i] && DEADJOB(i) == 0)
 	n++;
     }
@@ -4874,12 +4859,11 @@ mark_dead_jobs_as_notified (force)
   /* XXX could use js.j_firstj here */
   for (i = ndead = ndeadproc = 0; i < js.j_jobslots; i++)
     {
-#if defined (DEBUG)
       if (i < js.j_firstj && jobs[i])
-	itrace("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	INTERNAL_DEBUG (("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj));
       if (i > js.j_lastj && jobs[i])
-	itrace("mark_dead_jobs_as_notified: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
-#endif
+	INTERNAL_DEBUG (("mark_dead_jobs_as_notified: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
+
       if (jobs[i] && DEADJOB (i))
 	{
 	  ndead++;
@@ -4887,14 +4871,12 @@ mark_dead_jobs_as_notified (force)
 	}
     }
 
-#ifdef DEBUG
 # if 0
   if (ndeadproc != js.c_reaped)
     itrace("mark_dead_jobs_as_notified: ndeadproc (%d) != js.c_reaped (%d)", ndeadproc, js.c_reaped);
 # endif
   if (ndead != js.j_ndead)
-    itrace("mark_dead_jobs_as_notified: ndead (%d) != js.j_ndead (%d)", ndead, js.j_ndead);
-#endif
+    INTERNAL_DEBUG (("mark_dead_jobs_as_notified: ndead (%d) != js.j_ndead (%d)", ndead, js.j_ndead));
 
   if (js.c_childmax < 0)
     set_maxchild (0);
@@ -4927,12 +4909,11 @@ itrace("mark_dead_jobs_as_notified: child_max = %d ndead = %d ndeadproc = %d", j
     {
       if (jobs[i] && DEADJOB (i) && (interactive_shell || (find_last_pid (i, 0) != last_asynchronous_pid)))
 	{
-#if defined (DEBUG)
 	  if (i < js.j_firstj && jobs[i])
-	    itrace("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj);
+	    INTERNAL_DEBUG (("mark_dead_jobs_as_notified: job %d non-null before js.j_firstj (%d)", i, js.j_firstj));
 	  if (i > js.j_lastj && jobs[i])
-	    itrace("mark_dead_jobs_as_notified: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
-#endif
+	    INTERNAL_DEBUG (("mark_dead_jobs_as_notified: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
+
 	  /* If marking this job as notified would drop us down below
 	     child_max, don't mark it so we can keep at least child_max
 	     statuses.  XXX -- need to check what Posix actually says
@@ -4982,7 +4963,7 @@ set_job_control (arg)
   old = job_control;
   job_control = arg;
 
-  if (terminal_pgrp == NO_PID)
+  if (terminal_pgrp == NO_PID && shell_tty >= 0)
     terminal_pgrp = tcgetpgrp (shell_tty);
 
   /* If we're turning on job control we're going to want to know the shell's

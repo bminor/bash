@@ -4,13 +4,14 @@
 # Marko Uskokovic <uskokovic@etf.bg.ac.yu>, 2007, 2008.
 # Serbian linux distribution cp6Linux
 # Copyright © 2007 Marko Uskokovic
-# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2014—2020.
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2014—2022.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: bash-5.1\n"
+"Project-Id-Version: bash-5.2-rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-28 12:51-0500\n"
-"PO-Revision-Date: 2020-12-09 10:27+0200\n"
+"POT-Creation-Date: 2022-01-11 14:50-0500\n"
+"PO-Revision-Date: 2022-08-22 00:19+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <(nothing)>\n"
 "Language: sr\n"
@@ -24,57 +25,52 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "лоша подскрипта низа"
 
-#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2274 variables.c:2300
-#: variables.c:3133
+#: arrayfunc.c:471 builtins/declare.def:709 variables.c:2242 variables.c:2268
+#: variables.c:3101
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr "%s: уклањам атрибут упуте назива"
 
-#: arrayfunc.c:446 builtins/declare.def:851
+#: arrayfunc.c:496 builtins/declare.def:868
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: не могу да претворим пописани низ у придружив"
 
-#: arrayfunc.c:700
-#, c-format
-msgid "%s: invalid associative array key"
-msgstr "%s: неисправан кључ придруживог низа"
-
-#: arrayfunc.c:702
+#: arrayfunc.c:777
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: не могу да доделим у не-бројевни попис"
 
-#: arrayfunc.c:747
+#: arrayfunc.c:822
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: мора користити индекс приликом додељивања придруживог низа"
 
-#: bashhist.c:452
+#: bashhist.c:455
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: не могу да направим: %s"
 
-#: bashline.c:4310
+#: bashline.c:4479
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "баш_изврши_јуникс_наредбу: не могу да нађем мапу кључа за наредбу"
 
-#: bashline.c:4459
+#: bashline.c:4637
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: први не-празан знак није \""
 
-#: bashline.c:4488
+#: bashline.c:4666
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "нема затварајућег „%c“ у %s"
 
-#: bashline.c:4519
+#: bashline.c:4697
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: недостаје раздвојник двотачке"
 
-#: bashline.c:4555
+#: bashline.c:4733
 #, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "„%s“: не могу да развежем у мапи тастера наредбе"
@@ -94,7 +90,7 @@ msgstr "ширење заграде: нисам успео да доделим �
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "ширење заграде: нисам успео да доделим меморију за „%s“"
 
-#: builtins/alias.def:131 variables.c:1844
+#: builtins/alias.def:131 variables.c:1817
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "„%s“: неисправан назив алијаса"
@@ -165,7 +161,7 @@ msgstr ""
 msgid "HOME not set"
 msgstr "„HOME“ није подешено"
 
-#: builtins/cd.def:335 builtins/common.c:161 test.c:901
+#: builtins/cd.def:335 builtins/common.c:161 test.c:916
 msgid "too many arguments"
 msgstr "превише аргумената"
 
@@ -192,7 +188,7 @@ msgstr "упозорење:"
 msgid "%s: usage: "
 msgstr "%s: употреба:"
 
-#: builtins/common.c:193 shell.c:516 shell.c:844
+#: builtins/common.c:193 shell.c:524 shell.c:866
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: опција захтева аргумент"
@@ -207,7 +203,7 @@ msgstr "%s: потребан је бројевни аргумент"
 msgid "%s: not found"
 msgstr "%s: не постоји"
 
-#: builtins/common.c:216 shell.c:857
+#: builtins/common.c:216 shell.c:879
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: неисправна опција"
@@ -217,7 +213,7 @@ msgstr "%s: неисправна опција"
 msgid "%s: invalid option name"
 msgstr "%s: неисправан назив опције"
 
-#: builtins/common.c:230 execute_cmd.c:2373 general.c:368 general.c:373
+#: builtins/common.c:230 execute_cmd.c:2402 general.c:368 general.c:373
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "„%s“: није исправан одредник"
@@ -230,7 +226,7 @@ msgstr "неисправан октални број"
 msgid "invalid hex number"
 msgstr "неисправан хексадецимални број"
 
-#: builtins/common.c:244 expr.c:1569
+#: builtins/common.c:244 expr.c:1574
 msgid "invalid number"
 msgstr "неисправан број"
 
@@ -244,88 +240,93 @@ msgstr "%s: неисправна одредба сигнала"
 msgid "`%s': not a pid or valid job spec"
 msgstr "„%s“: није пиб или исправна одредба посла"
 
-#: builtins/common.c:266 error.c:510
+#: builtins/common.c:266 error.c:536
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: променљива само за читање"
 
-#: builtins/common.c:274
+#: builtins/common.c:273
+#, c-format
+msgid "%s: cannot assign"
+msgstr "%s: не могу да доделим"
+
+#: builtins/common.c:281
 #, c-format
 msgid "%s: %s out of range"
 msgstr "%s: „%s“ је ван опсега"
 
-#: builtins/common.c:274 builtins/common.c:276
+#: builtins/common.c:281 builtins/common.c:283
 msgid "argument"
 msgstr "аргумент"
 
-#: builtins/common.c:276
+#: builtins/common.c:283
 #, c-format
 msgid "%s out of range"
 msgstr "„%s“ је ван опсега"
 
-#: builtins/common.c:284
+#: builtins/common.c:291
 #, c-format
 msgid "%s: no such job"
 msgstr "%s: нема таквог посла"
 
-#: builtins/common.c:292
+#: builtins/common.c:299
 #, c-format
 msgid "%s: no job control"
 msgstr "%s: нема управљања послом"
 
-#: builtins/common.c:294
+#: builtins/common.c:301
 msgid "no job control"
 msgstr "нема управљања послом"
 
-#: builtins/common.c:304
+#: builtins/common.c:311
 #, c-format
 msgid "%s: restricted"
 msgstr "%s: ограничено"
 
-#: builtins/common.c:306
+#: builtins/common.c:313
 msgid "restricted"
 msgstr "ограничено"
 
-#: builtins/common.c:314
+#: builtins/common.c:321
 #, c-format
 msgid "%s: not a shell builtin"
 msgstr "%s: није уграђеност шкољке"
 
-#: builtins/common.c:323
+#: builtins/common.c:330
 #, c-format
 msgid "write error: %s"
 msgstr "грешка писања: %s"
 
-#: builtins/common.c:331
+#: builtins/common.c:338
 #, c-format
 msgid "error setting terminal attributes: %s"
 msgstr "грешка подешавања особина терминала: %s"
 
-#: builtins/common.c:333
+#: builtins/common.c:340
 #, c-format
 msgid "error getting terminal attributes: %s"
 msgstr "грешка добављања особина терминала: %s"
 
-#: builtins/common.c:635
+#: builtins/common.c:642
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: грешка довлачења текућег директоријума: %s: %s\n"
 
-#: builtins/common.c:701 builtins/common.c:703
+#: builtins/common.c:708 builtins/common.c:710
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: нејасна одредба посла"
 
-#: builtins/common.c:964
+#: builtins/common.c:971
 msgid "help not available in this version"
 msgstr "помоћ није доступна у овом издању"
 
-#: builtins/common.c:1008 builtins/set.def:953 variables.c:3839
+#: builtins/common.c:1038 builtins/set.def:953 variables.c:3825
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: не могу да расподесим: „%s“ је само за читање"
 
-#: builtins/common.c:1013 builtins/set.def:932 variables.c:3844
+#: builtins/common.c:1043 builtins/set.def:932 variables.c:3830
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: не могу да расподесим"
@@ -335,108 +336,108 @@ msgstr "%s: не могу да расподесим"
 msgid "%s: invalid action name"
 msgstr "%s: неисправан назив радње"
 
-#: builtins/complete.def:486 builtins/complete.def:634
-#: builtins/complete.def:865
+#: builtins/complete.def:486 builtins/complete.def:642
+#: builtins/complete.def:873
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: нема одредбе довршавања"
 
-#: builtins/complete.def:688
+#: builtins/complete.def:696
 msgid "warning: -F option may not work as you expect"
 msgstr "упозорење: опција „-F“ можда неће радити како сте очекивали"
 
-#: builtins/complete.def:690
+#: builtins/complete.def:698
 msgid "warning: -C option may not work as you expect"
 msgstr "упозорење: опција „-C“ можда неће радити како сте очекивали"
 
-#: builtins/complete.def:838
+#: builtins/complete.def:846
 msgid "not currently executing completion function"
 msgstr "тренутно не обавља функцију довршавања"
 
-#: builtins/declare.def:134
+#: builtins/declare.def:137
 msgid "can only be used in a function"
 msgstr "може бити коришћено једино у функцији"
 
-#: builtins/declare.def:363 builtins/declare.def:756
-#, c-format
-msgid "%s: reference variable cannot be an array"
-msgstr "%s: променљива упуте не може бити низ"
-
-#: builtins/declare.def:374 variables.c:3385
-#, c-format
-msgid "%s: nameref variable self references not allowed"
-msgstr "%s: самоупућивање променљиве упуте назива није дозвољено"
-
-#: builtins/declare.def:379 variables.c:2104 variables.c:3304 variables.c:3312
-#: variables.c:3382
-#, c-format
-msgid "%s: circular name reference"
-msgstr "%s: кружна упута назива"
-
-#: builtins/declare.def:384 builtins/declare.def:762 builtins/declare.def:773
-#, c-format
-msgid "`%s': invalid variable name for name reference"
-msgstr "%s: неисправан назив променљиве за упуту назива"
-
-#: builtins/declare.def:514
+#: builtins/declare.def:437
 msgid "cannot use `-f' to make functions"
 msgstr "не можете користити „-f“ да направите функције"
 
-#: builtins/declare.def:526 execute_cmd.c:5986
+#: builtins/declare.def:464 execute_cmd.c:6132
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: функција само за читање"
 
-#: builtins/declare.def:824
+#: builtins/declare.def:521 builtins/declare.def:804
 #, c-format
-msgid "%s: quoted compound array assignment deprecated"
-msgstr "%s: додела низа цитираног споја је застарела"
+msgid "%s: reference variable cannot be an array"
+msgstr "%s: променљива упуте не може бити низ"
 
-#: builtins/declare.def:838
+#: builtins/declare.def:532 variables.c:3359
+#, c-format
+msgid "%s: nameref variable self references not allowed"
+msgstr "%s: самоупућивање променљиве упуте назива није дозвољено"
+
+#: builtins/declare.def:537 variables.c:2072 variables.c:3278 variables.c:3286
+#: variables.c:3356
+#, c-format
+msgid "%s: circular name reference"
+msgstr "%s: кружна упута назива"
+
+#: builtins/declare.def:541 builtins/declare.def:811 builtins/declare.def:820
+#, c-format
+msgid "`%s': invalid variable name for name reference"
+msgstr "%s: неисправан назив променљиве за упуту назива"
+
+#: builtins/declare.def:856
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: не могу да уништим променљиве низа на овај начин"
 
-#: builtins/declare.def:845 builtins/read.def:815
+#: builtins/declare.def:862 builtins/read.def:887
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: не могу да претворим придруживи низ у пописани"
 
-#: builtins/enable.def:143 builtins/enable.def:151
+#: builtins/declare.def:891
+#, c-format
+msgid "%s: quoted compound array assignment deprecated"
+msgstr "%s: додела низа цитираног споја је застарела"
+
+#: builtins/enable.def:145 builtins/enable.def:153
 msgid "dynamic loading not available"
 msgstr "променљиво учитавање није доступно"
 
-#: builtins/enable.def:343
+#: builtins/enable.def:376
 #, c-format
 msgid "cannot open shared object %s: %s"
 msgstr "не могу да отворим дељени предмет „%s“: %s"
 
-#: builtins/enable.def:371
+#: builtins/enable.def:405
 #, c-format
 msgid "cannot find %s in shared object %s: %s"
 msgstr "не могу да нађем „%s“ у дељеном предмету „%s“: %s"
 
-#: builtins/enable.def:388
+#: builtins/enable.def:422
 #, c-format
 msgid "%s: dynamic builtin already loaded"
 msgstr "%s: динамичка уградња је већ учитана"
 
-#: builtins/enable.def:392
+#: builtins/enable.def:426
 #, c-format
 msgid "load function for %s returns failure (%d): not loaded"
 msgstr "функција учитавања за „%s“ није успела (%d): није учитано"
 
-#: builtins/enable.def:517
+#: builtins/enable.def:551
 #, c-format
 msgid "%s: not dynamically loaded"
 msgstr "%s: није динамички учитано"
 
-#: builtins/enable.def:543
+#: builtins/enable.def:577
 #, c-format
 msgid "%s: cannot delete: %s"
 msgstr "%s: не могу да обришем: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5818
+#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5959
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: је директоријум"
@@ -451,7 +452,7 @@ msgstr "%s: није обична датотека"
 msgid "%s: file is too large"
 msgstr "%s: датотека је превелика"
 
-#: builtins/evalfile.c:188 builtins/evalfile.c:206 shell.c:1647
+#: builtins/evalfile.c:188 builtins/evalfile.c:206 shell.c:1673
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: не могу да извршим бинарну датотеку"
@@ -547,12 +548,12 @@ msgstr ""
 msgid "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
 msgstr "нема тема помоћи које одговарају „%s“.  Покушајте „help help“ или „man -k %s“ или „info %s“."
 
-#: builtins/help.def:224
+#: builtins/help.def:223
 #, c-format
 msgid "%s: cannot open: %s"
 msgstr "%s: не могу да отворим: %s"
 
-#: builtins/help.def:524
+#: builtins/help.def:523
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -571,21 +572,21 @@ msgstr ""
 "Звездица (*) поред назива значи да је наредба искључена.\n"
 "\n"
 
-#: builtins/history.def:155
+#: builtins/history.def:159
 msgid "cannot use more than one of -anrw"
 msgstr "не могу користити више од једног „-anrw“"
 
-#: builtins/history.def:188 builtins/history.def:198 builtins/history.def:213
-#: builtins/history.def:230 builtins/history.def:242 builtins/history.def:249
+#: builtins/history.def:192 builtins/history.def:204 builtins/history.def:215
+#: builtins/history.def:228 builtins/history.def:240 builtins/history.def:247
 msgid "history position"
 msgstr "положај историјата"
 
-#: builtins/history.def:340
+#: builtins/history.def:338
 #, c-format
 msgid "%s: invalid timestamp"
 msgstr "%s: неисправна ознака времена"
 
-#: builtins/history.def:451
+#: builtins/history.def:449
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: није успело ширење историјата"
@@ -608,78 +609,78 @@ msgstr "%s: аргументи морају бити процеси или ИБ-
 msgid "Unknown error"
 msgstr "Непозната грешка"
 
-#: builtins/let.def:97 builtins/let.def:122 expr.c:639 expr.c:657
+#: builtins/let.def:97 builtins/let.def:122 expr.c:640 expr.c:658
 msgid "expression expected"
 msgstr "очекиван је израз"
 
-#: builtins/mapfile.def:178
+#: builtins/mapfile.def:180
 #, c-format
 msgid "%s: not an indexed array"
 msgstr "%s: није пописани низ"
 
-#: builtins/mapfile.def:271 builtins/read.def:308
+#: builtins/mapfile.def:276 builtins/read.def:336
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: неисправна одредба описника датотеке"
 
-#: builtins/mapfile.def:279 builtins/read.def:315
+#: builtins/mapfile.def:284 builtins/read.def:343
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: неисправан описник датотеке: %s"
 
-#: builtins/mapfile.def:288 builtins/mapfile.def:326
+#: builtins/mapfile.def:293 builtins/mapfile.def:331
 #, c-format
 msgid "%s: invalid line count"
 msgstr "%s: неисправан број реда"
 
-#: builtins/mapfile.def:299
+#: builtins/mapfile.def:304
 #, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: неисправно порекло низа"
 
-#: builtins/mapfile.def:316
+#: builtins/mapfile.def:321
 #, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: неисправна количина опозива"
 
-#: builtins/mapfile.def:349
+#: builtins/mapfile.def:354
 msgid "empty array variable name"
 msgstr "празан назив променљиве низа"
 
-#: builtins/mapfile.def:370
+#: builtins/mapfile.def:375
 msgid "array variable support required"
 msgstr "потребна је подршка променљиве низа"
 
-#: builtins/printf.def:419
+#: builtins/printf.def:430
 #, c-format
 msgid "`%s': missing format character"
 msgstr "„%s“: недостаје знак записа"
 
-#: builtins/printf.def:474
+#: builtins/printf.def:485
 #, c-format
 msgid "`%c': invalid time format specification"
 msgstr "„%c“: неисправна одредба записа времена"
 
-#: builtins/printf.def:676
+#: builtins/printf.def:708
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "„%c“: неисправан знак записа"
 
-#: builtins/printf.def:702
+#: builtins/printf.def:734
 #, c-format
 msgid "warning: %s: %s"
 msgstr "упозорење: %s: %s"
 
-#: builtins/printf.def:788
+#: builtins/printf.def:822
 #, c-format
 msgid "format parsing problem: %s"
 msgstr "проблем обраде записа: %s"
 
-#: builtins/printf.def:885
+#: builtins/printf.def:919
 msgid "missing hex digit for \\x"
 msgstr "недостаје хексадецимална цифра за \\x"
 
-#: builtins/printf.def:900
+#: builtins/printf.def:934
 #, c-format
 msgid "missing unicode digit for \\%c"
 msgstr "недостаје цифра уникода за \\%c"
@@ -829,12 +830,12 @@ msgstr ""
 "    \n"
 "    Уграђено „dirs“ приказује спремник директоријума."
 
-#: builtins/read.def:280
+#: builtins/read.def:308
 #, c-format
 msgid "%s: invalid timeout specification"
 msgstr "%s: неисправна одредба временског истека"
 
-#: builtins/read.def:755
+#: builtins/read.def:827
 #, c-format
 msgid "read error: %d: %s"
 msgstr "грешка читања: %d: %s"
@@ -847,7 +848,7 @@ msgstr "могу једино да „испишем“ из функције и
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "не могу истовремено да расподесим функцију и променљиву"
 
-#: builtins/set.def:966
+#: builtins/set.def:969
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: није променљива низа"
@@ -866,11 +867,11 @@ msgstr "%s: не могу да извезем"
 msgid "shift count"
 msgstr "број помака"
 
-#: builtins/shopt.def:310
+#: builtins/shopt.def:323
 msgid "cannot set and unset shell options simultaneously"
 msgstr "не могу истовремено да подесим и да расподесим опције шкољке"
 
-#: builtins/shopt.def:428
+#: builtins/shopt.def:444
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: неисправан назив опције шкољке"
@@ -937,16 +938,16 @@ msgstr "%s: неисправан аргумент ограничења"
 msgid "`%c': bad command"
 msgstr "„%c“: лоша наредба"
 
-#: builtins/ulimit.def:455
+#: builtins/ulimit.def:464
 #, c-format
 msgid "%s: cannot get limit: %s"
 msgstr "%s: не могу да добавим ограничење: %s"
 
-#: builtins/ulimit.def:481
+#: builtins/ulimit.def:490
 msgid "limit"
 msgstr "ограничење"
 
-#: builtins/ulimit.def:493 builtins/ulimit.def:793
+#: builtins/ulimit.def:502 builtins/ulimit.def:802
 #, c-format
 msgid "%s: cannot modify limit: %s"
 msgstr "%s: не могу да изменим ограничење: %s"
@@ -965,7 +966,7 @@ msgstr "„%c“: неисправан оператер симболичког �
 msgid "`%c': invalid symbolic mode character"
 msgstr "„%c“: неисправан знак симболичког режима"
 
-#: error.c:89 error.c:347 error.c:349 error.c:351
+#: error.c:89 error.c:373 error.c:375 error.c:377
 msgid " line "
 msgstr " ред "
 
@@ -985,96 +986,106 @@ msgstr "Прекидам..."
 msgid "INFORM: "
 msgstr "ПОДАЦИ: "
 
-#: error.c:462
+#: error.c:310
+#, c-format
+msgid "DEBUG warning: "
+msgstr "упозорење ПРОЧИШЋАВАЊА:"
+
+#: error.c:488
 msgid "unknown command error"
 msgstr "непозната грешка наредбе"
 
-#: error.c:463
+#: error.c:489
 msgid "bad command type"
 msgstr "лоша врста наредбе"
 
-#: error.c:464
+#: error.c:490
 msgid "bad connector"
 msgstr "лош спајач"
 
-#: error.c:465
+#: error.c:491
 msgid "bad jump"
 msgstr "лош скок"
 
-#: error.c:503
+#: error.c:529
 #, c-format
 msgid "%s: unbound variable"
 msgstr "%s: несвезана променљива"
 
-#: eval.c:242
+#: eval.c:243
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\aистекло је време чекајући на улаз: сам се одјављујем\n"
 
-#: execute_cmd.c:537
+#: execute_cmd.c:555
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "не могу да преусмерим стандардни улаз из „/dev/null:“: %s"
 
-#: execute_cmd.c:1297
+#: execute_cmd.c:1317
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "ЗАПИСВРЕМЕНА: „%c“: неисправан знак записа"
 
-#: execute_cmd.c:2362
+#: execute_cmd.c:2391
 #, c-format
 msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr "изврши_копроц: копроцес [%d:%s] још увек постоји"
 
-#: execute_cmd.c:2486
+#: execute_cmd.c:2524
 msgid "pipe error"
 msgstr "грешка спојке"
 
-#: execute_cmd.c:4793
+#: execute_cmd.c:4923
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "процена: премашен је највећи ниво угнежђивања процене (%d)"
 
-#: execute_cmd.c:4805
+#: execute_cmd.c:4935
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: премашен је највећи ниво угнежђивања извора (%d)"
 
-#: execute_cmd.c:4913
+#: execute_cmd.c:5043
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: премашен је највећи ниво угнежђивања функције (%d)"
 
-#: execute_cmd.c:5467
+#: execute_cmd.c:5598
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: ограничено: не могу да наведем / у називима наредби"
 
-#: execute_cmd.c:5574
+#: execute_cmd.c:5715
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: нема такве наредбе"
 
-#: execute_cmd.c:5816
+#: execute_cmd.c:5957
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5854
+#: execute_cmd.c:5975
+#, c-format
+msgid "%s: cannot execute: required file not found"
+msgstr "%s: не могу да извршим: нисам нашао потребну датотеку"
+
+#: execute_cmd.c:6000
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: лош тумач"
 
-#: execute_cmd.c:5891
+#: execute_cmd.c:6037
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: не могу да извршим бинарну датотеку: %s"
 
-#: execute_cmd.c:5977
+#: execute_cmd.c:6123
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "„%s“: јесте посебна уграђеност"
 
-#: execute_cmd.c:6029
+#: execute_cmd.c:6175
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "не могу да удвостручим „fd %d“ у „fd %d“"
@@ -1087,68 +1098,68 @@ msgstr "премашен је ниво дубачења израза"
 msgid "recursion stack underflow"
 msgstr "недоток спремника дубачења"
 
-#: expr.c:477
+#: expr.c:478
 msgid "syntax error in expression"
 msgstr "садржајна грешка у изразу"
 
-#: expr.c:521
+#: expr.c:522
 msgid "attempted assignment to non-variable"
 msgstr "покушано је додељивање у не-променљиву"
 
-#: expr.c:530
+#: expr.c:531
 msgid "syntax error in variable assignment"
 msgstr "садржајна грешка у додели променљиве"
 
-#: expr.c:544 expr.c:911
+#: expr.c:545 expr.c:912
 msgid "division by 0"
 msgstr "дељење 0"
 
-#: expr.c:592
+#: expr.c:593
 msgid "bug: bad expassign token"
 msgstr "грешка: лош симбол доделе израза"
 
-#: expr.c:646
+#: expr.c:647
 msgid "`:' expected for conditional expression"
 msgstr "„:“ је очекивано за условни израз"
 
-#: expr.c:972
+#: expr.c:973
 msgid "exponent less than 0"
 msgstr "изложилац је мањи од 0"
 
-#: expr.c:1029
+#: expr.c:1030
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "одредник је очекиван након пре-увећања или пре-умањења"
 
-#: expr.c:1056
+#: expr.c:1057
 msgid "missing `)'"
 msgstr "недостаје )"
 
-#: expr.c:1107 expr.c:1487
+#: expr.c:1108 expr.c:1492
 msgid "syntax error: operand expected"
 msgstr "садржајна грешка: очекиван је операнд"
 
-#: expr.c:1489
+#: expr.c:1494
 msgid "syntax error: invalid arithmetic operator"
 msgstr "садржајна грешка: неисправан аритметички оператор"
 
-#: expr.c:1513
+#: expr.c:1518
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (симбол грешке је „%s“)"
 
-#: expr.c:1573
+#: expr.c:1578
 msgid "invalid arithmetic base"
 msgstr "неисправна аритметичка основа"
 
-#: expr.c:1582
+#: expr.c:1587
 msgid "invalid integer constant"
 msgstr "неисправна константа целог броја"
 
-#: expr.c:1598
+#: expr.c:1603
 msgid "value too great for base"
 msgstr "вредност је превише велика за основу"
 
-#: expr.c:1647
+#: expr.c:1652
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: грешка израза\n"
@@ -1157,7 +1168,7 @@ msgstr "%s: грешка израза\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: не могу да приступим родитељском директоријуму"
 
-#: input.c:99 subst.c:6069
+#: input.c:99 subst.c:6208
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "не могу да поништим режим без-кашњења за фд „%d“"
@@ -1176,167 +1187,167 @@ msgstr "save_bash_input: већ постоји међумеморија за н�
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: „pgrp“ спојка"
 
-#: jobs.c:906
+#: jobs.c:907
 #, c-format
 msgid "bgp_delete: LOOP: psi (%d) == storage[psi].bucket_next"
 msgstr "bgp_delete: LOOP: psi (%d) == storage[psi].bucket_next"
 
-#: jobs.c:959
+#: jobs.c:960
 #, c-format
 msgid "bgp_search: LOOP: psi (%d) == storage[psi].bucket_next"
 msgstr "bgp_search: LOOP: psi (%d) == storage[psi].bucket_next"
 
-#: jobs.c:1283
+#: jobs.c:1279
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "исцепљени пиб „%d“ се јавља у покренутом послу „%d“"
 
-#: jobs.c:1402
+#: jobs.c:1397
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "бришем заустављени посао „%d“ са групом процеса %ld"
 
-#: jobs.c:1511
+#: jobs.c:1502
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: пиб %5ld (%s) је означен да је још жив"
 
-#: jobs.c:1850
+#: jobs.c:1839
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: нема таквог пиб-а"
 
-#: jobs.c:1865
+#: jobs.c:1854
 #, c-format
 msgid "Signal %d"
 msgstr "Сигнал %d"
 
-#: jobs.c:1879 jobs.c:1905
+#: jobs.c:1868 jobs.c:1894
 msgid "Done"
 msgstr "Урађен"
 
-#: jobs.c:1884 siglist.c:122
+#: jobs.c:1873 siglist.c:123
 msgid "Stopped"
 msgstr "Заустављен"
 
-#: jobs.c:1888
+#: jobs.c:1877
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Заустављен(%s)"
 
-#: jobs.c:1892
+#: jobs.c:1881
 msgid "Running"
 msgstr "Покренут"
 
-#: jobs.c:1909
+#: jobs.c:1898
 #, c-format
 msgid "Done(%d)"
 msgstr "Урађен(%d)"
 
-#: jobs.c:1911
+#: jobs.c:1900
 #, c-format
 msgid "Exit %d"
 msgstr "Изађи из „%d“"
 
-#: jobs.c:1914
+#: jobs.c:1903
 msgid "Unknown status"
 msgstr "Непознато стање"
 
-#: jobs.c:2001
+#: jobs.c:1990
 #, c-format
 msgid "(core dumped) "
 msgstr "(језгрени избачај)"
 
-#: jobs.c:2020
+#: jobs.c:2009
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (wd: %s)"
 
-#: jobs.c:2259
+#: jobs.c:2250
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "сетпгиб порода (%ld у %ld)"
 
-#: jobs.c:2617 nojobs.c:664
+#: jobs.c:2608 nojobs.c:666
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: пиб %ld није пород ове шкољке"
 
-#: jobs.c:2893
+#: jobs.c:2884
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Нема записа о процесу %ld"
 
-#: jobs.c:3236
+#: jobs.c:3223
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: посао „%d“ је заустављен"
 
-#: jobs.c:3564
+#: jobs.c:3551
 #, c-format
 msgid "%s: no current jobs"
 msgstr "%s: нема текућих послова"
 
-#: jobs.c:3571
+#: jobs.c:3558
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: посао је завршио"
 
-#: jobs.c:3580
+#: jobs.c:3567
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: посао „%dд је већ у позадини"
 
-#: jobs.c:3806
+#: jobs.c:3793
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: укључујем „WNOHANG“ да избегнем неодређени блок"
 
-#: jobs.c:4320
+#: jobs.c:4307
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: ред %d:"
 
-#: jobs.c:4334 nojobs.c:919
+#: jobs.c:4321 nojobs.c:921
 #, c-format
 msgid " (core dumped)"
 msgstr " (језгрени избачај)"
 
-#: jobs.c:4346 jobs.c:4359
+#: jobs.c:4333 jobs.c:4346
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(„wd“ сада: %s)\n"
 
-#: jobs.c:4391
+#: jobs.c:4378
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: није успело „getpgrp“"
 
-#: jobs.c:4447
+#: jobs.c:4434
 msgid "initialize_job_control: no job control in background"
 msgstr "initialize_job_control: нема контроле посла у позадини"
 
-#: jobs.c:4463
+#: jobs.c:4450
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: дисциплина реда"
 
-#: jobs.c:4473
+#: jobs.c:4460
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4494 jobs.c:4503
+#: jobs.c:4481 jobs.c:4490
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "не могу да подесим групу процеса терминала (%d)"
 
-#: jobs.c:4508
+#: jobs.c:4495
 msgid "no job control in this shell"
 msgstr "нема управљања послом у овој шкољци"
 
-#: lib/malloc/malloc.c:353
+#: lib/malloc/malloc.c:367
 #, c-format
 msgid "malloc: failed assertion: %s\n"
 msgstr "malloc: тврдња није успела: %s\n"
 
-#: lib/malloc/malloc.c:369
+#: lib/malloc/malloc.c:383
 #, c-format
 msgid ""
 "\r\n"
@@ -1345,47 +1356,47 @@ msgstr ""
 "\r\n"
 "malloc: %s:%d: тврдња је лоше изведена\r\n"
 
-#: lib/malloc/malloc.c:370 lib/malloc/malloc.c:933
+#: lib/malloc/malloc.c:384 lib/malloc/malloc.c:941
 msgid "unknown"
 msgstr "непознато"
 
-#: lib/malloc/malloc.c:882
+#: lib/malloc/malloc.c:892
 msgid "malloc: block on free list clobbered"
 msgstr "malloc: блок на слободном списку је преписан"
 
-#: lib/malloc/malloc.c:972
+#: lib/malloc/malloc.c:980
 msgid "free: called with already freed block argument"
 msgstr "free: позвана са већ ослобођеним аргументом блока"
 
-#: lib/malloc/malloc.c:975
+#: lib/malloc/malloc.c:983
 msgid "free: called with unallocated block argument"
 msgstr "free: позвана са недодељеним аргументом блока"
 
-#: lib/malloc/malloc.c:994
+#: lib/malloc/malloc.c:1001
 msgid "free: underflow detected; mh_nbytes out of range"
 msgstr "free: откривена је недовољност тока; mh_n-бајтова је ван опсега"
 
-#: lib/malloc/malloc.c:1001
+#: lib/malloc/malloc.c:1007
 msgid "free: underflow detected; magic8 corrupted"
 msgstr "free: откривена је недовољност тока; „magic8“ је оштећено"
 
-#: lib/malloc/malloc.c:1009
+#: lib/malloc/malloc.c:1014
 msgid "free: start and end chunk sizes differ"
 msgstr "free: почетна и крајња величина дела се разликују"
 
-#: lib/malloc/malloc.c:1119
+#: lib/malloc/malloc.c:1176
 msgid "realloc: called with unallocated block argument"
 msgstr "realloc: позвана са недодељеним аргументом блока"
 
-#: lib/malloc/malloc.c:1134
+#: lib/malloc/malloc.c:1191
 msgid "realloc: underflow detected; mh_nbytes out of range"
 msgstr "realloc: откривена је недовољност тока; mh_n-бајтова је ван опсега"
 
-#: lib/malloc/malloc.c:1141
+#: lib/malloc/malloc.c:1197
 msgid "realloc: underflow detected; magic8 corrupted"
 msgstr "realloc: откривена је недовољност тока; „magic8“ је оштећено"
 
-#: lib/malloc/malloc.c:1150
+#: lib/malloc/malloc.c:1205
 msgid "realloc: start and end chunk sizes differ"
 msgstr "realloc: почетна и крајња величина дела се разликују"
 
@@ -1427,22 +1438,22 @@ msgstr "%s: лоша одредба путање мреже"
 msgid "network operations not supported"
 msgstr "радње мреже нису подржане"
 
-#: locale.c:217
+#: locale.c:219
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s)"
 msgstr "setlocale: LC_ALL: не могу да изменим језик (%s)"
 
-#: locale.c:219
+#: locale.c:221
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s): %s"
 msgstr "setlocale: LC_ALL: не могу да изменим језик (%s): %s"
 
-#: locale.c:292
+#: locale.c:294
 #, c-format
 msgid "setlocale: %s: cannot change locale (%s)"
 msgstr "setlocale: %s: не могу да изменим језик (%s)"
 
-#: locale.c:294
+#: locale.c:296
 #, c-format
 msgid "setlocale: %s: cannot change locale (%s): %s"
 msgstr "setlocale: %s: не могу да изменим језик (%s): %s"
@@ -1460,136 +1471,136 @@ msgstr "Имате нову пошту у $_"
 msgid "The mail in %s has been read\n"
 msgstr "Пошта у „%s“ је прочитана\n"
 
-#: make_cmd.c:317
+#: make_cmd.c:314
 msgid "syntax error: arithmetic expression required"
 msgstr "садржајна грешка: потребан је аритметички израз"
 
-#: make_cmd.c:319
+#: make_cmd.c:316
 msgid "syntax error: `;' unexpected"
 msgstr "садржајна грешка: није очекивано „;“"
 
-#: make_cmd.c:320
+#: make_cmd.c:317
 #, c-format
 msgid "syntax error: `((%s))'"
 msgstr "садржајна грешка: „((%s))“"
 
-#: make_cmd.c:572
+#: make_cmd.c:569
 #, c-format
 msgid "make_here_document: bad instruction type %d"
 msgstr "make_here_document: лоша врста упутства „%d“"
 
-#: make_cmd.c:657
+#: make_cmd.c:668
 #, c-format
 msgid "here-document at line %d delimited by end-of-file (wanted `%s')"
 msgstr "овде-документ у %d. реду је ограничен крајем-датотеке (тражи се „%s“)"
 
-#: make_cmd.c:756
+#: make_cmd.c:769
 #, c-format
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: упутсво преусмерења „%d“ је ван опсега"
 
-#: parse.y:2393
+#: parse.y:2428
 #, c-format
 msgid "shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line truncated"
 msgstr "shell_getc: величина_реда_улаза_шкољке (%zu) је премашила НАЈВЕЋУ_ВЕЛИЧИНУ (%lu): ред је скраћен"
 
-#: parse.y:2826
+#: parse.y:2921
 msgid "maximum here-document count exceeded"
 msgstr "премашен је највећи број „овде-документ“"
 
-#: parse.y:3581 parse.y:3957 parse.y:4556
+#: parse.y:3684 parse.y:4244 parse.y:6148
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "неочекивани крај датотеке приликом тражења поклапања „%c“"
 
-#: parse.y:4696
+#: parse.y:4452
 msgid "unexpected EOF while looking for `]]'"
 msgstr "неочекивани крај датотеке приликом тражења „]]“"
 
-#: parse.y:4701
+#: parse.y:4457
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "садржајна грешка у условном изразу: неочекивани симбол „%s“"
 
-#: parse.y:4705
+#: parse.y:4461
 msgid "syntax error in conditional expression"
 msgstr "садржајна грешка у условном изразу"
 
-#: parse.y:4783
+#: parse.y:4539
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "неочекивани симбол „%s“, очекивана је )"
 
-#: parse.y:4787
+#: parse.y:4543
 msgid "expected `)'"
 msgstr "очекивана је )"
 
-#: parse.y:4815
+#: parse.y:4571
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "неочекивани аргумент „%s“ условном једночланом оператору"
 
-#: parse.y:4819
+#: parse.y:4575
 msgid "unexpected argument to conditional unary operator"
 msgstr "неочекивани аргумент условном једночланом оператору"
 
-#: parse.y:4865
+#: parse.y:4621
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "неочекивани симбол „%s“, очекиван је условни двочлани оператор"
 
-#: parse.y:4869
+#: parse.y:4625
 msgid "conditional binary operator expected"
 msgstr "очекиван је условни двочлани оператор"
 
-#: parse.y:4891
+#: parse.y:4647
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "неочекивани аргумент „%s“ условном двочланом оператору"
 
-#: parse.y:4895
+#: parse.y:4651
 msgid "unexpected argument to conditional binary operator"
 msgstr "неочекивани аргумент условном двочланом оператору"
 
-#: parse.y:4906
+#: parse.y:4662
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "неочекивани симбол „%c“ у условној наредби"
 
-#: parse.y:4909
+#: parse.y:4665
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "неочекивани симбол „%s“ у условној наредби"
 
-#: parse.y:4913
+#: parse.y:4669
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "неочекивани симбол „%d“ у условној наредби"
 
-#: parse.y:6336
+#: parse.y:6118
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "садржајна грешка близу неочекиваног симбола „%s“"
 
-#: parse.y:6355
+#: parse.y:6137
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "садржајна грешка близу „%s“"
 
-#: parse.y:6365
+#: parse.y:6151
 msgid "syntax error: unexpected end of file"
 msgstr "садржајна грешка: неочекивани крај датотеке"
 
-#: parse.y:6365
+#: parse.y:6151
 msgid "syntax error"
 msgstr "садржајна грешка"
 
-#: parse.y:6428
+#: parse.y:6216
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Користите „%s“ да напустите шкољку.\n"
 
-#: parse.y:6602
+#: parse.y:6394
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "неочекивани крај датотеке приликом тражења поклапајуће )"
 
@@ -1627,94 +1638,94 @@ msgstr "xtrace_set: НИШТАВАН указивач датотеке"
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 
-#: print_cmd.c:1540
+#: print_cmd.c:1545
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: „%c“: неисправан знак записа"
 
-#: redir.c:149 redir.c:197
+#: redir.c:150 redir.c:198
 msgid "file descriptor out of range"
 msgstr "описник датотеке је ван опсега"
 
-#: redir.c:204
+#: redir.c:205
 #, c-format
 msgid "%s: ambiguous redirect"
 msgstr "%s: нејасно преусмерење"
 
-#: redir.c:208
+#: redir.c:209
 #, c-format
 msgid "%s: cannot overwrite existing file"
 msgstr "%s: не могу да препишем постојећу датотеку"
 
-#: redir.c:213
+#: redir.c:214
 #, c-format
 msgid "%s: restricted: cannot redirect output"
 msgstr "%s: ограничено: не могу да преусмерим излаз"
 
-#: redir.c:218
+#: redir.c:219
 #, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "не могу да направим привремену датотеку за документ-овде: %s"
 
-#: redir.c:222
+#: redir.c:223
 #, c-format
 msgid "%s: cannot assign fd to variable"
 msgstr "%s: не могу да доделим фд променљивој"
 
-#: redir.c:649
+#: redir.c:650
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "„/dev/(tcp|udp)/домаћин/прикључник“ није подржано без умрежавања"
 
-#: redir.c:938 redir.c:1053 redir.c:1114 redir.c:1284
+#: redir.c:945 redir.c:1065 redir.c:1130 redir.c:1303
 msgid "redirection error: cannot duplicate fd"
 msgstr "грешка преусмерења: не могу да удвостручим фд"
 
-#: shell.c:347
+#: shell.c:353
 msgid "could not find /tmp, please create!"
 msgstr "не могу да нађем „/tmp“, направите га!"
 
-#: shell.c:351
+#: shell.c:357
 msgid "/tmp must be a valid directory name"
 msgstr "„/tmp“ мора бити исправан назив директоријума"
 
-#: shell.c:804
+#: shell.c:826
 msgid "pretty-printing mode ignored in interactive shells"
 msgstr "режим уредног исписа је занемарен у међудејственим шкољкама"
 
-#: shell.c:948
+#: shell.c:972
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: неисправна опција"
 
-#: shell.c:1319
+#: shell.c:1343
 #, c-format
 msgid "cannot set uid to %d: effective uid %d"
 msgstr "не могу да подесим јиб на %d: стварни јиб %d"
 
-#: shell.c:1330
+#: shell.c:1354
 #, c-format
 msgid "cannot set gid to %d: effective gid %d"
 msgstr "не могу да подесим гиб на %d: стварни гиб %d"
 
-#: shell.c:1518
+#: shell.c:1544
 msgid "cannot start debugger; debugging mode disabled"
 msgstr "не могу да покренем прочишћавача; режим прочишћавања је искључен"
 
-#: shell.c:1632
+#: shell.c:1658
 #, c-format
 msgid "%s: Is a directory"
 msgstr "%s: је директоријум"
 
-#: shell.c:1881
+#: shell.c:1907
 msgid "I have no name!"
 msgstr "Немам назив!"
 
-#: shell.c:2035
+#: shell.c:2061
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "Гну баш, издање %s-(%s)\n"
 
-#: shell.c:2036
+#: shell.c:2062
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1723,317 +1734,317 @@ msgstr ""
 "Употреба:\t%s [Гнуова дуга опција] [опција] ...\n"
 "        \t%s [Гнуова дуга опција] [опција] датотека-списа ...\n"
 
-#: shell.c:2038
+#: shell.c:2064
 msgid "GNU long options:\n"
 msgstr "Гнуове дуге опције:\n"
 
-#: shell.c:2042
+#: shell.c:2068
 msgid "Shell options:\n"
 msgstr "Опције шкољке:\n"
 
-#: shell.c:2043
+#: shell.c:2069
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t„-ilrsD“ или наредба „-c“ или -O шопц_опција\t\t(призивање само)\n"
 
-#: shell.c:2062
+#: shell.c:2088
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t„-%s“ или опција „-o“\n"
 
-#: shell.c:2068
+#: shell.c:2094
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr "Укуцајте „%s -c \"help set\"“ за више података о опцијама шкољке.\n"
 
-#: shell.c:2069
+#: shell.c:2095
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr "Укуцајте „%s -c help“ за више података о уграђеним наредбама шкољке.\n"
 
-#: shell.c:2070
+#: shell.c:2096
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Користите наредбу „bashbug“ да известите о грешкама.\n"
 
-#: shell.c:2072
+#: shell.c:2098
 #, c-format
 msgid "bash home page: <http://www.gnu.org/software/bash>\n"
 msgstr "Матична страница баша: <http://www.gnu.org/software/bash>\n"
 
-#: shell.c:2073
+#: shell.c:2099
 #, c-format
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr "Општа помоћ коришћења Гну софтвера: <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:757
+#: sig.c:765
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: неисправна операција"
 
-#: siglist.c:47
+#: siglist.c:48
 msgid "Bogus signal"
 msgstr "Нетачан сигнал"
 
-#: siglist.c:50
+#: siglist.c:51
 msgid "Hangup"
 msgstr "Обустави"
 
-#: siglist.c:54
+#: siglist.c:55
 msgid "Interrupt"
 msgstr "Прекини"
 
-#: siglist.c:58
+#: siglist.c:59
 msgid "Quit"
 msgstr "Изађи"
 
-#: siglist.c:62
+#: siglist.c:63
 msgid "Illegal instruction"
 msgstr "Неисправна инструкција"
 
-#: siglist.c:66
+#: siglist.c:67
 msgid "BPT trace/trap"
 msgstr "Прати/ухвати БПТ"
 
-#: siglist.c:74
+#: siglist.c:75
 msgid "ABORT instruction"
 msgstr "Инструкција „ABORT“"
 
-#: siglist.c:78
+#: siglist.c:79
 msgid "EMT instruction"
 msgstr "Инструкција „EMT“"
 
-#: siglist.c:82
+#: siglist.c:83
 msgid "Floating point exception"
 msgstr "Изузетак покретног зареза"
 
-#: siglist.c:86
+#: siglist.c:87
 msgid "Killed"
 msgstr "Убијен"
 
-#: siglist.c:90
+#: siglist.c:91
 msgid "Bus error"
 msgstr "Грешка сабирнице"
 
-#: siglist.c:94
+#: siglist.c:95
 msgid "Segmentation fault"
 msgstr "Неуспех сегментације"
 
-#: siglist.c:98
+#: siglist.c:99
 msgid "Bad system call"
 msgstr "Лош системски позив"
 
-#: siglist.c:102
+#: siglist.c:103
 msgid "Broken pipe"
 msgstr "Сломљена спојка"
 
-#: siglist.c:106
+#: siglist.c:107
 msgid "Alarm clock"
 msgstr "Аларм"
 
-#: siglist.c:110
+#: siglist.c:111
 msgid "Terminated"
 msgstr "Окончано"
 
-#: siglist.c:114
+#: siglist.c:115
 msgid "Urgent IO condition"
 msgstr "Хитан УИ услов"
 
-#: siglist.c:118
+#: siglist.c:119
 msgid "Stopped (signal)"
 msgstr "Заустављен (сигнал)"
 
-#: siglist.c:126
+#: siglist.c:127
 msgid "Continue"
 msgstr "Настави"
 
-#: siglist.c:134
+#: siglist.c:135
 msgid "Child death or stop"
 msgstr "Пород је преминуо или заустављен"
 
-#: siglist.c:138
+#: siglist.c:139
 msgid "Stopped (tty input)"
 msgstr "Заустављен (улаз конзоле)"
 
-#: siglist.c:142
+#: siglist.c:143
 msgid "Stopped (tty output)"
 msgstr "Заустављен (излаз конзоле)"
 
-#: siglist.c:146
+#: siglist.c:147
 msgid "I/O ready"
 msgstr "Спреман на У/И"
 
-#: siglist.c:150
+#: siglist.c:151
 msgid "CPU limit"
 msgstr "Ограничење процесора"
 
-#: siglist.c:154
+#: siglist.c:155
 msgid "File limit"
 msgstr "Ограничење датотеке"
 
-#: siglist.c:158
+#: siglist.c:159
 msgid "Alarm (virtual)"
 msgstr "Аларм (виртуелни)"
 
-#: siglist.c:162
+#: siglist.c:163
 msgid "Alarm (profile)"
 msgstr "Аларм (профил)"
 
-#: siglist.c:166
+#: siglist.c:167
 msgid "Window changed"
 msgstr "Промењени прозор"
 
-#: siglist.c:170
+#: siglist.c:171
 msgid "Record lock"
 msgstr "Закључавање снимка"
 
-#: siglist.c:174
+#: siglist.c:175
 msgid "User signal 1"
 msgstr "Кориснички сигнал 1"
 
-#: siglist.c:178
+#: siglist.c:179
 msgid "User signal 2"
 msgstr "Кориснички сигнал 2"
 
-#: siglist.c:182
+#: siglist.c:183
 msgid "HFT input data pending"
 msgstr "Улазни ХФТ подаци на чекању"
 
-#: siglist.c:186
+#: siglist.c:187
 msgid "power failure imminent"
 msgstr "неизбежан пад напајања"
 
-#: siglist.c:190
+#: siglist.c:191
 msgid "system crash imminent"
 msgstr "неизбежан пад система"
 
-#: siglist.c:194
+#: siglist.c:195
 msgid "migrate process to another CPU"
 msgstr "пребацује процес на други процесор"
 
-#: siglist.c:198
+#: siglist.c:199
 msgid "programming error"
 msgstr "грешка програмирања"
 
-#: siglist.c:202
+#: siglist.c:203
 msgid "HFT monitor mode granted"
 msgstr "Осигуран је режим ХФТ праћења"
 
-#: siglist.c:206
+#: siglist.c:207
 msgid "HFT monitor mode retracted"
 msgstr "Понови је испраћен режим ХФТ праћења"
 
-#: siglist.c:210
+#: siglist.c:211
 msgid "HFT sound sequence has completed"
 msgstr "Низ ХФТ звука је завршен"
 
-#: siglist.c:214
+#: siglist.c:215
 msgid "Information request"
 msgstr "Захтев за подацима"
 
-#: siglist.c:222 siglist.c:224
+#: siglist.c:223 siglist.c:225
 #, c-format
 msgid "Unknown Signal #%d"
 msgstr "Непознат сигнал #%d"
 
-#: subst.c:1476 subst.c:1666
+#: subst.c:1480 subst.c:1670
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "лоша замена: нема затварајуће „%s“ у „%s“"
 
-#: subst.c:3281
+#: subst.c:3307
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: не могу да доделим списак члану низа"
 
-#: subst.c:5910 subst.c:5926
+#: subst.c:6048 subst.c:6064
 msgid "cannot make pipe for process substitution"
 msgstr "не могу да начиним спојку за замену процеса"
 
-#: subst.c:5985
+#: subst.c:6124
 msgid "cannot make child for process substitution"
 msgstr "не могу да начиним пород за замену процеса"
 
-#: subst.c:6059
+#: subst.c:6198
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "не могу да отворим именовану спојку „%s“ за читање"
 
-#: subst.c:6061
+#: subst.c:6200
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "не могу да отворим именовану спојку „%s“ за писање"
 
-#: subst.c:6084
+#: subst.c:6223
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "не могу да удвостручим именовану спојку „%s“ као фд %d"
 
-#: subst.c:6213
+#: subst.c:6370
 msgid "command substitution: ignored null byte in input"
 msgstr "замена наредбе: занемарих ништавни бајт у улазу"
 
-#: subst.c:6353
+#: subst.c:6533
 msgid "cannot make pipe for command substitution"
 msgstr "не могу да начиним спојку за замену наредбе"
 
-#: subst.c:6397
+#: subst.c:6580
 msgid "cannot make child for command substitution"
 msgstr "не могу да начиним пород за замену наредбе"
 
-#: subst.c:6423
+#: subst.c:6613
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: не могу да удвостручим спојку као фд 1"
 
-#: subst.c:6883 subst.c:9952
+#: subst.c:7082 subst.c:10252
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: неисправан назив променљиве за упуту назива"
 
-#: subst.c:6979 subst.c:6997 subst.c:7169
+#: subst.c:7178 subst.c:7196 subst.c:7369
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: неисправно посредно ширење"
 
-#: subst.c:7013 subst.c:7177
+#: subst.c:7212 subst.c:7377
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: неисправан назив променљиве"
 
-#: subst.c:7256
+#: subst.c:7478
 #, c-format
 msgid "%s: parameter not set"
 msgstr "%s: параметар није подешен"
 
-#: subst.c:7258
+#: subst.c:7480
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: параметар је ништаван или није подешен"
 
-#: subst.c:7503 subst.c:7518
+#: subst.c:7727 subst.c:7742
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: израз подниске < 0"
 
-#: subst.c:9281 subst.c:9302
+#: subst.c:9560 subst.c:9587
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: лоша замена"
 
-#: subst.c:9390
+#: subst.c:9678
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: не могу дадоделим на овај начин"
 
-#: subst.c:9814
+#: subst.c:10111
 msgid "future versions of the shell will force evaluation as an arithmetic substitution"
 msgstr "будућа издања шкољке ће приморати процену као аритметичку замену"
 
-#: subst.c:10367
+#: subst.c:10795
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "лоша замена: нема затварајућег „`“ у „%s“"
 
-#: subst.c:11434
+#: subst.c:11874
 #, c-format
 msgid "no match: %s"
 msgstr "нема поклапања: %s"
@@ -2056,21 +2067,21 @@ msgstr "очекивана је )"
 msgid "`)' expected, found %s"
 msgstr "очекивана је ), а пронађена %s"
 
-#: test.c:466 test.c:799
+#: test.c:469 test.c:814
 #, c-format
 msgid "%s: binary operator expected"
 msgstr "%s: очекиван је двочлани оператор"
 
-#: test.c:756 test.c:759
+#: test.c:771 test.c:774
 #, c-format
 msgid "%s: unary operator expected"
 msgstr "%s: очекиван је једночлани оператор"
 
-#: test.c:881
+#: test.c:896
 msgid "missing `]'"
 msgstr "недостаје ]"
 
-#: test.c:899
+#: test.c:914
 #, c-format
 msgid "syntax error: `%s' unexpected"
 msgstr "садржајна грешка: није очекивано „%s“"
@@ -2079,99 +2090,104 @@ msgstr "садржајна грешка: није очекивано „%s“"
 msgid "invalid signal number"
 msgstr "неисправан сигнални број"
 
-#: trap.c:325
+#: trap.c:323
 #, c-format
 msgid "trap handler: maximum trap handler level exceeded (%d)"
 msgstr "руковалац изузетком: премашен је највећи ниво руковаоца изузецима (%d)"
 
-#: trap.c:414
+#: trap.c:412
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: лоша вредност у „trap_list[%d]“: %p"
 
-#: trap.c:418
+#: trap.c:416
 #, c-format
 msgid "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
 msgstr "run_pending_traps: руковалац сигналом је „SIG_DFL“, поново шаљем %d (%s) мени самом"
 
-#: trap.c:487
+#: trap.c:509
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: лош сигнал %d"
 
-#: variables.c:421
+#: variables.c:424
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "грешка увоза одреднице функције за „%s“"
 
-#: variables.c:833
+#: variables.c:838
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "ниво шкољке (%d) је превисок, поново постављам на 1"
 
-#: variables.c:2674
+#: variables.c:2642
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: нема садржаја функције на текућем досегу"
 
-#: variables.c:2693
+#: variables.c:2661
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: вредности не може бити додељена вредност"
 
-#: variables.c:3475
+#: variables.c:2818 variables.c:2874
+#, c-format
+msgid "%s: cannot inherit value from incompatible type"
+msgstr "%s: не могу да наследим вредност из несагласне врсте"
+
+#: variables.c:3459
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s: додељујем цео број упути назива"
 
-#: variables.c:4404
+#: variables.c:4390
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variable: нема садржаја функције на текућем досегу"
 
-#: variables.c:4771
+#: variables.c:4757
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s има ништавну ниску извоза"
 
-#: variables.c:4776 variables.c:4785
+#: variables.c:4762 variables.c:4771
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "неисправан знак %d у нисци извоза за „%s“"
 
-#: variables.c:4791
+#: variables.c:4777
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "нема = у нисци извоза за „%s“"
 
-#: variables.c:5331
+#: variables.c:5317
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: глава променљивих шкољке није садржајност функције"
 
-#: variables.c:5344
+#: variables.c:5330
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: нема садржаја општих променљивих"
 
-#: variables.c:5424
+#: variables.c:5410
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: глава променљивих шкољке није привремени досег окружења"
 
-#: variables.c:6387
+#: variables.c:6400
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: не могу да отворим као ДАТОТЕКУ"
 
-#: variables.c:6392
+#: variables.c:6405
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: неисправна вредност за описник праћења датотеке"
 
-#: variables.c:6437
+#: variables.c:6450
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: вреднсот сагласности је ван опсега"
 
 #: version.c:46 version2.c:46
-msgid "Copyright (C) 2020 Free Software Foundation, Inc."
-msgstr "Ауторска права © 2020 Задужбина слободног софтвера, Доо."
+msgid "Copyright (C) 2022 Free Software Foundation, Inc."
+msgstr "Ауторска права © 2022. Фондација слободног софтвера, Доо."
 
 #: version.c:47 version2.c:47
 msgid "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
@@ -2251,12 +2267,12 @@ msgid "command [-pVv] command [arg ...]"
 msgstr "command [-pVv] command [арг ...]"
 
 #: builtins.c:78
-msgid "declare [-aAfFgiIlnrtux] [-p] [name[=value] ...]"
-msgstr "declare [-aAfFgiIlnrtux] [-p] [назив[=вредност] ...]"
+msgid "declare [-aAfFgiIlnrtux] [name[=value] ...] or declare -p [-aAfFilnrtux] [name ...]"
+msgstr "declare [-aAfFgiIlnrtux] [назив[=вредност] ...] или declare -p [-aAfFilnrtux] [назив ...]"
 
 #: builtins.c:80
-msgid "typeset [-aAfFgiIlnrtux] [-p] name[=value] ..."
-msgstr "typeset [-aAfFgiIlnrtux] [-p] назив[=вредност] ..."
+msgid "typeset [-aAfFgiIlnrtux] name[=value] ... or typeset -p [-aAfFilnrtux] [name ...]"
+msgstr "typeset [-aAfFgiIlnrtux] [-p] назив[=вредност] ... или typeset -p [-aAfFilnrtux] [назив ...]"
 
 #: builtins.c:82
 msgid "local [option] name[=value] ..."
@@ -2343,8 +2359,8 @@ msgid "return [n]"
 msgstr "return [n]"
 
 #: builtins.c:142
-msgid "set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]"
-msgstr "set [-abefhkmnptuvxBCHP] [-o назив-опције] [--] [арг ...]"
+msgid "set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]"
+msgstr "set [-abefhkmnptuvxBCEHPT] [-o назив-опције] [--] [-] [арг ...]"
 
 #: builtins.c:144
 msgid "unset [-f] [-v] [-n] [name ...]"
@@ -2391,8 +2407,8 @@ msgid "type [-afptP] name [name ...]"
 msgstr "type [-afptP] назив [назив ...]"
 
 #: builtins.c:171
-msgid "ulimit [-SHabcdefiklmnpqrstuvxPT] [limit]"
-msgstr "ulimit [-SHabcdefiklmnpqrstuvxPT] [ограничење]"
+msgid "ulimit [-SHabcdefiklmnpqrstuvxPRT] [limit]"
+msgstr "ulimit [-SHabcdefiklmnpqrstuvxPRT] [ограничење]"
 
 #: builtins.c:174
 msgid "umask [-p] [-S] [mode]"
@@ -2431,12 +2447,12 @@ msgid "if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else C
 msgstr "if НАРЕДБЕ; then НАРЕДБЕ; [ elif НАРЕДБЕ; then НАРЕДБЕ; ]... [ else НАРЕДБЕ; ] fi"
 
 #: builtins.c:196
-msgid "while COMMANDS; do COMMANDS; done"
-msgstr "while НАРЕДБЕ; do НАРЕДБЕ; done"
+msgid "while COMMANDS; do COMMANDS-2; done"
+msgstr "while НАРЕДБЕ; do НАРЕДБЕ-2; done"
 
 #: builtins.c:198
-msgid "until COMMANDS; do COMMANDS; done"
-msgstr "until НАРЕДБЕ; do НАРЕДБЕ; done"
+msgid "until COMMANDS; do COMMANDS-2; done"
+msgstr "until НАРЕДБЕ; do НАРЕДБЕ-2; done"
 
 #: builtins.c:200
 msgid "coproc [NAME] command [redirections]"
@@ -3729,7 +3745,8 @@ msgid ""
 "    splitting, and the first word is assigned to the first NAME, the second\n"
 "    word to the second NAME, and so on, with any leftover words assigned to\n"
 "    the last NAME.  Only the characters found in $IFS are recognized as word\n"
-"    delimiters.\n"
+"    delimiters. By default, the backslash character escapes delimiter characters\n"
+"    and newline.\n"
 "    \n"
 "    If no NAMEs are supplied, the line read is stored in the REPLY variable.\n"
 "    \n"
@@ -3771,7 +3788,8 @@ msgstr ""
 "    ако је достављена опција „-u“.  Ред је подељен на поља као при дељењу\n"
 "    речи, а прва реч се додељује првом НАЗИВУ, друга реч другом НАЗИВУ,\n"
 "    и тако редом, са сваком наредном речју додељеном последњем НАЗИВУ.\n"
-"    Само знаци пронађени у „$IFS“ се признају за граничнике речи.\n"
+"    Само знаци пронађени у „$IFS“ се признају за граничнике речи. По основи,\n"
+"    знак контра косе црте мења значење знакова граничника и новог реда.\n"
 "    \n"
 "    Ако нису достављени НАЗИВИ, читани ред је смештен у променљивој ОДГОВОР.\n"
 "    \n"
@@ -3805,7 +3823,7 @@ msgstr ""
 "    читања (у том случају је већи од 128), ако не дође до грешке доделе променљиве,\n"
 "    или ако се не достави неисправан описник датотеке као аргумент опције „-u“."
 
-#: builtins.c:1041
+#: builtins.c:1042
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3825,7 +3843,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје N, или неуспех ако шкољка не извршава функцију или спис."
 
-#: builtins.c:1054
+#: builtins.c:1055
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -3988,7 +4006,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако није дата неисправна опција."
 
-#: builtins.c:1139
+#: builtins.c:1140
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -4026,7 +4044,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако није дата неисправна опција или ако је НАЗИВ само за читање."
 
-#: builtins.c:1161
+#: builtins.c:1162
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4058,7 +4076,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако је дата неисправна опција или је НАЗИВ неисправан."
 
-#: builtins.c:1180
+#: builtins.c:1181
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4096,7 +4114,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако није дата неисправна опција или ако је НАЗИВ неисправан."
 
-#: builtins.c:1202
+#: builtins.c:1203
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4114,7 +4132,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Резултати су успешни осим ако N није негативно иливеће од $#."
 
-#: builtins.c:1214 builtins.c:1229
+#: builtins.c:1215 builtins.c:1230
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4138,7 +4156,7 @@ msgstr ""
 "    Даје стање последње извршене наредбе у ДАТОТЕЦИ; не успева\n"
 "    ако назив ДАТОТЕКЕ не може бити прочитан."
 
-#: builtins.c:1245
+#: builtins.c:1246
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4162,7 +4180,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако није укључено управљање послом или ако не дође до грешке."
 
-#: builtins.c:1261
+#: builtins.c:1262
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4313,7 +4331,7 @@ msgstr ""
 "    Даје позитиван резултат ако се ИЗРАЗ процени на тачно; неуспех ако се ИЗРАЗ процени\n"
 "    на нетачно или ако је дат неисправан аргумент."
 
-#: builtins.c:1343
+#: builtins.c:1344
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4325,7 +4343,7 @@ msgstr ""
 "    Ово је синоним за уграђеност „test“, али последњи аргумент мора\n"
 "    бити дословна ], да поклопи отворену [."
 
-#: builtins.c:1352
+#: builtins.c:1353
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4343,7 +4361,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Увек успешно."
 
-#: builtins.c:1364
+#: builtins.c:1365
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -4409,7 +4427,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим за неисправну ОДРЕДБА_СИГНАЛА или за неисправну опцију."
 
-#: builtins.c:1400
+#: builtins.c:1401
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4463,7 +4481,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат ако су пронађени сви НАЗИВИ; неуспех ако ниједан није пронађен."
 
-#: builtins.c:1431
+#: builtins.c:1432
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -4557,7 +4575,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако се не достави неисправна опција или ако не дође до грешке."
 
-#: builtins.c:1482
+#: builtins.c:1483
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4589,7 +4607,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако је РЕЖИМ неисправан или ако је дата неисправна опција."
 
-#: builtins.c:1502
+#: builtins.c:1503
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -4640,7 +4658,7 @@ msgstr ""
 "    дата неисправна опција, или ако је достављено „-n“ а шкољка нема „unwaited-for“\n"
 "    пород."
 
-#: builtins.c:1533
+#: builtins.c:1534
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4662,7 +4680,7 @@ msgstr ""
 "    Исписује стање последњег ПИБ-а; неуспех ако је ПИБ неисправан или ако је дата\n"
 "    неисправна опција."
 
-#: builtins.c:1548
+#: builtins.c:1549
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4684,7 +4702,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Исписује стање последње извршене наредбе."
 
-#: builtins.c:1562
+#: builtins.c:1563
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4714,7 +4732,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Исписује стање последње извршене наредбе."
 
-#: builtins.c:1580
+#: builtins.c:1581
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4750,7 +4768,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Исписује стање последње извршене наредбе."
 
-#: builtins.c:1601
+#: builtins.c:1602
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4779,7 +4797,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Стање резултата јесте стање резултата СПОЈНОГРЕДА."
 
-#: builtins.c:1618
+#: builtins.c:1619
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -4797,7 +4815,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Исписује стање последње извршене наредбе."
 
-#: builtins.c:1630
+#: builtins.c:1631
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4824,43 +4842,43 @@ msgstr ""
 "    Излазно стање:\n"
 "    Исписује стање последње извршене наредбе."
 
-#: builtins.c:1647
+#: builtins.c:1648
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
-"    Expand and execute COMMANDS as long as the final command in the\n"
-"    `while' COMMANDS has an exit status of zero.\n"
+"    Expand and execute COMMANDS-2 as long as the final command in COMMANDS has\n"
+"    an exit status of zero.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
 "Извршава наредбе након што се проба успешно обави.\n"
 "    \n"
-"    Шири и извршава НАРЕДБЕ након што завршна наредба у „while“ НАРЕДБАМА\n"
+"    Шири и извршава НАРЕДБЕ-2 након што завршна наредба у НАРЕДБАМА\n"
 "    има излазно стање нуле.\n"
 "    \n"
 "    Излазно стање:\n"
 "    Исписује стање последње извршене наредбе."
 
-#: builtins.c:1659
+#: builtins.c:1660
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
-"    Expand and execute COMMANDS as long as the final command in the\n"
-"    `until' COMMANDS has an exit status which is not zero.\n"
+"    Expand and execute COMMANDS-2 as long as the final command in COMMANDS has\n"
+"    an exit status which is not zero.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Извршава наредбе након што се проба успешно обави.\n"
+"Извршава наредбе све док проба не буде неуспела.\n"
 "    \n"
-"    Шири и извршава НАРЕДБЕ након што завршна наредба у „until“ НАРЕДБАМА\n"
+"    Шири и извршава НАРЕДБЕ-2 након што завршна наредба у НАРЕДБАМА\n"
 "    има излазно стање које није нула.\n"
 "    \n"
 "    Излазно стање:\n"
 "    Исписује стање последње извршене наредбе."
 
-#: builtins.c:1671
+#: builtins.c:1672
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -4882,7 +4900,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Наредба копроцеса даје излазно стање 0."
 
-#: builtins.c:1685
+#: builtins.c:1686
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4904,7 +4922,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако је НАЗИВ само за читање."
 
-#: builtins.c:1699
+#: builtins.c:1700
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -4922,7 +4940,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Исписује стање последње извршене наредбе."
 
-#: builtins.c:1711
+#: builtins.c:1712
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -4945,7 +4963,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје стање настављеног посла."
 
-#: builtins.c:1726
+#: builtins.c:1727
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -4963,7 +4981,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје 1 ако се ИЗРАЗ процени на 0; у супротном даје 0."
 
-#: builtins.c:1738
+#: builtins.c:1739
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -5009,7 +5027,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    0 или 1 у зависности од вредност ИЗРАЗА."
 
-#: builtins.c:1764
+#: builtins.c:1765
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5112,7 +5130,7 @@ msgstr ""
 "    ЗАНЕМАРИИСТОРИЈАТ   Списак шаблона раздвојен двотачком коришћених за одлучивање\n"
 "                        о наредбама које требају бити сачуване на списку историјата.\n"
 
-#: builtins.c:1821
+#: builtins.c:1822
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5168,7 +5186,7 @@ msgstr ""
 "    Даје позитиван резултат осим ако није достављен неисправан аргумент или замена\n"
 "    директоријума не успе."
 
-#: builtins.c:1855
+#: builtins.c:1856
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5218,7 +5236,7 @@ msgstr ""
 "    Даје позитиван резултат осим ако није достављен неисправан аргумент или измена\n"
 "    директоријума не успе."
 
-#: builtins.c:1885
+#: builtins.c:1886
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5270,7 +5288,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако се не достави неисправна опција или ако не дође до грешке."
 
-#: builtins.c:1916
+#: builtins.c:1917
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5306,7 +5324,7 @@ msgstr ""
 "    Даје позитиван резултат ако је НАЗИВ_ОПЦИЈЕ укључен; неуспех ако је дата\n"
 "    неисправна опција или ако је НАЗИВ_ОПЦИЈЕ искључен."
 
-#: builtins.c:1937
+#: builtins.c:1938
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -5325,6 +5343,8 @@ msgid ""
 "    \n"
 "      %b\texpand backslash escape sequences in the corresponding argument\n"
 "      %q\tquote the argument in a way that can be reused as shell input\n"
+"      %Q\tlike %q, but apply any precision to the unquoted argument before\n"
+"    \t\tquoting\n"
 "      %(fmt)T\toutput the date-time string resulting from using FMT as a format\n"
 "    \t        string for strftime(3)\n"
 "    \n"
@@ -5353,6 +5373,8 @@ msgstr ""
 "    \n"
 "      %b\tшири низове прекида контра косе црте у одговарајући аргумент\n"
 "      %q\tцитира аргумент на начин како би био коришћен као улаз шкољке\n"
+"      %Q\tкао %q, али примењује сваку тачност на нецитирани аргумент пре\n"
+"    \t\tцитирања\n"
 "      %(fmt)T   исписује ниску датум-време резултирајући коришћењем ФМТ-а као\n"
 "                ниске записа за „strftime(3)“\n"
 "    \n"
@@ -5364,7 +5386,7 @@ msgstr ""
 "    Даје позитиван резултат осим ако није дата неисправна опција или ако не\n"
 "    дође до грешке писања или доделе."
 
-#: builtins.c:1971
+#: builtins.c:1974
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -5412,7 +5434,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако се не достави неисправна опција или ако не дође до грешке."
 
-#: builtins.c:2001
+#: builtins.c:2004
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -5431,7 +5453,7 @@ msgstr ""
 "    Излазно стање:\n"
 "    Даје позитиван резултат осим ако се не достави неисправна опција или ако не дође до грешке."
 
-#: builtins.c:2016
+#: builtins.c:2019
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -5484,7 +5506,7 @@ msgstr ""
 "    Даје позитиван резултат осим ако се не достави неисправна опција или НАЗИВ\n"
 "    нема одређену одредбу довршавања."
 
-#: builtins.c:2047
+#: builtins.c:2050
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
@@ -5549,7 +5571,7 @@ msgstr ""
 "    Даје позитиван резултат осим ако није дата неисправна опција или ако је НИЗ само\n"
 "    за читање или није индексирани низ."
 
-#: builtins.c:2083
+#: builtins.c:2086
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
@@ -5558,6 +5580,9 @@ msgstr ""
 "Чита редове из датотеке у променљиву низа.\n"
 "    \n"
 "    Синоним за „mapfile“."
+
+#~ msgid "%s: invalid associative array key"
+#~ msgstr "%s: неисправан кључ придруживог низа"
 
 #~ msgid ""
 #~ "Returns the context of the current subroutine call.\n"

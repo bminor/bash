@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -267,6 +267,13 @@ sh_readonly (s)
 }
 
 void
+sh_noassign (s)
+     const char *s;
+{
+  internal_error (_("%s: cannot assign"), s);	/* XXX */
+}
+
+void
 sh_erange (s, desc)
      char *s, *desc;
 {
@@ -451,7 +458,7 @@ shift_args (times)
 int
 number_of_args ()
 {
-#ifdef DEBUG
+#if 0
   register WORD_LIST *list;
   int n;
 
@@ -462,9 +469,9 @@ number_of_args ()
 
 if (n != posparam_count)
   itrace("number_of_args: n (%d) != posparam_count (%d)", n, posparam_count);
-#endif
-
+#else
   return posparam_count;
+#endif
 }
 
 static int changed_dollar_vars;
@@ -935,7 +942,7 @@ find_special_builtin (name)
   			current_builtin->function :
   			(sh_builtin_func_t *)NULL);
 }
-  
+
 static int
 shell_builtin_compare (sbp1, sbp2)
      struct builtin *sbp1, *sbp2;
@@ -971,6 +978,7 @@ builtin_help ()
 /*								    */
 /* **************************************************************** */
 
+/* Assign NAME=VALUE, passing FLAGS to the assignment functions. */
 SHELL_VAR *
 builtin_bind_variable (name, value, flags)
      char *name;
@@ -978,12 +986,22 @@ builtin_bind_variable (name, value, flags)
      int flags;
 {
   SHELL_VAR *v;
+  int vflags, bindflags;
 
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
+  /* Callers are responsible for calling this with array references that have
+     already undergone valid_array_reference checks (read, printf). */
+  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+  bindflags = flags | (assoc_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;
+  if (flags & ASS_NOEXPAND)
+    vflags |= VA_NOEXPAND;
+  if (flags & ASS_ONEWORD)
+    vflags |= VA_ONEWORD;
+
+  if (valid_array_reference (name, vflags) == 0)
     v = bind_variable (name, value, flags);
   else
-    v = assign_array_element (name, value, flags | (assoc_expand_once ? ASS_NOEXPAND : 0));
+    v = assign_array_element (name, value, bindflags, (array_eltstate_t *)0);
 #else /* !ARRAY_VARS */
   v = bind_variable (name, value, flags);
 #endif /* !ARRAY_VARS */
@@ -993,6 +1011,52 @@ builtin_bind_variable (name, value, flags)
 
   return v;
 }
+
+SHELL_VAR *
+builtin_bind_var_to_int (name, val, flags)
+     char *name;
+     intmax_t val;
+     int flags;
+{
+  SHELL_VAR *v;
+
+  v = bind_var_to_int (name, val, flags|ASS_ALLOWALLSUB);
+  return v;
+}
+
+#if defined (ARRAY_VARS)
+SHELL_VAR *
+builtin_find_indexed_array (array_name, flags)
+     char *array_name;
+     int flags;
+{
+  SHELL_VAR *entry;
+
+  if ((flags & 2) && legal_identifier (array_name) == 0)
+    {
+      sh_invalidid (array_name);
+      return (SHELL_VAR *)NULL;
+    }
+
+  entry = find_or_make_array_variable (array_name, 1);
+  /* With flags argument & 1, find_or_make_array_variable checks for readonly
+     and noassign variables and prints error messages. */
+  if (entry == 0)
+    return entry;
+  else if (array_p (entry) == 0)
+    {
+      builtin_error (_("%s: not an indexed array"), array_name);
+      return (SHELL_VAR *)NULL;
+    }
+  else if (invisible_p (entry))
+    VUNSETATTR (entry, att_invisible);	/* no longer invisible */
+
+  if (flags & 1)
+    array_flush (array_cell (entry));
+
+  return entry;
+}
+#endif /* ARRAY_VARS */	
 
 /* Like check_unbind_variable, but for use by builtins (only matters for
    error messages). */
@@ -1015,3 +1079,53 @@ builtin_unbind_variable (vname)
     }
   return (unbind_variable (vname));
 }
+
+int
+builtin_arrayref_flags (w, baseflags)
+     WORD_DESC *w;
+     int baseflags;
+{
+  char *t;
+  int vflags;
+
+  vflags = baseflags;
+
+  /* Don't require assoc_expand_once if we have an argument that's already
+     passed through valid_array_reference and been expanded once. That
+     doesn't protect it from normal expansions like word splitting, so
+     proper quoting is still required. */
+  if (w->flags & W_ARRAYREF)
+    vflags |= VA_ONEWORD|VA_NOEXPAND;
+
+#  if 0
+  /* This is a little sketchier but handles quoted arguments. */
+  if (assoc_expand_once && (t =  strchr (w->word, '[')) && t[strlen(t) - 1] == ']')
+    vflags |= VA_ONEWORD|VA_NOEXPAND;
+#  endif
+
+  return vflags;
+}
+
+/* **************************************************************** */
+/*								    */
+/*	    External interface to manipulate shell options	    */
+/*								    */
+/* **************************************************************** */
+
+#if defined (ARRAY_VARS)
+int
+set_expand_once (nval, uwp)
+     int nval, uwp;
+{
+  int oa;
+
+  oa = assoc_expand_once;
+  if (shell_compatibility_level > 51)	/* XXX - internal */
+    {
+      if (uwp)
+	unwind_protect_int (assoc_expand_once);
+      assoc_expand_once = nval;
+    }
+  return oa;
+}
+#endif

@@ -1,6 +1,6 @@
 /* builtins.h -- What a builtin looks like, and where to find them. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,6 +45,7 @@
 #define ASSIGNMENT_BUILTIN 0x10	/* This builtin takes assignment statements. */
 #define POSIX_BUILTIN	0x20	/* This builtins is special in the Posix command search order. */
 #define LOCALVAR_BUILTIN   0x40	/* This builtin creates local variables */
+#define ARRAYREF_BUILTIN 0x80	/* This builtin takes array references as arguments */
 
 #define BASE_INDENT	4
 

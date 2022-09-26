@@ -51,7 +51,7 @@ extern long strtol PARAMS((const char *, char **, int));
 #ifndef HAVE_DECL_STRTOLL
 "this configure-time declaration test was not run"
 #endif
-#if !HAVE_DECL_STRTOLL && HAVE_LONG_LONG
+#if !HAVE_DECL_STRTOLL && HAVE_LONG_LONG_INT
 extern long long strtoll PARAMS((const char *, char **, int));
 #endif
 
@@ -65,7 +65,7 @@ strtoimax (ptr, endptr, base)
      char **endptr;
      int base;
 {
-#if HAVE_LONG_LONG
+#if HAVE_LONG_LONG_INT
   verify(size_is_that_of_long_or_long_long,
 	 (sizeof (intmax_t) == sizeof (long) ||
 	  sizeof (intmax_t) == sizeof (long long)));
@@ -86,20 +86,20 @@ main ()
 {
   char *p, *endptr;
   intmax_t x;
-#if HAVE_LONG_LONG
+#if HAVE_LONG_LONG_INT
   long long y;
 #endif
   long z;
   
   printf ("sizeof intmax_t: %d\n", sizeof (intmax_t));
 
-#if HAVE_LONG_LONG
+#if HAVE_LONG_LONG_INT
   printf ("sizeof long long: %d\n", sizeof (long long));
 #endif
   printf ("sizeof long: %d\n", sizeof (long));
 
   x = strtoimax("42", &endptr, 10);
-#if HAVE_LONG_LONG
+#if HAVE_LONG_LONG_INT
   y = strtoll("42", &endptr, 10);
 #else
   y = -1;

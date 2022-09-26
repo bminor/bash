@@ -1,7 +1,7 @@
 This file is suspend.def, from which is created suspend.c.
 It implements the builtin "suspend" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,10 +27,12 @@ $SHORT_DOC suspend [-f]
 Suspend shell execution.
 
 Suspend the execution of this shell until it receives a SIGCONT signal.
-Unless forced, login shells cannot be suspended.
+Unless forced, login shells and shells without job control cannot be
+suspended.
 
 Options:
-  -f	force the suspend, even if the shell is a login shell
+  -f	force the suspend, even if the shell is a login shell or job
+		control is not enabled.
 
 Exit Status:
 Returns success unless job control is not enabled or an error occurs.
@@ -96,16 +98,15 @@ suspend_builtin (list)
       }
       
   list = loptend;
-
-  if (job_control == 0)
-    {
-      sh_nojobs (_("cannot suspend"));
-      return (EXECUTION_FAILURE);
-    }
+  no_args (list);
 
   if (force == 0)  
     {
-      no_args (list);
+      if (job_control == 0)
+	{
+	  sh_nojobs (_("cannot suspend"));
+	  return (EXECUTION_FAILURE);
+	}
 
       if (login_shell)
 	{

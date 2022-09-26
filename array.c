@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,7 +84,6 @@ array_create()
 	ARRAY_ELEMENT	*head;
 
 	r = (ARRAY *)xmalloc(sizeof(ARRAY));
-	r->type = array_indexed;
 	r->max_index = -1;
 	r->num_elements = 0;
 	r->lastref = (ARRAY_ELEMENT *)0;
@@ -134,7 +133,6 @@ ARRAY	*a;
 	if (a == 0)
 		return((ARRAY *) NULL);
 	a1 = array_create();
-	a1->type = a->type;
 	a1->max_index = a->max_index;
 	a1->num_elements = a->num_elements;
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
@@ -161,7 +159,6 @@ ARRAY_ELEMENT	*s, *e;
 	arrayind_t mi;
 
 	a = array_create ();
-	a->type = array->type;
 
 	for (mi = 0, p = s, i = 0; p != e; p = element_forw(p), i++) {
 		n = array_create_element (element_index(p), element_value(p));
@@ -796,6 +793,27 @@ ARRAY	*a;
 	return (REVERSE_LIST(list, WORD_LIST *));
 }
 
+WORD_LIST *
+array_to_kvpair_list(a)
+ARRAY	*a;
+{
+	WORD_LIST	*list;
+	ARRAY_ELEMENT	*ae;
+	char		*k, *v;
+
+	if (a == 0 || array_empty(a))
+		return((WORD_LIST *)NULL);
+	list = (WORD_LIST *)NULL;
+	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
+		k = itos(element_index(ae));
+		v = element_value(ae);
+		list = make_word_list (make_bare_word(k), list);
+		list = make_word_list (make_bare_word(v), list);
+		free(k);
+	}
+	return (REVERSE_LIST(list, WORD_LIST *));
+}
+
 ARRAY *
 array_assign_list (array, list)
 ARRAY	*array;
@@ -834,6 +852,55 @@ int	*countp;
 	if (countp)
 		*countp = i;
 	return (ret);
+}
+
+ARRAY *
+array_from_argv(a, vec, count)
+ARRAY	*a;
+char	**vec;
+int	count;
+{
+  arrayind_t	i;
+  ARRAY_ELEMENT	*ae;
+  char	*t;
+
+  if (a == 0 || array_num_elements (a) == 0)
+    {
+      for (i = 0; i < count; i++)
+	array_insert (a, i, t);
+      return a;
+    }
+
+  /* Fast case */
+  if (array_num_elements (a) == count && count == 1)
+    {
+      ae = element_forw (a->head);
+      t = vec[0] ? savestring (vec[0]) : 0;
+      ARRAY_ELEMENT_REPLACE (ae, t);
+    }
+  else if (array_num_elements (a) <= count)
+    {
+      /* modify in array_num_elements members in place, then add */
+      ae = a->head;
+      for (i = 0; i < array_num_elements (a); i++)
+	{
+	  ae = element_forw (ae);
+	  t = vec[0] ? savestring (vec[0]) : 0;
+	  ARRAY_ELEMENT_REPLACE (ae, t);
+	}
+      /* add any more */
+      for ( ; i < count; i++)
+	array_insert (a, i, vec[i]);
+    }
+  else
+    {
+      /* deleting elements.  it's faster to rebuild the array. */	  
+      array_flush (a);
+      for (i = 0; i < count; i++)
+	array_insert (a, i, vec[i]);
+    }
+
+  return a;
 }
 	
 /*

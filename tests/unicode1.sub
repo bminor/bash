@@ -109,7 +109,13 @@ fr_FR_ISO_8859_1=(
  [0x00fb]=$'\373' [0x00fc]=$'\374' [0x00fd]=$'\375' [0x00fe]=$'\376'	
 )
 
-TestCodePage fr_FR.ISO8859-1 fr_FR_ISO_8859_1
+# this locale causes problems all over the place
+if locale -a | grep -i '^fr_FR\.ISO8859.*1$' >/dev/null ; then
+	TestCodePage fr_FR.ISO8859-1 fr_FR_ISO_8859_1
+else
+	echo "unicode1.sub: warning: you do not have the fr_FR.ISO8859-1 locale installed;" >&2
+	echo "unicode1.sub: that will cause some of these tests to be skipped." >&2
+fi
 
 zh_TW_BIG5=(
  [0x00f6]=$'\366' [0x00f7]=$'\367' [0x00f8]=$'\370' [0x00f9]=$'\371' [0x00fa]=$'\372'
@@ -309,8 +315,14 @@ jp_JP_SHIFT_JIS=(
   [0xFF9E]=$'\xDE' #  HALFWIDTH KATAKANA VOICED SOUND MARK
   [0xFF9F]=$'\xDF' #  HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK
 )
+
 #TestCodePage ja_JP.SHIFT_JIS jp_JP_SHIFT_JIS
-TestCodePage ja_JP.SJIS jp_JP_SHIFT_JIS
+if locale -a | grep -i '^ja_JP.SJIS' >/dev/null ; then
+	TestCodePage ja_JP.SJIS jp_JP_SHIFT_JIS
+else
+	echo "unicode1.sub: warning: you do not have the ja_JP.SJIS locale installed;" >&2
+	echo "unicode1.sub: that will cause some of these tests to be skipped." >&2
+fi
 
 #for ((x=1;x<1000;x++)); do printf ' [0x%04x]=%-11q' "$x" "$(printf "$(printf '\\U%08x' $x)")" ; [ $(($x%5)) = 0 ] && echo; done
 C_UTF_8=(

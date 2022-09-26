@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,7 +52,7 @@ $PRODUCES set.c
 
 $BUILTIN set
 $FUNCTION set_builtin
-$SHORT_DOC set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]
+$SHORT_DOC set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
 Set or unset values of shell options and positional parameters.
 
 Change the value of shell attributes and positional parameters, or
@@ -835,7 +835,7 @@ unset_builtin (list)
   WORD_LIST *list;
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
-  int global_unset_func, global_unset_var, vflags, valid_id;
+  int global_unset_func, global_unset_var, vflags, base_vflags, valid_id;
   char *name, *tname;
 
   unset_function = unset_variable = unset_array = nameref = any_failed = 0;
@@ -873,7 +873,7 @@ unset_builtin (list)
     nameref = 0;
 
 #if defined (ARRAY_VARS)
-  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+  base_vflags = assoc_expand_once ? VA_NOEXPAND : 0;
 #endif
 
   while (list)
@@ -890,14 +890,14 @@ unset_builtin (list)
       unset_variable = global_unset_var;
 
 #if defined (ARRAY_VARS)
+      vflags = builtin_arrayref_flags (list->word, base_vflags);
+#endif
+
+#if defined (ARRAY_VARS)
       unset_array = 0;
       /* XXX valid array reference second arg was 0 */
-      if (!unset_function && nameref == 0 && valid_array_reference (name, vflags))
-	{
-	  t = strchr (name, '[');
-	  *t++ = '\0';
-	  unset_array++;
-	}
+      if (!unset_function && nameref == 0 && tokenize_array_reference (name, vflags, &t))
+	unset_array = 1;
 #endif
       /* Get error checking out of the way first.  The low-level functions
 	 just perform the unset, relying on the caller to verify. */
@@ -959,6 +959,9 @@ unset_builtin (list)
 #if defined (ARRAY_VARS)
       if (var && unset_array)
 	{
+	  if (shell_compatibility_level <= 51)
+	    vflags |= VA_ALLOWALL;
+
 	  /* Let unbind_array_element decide what to do with non-array vars */
 	  tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
 	  if (tem == -2 && array_p (var) == 0 && assoc_p (var) == 0)
@@ -981,9 +984,16 @@ unset_builtin (list)
 #if defined (ARRAY_VARS)
 	      if (valid_array_reference (nameref_cell (var), 0))
 		{
+		  int len;
+
 		  tname = savestring (nameref_cell (var));
-		  if (var = array_variable_part (tname, 0, &t, (int *)0))
-		    tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
+		  if (var = array_variable_part (tname, 0, &t, &len))
+		    {
+		      /* change to what unbind_array_element now expects */
+		      if (t[len - 1] == ']')
+			t[len - 1] = 0;
+		      tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
+		    }
 		  free (tname);
 		}
 	      else

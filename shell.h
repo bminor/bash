@@ -1,6 +1,6 @@
 /* shell.h -- The data structures used by the shell */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -85,6 +85,7 @@ extern int EOF_Reached;
 #define MATCH_QUOTED	0x020
 #define MATCH_ASSIGNRHS	0x040
 #define MATCH_STARSUB	0x080
+#define MATCH_EXPREP	0x100	/* for pattern substitution, expand replacement */
 
 /* Some needed external declarations. */
 extern char **shell_environment;
@@ -165,18 +166,20 @@ extern struct user_info current_user;
 /* Structure in which to save partial parsing state when doing things like
    PROMPT_COMMAND and bash_execute_unix_command execution. */
 
-typedef struct _sh_parser_state_t {
-
+typedef struct _sh_parser_state_t
+{
   /* parsing state */
   int parser_state;
   int *token_state;
 
   char *token;
-  int token_buffer_size;
+  size_t token_buffer_size;
+  int eof_token;
 
   /* input line state -- line number saved elsewhere */
   int input_line_terminator;
   int eof_encountered;
+  int eol_lookahead;
 
 #if defined (HANDLE_MULTIBYTE)
   /* Nothing right now for multibyte state, but might want something later. */
@@ -204,11 +207,16 @@ typedef struct _sh_parser_state_t {
   int need_here_doc;
   int here_doc_first_line;
 
+  int esacs_needed;
+  int expecting_in;
+
   /* structures affecting the parser */
+  void *pushed_strings;
   REDIRECT *redir_stack[HEREDOC_MAX];
 } sh_parser_state_t;
 
-typedef struct _sh_input_line_state_t {
+typedef struct _sh_input_line_state_t
+{
   char *input_line;
   size_t input_line_index;
   size_t input_line_size;
@@ -220,6 +228,9 @@ typedef struct _sh_input_line_state_t {
 } sh_input_line_state_t;
 
 /* Let's try declaring these here. */
+extern void shell_ungets PARAMS((char *));
+extern void rewind_input_string PARAMS((void));
+
 extern char *parser_remaining_input PARAMS((void));
 
 extern sh_parser_state_t *save_parser_state PARAMS((sh_parser_state_t *));

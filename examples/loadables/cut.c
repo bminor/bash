@@ -415,10 +415,16 @@ cutfile (v, list, ops)
 #endif
 
       while ((n = zgetline (fd, &line, &llen, '\n', unbuffered_read)) != -1)
-	  cutline (v, line, ops);		/* can modify line */
+	{
+	  QUIT;
+	  if (line[n] == '\n')
+	    line[n] = '\0';		/* cutline expects no newline terminator */
+	  cutline (v, line, ops);	/* can modify line */
+	}
       if (fd > 0)
 	close (fd);
 
+      QUIT;
       if (l)
 	l = l->next;
     }

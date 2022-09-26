@@ -50,10 +50,18 @@ ${THIS_SH} ./exportfunc1.sub
 ${THIS_SH} ./exportfunc2.sub
 
 # CVE-2014-6277
+A100=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+A1000=${A100}
+
+for (( i = 0; i < 999; i++ ))
+do
+	A1000+=${A100}
+done
 
 env BASH_FUNC_foo%%="() { 000(){>0;}&000(){ 0;}<<0 0" ${THIS_SH} -c foo 2>/dev/null
-env BASH_FUNC_foo%%="() { 000(){>0;}&000(){ 0;}<<`perl -e '{print "A"x100000}'` 0" ${THIS_SH} -c foo 2>/dev/null
+env BASH_FUNC_foo%%="() { 000(){>0;}&000(){ 0;}<<${A1000} 0" ${THIS_SH} -c foo 2>/dev/null
 ${THIS_SH} -c "f(){ x(){ _;}; x(){ _;}<<a;}" 2>/dev/null
+unset A100 A1000
 
 # CVE-2014-6278
 

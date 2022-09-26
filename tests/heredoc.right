@@ -67,13 +67,13 @@ qux
 bar
 qux
 abc def geh
-./heredoc3.sub: line 23: warning: here-document at line 21 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 20: warning: here-document at line 18 delimited by end-of-file (wanted `EOF')
 = here is the text =
-./heredoc3.sub: line 29: warning: here-document at line 27 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 26: warning: here-document at line 24 delimited by end-of-file (wanted `EOF')
 this paren ) is not a problem
-./heredoc3.sub: line 35: warning: here-document at line 33 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 32: warning: here-document at line 30 delimited by end-of-file (wanted `EOF')
 these balanced parens ( ) are not a problem
-./heredoc3.sub: line 41: warning: here-document at line 39 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 38: warning: here-document at line 36 delimited by end-of-file (wanted `EOF')
 quoted balanced parens \( ) are not a problem either
 more text in a subshell
 some more text in a different subshell
@@ -100,7 +100,34 @@ argv[2] = <threefour>
 argv[1] = <two>
 argv[2] = <threefi>
 argv[3] = <ve>
+1: OK
+2: OK
+3: OK
+4: OK
+5: OK
+6: OK
+7: OK
+1: OK
+2: OK
+3: OK
+4: OK
+5: OK
+5: OK
+1: ${x#$'no\t'}
+2: O${x#$'no\t'O}
+3: ${x#n$'o\t'}
+4: ${x#'no	'}
+5: ${x#$pat}
+6: ${y#$'not'}
+7: ${y#'not'}
+./heredoc7.sub: line 17: warning: command substitution: 1 unterminated here-document
+foo bar
+./heredoc7.sub: line 21: after: command not found
+./heredoc7.sub: line 29: warning: here-document at line 29 delimited by end-of-file (wanted `EOF')
+./heredoc7.sub: line 29: foobar: command not found
+./heredoc7.sub: line 30: EOF: command not found
+grep: *.c: No such file or directory
 comsub here-string
-./heredoc.tests: line 149: warning: here-document at line 147 delimited by end-of-file (wanted `EOF')
+./heredoc.tests: line 156: warning: here-document at line 154 delimited by end-of-file (wanted `EOF')
 hi
 there

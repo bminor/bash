@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -30,7 +30,8 @@ if the -u option is supplied.  The line is split into fields as with word
 splitting, and the first word is assigned to the first NAME, the second
 word to the second NAME, and so on, with any leftover words assigned to
 the last NAME.  Only the characters found in $IFS are recognized as word
-delimiters.
+delimiters. By default, the backslash character escapes delimiter characters
+and newline.
 
 If no NAMEs are supplied, the line read is stored in the REPLY variable.
 
@@ -107,6 +108,7 @@ $END
 #endif
 
 #include "shmbutil.h"
+#include "timer.h"
 
 #if !defined(errno)
 extern int errno;
@@ -124,19 +126,19 @@ static int set_itext PARAMS((void));
 static char *edit_line PARAMS((char *, char *));
 static void set_eol_delim PARAMS((int));
 static void reset_eol_delim PARAMS((char *));
+static void set_readline_timeout PARAMS((sh_timer *t, time_t, long));
 #endif
-static SHELL_VAR *bind_read_variable PARAMS((char *, char *));
+static SHELL_VAR *bind_read_variable PARAMS((char *, char *, int));
 #if defined (HANDLE_MULTIBYTE)
 static int read_mbchar PARAMS((int, char *, int, int, int));
 #endif
 static void ttyrestore PARAMS((struct ttsave *));
 
 static sighandler sigalrm PARAMS((int));
-static void reset_alarm PARAMS((void));
+static void reset_timeout PARAMS((void));
 
 /* Try this to see what the rest of the shell can do with the information. */
-procenv_t alrmbuf;
-int sigalrm_seen;
+sh_timer *read_timeout;
 
 static int reading, tty_modified;
 static SigHandler *old_alrm;
@@ -148,21 +150,44 @@ static struct ttsave termsave;
    avoids problems with the semi-tricky stuff we do with the xfree of
    input_string at the top of the unwind-protect list (see below). */
 
-/* Set a flag that CHECK_ALRM can check.  This relies on zread or read_builtin
-   calling trap.c:check_signals(), which knows about sigalrm_seen and alrmbuf. */
+/* Set a flag that check_read_timeout can check.  This relies on zread or
+   read_builtin calling trap.c:check_signals() (which calls check_read_timeout()) */
 static sighandler
 sigalrm (s)
      int s;
 {
-  sigalrm_seen = 1;
+  /* Display warning if this is called without read_timeout set? */
+  if (read_timeout)
+    read_timeout->alrmflag = 1;
 }
 
 static void
-reset_alarm ()
+reset_timeout ()
 {
   /* Cancel alarm before restoring signal handler. */
-  falarm (0, 0);
-  set_signal_handler (SIGALRM, old_alrm);
+  if (read_timeout)
+    shtimer_clear (read_timeout);
+  read_timeout = 0;
+}
+
+void
+check_read_timeout ()
+{
+  if (read_timeout && shtimer_chktimeout (read_timeout))
+    sh_longjmp (read_timeout->jmpenv, 1);
+}
+
+int
+read_builtin_timeout (fd)
+     int fd;
+{
+  if ((read_timeout == 0) ||
+      (read_timeout->fd != fd) ||
+      (read_timeout->tmout.tv_sec == 0 && read_timeout->tmout.tv_usec == 0))
+    return 0;
+
+  return ((read_timeout->flags & SHTIMER_ALARM) ? shtimer_alrm (read_timeout)
+  						: shtimer_select (read_timeout));
 }
 
 /* Read the value of the shell variables whose names follow.
@@ -191,10 +216,12 @@ read_builtin (list)
   struct stat tsb;
   SHELL_VAR *var;
   TTYSTRUCT ttattrs, ttset;
+  sigset_t chldset, prevset;
 #if defined (ARRAY_VARS)
   WORD_LIST *alist;
   int vflags;
 #endif
+  int bindflags;
 #if defined (READLINE)
   char *rlbuf, *itext;
   int rlind;
@@ -225,7 +252,8 @@ read_builtin (list)
   USE_VAR(ps2);
   USE_VAR(lastsig);
 
-  sigalrm_seen = reading = tty_modified = 0;
+  reading = tty_modified = 0;
+  read_timeout = 0;
 
   i = 0;		/* Index into the string that we are reading. */
   raw = edit = 0;	/* Not reading raw input by default. */
@@ -330,18 +358,16 @@ read_builtin (list)
   /* `read -t 0 var' tests whether input is available with select/FIONREAD,
      and fails if those are unavailable */
   if (have_timeout && tmsec == 0 && tmusec == 0)
-#if 0
-    return (EXECUTION_FAILURE);
-#else
     return (input_avail (fd) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
-#endif
 
   /* Convenience: check early whether or not the first of possibly several
      variable names is a valid identifier, and bail early if so. */
 #if defined (ARRAY_VARS)
-  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+  if (list)
+    SET_VFLAGS (list->word->flags, vflags, bindflags);
   if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
+  bindflags = 0;
   if (list && legal_identifier (list->word->word) == 0)
 #endif
     {
@@ -386,6 +412,12 @@ read_builtin (list)
 	  tmusec = uval;
 	}
     }
+
+#if defined (SIGCHLD)
+  sigemptyset (&chldset);
+  sigprocmask (SIG_BLOCK, (sigset_t *)0, &chldset);
+  sigaddset (&chldset, SIGCHLD);
+#endif
 
   begin_unwind_frame ("read_builtin");
 
@@ -435,10 +467,27 @@ read_builtin (list)
 
   if (tmsec > 0 || tmusec > 0)
     {
-      code = setjmp_nosigs (alrmbuf);
+      read_timeout = shtimer_alloc ();
+      read_timeout->flags = SHTIMER_LONGJMP;
+
+#if defined (HAVE_SELECT)
+      read_timeout->flags |= (edit || posixly_correct) ? SHTIMER_ALARM : SHTIMER_SELECT;
+#else
+      read_timeout->flags |= SHTIMER_ALARM;
+#endif
+      read_timeout->fd = fd;
+
+      read_timeout->alrm_handler = sigalrm;
+    }
+
+  if (tmsec > 0 || tmusec > 0)
+    {
+      code = setjmp_nosigs (read_timeout->jmpenv);
       if (code)
 	{
-	  sigalrm_seen = 0;
+	  reset_timeout ();
+	  sigprocmask (SIG_SETMASK, &prevset, (sigset_t *)0);
+
 	  /* Tricky.  The top of the unwind-protect stack is the free of
 	     input_string.  We want to run all the rest and use input_string,
 	     so we have to save input_string temporarily, run the unwind-
@@ -460,16 +509,17 @@ read_builtin (list)
 	}
       if (interactive_shell == 0)
 	initialize_terminating_signals ();
-      old_alrm = set_signal_handler (SIGALRM, sigalrm);
-      add_unwind_protect (reset_alarm, (char *)NULL);
+      add_unwind_protect (reset_timeout, (char *)NULL);
 #if defined (READLINE)
       if (edit)
 	{
 	  add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
 	  add_unwind_protect (bashline_reset_event_hook, (char *)NULL);
+	  set_readline_timeout (read_timeout, tmsec, tmusec);
 	}
+      else
 #endif
-      falarm (tmsec, tmusec);
+      shtimer_set (read_timeout, tmsec, tmusec);
     }
 
   /* If we've been asked to read only NCHARS chars, or we're using some
@@ -545,12 +595,16 @@ read_builtin (list)
      of the unwind-protect stack after the realloc() works right. */
   add_unwind_protect (xfree, input_string);
 
-  CHECK_ALRM;
+  check_read_timeout ();
+  /* These only matter if edit == 0 */
   if ((nchars > 0) && (input_is_tty == 0) && ignore_delim)	/* read -N */
     unbuffered_read = 2;
+#if 0
   else if ((nchars > 0) || (delim != '\n') || input_is_pipe)
+#else
+  else if (((nchars > 0 || delim != '\n') && input_is_tty) || input_is_pipe)
     unbuffered_read = 1;
-
+#endif
   if (prompt && edit == 0)
     {
       fprintf (stderr, "%s", prompt);
@@ -564,7 +618,7 @@ read_builtin (list)
   ps2 = 0;
   for (print_ps2 = eof = retval = 0;;)
     {
-      CHECK_ALRM;
+      check_read_timeout ();
 
 #if defined (READLINE)
       if (edit)
@@ -575,6 +629,10 @@ read_builtin (list)
 	      free (rlbuf);
 	      rlbuf = (char *)0;
 	    }
+#if defined (SIGCHLD)
+	  if (tmsec > 0 || tmusec > 0)
+	    sigprocmask (SIG_SETMASK, &chldset, &prevset);
+#endif
 	  if (rlbuf == 0)
 	    {
 	      reading = 1;
@@ -582,6 +640,10 @@ read_builtin (list)
 	      reading = 0;
 	      rlind = 0;
 	    }
+#if defined (SIGCHLD)
+	  if (tmsec > 0 || tmusec > 0)
+	    sigprocmask (SIG_SETMASK, &prevset, (sigset_t *)0);
+#endif
 	  if (rlbuf == 0)
 	    {
 	      eof = 1;
@@ -603,14 +665,24 @@ read_builtin (list)
 	}
 
       reading = 1;
-      CHECK_ALRM;
+      check_read_timeout ();
       errno = 0;
+
+#if defined (SIGCHLD)
+      if (tmsec > 0 || tmusec > 0)
+	sigprocmask (SIG_SETMASK, &chldset, &prevset);
+#endif
       if (unbuffered_read == 2)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zreadn (fd, &c, nchars - nr);
       else if (unbuffered_read)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zread (fd, &c, 1);
       else
 	retval = posixly_correct ? zreadcintr (fd, &c) : zreadc (fd, &c);
+#if defined (SIGCHLD)
+      if (tmsec > 0 || tmusec > 0)
+	sigprocmask (SIG_SETMASK, &prevset, (sigset_t *)0);
+#endif
+
       reading = 0;
 
       if (retval <= 0)
@@ -644,7 +716,7 @@ read_builtin (list)
 #endif
 
       if (retval <= 0)			/* XXX shouldn't happen */
-	CHECK_ALRM;
+	check_read_timeout ();
 
       /* XXX -- use i + mb_cur_max (at least 4) for multibyte/read_mbchar */
       if (i + (mb_cur_max > 4 ? mb_cur_max : 4) >= size)
@@ -704,7 +776,7 @@ read_builtin (list)
 
 add_char:
       input_string[i++] = c;
-      CHECK_ALRM;
+      check_read_timeout ();
 
 #if defined (HANDLE_MULTIBYTE)
       /* XXX - what if C == 127? Can DEL introduce a multibyte sequence? */
@@ -741,7 +813,7 @@ add_char:
 	break;
     }
   input_string[i] = '\0';
-  CHECK_ALRM;
+  check_read_timeout ();
 
 #if defined (READLINE)
   if (edit)
@@ -758,7 +830,7 @@ add_char:
     }
 
   if (tmsec > 0 || tmusec > 0)
-    reset_alarm ();
+    reset_timeout ();
 
   if (nchars > 0 || delim != '\n')
     {
@@ -797,28 +869,14 @@ assign_vars:
      an assign them to `arrayname' in turn. */
   if (arrayname)
     {
-      if (legal_identifier (arrayname) == 0)
-	{
-	  sh_invalidid (arrayname);
-	  free (input_string);
-	  return (EXECUTION_FAILURE);
-	}
-
-      var = find_or_make_array_variable (arrayname, 1);
+      /* pass 1 for flags arg to clear the existing array + 2 to check for a
+	 valid identifier. */
+      var = builtin_find_indexed_array (arrayname, 3);
       if (var == 0)
 	{
 	  free (input_string);
 	  return EXECUTION_FAILURE;	/* readonly or noassign */
 	}
-      if (assoc_p (var))
-	{
-          builtin_error (_("%s: cannot convert associative to indexed array"), arrayname);
-	  free (input_string);
-	  return EXECUTION_FAILURE;	/* existing associative array */
-	}
-      else if (invisible_p (var))
-	VUNSETATTR (var, att_invisible);
-      array_flush (array_cell (var));
 
       alist = list_string (input_string, ifs_chars, 0);
       if (alist)
@@ -883,6 +941,7 @@ assign_vars:
     {
       varname = list->word->word;
 #if defined (ARRAY_VARS)
+      SET_VFLAGS (list->word->flags, vflags, bindflags);
       if (legal_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
 #else
       if (legal_identifier (varname) == 0)
@@ -906,16 +965,16 @@ assign_vars:
 	  if (t && saw_escape)
 	    {
 	      t1 = dequote_string (t);
-	      var = bind_read_variable (varname, t1);
+	      var = bind_read_variable (varname, t1, bindflags);
 	      free (t1);
 	    }
 	  else
-	    var = bind_read_variable (varname, t ? t : "");
+	    var = bind_read_variable (varname, t ? t : "", bindflags);
 	}
       else
 	{
 	  t = (char *)0;
-	  var = bind_read_variable (varname, "");
+	  var = bind_read_variable (varname, "", bindflags);
 	}
 
       FREE (t);
@@ -931,6 +990,7 @@ assign_vars:
 
   /* Now assign the rest of the line to the last variable argument. */
 #if defined (ARRAY_VARS)
+  SET_VFLAGS (list->word->flags, vflags, bindflags);
   if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   if (legal_identifier (list->word->word) == 0)
@@ -967,11 +1027,11 @@ assign_vars:
   if (saw_escape && input_string && *input_string)
     {
       t = dequote_string (input_string);
-      var = bind_read_variable (list->word->word, t);
+      var = bind_read_variable (list->word->word, t, bindflags);
       free (t);
     }
   else
-    var = bind_read_variable (list->word->word, input_string ? input_string : "");
+    var = bind_read_variable (list->word->word, input_string ? input_string : "", bindflags);
 
   if (var)
     {
@@ -988,12 +1048,13 @@ assign_vars:
 }
 
 static SHELL_VAR *
-bind_read_variable (name, value)
+bind_read_variable (name, value, flags)
      char *name, *value;
+     int flags;
 {
   SHELL_VAR *v;
 
-  v = builtin_bind_variable (name, value, 0);
+  v = builtin_bind_variable (name, value, flags);
   return (v == 0 ? v
 		 : ((readonly_p (v) || noassign_p (v)) ? (SHELL_VAR *)NULL : v));
 }
@@ -1131,12 +1192,31 @@ edit_line (p, itext)
   bashline_reset_event_hook ();
 
   if (ret == 0)
-    return ret;
+    {
+      if (RL_ISSTATE (RL_STATE_TIMEOUT))
+	{
+	  sigalrm (SIGALRM);		/* simulate receiving SIGALRM */
+	  check_read_timeout ();
+	}
+      return ret;
+    }
+
   len = strlen (ret);
   ret = (char *)xrealloc (ret, len + 2);
   ret[len++] = delim;
   ret[len] = '\0';
   return ret;
+}
+
+static void
+set_readline_timeout (t, sec, usec)
+     sh_timer *t;
+     time_t sec;
+     long usec;
+{
+  t->tmout.tv_sec = sec;
+  t->tmout.tv_usec = usec;
+  rl_set_timeout (sec, usec);
 }
 
 static int old_delim_ctype;

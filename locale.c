@@ -1,6 +1,6 @@
 /* locale.c - Miscellaneous internationalization functions. */
 
-/* Copyright (C) 1996-2009,2012,2016,2020 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2012,2016-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -47,6 +47,8 @@ int locale_utf8locale;
 int locale_mb_cur_max;	/* value of MB_CUR_MAX for current locale (LC_CTYPE) */
 int locale_shiftstates = 0;
 
+int singlequote_translations = 0;	/* single-quote output of $"..." */
+
 extern int dump_translatable_strings, dump_po_strings;
 
 /* The current locale when the program begins */
@@ -91,7 +93,7 @@ set_default_locale ()
 #if defined (HANDLE_MULTIBYTE)
   locale_shiftstates = mblen ((char *)NULL, 0);
 #else
-  local_shiftstates = 0;
+  locale_shiftstates = 0;
 #endif
 }
 
@@ -117,7 +119,7 @@ set_default_locale_vars ()
 #    if defined (HANDLE_MULTIBYTE)
       locale_shiftstates = mblen ((char *)NULL, 0);
 #    else
-      local_shiftstates = 0;
+      locale_shiftstates = 0;
 #    endif
 
       u32reset ();
@@ -226,7 +228,7 @@ set_locale_var (var, value)
 #  if defined (HANDLE_MULTIBYTE)
       locale_shiftstates = mblen ((char *)NULL, 0);
 #  else
-      local_shiftstates = 0;
+      locale_shiftstates = 0;
 #  endif
       u32reset ();
       return r;
@@ -250,7 +252,7 @@ set_locale_var (var, value)
 #if defined (HANDLE_MULTIBYTE)
 	  locale_shiftstates = mblen ((char *)NULL, 0);
 #else
-	  local_shiftstates = 0;
+	  locale_shiftstates = 0;
 #endif
 	  u32reset ();
 	}
@@ -391,13 +393,14 @@ reset_locale_vars ()
 #  if defined (HANDLE_MULTIBYTE)
   locale_shiftstates = mblen ((char *)NULL, 0);
 #  else
-  local_shiftstates = 0;
+  locale_shiftstates = 0;
 #  endif
   u32reset ();
 #endif
   return 1;
 }
 
+#if defined (TRANSLATABLE_STRINGS)
 /* Translate the contents of STRING, a $"..." quoted string, according
    to the current locale.  In the `C' or `POSIX' locale, or if gettext()
    is not available, the passed string is returned unchanged.  The
@@ -512,7 +515,7 @@ mk_msgstr (string, foundnlp)
    by the caller.  The length of the translated string is returned in LENP,
    if non-null. */
 char *
-localeexpand (string, start, end, lineno, lenp)
+locale_expand (string, start, end, lineno, lenp)
      char *string;
      int start, end, lineno, *lenp;
 {
@@ -565,6 +568,7 @@ localeexpand (string, start, end, lineno, lenp)
       return (temp);
     }
 }
+#endif
 
 /* Set every character in the <blank> character class to be a shell break
    character for the lexical analyzer when the locale changes. */

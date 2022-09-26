@@ -36,14 +36,24 @@ echo ${#a[@]}
 typeset -A B
 typeset -a b
 
+echo ${#B[@]}
+echo ${#b[@]}
+
 scalar1=foo
 scalar2=
 
+# this now checks for A[@] treating @ as a valid key - post-bash-5.1
 if [ -v A[@] ]; then echo assoc A; else echo assoc A unset; fi
 if [ -v a[@] ]; then echo array a; else echo array a unset; fi
 
+if [ ${#A[@]} -gt 0 ]; then echo assoc A; else echo assoc A unset; fi
+if [ ${#a[@]} -gt 0 ]; then echo array a; else echo array a unset; fi
+
 if [ -v B[@] ]; then echo assoc B; else echo assoc B unset; fi
 if [ -v b[@] ]; then echo array b; else echo array b unset; fi
+
+if [ ${#B[@]} -gt 0 ]; then echo assoc B; else echo assoc B unset; fi
+if [ ${#b[@]} -gt 0 ]; then echo array b; else echo array b unset; fi
 
 if [ -v scalar1[@] ]; then echo scalar 1; else echo scalar 1 unset; fi
 if [ -v scalar2[@] ]; then echo scalar 2; else echo scalar 2 unset; fi
@@ -69,6 +79,5 @@ echo scalar: ${#scalar2[@]}
 
 echo scalar: ${#scalar3}
 echo scalar: ${#scalar3[@]}
-
 
 

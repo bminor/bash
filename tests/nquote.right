@@ -35,6 +35,10 @@ argv[1] = <hello, $world>
 ;foo
 argv[1] = <^I>
 argv[1] = <'A^IB'>
+argv[1] = <a^Ib^Ic>
+argv[1] = <$'a\tb\tc'>
+		AD
+E
 hello' world
 hello world!
 hello' world!
@@ -62,3 +66,15 @@ argv[1] = <^?>
 0000000 esc fs gs rs us del nl
 0000007
 \q
+foo
+./nquote4.sub: line 6: quux: command not found
+argv[1] = <a^A)b>
+argv[1] = <a^Ab>
+argv[1] = <^A>
+argv[1] = <\^A>
+0000000 a $ ' \ 0 1 ' b \n a 001 b \n
+0000015
+0000000 a $ ' \ 0 1 ' b \n a 001 b \n
+0000015
+0000000 A \n A \n
+0000004

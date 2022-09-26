@@ -2,7 +2,7 @@ This file is mapfile.def, from which is created mapfile.c.
 It implements the builtin "mapfile" in Bash.
 
 Copyright (C) 2005-2006 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008-2020 Free Software Foundation, Inc.
+Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -68,6 +68,7 @@ $END
 #include <config.h>
 
 #include "builtins.h"
+#include "../bashtypes.h"
 #include "posixstat.h"
 
 #if defined (HAVE_UNISTD_H)
@@ -140,7 +141,7 @@ do_chop(line, delim)
   int length;
 
   length = strlen (line);
-  if (length && line[length-1] == delim) 
+  if (length && (unsigned char)line[length-1] == delim) 
     line[length-1] = '\0';
 }
 
@@ -156,6 +157,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
   size_t line_length;
   unsigned int array_index, line_count;
   SHELL_VAR *entry;
+  struct stat sb;
   int unbuffered_read;
   
   line = NULL;
@@ -165,33 +167,21 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
   /* The following check should be done before reading any lines.  Doing it
      here allows us to call bind_array_element instead of bind_array_variable
      and skip the variable lookup on every call. */
-  entry = find_or_make_array_variable (array_name, 1);
-  if (entry == 0 || readonly_p (entry) || noassign_p (entry))
-    {
-      if (entry && readonly_p (entry))
-	err_readonly (array_name);
-	
-      return (EXECUTION_FAILURE);
-    }
-  else if (array_p (entry) == 0)
-    {
-      builtin_error (_("%s: not an indexed array"), array_name);
-      return (EXECUTION_FAILURE);
-    }
-  else if (invisible_p (entry))
-    VUNSETATTR (entry, att_invisible);	/* no longer invisible */
-      
-  if (flags & MAPF_CLEARARRAY)
-    array_flush (array_cell (entry));
+  entry = builtin_find_indexed_array (array_name, flags & MAPF_CLEARARRAY);
+  if (entry == 0)
+    return EXECUTION_FAILURE;
 
 #ifndef __CYGWIN__
-  unbuffered_read = (lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
+  /* If the delimiter is a newline, turn on unbuffered reads for pipes
+     (terminals are ok). If the delimiter is not a newline, unbuffered reads
+     for every file descriptor that's not a regular file. */
+  if (delim == '\n')
+    unbuffered_read = (lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
+  else
+    unbuffered_read = (fstat (fd, &sb) != 0) || (S_ISREG (sb.st_mode) == 0);
 #else
   unbuffered_read = 1;
 #endif
-
-  if (delim != '\n')
-    unbuffered_read = 1;
 
   zreset ();
 
@@ -215,11 +205,11 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
       /* Has a callback been registered and if so is it time to call it? */
       if (callback && line_count && (line_count % callback_quantum) == 0) 
 	{
-	  run_callback (callback, array_index, line);
-
 	  /* Reset the buffer for bash own stream. */
 	  if (unbuffered_read == 0)
 	    zsyncfd (fd);
+
+	  run_callback (callback, array_index, line);
 	}
 
       /* XXX - bad things can happen if the callback modifies ENTRY, e.g.,

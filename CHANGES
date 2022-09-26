@@ -1,3 +1,549 @@
+This document details the changes between this version, bash-5.2-release, and
+the previous version, bash-5.2-rc4.
+
+1. Changes to Bash
+
+2. Changes to Readline
+
+a. When replacing a history entry, make sure the existing entry has a non-NULL
+   timestamp before copying it; it may have been added by the application, not
+   the history library.
+
+3. New Features in Bash
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-5.2-rc4, and
+the previous version, bash-5.2-rc3.
+
+1. Changes to Bash
+
+a. Changed how the compatibility mode enabling of extglob works in conjunction
+   with parsing conditional commands.
+
+b. Fixed a problem with aliases containing command substitutions.
+
+2. Changes to Readline
+
+3. New Features in Bash
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-5.2-rc3, and
+the previous version, bash-5.2-rc2.
+
+1. Changes to Bash
+
+a. Added a compatibility mode feature that causes the parser to parse command
+   substitutions as if extglob were enabled. If it is enabled before execution,
+   parse at execution will succeed. If not, the subsequent execution parse will
+   fail.
+
+b. Fixed an issue with handling a `return' executed in a trap action if the
+   trap is executed while running in a shell function.
+
+2. Changes to Readline
+
+3. New Features in Bash
+
+4. New Features in Readline
+
+a. Readline now checks for changes to locale settings (LC_ALL/LC_CTYPE/LANG)
+   each time it is called, and modifies the appropriate locale-specific display
+   and key binding variables when the locale changes.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-5.2-rc2, and
+the previous version, bash-5.2-rc1.
+
+1. Changes to Bash
+
+a. Fixed a bug that could disable history saving after a compound array
+   assignment in an interactive shell.
+
+b. Fixed a bug that could cause incorrect error messages when running a DEBUG
+   trap during a conditional or arithmetic command.
+
+c. Fixed a bug that caused test to print an error message when given ! ! arg
+   as arguments.
+
+d. Fixed a bug that resulted in incorrect error messages when completing a
+   backquoted command substitution.
+
+e. Changed command substitution parsing to reproduce the original text more
+   closely when reconsituting the command string from the parsed command.
+
+f. Fixed a bug that could cause an EXIT trap to use the wrong variable context
+   when the errexit option is set.
+
+g. Fixed a bug that could cause the parser to incorrectly delimit a token when
+   an alias expansion ended with a multibyte character.
+
+2. Changes to Readline
+
+3. New Features in Bash
+
+a. Since there is no `declare -' equivalent of `local -', make sure to use
+   `local -' in the output of `local -p'.
+
+b. Null anchored matches in pattern substitution now process `&' in the
+   replacement string, like sed.
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-5.2-rc1, and
+the previous version, bash-5.2-beta.
+
+1. Changes to Bash
+
+a. Changes to `wait -p' and how it sets the variable name in the presence of
+   valid and invalid PID arguments.
+
+b. Fixed a bug that caused compgen to dump core if the completion engine was
+   not initialized.
+
+c. Fixed a memory leak in the variable name programmable completion code.
+
+d. Here-documents and here-strings use tempfiles if the shell compatibility
+   level is 50 or lower.
+
+e. Non-interactive shells exit on a syntax error encountered while parsing a
+   command substitution.
+
+f. Fixed a bug with inherited parser state while parsing a command substitution.
+
+g. Fixed a bug that caused the shell not to check for terminating signals
+   after executing the command_string supplied with `-c' and before executing
+   the exit trap.
+
+h. Changes to avoid a make race condition while generating builtins.c.
+
+i. Make it explicit that BASH_REMATCH is always a global variable, and that
+   local copies are (currently) ignored.
+
+j. Fixed a bug that caused an ambiguous redirection (>&word) to be printed
+   incorrectly (>&word) if no file descriptor was supplied.
+
+2. Changes to Readline
+
+a. Fixed a bug that caused rl_eof_found to be set prematurely while reading a
+   multi-character key sequence in callback mode.
+
+3. New Features in Bash
+
+a. In posix mode, the `printf' builtin checks for the `L' length modifier and
+   uses long double for floating point conversion specifiers if it's present,
+   double otherwise.
+
+b. The `globbing' completion code now takes the `globstar' option into account.
+
+c. `suspend -f' now forces the shell to suspend even if job control is not
+   currently enabled.
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-5.2-beta, and
+the previous version, bash-5.2-alpha.
+
+1. Changes to Bash
+
+a. Fixed a problem with command-oriented history and multi-line commands that
+   caused embedded blank lines to be run together.
+
+b. Changed the way `&' is quoted when performing pattern substitution and
+   `patsub_replacement' is enabled.
+
+c. Fixed some integer overflows when expanding strings or reading the output
+   of command substitution larger than 2GB.
+
+d. `wait -p' without the `-n' option now does something useful if there are no
+   jobs.
+
+e. Fixed an issue with read timeouts in posix mode.
+
+f. Changed here-document processing to process $'...' and $"..." only when they
+   appear in the WORD portion of ${PARAM OP WORD} in the here-document body
+   and the body is being expanded.
+
+g. Changed alias expansion in command substitution to be posix-conformant
+   (performed while initially parsing the command substitution) when in posix
+   mode.
+
+h. Bash optimizes away more forks in subshells.
+
+i. Here-document construction now performs quote removal on the here-document
+   delimiter only if it's marked as quoted, which prevents quote characters in
+   command substitutions from being removed.
+
+j. Prompt string expansion now gives invisible characters in the expansion of
+   the \w, \W, and \s escape sequences a visible representation to avoid
+   problems with redisplay.
+
+k. Fixed a problem with SIGINT during the execution of a command bound with
+   `bind -x' affecting the saved terminal settings.
+
+l. Fixed an inconsistency with how $@ expands in a construct like ${@:+set}
+   or ${array[@]:+set} in the presence of null positional parameters or
+   array elements.
+
+2. Changes to Readline
+
+a. Prevent some display problems when running a command as the result of a
+   trap or one bound using `bind -x' and the command generates output.
+
+b. Fixed an issue with multi-line prompt strings that have one or more
+   invisible characters at the end of a physical line.
+
+c. Fixed an issue that caused a history line's undo list to be cleared when
+   it should not have been.
+
+3. New Features in Bash
+
+a. There is a new bindable readline command name: `vi-edit-and-execute-command'.
+
+4. New Features in Readline
+
+a. Two new bindable string variables: active-region-start-color and
+   active-region-end-color. The first sets the color used to display the
+   active region; the second turns it off. If set, these are used in place
+   of terminal standout mode.
+
+b. New readline state (RL_STATE_EOF) and application-visible variable
+   (rl_eof_found) to allow applications to detect when readline reads EOF
+   before calling the deprep-terminal hook.
+
+c. There is a new configuration option: --with-shared-termcap-library, which
+   forces linking the shared readline library with the shared termcap (or
+   curses/ncurses/termlib) library so applications don't have to do it.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-5.2-alpha, and
+the previous version, bash-5.1-release.
+
+1. Changes to Bash
+
+a. Fixed a bug that assigned a value to the variable name supplied as an
+   argument to `wait -p' when there were no jobs.
+
+b. Fixed a bug that resulted in performing incorrect word expansion on the
+   key/value pairs in a compound array assignment.
+
+c. Fixed a bug that could put the child forked to run a command substitution
+   into the wrong process group.
+
+d. Fixed a problem that could cause the lastpipe option to work incorrectly if
+   file descriptor 0 was closed.
+
+e. Bash tries to suppress traps if a forked child receives a trapped signal
+   before it has a chance to reset its signal handlers.
+
+f. Fixed several memory leaks in compound array assignments.
+
+g. Fixed a problem with performing an assignment with `+=' to an array element
+   that was the value of a nameref.
+
+h. Fixed a bug that could cause a nameref containing an array reference using
+   `@' or `*' not to expand to multiple words.
+
+i. Fixed a bug where extended glob functions could match `.' or `..' when it
+   wasn't explicitly specified, even if dotglob was set.
+
+j. Fixed a bug that caused non-interactive posix-mode shells not to exit on a
+   variable assignment error while assigning into the temporary environment.
+
+k. Fixed a bug that caused parsing errors if an alias contained a compound
+   array assignment.
+
+l. Fixed a couple of instances where bash checked syntax too aggressively when
+   trying to determine how to add a partial command to command-oriented
+   history.
+
+m. Fixed a parser problem that caused it not to allow reserved words to follow
+   the `((' and `[[' commands.
+
+n. Fixed a bad offset calculation when using negative offsets to `history -d'.
+
+o. Fixed an off-by-one error that caused a read past the end of a buffer when
+   reading a multibyte character from the output of a command substitution.
+
+p. Fixed a problem with a failed `exec' command not setting $? to the right
+   value for an exit trap.
+
+q. Fixed a problem that caused bash not to unlink FIFOs created as part of
+   expanding redirections for an external command.
+
+r. Fixed a bug that could cause aliases not to be expanded in case statements.
+
+s. Fixed a bug that could cause word completion to attempt programmable
+   completion for the target of a redirection, instead of filename completion.
+
+t. Fixed a bug that could result in errors after rebinding a key sequence with
+   `bind -x' multiple times.
+
+u. Fixed a problem that could result in not quoting the result when performing
+   command name completion with a glob pattern in the command name.
+
+v. `mapfile' now uses fully-buffered reads in more cases, which should improve
+   bulk read performance.
+
+w. Fixed a bug that caused `wait -n' to not reset its internal state when
+   interrupted by a signal, resulting in subsequent calls failing.
+
+x. Fixed a bug with parsing numeric arguments to readline key sequences
+   installed with `bind -x'.
+
+y. Bash suppresses forking in several additional cases, including most uses
+   of $(<file).
+
+z. If there are multiple `!' tokens in a [[ command, toggle the invert state
+   instead of setting it unconditionally.
+
+aa. Fixed a bug where running `fc' on an empty history list would cause the
+    shell to crash.
+
+bb. Word completion now checks whether or not a quote character closes a
+    quoted string begun on a previous line, so readline doesn't interpret the
+    quote as starting a new quoted string.
+
+cc. Fixed a typo that translated \UNNNNNNNN characters that were not valid in
+    the current locale encoding as \uNNNNNNNN.
+
+dd. Fixed an issue that could cause bash to print timing statistics for the
+    wrong command when `set -e' causes a command to fail.
+
+ee. Bash now runs the exit trap in function context if a failed command in
+    the function causes the shell to exit.
+
+ff. Some fixes to how subshells modify $SHLVL.
+
+gg. Fixed a bug that caused `mapfile -t' not to remove the delimiter when the
+    delimiter is > 128 in the current encoding.
+
+hh. Fixed a problem that could cause the shell to attempt to free unallocated
+    memory if an expansion error occurred.
+
+ii. Fixed a bug in the bash malloc implementation of malloc_usable_size. Bash
+    did not use it, but it could cause problems with library functions that
+    did.
+
+jj. If the `exec' builtin fails, and the shell does not exit, it restores
+    trapped signals to their trapped state.
+
+kk. Fixed a bug that could cause variable assignment arguments to `declare' to
+    expand variables using attributes that the call to declare was turning off.
+
+ll. Fixed a bug with LINENO and arithmetic for commands.
+
+mm. Fixed a posix-mode bug that caused tildes not to be expanded after an
+    unquoted colon on the right side of an assignment statement.
+
+nn. Fixed a problem with `caller' and line numbers when executing an ERR trap.
+
+oo. Fixed a problem that could make the value returned by ${a:=b} not be the
+    final value assigned to a (e.g., if `a' has an attribute that modifies
+    the value on assignment).
+
+pp. Fixed a problem with saving multi-line here-documents to the history list
+    where the here-document delimiter does not appear on the first line.
+
+qq. Fixed a bug with using += to assign to dynamic variables like RANDOM.
+
+rr. Fixed a bug that caused `set -n' to modify $? if set after execution had
+    started.
+
+ss. Builtins like printf/read/wait now behave more consistently when assigning
+    arbitrary keys to associative arrays (like `]'. when appropriately quoted).
+
+tt. Fixed a problem with here-document collection printing the wrong prompt
+    when parsing a compound list in an interactive shell.
+
+uu. Fixed a problem with quoting shell expansion characters (like `$') when
+    they appear in a tab-completed word along with characters that do need
+    quoting (e.g.. $HOME/VirtualBox VMs).
+
+2. Changes to Readline
+
+a. Fixed a problem with cleaning up active marks when using callback mode.
+
+b. Fixed a problem with arithmetic comparison operators checking the version.
+
+c. Fixed a problem that could cause readline not to build on systems without
+   POSIX signal functions.
+
+d. Fixed a bug that could cause readline to crash if the application removed
+   the callback line handler before readline read all typeahead.
+
+e. Added additional checks for read errors in the middle of readline commands.
+
+f. Fixed a redisplay problem that occurred when switching from the digit-
+   argument prompt `(arg: N)' back to the regular prompt and the regular
+   prompt contained invisible characters.
+
+g. Fixed a problem with restoring the prompt when aborting an incremental
+   search.
+
+h. Fix a problem with characters > 128 not being displayed correctly in certain
+   single-byte encodings.
+
+i. Fixed a problem with unix-filename-rubout that caused it to delete too much
+   when applied to a pathname consisting only of one or more slashes.
+
+j. Fixed a display problem that caused the prompt to be wrapped incorrectly if
+   the screen changed dimensions during a call to readline() and the prompt
+   became longer than the screen width.
+
+k. Fixed a problem that caused the \r output by turning off bracketed paste
+   to overwrite the line if terminal echo was disabled.
+
+l. Fixed a bug that could cause colored-completion-prefix to not display if
+   completion-prefix-display-length was set.
+
+m. Fixed a problem with line wrapping prompts when a group of invisible
+   characters runs to the right edge of the screen and the prompt extends
+   longer then the screen width.
+
+n. Fixed a couple problems that could cause rl_end to be set incorrectly by
+   transpose-words.
+
+3. New Features in Bash
+
+a. The bash malloc returns memory that is aligned on 16-byte boundaries.
+
+b. There is a new internal timer framework used for read builtin timeouts.
+
+c. Rewrote the command substitution parsing code to call the parser recursively
+   and rebuild the command string from the parsed command. This allows better
+   syntax checking and catches errors much earlier. Along with this, if
+   command substitution parsing completes with here-documents remaining to be
+   read, the shell prints a warning message and reads the here-document bodies
+   from the current input stream.
+
+d. The `ulimit' builtin now treats an operand remaining after all of the options
+   and arguments are parsed as an argument to the last command specified by
+   an option. This is for POSIX compatibility.
+
+e. Here-document parsing now handles $'...' and $"..." quoting when reading the
+   here-document body.
+
+f. The `shell-expand-line' and `history-and-alias-expand-line' bindable readline
+   commands now understand $'...' and $"..." quoting.
+
+g. There is a new `spell-correct-word' bindable readline command to perform
+   spelling correction on the current word.
+
+h. The `unset' builtin now attempts to treat arguments as array subscripts
+   without parsing or expanding the subscript, even when `assoc_expand_once'
+   is not set.
+
+i. There is a default value for $BASH_LOADABLES_PATH in config-top.h.
+
+j. Associative array assignment and certain instances of referencing (e.g.,
+   `test -v') now allow `@' and `*' to be used as keys.
+
+k. Bash attempts to expand indexed and associative array subscripts only
+   once when executing shell constructs and word expansions.
+
+l. The `unset' builtin allows a subscript of `@' or `*' to unset a key with
+   that value for associative arrays instead of unsetting the entire array
+   (which you can still do with `unset arrayname'). For indexed arrays, it
+   removes all elements of the array without unsetting it (like `A=()').
+
+m. Additional builtins (printf/test/read/wait) do a better job of not
+   parsing array subscripts if array_expand_once is set.
+
+n. New READLINE_ARGUMENT variable set to numeric argument for readline commands
+   defined using `bind -x'.
+
+o. The new `varredir_close' shell option causes bash to automatically close
+   file descriptors opened with {var}<fn and other styles of varassign
+   redirection unless they're arguments to the `exec' builtin.
+
+p. The `$0' special parameter is now set to the name of the script when running
+   any (non-interactive) startup files such as $BASH_ENV.
+
+q. The `enable' builtin tries to load a loadable builtin using the default
+   search path if `enable name' (without any options) attempts to enable a
+   non-existent builtin.
+
+r. The `printf' builtin has a new format specifier: %Q. This acts like %q but
+   applies any specified precision to the original unquoted argument, then
+   quotes and outputs the result.
+
+s. The new `noexpand_translations' option controls whether or not the translated
+   output of $"..." is single-quoted.
+
+t. There is a new parameter transformation operator: @k. This is like @K, but
+   expands the result to separate words after word splitting.
+
+u. There is an alternate array implementation, selectable at `configure' time,
+   that optimizes access speed over memory use (use the new configure
+    --enable-alt-array-implementation option).
+
+v. If an [N]<&WORD- or [N]>&WORD- redirection has WORD expand to the empty
+   string, treat the redirection as [N]<&- or [N]>&- and close file descriptor
+   N (default 0).
+
+w. Invalid parameter transformation operators are now invalid word expansions,
+   and so cause fatal errors in non-interactive shells.
+
+x. New shell option: patsub_replacement. When enabled, a `&' in the replacement
+   string of the pattern substitution expansion is replaced by the portion of
+   the string that matched the pattern. Backslash will escape the `&' and
+   insert a literal `&'.
+
+y. `command -p' no longer looks in the hash table for the specified command.
+
+z. The new `--enable-translatable-strings' option to `configure' allows $"..."
+   support to be compiled in or out.
+
+aa. The new `globskipdots' shell option forces pathname expansion never to
+    return `.' or `..' unless explicitly matched. It is enabled by default.
+
+bb. Array references using `@' and `*' that are the value of nameref variables
+    (declare -n ref='v[@]' ; echo $ref) no longer cause the shell to exit if
+    set -u is enabled and the array (v) is unset.
+
+4. New Features in Readline
+
+a. There is now an HS_HISTORY_VERSION containing the version number of the
+   history library for applications to use.
+
+b. History expansion better understands multiple history expansions that may
+   contain strings that would ordinarily inhibit history expansion (e.g.,
+   `abc!$!$').
+
+c. There is a new framework for readline timeouts, including new public
+   functions to set timeouts and query how much time is remaining before a
+   timeout hits, and a hook function that can trigger when readline times
+   out. There is a new state value to indicate a timeout.
+
+d. Automatically bind termcap key sequences for page-up and page-down to
+   history-search-backward and history-search-forward, respectively.
+
+e. There is a new `fetch-history' bindable command that retrieves the history
+   entry corresponding to its numeric argument. Negative arguments count back
+   from the end of the history.
+
+f. `vi-undo' is now a bindable command.
+
+g. There is a new option: `enable-active-region'. This separates control of
+   the active region and bracketed-paste. It has the same default value as
+   bracketed-paste, and enabling bracketed paste enables the active region.
+   Users can now turn off the active region while leaving bracketed paste
+   enabled.
+
+h. rl_completer_word_break_characters is now `const char *' like
+   rl_basic_word_break_characters.
+
+i. Readline looks in $LS_COLORS for a custom filename extension
+   (*.readline-colored-completion-prefix) and uses that as the default color
+   for the common prefix displayed when `colored-completion-prefix' is set.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.1-rc3, and
 the previous version, bash-5.1-rc2.
 
@@ -4024,7 +4570,7 @@ l.  There is a new configuration option (in config-top.h) that forces bash to
 m.  A new variable $BASHOPTS to export shell options settable using `shopt' to
     child processes.
 
-n.  There is a new confgure option that forces the extglob option to be
+n.  There is a new configure option that forces the extglob option to be
     enabled by default.
 
 o.  New variable $BASH_XTRACEFD; when set to an integer bash will write xtrace
@@ -4065,7 +4611,7 @@ d.  New bindable function: skip-csi-sequence.  Can be used as a default to
     to bind all keys.
 
 e.  New application-settable function: rl_filename_rewrite_hook.  Can be used
-    to rewite or modify filenames read from the file system before they are
+    to rewrite or modify filenames read from the file system before they are
     compared to the word to be completed.
 
 f.  New bindable variable: skip-completed-text, active when completing in the
@@ -4147,7 +4693,7 @@ and the previous version, bash-4.0-beta2.
 1.  Changes to Bash
 
 a.  Fixed a bug that caused parsing errors when a $()-style command
-    substitution was follwed immediately by a quoted newline.
+    substitution was followed immediately by a quoted newline.
 
 b.  Fixed a bug that caused extended shell globbing patterns beginning with
     `*(' to not work when used with pattern substitution word expansions.
@@ -9083,7 +9629,7 @@ gg. `alias' and `unalias' now print error messages when passed an argument
     not interactive, as POSIX.2 specifies.
 
 hh. `alias' and `alias -p' now return a status of 0 when no aliases are
-    defined, as POSIX.2 specifes.
+    defined, as POSIX.2 specifies.
 
 ii. `cd -' now prints the pathname of the new working directory if the shell
     is interactive.

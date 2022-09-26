@@ -20,8 +20,17 @@ after exec1.sub: one two three
 126
 0
 this is bashenv
-./exec3.sub: line 3: /tmp/bash-notthere: No such file or directory
-127
+trap -- 'echo EXIT' EXIT
+trap -- '' SIGTERM
+trap -- 'echo USR1' SIGUSR1
+USR1
+./exec3.sub: line 27: /tmp/bash-notthere: No such file or directory
+./exec3.sub: after failed exec: 127
+trap -- 'echo EXIT' EXIT
+trap -- '' SIGTERM
+trap -- 'echo USR1' SIGUSR1
+USR1
+EXIT
 ./execscript: line 71: notthere: No such file or directory
 127
 ./execscript: line 74: notthere: No such file or directory
@@ -108,6 +117,34 @@ x3b
 WORKS
 done
 WORKS
+WORKS
+a
+b
+c
+d
+a
+b
+c
+d
+e
+A
+B
+c
+d
+c
+d
+e
+x
+y
+z
+WORKS
+w
+x
+y
+z
+=====
+WORKS
+done
 WORKS
 a
 b

@@ -1,6 +1,6 @@
 /* common.h -- extern declarations for functions defined in common.c. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,7 +40,7 @@ do { \
     builtin_help (); \
     return (EX_USAGE)
 
-/* Flag values for parse_and_execute () */
+/* Flag values for parse_and_execute () and parse_string () */
 #define SEVAL_NONINT	0x001
 #define SEVAL_INTERACT	0x002
 #define SEVAL_NOHIST	0x004
@@ -95,10 +95,11 @@ extern void sh_invalidoptname PARAMS((char *));
 extern void sh_invalidid PARAMS((char *));
 extern void sh_invalidnum PARAMS((char *));
 extern void sh_invalidsig PARAMS((char *));
+extern void sh_readonly PARAMS((const char *));
+extern void sh_noassign PARAMS((const char *));
 extern void sh_erange PARAMS((char *, char *));
 extern void sh_badpid PARAMS((char *));
 extern void sh_badjob PARAMS((char *));
-extern void sh_readonly PARAMS((const char *));
 extern void sh_nojobs PARAMS((char *));
 extern void sh_restricted PARAMS((char *));
 extern void sh_notbuiltin PARAMS((char *));
@@ -138,6 +139,10 @@ extern sh_builtin_func_t *builtin_address PARAMS((char *));
 extern sh_builtin_func_t *find_special_builtin PARAMS((char *));
 extern void initialize_shell_builtins PARAMS((void));
 
+#if defined (ARRAY_VARS)
+extern int set_expand_once PARAMS((int, int));
+#endif
+
 /* Functions from exit.def */
 extern void bash_logout PARAMS((void));
 
@@ -150,6 +155,9 @@ extern void builtin_help PARAMS((void));
 /* Functions from read.def */
 extern void read_tty_cleanup PARAMS((void));
 extern int read_tty_modified PARAMS((void));
+
+extern int read_builtin_timeout PARAMS((int));
+extern void check_read_timeout PARAMS((void));
 
 /* Functions from set.def */
 extern int minus_o_option_value PARAMS((char *));
@@ -205,10 +213,11 @@ extern WORD_LIST *get_directory_stack PARAMS((int));
 extern int parse_and_execute PARAMS((char *, const char *, int));
 extern int evalstring PARAMS((char *, const char *, int));
 extern void parse_and_execute_cleanup PARAMS((int));
-extern int parse_string PARAMS((char *, const char *, int, char **));
+extern int parse_string PARAMS((char *, const char *, int, COMMAND **, char **));
 extern int should_suppress_fork PARAMS((COMMAND *));
 extern int can_optimize_connection PARAMS((COMMAND *));
-extern void optimize_fork PARAMS((COMMAND *));
+extern int can_optimize_cat_file PARAMS((COMMAND *));
+extern void optimize_connection_fork PARAMS((COMMAND *));
 extern void optimize_subshell_command PARAMS((COMMAND *));
 extern void optimize_shell_function PARAMS((COMMAND *));
 
@@ -223,7 +232,11 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern sh_builtin_func_t *last_shell_builtin;
 
 extern SHELL_VAR *builtin_bind_variable PARAMS((char *, char *, int));
+extern SHELL_VAR *builtin_bind_var_to_int PARAMS((char *, intmax_t, int));
 extern int builtin_unbind_variable PARAMS((const char *));
+
+extern SHELL_VAR *builtin_find_indexed_array PARAMS((char *, int));
+extern int builtin_arrayref_flags PARAMS((WORD_DESC *, int));
 
 /* variables from evalfile.c */
 extern int sourcelevel;
@@ -236,11 +249,13 @@ extern int breaking;
 extern int continuing;
 extern int loop_level;
 
-/* variables from read.def */
-extern int sigalrm_seen;
-
 /* variables from shift.def */
 extern int print_shift_error;
+
+/* variables from shopt.def */
+#if defined (ARRAY_VARS)
+extern int expand_once_flag;
+#endif
 
 /* variables from source.def */
 extern int source_searches_cwd;
@@ -248,5 +263,20 @@ extern int source_uses_path;
 
 /* variables from wait.def */
 extern int wait_intr_flag;
+
+/* common code to set flags for valid_array_reference and builtin_bind_variable */
+#if defined (ARRAY_VARS)
+#define SET_VFLAGS(wordflags, vflags, bindflags) \
+  do { \
+    vflags = assoc_expand_once ?  VA_NOEXPAND : 0; \
+    bindflags = assoc_expand_once ? ASS_NOEXPAND : 0; \
+    if (assoc_expand_once && (wordflags & W_ARRAYREF)) \
+      vflags |= VA_ONEWORD|VA_NOEXPAND; \
+    if (vflags & VA_NOEXPAND) \
+      bindflags |= ASS_NOEXPAND; \
+    if (vflags & VA_ONEWORD) \
+      bindflags |= ASS_ONEWORD; \
+  } while (0)
+#endif
 
 #endif /* !__COMMON_H */

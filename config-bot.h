@@ -1,7 +1,7 @@
 /* config-bot.h */
 /* modify settings or make new ones based on what autoconf tells us. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -99,7 +99,7 @@
 #endif
 
 #if !HAVE_MKDTEMP
-#  undef USE_MKDTMP
+#  undef USE_MKDTEMP
 #endif
 
 /* If the shell is called by this name, it will become restricted. */

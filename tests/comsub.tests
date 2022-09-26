@@ -69,7 +69,16 @@ comsub_foo_1()
   echo $(while true; do case $HOME in /*) echo abs ;; esac; done)
 }
 
+echo $(
+echo $(
+echo $(echo $( echo nested )
+)
+)
+)
+
 ${THIS_SH} ./comsub1.sub
 ${THIS_SH} ./comsub2.sub
 ${THIS_SH} ./comsub3.sub
 ${THIS_SH} ./comsub4.sub
+${THIS_SH} ./comsub5.sub
+${THIS_SH} ./comsub6.sub

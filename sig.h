@@ -1,6 +1,6 @@
 /* sig.h -- header file for signal handler definitions. */
 
-/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,14 +31,10 @@
 #  define SIGABRT SIGIOT
 #endif
 
-#define sighandler RETSIGTYPE
-typedef RETSIGTYPE SigHandler PARAMS((int));
+#define sighandler void
+typedef void SigHandler PARAMS((int));
 
-#if defined (VOID_SIGHANDLER)
-#  define SIGRETURN(n)	return
-#else
-#  define SIGRETURN(n)	return(n)
-#endif /* !VOID_SIGHANDLER */
+#define SIGRETURN(n)	return
 
 /* Here is a definition for set_signal_handler () which simply expands to
    a call to signal () for non-Posix systems.  The code for set_signal_handler

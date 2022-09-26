@@ -19,7 +19,7 @@ tf ()
         i=$(( i + 1 ));
     done;
     [[ -r /dev/fd/0 && -w /dev/fd/1 ]] || echo oops > /dev/null;
-    for name in $( echo 1 2 3 );
+    for name in $(echo 1 2 3);
     do
         test -r /dev/fd/$name;
     done;

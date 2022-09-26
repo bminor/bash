@@ -2,11 +2,11 @@ Compatibility with previous versions
 ====================================
 
 This document details the incompatibilities between this version of bash,
-bash-5.1, and the previous widely-available versions, bash-3.2 (which is
+bash-5.2, and the previous widely-available versions, bash-3.2 (which is
 still the `standard' version for Mac OS X), 4.2/4.3 (which are still
-standard on a few Linux distributions), and bash-4.4/bash-5.0, the current
-widely-available versions.  These were discovered by users of bash-2.x
-through 5.x, so this list is not comprehensive.  Some of these
+standard on a few Linux distributions), and bash-4.4/bash-5.0/bash-5.1,
+the current widely-available versions.  These were discovered by users of
+bash-2.x through 5.x, so this list is not comprehensive.  Some of these
 incompatibilities occur between the current version and versions 2.0 and
 above. 
 
@@ -419,6 +419,14 @@ above.
     options that posix mode modifies to the state they had before enabling
     posix mode. Previous versions restored these options to default values.
 
+66. Bash-5.2 attempts to prevent double-expansion of array subscripts under
+    certain circumstances, especially arithmetic evaluation, by acting as if
+    the `assoc_expand_once' shell option were set.
+
+67. The `unset' builtin in bash-5.2 treats array subscripts `@' and `*'
+    differently than previous versions, and differently depending on whether
+    the array is indexed or associative.
+
 
 Shell Compatibility Level
 =========================
@@ -542,7 +550,43 @@ compat50 (set using BASH_COMPAT)
 	  printed an informational message to that effect even when writing
 	  output in a format that can be reused as input (-l). Bash-5.1
 	  suppresses that message if -l is supplied
+	- Bash-5.1 and later use pipes for here-documents and here-strings if
+	  they are smaller than the pipe capacity. If the shell compatibility
+	  level is set to 50 or lower, it reverts to using temporary files.
 
+compat51 (set using BASH_COMPAT)
+	- The `unset' builtin will unset the array a given an argument like
+	  `a[@]'. Bash-5.2 will unset an element with key `@' (associative
+	  arrays) or remove all the elements without unsetting the array
+	  (indexed arrays)
+	- arithmetic commands ( ((...)) ) and the expressions in an arithmetic
+	  for statement can be expanded more than once
+	- expressions used as arguments to arithmetic operators in the [[
+	  conditional command can be expanded more than once
+	- indexed and associative array subscripts used as arguments to the
+	  operators in the [[ conditional command (e.g., `[[ -v') can be
+	  expanded more than once. Bash-5.2 behaves as if the
+	  `assoc_expand_once' option were enabled.
+	- the expressions in substring parameter brace expansion can be
+	  expanded more than once
+	- the expressions in the $(( ... )) word expansion can be expanded
+	  more than once
+	- arithmetic expressions used as indexed array subscripts can be
+	  expanded more than once;
+	- `test -v', when given an argument of A[@], where A is an existing
+	  associative array, will return true if the array has any set
+	  elements. Bash-5.2 will look for a key named `@';
+	- the ${param[:]=value} word expansion will return VALUE, before any
+	  variable-specific transformations have been performed (e.g.,
+	  converting to lowercase). Bash-5.2 will return the final value
+	  assigned to the variable, as POSIX specifies;
+	- Parsing command substitutions will act as if extended glob is
+	  enabled, so that parsing a command substitution containing an extglob
+	  pattern (say, as part of a shell function) will not fail. This
+	  assumes the intent is to enable extglob before the command is
+	  executed and word expansions are performed. It will fail at word
+	  expansion time if extglob hasn't been enabled by the time the
+	  command is executed.
 
 -------------------------------------------------------------------------------
 

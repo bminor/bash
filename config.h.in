@@ -23,15 +23,6 @@
 
 /* Template settings for autoconf */
 
-#undef __EXTENSIONS__
-#undef _ALL_SOURCE
-#undef _GNU_SOURCE
-#undef _POSIX_SOURCE
-#undef _POSIX_1_SOURCE
-#undef _POSIX_PTHREAD_SEMANTICS
-#undef _TANDEM_SOURCE
-#undef _MINIX
-
 /* Configuration feature settings controllable by autoconf. */
 
 /* Define JOB_CONTROL if your operating system supports
@@ -219,10 +210,10 @@
 
 #undef __CHAR_UNSIGNED__
 
-/* Define if the compiler supports `long long' variables. */
-#undef HAVE_LONG_LONG
+/* Define if the compiler supports `long long int' variables. */
+#undef HAVE_LONG_LONG_INT
 
-#undef HAVE_UNSIGNED_LONG_LONG
+#undef HAVE_UNSIGNED_LONG_LONG_INT
 
 /* The number of bytes in a int.  */
 #undef SIZEOF_INT
@@ -232,6 +223,9 @@
 
 /* The number of bytes in a pointer to char.  */
 #undef SIZEOF_CHAR_P
+
+/* The number of bytes in a size_t.  */
+#undef SIZEOF_SIZE_T
 
 /* The number of bytes in a double (hopefully 8). */
 #undef SIZEOF_DOUBLE
@@ -252,6 +246,8 @@
 /* Characteristics of the system's header files and libraries that affect
    the compilation environment. */
 
+/* These are set by AC_USE_SYSTEM_EXTENSIONS */
+
 /* Define if the system does not provide POSIX.1 features except
    with this defined.  */
 #undef _POSIX_1_SOURCE
@@ -259,11 +255,18 @@
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
 
-/* Define to use GNU libc extensions */
+/* Define to use GNU libc extensions. */
 #undef _GNU_SOURCE
 
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
+/* Define to enable general system extensions on Solaris. */
+#undef __EXTENSIONS__
+
+/* General system extensions on AIX */
+#undef _ALL_SOURCE
+
+#undef _POSIX_PTHREAD_SEMANTICS
+#undef _TANDEM_SOURCE
+#undef _MINIX
 
 /* Memory management functions. */
 
@@ -513,11 +516,6 @@
 
 #undef PGRP_PIPE
 
-/* Define if the setvbuf function takes the buffering type as its second
-   argument and the buffer pointer as the third, as on System V
-   before release 3.  */
-#undef SETVBUF_REVERSED
-
 #undef STAT_MACROS_BROKEN
 
 #undef ULIMIT_MAXFDS
@@ -529,8 +527,6 @@
 #undef HAVE_STD_UNSETENV
 
 #undef HAVE_PRINTF_A_FORMAT
-
-#undef CTYPE_NON_ASCII
 
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
 #undef HAVE_LANGINFO_CODESET
@@ -553,12 +549,6 @@
 #undef ICONV_CONST
 
 /* Type and behavior of signal handling functions. */
-
-/* Define as the return type of signal handlers (int or void).  */
-#undef RETSIGTYPE
-
-/* Define if return type of signal handlers is void */
-#undef VOID_SIGHANDLER
 
 #undef MUST_REINSTALL_SIGHANDLERS
 
@@ -1092,8 +1082,6 @@
 /* Define if you have <sys/time.h> */
 #undef HAVE_SYS_TIME_H
 
-#undef TIME_WITH_SYS_TIME
-
 /* Define if you have <sys/times.h> */
 #undef HAVE_SYS_TIMES_H
 
@@ -1168,6 +1156,13 @@
 #undef GETCWD_BROKEN
 
 #undef DEV_FD_STAT_BROKEN
+
+/* An array implementation that prioritizes speed (O(1) access) over space,
+   in array2.c */
+#undef ALT_ARRAY_IMPLEMENTATION
+
+/* Support for $"..." translatable strings. */
+#undef TRANSLATABLE_STRINGS
 
 /* Additional defines for configuring lib/intl, maintained by autoscan/autoheader */
 

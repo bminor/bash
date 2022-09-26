@@ -1,6 +1,6 @@
 /* error.c -- Functions for handling errors. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -292,6 +292,32 @@ internal_inform (format, va_alist)
   fprintf (stderr, "\n");
 
   va_end (args);
+}
+
+void
+#if defined (PREFER_STDARG)
+internal_debug (const char *format, ...)
+#else
+internal_debug (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+#ifdef DEBUG
+  va_list args;
+
+  error_prolog (1);
+  fprintf (stderr, _("DEBUG warning: "));
+
+  SH_VA_START (args, format);
+
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+
+  va_end (args);
+#else
+  return;
+#endif
 }
 
 void

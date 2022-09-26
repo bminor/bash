@@ -1,3 +1,174 @@
+This is a terse description of the new features added to bash-5.2 since
+the release of bash-5.1.  As always, the manual page (doc/bash.1) is
+the place to look for complete descriptions.
+
+1. New Features in Bash
+
+a. The bash malloc returns memory that is aligned on 16-byte boundaries.
+
+b. There is a new internal timer framework used for read builtin timeouts.
+
+c. Rewrote the command substitution parsing code to call the parser recursively
+   and rebuild the command string from the parsed command. This allows better
+   syntax checking and catches errors much earlier. Along with this, if
+   command substitution parsing completes with here-documents remaining to be
+   read, the shell prints a warning message and reads the here-document bodies
+   from the current input stream.
+
+d. The `ulimit' builtin now treats an operand remaining after all of the options
+   and arguments are parsed as an argument to the last command specified by
+   an option. This is for POSIX compatibility.
+
+e. Here-document parsing now handles $'...' and $"..." quoting when reading the
+   here-document body.
+
+f. The `shell-expand-line' and `history-and-alias-expand-line' bindable readline
+   commands now understand $'...' and $"..." quoting.
+
+g. There is a new `spell-correct-word' bindable readline command to perform
+   spelling correction on the current word.
+
+h. The `unset' builtin now attempts to treat arguments as array subscripts
+   without parsing or expanding the subscript, even when `assoc_expand_once'
+   is not set.
+
+i. There is a default value for $BASH_LOADABLES_PATH in config-top.h.
+
+j. Associative array assignment and certain instances of referencing (e.g.,
+   `test -v' now allow `@' and `*' to be used as keys.
+
+k. Bash attempts to expand indexed array subscripts only once when executing
+   shell constructs and word expansions.
+
+l. The `unset' builtin allows a subscript of `@' or `*' to unset a key with
+   that value for associative arrays instead of unsetting the entire array
+   (which you can still do with `unset arrayname'). For indexed arrays, it
+   removes all elements of the array without unsetting it (like `A=()').
+
+m. Additional builtins (printf/test/read/wait) do a better job of not
+   parsing array subscripts if array_expand_once is set.
+
+n. New READLINE_ARGUMENT variable set to numeric argument for readline commands
+   defined using `bind -x'.
+
+o. The new `varredir_close' shell option causes bash to automatically close
+   file descriptors opened with {var}<fn and other styles of varassign
+   redirection unless they're arguments to the `exec' builtin.
+
+p. The `$0' special parameter is now set to the name of the script when running
+   any (non-interactive) startup files such as $BASH_ENV.
+
+q. The `enable' builtin tries to load a loadable builtin using the default
+   search path if `enable name' (without any options) attempts to enable a
+   non-existent builtin.
+
+r. The `printf' builtin has a new format specifier: %Q. This acts like %q but
+   applies any specified precision to the original unquoted argument, then
+   quotes and outputs the result.
+
+s. The new `noexpand_translations' option controls whether or not the translated
+   output of $"..." is single-quoted.
+
+t. There is a new parameter transformation operator: @k. This is like @K, but
+   expands the result to separate words after word splitting.
+
+u. There is an alternate array implementation, selectable at `configure' time,
+   that optimizes access speed over memory use (use the new configure
+    --enable-alt-array-implementation option).
+
+v. If an [N]<&WORD- or [N]>&WORD- redirection has WORD expand to the empty
+   string, treat the redirection as [N]<&- or [N]>&- and close file descriptor
+   N (default 0).
+
+w. Invalid parameter transformation operators are now invalid word expansions,
+   and so cause fatal errors in non-interactive shells.
+
+x. New shell option: patsub_replacement. When enabled, a `&' in the replacement
+   string of the pattern substitution expansion is replaced by the portion of
+   the string that matched the pattern. Backslash will escape the `&' and
+   insert a literal `&'.
+
+y. `command -p' no longer looks in the hash table for the specified command.
+
+z. The new `--enable-translatable-strings' option to `configure' allows $"..."
+   support to be compiled in or out.
+
+aa. The new `globskipdots' shell option forces pathname expansion never to
+    return `.' or `..' unless explicitly matched. It is enabled by default.
+
+bb. Array references using `@' and `*' that are the value of nameref variables
+    (declare -n ref='v[@]' ; echo $ref) no longer cause the shell to exit if
+    set -u is enabled and the array (v) is unset.
+
+cc. There is a new bindable readline command name:
+    `vi-edit-and-execute-command'.
+
+dd. In posix mode, the `printf' builtin checks for the `L' length modifier and
+    uses long double for floating point conversion specifiers if it's present,
+    double otherwise.
+
+ee. The `globbing' completion code now takes the `globstar' option into account.
+
+ff. `suspend -f' now forces the shell to suspend even if job control is not
+   currently enabled.
+
+gg. Since there is no `declare -' equivalent of `local -', make sure to use
+    `local -' in the output of `local -p'.
+
+2. New Features in Readline
+
+a. There is now an HS_HISTORY_VERSION containing the version number of the
+   history library for applications to use.
+
+b. History expansion better understands multiple history expansions that may
+   contain strings that would ordinarily inhibit history expansion (e.g.,
+   `abc!$!$').
+
+c. There is a new framework for readline timeouts, including new public
+   functions to set timeouts and query how much time is remaining before a
+   timeout hits, and a hook function that can trigger when readline times
+   out. There is a new state value to indicate a timeout.
+
+d. Automatically bind termcap key sequences for page-up and page-down to
+   history-search-backward and history-search-forward, respectively.
+
+e. There is a new `fetch-history' bindable command that retrieves the history
+   entry corresponding to its numeric argument. Negative arguments count back
+   from the end of the history.
+
+f. `vi-undo' is now a bindable command.
+
+g. There is a new option: `enable-active-region'. This separates control of
+   the active region and bracketed-paste. It has the same default value as
+   bracketed-paste, and enabling bracketed paste enables the active region.
+   Users can now turn off the active region while leaving bracketed paste
+   enabled.
+
+h. rl_completer_word_break_characters is now `const char *' like
+   rl_basic_word_break_characters.
+
+i. Readline looks in $LS_COLORS for a custom filename extension
+   (*.readline-colored-completion-prefix) and uses that as the default color
+   for the common prefix displayed when `colored-completion-prefix' is set.
+
+j. Two new bindable string variables: active-region-start-color and
+   active-region-end-color. The first sets the color used to display the
+   active region; the second turns it off. If set, these are used in place
+   of terminal standout mode.
+
+k. New readline state (RL_STATE_EOF) and application-visible variable
+   (rl_eof_found) to allow applications to detect when readline reads EOF
+   before calling the deprep-terminal hook.
+
+l. There is a new configuration option: --with-shared-termcap-library, which
+   forces linking the shared readline library with the shared termcap (or
+   curses/ncurses/termlib) library so applications don't have to do it.
+
+m. Readline now checks for changes to locale settings (LC_ALL/LC_CTYPE/LANG)
+   each time it is called, and modifies the appropriate locale-specific display
+   and key binding variables when the locale changes.
+
+-------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-5.1 since
 the release of bash-5.0.  As always, the manual page (doc/bash.1) is
 the place to look for complete descriptions.
@@ -916,7 +1087,7 @@ l.  There is a new configuration option (in config-top.h) that forces bash to
 m.  A new variable $BASHOPTS to export shell options settable using `shopt' to
     child processes.
 
-n.  There is a new confgure option that forces the extglob option to be
+n.  There is a new configure option that forces the extglob option to be
     enabled by default.
 
 o.  New variable $BASH_XTRACEFD; when set to an integer bash will write xtrace
@@ -963,7 +1134,7 @@ d.  New bindable function: skip-csi-sequence.  Can be used as a default to
     to bind all keys.
 
 e.  New application-settable function: rl_filename_rewrite_hook.  Can be used
-    to rewite or modify filenames read from the file system before they are
+    to rewrite or modify filenames read from the file system before they are
     compared to the word to be completed.
 
 f.  New bindable variable: skip-completed-text, active when completing in the

@@ -42,6 +42,7 @@ PROFILE_FLAGS = @PROFILE_FLAGS@
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@
+STYLE_CFLAGS = @STYLE_CFLAGS@
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@ @LOCAL_LDFLAGS@
 
@@ -53,7 +54,7 @@ BASHINCDIR = ${topdir}/include
 INCLUDES = -I. -I../.. -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib
 
 CCFLAGS = $(PROFILE_FLAGS) $(DEFS) $(LOCAL_DEFS) ${INCLUDES} $(CPPFLAGS) \
-	  $(LOCAL_CFLAGS) $(CFLAGS) ${ADDON_CFLAGS}
+	  $(STYLE_CFLAGS) $(LOCAL_CFLAGS) $(CFLAGS) ${ADDON_CFLAGS}
 
 # Here is a rule for making .o files from .c files that doesn't force
 # the type of the machine (like -sun3) into the flags.

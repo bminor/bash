@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ $PRODUCES ulimit.c
 $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
-$SHORT_DOC ulimit [-SHabcdefiklmnpqrstuvxPT] [limit]
+$SHORT_DOC ulimit [-SHabcdefiklmnpqrstuvxPRT] [limit]
 Modify shell resource limits.
 
 Provides control over the resources available to the shell and processes
@@ -426,6 +426,15 @@ ulimit_builtin (list)
 	  builtin_error (_("`%c': bad command"), cmdlist[c].cmd);
 	  return (EX_USAGE);
 	}
+    }
+
+  /* POSIX compatibility. If the last item in cmdlist does not have an option
+     argument, but there is an operand (list != 0), treat the operand as if
+     it were an option argument for that last command. */
+  if (list && list->word && cmdlist[ncmd - 1].arg == 0)
+    {
+      cmdlist[ncmd - 1].arg = list->word->word;
+      list = list->next;
     }
 
   for (c = 0; c < ncmd; c++)

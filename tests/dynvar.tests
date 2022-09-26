@@ -50,15 +50,27 @@ unset before after
 # EPOCHSECONDS
 
 # not exact, but should work
-# could also use python -c 'import time; ts = int(time.time()); print(ts)'
-now1=$(perl -e 'print time')
+# date +%s should be portable enough now
+# then try gawk, perl, python in that order
+now1=$(date +%s 2>/dev/null) D=date
+[ -z "$now1" ] &&
+{
+	now1=$(gawk 'BEGIN { print systime(); }' 2>/dev/null) D=gawk
+	[ -z "$now1" ] && now1=$(perl -e 'print time' 2>/dev/null) D=perl
+	[ -z "$now1" ] && now1=$(python -c 'import time; ts = int(time.time()); print(ts)' 2>/dev/null) D=python
+}
 now2=$EPOCHSECONDS
 
-case $now1 in
-$now2)	echo EPOCHSECONDS ok ;;
-*)	echo "current time via perl and EPOCHSECONDS possible mismatch|$now1|$now2" >&2 ;;
-esac
-unset now1 now2
+# use a window of +-1 second
+offset=1
+if [[ -z $now1 ]]; then
+	echo "cannot get current time using date/gawk/perl/python" >&2
+elif (( $now1 - $offset <= $now2 && $now2 <= $now1 + $offset )); then
+	echo EPOCHSECONDS ok
+else
+	echo "current time via $D and EPOCHSECONDS possible mismatch|$now1|$now2|offset=$offset" >&2
+fi
+unset now1 now2 D
 
 LC_ALL=C		# force decimal point to `.'
 now1=$EPOCHREALTIME

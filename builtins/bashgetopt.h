@@ -1,6 +1,6 @@
 /* bashgetopt.h -- extern declarations for stuff defined in bashgetopt.c. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,6 +29,7 @@
 #define GETOPT_HELP	-99
 
 extern char *list_optarg;
+extern int list_optflags;
 
 extern int list_optopt;
 extern int list_opttype;

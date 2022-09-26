@@ -22,6 +22,7 @@ typeset -A var
 
 f() { declare -p ${!var*}; }
 
+# this is no longer an error
 var[0]=X var[@]=Y
 f
 

@@ -1,6 +1,6 @@
 /* chartypes.h -- extend ctype.h */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,22 +23,18 @@
 
 #include <ctype.h>
 
-/* Jim Meyering writes:
+#ifndef UCHAR_MAX
+#  define UCHAR_MAX 255
+#endif
+#ifndef CHAR_MAX
+#  define CHAR_MAX 127
+#endif
 
-   "... Some ctype macros are valid only for character codes that
-   isascii says are ASCII (SGI's IRIX-4.0.5 is one such system --when
-   using /bin/cc or gcc but without giving an ansi option).  So, all
-   ctype uses should be through macros like ISPRINT...  If
-   STDC_HEADERS is defined, then autoconf has verified that the ctype
-   macros don't need to be guarded with references to isascii. ...
-   Defining IN_CTYPE_DOMAIN to 1 should let any compiler worth its salt
-   eliminate the && through constant folding."
-   Solaris defines some of these symbols so we must undefine them first.  */
-
-#if STDC_HEADERS || (!defined (isascii) && !HAVE_ISASCII)
+/* use this as a proxy for C89 */
+#if defined (HAVE_STDLIB_H) && defined (HAVE_STRING_H)
 #  define IN_CTYPE_DOMAIN(c) 1
 #else
-#  define IN_CTYPE_DOMAIN(c) isascii(c)
+#  define IN_CTYPE_DOMAIN(c) ((c) >= 0 && (c) <= CHAR_MAX)
 #endif
 
 #if !defined (isspace) && !defined (HAVE_ISSPACE)
@@ -107,7 +103,7 @@
 #endif
 #ifndef UNCTRL
    /* control char to letter -- ASCII */
-#  define UNCTRL(x)	(TOUPPER(x) ^ 0x40)
+#  define UNCTRL(x)	(TOUPPER(x ^ 0x40))
 #endif
 
 #endif /* _SH_CHARTYPES_H */

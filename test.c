@@ -2,7 +2,7 @@
 
 /* Modified to run with the GNU shell Apr 25, 1988 by bfox. */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -339,12 +339,15 @@ arithcomp (s, t, op, flags)
   intmax_t l, r;
   int expok;
 
-  if (flags & TEST_ARITHEXP)
+  if (flags & TEST_ARITHEXP)		/* conditional command */
     {
-      l = evalexp (s, EXP_EXPANDED, &expok);
+      int eflag;
+
+      eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
+      l = evalexp (s, eflag, &expok);
       if (expok == 0)
 	return (FALSE);		/* should probably longjmp here */
-      r = evalexp (t, EXP_EXPANDED, &expok);
+      r = evalexp (t, eflag, &expok);
       if (expok == 0)
 	return (FALSE);		/* ditto */
     }
@@ -492,13 +495,13 @@ unary_operator ()
 	  if (legal_number (argv[pos], &r))
 	    {
 	      advance (0);
-	      return (unary_test (op, argv[pos - 1]));
+	      return (unary_test (op, argv[pos - 1], 0));
 	    }
 	  else
 	    return (FALSE);
 	}
       else
-	return (unary_test (op, "1"));
+	return (unary_test (op, "1", 0));
     }
 
   /* All of the unary operators take an argument, so we first call
@@ -506,17 +509,19 @@ unary_operator ()
      argument, and then advances pos right past it.  This means that
      pos - 1 is the location of the argument. */
   unary_advance ();
-  return (unary_test (op, argv[pos - 1]));
+  return (unary_test (op, argv[pos - 1], 0));
 }
 
 int
-unary_test (op, arg)
+unary_test (op, arg, flags)
      char *op, *arg;
+     int flags;
 {
   intmax_t r;
   struct stat stat_buf;
   struct timespec mtime, atime;
   SHELL_VAR *v;
+  int aflags;
      
   switch (op[1])
     {
@@ -624,17 +629,27 @@ unary_test (op, arg)
 
     case 'v':
 #if defined (ARRAY_VARS)
-      if (valid_array_reference (arg, 0))
+      aflags = assoc_expand_once ? AV_NOEXPAND : 0;
+      if (valid_array_reference (arg, aflags))
 	{
 	  char *t;
-	  int rtype, ret, flags;
+	  int ret;
+	  array_eltstate_t es;
 
 	  /* Let's assume that this has already been expanded once. */
-	  flags = assoc_expand_once ? AV_NOEXPAND : 0;
-	  t = array_value (arg, 0, flags, &rtype, (arrayind_t *)0);
+	  /* XXX - TAG:bash-5.2 fix with corresponding fix to execute_cmd.c:
+	     execute_cond_node() that passes TEST_ARRAYEXP in FLAGS */
+
+	  if (shell_compatibility_level > 51)
+	    /* Allow associative arrays to use `test -v array[@]' to look for
+	       a key named `@'. */
+	    aflags |= AV_ATSTARKEYS;	/* XXX */
+	  init_eltstate (&es);
+	  t = get_array_value (arg, aflags|AV_ALLOWALL, &es);
 	  ret = t ? TRUE : FALSE;
-	  if (rtype > 0)	/* subscript is * or @ */
+	  if (es.subtype > 0)	/* subscript is * or @ */
 	    free (t);
+	  flush_eltstate (&es);
 	  return ret;
 	}
       else if (legal_number (arg, &r))		/* -v n == is $n set? */
@@ -789,6 +804,7 @@ three_arguments ()
     {
       advance (1);
       value = !two_arguments ();
+      pos = argc;
     }
   else if (argv[pos][0] == '(' && argv[pos+2][0] == ')')
     {

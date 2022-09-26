@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -308,6 +308,16 @@ is_cclass (c, name)
 	? TOLOWER ((unsigned char)c) \
 	: ((unsigned char)c))
 
+#if !defined (__CYGWIN__)
+#  define ISDIRSEP(c)	((c) == '/')
+#else
+#  define ISDIRSEP(c)	((c) == '/' || (c) == '\\')
+#endif /* __CYGWIN__ */
+#define PATHSEP(c)	(ISDIRSEP(c) || (c) == 0)
+
+#  define PDOT_OR_DOTDOT(s)	(s[0] == '.' && (PATHSEP (s[1]) || (s[1] == '.' && PATHSEP (s[2]))))
+#  define SDOT_OR_DOTDOT(s)	(s[0] == '.' && (s[1] == 0 || (s[1] == '.' && s[2] == 0)))
+
 #define FCT			internal_strmatch
 #define GMATCH			gmatch
 #define COLLSYM			collsym
@@ -553,6 +563,17 @@ posix_cclass_only (pattern)
 
 /* Now include `sm_loop.c' for multibyte characters. */
 #define FOLD(c) ((flags & FNM_CASEFOLD) && iswupper (c) ? towlower (c) : (c))
+
+#  if !defined (__CYGWIN__)
+#    define ISDIRSEP(c)	((c) == L'/')
+#  else
+#    define ISDIRSEP(c)	((c) == L'/' || (c) == L'\\')
+#  endif /* __CYGWIN__ */
+#  define PATHSEP(c)	(ISDIRSEP(c) || (c) == L'\0')
+
+#  define PDOT_OR_DOTDOT(w)	(w[0] == L'.' && (PATHSEP(w[1]) || (w[1] == L'.' && PATHSEP(w[2]))))
+#  define SDOT_OR_DOTDOT(w)	(w[0] == L'.' && (w[1] == L'\0' || (w[1] == L'.' && w[2] == L'\0')))
+
 #define FCT			internal_wstrmatch
 #define GMATCH			gmatch_wc
 #define COLLSYM			collwcsym

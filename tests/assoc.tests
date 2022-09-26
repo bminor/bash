@@ -47,7 +47,7 @@ declare +i chaff
 chaff[hello world]=flip
 declare -p chaff
 
-# TEST - errors
+# TEST - no longer errors
 waste[stuff]=other
 unset waste
 chaff[*]=12
@@ -244,3 +244,25 @@ ${THIS_SH} ./assoc10.sub
 
 # test assigning associative arrays using compound key/value pair assignments
 ${THIS_SH} ./assoc11.sub
+
+# more kvpair associative array assignment tests
+${THIS_SH} ./assoc12.sub
+
+# assignment to @ and *
+${THIS_SH} ./assoc13.sub
+
+# tests of the @k transformation on associative arrays
+${THIS_SH} ./assoc14.sub
+
+# tests with subscripts and values containing 0x01 (some indexed array tests too)
+${THIS_SH} ./assoc15.sub
+
+# tests with subscripts being expanded more than one in ${xxx} word expansions
+${THIS_SH} ./assoc16.sub
+
+# tests with `[' and `]' subscripts and `unset'
+${THIS_SH} ./assoc17.sub
+
+# tests with `[' and `]' subscripts and printf/read/wait builtins
+${THIS_SH} ./assoc18.sub
+

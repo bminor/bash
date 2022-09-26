@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete", "compgen", and "compopt" in Bash.
 
-Copyright (C) 1999-2020 Free Software Foundation, Inc.
+Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -541,6 +541,8 @@ static void
 print_cmd_name (cmd)
      const char *cmd;
 {
+  char *x;
+
   if (STREQ (cmd, DEFAULTCMD))
     printf ("-D");
   else if (STREQ (cmd, EMPTYCMD))
@@ -549,6 +551,12 @@ print_cmd_name (cmd)
     printf ("-I");
   else if (*cmd == 0)		/* XXX - can this happen? */
     printf ("''");
+  else if (sh_contains_shell_metas (cmd))
+    {
+      x = sh_single_quote (cmd);
+      printf ("%s", x);
+      free (x);
+    }
   else
     printf ("%s", cmd);
 }
@@ -575,7 +583,7 @@ print_one_completion (cmd, cs)
   print_arg (cs->command, "-C", 1);
 
   /* simple arguments that don't require quoting */
-  print_arg (cs->funcname, "-F", 0);
+  print_arg (cs->funcname, "-F", sh_contains_shell_metas (cs->funcname) != 0);
 
   print_cmd_name (cmd);
   printf ("\n");

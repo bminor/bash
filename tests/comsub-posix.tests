@@ -28,6 +28,11 @@ echo $(
 echo $()
 echo ab$()cd
 echo ab$(  )cd
+echo mn$(
+)op
+echo qr$(
+
+    )st
 
 echo $(case a in (a) echo sh_352.26ax; esac )
 echo $(case a in (a) echo sh_352.26ay; esac)
@@ -41,6 +46,9 @@ echo $(echo sh_352.27 ')' ")" \)
 echo $(
 echo abc # a comment with )
 )
+
+echo $(#a comment with )
+echo def)
 
 echo $(
 cat <<eof
@@ -226,10 +234,12 @@ echo $(
 )
 
 ${THIS_SH} ./comsub-posix1.sub
-
 ${THIS_SH} ./comsub-posix2.sub
-
 ${THIS_SH} ./comsub-posix3.sub
+
+#${THIS_SH} ./comsub-posix4.sub
+${THIS_SH} ./comsub-posix5.sub
+${THIS_SH} ./comsub-posix6.sub
 
 # produced a parse error through bash-4.0-beta2
 : $(echo foo)"
@@ -247,6 +257,12 @@ unset x
 : $(case a in a) echo ;; # comment
 esac)
 
+: $(case a in 
+    a)
+        echo
+    ;;	# comment
+esac)
+
 # fixed after bash-4.3 released
 testing=$(
     echo test | while read line; do
@@ -256,6 +272,15 @@ testing=$(
         esac
     done
 )
+
+# sanity check for empty comsubs
+echo $()
+echo $(
+)
+
+echo $(		
+
+   )
 
 # recommended to be parsed as a nested comsub instead of arithsub
 echo $(( echo ab cde ) )

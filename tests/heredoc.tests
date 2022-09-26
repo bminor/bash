@@ -137,6 +137,13 @@ ${THIS_SH} ./heredoc4.sub
 # heredoc tests that use different size documents to test pipe implementation
 ${THIS_SH} ./heredoc5.sub
 
+# test $'...' and $"..." quoted strings in here-documents
+${THIS_SH} ./heredoc6.sub
+
+# interaction between here-documents and command substitutions
+${THIS_SH} ./heredoc7.sub
+
+
 echo $(
 	cat <<< "comsub here-string"
 )

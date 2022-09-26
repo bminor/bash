@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -363,7 +363,11 @@ show_all_var_attributes (v, nodefs)
 
   for (i = any_failed = 0; var = variable_list[i]; i++)
     {
-      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      /* There is no equivalent `declare -'. */
+      if (variable_context && var->context == variable_context && STREQ (var->name, "-"))
+	printf ("local -\n");
+      else  
+	show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       if (any_failed = sh_chkwrite (any_failed))
         break;
     }
@@ -372,7 +376,7 @@ show_all_var_attributes (v, nodefs)
 }
 
 /* Show all local variable variables with their attributes. This shows unset
-   local variables (all_local_variables called with 0 argment). */
+   local variables (all_local_variables called with 0 argument). */
 int
 show_local_var_attributes (v, nodefs)
      int v, nodefs;
@@ -387,7 +391,11 @@ show_local_var_attributes (v, nodefs)
 
   for (i = any_failed = 0; var = variable_list[i]; i++)
     {
-      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      /* There is no equivalent `declare -'. */
+      if (STREQ (var->name, "-"))
+	printf ("local -\n");
+      else  
+	show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       if (any_failed = sh_chkwrite (any_failed))
         break;
     }
@@ -514,7 +522,10 @@ show_var_attributes (var, pattr, nodefs)
     printf ("%s\n", var->name);
   else
     {
-      x = sh_double_quote (value_cell (var));
+      if (ansic_shouldquote (value_cell (var)))
+	x = ansic_quote (value_cell (var), 0, (int *)0);
+      else
+	x = sh_double_quote (value_cell (var));
       printf ("%s=%s\n", var->name, x);
       free (x);
     }

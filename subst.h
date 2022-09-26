@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -55,6 +55,8 @@
 #define ASS_NOEVAL	0x0100	/* don't evaluate value as expression */
 #define ASS_NOLONGJMP	0x0200	/* don't longjmp on fatal assignment error */
 #define ASS_NOINVIS	0x0400	/* don't resolve local invisible variables */
+#define ASS_ALLOWALLSUB	0x0800	/* allow * and @ as associative array keys */
+#define ASS_ONEWORD	0x1000	/* don't check array subscripts, assume higher level has done that */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */
@@ -69,6 +71,7 @@
 #define SX_WORD		0x0200	/* extracting word in ${param op word} */
 #define SX_COMPLETE	0x0400	/* extracting word for completion */
 #define SX_STRIPDQ	0x0800	/* strip double quotes when extracting double-quoted string */
+#define SX_NOERROR	0x1000	/* don't print parser error messages */
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */
@@ -143,7 +146,7 @@ extern int do_word_assignment PARAMS((WORD_DESC *, int));
    of space allocated to TARGET.  SOURCE can be NULL, in which
    case nothing happens.  Gets rid of SOURCE by free ()ing it.
    Returns TARGET in case the location has changed. */
-extern char *sub_append_string PARAMS((char *, char *, int *, size_t *));
+extern char *sub_append_string PARAMS((char *, char *, size_t *, size_t *));
 
 /* Append the textual representation of NUMBER to TARGET.
    INDEX and SIZE are as in SUB_APPEND_STRING. */
@@ -183,9 +186,13 @@ extern WORD_LIST *expand_string PARAMS((char *, int));
 extern char *expand_string_to_string PARAMS((char *, int));
 extern char *expand_string_unsplit_to_string PARAMS((char *, int));
 extern char *expand_assignment_string_to_string PARAMS((char *, int));
+extern char *expand_subscript_string PARAMS((char *, int));
 
 /* Expand an arithmetic expression string */
 extern char *expand_arith_string PARAMS((char *, int));
+
+/* Expand $'...' and $"..." in a string for code paths that do not. */
+extern char *expand_string_dollar_quote PARAMS((char *, int));
 
 /* De-quote quoted characters in STRING. */
 extern char *dequote_string PARAMS((char *));
@@ -308,6 +315,7 @@ extern char *cond_expand_word PARAMS((WORD_DESC *, int));
 #define SD_COMPLETE	0x100	/* skip_to_delim during completion */
 #define SD_HISTEXP	0x200	/* skip_to_delim during history expansion */
 #define SD_ARITHEXP	0x400	/* skip_to_delim during arithmetic expansion */
+#define SD_NOERROR	0x800	/* don't print error messages */
 
 extern int skip_to_delim PARAMS((char *, int, char *, int));
 
@@ -318,7 +326,7 @@ extern int skip_to_histexp PARAMS((char *, int, char *, int));
 #if defined (READLINE)
 extern int char_is_quoted PARAMS((char *, int));
 extern int unclosed_pair PARAMS((char *, int, char *));
-extern WORD_LIST *split_at_delims PARAMS((char *, int, char *, int, int, int *, int *));
+extern WORD_LIST *split_at_delims PARAMS((char *, int, const char *, int, int, int *, int *));
 #endif
 
 /* Variables used to keep track of the characters in IFS. */

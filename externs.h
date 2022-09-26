@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,6 +36,7 @@ extern intmax_t evalexp PARAMS((char *, int, int *));
 #define FUNC_EXTERNAL	0x02
 
 extern char *make_command_string PARAMS((COMMAND *));
+extern char *print_comsub PARAMS((COMMAND *));
 extern char *named_function_string PARAMS((char *, COMMAND *, int));
 
 extern void print_command PARAMS((COMMAND *));
@@ -109,6 +110,7 @@ extern int yyparse PARAMS((void));
 extern int return_EOF PARAMS((void));
 extern void push_token PARAMS((int));
 extern char *xparse_dolparen PARAMS((char *, char *, int *, int));
+extern COMMAND *parse_string_to_command PARAMS((char *, int));
 extern void reset_parser PARAMS((void));
 extern void reset_readahead_token PARAMS((void));
 extern WORD_LIST *parse_string_to_word_list PARAMS((char *, int, const char *));
@@ -142,7 +144,7 @@ extern void set_default_lang PARAMS((void));
 extern char *get_locale_var PARAMS((char *));
 extern char *localetrans PARAMS((char *, int, int *));
 extern char *mk_msgstr PARAMS((char *, int *));
-extern char *localeexpand PARAMS((char *, int, int, int, int *));
+extern char *locale_expand PARAMS((char *, int, int, int, int *));
 #ifndef locale_decpoint
 extern int locale_decpoint PARAMS((void));
 #endif
@@ -211,7 +213,7 @@ extern void dprintf PARAMS((int, const char *, ...))  __attribute__((__format__ 
 extern char *fmtulong PARAMS((unsigned long int, int, char *, size_t, int));
 
 /* Declarations for functions defined in lib/sh/fmtulong.c */
-#if defined (HAVE_LONG_LONG)
+#if defined (HAVE_LONG_LONG_INT)
 extern char *fmtullong PARAMS((unsigned long long int, int, char *, size_t, int));
 #endif
 
@@ -341,7 +343,7 @@ extern char *sh_double_quote PARAMS((const char *));
 extern char *sh_mkdoublequoted PARAMS((const char *, int, int));
 extern char *sh_un_double_quote PARAMS((char *));
 extern char *sh_backslash_quote PARAMS((char *, const char *, int));
-extern char *sh_backslash_quote_for_double_quotes PARAMS((char *));
+extern char *sh_backslash_quote_for_double_quotes PARAMS((char *, int));
 extern char *sh_quote_reusable PARAMS((char *, int));
 extern int sh_contains_shell_metas PARAMS((const char *));
 extern int sh_contains_quotes PARAMS((const char *));
@@ -440,7 +442,7 @@ extern long strtol PARAMS((const char *, char **, int));
 #endif
 
 /* declarations for functions defined in lib/sh/strtoll.c */
-#if defined (HAVE_LONG_LONG) && !HAVE_DECL_STRTOLL
+#if defined (HAVE_LONG_LONG_INT) && !HAVE_DECL_STRTOLL
 extern long long strtoll PARAMS((const char *, char **, int));
 #endif
 
@@ -450,7 +452,7 @@ extern unsigned long strtoul PARAMS((const char *, char **, int));
 #endif
 
 /* declarations for functions defined in lib/sh/strtoull.c */
-#if defined (HAVE_LONG_LONG) && !HAVE_DECL_STRTOULL
+#if defined (HAVE_UNSIGNED_LONG_LONG_INT) && !HAVE_DECL_STRTOULL
 extern unsigned long long strtoull PARAMS((const char *, char **, int));
 #endif
 
@@ -469,6 +471,10 @@ extern char *ansicstr PARAMS((char *, int, int, int *, int *));
 extern char *ansic_quote PARAMS((char *, int, int *));
 extern int ansic_shouldquote PARAMS((const char *));
 extern char *ansiexpand PARAMS((char *, int, int, int *));
+
+/* declarations for functions defined in lib/sh/strvis.c */
+extern int sh_charvis PARAMS((const char *, size_t *, size_t, char *, size_t *));
+extern char *sh_strvis PARAMS((const char *));
 
 /* declarations for functions defined in lib/sh/timeval.c.  No prototypes
    so we don't have to count on having a definition of struct timeval in

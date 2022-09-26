@@ -59,3 +59,13 @@ disown -a
 
 unset bgpid1 bgpid2 bgpid3
 unset wpid
+
+# now that we have no jobs, make sure that wait -n -p var leaves var unset
+jobs
+wait -n -p wpid
+echo $wpid $?
+
+# make sure wait -p var does something useful without the -n option
+jobs
+wait -p wpid
+declare -p wpid

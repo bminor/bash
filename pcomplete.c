@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2021 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -414,6 +414,7 @@ init_itemlist_from_varlist (itp, svfunc)
     sl->list[i] = savestring (vlist[i]->name);
   sl->list[sl->list_len = n] = (char *)NULL;
   itp->slist = sl;
+  free (vlist);
 }
 
 static int
@@ -884,16 +885,18 @@ gen_action_completions (cs, text)
    TEXT as a match prefix, or just go without?  Currently, the code does not
    use TEXT, just globs CS->globpat and returns the results.  If we do decide
    to use TEXT, we should call quote_string_for_globbing before the call to
-   glob_filename. */
+   glob_filename (in which case we could use shell_glob_filename). */
 static STRINGLIST *
 gen_globpat_matches (cs, text)
       COMPSPEC *cs;
       const char *text;
 {
   STRINGLIST *sl;
+  int gflags;
 
   sl = strlist_create (0);
-  sl->list = glob_filename (cs->globpat, 0);
+  gflags = glob_star ? GX_GLOBSTAR : 0;
+  sl->list = glob_filename (cs->globpat, gflags);
   if (GLOB_FAILED (sl->list))
     sl->list = (char **)NULL;
   if (sl->list)
@@ -1296,7 +1299,7 @@ command_line_to_word_list (line, llen, sentinel, nwp, cwp)
      int llen, sentinel, *nwp, *cwp;
 {
   WORD_LIST *ret;
-  char *delims;
+  const char *delims;
 
 #if 0
   delims = "()<>;&| \t\n";	/* shell metacharacters break words */

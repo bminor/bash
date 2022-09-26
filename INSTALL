@@ -20,20 +20,28 @@ The simplest way to compile Bash is:
   3. Optionally, type 'make tests' to run the Bash test suite.
 
   4. Type 'make install' to install 'bash' and 'bashbug'.  This will
-     also install the manual pages and Info file.
+     also install the manual pages and Info file, message translation
+     files, some supplemental documentation, a number of example
+     loadable builtin commands, and a set of header files for developing
+     loadable builtins.  You may need additional privileges to install
+     'bash' to your desired destination, so 'sudo make install' might be
+     required.  More information about controlling the locations where
+     'bash' and other files are installed is below (*note Installation
+     Names::).
 
 The 'configure' shell script attempts to guess correct values for
 various system-dependent variables used during compilation.  It uses
 those values to create a 'Makefile' in each directory of the package
-(the top directory, the 'builtins', 'doc', and 'support' directories,
-each directory under 'lib', and several others).  It also creates a
-'config.h' file containing system-dependent definitions.  Finally, it
-creates a shell script named 'config.status' that you can run in the
-future to recreate the current configuration, a file 'config.cache' that
-saves the results of its tests to speed up reconfiguring, and a file
-'config.log' containing compiler output (useful mainly for debugging
-'configure').  If at some point 'config.cache' contains results you
-don't want to keep, you may remove or edit it.
+(the top directory, the 'builtins', 'doc', 'po', and 'support'
+directories, each directory under 'lib', and several others).  It also
+creates a 'config.h' file containing system-dependent definitions.
+Finally, it creates a shell script named 'config.status' that you can
+run in the future to recreate the current configuration, a file
+'config.cache' that saves the results of its tests to speed up
+reconfiguring, and a file 'config.log' containing compiler output
+(useful mainly for debugging 'configure').  If at some point
+'config.cache' contains results you don't want to keep, you may remove
+or edit it.
 
 To find out more about the options and arguments that the 'configure'
 script understands, type
@@ -64,7 +72,7 @@ considered for the next release.
 The file 'configure.ac' is used to create 'configure' by a program
 called Autoconf.  You only need 'configure.ac' if you want to change it
 or regenerate 'configure' using a newer version of Autoconf.  If you do
-this, make sure you are using Autoconf version 2.50 or newer.
+this, make sure you are using Autoconf version 2.69 or newer.
 
 You can remove the program binaries and object files from the source
 code directory by typing 'make clean'.  To also remove the files that
@@ -101,7 +109,7 @@ need to supply the '--srcdir=PATH' argument to tell 'configure' where
 the source files are.  'configure' automatically checks for the source
 code in the directory that 'configure' is in and in '..'.
 
-If you have to use a 'make' that does not supports the 'VPATH' variable,
+If you have to use a 'make' that does not support the 'VPATH' variable,
 you can compile Bash for one architecture at a time in the source code
 directory.  After you have installed Bash for one architecture, use
 'make distclean' before reconfiguring for another architecture.
@@ -122,10 +130,13 @@ Installation Names
 ==================
 
 By default, 'make install' will install into '/usr/local/bin',
-'/usr/local/man', etc.  You can specify an installation prefix other
-than '/usr/local' by giving 'configure' the option '--prefix=PATH', or
-by specifying a value for the 'DESTDIR' 'make' variable when running
-'make install'.
+'/usr/local/man', etc.; that is, the "installation prefix" defaults to
+'/usr/local'.  You can specify an installation prefix other than
+'/usr/local' by giving 'configure' the option '--prefix=PATH', or by
+specifying a value for the 'prefix' 'make' variable when running 'make
+install' (e.g., 'make install prefix=PATH').  The 'prefix' variable
+provides a default for 'exec_prefix' and other variables used when
+installing bash.
 
 You can specify separate installation prefixes for architecture-specific
 files and architecture-independent files.  If you give 'configure' the
@@ -133,11 +144,35 @@ option '--exec-prefix=PATH', 'make install' will use PATH as the prefix
 for installing programs and libraries.  Documentation and other data
 files will still use the regular prefix.
 
+If you would like to change the installation locations for a single run,
+you can specify these variables as arguments to 'make': 'make install
+exec_prefix=/' will install 'bash' and 'bashbug' into '/bin' instead of
+the default '/usr/local/bin'.
+
+If you want to see the files bash will install and where it will install
+them without changing anything on your system, specify the variable
+'DESTDIR' as an argument to 'make'.  Its value should be the absolute
+directory path you'd like to use as the root of your sample installation
+tree.  For example,
+
+     mkdir /fs1/bash-install
+     make install DESTDIR=/fs1/bash-install
+
+will install 'bash' into '/fs1/bash-install/usr/local/bin/bash', the
+documentation into directories within
+'/fs1/bash-install/usr/local/share', the example loadable builtins into
+'/fs1/bash-install/usr/local/lib/bash', and so on.  You can use the
+usual 'exec_prefix' and 'prefix' variables to alter the directory paths
+beneath the value of 'DESTDIR'.
+
+The GNU Makefile standards provide a more complete description of these
+variables and their effects.
+
 Specifying the System Type
 ==========================
 
 There may be some features 'configure' can not figure out automatically,
-but need to determine by the type of host Bash will run on.  Usually
+but needs to determine by the type of host Bash will run on.  Usually
 'configure' can figure that out, but if it prints a message saying it
 can not guess the host type, give it the '--host=TYPE' option.  'TYPE'
 can either be a short name for the system type, such as 'sun4', or a
@@ -235,16 +270,20 @@ the Bash 'configure' recognizes.
      subdirectories of that directory (include files in PREFIX/'include'
      and the library in PREFIX/'lib').
 
-'--with-purify'
-     Define this to use the Purify memory allocation checker from
-     Rational Software.
+'--with-libintl-prefix[=PREFIX]'
+     Define this to make Bash link with a locally-installed version of
+     the libintl library instead of the version in 'lib/intl'.
+
+'--with-libiconv-prefix[=PREFIX]'
+     Define this to make Bash look for libiconv in PREFIX instead of the
+     standard system locations.  There is no version included with Bash.
 
 '--enable-minimal-config'
      This produces a shell with minimal features, close to the
      historical Bourne shell.
 
-There are several '--enable-' options that alter how Bash is compiled
-and linked, rather than changing run-time features.
+There are several '--enable-' options that alter how Bash is compiled,
+linked, and installed, rather than changing run-time features.
 
 '--enable-largefile'
      Enable support for large files
@@ -257,6 +296,10 @@ and linked, rather than changing run-time features.
      This builds a Bash binary that produces profiling information to be
      processed by 'gprof' each time it is executed.
 
+'--enable-separate-helpfiles'
+     Use external files for the documentation displayed by the 'help'
+     builtin instead of storing the text internally.
+
 '--enable-static-link'
      This causes Bash to be linked statically, if 'gcc' is being used.
      This could be used to build a version to use as root's shell.
@@ -265,13 +308,20 @@ The 'minimal-config' option can be used to disable all of the following
 options, but it is processed first, so individual options may be enabled
 using 'enable-FEATURE'.
 
-All of the following options except for 'disabled-builtins',
-'direxpand-default', and 'xpg-echo-default' are enabled by default,
-unless the operating system does not provide the necessary support.
+All of the following options except for 'alt-array-implementation',
+'disabled-builtins', 'direxpand-default', 'strict-posix-default', and
+'xpg-echo-default' are enabled by default, unless the operating system
+does not provide the necessary support.
 
 '--enable-alias'
      Allow alias expansion and include the 'alias' and 'unalias'
      builtins (*note Aliases::).
+
+'--enable-alt-array-implementation'
+     This builds bash using an alternate implementation of arrays (*note
+     Arrays::) that provides faster access at the expense of using more
+     memory (sometimes many times more, depending on how sparse an array
+     is).
 
 '--enable-arith-for-command'
      Include support for the alternate form of the 'for' command that
@@ -292,7 +342,7 @@ unless the operating system does not provide the necessary support.
 
 '--enable-casemod-attributes'
      Include support for case-modifying attributes in the 'declare'
-     builtin and assignment statements.  Variables with the UPPERCASE
+     builtin and assignment statements.  Variables with the 'uppercase'
      attribute, for example, will have their values converted to
      uppercase upon assignment.
 
@@ -351,7 +401,7 @@ unless the operating system does not provide the necessary support.
      described above under *note Pattern Matching::.
 
 '--enable-extended-glob-default'
-     Set the default value of the EXTGLOB shell option described above
+     Set the default value of the 'extglob' shell option described above
      under *note The Shopt Builtin:: to be enabled.
 
 '--enable-function-import'
@@ -360,10 +410,10 @@ unless the operating system does not provide the necessary support.
      enabled by default.
 
 '--enable-glob-asciirange-default'
-     Set the default value of the GLOBASCIIRANGES shell option described
-     above under *note The Shopt Builtin:: to be enabled.  This controls
-     the behavior of character ranges when used in pattern matching
-     bracket expressions.
+     Set the default value of the 'globasciiranges' shell option
+     described above under *note The Shopt Builtin:: to be enabled.
+     This controls the behavior of character ranges when used in pattern
+     matching bracket expressions.
 
 '--enable-help-builtin'
      Include the 'help' builtin, which displays help on shell builtins
@@ -414,10 +464,6 @@ unless the operating system does not provide the necessary support.
      Include the 'select' compound command, which allows the generation
      of simple menus (*note Conditional Constructs::).
 
-'--enable-separate-helpfiles'
-     Use external files for the documentation displayed by the 'help'
-     builtin instead of storing the text internally.
-
 '--enable-single-help-strings'
      Store the text displayed by the 'help' builtin as a single string
      for each help topic.  This aids in translating the text to
@@ -426,6 +472,10 @@ unless the operating system does not provide the necessary support.
 
 '--enable-strict-posix-default'
      Make Bash POSIX-conformant by default (*note Bash POSIX Mode::).
+
+'--enable-translatable-strings'
+     Enable support for '$"STRING"' translatable strings (*note Locale
+     Translation::).
 
 '--enable-usg-echo-default'
      A synonym for '--enable-xpg-echo-default'.

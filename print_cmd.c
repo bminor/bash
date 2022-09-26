@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -129,6 +129,7 @@ static int inside_function_def;
 static int skip_this_indent;
 static int was_heredoc;
 static int printing_connection;
+static int printing_comsub;
 static REDIRECT *deferred_heredocs;
 
 /* The depth of the group commands that we are currently printing.  This
@@ -160,6 +161,21 @@ make_command_string (command)
   deferred_heredocs = 0;
   make_command_string_internal (command);
   return (the_printed_command);
+}
+
+/* Print a command substitution after parsing it in parse_comsub to turn it
+   back into an external representation without turning newlines into `;'.
+   Placeholder for other changes, if any are necessary. */
+char *
+print_comsub (command)
+     COMMAND *command;
+{
+  char *ret;
+
+  printing_comsub++;
+  ret = make_command_string (command);
+  printing_comsub--;
+  return ret;
 }
 
 /* The internal function.  This is the real workhorse. */
@@ -278,25 +294,35 @@ make_command_string_internal (command)
 	      break;
 
 	    case ';':
-	      if (deferred_heredocs == 0)
-		{
-		  if (was_heredoc == 0)
-		    cprintf (";");
-		  else
-		    was_heredoc = 0;
-		}
-	      else
-		print_deferred_heredocs (inside_function_def ? "" : ";");
+	    case '\n':				/* special case this */
+	      {
+		char c = command->value.Connection->connector;
 
-	      if (inside_function_def)
-		cprintf ("\n");
-	      else
-		{
-		  cprintf (" ");
-		  if (command->value.Connection->second)
-		    skip_this_indent++;
-		}
-	      break;
+		s[0] = printing_comsub ? c : ';';
+		s[1] = '\0';
+
+		if (deferred_heredocs == 0)
+		  {
+		    if (was_heredoc == 0)
+		      cprintf ("%s", s);	/* inside_function_def? */
+		    else
+		      was_heredoc = 0;
+		  }
+		else
+		  /* print_deferred_heredocs special-cases `;' */
+		  print_deferred_heredocs (inside_function_def ? "" : ";");
+
+		if (inside_function_def)
+		  cprintf ("\n");
+		else
+		  {
+		    if (c == ';')
+		      cprintf (" ");
+		    if (command->value.Connection->second)
+		      skip_this_indent++;
+		  }
+		break;
+	      }
 
 	    default:
 	      cprintf (_("print_command: bad connector `%d'"),
@@ -440,7 +466,10 @@ indirection_level_string ()
     change_flag ('x', FLAG_ON);
 
   if (ps4 == 0 || *ps4 == '\0')
-    return (indirection_string);
+    {
+      FREE (ps4);
+      return (indirection_string);
+    }
 
 #if defined (HANDLE_MULTIBYTE)
   ps4_len = strnlen (ps4, MB_CUR_MAX);
@@ -956,11 +985,13 @@ void
 print_simple_command (simple_command)
      SIMPLE_COM *simple_command;
 {
-  command_print_word_list (simple_command->words, " ");
+  if (simple_command->words)
+    command_print_word_list (simple_command->words, " ");
 
   if (simple_command->redirects)
     {
-      cprintf (" ");
+      if (simple_command->words)
+	cprintf (" ");
       print_redirection_list (simple_command->redirects);
     }
 }
@@ -1050,6 +1081,9 @@ print_redirection_list (redirects)
 	  else
 	    hdtail = heredocs = newredir;
 	}
+#if 0
+      /* Remove this heuristic now that the command printing code doesn't
+	 unconditionally put in the redirector file descriptor. */
       else if (redirects->instruction == r_duplicating_output_word && (redirects->flags & REDIR_VARASSIGN) == 0 && redirects->redirector.dest == 1)
 	{
 	  /* Temporarily translate it as the execution code does. */
@@ -1059,6 +1093,7 @@ print_redirection_list (redirects)
 	  print_redirection (redirects);
 	  redirects->instruction = r_duplicating_output_word;
 	}
+#endif
       else
 	print_redirection (redirects);
 
@@ -1217,6 +1252,8 @@ print_redirection (redirect)
     case r_duplicating_input_word:
       if (redirect->rflags & REDIR_VARASSIGN)
 	cprintf ("{%s}<&%s", redir_word->word, redirectee->word);
+      else if (redirector == 0)
+	cprintf ("<&%s", redirectee->word);
       else
 	cprintf ("%d<&%s", redirector, redirectee->word);
       break;
@@ -1224,6 +1261,8 @@ print_redirection (redirect)
     case r_duplicating_output_word:
       if (redirect->rflags & REDIR_VARASSIGN)
 	cprintf ("{%s}>&%s", redir_word->word, redirectee->word);
+      else if (redirector == 1)
+	cprintf (">&%s", redirectee->word);
       else
 	cprintf ("%d>&%s", redirector, redirectee->word);
       break;
@@ -1280,6 +1319,7 @@ reset_locals ()
   indentation = 0;
   printing_connection = 0;
   deferred_heredocs = 0;
+  printing_comsub = 0;
 }
 
 static void
@@ -1351,6 +1391,7 @@ named_function_string (name, command, flags)
   old_amount = indentation_amount;
   command_string_index = was_heredoc = 0;
   deferred_heredocs = 0;
+  printing_comsub = 0;
 
   if (name && *name)
     {

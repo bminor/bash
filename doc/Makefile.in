@@ -74,7 +74,6 @@ TEXI2DVI    = ${SUPPORT_SRCDIR}/texi2dvi
 TEXI2HTML   = ${SUPPORT_SRCDIR}/texi2html
 MAN2HTML    = ${BUILD_DIR}/support/man2html
 HTMLPOST    = ${srcdir}/htmlpost.sh
-INFOPOST    = ${srcdir}/infopost.sh
 QUIETPS	    = #set this to -q to shut up dvips
 PAPERSIZE   = letter	# change to a4 for A4-size paper
 PSDPI       = 600	# could be 300 if you like
@@ -108,11 +107,11 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/fdl.texi $(srcdir)/version.texi
 
 .1.ps:
 	$(RM) $@
-	-${GROFF} -man $< > $@
+	-${GROFF} -I${srcdir} -man $< > $@
 
 .1.0:
 	$(RM) $@
-	-${NROFF} -man $< > $@
+	-${NROFF} -I${srcdir} -man $< > $@
 
 .1.html:
 	$(RM) $@
@@ -128,11 +127,11 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/fdl.texi $(srcdir)/version.texi
 
 .3.ps:
 	$(RM) $@
-	-${GROFF} -man $< > $@
+	-${GROFF} -I${srcdir} -man $< > $@
 
 .3.0:
 	$(RM) $@
-	-${NROFF} -man $< > $@
+	-${NROFF} -I${srcdir} -man $< > $@
 
 .3.html:
 	$(RM) $@
@@ -173,23 +172,26 @@ html: ${HTMLFILES}
 pdf: ${PDFFILES}
 
 bashref.dvi: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+	$(RM) $@
 	${SET_TEXINPUTS} $(TEXI2DVI) $(srcdir)/bashref.texi || { ${RM} $@ ; exit 1; }
 
 bashref.info: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+	$(RM) $@
 	$(MAKEINFO) --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
 # experimental
 bashref.pdf: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+	$(RM) $@
 	${SET_TEXINPUTS} $(TEXI2PDF) $(srcdir)/bashref.texi || { ${RM} $@ ; exit 1; }
-
 
 # can also use:
 #	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
 bashref.html: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 	$(MAKEINFO) --html --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
-bash.info: bashref.info
-	${SHELL} ${INFOPOST} < $(srcdir)/bashref.info > $@ ; \
+bash.info: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+	$(RM) $@
+	$(MAKEINFO) -o $@ --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
 bash.txt: bash.1
 bash.ps: bash.1
@@ -324,18 +326,18 @@ faq.mail: FAQ faq.headers.mail faq.version
 	cat faq.headers.mail faq.version FAQ > $@
 
 inst:	bashref.texi
-	$(SHELL) ./mkinstall
-	cmp -s INSTALL ../INSTALL || mv INSTALL ../INSTALL
+	$(SHELL) ${srcdir}/mkinstall -t ${topdir} -s ${srcdir}
+	cmp -s INSTALL ${topdir}/INSTALL || mv INSTALL ${topdir}/INSTALL
 	$(RM) INSTALL
 
 posix:	bashref.texi
-	$(SHELL) ./mkposix
-	cmp -s POSIX ../POSIX || mv POSIX ../POSIX
+	$(SHELL) ${srcdir}/mkposix -t ${topdir} -s ${srcdir}
+	cmp -s POSIX ${topdir}/POSIX || mv POSIX ${topdir}/POSIX
 	$(RM) POSIX
 
 rbash:	bashref.texi
-	$(SHELL) ./mkrbash
-	cmp -s RBASH ../RBASH || mv RBASH ../RBASH
+	$(SHELL) ${srcdir}/mkrbash -t ${topdir} -s ${srcdir}
+	cmp -s RBASH ${topdir}/RBASH || mv RBASH ${topdir}/RBASH
 	$(RM) RBASH
 
 xdist: everything inst posix rbash

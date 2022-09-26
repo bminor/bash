@@ -46,6 +46,7 @@ extern int executing_builtin;
 extern void check_signals_and_traps (void);
 extern void check_signals (void);
 extern int signal_is_trapped (int);
+extern int read_builtin_timeout (int);
 
 /* Read LEN bytes from FD into BUF.  Retry the read on EINTR.  Any other
    error causes the loop to break. */
@@ -58,7 +59,10 @@ zread (fd, buf, len)
   ssize_t r;
 
   check_signals ();	/* check for signals before a blocking read */
-  while ((r = read (fd, buf, len)) < 0 && errno == EINTR)
+  /* should generalize into a mechanism where different parts of the shell can
+     `register' timeouts and have them checked here. */
+  while (((r = read_builtin_timeout (fd)) < 0 || (r = read (fd, buf, len)) < 0) &&
+	     errno == EINTR)
     {
       int t;
       t = errno;

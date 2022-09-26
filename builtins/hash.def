@@ -1,7 +1,7 @@
 This file is hash.def, from which is created hash.c.
 It implements the builtin "hash" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2021 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -138,7 +138,7 @@ hash_builtin (list)
 	    (list_portably == 0 || shell_compatibility_level <= 50))
 	printf (_("%s: hash table empty\n"), this_command_name);
 
-      return (EXECUTION_SUCCESS);
+      return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   if (expunge_hash_table)
@@ -177,7 +177,7 @@ hash_builtin (list)
 	continue;
       else if (pathname)
 	{
-	  if (is_directory (pathname))
+	  if (file_isdir (pathname))
 	    {
 #ifdef EISDIR
 	      builtin_error ("%s: %s", pathname, strerror (EISDIR));
