@@ -38,6 +38,10 @@
 #include "mailcheck.h"
 #include <tilde/tilde.h>
 
+#if defined (READLINE)
+# include <readline/readline.h>
+#endif
+
 /* Values for flags word in struct _fileinfo */
 #define MBOX_INITIALIZED	0x01
 
@@ -87,6 +91,11 @@ time_to_check_mail ()
   char *temp;
   time_t now;
   intmax_t seconds;
+
+#if defined (READLINE)
+  if (RL_ISSTATE (RL_STATE_COMPLETING|RL_STATE_DISPATCHING))
+    return (0);
+#endif
 
   temp = get_string_value ("MAILCHECK");
 

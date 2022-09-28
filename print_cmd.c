@@ -451,6 +451,7 @@ indirection_level_string ()
   char *ps4;
   char ps4_firstc[MB_LEN_MAX+1];
   int ps4_firstc_len, ps4_len, ineed, old;
+  DECLARE_MBSTATE;
 
   ps4 = get_string_value ("PS4");
   if (indirection_string == 0)
@@ -473,7 +474,7 @@ indirection_level_string ()
 
 #if defined (HANDLE_MULTIBYTE)
   ps4_len = strnlen (ps4, MB_CUR_MAX);
-  ps4_firstc_len = MBLEN (ps4, ps4_len);
+  ps4_firstc_len = MBRLEN (ps4, ps4_len, &state);
   if (ps4_firstc_len == 1 || ps4_firstc_len == 0 || ps4_firstc_len < 0)
     {
       ps4_firstc[0] = ps4[0];

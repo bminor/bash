@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2021 Free Software Foundation, Inc.
+Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1343,7 +1343,7 @@ asciicode ()
 #if defined (HANDLE_MULTIBYTE)
   slen = strlen (garglist->word->word+1);
   wc = 0;
-  mblength = mbtowc (&wc, garglist->word->word+1, slen);
+  mblength = mbrtowc (&wc, garglist->word->word+1, slen, &state);
   if (mblength > 0)
     ch = wc;		/* XXX */
   else

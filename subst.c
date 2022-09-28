@@ -1173,6 +1173,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
   register int i;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t *wcharlist;
+  mbstate_t mbstmp;
 #endif
   int c;
   char *temp;
@@ -1226,11 +1227,15 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
       if (locale_utf8locale && slen > i && UTF8_SINGLEBYTE (string[i]))
 	mblength = (string[i] != 0) ? 1 : 0;
       else
-	mblength = MBLEN (string + i, slen - i);
+	{
+	  mbstmp = state;
+	  mblength = MBRLEN (string + i, slen - i, &mbstmp);
+	}
       if (mblength > 1)
 	{
 	  wchar_t wc;
-	  mblength = mbtowc (&wc, string + i, slen - i);
+	  mbstmp = state;
+	  mblength = mbrtowc (&wc, string + i, slen - i, &mbstmp);
 	  if (MB_INVALIDCH (mblength))
 	    {
 	      if (MEMBER (c, charlist))
@@ -12020,8 +12025,9 @@ setifs (v)
       else
 	{
 	  size_t ifs_len;
+	  DECLARE_MBSTATE;
 	  ifs_len = strnlen (ifs_value, MB_CUR_MAX);
-	  ifs_firstc_len = MBLEN (ifs_value, ifs_len);
+	  ifs_firstc_len = MBRLEN (ifs_value, ifs_len, &state);
 	}
       if (ifs_firstc_len == 1 || ifs_firstc_len == 0 || MB_INVALIDCH (ifs_firstc_len))
 	{

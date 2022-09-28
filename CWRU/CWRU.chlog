@@ -3950,3 +3950,43 @@ lib/readline/history.c
 				   9/23
 				   ----
 [bash-5.2 frozen]
+
+				   9/26
+				   ----
+[bash-5.2 released]
+
+				   9/27
+				   ----
+mailcheck.c
+	- time_to_check_mail: don't bother if we're in the middle of readline
+	  completion or command dispatching.
+	  From https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1019462
+
+lib/readline/display.c
+	- rl_forced_update_display: use memset to clear out visible_line
+	  instead of trying to use a loop; line_size is the size.
+	  Report from <srobertson@peratonlabs.com>
+
+print_cmd.c
+	- indirection_level_string: use MBRLEN and an initialized mbstate_t
+	  object to avoid altering an internal mbstate_t.
+	  From Koichi Murase <myoga.murase@gmail.com>
+
+subst.c
+	- string_extract_verbatim: use an explicit mbstate_t object and pass
+	  it to MBRLEN and mbrtowc to avoid altering the state that
+	  ADVANCE_CHAR is using.
+	  From Koichi Murase <myoga.murase@gmail.com>
+	- setifs: use an explicit mbstate_t object and pass it to MBRLEN so
+	  to avoid altering an internal mbstate_t.
+	  From Koichi Murase <myoga.murase@gmail.com>
+
+builtins/printf.def
+	- asciicode: use an explicit mbstate_t object and pass it to mbrtowc
+	  to avoid using an incorrect internal mbstate_t
+	  From Koichi Murase <myoga.murase@gmail.com>
+
+lib/sh/{mbscasecmp,mbscmp}.c
+	- mbscasecmp,mbscmp: use different mbstate_t objects for the different
+	  strings so they don't affect each others' intermediate mbstate.
+	  From Koichi Murase <myoga.murase@gmail.com>
