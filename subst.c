@@ -10862,7 +10862,7 @@ expand_array_subscript (string, sindex, quoted, flags)
   exp = substring (string, si+1, ni);
   t = expand_subscript_string (exp, quoted & ~(Q_ARITH|Q_DOUBLE_QUOTES));
   free (exp);
-  exp = sh_backslash_quote (t, abstab, 0);
+  exp = t ? sh_backslash_quote (t, abstab, 0) : savestring ("");
   free (t);
 
   slen = STRLEN (exp);

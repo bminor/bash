@@ -270,6 +270,8 @@ static int set_job_status_and_cleanup PARAMS((int));
 static WAIT job_signal_status PARAMS((int));
 static WAIT raw_job_exit_status PARAMS((int));
 
+static int job_killed_by_signal PARAMS((int));
+
 static void notify_of_job_status PARAMS((void));
 static void reset_job_indices PARAMS((void));
 static void cleanup_dead_jobs PARAMS((void));
@@ -1226,8 +1228,12 @@ cleanup_dead_jobs ()
       if (i > js.j_lastj && jobs[i])
 	INTERNAL_DEBUG(("cleanup_dead_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj));
 
-      if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i))
-	delete_job (i, 0);
+      if (jobs[i] == 0 || DEADJOB (i) == 0)
+	continue;		/* not a candidate */
+      else if (IS_NOTIFIED (i))
+	delete_job (i, 0);	/* already notified */
+      else if (IS_FOREGROUND (i) && job_killed_by_signal (i) == 0)
+	delete_job (i, 0);	/* we won't notify about this */
     }
 
 #if defined (PROCESS_SUBSTITUTION)
@@ -2876,6 +2882,20 @@ job_exit_signal (job)
   return (process_exit_signal (raw_job_exit_status (job)));
 }
 
+static int
+job_killed_by_signal (job)
+     int job;
+{
+  int termsig;
+
+  termsig = job_exit_signal (job);
+#if !defined (DONT_REPORT_SIGPIPE)
+  return (termsig && termsig != SIGINT);
+#else
+  return (termsig && termsig != SIGINT && termsig != SIGPIPE);
+#endif
+}
+
 #define FIND_CHILD(pid, child) \
   do \
     { \
@@ -3283,7 +3303,7 @@ wait_for_any_job (flags, ps)
     {
       if ((flags & JWAIT_WAITING) && jobs[i] && IS_WAITING (i) == 0)
 	continue;		/* if we don't want it, skip it */
-      if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i) == 0)
+      if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i) == 0 && IS_FOREGROUND (i) == 0)
 	{
 return_job:
 	  r = job_exit_status (i);
@@ -4318,6 +4338,7 @@ notify_of_job_status ()
 		  if (termsig && WIFSIGNALED (s) && termsig != SIGINT && termsig != SIGPIPE)
 #endif
 		    {
+itrace("notify_of_job_status: printing status of foreground job %d", job);
 		      fprintf (stderr, "%s", j_strsignal (termsig));
 
 		      if (WIFCORED (s))

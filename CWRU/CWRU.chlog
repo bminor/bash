@@ -3990,3 +3990,33 @@ lib/sh/{mbscasecmp,mbscmp}.c
 	- mbscasecmp,mbscmp: use different mbstate_t objects for the different
 	  strings so they don't affect each others' intermediate mbstate.
 	  From Koichi Murase <myoga.murase@gmail.com>
+
+				   9/28
+				   ----
+execute_cmd.c
+	- execute_command_internal: if executing a (command) subshell, restore
+	  the value of line_number from save_line_number before returning early
+	  due to being a non-terminal pipeline element.
+	  From https://savannah.gnu.org/support/index.php?110714
+
+				   9/30
+				   ----
+subst.c
+	- expand_array_subscript: make sure to pass a non-NULL first argument
+	  to sh_backslash_quote. Report from Emanuele Torre <torreemanuele6@gmail.com>,
+	  patch from Koichi Murase <myoga.murase@gmail.com>
+
+				   9/30
+				   ----
+jobs.c
+	- cleanup_dead_jobs: delete dead foreground jobs we won't notify the
+	  user about (those not killed by a signal or killed by SIGINT/SIGPIPE).
+	  From a report from Koichi Murase <myoga.murase@gmail.com>
+	- wait_for_any_job: never return a foreground job, even when requested
+	  by pid, if it's in the jobs list
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+m4/strtoimax.m4
+	- BASH_FUNC_STRTOIMAX: fix logic inversion of result; we should be
+	  replacing the function if the tests show we *don't* have a working
+	  version. Report from Emanuel Haupt <ehaupt@FreeBSD.org>

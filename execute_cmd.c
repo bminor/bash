@@ -648,6 +648,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       save_line_number = line_number;
       if (command->type == cm_subshell)
 	SET_LINE_NUMBER (command->value.Subshell->line);	/* XXX - save value? */
+
 	/* Otherwise we defer setting line_number */
       tcmd = make_command_string (command);
       fork_flags = asynchronous ? FORK_ASYNC : 0;
@@ -690,6 +691,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  if (variable_context == 0)	/* wait until shell function completes */
 	    unlink_fifo_list ();
 #endif
+
+	  /* Restore any saved state here before possible early return. */
+	  line_number = save_line_number;
+
 	  /* If we are part of a pipeline, and not the end of the pipeline,
 	     then we should simply return and let the last command in the
 	     pipe be waited for.  If we are not in a pipeline, or are the
@@ -699,8 +704,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	    return (EXECUTION_SUCCESS);
 
 	  stop_pipeline (asynchronous, (COMMAND *)NULL);
-
-	  line_number = save_line_number;
 
 	  if (asynchronous == 0)
 	    {

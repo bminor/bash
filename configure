@@ -20432,7 +20432,6 @@ printf "%s\n" "#define HAVE_DECL_STRTOIMAX $ac_have_decl" >>confdefs.h
   if test "$ac_cv_have_decl_strtoimax" = "yes" ; then
     HAVE_DECL_STRTOIMAX=1
   fi
-
   if test "$HAVE_STRTOIMAX" = 0 || test "$HAVE_DECL_STRTOIMAX" = 0 ; then
     bash_cv_func_strtoimax=no REPLACE_STRTOIMAX=1
   else
@@ -20443,7 +20442,11 @@ fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $bash_cv_func_strtoimax" >&5
 printf "%s\n" "$bash_cv_func_strtoimax" >&6; }
-if test $bash_cv_func_strtoimax = yes; then
+if test "$ac_cv_have_decl_strtoimax" = "yes" ; then
+printf "%s\n" "#define HAVE_DECL_STRTOIMAX 1" >>confdefs.h
+
+fi
+if test $bash_cv_func_strtoimax = no; then
 case " $LIBOBJS " in
   *" strtoimax.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS strtoimax.$ac_objext"
