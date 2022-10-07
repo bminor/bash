@@ -142,7 +142,7 @@ _rl_init_locale (void)
     lspec = "";
   ret = setlocale (LC_CTYPE, lspec);	/* ok, since it does not change locale */
   if (ret == 0 || *ret == 0)
-    ret = setlocale (LC_CTYPE, NULL);
+    ret = setlocale (LC_CTYPE, (char *)NULL);
   if (ret == 0 || *ret == 0)
     ret = RL_DEFAULT_LOCALE;
 #else

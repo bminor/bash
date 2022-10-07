@@ -257,6 +257,10 @@ extern int print_shift_error;
 extern int expand_once_flag;
 #endif
 
+#if defined (EXTENDED_GLOB)
+extern int extglob_flag;
+#endif
+
 /* variables from source.def */
 extern int source_searches_cwd;
 extern int source_uses_path;

@@ -4030,3 +4030,35 @@ lib/readline/nls.c
 
 lib/readline/{input.c,rlprivate.h}
 	- fixes for compiling on w64-mingw32
+
+				   10/5
+				   ----
+parse.y
+	- xparse_dolparen: save and restore extended_glob using local_extglob
+	  in the same way that parse_comsub does. Fixes compat issue reported in
+	  https://bugs.gentoo.org/873931 and by Kerin Millar <kfm@plushkava.net>
+
+				   10/6
+				   ----
+subst.c
+	- extract_dollar_brace_string: keep a stack of dolbrace_state values
+	  to handle nested expansions. Report from
+	  Antoine <bug-bash@glitchimini.net>
+
+				   10/7
+				   ----
+builtins/{shopt.def,common.h}
+	- extglob_flag: new variable to hold the state of the `extglob' option;
+	  initialized to EXTGLOB_DEFAULT like extended_glob
+	- shopt_set_extglob: new function to set extended_glob to the right
+	  value for the rest of the shell
+
+parse.y
+	- reset_parser: set extended_glob to extglob_flag, which is only
+	  changed by shopt, remove global_extglob
+	- parse_comsub,parse_cond_command,xparse_dolparen: no longer use
+	  global_extglob
+
+execute_cmd.c
+	- execute_cond_node: reset extended_glob to the value of extglob_flag,
+	  since we're executing a command here

@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2021 Free Software Foundation, Inc.
+Copyright (C) 1994-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -149,6 +149,11 @@ static int shopt_set_complete_direxpand PARAMS((char *, int));
 static int set_assoc_expand PARAMS((char *, int));
 #endif
 
+#if defined (EXTENDED_GLOB)
+int extglob_flag = EXTGLOB_DEFAULT;
+static int shopt_set_extglob PARAMS((char *, int));
+#endif
+
 static int shopt_set_debug_mode PARAMS((char *, int));
 
 static int shopt_login_shell;
@@ -203,7 +208,7 @@ static struct {
   { "extdebug", &debugging_mode, shopt_set_debug_mode },
 #endif
 #if defined (EXTENDED_GLOB)
-  { "extglob", &extended_glob, (shopt_set_func_t *)NULL },
+  { "extglob", &extglob_flag, shopt_set_extglob },
 #endif
   { "extquote", &extended_quote, (shopt_set_func_t *)NULL },
   { "failglob", &fail_glob_expansion, (shopt_set_func_t *)NULL },
@@ -374,7 +379,7 @@ reset_shopt_options ()
 #endif
 
 #if defined (EXTENDED_GLOB)
-  extended_glob = EXTGLOB_DEFAULT;
+  extended_glob = extglob_flag = EXTGLOB_DEFAULT;
 #endif
 
 #if defined (ARRAY_VARS)
@@ -631,11 +636,24 @@ shopt_set_debug_mode (option_name, mode)
   return (0);
 }
 
+#if defined (EXTENDED_GLOB)
+static int
+shopt_set_extglob (option_name, mode)
+     char *option_name;
+     int mode;
+{
+  extended_glob = extglob_flag;
+  return 0;
+}
+#endif
+
 #if defined (READLINE)
 static int
 shopt_enable_hostname_completion (option_name, mode)
      char *option_name;
      int mode;
+
+
 {
   return (enable_hostname_completion (mode));
 }

@@ -3993,13 +3993,11 @@ execute_cond_node (cond)
       else
 #endif /* COND_REGEXP */
 	{
-	  int oe;
-	  oe = extended_glob;
 	  extended_glob = 1;
 	  result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP|TEST_LOCALE)
 				  ? EXECUTION_SUCCESS
 				  : EXECUTION_FAILURE;
-	  extended_glob = oe;
+	  extended_glob = extglob_flag;
 	}
       if (arg1 != nullstr)
 	free (arg1);
