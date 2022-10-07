@@ -4020,3 +4020,13 @@ m4/strtoimax.m4
 	- BASH_FUNC_STRTOIMAX: fix logic inversion of result; we should be
 	  replacing the function if the tests show we *don't* have a working
 	  version. Report from Emanuel Haupt <ehaupt@FreeBSD.org>
+
+				   10/4
+				   ----
+lib/readline/nls.c
+	- _rl_init_locale: cope with setlocale returning NULL, make sure we
+	  set up a default value for LC_CTYPE. Report from
+	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1021109
+
+lib/readline/{input.c,rlprivate.h}
+	- fixes for compiling on w64-mingw32

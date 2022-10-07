@@ -303,7 +303,7 @@ extern int _rl_pushed_input_available (void);
 
 extern int _rl_timeout_init (void);
 extern int _rl_timeout_handle_sigalrm (void);
-#if defined (_POSIXSELECT_H_)
+#if defined (_POSIXSELECT_H_) && !defined (__MINGW32__)
 /* use as a sentinel for fd_set, struct timeval,  and sigset_t definitions */
 extern int _rl_timeout_select (int, fd_set *, fd_set *, fd_set *, const struct timeval *, const sigset_t *);
 #endif
