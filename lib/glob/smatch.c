@@ -60,6 +60,7 @@ extern int fnmatch (const char *, const char *, int);
 #endif
 
 int glob_asciirange = GLOBASCII_DEFAULT;
+int glob_recursion_depth;
 
 #if FNMATCH_EQUIV_FALLBACK
 /* Construct a string w1 = "c1" and a pattern w2 = "[[=c2=]]" and pass them
@@ -609,6 +610,8 @@ xstrmatch (pattern, string, flags)
   wchar_t *wpattern, *wstring;
   size_t plen, slen, mplen, mslen;
 
+  glob_recursion_depth = 0;
+
   if (MB_CUR_MAX == 1)
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
@@ -633,6 +636,8 @@ xstrmatch (pattern, string, flags)
 
   return ret;
 #else
+  glob_recursion_depth = 0;
+
   return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 #endif /* !HANDLE_MULTIBYTE */
 }

@@ -4338,7 +4338,6 @@ notify_of_job_status ()
 		  if (termsig && WIFSIGNALED (s) && termsig != SIGINT && termsig != SIGPIPE)
 #endif
 		    {
-itrace("notify_of_job_status: printing status of foreground job %d", job);
 		      fprintf (stderr, "%s", j_strsignal (termsig));
 
 		      if (WIFCORED (s))

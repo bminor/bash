@@ -846,6 +846,8 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
        case, we just want to compare the two as strings. */
     return (STRCOMPARE (p - 1, pe, s, se));
 
+  glob_recursion_depth++;
+
   switch (xc)
     {
     case L('+'):		/* match one or more occurrences */

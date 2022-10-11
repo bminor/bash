@@ -291,9 +291,11 @@ static int shell_input_line_terminator;
 
 /* The line number in a script on which a function definition starts. */
 static int function_dstart;
+static int save_dstart = -1;
 
 /* The line number in a script on which a function body starts. */
 static int function_bstart;
+static int save_bstart = -1;
 
 /* The line number in a script at which an arithmetic for command starts. */
 static int arith_for_lineno;
@@ -945,13 +947,13 @@ case_command:	CASE WORD newline_list IN newline_list ESAC
 	;
 
 function_def:	WORD '(' ')' newline_list function_body
-			{ $$ = make_function_def ($1, $5, function_dstart, function_bstart); }
+			{ $$ = make_function_def ($1, $5, function_dstart, function_bstart); function_dstart = save_dstart; }
 	|	FUNCTION WORD '(' ')' newline_list function_body
-			{ $$ = make_function_def ($2, $6, function_dstart, function_bstart); }
+			{ $$ = make_function_def ($2, $6, function_dstart, function_bstart); function_dstart = save_dstart; }
 	|	FUNCTION WORD function_body
-			{ $$ = make_function_def ($2, $3, function_dstart, function_bstart); }
+			{ $$ = make_function_def ($2, $3, function_dstart, function_bstart); function_dstart = save_dstart; }
 	|	FUNCTION WORD '\n' newline_list function_body
-			{ $$ = make_function_def ($2, $5, function_dstart, function_bstart); }
+			{ $$ = make_function_def ($2, $5, function_dstart, function_bstart); function_dstart = save_dstart; }
 	;
 
 function_body:	shell_command
@@ -3557,6 +3559,7 @@ read_token (command)
 #if defined (ALIAS)
 	  parser_state &= ~PST_ALEXPNEXT;
 #endif /* ALIAS */
+	  save_dstart = function_dstart;
 	  function_dstart = line_number;
 	}
 
@@ -5319,6 +5322,7 @@ got_token:
     {
     case FUNCTION:
       parser_state |= PST_ALLOWOPNBRC;
+      save_dstart = function_dstart;
       function_dstart = line_number;
       break;
     case CASE:

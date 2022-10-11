@@ -5983,11 +5983,6 @@ shell_execve (command, args, env)
 	  errno = i;
 	  file_error (command);
 	}
-      else if (i == ENOENT)
-	{
-	  errno = i;
-	  internal_error (_("%s: cannot execute: required file not found"), command);
-	}
       else
 	{
 	  /* The file has the execute bits set, but the kernel refuses to
@@ -6015,9 +6010,18 @@ shell_execve (command, args, env)
 	      FREE (interp);
 	      return (EX_NOEXEC);
 	    }
+	  else
 #endif
-	  errno = i;
-	  file_error (command);
+	  if (i == ENOENT)
+	    {
+	      errno = i;
+	      internal_error (_("%s: cannot execute: required file not found"), command);
+	    }
+	  else
+	    {
+	      errno = i;
+	      file_error (command);
+	    }
 	}
       return (last_command_exit_value);
     }

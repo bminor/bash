@@ -4062,3 +4062,19 @@ parse.y
 execute_cmd.c
 	- execute_cond_node: reset extended_glob to the value of extglob_flag,
 	  since we're executing a command here
+
+				   10/8
+				   ----
+parse.y
+	- save_dstart: when we set the value of function_dstart, save the old
+	  value in save_dstart (read_token, read_token_word); restore it in
+	  the grammar production after calling make_function_def. This gives
+	  you correct line numbers for one level of function nesting.
+	  Report from Daniel Castro <danicc097@gmail.com>
+
+				   10/10
+				   -----
+execute_cmd.c
+	- shell_execve: rearrange code so that we check for a bad interpreter
+	  before printing a generic ENOENT error message. Report from
+	  Kirill Elagin <kirelagin@gmail.com>
