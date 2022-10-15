@@ -4005,7 +4005,7 @@ expand_string_for_patsub (string, quoted)
   if (value)
     {
       t = (value->next) ? string_list (value) : value->word->word;
-      ret = quote_string_for_repl (t, quoted);
+      ret = t ? quote_string_for_repl (t, quoted) : t;
       if (t != value->word->word)
 	free (t);
       dispose_words (value);
@@ -8970,7 +8970,8 @@ pat_subst (string, pat, rep, mflags)
       return (ret);
     }
   else if (*string == 0 && (match_pattern (string, pat, mtype, &s, &e) != 0))
-    return ((mflags & MATCH_EXPREP) ? strcreplace (rep, '&', "", 2) : savestring (rep));
+    return (mflags & MATCH_EXPREP) ? strcreplace (rep, '&', "", 2)
+				   : (rep ? savestring (rep) : savestring (""));
 
   ret = (char *)xmalloc (rsize = 64);
   ret[0] = '\0';

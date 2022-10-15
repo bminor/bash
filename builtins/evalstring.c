@@ -590,6 +590,7 @@ parse_string (string, from_file, flags, cmdp, endp)
   char *ostring;
   volatile sigset_t ps_sigmask;
 
+  /* unwind-protects common to this and parse_and_execute */
   parse_prologue (string, flags, PS_TAG);
 
 #if defined (HAVE_POSIX_SIGNALS)

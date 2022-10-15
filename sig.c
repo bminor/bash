@@ -94,6 +94,7 @@ static SigHandler *old_winch = (SigHandler *)SIG_DFL;
 #endif
 
 static void initialize_shell_signals PARAMS((void));
+static void kill_shell PARAMS((int));
 
 void
 initialize_signals (reinit)
@@ -486,6 +487,8 @@ restore_sigmask ()
 #endif
 }
 
+static int handling_termsig = 0;
+
 sighandler
 termsig_sighandler (sig)
      int sig;
@@ -532,6 +535,14 @@ termsig_sighandler (sig)
    sig == terminating_signal)
     terminate_immediately = 1;
 
+  /* If we are currently handling a terminating signal, we have a couple of
+     choices here. We can ignore this second terminating signal and let the
+     shell exit from the first one, or we can exit immediately by killing
+     the shell with this signal. This code implements the latter; to implement
+     the former, replace the kill_shell(sig) with return. */
+  if (handling_termsig)
+    kill_shell (sig);		/* just short-circuit now */
+
   terminating_signal = sig;
 
   if (terminate_immediately)
@@ -564,16 +575,13 @@ void
 termsig_handler (sig)
      int sig;
 {
-  static int handling_termsig = 0;
-  int i, core;
-  sigset_t mask;
-
   /* Simple semaphore to keep this function from being executed multiple
      times.  Since we no longer are running as a signal handler, we don't
      block multiple occurrences of the terminating signals while running. */
   if (handling_termsig)
     return;
-  handling_termsig = 1;
+
+  handling_termsig = terminating_signal;	/* for termsig_sighandler */
   terminating_signal = 0;	/* keep macro from re-testing true. */
 
   /* I don't believe this condition ever tests true. */
@@ -613,6 +621,16 @@ termsig_handler (sig)
 
   run_exit_trap ();	/* XXX - run exit trap possibly in signal context? */
 
+  kill_shell (sig);
+}
+
+static void
+kill_shell (sig)
+     int sig;
+{
+  int i, core;
+  sigset_t mask;
+
   /* We don't change the set of blocked signals. If a user starts the shell
      with a terminating signal blocked, we won't get here (and if by some
      magic chance we do, we'll exit below). What we do is to restore the
@@ -627,7 +645,7 @@ termsig_handler (sig)
   if (dollar_dollar_pid != 1)
     exit (128+sig);		/* just in case the kill fails? */
 
-  /* We get here only under extraordinary circumstances. */
+  /* We get here only under extraordinarily rare circumstances. */
 
   /* We are PID 1, and the kill above failed to kill the process. We assume
      this means that we are running as an init process in a pid namespace

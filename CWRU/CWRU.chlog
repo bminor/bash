@@ -4078,3 +4078,69 @@ execute_cmd.c
 	- shell_execve: rearrange code so that we check for a bad interpreter
 	  before printing a generic ENOENT error message. Report from
 	  Kirill Elagin <kirelagin@gmail.com>
+
+				   10/12
+				   -----
+lib/readline/callback.c
+	- CALLBACK_READ_RETURN: add an inlined call to RL_CHECK_SIGNALS so we
+	  can handle any signals that arrived before we restored the calling
+	  application's signal handlers. From a gdb dicussion with
+	  Simon Marchi <simon.marchi@polymtl.ca>
+
+				   10/12
+				   -----
+variables.c
+	- pop_var_context: flag an internal error for shell_variables not
+	  pointing to a function context only if we haven't already flushed
+	  all the local contexts and reset variable_context. This can happen
+	  if errexit is enabled and we're going to be exiting the shell, but
+	  we're running unwind-protects on our way out. Report from
+	  Xavier Delaruelle <xavier.delaruelle@gmail.com>
+
+				   10/13
+				   -----
+sig.c
+	- kill_shell: broke the code that resets the signal disposition to the
+	  default and sends a terminating signal to the shell into a separate
+	  function
+	- termsig_handler: set handling_termsig to terminating_signal and make
+	  it file-scope so other functions know we're handling a terminating
+	  signal and are about to exit, and which signal it is (latter not used
+	  yet)
+	- termsig_sighandler: if we get a fatal signal while we're handling a
+	  fatal signal, kill ourselves with the second fatal signal immediately.
+	  Fixes issue reported by Andreas Schwab <schwab@suse.de>
+
+execute_cmd.c
+	- execute_case_command: call CHECK_TERMSIG after the call to strmatch,
+	  since gmatch will return FNM_NOMATCH if there's a pending terminating
+	  signal and we don't want incorrect results
+
+subst.c
+	- pat_subst: make sure REP is non-NULL before calling savestring on it.
+	  Report from Justin Wood (Callek) <callek@gmail.com>
+
+				   10/14
+				   -----
+builtins/{shopt.def,common.h}
+	- expand_aliases: split into a variable that holds the current state
+	  of alias expansion (expand_aliases) and a variable that reflects the
+	  global option value (expalias_flag), make sure expand_aliases is set
+	  appropriately by shopt
+
+shell.c,execute_cmd.c,general.c
+	- expand_aliases: make sure expand_aliases and expalias_flag always
+	  agree
+
+parser.h
+	- PST_STRING: new parser flag, set when parsing a string to a command
+	  or word list
+
+parse.y
+	- reset_parser: if we're parsing a command substitution or a string,
+	  and need to restore expand_aliases, make sure it's set to the value
+	  of expalias_flag.
+	  Fixes SIGINT during interactive command substitution parsing bug
+	  reported by feng xiangjun <fengxj325@gmail.com>
+	- parse_string_to_word_list,parse_string_to_command: make sure to set
+	  PST_STRING in parser_flags since we're resetting expand_aliases

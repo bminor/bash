@@ -5413,7 +5413,9 @@ pop_var_context ()
   vcxt = shell_variables;
   if (vc_isfuncenv (vcxt) == 0)
     {
-      internal_error (_("pop_var_context: head of shell_variables not a function context"));
+      /* If we haven't flushed all of the local contexts already, flag an error */
+      if (shell_variables != global_variables || variable_context > 0)
+	internal_error (_("pop_var_context: head of shell_variables not a function context"));
       return;
     }
 

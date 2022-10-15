@@ -261,6 +261,8 @@ extern int expand_once_flag;
 extern int extglob_flag;
 #endif
 
+extern int expaliases_flag;
+
 /* variables from source.def */
 extern int source_searches_cwd;
 extern int source_uses_path;
