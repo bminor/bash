@@ -3613,6 +3613,7 @@ tokword:
 #define P_BACKQUOTE	0x0010	/* parsing a backquoted command substitution */
 #define P_ARRAYSUB	0x0020	/* parsing a [...] array subscript for assignment */
 #define P_DOLBRACE	0x0040	/* parsing a ${...} construct */
+#define P_ARITH		0x0080	/* parsing a $(( )) arithmetic expansion */
 
 /* Lexical state while parsing a grouping construct or $(...). */
 #define LEX_WASDOL	0x0001
@@ -3911,6 +3912,9 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    }
 	  else if ((flags & (P_ARRAYSUB|P_DOLBRACE)) && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
 	    goto parse_dollar_word;
+	  else if ((flags & P_ARITH) && (tflags & LEX_WASDOL) && ch == '(') /*)*/
+	    /* $() inside $(( ))/$[ ] */
+	    goto parse_dollar_word;
 #if defined (PROCESS_SUBSTITUTION)
 	  /* XXX - technically this should only be recognized at the start of
 	     a word */
@@ -3941,7 +3945,7 @@ parse_dollar_word:
 	  else if (ch == '{')		/* } */
 	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|P_DOLBRACE|rflags);
 	  else if (ch == '[')		/* ] */
-	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags);
+	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags|P_ARITH);
 
 	  CHECK_NESTRET_ERROR ();
 	  APPEND_NESTRET ();
@@ -4080,7 +4084,7 @@ parse_comsub (qc, open, close, lenp, flags)
       peekc = shell_getc (1);
       shell_ungetc (peekc);
       if (peekc == '(')		/*)*/
-	return (parse_matched_pair (qc, open, close, lenp, 0));
+	return (parse_matched_pair (qc, open, close, lenp, P_ARITH));
     }
 
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
@@ -4504,7 +4508,7 @@ parse_arith_cmd (ep, adddq)
   int ttoklen;
 
   exp_lineno = line_number;
-  ttok = parse_matched_pair (0, '(', ')', &ttoklen, 0);
+  ttok = parse_matched_pair (0, '(', ')', &ttoklen, P_ARITH);
   rval = 1;
   if (ttok == &matched_pair_error)
     return -1;
@@ -5022,7 +5026,7 @@ read_token_word (character)
 		  pop_delimiter (dstack);
 		}
 	      else
-		ttok = parse_matched_pair (cd, '[', ']', &ttoklen, 0);
+		ttok = parse_matched_pair (cd, '[', ']', &ttoklen, P_ARITH);
 	      if (ttok == &matched_pair_error)
 		return -1;		/* Bail immediately. */
 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 3,

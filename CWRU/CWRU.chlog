@@ -4144,3 +4144,54 @@ parse.y
 	  reported by feng xiangjun <fengxj325@gmail.com>
 	- parse_string_to_word_list,parse_string_to_command: make sure to set
 	  PST_STRING in parser_flags since we're resetting expand_aliases
+
+				   10/17
+				   -----
+print_cmd.c
+	- print_function_def, named_function_string: if the function doesn't
+	  have any here-documents, unset was_heredoc after printing the
+	  closing brace so we can add a separator if there is another command
+	  following the function definition. Fixes bug with multiple function
+	  definitions and here-documents reported by D630 <d630@posteo.net>
+	- make_command_string_internal: if we're printing a command
+	  substitution, make sure to preserve newlines in the comsub so we
+	  avoid problems with re-parsing function defs or command substitutions
+	  containing multiple compound commands that need to be separated
+	  by newlines, but don't double them up
+
+parse.y
+	- P_ARITH: new parse_matched_pair flags value; used to jump to
+	  parse_comsub if we see a $( inside a $(( )), $[ ], or (( ))
+	- parse_matched_pair,parse_comsub,parse_arith_command,read_token_word:
+	  make sure to call parse_matched_pair with P_ARITH if we're parsing
+	  an arithmetic command or expansion
+	- parse_matched_pair: if we see $( inside a call with P_ARITH in the
+	  flags argument, jump to parse_dollar_word and call parse_comsub to
+	  parse it. The rest of the steps assume that parse_comsub has
+	  expanded aliases (or not) appropriately. Fixes bug 2 from
+	  https://bugzilla.redhat.com/show_bug.cgi?id=2134307
+
+				   10/18
+				   -----
+builtins/evalstring.c
+	- parse_and_execute: we play tricks in the parser and in command_substitute
+	  to turn expand_aliases on and off depending on the comsub parser
+	  pass and whether or not we're in posix mode. Since this should only
+	  matter for parsing, when we're processing a command substitution, we
+	  set expand_aliases to the global flag value after parsing the
+	  command and before executing it, and restore it if the global flag
+	  value isn't changed during execution. Fixes bug 1 from
+	  https://bugzilla.redhat.com/show_bug.cgi?id=2134307
+
+command.h
+	- PF_BACKQUOTE: new flag value, only used by command_substitute to
+	  differentiate between `` and $() forms. The former does not have
+	  aliases expanded by parse_comsub in posix mode, so needs to expand
+	  them in parse_and_execute like default mode
+
+subst.c
+	- command_substitute: don't modify expand_aliases if PF_BACKQUOTE is
+	  included in flags, since aliases haven't been expanded in the
+	  command string (it was run through parse.y:parse_matched_pair())
+	- expand_word_internal: pass PF_BACKQUOTE to command_substitute() if
+	  expanding a `` command substitution

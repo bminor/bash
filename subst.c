@@ -7128,8 +7128,12 @@ command_substitute (string, quoted, flags)
       remove_quoted_escapes (string);
 
       /* We want to expand aliases on this pass if we are not in posix mode
-	 for backwards compatibility. */
-      if (expand_aliases)
+	 for backwards compatibility. parse_and_execute() takes care of
+	 setting expand_aliases back to the global value when executing the
+	 parsed string. We only do this for $(...) command substitution,
+	 since that is what parse_comsub handles; `` comsubs are processed
+	 using parse.y:parse_matched_pair(). */
+      if (expand_aliases && (flags & PF_BACKQUOTE) == 0)
         expand_aliases = posixly_correct == 0;
 
       startup_state = 2;	/* see if we can avoid a fork */
@@ -11297,7 +11301,7 @@ add_string:
 	    else
 	      {
 		de_backslash (temp);
-		tword = command_substitute (temp, quoted, 0);
+		tword = command_substitute (temp, quoted, PF_BACKQUOTE);
 		temp1 = tword ? tword->word : (char *)NULL;
 		if (tword)
 		  dispose_word_desc (tword);

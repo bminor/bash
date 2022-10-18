@@ -431,6 +431,8 @@ parse_and_execute (string, from_file, flags)
 
       if (parse_command () == 0)
 	{
+	  int local_expalias, local_alflag;
+
 	  if ((flags & SEVAL_PARSEONLY) || (interactive_shell == 0 && read_but_dont_execute))
 	    {
 	      last_result = EXECUTION_SUCCESS;
@@ -507,6 +509,19 @@ parse_and_execute (string, from_file, flags)
 		}
 #endif /* ONESHOT */
 
+	      /* We play tricks in the parser and command_substitute() turning
+		 expand_aliases on and off depending on which parsing pass and
+		 whether or not we're in posix mode. This only matters for
+		 parsing, and we let the higher layers deal with that. We just
+		 want to ensure that expand_aliases is set to the appropriate
+		 global value when we go to execute this command, so we save
+		 and restore it around the execution (we don't restore it if
+		 the global value of the flag (expaliases_flag) changes). */
+	      local_expalias = expand_aliases;
+	      local_alflag = expaliases_flag;
+	      if (subshell_environment & SUBSHELL_COMSUB)
+		expand_aliases = expaliases_flag;
+
 	      /* See if this is a candidate for $( <file ). */
 	      if (startup_state == 2 &&
 		  (subshell_environment & SUBSHELL_COMSUB) &&
@@ -523,6 +538,10 @@ parse_and_execute (string, from_file, flags)
 	      dispose_command (command);
 	      dispose_fd_bitmap (bitmap);
 	      discard_unwind_frame ("pe_dispose");
+
+	      /* If the global value didn't change, we restore what we had. */
+	      if ((subshell_environment & SUBSHELL_COMSUB) && local_alflag == expaliases_flag)
+		expand_aliases = local_expalias;
 
 	      if (flags & SEVAL_ONECMD)
 		{
