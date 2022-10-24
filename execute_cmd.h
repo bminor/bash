@@ -52,6 +52,7 @@ extern int last_command_exit_signal;
 extern int builtin_ignoring_errexit;
 extern int executing_builtin;
 extern int executing_list;
+extern int retain_fifos;
 extern int comsub_ignore_return;
 extern int subshell_level;
 extern int match_ignore_case;

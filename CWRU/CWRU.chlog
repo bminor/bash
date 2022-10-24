@@ -4195,3 +4195,27 @@ subst.c
 	  command string (it was run through parse.y:parse_matched_pair())
 	- expand_word_internal: pass PF_BACKQUOTE to command_substitute() if
 	  expanding a `` command substitution
+
+				   10/20
+				   -----
+parse.y
+	- yylex: return YYUNDEF as current_token if read_token returns < 0.
+	  Fixes parser reset issue reported by Todd Stein <toddbstein@gmail.com>
+
+subst.c
+	- ARITH_EXP_CHARS: chars that are special and trigger expansion in
+	  arithmetic expressions, EXP_CHARS without `<' and `>'. Fixes bug
+	  reported by Glenn Jackman <glenn.jackman@gmail.com>
+
+execute_cmd.c
+	- retain_fifos: replace executing_list (which is still present) as the
+	  indicator of whether or not to save and restore the FIFO list around
+	  a call to execute_command_internal/execute_command; it's more
+	  descriptive and can be used elsewhere
+	- execute_for_command: set retain_fifos so we don't unlink the fifo
+	  list until the for command completes. Fixes issue reported in
+	  https://savannah.gnu.org/support/index.php?110743
+
+lib/readline/xmalloc.c
+	- memory_error_and_abort: add `const' qualifiers to the argument. Fix
+	  from Markus Elfring <Markus.Elfring@web.de>

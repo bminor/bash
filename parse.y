@@ -2899,7 +2899,7 @@ yylex ()
 #if defined (YYERRCODE) && !defined (YYUNDEF)
     current_token = YYERRCODE;
 #else
-    current_token = YYerror;
+    current_token = YYUNDEF;
 #endif
 
   return (current_token);
@@ -4156,7 +4156,9 @@ parse_comsub (qc, open, close, lenp, flags)
       shell_eof_token = ps.eof_token;
       expand_aliases = ps.expand_aliases;
 
-      /* yyparse() has already called yyerror() and reset_parser() */
+      /* yyparse() has already called yyerror() and reset_parser(), so we set
+	 PST_NOERROR to avoid a redundant error message. */
+      parser_state |= PST_NOERROR;
       return (&matched_pair_error);
     }
   else if (r != 0)

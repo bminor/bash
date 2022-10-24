@@ -240,6 +240,9 @@ int executing_builtin = 0;
 /* Non-zero if we are executing a command list (a;b;c, etc.) */
 int executing_list = 0;
 
+/* Non-zero if we should defer closing process substitution FDs. */
+int retain_fifos = 0;
+
 /* Non-zero if failing commands in a command substitution should not exit the
    shell even if -e is set.  Used to pass the CMD_IGNORE_RETURN flag down to
    commands run in command substitutions by parse_and_execute. */
@@ -418,7 +421,7 @@ execute_command (command)
 #if defined (PROCESS_SUBSTITUTION)
   /* don't unlink fifos if we're in a shell function; wait until the function
      returns. */
-  if (variable_context == 0 && executing_list == 0)
+  if (variable_context == 0 && retain_fifos == 0)
     unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
@@ -779,7 +782,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 #  endif
 
   /* XXX - also if sourcelevel != 0? */
-  if (variable_context != 0 || executing_list)
+  if (variable_context != 0 || retain_fifos)
     {
       ofifo = num_fifos ();
       ofifo_list = copy_fifo_list ((int *)&osize);
@@ -2749,7 +2752,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  if (command->value.Connection->second)
 	    command->value.Connection->second->flags |= CMD_IGNORE_RETURN;
 	}
-      executing_list++;
+      executing_list++; retain_fifos++;
       QUIT;
 
 #if 1
@@ -2765,7 +2768,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       exec_result = execute_command_internal (command->value.Connection->second,
 				      asynchronous, pipe_in, pipe_out,
 				      fds_to_close);
-      executing_list--;
+      executing_list--; retain_fifos--;
       break;
 
     case '|':
@@ -2819,7 +2822,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	 and the connector is OR_OR, then execute the second command,
 	 otherwise return. */
 
-      executing_list++;
+      executing_list++; retain_fifos++;
       if (command->value.Connection->first)
 	command->value.Connection->first->flags |= CMD_IGNORE_RETURN;
 
@@ -2842,7 +2845,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
 	  exec_result = execute_command (second);
 	}
-      executing_list--;
+      executing_list--; retain_fifos--;
       break;
 
     default:
@@ -2890,7 +2893,7 @@ execute_for_command (for_command)
       return (EXECUTION_FAILURE);
     }
 
-  loop_level++;
+  loop_level++; retain_fifos++;
   identifier = for_command->name->word;
 
   line_number = for_command->line;	/* for expansion error messages */
@@ -2970,7 +2973,7 @@ execute_for_command (for_command)
 	    {
 	      dispose_words (releaser);
 	      discard_unwind_frame ("for");
-	      loop_level--;
+	      loop_level--; retain_fifos--;
 	      return (EXECUTION_FAILURE);
 	    }
 	}
@@ -2998,7 +3001,7 @@ execute_for_command (for_command)
 	}
     }
 
-  loop_level--;
+  loop_level--; retain_fifos--;
   line_number = save_line_number;
 
 #if 0
@@ -5757,8 +5760,8 @@ parent_return:
 
       /* Make sure that the pipes are closed in the parent. */
       close_pipes (pipe_in, pipe_out);
-#if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
 #if 0
+#if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
       if (variable_context == 0)
         unlink_fifo_list ();
 #endif
@@ -5914,7 +5917,7 @@ initialize_subshell ()
   /* We're no longer inside a shell function. */
   variable_context = return_catch_flag = funcnest = evalnest = sourcenest = 0;
 
-  executing_list = 0;		/* XXX */
+  executing_list = retain_fifos = 0;		/* XXX */
 
   /* If we're not interactive, close the file descriptor from which we're
      reading the current shell script. */
