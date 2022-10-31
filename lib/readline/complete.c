@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -2526,7 +2526,8 @@ rl_filename_completion_function (const char *text, int state)
 	  temp = tilde_expand (dirname);
 	  xfree (dirname);
 	  dirname = temp;
-	  tilde_dirname = 1;
+	  if (*dirname != '~')
+	    tilde_dirname = 1;	/* indicate successful tilde expansion */
 	}
 
       /* We have saved the possibly-dequoted version of the directory name
@@ -2545,11 +2546,16 @@ rl_filename_completion_function (const char *text, int state)
 	  xfree (users_dirname);
 	  users_dirname = savestring (dirname);
 	}
-      else if (tilde_dirname == 0 && rl_completion_found_quote && rl_filename_dequoting_function)
+      else if (rl_completion_found_quote && rl_filename_dequoting_function)
 	{
-	  /* delete single and double quotes */
+	  /* We already ran users_dirname through the dequoting function.
+	     If tilde_dirname == 1, we successfully performed tilde expansion
+	     on dirname. Now we need to reconcile those results. We either
+	     just copy the already-dequoted users_dirname or tilde expand it
+	     if we tilde-expanded dirname. */
+	  temp = tilde_dirname ? tilde_expand (users_dirname) : savestring (users_dirname);
 	  xfree (dirname);
-	  dirname = savestring (users_dirname);
+	  dirname = temp;
 	}
       directory = opendir (dirname);
 

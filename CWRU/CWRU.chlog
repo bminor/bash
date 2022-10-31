@@ -4219,3 +4219,51 @@ execute_cmd.c
 lib/readline/xmalloc.c
 	- memory_error_and_abort: add `const' qualifiers to the argument. Fix
 	  from Markus Elfring <Markus.Elfring@web.de>
+
+				   10/24
+				   -----
+general.c
+	- check_binary_file: check the first two lines for NULs if the first
+	  line begins with a `#!'; otherwise check the first. From a discussion
+	  and patch in https://savannah.gnu.org/support/?110744
+	  (larsh@apache.org)
+
+parse.y
+	- parse_matched_pair: set PST_NOERROR if we read to EOF without finding
+	  a closing match and call parser_error; avoids redundant error
+	  message
+
+lib/sh/uconvert.c
+	- uconvert: RETURN: if ipart (integer part) is 0, but upart (fractional
+	  part) is non-zero, multiply upart by mult so we don't lose the sign
+	  for values in the range (-1, 0]. From a report by
+	  izabera <izaberina@gmail.com>
+
+execute_cmd.c
+	- execute_in_subshell: check for terminating signals before we return
+	  to our caller, which will immediately exit, and before running any
+	  exit trap (since termsig_handler will run any exit trap). Fixes bug
+	  reported by Andrew Neff <andrew.neff@visionsystemsinc.com>
+
+				   10/26
+				   -----
+lib/readline/complete.c
+	- rl_filename_completion_function: if the application doesn't supply
+	  any directory hook functions, we need to handle the case where we
+	  dequoted users_dirname and also tilde-expanded dirname. We choose
+	  to tilde expand users_dirname rather than call the application
+	  dequoting function again. Report and patch from
+	  Stefan H. Holek <stefan@epy.co.at>
+
+				   10/27
+				   -----
+execute_cmd.c
+	- execute_in_subshell: call procsub_clear in addition to clear_fifo_list,
+	  since none of these process substitutions are children of this new
+	  subshell
+
+jobs.c
+	- wait_for_background_pids: call procsub_waitpid on the last procsub
+	  created as long as it's the same as $!, then call reap_procsubs to
+	  clean up the procsub list. Don't call procsub_waitall. Report from
+	  Oguz İsmail Uysal <oguzismailuysal@gmail.com>

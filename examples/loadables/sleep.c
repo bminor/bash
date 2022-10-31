@@ -135,6 +135,7 @@ sleep_builtin (WORD_LIST *list)
 	if (list->word && ISOPTION (list->word->word, '-'))
 		list = list->next;
 
+	/* Reject options and negative arguments */
 	if (*list->word->word == '-' || list->next) {
 		builtin_usage ();
 		return (EX_USAGE);

@@ -1625,6 +1625,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif
 
 #if defined (PROCESS_SUBSTITUTION)
+  procsub_clear ();
   clear_fifo_list ();		/* XXX- we haven't created any FIFOs */
 #endif
 
@@ -1671,7 +1672,12 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
       dispose_redirects (command->redirects);
       command->redirects = (REDIRECT *)NULL;
-    }
+#if 0
+      /* TAG: bash-5.3 kre 10/24/2022 */
+      if (user_subshell && command->type == cm_subshell)
+	procsub_clear ();
+#endif
+      }
 
   if (command->type == cm_subshell)
     tcom = command->value.Subshell->command;
@@ -1730,6 +1736,9 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     return_code = (return_code == EXECUTION_SUCCESS) ? EXECUTION_FAILURE
 						     : EXECUTION_SUCCESS;
 
+  /* Check for terminating signals before we return to our caller, which we
+     expect to exit immediately anyway. */
+  CHECK_TERMSIG;
 
   /* If we were explicitly placed in a subshell with (), we need
      to do the `shell cleanup' things, such as running traps[0]. */

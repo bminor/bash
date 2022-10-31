@@ -40,7 +40,7 @@
 #define RETURN(x) \
 do { \
   if (ip) *ip = ipart * mult; \
-  if (up) *up = upart; \
+  if (up) *up = upart * (ipart == 0 ? mult : 1); \
   if (ep) *ep = p; \
   return (x); \
 } while (0)

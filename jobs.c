@@ -2708,13 +2708,15 @@ wait_for_background_pids (ps)
     }
 
 #if defined (PROCESS_SUBSTITUTION)
-  procsub_waitall ();
+  if (last_procsub_child && last_procsub_child->pid != NO_PID && last_procsub_child->pid == last_asynchronous_pid)
+    procsub_waitpid (last_procsub_child->pid);
+  reap_procsubs ();	/* closes fd */
 #endif
       
   /* POSIX.2 says the shell can discard the statuses of all completed jobs if
      `wait' is called with no arguments. */
   mark_dead_jobs_as_notified (1);
-  cleanup_dead_jobs ();
+  cleanup_dead_jobs ();		/* calls procsub_prune */
   bgp_clear ();
 
   return njobs;

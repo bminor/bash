@@ -3695,6 +3695,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  free (ret);
 	  parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), close);
 	  EOF_Reached = 1;	/* XXX */
+	  parser_state |= PST_NOERROR;	/* avoid redundant error message */
 	  return (&matched_pair_error);
 	}
 
