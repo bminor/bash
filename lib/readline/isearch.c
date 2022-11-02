@@ -463,6 +463,11 @@ add_character:
 	{
 	  rl_stuff_char (cxt->lastc);
 	  rl_execute_next (cxt->prevc);
+
+	  /* We're going to read the last two characters again. */
+	  _rl_del_executing_keyseq ();
+	  _rl_del_executing_keyseq ();
+
 	  /* XXX - do we insert everything in cxt->pmb? */
 	  return (0);
 	}
@@ -477,6 +482,8 @@ add_character:
 	  /* Make lastc be the next character read */
 	  /* XXX - do we insert everything in cxt->mb? */
 	  rl_execute_next (cxt->lastc);
+	  _rl_del_executing_keyseq ();
+
 	  /* Dispatch on the previous character (insert into search string) */
 	  cxt->lastc = cxt->prevc;
 #if defined (HANDLE_MULTIBYTE)
@@ -524,7 +531,10 @@ add_character:
 	 settable keyboard timeout value, this could alternatively
 	 use _rl_input_queued(100000) */
       if (cxt->lastc == ESC && (_rl_pushed_input_available () || _rl_input_available ()))
-	rl_execute_next (ESC);
+	{
+	  rl_execute_next (ESC);
+	  _rl_del_executing_keyseq ();
+	}
       return (0);
     }
 
@@ -536,6 +546,7 @@ add_character:
 	  /* This sets rl_pending_input to LASTC; it will be picked up the next
 	     time rl_read_key is called. */
 	  rl_execute_next (cxt->lastc);
+	  _rl_del_executing_keyseq ();
 	  return (0);
 	}
     }
@@ -546,6 +557,7 @@ add_character:
 	/* This sets rl_pending_input to LASTC; it will be picked up the next
 	   time rl_read_key is called. */
 	rl_execute_next (cxt->lastc);
+	_rl_del_executing_keyseq ();
 	return (0);
       }
 

@@ -1625,7 +1625,10 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif
 
 #if defined (PROCESS_SUBSTITUTION)
+#  if defined (JOB_CONTROL)
   procsub_clear ();
+  last_procsub_child = 0;
+#  endif
   clear_fifo_list ();		/* XXX- we haven't created any FIFOs */
 #endif
 
@@ -1674,8 +1677,13 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       command->redirects = (REDIRECT *)NULL;
 #if 0
       /* TAG: bash-5.3 kre 10/24/2022 */
+#if defined (PROCESS_SUBSTITUTION) && defined (JOB_CONTROL)
       if (user_subshell && command->type == cm_subshell)
-	procsub_clear ();
+	{
+	  procsub_clear ();
+	  last_procsub_child = 0;
+	}
+#endif
 #endif
       }
 

@@ -1168,6 +1168,8 @@ expr_streval (tok, e, lvalue)
   /* [[[[[ */
 #if defined (ARRAY_VARS)
   aflag = tflag;	/* use a different variable for now */
+  if (shell_compatibility_level > 51)
+    aflag |= AV_ATSTARKEYS;
   v = (e == ']') ? array_variable_part (tok, tflag, (char **)0, (int *)0) : find_variable (tok);
 #else
   v = find_variable (tok);

@@ -235,6 +235,7 @@ rl_digit_argument (int ignore, int key)
   else
     {
       rl_execute_next (key);
+      _rl_del_executing_keyseq ();
       return (rl_digit_loop ());
     }
 }

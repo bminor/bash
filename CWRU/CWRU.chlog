@@ -4201,6 +4201,7 @@ subst.c
 parse.y
 	- yylex: return YYUNDEF as current_token if read_token returns < 0.
 	  Fixes parser reset issue reported by Todd Stein <toddbstein@gmail.com>
+	  in https://savannah.gnu.org/support/index.php?110745
 
 subst.c
 	- ARITH_EXP_CHARS: chars that are special and trigger expansion in
@@ -4267,3 +4268,26 @@ jobs.c
 	  created as long as it's the same as $!, then call reap_procsubs to
 	  clean up the procsub list. Don't call procsub_waitall. Report from
 	  Oguz İsmail Uysal <oguzismailuysal@gmail.com>
+
+				   10/31
+				   -----
+expr.c
+	- expr_streval: explicitly permit `@' and `*' as associative array
+	  subscripts if the shell compatibility level is greater than 51.
+	  Prompted by report from Corey Hickey <bugfood-ml@fatooh.org>
+
+				   11/1
+				   ----
+lib/readline/readline.c
+	- readline_internal_char: save and restore the value of _rl_top_level
+	  around our use of setjmp, even though it doesn't matter in most
+	  cases. Report from sparrowhawk996@gmail.com that it causes crashes
+	  in some obscure callback-mode cases
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if we end the search and stuff characters back
+	  to be read again, decrement the current key sequence index by 2 so
+	  we don't have duplicate characters in the sequence
+
+lib/readline/misc.c
+	- rl_digit_argument: call _rl_del_executing_keyseq after rl_execute_next
