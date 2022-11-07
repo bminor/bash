@@ -297,10 +297,12 @@ make_command_string_internal (command)
 	    case '\n':				/* special case this */
 	      {
 		char c = command->value.Connection->connector;
+		int was_newline;
 
 		s[0] = printing_comsub ? c : ';';
 		s[1] = '\0';
 
+		was_newline = deferred_heredocs == 0 && was_heredoc == 0 && c == '\n';
 		if (deferred_heredocs == 0)
 		  {
 		    if (was_heredoc == 0)
@@ -314,6 +316,8 @@ make_command_string_internal (command)
 
 		if (inside_function_def)
 		  cprintf ("\n");
+		else if (printing_comsub && c == '\n' && was_newline == 0)
+		  cprintf ("\n");	/* preserve newlines in comsubs but don't double them */
 		else
 		  {
 		    if (c == ';')
@@ -1365,7 +1369,11 @@ print_function_def (func)
       cmdcopy->redirects = func_redirects;
     }
   else
-    newline ("}");
+    {
+      /* { */
+      newline ("}");
+      was_heredoc = 0;		/* not printing any here-documents now */
+    }
 
   dispose_command (cmdcopy);
 }
@@ -1442,7 +1450,10 @@ named_function_string (name, command, flags)
       cmdcopy->redirects = func_redirects;
     }
   else
-    newline ("}");
+    {	/* { */
+      newline ("}");
+      was_heredoc = 0;
+    }
 
   result = the_printed_command;
 
