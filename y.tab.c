@@ -5617,6 +5617,8 @@ reset_parser ()
   if (parser_state & (PST_EXTPAT|PST_CMDSUBST))
     extended_glob = global_extglob;
 #endif
+  if (parser_state & (PST_CMDSUBST|PST_STRING))
+    expand_aliases = expaliases_flag;
 
   parser_state = 0;
   here_doc_first_line = 0;
@@ -6699,6 +6701,7 @@ parse_string_to_command (string, flags)
   if (flags & SX_COMPLETE)
     parser_state |= PST_NOERROR;
 
+  parser_state |= PST_STRING;
   expand_aliases = 0;
 
   cmd = 0;
@@ -8712,7 +8715,7 @@ parse_string_to_word_list (s, flags, whom)
       /* State flags we don't want to persist into compound assignments. */
       parser_state &= ~PST_NOEXPAND;	/* parse_comsub sentinel */
       /* State flags we want to set for this run through the tokenizer. */
-      parser_state |= PST_COMPASSIGN|PST_REPARSE;
+      parser_state |= PST_COMPASSIGN|PST_REPARSE|PST_STRING;
     }
 
   while ((tok = read_token (READ)) != yacc_EOF)

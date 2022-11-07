@@ -1844,8 +1844,8 @@ reset_option_defaults ()
 static void
 init_interactive ()
 {
-  expand_aliases = interactive_shell = startup_state = 1;
-  interactive = 1;
+  expand_aliases = expaliases_flag = 1;
+  interactive_shell = startup_state = interactive = 1;
 #if defined (HISTORY)
   if (enable_history_list == -1)
     enable_history_list = 1;				/* set default  */
@@ -1865,7 +1865,7 @@ init_noninteractive ()
   bash_history_reinit (0);
 #endif /* HISTORY */
   interactive_shell = startup_state = interactive = 0;
-  expand_aliases = posixly_correct;	/* XXX - was 0 not posixly_correct */
+  expand_aliases = expaliases_flag = posixly_correct;	/* XXX - was 0 not posixly_correct */
   no_line_editing = 1;
 #if defined (JOB_CONTROL)
   /* Even if the shell is not interactive, enable job control if the -i or
@@ -1882,7 +1882,7 @@ init_interactive_script ()
     enable_history_list = 1;
 #endif
   init_noninteractive ();
-  expand_aliases = interactive_shell = startup_state = 1;
+  expand_aliases = expaliases_flag = interactive_shell = startup_state = 1;
 #if defined (HISTORY)
   remember_on_history = enable_history_list;	/* XXX */
 #endif
@@ -2025,7 +2025,7 @@ shell_reinitialize ()
   debugging = do_version = line_number = last_command_exit_value = 0;
   forced_interactive = interactive_shell = 0;
   subshell_environment = running_in_background = 0;
-  expand_aliases = 0;
+  expand_aliases = expaliases_flag = 0;
   bash_argv_initialized = 0;
 
   /* XXX - should we set jobs_m_flag to 0 here? */

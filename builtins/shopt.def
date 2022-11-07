@@ -149,6 +149,9 @@ static int shopt_set_complete_direxpand PARAMS((char *, int));
 static int set_assoc_expand PARAMS((char *, int));
 #endif
 
+int expaliases_flag = 0;
+static int shopt_set_expaliases PARAMS((char *, int));
+
 static int shopt_set_debug_mode PARAMS((char *, int));
 
 static int shopt_login_shell;
@@ -198,7 +201,7 @@ static struct {
 #endif
   { "dotglob", &glob_dot_filenames, (shopt_set_func_t *)NULL },
   { "execfail", &no_exit_on_failed_exec, (shopt_set_func_t *)NULL },
-  { "expand_aliases", &expand_aliases, (shopt_set_func_t *)NULL },
+  { "expand_aliases", &expaliases_flag, shopt_set_expaliases },
 #if defined (DEBUGGER)
   { "extdebug", &debugging_mode, shopt_set_debug_mode },
 #endif
@@ -350,7 +353,7 @@ reset_shopt_options ()
   check_window_size = CHECKWINSIZE_DEFAULT;
   allow_null_glob_expansion = glob_dot_filenames = 0;
   no_exit_on_failed_exec = 0;
-  expand_aliases = 0;
+  expand_aliases = expaliases_flag = 0;
   extended_quote = 1;
   fail_glob_expansion = 0;
   glob_asciirange = GLOBASCII_DEFAULT;
@@ -629,6 +632,15 @@ shopt_set_debug_mode (option_name, mode)
     init_bash_argv ();
 #endif
   return (0);
+}
+
+static int
+shopt_set_expaliases (option_name, mode)
+     char *option_name;
+     int mode;
+{
+  expand_aliases = expaliases_flag;
+  return 0;
 }
 
 #if defined (READLINE)

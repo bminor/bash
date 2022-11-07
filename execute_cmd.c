@@ -1536,7 +1536,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	 expansion with `shopt -s expand_alias' to continue to expand
 	 aliases. */
       if (ois != interactive_shell)
-	expand_aliases = 0;
+	expand_aliases = expaliases_flag = 0;
     }
 
   /* Subshells are neither login nor interactive. */

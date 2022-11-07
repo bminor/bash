@@ -91,7 +91,7 @@ static struct {
 {
   &interactive_comments,
   &source_uses_path,
-  &expand_aliases,
+  &expaliases_flag,
   &inherit_errexit,
   &print_shift_error,
   0
@@ -106,7 +106,8 @@ posix_initialize (on)
   /* Things that should be turned on when posix mode is enabled. */
   if (on != 0)
     {
-      interactive_comments = source_uses_path = expand_aliases = 1;
+      interactive_comments = source_uses_path = 1;
+      expand_aliases = expaliases_flag = 1;
       inherit_errexit = 1;
       source_searches_cwd = 0;
       print_shift_error = 1;
@@ -116,13 +117,14 @@ posix_initialize (on)
   else if (saved_posix_vars)		/* on == 0, restore saved settings */
     {
       set_posix_options (saved_posix_vars);
+      expand_aliases = expaliases_flag;
       free (saved_posix_vars);
       saved_posix_vars = 0;
     }
   else	/* on == 0, restore a default set of settings */
     {
       source_searches_cwd = 1;
-      expand_aliases = interactive_shell;
+      expand_aliases = expaliases_flag = interactive_shell;	/* XXX */
       print_shift_error = 0;
     }
 }
