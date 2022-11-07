@@ -3058,7 +3058,12 @@ string_list_pos_params (pchar, list, quoted, pflags)
     {
       tlist = quote_list (list);
       word_list_remove_quoted_nulls (tlist);
+#if 0
       ret = string_list (tlist);
+#else
+      /* TAG:bash-5.3 Aloxaf Yin 9/1/2022 */
+      ret = string_list_dollar_star (tlist, 0, 0);
+#endif
     }
   else if (pchar == '*' && quoted == 0 && ifs_is_null)	/* XXX */
     ret = expand_no_split_dollar_star ? string_list_dollar_star (list, quoted, 0) : string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
@@ -10367,7 +10372,12 @@ param_expand (string, sindex, quoted, expanded_something,
 	     quote the whole string, including the separators.  If IFS
 	     is unset, the parameters are separated by ' '; if $IFS is
 	     null, the parameters are concatenated. */
+#if 0
 	  temp = (quoted & (Q_DOUBLE_QUOTES|Q_PATQUOTE)) ? string_list_dollar_star (list, quoted, 0) : string_list (list);
+#else
+	  /* TAG:bash-5.3 Aloxaf Yin 9/1/2022 */
+	  temp = string_list_dollar_star (list, quoted, 0);
+#endif
 	  if (temp)
 	    {
 	      temp1 = (quoted & Q_DOUBLE_QUOTES) ? quote_string (temp) : temp;

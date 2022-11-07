@@ -63,6 +63,7 @@ extern char *trap_list[];
 extern int trapped_signal_received;
 extern int wait_signal_received;
 extern int running_trap;
+extern int trap_variable_context;
 extern int trap_saved_exit_value;
 extern int suppress_debug_trap_verbose;
 

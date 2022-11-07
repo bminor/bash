@@ -282,6 +282,10 @@ static int prompt_physical_chars;
    characters in the prompt or use heuristics about where they are. */
 static int *local_prompt_newlines;
 
+/* An array saying how many invisible characters are in each line of the
+   prompt. */
+static int *local_prompt_invis_chars;
+
 /* set to a non-zero value by rl_redisplay if we are marking modified history
    lines and the current line is so marked. */
 static int modmark;
@@ -295,6 +299,7 @@ static int line_totbytes;
 static char *saved_local_prompt;
 static char *saved_local_prefix;
 static int *saved_local_prompt_newlines;
+static int *saved_local_prompt_invis_chars;
 
 static int saved_last_invisible;
 static int saved_visible_length;
@@ -356,7 +361,7 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 {
   char *r, *ret, *p, *igstart, *nprompt, *ms;
   int l, rl, last, ignoring, ninvis, invfl, invflset, ind, pind, physchars;
-  int mlen, newlines, newlines_guess, bound, can_add_invis;
+  int mlen, newlines, newlines_guess, bound, can_add_invis, lastinvis;
   int mb_cur_max;
 
   /* We only expand the mode string for the last line of a multiline prompt
@@ -399,7 +404,8 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 	    *vlp = l;
 
 	  local_prompt_newlines = (int *) xrealloc (local_prompt_newlines, sizeof (int) * 2);
-	  local_prompt_newlines[0] = 0;
+	  local_prompt_invis_chars = (int *) xrealloc (local_prompt_invis_chars, sizeof (int) * 2);
+	  local_prompt_newlines[0] = local_prompt_invis_chars[0] = 0;
 	  local_prompt_newlines[1] = -1;
 
 	  return r;
@@ -414,15 +420,20 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
   newlines_guess = (_rl_screenwidth > 0) ? APPROX_DIV(l,  _rl_screenwidth) : APPROX_DIV(l, 80);
   local_prompt_newlines = (int *) xrealloc (local_prompt_newlines, sizeof (int) * (newlines_guess + 1));
   local_prompt_newlines[newlines = 0] = 0;
+  local_prompt_invis_chars = (int *) xrealloc (local_prompt_invis_chars, sizeof (int) * (newlines_guess + 1));
+  local_prompt_invis_chars[0] = 0;
   for (rl = 1; rl <= newlines_guess; rl++)
-    local_prompt_newlines[rl] = -1;
+    {
+      local_prompt_newlines[rl] = -1;
+      local_prompt_invis_chars[rl] = 0;
+    }
 
   rl = physchars = 0;	/* mode string now part of nprompt */
   invfl = 0;		/* invisible chars in first line of prompt */
   invflset = 0;		/* we only want to set invfl once */
   igstart = 0;		/* we're not ignoring any characters yet */
 
-  for (ignoring = last = ninvis = 0, p = nprompt; p && *p; p++)
+  for (ignoring = last = ninvis = lastinvis = 0, p = nprompt; p && *p; p++)
     {
       /* This code strips the invisible character string markers
 	 RL_PROMPT_START_IGNORE and RL_PROMPT_END_IGNORE */
@@ -447,6 +458,8 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 		 counter. */
 	      if (invflset && newlines == 1)
 		invfl = ninvis;
+	      local_prompt_invis_chars[newlines - 1] = ninvis - lastinvis;
+	      lastinvis = ninvis;
 	    }
 	  if (p != (igstart + 1))
 	    last = r - ret - 1;
@@ -511,6 +524,8 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 	      else
 	        new = r - ret;
 	      local_prompt_newlines[++newlines] = new;
+	      local_prompt_invis_chars[newlines - 1] = ninvis - lastinvis;
+	      lastinvis = ninvis;
 	    }
 
 	  /* What if a physical character of width >= 2 is split? There is
@@ -524,6 +539,9 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 
   if (rl <= _rl_screenwidth)
     invfl = ninvis;
+
+  /* Make sure we account for invisible characters on the last line. */
+  local_prompt_invis_chars[newlines] = ninvis - lastinvis;
 
   *r = '\0';
   if (lp)
@@ -964,6 +982,9 @@ rl_redisplay (void)
      in the first physical line of the prompt.
      wrap_offset - prompt_invis_chars_first_line is usually the number of
      invis chars on the second (or, more generally, last) line. */
+  /* XXX - There is code that assumes that all the invisible characters occur
+     on the first and last prompt lines; change that to use
+     local_prompt_invis_chars */
 
   /* This is zero-based, used to set the newlines */
   prompt_lines_estimate = lpos / _rl_screenwidth;
@@ -982,6 +1003,7 @@ rl_redisplay (void)
 	}  
 
       /* Now set lpos from the last newline */
+      /* XXX - change to use local_prompt_invis_chars[] */
       if (mb_cur_max > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
         lpos = _rl_col_width (local_prompt, temp, local_prompt_len, 1) - (wrap_offset - prompt_invis_chars_first_line);
       else
@@ -1249,10 +1271,9 @@ rl_redisplay (void)
 	     second and subsequent lines start at inv_lbreaks[N], offset by
 	     OFFSET (which has already been calculated above).  */
 
-#define INVIS_FIRST()	(prompt_physical_chars > _rl_screenwidth ? prompt_invis_chars_first_line : wrap_offset)
-#define WRAP_OFFSET(line, offset)  ((line == 0) \
-					? (offset ? INVIS_FIRST() : 0) \
-					: ((line == prompt_last_screen_line) ? wrap_offset-prompt_invis_chars_first_line : 0))
+#define INVIS_FIRST()	(local_prompt_invis_chars[0])
+#define WRAP_OFFSET(line, offset)  ((line <= prompt_last_screen_line) ? local_prompt_invis_chars[line] : 0)
+
 #define W_OFFSET(line, offset) ((line) == 0 ? offset : 0)
 #define VIS_LLEN(l)	((l) > _rl_vis_botlin ? 0 : (vis_lbreaks[l+1] - vis_lbreaks[l]))
 #define INV_LLEN(l)	(inv_lbreaks[l+1] - inv_lbreaks[l])
@@ -1262,6 +1283,9 @@ rl_redisplay (void)
 #define VIS_LINE_FACE(line) ((line) > _rl_vis_botlin) ? "" : VIS_FACE(line)
 #define INV_LINE(line) (invisible_line + inv_lbreaks[line])
 #define INV_LINE_FACE(line) (inv_face + inv_lbreaks[line])
+
+#define INV_CHARS_CURRENT_PROMPT_LINE(line) \
+	(local_prompt_invis_chars[line] > 0)
 
 #define OLD_CPOS_IN_PROMPT() (cpos_adjusted == 0 && \
 			_rl_last_c_pos != o_cpos && \
@@ -1319,6 +1343,7 @@ rl_redisplay (void)
 		   between the first and last lines of the prompt, if the 
 		   prompt consumes more than two lines. It's usually right */
 		/* XXX - not sure this is ever executed */
+		/* XXX - use local_prompt_invis_chars[linenum] */
 		_rl_last_c_pos -= (wrap_offset-prompt_invis_chars_first_line);
 
 	      /* If this is the line with the prompt, we might need to
@@ -1413,6 +1438,7 @@ rl_redisplay (void)
 	     only need to reprint it if the cursor is before the last
 	     invisible character in the prompt string. */
 	  /* XXX - why not use local_prompt_len? */
+	  /* XXX - This is right only if the prompt is a single line. */
 	  nleft = prompt_visible_length + wrap_offset;
 	  if (cursor_linenum == 0 && wrap_offset > 0 && _rl_last_c_pos > 0 &&
 	      _rl_last_c_pos < PROMPT_ENDING_INDEX && local_prompt)
@@ -1895,6 +1921,8 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
       /* See comments at dumb_update: for an explanation of this heuristic */
       if (nmax < omax)
 	goto clear_rest_of_line;
+      /* XXX - need to use WRAP_OFFSET(current_line, wrap_offset) instead of
+	 W_OFFSET - XXX */
       else if ((nmax - W_OFFSET(current_line, wrap_offset)) < (omax - W_OFFSET (current_line, visible_wrap_offset)))
 	goto clear_rest_of_line;
       else
@@ -2076,7 +2104,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
     }
 
   /* count of invisible characters in the current invisible line. */
-  current_invis_chars = W_OFFSET (current_line, wrap_offset);
+  current_invis_chars = WRAP_OFFSET (current_line, wrap_offset);
   if (_rl_last_v_pos != current_line)
     {
       _rl_move_vert (current_line);
@@ -2140,6 +2168,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 	  else
 	    /* We take wrap_offset into account here so we can pass correct
 	       information to _rl_move_cursor_relative. */
+	    /* XXX - can use local_prompt_invis_chars[0] instead of wrap_offset */
 	    _rl_last_c_pos = _rl_col_width (local_prompt, 0, lendiff, 1) - wrap_offset + modmark;
 	  cpos_adjusted = 1;
 	}
@@ -2183,6 +2212,7 @@ dumb_update:
 		     	wrap_offset-prompt_invis_chars_first_line
 		     on the assumption that this is the number of invisible
 		     characters in the last line of the prompt. */
+		  /* XXX - CHANGE THIS USING local_prompt_invis_chars[current_line] */
 		  if (wrap_offset > prompt_invis_chars_first_line &&
 		      current_line == prompt_last_screen_line &&
 		      prompt_physical_chars > _rl_screenwidth &&
@@ -2201,6 +2231,20 @@ dumb_update:
 			   wrap_offset >= prompt_invis_chars_first_line &&
 			   _rl_horizontal_scroll_mode == 0)
 		    ADJUST_CPOS (prompt_invis_chars_first_line);
+		  /* XXX - This is experimental. It's a start at supporting
+		     prompts where a non-terminal line contains the last
+		     invisible characters. We assume that we can use the
+		     local_prompt_invis_chars array and that the current line
+		     is completely filled with characters to _rl_screenwidth,
+		     so we can either adjust by the number of bytes in the
+		     current line or just go straight to _rl_screenwidth */
+		  else if (current_line > 0 && current_line < prompt_last_screen_line &&
+			   INV_CHARS_CURRENT_PROMPT_LINE(current_line) &&
+			   _rl_horizontal_scroll_mode == 0)
+		    {
+		      _rl_last_c_pos = _rl_screenwidth;
+		      cpos_adjusted = 1;
+		    }
 		}
 	      else
 		_rl_last_c_pos += temp;
@@ -2212,6 +2256,8 @@ dumb_update:
 	     know for sure, so we use another heuristic calclulation below. */
 	  if (nmax < omax)
 	    goto clear_rest_of_line;	/* XXX */
+	  /* XXX - use WRAP_OFFSET(current_line, wrap_offset) here instead of
+	     W_OFFSET since current_line == 0 */
 	  else if ((nmax - W_OFFSET(current_line, wrap_offset)) < (omax - W_OFFSET (current_line, visible_wrap_offset)))
 	    goto clear_rest_of_line;
 	  else
@@ -3099,10 +3145,12 @@ rl_save_prompt (void)
   saved_invis_chars_first_line = prompt_invis_chars_first_line;
   saved_physical_chars = prompt_physical_chars;
   saved_local_prompt_newlines = local_prompt_newlines;
+  saved_local_prompt_invis_chars = local_prompt_invis_chars;
 
   local_prompt = local_prompt_prefix = (char *)0;
   local_prompt_len = 0;
   local_prompt_newlines = (int *)0;
+  local_prompt_invis_chars = (int *)0;
 
   prompt_last_invisible = prompt_visible_length = prompt_prefix_length = 0;
   prompt_invis_chars_first_line = prompt_physical_chars = 0;
@@ -3114,11 +3162,13 @@ rl_restore_prompt (void)
   FREE (local_prompt);
   FREE (local_prompt_prefix);
   FREE (local_prompt_newlines);
+  FREE (local_prompt_invis_chars);
 
   local_prompt = saved_local_prompt;
   local_prompt_prefix = saved_local_prefix;
   local_prompt_len = saved_local_length;
   local_prompt_newlines = saved_local_prompt_newlines;
+  local_prompt_invis_chars = saved_local_prompt_invis_chars;
 
   prompt_prefix_length = saved_prefix_length;
   prompt_last_invisible = saved_last_invisible;
@@ -3131,7 +3181,7 @@ rl_restore_prompt (void)
   saved_local_length = 0;
   saved_last_invisible = saved_visible_length = saved_prefix_length = 0;
   saved_invis_chars_first_line = saved_physical_chars = 0;
-  saved_local_prompt_newlines = 0;
+  saved_local_prompt_newlines = saved_local_prompt_invis_chars = 0;
 }
 
 char *

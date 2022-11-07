@@ -38,15 +38,15 @@ $PRODUCES setattr.c
 #include "../flags.h"
 #include "common.h"
 #include "bashgetopt.h"
+#include "builtext.h"
 
 extern sh_builtin_func_t *this_shell_builtin;
 
-#ifdef ARRAY_VARS
-extern int declare_builtin PARAMS((WORD_LIST *));
-#endif
-
 #define READONLY_OR_EXPORT \
   (this_shell_builtin == readonly_builtin || this_shell_builtin == export_builtin)
+
+#define SPECIAL_LOCAL(n) \
+  (this_shell_builtin == local_builtin && n[0] == '-' && n[1] == 0)
 
 $BUILTIN export
 $FUNCTION export_builtin
@@ -561,7 +561,11 @@ show_localname_attributes (name, nodefs)
 
   if (var && local_p (var) && var->context == variable_context)	/* show every variable with attributes, even unset ones */
     {
-      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      /* There is no equivalent `declare -'. */
+      if (STREQ (var->name, "-"))
+	printf ("local -\n");
+      else
+	show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       return (0);
     }
   else

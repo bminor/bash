@@ -1676,8 +1676,8 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       dispose_redirects (command->redirects);
       command->redirects = (REDIRECT *)NULL;
 #if 0
-      /* TAG: bash-5.3 kre 10/24/2022 */
 #if defined (PROCESS_SUBSTITUTION) && defined (JOB_CONTROL)
+      /* TAG: bash-5.3 kre 10/24/2022 */
       if (user_subshell && command->type == cm_subshell)
 	{
 	  procsub_clear ();
@@ -1685,7 +1685,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	}
 #endif
 #endif
-      }
+    }
 
   if (command->type == cm_subshell)
     tcom = command->value.Subshell->command;

@@ -42,6 +42,10 @@
 extern int errno;
 #endif
 
+#if defined (HAVE_GETRANDOM) || defined (HAVE_ARC4RANDOM) || defined (HAVE_GETENTROPY)
+#  define USE_URANDOM32
+#endif
+
 #define BASEOPENFLAGS	(O_CREAT | O_TRUNC | O_EXCL | O_BINARY)
 
 #define DEFAULT_TMPDIR		"."	/* bogus default, should be changed */
@@ -163,13 +167,21 @@ sh_mktmpname (nameroot, flags)
       filename = NULL;
     }
 #else  /* !USE_MKTEMP */
+#ifndef USE_URANDOM32
   sh_seedrand ();
+#endif
   while (1)
     {
+      unsigned long x;
+#ifdef USE_URANDOM32
+      x = (unsigned long) ((flags & MT_USERANDOM) ? get_urandom32 () : ntmpfiles++);
+#else
+      x = (unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
+#endif
       filenum = (filenum << 1) ^
 		(unsigned long) time ((time_t *)0) ^
 		(unsigned long) dollar_dollar_pid ^
-		(unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
+		x;
       sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
       if (tmpnamelen > 0 && tmpnamelen < 32)
 	filename[tdlen + 1 + tmpnamelen] = '\0';
@@ -221,13 +233,21 @@ sh_mktmpfd (nameroot, flags, namep)
     *namep = filename;
   return fd;
 #else /* !USE_MKSTEMP */
+#ifndef USE_URANDOM32
   sh_seedrand ();
+#endif
   do
     {
+      unsigned long x;
+#ifdef USE_URANDOM32
+      x = (unsigned long) ((flags & MT_USERANDOM) ? get_urandom32 () : ntmpfiles++);
+#else
+      x = (unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
+#endif
       filenum = (filenum << 1) ^
 		(unsigned long) time ((time_t *)0) ^
 		(unsigned long) dollar_dollar_pid ^
-		(unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
+		x;
       sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
       if (tmpnamelen > 0 && tmpnamelen < 32)
 	filename[tdlen + 1 + tmpnamelen] = '\0';

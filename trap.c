@@ -113,6 +113,10 @@ int pending_traps[NSIG];
    trap command (e.g., when `return' is executed in the trap command). */
 int running_trap;
 
+/* The variable context (function execution level) when we began running
+   this trap command. */
+int trap_variable_context;
+
 /* Set to last_command_exit_value before running a trap. */
 int trap_saved_exit_value;
 
@@ -298,7 +302,7 @@ run_pending_traps ()
 {
   register int sig;
   int x;
-  volatile int old_exit_value, old_running;
+  volatile int old_exit_value, old_running, old_context;
   WORD_LIST *save_subst_varlist;
   HASH_TABLE *save_tempenv;
   sh_parser_state_t pstate;
@@ -336,6 +340,7 @@ run_pending_traps ()
   ps = save_pipestatus_array ();
 #endif
   old_running = running_trap;
+  old_context = trap_variable_context;
 
   for (sig = 1; sig < NSIG; sig++)
     {
@@ -345,6 +350,7 @@ run_pending_traps ()
 	{
 	  /* XXX - set last_command_exit_value = trap_saved_exit_value here? */
 	  running_trap = sig + 1;
+	  trap_variable_context = variable_context;
 
 	  if (sig == SIGINT)
 	    {
@@ -465,6 +471,7 @@ run_pending_traps ()
 		  if (function_code)
 		    {
 		      running_trap = old_running;		/* XXX */
+		      trap_variable_context = old_context;
 		      /* caller will set last_command_exit_value */
 		      sh_longjmp (return_catch, 1);
 		    }
@@ -473,6 +480,7 @@ run_pending_traps ()
 
 	  pending_traps[sig] = 0;	/* XXX - move before evalstring? */
 	  running_trap = old_running;
+	  trap_variable_context = old_context;
 	}
     }
 
@@ -992,6 +1000,7 @@ run_exit_trap ()
 
       retval = trap_saved_exit_value;
       running_trap = 1;
+      trap_variable_context = variable_context;
 
       code = setjmp_nosigs (top_level);
 
@@ -1047,7 +1056,7 @@ _run_trap_internal (sig, tag)
   char *trap_command, *old_trap;
   int trap_exit_value;
   volatile int save_return_catch_flag, function_code;
-  int old_modes, old_running, old_int;
+  int old_modes, old_running, old_int, old_context;
   int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
@@ -1057,7 +1066,7 @@ _run_trap_internal (sig, tag)
   ARRAY *ps;
 #endif
 
-  old_modes = old_running = -1;
+  old_modes = old_running = old_context = -1;
 
   trap_exit_value = function_code = 0;
   trap_saved_exit_value = last_command_exit_value;
@@ -1076,12 +1085,14 @@ _run_trap_internal (sig, tag)
       old_trap = trap_list[sig];
       old_modes = sigmodes[sig];
       old_running = running_trap;
+      old_context = trap_variable_context;
 
       sigmodes[sig] |= SIG_INPROGRESS;
       sigmodes[sig] &= ~SIG_CHANGED;		/* just to be sure */
       trap_command =  savestring (old_trap);
 
       running_trap = sig + 1;
+      trap_variable_context = variable_context;
 
       old_int = interrupt_state;	/* temporarily suppress pending interrupts */
       CLRINTERRUPT;
@@ -1141,6 +1152,7 @@ _run_trap_internal (sig, tag)
 
       running_trap = old_running;
       interrupt_state = old_int;
+      trap_variable_context = old_context;
 
       if (sigmodes[sig] & SIG_CHANGED)
 	{

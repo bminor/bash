@@ -4291,3 +4291,49 @@ lib/readline/isearch.c
 
 lib/readline/misc.c
 	- rl_digit_argument: call _rl_del_executing_keyseq after rl_execute_next
+
+				   11/3
+				   ----
+builtins/setattr.def
+	- show_localname_attributes: special-case "-" local variable, since
+	  there is no `declare -' equivalent.
+	  Reported by Emanuele Torre <torreemanuele6@gmail.com>.
+
+				   11/4
+				   ----
+lib/sh/tmpfile.c
+	- sh_mktmpname,sh_mktmpfd: use get_urandom32() instead of random() if
+	  we're not using mktemp or mkstemp and the system provides the
+	  appropriate support
+
+trap.c
+	- trap_variable_context: new variable, set to variable_context every
+	  time a trap string runs (that is, every time running_trap is set to
+	  a value > 0) in _run_trap_internal, run_exit_trap, run_pending_traps
+
+trap.h
+	- trap_variable_context: extern declaration
+
+builtins/common.c
+	- get_exitstat: if the `return' builtin is running, we are running a
+	  trap (but not the DEBUG trap), and the return would cause the trap
+	  string to complete (variable_context == trap_variable_context, so
+	  we haven't executed another shell function), use the last command
+	  exit value as the return status. POSIX interp 1602, from
+	  https://www.austingroupbugs.net/view.php?id=1602
+
+				   11/4
+				   ----
+
+lib/readline/display.c
+	- local_prompt_invis_chars: new array variable, similar to
+	  local_prompt_newlines, that keeps track of the number of invisible
+	  characters on each line of the prompt string. Use in WRAP_OFFSET
+	  macro with eye to using in W_OFFSET as well. Used for the case where
+	  the last line of the prompt is not the last line with invisible
+	  characters. Can use this in more calculations replacing wrap_offset
+	  and prompt_invis_chars_first_line going forward. Inspired by report
+	  from https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1018851
+	- update_line: use local_prompt_invis_chars to set _rl_last_c_pos
+	  correctly when on a non-terminal prompt line that contains
+	  invisible characters

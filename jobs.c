@@ -2712,7 +2712,7 @@ wait_for_background_pids (ps)
     procsub_waitpid (last_procsub_child->pid);
   reap_procsubs ();	/* closes fd */
 #endif
-      
+
   /* POSIX.2 says the shell can discard the statuses of all completed jobs if
      `wait' is called with no arguments. */
   mark_dead_jobs_as_notified (1);
