@@ -114,6 +114,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define PF_COMPLETE	0x10	/* same as W_COMPLETE, sets SX_COMPLETE */
 #define PF_EXPANDRHS	0x20	/* same as W_EXPANDRHS */
 #define PF_ALLINDS	0x40	/* array, act as if [@] was supplied */
+#define PF_BACKQUOTE	0x80	/* differentiate `` from $() for command_substitute */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
