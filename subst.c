@@ -8965,7 +8965,8 @@ pat_subst (string, pat, rep, mflags)
       return (ret);
     }
   else if (*string == 0 && (match_pattern (string, pat, mtype, &s, &e) != 0))
-    return ((mflags & MATCH_EXPREP) ? strcreplace (rep, '&', "", 2) : savestring (rep));
+    return (mflags & MATCH_EXPREP) ? strcreplace (rep, '&', "", 2)
+				   : (rep ? savestring (rep) : savestring (""));
 
   ret = (char *)xmalloc (rsize = 64);
   ret[0] = '\0';
