@@ -3819,6 +3819,10 @@ pos_params (string, start, end, quoted, pflags)
 #define EXP_CHAR(s) (s == '$' || s == '`' || s == CTLESC || s == '~')
 #endif
 
+/* We don't perform process substitution in arithmetic expressions, so don't
+   bother checking for it. */
+#define ARITH_EXP_CHAR(s) (s == '$' || s == '`' || s == CTLESC || s == '~')
+
 /* If there are any characters in STRING that require full expansion,
    then call FUNC to expand STRING; otherwise just perform quote
    removal if necessary.  This returns a new string. */
@@ -4028,7 +4032,7 @@ expand_arith_string (string, quoted)
   i = saw_quote = 0;
   while (string[i])
     {
-      if (EXP_CHAR (string[i]))
+      if (ARITH_EXP_CHAR (string[i]))
 	break;
       else if (string[i] == '\'' || string[i] == '\\' || string[i] == '"')
 	saw_quote = string[i];
