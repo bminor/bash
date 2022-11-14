@@ -1,9 +1,9 @@
 declare -A assoc=(["x],b[\$(echo uname >&2)"]="1" )
 declare -A assoc=(["\$key"]="1" ["x],b[\$(echo uname >&2)"]="1" )
 declare -A assoc=(["\$key"]="1" ["x],b[\$(echo uname >&2)"]="2" )
-./quotearray.tests: line 31: ((: 'assoc[x\],b\[\$(echo uname >&2)]++' : syntax error: operand expected (error token is "'assoc[x\],b\[\$(echo uname >&2)]++' ")
+./quotearray.tests: line 31: ((: 'assoc[x\],b\[\$(echo uname >&2)]++' : arithmetic syntax error: operand expected (error token is "'assoc[x\],b\[\$(echo uname >&2)]++' ")
 declare -A assoc=(["\$key"]="1" ["x],b[\$(echo uname >&2)"]="2" )
-./quotearray.tests: line 34: ((: 'assoc[x\],b\[\$(echo uname >&2)]'++ : syntax error: operand expected (error token is "'assoc[x\],b\[\$(echo uname >&2)]'++ ")
+./quotearray.tests: line 34: ((: 'assoc[x\],b\[\$(echo uname >&2)]'++ : arithmetic syntax error: operand expected (error token is "'assoc[x\],b\[\$(echo uname >&2)]'++ ")
 declare -A assoc=(["\$key"]="1" ["x],b[\$(echo uname >&2)"]="2" )
 declare -A assoc=(["\$key"]="1" ["x],b[\$(echo uname >&2)"]="3" )
 4
@@ -24,14 +24,14 @@ declare -a a=([0]="12" [1]="42")
 declare -Ai assoc=(["']"]="3" ["\$var"]="1" )
 105
 declare -A assoc=(["\` echo >&2 foo\`"]="42" ["\$( echo >&2 bar)"]="63" )
-./quotearray.tests: line 140: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
-./quotearray.tests: line 144: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 140: x],b[$(echo uname >&2): arithmetic syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 144: x],b[$(echo uname >&2): arithmetic syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
 1
-./quotearray.tests: line 147: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 147: x],b[$(echo uname >&2): arithmetic syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
 1
-./quotearray.tests: line 150: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 150: x],b[$(echo uname >&2): arithmetic syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
 1
-./quotearray.tests: line 153: x],b[$(echo uname >&2): syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
+./quotearray.tests: line 153: x],b[$(echo uname >&2): arithmetic syntax error: invalid arithmetic operator (error token is "],b[$(echo uname >&2)")
 1
 declare -A assoc
 0
@@ -44,7 +44,7 @@ declare -A assoc=(["\` echo >&2 foo\`"]="128" [0]="0" ["]"]="12" ["x],b[\$(echo 
 foo
 0
 0
-./quotearray1.sub: line 68: 0\],b\[1: syntax error: invalid arithmetic operator (error token is "\],b\[1")
+./quotearray1.sub: line 68: 0\],b\[1: arithmetic syntax error: invalid arithmetic operator (error token is "\],b\[1")
 declare -a array
 0
 0

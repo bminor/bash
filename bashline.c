@@ -151,6 +151,7 @@ static char *maybe_restore_tilde PARAMS((char *, char *));
 static char *bash_filename_rewrite_hook PARAMS((char *, int));
 
 static void bash_directory_expansion PARAMS((char **));
+static char *bash_expand_filename PARAMS((char *));
 static int bash_filename_stat_hook PARAMS((char **));
 static int bash_command_name_stat_hook PARAMS((char **));
 static int bash_directory_completion_hook PARAMS((char **));
@@ -328,10 +329,13 @@ static int dabbrev_expand_active = 0;
 	COMPLETE_DQUOTE = double-quoting the filename
 	COMPLETE_SQUOTE = single_quoting the filename
 	COMPLETE_BSQUOTE = backslash-quoting special chars in the filename
+	COMPLETE_DQUOTE2 = double-quote filename, but leave $ and ` unquoted
 */
 #define COMPLETE_DQUOTE  1
 #define COMPLETE_SQUOTE  2
 #define COMPLETE_BSQUOTE 3
+#define COMPLETE_DQUOTE2 4
+
 static int completion_quoting_style = COMPLETE_BSQUOTE;
 
 /* Flag values for the final argument to bash_default_completion */
@@ -3368,6 +3372,38 @@ directory_exists (dirname, should_dequote)
   free (new_dirname);
   return (r);
 }
+
+static char *
+bash_expand_filename (filename)
+     char *filename;
+{
+  char *newname;
+  int global_nounset;
+  WORD_LIST *wl;
+
+  newname = savestring (filename);
+  /* no error messages, and expand_prompt_string doesn't longjmp so we don't
+     have to worry about restoring this setting. */
+  global_nounset = unbound_vars_is_error;
+  unbound_vars_is_error = 0;
+  wl = expand_prompt_string (newname, 0, W_NOCOMSUB|W_NOPROCSUB|W_COMPLETE);	/* does the right thing */
+  unbound_vars_is_error = global_nounset;
+  free (newname);
+
+  if (wl == 0)
+    return filename;
+  else
+    {
+      newname = string_list (wl);
+      dispose_words (wl);
+      if (newname && *newname && STREQ (newname, filename))
+	{
+	  free (newname);
+	  return filename;
+	}
+      return newname;
+    }
+}
   
 /* Expand a filename before the readline completion code passes it to stat(2).
    The filename will already have had tilde expansion performed. */
@@ -4291,6 +4327,17 @@ bash_quote_filename (s, rtype, qcp)
       (expchar = bash_check_expchar (s, 0, &nextch, &closer)) &&
       file_exists (s) == 0)
     {
+      /* If it looks like the name is subject to expansion, see if we want to
+	 double-quote it. */
+      if (expchar == '$' || expchar == '`')
+	{
+	  char *newname;
+	  newname = bash_expand_filename (s);
+	  if (newname && strpbrk (newname, rl_filename_quote_characters))
+	    cs = COMPLETE_DQUOTE2;
+	  if (newname != s)
+	    free (newname);
+	}
       /* Usually this will have been set by bash_directory_completion_hook,
       	 but there are cases where it will not be. */
       if (rl_filename_quote_characters != custom_filename_quote_characters)
@@ -4300,7 +4347,12 @@ bash_quote_filename (s, rtype, qcp)
   else if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && mbschr (s, '\n'))
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
-    cs = COMPLETE_DQUOTE;
+    {
+      if ((expchar = bash_check_expchar (s, 0, &nextch, &closer)) == '$' || expchar == '`')
+	cs = COMPLETE_DQUOTE2;
+      else
+	cs = COMPLETE_DQUOTE;
+    }
   else if (*qcp == '\'')
     cs = COMPLETE_SQUOTE;
 #if defined (BANG_HISTORY)
@@ -4324,6 +4376,9 @@ bash_quote_filename (s, rtype, qcp)
 
   switch (cs)
     {
+    case COMPLETE_DQUOTE2:
+      rtext = sh_mkdoublequoted (mtext, strlen (mtext), 1);	/* For now */
+      break;
     case COMPLETE_DQUOTE:
       rtext = sh_double_quote (mtext);
       break;

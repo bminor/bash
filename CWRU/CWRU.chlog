@@ -4337,3 +4337,73 @@ lib/readline/display.c
 	- update_line: use local_prompt_invis_chars to set _rl_last_c_pos
 	  correctly when on a non-terminal prompt line that contains
 	  invisible characters
+
+				   11/7
+				   ----
+subst.c
+	- get_var_and_type: allocate new memory for *valp and return it if the
+	  type is VT_ARRAYMEMBER. The callers -- all of which treat this case
+	  the same as VT_VARIABLE -- will free appropriately. Fixes problems
+	  with using parameter operations like ## on dynamic array variables,
+	  reported by Ivan Kapranov <koltiradw@yandex.ru> back on 8/31/2022
+
+expr.c
+	- change some error messages to make it clearer these are arithmetic
+	  syntax errors. These will require new translations.
+
+test.c
+	- integer_expected_error: change the message to remove `expression',
+	  since this is only called for the `test' builtin, where TEST_ARITHEXP
+	  is not in FLAGS. This will require a new translation.
+	  Reported by Emanuele Torre <torreemanuele6@gmail.com> back on
+	  6/15/2022
+
+				   11/10
+				   -----
+builtins/read.def
+	- reset_timeout: when a timer expires, make sure to cancel any
+	  readline timeout as well with rl_clear_timeout().
+	  From https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1023776
+
+				   11/11
+				   -----
+builtins/reserved.def
+	- !: add short help text
+
+lib/readline/complete.c
+	- make_quoted_replacement: if readline found quote characters anywhere
+	  in the filename, but is not completing on an unclosed quoted string,
+	  and there is an application filename quoting function, let that
+	  function quote the filename if necessary
+
+bashline.c
+	- COMPLETE_DQUOTE2: new completion quoting style define
+	- bash_expand_filename: new function, runs a filename passed to it
+	  through word expansion, suppressing command and process substitution
+	  and returns the result (in new memory if it's different than the
+	  filename argument)
+	- bash_quote_filename: if the return value from bash_check_expchar is
+	  `$' or ``', expand the filename and if it contains characters that
+	  should be quoted, set the quoting style to COMPLETE_DQUOTE2
+	- bash_quote_filename: if the completion quoting style is COMPLETE_DQUOTE2,
+	  use sh_mkdoublequoted to put double quotes around the entire
+	  unexpanded filename instead of using sh_double_quote, which will
+	  backslash-quote any `$'. This is a start at preserving user-supplied
+	  quotes if the (expanded) completed filename requires them. From
+	  reports by Peng Yu <pengyu.ut@gmail.com> in 5/2020 and
+	  Pedro Gimeno <pgba-da0a@personal.formauri.es> in 6/2021
+
+				   11/14
+				   -----
+parse.y
+	- report_syntax_error: if word_top is set and we reach EOF, report the
+	  starting line number in the error message. From a patch from
+	  L A Walsh <bash@tlinx.org> and Manuel Reiter <manuel.reiter@dwd.de>
+	  back in 9/2018
+	- MAX_CASE_NEST: doubled to 256, renamed to MAX_COMPOUND_NEST
+	- read_token_word: add `if', `while', and `until' to the set of
+	  compound commands that use WORD_TOP and WORD_LINENO (with
+	  corresponding changes to grammar productions)
+	- [grammar]: changed check to decrement WORD_TOP to >= 0 since we
+	  start at -1 and we want to decrement back to -1 when all loops are
+	  closed

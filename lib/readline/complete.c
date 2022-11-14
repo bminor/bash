@@ -1784,6 +1784,11 @@ make_quoted_replacement (char *match, int mtype, char *qc)
       should_quote = rl_filename_quote_characters
 			? (_rl_strpbrk (match, rl_filename_quote_characters) != 0)
 			: 0;
+      /* If we saw a quote in the original word, but readline thinks the
+	 match doesn't need to be quoted, and the application has a filename
+	 quoting function, give the application a chance to quote it if
+	 needed so we don't second-guess the user. */
+      should_quote |= *qc == 0 && rl_completion_found_quote && mtype != NO_MATCH && rl_filename_quoting_function;
 
       do_replace = should_quote ? mtype : NO_MATCH;
       /* Quote the replacement, since we found an embedded
@@ -1791,6 +1796,7 @@ make_quoted_replacement (char *match, int mtype, char *qc)
       if (do_replace != NO_MATCH && rl_filename_quoting_function)
 	replacement = (*rl_filename_quoting_function) (match, do_replace, qc);
     }
+
   return (replacement);
 }
 

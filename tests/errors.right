@@ -83,8 +83,8 @@ readonly: usage: readonly [-aAf] [name[=value] ...] or readonly -p
 eval: usage: eval [arg ...]
 ./errors.tests: line 227: command: -i: invalid option
 command: usage: command [-pVv] command [arg ...]
-./errors.tests: line 230: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
-./errors.tests: line 231: /bin/sh + 0: syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 230: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 231: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
 ./errors.tests: line 234: trap: NOSIG: invalid signal specification
 ./errors.tests: line 237: trap: -s: invalid option
 trap: usage: trap [-lp] [[arg] signal_spec ...]
@@ -196,12 +196,17 @@ ok 4
 ok 5
 ./errors8.sub: line 14: set: notanoption: invalid option name
 ok 6
+./errors8.sub: line 16: /notthere: No such file or directory
+ok 7
+./errors8.sub: line 17: .: -x: invalid option
+.: usage: . filename [arguments]
+ok 8
 DEBUG
-./errors9.sub: line 6: [[: ++: syntax error: operand expected (error token is "+")
+./errors9.sub: line 6: [[: ++: arithmetic syntax error: operand expected (error token is "+")
 DEBUG
-./errors9.sub: line 8: ((: -- : syntax error: operand expected (error token is "- ")
+./errors9.sub: line 8: ((: -- : arithmetic syntax error: operand expected (error token is "- ")
 DEBUG
-./errors9.sub: line 10: ((: -- : syntax error: operand expected (error token is "- ")
+./errors9.sub: line 10: ((: -- : arithmetic syntax error: operand expected (error token is "- ")
 bash: line 1: return: can only `return' from a function or sourced script
 after return
 bash: line 1: return: can only `return' from a function or sourced script

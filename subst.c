@@ -85,6 +85,7 @@ extern int errno;
 
 #define VT_STARSUB	128	/* $* or ${array[*]} -- used to split */
 
+
 /* Flags for quoted_strchr */
 #define ST_BACKSL	0x01
 #define ST_CTLESC	0x02
@@ -5912,8 +5913,7 @@ parameter_brace_remove_pattern (varname, value, estatep, patstr, rtype, quoted, 
     case VT_VARIABLE:
     case VT_ARRAYMEMBER:
       temp1 = remove_pattern (val, pattern, patspec);
-      if (vtype == VT_VARIABLE)
-	FREE (val);
+      FREE (val);
       if (temp1)
 	{
 	  val = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
@@ -8320,7 +8320,8 @@ get_var_and_type (varname, value, estatep, quoted, flags, varp, valp)
 	  else
 	    {
 	      vtype = VT_ARRAYMEMBER;
-	      *valp = array_value (vname, Q_DOUBLE_QUOTES, flags, estatep);
+	      temp = array_value (vname, Q_DOUBLE_QUOTES, flags, estatep);
+	      *valp = temp ? savestring (temp) : temp;
 	    }
 	  *varp = v;
 	}
@@ -8337,14 +8338,16 @@ get_var_and_type (varname, value, estatep, quoted, flags, varp, valp)
 	{
 	  vtype = VT_ARRAYMEMBER;
 	  *varp = v;
-	  *valp = array_value (vname, Q_DOUBLE_QUOTES, flags, estatep);
+	  temp = array_value (vname, Q_DOUBLE_QUOTES, flags, estatep);
+	  *valp = temp ? savestring (temp) : temp;
 	}
     }
   else if ((v = find_variable (vname)) && (invisible_p (v) == 0) && (assoc_p (v) || array_p (v)))
     {
       vtype = VT_ARRAYMEMBER;
       *varp = v;
-      *valp = assoc_p (v) ? assoc_reference (assoc_cell (v), "0") : array_reference (array_cell (v), 0);
+      temp = assoc_p (v) ? assoc_reference (assoc_cell (v), "0") : array_reference (array_cell (v), 0);
+      *valp = temp ? savestring (temp) : temp;
     }
   else
 #endif
@@ -8708,8 +8711,7 @@ parameter_brace_transform (varname, value, estatep, xform, rtype, quoted, pflags
     case VT_VARIABLE:
     case VT_ARRAYMEMBER:
       temp1 = string_transform (xc, v, val);
-      if (vtype == VT_VARIABLE)
-	FREE (val);
+      FREE (val);
       if (temp1)
 	{
 	  val = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
@@ -8826,7 +8828,7 @@ parameter_brace_substring (varname, value, estatep, substr, quoted, pflags, flag
   this_command_name = oname;
   if (r <= 0)
     {
-      if (vtype == VT_VARIABLE)
+      if (vtype == VT_VARIABLE || vtype == VT_ARRAYMEMBER)
 	FREE (val);
       return ((r == 0) ? &expand_param_error : (char *)NULL);
     }
@@ -8842,8 +8844,7 @@ parameter_brace_substring (varname, value, estatep, substr, quoted, pflags, flag
 #endif
       tt = substring (val, e1, e2);
 
-      if (vtype == VT_VARIABLE)
-	FREE (val);
+      FREE (val);
       if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
 	temp = quote_string (tt);
       else
@@ -9202,7 +9203,6 @@ parameter_brace_patsub (varname, value, estatep, patsub, quoted, pflags, flags)
 	 consistently. */
       if (patsub_replacement && rep && *rep && shouldexp_replacement (rep))
 	mflags |= MATCH_EXPREP;
-
     }
 
   /* ksh93 doesn't allow the match specifier to be a part of the expanded
@@ -9241,8 +9241,7 @@ parameter_brace_patsub (varname, value, estatep, patsub, quoted, pflags, flags)
     case VT_VARIABLE:
     case VT_ARRAYMEMBER:
       temp = pat_subst (val, p, rep, mflags);
-      if (vtype == VT_VARIABLE)
-	FREE (val);
+      FREE (val);
       if (temp)
 	{
 	  tt = (mflags & MATCH_QUOTED) ? quote_string (temp) : quote_escapes (temp);
@@ -9429,8 +9428,7 @@ parameter_brace_casemod (varname, value, estatep, modspec, patspec, quoted, pfla
     case VT_VARIABLE:
     case VT_ARRAYMEMBER:
       temp = sh_modcase (val, pat, modop);
-      if (vtype == VT_VARIABLE)
-	FREE (val);
+      FREE (val);
       if (temp)
 	{
 	  tt = (mflags & MATCH_QUOTED) ? quote_string (temp) : quote_escapes (temp);

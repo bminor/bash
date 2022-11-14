@@ -317,8 +317,8 @@ static int two_tokens_ago;
 /* The line number in a script where the word in a `case WORD', `select WORD'
    or `for WORD' begins.  This is a nested command maximum, since the array
    index is decremented after a case, select, or for command is parsed. */
-#define MAX_CASE_NEST	128
-static int word_lineno[MAX_CASE_NEST+1];
+#define MAX_COMPOUND_NEST	256
+static int word_lineno[MAX_COMPOUND_NEST+1];
 static int word_top = -1;
 
 /* If non-zero, it is the token that we want read_token to return
@@ -800,9 +800,15 @@ shell_command:	for_command
 	|	case_command
 			{ $$ = $1; }
  	|	WHILE compound_list DO compound_list DONE
-			{ $$ = make_while_command ($2, $4); }
+			{
+			  $$ = make_while_command ($2, $4);
+			  if (word_top >= 0) word_top--;
+			}
 	|	UNTIL compound_list DO compound_list DONE
-			{ $$ = make_until_command ($2, $4); }
+			{
+			  $$ = make_until_command ($2, $4);
+			  if (word_top >= 0) word_top--;
+			}
 	|	select_command
 			{ $$ = $1; }
 	|	if_command
@@ -822,42 +828,42 @@ shell_command:	for_command
 for_command:	FOR WORD newline_list DO compound_list DONE
 			{
 			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	FOR WORD newline_list '{' compound_list '}'
 			{
 			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	FOR WORD ';' newline_list DO compound_list DONE
 			{
 			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	FOR WORD ';' newline_list '{' compound_list '}'
 			{
 			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	FOR WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
 			{
 			  $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	FOR WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
 			{
 			  $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	FOR WORD newline_list IN list_terminator newline_list DO compound_list DONE
 			{
 			  $$ = make_for_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	FOR WORD newline_list IN list_terminator newline_list '{' compound_list '}'
 			{
 			  $$ = make_for_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	;
 
@@ -865,84 +871,84 @@ arith_for_command:	FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
 				  if ($$ == 0) YYERROR;
-				  if (word_top > 0) word_top--;
+				  if (word_top >= 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS list_terminator newline_list '{' compound_list '}'
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
 				  if ($$ == 0) YYERROR;
-				  if (word_top > 0) word_top--;
+				  if (word_top >= 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS DO compound_list DONE
 				{
 				  $$ = make_arith_for_command ($2, $4, arith_for_lineno);
 				  if ($$ == 0) YYERROR;
-				  if (word_top > 0) word_top--;
+				  if (word_top >= 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS '{' compound_list '}'
 				{
 				  $$ = make_arith_for_command ($2, $4, arith_for_lineno);
 				  if ($$ == 0) YYERROR;
-				  if (word_top > 0) word_top--;
+				  if (word_top >= 0) word_top--;
 				}
 	;
 
 select_command:	SELECT WORD newline_list DO compound_list DONE
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	SELECT WORD newline_list '{' compound_list '}'
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	SELECT WORD ';' newline_list DO compound_list DONE
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	SELECT WORD ';' newline_list '{' compound_list '}'
 			{
 			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	SELECT WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
 			{
 			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	SELECT WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
 			{
 			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	SELECT WORD newline_list IN list_terminator newline_list DO compound_list DONE
 			{
 			  $$ = make_select_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	SELECT WORD newline_list IN list_terminator newline_list '{' compound_list '}'
 			{
 			  $$ = make_select_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	;
 
 case_command:	CASE WORD newline_list IN newline_list ESAC
 			{
 			  $$ = make_case_command ($2, (PATTERN_LIST *)NULL, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	CASE WORD newline_list IN case_clause_sequence newline_list ESAC
 			{
 			  $$ = make_case_command ($2, $5, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	|	CASE WORD newline_list IN case_clause ESAC
 			{
 			  $$ = make_case_command ($2, $5, word_lineno[word_top]);
-			  if (word_top > 0) word_top--;
+			  if (word_top >= 0) word_top--;
 			}
 	;
 
@@ -1058,11 +1064,21 @@ coproc:		COPROC shell_command
 	;
 
 if_command:	IF compound_list THEN compound_list FI
-			{ $$ = make_if_command ($2, $4, (COMMAND *)NULL); }
+			{
+			  $$ = make_if_command ($2, $4, (COMMAND *)NULL);
+  			  if (word_top >= 0) word_top--;
+			}
+			
 	|	IF compound_list THEN compound_list ELSE compound_list FI
-			{ $$ = make_if_command ($2, $4, $6); }
+			{
+			  $$ = make_if_command ($2, $4, $6);
+			  if (word_top >= 0) word_top--;
+			}
 	|	IF compound_list THEN compound_list elif_clause FI
-			{ $$ = make_if_command ($2, $4, $5); }
+			{
+			  $$ = make_if_command ($2, $4, $5);
+			  if (word_top >= 0) word_top--;
+			}
 	;
 
 
@@ -4450,7 +4466,7 @@ parse_dparen (c)
 #if defined (ARITH_FOR_COMMAND)
   if (last_read_token == FOR)
     {
-      if (word_top < MAX_CASE_NEST)
+      if (word_top < MAX_COMPOUND_NEST)
 	word_top++;
       arith_for_lineno = word_lineno[word_top] = line_number;
       cmdtyp = parse_arith_cmd (&wval, 0);
@@ -5338,10 +5354,17 @@ got_token:
     case CASE:
     case SELECT:
     case FOR:
-      if (word_top < MAX_CASE_NEST)
+      if (word_top < MAX_COMPOUND_NEST)
 	word_top++;
       word_lineno[word_top] = line_number;
       expecting_in_token++;
+      break;
+    case IF:
+    case WHILE:
+    case UNTIL:
+      if (word_top < MAX_COMPOUND_NEST)
+	word_top++;
+      word_lineno[word_top] = line_number;
       break;
     }
 
@@ -6274,6 +6297,8 @@ report_syntax_error (message)
     {
       if (EOF_Reached && shell_eof_token && current_token != shell_eof_token)
 	parser_error (line_number, _("unexpected EOF while looking for matching `%c'"), shell_eof_token);
+      else if (EOF_Reached && word_top >= 0)
+	parser_error (line_number, _("syntax error: unexpected end of file from command on line %d"), word_lineno[word_top]);
       else
 	{
 	  msg = EOF_Reached ? _("syntax error: unexpected end of file") : _("syntax error");

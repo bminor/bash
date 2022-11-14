@@ -153,7 +153,7 @@ static void
 integer_expected_error (pch)
      char *pch;
 {
-  test_syntax_error (_("%s: integer expression expected"), pch);
+  test_syntax_error (_("%s: integer expected"), pch);
 }
 
 /* Increment our position in the argument list.  Check that we're not

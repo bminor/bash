@@ -476,7 +476,7 @@ subexpr (expr)
 
   /*TAG:bash-5.3 make it clear that these are arithmetic syntax errors */
   if (curtok != 0)
-    evalerror (_("syntax error in expression"));
+    evalerror (_("arithmetic syntax error in expression"));
 
   FREE (tokstr);
   FREE (expression);
@@ -529,7 +529,7 @@ expassign ()
 	}
 
       if (tokstr == 0)
-	evalerror (_("syntax error in variable assignment"));
+	evalerror (_("arithmetic syntax error in variable assignment"));
 
       /* XXX - watch out for pointer aliasing issues here */
       lhs = savestring (tokstr);
@@ -1106,7 +1106,7 @@ exp0 ()
       readtok ();
     }
   else
-    evalerror (_("syntax error: operand expected"));
+    evalerror (_("arithmetic syntax error: operand expected"));
 
   return (val);
 }
@@ -1497,9 +1497,9 @@ readtok ()
 	  cp--;
 	  /* use curtok, since it hasn't been copied to lasttok yet */
 	  if (curtok == 0 || _is_arithop (curtok) || _is_multiop (curtok))
-	    evalerror (_("syntax error: operand expected"));
+	    evalerror (_("arithmetic syntax error: operand expected"));
 	  else
-	    evalerror (_("syntax error: invalid arithmetic operator"));
+	    evalerror (_("arithmetic syntax error: invalid arithmetic operator"));
 	}
       else
 	cp--;			/* `unget' the character */

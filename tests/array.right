@@ -400,7 +400,7 @@ qux: unset array element 0: ok
 0
 0
 1
-./array17.sub: line 43: ~: syntax error: operand expected (error token is "~")
+./array17.sub: line 43: ~: arithmetic syntax error: operand expected (error token is "~")
 0
 0
 3
@@ -415,7 +415,7 @@ one
 one
 two
 two
-./array17.sub: line 89: ~ : syntax error: operand expected (error token is "~ ")
+./array17.sub: line 89: ~ : arithmetic syntax error: operand expected (error token is "~ ")
 1
 argv[1] = <>
 argv[2] = <>
@@ -453,7 +453,7 @@ declare -A a=([1]="b" [0]="a" )
 declare -a var=([0]="[\$(echo" [1]="total" [2]="0)]=1" [3]="[2]=2]")
 declare -a var=([0]="[\$(echo total 0)]=1 [2]=2]")
 declare -a var=([0]="[\$(echo" [1]="total" [2]="0)]=1" [3]="[2]=2]")
-./array19.sub: line 89: total 0: syntax error in expression (error token is "0")
+./array19.sub: line 89: total 0: arithmetic syntax error in expression (error token is "0")
 declare -a var=()
 declare -al foo=([0]="abcde" [1]="two" [2]="three")
 declare -al foo=([0]="abcde")
@@ -522,14 +522,14 @@ p3
 argv[1] = <y>
 <X> <X> <X> <X>
 <X> <X> <X> <X>
-./array23.sub: line 22: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 23: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 24: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 26: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 30: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
-./array23.sub: line 33: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
-./array23.sub: line 34: $index: syntax error: operand expected (error token is "$index")
-./array23.sub: line 35: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 22: $( echo >&2 foo ) : arithmetic syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 23: $( echo >&2 foo ) : arithmetic syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 24: $( echo >&2 foo ) : arithmetic syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 26: $( echo >&2 foo ) : arithmetic syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 30: $( echo >&2 foo ): arithmetic syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 33: $( echo >&2 foo ): arithmetic syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 34: $index: arithmetic syntax error: operand expected (error token is "$index")
+./array23.sub: line 35: $( echo >&2 foo ): arithmetic syntax error: operand expected (error token is "$( echo >&2 foo )")
 0
 0
 0
@@ -583,7 +583,7 @@ jkl
 1. indexed:
 reference:
 1. 0
-./array25.sub: line 24: ' ': syntax error: operand expected (error token is "' '")
+./array25.sub: line 24: ' ': arithmetic syntax error: operand expected (error token is "' '")
 3. 0
 4. 0
 5. 0

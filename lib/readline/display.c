@@ -609,10 +609,17 @@ rl_expand_prompt (char *prompt)
   FREE (local_prompt);
   FREE (local_prompt_prefix);
 
+  /* Set default values for variables expand_prompt sets */
   local_prompt = local_prompt_prefix = (char *)0;
   local_prompt_len = 0;
   prompt_last_invisible = prompt_invis_chars_first_line = 0;
   prompt_visible_length = prompt_physical_chars = 0;
+
+  if (local_prompt_invis_chars == 0)
+    {
+      local_prompt_invis_chars = (int *)xmalloc (sizeof (int));
+      local_prompt_invis_chars[0] = 0;
+    }
 
   if (prompt == 0 || *prompt == 0)
     return (0);
@@ -775,6 +782,28 @@ _rl_optimize_redisplay (void)
   if (_rl_vis_botlin == 0)
     _rl_quick_redisplay = 1;
 }  
+
+/* Useful shorthand used by rl_redisplay, update_line, rl_move_cursor_relative */
+#define INVIS_FIRST()	(local_prompt_invis_chars[0])
+#define WRAP_OFFSET(line, offset)  ((line <= prompt_last_screen_line) ? local_prompt_invis_chars[line] : 0)
+
+#define W_OFFSET(line, offset) ((line) == 0 ? offset : 0)
+#define VIS_LLEN(l)	((l) > _rl_vis_botlin ? 0 : (vis_lbreaks[l+1] - vis_lbreaks[l]))
+#define INV_LLEN(l)	(inv_lbreaks[l+1] - inv_lbreaks[l])
+#define VIS_CHARS(line) (visible_line + vis_lbreaks[line])
+#define VIS_FACE(line) (vis_face + vis_lbreaks[line])
+#define VIS_LINE(line) ((line) > _rl_vis_botlin) ? "" : VIS_CHARS(line)
+#define VIS_LINE_FACE(line) ((line) > _rl_vis_botlin) ? "" : VIS_FACE(line)
+#define INV_LINE(line) (invisible_line + inv_lbreaks[line])
+#define INV_LINE_FACE(line) (inv_face + inv_lbreaks[line])
+
+#define INV_CHARS_CURRENT_PROMPT_LINE(line) \
+	(local_prompt_invis_chars[line] > 0)
+
+#define OLD_CPOS_IN_PROMPT() (cpos_adjusted == 0 && \
+			_rl_last_c_pos != o_cpos && \
+			_rl_last_c_pos > wrap_offset && \
+			o_cpos < prompt_last_invisible)
 
 /* Basic redisplay algorithm.  See comments inline. */
 void
@@ -1270,28 +1299,6 @@ rl_redisplay (void)
 	  /* The first line is at character position 0 in the buffer.  The
 	     second and subsequent lines start at inv_lbreaks[N], offset by
 	     OFFSET (which has already been calculated above).  */
-
-#define INVIS_FIRST()	(local_prompt_invis_chars[0])
-#define WRAP_OFFSET(line, offset)  ((line <= prompt_last_screen_line) ? local_prompt_invis_chars[line] : 0)
-
-#define W_OFFSET(line, offset) ((line) == 0 ? offset : 0)
-#define VIS_LLEN(l)	((l) > _rl_vis_botlin ? 0 : (vis_lbreaks[l+1] - vis_lbreaks[l]))
-#define INV_LLEN(l)	(inv_lbreaks[l+1] - inv_lbreaks[l])
-#define VIS_CHARS(line) (visible_line + vis_lbreaks[line])
-#define VIS_FACE(line) (vis_face + vis_lbreaks[line])
-#define VIS_LINE(line) ((line) > _rl_vis_botlin) ? "" : VIS_CHARS(line)
-#define VIS_LINE_FACE(line) ((line) > _rl_vis_botlin) ? "" : VIS_FACE(line)
-#define INV_LINE(line) (invisible_line + inv_lbreaks[line])
-#define INV_LINE_FACE(line) (inv_face + inv_lbreaks[line])
-
-#define INV_CHARS_CURRENT_PROMPT_LINE(line) \
-	(local_prompt_invis_chars[line] > 0)
-
-#define OLD_CPOS_IN_PROMPT() (cpos_adjusted == 0 && \
-			_rl_last_c_pos != o_cpos && \
-			_rl_last_c_pos > wrap_offset && \
-			o_cpos < prompt_last_invisible)
-
 
 	  /* We don't want to highlight anything that's going to be off the top
 	     of the display; if the current line takes up more than an entire
