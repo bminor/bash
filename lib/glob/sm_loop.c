@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -343,6 +343,11 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 		(n == string || ((flags & FNM_PATHNAME) && n[-1] == L('/'))))
 	      return (FNM_NOMATCH);
 
+	    /* If we are matching pathnames, we can't match a slash with a
+	       bracket expression. */
+	    if (sc == L('/') && (flags & FNM_PATHNAME))
+	      return (FNM_NOMATCH);
+
 	    /* `?' cannot match `.' or `..' if it is the first character of the
 	       string or if it is the first character following a slash and
 	       we are matching a pathname. */
@@ -403,6 +408,8 @@ PARSE_COLLSYM (p, vp)
    return (p + pc + 2);
 }
 
+#define SLASH_PATHNAME(c)	(c == L('/') && (flags & FNM_PATHNAME))
+
 /* Use prototype definition here because of type promotion. */
 static CHAR *
 #if defined (PROTOTYPES)
@@ -451,6 +458,12 @@ BRACKMATCH (p, test, flags)
 	{
 	  pc = FOLD (p[1]);
 	  p += 4;
+
+	  /* Finding a slash in a bracket expression means you have to
+	     match the bracket as an ordinary character (see below). */
+	  if (pc == L('/') && (flags & FNM_PATHNAME))
+	    return ((test == L('[')) ? savep : (CHAR *)0); /*]*/
+
 	  if (COLLEQUIV (test, pc))
 	    {
 /*[*/	      /* Move past the closing `]', since the first thing we do at
@@ -463,6 +476,10 @@ BRACKMATCH (p, test, flags)
 	      c = *p++;
 	      if (c == L('\0'))
 		return ((test == L('[')) ? savep : (CHAR *)0); /*]*/
+	      else if (c == L('/') && (flags & FNM_PATHNAME))
+		return ((test == L('[')) ? savep : (CHAR *)0); /*]*/
+	      else if (c == L(']'))
+		break;
 	      c = FOLD (c);
 	      continue;
 	    }
@@ -475,11 +492,11 @@ BRACKMATCH (p, test, flags)
 
 	  pc = 0;	/* make sure invalid char classes don't match. */
 	  /* Find end of character class name */
-	  for (close = p + 1; *close != '\0'; close++)
+	  for (close = p + 1; *close != '\0' && SLASH_PATHNAME(*close) == 0; close++)
 	    if (*close == L(':') && *(close+1) == L(']'))
 	      break;
 
-	  if (*close != L('\0'))
+	  if (*close != L('\0') && SLASH_PATHNAME(*close) == 0)
 	    {
 	      ccname = (CHAR *)malloc ((close - p) * sizeof (CHAR));
 	      if (ccname == 0)
@@ -526,6 +543,8 @@ BRACKMATCH (p, test, flags)
 	      c = *p++;
 	      if (c == L('\0'))
 		return ((test == L('[')) ? savep : (CHAR *)0);
+	      else if (c == L('/') && (flags & FNM_PATHNAME))
+		return ((test == L('[')) ? savep : (CHAR *)0); /*]*/
 	      else if (c == L(']'))
 		break;
 	      c = FOLD (c);
@@ -565,15 +584,23 @@ BRACKMATCH (p, test, flags)
       if (c == L('\0'))
 	return ((test == L('[')) ? savep : (CHAR *)0);
 
+      /* POSIX.2 2.13.3 says: `If a <slash> character is found following an
+         unescaped <left-square-bracket> character before a corresponding
+         <right-square-bracket> is found, the open bracket shall be treated
+         as an ordinary character.' If we find a slash in a bracket
+         expression and the flags indicate we're supposed to be treating the
+         string like a pathname, we have to treat the `[' as just a character
+         to be matched. */
+      if (c == L('/') && (flags & FNM_PATHNAME))
+	return ((test == L('[')) ? savep : (CHAR *)0);
+
       c = *p++;
       c = FOLD (c);
 
       if (c == L('\0'))
 	return ((test == L('[')) ? savep : (CHAR *)0);
-
-      if ((flags & FNM_PATHNAME) && c == L('/'))
-	/* [/] can never match when matching a pathname.  */
-	return (CHAR *)0;
+      else if (c == L('/') && (flags & FNM_PATHNAME))
+	return ((test == L('[')) ? savep : (CHAR *)0);
 
       /* This introduces a range, unless the `-' is the last
 	 character of the class.  Find the end of the range
@@ -584,7 +611,9 @@ BRACKMATCH (p, test, flags)
 	  if (!(flags & FNM_NOESCAPE) && cend == L('\\'))
 	    cend = *p++;
 	  if (cend == L('\0'))
-	    return (CHAR *)0;
+	    return ((test == L('[')) ? savep : (CHAR *)0);
+	  else if (cend == L('/') && (flags & FNM_PATHNAME))
+	    return ((test == L('[')) ? savep : (CHAR *)0);
 	  if (cend == L('[') && *p == L('.'))
 	    {
 	      p = PARSE_COLLSYM (p, &pc);
@@ -636,6 +665,8 @@ matched:
       /* A `[' without a matching `]' is just another character to match. */
       if (c == L('\0'))
 	return ((test == L('[')) ? savep : (CHAR *)0);
+      else if (c == L('/') && (flags & FNM_PATHNAME))
+	return ((test == L('[')) ? savep : (CHAR *)0);
 
       oc = c;
       c = *p++;
@@ -643,7 +674,10 @@ matched:
 	{
 	  brcnt++;
 	  brchrp = p++;		/* skip over the char after the left bracket */
-	  if ((c = *p) == L('\0'))
+	  c = *p;
+	  if (c == L('\0'))
+	    return ((test == L('[')) ? savep : (CHAR *)0);
+	  else if (c == L('/') && (flags & FNM_PATHNAME))
 	    return ((test == L('[')) ? savep : (CHAR *)0);
 	  /* If *brchrp == ':' we should check that the rest of the characters
 	     form a valid character class name. We don't do that yet, but we
@@ -666,6 +700,9 @@ matched:
 	{
 	  if (*p == '\0')
 	    return (CHAR *)0;
+	  /* We don't allow backslash to quote slash if we're matching pathnames */
+	  else if (*p == L('/') && (flags & FNM_PATHNAME))
+	    return ((test == L('[')) ? savep : (CHAR *)0);
 	  /* XXX 1003.2d11 is unclear if this is right. */
 	  ++p;
 	}

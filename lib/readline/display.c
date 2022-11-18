@@ -616,10 +616,8 @@ rl_expand_prompt (char *prompt)
   prompt_visible_length = prompt_physical_chars = 0;
 
   if (local_prompt_invis_chars == 0)
-    {
-      local_prompt_invis_chars = (int *)xmalloc (sizeof (int));
-      local_prompt_invis_chars[0] = 0;
-    }
+    local_prompt_invis_chars = (int *)xmalloc (sizeof (int));
+  local_prompt_invis_chars[0] = 0;
 
   if (prompt == 0 || *prompt == 0)
     return (0);

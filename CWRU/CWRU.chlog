@@ -4407,3 +4407,62 @@ parse.y
 	- [grammar]: changed check to decrement WORD_TOP to >= 0 since we
 	  start at -1 and we want to decrement back to -1 when all loops are
 	  closed
+
+builtins/jobs.def
+	- jobs_builtin: call notify_and_cleanup after displaying the status of
+	  jobs to implement POSIX requirement that `jobs' remove terminated
+	  jobs from the jobs list
+	  https://pubs.opengroup.org/onlinepubs/9699919799/utilities/jobs.html#tag_20_62
+
+				   11/15
+				   -----
+lib/sh/input_avail.c
+	- include signal.h unconditionally, we need it for HAVE_SELECT and
+	  HAVE_PSELECT
+	- nchars_avail: make sure we declare and use readfds and exceptfds if
+	  we have pselect or select available
+
+lib/readline/input.c
+	- rl_gather_tyi,rl_getc: need to declare and use readfds and exceptfds
+	  if HAVE_PSELECT or HAVE_SELECT is set. Report from
+	  Henry Bent <henry.r.bent@gmail.com>, fixes from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+				   11/16
+				   -----
+lib/sh/ufuncs.c
+	- quit.h: include unconditionally for declaration of sigemptyset even
+	  if HAVE_SELECT is not defined
+
+lib/sh/timers.c
+	- USEC_PER_SEC: make sure it's defined even if HAVE_SELECT is not
+
+lib/glob/sm_loop.c
+	- BRACKMATCH: if an equivalence class does not match, and the next
+	  character following the class is a `]', treat that as the end of
+	  the bracket expression.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+	- GMATCH: if the current character in the string is a `/' and the
+	  current element in the pattern is a bracket expresion, and the FLAGS
+	  include FNM_PATHNAME, return FNM_NOMATCH immediately. A bracket
+	  expression can never match a slash.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+	- BRACKMATCH: if we encounter a <slash> in a bracket expression, either
+	  individually or as part of an equivalence class, nullify the bracket
+	  expression and force the `[' to be matched as an ordinary
+	  character
+
+				   11/17
+				   -----
+lib/glob/sm_loop.c
+	- BRACKMATCH: if a slash character appears as the first character
+	  after a non-matching character class or equivalence class, treat
+	  the bracket as an ordinary character that must be matched literally
+	- BRACKMATCH: if a slash character appears as the second character
+	  of a range expression, treat the bracket as an ordinary character
+	- BRACKMATCH: if a slash character appears in the portion of a
+	  bracket expression that already matched, treat the bracket as an
+	  ordinary character
+	  Updates from Koichi Murase <myoga.murase@gmail.com>
+	- BRACKMATCH: if a range expression is incomplete (no end char),
+	  treat the bracket as an ordinary character

@@ -1,6 +1,6 @@
 /* input.c -- character input functions for readline. */
 
-/* Copyright (C) 1994-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2022 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -250,7 +250,7 @@ rl_gather_tyi (void)
   register int tem, result;
   int chars_avail, k;
   char input;
-#if defined(HAVE_SELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   fd_set readfds, exceptfds;
   struct timeval timeout;
 #endif
@@ -807,7 +807,7 @@ rl_getc (FILE *stream)
   int result;
   unsigned char c;
   int fd;
-#if defined (HAVE_PSELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   sigset_t empty_set;
   fd_set readfds;
 #endif

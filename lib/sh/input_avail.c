@@ -1,7 +1,7 @@
 /* input_avail.c -- check whether or not data is available for reading on a
 		    specified file descriptor. */
 
-/* Copyright (C) 2008,2009-2019 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009-2019,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,9 +33,7 @@
 #  include <sys/file.h>
 #endif /* HAVE_SYS_FILE_H */
 
-#if defined (HAVE_PSELECT)
-#  include <signal.h>
-#endif
+#include <signal.h>
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -107,10 +105,8 @@ nchars_avail (fd, nchars)
      int nchars;
 {
   int result, chars_avail;
-#if defined(HAVE_SELECT)
-  fd_set readfds, exceptfds;
-#endif
 #if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
+  fd_set readfds, exceptfds;
   sigset_t set, oset;
 #endif
 
@@ -121,7 +117,7 @@ nchars_avail (fd, nchars)
 
   chars_avail = 0;
 
-#if defined (HAVE_SELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   FD_ZERO (&readfds);
   FD_ZERO (&exceptfds);
   FD_SET (fd, &readfds);

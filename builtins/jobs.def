@@ -136,6 +136,9 @@ jobs_builtin (list)
 	{
 	case JSTATE_ANY:
 	  list_all_jobs (form);
+	  /* POSIX says to remove terminated jobs from the list after the jobs
+	     builtin reports their status. */
+	  notify_and_cleanup ();	/* the notify part will be a no-op */
 	  break;
 	case JSTATE_RUNNING:
 	  list_running_jobs (form);
@@ -163,6 +166,10 @@ jobs_builtin (list)
       UNBLOCK_CHILD (oset);
       list = list->next;
     }
+  /* POSIX says to remove terminated jobs from the list after the jobs
+     builtin reports their status. */
+  notify_and_cleanup ();
+
   return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
 

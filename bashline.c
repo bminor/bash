@@ -1877,7 +1877,13 @@ bash_default_completion (text, start, end, qc, compflags)
 	      rl_completion_suppress_append = 1;
 	      rl_filename_completion_desired = 0;
 	    }
+#if 0
+	  /* TAG:bash-5.3 jidanni@jidanni.org 11/11/2022 */
+	  else if (matches[0] && matches[1] && STREQ (matches[0], matches[1]) &&
+	  	   matches[2] && STREQ (matches[1], matches[2]) && CMD_IS_DIR (matches[0]))
+#else
 	  else if (matches[0] && matches[1] && STREQ (matches[0], matches[1]) && CMD_IS_DIR (matches[0]))
+#endif
 	    /* There are multiple instances of the same match (duplicate
 	       completions haven't yet been removed).  In this case, all of
 	       the matches will be the same, and the duplicate removal code

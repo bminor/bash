@@ -308,6 +308,7 @@ run_pending_traps ()
   sh_parser_state_t pstate;
   volatile int save_return_catch_flag, function_code;
   procenv_t save_return_catch;
+  char *trap_command, *old_trap;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -425,6 +426,10 @@ run_pending_traps ()
 	    }
 	  else
 	    {
+	      /* XXX - why not set SIG_INPROGRESS, clear SIG_CHANGED here? */
+	      old_trap = trap_list[sig];
+	      trap_command = savestring (old_trap);
+
 	      save_parser_state (&pstate);
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
@@ -447,7 +452,8 @@ run_pending_traps ()
 		}
 
 	      if (function_code == 0)
-		x = parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+	        /* XXX is x always last_command_exit_value? */
+		x = parse_and_execute (trap_command, "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 	      else
 		{
 		  parse_and_execute_cleanup (sig + 1);	/* XXX - could use -1 */
@@ -1068,7 +1074,7 @@ _run_trap_internal (sig, tag)
 
   old_modes = old_running = old_context = -1;
 
-  trap_exit_value = function_code = 0;
+  trap_exit_value = 0;
   trap_saved_exit_value = last_command_exit_value;
   /* Run the trap only if SIG is trapped and not ignored, and we are not
      currently executing in the trap handler. */
@@ -1112,7 +1118,11 @@ _run_trap_internal (sig, tag)
 	save_pipeline (1);	/* XXX only provides one save level */
 #endif
 
+      /* XXX - set pending_traps[sig] = 0 here? */
+      evalnest++;
+
       /* If we're in a function, make sure return longjmps come here, too. */
+      function_code = 0;
       save_return_catch_flag = return_catch_flag;
       if (return_catch_flag)
 	{
@@ -1123,7 +1133,6 @@ _run_trap_internal (sig, tag)
       flags = SEVAL_NONINT|SEVAL_NOHIST;
       if (sig != DEBUG_TRAP && sig != RETURN_TRAP && sig != ERROR_TRAP)
 	flags |= SEVAL_RESETLINE;
-      evalnest++;
       if (function_code == 0)
         {
 	  parse_and_execute (trap_command, tag, flags);

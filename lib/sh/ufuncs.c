@@ -1,6 +1,6 @@
 /* ufuncs - sleep and alarm functions that understand fractional values */
 
-/* Copyright (C) 2008,2009-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,9 +33,10 @@
 extern int errno;
 #endif /* !errno */
 
+#include "quit.h"
+
 #if defined (HAVE_SELECT)
 #  include "posixselect.h"
-#  include "quit.h"
 #  include "trap.h"
 #  include "stat-time.h"
 #endif

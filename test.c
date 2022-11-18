@@ -397,7 +397,7 @@ binary_test (op, arg1, arg2, flags)
   else if ((op[0] == '>' || op[0] == '<') && op[1] == '\0')
     {
 #if defined (HAVE_STRCOLL)
-      if (shell_compatibility_level > 40 && flags & TEST_LOCALE)
+      if (shell_compatibility_level > 40 && (flags & TEST_LOCALE))
 	return ((op[0] == '>') ? (strcoll (arg1, arg2) > 0) : (strcoll (arg1, arg2) < 0));
       else
 #endif
@@ -450,7 +450,11 @@ binary_operator ()
       ((w[0] == '>' || w[0] == '<') && w[1] == '\0') ||		/* <, > */
       (w[0] == '!' && w[1] == '=' && w[2] == '\0'))		/* != */
     {
+#if 0	/* TAG: bash-5.3 POSIX interp 375 11/9/2022 */
+      value = binary_test (w, argv[pos], argv[pos + 2], (posixly_correct ? TEST_LOCALE : 0));
+#else
       value = binary_test (w, argv[pos], argv[pos + 2], 0);
+#endif
       pos += 3;
       return (value);
     }
