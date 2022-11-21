@@ -2843,7 +2843,7 @@ execute_variable_command (command, vname)
   if (last_lastarg)
     last_lastarg = savestring (last_lastarg);
 
-  parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST);
+  parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE);
 
   restore_parser_state (&ps);
   bind_variable ("_", last_lastarg, 0);

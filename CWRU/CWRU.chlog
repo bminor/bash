@@ -4466,3 +4466,32 @@ lib/glob/sm_loop.c
 	  Updates from Koichi Murase <myoga.murase@gmail.com>
 	- BRACKMATCH: if a range expression is incomplete (no end char),
 	  treat the bracket as an ordinary character
+
+				   11/18
+				   -----
+doc/bashref.texi
+	- Reporting Bugs: add mention of the Savannah project page. Suggested
+	  by Loïc Yhuel <loic.yhuel@gmail.com>
+
+				   11/20
+				   -----
+builtins/common.h
+	- SEVAL_NOOPTIMIZE: new flag for parse_and_execute: means don't try to
+	  optimize forks out of any simple or conditional commands
+
+builtins/evalstring.c
+	- parse_and_execute: if FLAGS includes SEVAL_NOOPTIMIZE, don't try to
+	  call can_optimize_connection to optimize away forks from AND_AND or
+	  OR_OR commands
+
+builtins/eval.def,trap.c,parse.y,jobs.c
+	- parse_and_execute: include SEVAL_NOOPTIMIZE in any calls to
+	  parse_and_execute. Fixes bug reported by
+	  Frode Nordahl <frode.nordahl@canonical.com>
+
+				   11/21
+				   -----
+lib/readline/readline.c
+	- readline_initialize_everything: use xmalloc to initialize
+	  rl_executing_keyseq, since we use xrealloc to reallocate it and
+	  don't check it for NULL anywhere

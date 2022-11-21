@@ -53,5 +53,5 @@ eval_builtin (list)
     return (EX_USAGE);
   list = loptend;	/* skip over possible `--' */
 
-  return (list ? evalstring (string_list (list), "eval", SEVAL_NOHIST) : EXECUTION_SUCCESS);
+  return (list ? evalstring (string_list (list), "eval", SEVAL_NOHIST|SEVAL_NOOPTIMIZE) : EXECUTION_SUCCESS);
 }

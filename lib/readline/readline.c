@@ -1327,9 +1327,8 @@ readline_initialize_everything (void)
     _rl_parse_colors ();
 #endif
 
-  rl_executing_keyseq = malloc (_rl_executing_keyseq_size = 16);
-  if (rl_executing_keyseq)
-    rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
+  rl_executing_keyseq = xmalloc (_rl_executing_keyseq_size = 16);
+  rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
 }
 
 /* If this system allows us to look at the values of the regular
