@@ -167,6 +167,9 @@ reset_timeout ()
   /* Cancel alarm before restoring signal handler. */
   if (read_timeout)
     shtimer_clear (read_timeout);
+#if defined (READLINE)
+  rl_clear_timeout ();
+#endif
   read_timeout = 0;
 }
 
