@@ -683,21 +683,20 @@ check_binary_file (sample, sample_len)
      int sample_len;
 {
   register int i;
+  int nline;
   unsigned char c;
 
   if (sample_len >= 4 && sample[0] == 0x7f && sample[1] == 'E' && sample[2] == 'L' && sample[3] == 'F')
     return 1;
 
   /* Generally we check the first line for NULs. If the first line looks like
-     a `#!' interpreter specifier, we just look for NULs anywhere in the
-     buffer. */
-  if (sample[0] == '#' && sample[1] == '!')
-    return (memchr (sample, '\0', sample_len) != NULL);
+     a `#!' interpreter specifier, we look for NULs in the first two lines. */
+  nline = (sample[0] == '#' && sample[1] == '!') ? 2 : 1;
 
   for (i = 0; i < sample_len; i++)
     {
       c = sample[i];
-      if (c == '\n')
+      if (c == '\n' && --nline == 0)
 	return (0);
       if (c == '\0')
 	return (1);
