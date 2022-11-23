@@ -569,7 +569,9 @@ BRACKMATCH (p, test, flags)
       if (!(flags & FNM_NOESCAPE) && c == L('\\'))
 	{
 	  if (*p == '\0')
-	    return (CHAR *)0;
+	    return ((test == L('[')) ? savep : (CHAR *)0);
+	  else if (*p == L('/') && (flags & FNM_PATHNAME))
+	    return ((test == L('[')) ? savep : (CHAR *)0);
 	  cstart = cend = *p++;
 	}
 
@@ -699,11 +701,11 @@ matched:
       else if (!(flags & FNM_NOESCAPE) && c == L('\\'))
 	{
 	  if (*p == '\0')
-	    return (CHAR *)0;
+	    return ((test == L('[')) ? savep : (CHAR *)0);
 	  /* We don't allow backslash to quote slash if we're matching pathnames */
 	  else if (*p == L('/') && (flags & FNM_PATHNAME))
 	    return ((test == L('[')) ? savep : (CHAR *)0);
-	  /* XXX 1003.2d11 is unclear if this is right. */
+	  /* Posix issue 8 leaves this unspecified for the shell. */
 	  ++p;
 	}
     }

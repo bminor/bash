@@ -875,6 +875,7 @@ AC_CHECK_DECLS([sbrk])
 AC_CHECK_DECLS([setregid])
 AC_CHECK_DECLS([strcpy])
 AC_CHECK_DECLS([strsignal])
+AC_CHECK_DECLS([gettimeofday])
 
 AC_CHECK_FUNCS(setresuid setresgid)
 

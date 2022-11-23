@@ -1664,7 +1664,8 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      subshell sets an exit trap, so we set CMD_NO_FORK for simple commands
      and set CMD_TRY_OPTIMIZING for simple commands on the right side of an
      and-or or `;' list to test for optimizing forks when they are executed. */
-  if (user_subshell && command->type == cm_subshell)
+  if (user_subshell && command->type == cm_subshell &&
+      (command->flags & (CMD_TIME_PIPELINE|CMD_INVERT_RETURN)) == 0)
     optimize_subshell_command (command->value.Subshell->command);
 
   /* Do redirections, then dispose of them before recursive call. */

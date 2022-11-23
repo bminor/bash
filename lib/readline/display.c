@@ -3374,7 +3374,7 @@ _rl_update_final (void)
       full_lines = 1;
     }
   _rl_move_vert (_rl_vis_botlin);
-  woff = W_OFFSET(_rl_vis_botlin, wrap_offset);
+  woff = W_OFFSET(_rl_vis_botlin, wrap_offset);		/* XXX - WRAP_OFFSET? */
   botline_length = VIS_LLEN(_rl_vis_botlin) - woff;
   /* If we've wrapped lines, remove the final xterm line-wrap flag. */
   if (full_lines && _rl_term_autowrap && botline_length == _rl_screenwidth)
@@ -3383,7 +3383,7 @@ _rl_update_final (void)
 
       /* LAST_LINE includes invisible characters, so if you want to get the
 	 last character of the first line, you have to take WOFF into account.
-	 This needs to be done for both calls to _rl_move_cursor_relative,
+	 This needs to be done both for calls to _rl_move_cursor_relative,
 	 which takes a buffer position as the first argument, and any direct
 	 subscripts of LAST_LINE. */
       last_line = &visible_line[vis_lbreaks[_rl_vis_botlin]]; /* = VIS_CHARS(_rl_vis_botlin); */

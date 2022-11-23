@@ -7507,8 +7507,6 @@ expand_arrayref:
 		    ? quote_string (temp)
 		    : quote_escapes (temp);
 	  rflags |= W_ARRAYIND;
-	  if (estatep)
-	    *estatep = es;	/* structure copy */
 	}
       /* Note that array[*] and array[@] expanded to a quoted null string by
 	 returning the W_HASQUOTEDNULL flag to the caller in addition to TEMP. */
@@ -7517,7 +7515,9 @@ expand_arrayref:
       else if (es.subtype == 2 && temp && QUOTED_NULL (temp) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	rflags |= W_HASQUOTEDNULL;
 
-      if (estatep == 0)
+      if (estatep)
+	*estatep = es;	/* structure copy */
+      else
 	flush_eltstate (&es);
     }
 #endif

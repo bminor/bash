@@ -694,7 +694,7 @@ static int saved_history_logical_offset = -1;
 #define HISTORY_FULL() (history_is_stifled () && history_length >= history_max_entries)
 
 static int
-set_saved_history ()
+set_saved_history (void)
 {
   int absolute_offset, count;
 

@@ -4495,3 +4495,38 @@ lib/readline/readline.c
 	- readline_initialize_everything: use xmalloc to initialize
 	  rl_executing_keyseq, since we use xrealloc to reallocate it and
 	  don't check it for NULL anywhere
+
+subst.c
+	- parameter_brace_expand_word: make sure to update *ESTATEP and pass
+	  ES back to the caller even if array_value returns NULL. Fixes
+	  memory leak referencing unset associative array elements reported
+	  by Ralf Oehler <Ralf@Oehler-Privat.de>; fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+				   11/22
+				   -----
+lib/glob/sm_loop.c
+	- BRACKMATCH: if a backslash appears before a slash in a bracket
+	  expression, treat the whole thing as literal and try to match the
+	  open bracket
+	- BRACKMATCH: if a bracket expression ends in an unquoted backslash,
+	  try to match the left bracket literally and go on. More discussion with
+	  Koichi Murase <myoga.murase@gmail.com>
+
+execute_cmd.c
+	- execute_in_subshell: don't try to optimize away forks in the command
+	  if the subshell command is being timed or its return value is being
+	  inverted. Report from Dabrien 'Dabe' Murphy <dabe@dabe.com>
+
+				   11/23
+				   -----
+lib/readline/complete.c
+	- __WIN32__: remove uses of this preprocessor symbol, use _WIN32
+
+lib/readline/rldefs.h
+	- Don't define NEW_TTY_DRIVER on _WIN32. Fix from
+	  sparrowhawk996@gmail.com
+
+include/posixselect.h
+	- include "posixtime.h" instead of <sys/time.h> so the right guards
+	  are present

@@ -708,6 +708,7 @@ readline_internal_charloop (void)
       _rl_internal_char_cleanup ();
 
 #if defined (READLINE_CALLBACKS)
+      memcpy ((void *)_rl_top_level, (void *)olevel, sizeof (procenv_t));
       return 0;
 #else
     }
