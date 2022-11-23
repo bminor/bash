@@ -125,7 +125,7 @@ do { \
 } while (0)
 
 #if defined (EXTENDED_GLOB)
-extern int extended_glob;
+extern int extended_glob, extglob_flag;
 #endif
 
 #if defined (TRANSLATABLE_STRINGS)
@@ -3304,7 +3304,7 @@ reset_parser ()
 #if defined (EXTENDED_GLOB)
   /* Reset to global value of extended glob */
   if (parser_state & (PST_EXTPAT|PST_CMDSUBST))
-    extended_glob = global_extglob;
+    extended_glob = extglob_flag;
 #endif
   if (parser_state & (PST_CMDSUBST|PST_STRING))
     expand_aliases = expaliases_flag;
@@ -4124,10 +4124,10 @@ parse_comsub (qc, open, close, lenp, flags)
     expand_aliases = posixly_correct != 0;
 #if defined (EXTENDED_GLOB)
   /* If (parser_state & PST_EXTPAT), we're parsing an extended pattern for a
-     conditional command and have already set global_extglob appropriately. */
+     conditional command and have already set extended_glob appropriately. */
   if (shell_compatibility_level <= 51 && was_extpat == 0)
     {
-      local_extglob = global_extglob = extended_glob;
+      local_extglob = extended_glob;
       extended_glob = 1;
     }
 #endif
@@ -4235,7 +4235,7 @@ xparse_dolparen (base, string, indp, flags)
 {
   sh_parser_state_t ps;
   sh_input_line_state_t ls;
-  int orig_ind, nc, sflags, start_lineno;
+  int orig_ind, nc, sflags, start_lineno, local_extglob;
   char *ret, *ep, *ostring;
 
 /*debug_parser(1);*/
@@ -4278,7 +4278,7 @@ xparse_dolparen (base, string, indp, flags)
      old value will be restored by restore_parser_state(). */
   expand_aliases = 0;
 #if defined (EXTENDED_GLOB)
-  global_extglob = extended_glob;		/* for reset_parser() */
+  local_extglob = extended_glob;
 #endif
 
   token_to_read = DOLPAREN;			/* let's trick the parser */
@@ -4296,6 +4296,9 @@ xparse_dolparen (base, string, indp, flags)
   restore_input_line_state (&ls);
   restore_parser_state (&ps);
 
+#if defined (EXTENDED_GLOB)
+  extended_glob = local_extglob;
+#endif
   token_to_read = 0;
 
   /* If parse_string returns < 0, we need to jump to top level with the
@@ -4731,12 +4734,16 @@ cond_term ()
 	}
 
       /* rhs */
+#if defined (EXTENDED_GLOB)
       local_extglob = extended_glob;
       if (parser_state & PST_EXTPAT)
 	extended_glob = 1;
+#endif
       tok = read_token (READ);
+#if defined (EXTENDED_GLOB)
       if (parser_state & PST_EXTPAT)
 	extended_glob = local_extglob;
+#endif
       parser_state &= ~(PST_REGEXP|PST_EXTPAT);
 
       if (tok == WORD)
@@ -4783,7 +4790,6 @@ parse_cond_command ()
 {
   COND_COM *cexp;
 
-  global_extglob = extended_glob;
   cexp = cond_expr ();
   return (make_cond_command (cexp));
 }
