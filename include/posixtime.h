@@ -49,7 +49,7 @@ struct timeval
 #endif
 
 #if !HAVE_GETTIMEOFDAY
-extern int gettimeofday PARAMS((struct timeval *, void *));
+extern int gettimeofday PARAMS((struct timeval * restrict, void * restrict));
 #endif
 
 /* These exist on BSD systems, at least. */

@@ -2086,7 +2086,7 @@ find_variable_nameref (v)
     {
       level++;
       if (level > NAMEREF_MAX)
-	return ((SHELL_VAR *)0);	/* error message here? */
+	return (&nameref_maxloop_value);
       newname = nameref_cell (v);
       if (newname == 0 || *newname == '\0')
 	return ((SHELL_VAR *)0);
@@ -2266,6 +2266,11 @@ find_variable_nameref_for_create (name, flags)
   /* See if we have a nameref pointing to a variable that hasn't been
      created yet. */
   var = find_variable_last_nameref (name, 1);
+  if (var == &nameref_maxloop_value)
+    {
+      internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+      return ((SHELL_VAR *)INVALID_NAMEREF_VALUE);
+    }
   if ((flags&1) && var && nameref_p (var) && invisible_p (var))
     {
       internal_warning (_("%s: removing nameref attribute"), name);
@@ -2292,6 +2297,11 @@ find_variable_nameref_for_assignment (name, flags)
   /* See if we have a nameref pointing to a variable that hasn't been
      created yet. */
   var = find_variable_last_nameref (name, 1);
+  if (var == &nameref_maxloop_value)
+    {
+      internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+      return ((SHELL_VAR *)INVALID_NAMEREF_VALUE);
+    }
   if (var && nameref_p (var) && invisible_p (var))	/* XXX - flags */
     {
       internal_warning (_("%s: removing nameref attribute"), name);
@@ -2347,7 +2357,14 @@ find_variable_tempenv (name)
 
   var = find_variable_internal (name, FV_FORCETEMPENV);
   if (var && nameref_p (var))
-    var = find_variable_nameref (var);
+    {
+      var = find_variable_nameref (var);
+      if (var == &nameref_maxloop_value)
+	{
+	  internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+	  return (0);
+	}
+    }
   return (var);
 }
 
@@ -2360,7 +2377,14 @@ find_variable_notempenv (name)
 
   var = find_variable_internal (name, 0);
   if (var && nameref_p (var))
-    var = find_variable_nameref (var);
+    {
+      var = find_variable_nameref (var);
+      if (var == &nameref_maxloop_value)
+	{
+	  internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+	  return (0);
+	}
+    }
   return (var);
 }
 
@@ -2372,7 +2396,14 @@ find_global_variable (name)
 
   var = var_lookup (name, global_variables);
   if (var && nameref_p (var))
-    var = find_variable_nameref (var);	/* XXX - find_global_variable_noref? */
+    {
+      var = find_variable_nameref (var);	/* XXX - find_global_variable_noref? */
+      if (var == &nameref_maxloop_value)
+	{
+	  internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+	  return ((SHELL_VAR *)NULL);
+	}
+    }      
 
   if (var == 0)
     return ((SHELL_VAR *)NULL);
@@ -2402,7 +2433,14 @@ find_shell_variable (name)
 
   var = var_lookup (name, shell_variables);
   if (var && nameref_p (var))
-    var = find_variable_nameref (var);
+    {
+      var = find_variable_nameref (var);
+      if (var == &nameref_maxloop_value)
+	{
+	  internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+	  return ((SHELL_VAR *)NULL);
+	}
+    }
 
   if (var == 0)
     return ((SHELL_VAR *)NULL);
@@ -2424,7 +2462,15 @@ find_variable (name)
     flags |= FV_FORCETEMPENV;
   v = find_variable_internal (name, flags);
   if (v && nameref_p (v))
-    v = find_variable_nameref (v);
+    {
+      v = find_variable_nameref (v);
+      if (v == &nameref_maxloop_value)
+	{
+	  internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+	  return (0);
+	}
+    }
+
   return v;
 }
 
@@ -2444,7 +2490,15 @@ find_variable_no_invisible (name)
     flags |= FV_FORCETEMPENV;
   v = find_variable_internal (name, flags);
   if (v && nameref_p (v))
-    v = find_variable_nameref (v);
+    {
+      v = find_variable_nameref (v);
+      if (v == &nameref_maxloop_value)
+	{
+	  internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+	  return (0);
+	}
+    }
+
   return v;
 }
 
@@ -2463,7 +2517,15 @@ find_variable_for_assignment (name)
     flags |= FV_FORCETEMPENV;
   v = find_variable_internal (name, flags);
   if (v && nameref_p (v))
-    v = find_variable_nameref (v);
+    {
+      v = find_variable_nameref (v);
+      if (v == &nameref_maxloop_value)
+	{
+	  internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+	  return (0);
+	}
+    }
+
   return v;
 }
 
@@ -3288,7 +3350,7 @@ bind_variable (name, value, flags)
 	      if (nv == 0)
 		{
 		  nv = find_variable_last_nameref_context (v, vc, &nvc);
-		  if (nv && nameref_p (nv))
+		  if (nv && nv != &nameref_maxloop_value && nameref_p (nv))
 		    {
 		      /* If this nameref variable doesn't have a value yet,
 			 set the value.  Otherwise, assign using the value as
@@ -3304,7 +3366,7 @@ bind_variable (name, value, flags)
 		    }
 		  else if (nv == &nameref_maxloop_value)
 		    {
-		      internal_warning (_("%s: circular name reference"), v->name);
+		      internal_warning (_("%s: maximum nameref depth (%d) exceeded"), v->name, NAMEREF_MAX);
 		      return (bind_global_variable (v->name, value, flags));
 		    }
 		  else
@@ -3312,7 +3374,7 @@ bind_variable (name, value, flags)
 		}
 	      else if (nv == &nameref_maxloop_value)
 		{
-		  internal_warning (_("%s: circular name reference"), v->name);
+		  internal_warning (_("%s: maximum nameref depth (%d) exceeded"), v->name, NAMEREF_MAX);
 		  return (bind_global_variable (v->name, value, flags));
 		}
 	      else
@@ -3811,6 +3873,11 @@ unbind_variable (name)
 
   v = var_lookup (name, shell_variables);
   nv = (v && nameref_p (v)) ? find_variable_nameref (v) : (SHELL_VAR *)NULL;
+  if (nv == &nameref_maxloop_value)
+    {
+      internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+      nv = 0;
+    }
 
   r = nv ? makunbound (nv->name, shell_variables) : makunbound (name, shell_variables);
   return r;
@@ -3853,6 +3920,11 @@ unbind_global_variable (name)
   /* This starts at the current scope, just like find_global_variable; should we
      use find_global_variable_nameref here? */
   nv = (v && nameref_p (v)) ? find_variable_nameref (v) : (SHELL_VAR *)NULL;
+  if (nv == &nameref_maxloop_value)
+    {
+      internal_warning (_("%s: maximum nameref depth (%d) exceeded"), name, NAMEREF_MAX);
+      nv = 0;
+    }
 
   r = nv ? makunbound (nv->name, shell_variables) : makunbound (name, global_variables);
   return r;

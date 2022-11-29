@@ -4530,3 +4530,52 @@ lib/readline/rldefs.h
 include/posixselect.h
 	- include "posixtime.h" instead of <sys/time.h> so the right guards
 	  are present
+
+builtins/read.def
+	- read_builtin_timeout: make sure we don't try to call shtimer_select
+	  if HAVE_SELECT isn't define; it won't be compiled in
+
+include/stdc.h
+	- restrict: make sure we have a definition if __STDC__ is not defined
+
+include/posixtime.h,lib/sh/gettimeofday.c
+	- gettimeofday: make sure the function signature matches POSIX by
+	  adding `restrict'
+
+				   11/25
+				   -----
+include/posixselect.h
+	- don't try to define HAVE_SELECT at all if _WIN32 is defined
+
+lib/readline/kill.c
+	- define WIN32_LEAN_AND_MEAN for the windows-specific paste function
+
+lib/readline/rlprivate.h
+	- _rl_timeout_select: only include declaration if HAVE_SELECT or
+	  HAVE_PSELECT are defined
+
+				   11/28
+				   -----
+lib/readline/input.c
+	- rl_gather_tyi: call rl_input_available_hook after FIONREAD test,
+	  let the application hook into whether or not there are characters
+	  to read
+
+execute_cmd.c
+	- execute_function: if the maximum function nesting level is exceeded,
+	  run the unwind-protects before jumping back to top level. Report
+	  from felix <felix@f-hauri.ch>
+
+variables.c
+	- find_variable_nameref_for_create,find_variable_nameref_for_assignment:
+	  handle find_variable_nameref returning &nameref_maxloop_value, return
+	  NULL and print a warning message in that case
+	- find_variable_nameref: return &namref_maxloop_value instead of NULL
+	  if the number of resolution cycles exceeds NAMEREF_MAX; change
+	  callers to print a new error message in this case; no other change
+	  in behavior. From a 4/2020 suggestion from Andrej Podzimek
+	  <andrej@podzimek.org>
+	- find_variable_nameref_context, find_nameref_at_context,
+	  find_variable_last_nameref_context: make sure to return
+	  &nameref_maxloop_value consistently and handle getting it as a
+	  return value from other functions

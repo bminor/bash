@@ -189,8 +189,12 @@ read_builtin_timeout (fd)
       (read_timeout->tmout.tv_sec == 0 && read_timeout->tmout.tv_usec == 0))
     return 0;
 
+#if defined (HAVE_SELECT)
   return ((read_timeout->flags & SHTIMER_ALARM) ? shtimer_alrm (read_timeout)
   						: shtimer_select (read_timeout));
+#else
+  return (shtimer_alrm (read_timeout));
+#endif
 }
 
 /* Read the value of the shell variables whose names follow.

@@ -5077,6 +5077,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (funcnest_max > 0 && funcnest >= funcnest_max)
     {
       internal_error (_("%s: maximum function nesting level exceeded (%d)"), var->name, funcnest);
+      run_unwind_protects ();		/* XXX */
       funcnest = 0;	/* XXX - should we reset it somewhere else? */
       jump_to_top_level (DISCARD);
     }

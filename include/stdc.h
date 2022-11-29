@@ -52,6 +52,9 @@
 #  if !defined (volatile)
 #    define volatile __volatile
 #  endif
+#  if !defined (restrict)
+#    define restrict __restrict
+#  endif
 #else /* !__GNUC__ */
 #  if !defined (inline)
 #    define inline
@@ -61,6 +64,9 @@
 #  endif
 #  if !defined (volatile)
 #    define volatile
+#  endif
+#  if !defined (restrict)
+#    define restrict
 #  endif
 #endif /* !__GNUC__ */
 

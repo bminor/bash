@@ -123,17 +123,17 @@ bar
 unset
 ./nameref8.sub: line 16: typeset: warning: v: circular name reference
 ./nameref8.sub: line 16: warning: v: circular name reference
-./nameref8.sub: line 18: warning: v: circular name reference
+./nameref8.sub: line 18: warning: v: maximum nameref depth (8) exceeded
 inside
 inside: two
 outside:
 ./nameref8.sub: line 42: typeset: warning: x: circular name reference
 ./nameref8.sub: line 42: warning: x: circular name reference
-./nameref8.sub: line 44: warning: x: circular name reference
+./nameref8.sub: line 44: warning: x: maximum nameref depth (8) exceeded
 foo
 ./nameref8.sub: line 51: typeset: warning: v: circular name reference
 ./nameref8.sub: line 51: warning: v: circular name reference
-./nameref8.sub: line 51: warning: v: circular name reference
+./nameref8.sub: line 51: warning: v: maximum nameref depth (8) exceeded
 local
 ./nameref8.sub: line 60: typeset: v: nameref variable self references not allowed
 ./nameref8.sub: line 67: warning: x: circular name reference
@@ -302,7 +302,7 @@ declare -n ref="var"
 declare -a a=([0]="0")
 ./nameref15.sub: line 14: local: warning: a: circular name reference
 ./nameref15.sub: line 14: warning: a: circular name reference
-./nameref15.sub: line 14: warning: a: circular name reference
+./nameref15.sub: line 14: warning: a: maximum nameref depth (8) exceeded
 declare -a a=([0]="X")
 declare -a b=([0]="X")
 ./nameref15.sub: line 14: local: warning: a: circular name reference
@@ -311,14 +311,14 @@ declare -a b=([0]="X")
 declare -a b=([0]="0")
 ./nameref15.sub: line 32: typeset: warning: ref: circular name reference
 ./nameref15.sub: line 32: warning: ref: circular name reference
-./nameref15.sub: line 33: warning: ref: circular name reference
+./nameref15.sub: line 33: warning: ref: maximum nameref depth (8) exceeded
 ./nameref15.sub: line 34: warning: ref: circular name reference
 inside X
 outside X
 before: 7
 ./nameref15.sub: line 45: typeset: warning: xxx: circular name reference
 ./nameref15.sub: line 45: warning: xxx: circular name reference
-./nameref15.sub: line 46: warning: xxx: circular name reference
+./nameref15.sub: line 46: warning: xxx: maximum nameref depth (8) exceeded
 declare -n xxx="xxx"
 ./nameref15.sub: line 48: warning: xxx: circular name reference
 xxx_func: inside: xxx = foo

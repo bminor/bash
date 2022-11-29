@@ -26,7 +26,7 @@
 
 /* A version of gettimeofday that just sets tv_sec from time(3) */
 int
-gettimeofday (struct timeval *tv, void *tz)
+gettimeofday (struct timeval *restrict tv, void *restrict tz)
 {
   tv->tv_sec = (time_t) time ((time_t *)0);
   tv->tv_usec = 0;
