@@ -4579,3 +4579,37 @@ variables.c
 	  find_variable_last_nameref_context: make sure to return
 	  &nameref_maxloop_value consistently and handle getting it as a
 	  return value from other functions
+
+				   11/29
+				   -----
+lib/readline/display.c
+	- _rl_update_final: if there is only one line (_rl_vis_botlin == 0)
+	  and that line is empty (botline_length == 0), assume there is no
+	  prompt and the line has no contents, so output the CR/LF to indicate
+	  that the newline has been read. From a report from
+	  Kevin Pulo <kev@pulo.com.au>
+
+				   11/30
+				   -----
+builtins/evalstring.c
+	- parse_and_execute: if we are executing the eval builtin, and the
+	  return status from the command is suppressed (builtin_ignoring_errexit),
+	  set CMD_IGNORE_RETURN in the parsed command's flags. From a report
+	  from Tycho Kirchner <tychokirchner@mail.de>
+
+				   12/1
+				   ----
+lib/glob/sm_loop.c
+	- PARSE_SUBBRACKET: a reworked PARSE_COLLSYM, generalized to handle
+	  [:, [=, and [. special bracket expressions
+	- BRACKMATCH: change to use PARSE_SUBBRACKET consistently to parse
+	  [:, [=, and [. special bracket expressions
+	- PATSCAN: takes new FLAGS arg, changed all callers to just pass the
+	  flags they get through to PATSCAN
+	- PATSCAN: call PARSE_SUBBRACKET for [:, [=, and [. to treat them
+	  consistently (uses FLAGS argument here)
+	- PATSCAN: handle FNM_NOESCAPE appearing in FLAGS argument
+	This set of fixes contributed by Koichi Murase <myoga.murase@gmail.com>
+
+lib/glob/{glob,gmisc}.c
+	- PATSCAN: change all callers to add extra flags arg of 0

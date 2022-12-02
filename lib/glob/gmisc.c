@@ -38,7 +38,7 @@
 #include "glob.h"
 
 /* Make sure these names continue to agree with what's in smatch.c */
-extern char *glob_patscan PARAMS((char *, char *, int));
+extern char *glob_patscan PARAMS((char *, char *, int, int));
 
 /* Compile `gm_loop.c' for single-byte characters. */
 #define CHAR	char
@@ -92,7 +92,7 @@ glob_dirscan (pat, dirsep)
 	{
 	  if (se == 0)
 	    se = p + strlen (p) - 1;
-	  pe = glob_patscan (p + 2, se, 0);
+	  pe = glob_patscan (p + 2, se, 0, 0);
 	  if (pe == 0)
 	    continue;
 	  else if (*pe == 0)

@@ -127,8 +127,8 @@ static int glob_testdir PARAMS((char *, int));
 static char **glob_dir_to_array PARAMS((char *, char **, int));
 
 /* Make sure these names continue to agree with what's in smatch.c */
-extern char *glob_patscan PARAMS((char *, char *, int));
-extern wchar_t *glob_patscan_wc PARAMS((wchar_t *, wchar_t *, int));
+extern char *glob_patscan PARAMS((char *, char *, int, int));
+extern wchar_t *glob_patscan_wc PARAMS((wchar_t *, wchar_t *, wint_t, int));
 
 /* And this from gmisc.c/gm_loop.c */
 extern int wextglob_pattern_p PARAMS((wchar_t *));
@@ -207,7 +207,7 @@ extglob_skipname (pat, dname, flags)
   wild = *pat == '*' || *pat == '?';
   pp = pat + 2;
   se = pp + strlen (pp);		/* end of pattern string */
-  pe = glob_patscan (pp, se, 0);	/* end of extglob pattern */
+  pe = glob_patscan (pp, se, 0, 0);	/* end of extglob pattern */
 
   /* if pe == 0, this is an invalid extglob pattern */
   if (pe == 0)
@@ -234,7 +234,7 @@ extglob_skipname (pat, dname, flags)
   nullpat = pe >= (pat + 2) && pe[-2] == '(' && pe[-1] == ')';
 
   /* check every subpattern */
-  while (t = glob_patscan (pp, pe, '|'))
+  while (t = glob_patscan (pp, pe, '|', 0))
     {
       /* If T == PE and *T == 0 (&& PE[-1] == RPAREN), we have hit the end
 	 of a pattern with no trailing characters. */
@@ -358,7 +358,7 @@ wextglob_skipname (pat, dname, flags)
   wild = *pat == L'*' || *pat == L'?';
   pp = pat + 2;
   se = pp + wcslen (pp);
-  pe = glob_patscan_wc (pp, se, 0);
+  pe = glob_patscan_wc (pp, se, 0, 0);
 
   /* if pe == 0, this is an invalid extglob pattern */
   if (pe == 0)
@@ -382,7 +382,7 @@ wextglob_skipname (pat, dname, flags)
   nullpat = pe >= (pat + 2) && pe[-2] == L'(' && pe[-1] == L')';
 
   /* check every subpattern */
-  while (t = glob_patscan_wc (pp, pe, '|'))
+  while (t = glob_patscan_wc (pp, pe, '|', 0))
     {
       n = t[-1];	/* ( */
       if (wextglob_pattern_p (pp) && n == L')')		/* nested extglob? */

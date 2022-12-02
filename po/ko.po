@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bash-5.2-rc1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-11 14:50-0500\n"
-"PO-Revision-Date: 2022-06-25 01:50+0900\n"
+"PO-Revision-Date: 2022-11-29 14:23+0900\n"
 "Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>\n"
 "Language-Team: Korean <translation-team-ko@googlegroups.com>\n"
 "Language: ko\n"
@@ -566,7 +566,7 @@ msgstr ""
 "셸에 대한 일반적인 정보를 더 확인하려면 `info bash'를 사용하십시오.\n"
 "이 목록에 없는 명령어에 대해 더 알아보려면 `man -k' 또는 `info'를 사용하십시오.\n"
 "\n"
-"명령어 이름 다음의 별(*) 표시는 해당 명령어의 비활성 상태을 의미합니다.\n"
+"명령어 이름 다음의 별(*) 표시는 해당 명령어를 사용하지 않음을 의미합니다.\n"
 "\n"
 
 #: builtins/history.def:159
@@ -1737,7 +1737,7 @@ msgstr "셸 옵션:\n"
 
 #: shell.c:2069
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
-msgstr "\t-ilrsD 또는 -c <명령> 또는 -O shopt_option\t\t(invocation 전용)\n"
+msgstr "\t-ilrsD 또는 -c <명령> 또는 -O <shopt_옵션>\t\t(실행 전용)\n"
 
 #: shell.c:2088
 #, c-format
@@ -2289,7 +2289,7 @@ msgstr "eval [인자 ...]"
 
 #: builtins.c:96
 msgid "getopts optstring name [arg ...]"
-msgstr "getopts optstring name [<인자> ...]"
+msgstr "getopts <옵션문자열> <이름> [<인자> ...]"
 
 #: builtins.c:98
 msgid "exec [-cl] [-a name] [command [argument ...]] [redirection ...]"
@@ -2309,11 +2309,11 @@ msgstr "fc [-e <편집기이름>] [-lnr] [<처음>] [<종결>] 또는 fc -s [<�
 
 #: builtins.c:109
 msgid "fg [job_spec]"
-msgstr "fg [<JOBSPEC>]"
+msgstr "fg [<작업명세>]"
 
 #: builtins.c:113
 msgid "bg [job_spec ...]"
-msgstr "bg [<JOBSPEC> ...]"
+msgstr "bg [<작업명세> ...]"
 
 #: builtins.c:116
 msgid "hash [-lr] [-p pathname] [-dt] [name ...]"
@@ -2329,15 +2329,15 @@ msgstr "history [-c] [-d <오프셋>] [n] 또는 history -anrw [<파일이름>] 
 
 #: builtins.c:127
 msgid "jobs [-lnprs] [jobspec ...] or jobs -x command [args]"
-msgstr "jobs [-lnprs] [jobspec ...] 또는 jobs -x command [args]"
+msgstr "jobs [-lnprs] [<작업명세> ...] 또는 jobs -x <명령> [<인자> ...]"
 
 #: builtins.c:131
 msgid "disown [-h] [-ar] [jobspec ... | pid ...]"
-msgstr "disown [-h] [-ar] [<JOBSPEC> ... | <PID> ...]"
+msgstr "disown [-h] [-ar] [<작업명세> ... | <PID> ...]"
 
 #: builtins.c:134
 msgid "kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]"
-msgstr "kill [-s <시그널명세> | -n <시그널번호> | -<시그널명세>] <PID> | <JOBSPEC> ... 또는 kill -l [<시그널명세>]"
+msgstr "kill [-s <시그널명세> | -n <시그널번호> | -<시그널명세>] <PID> | <작업명세> ... 또는 kill -l [<시그널명세>]"
 
 #: builtins.c:136
 msgid "let arg [arg ...]"
@@ -5057,8 +5057,7 @@ msgstr ""
 "    HOME\t로그인 후 접근하는 완전한 경로 이름입니다.\n"
 "    HOSTNAME\t현재 호스트 이름입니다.\n"
 "    HOSTTYPE\t이 배시 버전이 실행하고 있는 시스템의 CPU 형식입니다.\n"
-"    IGNOREEOF\n"
-"EOF 문자 입력을 유일한 입력으로 받는 셸의 동작을\n"
+"    IGNOREEOF\tEOF 문자 입력을 유일한 입력으로 받는 셸의 동작을\n"
 "    \t\t제어합니다.  설정하면, 이 변수의 값은 셸을 나가기\n"
 "    \t\t전 빈 줄에 한줄로 나타낼 EOF 문자 수 입니다 (기본 10개).\n"
 "    \t\t설정을 해제하면, EOF는 입력 끝을 나타냅니다.\n"

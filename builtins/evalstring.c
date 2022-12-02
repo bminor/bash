@@ -234,6 +234,7 @@ parse_prologue (string, flags, tag)
   unwind_protect_int (loop_level);
   unwind_protect_int (executing_list);
   unwind_protect_int (comsub_ignore_return);
+  unwind_protect_int (builtin_ignoring_errexit);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
 
@@ -299,7 +300,7 @@ parse_and_execute (string, from_file, flags)
      const char *from_file;
      int flags;
 {
-  int code, lreset;
+  int code, lreset, ignore_return;
   volatile int should_jump_to_top_level, last_result;
   COMMAND *volatile command;
   volatile sigset_t pe_sigmask;
@@ -309,6 +310,8 @@ parse_and_execute (string, from_file, flags)
   parse_and_execute_level++;
 
   lreset = flags & SEVAL_RESETLINE;
+  ignore_return = (this_shell_builtin == eval_builtin || this_shell_builtin == source_builtin) &&
+		  builtin_ignoring_errexit;
 
 #if defined (HAVE_POSIX_SIGNALS)
   /* If we longjmp and are going to go on, use this to restore signal mask */
@@ -474,6 +477,9 @@ parse_and_execute (string, from_file, flags)
 	      global_command = (COMMAND *)NULL;
 
 	      if ((subshell_environment & SUBSHELL_COMSUB) && comsub_ignore_return)
+		command->flags |= CMD_IGNORE_RETURN;
+
+	      if (ignore_return)
 		command->flags |= CMD_IGNORE_RETURN;
 
 #if defined (ONESHOT)

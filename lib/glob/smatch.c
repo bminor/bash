@@ -322,7 +322,7 @@ is_cclass (c, name)
 #define FCT			internal_strmatch
 #define GMATCH			gmatch
 #define COLLSYM			collsym
-#define PARSE_COLLSYM		parse_collsym
+#define PARSE_SUBBRACKET	parse_subbracket
 #define BRACKMATCH		brackmatch
 #define PATSCAN			glob_patscan
 #define STRCOMPARE		strcompare
@@ -578,7 +578,7 @@ posix_cclass_only (pattern)
 #define FCT			internal_wstrmatch
 #define GMATCH			gmatch_wc
 #define COLLSYM			collwcsym
-#define PARSE_COLLSYM		parse_collwcsym
+#define PARSE_SUBBRACKET	parse_subbracket_wc
 #define BRACKMATCH		brackmatch_wc
 #define PATSCAN			glob_patscan_wc
 #define STRCOMPARE		wscompare
