@@ -13,6 +13,8 @@
 #
 # tests of various aspects of pathname expansion, mostly dealing with bracket
 # expressions
+#
+# Derived from tests contributed by Koichi Murase <myoga.murase@gmail.com>
 
 LC_COLLATE=C
 
@@ -25,15 +27,25 @@ trap 'rm -rf $TESTDIR $WORK_DIR' EXIT
 WORK_DIR=${TMPDIR}/globtest-$$
 
 mkdir $WORK_DIR || {
-	echo "cannot create directory $WORK_DIR" >&2
+	echo "glob-bracket: cannot create directory $WORK_DIR" >&2
 	exit 1
 }
 cd $WORK_DIR || {
-	echo "cannot cd to directory $WORK_DIR" >&2
+	echo "glob-bracket: cannot cd to directory $WORK_DIR" >&2
 	exit 1
 }
 
-gcc -O2 -xc -o ./fnmatch - <<-EOF
+eval $(grep -E '^(CC |SHOBJ_).*=' $BUILD_DIR/examples/loadables/Makefile | sed -e 's/[ ]*=[ ]*/="/' -e 's/\$@/strmatch/' -e 's/$/"/' )
+
+if [ "$SHOBJ_STATUS" != "supported" ]; then
+	echo "glob-bracket: shared objects not supported, cannot continue" >&2
+	exit 2
+fi
+
+# we assume gcc as a default here
+: ${CC:=gcc}
+
+cat > fnmatch.c <<-EOF
 	#include <fnmatch.h>
 	#include <stdlib.h>
 	#include <stdio.h>
@@ -54,15 +66,15 @@ gcc -O2 -xc -o ./fnmatch - <<-EOF
 	  return 1;
 	}
 EOF
+$CC -O2 -o fnmatch fnmatch.c
+rm -f fnmatch.c
 
-eval $(grep -E '^(CC |SHOBJ_).*=' $BUILD_DIR/examples/loadables/Makefile | sed -e 's/[ ]*=[ ]*/="/' -e 's/$/"/' )
-
-if [ "$SHOBJ_STATUS" != "supported" ]; then
-	echo "glob-bracket: shared objects not supported, cannot continue" >&2
+if [ ! -f fnmatch ] ; then
+	echo "glob-bracket: cannot create fnmatch executable" >&2
 	exit 2
 fi
 
-cat > ./strmatch.c <<-EOF
+cat > strmatch.c <<-EOF
 	#define BUILTIN_ENABLED 0x01
 	struct word_desc { char* word; int flags; };
 	struct word_list { struct word_list* next; struct word_desc* word; };
@@ -120,7 +132,7 @@ enable -f ./strmatch.so strmatch || {
 check_count=1
 
 if [ -z "$BASH_TSTOUT" ]; then
-	yes=$(printf '\033[32myes\033[m') no=$(printf '\033[31mno\033[m')
+	yes=$'\033[32myes\033[m' no=$'\033[31mno\033[m'
 else
 	yes=yes no=no
 fi
@@ -157,10 +169,13 @@ function pcheck {
   fi
 
   # Linux fnmatch
-  if $WORK_DIR/fnmatch ab/cd/efg "$1"; then
-    local fnmatch=$yes
-  else
-    local fnmatch=$no
+  local fnmatch=${2-}
+  if [[ ! $fnmatch ]]; then
+    if $WORK_DIR/fnmatch ab/cd/efg "$1"; then
+      fnmatch=$yes
+    else
+      fnmatch=$no
+    fi
   fi
 
   printf '#%d: pat=%-16s %s/%s\n' "$((check_count++))" "$1" "$strmatch" "$fnmatch"
@@ -192,9 +207,11 @@ pcheck '*[ba]/*/efg'
 pcheck '*[!a]/*/efg'
 pcheck '*[a-c]/*/efg'
 
-pcheck 'ab@(/)cd/efg'
-pcheck '*@(/)cd/efg'
+shopt -s extglob
+pcheck 'ab@(/)cd/efg'	"$yes"
+pcheck '*@(/)cd/efg'	"$no"
 pcheck '*/cd/efg'
+shopt -u extglob
 
 cd "$WORK_DIR"
 fi

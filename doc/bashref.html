@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 19 September 2022).
+the Bash shell (version 5.2, 2 December 2022).
 
-This is Edition 5.2, last updated 19 September 2022,
+This is Edition 5.2, last updated 2 December 2022,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 19 September 2022).
+the Bash shell (version 5.2, 2 December 2022).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 19 September 2022,
+<p>This is Edition 5.2, last updated 2 December 2022,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -2561,7 +2561,7 @@ introduce indirection.
 <p>In each of the cases below, <var>word</var> is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
 </p>
-<p>When not performing substring expansion, using the form described
+<p>When not performing substring expansion, using the forms described
 below (e.g., &lsquo;<samp>:-</samp>&rsquo;), Bash tests for a parameter that is unset or null.
 Omitting the colon results in a test only for a parameter that is unset.
 Put another way, if the colon is included,
@@ -4740,41 +4740,47 @@ The return status is zero.
 </dd>
 <dt id='index-trap'><span><code>trap</code><a href='#index-trap' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example">trap [-lp] [<var>arg</var>] [<var>sigspec</var> &hellip;]
+<pre class="example">trap [-lp] [<var>action</var>] [<var>sigspec</var> &hellip;]
 </pre></div>
 
-<p>The commands in <var>arg</var> are to be read and executed when the
-shell receives signal <var>sigspec</var>.  If <var>arg</var> is absent (and
+<p>The <var>action</var> is a command that is read and executed when the
+shell receives signal <var>sigspec</var>. If <var>action</var> is absent (and
 there is a single <var>sigspec</var>) or
 equal to &lsquo;<samp>-</samp>&rsquo;, each specified signal&rsquo;s disposition is reset
 to the value it had when the shell was started.
-If <var>arg</var> is the null string, then the signal specified by
+If <var>action</var> is the null string, then the signal specified by
 each <var>sigspec</var> is ignored by the shell and commands it invokes.
-If <var>arg</var> is not present and <samp>-p</samp> has been supplied,
-the shell displays the trap commands associated with each <var>sigspec</var>.
-If no arguments are supplied, or
-only <samp>-p</samp> is given, <code>trap</code> prints the list of commands
-associated with each signal number in a form that may be reused as
-shell input.
-The <samp>-l</samp> option causes the shell to print a list of signal names
+</p>
+<p>If no arguments are supplied, <code>trap</code> prints the actions
+associated with each trapped signal
+as a set of <code>trap</code> commands that can be reused as shell input to
+restore the current signal dispositions.
+If <var>action</var> is not present and <samp>-p</samp> has been supplied,
+<code>trap</code> displays the trap commands associated with each <var>sigspec</var>,
+or, if no <var>sigspec</var>s are supplied, for all trapped signals,
+as a set of <code>trap</code> commands that can be reused as shell input to
+restore the current signal dispositions.
+</p>
+<p>The <samp>-l</samp> option causes <code>trap</code> to print a list of signal names
 and their corresponding numbers.
 Each <var>sigspec</var> is either a signal name or a signal number.
 Signal names are case insensitive and the <code>SIG</code> prefix is optional.
 </p>
 <p>If a <var>sigspec</var>
-is <code>0</code> or <code>EXIT</code>, <var>arg</var> is executed when the shell exits.
-If a <var>sigspec</var> is <code>DEBUG</code>, the command <var>arg</var> is executed
+is <code>0</code> or <code>EXIT</code>, <var>action</var> is executed when the shell exits.
+If a <var>sigspec</var> is <code>DEBUG</code>, <var>action</var> is executed
 before every simple command, <code>for</code> command, <code>case</code> command,
-<code>select</code> command, every arithmetic <code>for</code> command, and before
-the first command executes in a shell function.
+<code>select</code> command, (( arithmetic command, [[ conditional command,
+arithmetic <code>for</code> command,
+and before the first command executes in a shell function.
 Refer to the description of the <code>extdebug</code> option to the
 <code>shopt</code> builtin (see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>) for details of its
 effect on the <code>DEBUG</code> trap.
-If a <var>sigspec</var> is <code>RETURN</code>, the command <var>arg</var> is executed
+If a <var>sigspec</var> is <code>RETURN</code>, <var>action</var> is executed
 each time a shell function or a script executed with the <code>.</code> or
 <code>source</code> builtins finishes executing.
 </p>
-<p>If a <var>sigspec</var> is <code>ERR</code>, the command <var>arg</var> 
+<p>If a <var>sigspec</var> is <code>ERR</code>, <var>action</var> 
 is executed whenever
 a pipeline (which may consist of a single simple
 command), a list, or a compound command returns a
@@ -4791,7 +4797,9 @@ status is being inverted using <code>!</code>.
 These are the same conditions obeyed by the <code>errexit</code> (<samp>-e</samp>)
 option.
 </p>
-<p>Signals ignored upon entry to the shell cannot be trapped or reset.
+<p>Signals ignored upon entry to a non-interactive shell cannot be trapped or
+reset.
+Interactive shells permit trapping signals ignored on entry.
 Trapped signals that are not being ignored are reset to their original
 values in a subshell or subshell environment when one is created.
 </p>
@@ -9291,8 +9299,9 @@ is a valid signal number.  If users want to reset the handler for a given
 signal to the original disposition, they should use &lsquo;<samp>-</samp>&rsquo; as the
 first argument.
 
-</li><li> <code>trap -p</code> displays signals whose dispositions are set to SIG_DFL and
-those that were ignored when the shell started.
+</li><li> <code>trap -p</code> without arguments displays signals whose dispositions are
+set to SIG_DFL and those that were ignored when the shell started, not
+just trapped signals.
 
 </li><li> The <code>.</code> and <code>source</code> builtins do not search the current directory
 for the filename argument if it is not found by searching <code>PATH</code>.
@@ -13913,11 +13922,11 @@ The latest version of Bash is always available for FTP from
 <a href="http://git.savannah.gnu.org/cgit/bash.git/snapshot/bash-master.tar.gz">http://git.savannah.gnu.org/cgit/bash.git/snapshot/bash-master.tar.gz</a>.
 </p>
 <p>Once you have determined that a bug actually exists, use the
-<code>bashbug</code> command to submit a bug report.
-If you have a fix, you are encouraged to mail that as well!
+<code>bashbug</code> command to submit a bug report or use the form at the
+&lt;a href=&quot;https://savannah.gnu.org/projects/bash/&quot;&gt;Bash project page&lt;/a&gt;.
+If you have a fix, you are encouraged to submit that as well!
 Suggestions and &lsquo;philosophical&rsquo; bug reports may be mailed
-to <a href="mailto:bug-bash@gnu.org">bug-bash@gnu.org</a> or posted to the Usenet
-newsgroup <code>gnu.bash.bug</code>.
+to <a href="mailto:bug-bash@gnu.org">bug-bash@gnu.org</a> or <a href="mailto:help-bash@gnu.org">help-bash@gnu.org</a>.
 </p>
 <p>All bug reports should include:
 </p><ul>

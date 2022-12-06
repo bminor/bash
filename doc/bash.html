@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 September 19<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 December 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1586,7 +1586,7 @@ See the description of
 <B>shopt</B>
 
 below under
-<FONT SIZE=-1><B>SHELL</B>BUILTIN<B>COMMANDS</B>.
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>.
 
 </FONT>
 <A NAME="lbAT">&nbsp;</A>
@@ -4994,7 +4994,7 @@ Matches anything except one of the given patterns
 
 <P>
 
-The<B>extglob</B> option changes the behavior of the parser, since the
+The <B>extglob</B> option changes the behavior of the parser, since the
 parentheses are normally treated as operators with syntactic meaning.
 To ensure that extended matching patterns are parsed correctly, make sure
 that <B>extglob</B> is enabled before parsing constructs containing the
@@ -13632,16 +13632,16 @@ sort lexicographically using ASCII ordering.
 <DD>
 Print the accumulated user and system times for the shell and
 for processes run from the shell.  The return status is 0.
-<DT><B>trap</B> [<B>-lp</B>] [[<I>arg</I>] <I>sigspec</I> ...]<DD>
-The command
-<I>arg</I>
+<DT><B>trap</B> [<B>-lp</B>] [[<I>action</I>] <I>sigspec</I> ...]<DD>
+The
+<I>action</I>
 
-is to be read and executed when the shell receives
+is a command that is read and executed when the shell receives
 signal(s)
 <I>sigspec</I>.
 
 If
-<I>arg</I>
+<I>action</I>
 
 is absent (and there is a single <I>sigspec</I>) or
 <B>-</B>,
@@ -13650,33 +13650,44 @@ each specified signal is
 reset to its original disposition (the value it had
 upon entrance to the shell).
 If
-<I>arg</I>
+<I>action</I>
 
 is the null string the signal specified by each
 <I>sigspec</I>
 
 is ignored by the shell and by the commands it invokes.
+<P>
+
+
+If no arguments are supplied,
+<B>trap</B>
+
+displays the actions associated with each trapped signal
+as a set of <B>trap</B> commands
+that can be reused as shell input to
+restore the current signal dispositions.
 If
-<I>arg</I>
-
-is not present and
-<B>-p</B>
-
-has been supplied, then the trap commands associated with each
-<I>sigspec</I>
-
-are displayed.
-If no arguments are supplied or if only
 <B>-p</B>
 
 is given,
-<B>trap</B>
+and
+<I>action</I>
 
-prints the list of commands associated with each signal.
+is not present,
+then <B>trap</B> displays the actions associated with each
+<I>sigspec</I>
+
+or, if none are supplied, for all trapped signals,
+as a set of <B>trap</B> commands
+that can be reused as shell input to
+restore the current signal dispositions.
+<P>
+
+
 The
 <B>-l</B>
 
-option causes the shell to print a list of signal names and
+option causes <B>trap</B> to print a list of signal names and
 their corresponding numbers.
 Each
 <I>sigspec</I>
@@ -13699,7 +13710,7 @@ is
 
 </FONT>
 (0) the command
-<I>arg</I>
+<I>action</I>
 
 is executed on exit from the shell.
 If a
@@ -13710,11 +13721,13 @@ is
 
 </FONT>
 the command
-<I>arg</I>
+<I>action</I>
 
 is executed before every <I>simple command</I>, <I>for</I> command,
-<I>case</I> command, <I>select</I> command, every arithmetic <I>for</I>
-command, and before the first command executes in a shell function (see
+<I>case</I> command, <I>select</I> command, (( arithmetic command,
+[[ conditional command, 
+arithmetic <I>for</I> command, and before the first command executes
+in a shell function (see
 <FONT SIZE=-1><B>SHELL GRAMMAR</B>
 
 </FONT>
@@ -13730,7 +13743,7 @@ is
 
 </FONT>
 the command
-<I>arg</I>
+<I>action</I>
 
 is executed each time a shell function or a script executed with
 the <B>.</B> or <B>source</B> builtins finishes executing.
@@ -13745,7 +13758,7 @@ is
 
 </FONT>
 the command
-<I>arg</I>
+<I>action</I>
 
 is executed whenever
 a pipeline (which may consist of a single simple
@@ -13783,7 +13796,9 @@ These are the same conditions obeyed by the <B>errexit</B> (<B>-e</B>) option.
 <P>
 
 
-Signals ignored upon entry to the shell cannot be trapped or reset.
+When the shell is not interactive,
+signals ignored upon entry to the shell cannot be trapped or reset.
+Interactive shells permit trapping signals ignored on entry.
 Trapped signals that are not being ignored are reset to their original
 values in a subshell or subshell environment when one is created.
 The return status is false if any
@@ -14787,7 +14802,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 September 19<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 December 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14893,7 +14908,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20220907/doc/bash.1.<BR>
-Time: 19 September 2022 12:02:51 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20221202/doc/bash.1.<BR>
+Time: 02 December 2022 17:01:20 EST
 </BODY>
 </HTML>

@@ -4613,3 +4613,44 @@ lib/glob/sm_loop.c
 
 lib/glob/{glob,gmisc}.c
 	- PATSCAN: change all callers to add extra flags arg of 0
+
+doc/{bash.1,bashref.texi}
+	- trap description: replace ARG with ACTION
+	- clarify the language describing what trap without arguments and
+	  trap -p without arguments display 
+	- clarify that trap in non-interactive shells does not allow signals
+	  that were ignored at shell start to be trapped; interactive shells
+	  allow this
+	- trap: add missing command types to the description of when the
+	  DEBUG trap is executed
+
+builtins/trap.def
+	- LONG_DOC: replace ARG with ACTION
+	- make it clear that trap and trap -p without arguments display a
+	  information about specified signals, but in a form that may be
+	  reused as shell input
+
+				   12/5
+				   ----
+pcomplete.c
+	- compgen_compspec: new flag saying whether or not we're running via
+	  the compgen builtin or via programmable completion: set to 0
+	  every time gen_progcomp_completions runs, set to 1 in
+	  gen_compspec_completions if this_shell_builtin == compgen_builtin
+	- gen_shell_function_completions: call rl_clear_signals and
+	  rl_set_signals so the shell's signal handlers are active when
+	  running shell functions to generate completions. We try to do it
+	  only when programmable completion, not the compgen builtin, is active.
+	  Idea from Koichi Murase <myoga.murase@gmail.com>, fixes bug
+	  reported in 9/22
+
+sig.c
+	- sigint_sighandler, termsig_sighandler: since these can now be called
+	  during programmable completion, we need to set the readline signal
+	  event hook if the readline state includes RL_STATE_DISPATCHING or
+	  RL_STATE_COMPLETING, since we can't rely on RL_STATE_SIGHANDLER
+	  being set and we want to call throw_to_top_level here
+	- throw_to_top_level: if the shell is interactive, before calling
+	  bashline_reset (which zeroes rl_signal_event_hook), call
+	  rl_cleanup_after_signal if we think readline hasn't called it
+	  already

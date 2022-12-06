@@ -145,6 +145,8 @@ static void unbind_compfunc_variables PARAMS((int));
 static WORD_LIST *build_arg_list PARAMS((char *, const char *, const char *, WORD_LIST *, int));
 static WORD_LIST *command_line_to_word_list PARAMS((char *, int, int, int *, int *));
 
+static int compgen_compspec = 0;	/* are we generating completions for compgen? */
+
 #ifdef DEBUG
 static int progcomp_debug = 0;
 #endif
@@ -1117,13 +1119,14 @@ gen_shell_function_matches (cs, cmd, text, line, ind, lwords, nw, cw, foundp)
   STRINGLIST *sl;
   SHELL_VAR *f, *v;
   WORD_LIST *cmdlist;
-  int fval, found;
+  int fval, found, local_compgen;
   sh_parser_state_t ps;
   sh_parser_state_t * restrict pps;
 #if defined (ARRAY_VARS)
   ARRAY *a;
 #endif
 
+  local_compgen = compgen_compspec;
   found = 0;
   if (foundp)
     *foundp = found;
@@ -1154,11 +1157,21 @@ gen_shell_function_matches (cs, cmd, text, line, ind, lwords, nw, cw, foundp)
   add_unwind_protect (restore_parser_state, (char *)pps);
   add_unwind_protect (dispose_words, (char *)cmdlist);
   add_unwind_protect (unbind_compfunc_variables, (char *)0);
+  if (local_compgen == 0)
+    {
+      add_unwind_protect (rl_set_signals, (char *)NULL);
+      rl_clear_signals ();
+    }
 
   fval = execute_shell_function (f, cmdlist);  
 
   discard_unwind_frame ("gen-shell-function-matches");
   restore_parser_state (pps);
+  if (local_compgen == 0)
+    {
+      QUIT;
+      rl_set_signals ();
+    }
 
   found = fval != EX_NOTFOUND;
   if (fval == EX_RETRYFAIL)
@@ -1328,6 +1341,7 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
   COMPSPEC *tcs;
 
   found = 1;
+  compgen_compspec = this_shell_builtin == compgen_builtin;
 
 #ifdef DEBUG
   debug_printf ("gen_compspec_completions (%s, %s, %d, %d)", cmd, word, start, end);
@@ -1567,6 +1581,8 @@ gen_progcomp_completions (ocmd, cmd, word, start, end, foundp, retryp, lastcs)
   COMPSPEC *cs, *oldcs;
   const char *oldcmd, *oldtxt;
   STRINGLIST *ret;
+
+  compgen_compspec = 0;
 
   cs = progcomp_search (ocmd);
 

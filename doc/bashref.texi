@@ -4224,41 +4224,47 @@ The return status is zero.
 @item trap
 @btindex trap
 @example
-trap [-lp] [@var{arg}] [@var{sigspec} @dots{}]
+trap [-lp] [@var{action}] [@var{sigspec} @dots{}]
 @end example
 
-The commands in @var{arg} are to be read and executed when the
-shell receives signal @var{sigspec}.  If @var{arg} is absent (and
+The @var{action} is a command that is read and executed when the
+shell receives signal @var{sigspec}. If @var{action} is absent (and
 there is a single @var{sigspec}) or
 equal to @samp{-}, each specified signal's disposition is reset
 to the value it had when the shell was started.
-If @var{arg} is the null string, then the signal specified by
+If @var{action} is the null string, then the signal specified by
 each @var{sigspec} is ignored by the shell and commands it invokes.
-If @var{arg} is not present and @option{-p} has been supplied,
-the shell displays the trap commands associated with each @var{sigspec}.
-If no arguments are supplied, or
-only @option{-p} is given, @code{trap} prints the list of commands
-associated with each signal number in a form that may be reused as
-shell input.
-The @option{-l} option causes the shell to print a list of signal names
+
+If no arguments are supplied, @code{trap} prints the actions
+associated with each trapped signal
+as a set of @code{trap} commands that can be reused as shell input to
+restore the current signal dispositions.
+If @var{action} is not present and @option{-p} has been supplied,
+@code{trap} displays the trap commands associated with each @var{sigspec},
+or, if no @var{sigspec}s are supplied, for all trapped signals,
+as a set of @code{trap} commands that can be reused as shell input to
+restore the current signal dispositions.
+
+The @option{-l} option causes @code{trap} to print a list of signal names
 and their corresponding numbers.
 Each @var{sigspec} is either a signal name or a signal number.
 Signal names are case insensitive and the @code{SIG} prefix is optional.
 
 If a @var{sigspec}
-is @code{0} or @code{EXIT}, @var{arg} is executed when the shell exits.
-If a @var{sigspec} is @code{DEBUG}, the command @var{arg} is executed
+is @code{0} or @code{EXIT}, @var{action} is executed when the shell exits.
+If a @var{sigspec} is @code{DEBUG}, @var{action} is executed
 before every simple command, @code{for} command, @code{case} command,
-@code{select} command, every arithmetic @code{for} command, and before
-the first command executes in a shell function.
+@code{select} command, (( arithmetic command, [[ conditional command,
+arithmetic @code{for} command,
+and before the first command executes in a shell function.
 Refer to the description of the @code{extdebug} option to the
 @code{shopt} builtin (@pxref{The Shopt Builtin}) for details of its
 effect on the @code{DEBUG} trap.
-If a @var{sigspec} is @code{RETURN}, the command @var{arg} is executed
+If a @var{sigspec} is @code{RETURN}, @var{action} is executed
 each time a shell function or a script executed with the @code{.} or
 @code{source} builtins finishes executing.
 
-If a @var{sigspec} is @code{ERR}, the command @var{arg} 
+If a @var{sigspec} is @code{ERR}, @var{action} 
 is executed whenever
 a pipeline (which may consist of a single simple
 command), a list, or a compound command returns a
@@ -4275,7 +4281,9 @@ status is being inverted using @code{!}.
 These are the same conditions obeyed by the @code{errexit} (@option{-e})
 option.
 
-Signals ignored upon entry to the shell cannot be trapped or reset.
+Signals ignored upon entry to a non-interactive shell cannot be trapped or
+reset.
+Interactive shells permit trapping signals ignored on entry.
 Trapped signals that are not being ignored are reset to their original
 values in a subshell or subshell environment when one is created.
 
@@ -8325,8 +8333,9 @@ signal to the original disposition, they should use @samp{-} as the
 first argument.
 
 @item
-@code{trap -p} displays signals whose dispositions are set to SIG_DFL and
-those that were ignored when the shell started.
+@code{trap -p} without arguments displays signals whose dispositions are
+set to SIG_DFL and those that were ignored when the shell started, not
+just trapped signals.
 
 @item
 The @code{.} and @code{source} builtins do not search the current directory
@@ -9596,7 +9605,7 @@ Once you have determined that a bug actually exists, use the
 <a href="https://savannah.gnu.org/projects/bash/">Bash project page</a>.
 If you have a fix, you are encouraged to submit that as well!
 Suggestions and `philosophical' bug reports may be mailed
-to @email{bug-bash@@gnu.org} or @email{help-bash@gnu.org}.
+to @email{bug-bash@@gnu.org} or @email{help-bash@@gnu.org}.
 
 All bug reports should include:
 @itemize @bullet

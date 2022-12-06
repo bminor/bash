@@ -446,7 +446,12 @@ throw_to_top_level ()
 
 #if defined (READLINE)
   if (interactive)
-    bashline_reset ();
+    {
+      if (RL_ISSTATE (RL_STATE_SIGHANDLER) == 0)
+	rl_cleanup_after_signal ();
+      bashline_reset ();
+    }
+      
 #endif /* READLINE */
 
 #if defined (PROCESS_SUBSTITUTION)
@@ -567,6 +572,8 @@ termsig_sighandler (sig)
      need to set this no matter what the signal is, though the check for
      RL_STATE_TERMPREPPED is possibly redundant. */
   if (RL_ISSTATE (RL_STATE_SIGHANDLER) || RL_ISSTATE (RL_STATE_TERMPREPPED))
+    bashline_set_event_hook ();
+  else if (RL_ISSTATE (RL_STATE_COMPLETING|RL_STATE_DISPATCHING))
     bashline_set_event_hook ();
 #endif
 
@@ -715,6 +722,8 @@ sigint_sighandler (sig)
      finish executing, so if this interrupted character input we can get
      quick response. */
   else if (RL_ISSTATE (RL_STATE_SIGHANDLER))
+    bashline_set_event_hook ();
+  else if (RL_ISSTATE (RL_STATE_COMPLETING|RL_STATE_DISPATCHING))
     bashline_set_event_hook ();
 #endif
 

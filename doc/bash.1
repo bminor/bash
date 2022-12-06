@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Sep 19 11:13:21 EDT 2022
+.\"	Last Change: Fri Dec  2 15:53:52 EST 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 September 19" "GNU Bash 5.2"
+.TH BASH 1 "2022 December 2" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -10858,39 +10858,49 @@ sort lexicographically using ASCII ordering.
 Print the accumulated user and system times for the shell and
 for processes run from the shell.  The return status is 0.
 .TP
-\fBtrap\fP [\fB\-lp\fP] [[\fIarg\fP] \fIsigspec\fP ...]
-The command
-.I arg
-is to be read and executed when the shell receives
+\fBtrap\fP [\fB\-lp\fP] [[\fIaction\fP] \fIsigspec\fP ...]
+The
+.I action
+is a command that is read and executed when the shell receives
 signal(s)
 .IR sigspec .
 If
-.I arg
+.I action
 is absent (and there is a single \fIsigspec\fP) or
 .BR \- ,
 each specified signal is
 reset to its original disposition (the value it had
 upon entrance to the shell).
 If
-.I arg
+.I action
 is the null string the signal specified by each
 .I sigspec
 is ignored by the shell and by the commands it invokes.
+.if t .sp 0.5
+.if n .sp 1
+If no arguments are supplied,
+.B trap
+displays the actions associated with each trapped signal
+as a set of \fBtrap\fP commands
+that can be reused as shell input to
+restore the current signal dispositions.
 If
-.I arg
-is not present and
-.B \-p
-has been supplied, then the trap commands associated with each
-.I sigspec
-are displayed.
-If no arguments are supplied or if only
 .B \-p
 is given,
-.B trap
-prints the list of commands associated with each signal.
+and
+.I action
+is not present,
+then \fBtrap\fP displays the actions associated with each
+.I sigspec
+or, if none are supplied, for all trapped signals,
+as a set of \fBtrap\fP commands
+that can be reused as shell input to
+restore the current signal dispositions.
+.if t .sp 0.5
+.if n .sp 1
 The
 .B \-l
-option causes the shell to print a list of signal names and
+option causes \fBtrap\fP to print a list of signal names and
 their corresponding numbers.
 Each
 .I sigspec
@@ -10908,7 +10918,7 @@ is
 .SM
 .B EXIT
 (0) the command
-.I arg
+.I action
 is executed on exit from the shell.
 If a
 .I sigspec
@@ -10916,10 +10926,12 @@ is
 .SM
 .BR DEBUG ,
 the command
-.I arg
+.I action
 is executed before every \fIsimple command\fP, \fIfor\fP command,
-\fIcase\fP command, \fIselect\fP command, every arithmetic \fIfor\fP
-command, and before the first command executes in a shell function (see
+\fIcase\fP command, \fIselect\fP command, (( arithmetic command,
+[[ conditional command, 
+arithmetic \fIfor\fP command, and before the first command executes
+in a shell function (see
 .SM
 .B SHELL GRAMMAR
 .ie \n(zZ=1 in \fIbash(1)\fP).
@@ -10932,7 +10944,7 @@ is
 .SM
 .BR RETURN ,
 the command
-.I arg
+.I action
 is executed each time a shell function or a script executed with
 the \fB.\fP or \fBsource\fP builtins finishes executing.
 .if t .sp 0.5
@@ -10943,7 +10955,7 @@ is
 .SM
 .BR ERR ,
 the command
-.I arg
+.I action
 is executed whenever
 a pipeline (which may consist of a single simple
 command), a list, or a compound command returns a
@@ -10972,7 +10984,9 @@ being inverted using
 These are the same conditions obeyed by the \fBerrexit\fP (\fB\-e\fP) option.
 .if t .sp 0.5
 .if n .sp 1
-Signals ignored upon entry to the shell cannot be trapped or reset.
+When the shell is not interactive,
+signals ignored upon entry to the shell cannot be trapped or reset.
+Interactive shells permit trapping signals ignored on entry.
 Trapped signals that are not being ignored are reset to their original
 values in a subshell or subshell environment when one is created.
 The return status is false if any
