@@ -304,6 +304,7 @@ run_pending_traps ()
   sh_parser_state_t pstate;
   volatile int save_return_catch_flag, function_code;
   procenv_t save_return_catch;
+  char *trap_command, *old_trap;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -419,6 +420,9 @@ run_pending_traps ()
 	    }
 	  else
 	    {
+	      old_trap = trap_list[sig];
+	      trap_command = savestring (old_trap);
+
 	      save_parser_state (&pstate);
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
@@ -441,7 +445,8 @@ run_pending_traps ()
 		}
 
 	      if (function_code == 0)
-		x = parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+	        /* XXX is x always last_command_exit_value? */
+		x = parse_and_execute (trap_command, "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE|SEVAL_NOOPTIMIZE);
 	      else
 		{
 		  parse_and_execute_cleanup (sig + 1);	/* XXX - could use -1 */
@@ -1002,7 +1007,7 @@ run_exit_trap ()
       if (code == 0 && function_code == 0)
 	{
 	  reset_parser ();
-	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE|SEVAL_NOOPTIMIZE);
 	}
       else if (code == ERREXIT)
 	retval = last_command_exit_value;
@@ -1109,7 +1114,7 @@ _run_trap_internal (sig, tag)
 	  function_code = setjmp_nosigs (return_catch);
 	}
 
-      flags = SEVAL_NONINT|SEVAL_NOHIST;
+      flags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE;
       if (sig != DEBUG_TRAP && sig != RETURN_TRAP && sig != ERROR_TRAP)
 	flags |= SEVAL_RESETLINE;
       evalnest++;

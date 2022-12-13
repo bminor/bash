@@ -4220,7 +4220,7 @@ run_sigchld_trap (nchild)
   jobs_list_frozen = 1;
   for (i = 0; i < nchild; i++)
     {
-      parse_and_execute (savestring (trap_command), "trap", SEVAL_NOHIST|SEVAL_RESETLINE);
+      parse_and_execute (savestring (trap_command), "trap", SEVAL_NOHIST|SEVAL_RESETLINE|SEVAL_NOOPTIMIZE);
     }
 
   run_unwind_frame ("SIGCHLD trap");

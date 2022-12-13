@@ -132,8 +132,8 @@ optimize_connection_fork (command)
   if (command->type == cm_connection &&
       (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
       (command->value.Connection->second->flags & CMD_TRY_OPTIMIZING) &&
-      ((startup_state == 2 && should_suppress_fork (command->value.Connection->second)) ||
-       ((subshell_environment & SUBSHELL_PAREN) && should_optimize_fork (command->value.Connection->second, 0))))
+      (should_suppress_fork (command->value.Connection->second) ||
+      ((subshell_environment & SUBSHELL_PAREN) && should_optimize_fork (command->value.Connection->second, 0))))
     {
       command->value.Connection->second->flags |= CMD_NO_FORK;
       command->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
@@ -290,6 +290,7 @@ parse_prologue (string, flags, tag)
    	(flags & SEVAL_NOFREE) -> don't free STRING when finished
    	(flags & SEVAL_RESETLINE) -> reset line_number to 1
    	(flags & SEVAL_NOHISTEXP) -> history_expansion_inhibited -> 1
+   	(flags & SEVAL_NOOPTIMIZE) -> don't try to turn on optimizing flags
 */
 
 int
@@ -502,7 +503,9 @@ parse_and_execute (string, from_file, flags)
 		 if we are at the end of the command string, the last in a
 		 series of connection commands is
 		 command->value.Connection->second. */
-	      else if (command->type == cm_connection && can_optimize_connection (command))
+	      else if (command->type == cm_connection &&
+		       (flags & SEVAL_NOOPTIMIZE) == 0 &&
+		       can_optimize_connection (command))
 		{
 		  command->value.Connection->second->flags |= CMD_TRY_OPTIMIZING;
 		  command->value.Connection->second->value.Simple->flags |= CMD_TRY_OPTIMIZING;
