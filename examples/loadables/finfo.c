@@ -318,6 +318,7 @@ int	flags;
 	struct group *gr;
 	int	p;
 	char	*b;
+	intmax_t xtime;
 
 	st = getstat(f);
 	if (st == NULL)
@@ -325,20 +326,23 @@ int	flags;
 
 	/* Print requested info */
 	if (flags & OPT_ATIME) {
+		xtime = st->st_atime;
 		if (flags & OPT_ASCII)
 			printf("%s", ctime(&st->st_atime));
 		else
-			printf("%ld\n", st->st_atime);
+			printf("%jd\n", xtime);
 	} else if (flags & OPT_MTIME) {
+		xtime = st->st_mtime;
 		if (flags & OPT_ASCII)
 			printf("%s", ctime(&st->st_mtime));
 		else
-			printf("%ld\n", st->st_mtime);
+			printf("%jd\n", xtime);
 	} else if (flags & OPT_CTIME) {
+		xtime = st->st_ctime;
 		if (flags & OPT_ASCII)
 			printf("%s", ctime(&st->st_ctime));
 		else
-			printf("%ld\n", st->st_ctime);
+			printf("%jd\n", xtime);
 	} else if (flags & OPT_DEV)
 		printf("%lu\n", (unsigned long)st->st_dev);
 	else if (flags & OPT_INO)

@@ -3648,7 +3648,10 @@ execute_case_command (case_command)
 	  free (pattern);
 
 	  dispose_words (es);
-	  CHECK_TERMSIG;
+
+	  /* sm_loop.c:GMATCH returns failure on interrupt_state or
+	     terminating_signal, so we check for those here. */
+	  QUIT;
 
 	  if (match)
 	    {

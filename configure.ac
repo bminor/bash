@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.046])dnl
+AC_REVISION([for Bash 5.2, version 5.047])dnl
 
 define(bashvers, 5.2)
 define(relstatus, maint)
@@ -1200,7 +1200,9 @@ freebsd[[3-9]]*)
 		if test -x /usr/bin/objformat && test "`/usr/bin/objformat`" = "elf" ; then
 			LOCAL_LDFLAGS=-rdynamic # allow dynamic loading
 		fi ;;
-freebsdelf*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
+freebsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
+openbsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
+netbsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 dragonfly*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 midnightbsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 esac

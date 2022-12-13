@@ -4654,3 +4654,16 @@ sig.c
 	  bashline_reset (which zeroes rl_signal_event_hook), call
 	  rl_cleanup_after_signal if we think readline hasn't called it
 	  already
+
+				   12/9
+				   ----
+configure.ac
+	- add "LOCAL_LDFLAGS = -rdynamic" for freebsd/openbsd/netbsd. Reported
+	  by Christian Weisgerber <naddy@mips.inka.de>
+
+				   12/12
+				   -----
+subst.c
+	- parameter_brace_expand_length: handle namerefs with values that are
+	  valid length expansion expressions but invalid identifiers. From
+	  ed7-aspire4925@hotmail.com via https://savannah.gnu.org/support/?110799

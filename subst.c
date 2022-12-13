@@ -8068,8 +8068,23 @@ parameter_brace_expand_length (name)
       else if ((var || (var = find_variable (name + 1))) &&
       		invisible_p (var) == 0 &&
 		array_p (var) == 0 && assoc_p (var) == 0 &&
+		nameref_p (var) == 0 &&
 		var->dynamic_value == 0)
 	number = value_cell (var) ? MB_STRLEN (value_cell (var)) : 0;
+      else if ((var = find_variable_last_nameref (name + 1, 0)) && nameref_p (var))
+	{
+	  /* nameref that resolves to unset variable or non-identifier */
+	  newname = nameref_cell (var);
+	  if (newname && *newname)
+	    {
+	      newname = (char *)xmalloc (strlen (nameref_cell (var)) + 2);
+	      newname[0] = '#';
+	      strcpy (newname + 1, nameref_cell (var));
+	      if (valid_length_expression (newname))
+		number = parameter_brace_expand_length (newname);
+	      free (newname);
+	    }
+	}
       else if (var == 0 && unbound_vars_is_error == 0)
 	number = 0;
       else				/* ${#PS1} */
