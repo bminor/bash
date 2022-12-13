@@ -3624,6 +3624,7 @@ execute_case_command (case_command)
 	  free (pattern);
 
 	  dispose_words (es);
+	  QUIT;
 
 	  if (match)
 	    {
