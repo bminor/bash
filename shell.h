@@ -73,6 +73,7 @@ extern int EOF_Reached;
 #define EX_BADASSIGN	260	/* variable assignment error */
 #define EX_EXPFAIL	261	/* word expansion failed */
 #define EX_DISKFALLBACK	262	/* fall back to disk command from builtin */
+#define EX_UTILERROR	263	/* Posix special builtin utility error */
 
 /* Flag values that control parameter pattern substitution. */
 #define MATCH_ANY	0x000

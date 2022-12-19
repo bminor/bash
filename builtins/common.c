@@ -573,7 +573,7 @@ get_exitstat (list)
 	 trap gets to change $?, though, since that is part of its reason for
 	 existing, and because the extended debug mode does things with the
 	 return value. */
-      if (this_shell_builtin == return_builtin && running_trap > 0 && running_trap != DEBUG_TRAP+1 && variable_context == trap_variable_context)
+      if (this_shell_builtin == return_builtin && running_trap > 0 && running_trap != DEBUG_TRAP+1 && trap_return_context == funcnest + sourcenest)
 	return (trap_saved_exit_value);
       return (last_command_exit_value);
     }

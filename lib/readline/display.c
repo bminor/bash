@@ -2732,7 +2732,6 @@ int
 rl_forced_update_display (void)
 {
   register char *temp;
-  register int tlen;
 
   if (visible_line)
     memset (visible_line, 0, line_size);

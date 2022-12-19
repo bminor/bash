@@ -836,9 +836,11 @@ unset_builtin (list)
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
   int global_unset_func, global_unset_var, vflags, base_vflags, valid_id;
+  int posix_utility_error;
   char *name, *tname;
 
-  unset_function = unset_variable = unset_array = nameref = any_failed = 0;
+  unset_function = unset_variable = unset_array = nameref = 0;
+  posix_utility_error = any_failed = 0;
   global_unset_func = global_unset_var = 0;
 
   reset_internal_getopt ();
@@ -918,6 +920,7 @@ unset_builtin (list)
       if (unset_function == 0 && valid_id == 0)
 	{
 	  sh_invalidid (name);
+	  posix_utility_error++;
 	  NEXT_VARIABLE ();
 	}
 
@@ -930,6 +933,7 @@ unset_builtin (list)
       if (var && unset_function == 0 && non_unsettable_p (var))
 	{
 	  builtin_error (_("%s: cannot unset"), name);
+	  posix_utility_error++;
 	  NEXT_VARIABLE ();
 	}
 
@@ -952,6 +956,7 @@ unset_builtin (list)
 	{
 	  builtin_error (_("%s: cannot unset: readonly %s"),
 			 var->name, unset_function ? "function" : "variable");
+	  posix_utility_error++;
 	  NEXT_VARIABLE ();
 	}
 
@@ -1008,8 +1013,10 @@ unset_builtin (list)
 
       /* This is what Posix.2 says:  ``If neither -f nor -v
 	 is specified, the name refers to a variable; if a variable by
-	 that name does not exist, a function by that name, if any,
-	 shall be unset.'' */
+	 that name does not exist, it is unspecified whether  a function
+	 by that name, if any, shall be unset.'' The unspecified part is a
+	 recent addition, so we continue to try to unset a shell function if
+	 we don't find a variable named NAME. */
       if (tem == -1 && nameref == 0 && unset_function == 0 && unset_variable == 0)
 	tem = unbind_func (name);
 
@@ -1024,5 +1031,5 @@ unset_builtin (list)
       list = list->next;
     }
 
-  return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+  return (any_failed ? (posix_utility_error ? EX_UTILERROR : EXECUTION_FAILURE) : EXECUTION_SUCCESS);
 }

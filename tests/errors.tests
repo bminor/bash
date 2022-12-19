@@ -161,7 +161,7 @@ umask -i
 
 # bad assignments shouldn't change the umask
 mask=$(umask)
-umask g=u
+umask g=p
 mask2=$(umask)
 if [ "$mask" != "$mask2" ]; then
 	echo "umask errors change process umask"
@@ -296,6 +296,17 @@ ${THIS_SH} ./errors9.sub
 
 ${THIS_SH} -c 'return ; echo after return' bash
 ${THIS_SH} -o posix -c 'return ; echo after return' bash
+
+# various posix-mode special builtin fatal (or not) errors
+
+# posix says unsetting readonly variables is a fatal error
+${THIS_SH} -o posix -c 'readonly a=a ; unset -v a; echo after unset 1' sh
+# the same with non-identifiers
+${THIS_SH} -o posix -c 'unset -v a-b; echo after unset 2' sh
+# and sourcing a non-existent file is fatal too
+${THIS_SH} -o posix -c '. /nosuchfile ; echo after source' sh
+# but trap specifying a bad signal nunber is non-fatal
+${THIS_SH} -o posix -c 'trap "echo bad" SIGNOSIG; echo after trap' sh
 
 # this must be last!
 # in posix mode, a function name must be a valid identifier

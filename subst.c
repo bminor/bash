@@ -85,7 +85,6 @@ extern int errno;
 
 #define VT_STARSUB	128	/* $* or ${array[*]} -- used to split */
 
-
 /* Flags for quoted_strchr */
 #define ST_BACKSL	0x01
 #define ST_CTLESC	0x02
@@ -1699,7 +1698,7 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  t = extract_command_subst (string, &si, flags);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
-	  tlen = si - i - 1;
+	  tlen = si - i - 2;
 	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
 	  result[result_index++] = c;
 	  result[result_index++] = LPAREN;
@@ -1719,7 +1718,7 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  t = extract_process_subst (string, (string[i] == '<' ? "<(" : ">)"), &si, flags);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
-	  tlen = si - i - 1;
+	  tlen = si - i - 2;
 	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
 	  result[result_index++] = c;
 	  result[result_index++] = LPAREN;
@@ -2002,8 +2001,9 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */
 char *
-de_backslash (string)
+de_backslash (string, qflags)
      char *string;
+     int qflags;
 {
   register size_t slen;
   register int i, j, prev_i;
@@ -2017,6 +2017,8 @@ de_backslash (string)
     {
       if (string[i] == '\\' && (string[i + 1] == '`' || string[i + 1] == '\\' ||
 			      string[i + 1] == '$'))
+	i++;
+      else if (posixly_correct && (qflags & Q_HERE_DOCUMENT) && string[i] == '\\' && string[i + 1] == '"')
 	i++;
       prev_i = i;
       ADVANCE_CHAR (string, slen, i);
@@ -11327,7 +11329,7 @@ add_string:
 	      temp1 = substring (string, t_index, sindex + 1);
 	    else
 	      {
-		de_backslash (temp);
+		de_backslash (temp, quoted);
 		tword = command_substitute (temp, quoted, PF_BACKQUOTE);
 		temp1 = tword ? tword->word : (char *)NULL;
 		if (tword)

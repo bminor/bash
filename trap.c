@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -113,9 +113,11 @@ int pending_traps[NSIG];
    trap command (e.g., when `return' is executed in the trap command). */
 int running_trap;
 
-/* The variable context (function execution level) when we began running
-   this trap command. */
-int trap_variable_context;
+/* The execution context (function/source execution level) when we began
+   running this trap command. This is used to determine whether we have
+   executed any shell functions or sourced files from the trap action, and
+   determines where `return' without arguments gets its return status. */
+int trap_return_context;
 
 /* Set to last_command_exit_value before running a trap. */
 int trap_saved_exit_value;
@@ -341,7 +343,7 @@ run_pending_traps ()
   ps = save_pipestatus_array ();
 #endif
   old_running = running_trap;
-  old_context = trap_variable_context;
+  old_context = trap_return_context;
 
   for (sig = 1; sig < NSIG; sig++)
     {
@@ -351,7 +353,7 @@ run_pending_traps ()
 	{
 	  /* XXX - set last_command_exit_value = trap_saved_exit_value here? */
 	  running_trap = sig + 1;
-	  trap_variable_context = variable_context;
+	  trap_return_context = funcnest + sourcenest;
 
 	  if (sig == SIGINT)
 	    {
@@ -477,7 +479,7 @@ run_pending_traps ()
 		  if (function_code)
 		    {
 		      running_trap = old_running;		/* XXX */
-		      trap_variable_context = old_context;
+		      trap_return_context = old_context;
 		      /* caller will set last_command_exit_value */
 		      sh_longjmp (return_catch, 1);
 		    }
@@ -486,7 +488,7 @@ run_pending_traps ()
 
 	  pending_traps[sig] = 0;	/* XXX - move before evalstring? */
 	  running_trap = old_running;
-	  trap_variable_context = old_context;
+	  trap_return_context = old_context;
 	}
     }
 
@@ -1006,7 +1008,7 @@ run_exit_trap ()
 
       retval = trap_saved_exit_value;
       running_trap = 1;
-      trap_variable_context = variable_context;
+      trap_return_context = funcnest + sourcenest;
 
       code = setjmp_nosigs (top_level);
 
@@ -1091,14 +1093,14 @@ _run_trap_internal (sig, tag)
       old_trap = trap_list[sig];
       old_modes = sigmodes[sig];
       old_running = running_trap;
-      old_context = trap_variable_context;
+      old_context = trap_return_context;
 
       sigmodes[sig] |= SIG_INPROGRESS;
       sigmodes[sig] &= ~SIG_CHANGED;		/* just to be sure */
       trap_command =  savestring (old_trap);
 
       running_trap = sig + 1;
-      trap_variable_context = variable_context;
+      trap_return_context = funcnest + sourcenest;
 
       old_int = interrupt_state;	/* temporarily suppress pending interrupts */
       CLRINTERRUPT;
@@ -1161,7 +1163,7 @@ _run_trap_internal (sig, tag)
 
       running_trap = old_running;
       interrupt_state = old_int;
-      trap_variable_context = old_context;
+      trap_return_context = old_context;
 
       if (sigmodes[sig] & SIG_CHANGED)
 	{

@@ -75,7 +75,7 @@
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */
-extern char * de_backslash PARAMS((char *));
+extern char * de_backslash PARAMS((char *, int));
 
 /* Replace instances of \! in a string with !. */
 extern void unquote_bang PARAMS((char *));

@@ -3072,12 +3072,7 @@ alias_expand_token (tokstr)
   char *expanded;
   alias_t *ap;
 
-#if 0
-  if (((parser_state & PST_ALEXPNEXT) || command_token_position (last_read_token)) &&
-	(parser_state & PST_CASEPAT) == 0)
-#else
   if ((parser_state & PST_ALEXPNEXT) || assignment_acceptable (last_read_token))
-#endif
     {
       ap = find_alias (tokstr);
 

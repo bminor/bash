@@ -48,7 +48,7 @@ hash: usage: hash [-lr] [-p pathname] [-dt] [name ...]
 ./errors.tests: line 157: umask: `:': invalid symbolic mode operator
 ./errors.tests: line 160: umask: -i: invalid option
 umask: usage: umask [-p] [-S] [mode]
-./errors.tests: line 164: umask: `u': invalid symbolic mode character
+./errors.tests: line 164: umask: `p': invalid symbolic mode character
 ./errors.tests: line 173: VAR: readonly variable
 ./errors.tests: line 176: declare: VAR: readonly variable
 ./errors.tests: line 177: declare: VAR: readonly variable
@@ -210,4 +210,9 @@ DEBUG
 bash: line 1: return: can only `return' from a function or sourced script
 after return
 bash: line 1: return: can only `return' from a function or sourced script
-./errors.tests: line 305: `!!': not a valid identifier
+sh: line 1: unset: a: cannot unset: readonly variable
+sh: line 1: unset: `a-b': not a valid identifier
+sh: line 1: /nosuchfile: No such file or directory
+sh: line 1: trap: SIGNOSIG: invalid signal specification
+after trap
+./errors.tests: line 316: `!!': not a valid identifier

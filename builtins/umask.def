@@ -1,7 +1,7 @@
 This file is umask.def, from which is created umask.c.
 It implements the builtin "umask" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -186,17 +186,46 @@ print_symbolic_umask (um)
   printf ("u=%s,g=%s,o=%s\n", ubits, gbits, obits);
 }
 
+static inline mode_t
+copyuser (mask)
+     mode_t mask;
+{
+  return ((mask & S_IRUSR) ? S_IRUGO : 0) |
+	 ((mask & S_IWUSR) ? S_IWUGO : 0) |
+	 ((mask & S_IXUSR) ? S_IXUGO : 0);
+}
+
+static inline mode_t
+copygroup (mask)
+     mode_t mask;
+{
+  return ((mask & S_IRGRP) ? S_IRUGO : 0) |
+	 ((mask & S_IWGRP) ? S_IWUGO : 0) |
+	 ((mask & S_IXGRP) ? S_IXUGO : 0);
+}
+
+static inline mode_t
+copyother (mask)
+     mode_t mask;
+{
+  return ((mask & S_IROTH) ? S_IRUGO : 0) |
+	 ((mask & S_IWOTH) ? S_IWUGO : 0) |
+	 ((mask & S_IXOTH) ? S_IXUGO : 0);
+}
+
 int
 parse_symbolic_mode (mode, initial_bits)
      char *mode;
-     int initial_bits;
+     mode_t initial_bits;
 {
-  int who, op, perm, bits, c;
+  char op, c;
+  mode_t who, perm, bits;
   char *s;
 
   for (s = mode, bits = initial_bits;;)
     {
-      who = op = perm = 0;
+      who = 0;
+      op = 0;
 
       /* Parse the `who' portion of the symbolic mode clause. */
       while (member (*s, "agou"))
@@ -220,7 +249,13 @@ parse_symbolic_mode (mode, initial_bits)
 	    }
 	}
 
+      /* default `who' is `a' */
+      if (who == 0)
+	who = S_IRWXU | S_IRWXG | S_IRWXO;
+
       /* The operation is now sitting in *s. */
+start_op:
+      perm = 0;
       op = *s++;
       switch (op)
 	{
@@ -233,57 +268,87 @@ parse_symbolic_mode (mode, initial_bits)
 	  return (-1);
 	}
 
-      /* Parse out the `perm' section of the symbolic mode clause. */
-      while (member (*s, "rwx"))
+      /* Parse out the `action' section of the symbolic mode clause. An
+	 action can be a set of permissions (rwxXst), a copy specification
+	 (ugo), or another op (+-=). */
+      while (member (*s, "rwxXstugo"))
 	{
-	  c = *s++;
-
-	  switch (c)
+	  switch (*s)
 	    {
+	    /* First the copy specification */
+	    case 'u':
+	      perm = copyuser (initial_bits);
+	      break;
+	    case 'g':
+	      perm = copygroup (initial_bits);
+	      break;
+	    case 'o':
+	      perm = copyother (initial_bits);
+	      break;
+
+	    /* Then the permissions. */
 	    case 'r':
 	      perm |= S_IRUGO;
 	      break;
 	    case 'w':
 	      perm |= S_IWUGO;
 	      break;
+	    case 'X':
+	      /* for chmod, this includes S_ISDIR but that doesn't make sense here */
+	      if ((initial_bits & S_IXUGO) == 0)
+		break;		/* no-op if original mask doesn't include execute bits */
+	      /* FALLTHROUGH */
 	    case 'x':
 	      perm |= S_IXUGO;
 	      break;
+	    case 's':
+#ifdef S_ISUID
+	      perm |= S_ISUID | S_ISGID;
+	      break;
+#else
+	      goto spec_error;
+#endif
+	    case 't':
+#ifdef S_ISVTX
+	      perm |= S_ISVTX;
+	      break;
+#else
+	      goto spec_error;
+#endif
 	    }
+	  s++;
 	}
 
       /* Now perform the operation or return an error for a
 	 bad permission string. */
-      if (!*s || *s == ',')
+      perm &= who;
+
+      switch (op)
 	{
-	  if (who)
-	    perm &= who;
-
-	  switch (op)
-	    {
-	    case '+':
-	      bits |= perm;
-	      break;
-	    case '-':
-	      bits &= ~perm;
-	      break;
-	    case '=':
-	      if (who == 0)
-		who = S_IRWXU | S_IRWXG | S_IRWXO;
-	      bits &= ~who;
-	      bits |= perm;
-	      break;
-
-	    /* No other values are possible. */
-	    }
-
-	  if (*s == '\0')
-	    break;
-	  else
-	    s++;	/* skip past ',' */
+	case '+':
+	  bits |= perm;
+	  break;
+	case '-':
+	  bits &= ~perm;
+	  break;
+	case '=':
+	  bits &= ~who;
+	  bits |= perm;
+	  break;
 	}
+
+      /* Break if the end of the action string, loop if we're going to parse
+	 another `who', go back to parsing another op if we have an op spec
+	 (+-=). Return an invalid mode character error for everything else. */
+      if (*s == '\0')
+	break;
+      else if (*s == ',')
+	s++;	/* skip past ',' */
+      else if (*s == '+' || *s == '-' || *s == '=')
+	goto start_op;
       else
 	{
+spec_error:
 	  builtin_error (_("`%c': invalid symbolic mode character"), *s);
 	  return (-1);
 	}
@@ -299,7 +364,8 @@ static int
 symbolic_umask (list)
      WORD_LIST *list;
 {
-  int um, bits;
+  mode_t um;
+  int bits;
 
   /* Get the initial umask.  Don't change it yet. */
   um = umask (022);

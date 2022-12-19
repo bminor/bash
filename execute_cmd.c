@@ -4014,6 +4014,8 @@ execute_cond_node (cond)
 #endif
 
 	  result = sh_regmatch (arg1, arg2, mflags);
+	  if (result == 2)
+	    builtin_error (_("invalid regular expression `%s'"), arg2);
 	}
       else
 #endif /* COND_REGEXP */
@@ -4869,6 +4871,7 @@ builtin_status (result)
     case EX_REDIRFAIL:
     case EX_BADASSIGN:
     case EX_EXPFAIL:
+    case EX_UTILERROR:
       r = EXECUTION_FAILURE;
       break;
     default:

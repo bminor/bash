@@ -8249,6 +8249,12 @@ redirection errors, variable assignment errors for assignments preceding
 the command name, and so on.
 
 @item
+The @code{unset} builtin with the @option{-v} option specified returns a
+fatal error if it attempts to unset a @code{readonly} or @code{non-unsettable}
+variable, or encounters a variable name argument that is an invalid identifier,
+which causes a non-interactive shell to exit.
+
+@item
 A non-interactive shell exits with an error status if a variable
 assignment error occurs when no command name follows the assignment
 statements.
@@ -8433,6 +8439,13 @@ arguments corresponding to floating point conversion specifiers, instead of
 @item
 Bash removes an exited background process's status from the list of such
 statuses after the @code{wait} builtin is used to obtain it.
+
+@item
+A double quote character (@samp{"}) is treated specially when it appears
+in a backquoted command substitution in the body of a here-document that
+undergoes expansion.
+That means, for example, that a backslash preceding a double quote
+character will escape it and the backslash will be removed.
 
 @end enumerate
 

@@ -590,7 +590,8 @@ readline_internal_charloop (void)
 	{
 	  (*rl_redisplay_function) ();
 	  _rl_want_redisplay = 0;
-	  memcpy ((void *)_rl_top_level, (void *)olevel, sizeof (procenv_t));
+	  if (RL_ISSTATE (RL_STATE_CALLBACK))
+	    memcpy ((void *)_rl_top_level, (void *)olevel, sizeof (procenv_t));
 
 	  /* If we longjmped because of a timeout, handle it here. */
 	  if (RL_ISSTATE (RL_STATE_TIMEOUT))

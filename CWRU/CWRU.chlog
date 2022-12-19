@@ -4667,3 +4667,81 @@ subst.c
 	- parameter_brace_expand_length: handle namerefs with values that are
 	  valid length expansion expressions but invalid identifiers. From
 	  ed7-aspire4925@hotmail.com via https://savannah.gnu.org/support/?110799
+
+				   12/13
+				   -----
+subst.c
+	- extract_heredoc_dolbrace_string: fix off-by-one error after calling
+	  extract_command_subst and extract_process_subst that caused it to
+	  copy one too many parsed characters. Fix for bug reported by
+	  Norbert Lange <nolange79@gmail.com>
+
+				   12/14
+				   -----
+execute_cmd.c
+	- execute_cond_node: if a regular expression fails to compile, print
+	  an error message. Report from Emanuele Torre <torreemanuele6@gmail.com>
+	  back on 6/15/2022
+
+trap.c
+	- trap_variable_context -> trap_return_context, initialize from
+	  funcnest + sourcenest instead of variable_context so we handle
+	  shell function execution and `./source', both of which can use
+	  `return'. Idea from Koichi Murase <myoga.murase@gmail.com>
+
+builtins/common.c
+	- get_exitstat: compare trap_return_context against funcnest+sourcenest,
+	  since that's how it's initialized now
+
+lib/readline/readline.c
+	- readline_internal_charloop: if we're not using the callback interface,
+	  don't restore _rl_top_level from olevel, since we will just be going
+	  around the loop again and will potentially need to use it multiple
+	  times. Report from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   12/15
+				   -----
+shell.h
+	- EX_UTILERROR: new generic special builtin return status to indicate a
+	  POSIX utility error that should cause a non-interactive shell to abort
+
+execute_cmd.c
+	- builtin_status: translate EX_UTILERROR to EXECUTION_FAILURE
+
+builtins/set.def
+	- unset_builtin: return EX_UTILERROR if posix_utility_error is set;
+	  set it when trying to unset a non-identifier (variable) or a
+	  non-unsettable or readonly variable
+
+				   12/16
+				   -----
+subst.c
+	- de_backslash: now takes a second argument with the current quoting
+	  flags
+	- de_backslash: if the quoting flags include Q_HERE_DOCUMENT and the
+	  shell is in posix mode, remove backslashes quoting double quotes
+
+subst.h
+	- de_backslash: update extern declaration
+
+lib/readline/histexpand.c
+	- history_expand_internal,get_history_word_specifier,get_subst_pattern,
+	  hist_error,history_find_word,hist_string_extract_single_quoted:
+	  now take const char * string arguments
+
+lib/readline/mbutil.c
+	- _rl_get_char_len,_rl_adjust_point,_rl_find_next_mbchar_internal,
+	  _rl_find_next_mbchar,_rl_find_prev_mbchar,_rl_find_prev_mbchar_internal,
+	  _rl_test_nonzero,_rl_find_prev_utf8char,_rl_is_mbchar_matched,
+	  _rl_compare_chars,_rl_char_value: take const char * string arguments
+
+				   12/17
+				   -----
+builtins/umask.def
+	- parse_symbolic_umask: add missing POSIX pieces:
+		o `action' of ugo, meaning to copy portions of initial mask
+		o multiple `op' specs as part of the action string (`u=r-w')
+		  (resets perm)
+		o missing perm characters Xst in action string
+		o default `who' equivalent to `a' instead of fixing up later
+

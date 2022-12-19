@@ -87,7 +87,7 @@ BVAR=xxx eval echo $AVAR
 
 unset -v AVAR BVAR
 
-# test umask
+# basic umask tests
 mask=$(umask)
 umask 022
 umask
@@ -279,6 +279,9 @@ ${THIS_SH} ./builtins6.sub
 
 # test behavior of command builtin after changing it to a pseudo-keyword
 ${THIS_SH} ./builtins7.sub
+
+# POSIX complete symbolic umask tests
+${THIS_SH} ./builtins8.sub
 
 # this must be last -- it is a fatal error
 exit status
