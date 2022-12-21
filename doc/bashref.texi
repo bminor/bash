@@ -5049,27 +5049,32 @@ For each @var{name}, indicate how it would be interpreted if used as a
 command name.
 
 If the @option{-t} option is used, @code{type} prints a single word
-which is one of @samp{alias}, @samp{function}, @samp{builtin},
-@samp{file} or @samp{keyword},
-if @var{name} is an alias, shell function, shell builtin,
-disk file, or shell reserved word, respectively.
+which is one of @samp{alias}, @samp{keyword}, @samp{function},
+@samp{builtin}, or @samp{file},
+if @var{name} is an alias, shell reserved word, shell function,
+shell builtin, or executable disk file, respectively.
 If the @var{name} is not found, then nothing is printed, and
 @code{type} returns a failure status.
 
 If the @option{-p} option is used, @code{type} either returns the name
-of the disk file that would be executed, or nothing if @option{-t}
-would not return @samp{file}.
+of the executable file that would be found by searching @code{$PATH},
+or nothing if @option{-t} would not return @samp{file}.
 
 The @option{-P} option forces a path search for each @var{name}, even if
 @option{-t} would not return @samp{file}.
 
-If a command is hashed, @option{-p} and @option{-P} print the hashed value,
-which is not necessarily the file that appears first in @code{$PATH}.
+If a @var{name} is present in the table of hashed commands,
+options @option{-p} and @option{-P} print the hashed value, which is not
+necessarily the file that appears first in @code{$PATH}.
 
 If the @option{-a} option is used, @code{type} returns all of the places
-that contain an executable named @var{file}.
-This includes aliases and functions, if and only if the @option{-p} option
-is not also used.
+that contain a command named @var{name}.
+This includes aliases, reserved words, functions, and builtins,
+but the path search options (@option{-p} and @option{-P}) can be supplied
+to restrict the output to executable files.
+If @option{-a} is supplied with @option{-p}, @code{type} does not look
+in the table of hashed commands, and only performs a @code{PATH}
+search for @var{name}.
 
 If the @option{-f} option is used, @code{type} does not attempt to find
 shell functions, as with the @code{command} builtin.

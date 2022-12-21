@@ -5025,6 +5025,7 @@ without_job_control ()
 #endif
   delete_all_jobs (0);
   set_job_control (0);
+  original_pgrp = NO_PID;
 }
 
 /* If this shell is interactive, terminate all stopped jobs and

@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -434,7 +434,7 @@ set_edit_mode (on_or_off, option_name)
     {
       rl_variable_bind ("editing-mode", option_name);
 
-      if (interactive)
+      if (interactive && command_execution_string == 0)
 	with_input_from_stdin ();
       no_line_editing = 0;
     }
@@ -443,7 +443,7 @@ set_edit_mode (on_or_off, option_name)
       isemacs = rl_editing_mode == 1;
       if ((isemacs && *option_name == 'e') || (!isemacs && *option_name == 'v'))
 	{
-	  if (interactive)
+	  if (interactive && command_execution_string == 0)
 	    with_input_from_stream (stdin, "stdin");
 	  no_line_editing = 1;
 	}

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Dec  2 15:53:52 EST 2022
+.\"	Last Change: Mon Dec 19 13:56:57 EST 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 December 2" "GNU Bash 5.2"
+.TH BASH 1 "2022 December 19" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -11013,18 +11013,20 @@ or
 .I file
 if
 .I name
-is an alias, shell reserved word, function, builtin, or disk file,
+is an alias, shell reserved word, function, builtin, or executable disk file,
 respectively.
 If the
 .I name
-is not found, then nothing is printed, and an exit status of false
-is returned.
+is not found, then nothing is printed, and \fBtype\fP returns a
+non-zero exit status.
 If the
 .B \-p
 option is used,
 .B type
-either returns the name of the disk file
-that would be executed if
+either returns the name of the executable file
+that would be found by searching
+.B $PATH
+if
 .I name
 were specified as a command name,
 or nothing if
@@ -11054,16 +11056,20 @@ If the
 .B \-a
 option is used,
 .B type
-prints all of the places that contain
-an executable named
+prints all of the places that contain a command named
 .IR name .
-This includes aliases and functions,
-if and only if the
-.B \-p
-option is not also used.
-The table of hashed commands is not consulted
+This includes aliases, reserved words, functions, and builtins,
+but the path search options (\fB\-p\fP and \fB\-P\fP)
+can be supplied to restrict the output to executable files.
+\fBtype\fP does not consult the table of hashed commands
 when using
-.BR \-a .
+.B \-a 
+with
+.BR \-p ,
+and only performs a
+.SM
+.B PATH
+search for \fIname\fP.
 The
 .B \-f
 option suppresses shell function lookup, as with the \fBcommand\fP builtin.

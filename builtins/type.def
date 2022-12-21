@@ -1,7 +1,7 @@
 This file is type.def, from which is created type.c.
 It implements the builtin "type" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -163,7 +163,7 @@ type_builtin (list)
 	  dflags |= CDESC_TYPE;
 	  dflags &= ~(CDESC_PATH_ONLY|CDESC_SHORTDESC);
 	  break;
-	case 'P':	/* shorthand for type -ap */
+	case 'P':	/* force path search only plus hash table lookup */
 	  dflags |= (CDESC_PATH_ONLY|CDESC_FORCE_PATH);
 	  dflags &= ~(CDESC_TYPE|CDESC_SHORTDESC);
 	  break;
@@ -242,7 +242,7 @@ describe_command (command, dflags)
 
       found = 1;
 
-      if (all == 0)
+      if (all == 0)		/* type -p returns, any executable file would not have precedence */
 	return (1);
     }
 #endif /* ALIAS */
@@ -345,7 +345,8 @@ describe_command (command, dflags)
 	    printf ("%s\n", full_path);
 
 	  free (full_path);
-	  return (1);
+	  if (all == 0)
+	    return (1);
 	}
     }
 

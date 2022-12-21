@@ -4745,3 +4745,28 @@ builtins/umask.def
 		o missing perm characters Xst in action string
 		o default `who' equivalent to `a' instead of fixing up later
 
+				   12/19
+				   -----
+builtins/type.def
+	- if -a and -P are both supplied, look in the command hash table but
+	  continue and perform a $PATH search even if the NAME is hashed.
+	  From a report by Adam Vodopjan <adam.vodopjan@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- type: update description to fix it to what the code actually does
+
+builtins/set.def
+	- set_edit_mode: don't run with_input_from_stdin or with_input_from_stream
+	  unless command_execution_string is NULL. Report from
+	  Harald van Dijk <harald@gigawatt.nl>
+
+				   12/20
+				   -----
+braces.c
+	- array_concat: add a check for interrupts and terminating signals
+	  into the inner loop
+
+jobs.c
+	- without_job_control: set original_pgrp == NO_PID since we don't
+	  want to be messing with the terminal pgrp if we call end_job_control.
+	  From a report from ks1322 ks1322 <ks1322@gmail.com>

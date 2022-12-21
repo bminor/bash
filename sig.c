@@ -613,6 +613,7 @@ termsig_handler (sig)
   if (sig == SIGHUP && (interactive || (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB))))
     hangup_all_jobs ();
 
+  /* XXX - should we also suppress this call if SUBSHELL_PIPE? */
   if ((subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB)) == 0)
     end_job_control ();
 #endif /* JOB_CONTROL */

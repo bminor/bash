@@ -767,6 +767,17 @@ array_concat (arr1, arr2)
 
       for (j = 0; j < len2; j++)
 	{
+#if defined (SHELL)
+	  if (ISINTERRUPT)
+	    {
+	      result[len] = (char *)NULL;
+	      strvec_dispose (result);
+	      result = (char **)NULL;
+	      strvec_dispose (arr1);	/* caller expects us to free arr1 */
+	    }
+	  QUIT;
+#endif
+	
 	  result[len] = (char *)xmalloc (1 + strlen_1 + strlen (arr2[j]));
 	  strcpy (result[len], arr1[i]);
 	  strcpy (result[len] + strlen_1, arr2[j]);
