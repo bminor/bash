@@ -115,8 +115,7 @@ $END
 
 /* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
 static int
-setpwd (dirname)
-     char *dirname;
+setpwd (char *dirname)
 {
   int old_anm;
   SHELL_VAR *tvar;
@@ -134,8 +133,7 @@ setpwd (dirname)
 }
 
 static int
-bindpwd (no_symlinks)
-     int no_symlinks;
+bindpwd (int no_symlinks)
 {
   char *dirname, *pwdvar;
   int old_anm, r, canon_failed;
@@ -183,8 +181,7 @@ bindpwd (no_symlinks)
 /* Call get_working_directory to reset the value of
    the_current_working_directory () */
 static char *
-resetpwd (caller)
-     char *caller;
+resetpwd (char *caller)
 {
   char *tdir;
       
@@ -194,10 +191,9 @@ resetpwd (caller)
   return (tdir);
 }
 
+/* return new constructed directory name in *NDIRP */
 static int
-cdxattr (dir, ndirp)
-     char *dir;		/* don't assume we can always free DIR */
-     char **ndirp;	/* return new constructed directory name */
+cdxattr (char *dir, char **ndirp)
 {
 #if defined (O_XATTR)
   int apfd, fd, r, e;
@@ -241,7 +237,7 @@ cdxattr (dir, ndirp)
 
 /* Clean up the O_XATTR baggage.  Currently only closes xattrfd */
 static void
-resetxattr ()
+resetxattr (void)
 {
 #if defined (O_XATTR)
   if (xattrfd >= 0)
@@ -264,8 +260,7 @@ resetxattr ()
    so the programming interface is simple, and it handles errors and
    restrictions properly. */
 int
-cd_builtin (list)
-     WORD_LIST *list;
+cd_builtin (WORD_LIST *list)
 {
   char *dirname, *cdpath, *path, *temp;
   int path_index, no_symlinks, opt, lflag, e;
@@ -482,8 +477,7 @@ static int verbatim_pwd;
 
 /* Print the name of the current working directory. */
 int
-pwd_builtin (list)
-     WORD_LIST *list;
+pwd_builtin (WORD_LIST *list)
 {
   char *directory;
   int opt, pflag;
@@ -548,9 +542,7 @@ pwd_builtin (list)
    to the working directory.  Return 1 on success, 0 on failure. */
 
 static int
-change_to_directory (newdir, nolinks, xattr)
-     char *newdir;
-     int nolinks, xattr;
+change_to_directory (char *newdir, int nolinks, int xattr)
 {
   char *t, *tdir, *ndir;
   int err, canon_failed, r, ndlen;

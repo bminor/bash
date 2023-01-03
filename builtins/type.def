@@ -107,8 +107,7 @@ extern int find_reserved_word (char *);
  */
 
 int
-type_builtin (list)
-     WORD_LIST *list;
+type_builtin (WORD_LIST *list)
 {
   int dflags, any_failed, opt;
   WORD_LIST *this;
@@ -210,9 +209,7 @@ type_builtin (list)
  * return after finding it once.
  */
 int
-describe_command (command, dflags)
-     char *command;
-     int dflags;
+describe_command (char *command, int dflags)
 {
   int found, i, found_file, f, all;
   char *full_path, *x, *pathlist;

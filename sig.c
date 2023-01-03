@@ -24,7 +24,7 @@
 
 #if defined (HAVE_UNISTD_H)
 #  ifdef _MINIX
-#    include <sys/types.h>
+initialize_shell_signals (#    include <sys/types.h>
 #  endif
 #  include <unistd.h>
 #endif
@@ -55,11 +55,11 @@
 #  include "bashhist.h"
 #endif
 
-extern void initialize_siglist PARAMS((void));
-extern void set_original_signal PARAMS((int, SigHandler *));
+extern void initialize_siglist (void);
+extern void set_original_signal (int, SigHandler *);
 
 #if !defined (JOB_CONTROL)
-extern void initialize_job_signals PARAMS((void));
+extern void initialize_job_signals (void);
 #endif
 
 /* Non-zero after SIGINT. */
@@ -93,12 +93,11 @@ int terminate_immediately = 0;
 static SigHandler *old_winch = (SigHandler *)SIG_DFL;
 #endif
 
-static void initialize_shell_signals PARAMS((void));
-static void kill_shell PARAMS((int));
+static void initialize_shell_signals (void);
+static void kill_shell (int);
 
 void
-initialize_signals (reinit)
-     int reinit;
+initialize_signals (int reinit)
 {
   initialize_shell_signals ();
   initialize_job_signals ();
@@ -227,7 +226,7 @@ static int termsigs_initialized = 0;
    this when a trap is defined for EXIT (0) or when trap is run
    to display signal dispositions. */
 void
-initialize_terminating_signals ()
+initialize_terminating_signals (void)
 {
   register int i;
 #if defined (HAVE_POSIX_SIGNALS)
@@ -307,7 +306,7 @@ initialize_terminating_signals ()
 }
 
 static void
-initialize_shell_signals ()
+initialize_shell_signals (void)
 {
   if (interactive)
     initialize_terminating_signals ();
@@ -339,7 +338,7 @@ initialize_shell_signals ()
 }
 
 void
-reset_terminating_signals ()
+reset_terminating_signals (void)
 {
   register int i;
 #if defined (HAVE_POSIX_SIGNALS)
@@ -381,7 +380,7 @@ reset_terminating_signals ()
    jump_to_top_level from a builtin command context.  XXX - might want to
    also call reset_parser here. */
 void
-top_level_cleanup ()
+top_level_cleanup (void)
 {
   /* Clean up string parser environment. */
   while (parse_and_execute_level)
@@ -399,7 +398,7 @@ top_level_cleanup ()
 
 /* What to do when we've been interrupted, and it is safe to handle it. */
 void
-throw_to_top_level ()
+throw_to_top_level (void)
 {
   int print_newline = 0;
 
@@ -480,14 +479,13 @@ throw_to_top_level ()
 
 /* This is just here to isolate the longjmp calls. */
 void
-jump_to_top_level (value)
-     int value;
+jump_to_top_level (int value)
 {
   sh_longjmp (top_level, value);
 }
 
 void
-restore_sigmask ()
+restore_sigmask (void)
 {
 #if defined (JOB_CONTROL) || defined (HAVE_POSIX_SIGNALS)
   sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
@@ -497,8 +495,7 @@ restore_sigmask ()
 static int handling_termsig = 0;
 
 sighandler
-termsig_sighandler (sig)
-     int sig;
+termsig_sighandler (int sig)
 {
   /* If we get called twice with the same signal before handling it,
      terminate right away. */
@@ -581,8 +578,7 @@ termsig_sighandler (sig)
 }
 
 void
-termsig_handler (sig)
-     int sig;
+termsig_handler (int sig)
 {
   /* Simple semaphore to keep this function from being executed multiple
      times.  Since we no longer are running as a signal handler, we don't
@@ -636,8 +632,7 @@ termsig_handler (sig)
 }
 
 static void
-kill_shell (sig)
-     int sig;
+kill_shell (int sig)
 {
   int i, core;
   sigset_t mask;
@@ -683,8 +678,7 @@ kill_shell (sig)
 
 /* What we really do when SIGINT occurs. */
 sighandler
-sigint_sighandler (sig)
-     int sig;
+sigint_sighandler (int sig)
 {
 #if defined (MUST_REINSTALL_SIGHANDLERS)
   signal (sig, sigint_sighandler);
@@ -733,8 +727,7 @@ sigint_sighandler (sig)
 
 #if defined (SIGWINCH)
 sighandler
-sigwinch_sighandler (sig)
-     int sig;
+sigwinch_sighandler (int sig)
 {
 #if defined (MUST_REINSTALL_SIGHANDLERS)
   set_signal_handler (SIGWINCH, sigwinch_sighandler);
@@ -745,7 +738,7 @@ sigwinch_sighandler (sig)
 #endif /* SIGWINCH */
 
 void
-set_sigwinch_handler ()
+set_sigwinch_handler (void)
 {
 #if defined (SIGWINCH)
  old_winch = set_signal_handler (SIGWINCH, sigwinch_sighandler);
@@ -753,7 +746,7 @@ set_sigwinch_handler ()
 }
 
 void
-unset_sigwinch_handler ()
+unset_sigwinch_handler (void)
 {
 #if defined (SIGWINCH)
   set_signal_handler (SIGWINCH, old_winch);
@@ -761,8 +754,7 @@ unset_sigwinch_handler ()
 }
 
 sighandler
-sigterm_sighandler (sig)
-     int sig;
+sigterm_sighandler (int sig)
 {
   sigterm_received = 1;		/* XXX - counter? */
   SIGRETURN (0);
@@ -772,8 +764,7 @@ sigterm_sighandler (sig)
 #if !defined (HAVE_POSIX_SIGNALS)
 
 /* Perform OPERATION on NEWSET, perhaps leaving information in OLDSET. */
-sigprocmask (operation, newset, oldset)
-     int operation, *newset, *oldset;
+sigprocmask (int operation, int *newset, int *oldset)
 {
   int old, new;
 
@@ -811,9 +802,7 @@ sigprocmask (operation, newset, oldset)
 #endif
 
 SigHandler *
-set_signal_handler (sig, handler)
-     int sig;
-     SigHandler *handler;
+set_signal_handler (int sig, SigHandler *handler)
 {
   struct sigaction act, oact;
 

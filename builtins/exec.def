@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2021,2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -85,8 +85,7 @@ int no_exit_on_failed_exec;
 /* If the user wants this to look like a login shell, then
    prepend a `-' onto NAME and return the new name. */
 static char *
-mkdashname (name)
-     char *name;
+mkdashname (char *name)
 {
   char *ret;
 
@@ -97,8 +96,7 @@ mkdashname (name)
 }
 
 int
-exec_builtin (list)
-     WORD_LIST *list;
+exec_builtin (WORD_LIST *list)
 {
   int exit_value = EXECUTION_FAILURE;
   int cleanenv, login, opt, orig_job_control;

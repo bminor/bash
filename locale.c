@@ -1,6 +1,6 @@
 /* locale.c - Miscellaneous internationalization functions. */
 
-/* Copyright (C) 1996-2009,2012,2016-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2012,2016-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -68,15 +68,15 @@ static char *lang;
 
 /* Called to reset all of the locale variables to their appropriate values
    if (and only if) LC_ALL has not been assigned a value. */
-static int reset_locale_vars PARAMS((void));
+static int reset_locale_vars (void);
 
-static void locale_setblanks PARAMS((void));
-static int locale_isutf8 PARAMS((char *));
+static void locale_setblanks (void);
+static int locale_isutf8 (char *);
 
 /* Set the value of default_locale and make the current locale the
    system default locale.  This should be called very early in main(). */
 void
-set_default_locale ()
+set_default_locale (void)
 {
 #if defined (HAVE_SETLOCALE)
   default_locale = setlocale (LC_ALL, "");
@@ -101,7 +101,7 @@ set_default_locale ()
    LC_TIME if they are not specified in the environment, but LC_ALL is.  This
    should be called from main() after parsing the environment. */
 void
-set_default_locale_vars ()
+set_default_locale_vars (void)
 {
   char *val;
 
@@ -174,8 +174,7 @@ set_default_locale_vars ()
 /* Set one of the locale categories (specified by VAR) to VALUE.  Returns 1
   if successful, 0 otherwise. */
 int
-set_locale_var (var, value)
-     char *var, *value;
+set_locale_var (char *var, char *value)
 {
   int r;
   char *x;
@@ -303,8 +302,7 @@ set_locale_var (var, value)
    reset_locale_vars() to reset any default values if LC_ALL is unset or
    null. */
 int
-set_lang (var, value)
-     char *var, *value;
+set_lang (char *var, char *value)
 {
   FREE (lang);
   if (value)
@@ -321,7 +319,7 @@ set_lang (var, value)
 /* Set default values for LANG and LC_ALL.  Default values for all other
    locale-related variables depend on these. */
 void
-set_default_lang ()
+set_default_lang (void)
 {
   char *v;
 
@@ -336,8 +334,7 @@ set_default_lang ()
    The precedence is as POSIX.2 specifies:  LC_ALL has precedence over
    the specific locale variables, and LANG, if set, is used as the default. */
 char *
-get_locale_var (var)
-     char *var;
+get_locale_var (char *var)
 {
   char *locale;
 
@@ -360,7 +357,7 @@ get_locale_var (var)
    if (and only if) LC_ALL has not been assigned a value.  DO NOT CALL THIS
    IF LC_ALL HAS BEEN ASSIGNED A VALUE. */
 static int
-reset_locale_vars ()
+reset_locale_vars (void)
 {
   char *t, *x;
 #if defined (HAVE_SETLOCALE)
@@ -406,9 +403,7 @@ reset_locale_vars ()
    is not available, the passed string is returned unchanged.  The
    length of the translated string is returned in LENP, if non-null. */
 char *
-localetrans (string, len, lenp)
-     char *string;
-     int len, *lenp;
+localetrans (char *string, int len, int *lenp)
 {
   char *locale, *t;
   char *translated;
@@ -464,9 +459,7 @@ localetrans (string, len, lenp)
 /* Change a bash string into a string suitable for inclusion in a `po' file.
    This backslash-escapes `"' and `\' and changes newlines into \\\n"\n". */
 char *
-mk_msgstr (string, foundnlp)
-     char *string;
-     int *foundnlp;
+mk_msgstr (char *string, int *foundnlp)
 {
   register int c, len;
   char *result, *r, *s;
@@ -515,9 +508,7 @@ mk_msgstr (string, foundnlp)
    by the caller.  The length of the translated string is returned in LENP,
    if non-null. */
 char *
-locale_expand (string, start, end, lineno, lenp)
-     char *string;
-     int start, end, lineno, *lenp;
+locale_expand (char *string, int start, int end, int lineno, int *lenp)
 {
   int len, tlen, foundnl;
   char *temp, *t, *t2;
@@ -573,7 +564,7 @@ locale_expand (string, start, end, lineno, lenp)
 /* Set every character in the <blank> character class to be a shell break
    character for the lexical analyzer when the locale changes. */
 static void
-locale_setblanks ()
+locale_setblanks (void)
 {
   int x;
 
@@ -595,8 +586,7 @@ locale_setblanks ()
      language[_territory][.codeset][@modifier][+special][,[sponsor][_revision]]
    and return TRUE if the codeset is UTF-8 or utf8 */
 static int
-locale_isutf8 (lspec)
-     char *lspec;
+locale_isutf8 (char *lspec)
 {
   char *cp, *encoding;
 
@@ -628,7 +618,7 @@ locale_isutf8 (lspec)
 
 #if defined (HAVE_LOCALECONV)
 int
-locale_decpoint ()
+locale_decpoint (void)
 {
   struct lconv *lv;
 
@@ -638,7 +628,7 @@ locale_decpoint ()
 #else
 #  undef locale_decpoint
 int
-locale_decpoint ()
+locale_decpoint (void)
 {
   return '.';
 }

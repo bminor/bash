@@ -1,6 +1,6 @@
 /* mailcheck.c -- The check is in the mail... */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -47,7 +47,7 @@
 
 extern time_t shell_start_time;
 
-extern int mailstat PARAMS((const char *, struct stat *));
+extern int mailstat (const char *, struct stat *);
 
 typedef struct _fileinfo {
   char *name;
@@ -69,24 +69,23 @@ static time_t last_time_mail_checked = 0;
 
 /* Non-zero means warn if a mail file has been read since last checked. */
 int mail_warning;
+static int find_mail_file (const char *);
+static void init_mail_file (int);
+static void update_mail_file (int);
+static int add_mail_file (char *, char *);
 
-static int find_mail_file PARAMS((char *));
-static void init_mail_file PARAMS((int));
-static void update_mail_file PARAMS((int));
-static int add_mail_file PARAMS((char *, char *));
+static FILEINFO *alloc_mail_file (char *, char *);
+static void dispose_mail_file (FILEINFO *);
 
-static FILEINFO *alloc_mail_file PARAMS((char *, char *));
-static void dispose_mail_file PARAMS((FILEINFO *));
+static int file_mod_date_changed (int);
+static int file_access_date_changed (int);
+static int file_has_grown (int);
 
-static int file_mod_date_changed PARAMS((int));
-static int file_access_date_changed PARAMS((int));
-static int file_has_grown PARAMS((int));
-
-static char *parse_mailpath_spec PARAMS((char *));
+static char *parse_mailpath_spec (char *);
 
 /* Returns non-zero if it is time to check mail. */
 int
-time_to_check_mail ()
+time_to_check_mail (void)
 {
   char *temp;
   time_t now;
@@ -113,7 +112,7 @@ time_to_check_mail ()
 /* Okay, we have checked the mail.  Perhaps I should make this function
    go away. */
 void
-reset_mail_timer ()
+reset_mail_timer (void)
 {
   last_time_mail_checked = NOW;
 }
@@ -121,8 +120,7 @@ reset_mail_timer ()
 /* Locate a file in the list.  Return index of
    entry, or -1 if not found. */
 static int
-find_mail_file (file)
-     char *file;
+find_mail_file (const char *file)
 {
   register int i;
 
@@ -153,8 +151,7 @@ find_mail_file (file)
   while (0)
 
 static void
-init_mail_file (i)
-     int i;
+init_mail_file (int i)
 {
   mailfiles[i]->access_time = mailfiles[i]->mod_time = last_time_mail_checked ? last_time_mail_checked : shell_start_time;
   mailfiles[i]->file_size = 0;
@@ -162,8 +159,7 @@ init_mail_file (i)
 }
 
 static void
-update_mail_file (i)
-     int i;
+update_mail_file (int i)
 {
   char *file;
   struct stat finfo;
@@ -178,8 +174,7 @@ update_mail_file (i)
 /* Add this file to the list of remembered files and return its index
    in the list of mail files. */
 static int
-add_mail_file (file, msg)
-     char *file, *msg;
+add_mail_file (char *file, char *msg)
 {
   struct stat finfo;
   char *filename;
@@ -208,7 +203,7 @@ add_mail_file (file, msg)
 
 /* Reset the existing mail files access and modification times to zero. */
 void
-reset_mail_files ()
+reset_mail_files (void)
 {
   register int i;
 
@@ -217,8 +212,7 @@ reset_mail_files ()
 }
 
 static FILEINFO *
-alloc_mail_file (filename, msg)
-     char *filename, *msg;
+alloc_mail_file (char *filename, char *msg)
 {
   FILEINFO *mf;
 
@@ -231,8 +225,7 @@ alloc_mail_file (filename, msg)
 }
 
 static void
-dispose_mail_file (mf)
-     FILEINFO *mf;
+dispose_mail_file (FILEINFO *mf)
 {
   free (mf->name);
   FREE (mf->msg);
@@ -241,7 +234,7 @@ dispose_mail_file (mf)
 
 /* Free the information that we have about the remembered mail files. */
 void
-free_mail_files ()
+free_mail_files (void)
 {
   register int i;
 
@@ -256,7 +249,7 @@ free_mail_files ()
 }
 
 void
-init_mail_dates ()
+init_mail_dates (void)
 {
   if (mailfiles == 0)
     remember_mail_dates ();
@@ -266,8 +259,7 @@ init_mail_dates ()
    accessed since modified.  If the size has dropped to zero, reset
    the cached mail file info. */
 static int
-file_mod_date_changed (i)
-     int i;
+file_mod_date_changed (int i)
 {
   time_t mtime;
   struct stat finfo;
@@ -290,8 +282,7 @@ file_mod_date_changed (i)
 
 /* Return non-zero if FILE's access date has changed. */
 static int
-file_access_date_changed (i)
-     int i;
+file_access_date_changed (int i)
 {
   time_t atime;
   struct stat finfo;
@@ -311,8 +302,7 @@ file_access_date_changed (i)
 
 /* Return non-zero if FILE's size has increased. */
 static int
-file_has_grown (i)
-     int i;
+file_has_grown (int i)
 {
   off_t size;
   struct stat finfo;
@@ -328,8 +318,7 @@ file_has_grown (i)
    the first unquoted `?' or `%' to the end of the string.  This is the
    message to be printed when the file contents change. */
 static char *
-parse_mailpath_spec (str)
-     char *str;
+parse_mailpath_spec (char *str)
 {
   char *s;
   int pass_next;
@@ -353,7 +342,7 @@ parse_mailpath_spec (str)
 }
 
 char *
-make_default_mailpath ()
+make_default_mailpath (void)
 {
 #if defined (DEFAULT_MAIL_DIRECTORY)
   char *mp;
@@ -374,7 +363,7 @@ make_default_mailpath ()
    default value, which we randomly concoct from using Unix. */
 
 void
-remember_mail_dates ()
+remember_mail_dates (void)
 {
   char *mailpaths;
   char *mailfile, *mp;
@@ -423,7 +412,7 @@ remember_mail_dates ()
    mail file has been accessed since the last time we remembered, then
    the message "The mail in <mailfile> has been read" is printed. */
 void
-check_mail ()
+check_mail (void)
 {
   char *current_mail_file, *message;
   int i, use_user_notification;

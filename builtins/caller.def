@@ -2,7 +2,7 @@ This file is caller.def, from which is created caller.c.  It implements the
 builtin "caller" in Bash.
 
 Copyright (C) 2002-2008 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008-2019 Free Software Foundation, Inc.
+Copyright (C) 2008-2019,2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -69,8 +69,7 @@ extern int errno;
 #endif /* !errno */
 
 int
-caller_builtin (list)
-     WORD_LIST *list;
+caller_builtin (WORD_LIST *list)
 {
 #if !defined (ARRAY_VARS)
   printf ("1 NULL\n");

@@ -1,6 +1,6 @@
 /* pcomplib.c - library functions for programmable completion. */
 
-/* Copyright (C) 1999-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,10 +43,10 @@
 
 HASH_TABLE *prog_completes = (HASH_TABLE *)NULL;
 
-static void free_progcomp PARAMS((PTR_T));
+static void free_progcomp (PTR_T);
 
 COMPSPEC *
-compspec_create ()
+compspec_create (void)
 {
   COMPSPEC *ret;
 
@@ -69,8 +69,7 @@ compspec_create ()
 }
 
 void
-compspec_dispose (cs)
-     COMPSPEC *cs;
+compspec_dispose (COMPSPEC *cs)
 {
   cs->refcount--;
   if (cs->refcount == 0)
@@ -89,8 +88,7 @@ compspec_dispose (cs)
 }
 
 COMPSPEC *
-compspec_copy (cs)
-     COMPSPEC *cs;
+compspec_copy (COMPSPEC *cs)
 {
   COMPSPEC *new;
 
@@ -113,21 +111,20 @@ compspec_copy (cs)
 }
 
 void
-progcomp_create ()
+progcomp_create (void)
 {
   if (prog_completes == 0)
     prog_completes = hash_create (COMPLETE_HASH_BUCKETS);
 }
 
 int
-progcomp_size ()
+progcomp_size (void)
 {
   return (HASH_ENTRIES (prog_completes));
 }
 
 static void
-free_progcomp (data)
-     PTR_T data;
+free_progcomp (PTR_T data)
 {
   COMPSPEC *cs;
 
@@ -136,14 +133,14 @@ free_progcomp (data)
 }
   
 void
-progcomp_flush ()
+progcomp_flush (void)
 {
   if (prog_completes)
     hash_flush (prog_completes, free_progcomp);
 }
 
 void
-progcomp_dispose ()
+progcomp_dispose (void)
 {
   if (prog_completes)
     hash_dispose (prog_completes);
@@ -151,8 +148,7 @@ progcomp_dispose ()
 }
 
 int
-progcomp_remove (cmd)
-     char *cmd;
+progcomp_remove (const char *cmd)
 {
   register BUCKET_CONTENTS *item;
 
@@ -172,9 +168,7 @@ progcomp_remove (cmd)
 }
 
 int
-progcomp_insert (cmd, cs)
-      char *cmd;
-      COMPSPEC *cs;
+progcomp_insert (char *cmd, COMPSPEC *cs)
 {
   register BUCKET_CONTENTS *item;
 
@@ -196,8 +190,7 @@ progcomp_insert (cmd, cs)
 }
 
 COMPSPEC *
-progcomp_search (cmd)
-     const char *cmd;
+progcomp_search (const char *cmd)
 {
   register BUCKET_CONTENTS *item;
   COMPSPEC *cs;
@@ -216,8 +209,7 @@ progcomp_search (cmd)
 }
 
 void
-progcomp_walk (pfunc)
-     hash_wfunc *pfunc;
+progcomp_walk (hash_wfunc *pfunc)
 {
   if (prog_completes == 0 || pfunc == 0 || HASH_ENTRIES (prog_completes) == 0)
     return;

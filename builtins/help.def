@@ -89,8 +89,7 @@ static void show_longdoc (int);
    If LIST is supplied, print out the list which matches for each pattern
    specified. */
 int
-help_builtin (list)
-     WORD_LIST *list;
+help_builtin (WORD_LIST *list)
 {
   register int i;
   char *pattern, *name;
@@ -190,7 +189,7 @@ help_builtin (list)
 }
 
 void
-builtin_help ()
+builtin_help (void)
 {
   int ind;
   ptrdiff_t d;
@@ -212,8 +211,7 @@ builtin_help ()
 }
 
 static int
-open_helpfile (name)
-     char *name;
+open_helpfile (char *name)
 {
   int fd;
 
@@ -230,8 +228,7 @@ open_helpfile (name)
    used, the long_doc array contains one string -- the full pathname of the
    help file for this builtin.  */
 static void
-show_longdoc (i)
-     int i;
+show_longdoc (int i)
 {
   register int j;
   char * const *doc;
@@ -253,9 +250,7 @@ show_longdoc (i)
 }
 
 static void
-show_desc (name, i)
-     char *name;
-     int i;
+show_desc (char *name, int i)
 {
   register int j, r;
   char **doc, *line;
@@ -292,9 +287,7 @@ show_desc (name, i)
 
 /* Print builtin help in pseudo-manpage format. */
 static void
-show_manpage (name, i)
-     char *name;
-     int i;
+show_manpage (char *name, int i)
 {
   register int j;
   char **doc, *line;
@@ -366,11 +359,7 @@ show_manpage (name, i)
 }
 
 static void
-dispcolumn (i, buf, bufsize, width, height)
-     int i;
-     char *buf;
-     size_t bufsize;
-     int width, height;
+dispcolumn (int i, char *buf, size_t bufsize, int width, int height)
 {
   int j;
   int dispcols;
@@ -408,11 +397,7 @@ dispcolumn (i, buf, bufsize, width, height)
 
 #if defined (HANDLE_MULTIBYTE)
 static void
-wdispcolumn (i, buf, bufsize, width, height)
-     int i;
-     char *buf;
-     size_t bufsize;
-     int width, height;
+wdispcolumn (int i, char *buf, size_t bufsize, int width, int height)
 {
   int j;
   int dispcols, dispchars;
@@ -513,7 +498,7 @@ wdispcolumn (i, buf, bufsize, width, height)
 #endif /* HANDLE_MULTIBYTE */
 
 static void
-show_builtin_command_help ()
+show_builtin_command_help (void)
 {
   int i, j;
   int height, width;

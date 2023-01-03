@@ -108,8 +108,7 @@ static void unset_waitlist (void);
   while (0)
 
 int
-wait_builtin (list)
-     WORD_LIST *list;
+wait_builtin (WORD_LIST *list)
 {
   int status, code, opt, nflag, vflags, bindflags;
   volatile int wflags;
@@ -331,8 +330,7 @@ wait_builtin (list)
    J_WAITING, so wait -n knows which jobs to wait for. Return the number of
    jobs we found. */
 static int
-set_waitlist (list)
-     WORD_LIST *list;
+set_waitlist (WORD_LIST *list)
 {
   sigset_t set, oset;
   int job, r, njob;
@@ -367,7 +365,7 @@ set_waitlist (list)
 
 /* Clean up after a call to wait -n jobs */
 static void
-unset_waitlist ()
+unset_waitlist (void)
 {
   int i;
   sigset_t set, oset;

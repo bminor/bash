@@ -102,8 +102,7 @@ static int display_traps (WORD_LIST *, int);
 #define IGNORE 2		/* Ignore this signal. */
 
 int
-trap_builtin (list)
-     WORD_LIST *list;
+trap_builtin (WORD_LIST *list)
 {
   int list_signal_names, display, result, opt;
 
@@ -250,8 +249,7 @@ trap_builtin (list)
 }
 
 static void
-showtrap (i, show_default)
-     int i, show_default;
+showtrap (int i, int show_default)
 {
   char *t, *p, *sn;
   int free_t;
@@ -291,9 +289,7 @@ showtrap (i, show_default)
 }
 
 static int
-display_traps (list, show_all)
-     WORD_LIST *list;
-     int show_all;
+display_traps (WORD_LIST *list, int show_all)
 {
   int result, i;
 

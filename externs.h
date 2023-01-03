@@ -169,7 +169,7 @@ extern char *strsub (char *, char *, char *, int);
 extern char *strcreplace (char *, int, const char *, int);
 extern void strip_leading (char *);
 extern void strip_trailing (char *, int, int);
-extern void xbcopy (char *, char *, int);
+extern void xbcopy (char *, char *, size_t);
 
 /* Functions from version.c. */
 extern char *shell_version_string (void);

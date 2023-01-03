@@ -99,8 +99,7 @@ static int declare_internal (register WORD_LIST *, int);
 
 /* Declare or change variable attributes. */
 int
-declare_builtin (list)
-     register WORD_LIST *list;
+declare_builtin (WORD_LIST *list)
 {
   return (declare_internal (list, 0));
 }
@@ -121,8 +120,7 @@ Returns success unless an invalid option is supplied, a variable
 assignment error occurs, or the shell is not executing a function.
 $END
 int
-local_builtin (list)
-     register WORD_LIST *list;
+local_builtin (WORD_LIST *list)
 {
   /* Catch a straight `local --help' before checking function context */
   if (list && list->word && STREQ (list->word->word, "--help"))
@@ -147,9 +145,7 @@ local_builtin (list)
 #endif
 
 static SHELL_VAR *
-declare_find_variable (name, mkglobal, chklocal)
-     const char *name;
-     int mkglobal, chklocal;
+declare_find_variable (const char *name, int mkglobal, int chklocal)
 {
   SHELL_VAR *var;
 
@@ -170,11 +166,7 @@ declare_find_variable (name, mkglobal, chklocal)
 	NAME[SUBSCRIPT][[+]=VALUE]
    from expanding a nameref into NAME */
 static char *
-declare_build_newname (name, subscript_start, offset, value, aflags)
-     char *name, *subscript_start;
-     int offset;
-     char *value;
-     int aflags;
+declare_build_newname (char *name, char *subscript_start, int offset, char *value, int aflags)
 {
   size_t namelen, savelen;
   char *ret;
@@ -204,9 +196,7 @@ declare_build_newname (name, subscript_start, offset, value, aflags)
 }
 
 static char *
-declare_transform_name (name, flags_on, flags_off)
-     char *name;
-     int flags_on, flags_off;
+declare_transform_name (char *name, int flags_on, int flags_off)
 {
   SHELL_VAR *var, *v;
   char *newname;
@@ -230,9 +220,7 @@ declare_transform_name (name, flags_on, flags_off)
 
 /* The workhorse function. */
 static int
-declare_internal (list, local_var)
-     register WORD_LIST *list;
-     int local_var;
+declare_internal (WORD_LIST *list, int local_var)
 {
   int flags_on, flags_off, *flags;
   int any_failed, assign_error, pflag, nodefs, opt, onref, offref;

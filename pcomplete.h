@@ -158,7 +158,7 @@ extern void progcomp_dispose (void);
 extern int progcomp_size (void);
 
 extern int progcomp_insert (char *, COMPSPEC *);
-extern int progcomp_remove (char *);
+extern int progcomp_remove (const char *);
 
 extern COMPSPEC *progcomp_search (const char *);
 

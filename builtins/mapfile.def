@@ -107,10 +107,7 @@ static int run_callback (const char *, unsigned int, const char *);
 static int delim;
 
 static int
-run_callback (callback, curindex, curline)
-     const char *callback;
-     unsigned int curindex;
-     const char *curline;
+run_callback (const char *callback, unsigned int curindex, const char *curline)
 {
   unsigned int execlen;
   char  *execstr, *qline;
@@ -134,9 +131,7 @@ run_callback (callback, curindex, curline)
 }
 
 static void
-do_chop(line, delim)
-     char *line;
-     unsigned char delim;
+do_chop(char *line, unsigned char delim)
 {
   int length;
 
@@ -146,12 +141,8 @@ do_chop(line, delim)
 }
 
 static int
-mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_name, delim, flags)
-     int fd;
-     long line_count_goal, origin, nskip, callback_quantum;
-     char *callback, *array_name;
-     int delim;
-     int flags;
+mapfile (int fd, long line_count_goal, long origin, long nskip, long callback_quantum,
+	 char *callback, char *array_name, int delim, int flags)
 {
   char *line;
   size_t line_length;
@@ -231,8 +222,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
 }
 
 int
-mapfile_builtin (list)
-     WORD_LIST *list;
+mapfile_builtin (WORD_LIST *list)
 {
   int opt, code, fd, flags;
   intmax_t intval;
@@ -354,8 +344,7 @@ mapfile_builtin (list)
 #else
 
 int
-mapfile_builtin (list)
-     WORD_LIST *list;
+mapfile_builtin (WORD_LIST *list)
 {
   builtin_error (_("array variable support required"));
   return (EXECUTION_FAILURE);

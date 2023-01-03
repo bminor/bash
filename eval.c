@@ -48,13 +48,13 @@
 #  include "bashhist.h"
 #endif
 
-static void send_pwd_to_eterm PARAMS((void));
-static sighandler alrm_catcher PARAMS((int));
+static void send_pwd_to_eterm (void);
+static sighandler alrm_catcher (int);
 
 /* Read and execute commands until EOF is reached.  This assumes that
    the input source has already been initialized. */
 int
-reader_loop ()
+reader_loop (void)
 {
   int our_indirection_level;
   COMMAND * volatile current_command;
@@ -195,7 +195,7 @@ reader_loop ()
 
 /* Pretty print shell scripts */
 int
-pretty_print_loop ()
+pretty_print_loop (void)
 {
   COMMAND *current_command;
   char *command_to_print;
@@ -235,8 +235,7 @@ pretty_print_loop ()
 }
 
 static sighandler
-alrm_catcher(i)
-     int i;
+alrm_catcher(int i)
 {
   char *msg;
 
@@ -251,7 +250,7 @@ alrm_catcher(i)
 /* Send an escape sequence to emacs term mode to tell it the
    current working directory. */
 static void
-send_pwd_to_eterm ()
+send_pwd_to_eterm (void)
 {
   char *pwd, *f;
 
@@ -266,9 +265,7 @@ send_pwd_to_eterm ()
 #if defined (ARRAY_VARS)
 /* Caller ensures that A has a non-zero number of elements */
 int
-execute_array_command (a, v)
-     ARRAY *a;
-     void *v;
+execute_array_command (ARRAY *a, void *v)
 {
   char *tag;
   char **argv;
@@ -288,7 +285,7 @@ execute_array_command (a, v)
 #endif
   
 static void
-execute_prompt_command ()
+execute_prompt_command (void)
 {
   char *command_to_execute;
   SHELL_VAR *pcv;
@@ -320,7 +317,7 @@ execute_prompt_command ()
    leaves the parsed command in the global variable GLOBAL_COMMAND.
    This is where PROMPT_COMMAND is executed. */
 int
-parse_command ()
+parse_command (void)
 {
   int r;
 
@@ -357,7 +354,7 @@ parse_command ()
    is left in the globval variable GLOBAL_COMMAND for use by reader_loop.
    This is where the shell timeout code is executed. */
 int
-read_command ()
+read_command (void)
 {
   SHELL_VAR *tmout_var;
   int tmout_len, result;

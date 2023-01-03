@@ -79,8 +79,7 @@ static int execute_list_with_replacements (WORD_LIST *);
    group leader and execute the command.  The -r and -s options mean
    to print info about running and stopped jobs only, respectively. */
 int
-jobs_builtin (list)
-     WORD_LIST *list;
+jobs_builtin (WORD_LIST *list)
 {
   int form, execute, state, opt, any_failed, job;
   sigset_t set, oset;
@@ -174,8 +173,7 @@ jobs_builtin (list)
 }
 
 static int
-execute_list_with_replacements (list)
-     WORD_LIST *list;
+execute_list_with_replacements (WORD_LIST *list)
 {
   register WORD_LIST *l;
   int job, result;
@@ -238,8 +236,7 @@ $END
 
 #if defined (JOB_CONTROL)
 int
-disown_builtin (list)
-     WORD_LIST *list;
+disown_builtin (WORD_LIST *list)
 {
   int opt, job, retval, nohup_only, running_jobs, all_jobs;
   sigset_t set, oset;

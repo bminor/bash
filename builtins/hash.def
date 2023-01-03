@@ -80,8 +80,7 @@ static int list_hashed_filename_targets (WORD_LIST *, int);
    not empty, then rehash (or hash in the first place) the specified
    commands. */
 int
-hash_builtin (list)
-     WORD_LIST *list;
+hash_builtin (WORD_LIST *list)
 {
   int expunge_hash_table, list_targets, list_portably, delete, opt;
   char *w, *pathname;
@@ -206,9 +205,7 @@ hash_builtin (list)
 }
 
 static int
-add_hashed_command (w, quiet)
-     char *w;
-     int quiet;
+add_hashed_command (char *w, int quiet)
 {
   int rv;
   char *full_path;
@@ -233,16 +230,14 @@ add_hashed_command (w, quiet)
 
 /* Print information about current hashed info. */
 static int
-print_hash_info (item)
-     BUCKET_CONTENTS *item;
+print_hash_info (BUCKET_CONTENTS *item)
 {
   printf ("%4d\t%s\n", item->times_found, pathdata(item)->path);
   return 0;
 }
 
 static int
-print_portable_hash_info (item)
-     BUCKET_CONTENTS *item;
+print_portable_hash_info (BUCKET_CONTENTS *item)
 {
   char *fp, *fn;
 
@@ -257,8 +252,7 @@ print_portable_hash_info (item)
 }
 
 static int
-print_hashed_commands (fmt)
-     int fmt;
+print_hashed_commands (int fmt)
 {
   if (hashed_filenames == 0 || HASH_ENTRIES (hashed_filenames) == 0)
     return (0);
@@ -270,9 +264,7 @@ print_hashed_commands (fmt)
 }
 
 static int
-list_hashed_filename_targets (list, fmt)
-     WORD_LIST *list;
-     int fmt;
+list_hashed_filename_targets (WORD_LIST *list, int fmt)
 {
   int all_found, multiple;
   char *target;

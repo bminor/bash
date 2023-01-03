@@ -42,18 +42,18 @@ extern void initialize_aliases (void);
 
 /* Scan the list of aliases looking for one with NAME.  Return NULL
    if the alias doesn't exist, else a pointer to the alias. */
-extern alias_t *find_alias (char *);
+extern alias_t *find_alias (const char *);
 
 /* Return the value of the alias for NAME, or NULL if there is none. */
-extern char *get_alias_value (char *);
+extern char *get_alias_value (const char *);
 
 /* Make a new alias from NAME and VALUE.  If NAME can be found,
    then replace its value. */
-extern void add_alias (char *, char *);
+extern void add_alias (const char *, const char *);
 
 /* Remove the alias with name NAME from the alias list.  Returns
    the index of the removed alias, or -1 if the alias didn't exist. */
-extern int remove_alias (char *);
+extern int remove_alias (const char *);
 
 /* Remove all aliases. */
 extern void delete_all_aliases (void);
@@ -62,7 +62,7 @@ extern void delete_all_aliases (void);
 extern alias_t **all_aliases (void);
 
 /* Expand a single word for aliases. */
-extern char *alias_expand_word (char *);
+extern char *alias_expand_word (const char *);
 
 /* Return a new line, with any aliases expanded. */
 extern char *alias_expand (char *);

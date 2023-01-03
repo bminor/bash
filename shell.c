@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -62,8 +62,8 @@
 #include "jobs.h"
 #else
 extern int running_in_background;
-extern int initialize_job_control PARAMS((int));
-extern int get_tty_state PARAMS((void));
+extern int initialize_job_control (int);
+extern int get_tty_state (void);
 #endif /* JOB_CONTROL */
 
 #include "input.h"
@@ -310,42 +310,42 @@ static FILE *default_input;
 static STRING_INT_ALIST *shopt_alist;
 static int shopt_ind = 0, shopt_len = 0;
 
-static int parse_long_options PARAMS((char **, int, int));
-static int parse_shell_options PARAMS((char **, int, int));
-static int bind_args PARAMS((char **, int, int, int));
+static int parse_long_options (char **, int, int);
+static int parse_shell_options (char **, int, int);
+static int bind_args (char **, int, int, int);
 
-static void start_debugger PARAMS((void));
+static void start_debugger (void);
 
-static void add_shopt_to_alist PARAMS((char *, int));
-static void run_shopt_alist PARAMS((void));
+static void add_shopt_to_alist (char *, int);
+static void run_shopt_alist (void);
 
-static void execute_env_file PARAMS((char *));
-static void run_startup_files PARAMS((void));
-static int open_shell_script PARAMS((char *));
-static void set_bash_input PARAMS((void));
-static int run_one_command PARAMS((char *));
+static void execute_env_file (char *);
+static void run_startup_files (void);
+static int open_shell_script (char *);
+static void set_bash_input (void);
+static int run_one_command (char *);
 #if defined (WORDEXP_OPTION)
-static int run_wordexp PARAMS((char *));
+static int run_wordexp (char *);
 #endif
 
-static int uidget PARAMS((void));
+static int uidget (void);
 
-static void set_option_defaults PARAMS((void));
-static void reset_option_defaults PARAMS((void));
+static void set_option_defaults (void);
+static void reset_option_defaults (void);
 
-static void init_interactive PARAMS((void));
-static void init_noninteractive PARAMS((void));
-static void init_interactive_script PARAMS((void));
+static void init_interactive (void);
+static void init_noninteractive (void);
+static void init_interactive_script (void);
 
-static void set_shell_name PARAMS((char *));
-static void shell_initialize PARAMS((void));
-static void shell_reinitialize PARAMS((void));
+static void set_shell_name (char *);
+static void shell_initialize (void);
+static void shell_reinitialize (void);
 
-static void show_shell_usage PARAMS((FILE *, int));
+static void show_shell_usage (FILE *, int);
 
 #ifdef __CYGWIN__
 static void
-_cygwin32_check_tmp ()
+_cygwin32_check_tmp (void)
 {
   struct stat sb;
 
@@ -362,14 +362,10 @@ _cygwin32_check_tmp ()
 #if defined (NO_MAIN_ENV_ARG)
 /* systems without third argument to main() */
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 #else /* !NO_MAIN_ENV_ARG */
 int
-main (argc, argv, env)
-     int argc;
-     char **argv, **env;
+main (int argc, char **argv, char **env)
 #endif /* !NO_MAIN_ENV_ARG */
 {
   register int i;
@@ -835,9 +831,7 @@ main (argc, argv, env)
 }
 
 static int
-parse_long_options (argv, arg_start, arg_end)
-     char **argv;
-     int arg_start, arg_end;
+parse_long_options (char **argv, int arg_start, int arg_end)
 {
   int arg_index, longarg, i;
   char *arg_string;
@@ -890,9 +884,7 @@ parse_long_options (argv, arg_start, arg_end)
 }
 
 static int
-parse_shell_options (argv, arg_start, arg_end)
-     char **argv;
-     int arg_start, arg_end;
+parse_shell_options (char **argv, int arg_start, int arg_end)
 {
   int arg_index;
   int arg_character, on_or_off, next_arg, i;
@@ -985,8 +977,7 @@ parse_shell_options (argv, arg_start, arg_end)
 
 /* Exit the shell with status S. */
 void
-exit_shell (s)
-     int s;
+exit_shell (int s)
 {
   fflush (stdout);		/* XXX */
   fflush (stderr);
@@ -1040,8 +1031,7 @@ exit_shell (s)
 /* A wrapper for exit that (optionally) can do other things, like malloc
    statistics tracing. */
 void
-sh_exit (s)
-     int s;
+sh_exit (int s)
 {
 #if defined (MALLOC_DEBUG) && defined (USING_BASH_MALLOC)
   if (malloc_trace_at_exit && (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB)) == 0)
@@ -1056,8 +1046,7 @@ sh_exit (s)
    do any more cleanup, since a subshell is created as an exact copy of its
    parent. */
 void
-subshell_exit (s)
-     int s;
+subshell_exit (int s)
 {
   fflush (stdout);
   fflush (stderr);
@@ -1072,8 +1061,7 @@ subshell_exit (s)
 }
 
 void
-set_exit_status (s)
-     int s;
+set_exit_status (int s)
 {
   set_pipestatus_from_exit (last_command_exit_value = s);
 }
@@ -1106,8 +1094,7 @@ set_exit_status (s)
 */
 
 static void
-execute_env_file (env_file)
-      char *env_file;
+execute_env_file (char *env_file)
 {
   char *fn;
 
@@ -1121,7 +1108,7 @@ execute_env_file (env_file)
 }
 
 static void
-run_startup_files ()
+run_startup_files (void)
 {
 #if defined (JOB_CONTROL)
   int old_job_control;
@@ -1264,8 +1251,7 @@ run_startup_files ()
    value of `restricted'.  Don't actually do anything, just return a
    boolean value. */
 int
-shell_is_restricted (name)
-     char *name;
+shell_is_restricted (char *name)
 {
   char *temp;
 
@@ -1285,8 +1271,7 @@ shell_is_restricted (name)
    Do this also if `restricted' is already set to 1; maybe the shell was
    started with -r. */
 int
-maybe_make_restricted (name)
-     char *name;
+maybe_make_restricted (char *name)
 {
   char *temp;
 
@@ -1313,7 +1298,7 @@ maybe_make_restricted (name)
 /* Fetch the current set of uids and gids and return 1 if we're running
    setuid or setgid. */
 static int
-uidget ()
+uidget (void)
 {
   uid_t u;
 
@@ -1336,7 +1321,7 @@ uidget ()
 }
 
 void
-disable_priv_mode ()
+disable_priv_mode (void)
 {
   int e;
 
@@ -1366,8 +1351,7 @@ disable_priv_mode ()
 
 #if defined (WORDEXP_OPTION)
 static int
-run_wordexp (words)
-     char *words;
+run_wordexp (char *words)
 {
   int code, nw, nb;
   WORD_LIST *wl, *tl, *result;
@@ -1443,8 +1427,7 @@ run_wordexp (words)
 /* Run one command, given as the argument to the -c option.  Tell
    parse_and_execute not to fork for a simple command. */
 static int
-run_one_command (command)
-     char *command;
+run_one_command (char *command)
 {
   int code;
 
@@ -1475,9 +1458,7 @@ run_one_command (command)
 #endif /* ONESHOT */
 
 static int
-bind_args (argv, arg_start, arg_end, start_index)
-     char **argv;
-     int arg_start, arg_end, start_index;
+bind_args (char **argv, int arg_start, int arg_end, int start_index)
 {
   register int i;
   WORD_LIST *args, *tl;
@@ -1529,14 +1510,14 @@ bind_args (argv, arg_start, arg_end, start_index)
 }
 
 void
-unbind_args ()
+unbind_args (void)
 {
   remember_args ((WORD_LIST *)NULL, 1);
   pop_args ();				/* Reset BASH_ARGV and BASH_ARGC */
 }
 
 static void
-start_debugger ()
+start_debugger (void)
 {
 #if defined (DEBUGGER) && defined (DEBUGGER_START_FILE)
   int old_errexit;
@@ -1561,8 +1542,7 @@ start_debugger ()
 }
 
 static int
-open_shell_script (script_name)
-     char *script_name;
+open_shell_script (char *script_name)
 {
   int fd, e, fd_is_tty;
   char *filename, *path_filename, *t;
@@ -1737,7 +1717,7 @@ open_shell_script (script_name)
 
 /* Initialize the input routines for the parser. */
 static void
-set_bash_input ()
+set_bash_input (void)
 {
   /* Make sure the fd from which we are reading input is not in
      no-delay mode. */
@@ -1764,8 +1744,7 @@ set_bash_input ()
    is non-zero, we close default_buffered_input even if it's the standard
    input (fd 0). */
 void
-unset_bash_input (check_zero)
-     int check_zero;
+unset_bash_input (int check_zero)
 {
 #if defined (BUFFERED_INPUT)
   if ((check_zero && default_buffered_input >= 0) ||
@@ -1790,8 +1769,7 @@ unset_bash_input (check_zero)
 #endif
 
 static void
-set_shell_name (argv0)
-     char *argv0;
+set_shell_name (char *argv0)
 {
   /* Here's a hack.  If the name of this shell is "sh", then don't do
      any startup files; just try to be more like /bin/sh. */
@@ -1826,7 +1804,7 @@ set_shell_name (argv0)
    them after the call to list_minus_o_options (). */
 /* XXX - could also do this for histexp_flag, jobs_m_flag */
 static void
-set_option_defaults ()
+set_option_defaults (void)
 {
 #if defined (HISTORY)
   enable_history_list = 0;
@@ -1834,7 +1812,7 @@ set_option_defaults ()
 }
 
 static void
-reset_option_defaults ()
+reset_option_defaults (void)
 {
 #if defined (HISTORY)
   enable_history_list = -1;
@@ -1842,7 +1820,7 @@ reset_option_defaults ()
 }
 
 static void
-init_interactive ()
+init_interactive (void)
 {
   expand_aliases = expaliases_flag = 1;
   interactive_shell = startup_state = interactive = 1;
@@ -1857,7 +1835,7 @@ init_interactive ()
 }
 
 static void
-init_noninteractive ()
+init_noninteractive (void)
 {
 #if defined (HISTORY)
   if (enable_history_list == -1)			/* set default */
@@ -1875,7 +1853,7 @@ init_noninteractive ()
 }
 
 static void
-init_interactive_script ()
+init_interactive_script (void)
 {
 #if defined (HISTORY)
   if (enable_history_list == -1)
@@ -1889,7 +1867,7 @@ init_interactive_script ()
 }
 
 void
-get_current_user_info ()
+get_current_user_info (void)
 {
   struct passwd *entry;
 
@@ -1925,7 +1903,7 @@ get_current_user_info ()
 /* Do whatever is necessary to initialize the shell.
    Put new initializations in here. */
 static void
-shell_initialize ()
+shell_initialize (void)
 {
   char hostname[256];
   int should_be_restricted;
@@ -2005,7 +1983,7 @@ shell_initialize ()
    had some initialization performed.  This is supposed to reset the world
    back to a pristine state, as if we had been exec'ed. */
 static void
-shell_reinitialize ()
+shell_reinitialize (void)
 {
   /* The default shell prompts. */
   primary_prompt = PPROMPT;
@@ -2057,9 +2035,7 @@ shell_reinitialize ()
 }
 
 static void
-show_shell_usage (fp, extra)
-     FILE *fp;
-     int extra;
+show_shell_usage (FILE *fp, int extra)
 {
   int i;
   char *set_opts, *s, *t;
@@ -2108,9 +2084,7 @@ show_shell_usage (fp, extra)
 }
 
 static void
-add_shopt_to_alist (opt, on_or_off)
-     char *opt;
-     int on_or_off;
+add_shopt_to_alist (char *opt, int on_or_off)
 {
   if (shopt_ind >= shopt_len)
     {
@@ -2123,7 +2097,7 @@ add_shopt_to_alist (opt, on_or_off)
 }
 
 static void
-run_shopt_alist ()
+run_shopt_alist (void)
 {
   register int i;
 

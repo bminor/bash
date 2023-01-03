@@ -70,24 +70,21 @@ static int cat_file (REDIRECT *);
 
 #if defined (HISTORY)
 static void
-set_history_remembering ()
+set_history_remembering (void)
 {
   remember_on_history = enable_history_list;
 }
 #endif
 
 static void
-restore_lastcom (x)
-     char *x;
+restore_lastcom (char *x)
 {
   FREE (the_printed_command_except_trap);
   the_printed_command_except_trap = x;
 }
 
 int
-should_optimize_fork (command, subshell)
-     COMMAND *command;
-     int subshell;
+should_optimize_fork (COMMAND *command, int subshell)
 {
   return (running_trap == 0 &&
       command->type == cm_simple &&
@@ -103,8 +100,7 @@ should_optimize_fork (command, subshell)
    -c command but has been extended to command and process substitution
    (basically any time you call parse_and_execute in a subshell). */
 int
-should_suppress_fork (command)
-     COMMAND *command;
+should_suppress_fork (COMMAND *command)
 {
   int subshell;
 
@@ -116,8 +112,7 @@ should_suppress_fork (command)
 }
 
 int
-can_optimize_connection (command)
-     COMMAND *command;
+can_optimize_connection (COMMAND *command)
 {
   return (*bash_input.location.string == '\0' &&
 	  parser_expanding_alias () == 0 &&
@@ -126,8 +121,7 @@ can_optimize_connection (command)
 }
 
 void
-optimize_connection_fork (command)
-     COMMAND *command;
+optimize_connection_fork (COMMAND *command)
 {
   if (command->type == cm_connection &&
       (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
@@ -141,8 +135,7 @@ optimize_connection_fork (command)
 }
 
 void
-optimize_subshell_command (command)
-     COMMAND *command;
+optimize_subshell_command (COMMAND *command)
 {
   if (should_optimize_fork (command, 0))
     {
@@ -160,8 +153,7 @@ optimize_subshell_command (command)
 }
 
 void
-optimize_shell_function (command)
-     COMMAND *command;
+optimize_shell_function (COMMAND *command)
 {
   COMMAND *fc;
 
@@ -180,8 +172,7 @@ optimize_shell_function (command)
 }
 
 int
-can_optimize_cat_file (command)
-     COMMAND *command;
+can_optimize_cat_file (COMMAND *command)
 {
   return (command->type == cm_simple && !command->redirects &&
 	    (command->flags & CMD_TIME_PIPELINE) == 0 &&
@@ -194,8 +185,7 @@ can_optimize_cat_file (command)
 
 /* How to force parse_and_execute () to clean up after itself. */
 void
-parse_and_execute_cleanup (old_running_trap)
-     int old_running_trap;
+parse_and_execute_cleanup (int old_running_trap)
 {
   if (running_trap > 0)
     {
@@ -215,10 +205,7 @@ parse_and_execute_cleanup (old_running_trap)
 }
 
 static void
-parse_prologue (string, flags, tag)
-     char *string;
-     int flags;
-     char *tag;
+parse_prologue (char *string, int flags, char *tag)
 {
   char *orig_string, *lastcom;
   int x;
@@ -295,10 +282,7 @@ parse_prologue (string, flags, tag)
 */
 
 int
-parse_and_execute (string, from_file, flags)
-     char *string;
-     const char *from_file;
-     int flags;
+parse_and_execute (char *string, const char *from_file, int flags)
 {
   int code, lreset, ignore_return;
   volatile int should_jump_to_top_level, last_result;
@@ -605,12 +589,7 @@ parse_and_execute (string, from_file, flags)
    command substitutions during parsing to obey Posix rules about finding
    the end of the command and balancing parens. */
 int
-parse_string (string, from_file, flags, cmdp, endp)
-     char *string;
-     const char *from_file;
-     int flags;
-     COMMAND **cmdp;
-     char **endp;
+parse_string (char *string, const char *from_file, int flags, COMMAND **cmdp, char **endp)
 {
   int code, nc;
   volatile int should_jump_to_top_level;
@@ -734,9 +713,7 @@ out:
 }
 
 int
-open_redir_file (r, fnp)
-     REDIRECT *r;
-     char **fnp;
+open_redir_file (REDIRECT *r, char **fnp)
 {
   char *fn;
   int fd, rval;
@@ -776,8 +753,7 @@ open_redir_file (r, fnp)
    returning errors as appropriate, then just cats the file to the standard
    output. */
 static int
-cat_file (r)
-     REDIRECT *r;
+cat_file (REDIRECT *r)
 {
   char *fn;
   int fd, rval;
@@ -795,10 +771,7 @@ cat_file (r)
 }
 
 int
-evalstring (string, from_file, flags)
-     char *string;
-     const char *from_file;
-     int flags;
+evalstring (char *string, const char *from_file, int flags)
 {
   volatile int r, rflag, rcatch;
   volatile int was_trap;

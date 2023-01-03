@@ -1,6 +1,6 @@
 /* pathexp.c -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1995-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,9 +38,9 @@
 
 #include <glob/strmatch.h>
 
-static int glob_name_is_acceptable PARAMS((const char *));
-static void ignore_globbed_names PARAMS((char **, sh_ignore_func_t *));
-static char *split_ignorespec PARAMS((char *, int *));
+static int glob_name_is_acceptable (const char *);
+static void ignore_globbed_names (char **, sh_ignore_func_t *);
+static char *split_ignorespec (char *, int *);
 	       
 #include <glob/glob.h>
 
@@ -58,8 +58,7 @@ int glob_star = 0;
    it implements the rules in Posix 2.13.3, specifically that an unquoted
    slash cannot appear in a bracket expression. */
 int
-unquoted_glob_pattern_p (string)
-     register char *string;
+unquoted_glob_pattern_p (char *string)
 {
   register int c;
   char *send;
@@ -142,8 +141,7 @@ unquoted_glob_pattern_p (string)
 /* Return 1 if C is a character that is `special' in a POSIX ERE and needs to
    be quoted to match itself. */
 static inline int
-ere_char (c)
-     int c;
+ere_char (int c)
 {
   switch (c)
     {
@@ -168,8 +166,7 @@ ere_char (c)
 
 /* This is only used to determine whether to backslash-quote a character. */
 int
-glob_char_p (s)
-     const char *s;
+glob_char_p (const char *s)
 {
   switch (*s)
     {
@@ -203,9 +200,7 @@ glob_char_p (s)
    performed.  QGLOB_REGEXP means we're quoting for a Posix ERE (for
    [[ string =~ pat ]]) and that requires some special handling. */
 char *
-quote_string_for_globbing (pathname, qflags)
-     const char *pathname;
-     int qflags;
+quote_string_for_globbing (const char *pathname, int qflags)
 {
   char *temp;
   register int i, j;
@@ -377,8 +372,7 @@ endpat:
 }
 
 char *
-quote_globbing_chars (string)
-     const char *string;
+quote_globbing_chars (const char *string)
 {
   size_t slen;
   char *temp, *t;
@@ -404,9 +398,7 @@ quote_globbing_chars (string)
 
 /* Call the glob library to do globbing on PATHNAME. */
 char **
-shell_glob_filename (pathname, qflags)
-     const char *pathname;
-     int qflags;
+shell_glob_filename (const char *pathname, int qflags)
 {
   char *temp, **results;
   int gflags, quoted_pattern;
@@ -449,8 +441,7 @@ static struct ignorevar globignore =
    has changed.  If GLOBIGNORE is being unset, we also need to disable
    the globbing of filenames beginning with a `.'. */
 void
-setup_glob_ignore (name)
-     char *name;
+setup_glob_ignore (char *name)
 {
   char *v;
 
@@ -464,15 +455,14 @@ setup_glob_ignore (name)
 }
 
 int
-should_ignore_glob_matches ()
+should_ignore_glob_matches (void)
 {
   return globignore.num_ignores;
 }
 
 /* Return 0 if NAME matches a pattern in the globignore.ignores list. */
 static int
-glob_name_is_acceptable (name)
-     const char *name;
+glob_name_is_acceptable (const char *name)
 {
   struct ign *p;
   char *n;
@@ -505,9 +495,7 @@ glob_name_is_acceptable (name)
    be removed from NAMES. */
 
 static void
-ignore_globbed_names (names, name_func)
-     char **names;
-     sh_ignore_func_t *name_func;
+ignore_globbed_names (char **names, sh_ignore_func_t *name_func)
 {
   char **newnames;
   int n, i;
@@ -542,8 +530,7 @@ ignore_globbed_names (names, name_func)
 }
 
 void
-ignore_glob_matches (names)
-     char **names;
+ignore_glob_matches (char **names)
 {
   if (globignore.num_ignores == 0)
     return;
@@ -552,9 +539,7 @@ ignore_glob_matches (names)
 }
 
 static char *
-split_ignorespec (s, ip)
-     char *s;
-     int *ip;
+split_ignorespec (char *s, int *ip)
 {
   char *t;
   int n, i;
@@ -576,8 +561,7 @@ split_ignorespec (s, ip)
 }
   
 void
-setup_ignore_patterns (ivp)
-     struct ignorevar *ivp;
+setup_ignore_patterns (struct ignorevar *ivp)
 {
   int numitems, maxitems, ptr;
   char *colon_bit, *this_ignoreval;
@@ -614,11 +598,7 @@ setup_ignore_patterns (ivp)
 
   numitems = maxitems = ptr = 0;
 
-#if 0
-  while (colon_bit = extract_colon_unit (this_ignoreval, &ptr))
-#else
   while (colon_bit = split_ignorespec (this_ignoreval, &ptr))
-#endif
     {
       if (numitems + 1 >= maxitems)
 	{

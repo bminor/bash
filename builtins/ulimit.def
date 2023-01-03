@@ -303,9 +303,7 @@ static int cmdlistsz;
 
 #if !defined (HAVE_RESOURCE) && !defined (HAVE_ULIMIT)
 long
-ulimit (cmd, newlim)
-     int cmd;
-     long newlim;
+ulimit (int cmd, long newlim)
 {
   errno = EINVAL;
   return -1;
@@ -313,8 +311,7 @@ ulimit (cmd, newlim)
 #endif /* !HAVE_RESOURCE && !HAVE_ULIMIT */
 
 static int
-_findlim (opt)
-     int opt;
+_findlim (int opt)
 {
   register int i;
 
@@ -329,8 +326,7 @@ static char optstring[4 + 2 * NCMDS];
 /* Report or set limits associated with certain per-process resources.
    See the help documentation in builtins.c for a full description. */
 int
-ulimit_builtin (list)
-     register WORD_LIST *list;
+ulimit_builtin (WORD_LIST *list)
 {
   register char *s;
   int c, limind, mode, opt, all_limits;
@@ -445,10 +441,7 @@ ulimit_builtin (list)
 }
 
 static int
-ulimit_internal (cmd, cmdarg, mode, multiple)
-     int cmd;
-     char *cmdarg;
-     int mode, multiple;
+ulimit_internal (int cmd, char *cmdarg, int mode, int multiple)
 {
   int opt, limind, setting;
   int block_factor;
@@ -508,9 +501,7 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
 }
 
 static int
-get_limit (ind, softlim, hardlim)
-     int ind;
-     RLIMTYPE *softlim, *hardlim;
+get_limit (int ind, RLIMTYPE *softlim, RLIMTYPE *hardlim)
 {
   RLIMTYPE value;
 #if defined (HAVE_RESOURCE)
@@ -569,10 +560,7 @@ get_limit (ind, softlim, hardlim)
 }
 
 static int
-set_limit (ind, newlim, mode)
-     int ind;
-     RLIMTYPE newlim;
-     int mode;
+set_limit (int ind, RLIMTYPE newlim, int mode)
 {
 #if defined (HAVE_RESOURCE)
    struct rlimit limit;
@@ -634,8 +622,7 @@ set_limit (ind, newlim, mode)
 }
 
 static int
-getmaxvm (softlim, hardlim)
-     RLIMTYPE *softlim, *hardlim;
+getmaxvm (RLIMTYPE *softlim, RLIMTYPE *hardlim)
 {
 #if defined (HAVE_RESOURCE)
   struct rlimit datalim, stacklim;
@@ -657,8 +644,7 @@ getmaxvm (softlim, hardlim)
 }
 
 static int
-filesize(valuep)
-     RLIMTYPE *valuep;
+filesize (RLIMTYPE *valuep)
 {
 #if !defined (HAVE_RESOURCE)
   long result;
@@ -674,8 +660,7 @@ filesize(valuep)
 }
 
 static int
-pipesize (valuep)
-     RLIMTYPE *valuep;
+pipesize (RLIMTYPE *valuep)
 {
 #if defined (PIPE_BUF)
   /* This is defined on Posix systems. */
@@ -699,8 +684,7 @@ pipesize (valuep)
 }
 
 static int
-getmaxuprc (valuep)
-     RLIMTYPE *valuep;
+getmaxuprc (RLIMTYPE *valuep)
 {
   long maxchild;
 
@@ -718,8 +702,7 @@ getmaxuprc (valuep)
 }
 
 static void
-print_all_limits (mode)
-     int mode;
+print_all_limits (int mode)
 {
   register int i;
   RLIMTYPE softlim, hardlim;
@@ -738,10 +721,7 @@ print_all_limits (mode)
 }
 
 static void
-printone (limind, curlim, pdesc)
-     int limind;
-     RLIMTYPE curlim;
-     int pdesc;
+printone (int limind, RLIMTYPE curlim, int pdesc)
 {
   char unitstr[64];
   int factor;
@@ -780,9 +760,7 @@ printone (limind, curlim, pdesc)
 */
 
 static int
-set_all_limits (mode, newlim)
-     int mode;
-     RLIMTYPE newlim;
+set_all_limits (int mode, RLIMTYPE newlim)
 {
   register int i;
   int retval = 0;

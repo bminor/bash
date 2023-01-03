@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -73,8 +73,7 @@ $END
    exported attribute from variables named in LIST.  An argument of
   -f indicates that the names present in LIST refer to functions. */
 int
-export_builtin (list)
-     register WORD_LIST *list;
+export_builtin (WORD_LIST *list)
 {
   return (set_or_show_attributes (list, att_exported, 0));
 }
@@ -104,8 +103,7 @@ $END
 /* For each variable name in LIST, make that variable readonly.  Given an
    empty LIST, print out all existing readonly variables. */
 int
-readonly_builtin (list)
-     register WORD_LIST *list;
+readonly_builtin (WORD_LIST *list)
 {
   return (set_or_show_attributes (list, att_readonly, 0));
 }
@@ -120,9 +118,7 @@ readonly_builtin (list)
    ATTRIBUTE.  An arg of `-n' says to remove the attribute from the the
    remaining names in LIST (doesn't work for readonly). */
 int
-set_or_show_attributes (list, attribute, nodefs)
-     register WORD_LIST *list;
-     int attribute, nodefs;
+set_or_show_attributes (WORD_LIST *list, int attribute, int nodefs)
 {
   register SHELL_VAR *var;
   int assign, undo, any_failed, assign_error, opt;
@@ -350,8 +346,7 @@ set_or_show_attributes (list, attribute, nodefs)
 /* Show all variable variables (v == 1) or functions (v == 0) with
    attributes. */
 int
-show_all_var_attributes (v, nodefs)
-     int v, nodefs;
+show_all_var_attributes (int v, int nodefs)
 {
   SHELL_VAR **variable_list, *var;
   int any_failed;
@@ -378,8 +373,7 @@ show_all_var_attributes (v, nodefs)
 /* Show all local variable variables with their attributes. This shows unset
    local variables (all_local_variables called with 0 argument). */
 int
-show_local_var_attributes (v, nodefs)
-     int v, nodefs;
+show_local_var_attributes (int v, int nodefs)
 {
   SHELL_VAR **variable_list, *var;
   int any_failed;
@@ -403,11 +397,9 @@ show_local_var_attributes (v, nodefs)
   return (any_failed == 0 ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
 
+/* Fill in FLAGS with attribute characters */
 int
-var_attribute_string (var, pattr, flags)
-     SHELL_VAR *var;
-     int pattr;
-     char *flags;	/* filled in with attributes */
+var_attribute_string (SHELL_VAR *var, int pattr, char *flags)
 {
   int i;
 
@@ -476,9 +468,7 @@ var_attribute_string (var, pattr, flags)
    or `readonly') instead of `declare', and doesn't print function defs
    when called by `export' or `readonly'. */
 int
-show_var_attributes (var, pattr, nodefs)
-     SHELL_VAR *var;
-     int pattr, nodefs;
+show_var_attributes (SHELL_VAR *var, int pattr, int nodefs)
 {
   char flags[MAX_ATTRIBUTES], *x;
   int i;
@@ -533,9 +523,7 @@ show_var_attributes (var, pattr, nodefs)
 }
 
 int
-show_name_attributes (name, nodefs)
-     char *name;
-     int nodefs;
+show_name_attributes (char *name, int nodefs)
 {
   SHELL_VAR *var;
 
@@ -551,9 +539,7 @@ show_name_attributes (name, nodefs)
 }
 
 int
-show_localname_attributes (name, nodefs)
-     char *name;
-     int nodefs;
+show_localname_attributes (char *name, int nodefs)
 {
   SHELL_VAR *var;
 
@@ -573,9 +559,7 @@ show_localname_attributes (name, nodefs)
 }
 
 int
-show_func_attributes (name, nodefs)
-     char *name;
-     int nodefs;
+show_func_attributes (char *name, int nodefs)
 {
   SHELL_VAR *var;
 
@@ -591,9 +575,7 @@ show_func_attributes (name, nodefs)
 }
 
 void
-set_var_attribute (name, attribute, undo)
-     char *name;
-     int attribute, undo;
+set_var_attribute (char *name, int attribute, int undo)
 {
   SHELL_VAR *var, *tv, *v, *refvar;
   char *tvalue;

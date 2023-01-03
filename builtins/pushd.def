@@ -170,8 +170,7 @@ static int get_dirstack_index (intmax_t, int, int *);
 #define CLEARSTAK	0x08
 
 int
-pushd_builtin (list)
-     WORD_LIST *list;
+pushd_builtin (WORD_LIST *list)
 {
   WORD_LIST *orig_list;
   char *temp, *current_directory, *top;
@@ -316,8 +315,7 @@ pushd_builtin (list)
    If LIST is non-null it should consist of a word +N or -N, which says
    what element to delete from the stack.  The default is the top one. */
 int
-popd_builtin (list)
-     WORD_LIST *list;
+popd_builtin (WORD_LIST *list)
 {
   register int i;
   intmax_t which;
@@ -406,8 +404,7 @@ popd_builtin (list)
 
 /* Print the current list of directories on the directory stack. */
 int
-dirs_builtin (list)
-     WORD_LIST *list;
+dirs_builtin (WORD_LIST *list)
 {
   int flags, desired_index, index_flag, vflag;
   intmax_t i;
@@ -516,9 +513,7 @@ dirs_builtin (list)
 }
 
 static void
-pushd_error (offset, arg)
-     int offset;
-     char *arg;
+pushd_error (int offset, char *arg)
 {
   if (offset == 0)
     builtin_error (_("directory stack empty"));
@@ -527,7 +522,7 @@ pushd_error (offset, arg)
 }
 
 static void
-clear_directory_stack ()
+clear_directory_stack (void)
 {
   register int i;
 
@@ -540,8 +535,7 @@ clear_directory_stack ()
    so if the result is EXECUTION_FAILURE then an error message has already
    been printed. */
 static int
-cd_to_string (name)
-     char *name;
+cd_to_string (char *name)
 {
   WORD_LIST *tlist;
   WORD_LIST *dir;
@@ -555,8 +549,7 @@ cd_to_string (name)
 }
 
 static int
-change_to_temp (temp)
-     char *temp;
+change_to_temp (char *temp)
 {
   int tt;
 
@@ -569,8 +562,7 @@ change_to_temp (temp)
 }
 
 static void
-add_dirstack_element (dir)
-     char *dir;
+add_dirstack_element (char *dir)
 {
   if (directory_list_offset == directory_list_size)
     pushd_directory_list = strvec_resize (pushd_directory_list, directory_list_size += 10);
@@ -578,9 +570,7 @@ add_dirstack_element (dir)
 }
 
 static int
-get_dirstack_index (ind, sign, indexp)
-     intmax_t ind;
-     int sign, *indexp;
+get_dirstack_index (intmax_t ind, int sign, int *indexp)
 {
   if (indexp)
     *indexp = sign > 0 ? 1 : 2;
@@ -603,8 +593,7 @@ get_dirstack_index (ind, sign, indexp)
 
 /* Used by the tilde expansion code. */
 char *
-get_dirstack_from_string (string)
-     char *string;
+get_dirstack_from_string (char *string)
 {
   int ind, sign, index_flag;
   intmax_t i;
@@ -630,9 +619,7 @@ get_dirstack_from_string (string)
 
 #ifdef INCLUDE_UNUSED
 char *
-get_dirstack_element (ind, sign)
-     intmax_t ind;
-     int sign;
+get_dirstack_element (intmax_t ind, int sign)
 {
   int i;
 
@@ -643,10 +630,7 @@ get_dirstack_element (ind, sign)
 #endif
 
 void
-set_dirstack_element (ind, sign, value)
-     intmax_t ind;
-     int  sign;
-     char *value;
+set_dirstack_element (intmax_t ind, int  sign, char *value)
 {
   int i;
 
@@ -658,8 +642,7 @@ set_dirstack_element (ind, sign, value)
 }
 
 WORD_LIST *
-get_directory_stack (flags)
-     int flags;
+get_directory_stack (int flags)
 {
   register int i;
   WORD_LIST *ret;

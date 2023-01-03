@@ -2,7 +2,7 @@
 
 /* Modified to run with the GNU shell Apr 25, 1988 by bfox. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -103,35 +103,34 @@ static int test_error_return;
 #define test_exit(val) \
 	do { test_error_return = val; sh_longjmp (test_exit_buf, 1); } while (0)
 
-extern int sh_stat PARAMS((const char *, struct stat *));
+extern int sh_stat (const char *, struct stat *);
 
 static int pos;		/* The offset of the current argument in ARGV. */
 static int argc;	/* The number of arguments present in ARGV. */
 static char **argv;	/* The argument list. */
 static int noeval;
 
-static void test_syntax_error PARAMS((char *, char *)) __attribute__((__noreturn__));
-static void beyond PARAMS((void)) __attribute__((__noreturn__));
-static void integer_expected_error PARAMS((char *)) __attribute__((__noreturn__));
+static void test_syntax_error (char *, char *) __attribute__((__noreturn__));
+static void beyond (void) __attribute__((__noreturn__));
+static void integer_expected_error (char *) __attribute__((__noreturn__));
 
-static int unary_operator PARAMS((void));
-static int binary_operator PARAMS((void));
-static int two_arguments PARAMS((void));
-static int three_arguments PARAMS((void));
-static int posixtest PARAMS((void));
+static int unary_operator (void);
+static int binary_operator (void);
+static int two_arguments (void);
+static int three_arguments (void);
+static int posixtest (void);
 
-static int expr PARAMS((void));
-static int term PARAMS((void));
-static int and PARAMS((void));
-static int or PARAMS((void));
+static int expr (void);
+static int term (void);
+static int and (void);
+static int or (void);
 
-static int filecomp PARAMS((char *, char *, int));
-static int arithcomp PARAMS((char *, char *, int, int));
-static int patcomp PARAMS((char *, char *, int));
+static int filecomp (char *, char *, int);
+static int arithcomp (char *, char *, int, int);
+static int patcomp (char *, char *, int);
 
 static void
-test_syntax_error (format, arg)
-     char *format, *arg;
+test_syntax_error (char *format, char *arg)
 {
   builtin_error (format, arg);
   test_exit (TEST_ERREXIT_STATUS);
@@ -142,7 +141,7 @@ test_syntax_error (format, arg)
  *	error condition)
  */
 static void
-beyond ()
+beyond (void)
 {
   test_syntax_error (_("argument expected"), (char *)NULL);
 }
@@ -150,8 +149,7 @@ beyond ()
 /* Syntax error for when an integer argument was expected, but
    something else was found. */
 static void
-integer_expected_error (pch)
-     char *pch;
+integer_expected_error (char *pch)
 {
   test_syntax_error (_("%s: integer expected"), pch);
 }
@@ -167,7 +165,7 @@ integer_expected_error (pch)
  *	or
  */
 static int
-expr ()
+expr (void)
 {
   if (pos >= argc)
     beyond ();
@@ -181,7 +179,7 @@ expr ()
  *	and '-o' or
  */
 static int
-or ()
+or (void)
 {
   int value, v2;
 
@@ -202,7 +200,7 @@ or ()
  *	term '-a' and
  */
 static int
-and ()
+and (void)
 {
   int value, v2;
 
@@ -236,7 +234,7 @@ and ()
  *	positive and negative integers
  */
 static int
-term ()
+term (void)
 {
   int value;
 
@@ -288,10 +286,7 @@ term ()
 }
 
 static int
-stat_mtime (fn, st, ts)
-     char *fn;
-     struct stat *st;
-     struct timespec *ts;
+stat_mtime (char *fn, struct stat *st, struct timespec *ts)
 {
   int r;
 
@@ -303,9 +298,7 @@ stat_mtime (fn, st, ts)
 }
 
 static int
-filecomp (s, t, op)
-     char *s, *t;
-     int op;
+filecomp (char *s, char *t, int op)
 {
   struct stat st1, st2;
   struct timespec ts1, ts2;
@@ -332,9 +325,7 @@ filecomp (s, t, op)
 }
 
 static int
-arithcomp (s, t, op, flags)
-     char *s, *t;
-     int op, flags;
+arithcomp (char *s, char *t, int op, int flags)
 {
   intmax_t l, r;
   int expok;
@@ -373,9 +364,7 @@ arithcomp (s, t, op, flags)
 }
 
 static int
-patcomp (string, pat, op)
-     char *string, *pat;
-     int op;
+patcomp (char *string, char *pat, int op)
 {
   int m;
 
@@ -384,9 +373,7 @@ patcomp (string, pat, op)
 }
 
 int
-binary_test (op, arg1, arg2, flags)
-     char *op, *arg1, *arg2;
-     int flags;
+binary_test (char *op, char *arg1, char *arg2, int flags)
 {
   int patmatch;
 
@@ -438,9 +425,8 @@ binary_test (op, arg1, arg2, flags)
   return (FALSE);	/* should never get here */
 }
 
-
 static int
-binary_operator ()
+binary_operator (void)
 {
   int value;
   char *w;
@@ -481,7 +467,7 @@ binary_operator ()
 }
 
 static int
-unary_operator ()
+unary_operator (void)
 {
   char *op;
   intmax_t r;
@@ -517,9 +503,7 @@ unary_operator ()
 }
 
 int
-unary_test (op, arg, flags)
-     char *op, *arg;
-     int flags;
+unary_test (char *op, char *arg, int flags)
 {
   intmax_t r;
   struct stat stat_buf;
@@ -688,8 +672,7 @@ unary_test (op, arg, flags)
 
 /* Return TRUE if OP is one of the test command's binary operators. */
 int
-test_binop (op)
-     char *op;
+test_binop (char *op)
 {
   if (op[0] == '=' && op[1] == '\0')
     return (1);		/* '=' */
@@ -742,8 +725,7 @@ test_binop (op)
 
 /* Return non-zero if OP is one of the test command's unary operators. */
 int
-test_unop (op)
-     char *op;
+test_unop (char *op)
 {
   if (op[0] != '-' || (op[1] && op[2] != 0))
     return (0);
@@ -763,7 +745,7 @@ test_unop (op)
 }
 
 static int
-two_arguments ()
+two_arguments (void)
 {
   if (argv[pos][0] == '!' && argv[pos][1] == '\0')
     return (argv[pos + 1][0] == '\0');
@@ -787,7 +769,7 @@ two_arguments ()
 #define ONE_ARG_TEST(s)		((s)[0] != '\0')
 
 static int
-three_arguments ()
+three_arguments (void)
 {
   int value;
 
@@ -823,7 +805,7 @@ three_arguments ()
 
 /* This is an implementation of a Posix.2 proposal by David Korn. */
 static int
-posixtest ()
+posixtest (void)
 {
   int value;
 
@@ -877,9 +859,7 @@ posixtest ()
  *	test expr
  */
 int
-test_command (margc, margv)
-     int margc;
-     char **margv;
+test_command (int margc, char **margv)
 {
   int value;
   int code;

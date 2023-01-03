@@ -87,7 +87,7 @@ extern int errno;
 #endif /* !errno */
 
 #if !defined (HAVE_KILLPG)
-extern int killpg PARAMS((pid_t, int));
+extern int killpg (pid_t, int);
 #endif
 
 #if !DEFAULT_CHILD_MAX
@@ -162,14 +162,14 @@ extern int killpg PARAMS((pid_t, int));
 /* The number of additional slots to allocate when we run out. */
 #define JOB_SLOTS 8
 
-typedef int sh_job_map_func_t PARAMS((JOB *, int, int, int));
+typedef int sh_job_map_func_t (JOB *, int, int, int);
 
 /* Variables used here but defined in other files. */
 extern WORD_LIST *subst_assign_varlist;
 
 extern SigHandler **original_signals;
 
-extern void set_original_signal PARAMS((int, SigHandler *));
+extern void set_original_signal (int, SigHandler *);
 
 static struct jobstats zerojs = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
@@ -237,77 +237,77 @@ PROCESS *last_procsub_child = (PROCESS *)NULL;
 
 void debug_print_pgrps (void);
 
-static sighandler wait_sigint_handler PARAMS((int));
-static sighandler sigchld_handler PARAMS((int));
-static sighandler sigcont_sighandler PARAMS((int));
-static sighandler sigstop_sighandler PARAMS((int));
+static sighandler wait_sigint_handler (int);
+static sighandler sigchld_handler (int);
+static sighandler sigcont_sighandler (int);
+static sighandler sigstop_sighandler (int);
 
-static int waitchld PARAMS((pid_t, int));
+static int waitchld (pid_t, int);
 
-static PROCESS *find_pid_in_pipeline PARAMS((pid_t, PROCESS *, int));
-static PROCESS *find_pipeline PARAMS((pid_t, int, int *));
-static PROCESS *find_process PARAMS((pid_t, int, int *));
+static PROCESS *find_pid_in_pipeline (pid_t, PROCESS *, int);
+static PROCESS *find_pipeline (pid_t, int, int *);
+static PROCESS *find_process (pid_t, int, int *);
 
-static char *current_working_directory PARAMS((void));
-static char *job_working_directory PARAMS((void));
-static char *j_strsignal PARAMS((int));
-static char *printable_job_status PARAMS((int, PROCESS *, int));
+static char *current_working_directory (void);
+static char *job_working_directory (void);
+static char *j_strsignal (int);
+static char *printable_job_status (int, PROCESS *, int);
 
-static PROCESS *find_last_proc PARAMS((int, int));
-static pid_t find_last_pid PARAMS((int, int));
+static PROCESS *find_last_proc (int, int);
+static pid_t find_last_pid (int, int);
 
-static int set_new_line_discipline PARAMS((int));
-static int map_over_jobs PARAMS((sh_job_map_func_t *, int, int));
-static int job_last_stopped PARAMS((int));
-static int job_last_running PARAMS((int));
-static int most_recent_job_in_state PARAMS((int, JOB_STATE));
-static int find_job PARAMS((pid_t, int, PROCESS **));
-static int print_job PARAMS((JOB *, int, int, int));
-static int process_exit_status PARAMS((WAIT));
-static int process_exit_signal PARAMS((WAIT));
-static int set_job_status_and_cleanup PARAMS((int));
+static int set_new_line_discipline (int);
+static int map_over_jobs (sh_job_map_func_t *, int, int);
+static int job_last_stopped (int);
+static int job_last_running (int);
+static int most_recent_job_in_state (int, JOB_STATE);
+static int find_job (pid_t, int, PROCESS **);
+static int print_job (JOB *, int, int, int);
+static int process_exit_status (WAIT);
+static int process_exit_signal (WAIT);
+static int set_job_status_and_cleanup (int);
 
-static WAIT job_signal_status PARAMS((int));
-static WAIT raw_job_exit_status PARAMS((int));
+static WAIT job_signal_status (int);
+static WAIT raw_job_exit_status (int);
 
-static int job_killed_by_signal PARAMS((int));
+static int job_killed_by_signal (int);
 
-static void notify_of_job_status PARAMS((void));
-static void reset_job_indices PARAMS((void));
-static void cleanup_dead_jobs PARAMS((void));
-static int processes_in_job PARAMS((int));
-static void realloc_jobs_list PARAMS((void));
-static int compact_jobs_list PARAMS((int));
-static void add_process PARAMS((char *, pid_t));
-static void print_pipeline PARAMS((PROCESS *, int, int, FILE *));
-static void pretty_print_job PARAMS((int, int, FILE *));
-static void set_current_job PARAMS((int));
-static void reset_current PARAMS((void));
-static void set_job_running PARAMS((int));
-static void setjstatus PARAMS((int));
-static int maybe_give_terminal_to PARAMS((pid_t, pid_t, int));
-static void mark_all_jobs_as_dead PARAMS((void));
-static void mark_dead_jobs_as_notified PARAMS((int));
-static void restore_sigint_handler PARAMS((void));
+static void notify_of_job_status (void);
+static void reset_job_indices (void);
+static void cleanup_dead_jobs (void);
+static int processes_in_job (int);
+static void realloc_jobs_list (void);
+static int compact_jobs_list (int);
+static void add_process (char *, pid_t);
+static void print_pipeline (PROCESS *, int, int, FILE *);
+static void pretty_print_job (int, int, FILE *);
+static void set_current_job (int);
+static void reset_current (void);
+static void set_job_running (int);
+static void setjstatus (int);
+static int maybe_give_terminal_to (pid_t, pid_t, int);
+static void mark_all_jobs_as_dead (void);
+static void mark_dead_jobs_as_notified (int);
+static void restore_sigint_handler (void);
 #if defined (PGRP_PIPE)
-static void pipe_read PARAMS((int *));
+static void pipe_read (int *);
 #endif
 
 /* Hash table manipulation */
 
-static ps_index_t *pshash_getbucket PARAMS((pid_t));
-static void pshash_delindex PARAMS((ps_index_t));
+static ps_index_t *pshash_getbucket (pid_t);
+static void pshash_delindex (ps_index_t);
 
 /* Saved background process status management */
-static struct pidstat *bgp_add PARAMS((pid_t, int));
-static int bgp_delete PARAMS((pid_t));
-static void bgp_clear PARAMS((void));
-static int bgp_search PARAMS((pid_t));
+static struct pidstat *bgp_add (pid_t, int);
+static int bgp_delete (pid_t);
+static void bgp_clear (void);
+static int bgp_search (pid_t);
 
-static struct pipeline_saver *alloc_pipeline_saver PARAMS((void));
+static struct pipeline_saver *alloc_pipeline_saver (void);
 
-static ps_index_t bgp_getindex PARAMS((void));
-static void bgp_resize PARAMS((void));	/* XXX */
+static ps_index_t bgp_getindex (void);
+static void bgp_resize (void);	/* XXX */
 
 #if defined (ARRAY_VARS)
 static int *pstatuses;		/* list of pipeline statuses */
@@ -357,8 +357,7 @@ static char retcode_name_buffer[64];
 #define tcsetpgrp(fd, pgrp)	ioctl ((fd), TIOCSPGRP, &(pgrp))
 
 pid_t
-tcgetpgrp (fd)
-     int fd;
+tcgetpgrp (int fd)
 {
   pid_t pgrp;
 
@@ -372,7 +371,7 @@ tcgetpgrp (fd)
 
 /* Initialize the global job stats structure and other bookkeeping variables */
 void
-init_job_stats ()
+init_job_stats (void)
 {
   js = zerojs;
 }
@@ -382,7 +381,7 @@ init_job_stats ()
    of the functions it calls.  This is so that it can safely be called
    from a signal handler. */
 static char *
-current_working_directory ()
+current_working_directory (void)
 {
   char *dir;
   static char d[PATH_MAX];
@@ -404,7 +403,7 @@ current_working_directory ()
 
 /* Return the working directory for the current process. */
 static char *
-job_working_directory ()
+job_working_directory (void)
 {
   char *dir;
 
@@ -420,7 +419,7 @@ job_working_directory ()
 }
 
 void
-making_children ()
+making_children (void)
 {
   if (already_making_children)
     return;
@@ -430,13 +429,13 @@ making_children ()
 }
 
 void
-stop_making_children ()
+stop_making_children (void)
 {
   already_making_children = 0;
 }
 
 void
-cleanup_the_pipeline ()
+cleanup_the_pipeline (void)
 {
   PROCESS *disposer;
   sigset_t set, oset;
@@ -452,7 +451,7 @@ cleanup_the_pipeline ()
 
 /* Not used right now */
 void
-discard_last_procsub_child ()
+discard_last_procsub_child (void)
 {
   PROCESS *disposer;
   sigset_t set, oset;
@@ -467,7 +466,7 @@ discard_last_procsub_child ()
 }
 
 static struct pipeline_saver *
-alloc_pipeline_saver ()
+alloc_pipeline_saver (void)
 {
   struct pipeline_saver *ret;
 
@@ -478,8 +477,7 @@ alloc_pipeline_saver ()
 }
 
 void
-save_pipeline (clear)
-     int clear;
+save_pipeline (int clear)
 {
   sigset_t set, oset;
   struct pipeline_saver *saver;
@@ -496,8 +494,7 @@ save_pipeline (clear)
 }
 
 PROCESS *
-restore_pipeline (discard)
-     int discard;
+restore_pipeline (int discard)
 {
   PROCESS *old_pipeline;
   sigset_t set, oset;
@@ -522,7 +519,7 @@ restore_pipeline (discard)
 
 /* Start building a pipeline.  */
 void
-start_pipeline ()
+start_pipeline (void)
 {
   if (the_pipeline)
     {
@@ -552,9 +549,7 @@ start_pipeline ()
    DEFERRED is a command structure to be executed upon satisfactory
    execution exit of this pipeline. */
 int
-stop_pipeline (async, deferred)
-     int async;
-     COMMAND *deferred;
+stop_pipeline (int async, COMMAND *deferred)
 {
   register int i, j;
   JOB *newjob;
@@ -758,7 +753,7 @@ stop_pipeline (async, deferred)
 /* The number of elements in bgpids.storage always has to be > js.c_childmax for
    the circular buffer to work right. */
 static void
-bgp_resize ()
+bgp_resize (void)
 {
   ps_index_t nsize, nsize_cur, nsize_max;
   ps_index_t psi;
@@ -801,7 +796,7 @@ bgp_resize ()
 }
 
 static ps_index_t
-bgp_getindex ()
+bgp_getindex (void)
 {
   if (bgpids.nalloc < (ps_index_t)js.c_childmax || bgpids.head >= bgpids.nalloc)
     bgp_resize ();
@@ -811,8 +806,7 @@ bgp_getindex ()
 }
 
 static ps_index_t *
-pshash_getbucket (pid)
-     pid_t pid;
+pshash_getbucket (pid_t pid)
 {
   unsigned long hash;		/* XXX - u_bits32_t */
 
@@ -821,9 +815,7 @@ pshash_getbucket (pid)
 }
 
 static struct pidstat *
-bgp_add (pid, status)
-     pid_t pid;
-     int status;
+bgp_add (pid_t pid, int status)
 {
   ps_index_t *bucket, psi;
   struct pidstat *ps;
@@ -865,8 +857,7 @@ bgp_add (pid, status)
 }
 
 static void
-pshash_delindex (psi)
-     ps_index_t psi;
+pshash_delindex (ps_index_t psi)
 {
   struct pidstat *ps;
   ps_index_t *bucket;
@@ -891,8 +882,7 @@ pshash_delindex (psi)
 }
 
 static int
-bgp_delete (pid)
-     pid_t pid;
+bgp_delete (pid_t pid)
 {
   ps_index_t psi, orig_psi;
 
@@ -926,7 +916,7 @@ bgp_delete (pid)
 
 /* Clear out the list of saved statuses */
 static void
-bgp_clear ()
+bgp_clear (void)
 {
   if (bgpids.storage == 0 || bgpids.nalloc == 0)
     return;
@@ -944,8 +934,7 @@ bgp_clear ()
    found.  If not found, return -1.  We hash to the right spot in pidstat_table
    and follow the bucket chain to the end. */
 static int
-bgp_search (pid)
-     pid_t pid;
+bgp_search (pid_t pid)
 {
   ps_index_t psi, orig_psi;
 
@@ -969,7 +958,7 @@ bgp_search (pid)
 
 #if 0
 static void
-bgp_prune ()
+bgp_prune (void)
 {
   return;
 }
@@ -978,9 +967,7 @@ bgp_prune ()
 /* External interface to bgp_add; takes care of blocking and unblocking
    SIGCHLD. Not really used. */
 void
-save_proc_status (pid, status)
-     pid_t pid;
-     int status;
+save_proc_status (pid_t pid, int status)
 {
   sigset_t set, oset;
 
@@ -998,16 +985,14 @@ save_proc_status (pid, status)
    eventually removed from the list and added to the bgpids table. */
 
 static void
-procsub_free (p)
-     PROCESS *p;
+procsub_free (PROCESS *p)
 {
   FREE (p->command);
   free (p);
 }
     
 PROCESS *
-procsub_add (p)
-     PROCESS *p;
+procsub_add (PROCESS *p)
 {
   sigset_t set, oset;
 
@@ -1029,8 +1014,7 @@ procsub_add (p)
 }
 
 PROCESS *
-procsub_search (pid)
-     pid_t pid;
+procsub_search (pid_t pid)
 {
   PROCESS *p;
   sigset_t set, oset;
@@ -1045,8 +1029,7 @@ procsub_search (pid)
 }
 
 PROCESS *
-procsub_delete (pid)
-     pid_t pid;
+procsub_delete (pid_t pid)
 {
   PROCESS *p, *prev;
   sigset_t set, oset;
@@ -1083,8 +1066,7 @@ procsub_delete (pid)
 }
 
 int
-procsub_waitpid (pid)
-     pid_t pid;
+procsub_waitpid (pid_t pid)
 {
   PROCESS *p;
   int r;
@@ -1099,7 +1081,7 @@ procsub_waitpid (pid)
 }
 
 void
-procsub_waitall ()
+procsub_waitall (void)
 {
   PROCESS *p;
   int r;
@@ -1113,7 +1095,7 @@ procsub_waitall ()
 }
 
 void
-procsub_clear ()
+procsub_clear (void)
 {
   PROCESS *p, *ps;
   sigset_t set, oset;
@@ -1133,7 +1115,7 @@ procsub_clear ()
 
 /* Must be called with SIGCHLD blocked. */
 void
-procsub_prune ()
+procsub_prune (void)
 {
   PROCESS *ohead, *oend, *ps, *p;
   int onproc;
@@ -1169,7 +1151,7 @@ procsub_prune ()
    calling this.  This wraps around, but the rest of the code does not.  At
    this point, it should not matter. */
 static void
-reset_job_indices ()
+reset_job_indices (void)
 {
   int old;
 
@@ -1209,7 +1191,7 @@ reset_job_indices ()
       
 /* Delete all DEAD jobs that the user had received notification about. */
 static void
-cleanup_dead_jobs ()
+cleanup_dead_jobs (void)
 {
   register int i;
   int os;
@@ -1249,8 +1231,7 @@ cleanup_dead_jobs ()
 }
 
 static int
-processes_in_job (job)
-     int job;
+processes_in_job (int job)
 {
   int nproc;
   register PROCESS *p;
@@ -1268,8 +1249,7 @@ processes_in_job (job)
 }
 
 static void
-delete_old_job (pid)
-     pid_t pid;
+delete_old_job (pid_t pid)
 {
   PROCESS *p;
   int job;
@@ -1293,7 +1273,7 @@ delete_old_job (pid)
    whose size is a multiple of JOB_SLOTS and can hold the current number of
    jobs.  Heuristics are used to minimize the number of new reallocs. */
 static void
-realloc_jobs_list ()
+realloc_jobs_list (void)
 {
   sigset_t set, oset;
   int nsize, i, j, ncur, nprev;
@@ -1370,8 +1350,7 @@ realloc_jobs_list ()
    the list needs to be reallocated.  The jobs array may be in new memory if
    this returns > 0 and < js.j_jobslots.  FLAGS is reserved for future use. */
 static int
-compact_jobs_list (flags)
-     int flags;
+compact_jobs_list (int flags)
 {
   if (js.j_jobslots == 0 || jobs_list_frozen)
     return js.j_jobslots;
@@ -1389,8 +1368,7 @@ compact_jobs_list (flags)
 /* Delete the job at INDEX from the job list.  Must be called
    with SIGCHLD blocked. */
 void
-delete_job (job_index, dflags)
-     int job_index, dflags;
+delete_job (int job_index, int dflags)
 {
   register JOB *temp;
   PROCESS *proc;
@@ -1452,8 +1430,7 @@ delete_job (job_index, dflags)
 
 /* Must be called with SIGCHLD blocked. */
 void
-nohup_job (job_index)
-     int job_index;
+nohup_job (int job_index)
 {
   register JOB *temp;
 
@@ -1466,8 +1443,7 @@ nohup_job (job_index)
 
 /* Get rid of the data structure associated with a process chain. */
 int
-discard_pipeline (chain)
-     register PROCESS *chain;
+discard_pipeline (PROCESS *chain)
 {
   register PROCESS *this, *next;
   int n;
@@ -1491,9 +1467,7 @@ discard_pipeline (chain)
    NAME is the command string that will be exec'ed later.
    PID is the process id of the child. */
 static void
-add_process (name, pid)
-     char *name;
-     pid_t pid;
+add_process (char *name, pid_t pid)
 {
   PROCESS *t, *p;
 
@@ -1532,11 +1506,7 @@ add_process (name, pid)
 /* Create a (dummy) PROCESS with NAME, PID, and STATUS, and make it the last
    process in jobs[JID]->pipe.  Used by the lastpipe code. */
 void
-append_process (name, pid, status, jid)
-     char *name;
-     pid_t pid;
-     int status;
-     int jid;
+append_process (char *name, pid_t pid, int status, int jid)
 {
   PROCESS *t, *p;
 
@@ -1560,7 +1530,7 @@ append_process (name, pid, status, jid)
 /* Take the last job and make it the first job.  Must be called with
    SIGCHLD blocked. */
 int
-rotate_the_pipeline ()
+rotate_the_pipeline (void)
 {
   PROCESS *p;
 
@@ -1574,7 +1544,7 @@ rotate_the_pipeline ()
 /* Reverse the order of the processes in the_pipeline.  Must be called with
    SIGCHLD blocked. */
 int
-reverse_the_pipeline ()
+reverse_the_pipeline (void)
 {
   PROCESS *p, *n;
 
@@ -1599,9 +1569,7 @@ reverse_the_pipeline ()
    for map_over_jobs.  FUNC is called with a JOB, arg1, arg2,
    and INDEX. */
 static int
-map_over_jobs (func, arg1, arg2)
-     sh_job_map_func_t *func;
-     int arg1, arg2;
+map_over_jobs (sh_job_map_func_t *func, int arg1, int arg2)
 {
   register int i;
   int result;
@@ -1635,7 +1603,7 @@ map_over_jobs (func, arg1, arg2)
 
 /* Cause all the jobs in the current pipeline to exit. */
 void
-terminate_current_pipeline ()
+terminate_current_pipeline (void)
 {
   if (pipeline_pgrp && pipeline_pgrp != shell_pgrp)
     {
@@ -1646,7 +1614,7 @@ terminate_current_pipeline ()
 
 /* Cause all stopped jobs to exit. */
 void
-terminate_stopped_jobs ()
+terminate_stopped_jobs (void)
 {
   register int i;
 
@@ -1664,7 +1632,7 @@ terminate_stopped_jobs ()
 /* Cause all jobs, running or stopped, to receive a hangup signal.  If
    a job is marked J_NOHUP, don't send the SIGHUP. */
 void
-hangup_all_jobs ()
+hangup_all_jobs (void)
 {
   register int i;
 
@@ -1683,17 +1651,14 @@ hangup_all_jobs ()
 }
 
 void
-kill_current_pipeline ()
+kill_current_pipeline (void)
 {
   stop_making_children ();
   start_pipeline ();
 }
 
 static PROCESS *
-find_pid_in_pipeline (pid, pipeline, alive_only)
-     pid_t pid;
-     PROCESS *pipeline;
-     int alive_only;
+find_pid_in_pipeline (pid_t pid, PROCESS *pipeline, int alive_only)
 {
   PROCESS *p;
 
@@ -1712,12 +1677,10 @@ find_pid_in_pipeline (pid, pipeline, alive_only)
 
 /* Return the pipeline that PID belongs to.  Note that the pipeline
    doesn't have to belong to a job.  Must be called with SIGCHLD blocked.
-   If JOBP is non-null, return the index of the job containing PID.  */
+   If JOBP is non-null, return the index of the job containing PID, or
+   NO_JOB if PID doesn't belong to an existing job. */
 static PROCESS *
-find_pipeline (pid, alive_only, jobp)
-     pid_t pid;
-     int alive_only;
-     int *jobp;		/* index into jobs list or NO_JOB */
+find_pipeline (pid_t pid, int alive_only, int *jobp)
 {
   int job;
   PROCESS *p;
@@ -1748,13 +1711,10 @@ find_pipeline (pid, alive_only, jobp)
 }
 
 /* Return the PROCESS * describing PID.  If JOBP is non-null return the index
-   into the jobs array of the job containing PID.  Must be called with
-   SIGCHLD blocked. */
+   into the jobs array of the job containing PID or NO_JOB.  Must be called
+   with SIGCHLD blocked. */
 static PROCESS *
-find_process (pid, alive_only, jobp)
-     pid_t pid;
-     int alive_only;
-     int *jobp;		/* index into jobs list or NO_JOB */
+find_process (pid_t pid, int alive_only, int *jobp)
 {
   PROCESS *p;
 
@@ -1767,10 +1727,7 @@ find_process (pid, alive_only, jobp)
 /* Return the job index that PID belongs to, or NO_JOB if it doesn't
    belong to any job.  Must be called with SIGCHLD blocked. */
 static int
-find_job (pid, alive_only, procp)
-     pid_t pid;
-     int alive_only;
-     PROCESS **procp;
+find_job (pid_t pid, int alive_only, PROCESS **procp)
 {
   register int i;
   PROCESS *p;
@@ -1808,10 +1765,7 @@ find_job (pid, alive_only, procp)
 /* Find a job given a PID.  If BLOCK is non-zero, block SIGCHLD as
    required by find_job. */
 int
-get_job_by_pid (pid, block, procp)
-     pid_t pid;
-     int block;
-     PROCESS **procp;
+get_job_by_pid (pid_t pid, int block, PROCESS **procp)
 {
   int job;
   sigset_t set, oset;
@@ -1829,8 +1783,7 @@ get_job_by_pid (pid, block, procp)
 
 /* Print descriptive information about the job with leader pid PID. */
 void
-describe_pid (pid)
-     pid_t pid;
+describe_pid (pid_t pid)
 {
   int job;
   sigset_t set, oset;
@@ -1848,8 +1801,7 @@ describe_pid (pid)
 }
 
 static char *
-j_strsignal (s)
-     int s;
+j_strsignal (int s)
 {
   char *x;
 
@@ -1863,10 +1815,7 @@ j_strsignal (s)
 }
 
 static char *
-printable_job_status (j, p, format)
-     int j;
-     PROCESS *p;
-     int format;
+printable_job_status (int j, PROCESS *p, int format)
 {
   static char *temp;
   int es;
@@ -1936,10 +1885,7 @@ printable_job_status (j, p, format)
    If you're printing a pipeline that's not in the jobs array, like the
    current pipeline as it's being created, pass -1 for JOB_INDEX */
 static void
-print_pipeline (p, job_index, format, stream)
-     PROCESS *p;
-     int job_index, format;
-     FILE *stream;
+print_pipeline (PROCESS *p, int job_index, int format, FILE *stream)
 {
   PROCESS *first, *last, *show;
   int es, name_padding;
@@ -2037,9 +1983,7 @@ print_pipeline (p, job_index, format, stream)
 /* Print information to STREAM about jobs[JOB_INDEX] according to FORMAT.
    Must be called with SIGCHLD blocked or queued with queue_sigchld */
 static void
-pretty_print_job (job_index, format, stream)
-     int job_index, format;
-     FILE *stream;
+pretty_print_job (int job_index, int format, FILE *stream)
 {
   register PROCESS *p;
 
@@ -2075,9 +2019,7 @@ pretty_print_job (job_index, format, stream)
 }
 
 static int
-print_job (job, format, state, job_index)
-     JOB *job;
-     int format, state, job_index;
+print_job (JOB *job, int format, int state, int job_index)
 {
   if (state == -1 || (JOB_STATE)state == job->state)
     pretty_print_job (job_index, format, stdout);
@@ -2085,25 +2027,21 @@ print_job (job, format, state, job_index)
 }
 
 void
-list_one_job (job, format, ignore, job_index)
-     JOB *job;
-     int format, ignore, job_index;
+list_one_job (JOB *job, int format, int ignore, int job_index)
 {
   pretty_print_job (job_index, format, stdout);
   cleanup_dead_jobs ();
 }
 
 void
-list_stopped_jobs (format)
-     int format;
+list_stopped_jobs (int format)
 {
   cleanup_dead_jobs ();
   map_over_jobs (print_job, format, (int)JSTOPPED);
 }
 
 void
-list_running_jobs (format)
-     int format;
+list_running_jobs (int format)
 {
   cleanup_dead_jobs ();
   map_over_jobs (print_job, format, (int)JRUNNING);
@@ -2112,8 +2050,7 @@ list_running_jobs (format)
 /* List jobs.  If FORMAT is non-zero, then the long form of the information
    is printed, else just a short version. */
 void
-list_all_jobs (format)
-     int format;
+list_all_jobs (int format)
 {
   cleanup_dead_jobs ();
   map_over_jobs (print_job, format, -1);
@@ -2124,9 +2061,7 @@ list_all_jobs (format)
    anything else with it.  ASYNC_P says what to do with the tty.  If
    non-zero, then don't give it away. */
 pid_t
-make_child (command, flags)
-     char *command;
-     int flags;
+make_child (char *command, int flags)
 {
   int async_p, forksleep;
   sigset_t set, oset, termset, chldset, oset_copy;
@@ -2361,7 +2296,7 @@ make_child (command, flags)
 
 /* These two functions are called only in child processes. */
 void
-ignore_tty_job_signals ()
+ignore_tty_job_signals (void)
 {
   set_signal_handler (SIGTSTP, SIG_IGN);
   set_signal_handler (SIGTTIN, SIG_IGN);
@@ -2373,7 +2308,7 @@ ignore_tty_job_signals ()
    SIG_IGN in the child.  We can't rely on resetting traps, since the hard
    ignored signals can't be trapped. */
 void
-default_tty_job_signals ()
+default_tty_job_signals (void)
 {
   if (signal_is_trapped (SIGTSTP) == 0 && signal_is_hard_ignored (SIGTSTP))
     set_signal_handler (SIGTSTP, SIG_IGN);
@@ -2393,7 +2328,7 @@ default_tty_job_signals ()
 
 /* Called once in a parent process. */
 void
-get_original_tty_job_signals ()
+get_original_tty_job_signals (void)
 {
   static int fetched = 0;
 
@@ -2443,8 +2378,7 @@ static int ttspeeds[] =
 };
 
 static void
-draino (fd, ospeed)
-     int fd, ospeed;
+draino (int fd, int ospeed)
 {
   register int delay = ttspeeds[ospeed];
   int n;
@@ -2474,7 +2408,7 @@ draino (fd, ospeed)
 
 /* Fill the contents of shell_tty_info with the current tty info. */
 int
-get_tty_state ()
+get_tty_state (void)
 {
   int tty;
 
@@ -2511,7 +2445,7 @@ get_tty_state ()
 
 /* Make the current tty use the state in shell_tty_info. */
 int
-set_tty_state ()
+set_tty_state (void)
 {
   int tty;
 
@@ -2549,9 +2483,7 @@ set_tty_state ()
    process in that job's pipeline.  This is the one whose exit status
    counts.  Must be called with SIGCHLD blocked or queued. */
 static PROCESS *
-find_last_proc (job, block)
-     int job;
-     int block;
+find_last_proc (int job, int block)
 {
   register PROCESS *p;
   sigset_t set, oset;
@@ -2570,9 +2502,7 @@ find_last_proc (job, block)
 }
 
 static pid_t
-find_last_pid (job, block)
-     int job;
-     int block;
+find_last_pid (int job, int block)
 {
   PROCESS *p;
 
@@ -2589,9 +2519,7 @@ find_last_pid (job, block)
    we suppress the error message if PID isn't found. */
 
 int
-wait_for_single_pid (pid, flags)
-     pid_t pid;
-     int flags;
+wait_for_single_pid (pid_t pid, int flags)
 {
   register PROCESS *child;
   sigset_t set, oset;
@@ -2651,8 +2579,7 @@ wait_for_single_pid (pid, flags)
 
 /* Wait for all of the background processes started by this shell to finish. */
 int
-wait_for_background_pids (ps)
-     struct procstat *ps;
+wait_for_background_pids (struct procstat *ps)
 {
   register int i, r;
   int any_stopped, check_async, njobs;
@@ -2733,7 +2660,7 @@ int waiting_for_child;
 
 /* Clean up state after longjmp to wait_intr_buf */
 void
-wait_sigint_cleanup ()
+wait_sigint_cleanup (void)
 {
   queue_sigchld = 0;
   waiting_for_child = 0;
@@ -2741,7 +2668,7 @@ wait_sigint_cleanup ()
 }
 
 static void
-restore_sigint_handler ()
+restore_sigint_handler (void)
 {
   if (old_sigint_handler != INVALID_SIGNAL_HANDLER)
     {
@@ -2755,8 +2682,7 @@ restore_sigint_handler ()
    The `wait' builtin should be interruptible, but all others should be
    effectively ignored (i.e. not cause the shell to exit). */
 static sighandler
-wait_sigint_handler (sig)
-     int sig;
+wait_sigint_handler (int sig)
 {
   SigHandler *sigint_handler;
 
@@ -2799,15 +2725,13 @@ wait_sigint_handler (sig)
 }
 
 static int
-process_exit_signal (status)
-     WAIT status;
+process_exit_signal (WAIT status)
 {
   return (WIFSIGNALED (status) ? WTERMSIG (status) : 0);
 }
 
 static int
-process_exit_status (status)
-     WAIT status;
+process_exit_status (WAIT status)
 {
   if (WIFSIGNALED (status))
     return (128 + WTERMSIG (status));
@@ -2818,8 +2742,7 @@ process_exit_status (status)
 }
 
 static WAIT
-job_signal_status (job)
-     int job;
+job_signal_status (int job)
 {
   register PROCESS *p;
   WAIT s;
@@ -2840,8 +2763,7 @@ job_signal_status (job)
 /* Return the exit status of the last process in the pipeline for job JOB.
    This is the exit status of the entire job. */
 static WAIT
-raw_job_exit_status (job)
-     int job;
+raw_job_exit_status (int job)
 {
   register PROCESS *p;
   int fail;
@@ -2871,22 +2793,19 @@ raw_job_exit_status (job)
    (rightmost) process in the job's pipeline, modified if the job was killed
    by a signal or stopped. */
 int
-job_exit_status (job)
-     int job;
+job_exit_status (int job)
 {
   return (process_exit_status (raw_job_exit_status (job)));
 }
 
 int
-job_exit_signal (job)
-     int job;
+job_exit_signal (int job)
 {
   return (process_exit_signal (raw_job_exit_status (job)));
 }
 
 static int
-job_killed_by_signal (job)
-     int job;
+job_killed_by_signal (int job)
 {
   int termsig;
 
@@ -2918,9 +2837,7 @@ job_killed_by_signal (job)
    the jobs table.  Returns -1 if waitchld() returns -1, indicating
    that there are no unwaited-for child processes. */
 int
-wait_for (pid, flags)
-     pid_t pid;
-     int flags;
+wait_for (pid_t pid, int flags)
 {
   int job, termination_state, r;
   WAIT s;
@@ -3234,9 +3151,7 @@ wait_for_return:
    includes JWAIT_FORCE, we wait for the job to terminate, no just change
    state */
 int
-wait_for_job (job, flags, ps)
-     int job, flags;
-     struct procstat *ps;
+wait_for_job (int job, int flags, struct procstat *ps)
 {
   pid_t pid;
   int r, state;
@@ -3288,9 +3203,7 @@ wait_for_job (job, flags, ps)
    is responsible for translating -1 into the right return value. RPID,
    if non-null, gets the pid of the job's process leader. */
 int
-wait_for_any_job (flags, ps)
-     int flags;
-     struct procstat *ps;
+wait_for_any_job (int flags, struct procstat *ps)
 {
   pid_t pid;
   int i, r;
@@ -3372,7 +3285,7 @@ return_job:
    shell is not interactive, because the dead jobs are not marked
    as notified. */
 void
-notify_and_cleanup ()
+notify_and_cleanup (void)
 {
   if (jobs_list_frozen)
     return;
@@ -3386,7 +3299,7 @@ notify_and_cleanup ()
 /* Make dead jobs disappear from the jobs array without notification.
    This is used when the shell is not interactive. */
 void
-reap_dead_jobs ()
+reap_dead_jobs (void)
 {
   mark_dead_jobs_as_notified (0);
   cleanup_dead_jobs ();
@@ -3396,9 +3309,7 @@ reap_dead_jobs ()
    STATE.  STATE can be JSTOPPED, JRUNNING.  NO_JOB is returned if
    there is no next recent job. */
 static int
-most_recent_job_in_state (job, state)
-     int job;
-     JOB_STATE state;
+most_recent_job_in_state (int job, JOB_STATE state)
 {
   register int i, result;
   sigset_t set, oset;
@@ -3422,8 +3333,7 @@ most_recent_job_in_state (job, state)
 /* Return the newest *stopped* job older than JOB, or NO_JOB if not
    found. */
 static int
-job_last_stopped (job)
-     int job;
+job_last_stopped (int job)
 {
   return (most_recent_job_in_state (job, JSTOPPED));
 }
@@ -3431,8 +3341,7 @@ job_last_stopped (job)
 /* Return the newest *running* job older than JOB, or NO_JOB if not
    found. */
 static int
-job_last_running (job)
-     int job;
+job_last_running (int job)
 {
   return (most_recent_job_in_state (job, JRUNNING));
 }
@@ -3440,8 +3349,7 @@ job_last_running (job)
 /* Make JOB be the current job, and make previous be useful.  Must be
    called with SIGCHLD blocked. */
 static void
-set_current_job (job)
-     int job;
+set_current_job (int job)
 {
   int candidate;
 
@@ -3501,7 +3409,7 @@ set_current_job (job)
    next-newest running job is `-'.  Must be called with SIGCHLD blocked. */
 
 static void
-reset_current ()
+reset_current (void)
 {
   int candidate;
 
@@ -3535,8 +3443,7 @@ reset_current ()
 /* Set up the job structures so we know the job and its processes are
    all running. */
 static void
-set_job_running (job)
-     int job;
+set_job_running (int job)
 {
   register PROCESS *p;
 
@@ -3560,8 +3467,7 @@ set_job_running (job)
    JOBS.  Returns -1 if it is unable to start a job, and the return
    status of the job otherwise. */
 int
-start_job (job, foreground)
-     int job, foreground;
+start_job (int job, int foreground)
 {
   register PROCESS *p;
   int already_running;
@@ -3684,9 +3590,7 @@ start_job (job, foreground)
    job after giving it SIGNAL.  Returns -1 on failure.  If GROUP is non-null,
    then kill the process group associated with PID. */
 int
-kill_pid (pid, sig, group)
-     pid_t pid;
-     int sig, group;
+kill_pid (pid_t pid, int sig, int group)
 {
   register PROCESS *p;
   int job, result, negative;
@@ -3760,8 +3664,7 @@ kill_pid (pid, sig, group)
 /* sigchld_handler () flushes at least one of the children that we are
    waiting for.  It gets run when we have gotten a SIGCHLD signal. */
 static sighandler
-sigchld_handler (sig)
-     int sig;
+sigchld_handler (int sig)
 {
   int n, oerrno;
 
@@ -3783,9 +3686,7 @@ sigchld_handler (sig)
    the number of children reaped, or -1 if there are no unwaited-for child
    processes. */
 static int
-waitchld (wpid, block)
-     pid_t wpid;
-     int block;
+waitchld (pid_t wpid, int block)
 {
   WAIT status;
   PROCESS *child;
@@ -3999,8 +3900,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
    Currently, the cleanup activity is restricted to handling any SIGINT
    received while waiting for a foreground job to finish. */
 static int
-set_job_status_and_cleanup (job)
-     int job;
+set_job_status_and_cleanup (int job)
 {
   PROCESS *child;
   int tstatus, job_state, any_stopped, any_tstped, call_set_current;
@@ -4174,8 +4074,7 @@ set_job_status_and_cleanup (job)
 /* Build the array of values for the $PIPESTATUS variable from the set of
    exit statuses of all processes in the job J. */
 static void
-setjstatus (j)
-     int j;
+setjstatus (int j)
 {
 #if defined (ARRAY_VARS)
   register int i;
@@ -4204,8 +4103,7 @@ setjstatus (j)
 }
 
 void
-run_sigchld_trap (nchild)
-     int nchild;
+run_sigchld_trap (int nchild)
 {
   char *trap_command;
   int i;
@@ -4254,7 +4152,7 @@ run_sigchld_trap (nchild)
    notification to stderr, and marks those printed as already
    notified, thus making them candidates for cleanup. */
 static void
-notify_of_job_status ()
+notify_of_job_status (void)
 {
   register int job, termsig;
   char *dir;
@@ -4389,8 +4287,7 @@ notify_of_job_status ()
 
 /* Initialize the job control mechanism, and set up the tty stuff. */
 int
-initialize_job_control (force)
-     int force;
+initialize_job_control (int force)
 {
   pid_t t;
   int t_errno, tty_sigs;
@@ -4540,7 +4437,7 @@ just_bail:
 
 #ifdef DEBUG
 void
-debug_print_pgrps ()
+debug_print_pgrps (void)
 {
   itrace("original_pgrp = %ld shell_pgrp = %ld terminal_pgrp = %ld",
 	 (long)original_pgrp, (long)shell_pgrp, (long)terminal_pgrp);
@@ -4553,8 +4450,7 @@ debug_print_pgrps ()
 /* Set the line discipline to the best this system has to offer.
    Return -1 if this is not possible. */
 static int
-set_new_line_discipline (tty)
-     int tty;
+set_new_line_discipline (int tty)
 {
 #if defined (NEW_TTY_DRIVER)
   int ldisc;
@@ -4609,7 +4505,7 @@ set_new_line_discipline (tty)
 
 /* Setup this shell to handle C-C, etc. */
 void
-initialize_job_signals ()
+initialize_job_signals (void)
 {
   if (interactive)
     {
@@ -4630,8 +4526,7 @@ initialize_job_signals ()
 
 /* Here we handle CONT signals. */
 static sighandler
-sigcont_sighandler (sig)
-     int sig;
+sigcont_sighandler (int sig)
 {
   initialize_job_signals ();
   set_signal_handler (SIGCONT, old_cont);
@@ -4642,8 +4537,7 @@ sigcont_sighandler (sig)
 
 /* Here we handle stop signals while we are running not as a login shell. */
 static sighandler
-sigstop_sighandler (sig)
-     int sig;
+sigstop_sighandler (int sig)
 {
   set_signal_handler (SIGTSTP, old_tstp);
   set_signal_handler (SIGTTOU, old_ttou);
@@ -4660,9 +4554,7 @@ sigstop_sighandler (sig)
 
 /* Give the terminal to PGRP.  */
 int
-give_terminal_to (pgrp, force)
-     pid_t pgrp;
-     int force;
+give_terminal_to (pid_t pgrp, int force)
 {
   sigset_t set, oset;
   int r, e;
@@ -4702,9 +4594,7 @@ give_terminal_to (pgrp, force)
 /* Give terminal to NPGRP iff it's currently owned by OPGRP.  FLAGS are the
    flags to pass to give_terminal_to(). */
 static int
-maybe_give_terminal_to (opgrp, npgrp, flags)
-     pid_t opgrp, npgrp;
-     int flags;
+maybe_give_terminal_to (pid_t opgrp, pid_t npgrp, int flags)
 {
   int tpgrp;
 
@@ -4731,8 +4621,7 @@ maybe_give_terminal_to (opgrp, npgrp, flags)
    and functions with pipes are the two that spring to mind).  If RUNNING_ONLY
    is nonzero, only running jobs are removed from the table. */
 void
-delete_all_jobs (running_only)
-     int running_only;
+delete_all_jobs (int running_only)
 {
   register int i;
   sigset_t set, oset;
@@ -4777,8 +4666,7 @@ delete_all_jobs (running_only)
 /* Mark all jobs in the job array so that they don't get a SIGHUP when the
    shell gets one.  If RUNNING_ONLY is nonzero, mark only running jobs. */
 void
-nohup_all_jobs (running_only)
-     int running_only;
+nohup_all_jobs (int running_only)
 {
   register int i;
   sigset_t set, oset;
@@ -4797,7 +4685,7 @@ nohup_all_jobs (running_only)
 }
 
 int
-count_all_jobs ()
+count_all_jobs (void)
 {
   int i, n;
   sigset_t set, oset;
@@ -4820,7 +4708,7 @@ count_all_jobs ()
 }
 
 static void
-mark_all_jobs_as_dead ()
+mark_all_jobs_as_dead (void)
 {
   register int i;
   sigset_t set, oset;
@@ -4846,8 +4734,7 @@ mark_all_jobs_as_dead ()
    status of the last CHILD_MAX jobs, so we count the number of dead
    jobs and mark only enough as notified to save CHILD_MAX statuses. */
 static void
-mark_dead_jobs_as_notified (force)
-     int force;
+mark_dead_jobs_as_notified (int force)
 {
   register int i, ndead, ndeadproc;
   sigset_t set, oset;
@@ -4952,7 +4839,7 @@ itrace("mark_dead_jobs_as_notified: child_max = %d ndead = %d ndeadproc = %d", j
 /* Here to allow other parts of the shell (like the trap stuff) to
    freeze and unfreeze the jobs list. */
 int
-freeze_jobs_list ()
+freeze_jobs_list (void)
 {
   int o;
 
@@ -4962,23 +4849,21 @@ freeze_jobs_list ()
 }
 
 void
-unfreeze_jobs_list ()
+unfreeze_jobs_list (void)
 {
   jobs_list_frozen = 0;
 }
 
 void
-set_jobs_list_frozen (s)
-     int s;
+set_jobs_list_frozen (int s)
 {
   jobs_list_frozen = s;
 }
 
-/* Allow or disallow job control to take place.  Returns the old value
+/* Allow or disallow job control to take place. Returns the old value
    of job_control. */
 int
-set_job_control (arg)
-     int arg;
+set_job_control (int arg)
 {
   int old;
 
@@ -5016,7 +4901,7 @@ set_job_control (arg)
 /* Turn off all traces of job control.  This is run by children of the shell
    which are going to do shellsy things, like wait (), etc. */
 void
-without_job_control ()
+without_job_control (void)
 {
   stop_making_children ();
   start_pipeline ();
@@ -5032,7 +4917,7 @@ without_job_control ()
    restore the original terminal process group.  This is done
    before the `exec' builtin calls shell_execve. */
 void
-end_job_control ()
+end_job_control (void)
 {
   if (job_control)
     terminate_stopped_jobs ();
@@ -5047,7 +4932,7 @@ end_job_control ()
 /* Restart job control by closing shell tty and reinitializing.  This is
    called after an exec fails in an interactive shell and we do not exit. */
 void
-restart_job_control ()
+restart_job_control (void)
 {
   if (shell_tty != -1)
     close (shell_tty);
@@ -5058,8 +4943,7 @@ restart_job_control ()
    If the caller passes NCHILD as 0 or -1, this ends up setting it to
    LMAXCHILD, which is initialized the first time through. */
 void
-set_maxchild (nchild)
-     int nchild;
+set_maxchild (int nchild)
 {
   static int lmaxchild = -1;
 
@@ -5086,7 +4970,7 @@ set_maxchild (nchild)
 
 /* Set the handler to run when the shell receives a SIGCHLD signal. */
 void
-set_sigchld_handler ()
+set_sigchld_handler (void)
 {
   set_signal_handler (SIGCHLD, sigchld_handler);
 }
@@ -5095,8 +4979,7 @@ set_sigchld_handler ()
 /* Read from the read end of a pipe.  This is how the process group leader
    blocks until all of the processes in a pipeline have been made. */
 static void
-pipe_read (pp)
-     int *pp;
+pipe_read (int *pp)
 {
   char ch;
 
@@ -5115,15 +4998,13 @@ pipe_read (pp)
 
 /* Functional interface closes our local-to-job-control pipes. */
 void
-close_pgrp_pipe ()
+close_pgrp_pipe (void)
 {
   sh_closepipe (pgrp_pipe);
 }
 
 void
-save_pgrp_pipe (p, clear)
-     int *p;
-     int clear;
+save_pgrp_pipe (int *p, int clear)
 {
   p[0] = pgrp_pipe[0];
   p[1] = pgrp_pipe[1];
@@ -5132,8 +5013,7 @@ save_pgrp_pipe (p, clear)
 }
 
 void
-restore_pgrp_pipe (p)
-     int *p;
+restore_pgrp_pipe (int *p)
 {
   pgrp_pipe[0] = p[0];
   pgrp_pipe[1] = p[1];

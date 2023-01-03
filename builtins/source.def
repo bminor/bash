@@ -96,7 +96,7 @@ int source_searches_cwd = 1;
    not executing a shell function, we leave the new values alone and free
    the saved values. */
 static void
-maybe_pop_dollar_vars ()
+maybe_pop_dollar_vars (void)
 {
   if (variable_context == 0 && (dollar_vars_changed () & ARGS_SETBLTIN))
     dispose_saved_dollar_vars ();
@@ -113,8 +113,7 @@ maybe_pop_dollar_vars ()
    take place in there.  So, I open the file, place it into a large string,
    close the file, and then execute the string. */
 int
-source_builtin (list)
-     WORD_LIST *list;
+source_builtin (WORD_LIST *list)
 {
   int result;
   char *filename, *debug_trap, *x;

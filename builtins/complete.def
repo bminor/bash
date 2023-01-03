@@ -153,8 +153,7 @@ static const struct _compopt {
 };
 
 static int
-find_compact (name)
-     char *name;
+find_compact (char *name)
 {
   register int i;
 
@@ -165,8 +164,7 @@ find_compact (name)
 }
 
 static int
-find_compopt (name)
-     char *name;
+find_compopt (char *name)
 {
   register int i;
 
@@ -191,10 +189,7 @@ find_compopt (name)
 */
 
 static int
-build_actions (list, flagp, actp, optp)
-     WORD_LIST *list;
-     struct _optflags *flagp;
-     unsigned long *actp, *optp;
+build_actions (WORD_LIST *list, struct _optflags *flagp, unsigned long *actp, unsigned long *optp)
 {
   int opt, ind, opt_given;
   unsigned long acts, copts;
@@ -367,8 +362,7 @@ build_actions (list, flagp, actp, optp)
 
 /* Add, remove, and display completion specifiers. */
 int
-complete_builtin (list)
-     WORD_LIST *list;
+complete_builtin (WORD_LIST *list)
 {
   int opt_given, rval;
   unsigned long acts, copts;
@@ -473,8 +467,7 @@ complete_builtin (list)
 }
 
 static int
-remove_cmd_completions (list)
-     WORD_LIST *list;
+remove_cmd_completions (WORD_LIST *list)
 {
   WORD_LIST *l;
   int ret;
@@ -491,9 +484,7 @@ remove_cmd_completions (list)
 }
 
 static void
-print_compoptions (copts, full)
-     unsigned long copts;
-     int full;
+print_compoptions (unsigned long copts, int full)
 {
   const struct _compopt *co;
 
@@ -505,8 +496,7 @@ print_compoptions (copts, full)
 }
 
 static void
-print_compactions (acts)
-     unsigned long acts;
+print_compactions (unsigned long acts)
 {
   const struct _compacts *ca;
 
@@ -522,9 +512,7 @@ print_compactions (acts)
 }
 
 static void
-print_arg (arg, flag, quote)
-     const char *arg, *flag;
-     int quote;
+print_arg (const char *arg, const char *flag, int quote)
 {
   char *x;
 
@@ -538,8 +526,7 @@ print_arg (arg, flag, quote)
 }
 
 static void
-print_cmd_name (cmd)
-     const char *cmd;
+print_cmd_name (const char *cmd)
 {
   char *x;
 
@@ -562,9 +549,7 @@ print_cmd_name (cmd)
 }
 
 static int
-print_one_completion (cmd, cs)
-     char *cmd;
-     COMPSPEC *cs;
+print_one_completion (char *cmd, COMPSPEC *cs)
 {
   printf ("complete ");
 
@@ -592,10 +577,7 @@ print_one_completion (cmd, cs)
 }
 
 static void
-print_compopts (cmd, cs, full)
-     const char *cmd;
-     COMPSPEC *cs;
-     int full;
+print_compopts (const char *cmd, COMPSPEC *cs, int full)
 {
   printf ("compopt ");
 
@@ -606,8 +588,7 @@ print_compopts (cmd, cs, full)
 }
 
 static int
-print_compitem (item)
-     BUCKET_CONTENTS *item;
+print_compitem (BUCKET_CONTENTS *item)
 {
   COMPSPEC *cs;
   char *cmd;
@@ -619,14 +600,13 @@ print_compitem (item)
 }
 
 static void
-print_all_completions ()
+print_all_completions (void)
 {
   progcomp_walk (print_compitem);
 }
 
 static int
-print_cmd_completions (list)
-     WORD_LIST *list;
+print_cmd_completions (WORD_LIST *list)
 {
   WORD_LIST *l;
   COMPSPEC *cs;
@@ -662,8 +642,7 @@ Returns success unless an invalid option is supplied or an error occurs.
 $END
 
 int
-compgen_builtin (list)
-     WORD_LIST *list;
+compgen_builtin (WORD_LIST *list)
 {
   int rval;
   unsigned long acts, copts;
@@ -787,8 +766,7 @@ have a completion specification defined.
 $END
 
 int
-compopt_builtin (list)
-     WORD_LIST *list;
+compopt_builtin (WORD_LIST *list)
 {
   int opts_on, opts_off, *opts, opt, oind, ret, Dflag, Eflag, Iflag;
   WORD_LIST *l, *wl;

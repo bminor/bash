@@ -153,8 +153,7 @@ static struct ttsave termsave;
 /* Set a flag that check_read_timeout can check.  This relies on zread or
    read_builtin calling trap.c:check_signals() (which calls check_read_timeout()) */
 static sighandler
-sigalrm (s)
-     int s;
+sigalrm (int s)
 {
   /* Display warning if this is called without read_timeout set? */
   if (read_timeout)
@@ -162,7 +161,7 @@ sigalrm (s)
 }
 
 static void
-reset_timeout ()
+reset_timeout (void)
 {
   /* Cancel alarm before restoring signal handler. */
   if (read_timeout)
@@ -174,15 +173,14 @@ reset_timeout ()
 }
 
 void
-check_read_timeout ()
+check_read_timeout (void)
 {
   if (read_timeout && shtimer_chktimeout (read_timeout))
     sh_longjmp (read_timeout->jmpenv, 1);
 }
 
 int
-read_builtin_timeout (fd)
-     int fd;
+read_builtin_timeout (int fd)
 {
   if ((read_timeout == 0) ||
       (read_timeout->fd != fd) ||
@@ -204,8 +202,7 @@ read_builtin_timeout (fd)
    gets the remainder of the words on the line.  If no variables
    are mentioned in LIST, then the default variable is $REPLY. */
 int
-read_builtin (list)
-     WORD_LIST *list;
+read_builtin (WORD_LIST *list)
 {
   register char *varname;
   int size, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2, nflag;
@@ -1055,9 +1052,7 @@ assign_vars:
 }
 
 static SHELL_VAR *
-bind_read_variable (name, value, flags)
-     char *name, *value;
-     int flags;
+bind_read_variable (char *name, char *value, int flags)
 {
   SHELL_VAR *v;
 
@@ -1068,10 +1063,7 @@ bind_read_variable (name, value, flags)
 
 #if defined (HANDLE_MULTIBYTE)
 static int
-read_mbchar (fd, string, ind, ch, unbuffered)
-     int fd;
-     char *string;
-     int ind, ch, unbuffered;
+read_mbchar (int fd, char *string, int ind, int ch, int unbuffered)
 {
   char mbchar[MB_LEN_MAX + 1];
   int i, n, r;
@@ -1120,22 +1112,21 @@ mbchar_return:
 
 
 static void
-ttyrestore (ttp)
-     struct ttsave *ttp;
+ttyrestore (struct ttsave *ttp)
 {
   ttsetattr (ttp->fd, &(ttp->attrs));
   tty_modified = 0;
 }
 
 void
-read_tty_cleanup ()
+read_tty_cleanup (void)
 {
   if (tty_modified)
     ttyrestore (&termsave);
 }
 
 int
-read_tty_modified ()
+read_tty_modified (void)
 {
   return (tty_modified);
 }
@@ -1146,15 +1137,14 @@ static rl_hook_func_t *old_startup_hook;
 static char *deftext;
 
 static void
-reset_attempted_completion_function (cp)
-     char *cp;
+reset_attempted_completion_function (char *cp)
 {
   if (rl_attempted_completion_function == 0 && old_attempted_completion_function)
     rl_attempted_completion_function = old_attempted_completion_function;
 }
 
 static int
-set_itext ()
+set_itext (void)
 {
   int r1, r2;
 
@@ -1172,9 +1162,7 @@ set_itext ()
 }
 
 static char *
-edit_line (p, itext)
-     char *p;
-     char *itext;
+edit_line (char *p, char *itext)
 {
   char *ret;
   int len;
@@ -1216,10 +1204,7 @@ edit_line (p, itext)
 }
 
 static void
-set_readline_timeout (t, sec, usec)
-     sh_timer *t;
-     time_t sec;
-     long usec;
+set_readline_timeout (sh_timer *t, time_t sec, long usec)
 {
   t->tmout.tv_sec = sec;
   t->tmout.tv_usec = usec;
@@ -1234,8 +1219,7 @@ static rl_command_func_t *old_newline_func;
 static unsigned char delim_char;
 
 static void
-set_eol_delim (c)
-     int c;
+set_eol_delim (int c)
 {
   Keymap cmap;
 
@@ -1261,8 +1245,7 @@ set_eol_delim (c)
 }
 
 static void
-reset_eol_delim (cp)
-     char *cp;
+reset_eol_delim (char *cp)
 {
   Keymap cmap;
 

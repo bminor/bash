@@ -105,8 +105,7 @@ static int expand_and_print_history (WORD_LIST *);
 #endif
 
 int
-history_builtin (list)
-     WORD_LIST *list;
+history_builtin (WORD_LIST *list)
 {
   int flags, opt, result, old_history_lines, obase, ind;
   char *filename, *delete_arg, *range;
@@ -322,9 +321,7 @@ history_builtin (list)
 #define histdata(i) (hlist[(i)]->data)
 
 static char *
-histtime (hlist, histtimefmt)
-     HIST_ENTRY *hlist;
-     const char *histtimefmt;
+histtime (HIST_ENTRY *hlist, const char *histtimefmt)
 {
   static char timestr[TIMELEN_MAX];
   time_t t;
@@ -343,8 +340,7 @@ histtime (hlist, histtimefmt)
 }
 
 static int
-display_history (list)
-     WORD_LIST *list;
+display_history (WORD_LIST *list)
 {
   register int i;
   intmax_t limit;
@@ -395,8 +391,7 @@ display_history (list)
 /* Remove the last entry in the history list and add each argument in
    LIST to the history. */
 static void
-push_history (list)
-     WORD_LIST *list;
+push_history (WORD_LIST *list)
 {
   char *s;
 
@@ -432,8 +427,7 @@ push_history (list)
 
 #if defined (BANG_HISTORY)
 static int
-expand_and_print_history (list)
-     WORD_LIST *list;
+expand_and_print_history (WORD_LIST *list)
 {
   char *s;
   int r, result;

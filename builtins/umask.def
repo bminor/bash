@@ -73,8 +73,7 @@ static int symbolic_umask (WORD_LIST *);
 /* Set or display the mask used by the system when creating files.  Flag
    of -S means display the umask in a symbolic mode. */
 int
-umask_builtin (list)
-     WORD_LIST *list;
+umask_builtin (WORD_LIST *list)
 {
   int print_symbolically, opt, umask_value, pflag;
   mode_t umask_arg;
@@ -146,12 +145,7 @@ umask_builtin (list)
 /* Print the umask in a symbolic form.  In the output, a letter is
    printed if the corresponding bit is clear in the umask. */
 static void
-#if defined (__STDC__)
 print_symbolic_umask (mode_t um)
-#else
-print_symbolic_umask (um)
-     mode_t um;
-#endif
 {
   char ubits[4], gbits[4], obits[4];		/* u=rwx,g=rwx,o=rwx */
   int i;
@@ -187,8 +181,7 @@ print_symbolic_umask (um)
 }
 
 static inline mode_t
-copyuser (mask)
-     mode_t mask;
+copyuser (mode_t mask)
 {
   return ((mask & S_IRUSR) ? S_IRUGO : 0) |
 	 ((mask & S_IWUSR) ? S_IWUGO : 0) |
@@ -196,8 +189,7 @@ copyuser (mask)
 }
 
 static inline mode_t
-copygroup (mask)
-     mode_t mask;
+copygroup (mode_t mask)
 {
   return ((mask & S_IRGRP) ? S_IRUGO : 0) |
 	 ((mask & S_IWGRP) ? S_IWUGO : 0) |
@@ -205,8 +197,7 @@ copygroup (mask)
 }
 
 static inline mode_t
-copyother (mask)
-     mode_t mask;
+copyother (mode_t mask)
 {
   return ((mask & S_IROTH) ? S_IRUGO : 0) |
 	 ((mask & S_IWOTH) ? S_IWUGO : 0) |
@@ -214,9 +205,7 @@ copyother (mask)
 }
 
 int
-parse_symbolic_mode (mode, initial_bits)
-     char *mode;
-     mode_t initial_bits;
+parse_symbolic_mode (char *mode, mode_t initial_bits)
 {
   char op, c;
   mode_t who, perm, bits;
@@ -361,8 +350,7 @@ spec_error:
    by chmod.  If the -S argument is given, then print the umask in a
    symbolic form. */
 static int
-symbolic_umask (list)
-     WORD_LIST *list;
+symbolic_umask (WORD_LIST *list)
 {
   mode_t um;
   int bits;

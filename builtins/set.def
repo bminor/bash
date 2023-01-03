@@ -245,8 +245,7 @@ const struct {
 			   : (*o_options[i].variable = (onoff == FLAG_ON)))
 
 static int
-find_minus_o_option (name)
-     char *name;
+find_minus_o_option (char *name)
 {
   register int i;
 
@@ -257,8 +256,7 @@ find_minus_o_option (name)
 }
 
 int
-minus_o_option_value (name)
-     char *name;
+minus_o_option_value (char *name)
 {
   register int	i;
   int *on_or_off;
@@ -279,9 +277,7 @@ minus_o_option_value (name)
 #define MINUS_O_FORMAT "%-15s\t%s\n"
 
 static void
-print_minus_o_option (name, value, pflag)
-     char *name;
-     int value, pflag;
+print_minus_o_option (char *name, int value, int pflag)
 {
   if (pflag == 0)
     printf (MINUS_O_FORMAT, name, value ? on : off);
@@ -290,8 +286,7 @@ print_minus_o_option (name, value, pflag)
 }
 
 void
-list_minus_o_opts (mode, reusable)
-     int mode, reusable;
+list_minus_o_opts (int mode, int reusable)
 {
   register int	i;
   int *on_or_off, value;
@@ -317,7 +312,7 @@ list_minus_o_opts (mode, reusable)
 }
 
 char **
-get_minus_o_opts ()
+get_minus_o_opts (void)
 {
   char **ret;
   int i;
@@ -330,7 +325,7 @@ get_minus_o_opts ()
 }
 
 char *
-get_current_options ()
+get_current_options (void)
 {
   char *temp;
   int i, posixopts;
@@ -355,8 +350,7 @@ get_current_options ()
 }
 
 void
-set_current_options (bitmap)
-     const char *bitmap;
+set_current_options (const char *bitmap)
 {
   int i, v, cv, *on_or_off;
 
@@ -388,9 +382,7 @@ set_current_options (bitmap)
 }
 
 static int
-set_ignoreeof (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+set_ignoreeof (int on_or_off, char *option_name)
 {
   ignoreeof = on_or_off == FLAG_ON;
   unbind_variable_noref ("ignoreeof");
@@ -403,9 +395,7 @@ set_ignoreeof (on_or_off, option_name)
 }
 
 static int
-set_posix_mode (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+set_posix_mode (int on_or_off, char *option_name)
 {
   /* short-circuit on no-op */
   if ((on_or_off == FLAG_ON && posixly_correct) ||
@@ -424,9 +414,7 @@ set_posix_mode (on_or_off, option_name)
 #if defined (READLINE)
 /* Magic.  This code `knows' how readline handles rl_editing_mode. */
 static int
-set_edit_mode (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+set_edit_mode (int on_or_off, char *option_name)
 {
   int isemacs;
 
@@ -452,8 +440,7 @@ set_edit_mode (on_or_off, option_name)
 }
 
 static int
-get_edit_mode (name)
-     char *name;
+get_edit_mode (char *name)
 {
   return (*name == 'e' ? no_line_editing == 0 && rl_editing_mode == 1
 		       : no_line_editing == 0 && rl_editing_mode == 0);
@@ -462,9 +449,7 @@ get_edit_mode (name)
 
 #if defined (HISTORY)
 static int
-bash_set_history (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+bash_set_history (int on_or_off, char *option_name)
 {
   if (on_or_off == FLAG_ON)
     {
@@ -483,9 +468,7 @@ bash_set_history (on_or_off, option_name)
 #endif
 
 int
-set_minus_o_option (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+set_minus_o_option (int on_or_off, char *option_name)
 {
   register int i;
 
@@ -515,7 +498,7 @@ set_minus_o_option (on_or_off, option_name)
 }
 
 static void
-print_all_shell_variables ()
+print_all_shell_variables (void)
 {
   SHELL_VAR **vars;
 
@@ -540,7 +523,7 @@ print_all_shell_variables ()
 }
 
 void
-set_shellopts ()
+set_shellopts (void)
 {
   char *value;
   char tflag[N_O_OPTIONS];
@@ -607,8 +590,7 @@ set_shellopts ()
 }
 
 void
-parse_shellopts (value)
-     char *value;
+parse_shellopts (char *value)
 {
   char *vname;
   int vptr;
@@ -622,8 +604,7 @@ parse_shellopts (value)
 }
 
 void
-initialize_shell_options (no_shellopts)
-     int no_shellopts;
+initialize_shell_options (int no_shellopts)
 {
   char *temp;
   SHELL_VAR *var;
@@ -651,7 +632,7 @@ initialize_shell_options (no_shellopts)
    called from execute_cmd.c:initialize_subshell() when setting up a subshell
    to run an executable shell script without a leading `#!'. */
 void
-reset_shell_options ()
+reset_shell_options (void)
 {
   pipefail_opt = 0;
   ignoreeof = 0;
@@ -671,8 +652,7 @@ reset_shell_options ()
    then print out the values of the variables instead.  If LIST contains
    non-flags, then set $1 - $9 to the successive words of LIST. */
 int
-set_builtin (list)
-     WORD_LIST *list;
+set_builtin (WORD_LIST *list)
 {
   int on_or_off, flag_name, force_assignment, opts_changed, rv, r;
   register char *arg;
@@ -831,8 +811,7 @@ $END
 #define NEXT_VARIABLE()	any_failed++; list = list->next; continue;
 
 int
-unset_builtin (list)
-  WORD_LIST *list;
+unset_builtin (WORD_LIST *list)
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
   int global_unset_func, global_unset_var, vflags, base_vflags, valid_id;
