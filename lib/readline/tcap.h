@@ -46,14 +46,14 @@ extern char *UP, *BC;
 
 extern short ospeed;
 
-extern int tgetent ();
-extern int tgetflag ();
-extern int tgetnum ();
-extern char *tgetstr ();
+extern int tgetent PARAMS((char *, const char *));
+extern int tgetflag PARAMS((const char *));
+extern int tgetnum PARAMS((const char *));
+extern char *tgetstr PARAMS((const char *, char **));
 
-extern int tputs ();
+extern int tputs PARAMS((const char *, int, int (*)(int));
 
-extern char *tgoto ();
+extern char *tgoto PARAMS((const char *, int, int));
 
 #endif /* HAVE_TERMCAP_H */
 

@@ -109,7 +109,7 @@ extern int force_fignore;
 extern int dircomplete_spelling, dircomplete_expand;
 extern int complete_fullquote;
 
-extern int enable_hostname_completion PARAMS((int));
+extern int enable_hostname_completion (int);
 #endif
 
 #if defined (PROGRAMMABLE_COMPLETION)
@@ -131,33 +131,33 @@ int expand_once_flag;
 extern int syslog_history;
 #endif
 
-static void shopt_error PARAMS((char *));
+static void shopt_error (char *);
 
-static int set_shellopts_after_change PARAMS((char *, int));
-static int set_compatibility_level PARAMS((char *, int));
+static int set_shellopts_after_change (char *, int);
+static int set_compatibility_level (char *, int);
 
 #if defined (RESTRICTED_SHELL)
-static int set_restricted_shell PARAMS((char *, int));
+static int set_restricted_shell (char *, int);
 #endif
 
 #if defined (READLINE)
-static int shopt_enable_hostname_completion PARAMS((char *, int));
-static int shopt_set_complete_direxpand PARAMS((char *, int));
+static int shopt_enable_hostname_completion (char *, int);
+static int shopt_set_complete_direxpand (char *, int);
 #endif
 
 #if defined (ARRAY_VARS)
-static int set_assoc_expand PARAMS((char *, int));
+static int set_assoc_expand (char *, int);
 #endif
 
 #if defined (EXTENDED_GLOB)
 int extglob_flag = EXTGLOB_DEFAULT;
-static int shopt_set_extglob PARAMS((char *, int));
+static int shopt_set_extglob (char *, int);
 #endif
 
 int expaliases_flag = 0;
-static int shopt_set_expaliases PARAMS((char *, int));
+static int shopt_set_expaliases (char *, int);
 
-static int shopt_set_debug_mode PARAMS((char *, int));
+static int shopt_set_debug_mode (char *, int);
 
 static int shopt_login_shell;
 static int shopt_compat31;
@@ -168,7 +168,7 @@ static int shopt_compat42;
 static int shopt_compat43;
 static int shopt_compat44;
 
-typedef int shopt_set_func_t PARAMS((char *, int));
+typedef int shopt_set_func_t (char *, int);
 
 /* If you add a new variable name here, make sure to set the default value
    appropriately in reset_shopt_options. */
@@ -276,14 +276,14 @@ static struct {
 static const char * const on = "on";
 static const char * const off = "off";
 
-static int find_shopt PARAMS((char *));
-static int toggle_shopts PARAMS((int, WORD_LIST *, int));
-static void print_shopt PARAMS((char *, int, int));
-static int list_shopts PARAMS((WORD_LIST *, int));
-static int list_some_shopts PARAMS((int, int));
-static int list_shopt_o_options PARAMS((WORD_LIST *, int));
-static int list_some_o_options PARAMS((int, int));
-static int set_shopt_o_options PARAMS((int, WORD_LIST *, int));
+static int find_shopt (char *);
+static int toggle_shopts (int, WORD_LIST *, int);
+static void print_shopt (char *, int, int);
+static int list_shopts (WORD_LIST *, int);
+static int list_some_shopts (int, int);
+static int list_shopt_o_options (WORD_LIST *, int);
+static int list_some_o_options (int, int);
+static int set_shopt_o_options (int, WORD_LIST *, int);
 
 #define SFLAG	0x01
 #define UFLAG	0x02

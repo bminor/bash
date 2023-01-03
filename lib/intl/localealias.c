@@ -1,6 +1,6 @@
 /* localealias.c - Handle aliases for locale names. */
 
-/* Copyright (C) 1995-1999, 2000-2001, 2003, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000-2001, 2003, 2005-2009, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 
@@ -90,10 +90,6 @@ char *alloca ();
 __libc_lock_define_initialized (static, lock);
 #endif
 
-#ifndef internal_function
-# define internal_function
-#endif
-
 /* Some optimizations for glibc.  */
 #ifdef _LIBC
 # define FEOF(fp)		feof_unlocked (fp)
@@ -142,12 +138,10 @@ static size_t maxmap;
 
 
 /* Prototypes for local functions.  */
-static size_t read_alias_file PARAMS ((const char *fname, int fname_len))
-     internal_function;
-static int extend_alias_table PARAMS ((void));
-static int alias_compare PARAMS ((const struct alias_map *map1,
-				  const struct alias_map *map2));
-
+static inline size_t read_alias_file (const char *fname, int fname_len);
+static int extend_alias_table (void);
+static int alias_compare (const struct alias_map *map1,
+			  const struct alias_map *map2);
 
 const char *
 _nl_expand_alias (name)
@@ -174,8 +168,8 @@ _nl_expand_alias (name)
       if (nmap > 0)
 	retval = (struct alias_map *) bsearch (&item, map, nmap,
 					       sizeof (struct alias_map),
-					       (int (*) PARAMS ((const void *,
-								 const void *))
+					       (int (*) (const void *,
+								 const void *)
 						) alias_compare);
       else
 	retval = NULL;
@@ -215,8 +209,7 @@ _nl_expand_alias (name)
 }
 
 
-static size_t
-internal_function
+static inline size_t
 read_alias_file (fname, fname_len)
      const char *fname;
      int fname_len;
@@ -369,7 +362,7 @@ read_alias_file (fname, fname_len)
 
   if (added > 0)
     qsort (map, nmap, sizeof (struct alias_map),
-	   (int (*) PARAMS ((const void *, const void *))) alias_compare);
+	   (int (*) (const void *, const void *)) alias_compare);
 
   return added;
 }

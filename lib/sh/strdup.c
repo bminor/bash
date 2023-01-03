@@ -1,6 +1,6 @@
 /* strdup - return a copy of a string in newly-allocated memory. */
 
-/* Copyright (C) 2013 Free Software Foundation, Inc.
+/* Copyright (C) 2013,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -26,8 +26,7 @@
 
 /* Duplicate S, returning an identical malloc'd string.  */
 char *
-strdup (s)
-     const char *s;
+strdup (const char *s)
 {
   size_t len;
   void *new;

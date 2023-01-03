@@ -1,6 +1,6 @@
 /* dcigettext.c - Implementation of the internal dcigettext function. */
 
-/* Copyright (C) 1995-1999, 2000-2003, 2006-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000-2003, 2006-2009, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 
@@ -157,10 +157,10 @@ char *getwd ();
 char *getcwd ();
 # endif
 # ifndef HAVE_STPCPY
-static char *stpcpy PARAMS ((char *dest, const char *src));
+static char *stpcpy (char *dest, const char *src);
 # endif
 # ifndef HAVE_MEMPCPY
-static void *mempcpy PARAMS ((void *dest, const void *src, size_t n));
+static void *mempcpy (void *dest, const void *src, size_t n);
 # endif
 #endif
 
@@ -254,7 +254,7 @@ static void *root;
 # endif
 
 /* Function to compare two entries in the table of known translations.  */
-static int transcmp PARAMS ((const void *p1, const void *p2));
+static int transcmp (const void *p1, const void *p2);
 static int
 transcmp (p1, p2)
      const void *p1;
@@ -310,21 +310,19 @@ INTVARDEF (_nl_default_dirname)
 struct binding *_nl_domain_bindings;
 
 /* Prototypes for local functions.  */
-static char *plural_lookup PARAMS ((struct loaded_l10nfile *domain,
+static inline char *plural_lookup (struct loaded_l10nfile *domain,
 				    unsigned long int n,
 				    const char *translation,
-				    size_t translation_len))
-     internal_function;
-static const char *guess_category_value PARAMS ((int category,
-						 const char *categoryname))
-     internal_function;
+				    size_t translation_len);
+static inline const char *guess_category_value (int category,
+					 const char *categoryname);
+
 #ifdef _LIBC
 # include "../locale/localeinfo.h"
 # define category_to_name(category)	_nl_category_names[category]
 #else
-static const char *category_to_name PARAMS ((int category)) internal_function;
+static inline const char *category_to_name (int category);
 #endif
-
 
 /* For those loosing systems which don't have `alloca' we have to add
    some additional code emulating it.  */
@@ -713,11 +711,11 @@ DCIGETTEXT (domainname, msgid1, msgid2, plural, n, category)
 #ifndef _LIBC
   if (!ENABLE_SECURE)
     {
-      extern void _nl_log_untranslated PARAMS ((const char *logfilename,
+      extern void _nl_log_untranslated (const char *logfilename,
 						const char *domainname,
 						const char *msgid1,
 						const char *msgid2,
-						int plural));
+						int plural);
       const char *logfilename = getenv ("GETTEXT_LOG_UNTRANSLATED");
 
       if (logfilename != NULL && logfilename[0] != '\0')
@@ -732,8 +730,7 @@ DCIGETTEXT (domainname, msgid1, msgid2, plural, n, category)
 }
 
 
-char *
-internal_function
+inline char *
 _nl_find_msg (domain_file, domainbinding, msgid, lengthp)
      struct loaded_l10nfile *domain_file;
      struct binding *domainbinding;
@@ -1043,8 +1040,7 @@ _nl_find_msg (domain_file, domainbinding, msgid, lengthp)
 
 
 /* Look up a plural variant.  */
-static char *
-internal_function
+static inline char *
 plural_lookup (domain, n, translation, translation_len)
      struct loaded_l10nfile *domain;
      unsigned long int n;
@@ -1084,8 +1080,7 @@ plural_lookup (domain, n, translation, translation_len)
 
 #ifndef _LIBC
 /* Return string representation of locale CATEGORY.  */
-static const char *
-internal_function
+static inline const char *
 category_to_name (category)
      int category;
 {
@@ -1145,8 +1140,7 @@ category_to_name (category)
 #endif
 
 /* Guess value of current locale from value of the environment variables.  */
-static const char *
-internal_function
+static inline const char *
 guess_category_value (category, categoryname)
      int category;
      const char *categoryname;

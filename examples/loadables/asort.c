@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020,2022 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,8 @@ static int reverse_flag;
 static int numeric_flag;
 
 static int
-compare(const void *p1, const void *p2) {
+compare(const void *p1, const void *p2)
+{
     const sort_element e1 = *(sort_element *) p1;
     const sort_element e2 = *(sort_element *) p2;
 
@@ -55,7 +56,8 @@ compare(const void *p1, const void *p2) {
 }
 
 static int
-sort_index(SHELL_VAR *dest, SHELL_VAR *source) {
+sort_index(SHELL_VAR *dest, SHELL_VAR *source)
+{
     HASH_TABLE *hash;
     BUCKET_CONTENTS *bucket;
     sort_element *sa;
@@ -125,7 +127,8 @@ sort_index(SHELL_VAR *dest, SHELL_VAR *source) {
 }
 
 static int
-sort_inplace(SHELL_VAR *var) {
+sort_inplace(SHELL_VAR *var)
+{
     size_t i, n;
     ARRAY *a;
     ARRAY_ELEMENT *ae;
@@ -174,7 +177,8 @@ sort_inplace(SHELL_VAR *var) {
 }
 
 int
-asort_builtin(WORD_LIST *list) {
+asort_builtin(WORD_LIST *list)
+{
     SHELL_VAR *var, *var2;
     char *word;
     int opt, ret;

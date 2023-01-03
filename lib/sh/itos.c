@@ -30,10 +30,7 @@
 #include "shell.h"
 
 char *
-inttostr (i, buf, len)
-     intmax_t i;
-     char *buf;
-     size_t len;
+inttostr (intmax_t i, char *buf, size_t len)
 {
   return (fmtumax (i, 10, buf, len, 0));
 }
@@ -41,8 +38,7 @@ inttostr (i, buf, len)
 /* Integer to string conversion.  This conses the string; the
    caller should free it. */
 char *
-itos (i)
-     intmax_t i;
+itos (intmax_t i)
 {
   char *p, lbuf[INT_STRLEN_BOUND(intmax_t) + 1];
 
@@ -53,8 +49,7 @@ itos (i)
 /* Integer to string conversion.  This conses the string using strdup;
    caller should free it and be prepared to deal with NULL return. */
 char *
-mitos (i)
-     intmax_t i;
+mitos (intmax_t i)
 {
   char *p, lbuf[INT_STRLEN_BOUND(intmax_t) + 1];
 
@@ -63,10 +58,7 @@ mitos (i)
 }
 
 char *
-uinttostr (i, buf, len)
-     uintmax_t i;
-     char *buf;
-     size_t len;
+uinttostr (uintmax_t i, char *buf, size_t len)
 {
   return (fmtumax (i, 10, buf, len, FL_UNSIGNED));
 }
@@ -74,8 +66,7 @@ uinttostr (i, buf, len)
 /* Integer to string conversion.  This conses the string; the
    caller should free it. */
 char *
-uitos (i)
-     uintmax_t i;
+uitos (uintmax_t i)
 {
   char *p, lbuf[INT_STRLEN_BOUND(uintmax_t) + 1];
 

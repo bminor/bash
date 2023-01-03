@@ -2,7 +2,7 @@
 	      or print them to the standard output */
 
 /*
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020,2022 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -61,8 +61,7 @@ struct cutop
 };
 
 static int
-poscmp (a, b)
-     void *a, *b;
+poscmp (const void *a, const void *b)
 {
   struct cutpos *p1, *p2;
 
@@ -72,9 +71,7 @@ poscmp (a, b)
 }
 
 static int
-getlist (arg, opp)
-     char *arg;
-     struct cutpos **opp;
+getlist (char *arg, struct cutpos **opp)
 {
   char *ntok, *ltok, *larg;
   int s, e;
@@ -146,10 +143,7 @@ getlist (arg, opp)
 }
 
 static int
-cutbytes (v, line, ops)
-     SHELL_VAR *v;
-     char *line;
-     struct cutop *ops;
+cutbytes (SHELL_VAR *v, char *line, struct cutop *ops)
 {
   arrayind_t ind;
   char *buf, *bmap;
@@ -197,10 +191,7 @@ cutbytes (v, line, ops)
 }
 
 static int
-cutchars (v, line, ops)
-     SHELL_VAR *v;
-     char *line;
-     struct cutop *ops;
+cutchars (SHELL_VAR *v, char *line, struct cutop *ops)
 {
   arrayind_t ind;
   char *buf, *bmap;
@@ -272,10 +263,7 @@ cutchars (v, line, ops)
    bitmap approach as cut{bytes,chars} and assign them to the array variable
    V or print them on stdout. This function obeys SFLAG. */
 static int
-cutfields (v, line, ops)
-     SHELL_VAR *v;
-     char *line;
-     struct cutop *ops;
+cutfields (SHELL_VAR *v, char *line, struct cutop *ops)
 {
   arrayind_t ind;
   char *buf, *bmap, *field, **fields, delim[2];
@@ -362,10 +350,7 @@ cutfields (v, line, ops)
 }
 
 static int
-cutline (v, line, ops)
-     SHELL_VAR *v;
-     char *line;
-     struct cutop *ops;
+cutline (SHELL_VAR *v, char *line, struct cutop *ops)
 {
   int rval;
 
@@ -380,10 +365,7 @@ cutline (v, line, ops)
 }
 
 static int
-cutfile (v, list, ops)
-     SHELL_VAR *v;
-     WORD_LIST *list;
-     struct cutop *ops;
+cutfile (SHELL_VAR *v, WORD_LIST *list, struct cutop *ops)
 {
   int fd, unbuffered_read;
   char *line, *b;
@@ -437,9 +419,7 @@ cutfile (v, list, ops)
 #define OPTSET(x)	     ((cutflags & (x)) ? 1 : 0)
 
 static int
-cut_internal (which, list)
-     int which;				/* not used yet */
-     WORD_LIST *list;
+cut_internal (int which, WORD_LIST *list)
 {
   int opt, rval, cutflags, delim, npos;
   char *array_name, *cutstring, *list_arg;
@@ -566,15 +546,13 @@ cut_internal (which, list)
 }
 
 int
-lcut_builtin (list)
-     WORD_LIST *list;
+lcut_builtin (WORD_LIST *list)
 {
   return (cut_internal (0, list));
 }
 
 int
-cut_builtin (list)
-     WORD_LIST *list;
+cut_builtin (WORD_LIST *list)
 {
   return (cut_internal (1, list));
 }

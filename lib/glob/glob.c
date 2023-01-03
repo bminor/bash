@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2021 Free Software Foundation, Inc.
+   Copyright (C) 1985-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
    
@@ -84,11 +84,11 @@ struct globval
     char *name;
   };
 
-extern void throw_to_top_level PARAMS((void));
-extern int sh_eaccess PARAMS((const char *, int));
-extern char *sh_makepath PARAMS((const char *, const char *, int));
-extern int signal_is_pending PARAMS((int));
-extern void run_pending_traps PARAMS((void));
+extern void throw_to_top_level (void);
+extern int sh_eaccess (const char *, int);
+extern char *sh_makepath (const char *, const char *, int);
+extern int signal_is_pending (int);
+extern void run_pending_traps (void);
 
 extern int extended_glob;
 
@@ -111,29 +111,29 @@ char *glob_error_return;
 static struct globval finddirs_error_return;
 
 /* Some forward declarations. */
-static int skipname PARAMS((char *, char *, int));
+static int skipname (char *, char *, int);
 #if HANDLE_MULTIBYTE
-static int mbskipname PARAMS((char *, char *, int));
+static int mbskipname (char *, char *, int);
 #endif
-void udequote_pathname PARAMS((char *));
+void udequote_pathname (char *);
 #if HANDLE_MULTIBYTE
-void wcdequote_pathname PARAMS((wchar_t *));
-static void wdequote_pathname PARAMS((char *));
-static void dequote_pathname PARAMS((char *));
+void wcdequote_pathname (wchar_t *);
+static void wdequote_pathname (char *);
+static void dequote_pathname (char *);
 #else
 #  define dequote_pathname(p) udequote_pathname(p)
 #endif
-static int glob_testdir PARAMS((char *, int));
-static char **glob_dir_to_array PARAMS((char *, char **, int));
+static int glob_testdir (char *, int);
+static char **glob_dir_to_array (char *, char **, int);
 
 /* Make sure these names continue to agree with what's in smatch.c */
-extern char *glob_patscan PARAMS((char *, char *, int, int));
-extern wchar_t *glob_patscan_wc PARAMS((wchar_t *, wchar_t *, wint_t, int));
+extern char *glob_patscan (char *, char *, int, int);
+extern wchar_t *glob_patscan_wc (wchar_t *, wchar_t *, wint_t, int);
 
 /* And this from gmisc.c/gm_loop.c */
-extern int wextglob_pattern_p PARAMS((wchar_t *));
+extern int wextglob_pattern_p (wchar_t *);
 
-extern char *glob_dirscan PARAMS((char *, int));
+extern char *glob_dirscan (char *, int);
 
 /* Compile `glob_loop.c' for single-byte characters. */
 #define GCHAR	unsigned char
@@ -158,8 +158,7 @@ extern char *glob_dirscan PARAMS((char *, int));
 /* And now a function that calls either the single-byte or multibyte version
    of internal_glob_pattern_p. */
 int
-glob_pattern_p (pattern)
-     const char *pattern;
+glob_pattern_p (const char *pattern)
 {
 #if HANDLE_MULTIBYTE
   size_t n;
@@ -196,9 +195,7 @@ glob_pattern_p (pattern)
    that the name should be skipped.  XXX - doesn't handle pattern negation,
    not sure if it should */
 static int
-extglob_skipname (pat, dname, flags)
-     char *pat, *dname;
-     int flags;
+extglob_skipname (char *pat, char *dname, int flags)
 {
   char *pp, *pe, *t, *se;
   int n, r, negate, wild, nullpat, xflags;
@@ -267,10 +264,7 @@ extglob_skipname (pat, dname, flags)
 /* Return 1 if DNAME should be skipped according to PAT.  Mostly concerned
    with matching leading `.'. */
 static int
-skipname (pat, dname, flags)
-     char *pat;
-     char *dname;
-     int flags;
+skipname (char *pat, char *dname, int flags)
 {
   int i;
 
@@ -310,9 +304,7 @@ skipname (pat, dname, flags)
 #if HANDLE_MULTIBYTE
 
 static int
-wskipname (pat, dname, flags)
-     wchar_t *pat, *dname;
-     int flags;
+wskipname (wchar_t *pat, wchar_t *dname, int flags)
 {
   int i;
 
@@ -346,9 +338,7 @@ wskipname (pat, dname, flags)
 }
 
 static int
-wextglob_skipname (pat, dname, flags)
-     wchar_t *pat, *dname;
-     int flags;
+wextglob_skipname (wchar_t *pat, wchar_t *dname, int flags)
 {
 #if EXTENDED_GLOB
   wchar_t *pp, *pe, *t, *se, n;
@@ -415,9 +405,7 @@ wextglob_skipname (pat, dname, flags)
 /* Return 1 if DNAME should be skipped according to PAT.  Handles multibyte
    characters in PAT and DNAME.  Mostly concerned with matching leading `.'. */
 static int
-mbskipname (pat, dname, flags)
-     char *pat, *dname;
-     int flags;
+mbskipname (char *pat, char *dname, int flags)
 {
   int ret, ext;
   wchar_t *pat_wc, *dn_wc;
@@ -452,8 +440,7 @@ mbskipname (pat, dname, flags)
 
 /* Remove backslashes quoting characters in PATHNAME by modifying PATHNAME. */
 void
-udequote_pathname (pathname)
-     char *pathname;
+udequote_pathname (char *pathname)
 {
   register int i, j;
 
@@ -474,8 +461,7 @@ udequote_pathname (pathname)
 #if HANDLE_MULTIBYTE
 /* Remove backslashes quoting characters in PATHNAME by modifying PATHNAME. */
 void
-wcdequote_pathname (wpathname)
-     wchar_t *wpathname;
+wcdequote_pathname (wchar_t *wpathname)
 {
   int i, j;
 
@@ -494,8 +480,7 @@ wcdequote_pathname (wpathname)
 }
 
 static void
-wdequote_pathname (pathname)
-     char *pathname;
+wdequote_pathname (char *pathname)
 {
   mbstate_t ps;
   size_t len, n;
@@ -538,8 +523,7 @@ wdequote_pathname (pathname)
 }
 
 static void
-dequote_pathname (pathname)
-     char *pathname;
+dequote_pathname (char *pathname)
 {
   if (MB_CUR_MAX > 1)
     wdequote_pathname (pathname);
@@ -562,9 +546,7 @@ dequote_pathname (pathname)
 
 /* Return 0 if DIR is a directory, -2 if DIR is a symlink,  -1 otherwise. */
 static int
-glob_testdir (dir, flags)
-     char *dir;
-     int flags;
+glob_testdir (char *dir, int flags)
 {
   struct stat finfo;
   int r;
@@ -596,12 +578,7 @@ glob_testdir (dir, flags)
    directories in the returned list.  These two variables exist for the
    convenience of the caller (always glob_vector). */
 static struct globval *
-finddirs (pat, sdir, flags, ep, np)
-     char *pat;
-     char *sdir;
-     int flags;
-     struct globval **ep;
-     int *np;
+finddirs (char *pat, char *sdir, int flags, struct globval **ep, int *np)
 {
   char **r, *n;
   int ndirs;
@@ -674,10 +651,7 @@ finddirs (pat, sdir, flags, ep, np)
    Look in errno for more information.  */
 
 char **
-glob_vector (pat, dir, flags)
-     char *pat;
-     char *dir;
-     int flags;
+glob_vector (char *pat, char *dir, int flags)
 {
   DIR *d;
   register struct dirent *dp;
@@ -1059,9 +1033,7 @@ glob_vector (pat, dir, flags)
    it takes care of free()ing that array.  Thus, you might think of this
    function as side-effecting ARRAY.  This should handle GX_MARKDIRS. */
 static char **
-glob_dir_to_array (dir, array, flags)
-     char *dir, **array;
-     int flags;
+glob_dir_to_array (char *dir, char **array, int flags)
 {
   register unsigned int i, l;
   int add_slash;
@@ -1148,9 +1120,7 @@ glob_dir_to_array (dir, array, flags)
    If there isn't enough memory, then return NULL.
    If a file system error occurs, return -1; `errno' has the error code.  */
 char **
-glob_filename (pathname, flags)
-     char *pathname;
-     int flags;
+glob_filename (char *pathname, int flags)
 {
   char **result, **new_result;
   unsigned int result_size;

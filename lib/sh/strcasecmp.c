@@ -1,6 +1,6 @@
 /* strcasecmp.c - functions for case-insensitive string comparison. */
 
-/* Copyright (C) 1995 Free Software Foundation, Inc.
+/* Copyright (C) 1995, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,10 +29,7 @@
 /* Compare at most COUNT characters from string1 to string2.  Case
    doesn't matter. */
 int
-strncasecmp (string1, string2, count)
-     const char *string1;
-     const char *string2;
-     size_t count;
+strncasecmp (const char *string1, const char *string2, size_t count)
 {
   register const char *s1;
   register const char *s2;
@@ -58,9 +55,7 @@ strncasecmp (string1, string2, count)
 
 /* strcmp (), but caseless. */
 int
-strcasecmp (string1, string2)
-     const char *string1;
-     const char *string2;
+strcasecmp (const char *string1, const char *string2)
 {
   register const char *s1;
   register const char *s2;

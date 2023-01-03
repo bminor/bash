@@ -1,7 +1,7 @@
 /* uconvert - convert string representations of decimal numbers into whole
 	      number/fractional value pairs. */
 
-/* Copyright (C) 2008,2009,2020 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,10 +57,7 @@ static int multiplier[7] = { 1, 100000, 10000, 1000, 100, 10, 1 };
    Return 1 if value converted; 0 if invalid integer for either whole or
    fractional parts. */
 int
-uconvert(s, ip, up, ep)
-     char *s;
-     long *ip, *up;
-     char **ep;
+uconvert(char *s, long *ip, long *up, char **ep)
 {
   int n, mult;
   long ipart, upart;

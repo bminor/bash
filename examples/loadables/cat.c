@@ -32,13 +32,11 @@
 extern int errno;
 #endif
 
-extern char *strerror ();
-extern char **make_builtin_argv ();
+extern char *strerror (int);
+extern char **make_builtin_argv (WORD_LIST *, int *);
 
 static int
-fcopy(fd, fn)
-int	fd;
-char	*fn;
+fcopy(int fd, char *fn)
 {
 	char	buf[4096], *s;
 	int	n, w, e;
@@ -70,9 +68,7 @@ char	*fn;
 }
 
 int
-cat_main (argc, argv)
-int	argc;
-char	**argv;
+cat_main (int argc, char **argv)
 {
 	int	i, fd, r;
 	char	*s;
@@ -105,8 +101,7 @@ char	**argv;
 }
 
 int
-cat_builtin(list)
-WORD_LIST *list;
+cat_builtin(WORD_LIST *list)
 {
 	char	**v;
 	int	c, r;

@@ -81,12 +81,7 @@ extern int errno;
    base.  The caller passes the output buffer and the size.  This should
    check for buffer underflow, but currently does not. */
 char *
-fmtulong (ui, base, buf, len, flags)
-     UNSIGNED_LONG ui;
-     int base;
-     char *buf;
-     size_t len;
-     int flags;
+fmtulong (UNSIGNED_LONG ui, int base, char *buf, size_t len, int flags)
 {
   char *p;
   int sign;

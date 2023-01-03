@@ -1,5 +1,5 @@
 /* File-name wildcard pattern matching for GNU.
-   Copyright (C) 1985-2021 Free Software Foundation, Inc.
+   Copyright (C) 1985-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -34,11 +34,11 @@
 #define GX_SYMLINK	0x1000	/* internal -- symlink to a directory */
 #define GX_NEGATE	0x2000	/* internal -- extglob pattern being negated */
 
-extern int glob_pattern_p PARAMS((const char *));
-extern char **glob_vector PARAMS((char *, char *, int));
-extern char **glob_filename PARAMS((char *, int));
+extern int glob_pattern_p (const char *);
+extern char **glob_vector (char *, char *, int);
+extern char **glob_filename (char *, int);
 
-extern int extglob_pattern_p PARAMS((const char *));
+extern int extglob_pattern_p (const char *);
 
 extern char *glob_error_return;
 extern int noglob_dot_filenames;

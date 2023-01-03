@@ -1,6 +1,6 @@
 /* fpurge - Flushing buffers of a FILE stream. */
 
-/* Copyright (C) 2007-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2007-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,7 +29,7 @@
 #if HAVE_FPURGE
 #  define fpurge _bash_fpurge
 #endif
-extern int fpurge PARAMS((FILE *stream));
+extern int fpurge (FILE *stream);
 
 #if HAVE___FPURGE                   /* glibc >= 2.2, Haiku, Solaris >= 7 */
 # include <stdio_ext.h>

@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -31,8 +31,7 @@
 extern char *ttyname ();
 
 int
-tty_builtin (list)
-     WORD_LIST *list;
+tty_builtin (WORD_LIST *list)
 {
   int opt, sflag;
   char *t;

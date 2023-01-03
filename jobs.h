@@ -207,7 +207,7 @@ struct procchain {
 
 /* System calls. */
 #if !defined (HAVE_UNISTD_H)
-extern pid_t fork (), getpid (), getpgrp ();
+extern pid_t fork (void), getpid (void), getpgrp (void);
 #endif /* !HAVE_UNISTD_H */
 
 /* Stuff from the jobs.c file. */
@@ -224,97 +224,97 @@ extern PROCESS *last_procsub_child;
 
 extern JOB **jobs;
 
-extern void making_children PARAMS((void));
-extern void stop_making_children PARAMS((void));
-extern void cleanup_the_pipeline PARAMS((void));
-extern void discard_last_procsub_child PARAMS((void));
-extern void save_pipeline PARAMS((int));
-extern PROCESS *restore_pipeline PARAMS((int));
-extern void start_pipeline PARAMS((void));
-extern int stop_pipeline PARAMS((int, COMMAND *));
-extern int discard_pipeline PARAMS((PROCESS *));
-extern void append_process PARAMS((char *, pid_t, int, int));
+extern void making_children (void);
+extern void stop_making_children (void);
+extern void cleanup_the_pipeline (void);
+extern void discard_last_procsub_child (void);
+extern void save_pipeline (int);
+extern PROCESS *restore_pipeline (int);
+extern void start_pipeline (void);
+extern int stop_pipeline (int, COMMAND *);
+extern int discard_pipeline (PROCESS *);
+extern void append_process (char *, pid_t, int, int);
 
-extern void save_proc_status PARAMS((pid_t, int));
+extern void save_proc_status (pid_t, int);
 
-extern PROCESS *procsub_add PARAMS((PROCESS *));
-extern PROCESS *procsub_search PARAMS((pid_t));
-extern PROCESS *procsub_delete PARAMS((pid_t));
-extern int procsub_waitpid PARAMS((pid_t));
-extern void procsub_waitall PARAMS((void));
-extern void procsub_clear PARAMS((void));
-extern void procsub_prune PARAMS((void));
+extern PROCESS *procsub_add (PROCESS *);
+extern PROCESS *procsub_search (pid_t);
+extern PROCESS *procsub_delete (pid_t);
+extern int procsub_waitpid (pid_t);
+extern void procsub_waitall (void);
+extern void procsub_clear (void);
+extern void procsub_prune (void);
 
-extern void delete_job PARAMS((int, int));
-extern void nohup_job PARAMS((int));
-extern void delete_all_jobs PARAMS((int));
-extern void nohup_all_jobs PARAMS((int));
+extern void delete_job (int, int);
+extern void nohup_job (int);
+extern void delete_all_jobs (int);
+extern void nohup_all_jobs (int);
 
-extern int count_all_jobs PARAMS((void));
+extern int count_all_jobs (void);
 
-extern void terminate_current_pipeline PARAMS((void));
-extern void terminate_stopped_jobs PARAMS((void));
-extern void hangup_all_jobs PARAMS((void));
-extern void kill_current_pipeline PARAMS((void));
+extern void terminate_current_pipeline (void);
+extern void terminate_stopped_jobs (void);
+extern void hangup_all_jobs (void);
+extern void kill_current_pipeline (void);
 
 #if defined (__STDC__) && defined (pid_t)
-extern int get_job_by_pid PARAMS((int, int, PROCESS **));
-extern void describe_pid PARAMS((int));
+extern int get_job_by_pid (int, int, PROCESS **);
+extern void describe_pid (int);
 #else
-extern int get_job_by_pid PARAMS((pid_t, int, PROCESS **));
-extern void describe_pid PARAMS((pid_t));
+extern int get_job_by_pid (pid_t, int, PROCESS **);
+extern void describe_pid (pid_t);
 #endif
 
-extern void list_one_job PARAMS((JOB *, int, int, int));
-extern void list_all_jobs PARAMS((int));
-extern void list_stopped_jobs PARAMS((int));
-extern void list_running_jobs PARAMS((int));
+extern void list_one_job (JOB *, int, int, int);
+extern void list_all_jobs (int);
+extern void list_stopped_jobs (int);
+extern void list_running_jobs (int);
 
-extern pid_t make_child PARAMS((char *, int));
+extern pid_t make_child (char *, int);
 
-extern int get_tty_state PARAMS((void));
-extern int set_tty_state PARAMS((void));
+extern int get_tty_state (void);
+extern int set_tty_state (void);
 
-extern int job_exit_status PARAMS((int));
-extern int job_exit_signal PARAMS((int));
+extern int job_exit_status (int);
+extern int job_exit_signal (int);
 
-extern int wait_for_single_pid PARAMS((pid_t, int));
-extern int wait_for_background_pids PARAMS((struct procstat *));
-extern int wait_for PARAMS((pid_t, int));
-extern int wait_for_job PARAMS((int, int, struct procstat *));
-extern int wait_for_any_job PARAMS((int, struct procstat *));
+extern int wait_for_single_pid (pid_t, int);
+extern int wait_for_background_pids (struct procstat *);
+extern int wait_for (pid_t, int);
+extern int wait_for_job (int, int, struct procstat *);
+extern int wait_for_any_job (int, struct procstat *);
 
-extern void wait_sigint_cleanup PARAMS((void));
+extern void wait_sigint_cleanup (void);
 
-extern void notify_and_cleanup PARAMS((void));
-extern void reap_dead_jobs PARAMS((void));
-extern int start_job PARAMS((int, int));
-extern int kill_pid PARAMS((pid_t, int, int));
-extern int initialize_job_control PARAMS((int));
-extern void initialize_job_signals PARAMS((void));
-extern int give_terminal_to PARAMS((pid_t, int));
+extern void notify_and_cleanup (void);
+extern void reap_dead_jobs (void);
+extern int start_job (int, int);
+extern int kill_pid (pid_t, int, int);
+extern int initialize_job_control (int);
+extern void initialize_job_signals (void);
+extern int give_terminal_to (pid_t, int);
 
-extern void run_sigchld_trap PARAMS((int));
+extern void run_sigchld_trap (int);
 
-extern int freeze_jobs_list PARAMS((void));
-extern void unfreeze_jobs_list PARAMS((void));
-extern void set_jobs_list_frozen PARAMS((int));
-extern int set_job_control PARAMS((int));
-extern void without_job_control PARAMS((void));
-extern void end_job_control PARAMS((void));
-extern void restart_job_control PARAMS((void));
-extern void set_sigchld_handler PARAMS((void));
-extern void ignore_tty_job_signals PARAMS((void));
-extern void default_tty_job_signals PARAMS((void));
-extern void get_original_tty_job_signals PARAMS((void));
+extern int freeze_jobs_list (void);
+extern void unfreeze_jobs_list (void);
+extern void set_jobs_list_frozen (int);
+extern int set_job_control (int);
+extern void without_job_control (void);
+extern void end_job_control (void);
+extern void restart_job_control (void);
+extern void set_sigchld_handler (void);
+extern void ignore_tty_job_signals (void);
+extern void default_tty_job_signals (void);
+extern void get_original_tty_job_signals (void);
 
-extern void init_job_stats PARAMS((void));
+extern void init_job_stats (void);
 
-extern void close_pgrp_pipe PARAMS((void));
-extern void save_pgrp_pipe PARAMS((int *, int));
-extern void restore_pgrp_pipe PARAMS((int *));
+extern void close_pgrp_pipe (void);
+extern void save_pgrp_pipe (int *, int);
+extern void restore_pgrp_pipe (int *);
 
-extern void set_maxchild PARAMS((int));
+extern void set_maxchild (int);
 
 #ifdef DEBUG
 extern void debug_print_pgrps (void);

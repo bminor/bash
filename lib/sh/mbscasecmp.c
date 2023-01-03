@@ -31,9 +31,7 @@
 
 /* Compare MBS1 and MBS2 without regard to case.  */
 int
-mbscasecmp (mbs1, mbs2)
-    const char *mbs1;
-    const char *mbs2;
+mbscasecmp (const char *mbs1, const char *mbs2)
 {
   int len1, len2, mb_cur_max;
   wchar_t c1, c2, l1, l2;

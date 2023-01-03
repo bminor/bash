@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -86,9 +86,9 @@ extern int errno;
 #include "bashgetopt.h"
 #include "common.h"
 
-static int query_bindings PARAMS((char *));
-static int unbind_command PARAMS((char *));
-static int unbind_keyseq PARAMS((char *));
+static int query_bindings (char *);
+static int unbind_command (char *);
+static int unbind_keyseq (char *);
 
 #define BIND_RETURN(x)  do { return_code = x; goto bind_exit; } while (0)
 

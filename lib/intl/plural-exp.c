@@ -1,6 +1,6 @@
 /* plural-exp.c - Expression parsing for plural form selection. */
 
-/* Copyright (C) 2000, 2001, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2001, 2005-2009, 2022 Free Software Foundation, Inc.`
    Written by Ulrich Drepper <drepper@cygnus.com>, 2000.
 
    This file is part of GNU Bash.
@@ -96,8 +96,7 @@ init_germanic_plural ()
 
 #endif
 
-void
-internal_function
+inline void
 EXTRACT_PLURAL_EXPRESSION (nullentry, pluralp, npluralsp)
      const char *nullentry;
      struct expression **pluralp;

@@ -1,6 +1,6 @@
 /* strtoimax - convert string representation of a number into an intmax_t value. */
 
-/* Copyright 1999-2020 Free Software Foundation, Inc.
+/* Copyright 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -45,14 +45,14 @@
 "this configure-time declaration test was not run"
 #endif
 #if !HAVE_DECL_STRTOL
-extern long strtol PARAMS((const char *, char **, int));
+extern long strtol (const char *, char **, int);
 #endif
 
 #ifndef HAVE_DECL_STRTOLL
 "this configure-time declaration test was not run"
 #endif
 #if !HAVE_DECL_STRTOLL && HAVE_LONG_LONG_INT
-extern long long strtoll PARAMS((const char *, char **, int));
+extern long long strtoll (const char *, char **, int);
 #endif
 
 #ifdef strtoimax
@@ -60,10 +60,7 @@ extern long long strtoll PARAMS((const char *, char **, int));
 #endif
 
 intmax_t
-strtoimax (ptr, endptr, base)
-     const char *ptr;
-     char **endptr;
-     int base;
+strtoimax (const char *ptr, char **endptr, int base)
 {
 #if HAVE_LONG_LONG_INT
   verify(size_is_that_of_long_or_long_long,

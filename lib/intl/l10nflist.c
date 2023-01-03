@@ -1,6 +1,6 @@
 /* l10nflist.c - make localization file list. */
 
-/* Copyright (C) 1995-1999, 2000, 2001, 2002, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000, 2001, 2002, 2005-2009, 2022 Free Software Foundation, Inc.
    Contributed by Ulrich Drepper <drepper@gnu.ai.mit.edu>, 1995.
 
    This file is part of GNU Bash.
@@ -61,7 +61,7 @@
 # endif
 #else
 # ifndef HAVE_STPCPY
-static char *stpcpy PARAMS ((char *dest, const char *src));
+static char *stpcpy (char *dest, const char *src);
 # endif
 #endif
 
@@ -87,7 +87,7 @@ static char *stpcpy PARAMS ((char *dest, const char *src));
 
 #if !defined _LIBC && !defined HAVE___ARGZ_COUNT
 /* Returns the number of strings in ARGZ.  */
-static size_t argz_count__ PARAMS ((const char *argz, size_t len));
+static size_t argz_count__ (const char *argz, size_t len);
 
 static size_t
 argz_count__ (argz, len)
@@ -115,7 +115,7 @@ argz_count__ (argz, len)
 #if !defined _LIBC && !defined HAVE___ARGZ_STRINGIFY
 /* Make '\0' separated arg vector ARGZ printable by converting all the '\0's
    except the last into the character SEP.  */
-static void argz_stringify__ PARAMS ((char *argz, size_t len, int sep));
+static void argz_stringify__ (char *argz, size_t len, int sep);
 
 static void
 argz_stringify__ (argz, len, sep)
@@ -142,8 +142,8 @@ argz_stringify__ (argz, len, sep)
 #endif	/* !_LIBC && !HAVE___ARGZ_STRINGIFY */
 
 #if !defined _LIBC && !defined HAVE___ARGZ_NEXT
-static char *argz_next__ PARAMS ((char *argz, size_t argz_len,
-				  const char *entry));
+static char *argz_next__ (char *argz, size_t argz_len,
+				  const char *entry);
 
 static char *
 argz_next__ (argz, argz_len, entry)
@@ -170,7 +170,7 @@ argz_next__ (argz, argz_len, entry)
 
 
 /* Return number of bits set in X.  */
-static int pop PARAMS ((int x));
+static int pop (int x);
 
 static inline int
 pop (x)

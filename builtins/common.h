@@ -81,163 +81,163 @@ do { \
 #define MAX_ATTRIBUTES		16
 
 /* Functions from common.c */
-extern void builtin_error PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
-extern void builtin_warning PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
-extern void builtin_usage PARAMS((void));
-extern void no_args PARAMS((WORD_LIST *));
-extern int no_options PARAMS((WORD_LIST *));
+extern void builtin_error (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+extern void builtin_warning (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+extern void builtin_usage (void);
+extern void no_args (WORD_LIST *);
+extern int no_options (WORD_LIST *);
 
 /* common error message functions */
-extern void sh_needarg PARAMS((char *));
-extern void sh_neednumarg PARAMS((char *));
-extern void sh_notfound PARAMS((char *));
-extern void sh_invalidopt PARAMS((char *));
-extern void sh_invalidoptname PARAMS((char *));
-extern void sh_invalidid PARAMS((char *));
-extern void sh_invalidnum PARAMS((char *));
-extern void sh_invalidsig PARAMS((char *));
-extern void sh_readonly PARAMS((const char *));
-extern void sh_noassign PARAMS((const char *));
-extern void sh_erange PARAMS((char *, char *));
-extern void sh_badpid PARAMS((char *));
-extern void sh_badjob PARAMS((char *));
-extern void sh_nojobs PARAMS((char *));
-extern void sh_restricted PARAMS((char *));
-extern void sh_notbuiltin PARAMS((char *));
-extern void sh_wrerror PARAMS((void));
-extern void sh_ttyerror PARAMS((int));
-extern int sh_chkwrite PARAMS((int));
+extern void sh_needarg (char *);
+extern void sh_neednumarg (char *);
+extern void sh_notfound (char *);
+extern void sh_invalidopt (char *);
+extern void sh_invalidoptname (char *);
+extern void sh_invalidid (char *);
+extern void sh_invalidnum (char *);
+extern void sh_invalidsig (char *);
+extern void sh_readonly (const char *);
+extern void sh_noassign (const char *);
+extern void sh_erange (char *, char *);
+extern void sh_badpid (char *);
+extern void sh_badjob (char *);
+extern void sh_nojobs (char *);
+extern void sh_restricted (char *);
+extern void sh_notbuiltin (char *);
+extern void sh_wrerror (void);
+extern void sh_ttyerror (int);
+extern int sh_chkwrite (int);
 
-extern char **make_builtin_argv PARAMS((WORD_LIST *, int *));
-extern void remember_args PARAMS((WORD_LIST *, int));
-extern void shift_args PARAMS((int));
-extern int number_of_args PARAMS((void));
+extern char **make_builtin_argv (WORD_LIST *, int *);
+extern void remember_args (WORD_LIST *, int);
+extern void shift_args (int);
+extern int number_of_args (void);
 
-extern int dollar_vars_changed PARAMS((void));
-extern void set_dollar_vars_unchanged PARAMS((void));
-extern void set_dollar_vars_changed PARAMS((void));
+extern int dollar_vars_changed (void);
+extern void set_dollar_vars_unchanged (void);
+extern void set_dollar_vars_changed (void);
 
-extern int get_numeric_arg PARAMS((WORD_LIST *, int, intmax_t *));
-extern int get_exitstat PARAMS((WORD_LIST *));
-extern int read_octal PARAMS((char *));
+extern int get_numeric_arg (WORD_LIST *, int, intmax_t *);
+extern int get_exitstat (WORD_LIST *);
+extern int read_octal (char *);
 
 /* Keeps track of the current working directory. */
 extern char *the_current_working_directory;
-extern char *get_working_directory PARAMS((char *));
-extern void set_working_directory PARAMS((char *));
+extern char *get_working_directory (char *);
+extern void set_working_directory (char *);
 
 #if defined (JOB_CONTROL)
-extern int get_job_by_name PARAMS((const char *, int));
-extern int get_job_spec PARAMS((WORD_LIST *));
+extern int get_job_by_name (const char *, int);
+extern int get_job_spec (WORD_LIST *);
 #endif
-extern int display_signal_list PARAMS((WORD_LIST *, int));
+extern int display_signal_list (WORD_LIST *, int);
 
 /* It's OK to declare a function as returning a Function * without
    providing a definition of what a `Function' is. */
-extern struct builtin *builtin_address_internal PARAMS((char *, int));
-extern sh_builtin_func_t *find_shell_builtin PARAMS((char *));
-extern sh_builtin_func_t *builtin_address PARAMS((char *));
-extern sh_builtin_func_t *find_special_builtin PARAMS((char *));
-extern void initialize_shell_builtins PARAMS((void));
+extern struct builtin *builtin_address_internal (const char *, int);
+extern sh_builtin_func_t *find_shell_builtin (const char *);
+extern sh_builtin_func_t *builtin_address (const char *);
+extern sh_builtin_func_t *find_special_builtin (const char *);
+extern void initialize_shell_builtins (void);
 
 #if defined (ARRAY_VARS)
-extern int set_expand_once PARAMS((int, int));
+extern int set_expand_once (int, int);
 #endif
 
 /* Functions from exit.def */
-extern void bash_logout PARAMS((void));
+extern void bash_logout (void);
 
 /* Functions from getopts.def */
-extern void getopts_reset PARAMS((int));
+extern void getopts_reset (int);
 
 /* Functions from help.def */
-extern void builtin_help PARAMS((void));
+extern void builtin_help (void);
 
 /* Functions from read.def */
-extern void read_tty_cleanup PARAMS((void));
-extern int read_tty_modified PARAMS((void));
+extern void read_tty_cleanup (void);
+extern int read_tty_modified (void);
 
-extern int read_builtin_timeout PARAMS((int));
-extern void check_read_timeout PARAMS((void));
+extern int read_builtin_timeout (int);
+extern void check_read_timeout (void);
 
 /* Functions from set.def */
-extern int minus_o_option_value PARAMS((char *));
-extern void list_minus_o_opts PARAMS((int, int));
-extern char **get_minus_o_opts PARAMS((void));
-extern int set_minus_o_option PARAMS((int, char *));
+extern int minus_o_option_value (char *);
+extern void list_minus_o_opts (int, int);
+extern char **get_minus_o_opts (void);
+extern int set_minus_o_option (int, char *);
 
-extern void set_shellopts PARAMS((void));
-extern void parse_shellopts PARAMS((char *));
-extern void initialize_shell_options PARAMS((int));
+extern void set_shellopts (void);
+extern void parse_shellopts (char *);
+extern void initialize_shell_options (int);
 
-extern void reset_shell_options PARAMS((void));
+extern void reset_shell_options (void);
 
-extern char *get_current_options PARAMS((void));
-extern void set_current_options PARAMS((const char *));
+extern char *get_current_options (void);
+extern void set_current_options (const char *);
 
 /* Functions from shopt.def */
-extern void reset_shopt_options PARAMS((void));
-extern char **get_shopt_options PARAMS((void));
+extern void reset_shopt_options (void);
+extern char **get_shopt_options (void);
 
-extern int shopt_setopt PARAMS((char *, int));
-extern int shopt_listopt PARAMS((char *, int));
+extern int shopt_setopt (char *, int);
+extern int shopt_listopt (char *, int);
 
-extern int set_login_shell PARAMS((char *, int));
+extern int set_login_shell (char *, int);
 
-extern void set_bashopts PARAMS((void));
-extern void parse_bashopts PARAMS((char *));
-extern void initialize_bashopts PARAMS((int));
+extern void set_bashopts (void);
+extern void parse_bashopts (char *);
+extern void initialize_bashopts (int);
 
-extern void set_compatibility_opts PARAMS((void));
+extern void set_compatibility_opts (void);
 
 /* Functions from type.def */
-extern int describe_command PARAMS((char *, int));
+extern int describe_command (char *, int);
 
 /* Functions from setattr.def */
-extern int set_or_show_attributes PARAMS((WORD_LIST *, int, int));
-extern int show_all_var_attributes PARAMS((int, int));
-extern int show_local_var_attributes PARAMS((int, int));
-extern int show_var_attributes PARAMS((SHELL_VAR *, int, int));
-extern int show_name_attributes PARAMS((char *, int));
-extern int show_localname_attributes PARAMS((char *, int));
-extern int show_func_attributes PARAMS((char *, int));
-extern void set_var_attribute PARAMS((char *, int, int));
-extern int var_attribute_string PARAMS((SHELL_VAR *, int, char *));
+extern int set_or_show_attributes (WORD_LIST *, int, int);
+extern int show_all_var_attributes (int, int);
+extern int show_local_var_attributes (int, int);
+extern int show_var_attributes (SHELL_VAR *, int, int);
+extern int show_name_attributes (char *, int);
+extern int show_localname_attributes (char *, int);
+extern int show_func_attributes (char *, int);
+extern void set_var_attribute (char *, int, int);
+extern int var_attribute_string (SHELL_VAR *, int, char *);
 
 /* Functions from pushd.def */
-extern char *get_dirstack_from_string PARAMS((char *));
-extern char *get_dirstack_element PARAMS((intmax_t, int));
-extern void set_dirstack_element PARAMS((intmax_t, int, char *));
-extern WORD_LIST *get_directory_stack PARAMS((int));
+extern char *get_dirstack_from_string (char *);
+extern char *get_dirstack_element (intmax_t, int);
+extern void set_dirstack_element (intmax_t, int, char *);
+extern WORD_LIST *get_directory_stack (int);
 
 /* Functions from evalstring.c */
-extern int parse_and_execute PARAMS((char *, const char *, int));
-extern int evalstring PARAMS((char *, const char *, int));
-extern void parse_and_execute_cleanup PARAMS((int));
-extern int parse_string PARAMS((char *, const char *, int, COMMAND **, char **));
-extern int should_suppress_fork PARAMS((COMMAND *));
-extern int can_optimize_connection PARAMS((COMMAND *));
-extern int can_optimize_cat_file PARAMS((COMMAND *));
-extern void optimize_connection_fork PARAMS((COMMAND *));
-extern void optimize_subshell_command PARAMS((COMMAND *));
-extern void optimize_shell_function PARAMS((COMMAND *));
+extern int parse_and_execute (char *, const char *, int);
+extern int evalstring (char *, const char *, int);
+extern void parse_and_execute_cleanup (int);
+extern int parse_string (char *, const char *, int, COMMAND **, char **);
+extern int should_suppress_fork (COMMAND *);
+extern int can_optimize_connection (COMMAND *);
+extern int can_optimize_cat_file (COMMAND *);
+extern void optimize_connection_fork (COMMAND *);
+extern void optimize_subshell_command (COMMAND *);
+extern void optimize_shell_function (COMMAND *);
 
 /* Functions from evalfile.c */
-extern int maybe_execute_file PARAMS((const char *, int));
-extern int force_execute_file PARAMS((const char *, int));
-extern int source_file PARAMS((const char *, int));
-extern int fc_execute_file PARAMS((const char *));
+extern int maybe_execute_file (const char *, int);
+extern int force_execute_file (const char *, int);
+extern int source_file (const char *, int);
+extern int fc_execute_file (const char *);
 
 /* variables from common.c */
 extern sh_builtin_func_t *this_shell_builtin;
 extern sh_builtin_func_t *last_shell_builtin;
 
-extern SHELL_VAR *builtin_bind_variable PARAMS((char *, char *, int));
-extern SHELL_VAR *builtin_bind_var_to_int PARAMS((char *, intmax_t, int));
-extern int builtin_unbind_variable PARAMS((const char *));
+extern SHELL_VAR *builtin_bind_variable (char *, char *, int);
+extern SHELL_VAR *builtin_bind_var_to_int (char *, intmax_t, int);
+extern int builtin_unbind_variable (const char *);
 
-extern SHELL_VAR *builtin_find_indexed_array PARAMS((char *, int));
-extern int builtin_arrayref_flags PARAMS((WORD_DESC *, int));
+extern SHELL_VAR *builtin_find_indexed_array (char *, int);
+extern int builtin_arrayref_flags (WORD_DESC *, int);
 
 /* variables from evalfile.c */
 extern int sourcelevel;

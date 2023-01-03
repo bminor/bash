@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -37,8 +37,7 @@
 #include "bashgetopt.h"
 
 int
-strftime_builtin (list)
-     WORD_LIST *list;
+strftime_builtin (WORD_LIST *list)
 {
   char *format, *tbuf;
   size_t tbsize, tsize;

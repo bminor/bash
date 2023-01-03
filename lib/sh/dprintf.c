@@ -1,6 +1,6 @@
 /* dprintf -- printf to a file descriptor */
 
-/* Copyright (C) 2008-2010 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2010,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,14 +37,7 @@
 #include <stdio.h>
 
 int
-#if defined (PREFER_STDARG)
 dprintf(int fd, const char *format, ...)
-#else
-dprintf(fd, format, va_alist)
-     int fd;
-     const char *format;
-     va_dcl
-#endif
 {
   FILE *fp;
   int fd2, rc, r2;

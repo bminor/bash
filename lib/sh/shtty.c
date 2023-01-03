@@ -2,7 +2,7 @@
  * shtty.c -- abstract interface to the terminal, focusing on capabilities.
  */
 
-/* Copyright (C) 1999 Free Software Foundation, Inc.
+/* Copyright (C) 1999, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,9 +34,7 @@ static TTYSTRUCT ttin, ttout;
 static int ttsaved = 0;
 
 int
-ttgetattr(fd, ttp)
-int	fd;
-TTYSTRUCT *ttp;
+ttgetattr(int fd, TTYSTRUCT *ttp)
 {
 #ifdef TERMIOS_TTY_DRIVER
   return tcgetattr(fd, ttp);
@@ -50,9 +48,7 @@ TTYSTRUCT *ttp;
 }
 
 int
-ttsetattr(fd, ttp)
-int	fd;
-TTYSTRUCT *ttp;
+ttsetattr(int fd, TTYSTRUCT *ttp)
 {
 #ifdef TERMIOS_TTY_DRIVER
   return tcsetattr(fd, TCSADRAIN, ttp);
@@ -66,7 +62,7 @@ TTYSTRUCT *ttp;
 }
 
 void
-ttsave()
+ttsave(void)
 {
   if (ttsaved)
    return;
@@ -76,7 +72,7 @@ ttsave()
 }
 
 void
-ttrestore()
+ttrestore(void)
 {
   if (ttsaved == 0)
     return;
@@ -87,8 +83,7 @@ ttrestore()
 
 /* Retrieve the internally-saved attributes associated with tty fd FD. */
 TTYSTRUCT *
-ttattr (fd)
-     int fd;
+ttattr (int fd)
 {
   if (ttsaved == 0)
     return ((TTYSTRUCT *)0);
@@ -105,8 +100,7 @@ ttattr (fd)
  * ttsetattr, the terminal will be in one-char-at-a-time mode.
  */
 int
-tt_setonechar(ttp)
-     TTYSTRUCT *ttp;
+tt_setonechar(TTYSTRUCT *ttp)
 {
 #if defined (TERMIOS_TTY_DRIVER) || defined (TERMIO_TTY_DRIVER)
 
@@ -151,9 +145,7 @@ tt_setonechar(ttp)
 
 /* Set the tty associated with FD and TTP into one-character-at-a-time mode */
 int
-ttfd_onechar (fd, ttp)
-     int fd;
-     TTYSTRUCT *ttp;
+ttfd_onechar (int fd, TTYSTRUCT *ttp)
 {
   if (tt_setonechar(ttp) < 0)
     return -1;
@@ -162,7 +154,7 @@ ttfd_onechar (fd, ttp)
 
 /* Set the terminal into one-character-at-a-time mode */
 int
-ttonechar ()
+ttonechar (void)
 {
   TTYSTRUCT tt;
 
@@ -177,8 +169,7 @@ ttonechar ()
  * ttsetattr, the terminal will be in no-echo mode.
  */
 int
-tt_setnoecho(ttp)
-     TTYSTRUCT *ttp;
+tt_setnoecho(TTYSTRUCT *ttp)
 {
 #if defined (TERMIOS_TTY_DRIVER) || defined (TERMIO_TTY_DRIVER)
   ttp->c_lflag &= ~(ECHO|ECHOK|ECHONL);
@@ -191,9 +182,7 @@ tt_setnoecho(ttp)
 
 /* Set the tty associated with FD and TTP into no-echo mode */
 int
-ttfd_noecho (fd, ttp)
-     int fd;
-     TTYSTRUCT *ttp;
+ttfd_noecho (int fd, TTYSTRUCT *ttp)
 {
   if (tt_setnoecho (ttp) < 0)
     return -1;
@@ -202,7 +191,7 @@ ttfd_noecho (fd, ttp)
 
 /* Set the terminal into no-echo mode */
 int
-ttnoecho ()
+ttnoecho (void)
 {
   TTYSTRUCT tt;
 
@@ -217,8 +206,7 @@ ttnoecho ()
  * ttsetattr, the terminal will be in eight-bit mode (pass8).
  */
 int
-tt_seteightbit (ttp)
-     TTYSTRUCT *ttp;
+tt_seteightbit (TTYSTRUCT *ttp)
 {
 #if defined (TERMIOS_TTY_DRIVER) || defined (TERMIO_TTY_DRIVER)
   ttp->c_iflag &= ~ISTRIP;
@@ -233,9 +221,7 @@ tt_seteightbit (ttp)
 
 /* Set the tty associated with FD and TTP into eight-bit mode */
 int
-ttfd_eightbit (fd, ttp)
-     int fd;
-     TTYSTRUCT *ttp;
+ttfd_eightbit (int fd, TTYSTRUCT *ttp)
 {
   if (tt_seteightbit (ttp) < 0)
     return -1;
@@ -244,7 +230,7 @@ ttfd_eightbit (fd, ttp)
 
 /* Set the terminal into eight-bit mode */
 int
-tteightbit ()
+tteightbit (void)
 {
   TTYSTRUCT tt;
 
@@ -259,8 +245,7 @@ tteightbit ()
  * ttsetattr, the terminal will be in non-canonical input mode.
  */
 int
-tt_setnocanon (ttp)
-     TTYSTRUCT *ttp;
+tt_setnocanon (TTYSTRUCT *ttp)
 {
 #if defined (TERMIOS_TTY_DRIVER) || defined (TERMIO_TTY_DRIVER)
   ttp->c_lflag &= ~ICANON;
@@ -271,9 +256,7 @@ tt_setnocanon (ttp)
 
 /* Set the tty associated with FD and TTP into non-canonical mode */
 int
-ttfd_nocanon (fd, ttp)
-     int fd;
-     TTYSTRUCT *ttp;
+ttfd_nocanon (int fd, TTYSTRUCT *ttp)
 {
   if (tt_setnocanon (ttp) < 0)
     return -1;
@@ -282,7 +265,7 @@ ttfd_nocanon (fd, ttp)
 
 /* Set the terminal into non-canonical mode */
 int
-ttnocanon ()
+ttnocanon (void)
 {
   TTYSTRUCT tt;
 
@@ -297,8 +280,7 @@ ttnocanon ()
  * ttsetattr, the terminal will be in cbreak, no-echo mode.
  */
 int
-tt_setcbreak(ttp)
-     TTYSTRUCT *ttp;
+tt_setcbreak(TTYSTRUCT *ttp)
 {
   if (tt_setonechar (ttp) < 0)
     return -1;
@@ -308,9 +290,7 @@ tt_setcbreak(ttp)
 /* Set the tty associated with FD and TTP into cbreak (no-echo,
    one-character-at-a-time) mode */
 int
-ttfd_cbreak (fd, ttp)
-     int fd;
-     TTYSTRUCT *ttp;
+ttfd_cbreak (int fd, TTYSTRUCT *ttp)
 {
   if (tt_setcbreak (ttp) < 0)
     return -1;
@@ -319,7 +299,7 @@ ttfd_cbreak (fd, ttp)
 
 /* Set the terminal into cbreak (no-echo, one-character-at-a-time) mode */
 int
-ttcbreak ()
+ttcbreak (void)
 {
   TTYSTRUCT tt;
 

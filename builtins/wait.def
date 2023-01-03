@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -90,8 +90,8 @@ extern int wait_signal_received;
 procenv_t wait_intr_buf;
 int wait_intr_flag;
 
-static int set_waitlist PARAMS((WORD_LIST *));
-static void unset_waitlist PARAMS((void));
+static int set_waitlist (WORD_LIST *);
+static void unset_waitlist (void);
 
 /* Wait for the pid in LIST to stop or die.  If no arguments are given, then
    wait for all of the active background processes of the shell and return

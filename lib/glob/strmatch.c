@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -24,16 +24,13 @@
 #include "stdc.h"
 #include "strmatch.h"
 
-extern int xstrmatch PARAMS((char *, char *, int));
+extern int xstrmatch (char *, char *, int);
 #if defined (HANDLE_MULTIBYTE)
-extern int internal_wstrmatch PARAMS((wchar_t *, wchar_t *, int));
+extern int internal_wstrmatch (wchar_t *, wchar_t *, int);
 #endif
 
 int
-strmatch (pattern, string, flags)
-     char *pattern;
-     char *string;
-     int flags;
+strmatch (char *pattern, char *string, int flags)
 {
   if (string == 0 || pattern == 0)
     return FNM_NOMATCH;
@@ -43,10 +40,7 @@ strmatch (pattern, string, flags)
 
 #if defined (HANDLE_MULTIBYTE)
 int
-wcsmatch (wpattern, wstring, flags)
-     wchar_t *wpattern;
-     wchar_t *wstring;
-     int flags;
+wcsmatch (wchar_t *wpattern, wchar_t *wstring, int flags)
 {
   if (wstring == 0 || wpattern == 0)
     return (FNM_NOMATCH);

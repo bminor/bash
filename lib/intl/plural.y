@@ -1,7 +1,7 @@
 %{
 /* plural.y - Expression parsing for plural form selection. */
 
-/* Copyright (C) 2000, 2001, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2001, 2005-2009, 2022 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@cygnus.com>, 2000.
 
    This file is part of GNU Bash.
@@ -56,20 +56,20 @@
 
 %{
 /* Prototypes for local functions.  */
-static struct expression *new_exp PARAMS ((int nargs, enum operator op,
-					   struct expression * const *args));
-static inline struct expression *new_exp_0 PARAMS ((enum operator op));
-static inline struct expression *new_exp_1 PARAMS ((enum operator op,
-						   struct expression *right));
-static struct expression *new_exp_2 PARAMS ((enum operator op,
+static struct expression *new_exp (int nargs, enum operator op,
+					   struct expression * const *args);
+static inline struct expression *new_exp_0 (enum operator op);
+static inline struct expression *new_exp_1 (enum operator op,
+						   struct expression *right);
+static struct expression *new_exp_2 (enum operator op,
 					     struct expression *left,
-					     struct expression *right));
-static inline struct expression *new_exp_3 PARAMS ((enum operator op,
+					     struct expression *right);
+static inline struct expression *new_exp_3 (enum operator op,
 						   struct expression *bexp,
 						   struct expression *tbranch,
-						   struct expression *fbranch));
-static int yylex PARAMS ((YYSTYPE *lval, const char **pexp));
-static void yyerror PARAMS ((const char *str));
+						   struct expression *fbranch);
+static int yylex (YYSTYPE *lval, const char **pexp);
+static void yyerror (const char *str);
 
 /* Allocation of expressions.  */
 
@@ -230,8 +230,7 @@ exp:	  exp '?' exp ':' exp
 
 %%
 
-void
-internal_function
+inline void
 FREE_EXPRESSION (exp)
      struct expression *exp;
 {

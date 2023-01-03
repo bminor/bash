@@ -462,7 +462,7 @@ array_free (array)
 
 /* The definition of a function. */
 typedef int Function ();
-typedef int mk_handler_func_t PARAMS((char *, DEF_FILE *, char *));
+typedef int mk_handler_func_t (char *, DEF_FILE *, char *);
 
 /* Structure handles processor directives. */
 typedef struct {
@@ -470,14 +470,14 @@ typedef struct {
   mk_handler_func_t *function;
 } HANDLER_ENTRY;
 
-extern int builtin_handler PARAMS((char *, DEF_FILE *, char *));
-extern int function_handler PARAMS((char *, DEF_FILE *, char *));
-extern int short_doc_handler PARAMS((char *, DEF_FILE *, char *));
-extern int comment_handler PARAMS((char *, DEF_FILE *, char *));
-extern int depends_on_handler PARAMS((char *, DEF_FILE *, char *));
-extern int produces_handler PARAMS((char *, DEF_FILE *, char *));
-extern int end_handler PARAMS((char *, DEF_FILE *, char *));
-extern int docname_handler PARAMS((char *, DEF_FILE *, char *));
+extern int builtin_handler (char *, DEF_FILE *, char *);
+extern int function_handler (char *, DEF_FILE *, char *);
+extern int short_doc_handler (char *, DEF_FILE *, char *);
+extern int comment_handler (char *, DEF_FILE *, char *);
+extern int depends_on_handler (char *, DEF_FILE *, char *);
+extern int produces_handler (char *, DEF_FILE *, char *);
+extern int end_handler (char *, DEF_FILE *, char *);
+extern int docname_handler (char *, DEF_FILE *, char *);
 
 HANDLER_ENTRY handlers[] = {
   { "BUILTIN", builtin_handler },
@@ -1258,7 +1258,7 @@ write_builtins (defs, structfile, externfile)
 	      if (externfile)
 		{
 		  if (builtin->function)
-		    fprintf (externfile, "extern int %s PARAMS((WORD_LIST *));\n",
+		    fprintf (externfile, "extern int %s (WORD_LIST *);\n",
 			     builtin->function);
 
 		  fprintf (externfile, "extern char * const %s_doc[];\n",

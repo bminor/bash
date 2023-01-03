@@ -61,8 +61,7 @@ extern int errno;
 /* Return >= 1 if select/FIONREAD indicates data available for reading on
    file descriptor FD; 0 if no data available.  Return -1 on error. */
 int
-input_avail (fd)
-     int fd;
+input_avail (int fd)
 {
   int result, chars_avail;
 #if defined(HAVE_SELECT)
@@ -100,9 +99,7 @@ input_avail (fd)
 /* Wait until NCHARS are available for reading on file descriptor FD.
    This can wait indefinitely. Return -1 on error. */
 int
-nchars_avail (fd, nchars)
-     int fd;
-     int nchars;
+nchars_avail (int fd, int nchars)
 {
   int result, chars_avail;
 #if defined (HAVE_PSELECT) || defined (HAVE_SELECT)

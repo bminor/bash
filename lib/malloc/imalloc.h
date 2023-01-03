@@ -1,6 +1,6 @@
 /* imalloc.h -- internal malloc definitions shared by source files. */
 
-/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -172,7 +172,7 @@ do {									\
 
 #include <signal.h>
 
-extern void _malloc_block_signals PARAMS((sigset_t *, sigset_t *));
-extern void _malloc_unblock_signals PARAMS((sigset_t *, sigset_t *));
+extern void _malloc_block_signals (sigset_t *, sigset_t *);
+extern void _malloc_unblock_signals (sigset_t *, sigset_t *);
 
 #endif /* _IMALLOC_H */

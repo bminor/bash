@@ -61,7 +61,7 @@
 extern int	errno;
 #endif
 
-extern char	*sh_realpath();
+extern char	*sh_realpath(const char *, char *);
 
 int
 realpath_builtin(WORD_LIST *list)

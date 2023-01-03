@@ -6,7 +6,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -51,14 +51,19 @@
 extern int	errno;
 #endif
 
-extern char	**make_builtin_argv ();
+extern char	**make_builtin_argv (WORD_LIST *, int *);
 
-static void	perms();
-static int	printst();
-static int	printsome();
-static void	printmode();
-static int	printfinfo();
-static int	finfo_main();
+static int	octal(char *);
+static struct stat *getstat(char *);
+static int	printinfo(char *);
+static int	getperm(int);
+
+static void	perms(int);
+static int	printst(struct stat *);
+static int	printsome(char *, int);
+static void	printmode(int);
+static int	printfinfo(char *);
+static int	finfo_main(int, char **);
 
 extern int	sh_optind;
 extern char	*sh_optarg;

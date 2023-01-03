@@ -74,7 +74,7 @@ do { \
 } while (0)
 
 static size_t
-findbrk ()
+findbrk (void)
 {
   FINDBRK();
   return (char *)sbrk (0) - (char *)lbreak;
@@ -84,9 +84,7 @@ findbrk ()
 #endif
 
 static void
-allocerr (func, bytes)
-     const char *func;
-     size_t bytes;
+allocerr (const char *func, size_t bytes)
 {
 #if HAVE_SBRK && defined (USING_BASH_MALLOC)
       allocated = findbrk ();
@@ -100,8 +98,7 @@ allocerr (func, bytes)
    to hold BYTES number of bytes.  If the memory cannot be allocated,
    print an error message and abort. */
 PTR_T
-xmalloc (bytes)
-     size_t bytes;
+xmalloc (size_t bytes)
 {
   PTR_T temp;
 
@@ -120,9 +117,7 @@ xmalloc (bytes)
 }
 
 PTR_T
-xrealloc (pointer, bytes)
-     PTR_T pointer;
-     size_t bytes;
+xrealloc (PTR_T pointer, size_t bytes)
 {
   PTR_T temp;
 
@@ -143,8 +138,7 @@ xrealloc (pointer, bytes)
 /* Use this as the function to call when adding unwind protects so we
    don't need to know what free() returns. */
 void
-xfree (string)
-     PTR_T string;
+xfree (PTR_T string)
 {
   if (string)
     free (string);
@@ -154,11 +148,7 @@ xfree (string)
 #include <malloc/shmalloc.h>
 
 static void
-sh_allocerr (func, bytes, file, line)
-     const char *func;
-     size_t bytes;
-     char *file;
-     int line;
+sh_allocerr (const char *func, size_t bytes, char *file, int line)
 {
 #if HAVE_SBRK
       allocated = findbrk ();
@@ -169,10 +159,7 @@ sh_allocerr (func, bytes, file, line)
 }
 
 PTR_T
-sh_xmalloc (bytes, file, line)
-     size_t bytes;
-     char *file;
-     int line;
+sh_xmalloc (size_t bytes, char *file, int line)
 {
   PTR_T temp;
 
@@ -191,11 +178,7 @@ sh_xmalloc (bytes, file, line)
 }
 
 PTR_T
-sh_xrealloc (pointer, bytes, file, line)
-     PTR_T pointer;
-     size_t bytes;
-     char *file;
-     int line;
+sh_xrealloc (PTR_T pointer, size_t bytes, char *file, int line)
 {
   PTR_T temp;
 
@@ -214,10 +197,7 @@ sh_xrealloc (pointer, bytes, file, line)
 }
 
 void
-sh_xfree (string, file, line)
-     PTR_T string;
-     char *file;
-     int line;
+sh_xfree (PTR_T string, char *file, int line)
 {
   if (string)
     sh_free (string, file, line);

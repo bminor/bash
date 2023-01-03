@@ -2,7 +2,7 @@
  * mksyntax.c - construct shell syntax table for fast char attribute lookup.
  */
 
-/* Copyright (C) 2000-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2009,2012,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,7 +84,7 @@ char	includes[] = "\
 #include \"syntax.h\"\n\n";
 
 static void
-usage()
+usage(void)
 {
   fprintf (stderr, "%s: usage: %s [-d] [-o filename]\n", progname, progname);
   exit (2);
@@ -92,8 +92,7 @@ usage()
 
 #ifdef INCLUDE_UNUSED
 static int
-getcflag (s)
-     char *s;
+getcflag (char *s)
 {
   int i;
 
@@ -105,8 +104,7 @@ getcflag (s)
 #endif
 
 static char *
-cdesc (i)
-     int i;
+cdesc (int i)
 {
   static char xbuf[16];
 
@@ -149,8 +147,7 @@ cdesc (i)
 }
 
 static char *
-getcstr (f)
-     int f;
+getcstr (int f)
 {
   int i;
 
@@ -161,9 +158,7 @@ getcstr (f)
 }
 
 static void
-addcstr (str, flag)
-     char *str;
-     int flag;
+addcstr (char *str, int flag)
 {
   char *s, *fstr;
   unsigned char uc;
@@ -183,9 +178,7 @@ addcstr (str, flag)
 }
 
 static void
-addcchar (c, flag)
-     unsigned char c;
-     int flag;
+addcchar (unsigned char c, int flag)
 {
   char *fstr;
 
@@ -198,7 +191,7 @@ addcchar (c, flag)
 }
 
 static void
-addblanks ()
+addblanks (void)
 {
   register int i;
   unsigned char uc;
@@ -215,7 +208,7 @@ addblanks ()
 
 /* load up the correct flag values in lsyntax */
 static void
-load_lsyntax ()
+load_lsyntax (void)
 {
   /* shell metacharacters */
   addcstr (shell_meta_chars, CSHMETA);
@@ -252,9 +245,7 @@ load_lsyntax ()
 }
 
 static void
-dump_lflags (fp, ind)
-     FILE *fp;
-     int ind;
+dump_lflags (FILE *fp, int ind)
 {
   int xflags, first, i;
 
@@ -278,9 +269,7 @@ dump_lflags (fp, ind)
 }
 
 static void
-wcomment (fp, i)
-     FILE *fp;
-     int i;
+wcomment (FILE *fp, int i)
 {
   fputs ("\t\t/* ", fp);
 
@@ -290,8 +279,7 @@ wcomment (fp, i)
 }
 
 static void
-dump_lsyntax (fp)
-     FILE *fp;
+dump_lsyntax (FILE *fp)
 {
   int i;
 
@@ -311,9 +299,7 @@ dump_lsyntax (fp)
 }
 
 int
-main(argc, argv)
-     int argc;
-     char **argv;
+main(int argc, char **argv)
 {
   int opt, i;
   char *filename;
@@ -395,8 +381,7 @@ main(argc, argv)
 #endif
 
 char *
-strerror (e)
-     int e;
+strerror (int e)
 {
   static char emsg[40];
 #if defined (HAVE_SYS_ERRLIST)

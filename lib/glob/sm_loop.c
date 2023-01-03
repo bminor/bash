@@ -24,22 +24,19 @@ struct STRUCT
   CHAR *string;
 };
 
-int FCT PARAMS((CHAR *, CHAR *, int));
+int FCT (CHAR *, CHAR *, int);
 
-static int GMATCH PARAMS((CHAR *, CHAR *, CHAR *, CHAR *, struct STRUCT *, int));
-static inline CHAR *PARSE_SUBBRACKET PARAMS((CHAR *, int));
-static CHAR *BRACKMATCH PARAMS((CHAR *, U_CHAR, int));
-static int EXTMATCH PARAMS((INT, CHAR *, CHAR *, CHAR *, CHAR *, int));
+static int GMATCH (CHAR *, CHAR *, CHAR *, CHAR *, struct STRUCT *, int);
+static inline CHAR *PARSE_SUBBRACKET (CHAR *, int);
+static CHAR *BRACKMATCH (CHAR *, U_CHAR, int);
+static int EXTMATCH (INT, CHAR *, CHAR *, CHAR *, CHAR *, int);
 
-extern void DEQUOTE_PATHNAME PARAMS((CHAR *));
+extern void DEQUOTE_PATHNAME (CHAR *);
 
-/*static*/ CHAR *PATSCAN PARAMS((CHAR *, CHAR *, INT, int));
+/*static*/ CHAR *PATSCAN (CHAR *, CHAR *, INT, int);
 
 int
-FCT (pattern, string, flags)
-     CHAR *pattern;
-     CHAR *string;
-     int flags;
+FCT (CHAR *pattern, CHAR *string, int flags)
 {
   CHAR *se, *pe;
 
@@ -55,11 +52,7 @@ FCT (pattern, string, flags)
 /* Match STRING against the filename pattern PATTERN, returning zero if
    it matches, FNM_NOMATCH if not.  */
 static int
-GMATCH (string, se, pattern, pe, ends, flags)
-     CHAR *string, *se;
-     CHAR *pattern, *pe;
-     struct STRUCT *ends;
-     int flags;
+GMATCH (CHAR *string, CHAR *se, CHAR *pattern, CHAR *pe, struct STRUCT *ends, int flags)
 {
   CHAR *p, *n;		/* pattern, string */
   INT c;		/* current pattern character - XXX U_CHAR? */
@@ -387,9 +380,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
    P points to the character after the opening bracket. Returns NULL if the
    symbol isn't correctly terminated. */
 static inline CHAR *
-PARSE_SUBBRACKET (p, flags)
-     CHAR *p;
-     int flags;
+PARSE_SUBBRACKET (CHAR *p, int flags)
 {
   CHAR type;		/* the type of special bracket expression symbol */
 
@@ -404,14 +395,7 @@ PARSE_SUBBRACKET (p, flags)
 
 /* Use prototype definition here because of type promotion. */
 static CHAR *
-#if defined (PROTOTYPES)
 BRACKMATCH (CHAR *p, U_CHAR test, int flags)
-#else
-BRACKMATCH (p, test, flags)
-     CHAR *p;
-     U_CHAR test;
-     int flags;
-#endif
 {
   register CHAR cstart, cend, c;
   register int not;    /* Nonzero if the sense of the character class is inverted.  */
@@ -689,10 +673,7 @@ matched:
    first character after the matching DELIM or NULL if the pattern is
    empty or invalid. */
 /*static*/ CHAR *
-PATSCAN (string, end, delim, flags)
-     CHAR *string, *end;
-     INT delim;
-     int flags;
+PATSCAN (CHAR *string, CHAR *end, INT delim,  int flags)
 {
   int pnest, bnest, skip;
   CHAR *s, c, *bfirst, *t;
@@ -777,8 +758,7 @@ PATSCAN (string, end, delim, flags)
 
 /* Return 0 if dequoted pattern matches S in the current locale. */
 static int
-STRCOMPARE (p, pe, s, se)
-     CHAR *p, *pe, *s, *se;
+STRCOMPARE (CHAR *p, CHAR *pe, CHAR *s, CHAR *se)
 {
   int ret;
   CHAR c1, c2;
@@ -817,11 +797,7 @@ STRCOMPARE (p, pe, s, se)
    the first time an extended pattern specifier is encountered, so it calls
    gmatch recursively. */
 static int
-EXTMATCH (xc, s, se, p, pe, flags)
-     INT xc;		/* select which operation */
-     CHAR *s, *se;
-     CHAR *p, *pe;
-     int flags;
+EXTMATCH (INT xc, CHAR *s, CHAR *se, CHAR *p, CHAR *pe, int flags)
 {
   CHAR *prest;			/* pointer to rest of pattern */
   CHAR *psub;			/* pointer to sub-pattern */

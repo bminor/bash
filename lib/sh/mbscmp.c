@@ -32,9 +32,7 @@ extern int utf8_mbscmp (const char *, const char *);
 
 /* Compare MBS1 and MBS2.  */
 int
-mbscmp (mbs1, mbs2)
-    const char *mbs1;
-    const char *mbs2;
+mbscmp (const char *mbs1, const char *mbs2)
 {
   int len1, len2, mb_cur_max;
   wchar_t c1, c2;

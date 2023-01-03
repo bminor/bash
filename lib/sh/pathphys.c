@@ -1,6 +1,6 @@
 /* pathphys.c -- return pathname with all symlinks expanded. */
 
-/* Copyright (C) 2000-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,13 +46,10 @@
 extern int errno;
 #endif /* !errno */
 
-extern char *get_working_directory PARAMS((char *));
+extern char *get_working_directory (char *);
 
-static int
-_path_readlink (path, buf, bufsiz)
-     char *path;
-     char *buf;
-     int bufsiz;
+static inline int
+_path_readlink (char *path, char *buf, int bufsiz)
 {
 #ifdef HAVE_READLINK
   return readlink (path, buf, bufsiz);
@@ -72,9 +69,7 @@ _path_readlink (path, buf, bufsiz)
  */
 
 char *
-sh_physpath (path, flags)
-     char *path;
-     int flags;
+sh_physpath (char *path, int flags)
 {
   char tbuf[PATH_MAX+1], linkbuf[PATH_MAX+1];
   char *result, *p, *q, *qsave, *qbase, *workpath;
@@ -252,9 +247,7 @@ error:
 }
 
 char *
-sh_realpath (pathname, resolved)
-     const char *pathname;
-     char *resolved;
+sh_realpath (const char *pathname, char *resolved)
 {
   char *tdir, *wd;
 

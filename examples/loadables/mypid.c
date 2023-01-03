@@ -32,11 +32,7 @@
   while (0)
 
 static SHELL_VAR *
-assign_mypid (
-     SHELL_VAR *self,
-     char *value,
-     arrayind_t unused,
-     char *key )
+assign_mypid (SHELL_VAR *self, char *value, arrayind_t unused, char *key)
 {
   return (self);
 }

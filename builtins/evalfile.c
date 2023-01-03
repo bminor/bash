@@ -73,9 +73,7 @@ extern int errno;
 int sourcelevel = 0;
 
 static int
-_evalfile (filename, flags)
-     const char *filename;
-     int flags;
+_evalfile (const char *filename, int flags)
 {
   volatile int old_interactive;
   procenv_t old_return_catch;
@@ -316,9 +314,7 @@ file_error_and_exit:
 }
 
 int
-maybe_execute_file (fname, force_noninteractive)
-     const char *fname;
-     int force_noninteractive;
+maybe_execute_file (const char *fname, int force_noninteractive)
 {
   char *filename;
   int result, flags;
@@ -333,9 +329,7 @@ maybe_execute_file (fname, force_noninteractive)
 }
 
 int
-force_execute_file (fname, force_noninteractive)
-     const char *fname;
-     int force_noninteractive;
+force_execute_file (const char *fname, int force_noninteractive)
 {
   char *filename;
   int result, flags;
@@ -351,8 +345,7 @@ force_execute_file (fname, force_noninteractive)
 
 #if defined (HISTORY)
 int
-fc_execute_file (filename)
-     const char *filename;
+fc_execute_file (const char *filename)
 {
   int flags;
 
@@ -365,9 +358,7 @@ fc_execute_file (filename)
 #endif /* HISTORY */
 
 int
-source_file (filename, sflags)
-     const char *filename;
-     int sflags;
+source_file (const char *filename, int sflags)
 {
   int flags, rval;
 

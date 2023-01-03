@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete", "compgen", and "compopt" in Bash.
 
-Copyright (C) 1999-2021 Free Software Foundation, Inc.
+Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,23 +84,23 @@ struct _optflags {
   int Iflag;
 };
 
-static int find_compact PARAMS((char *));
-static int find_compopt PARAMS((char *));
+static int find_compact (char *);
+static int find_compopt (char *);
 
-static int build_actions PARAMS((WORD_LIST *, struct _optflags *, unsigned long *, unsigned long *));
+static int build_actions (WORD_LIST *, struct _optflags *, unsigned long *, unsigned long *);
 
-static int remove_cmd_completions PARAMS((WORD_LIST *));
+static int remove_cmd_completions (WORD_LIST *);
 
-static int print_one_completion PARAMS((char *, COMPSPEC *));
-static int print_compitem PARAMS((BUCKET_CONTENTS *));
-static void print_compopts PARAMS((const char *, COMPSPEC *, int));
-static void print_all_completions PARAMS((void));
-static int print_cmd_completions PARAMS((WORD_LIST *));
+static int print_one_completion (char *, COMPSPEC *);
+static int print_compitem (BUCKET_CONTENTS *);
+static void print_compopts (const char *, COMPSPEC *, int);
+static void print_all_completions (void);
+static int print_cmd_completions (WORD_LIST *);
 
-static void print_compoptions PARAMS((unsigned long, int));
-static void print_compactions PARAMS((unsigned long));
-static void print_arg PARAMS((const char *, const char *, int));
-static void print_cmd_name PARAMS((const char *));
+static void print_compoptions (unsigned long, int);
+static void print_compactions (unsigned long);
+static void print_arg (const char *, const char *, int);
+static void print_cmd_name (const char *);
 
 static char *Garg, *Warg, *Parg, *Sarg, *Xarg, *Farg, *Carg;
 

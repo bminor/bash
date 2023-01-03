@@ -63,7 +63,7 @@ extern int errno;
 
 int parse_and_execute_level = 0;
 
-static int cat_file PARAMS((REDIRECT *));
+static int cat_file (REDIRECT *);
 
 #define PE_TAG "parse_and_execute top"
 #define PS_TAG "parse_string top"

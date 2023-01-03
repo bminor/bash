@@ -1,6 +1,6 @@
 /* stringvec.c - functions for managing arrays of strings. */
 
-/* Copyright (C) 2000-2002 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2002,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,40 +34,33 @@
 
 /* Allocate an array of strings with room for N members. */
 char **
-strvec_create (n)
-     int n;
+strvec_create (int n)
 {
   return ((char **)xmalloc ((n) * sizeof (char *)));
 }
 
 /* Allocate an array of strings with room for N members. */
 char **
-strvec_mcreate (n)
-     int n;
+strvec_mcreate (int n)
 {
   return ((char **)malloc ((n) * sizeof (char *)));
 }
 
 char **
-strvec_resize (array, nsize)
-     char **array;
-     int nsize;
+strvec_resize (char **array, int nsize)
 {
   return ((char **)xrealloc (array, nsize * sizeof (char *)));
 }
 
 char **
-strvec_mresize (array, nsize)
-     char **array;
-     int nsize;
+strvec_mresize (char **array, int nsize)
 {
   return ((char **)realloc (array, nsize * sizeof (char *)));
 }
 
 /* Return the length of ARRAY, a NULL terminated array of char *. */
 int
-strvec_len (array)
-     char **array;
+strvec_len (char **array)
 {
   register int i;
 
@@ -77,8 +70,7 @@ strvec_len (array)
 
 /* Free the contents of ARRAY, a NULL terminated array of char *. */
 void
-strvec_flush (array)
-     char **array;
+strvec_flush (char **array)
 {
   register int i;
 
@@ -90,8 +82,7 @@ strvec_flush (array)
 }
 
 void
-strvec_dispose (array)
-     char **array;
+strvec_dispose (char **array)
 {
   if (array == 0)
     return;
@@ -101,8 +92,7 @@ strvec_dispose (array)
 }
 
 int
-strvec_remove (array, name)
-     char **array, *name;
+strvec_remove (char **array, char *name)
 {
   register int i, j;
   char *x;
@@ -125,8 +115,7 @@ strvec_remove (array, name)
 /* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
    ARRAY should be NULL terminated. */
 int
-strvec_search (array, name)
-     char **array, *name;
+strvec_search (char **array, char *name)
 {
   int i;
 
@@ -139,8 +128,7 @@ strvec_search (array, name)
 
 /* Allocate and return a new copy of ARRAY and its contents. */
 char **
-strvec_copy (array)
-     char **array;
+strvec_copy (char **array)
 {
   register int i;
   int len;
@@ -161,8 +149,7 @@ strvec_copy (array)
 
    Perform a bytewise comparison if *S1 and *S2 collate equally. */
 int
-strvec_posixcmp (s1, s2)
-     register char **s1, **s2;
+strvec_posixcmp (char **s1, char **s2)
 {
   int result;
 
@@ -181,8 +168,7 @@ strvec_posixcmp (s1, s2)
 /* Comparison routine for use with qsort() on arrays of strings.  Uses
    strcoll(3) if available, otherwise it uses strcmp(3). */
 int
-strvec_strcmp (s1, s2)
-     register char **s1, **s2;
+strvec_strcmp (char **s1, char **s2)
 {
 #if defined (HAVE_STRCOLL)
    return (strcoll (*s1, *s2));
@@ -198,9 +184,7 @@ strvec_strcmp (s1, s2)
 
 /* Sort ARRAY, a null terminated array of pointers to strings. */
 void
-strvec_sort (array, posix)
-     char **array;
-     int posix;
+strvec_sort (char **array, int posix)
 {
   if (posix)
     qsort (array, strvec_len (array), sizeof (char *), (QSFUNC *)strvec_posixcmp);
@@ -217,9 +201,7 @@ strvec_sort (array, posix)
    space at the beginning of the array. */
 
 char **
-strvec_from_word_list (list, alloc, starting_index, ip)
-     WORD_LIST *list;
-     int alloc, starting_index, *ip;
+strvec_from_word_list (WORD_LIST *list, int alloc, int starting_index, int *ip)
 {
   int count;
   char **array;
@@ -244,9 +226,7 @@ strvec_from_word_list (list, alloc, starting_index, ip)
    in ARRAY to begin. */
 
 WORD_LIST *
-strvec_to_word_list (array, alloc, starting_index)
-     char **array;
-     int alloc, starting_index;
+strvec_to_word_list (char **array, int alloc, int starting_index)
 {
   WORD_LIST *list;
   WORD_DESC *w;

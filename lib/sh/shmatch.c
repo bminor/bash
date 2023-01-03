@@ -46,10 +46,7 @@ extern SHELL_VAR *builtin_find_indexed_array (char *, int);
 #endif
 
 int
-sh_regmatch (string, pattern, flags)
-     const char *string;
-     const char *pattern;
-     int flags;
+sh_regmatch (const char *string, const char *pattern, int flags)
 {
   regex_t regex = { 0 };
   regmatch_t *matches;

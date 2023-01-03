@@ -45,8 +45,7 @@ extern int errno;
 
 #if defined (HAVE_SETITIMER)
 unsigned int
-falarm(secs, usecs)
-     unsigned int secs, usecs;
+falarm(unsigned int secs, unsigned int usecs)
 {
   struct itimerval it, oit;
 
@@ -66,8 +65,7 @@ falarm(secs, usecs)
 }
 #else
 int
-falarm (secs, usecs)
-     unsigned int secs, usecs;
+falarm (unsigned int secs, unsigned int usecs)
 {
   if (secs == 0 && usecs == 0)
     return (alarm (0));
@@ -86,8 +84,7 @@ falarm (secs, usecs)
 
 #if defined (HAVE_TIMEVAL) && (defined (HAVE_SELECT) || defined (HAVE_PSELECT))
 int
-fsleep(sec, usec)
-     unsigned int sec, usec;
+fsleep(unsigned int sec, unsigned int usec)
 {
   int e, r;
   sigset_t blocked_sigs, prevmask;
@@ -131,8 +128,7 @@ fsleep(sec, usec)
 }
 #else /* !HAVE_TIMEVAL || !HAVE_SELECT */
 int
-fsleep(sec, usec)
-     long sec, usec;
+fsleep(unsigned int sec, unsigned int usec)
 {
   if (usec >= 500000)	/* round */
    sec++;

@@ -1,7 +1,7 @@
 This file is hash.def, from which is created hash.c.
 It implements the builtin "hash" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,11 +70,11 @@ $END
 
 extern int dot_found_in_search;
 
-static int add_hashed_command PARAMS((char *, int));
-static int print_hash_info PARAMS((BUCKET_CONTENTS *));
-static int print_portable_hash_info PARAMS((BUCKET_CONTENTS *));
-static int print_hashed_commands PARAMS((int));
-static int list_hashed_filename_targets PARAMS((WORD_LIST *, int));
+static int add_hashed_command (char *, int);
+static int print_hash_info (BUCKET_CONTENTS *);
+static int print_portable_hash_info (BUCKET_CONTENTS *);
+static int print_hashed_commands (int);
+static int list_hashed_filename_targets (WORD_LIST *, int);
 
 /* Print statistics on the current state of hashed commands.  If LIST is
    not empty, then rehash (or hash in the first place) the specified

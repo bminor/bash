@@ -1,6 +1,6 @@
 /* loadmsgcat.c - Load needed message catalogs. */
 
-/* Copyright (C) 1995-1999, 2000-2003, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000-2003, 2005-2009, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 
@@ -495,7 +495,7 @@ char *alloca ();
 
 /* Prototypes for local functions.  Needed to ensure compiler checking of
    function argument counts despite of K&R C function definition syntax.  */
-static const char *get_sysdep_segment_value PARAMS ((const char *name));
+static const char *get_sysdep_segment_value (const char *name);
 
 
 /* We need a sign, whether a new catalog was loaded, which can be associated
@@ -762,8 +762,7 @@ get_sysdep_segment_value (name)
 
 /* Initialize the codeset dependent parts of an opened message catalog.
    Return the header entry.  */
-const char *
-internal_function
+const inline char *
 _nl_init_domain_conv (domain_file, domain, domainbinding)
      struct loaded_l10nfile *domain_file;
      struct loaded_domain *domain;
@@ -831,7 +830,7 @@ _nl_init_domain_conv (domain_file, domain, domainbinding)
 		  outcharset = _NL_CURRENT (LC_CTYPE, CODESET);
 # else
 #  if HAVE_ICONV
-		  extern const char *locale_charset PARAMS ((void));
+		  extern const char *locale_charset (void);
 		  outcharset = locale_charset ();
 #  endif
 # endif
@@ -881,8 +880,7 @@ _nl_init_domain_conv (domain_file, domain, domainbinding)
 }
 
 /* Frees the codeset dependent parts of an opened message catalog.  */
-void
-internal_function
+inline void
 _nl_free_domain_conv (domain)
      struct loaded_domain *domain;
 {
@@ -902,8 +900,7 @@ _nl_free_domain_conv (domain)
 
 /* Load the message catalogs specified by FILENAME.  If it is no valid
    message catalog do nothing.  */
-void
-internal_function
+inline void
 _nl_load_domain (domain_file, domainbinding)
      struct loaded_l10nfile *domain_file;
      struct binding *domainbinding;
@@ -1311,8 +1308,7 @@ _nl_load_domain (domain_file, domainbinding)
 
 
 #ifdef _LIBC
-void
-internal_function
+inline void
 _nl_unload_domain (domain)
      struct loaded_domain *domain;
 {

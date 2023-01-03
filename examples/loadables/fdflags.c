@@ -120,7 +120,7 @@ extern int errno;
 
 /* FIX THIS */
 static int
-getallflags ()
+getallflags (void)
 {
   int i, allflags;
   
@@ -257,7 +257,7 @@ setone(int fd, char *v, int verbose)
 }
 
 static int
-getmaxfd ()
+getmaxfd (void)
 {
   int maxfd, ignore;
 

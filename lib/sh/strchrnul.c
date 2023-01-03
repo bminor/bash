@@ -1,5 +1,5 @@
 /* Searching in a string.
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012, 2022 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,9 +22,7 @@
 
 /* Find the first occurrence of C in S or the final NUL byte.  */
 char *
-strchrnul (s, c_in)
-     const char *s;
-     int c_in;
+strchrnul (const char *s, int c_in)
 {
   char c;
   register char *s1;

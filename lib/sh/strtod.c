@@ -1,6 +1,6 @@
 /* strtod.c - convert string to double-precision floating-point value. */
 
-/* Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1992, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -50,15 +50,13 @@ extern int errno;
 #endif
 
 #ifndef locale_decpoint
-extern int locale_decpoint PARAMS((void));
+extern int locale_decpoint (void);
 #endif
 
 /* Convert NPTR to a double.  If ENDPTR is not NULL, a pointer to the
    character after the last one used in the number is put in *ENDPTR.  */
 double
-strtod (nptr, endptr)
-     const char *nptr;
-     char **endptr;
+strtod (const char *nptr, char **endptr)
 {
   register const char *s;
   short sign;

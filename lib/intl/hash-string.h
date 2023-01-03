@@ -1,6 +1,6 @@
 /* hash-string.h - Description of GNU message catalog format: string hashing function. */
 
-/* Copyright (C) 1995, 1997, 1998, 2000, 2001, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995, 1997, 1998, 2000, 2001, 2005-2009, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 
@@ -20,22 +20,13 @@
 
 /* @@ end of prolog @@ */
 
-#ifndef PARAMS
-# if __STDC__ || defined __GNUC__ || defined __SUNPRO_C || defined __cplusplus || __PROTOTYPES
-#  define PARAMS(Args) Args
-# else
-#  define PARAMS(Args) ()
-# endif
-#endif
-
 /* We assume to have `unsigned long int' value with at least 32 bits.  */
 #define HASHWORDBITS 32
-
 
 /* Defines the so called `hashpjw' function by P.J. Weinberger
    [see Aho/Sethi/Ullman, COMPILERS: Principles, Techniques and Tools,
    1986, 1987 Bell Telephone Laboratories, Inc.]  */
-static unsigned long int hash_string PARAMS ((const char *__str_param));
+static unsigned long int hash_string (const char *__str_param);
 
 static inline unsigned long int
 hash_string (str_param)

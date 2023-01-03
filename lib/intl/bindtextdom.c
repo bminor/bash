@@ -1,6 +1,6 @@
 /* bindtextdom.c - Implementation of the bindtextdomain(3) function */
 
-/* Copyright (C) 1995-1998, 2000, 2001, 2002, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1998, 2000, 2001, 2002, 2005-2009, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 
@@ -89,9 +89,9 @@ __libc_rwlock_define (extern, _nl_state_lock attribute_hidden)
 #endif
 
 /* Prototypes for local functions.  */
-static void set_binding_values PARAMS ((const char *domainname,
+static void set_binding_values (const char *domainname,
 					const char **dirnamep,
-					const char **codesetp));
+					const char **codesetp);
 
 /* Specifies the directory name *DIRNAMEP and the output codeset *CODESETP
    to be used for the DOMAINNAME message catalog.

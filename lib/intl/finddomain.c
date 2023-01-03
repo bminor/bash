@@ -1,6 +1,6 @@
 /* finddomain.c - Handle list of needed message catalogs */
 
-/* Copyright (C) 1995-1999, 2000, 2001, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995-1999, 2000, 2001, 2005-2009, 2022 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@gnu.org>, 1995.
 
    This file is part of GNU Bash.
@@ -47,8 +47,7 @@ static struct loaded_l10nfile *_nl_loaded_domains;
 /* Return a data structure describing the message catalog described by
    the DOMAINNAME and CATEGORY parameters with respect to the currently
    established bindings.  */
-struct loaded_l10nfile *
-internal_function
+inline struct loaded_l10nfile *
 _nl_find_domain (dirname, locale, domainname, domainbinding)
      const char *dirname;
      char *locale;

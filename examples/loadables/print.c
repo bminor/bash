@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -42,8 +42,8 @@
 extern int errno;
 #endif
 
-int print_builtin ();
-static int printargs ();
+int print_builtin (WORD_LIST *);
+static int printargs (WORD_LIST *, FILE *);
 
 static FILE *ofp;
 
@@ -72,8 +72,7 @@ struct builtin print_struct = {
 #endif
 
 int
-print_builtin (list)
-     WORD_LIST *list;
+print_builtin (WORD_LIST *list)
 {
   int c, r, nflag, raw, ofd, sflag;
   intmax_t lfd;
@@ -170,9 +169,7 @@ opt_end:
 }
 
 static int
-printargs (list, ofp)
-     WORD_LIST *list;
-     FILE *ofp;
+printargs (WORD_LIST *list, FILE *ofp)
 {
   WORD_LIST *l;
   char *ostr;

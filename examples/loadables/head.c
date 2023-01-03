@@ -46,8 +46,7 @@ extern int errno;
 #endif
 
 static void
-munge_list (list)
-     WORD_LIST *list;
+munge_list (WORD_LIST *list)
 {
   WORD_LIST *l, *nl;
   WORD_DESC *wd;
@@ -69,9 +68,7 @@ munge_list (list)
 }
 
 static int
-file_head (fp, cnt)
-     FILE *fp;
-     int cnt;
+file_head (FILE *fp, int cnt)
 {
   int ch;
 
@@ -94,8 +91,7 @@ file_head (fp, cnt)
 }
 
 int
-head_builtin (list)
-     WORD_LIST *list;
+head_builtin (WORD_LIST *list)
 {
   int nline, opt, rval;
   WORD_LIST *l;

@@ -1,6 +1,6 @@
 /* getopt.h - declarations for getopt. */
 
-/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,7 +59,7 @@ extern int sh_optopt;
 /* Set to 1 when an unrecognized option is encountered. */
 extern int sh_badopt;
 
-extern int sh_getopt PARAMS((int, char *const *, const char *));
+extern int sh_getopt (int, char *const *, const char *);
 
 typedef struct sh_getopt_state
 {
@@ -71,12 +71,12 @@ typedef struct sh_getopt_state
   int gs_flags;
 } sh_getopt_state_t;
 
-extern void sh_getopt_restore_state PARAMS((char **));
+extern void sh_getopt_restore_state (char **);
 
-extern sh_getopt_state_t *sh_getopt_alloc_istate PARAMS((void));
-extern void sh_getopt_dispose_istate PARAMS((sh_getopt_state_t *));
+extern sh_getopt_state_t *sh_getopt_alloc_istate (void);
+extern void sh_getopt_dispose_istate (sh_getopt_state_t *);
 
-extern sh_getopt_state_t *sh_getopt_save_istate PARAMS((void));
-extern void sh_getopt_restore_istate PARAMS((sh_getopt_state_t *));
+extern sh_getopt_state_t *sh_getopt_save_istate (void);
+extern void sh_getopt_restore_istate (sh_getopt_state_t *);
 
 #endif /* _SH_GETOPT_H */

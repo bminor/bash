@@ -1,6 +1,6 @@
 /* timeval.c - functions to perform operations on struct timevals */
 
-/* Copyright (C) 1999 Free Software Foundation, Inc.
+/* Copyright (C) 1999,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,14 +29,13 @@
 #include <stdc.h>
 
 #ifndef locale_decpoint
-extern int locale_decpoint PARAMS((void));
+extern int locale_decpoint (void);
 #endif
 
 #include <stdio.h>
 
 struct timeval *
-difftimeval (d, t1, t2)
-     struct timeval *d, *t1, *t2;
+difftimeval (struct timeval *d, struct timeval *t1, struct timeval *t2)
 {
   d->tv_sec = t2->tv_sec - t1->tv_sec;
   d->tv_usec = t2->tv_usec - t1->tv_usec;
@@ -54,8 +53,7 @@ difftimeval (d, t1, t2)
 }
 
 struct timeval *
-addtimeval (d, t1, t2)
-     struct timeval *d, *t1, *t2;
+addtimeval (struct timeval *d, struct timeval *t1, struct timeval *t2)
 {
   d->tv_sec = t1->tv_sec + t2->tv_sec;
   d->tv_usec = t1->tv_usec + t2->tv_usec;
@@ -68,9 +66,7 @@ addtimeval (d, t1, t2)
 }
 
 struct timeval *
-multimeval (d, m)
-     struct timeval *d;
-     int m;
+multimeval (struct timeval *d, int m)
 {
   time_t t;
 
@@ -81,9 +77,7 @@ multimeval (d, m)
 }
 
 struct timeval *
-divtimeval (d, m)
-     struct timeval *d;
-     int m;
+divtimeval (struct timeval *d, int m)
 {
   time_t t;
 
@@ -96,8 +90,7 @@ divtimeval (d, m)
 /* Do "cpu = ((user + sys) * 10000) / real;" with timevals.
    Barely-tested code from Deven T. Corzine <deven@ties.org>. */
 int
-timeval_to_cpu (rt, ut, st)
-     struct timeval *rt, *ut, *st;	/* real, user, sys */
+timeval_to_cpu (struct timeval *rt, struct timeval *ut, struct timeval *st)
 {
   struct timeval t1, t2;
   register int i;
@@ -134,10 +127,7 @@ timeval_to_cpu (rt, ut, st)
    second, returning the values in *SP and *SFP, respectively.  This does
    rounding on the fractional part, not just truncation to three places. */
 void
-timeval_to_secs (tvp, sp, sfp)
-     struct timeval *tvp;
-     time_t *sp;
-     int *sfp;
+timeval_to_secs (struct timeval *tvp, time_t *sp, int *sfp)
 {
   int rest;
 
@@ -160,9 +150,7 @@ timeval_to_secs (tvp, sp, sfp)
 /* Print the contents of a struct timeval * in a standard way to stdio
    stream FP.  */
 void
-print_timeval (fp, tvp)
-     FILE *fp;
-     struct timeval *tvp;
+print_timeval (FILE *fp, struct timeval *tvp)
 {
   time_t timestamp;
   long minutes;

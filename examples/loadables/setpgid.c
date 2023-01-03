@@ -4,6 +4,8 @@
 
    Originally contributed by Jason Vas Dias <jason.vas.dias@gmail.com>
    
+   Copyright (C) 2018-2022 Free Software Foundation, Inc.
+
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -42,8 +44,7 @@
 #endif
 
 int
-setpgid_builtin (list)
-      WORD_LIST *list;
+setpgid_builtin (WORD_LIST *list)
 {
   register WORD_LIST *wl;
   intmax_t pid_arg, pgid_arg;

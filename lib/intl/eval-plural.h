@@ -1,6 +1,6 @@
 /* eval-plural.c - Plural expression evaluation. */
 
-/* Copyright (C) 2000-2002, 2006-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2002, 2006-2009, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 
@@ -18,18 +18,12 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef STATIC
-#define STATIC static
-#endif
-
 /* Evaluate the plural expression and return an index value.  */
-STATIC unsigned long int plural_eval PARAMS ((struct expression *pexp,
-					      unsigned long int n))
-     internal_function;
+static inline unsigned long int plural_eval (struct expression *pexp,
+					      unsigned long int n);
 
-STATIC
+static inline
 unsigned long int
-internal_function
 plural_eval (pexp, n)
      struct expression *pexp;
      unsigned long int n;

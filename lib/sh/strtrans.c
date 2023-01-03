@@ -1,6 +1,6 @@
 /* strtrans.c - Translate and untranslate strings with ANSI-C escape sequences. */
 
-/* Copyright (C) 2000-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2015,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,9 +48,7 @@
    quote CTLESC and CTLNUL with CTLESC.  If (flags&4) is non-zero, we want
    to remove the backslash before any unrecognized escape sequence. */
 char *
-ansicstr (string, len, flags, sawc, rlen)
-     char *string;
-     int len, flags, *sawc, *rlen;
+ansicstr (char *string, int len, int flags, int *sawc, int *rlen)
 {
   int c, temp;
   char *ret, *r, *s;
@@ -227,9 +225,7 @@ ansicstr (string, len, flags, sawc, rlen)
 /* Take a string STR, possibly containing non-printing characters, and turn it
    into a $'...' ANSI-C style quoted string.  Returns a new string. */
 char *
-ansic_quote (str, flags, rlen)
-     char *str;
-     int flags, *rlen;
+ansic_quote (char *str, int flags, int *rlen)
 {
   char *r, *ret, *s;
   int l, rsize;
@@ -318,8 +314,7 @@ ansic_quote (str, flags, rlen)
 
 #if defined (HANDLE_MULTIBYTE)
 int
-ansic_wshouldquote (string)
-     const char *string;
+ansic_wshouldquote (const char *string)
 {
   const wchar_t *wcs;
   wchar_t wcc;
@@ -348,8 +343,7 @@ ansic_wshouldquote (string)
 
 /* return 1 if we need to quote with $'...' because of non-printing chars. */
 int
-ansic_shouldquote (string)
-     const char *string;
+ansic_shouldquote (const char *string)
 {
   const char *s;
   unsigned char c;
@@ -373,9 +367,7 @@ ansic_shouldquote (string)
 /* $'...' ANSI-C expand the portion of STRING between START and END and
    return the result.  The result cannot be longer than the input string. */
 char *
-ansiexpand (string, start, end, lenp)
-     char *string;
-     int start, end, *lenp;
+ansiexpand (char *string, int start, int end, int *lenp)
 {
   char *temp, *t;
   int len, tlen;

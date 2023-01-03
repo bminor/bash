@@ -1,6 +1,6 @@
 /* wcswidth.c - compute display width of wide character string */
 
-/* Copyright (C) 2010 Free Software Foundation, Inc.
+/* Copyright (C) 2010,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,9 +27,7 @@
 #include <bashansi.h>
 
 int
-wcswidth(pwcs, n)
-     const wchar_t *pwcs;
-     size_t n;
+wcswidth(const wchar_t *pwcs, size_t n)
 {
   wchar_t wc;
   int len, l;

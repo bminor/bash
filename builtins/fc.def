@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -94,9 +94,9 @@ extern int errno;
 #define HN_LISTING	0x01
 #define HN_FIRST	0x02
 
-extern int unlink PARAMS((const char *));
+extern int unlink (const char *);
 
-extern FILE *sh_mktmpfp PARAMS((char *, int, char **));
+extern FILE *sh_mktmpfp (char *, int, char **);
 
 extern int suppress_debug_trap_verbose;
 
@@ -154,14 +154,14 @@ typedef struct repl {
 		} \
 	} while (0)
 
-static char *fc_dosubs PARAMS((char *, REPL *));
-static char *fc_gethist PARAMS((char *, HIST_ENTRY **, int));
-static int fc_gethnum PARAMS((char *, HIST_ENTRY **, int));
-static int fc_number PARAMS((WORD_LIST *));
-static void fc_replhist PARAMS((char *));
+static char *fc_dosubs (char *, REPL *);
+static char *fc_gethist (char *, HIST_ENTRY **, int);
+static int fc_gethnum (char *, HIST_ENTRY **, int);
+static int fc_number (WORD_LIST *);
+static void fc_replhist (char *);
 #ifdef INCLUDE_UNUSED
-static char *fc_readline PARAMS((FILE *));
-static void fc_addhist PARAMS((char *));
+static char *fc_readline (FILE *);
+static void fc_addhist (char *);
 #endif
 
 static void

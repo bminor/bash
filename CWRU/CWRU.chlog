@@ -4792,3 +4792,75 @@ doc/{bash.1,bashref.texi},builtins/printf.def
 	- specify the valid format characters as a subset of what printf(3)
 	  specifies, note that the %n format specifier takes a variable name
 	  as an argument. Suggestion from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   12/28
+				   -----
+{xmalloc,variables,unwind_prot,trap,test,subst,sig,siglist,shell,redir,
+pcomplete,pathexp,make_cmd,mailcheck,jobs,input,hashcmd,hashlib,general,
+flags,findcmd,externs,execute_cmd,error,dispose_cmd,command,bashline,
+bashhist,assoc,arrayfunc,array,alias}.h
+{version,version2}.c
+	- PARAMS: remove for ANSI C-ification
+
+builtins/{getopt,common,bashgetopt}.h
+builtins/{mkbuiltins,gen-helpfiles,psize,psize-posix}.c
+builtins/{evalstring,bashgetopt,common,evalfile,getopt}.c
+builtins{alias,bind,break,cd,command,complete,declare,enable,exit,fc,
+fg_bg,getopts,hash,help,history,jobs,kill,mapfile,printf,pushd,read,set,
+shopt,source,suspend,trap,type,ulimit,umask,wait}.def
+	- PARAMS: remove for ANSI C-ification
+
+lib/malloc/{watch,table,shmalloc,mstats,imalloc}.h
+lib/malloc/{malloc,stats,table,trace}.c
+	- PARAMS: remove for ANSI C-ification
+
+lib/glob/{glob,strmatch}.h
+lib/glob/{glob,glob_loop,gmisc,sm_loop,smatch,strmatch,xmbsrtowcs}.c
+	- PARAMS: remove for ANSI C-ification
+
+lib/intl/{eval-plural,plural-exp,loadinfo,hash-string,gettextP}.h,
+lib/intl{plural.y,plural.c},
+lib/intl/{finddomain,bindtextdom,dcigettext,l10nflist,loadmsgcat,localealias,plural-exp}.c 
+	- PARAMS: remove for ANSI C-ification
+	- STATIC -> static
+	- internal_function -> inline
+
+lib/sh/{casemod,clock,eaccess,fnxform,fpurge,makepath,mktime,netopen,pathphys,random,shquote,snprintf,spell,strtod,strtoimax,strtoumax,times,timeval,tmpfile,unicode,winsize,zcatfd,zgetline,zmapfd}.c
+	- PARAMS: remove for ANSI C-ification
+
+support/{bashversion.c,mkversion.sh,mksignames.c}
+	- PARAMS: remove for ANSI C-ification
+
+lib/sh/{clock,strchrnul,getcwd,times,rename,inet_aton,strdup,strerror,strnlen
+strpbrk,strtod,strtoimax,strtol,strtoumax,wcsdup,wcsnwidth,wcswidth,strcasecmp,
+strcasestr}.c
+	- C89-style function declarations
+
+lib/malloc/{alloca,malloc,stats,table,trace,xmalloc}.c
+	- C89-style function declarations
+
+				   12/29
+				   -----
+lib/glob/{glob,glob_loop,gmisc,sm_loop,smatch,strmatch,xmbsrtowcs}.c
+	- C89-style function declarations
+
+lib/sh/{zcatfd,zgetline,zmapfd,zread,zwrite,winsize,vprint,uconvert,ufuncs,
+unicode,utf8}.c
+lib/sh/{stringlist,stringvec,strtrans,strvis,timeval,tmpfile}.c
+lib/sh/{setlinebuf,shmatch,shmbchar,shquote,shtty,snprintf,spell}.c
+lib/sh/{random,pathcanon,pathphys,oslib,netconn,netopen}.c
+lib/sh/{mailstat,makepath,mbscasecmp,mbschr,mbscmp,mktime}.c
+lib/sh/{input_avail,itos,getenv,fmtulong,fnxform,eaccess,dprintf,casemod,clktck}.c
+	- C89-style function declarations
+
+examples/loadables/{accept,asort,basename,bcat,cat,csv,cut,dirname,dsv}.c
+examples/loadables/{fdflags,finfo,head,hello,id,lcut,ln}.c
+examples/loadables/{mkdir,mkfifo,mktemp,mypid,necho,pathchk}.c
+examples/loadables/{print,printenv,push,realpath,rm,rmdir,seq}.c
+examples/loadables/{setpgid,stat,strftime,sync,tee,template,truefalse,tty}.c
+examples/loadables/{uname,unlink,whoami}.c
+	- C89-style function declarations
+
+xmalloc.c, array2.c, list.c, dispose_cmd.c, copy_cmd.c, bracecomp.c, mksyntax.c
+	- PARAMS: remove for ANSI C-ification
+	- C89-style function declarations

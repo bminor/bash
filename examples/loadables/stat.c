@@ -80,10 +80,7 @@ static char *arraysubs[] =
 static char *stattime (time_t, const char *);
 
 static int
-getstat (fname, flags, sp)
-     const char *fname;
-     int flags;
-     struct stat *sp;
+getstat (const char *fname, int flags, struct stat *sp)
 {
   intmax_t lfd;
   int fd, r;
@@ -109,9 +106,7 @@ getstat (fname, flags, sp)
 }
 
 static char *
-statlink (fname, sp)
-     char *fname;
-     struct stat *sp;
+statlink (char *fname, struct stat *sp)
 {
 #if defined (HAVE_READLINK)
   char linkbuf[PATH_MAX];
@@ -128,8 +123,7 @@ statlink (fname, sp)
 }
 
 static char *
-octalperms (m)
-     int m;
+octalperms (int m)
 {
   int operms;
   char *ret;
@@ -170,8 +164,7 @@ octalperms (m)
 }
 
 static char *
-statperms (m)
-     int m;
+statperms (int m)
 {
   char ubits[4], gbits[4], obits[4];	/* u=rwx,g=rwx,o=rwx */
   int i;
@@ -217,8 +210,7 @@ statperms (m)
 }
 
 static char *
-statmode(mode)
-     int mode;
+statmode(int mode)
 {
   char *modestr, *m;
 
@@ -260,9 +252,7 @@ statmode(mode)
 }
 
 static char *
-stattime (t, timefmt)
-     time_t t;
-     const char *timefmt;
+stattime (time_t t, const char *timefmt)
 {
   char *tbuf, *ret;
   const char *fmt;
@@ -282,12 +272,7 @@ stattime (t, timefmt)
 }
 
 static char *
-statval (which, fname, flags, fmt, sp)
-     int which;
-     char *fname;
-     int flags;
-     char *fmt;
-     struct stat *sp;
+statval (int which, char *fname, int flags, char *fmt, struct stat *sp)
 {
   int temp;
 
@@ -332,13 +317,7 @@ statval (which, fname, flags, fmt, sp)
 }
 
 static int
-loadstat (vname, var, fname, flags, fmt, sp)
-     char *vname;
-     SHELL_VAR *var;
-     char *fname;
-     int flags;
-     char *fmt;
-     struct stat *sp;
+loadstat (char *vname, SHELL_VAR *var, char *fname, int flags, char *fmt, struct stat *sp)
 {
   int i;
   char *key, *value;
@@ -354,8 +333,7 @@ loadstat (vname, var, fname, flags, fmt, sp)
 }
 
 int
-stat_builtin (list)
-     WORD_LIST *list;
+stat_builtin (WORD_LIST *list)
 {
   int opt, flags;
   char *aname, *fname, *timefmt;

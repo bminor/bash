@@ -1,6 +1,6 @@
 /* getcwd.c -- get pathname of current directory */
 
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -73,10 +73,7 @@ extern int errno;
    the inode corresponding to PATH/DIR is identical to THISINO. */
 #if !defined (D_FILENO_AVAILABLE)
 static int
-_path_checkino (dotp, name, thisino)
-     char *dotp;
-     char *name;
-     ino_t thisino;
+_path_checkino (char *dotp, char *name, ino_t thisino)
 {
   char *fullpath;
   int r, e;
@@ -102,15 +99,8 @@ _path_checkino (dotp, name, thisino)
    an array is allocated with `malloc'; the array is SIZE
    bytes long, unless SIZE <= 0, in which case it is as
    big as necessary.  */
-#if defined (__STDC__)
 char *
 getcwd (char *buf, size_t size)
-#else /* !__STDC__ */
-char *
-getcwd (buf, size)
-     char *buf;
-     size_t size;
-#endif /* !__STDC__ */
 {
   static const char dots[]
     = "../../../../../../../../../../../../../../../../../../../../../../../\

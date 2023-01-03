@@ -1,6 +1,6 @@
 /* random.c -- Functions for managing 16-bit and 32-bit random numbers. */
 
-/* Copyright (C) 2020 Free Software Foundation, Inc.
+/* Copyright (C) 2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,20 +40,19 @@ extern time_t shell_start_time;
 
 extern int last_random_value;
 
-static u_bits32_t intrand32 PARAMS((u_bits32_t));
-static u_bits32_t genseed PARAMS((void));
+static u_bits32_t intrand32 (u_bits32_t);
+static u_bits32_t genseed (void);
 
-static u_bits32_t brand32 PARAMS((void));
-static void sbrand32 PARAMS((u_bits32_t));
-static void perturb_rand32 PARAMS((void));
+static u_bits32_t brand32 (void);
+static void sbrand32 (u_bits32_t);
+static void perturb_rand32 (void);
 
 /* The random number seed.  You can change this by setting RANDOM. */
 static u_bits32_t rseed = 1;
 
 /* Returns a 32-bit pseudo-random number. */
 static u_bits32_t
-intrand32 (last)
-     u_bits32_t last;
+intrand32 (u_bits32_t last)
 {
   /* Minimal Standard generator from
      "Random number generators: good ones are hard to find",
@@ -84,7 +83,7 @@ intrand32 (last)
 }
 
 static u_bits32_t
-genseed ()
+genseed (void)
 {
   struct timeval tv;
   u_bits32_t iv;
@@ -99,7 +98,7 @@ genseed ()
 
 /* Returns a pseudo-random number between 0 and 32767. */
 int
-brand ()
+brand (void)
 {
   unsigned int ret;
 
@@ -113,15 +112,14 @@ brand ()
 
 /* Set the random number generator seed to SEED. */
 void
-sbrand (seed)
-     unsigned long seed;
+sbrand (unsigned long seed)
 {
   rseed = seed;
   last_random_value = 0;
 }
 
 void
-seedrand ()
+seedrand (void)
 {
   u_bits32_t iv;
 
@@ -138,7 +136,7 @@ static int urandfd = -1;
 
 /* Returns a 32-bit pseudo-random number between 0 and 4294967295. */
 static u_bits32_t
-brand32 ()
+brand32 (void)
 {
   u_bits32_t ret;
 
@@ -147,14 +145,13 @@ brand32 ()
 }
 
 static void
-sbrand32 (seed)
-     u_bits32_t seed;
+sbrand32 (u_bits32_t seed)
 {
   last_rand32 = rseed32 = seed;
 }
 
 void
-seedrand32 ()
+seedrand32 (void)
 {
   u_bits32_t iv;
 
@@ -163,14 +160,14 @@ seedrand32 ()
 }
 
 static void
-perturb_rand32 ()
+perturb_rand32 (void)
 {
   rseed32 ^= genseed ();
 }
 
 /* Force another attempt to open /dev/urandom on the next call to get_urandom32 */
 void
-urandom_close ()
+urandom_close (void)
 {
   if (urandfd >= 0)
     close (urandfd);
@@ -185,10 +182,7 @@ urandom_close ()
 #endif
 
 static ssize_t
-getrandom (buf, len, flags)
-     void *buf;
-     size_t len;
-     unsigned int flags;
+getrandom (void *buf, size_t len, unsigned int flags)
 {
   int oflags;
   ssize_t r;
@@ -220,7 +214,7 @@ getrandom (buf, len, flags)
 #endif
       
 u_bits32_t
-get_urandom32 ()
+get_urandom32 (void)
 {
   u_bits32_t ret;
 

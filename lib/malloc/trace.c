@@ -1,6 +1,6 @@
 /* trace.c - tracing functions for malloc */
 
-/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,18 +35,13 @@ static int _mtrace_verbose = 0;
 
 #ifdef MALLOC_TRACE
 
-extern FILE *_imalloc_fopen PARAMS((char *, char *, char *, char *, size_t));
+extern FILE *_imalloc_fopen (char *, char *, char *, char *, size_t);
 
 FILE *_mtrace_fp = NULL;
 extern char _malloc_trace_buckets[];
 
 void
-mtrace_alloc (tag, mem, size, file, line)
-     const char *tag;
-     PTR_T mem;
-     size_t size;
-     const char *file;
-     int line;
+mtrace_alloc (const char *tag, PTR_T mem, size_t size, const char *file, int line)
 {
   if (_mtrace_fp == NULL)
     _mtrace_fp = stderr;
@@ -60,11 +55,7 @@ mtrace_alloc (tag, mem, size, file, line)
 }
 
 void
-mtrace_free (mem, size, file, line)
-     PTR_T mem;
-     int size;
-     const char *file;
-     int line;
+mtrace_free (PTR_T mem, int size, const char *file, int line)
 {
   if (_mtrace_fp == NULL)
     _mtrace_fp = stderr;
@@ -79,8 +70,7 @@ mtrace_free (mem, size, file, line)
 #endif /* MALLOC_TRACE */
 
 int
-malloc_set_trace (n)
-     int n;
+malloc_set_trace (int n)
 {
   int old;
 
@@ -91,8 +81,7 @@ malloc_set_trace (n)
 }
 
 void
-malloc_set_tracefp (fp)
-     FILE *fp;
+malloc_set_tracefp (FILE *fp)
 {
 #ifdef MALLOC_TRACE
   _mtrace_fp = fp ? fp : stderr;
@@ -100,8 +89,7 @@ malloc_set_tracefp (fp)
 }
 
 void
-malloc_trace_bin (n)
-     int n;
+malloc_trace_bin (int n)
 {
 #ifdef MALLOC_TRACE
   _malloc_trace_buckets[n] = 1;
@@ -111,9 +99,7 @@ malloc_trace_bin (n)
 #define TRACEROOT "/var/tmp/maltrace/trace."
 
 void
-malloc_set_tracefn (s, fn)
-     char *s;
-     char *fn;
+malloc_set_tracefn (char *s, char *fn)
 {
 #ifdef MALLOC_TRACE
   FILE *fp;

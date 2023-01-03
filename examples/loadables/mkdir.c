@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -42,15 +42,14 @@ extern int errno;
 
 #define ISOCTAL(c)	((c) >= '0' && (c) <= '7')
 
-extern int parse_symbolic_mode ();
+extern int parse_symbolic_mode (char *, mode_t);
 
-static int make_path ();
+static int make_path (char *, int, int, int);
 
 static int original_umask;
 
 int
-mkdir_builtin (list)
-     WORD_LIST *list;
+mkdir_builtin (WORD_LIST *list)
 {
   int opt, pflag, mflag, omode, rval, nmode, parent_mode;
   char *mode;
@@ -134,10 +133,7 @@ mkdir_builtin (list)
    this changes the process's umask; make sure that all paths leading to a
    return reset it to ORIGINAL_UMASK */
 static int
-make_path (path, user_mode, nmode, parent_mode)
-     char *path;
-     int user_mode;
-     int nmode, parent_mode;
+make_path (char *path, int user_mode, int nmode, int parent_mode)
 {
   int oumask;
   struct stat sb;

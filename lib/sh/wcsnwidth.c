@@ -1,7 +1,7 @@
 /* wcsnwidth.c - compute display width of wide character string, up to max
 		 specified width, return length. */
 
-/* Copyright (C) 2012 Free Software Foundation, Inc.
+/* Copyright (C) 2012,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,9 +31,7 @@
    PWCS.  If the display width exceeds MAX, return the number of wide chars
    from PWCS required to display MAX characters on the screen. */
 int
-wcsnwidth(pwcs, n, max)
-     const wchar_t *pwcs;
-     size_t n, max;
+wcsnwidth(const wchar_t *pwcs, size_t n, size_t max)
 {
   wchar_t wc, *ws;
   int len, l;

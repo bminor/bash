@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -204,22 +204,22 @@ extern int errno;
 
 #define BLOCKSIZE(x)	(((x) == POSIXBLK) ? (posixly_correct ? 512 : 1024) : (x))
 
-static int _findlim PARAMS((int));
+static int _findlim (int);
 
-static int ulimit_internal PARAMS((int, char *, int, int));
+static int ulimit_internal (int, char *, int, int);
 
-static int get_limit PARAMS((int, RLIMTYPE *, RLIMTYPE *));
-static int set_limit PARAMS((int, RLIMTYPE, int));
+static int get_limit (int, RLIMTYPE *, RLIMTYPE *);
+static int set_limit (int, RLIMTYPE, int);
 
-static void printone PARAMS((int, RLIMTYPE, int));
-static void print_all_limits PARAMS((int));
+static void printone (int, RLIMTYPE, int);
+static void print_all_limits (int);
 
-static int set_all_limits PARAMS((int, RLIMTYPE));
+static int set_all_limits (int, RLIMTYPE);
 
-static int filesize PARAMS((RLIMTYPE *));
-static int pipesize PARAMS((RLIMTYPE *));
-static int getmaxuprc PARAMS((RLIMTYPE *));
-static int getmaxvm PARAMS((RLIMTYPE *, RLIMTYPE *));
+static int filesize (RLIMTYPE *);
+static int pipesize (RLIMTYPE *);
+static int getmaxuprc (RLIMTYPE *);
+static int getmaxvm (RLIMTYPE *, RLIMTYPE *);
 
 typedef struct {
   int  option;			/* The ulimit option for this limit. */
