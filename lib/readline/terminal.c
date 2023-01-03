@@ -69,7 +69,7 @@
 #include "rlshell.h"
 #include "xmalloc.h"
 
-#if defined (__MINGW32__)
+#if defined (_WIN32)
 #  include <windows.h>
 #  include <wincon.h>
 
@@ -229,7 +229,7 @@ _emx_get_screensize (int *swp, int *shp)
 }
 #endif
 
-#if defined (__MINGW32__)
+#if defined (_WIN32)
 static void
 _win_get_screensize (int *swp, int *shp)
 {
@@ -272,7 +272,7 @@ _rl_get_screen_size (int tty, int ignore_env)
 
 #if defined (__EMX__)
   _emx_get_screensize (&wc, &wr);
-#elif defined (__MINGW32__)
+#elif defined (_WIN32) && !defined (__CYGWIN__)
   _win_get_screensize (&wc, &wr);
 #endif
 

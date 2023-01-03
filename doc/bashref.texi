@@ -2309,7 +2309,7 @@ If @var{parameter} is @samp{@@} or @samp{*}, the result is @var{length}
 positional parameters beginning at @var{offset}.
 A negative @var{offset} is taken relative to one greater than the greatest
 positional parameter, so an offset of -1 evaluates to the last positional
-parameter.
+parameter (or 0 if there are no positional parameters).
 It is an expansion error if @var{length} evaluates to a number less than zero.
 
 The following examples illustrate substring expansion using positional
@@ -4866,8 +4866,9 @@ plain characters, which are simply copied to standard output, character
 escape sequences, which are converted and copied to the standard output, and
 format specifications, each of which causes printing of the next successive
 @var{argument}.
-In addition to the standard @code{printf(1)} formats, @code{printf}
-interprets the following extensions:
+In addition to the standard @code{printf(3)} format characters
+@code{csndiouxXeEfFgGaA},
+@code{printf} interprets the following additional format specifiers:
 
 @table @code
 @item %b
@@ -4897,6 +4898,9 @@ arguments from the format specification and write that many bytes from
 (or use that wide a field for) the expanded argument, which usually
 contains more characters than the original.
 
+The %n format specifier accepts a corresponding argument that is treated
+as a shell variable name.
+
 Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the ASCII value of
@@ -4905,8 +4909,10 @@ the following character.
 The @var{format} is reused as necessary to consume all of the @var{arguments}.
 If the @var{format} requires more @var{arguments} than are supplied, the
 extra format specifications behave as if a zero value or null string, as
-appropriate, had been supplied.  The return value is zero on success,
-non-zero on failure.
+appropriate, had been supplied.
+The return value is zero on success,
+non-zero if an invalid option is supplied or a write or assignment error
+occurs.
 
 @item read
 @btindex read

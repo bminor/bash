@@ -4770,3 +4770,25 @@ jobs.c
 	- without_job_control: set original_pgrp == NO_PID since we don't
 	  want to be messing with the terminal pgrp if we call end_job_control.
 	  From a report from ks1322 ks1322 <ks1322@gmail.com>
+
+				   12/21
+				   -----
+include/{posixtime.h,systimes.h,shmbutil.h,shtty.h}
+	- PARAMS: remove
+
+				   12/22
+				   -----
+builtins/evalfile.c
+	- _evalfile: add SEVAL_NOOPTIMIZE to the parse_and_execute flags
+	  (maybe overkill, but safer). From a report by
+	  Dan Church <h3xx@gmx.com> and Oguz <oguzismailuysal@gmail.com>
+
+lib/sh/gettimeofday.c
+	- gettimeofday: added code for _WIN32 version
+
+				   12/27
+				   -----
+doc/{bash.1,bashref.texi},builtins/printf.def
+	- specify the valid format characters as a subset of what printf(3)
+	  specifies, note that the %n format specifier takes a variable name
+	  as an argument. Suggestion from Emanuele Torre <torreemanuele6@gmail.com>

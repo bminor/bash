@@ -1,6 +1,6 @@
 /* evalfile.c - read and evaluate commands from a file or file descriptor */
 
-/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -266,7 +266,7 @@ file_error_and_exit:
 #endif
 
   /* set the flags to be passed to parse_and_execute */
-  pflags = SEVAL_RESETLINE;
+  pflags = SEVAL_RESETLINE|SEVAL_NOOPTIMIZE;
   pflags |= (flags & FEVAL_HISTORY) ? 0 : SEVAL_NOHIST;
 
   if (flags & FEVAL_BUILTIN)
