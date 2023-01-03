@@ -1,6 +1,6 @@
 /* bashhist.c -- bash interface to the GNU history library. */
 
-/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -979,7 +979,7 @@ histignore_item_func (struct ign *ign)
 }
 
 void
-setup_history_ignore (char *varname)
+setup_history_ignore (const char *varname)
 {
   setup_ignore_patterns (&histignore);
 }

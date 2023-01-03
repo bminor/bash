@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,8 +52,8 @@ int assoc_expand_once = 0;
 /* Ditto for indexed array subscripts -- currently unused */
 int array_expand_once = 0;
 
-static SHELL_VAR *bind_array_var_internal (SHELL_VAR *, arrayind_t, char *, char *, int);
-static SHELL_VAR *assign_array_element_internal (SHELL_VAR *, char *, char *, char *, int, char *, int, array_eltstate_t *);
+static SHELL_VAR *bind_array_var_internal (SHELL_VAR *, arrayind_t, char *, const char *, int);
+static SHELL_VAR *assign_array_element_internal (SHELL_VAR *, const char *, char *, char *, int, const char *, int, array_eltstate_t *);
 
 static void assign_assoc_from_kvlist (SHELL_VAR *, WORD_LIST *, HASH_TABLE *, int);
 
@@ -146,7 +146,7 @@ convert_var_to_assoc (SHELL_VAR *var)
 }
 
 char *
-make_array_variable_value (SHELL_VAR *entry, arrayind_t ind, char *key, char *value, int flags)
+make_array_variable_value (SHELL_VAR *entry, arrayind_t ind, const char *key, const char *value, int flags)
 {
   SHELL_VAR *dentry;
   char *newval;
@@ -188,7 +188,7 @@ make_array_variable_value (SHELL_VAR *entry, arrayind_t ind, char *key, char *va
    XXX - make sure that any dynamic associative array variables recreate the
    hash table on each assignment. BASH_CMDS and BASH_ALIASES already do this */
 static SHELL_VAR *
-bind_assoc_var_internal (SHELL_VAR *entry, HASH_TABLE *hash, char *key, char *value, int flags)
+bind_assoc_var_internal (SHELL_VAR *entry, HASH_TABLE *hash, char *key, const char *value, int flags)
 {
   char *newval;
 
@@ -211,7 +211,7 @@ bind_assoc_var_internal (SHELL_VAR *entry, HASH_TABLE *hash, char *key, char *va
 /* Perform ENTRY[IND]=VALUE or ENTRY[KEY]=VALUE. This is not called for every
    assignment to an associative array; see assign_compound_array_list below. */
 static SHELL_VAR *
-bind_array_var_internal (SHELL_VAR *entry, arrayind_t ind, char *key, char *value, int flags)
+bind_array_var_internal (SHELL_VAR *entry, arrayind_t ind, char *key, const char *value, int flags)
 {
   char *newval;
 
@@ -239,7 +239,7 @@ bind_array_var_internal (SHELL_VAR *entry, arrayind_t ind, char *key, char *valu
    If NAME does not exist, just create an array variable, no matter what
    IND's value may be. */
 SHELL_VAR *
-bind_array_variable (char *name, arrayind_t ind, char *value, int flags)
+bind_array_variable (const char *name, arrayind_t ind, const char *value, int flags)
 {
   SHELL_VAR *entry;
 
@@ -276,7 +276,7 @@ bind_array_element (SHELL_VAR *entry, arrayind_t ind, char *value, int flags)
 }
                     
 SHELL_VAR *
-bind_assoc_variable (SHELL_VAR *entry, char *name, char *key, char *value, int flags)
+bind_assoc_variable (SHELL_VAR *entry, const char *name, char *key, const char *value, int flags)
 {
   if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
     {
@@ -311,7 +311,7 @@ flush_eltstate (array_eltstate_t *estatep)
    assign VALUE to that array element by calling bind_array_variable().
    Flags are ASS_ assignment flags */
 SHELL_VAR *
-assign_array_element (char *name, char *value, int flags, array_eltstate_t *estatep)
+assign_array_element (const char *name, const char *value, int flags, array_eltstate_t *estatep)
 {
   char *sub, *vname;
   int sublen, isassoc, avflags;
@@ -359,8 +359,8 @@ assign_array_element (char *name, char *value, int flags, array_eltstate_t *esta
 }
 
 static SHELL_VAR *
-assign_array_element_internal (SHELL_VAR *entry, char *name, char *vname,
-			       char *sub, int sublen, char *value,
+assign_array_element_internal (SHELL_VAR *entry, const char *name, char *vname,
+			       char *sub, int sublen, const char *value,
 			       int flags, array_eltstate_t *estatep)
 {
   char *akey, *nkey;
@@ -423,7 +423,7 @@ assign_array_element_internal (SHELL_VAR *entry, char *name, char *vname,
    for assignment (e.g., by the `read' builtin).  If FLAGS&2 is non-zero, we
    create an associative array. */
 SHELL_VAR *
-find_or_make_array_variable (char *name, int flags)
+find_or_make_array_variable (const char *name, int flags)
 {
   SHELL_VAR *var;
 
@@ -474,7 +474,7 @@ find_or_make_array_variable (char *name, int flags)
 /* Perform a compound assignment statement for array NAME, where VALUE is
    the text between the parens:  NAME=( VALUE ) */
 SHELL_VAR *
-assign_array_from_string (char *name, char *value, int flags)
+assign_array_from_string (const char *name, char *value, int flags)
 {
   SHELL_VAR *var;
   int vflags;
@@ -618,7 +618,7 @@ kvpair_assignment_p (WORD_LIST *l)
 }
 
 char *
-expand_and_quote_kvpair_word (char *w)
+expand_and_quote_kvpair_word (const char *w)
 {
   char *r, *s, *t;
 
@@ -1186,7 +1186,7 @@ print_assoc_assignment (SHELL_VAR *var, int quoted)
    not be modified. */
 /* We need to reserve 1 for FLAGS, which we pass to skipsubscript. */
 int
-tokenize_array_reference (char *name, int flags, char **subp)
+tokenize_array_reference (const char *name, int flags, char **subp)
 {
   char *t;
   int r, len, isassoc, ssflags;
@@ -1248,12 +1248,12 @@ tokenize_array_reference (char *name, int flags, char **subp)
 int
 valid_array_reference (const char *name, int flags)
 {
-  return tokenize_array_reference ((char *)name, flags, (char **)NULL);
+  return tokenize_array_reference (name, flags, (char **)NULL);
 }
 
 /* Expand the array index beginning at S and extending LEN characters. */
 arrayind_t
-array_expand_index (SHELL_VAR *var, char *s, int len, int flags)
+array_expand_index (SHELL_VAR *var, const char *s, int len, int flags)
 {
   char *exp, *t, *savecmd;
   int expok, eflag;
@@ -1560,7 +1560,7 @@ get_array_value (const char *s, int flags, array_eltstate_t *estatep)
 }
 
 char *
-array_keys (char *s, int quoted, int pflags)
+array_keys (const char *s, int quoted, int pflags)
 {
   int len;
   char *retval, *t, *temp;

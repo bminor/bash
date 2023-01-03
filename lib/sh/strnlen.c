@@ -35,7 +35,7 @@
 /* Find the length of S, but scan at most MAXLEN characters.  If no '\0'
    terminator is found within the first MAXLEN characters, return MAXLEN. */
 size_t
-strnlen (register const char *s, size_t maxlen)
+strnlen (const char *s, size_t maxlen)
 {
   register const char *e;
   size_t n;

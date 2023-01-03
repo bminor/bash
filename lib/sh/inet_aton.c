@@ -94,7 +94,7 @@ static char rcsid[] = "$Id: inet_addr.c,v 1.5 1996/08/14 03:48:37 drepper Exp $"
  * The value returned is in network order.
  */
 u_long
-inet_addr(register const char *cp)
+inet_addr(const char *cp)
 {
 	struct in_addr val;
 
@@ -112,7 +112,7 @@ inet_addr(register const char *cp)
  * cannot distinguish between failure and a local broadcast address.
  */
 int
-inet_aton(register const char *cp, struct in_addr *addr)
+inet_aton(const char *cp, struct in_addr *addr)
 {
 	register u_bits32_t val;
 	register int base, n;

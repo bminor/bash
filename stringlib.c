@@ -1,6 +1,6 @@
 /* stringlib.c - Miscellaneous string functions. */
 
-/* Copyright (C) 1996-2009,2022 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -131,7 +131,7 @@ substring (const char *string, int start, int end)
    replace all occurrences, otherwise replace only the first.
    This returns a new string; the caller should free it. */
 char *
-strsub (char *string, char *pat, char *rep, int global)
+strsub (const char *string, const char *pat, const char *rep, int global)
 {
   size_t patlen, replen, templen, tempsize, i;
   int repl;
@@ -146,8 +146,13 @@ strsub (char *string, char *pat, char *rep, int global)
 	  if (replen)
 	    RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
 
-	  for (r = rep; *r; )	/* can rep == "" */
+#if 0
+	  for (r = (char *)rep; *r; )	/* can rep == "" */
 	    temp[templen++] = *r++;
+#else
+	  memcpy (temp + templen, rep, replen);
+	  templen += replen;
+#endif
 
 	  i += patlen ? patlen : 1;	/* avoid infinite recursion */
 	  repl = global != 0;
@@ -170,9 +175,9 @@ strsub (char *string, char *pat, char *rep, int global)
    globbing.  Backslash may be used to quote C. If (FLAGS & 2) we allow
    backslash to escape backslash as well. */
 char *
-strcreplace (char *string, int c, const char *text, int flags)
+strcreplace (const char *string, int c, const char *text, int flags)
 {
-  char *ret, *p, *r, *t;
+  char *ret, *r, *p, *t;
   size_t len, rlen, ind, tlen;
   int do_glob, escape_backslash;
 
@@ -183,7 +188,7 @@ strcreplace (char *string, int c, const char *text, int flags)
   rlen = len + strlen (string) + 2;
   ret = (char *)xmalloc (rlen);
 
-  for (p = string, r = ret; p && *p; )
+  for (p = (char *)string, r = ret; p && *p; )
     {
       if (*p == c)
 	{

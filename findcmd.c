@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -89,7 +89,7 @@ static struct ignorevar execignore =
 };
 
 void
-setup_exec_ignore (char *varname)
+setup_exec_ignore (const char *varname)
 {
   setup_ignore_patterns (&execignore);
 }

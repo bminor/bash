@@ -44,7 +44,7 @@ extern int zwrite (int, char *, ssize_t);
 /* Dump contents of file descriptor FD to OFD.  FN is the filename for
    error messages (not used right now). */
 int
-zcatfd (int fd, int ofd, char *fn)
+zcatfd (int fd, int ofd, const char *fn)
 {
   ssize_t nr;
   int rval;

@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -145,7 +145,7 @@ static int bash_transpose_shellwords (int, int);
 static int bash_spell_correct_shellword (int, int);
 
 /* Helper functions for Readline. */
-static char *restore_tilde (char *, char *);
+static char *restore_tilde (const char *, char *);
 static char *maybe_restore_tilde (char *, char *);
 
 static char *bash_filename_rewrite_hook (char *, int);
@@ -166,7 +166,7 @@ static void restore_directory_hook (rl_icppfunc_t);
 static int directory_exists (const char *, int);
 
 static void cleanup_expansion_error (void);
-static void maybe_make_readline_line (char *);
+static void maybe_make_readline_line (const char *);
 static void set_up_new_line (char *);
 
 static int check_redir (int);
@@ -181,9 +181,9 @@ static int dynamic_complete_history (int, int);
 static int bash_dabbrev_expand (int, int);
 
 static void initialize_hostname_list (void);
-static void add_host_name (char *);
-static void snarf_hosts_from_file (char *);
-static char **hostnames_matching (char *);
+static void add_host_name (const char *);
+static void snarf_hosts_from_file (const char *);
+static char **hostnames_matching (const char *);
 
 static void _ignore_completion_names (char **, sh_ignore_func_t *);
 static int name_is_acceptable (const char *);
@@ -268,7 +268,7 @@ static int bash_glob_list_expansions (int, int);
 
 #endif /* SPECIFIC_COMPLETION_FUNCTIONS */
 
-static int edit_and_execute_command (int, int, int, char *);
+static int edit_and_execute_command (int, int, int, const char *);
 #if defined (VI_MODE)
 static int vi_edit_and_execute_command (int, int);
 static int bash_vi_complete (int, int);
@@ -715,7 +715,7 @@ bash_push_line (void)
 /* Call this to set the initial text for the next line to read
    from readline. */
 int
-bash_re_edit (char *line)
+bash_re_edit (const char *line)
 {
   FREE (push_to_readline);
 
@@ -781,7 +781,7 @@ initialize_hostname_list (void)
 
 /* Add NAME to the list of hosts. */
 static void
-add_host_name (char *name)
+add_host_name (const char *name)
 {
   if (hostname_list_length + 2 > hostname_list_size)
     {
@@ -796,7 +796,7 @@ add_host_name (char *name)
 #define cr_whitespace(c) ((c) == '\r' || (c) == '\n' || whitespace(c))
 
 static void
-snarf_hosts_from_file (char *filename)
+snarf_hosts_from_file (const char *filename)
 {
   FILE *file;
   char *temp, buffer[256], name[256];
@@ -885,7 +885,7 @@ clear_hostname_list (void)
    Initialize the hostname list the first time if necessary.
    The array is malloc ()'ed, but not the individual strings. */
 static char **
-hostnames_matching (char *text)
+hostnames_matching (const char *text)
 {
   register int i, len, nmatch, rsize;
   char **result;
@@ -938,7 +938,7 @@ hostnames_matching (char *text)
 #define POSIX_VI_EDIT_COMMAND	"fc -e vi"
 
 static int
-edit_and_execute_command (int count, int c, int editing_mode, char *edit_command)
+edit_and_execute_command (int count, int c, int editing_mode, const char *edit_command)
 {
   char *command, *metaval;
   int r, rrs, metaflag;
@@ -2692,7 +2692,7 @@ cleanup_expansion_error (void)
    undo record to get from the readline line buffer contents to the new
    line and make NEW_LINE the current readline line. */
 static void
-maybe_make_readline_line (char *new_line)
+maybe_make_readline_line (const char *new_line)
 {
   if (new_line && strcmp (new_line, rl_line_buffer) != 0)
     {
@@ -3042,7 +3042,7 @@ name_is_acceptable (const char *name)
 
 #if 0
 static int
-ignore_dot_names (char *name)
+ignore_dot_names (const char *name)
 {
   return (name[0] != '.');
 }
@@ -3126,7 +3126,7 @@ bash_ignore_everything (char **names)
    is an expanded filename.  DIRECTORY_PART is the tilde-prefix portion
    of the un-tilde-expanded version of VAL (what the user typed). */
 static char *
-restore_tilde (char *val, char *directory_part)
+restore_tilde (const char *val, char *directory_part)
 {
   int l, vl, dl2, xl;
   char *dh2, *expdir, *ret, *v;

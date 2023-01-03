@@ -48,7 +48,7 @@
    quote CTLESC and CTLNUL with CTLESC.  If (flags&4) is non-zero, we want
    to remove the backslash before any unrecognized escape sequence. */
 char *
-ansicstr (char *string, int len, int flags, int *sawc, int *rlen)
+ansicstr (const char *string, int len, int flags, int *sawc, int *rlen)
 {
   int c, temp;
   char *ret, *r, *s;
@@ -71,7 +71,7 @@ ansicstr (char *string, int len, int flags, int *sawc, int *rlen)
 #else
   ret = (char *)xmalloc (2*len + 1);	/* 2*len for possible CTLESC */
 #endif
-  for (r = ret, s = string; s && *s; )
+  for (r = ret, s = (char *)string; s && *s; )
     {
       c = *s++;
       if (c != '\\' || *s == '\0')
@@ -225,7 +225,7 @@ ansicstr (char *string, int len, int flags, int *sawc, int *rlen)
 /* Take a string STR, possibly containing non-printing characters, and turn it
    into a $'...' ANSI-C style quoted string.  Returns a new string. */
 char *
-ansic_quote (char *str, int flags, int *rlen)
+ansic_quote (const char *str, int flags, int *rlen)
 {
   char *r, *ret, *s;
   int l, rsize;
@@ -246,7 +246,7 @@ ansic_quote (char *str, int flags, int *rlen)
   *r++ = '$';
   *r++ = '\'';
 
-  for (s = str; c = *s; s++)
+  for (s = (char *)str; c = *s; s++)
     {
       b = l = 1;		/* 1 == add backslash; 0 == no backslash */
       clen = 1;
@@ -367,7 +367,7 @@ ansic_shouldquote (const char *string)
 /* $'...' ANSI-C expand the portion of STRING between START and END and
    return the result.  The result cannot be longer than the input string. */
 char *
-ansiexpand (char *string, int start, int end, int *lenp)
+ansiexpand (const char *string, int start, int end, int *lenp)
 {
   char *temp, *t;
   int len, tlen;

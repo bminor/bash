@@ -57,7 +57,7 @@ static int multiplier[7] = { 1, 100000, 10000, 1000, 100, 10, 1 };
    Return 1 if value converted; 0 if invalid integer for either whole or
    fractional parts. */
 int
-uconvert(char *s, long *ip, long *up, char **ep)
+uconvert(const char *s, long *ip, long *up, char **ep)
 {
   int n, mult;
   long ipart, upart;
@@ -69,10 +69,10 @@ uconvert(char *s, long *ip, long *up, char **ep)
   if (s && (*s == '-' || *s == '+'))
     {
       mult = (*s == '-') ? -1 : 1;
-      p = s + 1;
+      p = (char *)s + 1;
     }
   else
-    p = s;
+    p = (char *)s;
 
   for ( ; p && *p; p++)
     {

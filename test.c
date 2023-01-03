@@ -2,7 +2,7 @@
 
 /* Modified to run with the GNU shell Apr 25, 1988 by bfox. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -125,7 +125,7 @@ static int term (void);
 static int and (void);
 static int or (void);
 
-static int filecomp (char *, char *, int);
+static int filecomp (const char *, const char *, int);
 static int arithcomp (char *, char *, int, int);
 static int patcomp (char *, char *, int);
 
@@ -286,7 +286,7 @@ term (void)
 }
 
 static int
-stat_mtime (char *fn, struct stat *st, struct timespec *ts)
+stat_mtime (const char *fn, struct stat *st, struct timespec *ts)
 {
   int r;
 
@@ -298,7 +298,7 @@ stat_mtime (char *fn, struct stat *st, struct timespec *ts)
 }
 
 static int
-filecomp (char *s, char *t, int op)
+filecomp (const char *s, const char *t, int op)
 {
   struct stat st1, st2;
   struct timespec ts1, ts2;

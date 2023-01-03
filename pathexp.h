@@ -1,6 +1,6 @@
 /* pathexp.h -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -97,7 +97,7 @@ struct ignorevar {
 
 extern void setup_ignore_patterns (struct ignorevar *);
 
-extern void setup_glob_ignore (char *);
+extern void setup_glob_ignore (const char *);
 extern int should_ignore_glob_matches (void);
 extern void ignore_glob_matches (char **);
 

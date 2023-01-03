@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,22 +84,22 @@ extern void unquote_bang (char *);
    Start extracting at (SINDEX) as if we had just seen "$(".
    Make (SINDEX) get the position just after the matching ")".
    XFLAGS is additional flags to pass to other extraction functions, */
-extern char *extract_command_subst (char *, int *, int);
+extern char *extract_command_subst (const char *, int *, int);
 
 /* Extract the $[ construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "$[".
    Make (SINDEX) get the position just after the matching "]". */
-extern char *extract_arithmetic_subst (char *, int *);
+extern char *extract_arithmetic_subst (const char *, int *);
 
 #if defined (PROCESS_SUBSTITUTION)
 /* Extract the <( or >( construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "<(".
    Make (SINDEX) get the position just after the matching ")". */
-extern char *extract_process_subst (char *, char *, int *, int);
+extern char *extract_process_subst (const char *, char *, int *, int);
 #endif /* PROCESS_SUBSTITUTION */
 
 /* Extract the name of the variable to bind to from the assignment string. */
-extern char *assignment_name (char *);
+extern char *assignment_name (const char *);
 
 /* Return a single string of all the words present in LIST, separating
    each word with SEP. */
@@ -140,7 +140,7 @@ extern char *strip_trailing_ifs_whitespace (char *, char *, int);
    splitting on the result of expansion. */
 extern int do_assignment (char *);
 extern int do_assignment_no_expand (char *);
-extern int do_word_assignment (WORD_DESC *, int);
+extern int do_word_assignment (const WORD_DESC *, int);
 
 /* Append SOURCE to TARGET at INDEX.  SIZE is the current amount
    of space allocated to TARGET.  SOURCE can be NULL, in which
@@ -165,20 +165,20 @@ extern char *string_rest_of_args (int);
    returning it, but do not perform word splitting.  The call to
    remove_quoted_nulls () is made here because word splitting normally
    takes care of quote removal. */
-extern WORD_LIST *expand_string_unsplit (char *, int);
+extern WORD_LIST *expand_string_unsplit (const char *, int);
 
 /* Expand the rhs of an assignment statement. */
-extern WORD_LIST *expand_string_assignment (char *, int);
+extern WORD_LIST *expand_string_assignment (const char *, int);
 
 /* Expand a prompt string. */
-extern WORD_LIST *expand_prompt_string (char *, int, int);
+extern WORD_LIST *expand_prompt_string (const char *, int, int);
 
 /* Expand STRING just as if you were expanding a word.  This also returns
    a list of words.  Note that filename globbing is *NOT* done for word
    or string expansion, just when the shell is expanding a command.  This
    does parameter expansion, command substitution, arithmetic expansion,
    and word splitting.  Dequote the resultant WORD_LIST before returning. */
-extern WORD_LIST *expand_string (char *, int);
+extern WORD_LIST *expand_string (const char *, int);
 
 /* Convenience functions that expand strings to strings, taking care of
    converting the WORD_LIST * returned by the expand_string* functions
@@ -186,16 +186,16 @@ extern WORD_LIST *expand_string (char *, int);
 extern char *expand_string_to_string (char *, int);
 extern char *expand_string_unsplit_to_string (char *, int);
 extern char *expand_assignment_string_to_string (char *, int);
-extern char *expand_subscript_string (char *, int);
+extern char *expand_subscript_string (const char *, int);
 
 /* Expand an arithmetic expression string */
 extern char *expand_arith_string (char *, int);
 
 /* Expand $'...' and $"..." in a string for code paths that do not. */
-extern char *expand_string_dollar_quote (char *, int);
+extern char *expand_string_dollar_quote (const char *, int);
 
 /* De-quote quoted characters in STRING. */
-extern char *dequote_string (char *);
+extern char *dequote_string (const char *);
 
 /* De-quote CTLESC-escaped CTLESC or CTLNUL characters in STRING. */
 extern char *dequote_escapes (const char *);
@@ -220,7 +220,7 @@ extern WORD_LIST *expand_word_leave_quoted (WORD_DESC *, int);
 extern char *get_dollar_var_value (intmax_t);
 
 /* Quote a string to protect it from word splitting. */
-extern char *quote_string (char *);
+extern char *quote_string (const char *);
 
 /* Quote escape characters (characters special to internals of expansion)
    in a string. */
@@ -234,7 +234,7 @@ extern char *remove_quoted_nulls (char *);
 
 /* Perform quote removal on STRING.  If QUOTED > 0, assume we are obeying the
    backslash quoting rules for within double quotes. */
-extern char *string_quote_removal (char *, int);
+extern char *string_quote_removal (const char *, int);
 
 /* Perform quote removal on word WORD.  This allocates and returns a new
    WORD_DESC *. */
@@ -295,11 +295,11 @@ extern void reap_procsubs (void);
 extern WORD_LIST *list_string_with_quotes (char *);
 
 #if defined (ARRAY_VARS)
-extern char *extract_array_assignment_list (char *, int *);
+extern char *extract_array_assignment_list (const char *, int *);
 #endif
 
 #if defined (COND_COMMAND)
-extern char *remove_backslashes (char *);
+extern char *remove_backslashes (const char *);
 extern char *cond_expand_word (WORD_DESC *, int);
 #endif
 
@@ -317,16 +317,16 @@ extern char *cond_expand_word (WORD_DESC *, int);
 #define SD_ARITHEXP	0x400	/* skip_to_delim during arithmetic expansion */
 #define SD_NOERROR	0x800	/* don't print error messages */
 
-extern int skip_to_delim (char *, int, char *, int);
+extern int skip_to_delim (const char *, int, const char *, int);
 
 #if defined (BANG_HISTORY)
-extern int skip_to_histexp (char *, int, char *, int);
+extern int skip_to_histexp (const char *, int, const char *, int);
 #endif
 
 #if defined (READLINE)
 extern int char_is_quoted (char *, int);
 extern int unclosed_pair (char *, int, char *);
-extern WORD_LIST *split_at_delims (char *, int, const char *, int, int, int *, int *);
+extern WORD_LIST *split_at_delims (const char *, int, const char *, int, int, int *, int *);
 #endif
 
 /* Variables used to keep track of the characters in IFS. */

@@ -1,6 +1,6 @@
 /* locale.c - Miscellaneous internationalization functions. */
 
-/* Copyright (C) 1996-2009,2012,2016-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2012,2016-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -174,7 +174,7 @@ set_default_locale_vars (void)
 /* Set one of the locale categories (specified by VAR) to VALUE.  Returns 1
   if successful, 0 otherwise. */
 int
-set_locale_var (char *var, char *value)
+set_locale_var (const char *var, const char *value)
 {
   int r;
   char *x;
@@ -302,7 +302,7 @@ set_locale_var (char *var, char *value)
    reset_locale_vars() to reset any default values if LC_ALL is unset or
    null. */
 int
-set_lang (char *var, char *value)
+set_lang (const char *var, const char *value)
 {
   FREE (lang);
   if (value)
@@ -334,7 +334,7 @@ set_default_lang (void)
    The precedence is as POSIX.2 specifies:  LC_ALL has precedence over
    the specific locale variables, and LANG, if set, is used as the default. */
 char *
-get_locale_var (char *var)
+get_locale_var (const char *var)
 {
   char *locale;
 
@@ -403,7 +403,7 @@ reset_locale_vars (void)
    is not available, the passed string is returned unchanged.  The
    length of the translated string is returned in LENP, if non-null. */
 char *
-localetrans (char *string, int len, int *lenp)
+localetrans (const char *string, int len, int *lenp)
 {
   char *locale, *t;
   char *translated;
@@ -436,7 +436,7 @@ localetrans (char *string, int len, int *lenp)
   if (default_domain && *default_domain)
     translated = dgettext (default_domain, string);
   else
-    translated = string;
+    translated = (char *)string;
 
   if (translated == string)	/* gettext returns its argument if untranslatable */
     {
@@ -508,7 +508,7 @@ mk_msgstr (char *string, int *foundnlp)
    by the caller.  The length of the translated string is returned in LENP,
    if non-null. */
 char *
-locale_expand (char *string, int start, int end, int lineno, int *lenp)
+locale_expand (const char *string, int start, int end, int lineno, int *lenp)
 {
   int len, tlen, foundnl;
   char *temp, *t, *t2;

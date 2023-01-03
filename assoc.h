@@ -1,7 +1,7 @@
 /* assoc.h -- definitions for the interface exported by assoc.c that allows
    the rest of the shell to manipulate associative array variables. */
 
-/* Copyright (C) 2008,2009-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,9 +41,9 @@ extern void assoc_flush (HASH_TABLE *);
 
 extern int assoc_insert (HASH_TABLE *, char *, char *);
 extern PTR_T assoc_replace (HASH_TABLE *, char *, char *);
-extern void assoc_remove (HASH_TABLE *, char *);
+extern void assoc_remove (HASH_TABLE *, const char *);
 
-extern char *assoc_reference (HASH_TABLE *, char *);
+extern char *assoc_reference (HASH_TABLE *, const char *);
 
 extern char *assoc_subrange (HASH_TABLE *, arrayind_t, arrayind_t, int, int, int);
 extern char *assoc_patsub (HASH_TABLE *, char *, char *, int);

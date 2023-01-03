@@ -1,6 +1,6 @@
 /* bashhist.h -- interface to the bash history functions in bashhist.c. */
 
-/* Copyright (C) 1993-2022 Free Software Foundation,  Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation,  Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -82,7 +82,7 @@ extern void bash_add_history (char *);
 extern int check_add_history (char *, int);
 extern int history_number (void);
 
-extern void setup_history_ignore (char *);
+extern void setup_history_ignore (const char *);
 
 extern char *last_history_line (void);
 

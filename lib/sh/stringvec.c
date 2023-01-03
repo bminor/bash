@@ -60,7 +60,7 @@ strvec_mresize (char **array, int nsize)
 
 /* Return the length of ARRAY, a NULL terminated array of char *. */
 int
-strvec_len (char **array)
+strvec_len (char * const *array)
 {
   register int i;
 
@@ -92,7 +92,7 @@ strvec_dispose (char **array)
 }
 
 int
-strvec_remove (char **array, char *name)
+strvec_remove (char **array, const char *name)
 {
   register int i, j;
   char *x;
@@ -115,7 +115,7 @@ strvec_remove (char **array, char *name)
 /* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
    ARRAY should be NULL terminated. */
 int
-strvec_search (char **array, char *name)
+strvec_search (char **array, const char *name)
 {
   int i;
 
@@ -128,7 +128,7 @@ strvec_search (char **array, char *name)
 
 /* Allocate and return a new copy of ARRAY and its contents. */
 char **
-strvec_copy (char **array)
+strvec_copy (char * const *array)
 {
   register int i;
   int len;

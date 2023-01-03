@@ -7,7 +7,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 2008,2009,2011-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2011-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -103,7 +103,7 @@ assoc_replace (HASH_TABLE *hash, char *key, char *value)
 }
 
 void
-assoc_remove (HASH_TABLE *hash, char *string)
+assoc_remove (HASH_TABLE *hash, const char *string)
 {
   BUCKET_CONTENTS *b;
 
@@ -117,7 +117,7 @@ assoc_remove (HASH_TABLE *hash, char *string)
 }
 
 char *
-assoc_reference (HASH_TABLE *hash, char *string)
+assoc_reference (HASH_TABLE *hash, const char *string)
 {
   BUCKET_CONTENTS *b;
 

@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,7 +29,7 @@
 /* Functions from expr.c. */
 #define EXP_EXPANDED	0x01
 
-extern intmax_t evalexp (char *, int, int *);
+extern intmax_t evalexp (const char *, int, int *);
 
 /* Functions from print_cmd.c. */
 #define FUNC_MULTILINE	0x01
@@ -109,7 +109,7 @@ extern char **brace_expand (char *);
 extern int yyparse (void);
 extern int return_EOF (void);
 extern void push_token (int);
-extern char *xparse_dolparen (char *, char *, int *, int);
+extern char *xparse_dolparen (const char *, char *, int *, int);
 extern COMMAND *parse_string_to_command (char *, int);
 extern void reset_parser (void);
 extern void reset_readahead_token (void);
@@ -138,13 +138,13 @@ extern char *history_delimiting_chars (const char *);
 /* Declarations for functions defined in locale.c */
 extern void set_default_locale (void);
 extern void set_default_locale_vars (void);
-extern int set_locale_var (char *, char *);
-extern int set_lang (char *, char *);
+extern int set_locale_var (const char *, const char *);
+extern int set_lang (const char *, const char *);
 extern void set_default_lang (void);
-extern char *get_locale_var (char *);
-extern char *localetrans (char *, int, int *);
+extern char *get_locale_var (const char *);
+extern char *localetrans (const char *, int, int *);
 extern char *mk_msgstr (char *, int *);
-extern char *locale_expand (char *, int, int, int, int *);
+extern char *locale_expand (const char *, int, int, int, int *);
 #ifndef locale_decpoint
 extern int locale_decpoint (void);
 #endif
@@ -165,8 +165,8 @@ extern char *find_token_in_alist (int, STRING_INT_ALIST *, int);
 extern int find_index_in_alist (char *, STRING_INT_ALIST *, int);
 
 extern char *substring (const char *, int, int);
-extern char *strsub (char *, char *, char *, int);
-extern char *strcreplace (char *, int, const char *, int);
+extern char *strsub (const char *, const char *, const char *, int);
+extern char *strcreplace (const char *, int, const char *, int);
 extern void strip_leading (char *);
 extern void strip_trailing (char *, int, int);
 extern void xbcopy (char *, char *, size_t);
@@ -397,12 +397,12 @@ extern STRINGLIST *strlist_create (int);
 extern STRINGLIST *strlist_resize (STRINGLIST *, int);
 extern void strlist_flush (STRINGLIST *);
 extern void strlist_dispose (STRINGLIST *);
-extern int strlist_remove (STRINGLIST *, char *);
+extern int strlist_remove (STRINGLIST *, const char *);
 extern STRINGLIST *strlist_copy (STRINGLIST *);
 extern STRINGLIST *strlist_merge (STRINGLIST *, STRINGLIST *);
 extern STRINGLIST *strlist_append (STRINGLIST *, STRINGLIST *);
-extern STRINGLIST *strlist_prefix_suffix (STRINGLIST *, char *, char *);
-extern void strlist_print (STRINGLIST *, char *);
+extern STRINGLIST *strlist_prefix_suffix (STRINGLIST *, const char *, const char *);
+extern void strlist_print (STRINGLIST *, const char *);
 extern void strlist_walk (STRINGLIST *, sh_strlist_map_func_t *);
 extern void strlist_sort (STRINGLIST *);
 
@@ -414,10 +414,10 @@ extern char **strvec_mcreate (int);
 extern char **strvec_mresize (char **, int);
 extern void strvec_flush (char **);
 extern void strvec_dispose (char **);
-extern int strvec_remove (char **, char *);
-extern int strvec_len (char **);
-extern int strvec_search (char **, char *);
-extern char **strvec_copy (char **);
+extern int strvec_remove (char **, const char *);
+extern int strvec_len (char * const *);
+extern int strvec_search (char **, const char *);
+extern char **strvec_copy (char * const *);
 extern int strvec_posixcmp (char **, char **);
 extern int strvec_strcmp (char **, char **);
 extern void strvec_sort (char **, int);
@@ -471,10 +471,10 @@ extern uintmax_t strtoumax (const char *, char **, int);
 #endif
 
 /* declarations for functions defined in lib/sh/strtrans.c */
-extern char *ansicstr (char *, int, int, int *, int *);
-extern char *ansic_quote (char *, int, int *);
+extern char *ansicstr (const char *, int, int, int *, int *);
+extern char *ansic_quote (const char *, int, int *);
 extern int ansic_shouldquote (const char *);
-extern char *ansiexpand (char *, int, int, int *);
+extern char *ansiexpand (const char *, int, int, int *);
 
 /* declarations for functions defined in lib/sh/strvis.c */
 extern int sh_charvis (const char *, size_t *, size_t, char *, size_t *);
@@ -492,13 +492,13 @@ extern void print_timeval ();
 #define MT_USERANDOM		0x0004
 #define MT_TEMPLATE		0x0008
 
-extern char *sh_mktmpname (char *, int);
-extern int sh_mktmpfd (char *, int, char **);
-/* extern FILE *sh_mktmpfp (char *, int, char **); */
-extern char *sh_mktmpdir (char *, int);
+extern char *sh_mktmpname (const char *, int);
+extern int sh_mktmpfd (const char *, int, char **);
+/* extern FILE *sh_mktmpfp (const char *, int, char **); */
+extern char *sh_mktmpdir (const char *, int);
 
 /* declarations for functions defined in lib/sh/uconvert.c */
-extern int uconvert (char *, long *, long *, char **);
+extern int uconvert (const char *, long *, long *, char **);
 
 /* declarations for functions defined in lib/sh/ufuncs.c */
 extern unsigned int falarm (unsigned int, unsigned int);
@@ -525,7 +525,7 @@ extern int wcsnwidth (const wchar_t *, size_t, int);
 extern void get_new_window_size (int, int *, int *);
 
 /* declarations for functions defined in lib/sh/zcatfd.c */
-extern int zcatfd (int, int, char *);
+extern int zcatfd (int, int, const char *);
 
 /* declarations for functions defined in lib/sh/zgetline.c */
 extern ssize_t zgetline (int, char **, size_t *, int, int);

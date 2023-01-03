@@ -40,7 +40,7 @@
 #include <maxpath.h>
 #include <stdc.h>
 
-static int mindist (char *, char *, char *);
+static int mindist (const char *, char *, char *);
 static int spdist (char *, char *);
 
 /*
@@ -102,7 +102,7 @@ spname(char *oldname, char *newname)
  *  Search directory for a guess
  */
 static int
-mindist(char *dir, char *guess, char *best)
+mindist(const char *dir, char *guess, char *best)
 {
   DIR *fd;
   struct dirent *dp;

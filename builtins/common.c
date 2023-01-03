@@ -185,19 +185,19 @@ no_options (WORD_LIST *list)
 }
 
 void
-sh_needarg (char *s)
+sh_needarg (const char *s)
 {
   builtin_error (_("%s: option requires an argument"), s);
 }
 
 void
-sh_neednumarg (char *s)
+sh_neednumarg (const char *s)
 {
   builtin_error (_("%s: numeric argument required"), s);
 }
 
 void
-sh_notfound (char *s)
+sh_notfound (const char *s)
 {
   builtin_error (_("%s: not found"), s);
 }
@@ -205,25 +205,25 @@ sh_notfound (char *s)
 /* Function called when one of the builtin commands detects an invalid
    option. */
 void
-sh_invalidopt (char *s)
+sh_invalidopt (const char *s)
 {
   builtin_error (_("%s: invalid option"), s);
 }
 
 void
-sh_invalidoptname (char *s)
+sh_invalidoptname (const char *s)
 {
   builtin_error (_("%s: invalid option name"), s);
 }
 
 void
-sh_invalidid (char *s)
+sh_invalidid (const char *s)
 {
   builtin_error (_("`%s': not a valid identifier"), s);
 }
 
 void
-sh_invalidnum (char *s)
+sh_invalidnum (const char *s)
 {
   char *msg;
 
@@ -237,13 +237,13 @@ sh_invalidnum (char *s)
 }
 
 void
-sh_invalidsig (char *s)
+sh_invalidsig (const char *s)
 {
   builtin_error (_("%s: invalid signal specification"), s);
 }
 
 void
-sh_badpid (char *s)
+sh_badpid (const char *s)
 {
   builtin_error (_("`%s': not a pid or valid job spec"), s);
 }
@@ -261,7 +261,7 @@ sh_noassign (const char *s)
 }
 
 void
-sh_erange (char *s, char *desc)
+sh_erange (const char *s, const char *desc)
 {
   if (s)
     builtin_error (_("%s: %s out of range"), s, desc ? desc : _("argument"));
@@ -271,13 +271,13 @@ sh_erange (char *s, char *desc)
 
 #if defined (JOB_CONTROL)
 void
-sh_badjob (char *s)
+sh_badjob (const char *s)
 {
   builtin_error (_("%s: no such job"), s);
 }
 
 void
-sh_nojobs (char *s)
+sh_nojobs (const char *s)
 {
   if (s)
     builtin_error (_("%s: no job control"), s);
@@ -288,7 +288,7 @@ sh_nojobs (char *s)
 
 #if defined (RESTRICTED_SHELL)
 void
-sh_restricted (char *s)
+sh_restricted (const char *s)
 {
   if (s)
     builtin_error (_("%s: restricted"), s);
@@ -298,7 +298,7 @@ sh_restricted (char *s)
 #endif
 
 void
-sh_notbuiltin (char *s)
+sh_notbuiltin (const char *s)
 {
   builtin_error (_("%s: not a shell builtin"), s);
 }
@@ -594,7 +594,7 @@ read_octal (char *string)
 char *the_current_working_directory = (char *)NULL;
 
 char *
-get_working_directory (char *for_whom)
+get_working_directory (const char *for_whom)
 {
   if (no_symbolic_links)
     {
@@ -623,7 +623,7 @@ get_working_directory (char *for_whom)
 
 /* Make NAME our internal idea of the current working directory. */
 void
-set_working_directory (char *name)
+set_working_directory (const char *name)
 {
   FREE (the_current_working_directory);
   the_current_working_directory = savestring (name);
@@ -905,7 +905,7 @@ find_special_builtin (const char *name)
 }
 
 static int
-shell_builtin_compare (struct builtin *sbp1, struct builtin *sbp2)
+shell_builtin_compare (const struct builtin *sbp1, const struct builtin *sbp2)
 {
   int result;
 

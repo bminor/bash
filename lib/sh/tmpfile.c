@@ -135,9 +135,10 @@ sh_seedrand (void)
 }
 
 char *
-sh_mktmpname (char *nameroot, int flags)
+sh_mktmpname (const char *nameroot, int flags)
 {
-  char *filename, *tdir, *lroot;
+  char *filename, *tdir;
+  const char *lroot;
   struct stat sb;
   int r, tdlen;
   static int seeded = 0;
@@ -196,9 +197,10 @@ sh_mktmpname (char *nameroot, int flags)
 }
 
 int
-sh_mktmpfd (char *nameroot, int flags, char **namep)
+sh_mktmpfd (const char *nameroot, int flags, char **namep)
 {
-  char *filename, *tdir, *lroot;
+  char *filename, *tdir;
+  const char *lroot;
   int fd, tdlen;
   
   filename = (char *)xmalloc (PATH_MAX + 1);
@@ -259,7 +261,7 @@ sh_mktmpfd (char *nameroot, int flags, char **namep)
 }
 
 FILE *
-sh_mktmpfp (char *nameroot, int flags, char **namep)
+sh_mktmpfp (const char *nameroot, int flags, char **namep)
 {
   int fd;
   FILE *fp;
@@ -274,9 +276,10 @@ sh_mktmpfp (char *nameroot, int flags, char **namep)
 }
 
 char *
-sh_mktmpdir (char *nameroot, int flags)
+sh_mktmpdir (const char *nameroot, int flags)
 {
-  char *filename, *tdir, *lroot, *dirname;
+  char *filename, *tdir, *dirname;
+  const char *lroot;
   int fd, tdlen;
   
 #ifdef USE_MKDTEMP

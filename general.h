@@ -1,6 +1,6 @@
 /* general.h -- defines that everybody likes to use. */
 
-/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -226,14 +226,14 @@ typedef void sh_vmsg_func_t (const char *, ...);	/* printf(3)-like */
 
 /* Specific function pointer typedefs.  Most of these could be done
    with #defines. */
-typedef void sh_sv_func_t (char *);	/* sh_vcpfunc_t */
+typedef void sh_sv_func_t (const char *);
 typedef void sh_free_func_t (PTR_T);	/* sh_vptrfunc_t */
 typedef void sh_resetsig_func_t (int);	/* sh_vintfunc_t */
 
 typedef int sh_ignore_func_t (const char *);	/* sh_icpfunc_t */
 
 typedef int sh_assign_func_t (const char *);
-typedef int sh_wassign_func_t (WORD_DESC *, int);
+typedef int sh_wassign_func_t (const WORD_DESC *, int);
 
 typedef int sh_load_func_t (char *);
 typedef void sh_unload_func_t (char *);

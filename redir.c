@@ -103,11 +103,11 @@ static int undoablefd (int);
 static int do_redirection_internal (REDIRECT *, int, char **);
 
 static char *heredoc_expand (WORD_DESC *, enum r_instruction, size_t *);
-static int heredoc_write (int, char *, size_t);
+static int heredoc_write (int, const char *, size_t);
 static int here_document_to_fd (WORD_DESC *, enum r_instruction);
 
 static int redir_special_open (int, char *, int, int, enum r_instruction);
-static int noclobber_open (char *, int, int, enum r_instruction);
+static int noclobber_open (const char *, int, int, enum r_instruction);
 static int redir_open (char *, int, int, enum r_instruction);
 
 static int redir_varassign (REDIRECT *, int);
@@ -400,7 +400,7 @@ heredoc_expand (WORD_DESC *redirectee, enum r_instruction ri, size_t *lenp)
 /* Write HEREDOC (of length HDLEN) to FD, returning 0 on success and ERRNO on
    error. Don't handle interrupts. */
 static int
-heredoc_write (int fd, char *heredoc, size_t herelen)
+heredoc_write (int fd, const char *heredoc, size_t herelen)
 {
   ssize_t nw;
   int e;
@@ -646,7 +646,7 @@ redir_special_open (int spec, char *filename, int flags, int mode, enum r_instru
    race conditions and avoiding the problem where the file is replaced
    between the stat(2) and open(2). */
 static int
-noclobber_open (char *filename, int flags, int mode, enum r_instruction ri)
+noclobber_open (const char *filename, int flags, int mode, enum r_instruction ri)
 {
   int r, fd;
   struct stat finfo, finfo2;

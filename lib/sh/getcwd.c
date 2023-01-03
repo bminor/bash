@@ -73,7 +73,7 @@ extern int errno;
    the inode corresponding to PATH/DIR is identical to THISINO. */
 #if !defined (D_FILENO_AVAILABLE)
 static int
-_path_checkino (char *dotp, char *name, ino_t thisino)
+_path_checkino (const char *dotp, const char *name, ino_t thisino)
 {
   char *fullpath;
   int r, e;

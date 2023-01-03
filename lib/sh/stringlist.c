@@ -97,7 +97,7 @@ strlist_dispose (STRINGLIST *sl)
 }
 
 int
-strlist_remove (STRINGLIST *sl, char *s)
+strlist_remove (STRINGLIST *sl, const char *s)
 {
   int r;
 
@@ -179,7 +179,7 @@ strlist_append (STRINGLIST *m1, STRINGLIST *m2)
 }
 
 STRINGLIST *
-strlist_prefix_suffix (STRINGLIST *sl, char *prefix, char *suffix)
+strlist_prefix_suffix (STRINGLIST *sl, const char *prefix, const char *suffix)
 {
   int plen, slen, tlen, llen, i;
   char *t;
@@ -211,7 +211,7 @@ strlist_prefix_suffix (STRINGLIST *sl, char *prefix, char *suffix)
 }
    
 void
-strlist_print (STRINGLIST *sl, char *prefix)
+strlist_print (STRINGLIST *sl, const char *prefix)
 {
   register int i;
 

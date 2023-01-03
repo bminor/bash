@@ -4202,7 +4202,7 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
    called by the word expansion code and so does not have to reset as much
    parser state before calling yyparse(). */
 char *
-xparse_dolparen (char *base, char *string, int *indp, int flags)
+xparse_dolparen (const char *base, char *string, int *indp, int flags)
 {
   sh_parser_state_t ps;
   sh_input_line_state_t ls;

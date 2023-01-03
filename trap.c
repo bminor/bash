@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -85,7 +85,7 @@ static void restore_signal (int);
 static void reset_or_restore_signal_handlers (sh_resetsig_func_t *);
 static void reinit_trap (int);
 
-static void trap_if_untrapped (int, char *);
+static void trap_if_untrapped (int, const char *);
 
 /* Variables used here but defined in other files. */
 
@@ -232,7 +232,7 @@ signal_name (int sig)
    then (int)2 is returned.  Return NO_SIG if STRING doesn't
    contain a valid signal descriptor. */
 int
-decode_signal (char *string, int flags)
+decode_signal (const char *string, int flags)
 {
   intmax_t sig;
   char *name;
@@ -639,7 +639,7 @@ check_signals_and_traps (void)
 #ifdef INCLUDE_UNUSED
 /* Make COMMAND_STRING be executed when SIGCHLD is caught. */
 void
-set_sigchld_trap (char *command_string)
+set_sigchld_trap (const char *command_string)
 {
   set_signal (SIGCHLD, command_string);
 }
@@ -651,7 +651,7 @@ set_sigchld_trap (char *command_string)
    reset the disposition to the default and not have the original signal
    accidentally restored, undoing the user's command. */
 void
-maybe_set_sigchld_trap (char *command_string)
+maybe_set_sigchld_trap (const char *command_string)
 {
   if ((sigmodes[SIGCHLD] & SIG_TRAPPED) == 0 && trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER)
     set_signal (SIGCHLD, command_string);
@@ -685,14 +685,14 @@ queue_sigchld_trap (int nchild)
 
 /* Set a trap for SIG only if SIG is not already trapped. */
 static inline void
-trap_if_untrapped (int sig, char *command)
+trap_if_untrapped (int sig, const char *command)
 {
   if ((sigmodes[sig] & SIG_TRAPPED) == 0)
     set_signal (sig, command);
 }
 
 void
-set_debug_trap (char *command)
+set_debug_trap (const char *command)
 {
   set_signal (DEBUG_TRAP, command);
 }
@@ -704,38 +704,38 @@ set_debug_trap (char *command)
    SIG_TRAPPED will be set and we don't bother restoring the original trap string.
    This is used by both functions and the source builtin. */
 void
-maybe_set_debug_trap (char *command)
+maybe_set_debug_trap (const char *command)
 {
   trap_if_untrapped (DEBUG_TRAP, command);
 }
 
 void
-set_error_trap (char *command)
+set_error_trap (const char *command)
 {
   set_signal (ERROR_TRAP, command);
 }
 
 void
-maybe_set_error_trap (char *command)
+maybe_set_error_trap (const char *command)
 {
   trap_if_untrapped (ERROR_TRAP, command);
 }
 
 void
-set_return_trap (char *command)
+set_return_trap (const char *command)
 {
   set_signal (RETURN_TRAP, command);
 }
 
 void
-maybe_set_return_trap (char *command)
+maybe_set_return_trap (const char *command)
 {
   trap_if_untrapped (RETURN_TRAP, command);
 }
 
 #ifdef INCLUDE_UNUSED
 void
-set_sigint_trap (char *command)
+set_sigint_trap (const char *command)
 {
   set_signal (SIGINT, command);
 }
@@ -780,7 +780,7 @@ trap_to_sighandler (int sig)
 
 /* Set SIG to call STRING as a command. */
 void
-set_signal (int sig, char *string)
+set_signal (int sig, const char *string)
 {
   sigset_t set, oset;
 

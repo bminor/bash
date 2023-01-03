@@ -1,6 +1,6 @@
 /* trap.h -- data structures used in the trap mechanism. */
 
-/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -73,20 +73,20 @@ extern void initialize_traps (void);
 extern void run_pending_traps (void);
 
 extern void queue_sigchld_trap (int);
-extern void maybe_set_sigchld_trap (char *);
+extern void maybe_set_sigchld_trap (const char *);
 extern void set_impossible_sigchld_trap (void);
-extern void set_sigchld_trap (char *);
+extern void set_sigchld_trap (const char *);
 
-extern void set_debug_trap (char *);
-extern void set_error_trap (char *);
-extern void set_return_trap (char *);
+extern void set_debug_trap (const char *);
+extern void set_error_trap (const char *);
+extern void set_return_trap (const char *);
 
-extern void maybe_set_debug_trap (char *);
-extern void maybe_set_error_trap (char *);
-extern void maybe_set_return_trap (char *);
+extern void maybe_set_debug_trap (const char *);
+extern void maybe_set_error_trap (const char *);
+extern void maybe_set_return_trap (const char *);
 
-extern void set_sigint_trap (char *);
-extern void set_signal (int, char *);
+extern void set_sigint_trap (const char *);
+extern void set_signal (int, const char *);
 
 extern void restore_default_signal (int);
 extern void ignore_signal (int);
@@ -106,7 +106,7 @@ extern void get_all_original_signals (void);
 
 extern char *signal_name (int);
 
-extern int decode_signal (char *, int);
+extern int decode_signal (const char *, int);
 extern void run_interrupt_trap (int);
 extern int maybe_call_trap_handler (int);
 extern int signal_is_special (int);

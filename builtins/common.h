@@ -88,22 +88,22 @@ extern void no_args (WORD_LIST *);
 extern int no_options (WORD_LIST *);
 
 /* common error message functions */
-extern void sh_needarg (char *);
-extern void sh_neednumarg (char *);
-extern void sh_notfound (char *);
-extern void sh_invalidopt (char *);
-extern void sh_invalidoptname (char *);
-extern void sh_invalidid (char *);
-extern void sh_invalidnum (char *);
-extern void sh_invalidsig (char *);
+extern void sh_needarg (const char *);
+extern void sh_neednumarg (const char *);
+extern void sh_notfound (const char *);
+extern void sh_invalidopt (const char *);
+extern void sh_invalidoptname (const char *);
+extern void sh_invalidid (const char *);
+extern void sh_invalidnum (const char *);
+extern void sh_invalidsig (const char *);
 extern void sh_readonly (const char *);
 extern void sh_noassign (const char *);
-extern void sh_erange (char *, char *);
-extern void sh_badpid (char *);
-extern void sh_badjob (char *);
-extern void sh_nojobs (char *);
-extern void sh_restricted (char *);
-extern void sh_notbuiltin (char *);
+extern void sh_erange (const char *, const char *);
+extern void sh_badpid (const char *);
+extern void sh_badjob (const char *);
+extern void sh_nojobs (const char *);
+extern void sh_restricted (const char *);
+extern void sh_notbuiltin (const char *);
 extern void sh_wrerror (void);
 extern void sh_ttyerror (int);
 extern int sh_chkwrite (int);
@@ -123,8 +123,8 @@ extern int read_octal (char *);
 
 /* Keeps track of the current working directory. */
 extern char *the_current_working_directory;
-extern char *get_working_directory (char *);
-extern void set_working_directory (char *);
+extern char *get_working_directory (const char *);
+extern void set_working_directory (const char *);
 
 #if defined (JOB_CONTROL)
 extern int get_job_by_name (const char *, int);

@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -111,7 +111,7 @@ static int it_init_setopts (ITEMLIST *);
 static int it_init_shopts (ITEMLIST *);
 
 static int shouldexp_filterpat (char *);
-static char *preproc_filterpat (char *, const char *);
+static char *preproc_filterpat (const char *, const char *);
 
 static void init_itemlist_from_varlist (ITEMLIST *, SVFUNC *);
 
@@ -140,7 +140,7 @@ static SHELL_VAR *bind_comp_words (WORD_LIST *);
 #endif
 static void bind_compfunc_variables (char *, int, WORD_LIST *, int, int);
 static void unbind_compfunc_variables (int);
-static WORD_LIST *build_arg_list (char *, const char *, const char *, WORD_LIST *, int);
+static WORD_LIST *build_arg_list (const char *, const char *, const char *, WORD_LIST *, int);
 static WORD_LIST *command_line_to_word_list (char *, int, int, int *, int *);
 
 static int compgen_compspec = 0;	/* are we generating completions for compgen? */
@@ -263,7 +263,7 @@ shouldexp_filterpat (char *s)
    quote a `&' and inhibit substitution.  Returns a new string.  This just
    calls stringlib.c:strcreplace(). */
 static char *
-preproc_filterpat (char *pat, const char *text)
+preproc_filterpat (const char *pat, const char *text)
 {
   char *ret;
 
@@ -1004,7 +1004,7 @@ unbind_compfunc_variables (int exported)
    make do with the COMP_LINE and COMP_POINT variables. */
 
 static WORD_LIST *
-build_arg_list (char *cmd, const char *cname, const char *text, WORD_LIST *lwords, int ind)
+build_arg_list (const char *cmd, const char *cname, const char *text, WORD_LIST *lwords, int ind)
 {
   WORD_LIST *ret, *cl, *l;
   WORD_DESC *w;

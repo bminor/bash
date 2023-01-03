@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -259,7 +259,7 @@ extern void initialize_shell_variables (char **, int);
 
 extern int validate_inherited_value (SHELL_VAR *, int);
 
-extern SHELL_VAR *set_if_not (char *, char *);
+extern SHELL_VAR *set_if_not (const char *, const char *);
 
 extern void sh_set_lines_and_columns (int, int);
 extern void set_pwd (void);
@@ -286,11 +286,11 @@ extern SHELL_VAR *find_shell_variable (const char *);
 extern SHELL_VAR *find_tempenv_variable (const char *);
 extern SHELL_VAR *find_variable_no_invisible (const char *);
 extern SHELL_VAR *find_variable_for_assignment (const char *);
-extern char *nameref_transform_name (char *, int);
+extern char *nameref_transform_name (const char *, int);
 extern SHELL_VAR *copy_variable (SHELL_VAR *);
 extern SHELL_VAR *make_local_variable (const char *, int);
-extern SHELL_VAR *bind_variable (const char *, char *, int);
-extern SHELL_VAR *bind_global_variable (const char *, char *, int);
+extern SHELL_VAR *bind_variable (const char *, const char *, int);
+extern SHELL_VAR *bind_global_variable (const char *, const char *, int);
 extern SHELL_VAR *bind_function (const char *, COMMAND *);
 
 extern void bind_function_def (const char *, FUNCTION_DEF *, int);
@@ -316,13 +316,13 @@ extern char **add_or_supercede_exported_var (char *, int);
 extern char *get_variable_value (SHELL_VAR *);
 extern char *get_string_value (const char *);
 extern char *sh_get_env_value (const char *);
-extern char *make_variable_value (SHELL_VAR *, char *, int);
+extern char *make_variable_value (SHELL_VAR *, const char *, int);
 
 extern SHELL_VAR *bind_variable_value (SHELL_VAR *, char *, int);
-extern SHELL_VAR *bind_int_variable (char *, char *, int);
-extern SHELL_VAR *bind_var_to_int (char *, intmax_t, int);
+extern SHELL_VAR *bind_int_variable (const char *, const char *, int);
+extern SHELL_VAR *bind_var_to_int (const char *, intmax_t, int);
 
-extern int assign_in_env (WORD_DESC *, int);
+extern int assign_in_env (const WORD_DESC *, int);
 
 extern int unbind_variable (const char *);
 extern int check_unbind_variable (const char *);
@@ -391,11 +391,11 @@ extern void print_var_value (SHELL_VAR *, int);
 extern void print_var_function (SHELL_VAR *);
 
 #if defined (ARRAY_VARS)
-extern SHELL_VAR *make_new_array_variable (char *);
-extern SHELL_VAR *make_local_array_variable (char *, int);
+extern SHELL_VAR *make_new_array_variable (const char *);
+extern SHELL_VAR *make_local_array_variable (const char *, int);
 
-extern SHELL_VAR *make_new_assoc_variable (char *);
-extern SHELL_VAR *make_local_assoc_variable (char *, int);
+extern SHELL_VAR *make_new_assoc_variable (const char *);
+extern SHELL_VAR *make_local_assoc_variable (const char *, int);
 
 extern void set_pipestatus_array (int *, int);
 extern ARRAY *save_pipestatus_array (void);
@@ -406,7 +406,7 @@ extern void set_pipestatus_from_exit (int);
 
 /* The variable in NAME has just had its state changed.  Check to see if it
    is one of the special ones where something special happens. */
-extern void stupidly_hack_special_variables (char *);
+extern void stupidly_hack_special_variables (const char *);
 
 /* Reinitialize some special variables that have external effects upon unset
    when the shell reinitializes itself. */
@@ -416,47 +416,47 @@ extern int get_random_number (void);
 
 /* The `special variable' functions that get called when a particular
    variable is set. */
-extern void sv_ifs (char *);
-extern void sv_path (char *);
-extern void sv_mail (char *);
-extern void sv_funcnest (char *);
-extern void sv_execignore (char *);
-extern void sv_globignore (char *);
-extern void sv_ignoreeof (char *);
-extern void sv_strict_posix (char *);
-extern void sv_optind (char *);
-extern void sv_opterr (char *);
-extern void sv_locale (char *);
-extern void sv_xtracefd (char *);
-extern void sv_shcompat (char *);
+extern void sv_ifs (const char *);
+extern void sv_path (const char *);
+extern void sv_mail (const char *);
+extern void sv_funcnest (const char *);
+extern void sv_execignore (const char *);
+extern void sv_globignore (const char *);
+extern void sv_ignoreeof (const char *);
+extern void sv_strict_posix (const char *);
+extern void sv_optind (const char *);
+extern void sv_opterr (const char *);
+extern void sv_locale (const char *);
+extern void sv_xtracefd (const char *);
+extern void sv_shcompat (const char *);
 
 #if defined (READLINE)
-extern void sv_comp_wordbreaks (char *);
-extern void sv_terminal (char *);
-extern void sv_hostfile (char *);
-extern void sv_winsize (char *);
+extern void sv_comp_wordbreaks (const char *);
+extern void sv_terminal (const char *);
+extern void sv_hostfile (const char *);
+extern void sv_winsize (const char *);
 #endif
 
 #if defined (__CYGWIN__)
-extern void sv_home (char *);
+extern void sv_home (const char *);
 #endif
 
 #if defined (HISTORY)
-extern void sv_histsize (char *);
-extern void sv_histignore (char *);
-extern void sv_history_control (char *);
+extern void sv_histsize (const char *);
+extern void sv_histignore (const char *);
+extern void sv_history_control (const char *);
 #  if defined (BANG_HISTORY)
-extern void sv_histchars (char *);
+extern void sv_histchars (const char *);
 #  endif
-extern void sv_histtimefmt (char *);
+extern void sv_histtimefmt (const char *);
 #endif /* HISTORY */
 
 #if defined (HAVE_TZSET)
-extern void sv_tz (char *);
+extern void sv_tz (const char *);
 #endif
 
 #if defined (JOB_CONTROL)
-extern void sv_childmax (char *);
+extern void sv_childmax (const char *);
 #endif
 
 #endif /* !_VARIABLES_H_ */

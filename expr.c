@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -196,12 +196,12 @@ static void	evalerror (const char *);
 static void	pushexp (void);
 static void	popexp (void);
 static void	expr_unwind (void);
-static void	expr_bind_variable (char *, char *);
+static void	expr_bind_variable (const char *, const char *);
 #if defined (ARRAY_VARS)
-static void	expr_bind_array_element (char *, arrayind_t, char *);
+static void	expr_bind_array_element (const char *, arrayind_t, const char *);
 #endif
 
-static intmax_t subexpr (char *);
+static intmax_t subexpr (const char *);
 
 static intmax_t	expcomma (void);
 static intmax_t expassign (void);
@@ -320,7 +320,7 @@ expr_unwind (void)
 }
 
 static void
-expr_bind_variable (char *lhs, char *rhs)
+expr_bind_variable (const char *lhs, const char *rhs)
 {
   SHELL_VAR *v;
   int aflags;
@@ -364,7 +364,7 @@ expr_skipsubscript (char *vp, char *cp)
 /* Rewrite tok, which is of the form vname[expression], to vname[ind], where
    IND is the already-calculated value of expression. */
 static void
-expr_bind_array_element (char *tok, arrayind_t ind, char *rhs)
+expr_bind_array_element (const char *tok, arrayind_t ind, const char *rhs)
 {
   char *lhs, *vname;
   size_t llen;
@@ -399,7 +399,7 @@ expr_bind_array_element (char *tok, arrayind_t ind, char *rhs)
    safe to let the loop terminate when expr_depth == 0, without freeing up
    any of the expr_depth[0] stuff. */
 intmax_t
-evalexp (char *expr, int flags, int *validp)
+evalexp (const char *expr, int flags, int *validp)
 {
   intmax_t val;
   int c;
@@ -441,12 +441,12 @@ evalexp (char *expr, int flags, int *validp)
 }
 
 static intmax_t
-subexpr (char *expr)
+subexpr (const char *expr)
 {
   intmax_t val;
   char *p;
 
-  for (p = expr; p && *p && cr_whitespace (*p); p++)
+  for (p = (char *)expr; p && *p && cr_whitespace (*p); p++)
     ;
 
   if (p == NULL || *p == '\0')
@@ -1232,7 +1232,7 @@ expr_streval (char *tok, int e, struct lvalue *lvalue)
   return (tval);
 }
 
-static int
+static inline int
 _is_multiop (int c)
 {
   switch (c)
@@ -1258,7 +1258,7 @@ _is_multiop (int c)
     }
 }
 
-static int
+static inline int
 _is_arithop (int c)
 {
   switch (c)

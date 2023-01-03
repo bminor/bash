@@ -1,6 +1,6 @@
 /* mailcheck.c -- The check is in the mail... */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -72,9 +72,9 @@ int mail_warning;
 static int find_mail_file (const char *);
 static void init_mail_file (int);
 static void update_mail_file (int);
-static int add_mail_file (char *, char *);
+static int add_mail_file (char *, const char *);
 
-static FILEINFO *alloc_mail_file (char *, char *);
+static FILEINFO *alloc_mail_file (char *, const char *);
 static void dispose_mail_file (FILEINFO *);
 
 static int file_mod_date_changed (int);
@@ -174,7 +174,7 @@ update_mail_file (int i)
 /* Add this file to the list of remembered files and return its index
    in the list of mail files. */
 static int
-add_mail_file (char *file, char *msg)
+add_mail_file (char *file, const char *msg)
 {
   struct stat finfo;
   char *filename;
@@ -212,7 +212,7 @@ reset_mail_files (void)
 }
 
 static FILEINFO *
-alloc_mail_file (char *filename, char *msg)
+alloc_mail_file (char *filename, const char *msg)
 {
   FILEINFO *mf;
 

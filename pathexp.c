@@ -1,6 +1,6 @@
 /* pathexp.c -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1995-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -441,7 +441,7 @@ static struct ignorevar globignore =
    has changed.  If GLOBIGNORE is being unset, we also need to disable
    the globbing of filenames beginning with a `.'. */
 void
-setup_glob_ignore (char *name)
+setup_glob_ignore (const char *name)
 {
   char *v;
 

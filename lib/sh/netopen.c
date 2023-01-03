@@ -67,21 +67,21 @@ extern int inet_aton (const char *, struct in_addr *);
 #endif
 
 #ifndef HAVE_GETADDRINFO
-static int _getaddr (char *, struct in_addr *);
-static int _getserv (char *, int, unsigned short *);
-static int _netopen4 (char *, char *, int);
+static int _getaddr (const char *, struct in_addr *);
+static int _getserv (const char *, int, unsigned short *);
+static int _netopen4 (const char *, const char *, int);
 #else /* HAVE_GETADDRINFO */
-static int _netopen6 (char *, char *, int);
+static int _netopen6 (const char *, const char *, int);
 #endif
 
-static int _netopen (char *, char *, int);
+static int _netopen (const char *, const char *, int);
 
 #ifndef HAVE_GETADDRINFO
 /* Stuff the internet address corresponding to HOST into AP, in network
    byte order.  Return 1 on success, 0 on failure. */
 
 static int
-_getaddr (char *host, struct in_addr *ap)
+_getaddr (const char *host, struct in_addr *ap)
 {
   struct hostent *h;
   int r;
@@ -112,7 +112,7 @@ _getaddr (char *host, struct in_addr *ap)
 /* Return 1 if SERV is a valid port number and stuff the converted value into
    PP in network byte order. */   
 static int
-_getserv (char *serv, int proto, unsigned short *pp)
+_getserv (const char *serv, int proto, unsigned short *pp)
 {
   intmax_t l;
   unsigned short s;
@@ -149,7 +149,7 @@ _getserv (char *serv, int proto, unsigned short *pp)
  * traditional BSD mechanisms.  Returns the connected socket or -1 on error.
  */
 static int 
-_netopen4(char *host, char *serv, int typ)
+_netopen4(const char *host, const char *serv, int typ)
 {
   struct in_addr ina;
   struct sockaddr_in sin;
@@ -202,7 +202,7 @@ _netopen4(char *host, char *serv, int typ)
  * on error.
  */
 static int
-_netopen6 (char *host, char *serv, int typ)
+_netopen6 (const char *host, const char *serv, int typ)
 {
   int s, e;
   struct addrinfo hints, *res, *res0;
@@ -265,7 +265,7 @@ _netopen6 (char *host, char *serv, int typ)
  * Returns the connected socket or -1 on error.
  */
 static int 
-_netopen(char *host, char *serv, int typ)
+_netopen(const char *host, const char *serv, int typ)
 {
 #ifdef HAVE_GETADDRINFO
   return (_netopen6 (host, serv, typ));

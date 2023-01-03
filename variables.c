@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -259,11 +259,11 @@ static SHELL_VAR *get_bashargcv (SHELL_VAR *);
 #  endif
 static SHELL_VAR *build_hashcmd (SHELL_VAR *);
 static SHELL_VAR *get_hashcmd (SHELL_VAR *);
-static SHELL_VAR *assign_hashcmd (SHELL_VAR *,  char *, arrayind_t, char *);
+static SHELL_VAR *assign_hashcmd (SHELL_VAR *, char *, arrayind_t, char *);
 #  if defined (ALIAS)
 static SHELL_VAR *build_aliasvar (SHELL_VAR *);
 static SHELL_VAR *get_aliasvar (SHELL_VAR *);
-static SHELL_VAR *assign_aliasvar (SHELL_VAR *,  char *, arrayind_t, char *);
+static SHELL_VAR *assign_aliasvar (SHELL_VAR *, char *, arrayind_t, char *);
 #  endif
 #endif
 
@@ -272,14 +272,14 @@ static SHELL_VAR *init_funcname_var (void);
 
 static void initialize_dynamic_variables (void);
 
-static SHELL_VAR *bind_invalid_envvar (const char *, char *, int);
+static SHELL_VAR *bind_invalid_envvar (const char *, const char *, int);
 
 static int var_sametype (SHELL_VAR *, SHELL_VAR *);
 
 static SHELL_VAR *hash_lookup (const char *, HASH_TABLE *);
 static SHELL_VAR *new_shell_variable (const char *);
 static SHELL_VAR *make_new_variable (const char *, HASH_TABLE *);
-static SHELL_VAR *bind_variable_internal (const char *, char *, HASH_TABLE *, int, int);
+static SHELL_VAR *bind_variable_internal (const char *, const char *, HASH_TABLE *, int, int);
 
 static void dispose_variable_value (SHELL_VAR *);
 static void free_variable_hash_data (PTR_T);
@@ -311,7 +311,7 @@ static SHELL_VAR *find_nameref_at_context (SHELL_VAR *, VAR_CONTEXT *);
 static SHELL_VAR *find_variable_nameref_context (SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **);
 static SHELL_VAR *find_variable_last_nameref_context (SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **);
 
-static SHELL_VAR *bind_tempenv_variable (const char *, char *);
+static SHELL_VAR *bind_tempenv_variable (const char *, const char *);
 static void push_posix_temp_var (PTR_T);
 static void push_temp_var (PTR_T);
 static void propagate_temp_var (PTR_T);
@@ -2215,7 +2215,7 @@ find_variable_nameref_for_assignment (const char *name, int flags)
    function, but dealing strictly with names. This takes assignment flags
    so it can deal with the various assignment modes used by `declare'. */
 char *
-nameref_transform_name (char *name, int flags)
+nameref_transform_name (const char *name, int flags)
 {
   SHELL_VAR *v;
   char *newname;
@@ -2234,7 +2234,7 @@ nameref_transform_name (char *name, int flags)
 			       : find_global_variable_last_nameref (name, 1);
   if (v && nameref_p (v) && valid_nameref_value (nameref_cell (v), 1))
     return nameref_cell (v);
-  return name;
+  return (char *)name;
 }
 
 /* Find a variable, forcing a search of the temporary environment first */
@@ -2522,7 +2522,7 @@ validate_inherited_value (SHELL_VAR *var, int type)
 
 /* Set NAME to VALUE if NAME has no value. */
 SHELL_VAR *
-set_if_not (char *name, char *value)
+set_if_not (const char *name, const char *value)
 {
   SHELL_VAR *v;
 
@@ -2736,7 +2736,7 @@ make_new_variable (const char *name, HASH_TABLE *table)
 
 #if defined (ARRAY_VARS)
 SHELL_VAR *
-make_new_array_variable (char *name)
+make_new_array_variable (const char *name)
 {
   SHELL_VAR *entry;
   ARRAY *array;
@@ -2750,7 +2750,7 @@ make_new_array_variable (char *name)
 }
 
 SHELL_VAR *
-make_local_array_variable (char *name, int flags)
+make_local_array_variable (const char *name, int flags)
 {
   SHELL_VAR *var;
   ARRAY *array;
@@ -2789,7 +2789,7 @@ make_local_array_variable (char *name, int flags)
 }
 
 SHELL_VAR *
-make_new_assoc_variable (char *name)
+make_new_assoc_variable (const char *name)
 {
   SHELL_VAR *entry;
   HASH_TABLE *hash;
@@ -2803,7 +2803,7 @@ make_new_assoc_variable (char *name)
 }
 
 SHELL_VAR *
-make_local_assoc_variable (char *name, int flags)
+make_local_assoc_variable (const char *name, int flags)
 {
   SHELL_VAR *var;
   HASH_TABLE *hash;
@@ -2843,7 +2843,7 @@ make_local_assoc_variable (char *name, int flags)
 #endif
 
 char *
-make_variable_value (SHELL_VAR *var, char *value, int flags)
+make_variable_value (SHELL_VAR *var, const char *value, int flags)
 {
   char *retval, *oval;
   intmax_t lval, rval;
@@ -2949,7 +2949,7 @@ make_value:
 
 /* If we can optimize appending to string variables, say so */
 static int
-can_optimize_assignment (SHELL_VAR *entry, char *value, int aflags)
+can_optimize_assignment (SHELL_VAR *entry, const char *value, int aflags)
 {
   if ((aflags & ASS_APPEND) == 0)
     return 0;
@@ -2966,7 +2966,7 @@ can_optimize_assignment (SHELL_VAR *entry, char *value, int aflags)
 
 /* right now we optimize appends to string variables */
 static SHELL_VAR *
-optimized_assignment (SHELL_VAR *entry, char *value, int aflags)
+optimized_assignment (SHELL_VAR *entry, const char *value, int aflags)
 {
   size_t len, vlen;
   char *v, *new;
@@ -2991,7 +2991,7 @@ optimized_assignment (SHELL_VAR *entry, char *value, int aflags)
    temporary environment (but usually is not).  HFLAGS controls how NAME
    is looked up in TABLE; AFLAGS controls how VALUE is assigned */
 static SHELL_VAR *
-bind_variable_internal (const char *name, char *value, HASH_TABLE *table, int hflags, int aflags)
+bind_variable_internal (const char *name, const char *value, HASH_TABLE *table, int hflags, int aflags)
 {
   char *newval, *tname;
   SHELL_VAR *entry, *tentry;
@@ -3075,7 +3075,7 @@ bind_variable_internal (const char *name, char *value, HASH_TABLE *table, int hf
 	}
 
       INVALIDATE_EXPORTSTR (entry);
-      newval = (aflags & ASS_APPEND) ? make_variable_value (entry, value, aflags) : value;
+      newval = (aflags & ASS_APPEND) ? make_variable_value (entry, value, aflags) : (char *)value;
       if (assoc_p (entry))
 	entry = (*(entry->assign_func)) (entry, newval, -1, savestring ("0"));
       else if (array_p (entry))
@@ -3162,7 +3162,7 @@ assign_value:
    first, then we bind into shell_variables. */
 
 SHELL_VAR *
-bind_variable (const char *name, char *value, int flags)
+bind_variable (const char *name, const char *value, int flags)
 {
   SHELL_VAR *v, *nv;
   VAR_CONTEXT *vc, *nvc;
@@ -3233,7 +3233,7 @@ bind_variable (const char *name, char *value, int flags)
 }
 
 SHELL_VAR *
-bind_global_variable (const char *name, char *value, int flags)
+bind_global_variable (const char *name, const char *value, int flags)
 {
   if (shell_variables == 0)
     create_variable_tables ();
@@ -3243,7 +3243,7 @@ bind_global_variable (const char *name, char *value, int flags)
 }
 
 static SHELL_VAR *
-bind_invalid_envvar (const char *name, char *value, int aflags)
+bind_invalid_envvar (const char *name, const char *value, int aflags)
 {
   if (invalid_env == 0)
     invalid_env = hash_create (64);	/* XXX */
@@ -3322,7 +3322,7 @@ bind_variable_value (SHELL_VAR *var, char *value, int aflags)
    variable we set here, then turn it back on after binding as necessary. */
 
 SHELL_VAR *
-bind_int_variable (char *lhs, char *rhs, int flags)
+bind_int_variable (const char *lhs, const char *rhs, int flags)
 {
   register SHELL_VAR *v;
   int isint, isarr, implicitarray, vflags, avflags;
@@ -3386,7 +3386,7 @@ bind_int_variable (char *lhs, char *rhs, int flags)
 }
 
 SHELL_VAR *
-bind_var_to_int (char *var, intmax_t val, int flags)
+bind_var_to_int (const char *var, intmax_t val, int flags)
 {
   char ibuf[INT_STRLEN_BOUND (intmax_t) + 1], *p;
 
@@ -3476,7 +3476,7 @@ bind_function_def (const char *name, FUNCTION_DEF *value, int flags)
    responsible for moving the main temporary env to one of the other
    temporary environments.  The expansion code in subst.c calls this. */
 int
-assign_in_env (WORD_DESC *word, int flags)
+assign_in_env (const WORD_DESC *word, int flags)
 {
   int offset, aflags;
   char *name, *temp, *value, *newname;
@@ -4362,7 +4362,7 @@ all_variables_matching_prefix (const char *prefix)
 
 /* Make variable NAME have VALUE in the temporary environment. */
 static SHELL_VAR *
-bind_tempenv_variable (const char *name, char *value)
+bind_tempenv_variable (const char *name, const char *value)
 {
   SHELL_VAR *var;
 
@@ -5728,7 +5728,7 @@ find_special_var (const char *name)
 /* The variable in NAME has just had its state changed.  Check to see if it
    is one of the special ones where something special happens. */
 void
-stupidly_hack_special_variables (char *name)
+stupidly_hack_special_variables (const char *name)
 {
   static int sv_sorted = 0;
   int i;
@@ -5742,7 +5742,7 @@ stupidly_hack_special_variables (char *name)
 
   i = find_special_var (name);
   if (i != -1)
-    (*(special_vars[i].function)) (name);
+    (*(special_vars[i].function)) ((char *)name);
 }
 
 /* Special variables that need hooks to be run when they are unset as part
@@ -5758,7 +5758,7 @@ reinit_special_variables (void)
 }
 
 void
-sv_ifs (char *name)
+sv_ifs (const char *name)
 {
   SHELL_VAR *v;
 
@@ -5768,7 +5768,7 @@ sv_ifs (char *name)
 
 /* What to do just after the PATH variable has changed. */
 void
-sv_path (char *name)
+sv_path (const char *name)
 {
   /* hash -r */
   phash_flush ();
@@ -5778,7 +5778,7 @@ sv_path (char *name)
    is the name of the variable.  This is called with NAME set to one of
    MAIL, MAILCHECK, or MAILPATH.  */
 void
-sv_mail (char *name)
+sv_mail (const char *name)
 {
   /* If the time interval for checking the files has changed, then
      reset the mail timer.  Otherwise, one of the pathname vars
@@ -5794,7 +5794,7 @@ sv_mail (char *name)
 }
 
 void
-sv_funcnest (char *name)
+sv_funcnest (const char *name)
 {
   SHELL_VAR *v;
   intmax_t num;
@@ -5810,14 +5810,14 @@ sv_funcnest (char *name)
 
 /* What to do when EXECIGNORE changes. */
 void
-sv_execignore (char *name)
+sv_execignore (const char *name)
 {
   setup_exec_ignore (name);
 }
 
 /* What to do when GLOBIGNORE changes. */
 void
-sv_globignore (char *name)
+sv_globignore (const char *name)
 {
   if (privileged_mode == 0)
     setup_glob_ignore (name);
@@ -5825,7 +5825,7 @@ sv_globignore (char *name)
 
 #if defined (READLINE)
 void
-sv_comp_wordbreaks (char *name)
+sv_comp_wordbreaks (const char *name)
 {
   SHELL_VAR *sv;
 
@@ -5838,14 +5838,14 @@ sv_comp_wordbreaks (char *name)
    If we are an interactive shell, then try to reset the terminal
    information in readline. */
 void
-sv_terminal (char *name)
+sv_terminal (const char *name)
 {
   if (interactive_shell && no_line_editing == 0)
     rl_reset_terminal (get_string_value ("TERM"));
 }
 
 void
-sv_hostfile (char *name)
+sv_hostfile (const char *name)
 {
   SHELL_VAR *v;
 
@@ -5861,7 +5861,7 @@ sv_hostfile (char *name)
    found in the initial environment) to override the terminal size reported by
    the kernel. */
 void
-sv_winsize (char *name)
+sv_winsize (const char *name)
 {
   SHELL_VAR *v;
   intmax_t xd;
@@ -5892,7 +5892,7 @@ sv_winsize (char *name)
 /* Update the value of HOME in the export environment so tilde expansion will
    work on cygwin. */
 #if defined (__CYGWIN__)
-sv_home (char *name)
+sv_home (const char *name)
 {
   array_needs_making = 1;
   maybe_make_export_env ();
@@ -5907,7 +5907,7 @@ sv_home (char *name)
    numeric, truncate the history file to hold no more than that many
    lines. */
 void
-sv_histsize (char *name)
+sv_histsize (const char *name)
 {
   char *temp;
   intmax_t num;
@@ -5946,14 +5946,14 @@ sv_histsize (char *name)
 
 /* What to do after the HISTIGNORE variable changes. */
 void
-sv_histignore (char *name)
+sv_histignore (const char *name)
 {
   setup_history_ignore (name);
 }
 
 /* What to do after the HISTCONTROL variable changes. */
 void
-sv_history_control (char *name)
+sv_history_control (const char *name)
 {
   char *temp;
   char *val;
@@ -5984,7 +5984,7 @@ sv_history_control (char *name)
 #if defined (BANG_HISTORY)
 /* Setting/unsetting of the history expansion character. */
 void
-sv_histchars (char *name)
+sv_histchars (const char *name)
 {
   char *temp;
 
@@ -6009,7 +6009,7 @@ sv_histchars (char *name)
 #endif /* BANG_HISTORY */
 
 void
-sv_histtimefmt (char *name)
+sv_histtimefmt (const char *name)
 {
   SHELL_VAR *v;
 
@@ -6024,7 +6024,7 @@ sv_histtimefmt (char *name)
 
 #if defined (HAVE_TZSET)
 void
-sv_tz (char *name)
+sv_tz (const char *name)
 {
   SHELL_VAR *v;
 
@@ -6046,7 +6046,7 @@ sv_tz (char *name)
    of times we actually ignore the EOF.  The default is small,
    (smaller than csh, anyway). */
 void
-sv_ignoreeof (char *name)
+sv_ignoreeof (const char *name)
 {
   SHELL_VAR *tmp_var;
   char *temp;
@@ -6062,7 +6062,7 @@ sv_ignoreeof (char *name)
 }
 
 void
-sv_optind (char *name)
+sv_optind (const char *name)
 {
   SHELL_VAR *var;
   char *tt;
@@ -6089,7 +6089,7 @@ sv_optind (char *name)
 }
 
 void
-sv_opterr (char *name)
+sv_opterr (const char *name)
 {
   char *tt;
 
@@ -6098,7 +6098,7 @@ sv_opterr (char *name)
 }
 
 void
-sv_strict_posix (char *name)
+sv_strict_posix (const char *name)
 {
   SHELL_VAR *var;
 
@@ -6113,7 +6113,7 @@ sv_strict_posix (char *name)
 }
 
 void
-sv_locale (char *name)
+sv_locale (const char *name)
 {
   char *v;
   int r;
@@ -6265,7 +6265,7 @@ set_pipestatus_from_exit (int s)
 }
 
 void
-sv_xtracefd (char *name)
+sv_xtracefd (const char *name)
 {
   SHELL_VAR *v;
   char *t, *e;
@@ -6301,7 +6301,7 @@ sv_xtracefd (char *name)
 #define MIN_COMPAT_LEVEL 31
 
 void
-sv_shcompat (char *name)
+sv_shcompat (const char *name)
 {
   SHELL_VAR *v;
   char *val;
@@ -6353,7 +6353,7 @@ compat_error:
 
 #if defined (JOB_CONTROL)
 void
-sv_childmax (char *name)
+sv_childmax (const char *name)
 {
   char *tt;
   int s;

@@ -1,6 +1,6 @@
 /* bashline.h -- interface to the bash readline functions in bashline.c. */
 
-/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,7 +41,7 @@ extern int enable_hostname_completion (int);
 extern void initialize_readline (void);
 extern void bashline_reset (void);
 extern void bashline_reinitialize (void);
-extern int bash_re_edit (char *);
+extern int bash_re_edit (const char *);
 
 extern void bashline_set_event_hook (void);
 extern void bashline_reset_event_hook (void);
