@@ -1,6 +1,6 @@
 /* stringvec.c - functions for managing arrays of strings. */
 
-/* Copyright (C) 2000-2002,2022 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2002,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,32 +34,32 @@
 
 /* Allocate an array of strings with room for N members. */
 char **
-strvec_create (int n)
+strvec_create (size_t n)
 {
   return ((char **)xmalloc ((n) * sizeof (char *)));
 }
 
 /* Allocate an array of strings with room for N members. */
 char **
-strvec_mcreate (int n)
+strvec_mcreate (size_t n)
 {
   return ((char **)malloc ((n) * sizeof (char *)));
 }
 
 char **
-strvec_resize (char **array, int nsize)
+strvec_resize (char **array, size_t nsize)
 {
   return ((char **)xrealloc (array, nsize * sizeof (char *)));
 }
 
 char **
-strvec_mresize (char **array, int nsize)
+strvec_mresize (char **array, size_t nsize)
 {
   return ((char **)realloc (array, nsize * sizeof (char *)));
 }
 
 /* Return the length of ARRAY, a NULL terminated array of char *. */
-int
+size_t
 strvec_len (char * const *array)
 {
   register int i;

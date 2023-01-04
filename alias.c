@@ -464,7 +464,6 @@ char *
 
 alias_expand (char *string)
 {
-
   register int i, j, start;
   char *line, *token;
   int line_len, tl, real_start, expand_next, expand_this_token;

@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -276,7 +276,8 @@ bind_builtin (WORD_LIST *list)
   /* Process the rest of the arguments as binding specifications. */
   while (list)
     {
-      int olen, nlen, d, i;
+      size_t olen, nlen;
+      int d, i;
       char **obindings, **nbindings;
 
       obindings = rl_invoking_keyseqs (bash_execute_unix_command);

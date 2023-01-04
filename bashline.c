@@ -753,10 +753,10 @@ display_shell_version (int count, int c)
 static char **hostname_list = (char **)NULL;
 
 /* The physical size of the above list. */
-static int hostname_list_size;
+static size_t hostname_list_size;
 
 /* The number of hostnames in the above list. */
-static int hostname_list_length;
+static size_t hostname_list_length;
 
 /* Whether or not HOSTNAME_LIST has been initialized. */
 int hostname_list_initialized = 0;

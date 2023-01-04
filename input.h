@@ -102,9 +102,9 @@ extern void push_stream (int);
 extern void pop_stream (void);
 extern int stream_on_stack (enum stream_type);
 extern char *read_secondary_line (int);
-extern int find_reserved_word (char *);
+extern int find_reserved_word (const char *);
 extern void gather_here_documents (void);
-extern void execute_variable_command (char *, char *);
+extern void execute_variable_command (const char *, const char *);
 
 extern int *save_token_state (void);
 extern void restore_token_state (int *);

@@ -95,8 +95,8 @@ typedef struct variable {
 
 typedef struct _vlist {
   SHELL_VAR **list;
-  int list_size;	/* allocated size */
-  int list_len;		/* current number of entries */
+  size_t list_size;	/* allocated size */
+  size_t list_len;	/* current number of entries */
 } VARLIST;
 
 /* The various attributes that a given variable can have. */

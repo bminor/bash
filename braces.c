@@ -1,6 +1,6 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2020,2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -304,7 +304,8 @@ expand_amble (char *text, size_t tlen, int flags)
 	result = partial;
       else
 	{
-	  register int lr, lp, j;
+	  size_t lr, lp;
+	  int j;
 
 	  lr = strvec_len (result);
 	  lp = strvec_len (partial);
@@ -711,8 +712,9 @@ comsub:
 static char **
 array_concat (char **arr1, char **arr2)
 {
-  register int i, j, len, len1, len2;
-  register char **result;
+  int i, j, len;
+  size_t len1, len2;
+  char **result;
 
   if (arr1 == 0)
     return (arr2);		/* XXX - see if we can get away without copying? */

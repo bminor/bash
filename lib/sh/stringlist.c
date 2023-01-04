@@ -1,6 +1,6 @@
 /* stringlist.c - functions to handle a generic `list of strings' structure */
 
-/* Copyright (C) 2000-2019, 2022 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2019, 2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,7 +37,7 @@
 /* Allocate a new STRINGLIST, with room for N strings. */
 
 STRINGLIST *
-strlist_create (int n)
+strlist_create (size_t n)
 {
   STRINGLIST *ret;
   register int i;
@@ -60,7 +60,7 @@ strlist_create (int n)
 }
 
 STRINGLIST *
-strlist_resize (STRINGLIST *sl, int n)
+strlist_resize (STRINGLIST *sl, size_t n)
 {
   register int i;
 

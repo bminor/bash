@@ -175,7 +175,7 @@ int shell_level = 0;
    shell variables that are marked for export. */
 char **export_env = (char **)NULL;
 static int export_env_index;
-static int export_env_size;
+static size_t export_env_size;
 
 #if defined (READLINE)
 static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
@@ -284,8 +284,8 @@ static SHELL_VAR *bind_variable_internal (const char *, const char *, HASH_TABLE
 static void dispose_variable_value (SHELL_VAR *);
 static void free_variable_hash_data (PTR_T);
 
-static VARLIST *vlist_alloc (int);
-static VARLIST *vlist_realloc (VARLIST *, int);
+static VARLIST *vlist_alloc (size_t);
+static VARLIST *vlist_realloc (VARLIST *, size_t);
 static void vlist_add (VARLIST *, SHELL_VAR *, int);
 
 static void flatten (HASH_TABLE *, sh_var_map_func_t *, VARLIST *, int);
@@ -4037,7 +4037,7 @@ set_func_auto_export (const char *name)
 /* **************************************************************** */
 
 static VARLIST *
-vlist_alloc (int nentries)
+vlist_alloc (size_t nentries)
 {
   VARLIST  *vlist;
 
@@ -4051,7 +4051,7 @@ vlist_alloc (int nentries)
 }
 
 static VARLIST *
-vlist_realloc (VARLIST *vlist, int n)
+vlist_realloc (VARLIST *vlist, size_t n)
 {
   if (vlist == 0)
     return (vlist = vlist_alloc (n));
@@ -4090,7 +4090,7 @@ map_over (sh_var_map_func_t *function, VAR_CONTEXT *vc)
   VAR_CONTEXT *v;
   VARLIST *vlist;
   SHELL_VAR **ret;
-  int nentries;
+  size_t nentries;
 
   for (nentries = 0, v = vc; v; v = v->down)
     nentries += HASH_ENTRIES (v->table);
@@ -4334,7 +4334,8 @@ all_variables_matching_prefix (const char *prefix)
 {
   SHELL_VAR **varlist;
   char **rlist;
-  int vind, rind, plen;
+  int rind, plen;
+  size_t vind;
 
   plen = STRLEN (prefix);
   varlist = all_visible_variables ();

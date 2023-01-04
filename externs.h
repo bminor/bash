@@ -387,14 +387,14 @@ extern size_t strftime (char *, size_t, const char *, const struct tm *);
 /* This is a general-purpose argv-style array struct. */
 typedef struct _list_of_strings {
   char **list;
-  int list_size;
-  int list_len;
+  size_t list_size;
+  size_t list_len;
 } STRINGLIST;
 
 typedef int sh_strlist_map_func_t (char *);
 
-extern STRINGLIST *strlist_create (int);
-extern STRINGLIST *strlist_resize (STRINGLIST *, int);
+extern STRINGLIST *strlist_create (size_t);
+extern STRINGLIST *strlist_resize (STRINGLIST *, size_t);
 extern void strlist_flush (STRINGLIST *);
 extern void strlist_dispose (STRINGLIST *);
 extern int strlist_remove (STRINGLIST *, const char *);
@@ -408,14 +408,14 @@ extern void strlist_sort (STRINGLIST *);
 
 /* declarations for functions defined in lib/sh/stringvec.c */
 
-extern char **strvec_create (int);
-extern char **strvec_resize (char **, int);
-extern char **strvec_mcreate (int);
-extern char **strvec_mresize (char **, int);
+extern char **strvec_create (size_t);
+extern char **strvec_resize (char **, size_t);
+extern char **strvec_mcreate (size_t);
+extern char **strvec_mresize (char **, size_t);
 extern void strvec_flush (char **);
 extern void strvec_dispose (char **);
 extern int strvec_remove (char **, const char *);
-extern int strvec_len (char * const *);
+extern size_t strvec_len (char * const *);
 extern int strvec_search (char **, const char *);
 extern char **strvec_copy (char * const *);
 extern int strvec_posixcmp (char **, char **);

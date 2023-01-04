@@ -174,10 +174,10 @@ static int reserved_word_acceptable (int);
 static int yylex (void);
 
 static void push_heredoc (REDIRECT *);
-static char *mk_alexpansion (char *);
-static int alias_expand_token (char *);
+static char *mk_alexpansion (const char *);
+static int alias_expand_token (const char *);
 static int time_command_acceptable (void);
-static int special_case_tokens (char *);
+static int special_case_tokens (const char *);
 static int read_token (int);
 static char *parse_matched_pair (int, int, int, int *, int);
 static char *parse_comsub (int, int, int, int *, int);
@@ -198,7 +198,7 @@ static int cond_skip_newlines (void);
 static COMMAND *parse_cond_command (void);
 #endif
 #if defined (ARRAY_VARS)
-static int token_is_assignment (char *, int);
+static int token_is_assignment (const char *, int);
 static int token_is_ident (char *, int);
 #endif
 static int read_token_word (int);
@@ -207,7 +207,7 @@ static void discard_parser_constructs (int);
 static char *error_token_from_token (int);
 static char *error_token_from_text (void);
 static void print_offending_line (void);
-static void report_syntax_error (char *);
+static void report_syntax_error (const char *);
 
 static void handle_eof_input_unit (void);
 static void prompt_again (int);
@@ -1622,8 +1622,8 @@ with_input_from_stdin (void)
 static int
 yy_string_get (void)
 {
-  register char *string;
-  register unsigned char c;
+  char *string;
+  unsigned char c;
 
   string = bash_input.location.string;
 
@@ -2805,7 +2805,7 @@ discard_until (int character)
 }
 
 void
-execute_variable_command (char *command, char *vname)
+execute_variable_command (const char *command, const char *vname)
 {
   char *last_lastarg;
   sh_parser_state_t ps;
@@ -3013,7 +3013,7 @@ static int open_brace_count;
 	 In a pattern list in a case statement (parser_state & PST_CASEPAT). */
 
 static char *
-mk_alexpansion (char *s)
+mk_alexpansion (const char *s)
 {
   int l;
   char *r;
@@ -3035,7 +3035,7 @@ mk_alexpansion (char *s)
 }
 
 static int
-alias_expand_token (char *tokstr)
+alias_expand_token (const char *tokstr)
 {
   char *expanded;
   alias_t *ap;
@@ -3150,7 +3150,7 @@ time_command_acceptable (void)
 */
 
 static int
-special_case_tokens (char *tokstr)
+special_case_tokens (const char *tokstr)
 {
   /* Posix grammar rule 6 */
   if ((last_read_token == WORD) &&
@@ -4768,7 +4768,7 @@ parse_cond_command (void)
    substitution that will reallocate atoken.  We don't want to write beyond
    the end of an allocated buffer. */
 static int
-token_is_assignment (char *t, int i)
+token_is_assignment (const char *t, int i)
 {
   int r;
   char *atoken;
@@ -5367,7 +5367,7 @@ reserved_word_acceptable (int toksym)
 /* Return the index of TOKEN in the alist of reserved words, or -1 if
    TOKEN is not a shell reserved word. */
 int
-find_reserved_word (char *tokstr)
+find_reserved_word (const char *tokstr)
 {
   int i;
   for (i = 0; word_token_alist[i].word; i++)
@@ -6172,7 +6172,7 @@ print_offending_line (void)
    then place it in MESSAGE, otherwise pass NULL and this will figure
    out an appropriate message for you. */
 static void
-report_syntax_error (char *message)
+report_syntax_error (const char *message)
 {
   char *msg, *p;
 

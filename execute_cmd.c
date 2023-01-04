@@ -5836,9 +5836,9 @@ initialize_subshell (void)
 int
 shell_execve (char *command, char **args, char **env)
 {
-  int larray, i, fd;
+  int i, fd, sample_len;
   char sample[HASH_BANG_BUFSIZ];
-  int sample_len;
+  size_t larray;
 
   SETOSTYPE (0);		/* Some systems use for USG/POSIX semantics */
   execve (command, args, env);
