@@ -76,7 +76,7 @@
 #endif
 #define STRDUP(x)	((x) ? savestring (x) : (char *)NULL)
 
-typedef SHELL_VAR **SVFUNC ();
+typedef SHELL_VAR **SVFUNC (void);
 
 #ifndef HAVE_STRPBRK
 extern char *strpbrk (char *, char *);
@@ -247,7 +247,7 @@ clean_itemlist (ITEMLIST *itp)
 static int
 shouldexp_filterpat (char *s)
 {
-  register char *p;
+  char *p;
 
   for (p = s; p && *p; p++)
     {
@@ -319,7 +319,8 @@ STRINGLIST *
 completions_to_stringlist (char **matches)
 {
   STRINGLIST *sl;
-  int mlen, i, n;
+  int i, n;
+  size_t mlen;
 
   mlen = (matches == 0) ? 0 : strvec_len (matches);
   sl = strlist_create (mlen + 1);
@@ -350,7 +351,8 @@ it_init_aliases (ITEMLIST *itp)
 {
 #ifdef ALIAS
   alias_t **alias_list;
-  register int i, n;
+  int i;
+  size_t n;
   STRINGLIST *sl;
 
   alias_list = all_aliases ();
@@ -379,7 +381,8 @@ init_itemlist_from_varlist (ITEMLIST *itp, SVFUNC *svfunc)
 {
   SHELL_VAR **vlist;
   STRINGLIST *sl;
-  register int i, n;
+  int i;
+  size_t n;
 
   vlist = (*svfunc) ();
   if (vlist == 0)
@@ -430,7 +433,8 @@ static int
 it_init_builtins (ITEMLIST *itp)
 {
   STRINGLIST *sl;
-  register int i, n;
+  int i;
+  size_t n;
 
   sl = strlist_create (num_shell_builtins);
   for (i = n = 0; i < num_shell_builtins; i++)
@@ -446,7 +450,8 @@ static int
 it_init_enabled (ITEMLIST *itp)
 {
   STRINGLIST *sl;
-  register int i, n;
+  int i;
+  size_t n;
 
   sl = strlist_create (num_shell_builtins);
   for (i = n = 0; i < num_shell_builtins; i++)
@@ -464,7 +469,8 @@ static int
 it_init_disabled (ITEMLIST *itp)
 {
   STRINGLIST *sl;
-  register int i, n;
+  int i;
+  size_t n;
 
   sl = strlist_create (num_shell_builtins);
   for (i = n = 0; i < num_shell_builtins; i++)
@@ -498,7 +504,8 @@ static int
 it_init_helptopics (ITEMLIST *itp)
 {
   STRINGLIST *sl;
-  register int i, n;
+  int i;
+  size_t n;
 
   sl = strlist_create (num_shell_builtins);
   for (i = n = 0; i < num_shell_builtins; i++)
@@ -528,8 +535,8 @@ it_init_joblist (ITEMLIST *itp, int jstate)
 {
 #if defined (JOB_CONTROL)
   STRINGLIST *sl;
-  register int i;
-  register PROCESS *p;
+  int i;
+  PROCESS *p;
   char *s, *t;
   JOB *j;
   JOB_STATE ws;		/* wanted state */
@@ -585,7 +592,8 @@ static int
 it_init_keywords (ITEMLIST *itp)
 {
   STRINGLIST *sl;
-  register int i, n;
+  int i;
+  size_t n;
 
   for (n = 0; word_token_alist[n].word; n++)
     ;
@@ -653,7 +661,7 @@ static STRINGLIST *
 gen_matches_from_itemlist (ITEMLIST *itp, const char *text)
 {
   STRINGLIST *ret, *sl;
-  int tlen, i, n;
+  size_t tlen, i, n;
   char *ntxt;
 
   if ((itp->flags & (LIST_DIRTY|LIST_DYNAMIC)) ||
@@ -864,7 +872,7 @@ gen_wordlist_matches (COMPSPEC *cs, const char *text)
 {
   WORD_LIST *l, *l2;
   STRINGLIST *sl;
-  int nw, tlen;
+  size_t nw, tlen;
   char *ntxt;		/* dequoted TEXT to use in comparisons */
 
   if (cs->words == 0 || cs->words[0] == '\0')
@@ -1158,7 +1166,8 @@ gen_command_matches (COMPSPEC *cs, const char *cmd, const char *text,
 		     int nw, int cw)
 {
   char *csbuf, *cscmd, *t;
-  int cmdlen, cmdsize, n, ws, we;
+  int ws, we;
+  size_t cmdlen, cmdsize, n;
   WORD_LIST *cmdlist, *cl;
   WORD_DESC *tw;
   STRINGLIST *sl;

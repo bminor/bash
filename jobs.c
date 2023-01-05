@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1195,7 +1195,6 @@ cleanup_dead_jobs (void)
 {
   register int i;
   int os;
-  PROCESS *discard;
 
   if (js.j_jobslots == 0 || jobs_list_frozen)
     return;
@@ -2063,8 +2062,9 @@ list_all_jobs (int format)
 pid_t
 make_child (char *command, int flags)
 {
-  int async_p, forksleep;
-  sigset_t set, oset, termset, chldset, oset_copy;
+  int async_p;
+  unsigned int forksleep;
+  sigset_t set, oset, oset_copy;
   pid_t pid;
   SigHandler *oterm;
 
@@ -4174,7 +4174,7 @@ notify_of_job_status (void)
     queue_sigchld++;
 
   /* XXX could use js.j_firstj here */
-  for (job = 0, dir = (char *)NULL; job < js.j_jobslots; job++)
+  for (job = 0, dir = NULL; job < js.j_jobslots; job++)
     {
       if (jobs[job] && IS_NOTIFIED (job) == 0)
 	{

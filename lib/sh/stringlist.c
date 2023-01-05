@@ -40,7 +40,7 @@ STRINGLIST *
 strlist_create (size_t n)
 {
   STRINGLIST *ret;
-  register int i;
+  int i;
 
   ret = (STRINGLIST *)xmalloc (sizeof (STRINGLIST));
   if (n)
@@ -62,7 +62,7 @@ strlist_create (size_t n)
 STRINGLIST *
 strlist_resize (STRINGLIST *sl, size_t n)
 {
-  register int i;
+  size_t i;
 
   if (sl == 0)
     return (sl = strlist_create (n));
@@ -114,7 +114,7 @@ STRINGLIST *
 strlist_copy (STRINGLIST *sl)
 {
   STRINGLIST *new;
-  register int i;
+  int i;
 
   if (sl == 0)
     return ((STRINGLIST *)0);
@@ -139,7 +139,7 @@ STRINGLIST *
 strlist_merge (STRINGLIST *m1, STRINGLIST *m2)
 {
   STRINGLIST *sl;
-  int i, n, l1, l2;
+  size_t i, n, l1, l2;
 
   l1 = m1 ? m1->list_len : 0;
   l2 = m2 ? m2->list_len : 0;
@@ -158,7 +158,7 @@ strlist_merge (STRINGLIST *m1, STRINGLIST *m2)
 STRINGLIST *
 strlist_append (STRINGLIST *m1, STRINGLIST *m2)
 {
-  register int i, n, len1, len2;
+  size_t i, n, len1, len2;
 
   if (m1 == 0)
     return (m2 ? strlist_copy (m2) : (STRINGLIST *)0);
@@ -181,7 +181,7 @@ strlist_append (STRINGLIST *m1, STRINGLIST *m2)
 STRINGLIST *
 strlist_prefix_suffix (STRINGLIST *sl, const char *prefix, const char *suffix)
 {
-  int plen, slen, tlen, llen, i;
+  size_t plen, slen, tlen, llen, i;
   char *t;
 
   if (sl == 0 || sl->list == 0 || sl->list_len == 0)
@@ -213,7 +213,7 @@ strlist_prefix_suffix (STRINGLIST *sl, const char *prefix, const char *suffix)
 void
 strlist_print (STRINGLIST *sl, const char *prefix)
 {
-  register int i;
+  int i;
 
   if (sl == 0)
     return;
@@ -224,7 +224,7 @@ strlist_print (STRINGLIST *sl, const char *prefix)
 void
 strlist_walk (STRINGLIST *sl, sh_strlist_map_func_t *func)
 {
-  register int i;
+  int i;
 
   if (sl == 0)
     return;

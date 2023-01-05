@@ -259,7 +259,7 @@ static int bash_possible_variable_completions (int, int);
 static int bash_complete_command (int, int);
 static int bash_possible_command_completions (int, int);
 
-static int completion_glob_pattern (char *);
+static int completion_glob_pattern (const char *);
 static char *glob_complete_word (const char *, int);
 static int bash_glob_completion_internal (int);
 static int bash_glob_complete_word (int, int);
@@ -1329,10 +1329,9 @@ bash_transpose_shellwords (int count, int key)
 static int
 bash_spell_correct_shellword (int count, int key)
 {
-  int opoint, wbeg, wend;
+  int wbeg, wend;
   char *text, *newdir;
 
-  opoint = rl_point;
   while (count)
     {
       bash_backward_shellword (1, key);
@@ -1870,7 +1869,7 @@ bash_default_completion (const char *text, int start, int end, int qc, int compf
 
   /* This could be a globbing pattern, so try to expand it using pathname
      expansion. */
-  if (!matches && completion_glob_pattern ((char *)text))
+  if (!matches && completion_glob_pattern (text))
     {
       matches = rl_completion_matches (text, glob_complete_word);
       /* A glob expression that matches more than one filename is problematic.
@@ -1948,7 +1947,8 @@ command_word_completion_function (const char *hint_text, int state)
   static char *dequoted_hint = (char *)NULL;
   static char *directory_part = (char *)NULL;
   static char **glob_matches = (char **)NULL;
-  static int path_index, hint_len, istate, igncase;
+  static int path_index, istate, igncase;
+  static size_t hint_len;
   static int mapping_over, local_index, searching_path, hint_is_dir;
   static int old_glob_ignore_case, globpat;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
@@ -1983,7 +1983,7 @@ command_word_completion_function (const char *hint_text, int state)
 	  glob_matches = (char **)NULL;
 	}
 
-      globpat = completion_glob_pattern ((char *)hint_text);
+      globpat = completion_glob_pattern (hint_text);
 
       /* If this is an absolute program name, do not check it against
 	 aliases, reserved words, functions or builtins.  We must check
@@ -2558,7 +2558,7 @@ bash_servicename_completion_function (const char *text, int state)
 #else
   static char *sname = (char *)NULL;
   static struct servent *srvent;
-  static int snamelen;
+  static size_t snamelen;
   char *value;
   char **alist, *aentry;
   int afound;
@@ -2614,7 +2614,7 @@ bash_groupname_completion_function (const char *text, int state)
 #else
   static char *gname = (char *)NULL;
   static struct group *grent;
-  static int gnamelen;
+  static size_t gnamelen;
   char *value;
 
   if (state == 0)
@@ -2801,7 +2801,7 @@ tcsh_magic_space (int count, int ignore)
 static int
 history_and_alias_expand_line (int count, int ignore)
 {
-  char *new_line, *t;
+  char *new_line;
 
   new_line = 0;
 #if defined (BANG_HISTORY)
@@ -2940,7 +2940,7 @@ static void
 _ignore_completion_names (char **names, sh_ignore_func_t *name_func)
 {
   char **newnames;
-  int idx, nidx;
+  size_t idx, nidx;
   char **oldnames;
   int oidx;
 
@@ -3029,7 +3029,7 @@ static int
 name_is_acceptable (const char *name)
 {
   struct ign *p;
-  int nlen;
+  size_t nlen;
 
   for (nlen = strlen (name), p = fignore.ignores; p->val; p++)
     {
@@ -3128,7 +3128,7 @@ bash_ignore_everything (char **names)
 static char *
 restore_tilde (const char *val, char *directory_part)
 {
-  int l, vl, dl2, xl;
+  size_t l, vl, dl2, xl;
   char *dh2, *expdir, *ret, *v;
 
   vl = strlen (val);
@@ -3482,7 +3482,7 @@ bash_directory_completion_hook (char **dirname)
   if (no_symbolic_links == 0 && (local_dirname[0] != '.' || local_dirname[1]))
     {
       char *temp1, *temp2;
-      int len1, len2;
+      size_t len1, len2;
 
       /* If we have a relative path
       		(local_dirname[0] != '/' && local_dirname[0] != '.')
@@ -3556,8 +3556,8 @@ bash_directory_completion_hook (char **dirname)
 }
 
 static char **history_completion_array = (char **)NULL;
-static int harry_size;
-static int harry_len;
+static size_t harry_size;
+static size_t harry_len;
 
 static void
 build_history_completion_array (void)
@@ -3608,7 +3608,8 @@ build_history_completion_array (void)
 static char *
 history_completion_generator (const char *hint_text, int state)
 {
-  static int local_index, len;
+  static int local_index;
+  static size_t len;
   static const char *text;
 
   /* If this is the first call to the generator, then initialize the
@@ -3819,7 +3820,7 @@ bash_complete_command_internal (int what_to_do)
 }
 
 static int
-completion_glob_pattern (char *string)
+completion_glob_pattern (const char *string)
 {
   return (glob_pattern_p (string) == 1);
 }
@@ -3832,7 +3833,7 @@ glob_complete_word (const char *text, int state)
 {
   static char **matches = (char **)NULL;
   static int ind;
-  int glen;
+  size_t glen;
   char *ret, *ttext;
 
   if (state == 0)
@@ -4007,7 +4008,8 @@ static char *
 bash_dequote_filename (char *text, int quote_char)
 {
   char *ret, *p, *r;
-  int l, quoted;
+  int quoted;
+  size_t l;
 
   l = strlen (text);
   ret = (char *)xmalloc (l + 1);
@@ -4054,7 +4056,7 @@ static char *
 quote_word_break_chars (char *text)
 {
   char *ret, *r, *s;
-  int l;
+  size_t l;
 
   l = strlen (text);
   ret = (char *)xmalloc ((2 * l) + 1);
@@ -4149,7 +4151,8 @@ bash_check_expchar (char *dirname, int need_closer, int *nextp, int *closerp)
 static void
 set_filename_quote_chars (int expchar, int nextch, int closer)
 {
-  int i, j, c;
+  size_t i, j;
+  int c;
 
   if (rl_filename_quote_characters && *rl_filename_quote_characters)
     {
@@ -4190,8 +4193,8 @@ static char *
 bash_quote_filename (char *s, int rtype, char *qcp)
 {
   char *rtext, *mtext, *ret;
-  int rlen, cs;
-  int expchar, nextch, closer;
+  size_t rlen;
+  int cs, expchar, nextch, closer;
 
   rtext = (char *)NULL;
 
@@ -4380,7 +4383,7 @@ bash_execute_unix_command (int count, int key)
   register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
-  char *cmd, *value, *ce, old_ch;
+  char *cmd, *value, *ce;
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
   Keymap cmd_xmap;

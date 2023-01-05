@@ -2,7 +2,7 @@ This file is mapfile.def, from which is created mapfile.c.
 It implements the builtin "mapfile" in Bash.
 
 Copyright (C) 2005-2006 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008-2022 Free Software Foundation, Inc.
+Copyright (C) 2008-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -103,8 +103,6 @@ static int run_callback (const char *, unsigned int, const char *);
 /* Values for FLAGS */
 #define MAPF_CLEARARRAY	0x01
 #define MAPF_CHOP	0x02
-
-static int delim;
 
 static int
 run_callback (const char *callback, unsigned int curindex, const char *curline)
@@ -224,7 +222,7 @@ mapfile (int fd, long line_count_goal, long origin, long nskip, long callback_qu
 int
 mapfile_builtin (WORD_LIST *list)
 {
-  int opt, code, fd, flags;
+  int opt, code, fd, flags, delim;
   intmax_t intval;
   long lines, origin, nskip, callback_quantum;
   char *array_name, *callback;

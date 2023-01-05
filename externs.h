@@ -344,7 +344,7 @@ extern int sh_mbsnlen (const char *, size_t, int);
 /* declarations for functions defined in lib/sh/shquote.c */
 extern char *sh_single_quote (const char *);
 extern char *sh_double_quote (const char *);
-extern char *sh_mkdoublequoted (const char *, int, int);
+extern char *sh_mkdoublequoted (const char *, size_t, int);
 extern char *sh_un_double_quote (char *);
 extern char *sh_backslash_quote (char *, const char *, int);
 extern char *sh_backslash_quote_for_double_quotes (char *, int);
@@ -531,7 +531,7 @@ extern int zcatfd (int, int, const char *);
 extern ssize_t zgetline (int, char **, size_t *, int, int);
 
 /* declarations for functions defined in lib/sh/zmapfd.c */
-extern int zmapfd (int, char **, char *);
+extern int zmapfd (int, char **, const char *);
 
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread (int, char *, size_t);

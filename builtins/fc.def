@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -94,7 +94,9 @@ extern int errno;
 #define HN_LISTING	0x01
 #define HN_FIRST	0x02
 
+#ifndef HAVE_UNISTD_H
 extern int unlink (const char *);
+#endif
 
 extern FILE *sh_mktmpfp (char *, int, char **);
 
@@ -549,9 +551,10 @@ fc_number (WORD_LIST *list)
 static int
 fc_gethnum (char *command, HIST_ENTRY **hlist, int mode)
 {
-  int sign, n, clen, rh;
-  register int i, j, last_hist, real_last, listing;
-  register char *s;
+  int sign, n, rh;
+  size_t clen;
+  int i, j, last_hist, real_last, listing;
+  char *s;
 
   listing = mode & HN_LISTING;
   sign = 1;
@@ -733,7 +736,7 @@ fc_dosubs (char *command, REPL *subs)
 static void
 fc_replhist (char *command)
 {
-  int n;
+  size_t n;
 
   if (command == 0 || *command == '\0')
     return;

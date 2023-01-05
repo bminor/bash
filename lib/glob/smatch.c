@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -103,7 +103,6 @@ charcmp (int c1, int c2, int forcecoll)
 {
   static char s1[2] = { ' ', '\0' };
   static char s2[2] = { ' ', '\0' };
-  int ret;
 
   /* Eight bits only.  Period. */
   c1 &= 0xFF;
@@ -379,7 +378,6 @@ charcmp_wc (wint_t c1, wint_t c2, int forcecoll)
 {
   static wchar_t s1[2] = { L' ', L'\0' };
   static wchar_t s2[2] = { L' ', L'\0' };
-  int r;
 
   if (c1 == c2)
     return 0;
@@ -582,7 +580,6 @@ xstrmatch (char *pattern, char *string, int flags)
   int ret;
   size_t n;
   wchar_t *wpattern, *wstring;
-  size_t plen, slen, mplen, mslen;
 
   glob_recursion_depth = 0;
 

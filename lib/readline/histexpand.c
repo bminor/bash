@@ -1,6 +1,6 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021,2023 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -532,7 +532,7 @@ history_expand_internal (const char *string, int start, int qc, int *end_index_p
   int i, n, starting_index;
   int substitute_globally, subst_bywords, want_quotes, print_only;
   char *event, *temp, *result, *tstr, *t, c, *word_spec;
-  int result_len;
+  size_t result_len;
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t ps;
 
@@ -881,7 +881,7 @@ history_expand_internal (const char *string, int start, int qc, int *end_index_p
 #define ADD_STRING(s) \
 	do \
 	  { \
-	    int sl = strlen (s); \
+	    size_t sl = strlen (s); \
 	    j += sl; \
 	    if (j >= result_len) \
 	      { \
@@ -906,12 +906,13 @@ history_expand_internal (const char *string, int start, int qc, int *end_index_p
 int
 history_expand (char *hstring, char **output)
 {
-  register int j;
-  int i, r, l, passc, cc, modified, eindex, only_printing, dquote, squote, flag;
+  int j;
+  int i, r, passc, cc, modified, eindex, only_printing, dquote, squote, flag;
+  size_t l;
   char *string;
 
   /* The output string, and its length. */
-  int result_len;
+  size_t result_len;
   char *result;
 
 #if defined (HANDLE_MULTIBYTE)
@@ -1418,7 +1419,7 @@ history_arg_extract (int first, int last, const char *string)
 {
   register int i, len;
   char *result;
-  int size, offset;
+  size_t size, offset;
   char **list;
 
   /* XXX - think about making history_tokenize return a struct array,
@@ -1475,7 +1476,7 @@ history_arg_extract (int first, int last, const char *string)
 static int
 history_tokenize_word (const char *string, int ind)
 {
-  register int i, j;
+  int i, j;
   int delimiter, nestdelim, delimopen;
 
   i = ind;
@@ -1627,7 +1628,8 @@ static char **
 history_tokenize_internal (const char *string, int wind, int *indp)
 {
   char **result;
-  register int i, start, result_index, size;
+  int i, start, result_index;
+  size_t size;
 
   /* If we're searching for a string that's not part of a word (e.g., " "),
      make sure we set *INDP to a reasonable value. */
@@ -1636,7 +1638,7 @@ history_tokenize_internal (const char *string, int wind, int *indp)
 
   /* Get a token, and stuff it into RESULT.  The tokens are split
      exactly where the shell would split them. */
-  for (i = result_index = size = 0, result = (char **)NULL; string[i]; )
+  for (i = result_index = 0, size = 0, result = (char **)NULL; string[i]; )
     {
       /* Skip leading whitespace. */
       for (; string[i] && fielddelim (string[i]); i++)

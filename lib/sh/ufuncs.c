@@ -87,10 +87,11 @@ int
 fsleep(unsigned int sec, unsigned int usec)
 {
   int e, r;
-  sigset_t blocked_sigs, prevmask;
+  sigset_t blocked_sigs;
 #if defined (HAVE_PSELECT)
   struct timespec ts;
 #else
+  sigset_t prevmask;
   struct timeval tv;
 #endif
 

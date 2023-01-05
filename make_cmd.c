@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -511,9 +511,11 @@ make_simple_command (ELEMENT element, COMMAND *command)
 void
 make_here_document (REDIRECT *temp, int lineno)
 {
-  int kill_leading, redir_len;
+  int kill_leading;
+  size_t redir_len;
   char *redir_word, *document, *full_line;
-  int document_index, document_size, delim_unquoted;
+  int document_index, delim_unquoted;
+  size_t document_size;
 
   if (temp->instruction != r_deblank_reading_until &&
       temp->instruction != r_reading_until)
@@ -525,7 +527,8 @@ make_here_document (REDIRECT *temp, int lineno)
   kill_leading = temp->instruction == r_deblank_reading_until;
 
   full_line = document = (char *)NULL;
-  document_index = document_size = 0;
+  document_index = 0;
+  document_size = 0;
 
   delim_unquoted = (temp->redirectee.filename->flags & W_QUOTED) == 0;
 
@@ -566,7 +569,7 @@ make_here_document (REDIRECT *temp, int lineno)
   while (full_line = read_secondary_line (delim_unquoted))
     {
       register char *line;
-      int len;
+      size_t len;
 
       here_doc_first_line = 0;
       line = full_line;
@@ -639,7 +642,7 @@ make_redirection (REDIRECTEE source, enum r_instruction instruction, REDIRECTEE 
 {
   REDIRECT *temp;
   WORD_DESC *w;
-  int wlen;
+  size_t wlen;
   intmax_t lfd;
 
   temp = (REDIRECT *)xmalloc (sizeof (REDIRECT));

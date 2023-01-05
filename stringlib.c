@@ -81,7 +81,7 @@ find_token_in_alist (int token, STRING_INT_ALIST *alist, int flags)
       if (alist[i].token == token)
         return (savestring (alist[i].word));
     }
-  return ((char *)NULL);
+  return (NULL);
 }
 
 int
@@ -117,8 +117,8 @@ find_index_in_alist (char *string, STRING_INT_ALIST *alist, int flags)
 char *
 substring (const char *string, int start, int end)
 {
-  register int len;
-  register char *result;
+  int len;
+  char *result;
 
   len = end - start;
   result = (char *)xmalloc (len + 1);
@@ -135,11 +135,11 @@ strsub (const char *string, const char *pat, const char *rep, int global)
 {
   size_t patlen, replen, templen, tempsize, i;
   int repl;
-  char *temp, *r;
+  char *temp, *r;;
 
   patlen = strlen (pat);
   replen = strlen (rep);
-  for (temp = (char *)NULL, i = templen = tempsize = 0, repl = 1; string[i]; )
+  for (temp = NULL, i = templen = tempsize = 0, repl = 1; string[i]; )
     {
       if (repl && STREQN (string + i, pat, patlen))
 	{
@@ -177,7 +177,8 @@ strsub (const char *string, const char *pat, const char *rep, int global)
 char *
 strcreplace (const char *string, int c, const char *text, int flags)
 {
-  char *ret, *r, *p, *t;
+  char *ret, *r, *t;
+  const char *p;
   size_t len, rlen, ind, tlen;
   int do_glob, escape_backslash;
 
@@ -188,7 +189,7 @@ strcreplace (const char *string, int c, const char *text, int flags)
   rlen = len + strlen (string) + 2;
   ret = (char *)xmalloc (rlen);
 
-  for (p = (char *)string, r = ret; p && *p; )
+  for (p = string, r = ret; p && *p; )
     {
       if (*p == c)
 	{

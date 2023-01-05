@@ -182,7 +182,8 @@ static int	already_expanded;
 static struct lvalue curlval = {0, 0, 0, -1};
 static struct lvalue lastlval = {0, 0, 0, -1};
 
-static int	_is_arithop (int);
+static int	is_arithop (int);
+static int	is_multiop (int);
 static void	readtok (void);	/* lexical analyzer */
 
 static void	init_lvalue (struct lvalue *);
@@ -223,7 +224,7 @@ static intmax_t exp0 (void);
 /* Global var which contains the stack of expression contexts. */
 static EXPR_CONTEXT **expr_stack;
 static int expr_depth;		   /* Location in the stack. */
-static int expr_stack_size;	   /* Number of slots already allocated. */
+static size_t expr_stack_size;	   /* Number of slots already allocated. */
 
 #if defined (ARRAY_VARS)
 extern const char * const bash_badsub_errmsg;
@@ -951,7 +952,7 @@ ipow (intmax_t base, intmax_t exp)
 static intmax_t
 exppower (void)
 {
-  register intmax_t val1, val2, c;
+  register intmax_t val1, val2;
 
   val1 = expunary ();
   while (curtok == POWER)
@@ -1233,7 +1234,7 @@ expr_streval (char *tok, int e, struct lvalue *lvalue)
 }
 
 static inline int
-_is_multiop (int c)
+is_multiop (int c)
 {
   switch (c)
     {
@@ -1259,7 +1260,7 @@ _is_multiop (int c)
 }
 
 static inline int
-_is_arithop (int c)
+is_arithop (int c)
 {
   switch (c)
     {
@@ -1295,14 +1296,14 @@ _is_arithop (int c)
 static void
 readtok (void)
 {
-  register char *cp, *xp;
-  register unsigned char c, c1;
-  register int e;
-  struct lvalue lval;
+  char *cp, *xp;
+  unsigned char c, c1;
+  int e;
 
   /* Skip leading whitespace. */
   cp = tp;
-  c = e = 0;
+  c = 0;
+  e = 0;
   while (cp && (c = *cp) && (cr_whitespace (c)))
     cp++;
 
@@ -1477,11 +1478,11 @@ readtok (void)
 	  assigntok = c;	/* a OP= b */
 	  c = OP_ASSIGN;
 	}
-      else if (_is_arithop (c) == 0)
+      else if (is_arithop (c) == 0)
 	{
 	  cp--;
 	  /* use curtok, since it hasn't been copied to lasttok yet */
-	  if (curtok == 0 || _is_arithop (curtok) || _is_multiop (curtok))
+	  if (curtok == 0 || is_arithop (curtok) || is_multiop (curtok))
 	    evalerror (_("arithmetic syntax error: operand expected"));
 	  else
 	    evalerror (_("arithmetic syntax error: invalid arithmetic operator"));

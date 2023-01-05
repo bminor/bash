@@ -318,7 +318,8 @@ unwind_frame_run_internal (char *tag, char *ignore)
 static void
 unwind_protect_mem_internal (char *var, char *psize)
 {
-  int size, allocated;
+  int size;
+  size_t allocated;
   UNWIND_ELT *elt;
 
   size = *(int *) psize;

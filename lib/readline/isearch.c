@@ -6,7 +6,7 @@
 /*								    */
 /* **************************************************************** */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021,2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -340,7 +340,7 @@ _rl_search_getchar (_rl_search_cxt *cxt)
 int
 _rl_isearch_dispatch (_rl_search_cxt *cxt, int c)
 {
-  int n, wstart, wlen, limit, cval, incr;
+  int n, wstart, wlen, limit, cval;
   char *paste;
   size_t pastelen;
   int j;
@@ -725,13 +725,13 @@ opcode_dispatch:
 #if defined (HANDLE_MULTIBYTE)
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	{
-	  int j;
+	  int w;
 
 	  if (cxt->mb[0] == 0 || cxt->mb[1] == 0)
 	    cxt->search_string[cxt->search_string_index++] = cxt->mb[0];
 	  else
-	    for (j = 0; j < wlen; )
-	      cxt->search_string[cxt->search_string_index++] = cxt->mb[j++];
+	    for (w = 0; w < wlen; )
+	      cxt->search_string[cxt->search_string_index++] = cxt->mb[w++];
 	}
       else
 #endif

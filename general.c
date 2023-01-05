@@ -410,8 +410,8 @@ legal_alias_name (const char *string, int flags)
 int
 assignment (const char *string, int flags)
 {
-  register unsigned char c;
-  register int newi, indx;
+  unsigned char c;
+  int newi, indx;
 
   c = string[indx = 0];
 
@@ -1116,7 +1116,7 @@ bash_tilde_find_word (const char *s, int flags, int *lenp)
 {
   const char *r;
   char *ret;
-  int l;
+  size_t l;
 
   for (r = s; *r && *r != '/'; r++)
     {

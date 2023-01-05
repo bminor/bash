@@ -197,10 +197,6 @@ extern int wordexp_only;
 extern int singlequote_translations;
 extern int extended_quote;
 
-#if defined (JOB_CONTROL) && defined (PROCESS_SUBSTITUTION)
-extern PROCESS *last_procsub_child;
-#endif
-
 #if !defined (HAVE_WCSDUP) && defined (HANDLE_MULTIBYTE)
 extern wchar_t *wcsdup (const wchar_t *);
 #endif
@@ -1324,7 +1320,7 @@ extract_delimited_string (const char *string, int *sindex, char *opener, char *a
   size_t slen;
   char *t, *result;
   int pass_character, nesting_level, in_comment;
-  int len_closer, len_opener, len_alt_opener;
+  size_t len_closer, len_opener, len_alt_opener;
   DECLARE_MBSTATE;
 
   slen = strlen (string + *sindex) + *sindex;
@@ -2496,8 +2492,8 @@ char_is_quoted (char *string, int eindex)
 int
 unclosed_pair (char *string, int eindex, char *openstr)
 {
-  int i, pass_next, openc, olen;
-  size_t slen;
+  int i, pass_next, openc;
+  size_t olen, slen;
   DECLARE_MBSTATE;
 
   slen = strlen (string);
@@ -5340,7 +5336,7 @@ match_upattern (char *string, char *pat, int mtype, char **sp, char **ep)
 
 #if defined (HANDLE_MULTIBYTE)
 
-#define WFOLD(c) (match_ignore_case && iswupper (c) ? towlower (c) : (c))
+#define WFOLD(c) (match_ignore_case && iswupper (c) ? towlower (c) : (wint_t)(c))
 
 /* Match WPAT anywhere in WSTRING and return the match boundaries.
    This returns 1 in case of a successful match, 0 otherwise.  Wide
@@ -7390,6 +7386,8 @@ parameter_brace_expand_indir (char *name, int var_is_special, int quoted, int pf
   char *t;
   WORD_DESC *w;
   SHELL_VAR *v;
+
+  v = 0;	/* silence a maybe-uninitialized warning */
 
   /* See if it's a nameref first, behave in ksh93-compatible fashion.
      There is at least one incompatibility: given ${!foo[0]} where foo=bar,
@@ -12628,7 +12626,7 @@ do_assignment_statements (WORD_LIST *varlist, char *command, int is_nullcmd)
 static WORD_LIST *
 expand_word_list_internal (WORD_LIST *list, int eflags)
 {
-  WORD_LIST *new_list, *temp_list;
+  WORD_LIST *new_list;
 
   tempenv_assign_error = 0;
   if (list == 0)

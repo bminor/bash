@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -716,7 +716,7 @@ int
 open_redir_file (REDIRECT *r, char **fnp)
 {
   char *fn;
-  int fd, rval;
+  int fd;
 
   if (r->instruction != r_input_direction)
     return -1;

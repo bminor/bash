@@ -153,7 +153,7 @@ history_filename (const char *filename)
 {
   char *return_val;
   const char *home;
-  int home_len;
+  size_t home_len;
 
   return_val = filename ? savestring (filename) : (char *)NULL;
 
@@ -190,7 +190,6 @@ history_backupfile (const char *filename)
   char *ret, linkbuf[PATH_MAX+1];
   size_t len;
   ssize_t n;
-  struct stat fs;
 
   fn = filename;  
 #if defined (HAVE_READLINK)
@@ -218,7 +217,6 @@ history_tempfile (const char *filename)
   char *ret, linkbuf[PATH_MAX+1];
   size_t len;
   ssize_t n;
-  struct stat fs;
   int pid;
 
   fn = filename;  
@@ -680,7 +678,7 @@ history_do_write (const char *filename, int nelements, int overwrite)
   register int i;
   char *output, *tempname, *histname;
   int file, mode, rv, exists;
-  struct stat finfo, nfinfo;
+  struct stat finfo;
 #ifdef HISTORY_USE_MMAP
   size_t cursize;
 
@@ -718,8 +716,8 @@ history_do_write (const char *filename, int nelements, int overwrite)
      Suggested by Peter Ho (peter@robosts.oxford.ac.uk). */
   {
     HIST_ENTRY **the_history;	/* local */
-    register int j;
-    int buffer_size;
+    size_t j;
+    size_t buffer_size;
     char *buffer;
 
     the_history = history_list ();

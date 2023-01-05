@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -865,7 +865,7 @@ restart_new_var_name:
 	simple_array_assign = 1;
       else if ((making_array_special || creating_array || array_exists) && offset)
 	{
-	  int vlen;
+	  size_t vlen;
 	  vlen = STRLEN (value);
 /*itrace("declare_builtin: name = %s value = %s flags = %d", name, value, wflags);*/
 

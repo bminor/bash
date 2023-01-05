@@ -55,7 +55,7 @@ extern int errno;
 static char *_find_user_command_internal (const char *, int);
 static char *find_user_command_internal (const char *, int);
 static char *find_user_command_in_path (const char *, char *, int, int *);
-static char *find_in_path_element (const char *, char *, int, int, struct stat *, int *);
+static char *find_in_path_element (const char *, char *, int, size_t, struct stat *, int *);
 static char *find_absolute_program (const char *, int);
 
 static char *get_next_path_element (char *, int *);
@@ -402,12 +402,13 @@ char *
 user_command_matches (const char *name, int flags, int state)
 {
   register int i;
-  int  path_index, name_len;
+  int  path_index;
+  size_t name_len;
   char *path_list, *path_element, *match;
   struct stat dotinfo;
   static char **match_list = NULL;
-  static int match_list_size = 0;
-  static int match_index = 0;
+  static size_t match_list_size = 0;
+  static size_t match_index = 0;
 
   if (state == 0)
     {
@@ -500,7 +501,7 @@ find_absolute_program (const char *name, int flags)
 }
 
 static char *
-find_in_path_element (const char *name, char *path, int flags, int name_len, struct stat *dotinfop, int *rflagsp)
+find_in_path_element (const char *name, char *path, int flags, size_t name_len, struct stat *dotinfop, int *rflagsp)
 {
   int status;
   char *full_path, *xpath;
@@ -585,7 +586,8 @@ static char *
 find_user_command_in_path (const char *name, char *path_list, int flags, int *rflagsp)
 {
   char *full_path, *path;
-  int path_index, name_len, rflags;
+  int path_index, rflags;
+  size_t name_len;
   struct stat dotinfo;
 
   /* We haven't started looking, so we certainly haven't seen

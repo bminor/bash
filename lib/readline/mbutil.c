@@ -1,6 +1,6 @@
 /* mbutil.c -- readline multibyte character utility functions */
 
-/* Copyright (C) 2001-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2021,2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -244,7 +244,6 @@ _rl_test_nonzero (const char *string, int ind, int len)
 static int
 _rl_find_prev_utf8char (const char *string, int seed, int find_non_zero)
 {
-  char *s;
   unsigned char b;
   int save, prev;
   size_t len;
@@ -476,7 +475,7 @@ _rl_char_value (const char *buf, int ind)
   size_t tmp;
   WCHAR_T wc;
   mbstate_t ps;
-  int l;
+  size_t l;
 
   if (MB_LEN_MAX == 1 || rl_byte_oriented)
     return ((WCHAR_T) buf[ind]);

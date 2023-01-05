@@ -141,7 +141,6 @@ static void reset_timeout (void);
 sh_timer *read_timeout;
 
 static int reading, tty_modified;
-static SigHandler *old_alrm;
 static unsigned char delim;
 
 static struct ttsave termsave;
@@ -204,8 +203,9 @@ read_builtin_timeout (int fd)
 int
 read_builtin (WORD_LIST *list)
 {
-  register char *varname;
-  int size, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2, nflag;
+  char *varname;
+  int nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2, nflag;
+  size_t size;
   volatile int i;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
   int raw, edit, nchars, silent, have_timeout, ignore_delim, fd;
@@ -691,9 +691,9 @@ read_builtin (WORD_LIST *list)
 
       if (retval <= 0)
 	{
-	  int t;
+	  int x;
 
-	  t = errno;
+	  x = errno;
 	  if (retval < 0 && errno == EINTR)
 	    {
 	      check_signals ();		/* in case we didn't call zread via zreadc */
@@ -710,7 +710,7 @@ read_builtin (WORD_LIST *list)
 	    ttyrestore (&termsave);	/* fix terminal before exiting */
 	  CHECK_TERMSIG;
 	  eof = 1;
-	  errno = t;	/* preserve it for the error message below */
+	  errno = x;	/* preserve it for the error message below */
 	  break;
 	}
 
@@ -725,13 +725,13 @@ read_builtin (WORD_LIST *list)
       /* XXX -- use i + mb_cur_max (at least 4) for multibyte/read_mbchar */
       if (i + (mb_cur_max > 4 ? mb_cur_max : 4) >= size)
 	{
-	  char *t;
-	  t = (char *)xrealloc (input_string, size += 128);
+	  char *x;
+	  x = (char *)xrealloc (input_string, size += 128);
 
 	  /* Only need to change unwind-protect if input_string changes */
-	  if (t != input_string)
+	  if (x != input_string)
 	    {
-	      input_string = t;
+	      input_string = x;
 	      remove_unwind_protect ();
 	      add_unwind_protect (xfree, input_string);
 	    }
@@ -1165,7 +1165,7 @@ static char *
 edit_line (char *p, char *itext)
 {
   char *ret;
-  int len;
+  size_t len;
 
   if (bash_readline_initialized == 0)
     initialize_readline ();

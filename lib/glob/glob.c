@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2022 Free Software Foundation, Inc.
+   Copyright (C) 1985-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
    
@@ -266,8 +266,6 @@ extglob_skipname (char *pat, char *dname, int flags)
 static int
 skipname (char *pat, char *dname, int flags)
 {
-  int i;
-
 #if EXTENDED_GLOB
   if (extglob_pattern_p (pat))		/* XXX */
     return (extglob_skipname (pat, dname, flags));
@@ -306,8 +304,6 @@ skipname (char *pat, char *dname, int flags)
 static int
 wskipname (wchar_t *pat, wchar_t *dname, int flags)
 {
-  int i;
-
   if (glob_always_skip_dot_and_dotdot && WDOT_OR_DOTDOT (dname))
     return 1;
 
@@ -485,7 +481,6 @@ wdequote_pathname (char *pathname)
   mbstate_t ps;
   size_t len, n;
   wchar_t *wpathname;
-  int i, j;
   wchar_t *orig_wpathname;
 
   if (mbsmbchar (pathname) == 0)
@@ -580,7 +575,7 @@ glob_testdir (char *dir, int flags)
 static struct globval *
 finddirs (char *pat, char *sdir, int flags, struct globval **ep, int *np)
 {
-  char **r, *n;
+  char **r;
   int ndirs;
   struct globval *ret, *e, *g;
 
@@ -654,14 +649,13 @@ char **
 glob_vector (char *pat, char *dir, int flags)
 {
   DIR *d;
-  register struct dirent *dp;
-  struct globval *lastlink, *e, *dirlist;
-  register struct globval *nextlink;
-  register char *nextname, *npat, *subdir;
-  unsigned int count;
-  int lose, skip, ndirs, isdir, sdlen, add_current, patlen;
-  register char **name_vector;
-  register unsigned int i;
+  struct dirent *dp;
+  struct globval *nextlink, *lastlink, *e, *dirlist;
+  char *nextname, *npat, *subdir;
+  unsigned int count, i;
+  int lose, skip, ndirs, isdir, add_current;
+  size_t patlen, sdlen;
+  char **name_vector;
   int mflags;		/* Flags passed to strmatch (). */
   int pflags;		/* flags passed to sh_makepath () */
   int hasglob;		/* return value from glob_pattern_p */
@@ -670,7 +664,8 @@ glob_vector (char *pat, char *dir, int flags)
   char *convfn;
 
   lastlink = 0;
-  count = lose = skip = add_current = 0;
+  count = 0;
+  lose = skip = add_current = 0;
 
   firstmalloc = 0;
   nalloca = 0;
@@ -713,7 +708,7 @@ glob_vector (char *pat, char *dir, int flags)
   hasglob = 0;
   if (skip == 0 && ((hasglob = glob_pattern_p (pat)) == 0 || hasglob == 2))
     {
-      int dirlen;
+      size_t dirlen;
       struct stat finfo;
 
       if (glob_testdir (dir, 0) < 0)
@@ -1035,7 +1030,8 @@ glob_vector (char *pat, char *dir, int flags)
 static char **
 glob_dir_to_array (char *dir, char **array, int flags)
 {
-  register unsigned int i, l;
+  unsigned int i;
+  size_t l;
   int add_slash;
   char **result, *new;
   struct stat sb;
@@ -1125,7 +1121,7 @@ glob_filename (char *pathname, int flags)
   char **result, **new_result;
   unsigned int result_size;
   char *directory_name, *filename, *dname, *fn;
-  unsigned int directory_len;
+  size_t directory_len;
   int free_dirname;			/* flag */
   int dflags, hasglob;
 
@@ -1184,7 +1180,7 @@ glob_filename (char *pathname, int flags)
   if (directory_len > 0 && (hasglob = glob_pattern_p (directory_name)) == 1)
     {
       char **directories, *d, *p;
-      register unsigned int i;
+      unsigned int i;
       int all_starstar, last_starstar;
 
       all_starstar = last_starstar = 0;
@@ -1220,7 +1216,7 @@ glob_filename (char *pathname, int flags)
 	 so we can compensate if filename is [star][star] */
       if ((flags & GX_GLOBSTAR) && all_starstar == 0)
 	{
-	  int dl, prev;
+	  size_t dl, prev;
 	  prev = dl = directory_len;
 	  while (dl >= 4 && d[dl - 1] == '/' &&
 			   d[dl - 2] == '*' &&
@@ -1306,8 +1302,6 @@ glob_filename (char *pathname, int flags)
 	  /* Special handling for symlinks to directories with globstar on */
 	  if (all_starstar && (dflags & GX_NULLDIR) == 0)
 	    {
-	      int dlen;
-
 	      /* If we have a directory name that is not null (GX_NULLDIR above)
 		 and is a symlink to a directory, we return the symlink if
 		 we're not `descending' into it (filename[0] == 0) and return
@@ -1350,7 +1344,7 @@ glob_filename (char *pathname, int flags)
 	  else
 	    {
 	      char **array;
-	      register unsigned int l;
+	      unsigned int l;
 
 	      /* If we're expanding **, we don't need to glue the directory
 		 name to the results; we've already done it in glob_vector */
@@ -1374,7 +1368,7 @@ glob_filename (char *pathname, int flags)
 			NULL_PLACEHOLDER (temp_results))
 #undef NULL_PLACEHOLDER
 		    {
-		      register int i, n;
+		      int i, n;
 		      for (n = 0; temp_results[n] && *temp_results[n] == 0; n++)
 			;
 		      i = n;

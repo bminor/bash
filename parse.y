@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1514,7 +1514,7 @@ static int
 yy_readline_get (void)
 {
   SigHandler *old_sigint;
-  int line_len;
+  size_t line_len;
   unsigned char c;
 
   if (current_readline_line == 0)
@@ -2150,7 +2150,6 @@ char *
 read_secondary_line (int remove_quoted_newline)
 {
   char *ret;
-  int n, c;
 
   prompt_string_pointer = &ps2_prompt;
   if (SHOULD_PROMPT ())
@@ -3015,7 +3014,7 @@ static int open_brace_count;
 static char *
 mk_alexpansion (const char *s)
 {
-  int l;
+  size_t l;
   char *r;
 
   l = strlen (s);
@@ -4342,7 +4341,7 @@ parse_string_to_command (char *string, int flags)
   sh_input_line_state_t ls;
   int nc, sflags;
   size_t slen;
-  char *ret, *ep;
+  char *ep;
   COMMAND *cmd;
 
   if (*string == 0)
@@ -5803,7 +5802,6 @@ decode_prompt_string (char *string)
 	      /* Try to quote anything the user can set in the file system */
 	      if (promptvars || posixly_correct)
 		{
-		  char *t;
 		  t = sh_strvis (temp);
 		  temp = sh_backslash_quote_for_double_quotes (t, 0);
 		  free (t);
@@ -5885,7 +5883,6 @@ decode_prompt_string (char *string)
 		     second argument of Q_DOUBLE_QUOTES if we use this
 		     function here. */
 		  {
-		    char *t;
 		    t = sh_strvis (t_string);
 		    temp = sh_backslash_quote_for_double_quotes (t, 0);
 		    free (t);
@@ -6570,8 +6567,6 @@ save_parser_state (sh_parser_state_t *ps)
 void
 restore_parser_state (sh_parser_state_t *ps)
 {
-  int i;
-
   if (ps == 0)
     return;
 

@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2022 Free Software Foundation, Inc.
+Copyright (C) 1994-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -651,8 +651,7 @@ set_compatibility_level (char *option_name, int mode)
 
   /* If we're unsetting one of the compatibility options, make sure the
      current value is in the range of the compatNN space. */
-  if (mode == 0)
-    oldval = shell_compatibility_level;
+  oldval = (mode == 0) ? shell_compatibility_level : 0;
 
   /* If we're setting something, redo some of the work we did above in
      toggle_shopt().  Unset everything and reset the appropriate option
@@ -762,7 +761,8 @@ char **
 get_shopt_options (void)
 {
   char **ret;
-  int n, i;
+  int i;
+  size_t n;
 
   n = sizeof (shopt_vars) / sizeof (shopt_vars[0]);
   ret = strvec_create (n + 1);
@@ -813,7 +813,8 @@ set_bashopts (void)
 {
   char *value;
   char tflag[N_SHOPT_OPTIONS];
-  int vsize, i, vptr, *ip, exported;
+  int i, exported;
+  size_t vsize, vptr;
   SHELL_VAR *v;
 
   for (vsize = i = 0; shopt_vars[i].name; i++)

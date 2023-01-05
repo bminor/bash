@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -527,7 +527,8 @@ set_shellopts (void)
 {
   char *value;
   char tflag[N_O_OPTIONS];
-  int vsize, i, vptr, *ip, exported;
+  int i, *ip, exported;
+  size_t vsize, vptr;
   SHELL_VAR *v;
 
   for (vsize = i = 0; o_options[i].name; i++)

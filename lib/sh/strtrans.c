@@ -1,6 +1,6 @@
 /* strtrans.c - Translate and untranslate strings with ANSI-C escape sequences. */
 
-/* Copyright (C) 2000-2015,2022 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2015,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -51,16 +51,17 @@ char *
 ansicstr (const char *string, int len, int flags, int *sawc, int *rlen)
 {
   int c, temp;
-  char *ret, *r, *s;
+  char *ret, *r;
+  const char *s;
   unsigned long v;
   size_t clen;
-  int b, mb_cur_max;
+  int mb_cur_max;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
 #endif
 
   if (string == 0 || *string == '\0')
-    return ((char *)NULL);
+    return ((char *)0);
 
   mb_cur_max = MB_CUR_MAX;
 #if defined (HANDLE_MULTIBYTE)
@@ -71,7 +72,7 @@ ansicstr (const char *string, int len, int flags, int *sawc, int *rlen)
 #else
   ret = (char *)xmalloc (2*len + 1);	/* 2*len for possible CTLESC */
 #endif
-  for (r = ret, s = (char *)string; s && *s; )
+  for (r = ret, s = string; s && *s; )
     {
       c = *s++;
       if (c != '\\' || *s == '\0')
@@ -227,8 +228,9 @@ ansicstr (const char *string, int len, int flags, int *sawc, int *rlen)
 char *
 ansic_quote (const char *str, int flags, int *rlen)
 {
-  char *r, *ret, *s;
-  int l, rsize;
+  char *r, *ret;
+  const char  *s;
+  size_t l, rsize;
   unsigned char c;
   size_t clen;
   int b;
@@ -246,9 +248,10 @@ ansic_quote (const char *str, int flags, int *rlen)
   *r++ = '$';
   *r++ = '\'';
 
-  for (s = (char *)str; c = *s; s++)
+  for (s = str; c = *s; s++)
     {
-      b = l = 1;		/* 1 == add backslash; 0 == no backslash */
+      b = 1;		/* 1 == add backslash; 0 == no backslash */
+      l = 1;
       clen = 1;
 
       switch (c)

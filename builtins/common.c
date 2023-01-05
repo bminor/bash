@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -639,9 +639,10 @@ set_working_directory (const char *name)
 int
 get_job_by_name (const char *name, int flags)
 {
-  register int i, wl, cl, match, job;
-  register PROCESS *p;
-  register JOB *j;
+  int i, match, job;
+  size_t wl, cl;
+  PROCESS *p;
+  JOB *j;
 
   job = NO_JOB;
   wl = strlen (name);
@@ -1034,7 +1035,6 @@ builtin_unbind_variable (const char *vname)
 int
 builtin_arrayref_flags (WORD_DESC *w, int baseflags)
 {
-  char *t;
   int vflags;
 
   vflags = baseflags;

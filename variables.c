@@ -789,7 +789,7 @@ get_bash_name (void)
     {
       /* Fast path for common case. */
       char *cdir;
-      int len;
+      size_t len;
 
       cdir = get_string_value ("PWD");
       if (cdir)
@@ -2218,7 +2218,6 @@ char *
 nameref_transform_name (const char *name, int flags)
 {
   SHELL_VAR *v;
-  char *newname;
 
   v = 0;
   if (flags & ASS_MKLOCAL)
@@ -2847,7 +2846,8 @@ make_variable_value (SHELL_VAR *var, const char *value, int flags)
 {
   char *retval, *oval;
   intmax_t lval, rval;
-  int expok, olen, op;
+  int expok, op;
+  size_t olen;
 
   /* If this variable has had its type set to integer (via `declare -i'),
      then do expression evaluation on it and store the result.  The
@@ -4334,8 +4334,8 @@ all_variables_matching_prefix (const char *prefix)
 {
   SHELL_VAR **varlist;
   char **rlist;
-  int rind, plen;
-  size_t vind;
+  int rind;
+  size_t plen, vind;
 
   plen = STRLEN (prefix);
   varlist = all_visible_variables ();
@@ -4398,7 +4398,9 @@ static void
 push_posix_temp_var (PTR_T data)
 {
   SHELL_VAR *var, *v;
+#if 0
   HASH_TABLE *binding_table;
+#endif
 
   var = (SHELL_VAR *)data;
 
@@ -4410,11 +4412,13 @@ push_posix_temp_var (PTR_T data)
 
   /* XXX - do we need to worry about array variables here? */
 
+#if 0
   /* If this modifies an existing local variable, v->context will be non-zero.
      If it comes back with v->context == 0, we bound at the global context.
      Set binding_table appropriately. It doesn't matter whether it's correct
      if the variable is local, only that it's not global_variables->table */
   binding_table = v->context ? shell_variables->table : global_variables->table;
+#endif
 
   /* global variables are no longer temporary and don't need propagating. */
   if (v->context == 0)
@@ -5375,7 +5379,7 @@ struct saved_dollar_vars {
 };
 
 static struct saved_dollar_vars *dollar_arg_stack = (struct saved_dollar_vars *)NULL;
-static int dollar_arg_stack_slots;
+static size_t dollar_arg_stack_slots;
 static int dollar_arg_stack_index;
 
 /* Functions to manipulate dollar_vars array. Need to keep these in sync with

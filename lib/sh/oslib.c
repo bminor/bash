@@ -56,7 +56,7 @@ extern int errno;
 char *
 strchr (const char *string, int c)
 {
-  register char *s;
+  char *s;
 
   for (s = string; s && *s; s++)
     if (*s == c)
@@ -68,9 +68,9 @@ strchr (const char *string, int c)
 char *
 strrchr (const char *string, int c)
 {
-  register char *s, *t;
+  char *s, *t;
 
-  for (s = string, t = (char *)NULL; s && *s; s++)
+  for (s = string, t = NULL; s && *s; s++)
     if (*s == c)
       t = s;
   return (t);

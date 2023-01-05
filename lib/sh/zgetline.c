@@ -1,7 +1,7 @@
 /* zgetline - read a line of input from a specified file descriptor and return
 	      a pointer to a newly-allocated buffer containing the data. */
 
-/* Copyright (C) 2008-2020,2022 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2020,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,8 +63,8 @@ typedef ssize_t creadfunc_t (int, char *);
 ssize_t
 zgetline (int fd, char **lineptr, size_t *n, int delim, int unbuffered_read)
 {
-  int retval;
-  size_t nr;
+  ssize_t retval;
+  ssize_t nr;
   char *line, c;
 
   if (lineptr == 0 || n == 0 || (*lineptr == 0 && *n != 0))

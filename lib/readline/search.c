@@ -65,7 +65,7 @@ static int _rl_history_search_len;
 static int _rl_history_search_flags;
 
 static char *history_search_string;
-static int history_string_size;
+static size_t history_string_size;
 
 static void make_history_line_current (HIST_ENTRY *);
 static int noninc_search_from_pos (char *, int, int, int, int *);

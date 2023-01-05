@@ -2,7 +2,7 @@
  * tmpfile.c - functions to create and safely open temp files for the shell.
  */
 
-/* Copyright (C) 2000-2020,2022 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2020,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -278,11 +278,12 @@ sh_mktmpfp (const char *nameroot, int flags, char **namep)
 char *
 sh_mktmpdir (const char *nameroot, int flags)
 {
-  char *filename, *tdir, *dirname;
+  char *filename;
+#ifdef USE_MKDTEMP
+  char *tdir, *dirname;
   const char *lroot;
   int fd, tdlen;
   
-#ifdef USE_MKDTEMP
   filename = (char *)xmalloc (PATH_MAX + 1);
   tdir = get_tmpdir (flags);
   tdlen = strlen (tdir);

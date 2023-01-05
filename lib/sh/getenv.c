@@ -1,7 +1,7 @@
 /* getenv.c - get environment variable value from the shell's variable
 	      list. */
 
-/* Copyright (C) 1997-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2002,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,7 +70,8 @@ getenv (const char *name)
     }
   else if (environ)
     {
-      register int i, len;
+      int i;
+      size_t len;
 
       /* In some cases, s5r3 invokes getenv() before main(); BSD systems
 	 using gprof also exhibit this behavior.  This means that

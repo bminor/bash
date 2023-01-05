@@ -94,7 +94,7 @@ static const char bstab[256] =
 char *
 sh_single_quote (const char *string)
 {
-  register int c;
+  int c;
   char *result, *r;
   const char *s;
 
@@ -133,7 +133,7 @@ sh_single_quote (const char *string)
 char *
 sh_double_quote (const char *string)
 {
-  register unsigned char c;
+  unsigned char c;
   int mb_cur_max;
   char *result, *r;
   size_t slen;
@@ -178,11 +178,12 @@ sh_double_quote (const char *string)
 /* Turn S into a simple double-quoted string.  If FLAGS is non-zero, quote
    double quote characters in S with backslashes. */
 char *
-sh_mkdoublequoted (const char *s, int slen, int flags)
+sh_mkdoublequoted (const char *s, size_t slen, int flags)
 {
   char *r, *ret;
   const char *send;
-  int rlen, mb_cur_max;
+  int mb_cur_max;
+  size_t rlen;
   DECLARE_MBSTATE;
 
   send = s + slen;
@@ -218,7 +219,7 @@ sh_mkdoublequoted (const char *s, int slen, int flags)
 char *
 sh_un_double_quote (char *string)
 {
-  register int c, pass_next;
+  int c, pass_next;
   char *result, *r, *s;
 
   r = result = (char *)xmalloc (strlen (string) + 1);

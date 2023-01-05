@@ -1369,6 +1369,7 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
 #endif
     }
 
+  rv = EXECUTION_SUCCESS;		/* suppress uninitialized use warnings */
   old_flags = command->flags;
   COPY_PROCENV (top_level, save_top_level);
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
@@ -5721,7 +5722,7 @@ execute_shell_script (char *sample, int sample_len,
   size_increment = 1;
 
   /* Now the argument, if any. */
-  for (firstarg = (char *)NULL, start = i; WHITECHAR(i); i++)
+  for (firstarg = NULL, start = i; WHITECHAR(i); i++)
     ;
 
   /* If there is more text on the line, then it is an argument for the
@@ -5880,7 +5881,7 @@ shell_execve (char *command, char **args, char **env)
 	  if (sample_len > 2 && sample[0] == '#' && sample[1] == '!')
 	    {
 	      char *interp;
-	      int ilen;
+	      size_t ilen;
 
 	      interp = getinterp (sample, sample_len, (int *)NULL);
 	      ilen = strlen (interp);

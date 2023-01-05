@@ -45,7 +45,7 @@ extern ssize_t zread (int, char *, size_t);
 /* Dump contents of file descriptor FD to *OSTR.  FN is the filename for
    error messages (not used right now). */
 int
-zmapfd (int fd, char **ostr, char *fn)
+zmapfd (int fd, char **ostr, const char *fn)
 {
   ssize_t nr;
   int rval;

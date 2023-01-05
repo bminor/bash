@@ -215,7 +215,7 @@ static alias_t **
 map_over_aliases (sh_alias_map_func_t *function)
 {
   register int i;
-  register BUCKET_CONTENTS *tlist;
+  BUCKET_CONTENTS *tlist;
   alias_t *alias, **list;
   int list_index;
 
@@ -464,9 +464,10 @@ char *
 
 alias_expand (char *string)
 {
-  register int i, j, start;
+  int i, start;
   char *line, *token;
-  int line_len, tl, real_start, expand_next, expand_this_token;
+  size_t j, line_len;
+  int tl, real_start, expand_next, expand_this_token;
   alias_t *alias;
 
   line_len = strlen (string) + 1;
@@ -545,7 +546,7 @@ alias_expand (char *string)
 	  (alias = find_alias (token)))
 	{
 	  char *v;
-	  int vlen, llen;
+	  size_t vlen, llen;
 
 	  v = alias->value;
 	  vlen = strlen (v);
@@ -562,7 +563,7 @@ alias_expand (char *string)
 	}
       else
 	{
-	  int llen, tlen;
+	  size_t llen, tlen;
 
 	  llen = strlen (line);
 	  tlen = i - real_start; /* tlen == strlen(token) */

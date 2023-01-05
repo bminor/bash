@@ -383,8 +383,6 @@ rl_maybe_save_line (void)
 int
 _rl_free_saved_history_line (void)
 {
-  UNDO_LIST *orig;
-
   if (_rl_saved_line_for_history)
     {
       if (rl_undo_list && rl_undo_list == (UNDO_LIST *)_rl_saved_line_for_history->data)

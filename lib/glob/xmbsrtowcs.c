@@ -419,7 +419,6 @@ xwcsrtombs (char *dest, const wchar_t **srcp, size_t len, mbstate_t *ps)
   size_t cur_max;			/* XXX - locale_cur_max */
   char buf[64], *destptr, *tmp_dest;
   unsigned char uc;
-  mbstate_t prev_state;
 
   cur_max = MB_CUR_MAX;
   if (cur_max > sizeof (buf))		/* Holy cow. */

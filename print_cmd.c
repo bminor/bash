@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -65,7 +65,7 @@ static void reset_locals (void);
 static void newline (char *);
 static void indent (int);
 static void semicolon (void);
-static void the_printed_command_resize (int);
+static void the_printed_command_resize (size_t);
 
 static void make_command_string_internal (COMMAND *);
 static void _print_word_list (WORD_LIST *, char *, PFUNC *);
@@ -101,7 +101,7 @@ static void print_function_def (FUNCTION_DEF *);
 #define PRINTED_COMMAND_GROW_SIZE 128
 
 char *the_printed_command = (char *)NULL;
-int the_printed_command_size = 0;
+size_t the_printed_command_size = 0;
 int command_string_index = 0;
 
 int xtrace_fd = -1;
@@ -132,7 +132,7 @@ static int group_command_nesting;
 
 /* A buffer to indicate the indirection level (PS4) when set -x is enabled. */
 static char *indirection_string = 0;
-static int indirection_stringsiz = 0;
+static size_t indirection_stringsiz = 0;
 
 /* Print COMMAND (a command tree) on standard output. */
 void
@@ -436,7 +436,8 @@ indirection_level_string (void)
   register int i, j;
   char *ps4;
   char ps4_firstc[MB_LEN_MAX+1];
-  int ps4_firstc_len, ps4_len, ineed, old;
+  size_t ps4_firstc_len, ps4_len, ineed;
+  int old;
   DECLARE_MBSTATE;
 
   ps4 = get_string_value ("PS4");
@@ -1004,7 +1005,6 @@ static void
 print_redirection_list (REDIRECT *redirects)
 {
   REDIRECT *heredocs, *hdtail, *newredir;
-  char *rw;
 
   heredocs = (REDIRECT *)NULL;
   hdtail = heredocs;
@@ -1029,19 +1029,6 @@ print_redirection_list (REDIRECT *redirects)
 	  else
 	    hdtail = heredocs = newredir;
 	}
-#if 0
-      /* Remove this heuristic now that the command printing code doesn't
-	 unconditionally put in the redirector file descriptor. */
-      else if (redirects->instruction == r_duplicating_output_word && (redirects->flags & REDIR_VARASSIGN) == 0 && redirects->redirector.dest == 1)
-	{
-	  /* Temporarily translate it as the execution code does. */
-	  rw = redirects->redirectee.filename->word;
-	  if (rw && *rw != '-' && DIGIT (*rw) == 0 && EXPCHAR (*rw) == 0)
-	    redirects->instruction = r_err_and_out;
-	  print_redirection (redirects);
-	  redirects->instruction = r_duplicating_output_word;
-	}
-#endif
       else
 	print_redirection (redirects);
 
@@ -1428,7 +1415,7 @@ newline (char *string)
 }
 
 static char *indentation_string;
-static int indentation_size;
+static size_t indentation_size;
 
 static void
 indent (int amount)
@@ -1457,9 +1444,10 @@ semicolon (void)
 static void
 cprintf (const char *control, ...)
 {
-  register const char *s;
+  const char *s;
   char char_arg[2], *argp, intbuf[INT_STRLEN_BOUND (unsigned int) + 1];
-  int digit_arg, arg_len, c;
+  int digit_arg, c;
+  size_t arg_len;
   va_list args;
 
   SH_VA_START (args, control);
@@ -1539,7 +1527,7 @@ cprintf (const char *control, ...)
 /* Ensure that there is enough space to stuff LENGTH characters into
    THE_PRINTED_COMMAND. */
 static void
-the_printed_command_resize (int length)
+the_printed_command_resize (size_t length)
 {
   if (the_printed_command == 0)
     {
@@ -1549,7 +1537,7 @@ the_printed_command_resize (int length)
     }
   else if ((command_string_index + length) >= the_printed_command_size)
     {
-      int new;
+      size_t new;
       new = command_string_index + length + 1;
 
       /* Round up to the next multiple of PRINTED_COMMAND_GROW_SIZE. */

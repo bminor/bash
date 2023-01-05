@@ -1,6 +1,6 @@
 /* mbscasecmp - case-insensitive multibyte string comparison. */
 
-/* Copyright (C) 2009-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,8 +33,10 @@
 int
 mbscasecmp (const char *mbs1, const char *mbs2)
 {
-  int len1, len2, mb_cur_max;
-  wchar_t c1, c2, l1, l2;
+  size_t len1, len2;
+  int mb_cur_max;
+  wchar_t c1, c2;
+  wint_t l1, l2;
   mbstate_t state1 = { 0 }, state2 = { 0 };
 
   len1 = len2 = 0;

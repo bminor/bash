@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2017,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -76,7 +76,7 @@ MATCHLEN (pat, max)
      size_t max;
 {
   CHAR c;
-  int matlen, bracklen, t, in_cclass, in_collsym, in_equiv;
+  int matlen, bracklen, in_cclass, in_collsym, in_equiv;
 
   if (*pat == 0)
     return (0);

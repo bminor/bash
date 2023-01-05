@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -80,7 +80,7 @@ extern const char * const bash_copyright;
 extern const char * const bash_license;
 
 static void show_builtin_command_help (void);
-static int open_helpfile (char *);
+static int open_helpfile (const char *);
 static void show_desc (char *, int);
 static void show_manpage (char *, int);
 static void show_longdoc (int);
@@ -93,7 +93,8 @@ help_builtin (WORD_LIST *list)
 {
   register int i;
   char *pattern, *name;
-  int plen, match_found, sflag, dflag, mflag, m, pass, this_found;
+  int match_found, sflag, dflag, mflag, m, pass, this_found;
+  size_t plen;
 
   dflag = sflag = mflag = 0;
   reset_internal_getopt ();
@@ -211,7 +212,7 @@ builtin_help (void)
 }
 
 static int
-open_helpfile (char *name)
+open_helpfile (const char *name)
 {
   int fd;
 
@@ -290,10 +291,11 @@ static void
 show_manpage (char *name, int i)
 {
   register int j;
-  char **doc, *line;
+  char * const *doc;
+  char *line;
   int fd, usefile;
 
-  doc = (char **)shell_builtins[i].long_doc;
+  doc = shell_builtins[i].long_doc;
 
   usefile = (doc && doc[0] && *doc[0] == '/' && doc[1] == (char *)NULL);
   if (usefile)
@@ -362,7 +364,7 @@ static void
 dispcolumn (int i, char *buf, size_t bufsize, int width, int height)
 {
   int j;
-  int dispcols;
+  size_t dispcols;
   char *helpdoc;
 
   /* first column */
@@ -500,7 +502,7 @@ wdispcolumn (int i, char *buf, size_t bufsize, int width, int height)
 static void
 show_builtin_command_help (void)
 {
-  int i, j;
+  int i;
   int height, width;
   char *t, blurb[128];
 

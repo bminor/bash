@@ -853,7 +853,8 @@ bash_syslog_history (const char *line)
 void
 bash_add_history (char *line)
 {
-  int add_it, offset, curlen, is_comment;
+  int add_it, offset, is_comment;
+  size_t curlen;
   HIST_ENTRY *current, *old;
   char *chars_to_add, *new_line;
 

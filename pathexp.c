@@ -498,7 +498,7 @@ static void
 ignore_globbed_names (char **names, sh_ignore_func_t *name_func)
 {
   char **newnames;
-  int n, i;
+  size_t n, i;
 
   for (i = 0; names[i]; i++)
     ;

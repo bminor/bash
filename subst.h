@@ -229,6 +229,9 @@ extern char *quote_escapes (const char *);
 /* And remove such quoted special characters. */
 extern char *remove_quoted_escapes (char *);
 
+/* Quote escape characters on the rhs of a word expansion. */
+extern char *quote_rhs (const char *);
+
 /* Remove CTLNUL characters from STRING unless they are quoted with CTLESC. */
 extern char *remove_quoted_nulls (char *);
 

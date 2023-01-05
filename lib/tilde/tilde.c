@@ -1,6 +1,6 @@
 /* tilde.c -- Tilde expansion code (~/foo := $HOME/foo). */
 
-/* Copyright (C) 1988-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1988-2020,2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -318,7 +318,7 @@ static char *
 glue_prefix_and_suffix (char *prefix, const char *suffix, int suffind)
 {
   char *ret;
-  int plen, slen;
+  size_t plen, slen;
 
   plen = (prefix && *prefix) ? strlen (prefix) : 0;
   slen = strlen (suffix + suffind);

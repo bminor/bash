@@ -435,7 +435,7 @@ main (int argc, char **argv, char **env)
   arg_index = 1;
   if (arg_index > argc)
     arg_index = argc;
-  command_execution_string = shell_script_filename = (char *)NULL;
+  command_execution_string = shell_script_filename = NULL;
   want_pending_command = locally_skip_execution = read_from_stdin = 0;
   default_input = stdin;
 #if defined (BUFFERED_INPUT)
@@ -522,7 +522,7 @@ main (int argc, char **argv, char **env)
 	}
       arg_index++;
     }
-  this_command_name = (char *)NULL;
+  this_command_name = NULL;
 
   /* First, let the outside world know about our interactive status.
      A shell is interactive if the `-i' flag was given, or if all of
@@ -775,7 +775,7 @@ main (int argc, char **argv, char **env)
 #if defined (BUFFERED_INPUT)
       default_buffered_input = fileno (stdin);	/* == 0 */
 #else
-      setbuf (default_input, (char *)NULL);
+      setbuf (default_input, NULL);
 #endif /* !BUFFERED_INPUT */
       read_from_stdin = 1;
     }
@@ -1035,7 +1035,7 @@ sh_exit (int s)
 {
 #if defined (MALLOC_DEBUG) && defined (USING_BASH_MALLOC)
   if (malloc_trace_at_exit && (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB)) == 0)
-    trace_malloc_stats (get_name_for_error (), (char *)NULL);
+    trace_malloc_stats (get_name_for_error (), NULL);
   /* mlocation_write_table (); */
 #endif
 
@@ -1308,7 +1308,7 @@ uidget (void)
       FREE (current_user.user_name);
       FREE (current_user.shell);
       FREE (current_user.home_dir);
-      current_user.user_name = current_user.shell = current_user.home_dir = (char *)NULL;
+      current_user.user_name = current_user.shell = current_user.home_dir = NULL;
     }
   current_user.uid = u;
   current_user.gid = getgid ();
@@ -1588,7 +1588,7 @@ open_shell_script (char *script_name)
   if (exec_argv0)
     {
       free (exec_argv0);
-      exec_argv0 = (char *)NULL;
+      exec_argv0 = NULL;
     }
 
   if (file_isdir (filename))

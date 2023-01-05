@@ -795,7 +795,7 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 
       savecmd = this_command_name;
       if (integer_p (var))
-	this_command_name = (char *)NULL;	/* no command name for errors */
+	this_command_name = 0;	/* no command name for errors */
       if (assoc_p (var))
 	bind_assoc_var_internal (var, nhash, akey, val, iflags);
       else

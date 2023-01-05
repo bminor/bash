@@ -2467,7 +2467,8 @@ rl_filename_completion_function (const char *text, int state)
   static char *users_dirname = (char *)NULL;
   static int filename_len;
   char *temp, *dentry, *convfn;
-  int dirlen, dentlen, convlen;
+  size_t dirlen;
+  int dentlen, convlen;
   int tilde_dirname;
   struct dirent *entry;
 
@@ -2588,6 +2589,7 @@ rl_filename_completion_function (const char *text, int state)
   /* Now that we have some state, we can read the directory. */
 
   entry = (struct dirent *)NULL;
+  convfn = dentry = 0;
   while (directory && (entry = readdir (directory)))
     {
       convfn = dentry = entry->d_name;
@@ -2837,7 +2839,7 @@ rl_menu_complete (int count, int ignore)
   static int full_completion = 0;	/* set to 1 if menu completion should reinitialize on next call */
   static int orig_start, orig_end;
   static char quote_char;
-  static int delimiter, cstate;
+  static int delimiter;
 
   /* The first time through, we generate the list of matches and set things
      up to insert them. */

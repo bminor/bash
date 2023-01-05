@@ -1,6 +1,6 @@
 /* spell.c -- spelling correction for pathnames. */
 
-/* Copyright (C) 2000-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -184,7 +184,7 @@ spdist(char *cur, char *new)
 char *
 dirspell (char *dirname)
 {
-  int n;
+  size_t n;
   char *guess;
 
   n = (strlen (dirname) * 3 + 1) / 2 + 1;

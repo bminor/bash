@@ -48,7 +48,7 @@ utf8_mbscmp (const char *s1, const char *s2)
 char *
 utf8_mbsmbchar (const char *str)
 {
-  register char *s;
+  char *s;
 
   for (s = (char *)str; *s; s++)
     if ((*s & 0xc0) == 0x80)
@@ -59,7 +59,7 @@ utf8_mbsmbchar (const char *str)
 int
 utf8_mbsnlen(const char *src, size_t srclen, int maxlen)
 {
-  register int sind, count;
+  int sind, count;
 
   for (sind = count = 0; src[sind] && sind <= maxlen; sind++)
     {

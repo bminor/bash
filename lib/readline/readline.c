@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -262,7 +262,7 @@ _rl_keyseq_cxt *_rl_kscxt = 0;
 
 int rl_executing_key;
 char *rl_executing_keyseq = 0;
-int _rl_executing_keyseq_size = 0;
+size_t _rl_executing_keyseq_size = 0;
 
 struct _rl_cmd _rl_pending_command;
 struct _rl_cmd *_rl_command_to_execute = (struct _rl_cmd *)NULL;

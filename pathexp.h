@@ -82,7 +82,8 @@ extern char **shell_glob_filename (const char *, int);
 
 struct ign {
   char *val;
-  int len, flags;
+  size_t len;
+  int flags;
 };
 
 typedef int sh_iv_item_func_t (struct ign *);

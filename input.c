@@ -189,7 +189,8 @@ make_buffered_stream (int fd, char *buffer, size_t bufsize)
   bp->b_fd = fd;
   bp->b_buffer = buffer;
   bp->b_size = bufsize;
-  bp->b_used = bp->b_inputp = bp->b_flag = 0;
+  bp->b_used = 0;
+  bp->b_inputp = bp->b_flag = 0;
   if (bufsize == 1)
     bp->b_flag |= B_UNBUFF;
   if (O_TEXT && (fcntl (fd, F_GETFL) & O_TEXT) != 0)

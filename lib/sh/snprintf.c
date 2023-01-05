@@ -1135,7 +1135,7 @@ static char *
 groupnum (char *s)
 {
   char *se, *ret, *re, *g;
-  int len, slen;
+  size_t len, slen;
 
   if (grouping == 0 || *grouping <= 0 || *grouping == CHAR_MAX)
     return ((char *)NULL);

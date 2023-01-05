@@ -33,7 +33,6 @@ extern void run_unwind_protects (void);
 extern void clear_unwind_protect_list (int);
 extern int have_unwind_protects (void);
 extern int unwind_protect_tag_on_stack (const char *);
-extern void uwp_init (void);
 
 /* Define for people who like their code to look a certain way. */
 #define end_unwind_frame()
