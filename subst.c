@@ -1528,7 +1528,7 @@ extract_heredoc_dolbrace_string (const char *string, int *sindex, int quoted, in
       if (c == '$' && string[i+1] == '\'')
 	{
 	  char *ttrans;
-	  int ttranslen;
+	  size_t ttranslen;
 
 	  if ((posixly_correct || extended_quote == 0) && dolbrace_state != DOLBRACE_QUOTE && dolbrace_state != DOLBRACE_QUOTE2)
 	    {
@@ -1573,7 +1573,7 @@ extract_heredoc_dolbrace_string (const char *string, int *sindex, int quoted, in
       if (c == '$' && string[i+1] == '"')
 	{
 	  char *ttrans;
-	  int ttranslen;
+	  size_t ttranslen;
 
 	  si = i + 2;
 	  t = string_extract_double_quoted (string, &si, flags);	/* XXX */
@@ -2015,7 +2015,7 @@ skip_matched_pair (const char *string, int start, int open, int close, int flags
 {
   int i, pass_next, backq, si, c, count, oldjmp;
   size_t slen;
-  char *temp, *ss;
+  char *temp;
   DECLARE_MBSTATE;
 
   slen = strlen (string + start) + start;
@@ -2028,7 +2028,6 @@ skip_matched_pair (const char *string, int start, int open, int close, int flags
   i = (flags & 2) ? start : start + 1;
   count = 1;
   pass_next = backq = 0;
-  ss = (char *)string;
   while (c = string[i])
     {
       if (pass_next)
@@ -2074,8 +2073,8 @@ skip_matched_pair (const char *string, int start, int open, int close, int flags
 	}
       else if ((flags & 1) == 0 && (c == '\'' || c == '"'))
 	{
-	  i = (c == '\'') ? skip_single_quoted (ss, slen, ++i, 0)
-			  : skip_double_quoted (ss, slen, ++i, 0);
+	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i, 0)
+			  : skip_double_quoted (string, slen, ++i, 0);
 	  /* no increment, the skip functions increment past the closing quote. */
 	}
       else if ((flags & 1) == 0 && c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
@@ -2086,9 +2085,9 @@ skip_matched_pair (const char *string, int start, int open, int close, int flags
 
 	  /* XXX - extract_command_subst here? */
 	  if (string[i+1] == LPAREN)
-	    temp = extract_delimited_string (ss, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
+	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
 	  else
-	    temp = extract_dollar_brace_string (ss, &si, 0, SX_NOALLOC);
+	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
 
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
@@ -4054,8 +4053,9 @@ char *
 expand_string_dollar_quote (const char *string, int flags)
 {
   size_t slen, retind, retsize;
-  int sindex, c, translen, peekc, news;
+  int sindex, c, peekc, news;
   char *ret, *trans, *t;
+  size_t translen;
   const char *send;
   DECLARE_MBSTATE;
 
@@ -6570,7 +6570,8 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
 #endif
 
   istring = (char *)NULL;
-  istring_index = istring_size = bufn = tflag = 0;
+  istring_index = istring_size = tflag = 0;
+  bufn = 0;
 
   skip_ctlesc = ifs_cmap[CTLESC];
   skip_ctlnul = ifs_cmap[CTLNUL];
@@ -8232,7 +8233,7 @@ string_transform (int xc, SHELL_VAR *v, char *s)
 	break;
       /* Transformations that modify the variable's value */
       case 'E':
-	t = ansiexpand (s, 0, strlen (s), (int *)0);
+	t = ansiexpand (s, 0, strlen (s), 0);
 	ret = dequote_escapes (t);
 	free (t);
 	break;
@@ -9229,7 +9230,7 @@ chk_arithsub (const char *s, int len)
 	  break;
 
 	case '"':
-	  i = skip_double_quoted ((char *)s, len, ++i, 0);
+	  i = skip_double_quoted (s, len, ++i, 0);
 	  break;
 	}
     }

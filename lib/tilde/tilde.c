@@ -160,8 +160,9 @@ tilde_find_prefix (const char *string, int *len)
 static int
 tilde_find_suffix (const char *string)
 {
-  register int i, j, string_len;
-  register char **suffixes;
+  int i, j;
+  size_t string_len;
+  char **suffixes;
 
   suffixes = tilde_additional_suffixes;
   string_len = strlen (string);
@@ -189,7 +190,7 @@ char *
 tilde_expand (const char *string)
 {
   char *result;
-  int result_size, result_index;
+  size_t result_size, result_index;
 
   result_index = result_size = 0;
   if (result = strchr (string, '~'))
@@ -200,7 +201,7 @@ tilde_expand (const char *string)
   /* Scan through STRING expanding tildes as we come to them. */
   while (1)
     {
-      register int start, end;
+      int start, end;
       char *tilde_word, *expansion;
       int len;
 

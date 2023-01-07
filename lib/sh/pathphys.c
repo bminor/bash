@@ -48,7 +48,7 @@ extern int errno;
 
 extern char *get_working_directory (char *);
 
-static inline int
+static inline ssize_t
 _path_readlink (char *path, char *buf, size_t bufsiz)
 {
 #ifdef HAVE_READLINK
@@ -74,6 +74,7 @@ sh_physpath (char *path, int flags)
   char tbuf[PATH_MAX+1], linkbuf[PATH_MAX+1];
   char *result, *p, *q, *qsave, *qbase, *workpath;
   int double_slash_path, nlink;
+  ssize_t r;
   size_t linklen;
 
   linklen = strlen (path);
@@ -160,13 +161,14 @@ sh_physpath (char *path, int flags)
 
 	  *q = '\0';
 
-	  linklen = _path_readlink (result, linkbuf, PATH_MAX);
-	  if (linklen < 0)	/* if errno == EINVAL, it's not a symlink */
+	  r = _path_readlink (result, linkbuf, PATH_MAX);
+	  if (r < 0)	/* if errno == EINVAL, it's not a symlink */
 	    {
 	      if (errno != EINVAL)
 		goto error;
 	      continue;
 	    }
+	  linklen = r;
 
 	  /* It's a symlink, and the value is in LINKBUF. */
 	  nlink++;

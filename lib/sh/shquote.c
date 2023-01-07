@@ -255,18 +255,19 @@ sh_un_double_quote (char *string)
    other shell blank characters. */
    
 char *
-sh_backslash_quote (char *string, char *table, int flags)
+sh_backslash_quote (char *string, const char *table, int flags)
 {
   int c, mb_cur_max;
   size_t slen;
-  char *result, *r, *s, *backslash_table, *send;
+  char *result, *r, *s, *send;
+  const char *backslash_table;
   DECLARE_MBSTATE;
 
   slen = strlen (string);
   send = string + slen;
   result = (char *)xmalloc (2 * slen + 1);
 
-  backslash_table = table ? table : (char *)bstab;
+  backslash_table = table ? table : bstab;
   mb_cur_max = MB_CUR_MAX;
 
   for (r = result, s = string; s && (c = *s); s++)

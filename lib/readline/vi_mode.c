@@ -102,7 +102,7 @@ static int vi_replace_count;
    us implicitly into insert mode.  Some people want this text to be
    attached to the command so that it is `redoable' with `.'. */
 static char *vi_insert_buffer;
-static int vi_insert_buffer_size;
+static size_t vi_insert_buffer_size;
 
 static int _rl_vi_last_repeat = 1;
 static int _rl_vi_last_arg_sign = 1;

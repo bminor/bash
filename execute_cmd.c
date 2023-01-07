@@ -350,7 +350,7 @@ dispose_fd_bitmap (struct fd_bitmap *fdbp)
 void
 close_fd_bitmap (struct fd_bitmap *fdbp)
 {
-  register int i;
+  int i;
 
   if (fdbp)
     {
@@ -520,7 +520,7 @@ restore_signal_mask (sigset_t *set)
 void
 open_files (void)
 {
-  register int i;
+  int i;
   int f, fd_table_size;
 
   fd_table_size = getdtablesize ();
@@ -2312,7 +2312,7 @@ coproc_setvars (struct coproc *cp)
 void
 coproc_unsetvars (struct coproc *cp)
 {
-  int l;
+  size_t l;
   char *namevar;
 
   if (cp->c_name == 0)
@@ -2819,7 +2819,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 static int
 execute_for_command (FOR_COM *for_command)
 {
-  register WORD_LIST *releaser, *list;
+  WORD_LIST *releaser, *list;
   SHELL_VAR *v;
   char *identifier;
   int retval, save_line_number;
@@ -3172,8 +3172,8 @@ displen (const char *s)
 static int
 print_index_and_element (int len, int ind, WORD_LIST *list)
 {
-  register WORD_LIST *l;
-  register int i;
+  WORD_LIST *l;
+  int i;
 
   if (list == 0)
     return (0);
@@ -3467,7 +3467,7 @@ execute_select_command (SELECT_COM *select_command)
 static int
 execute_case_command (CASE_COM *case_command)
 {
-  register WORD_LIST *list;
+  WORD_LIST *list;
   WORD_LIST *wlist, *es;
   PATTERN_LIST *clauses;
   char *word, *pattern;
@@ -5681,7 +5681,7 @@ parent_return:
 static char *
 getinterp (char *sample, int sample_len, int *endp)
 {
-  register int i;
+  int i;
   char *execname;
   int start;
 
@@ -6049,7 +6049,7 @@ execute_intern_function (WORD_DESC *name, FUNCTION_DEF *funcdef)
 void
 close_all_files (void)
 {
-  register int i, fd_table_size;
+  int i, fd_table_size;
 
   fd_table_size = getdtablesize ();
   if (fd_table_size > 256)	/* clamp to a reasonable value */

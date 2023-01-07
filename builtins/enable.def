@@ -319,8 +319,8 @@ dyn_load_builtin (WORD_LIST *list, int flags, char *filename)
   WORD_LIST *l;
   void *handle;
   
-  int total, new, replaced, r;
-  size_t size;
+  int total, replaced, r;
+  size_t size, new;
   char *struct_name, *name, *funcname;
   sh_load_func_t *loadfunc;
   struct builtin **new_builtins, *b, *new_shell_builtins, *old_builtin;
@@ -381,7 +381,7 @@ dyn_load_builtin (WORD_LIST *list, int flags, char *filename)
   /* For each new builtin in the shared object, find it and its describing
      structure.  If this is overwriting an existing builtin, do so, otherwise
      save the loaded struct for creating the new list of builtins. */
-  for (replaced = new = 0; list; list = list->next)
+  for (replaced = 0, new = 0; list; list = list->next)
     {
       name = list->word->word;
 

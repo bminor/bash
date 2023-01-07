@@ -130,8 +130,8 @@ strvec_search (char **array, const char *name)
 char **
 strvec_copy (char * const *array)
 {
-  register int i;
-  int len;
+  int i;
+  size_t len;
   char **ret;
 
   len = strvec_len (array);

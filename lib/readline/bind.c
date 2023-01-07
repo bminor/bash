@@ -2677,7 +2677,7 @@ rl_invoking_keyseqs_in_map (rl_command_func_t *function, Keymap map)
 {
   register int key;
   char **result;
-  int result_index, result_size;
+  size_t result_index, result_size;
 
   result = (char **)NULL;
   result_index = result_size = 0;
@@ -2874,9 +2874,9 @@ rl_dump_functions (int count, int key)
 static void
 _rl_macro_dumper_internal (int print_readably, Keymap map, char *prefix)
 {
-  register int key;
+  int key;
   char *keyname, *out;
-  int prefix_len;
+  size_t prefix_len;
 
   for (key = 0; key < KEYMAP_SIZE; key++)
     {

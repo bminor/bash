@@ -42,7 +42,6 @@ struct execstate
     pid_t pid;
     int subshell_env;
   };
-	
 
 /* Variables declared in execute_cmd.c, used by many other files */
 extern int return_catch_flag;

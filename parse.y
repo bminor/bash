@@ -179,10 +179,10 @@ static int alias_expand_token (const char *);
 static int time_command_acceptable (void);
 static int special_case_tokens (const char *);
 static int read_token (int);
-static char *parse_matched_pair (int, int, int, int *, int);
-static char *parse_comsub (int, int, int, int *, int);
+static char *parse_matched_pair (int, int, int, size_t *, int);
+static char *parse_comsub (int, int, int, size_t *, int);
 #if defined (ARRAY_VARS)
-static char *parse_compound_assignment (int *);
+static char *parse_compound_assignment (size_t *);
 #endif
 #if defined (DPAREN_ARITHMETIC) || defined (ARITH_FOR_COMMAND)
 static int parse_dparen (int);
@@ -2060,7 +2060,7 @@ static char *
 read_a_line (int remove_quoted_newline)
 {
   static char *line_buffer = (char *)NULL;
-  static int buffer_size = 0;
+  static size_t buffer_size = 0;
   int indx, c, peekc, pass_next;
 
 #if defined (READLINE)
@@ -2303,7 +2303,7 @@ static int unquoted_backslash = 0;
 static int
 shell_getc (int remove_quoted_newline)
 {
-  register int i;
+  int i;
   int c, truncating, last_was_backslash;
   unsigned char uc;
 
@@ -2991,6 +2991,14 @@ static int open_brace_count;
 		open_brace_count++; \
 	      else if (word_token_alist[i].token == '}' && open_brace_count) \
 		open_brace_count--; \
+\
+	      if (last_read_token == IF || last_read_token == WHILE || last_read_token == UNTIL) \
+		{ \
+		  if (word_top < MAX_COMPOUND_NEST) \
+		    word_top++; \
+		  word_lineno[word_top] = line_number; \
+		} \
+\
 	      return (word_token_alist[i].token); \
 	    } \
       } \
@@ -3634,12 +3642,13 @@ static char matched_pair_error;
 
 /* QC == `"' if this construct is within double quotes */
 static char *
-parse_matched_pair (int qc, int open, int close, int *lenp, int flags)
+parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
 {
-  int count, ch, prevch, tflags;
-  int nestlen, ttranslen, start_lineno;
+  int count, ch, prevch, tflags, start_lineno;
+  size_t nestlen, ttranslen;
   char *ret, *nestret, *ttrans;
-  int retind, retsize, rflags;
+  int rflags;
+  size_t retsize, retind;
   int dolbrace_state;
 
   dolbrace_state = (flags & P_DOLBRACE) ? DOLBRACE_PARAM : 0;
@@ -4038,12 +4047,12 @@ dump_tflags (int flags)
 /* Parse a $(...) command substitution.  This reads input from the current
    input stream. QC == `"' if this construct is within double quotes */
 static char *
-parse_comsub (int qc, int open, int close, int *lenp, int flags)
+parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 {
   int peekc, r;
   int start_lineno, local_extglob, was_extpat;
   char *ret, *tcmd;
-  int retlen;
+  size_t retlen;
   sh_parser_state_t ps;
   STRING_SAVER *saved_strings;
   COMMAND *saved_global, *parsed_command;
@@ -4469,7 +4478,7 @@ parse_arith_cmd (char **ep, int adddq)
 {
   int exp_lineno, rval, c;
   char *ttok, *tokstr;
-  int ttoklen;
+  size_t ttoklen;
 
   exp_lineno = line_number;
   ttok = parse_matched_pair (0, '(', ')', &ttoklen, P_ARITH);
@@ -4831,7 +4840,7 @@ read_token_word (int character)
   int cd;
   int result, peek_char;
   char *ttok, *ttrans;
-  int ttoklen, ttranslen;
+  size_t ttoklen, ttranslen;
   intmax_t lvalue;
 
   if (token_buffer_size < TOKEN_DEFAULT_INITIAL_SIZE)
@@ -5194,7 +5203,7 @@ got_token:
   /* Check for special case tokens. */
   result = (last_shell_getc_is_singlebyte) ? special_case_tokens (token) : -1;
   if (result >= 0)
-    return result;
+    return result;	/* don't need to set word_top in any of these cases */
 
 #if defined (ALIAS)
   /* Posix.2 does not allow reserved words to be aliased, so check for all
@@ -5655,6 +5664,7 @@ decode_prompt_string (char *string)
   time_t the_time;
   char timebuf[128];
   char *timefmt;
+  size_t tslen;
 
   result = (char *)xmalloc (result_size = PROMPT_GROWTH);
   result[result_index = 0] = 0;
@@ -5737,17 +5747,17 @@ decode_prompt_string (char *string)
 	      tm = localtime (&the_time);
 
 	      if (c == 'd')
-		n = strftime (timebuf, sizeof (timebuf), "%a %b %d", tm);
+		tslen = strftime (timebuf, sizeof (timebuf), "%a %b %d", tm);
 	      else if (c == 't')
-		n = strftime (timebuf, sizeof (timebuf), "%H:%M:%S", tm);
+		tslen = strftime (timebuf, sizeof (timebuf), "%H:%M:%S", tm);
 	      else if (c == 'T')
-		n = strftime (timebuf, sizeof (timebuf), "%I:%M:%S", tm);
+		tslen = strftime (timebuf, sizeof (timebuf), "%I:%M:%S", tm);
 	      else if (c == '@')
-		n = strftime (timebuf, sizeof (timebuf), "%I:%M %p", tm);
+		tslen = strftime (timebuf, sizeof (timebuf), "%I:%M %p", tm);
 	      else if (c == 'A')
-		n = strftime (timebuf, sizeof (timebuf), "%H:%M", tm);
+		tslen = strftime (timebuf, sizeof (timebuf), "%H:%M", tm);
 
-	      if (n == 0)
+	      if (tslen == 0)
 		timebuf[0] = '\0';
 	      else
 		timebuf[sizeof(timebuf) - 1] = '\0';
@@ -5773,10 +5783,10 @@ decode_prompt_string (char *string)
 		  timefmt[1] = 'X';	/* locale-specific current time */
 		  timefmt[2] = '\0';
 		}
-	      n = strftime (timebuf, sizeof (timebuf), timefmt, tm);
+	      tslen = strftime (timebuf, sizeof (timebuf), timefmt, tm);
 	      free (timefmt);
 
-	      if (n == 0)
+	      if (tslen == 0)
 		timebuf[0] = '\0';
 	      else
 		timebuf[sizeof(timebuf) - 1] = '\0';
@@ -6416,7 +6426,7 @@ parse_string_to_word_list (char *s, int flags, const char *whom)
 }
 
 static char *
-parse_compound_assignment (int *retlenp)
+parse_compound_assignment (size_t *retlenp)
 {
   WORD_LIST *wl, *rl;
   int tok, orig_line_number, assignok;

@@ -2206,7 +2206,7 @@ rl_completion_matches (const char *text, rl_compentry_func_t *entry_function)
   register int i;
 
   /* Number of slots in match_list. */
-  int match_list_size;
+  size_t match_list_size;
 
   /* The list of matches. */
   char **match_list;

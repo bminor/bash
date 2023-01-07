@@ -66,7 +66,8 @@ really_munge_braces (char **array, int real_start, int real_end, int gcd_zero)
 {
   int start, end, gcd;
   char *result, *subterm, *x;
-  int result_size, flag, tlen;
+  size_t result_size;
+  int flag, tlen;
 
   flag = 0;
 

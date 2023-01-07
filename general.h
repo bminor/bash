@@ -301,7 +301,7 @@ extern void xfree (void *);
 /* Declarations for functions defined in general.c */
 extern void posix_initialize (int);
 
-extern int num_posix_options (void);
+extern size_t num_posix_options (void);
 extern char *get_posix_options (char *);
 extern void set_posix_options (const char *);
 

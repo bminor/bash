@@ -416,11 +416,11 @@ reset_locale_vars (void)
    is not available, the passed string is returned unchanged.  The
    length of the translated string is returned in LENP, if non-null. */
 char *
-localetrans (const char *string, int len, int *lenp)
+localetrans (const char *string, int len, size_t *lenp)
 {
   char *locale, *t;
   char *translated;
-  int tlen;
+  size_t tlen;
 
   /* Don't try to translate null strings. */
   if (string == 0 || *string == 0)
@@ -521,10 +521,11 @@ mk_msgstr (char *string, int *foundnlp)
    by the caller.  The length of the translated string is returned in LENP,
    if non-null. */
 char *
-locale_expand (const char *string, int start, int end, int lineno, int *lenp)
+locale_expand (const char *string, int start, int end, int lineno, size_t *lenp)
 {
-  int len, tlen, foundnl;
+  int tlen, foundnl;
   char *temp, *t, *t2;
+  size_t len;
 
   temp = (char *)xmalloc (end - start + 1);
   for (tlen = 0, len = start; len < end; )

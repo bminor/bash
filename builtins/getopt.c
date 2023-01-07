@@ -215,7 +215,7 @@ sh_getopt (int argc, char *const *argv, const char *optstring)
 void
 sh_getopt_restore_state (char **argv)
 {
-  if (nextchar)
+  if (nextchar && argv && argv[sh_curopt])
     nextchar = argv[sh_curopt] + sh_charindex;
 }
 

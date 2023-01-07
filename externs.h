@@ -142,9 +142,9 @@ extern int set_locale_var (const char *, const char *);
 extern int set_lang (const char *, const char *);
 extern void set_default_lang (void);
 extern char *get_locale_var (const char *);
-extern char *localetrans (const char *, int, int *);
+extern char *localetrans (const char *, int, size_t *);
 extern char *mk_msgstr (char *, int *);
-extern char *locale_expand (const char *, int, int, int, int *);
+extern char *locale_expand (const char *, int, int, int, size_t *);
 #ifndef locale_decpoint
 extern int locale_decpoint (void);
 #endif
@@ -169,7 +169,7 @@ extern char *strsub (const char *, const char *, const char *, int);
 extern char *strcreplace (const char *, int, const char *, int);
 extern void strip_leading (char *);
 extern void strip_trailing (char *, int, int);
-extern void xbcopy (char *, char *, size_t);
+extern void xbcopy (const void *, void *, size_t);
 
 /* Functions from version.c. */
 extern char *shell_version_string (void);
@@ -471,10 +471,10 @@ extern uintmax_t strtoumax (const char *, char **, int);
 #endif
 
 /* declarations for functions defined in lib/sh/strtrans.c */
-extern char *ansicstr (const char *, int, int, int *, int *);
+extern char *ansicstr (const char *, size_t, int, int *, size_t *);
 extern char *ansic_quote (const char *, int, int *);
 extern int ansic_shouldquote (const char *);
-extern char *ansiexpand (const char *, int, int, int *);
+extern char *ansiexpand (const char *, int, int, size_t *);
 
 /* declarations for functions defined in lib/sh/strvis.c */
 extern int sh_charvis (const char *, size_t *, size_t, char *, size_t *);

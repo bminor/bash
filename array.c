@@ -814,7 +814,7 @@ array_from_argv(ARRAY *a, char **vec, int count)
   if (a == 0 || array_num_elements (a) == 0)
     {
       for (i = 0; i < count; i++)
-	array_insert (a, i, t);
+	array_insert (a, i, vec[i]);
       return a;
     }
 

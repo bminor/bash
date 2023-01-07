@@ -254,10 +254,10 @@ static void
 show_desc (char *name, int i)
 {
   register int j, r;
-  char **doc, *line;
+  char * const *doc, *line;
   int fd, usefile;
 
-  doc = (char **)shell_builtins[i].long_doc;
+  doc = shell_builtins[i].long_doc;
 
   usefile = (doc && doc[0] && *doc[0] == '/' && doc[1] == (char *)NULL);
   if (usefile)

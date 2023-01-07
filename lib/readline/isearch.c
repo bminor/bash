@@ -150,7 +150,7 @@ static void
 rl_display_search (char *search_string, int flags, int where)
 {
   char *message;
-  int msglen, searchlen;
+  size_t msglen, searchlen;
 
   searchlen = (search_string && *search_string) ? strlen (search_string) : 0;
 

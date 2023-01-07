@@ -445,9 +445,9 @@ static intmax_t
 subexpr (const char *expr)
 {
   intmax_t val;
-  char *p;
+  const char *p;
 
-  for (p = (char *)expr; p && *p && cr_whitespace (*p); p++)
+  for (p = expr; p && *p && cr_whitespace (*p); p++)
     ;
 
   if (p == NULL || *p == '\0')

@@ -272,7 +272,7 @@ strip_trailing (char *string, int len, int newlines_only)
 
 /* A wrapper for bcopy that can be prototyped in general.h */
 void
-xbcopy (char *s, char *d, size_t n)
+xbcopy (const void *s, void *d, size_t n)
 {
   FASTCOPY (s, d, n);
 }

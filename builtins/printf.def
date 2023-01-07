@@ -469,7 +469,8 @@ printf_builtin (WORD_LIST *list)
 	    case '(':
 	      {
 		char *timefmt, timebuf[TIMELEN_MAX], *t;
-		int n;
+		size_t n;
+		int r;
 		intmax_t arg;
 		time_t secs;
 		struct tm *tm;
@@ -529,8 +530,8 @@ printf_builtin (WORD_LIST *list)
 		/* convert to %s format that preserves fieldwidth and precision */
 		modstart[0] = 's';
 		modstart[1] = '\0';
-		n = printstr (start, timebuf, strlen (timebuf), fieldwidth, precision);	/* XXX - %s for now */
-		if (n < 0)
+		r = printstr (start, timebuf, strlen (timebuf), fieldwidth, precision);	/* XXX - %s for now */
+		if (r < 0)
 		  {
 		    if (ferror (stdout) == 0)
 		      {

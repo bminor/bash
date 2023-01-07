@@ -128,7 +128,7 @@ posix_initialize (int on)
     }
 }
 
-int
+size_t
 num_posix_options (void)
 {
   return ((sizeof (posix_vars) / sizeof (posix_vars[0])) - 1);

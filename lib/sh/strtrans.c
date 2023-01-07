@@ -48,7 +48,7 @@
    quote CTLESC and CTLNUL with CTLESC.  If (flags&4) is non-zero, we want
    to remove the backslash before any unrecognized escape sequence. */
 char *
-ansicstr (const char *string, int len, int flags, int *sawc, int *rlen)
+ansicstr (const char *string, size_t len, int flags, int *sawc, size_t *rlen)
 {
   int c, temp;
   char *ret, *r;
@@ -370,10 +370,11 @@ ansic_shouldquote (const char *string)
 /* $'...' ANSI-C expand the portion of STRING between START and END and
    return the result.  The result cannot be longer than the input string. */
 char *
-ansiexpand (const char *string, int start, int end, int *lenp)
+ansiexpand (const char *string, int start, int end, size_t *lenp)
 {
   char *temp, *t;
-  int len, tlen;
+  int len;
+  size_t tlen;
 
   temp = (char *)xmalloc (end - start + 1);
   for (tlen = 0, len = start; len < end; )

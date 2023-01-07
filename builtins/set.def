@@ -328,7 +328,8 @@ char *
 get_current_options (void)
 {
   char *temp;
-  int i, posixopts;
+  int i;
+  size_t posixopts;
 
   posixopts = num_posix_options ();	/* shopts modified by posix mode */
   /* Make the buffer big enough to hold the set -o options and the shopt
@@ -972,6 +973,7 @@ unset_builtin (WORD_LIST *list)
 		  int len;
 
 		  tname = savestring (nameref_cell (var));
+		  tem = 0;
 		  if (var = array_variable_part (tname, 0, &t, &len))
 		    {
 		      /* change to what unbind_array_element now expects */

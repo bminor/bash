@@ -887,8 +887,9 @@ clear_hostname_list (void)
 static char **
 hostnames_matching (const char *text)
 {
-  register int i, len, nmatch, rsize;
+  int i, nmatch;
   char **result;
+  size_t rsize, len;
 
   if (hostname_list_initialized == 0)
     initialize_hostname_list ();

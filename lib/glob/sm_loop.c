@@ -113,7 +113,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	     we are matching a pathname. */
 	  if ((flags & FNM_DOTDOT) &&
 	      ((n == string && SDOT_OR_DOTDOT(n)) ||
-	       ((flags & FNM_PATHNAME) && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
+	       ((flags & FNM_PATHNAME) && n > string && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
 	    return FNM_NOMATCH;
 
 	  break;
@@ -159,7 +159,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	     we are matching a pathname. */
 	  if ((flags & FNM_DOTDOT) &&
 	      ((n == string && SDOT_OR_DOTDOT(n)) ||
-	       ((flags & FNM_PATHNAME) && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
+	       ((flags & FNM_PATHNAME) && n > string && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
 	    return FNM_NOMATCH;
 
 	  if (p == pe)
@@ -346,7 +346,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	       we are matching a pathname. */
 	    if ((flags & FNM_DOTDOT) &&
 		((n == string && SDOT_OR_DOTDOT(n)) ||
-		((flags & FNM_PATHNAME) && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
+		((flags & FNM_PATHNAME) && n > string && n[-1] == L('/') && PDOT_OR_DOTDOT(n))))
 	      return FNM_NOMATCH;
 
 	    p = BRACKMATCH (p, sc, flags);

@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -177,7 +177,7 @@ printargs (WORD_LIST *list, FILE *ofp)
 
   for (sawc = 0, l = list; l; l = l->next)
     {
-      ostr = ansicstr (l->word->word, strlen (l->word->word), 0, &sawc, (int *)0);
+      ostr = ansicstr (l->word->word, strlen (l->word->word), 0, &sawc, 0);
       if (ostr)
 	fprintf (ofp, "%s", ostr);
       free (ostr);

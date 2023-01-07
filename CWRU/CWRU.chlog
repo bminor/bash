@@ -4951,3 +4951,30 @@ lib/readline/mbutil.c,lib/tilde/tilde.c
 	- size_t changes
 	- remove some unused variables
 	- remove `register'
+
+				    1/5
+				    ---
+builtins/getopt.c
+	- sh_getopt_restore_state: make sure argv[sh_curopt] is non-null before
+	  using it
+
+parse.y
+	- CHECK_FOR_RESERVED_WORD: make sure to set word_top appropriately if
+	  the last token was IF, WHILE, or UNTIL, since these tokens can follow
+	  those reserved words
+
+Makefile.in
+	- ubsan: new target, to build with gcc/clang UBSan undefined behavior
+	  sanitizer
+
+				    1/6
+				    ---
+execute_cmd.[ch],locale.c,parse.y,expr.c,bracecomp.c,bashline.c,externs.h
+stringlib.c,general.[ch]
+builtins/{subst.c,array.c,echo.def,printf.def,enable.def,help.def,set.def}
+lib/sh/{strtrans.c,stringvec.c,shquote.c}
+lib/glob/sm_loop.c
+lib/readline/{vi_mode.c,histfile.c,funmap.c,complete.c,display.c,bind.c,isearch.c}
+lib/tilde/tilde.c
+	- final code cleanups for ANSI C and lint/ubsan/asan runs
+
