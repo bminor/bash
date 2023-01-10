@@ -4978,3 +4978,30 @@ lib/readline/{vi_mode.c,histfile.c,funmap.c,complete.c,display.c,bind.c,isearch.
 lib/tilde/tilde.c
 	- final code cleanups for ANSI C and lint/ubsan/asan runs
 
+				    1/7
+				    ---
+lib/readline/complete.c
+	- rl_complete_internal: when computing nontrivial_lcd and the length
+	  of the text from the line buffer, dequote the text from the line
+	  buffer before comparing it against the common prefix of the matches
+	  (matches[0]), so we don't get spurious mismatches if the quoted text
+	  from the line is longer than the unquoted match. Report from
+	  Martin Castillo <castilma@uni-bremen.de>
+
+input.[ch]
+	- get_buffered_stream(fd): new function, return the BUFFERED_STREAM *
+	  corresponding to file descriptor FD, if it exists
+
+				    1/8
+				    ---
+parse.y
+	- shell_getc: if yy_getc returns EOF but the buffered stream input
+	  indicates an error state, set shell_input_line_terminator to
+	  READERR. Currently treated the same as EOF.
+
+				   1/10
+				   ----
+lib/sh/random.c
+	- intrand32: use % operator instead of (mathematically equivalent)
+	  subtraction and multiplication, which can cause signed 32-bit
+	  overflow. Report from Sam James <sam@gentoo.org>

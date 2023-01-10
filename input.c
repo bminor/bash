@@ -464,6 +464,13 @@ set_buffered_stream (int fd, BUFFERED_STREAM *bp)
   return ret;
 }
 
+/* Return the BUFFERED_STREAM associated with FD, if any. */
+BUFFERED_STREAM *
+get_buffered_stream (int fd)
+{
+  return (buffers && fd < nbuffers) ? buffers[fd] : (BUFFERED_STREAM *)0;
+}
+
 /* Read a buffer full of characters from BP, a buffered stream. */
 static int
 b_fill_buffer (BUFFERED_STREAM *bp)

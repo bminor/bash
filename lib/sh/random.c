@@ -1,6 +1,6 @@
 /* random.c -- Functions for managing 16-bit and 32-bit random numbers. */
 
-/* Copyright (C) 2020,2022 Free Software Foundation, Inc.
+/* Copyright (C) 2020,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -75,7 +75,7 @@ intrand32 (u_bits32_t last)
   /* Can't seed with 0. */
   ret = (last == 0) ? 123459876 : last;
   h = ret / 127773;
-  l = ret - (127773 * h);
+  l = ret % 127773;
   t = 16807 * l - 2836 * h;
   ret = (t < 0) ? t + 0x7fffffff : t;
 

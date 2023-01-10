@@ -97,6 +97,10 @@ typedef void *alias_t;
 
 #define END_ALIAS	-2
 
+#ifndef READERR
+#  define READERR	-2
+#endif
+
 #ifdef DEBUG
 #  define YYDEBUG 1
 #else
@@ -2433,6 +2437,15 @@ shell_getc (int remove_quoted_newline)
 
 	      if (i == 0)
 		shell_input_line_terminator = EOF;
+#if defined (BUFFERED_INPUT)
+	      if (i == 0)
+		{
+		   BUFFERED_STREAM *bp;
+		   bp = get_buffered_stream (default_buffered_input);
+		   if (bp && berror (bp))
+		     shell_input_line_terminator = READERR;
+		}
+#endif
 
 	      shell_input_line[i] = '\0';
 	      break;
@@ -2525,7 +2538,8 @@ shell_getc (int remove_quoted_newline)
 	     reason for the test against shell_eof_token, which is set to a
 	     right paren when parsing the contents of command substitutions. */
 	  if (echo_input_at_read && (shell_input_line[0] ||
-				       shell_input_line_terminator != EOF) &&
+				       (shell_input_line_terminator != EOF &&
+				        shell_input_line_terminator != READERR)) &&
 				     shell_eof_token == 0)
 	    fprintf (stderr, "%s\n", shell_input_line);
 	}
@@ -2540,7 +2554,7 @@ shell_getc (int remove_quoted_newline)
 
       /* Add the newline to the end of this string, iff the string does
 	 not already end in an EOF character.  */
-      if (shell_input_line_terminator != EOF)
+      if (shell_input_line_terminator != EOF && shell_input_line_terminator != READERR)
 	{
 	  if (shell_input_line_size < SIZE_MAX-3 && (shell_input_line_len+3 > shell_input_line_size))
 	    shell_input_line = (char *)xrealloc (shell_input_line,
@@ -2675,6 +2689,9 @@ pop_alias:
     }
 
   if (uc == 0 && shell_input_line_terminator == EOF)
+    return ((shell_input_line_index != 0) ? '\n' : EOF);
+  else if (uc == 0 && shell_input_line_terminator == READERR)
+    /* Treat read errors like EOF here. */
     return ((shell_input_line_index != 0) ? '\n' : EOF);
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)

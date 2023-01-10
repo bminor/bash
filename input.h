@@ -23,15 +23,6 @@
 
 #include "stdc.h"
 
-/* Function pointers can be declared as (Function *)foo. */
-#if !defined (_FUNCTION_DEF)
-#  define _FUNCTION_DEF
-typedef int Function ();
-typedef void VFunction ();
-typedef char *CPFunction ();		/* no longer used */
-typedef char **CPPFunction ();		/* no longer used */
-#endif /* _FUNCTION_DEF */
-
 typedef int sh_cget_func_t (void);	/* sh_ivoidfunc_t */
 typedef int sh_cunget_func_t (int);	/* sh_intfunc_t */
 
@@ -69,6 +60,12 @@ extern BUFFERED_STREAM **buffers;
 
 extern int default_buffered_input;
 extern int bash_input_fd_changed;
+
+#undef beof
+#undef berror
+
+#define beof(bp)	(((bp)->b_flag & B_EOF) != 0)	
+#define berror(bp)	(((bp)->b_flag & B_ERROR) != 0)
 
 #endif /* BUFFERED_INPUT */
 
@@ -122,6 +119,7 @@ extern int check_bash_input (int);
 extern int duplicate_buffered_stream (int, int);
 extern BUFFERED_STREAM *fd_to_buffered_stream (int);
 extern BUFFERED_STREAM *set_buffered_stream (int, BUFFERED_STREAM *);
+extern BUFFERED_STREAM *get_buffered_stream (int);
 extern BUFFERED_STREAM *open_buffered_stream (char *);
 extern void free_buffered_stream (BUFFERED_STREAM *);
 extern int close_buffered_stream (BUFFERED_STREAM *);
