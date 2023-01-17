@@ -1480,8 +1480,7 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 
   /* If a command is asynchronous in a subshell (like ( foo ) & or
      the special case of an asynchronous GROUP command where the
-
-     the subshell bit is turned on down in case cm_group: below),
+     subshell bit is turned on down in case cm_group: below),
      turn off `asynchronous', so that two subshells aren't spawned.
      XXX - asynchronous used to be set to 0 in this block, but that
      means that setup_async_signals was never run.  Now it's set to
@@ -1576,6 +1575,8 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
       asynchronous = 0;
     }
   else
+    /* XXX - restore if old handler is SIG_IGN like we do in
+       execute_subshell_builtin_or_function? */
     set_sigint_handler ();
 
 #if defined (JOB_CONTROL)
@@ -4628,7 +4629,7 @@ run_builtin:
         }
       if (already_forked)
 	{
-	  /* reset_terminating_signals (); */	/* XXX */
+	  reset_terminating_signals ();	/* XXX */
 	  /* Reset the signal handlers in the child, but don't free the
 	     trap strings.  Set a flag noting that we have to free the
 	     trap strings if we run trap to change a signal disposition. */
@@ -5266,7 +5267,18 @@ execute_subshell_builtin_or_function (WORD_LIST *words, REDIRECT *redirects,
   without_job_control ();
 #endif /* JOB_CONTROL */
 
-  set_sigint_handler ();
+  /* We don't call set_sigint_handler if async is 1 so we don't undo the work
+     done by setup_async_signals() in the caller. This is similar to what
+     execute_in_subshell() does. */
+  if (async == 0)
+    {
+      SigHandler *handler;
+
+      handler = set_sigint_handler ();
+      if (handler == SIG_IGN && signal_is_async_ignored (SIGINT) &&
+	  signal_is_trapped (SIGINT) == 0 && signal_is_hard_ignored (SIGINT) == 0)
+	set_signal_handler (SIGINT, handler);
+    }
 
   if (fds_to_close)
     close_fd_bitmap (fds_to_close);
@@ -5442,19 +5454,26 @@ setup_async_signals (void)
   set_signal_handler (SIGHUP, SIG_IGN);	/* they want csh-like behavior */
 #endif
 
-#if defined (JOB_CONTROL)
   if (job_control == 0)
-#endif
     {
       /* Make sure we get the original signal dispositions now so we don't
 	 confuse the trap builtin later if the subshell tries to use it to
-	 reset SIGINT/SIGQUIT.  Don't call set_signal_ignored; that sets
-	 the value of original_signals to SIG_IGN. Posix interpretation 751. */
+	 reset SIGINT/SIGQUIT. Don't call set_signal_ignored; we use
+	 set_signal_async_ignored to set the value of original_signals to
+	 SIG_IGN and set additional flags to satisfy Posix interpretation 751. */
       get_original_signal (SIGINT);
       set_signal_handler (SIGINT, SIG_IGN);
+      /* We use set_signal_async_ignored here to make sure that restore_signal
+	 doesn't undo this work. We want processes that are created by this
+	 asynchronous subshell to ignore SIGINT as well. We can't set the
+	 hard ignored flag because that would prevent the trap builtin from
+	 setting a trap. We also have to special-case set_signal so we can
+	 set a trap for one of these signals. */
+      set_signal_async_ignored (SIGINT);
 
       get_original_signal (SIGQUIT);
       set_signal_handler (SIGQUIT, SIG_IGN);
+      set_signal_async_ignored (SIGQUIT);
     }
 }
 

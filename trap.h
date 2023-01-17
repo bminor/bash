@@ -116,6 +116,8 @@ extern int signal_is_ignored (int);
 extern int signal_is_hard_ignored (int);
 extern void set_signal_hard_ignored (int);
 extern void set_signal_ignored (int);
+extern void set_signal_async_ignored (int);
+extern int signal_is_async_ignored (int);
 extern int signal_in_progress (int);
 
 extern void set_trap_state (int);

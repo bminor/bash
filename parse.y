@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include "chartypes.h"
 #include <signal.h>
+#include <errno.h>
 
 #include "memalloc.h"
 
@@ -2691,8 +2692,15 @@ pop_alias:
   if (uc == 0 && shell_input_line_terminator == EOF)
     return ((shell_input_line_index != 0) ? '\n' : EOF);
   else if (uc == 0 && shell_input_line_terminator == READERR)
-    /* Treat read errors like EOF here. */
-    return ((shell_input_line_index != 0) ? '\n' : EOF);
+    {
+#if defined (FATAL_READERROR)
+      report_error (_("script file read error: %s"), strerror (errno));
+      exit_shell (2);
+#else
+      /* Treat read errors like EOF here. */
+      return ((shell_input_line_index != 0) ? '\n' : EOF);
+#endif
+    }
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* We already know that we are not parsing an alias expansion because of the

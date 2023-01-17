@@ -252,6 +252,8 @@ initialize_terminating_signals (void)
       /* If we've already trapped it, don't do anything. */
       if (signal_is_trapped (XSIG (i)))
 	continue;
+      if (signal_is_async_ignored (XSIG (i)))
+	continue;
 
       sigaction (XSIG (i), &act, &oact);
       XHANDLER(i) = oact.sa_handler;

@@ -5005,3 +5005,55 @@ lib/sh/random.c
 	- intrand32: use % operator instead of (mathematically equivalent)
 	  subtraction and multiplication, which can cause signed 32-bit
 	  overflow. Report from Sam James <sam@gentoo.org>
+
+lib/readline/input.c
+	- rl_getc: if the application hasn't defined a signal event handler,
+	  and readline is in callback mode, make sure SIGINT breaks out of
+	  operations like incremental and non-incremental searches and digit
+	  arguments by calling _rl_abort_internal, since the callback code
+	  expects the various contexts that rl_callback_sigcleanup() resets
+	  to be valid
+	- rl_getc: if there is a pending signal when we enter the while loop
+	  in callback mode, handle it in the same way we would if a signal
+	  arrived while we were waiting in select/pselect. That forces
+	  callback mode to call _rl_abort_internal in the right place.
+	  From a report from Andrew Burgess <aburgess@redhat.com>
+
+				   1/13
+				   ----
+trap.c
+	- SIG_ASYNCSIG: new value for sigmodes; means that the signal is
+	  ignored because an async command is being executed
+	- set_signal: if the original signal disposition is SIG_IGN only
+	  return if SIG_ASYNCSIG isn't set. This implements POSIX interp 751
+	  for setting a trap
+	- ignore_signal: if we're ignoring a signal that already has SIG_IGNORED
+	  set, make sure we set SIG_TRAPPED in case of SIG_ASYNCSIG (POSIX
+	  interp 751)
+	- reset_signal,restore_signal: if we want to reset or restore a signal
+	  that has SIG_ASYNCSIG set, make sure we reset to SIG_DFL if the
+	  signal is trapped to maintain POSIX semantics
+	- set_signal_async_ignored: new function to set original_signals to
+	  SIG_IGN and set the SIG_IGNORED and SIG_ASYNCSIG sigmode flags; used
+	  by setup_async_signals
+	- signal_is_async_ignored: return true if the SIG argument is being
+	  ignored because it's part of an async list
+
+trap.h
+	- set_signal_async_ignored,signal_is_async_ignored: extern declarations
+
+sig.c
+	- initialize_terminating_signals: if a signal is ignored because it's
+	  part of an async list, don't bother trying to initialize or set the
+	  hard ignored flag
+
+execute_cmd.c
+	- execute_simple_command: if we're executing a builtin or function
+	  asynchronously, call reset_terminating_signals like we do in
+	  execute_in_subshell()
+	- execute_subshell_builtin_or_function: only call set_sigint_handler
+	  if async is 0, so we don't undo the work done by setup_async_signals.
+	  If the old handler is SIG_IGN and the signal has SIG_ASYNCSIG set
+	  and isn't trapped, restore the old handler
+	- setup_async_signals: call set_signal_async_ignored to set the right
+	  flags

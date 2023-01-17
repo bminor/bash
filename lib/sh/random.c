@@ -59,11 +59,13 @@ intrand32 (u_bits32_t last)
      Park and Miller, Communications of the ACM, vol. 31, no. 10,
      October 1988, p. 1195. Filtered through FreeBSD.
 
-     x(n+1) = 16807 * x(n) mod (m).
+     x(n+1) = 16807 * x(n) mod (m)
+
+     where 16807 == 7^5.
 
      We split up the calculations to avoid overflow.
 
-     h = last / q; l = x - h * q; t = a * l - h * r
+     h = last / q; l = last % q; t = a * l - h * r
      m = 2147483647, a = 16807, q = 127773, r = 2836
 
      There are lots of other combinations of constants to use; look at

@@ -210,7 +210,13 @@ trap_builtin (WORD_LIST *list)
 		      {
 		      case SIGINT:
 			/* XXX - should we do this if original disposition
-			   was SIG_IGN? */
+			   was SIG_IGN? Yes, because setup_async_signals can
+			   set the original disposition to SIG_IGN to keep
+			   restore_signal from restoring the SIGINT
+			   disposition from when the shell was invoked, and
+			   we want to allow an asynchronous subshell to
+			   use `trap' to restore the default disposition or
+			   set a trap command. */
 			if (interactive)
 			  set_signal_handler (SIGINT, sigint_sighandler);
 			/* special cases for interactive == 0 */

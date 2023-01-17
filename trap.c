@@ -66,6 +66,7 @@ extern int errno;
 #define SIG_INPROGRESS	0x10	/* Signal handler currently executing. */
 #define SIG_CHANGED	0x20	/* Trap value changed in trap handler. */
 #define SIG_IGNORED	0x40	/* The signal is currently being ignored. */
+#define SIG_ASYNCSIG	0x80	/* The signal is ignored because it's in an asynchronous command. */
 
 #define SPECIAL_TRAP(s)	((s) == EXIT_TRAP || (s) == DEBUG_TRAP || (s) == ERROR_TRAP || (s) == RETURN_TRAP)
 
@@ -804,8 +805,8 @@ set_signal (int sig, const char *string)
       /* If we aren't sure of the original value, check it. */
       if (original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER)
         GETORIGSIG (sig);
-      if (original_signals[sig] == SIG_IGN)
-	return;
+      if (original_signals[sig] == SIG_IGN && (sigmodes[sig] & SIG_ASYNCSIG) == 0)
+	return;			/* XXX */
     }
 
   /* Only change the system signal handler if SIG_NO_TRAP is not set.
@@ -939,7 +940,11 @@ ignore_signal (int sig)
 
   /* If already trapped and ignored, no change necessary. */
   if (sigmodes[sig] & SIG_IGNORED)
-    return;
+    {
+      sigmodes[sig] |= SIG_TRAPPED;	/* just make sure */
+      /* XXX - turn off SIG_ASYNCSIG here? */
+      return;
+    }
 
   /* Only change the signal handler for SIG if it allows it. */
   if ((sigmodes[sig] & SIG_NO_TRAP) == 0)
@@ -1301,6 +1306,15 @@ free_trap_string (int sig)
 static void
 reset_signal (int sig)
 {
+#if 1
+  /* If we have a trapped signal that was previously ignored because it was
+     SIGINT or SIGQUIT in an asynchronous list, then we need to restore the
+     default signal and not the (artificial) SIG_IGN. We know that the signal
+     was not ignored at shell invocation because you can't trap it if
+     SIG_HARD_IGNORE is set. */
+  if ((sigmodes[sig] & SIG_ASYNCSIG) && signal_is_trapped (sig) && original_signals[sig] == SIG_IGN)
+    original_signals[sig] = SIG_DFL;
+#endif
   set_signal_handler (sig, original_signals[sig]);
   sigmodes[sig] &= ~SIG_TRAPPED;		/* XXX - SIG_INPROGRESS? */
 }
@@ -1310,6 +1324,15 @@ reset_signal (int sig)
 static void
 restore_signal (int sig)
 {
+#if 1
+  /* If we have a trapped signal that was previously ignored because it was
+     SIGINT or SIGQUIT in an asynchronous list, then we need to restore the
+     default signal and not the (artificial) SIG_IGN. We know that the signal
+     was not ignored at shell invocation because you can't trap it if
+     SIG_HARD_IGNORE is set. */
+  if ((sigmodes[sig] & SIG_ASYNCSIG) && signal_is_trapped (sig) && original_signals[sig] == SIG_IGN)
+    original_signals[sig] = SIG_DFL;
+#endif
   set_signal_handler (sig, original_signals[sig]);
   change_signal (sig, (char *)DEFAULT_SIG);
   sigmodes[sig] &= ~SIG_TRAPPED;
@@ -1520,6 +1543,19 @@ void
 set_signal_ignored (int sig)
 {
   original_signals[sig] = SIG_IGN;
+}
+
+void
+set_signal_async_ignored (int sig)
+{
+  original_signals[sig] = SIG_IGN;
+  sigmodes[sig] |= SIG_ASYNCSIG|SIG_IGNORED;
+}
+
+int
+signal_is_async_ignored (int sig)
+{
+  return (sigmodes[sig] & SIG_ASYNCSIG);
 }
 
 int
