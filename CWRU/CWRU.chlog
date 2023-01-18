@@ -5057,3 +5057,34 @@ execute_cmd.c
 	  and isn't trapped, restore the old handler
 	- setup_async_signals: call set_signal_async_ignored to set the right
 	  flags
+
+				   1/16
+				   ----
+parse.y
+	- read_token_word: if we're in posix mode, and we find a reserved word
+	  before checking a token for aliases, turn off the `check next word
+	  for aliases' flag (PST_ALEXPNEXT). This is for compatibility with
+	  other shells. From a report by <anonymous4feedback@outlook.com>
+	- shell_getc: make sure the shell is reading a buffered stream before
+	  checking the default buffered stream for errors if yy_getc returns 0
+
+				   1/17
+				   ----
+subst.c
+	- split_at_delims: if the cursor is at whitespace just preceding a
+	  word, and we're doing this for completion (e.g., to build COMP_WORDS),
+	  force the creation of an empty word and set the current word to it.
+	  This is a change from previous behavior, but a useful one: it makes
+	  COMP_WORDS[COMP_CWORD] and $2 to a completion function consistent
+	  and the same as the word readline wants to complete. From a report
+	  from Naim Favier <n@monade.li> back in 6/2022
+
+parse.y
+	- read_token: turn off PST_ALEXPNEXT if we read a shell metacharacter:
+	  we will expand aliases anyway if the token puts the shell in a
+	  command word position and we took pains to turn it off for
+	  redirection tokens; remove special cases that turned it off
+	- pop_string: don't turn off PST_ALEXPNEXT if it's on; this is what
+	  prevents it from being enabled if an alias expansion of more than
+	  two aliases ends with a space. Fixes issue reported by
+	  <anonymous4feedback@outlook.com>

@@ -152,6 +152,11 @@ extern int errno;
 static void debug_parser (int);
 #endif
 
+#if defined (DEBUG)
+static void dump_tflags (int);
+static void dump_pflags (int);
+#endif
+
 static int yy_getc (void);
 static int yy_ungetc (int);
 
@@ -1934,9 +1939,6 @@ push_string (char *s, int expand, alias_t *ap)
   shell_input_line_size = shell_input_line_len = STRLEN (s);
   shell_input_line_index = 0;
   shell_input_line_terminator = '\0';
-#if 0
-  parser_state &= ~PST_ALEXPNEXT;	/* XXX */
-#endif
 
   set_line_mbstate ();
 }
@@ -1962,8 +1964,6 @@ pop_string (void)
 #if defined (ALIAS)
   if (pushed_string_list->expand_alias)
     parser_state |= PST_ALEXPNEXT;
-  else
-    parser_state &= ~PST_ALEXPNEXT;
 #endif
 
   t = pushed_string_list;
@@ -2439,7 +2439,7 @@ shell_getc (int remove_quoted_newline)
 	      if (i == 0)
 		shell_input_line_terminator = EOF;
 #if defined (BUFFERED_INPUT)
-	      if (i == 0)
+	      if (i == 0 && bash_input.type == st_bstream)
 		{
 		   BUFFERED_STREAM *bp;
 		   bp = get_buffered_stream (default_buffered_input);
@@ -3024,6 +3024,8 @@ static int open_brace_count;
 		  word_lineno[word_top] = line_number; \
 		} \
 \
+	      if (posixly_correct) \
+		parser_state &= ~PST_ALEXPNEXT; \
 	      return (word_token_alist[i].token); \
 	    } \
       } \
@@ -3381,6 +3383,7 @@ read_token (int command)
 	  word_desc_to_read = (WORD_DESC *)NULL;
 	}
       token_to_read = 0;
+      /* XXX - PST_ALEXPNEXT? */
       return (result);
     }
 
@@ -3459,10 +3462,9 @@ read_token (int command)
   if MBTEST(shellmeta (character))
     {
 #if defined (ALIAS)
-      /* Turn off alias tokenization iff this character sequence would
-	 not leave us ready to read a command. */
-      if (character == '<' || character == '>')
-	parser_state &= ~PST_ALEXPNEXT;
+      /* Turn off alias tokenization, we will perform alias expansion on the
+	 next command word if it's one where a command word is acceptable. */
+      parser_state &= ~PST_ALEXPNEXT;
 #endif /* ALIAS */
 
       parser_state &= ~PST_ASSIGNOK;
@@ -3500,10 +3502,6 @@ read_token (int command)
 
 	    case ';':
 	      parser_state |= PST_CASEPAT;
-#if defined (ALIAS)
-	      parser_state &= ~PST_ALEXPNEXT;
-#endif /* ALIAS */
-
 	      peek_char = shell_getc (1);
 	      if MBTEST(peek_char == '&')
 		return (SEMI_SEMI_AND);
@@ -3553,9 +3551,6 @@ read_token (int command)
       else if MBTEST(character == ';' && peek_char == '&')
 	{
 	  parser_state |= PST_CASEPAT;
-#if defined (ALIAS)
-	  parser_state &= ~PST_ALEXPNEXT;
-#endif /* ALIAS */
 	  return (SEMI_AND);
 	}
 
@@ -3567,9 +3562,6 @@ read_token (int command)
       if MBTEST(character == ')' && last_read_token == '(' && token_before_that == WORD)
 	{
 	  parser_state |= PST_ALLOWOPNBRC;
-#if defined (ALIAS)
-	  parser_state &= ~PST_ALEXPNEXT;
-#endif /* ALIAS */
 	  save_dstart = function_dstart;
 	  function_dstart = line_number;
 	}
@@ -4062,6 +4054,143 @@ dump_tflags (int flags)
     {
       f &= ~LEX_INWORD;
       fprintf (stderr, "LEX_INWORD%s", f ? "|" : "");
+    }
+
+  fprintf (stderr, "\n");
+  fflush (stderr);
+}
+
+static void
+dump_pflags (int flags)
+{
+  int f;
+
+  f = flags;
+  fprintf (stderr, "%d -> ", f);
+  if (f & PST_CASEPAT)
+    {
+      f &= ~PST_CASEPAT;
+      fprintf (stderr, "PST_CASEPAT%s", f ? "|" : "");
+    }
+  if (f & PST_ALEXPNEXT)
+    {
+      f &= ~PST_ALEXPNEXT;
+      fprintf (stderr, "PST_ALEXPNEXT%s", f ? "|" : "");
+    }
+  if (f & PST_ALLOWOPNBRC)
+    {
+      f &= ~PST_ALLOWOPNBRC;
+      fprintf (stderr, "PST_ALLOWOPNBRC%s", f ? "|" : "");
+    }
+  if (f & PST_NEEDCLOSBRC)
+    {
+      f &= ~PST_NEEDCLOSBRC;
+      fprintf (stderr, "PST_NEEDCLOSBRC%s", f ? "|" : "");
+    }
+  if (f & PST_DBLPAREN)
+    {
+      f &= ~PST_DBLPAREN;
+      fprintf (stderr, "PST_DBLPAREN%s", f ? "|" : "");
+    }
+  if (f & PST_SUBSHELL)
+    {
+      f &= ~PST_SUBSHELL;
+      fprintf (stderr, "PST_SUBSHELL%s", f ? "|" : "");
+    }
+  if (f & PST_CMDSUBST)
+    {
+      f &= ~PST_CMDSUBST;
+      fprintf (stderr, "PST_CMDSUBST%s", f ? "|" : "");
+    }
+  if (f & PST_CASESTMT)
+    {
+      f &= ~PST_CASESTMT;
+      fprintf (stderr, "PST_CASESTMT%s", f ? "|" : "");
+    }
+  if (f & PST_CONDCMD)
+    {
+      f &= ~PST_CONDCMD;
+      fprintf (stderr, "PST_CONDCMD%s", f ? "|" : "");
+    }
+  if (f & PST_CONDEXPR)
+    {
+      f &= ~PST_CONDEXPR;
+      fprintf (stderr, "PST_CONDEXPR%s", f ? "|" : "");
+    }
+  if (f & PST_ARITHFOR)
+    {
+      f &= ~PST_ARITHFOR;
+      fprintf (stderr, "PST_ARITHFOR%s", f ? "|" : "");
+    }
+  if (f & PST_ALEXPAND)
+    {
+      f &= ~PST_ALEXPAND;
+      fprintf (stderr, "PST_ALEXPAND%s", f ? "|" : "");
+    }
+  if (f & PST_EXTPAT)
+    {
+      f &= ~PST_EXTPAT;
+      fprintf (stderr, "PST_EXTPAT%s", f ? "|" : "");
+    }
+  if (f & PST_COMPASSIGN)
+    {
+      f &= ~PST_COMPASSIGN;
+      fprintf (stderr, "PST_COMPASSIGN%s", f ? "|" : "");
+    }
+  if (f & PST_ASSIGNOK)
+    {
+      f &= ~PST_ASSIGNOK;
+      fprintf (stderr, "PST_ASSIGNOK%s", f ? "|" : "");
+    }
+  if (f & PST_EOFTOKEN)
+    {
+      f &= ~PST_EOFTOKEN;
+      fprintf (stderr, "PST_EOFTOKEN%s", f ? "|" : "");
+    }
+  if (f & PST_REGEXP)
+    {
+      f &= ~PST_REGEXP;
+      fprintf (stderr, "PST_REGEXP%s", f ? "|" : "");
+    }
+  if (f & PST_HEREDOC)
+    {
+      f &= ~PST_HEREDOC;
+      fprintf (stderr, "PST_HEREDOC%s", f ? "|" : "");
+    }
+  if (f & PST_REPARSE)
+    {
+      f &= ~PST_REPARSE;
+      fprintf (stderr, "PST_REPARSE%s", f ? "|" : "");
+    }
+  if (f & PST_REDIRLIST)
+    {
+      f &= ~PST_REDIRLIST;
+      fprintf (stderr, "PST_REDIRLIST%s", f ? "|" : "");
+    }
+  if (f & PST_COMMENT)
+    {
+      f &= ~PST_COMMENT;
+      fprintf (stderr, "PST_COMMENT%s", f ? "|" : "");
+    }
+  if (f & PST_ENDALIAS)
+    {
+      f &= ~PST_ENDALIAS;
+      fprintf (stderr, "PST_ENDALIAS%s", f ? "|" : "");
+    }
+  if (f & PST_NOEXPAND)
+    {
+      f &= ~PST_NOEXPAND;
+      fprintf (stderr, "PST_NOEXPAND%s", f ? "|" : "");
+    }
+  if (f & PST_NOERROR)
+    {
+      f &= ~PST_NOERROR;
+      fprintf (stderr, "PST_NOERROR%s", f ? "|" : "");
+    }
+  if (f & PST_STRING)
+    {
+      f &= ~PST_STRING;
+      fprintf (stderr, "PST_STRING%s", f ? "|" : "");
     }
 
   fprintf (stderr, "\n");

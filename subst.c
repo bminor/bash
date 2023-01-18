@@ -2644,8 +2644,10 @@ split_at_delims (const char *string, int slen, const char *delims, int sentinel,
 	cw = nw;
 
       /* If the cursor is at whitespace just before word start, set the
-	 sentinel word to the current word. */
-      if (cwp && cw == -1 && sentinel == ts-1)
+	 sentinel word to the current word. We don't do this if this is
+	 being called as part of completion, since readline attempts
+	 completion on empty words in this case. */
+      if ((flags & SD_COMPLETE) == 0 && cwp && cw == -1 && sentinel == ts-1)
 	cw = nw;
 
       /* If the cursor is at whitespace between two words, make a new, empty

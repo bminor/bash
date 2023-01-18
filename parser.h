@@ -29,7 +29,7 @@
 #define PST_CASEPAT	0x000001	/* in a case pattern list */
 #define PST_ALEXPNEXT	0x000002	/* expand next word for aliases */
 #define PST_ALLOWOPNBRC	0x000004	/* allow open brace for function def */
-#define PST_NEEDCLOSBRC	0x000008	/* need close brace */
+#define PST_NEEDCLOSBRC	0x000008	/* need close brace -- unused */
 #define PST_DBLPAREN	0x000010	/* double-paren parsing - unused */
 #define PST_SUBSHELL	0x000020	/* ( ... ) subshell */
 #define PST_CMDSUBST	0x000040	/* $( ... ) command substitution */
