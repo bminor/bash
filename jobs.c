@@ -3016,9 +3016,11 @@ if (job == NO_JOB)
       /* Don't modify terminal pgrp if we are running in background or a
 	 subshell.  Make sure subst.c:command_substitute uses the same
 	 conditions to determine whether or not it should undo this and
-	 give the terminal to pipeline_pgrp. */
-      
+	 give the terminal to pipeline_pgrp. We don't give the terminal
+	 back to shell_pgrp if an async job exits because we never gave it
+	 to that job in the first place. */
       if ((flags & JWAIT_NOTERM) == 0 && running_in_background == 0 &&
+	  (job == NO_JOB || IS_ASYNC (job) == 0) &&
 	  (subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0)
 	give_terminal_to (shell_pgrp, 0);
     }

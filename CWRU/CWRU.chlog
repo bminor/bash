@@ -5088,3 +5088,20 @@ parse.y
 	  prevents it from being enabled if an alias expansion of more than
 	  two aliases ends with a space. Fixes issue reported by
 	  <anonymous4feedback@outlook.com>
+
+				   1/18
+				   ----
+jobs.c
+	- wait_for: if we are reaping a background job, don't bother trying to
+	  give the terminal back to shell_pgrp -- we never set the terminal's
+	  pgrp to that job in the first place. Fixes issue reported by
+	  Steffen Nurpmeso <steffen@sdaoden.eu>
+
+				   1/19
+				   ----
+lib/readline/{histexpand.c,history.h}
+	- history_expand: first argument is now `const char *'. Request from
+	  Simon Marchi <simon.marchi@polymtl.ca>
+
+lib/readline/doc/{history.3,hstech.texi}
+	- history_expansion: change description to note new const first arg
