@@ -5105,3 +5105,27 @@ lib/readline/{histexpand.c,history.h}
 
 lib/readline/doc/{history.3,hstech.texi}
 	- history_expansion: change description to note new const first arg
+
+				   1/21
+				   ----
+lib/readline/input.c
+	- rl_gather_tyi: move call to rl_input_available_hook to the top,
+	  giving it first shot. There's still no way for it to set chars_avail.
+	  Conditionalize the rest of the input methods based on whether the
+	  result == -1.
+
+lib/readline/rl_private.h
+	- move the decision making about RL_TIMEOUT_USE_SELECT/RL_TIMEOUT_USE_SIGALRM
+	  here from input.c
+
+				   1/23
+				   ----
+trap.c
+	- restore_default_signal: if we have a signal that's not trapped, but
+	  is a signal that is set to SIG_ASYNCSIG, POSIX interp 751 requires
+	  the shell to allow it to be reset to the default, even though it
+	  wasn't already trapped
+
+subst.c
+	- do_assignment_internal: don't allocate new memory for NAME, just
+	  modify and restore it in place

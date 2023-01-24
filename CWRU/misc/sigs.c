@@ -20,16 +20,16 @@
 
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 extern const char	* const sys_siglist[];
 
 typedef void	sighandler();
 
-main(argc, argv)
-int	argc;
-char	**argv;
+int
+main(int argc, char **argv)
 {
-	register int	i;
+	int	i;
 	sighandler	*h;
 
 	for (i = 1; i < NSIG; i++) {

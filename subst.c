@@ -3461,7 +3461,7 @@ do_assignment_internal (const WORD_DESC *word, int expand)
   char *t;
   int ni;
 #endif
-  const char *string;
+  char *string;
 
   if (word == 0 || word->word == 0)
     return 0;
@@ -3469,7 +3469,7 @@ do_assignment_internal (const WORD_DESC *word, int expand)
   appendop = assign_list = aflags = 0;
   string = word->word;
   offset = assignment (string, 0);
-  name = savestring (string);
+  name = string;
   value = (char *)NULL;
 
   if (name[offset] == '=')
@@ -3512,12 +3512,20 @@ do_assignment_internal (const WORD_DESC *word, int expand)
 	name[offset - 1] = '\0';
     }
 
-#define ASSIGN_RETURN(r)	do { FREE (value); free (name); return (r); } while (0)
+#define ASSIGN_RETURN(r) \
+do \
+{ \
+  FREE (value); \
+  if (appendop) name[offset - 1] = '+'; \
+  name[offset] = '='; \
+  return (r); \
+} while (0)
 
   if (appendop)
     aflags |= ASS_APPEND;
 
 #if defined (ARRAY_VARS)
+  /* could use strchr, since variable names can't yet contain multibyte characters */
   if (t = mbschr (name, LBRACK))
     {
       if (assign_list)

@@ -902,6 +902,17 @@ restore_default_signal (int sig)
   if (sigmodes[sig] & SIG_HARD_IGNORE)
     return;
 
+  /* Even if the signal is not trapped, POSIX interp 751 requires that we
+     allow `trap - SIGINT' to reset the signal disposition for SIGINT to
+     SIG_DFL. */
+  if ((sigmodes[sig] & (SIG_TRAPPED|SIG_ASYNCSIG|SIG_NO_TRAP)) == SIG_ASYNCSIG)
+    {
+      original_signals[sig] = SIG_DFL;	/* XXX */
+      set_signal_handler (sig, SIG_DFL);
+      change_signal (sig, (char *)DEFAULT_SIG);
+      return;
+    }
+    
   /* If we aren't trapping this signal, don't bother doing anything else. */
   /* We special-case SIGCHLD and IMPOSSIBLE_TRAP_HANDLER (see above) as a
      sentinel to determine whether or not disposition is reset to the default
