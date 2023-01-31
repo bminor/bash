@@ -5129,3 +5129,57 @@ trap.c
 subst.c
 	- do_assignment_internal: don't allocate new memory for NAME, just
 	  modify and restore it in place
+
+				   1/25
+				   ----
+lib/readline/histfile.c
+	- history_write_slow: a fallback function that uses stdio to write the
+	  history list to a supplied file descriptor
+	- history_do_write: call history_write_slow if ftrucate/mmap/malloc
+	  fail; hope the simpler approach works
+
+				   1/27
+				   ----
+general.[ch]
+	- valid_function_name: new function, returns non-zero if the name
+	  can be used as a function name without the `function' prefix
+
+print_cmd.c
+	- named_function_string,print_function_def: use valid_function_name so
+	  the rules about when to use the `function' reserved word are
+	  consistent
+
+builtins/trap.def
+	- new option -P, which prints only the action associated with each
+	  signal spec argument
+
+doc/{bash.1,bashref.texi}
+	- trap: document new -P option, add note that trap -p or trap -P in a
+	  subshell can print the parent's traps
+
+				   1/28
+				   ----
+parse.y
+	- shell_getc: make sure references to shell_input_line_property are
+	  protected by #ifdef HANDLE_MULTIBYTE. From
+	  https://savannah.gnu.org/patch/?10309
+
+print_cmd.c
+	- named_function_string,print_function_def: don't copy the function
+	  COMMAND * before printing it as text; unwind-protect any redirects
+	  attached to the function body
+
+parse.y
+	- PST_CMDBLTIN: new parser state, means the previous token word was 
+	  `command' in a command position
+	- read_token_word: in posix mode, "command" followed by a declaration
+	  utility preserves the declaration utility status of the following
+	  word, so we mark that state and then check a word for being an
+	  assignment builtin if in that state on the next call. This makes
+	  compound assignments to builtins that accept them (e.g., `declare')
+	  work as if `command' were not present. This is a POSIX issue 8
+	  requirement
+	- read_token: turn off PST_CMDBLTIN state as appropriate
+
+subst.c
+	- use locale_mb_cur_max instead of MB_CUR_MAX consistently

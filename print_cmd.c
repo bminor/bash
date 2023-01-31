@@ -1261,8 +1261,11 @@ print_function_def (FUNCTION_DEF *func)
   REDIRECT *func_redirects;
 
   func_redirects = NULL;
-  /* When in posix mode, print functions as posix specifies them. */
+  /* When in posix mode, print functions as posix specifies them, but prefix
+     `function' to words that are not valid POSIX identifiers. */
   if (posixly_correct == 0)
+    cprintf ("function %s () \n", func->name->word);
+  else if (valid_function_name (func->name->word, 0) == 0)
     cprintf ("function %s () \n", func->name->word);
   else
     cprintf ("%s () \n", func->name->word);
@@ -1274,7 +1277,8 @@ print_function_def (FUNCTION_DEF *func)
   inside_function_def++;
   indentation += indentation_amount;
 
-  cmdcopy = copy_command (func->command);
+  cmdcopy = func->command;
+  unwind_protect_pointer (cmdcopy);
   if (cmdcopy->type == cm_group)
     {
       func_redirects = cmdcopy->redirects;
@@ -1285,7 +1289,6 @@ print_function_def (FUNCTION_DEF *func)
 					: cmdcopy);
   PRINT_DEFERRED_HEREDOCS ("");
 
-  remove_unwind_protect ();
   indentation -= indentation_amount;
   inside_function_def--;
 
@@ -1302,7 +1305,8 @@ print_function_def (FUNCTION_DEF *func)
       was_heredoc = 0;		/* not printing any here-documents now */
     }
 
-  dispose_command (cmdcopy);
+  remove_unwind_protect ();	/* unwind_protect_pointer */
+  remove_unwind_protect ();	/* reset_locals */
 }
 
 /* Return the string representation of the named function.
@@ -1327,7 +1331,7 @@ named_function_string (char *name, COMMAND *command, int flags)
 
   if (name && *name)
     {
-      if (find_reserved_word (name) >= 0)	/* check valid identifier too? */
+      if (valid_function_name (name, 0) == 0)
 	cprintf ("function ");
       cprintf ("%s ", name);
     }
@@ -1349,7 +1353,9 @@ named_function_string (char *name, COMMAND *command, int flags)
 
   cprintf ((flags & FUNC_MULTILINE) ? "{ \n" : "{ ");	/* }} */
 
-  cmdcopy = copy_command (command);
+  cmdcopy = command;
+  unwind_protect_pointer (cmdcopy);
+
   /* Take any redirections specified in the function definition (which should
      apply to the function as a whole) and save them for printing later. */
   func_redirects = (REDIRECT *)NULL;
@@ -1379,25 +1385,14 @@ named_function_string (char *name, COMMAND *command, int flags)
       was_heredoc = 0;
     }
 
+  remove_unwind_protect ();	/* unwind_protect_pointer */
   result = the_printed_command;
 
   if ((flags & FUNC_MULTILINE) == 0)
     {
-#if 0
-      register int i;
-      for (i = 0; result[i]; i++)
-	if (result[i] == '\n')
-	  {
-	    strcpy (result + i, result + i + 1);
-	    --i;
-	  }
-#else
-      if (result[2] == '\n')	/* XXX -- experimental */
+      if (result[2] == '\n')
 	memmove (result + 2, result + 3, strlen (result) - 2);	
-#endif
     }
-
-  dispose_command (cmdcopy);
 
   if (flags & FUNC_EXTERNAL)
     result = remove_quoted_escapes (result);

@@ -119,6 +119,7 @@ typedef void *alias_t;
 #  define MBTEST(x)	((x))
 #endif
 
+#if defined (HANDLE_MULTIBYTE)
 #define EXTEND_SHELL_INPUT_LINE_PROPERTY() \
 do { \
     if (shell_input_line_len + 2 > shell_input_line_propsize) \
@@ -128,6 +129,9 @@ do { \
 				    shell_input_line_propsize); \
       } \
 } while (0)
+#else
+#define EXTEND_SHELL_INPUT_LINE_PROPERTY()
+#endif
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob, extglob_flag;
@@ -2631,6 +2635,7 @@ next_alias_char:
       parser_state |= PST_ENDALIAS;
       /* We need to do this to make sure last_shell_getc_is_singlebyte returns
 	 true, since we are returning a single-byte space. */
+#if defined (HANDLE_MULTIBYTE)
       if (shell_input_line_index == shell_input_line_len && last_shell_getc_is_singlebyte == 0)
 	{
 #if 0
@@ -2644,6 +2649,7 @@ next_alias_char:
 	  shell_input_line_property[shell_input_line_index - 1] = 1;
 #endif
 	}
+#endif
       return ' ';	/* END_ALIAS */
     }
 #endif
@@ -3390,6 +3396,7 @@ read_token (int command)
 #if defined (COND_COMMAND)
   if ((parser_state & (PST_CONDCMD|PST_CONDEXPR)) == PST_CONDCMD)
     {
+      parser_state &= ~PST_CMDBLTIN;
       cond_lineno = line_number;
       parser_state |= PST_CONDEXPR;
       yylval.command = parse_cond_command ();
@@ -3451,6 +3458,7 @@ read_token (int command)
 #endif /* ALIAS */
 
       parser_state &= ~PST_ASSIGNOK;
+      parser_state &= ~PST_CMDBLTIN;
 
       return (character);
     }
@@ -3468,6 +3476,7 @@ read_token (int command)
 #endif /* ALIAS */
 
       parser_state &= ~PST_ASSIGNOK;
+      parser_state &= ~PST_CMDBLTIN;
 
       /* If we are parsing a command substitution and we have read a character
 	 that marks the end of it, don't bother to skip over quoted newlines
@@ -3588,7 +3597,10 @@ read_token (int command)
 
   /* Hack <&- (close stdin) case.  Also <&N- (dup and close). */
   if MBTEST(character == '-' && (last_read_token == LESS_AND || last_read_token == GREATER_AND))
-    return (character);
+    {
+      parser_state &= ~PST_CMDBLTIN;
+      return (character);
+    }
 
 tokword:
   /* Okay, if we got this far, we have to read a word.  Read one,
@@ -4191,6 +4203,11 @@ dump_pflags (int flags)
     {
       f &= ~PST_STRING;
       fprintf (stderr, "PST_STRING%s", f ? "|" : "");
+    }
+  if (f & PST_CMDBLTIN)
+    {
+      f &= ~PST_CMDBLTIN;
+      fprintf (stderr, "PST_CMDBLTIN%s", f ? "|" : "");
     }
 
   fprintf (stderr, "\n");
@@ -5408,7 +5425,7 @@ got_token:
 	}
     }
 
-  if (command_token_position (last_read_token))
+  if (command_token_position (last_read_token) || (parser_state & PST_CMDBLTIN))
     {
       struct builtin *b;
       b = builtin_address_internal (token, 0);
@@ -5416,7 +5433,18 @@ got_token:
 	parser_state |= PST_ASSIGNOK;
       else if (STREQ (token, "eval") || STREQ (token, "let"))
 	parser_state |= PST_ASSIGNOK;
+      /* If we don't want to allow multiple instances of `command' to act as
+	 declaration utilities as long as the last one is followed by a
+	 declaration utility, add back a check for command_token_position.
+	 subst.c:fix_assignment_words allows multiple instances of "command"
+	 but I don't think that POSIX requires this. */
+      else if (posixly_correct && STREQ (token, "command"))
+	parser_state |= PST_CMDBLTIN;
+      else
+	parser_state &= ~PST_CMDBLTIN;
     }
+  else
+    parser_state &= ~PST_CMDBLTIN;
 
   yylval.word = the_word;
 

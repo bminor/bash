@@ -229,6 +229,11 @@ static floatmax_t getfloatmax (void);
 
 static intmax_t asciicode (void);
 
+#if defined (HANDLE_MULTIBYTE)
+static wchar_t *getwidestr (size_t *);
+static wint_t getwidechar (void);
+#endif
+
 static WORD_LIST *garglist, *orig_arglist;
 static int retval;
 static int conversion_error;
@@ -1336,3 +1341,50 @@ asciicode (void)
   garglist = garglist->next;
   return (ch);
 }
+
+#if defined (HANDLE_MULTIBYTE)
+static wchar_t *
+getwidestr (size_t *lenp)
+{
+  wchar_t *ws;
+  const char *mbs;
+  size_t slen, mblength;
+  DECLARE_MBSTATE;
+
+  mbs = garglist->word->word;
+  slen = strlen (mbs);
+  ws = (wchar_t *)xmalloc ((slen + 1) * sizeof (wchar_t));
+  mblength = mbsrtowcs (ws, &mbs, slen, &state);
+  if (lenp)
+    *lenp = mblength;
+
+  if (MB_INVALIDCH (mblength))
+    {
+      int i;
+      for (i = 0; i < slen; i++)
+	ws[i] = (wchar_t)garglist->word->word[i];
+      ws[slen] = L'\0';
+      if (lenp)
+	*lenp = slen;
+    }
+
+  garglist = garglist->next;
+  return (ws);
+}
+
+static wint_t
+getwidechar (void)
+{
+  wchar_t wc;
+  size_t slen, mblength;
+  DECLARE_MBSTATE;
+
+  wc = 0;
+  mblength = mbrtowc (&wc, garglist->word->word, locale_mb_cur_max, &state);
+  if (MB_INVALIDCH (mblength))
+    wc = (wchar_t)garglist->word->word[0];
+
+  garglist = garglist->next;
+  return (wc);
+}
+#endif

@@ -51,6 +51,7 @@
 #define PST_NOEXPAND	0x400000	/* don't expand anything in read_token_word; for command substitution */
 #define PST_NOERROR	0x800000	/* don't print error messages in yyerror */
 #define PST_STRING	0x1000000	/* parsing a string to a command or word list */
+#define PST_CMDBLTIN	0x2000000	/* last token was the `command' builtin */
 
 /* Definition of the delimiter stack.  Needed by parse.y and bashhist.c. */
 struct dstack {

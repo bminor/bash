@@ -321,6 +321,7 @@ extern int check_identifier (WORD_DESC *, int);
 extern int valid_nameref_value (const char *, int);
 extern int check_selfref (const char *, char *, int);
 extern int legal_alias_name (const char *, int);
+extern int valid_function_name (const char *, int);
 extern int line_isblank (const char *);
 extern int assignment (const char *, int);
 

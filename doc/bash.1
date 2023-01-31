@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Dec 27 16:11:59 EST 2022
+.\"	Last Change: Fri Jan 27 15:18:01 EST 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2022 December 27" "GNU Bash 5.2"
+.TH BASH 1 "2023 January 27" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2022 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2022 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2023 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2023 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -4953,8 +4953,8 @@ the exit status of the last command substitution performed.  If there
 were no command substitutions, the command exits with a status of zero.
 .SH "COMMAND EXECUTION"
 After a command has been split into words, if it results in a
-simple command and an optional list of arguments, the following
-actions are taken.
+simple command and an optional list of arguments, the shell performs
+the following actions.
 .PP
 If the command name contains no slashes, the shell attempts to
 locate it.  If there exists a shell function by that name, that
@@ -10902,6 +10902,16 @@ or, if none are supplied, for all trapped signals,
 as a set of \fBtrap\fP commands
 that can be reused as shell input to
 restore the current signal dispositions.
+The
+.B \-P
+option behaves similarly, but displays only the actions
+associated with each \fIsigspec\fP argument.
+.B \-P
+requires at least one \fIsigspec\fP argument.
+The \fB\-P\fP or \fB\-p\fP options to \fBtrap\fP may be used
+in a subshell environment (e.g., command substitution) and, as
+long as they are used before \fBtrap\fP is used to change a signal's
+handling, will display the state of its parent's traps.
 .if t .sp 0.5
 .if n .sp 1
 The

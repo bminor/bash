@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2022 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2023 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -3330,8 +3330,8 @@ were no command substitutions, the command exits with a status of zero.
 @cindex command search
 
 After a command has been split into words, if it results in a
-simple command and an optional list of arguments, the following
-actions are taken.
+simple command and an optional list of arguments, the shell performs
+the following actions.
 
 @enumerate
 @item
@@ -4224,7 +4224,7 @@ The return status is zero.
 @item trap
 @btindex trap
 @example
-trap [-lp] [@var{action}] [@var{sigspec} @dots{}]
+trap [-Plp] [@var{action}] [@var{sigspec} @dots{}]
 @end example
 
 The @var{action} is a command that is read and executed when the
@@ -4244,6 +4244,13 @@ If @var{action} is not present and @option{-p} has been supplied,
 or, if no @var{sigspec}s are supplied, for all trapped signals,
 as a set of @code{trap} commands that can be reused as shell input to
 restore the current signal dispositions.
+The @option{-P} option behaves similarly, but displays only the actions
+associated with each @var{sigspec} argument.
+@option{-P} requires at least one @var{sigspec} argument.
+The @option{-P} or @option{-p} options to @code{trap} may be
+used in a subshell environment (e.g., command substitution) and,
+as long as they are used before @code{trap} is used to change a
+signal's handling, will display the state of its parent's traps.
 
 The @option{-l} option causes @code{trap} to print a list of signal names
 and their corresponding numbers.

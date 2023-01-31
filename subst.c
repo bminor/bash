@@ -780,7 +780,7 @@ string_extract (const char *string, int *sindex, const char *charlist, int flags
   char *temp;
   DECLARE_MBSTATE;
 
-  slen = (MB_CUR_MAX > 1) ? strlen (string + *sindex) + *sindex : 0;
+  slen = (locale_mb_cur_max > 1) ? strlen (string + *sindex) + *sindex : 0;
   i = *sindex;
   found = 0;
   while (c = string[i])
@@ -1074,7 +1074,7 @@ string_extract_single_quoted (const char *string, int *sindex, int allowesc)
   DECLARE_MBSTATE;
 
   /* Don't need slen for ADVANCE_CHAR unless multibyte chars possible. */
-  slen = (MB_CUR_MAX > 1) ? strlen (string + *sindex) + *sindex : 0;
+  slen = (locale_mb_cur_max > 1) ? strlen (string + *sindex) + *sindex : 0;
   i = *sindex;
   pass_next = 0;
   while (string[i])
@@ -2842,7 +2842,7 @@ string_list_dollar_star (WORD_LIST *list, int quoted, int flags)
 
 #if defined (HANDLE_MULTIBYTE)
 #  if !defined (__GNUC__)
-  sep = (char *)xmalloc (MB_CUR_MAX + 1);
+  sep = (char *)xmalloc (locale_mb_cur_max + 1);
 #  endif /* !__GNUC__ */
   if (ifs_firstc_len == 1)
     {
@@ -2901,7 +2901,7 @@ string_list_dollar_at (WORD_LIST *list, int quoted, int flags)
 
 #if defined (HANDLE_MULTIBYTE)
 #  if !defined (__GNUC__)
-  sep = (char *)xmalloc (MB_CUR_MAX + 1);
+  sep = (char *)xmalloc (locale_mb_cur_max + 1);
 #  endif /* !__GNUC__ */
   /* XXX - testing PF_ASSIGNRHS to make sure positional parameters are
      separated with a space even when word splitting will not occur. */
@@ -3744,7 +3744,7 @@ expand_string_if_necessary (char *string, int quoted, EXPFUNC *func)
   DECLARE_MBSTATE;
 
   /* Don't need string length for ADVANCE_CHAR unless multibyte chars possible. */
-  slen = (MB_CUR_MAX > 1) ? strlen (string) : 0;
+  slen = (locale_mb_cur_max > 1) ? strlen (string) : 0;
   i = saw_quote = 0;
   while (string[i])
     {
@@ -3918,7 +3918,7 @@ expand_arith_string (char *string, int quoted)
   DECLARE_MBSTATE;
 
   /* Don't need string length for ADVANCE_CHAR unless multibyte chars possible. */
-  slen = (MB_CUR_MAX > 1) ? strlen (string) : 0;
+  slen = (locale_mb_cur_max > 1) ? strlen (string) : 0;
   i = saw_quote = 0;
   while (string[i])
     {
@@ -5137,7 +5137,7 @@ remove_pattern (char *param, char *pattern, int op)
     return (savestring (param));
 
 #if defined (HANDLE_MULTIBYTE)
-  if (MB_CUR_MAX > 1)
+  if (locale_mb_cur_max > 1)
     {
       wchar_t *ret, *oret;
       size_t n;
@@ -5505,7 +5505,7 @@ match_pattern (char *string, char *pat, int mtype, char **sp, char **ep)
     return (0);
 
 #if defined (HANDLE_MULTIBYTE)
-  if (MB_CUR_MAX > 1)
+  if (locale_mb_cur_max > 1)
     {
       if (mbsmbchar (string) == 0 && mbsmbchar (pat) == 0)
         return (match_upattern (string, pat, mtype, sp, ep));
@@ -6567,7 +6567,6 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
 {
   char *istring, buf[COMSUB_PIPEBUF], *bufp;
   int c, tflag, skip_ctlesc, skip_ctlnul;
-  int mb_cur_max;
   size_t istring_index;
   size_t istring_size;
   ssize_t bufn;
@@ -6586,7 +6585,6 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
   skip_ctlesc = ifs_cmap[CTLESC];
   skip_ctlnul = ifs_cmap[CTLNUL];
 
-  mb_cur_max = MB_CUR_MAX;
   nullbyte = 0;
 
   /* Read the output of the command through the pipe. */
@@ -6616,7 +6614,7 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
 	}
 
       /* Add the character to ISTRING, possibly after resizing it. */
-      RESIZE_MALLOCED_BUFFER (istring, istring_index, mb_cur_max+1, istring_size, 512);
+      RESIZE_MALLOCED_BUFFER (istring, istring_index, locale_mb_cur_max+1, istring_size, 512);
 
       /* This is essentially quote_string inline */
       if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) /* || c == CTLESC || c == CTLNUL */)
@@ -6633,7 +6631,7 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
 
 #if defined (HANDLE_MULTIBYTE)
       if ((locale_utf8locale && (c & 0x80)) ||
-	  (locale_utf8locale == 0 && mb_cur_max > 1 && (unsigned char)c > 127))
+	  (locale_utf8locale == 0 && locale_mb_cur_max > 1 && (unsigned char)c > 127))
 	{
 	  /* read a multibyte character from buf */
 	  /* punt on the hard case for now */
@@ -8510,7 +8508,7 @@ mb_substring (const char *string, int s, int e)
 
   start = 0;
   /* Don't need string length in ADVANCE_CHAR unless multibyte chars possible. */
-  slen = (MB_CUR_MAX > 1) ? STRLEN (string) : 0;
+  slen = (locale_mb_cur_max > 1) ? STRLEN (string) : 0;
 
   i = s;
   while (string[start] && i--)
@@ -8567,7 +8565,7 @@ parameter_brace_substring (char *varname, char *value, array_eltstate_t *estatep
     case VT_VARIABLE:
     case VT_ARRAYMEMBER:
 #if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1)
+      if (locale_mb_cur_max > 1)
 	tt = mb_substring (val, e1, e2);
       else
 #endif
@@ -10683,7 +10681,6 @@ expand_word_internal (WORD_DESC *word, int quoted, int isexp, int *contains_doll
   int local_expanded;
   int tflag;
   int pflags;			/* flags passed to param_expand */
-  int mb_cur_max;
 
   int assignoff;		/* If assignment, offset of `=' */
 
@@ -10724,11 +10721,10 @@ expand_word_internal (WORD_DESC *word, int quoted, int isexp, int *contains_doll
   string = word->word;
   if (string == 0)
     goto finished_with_string;
-  mb_cur_max = MB_CUR_MAX;
 
   /* Don't need the string length for the SADD... and COPY_ macros unless
      multibyte characters are possible, but do need it for bounds checking. */
-  string_size = (mb_cur_max > 1) ? strlen (string) : 1;
+  string_size = (locale_mb_cur_max > 1) ? strlen (string) : 1;
 
   if (contains_dollar_at)
     *contains_dollar_at = 0;
@@ -10750,7 +10746,7 @@ expand_word_internal (WORD_DESC *word, int quoted, int isexp, int *contains_doll
 	case CTLESC:
 	  sindex++;
 #if HANDLE_MULTIBYTE
-	  if (mb_cur_max > 1 && string[sindex])
+	  if (locale_mb_cur_max > 1 && string[sindex])
 	    {
 	      SADD_MBQCHAR_BODY(temp, string, sindex, string_size);
 	    }
@@ -11367,10 +11363,10 @@ add_quoted_character:
 #if HANDLE_MULTIBYTE
 		  /* XXX - should make sure that c is actually multibyte,
 		     otherwise we can use the twochars branch */
-		  if (mb_cur_max > 1)
+		  if (locale_mb_cur_max > 1)
 		    sindex--;
 
-		  if (mb_cur_max > 1)
+		  if (locale_mb_cur_max > 1)
 		    {
 		      SADD_MBQCHAR_BODY(temp, string, sindex, string_size);
 		    }
@@ -11739,7 +11735,7 @@ setifs (SHELL_VAR *v)
 	{
 	  size_t ifs_len;
 	  DECLARE_MBSTATE;
-	  ifs_len = strnlen (ifs_value, MB_CUR_MAX);
+	  ifs_len = strnlen (ifs_value, locale_mb_cur_max);
 	  ifs_firstc_len = MBRLEN (ifs_value, ifs_len, &state);
 	}
       if (ifs_firstc_len == 1 || ifs_firstc_len == 0 || MB_INVALIDCH (ifs_firstc_len))

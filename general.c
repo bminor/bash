@@ -403,6 +403,21 @@ legal_alias_name (const char *string, int flags)
   return 1;
 }
 
+/* Return 1 if this is a valid identifer that can be used to declare a function
+   without the `function' reserved word. FLAGS is currently unused; a
+   placeholder for the future. */
+int
+valid_function_name (const char *name, int flags)
+{
+  if (find_reserved_word (name) >= 0)
+    return 0;
+  if (posixly_correct && (all_digits (name) || legal_identifier (name) == 0))
+    return 0;
+  if (assignment (name, 0))	/* difference between WORD and ASSIGNMENT_WORD */
+    return 0;
+  return 1;
+}
+
 /* Returns non-zero if STRING is an assignment statement.  The returned value
    is the index of the `=' sign.  If FLAGS&1 we are expecting a compound assignment
    and require an array subscript before the `=' to denote an assignment
