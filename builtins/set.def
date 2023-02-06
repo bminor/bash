@@ -812,6 +812,16 @@ $END
 
 #define NEXT_VARIABLE()	any_failed++; list = list->next; continue;
 
+#define RESTORE_NAME() \
+do { \
+  tname = name + strlen (name); \
+  if (tname == t - 1)	/* probably a paranoid check */ \
+    { \
+      tname[0] = '['; \
+      t[strlen (t)] = ']'; \
+    } \
+} while (0)
+
 int
 unset_builtin (WORD_LIST *list)
 {
@@ -874,14 +884,13 @@ unset_builtin (WORD_LIST *list)
 
 #if defined (ARRAY_VARS)
       vflags = builtin_arrayref_flags (list->word, base_vflags);
-#endif
-
-#if defined (ARRAY_VARS)
       unset_array = 0;
       /* XXX valid array reference second arg was 0 */
-      if (!unset_function && nameref == 0 && tokenize_array_reference (name, vflags, &t))
+      /* XXX tokenize_array_reference modifies NAME if it succeeds */
+      if (unset_function == 0 && nameref == 0 && tokenize_array_reference (name, vflags, &t))
 	unset_array = 1;
 #endif
+
       /* Get error checking out of the way first.  The low-level functions
 	 just perform the unset, relying on the caller to verify. */
       valid_id = legal_identifier (name);
@@ -891,6 +900,10 @@ unset_builtin (WORD_LIST *list)
 	 treat them as potential shell function names. */
       if (global_unset_func == 0 && global_unset_var == 0 && valid_id == 0)
 	{
+#if defined (ARRAY_VARS)
+	  if (unset_array)
+	    RESTORE_NAME ();
+#endif
 	  unset_variable = unset_array = 0;
 	  unset_function = 1;
 	}
@@ -926,8 +939,20 @@ unset_builtin (WORD_LIST *list)
 	 find a function after unsuccessfully searching for a variable,
 	 note that we're acting on a function now as if -f were
 	 supplied.  The readonly check below takes care of it. */
-      if (var == 0 && nameref == 0 &&  unset_variable == 0 && unset_function == 0)
+      if (var == 0 && nameref == 0 && unset_variable == 0 && unset_function == 0)
 	{
+#if defined (ARRAY_VARS)
+	  /* We modified NAME in the call to tokenize_array_reference, so we
+	     need to restore it here. We turned the original `[' and `]' into
+	     NULL, to isolate the array name and subscript. This only happens
+	     if tokenize_array_reference succeeds with a non-NULL subscript
+	     pointer, and UNSET_ARRAY is set to 1 only in this case. */ 
+	  if (unset_array)
+	    {
+	      RESTORE_NAME();
+	      unset_array = 0;
+	    }
+#endif
 	  if (var = find_function (name))
 	    unset_function = 1;
 	}

@@ -5135,7 +5135,7 @@ subst.c
 lib/readline/histfile.c
 	- history_write_slow: a fallback function that uses stdio to write the
 	  history list to a supplied file descriptor
-	- history_do_write: call history_write_slow if ftrucate/mmap/malloc
+	- history_do_write: call history_write_slow if ftruncate/mmap/malloc
 	  fail; hope the simpler approach works
 
 				   1/27
@@ -5183,3 +5183,71 @@ parse.y
 
 subst.c
 	- use locale_mb_cur_max instead of MB_CUR_MAX consistently
+
+				    2/1
+				    ---
+builtins/printf.def
+	- printf_builtin: %q and %Q use the `alternate form' flag to force
+	  single quoting instead of backslash quoting. $'...' is still
+	  preferred if there are characters that require it
+	- getwidestr, getwidechar: functions to take a possibly multibyte
+	  character string and convert to a wide character string or a wide
+	  character, respectively
+	- convwidestr, convwidechar: functions to take a wide character string
+	  or single character, apply any precision, convert back to a multibyte
+	  character string, and return the result for printing
+	- printf_builtin: consistently print an error message if printstr()
+	  returns < 0, since it will only do that if ferror(stdout) is true;
+	  let the PRETURN macro do that if appropriate, so we don't duplicate
+	  code
+
+				    2/2
+				    ---
+builtins/printf.def
+	- printwidestr: wide-character version of printstr; understands
+	  fieldwidth and precision as characters instead of bytes
+	- printf_builtin: interpret %ls and %lc as referring to wide strings
+	  and characters, respectively; use printwidestr to print the wide-
+	  character string obtained from the (presumably multibyte) argument.
+	  Fieldwidth and precision are characters, not bytes
+
+				    2/3
+				    ---
+builtins/set.def
+	- unset_builtin: since tokenize_array_reference modifies its NAME
+	  argument, we need to restore the original word if there is no
+	  array variable found with that name, so we can do ahead and try to
+	  unset a function with that wonky name. Inspired by a report from
+	  Emanuele Torre <torreemanuele6@gmail.com>
+
+parse.y
+	- read_token_word: don't set the W_HASDOLLAR flag in the returned WORD
+	  for <(command) and >(command). That way they can be used in function
+	  names. 
+
+execute_cmd.c
+	- execute_simple_command: if in posix mode, don't perform function
+	  lookup for command names that contain a slash
+
+builtins/enable.def
+	- dyn_load_builtins: don't allow dynamically loaded builtins to have
+	  slashes in their name
+
+				    2/4
+				    ---
+general.c
+	- valid_function_word: new function, used to check whether a word can
+	  be used as a function name. Replaces call to check_identifier();
+	  incorporates POSIX interp 383 check for special builtin so we can
+	  move it out of execute_intern_function().
+	- valid_function_name: use the FLAGS argument instead of POSIXLY_CORRECT;
+	  only reject reserved words if FLAGS&1
+
+execute_cmd.c
+	- execute_intern_function: call valid_function_word() instead of
+	  check_identifier(); remove check for special builtin that
+	  valid_function_word performs
+
+print_cmd.c
+	- print_function_def,named_function_string: pass POSIXLY_CORRECT to
+	  valid_function_name as the FLAGS argument

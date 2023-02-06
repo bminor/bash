@@ -384,6 +384,11 @@ dyn_load_builtin (WORD_LIST *list, int flags, char *filename)
   for (replaced = 0, new = 0; list; list = list->next)
     {
       name = list->word->word;
+      if (absolute_program (name))
+	{
+	  builtin_error (_("%s: builtin names may not contain slashes"), name);
+	  continue;
+	}
 
       size = strlen (name);
       struct_name = (char *)xmalloc (size + 8);

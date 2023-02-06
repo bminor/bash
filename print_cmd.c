@@ -1265,10 +1265,12 @@ print_function_def (FUNCTION_DEF *func)
      `function' to words that are not valid POSIX identifiers. */
   if (posixly_correct == 0)
     cprintf ("function %s () \n", func->name->word);
-  else if (valid_function_name (func->name->word, 0) == 0)
+  else if (valid_function_name (func->name->word, posixly_correct) == 0)
     cprintf ("function %s () \n", func->name->word);
   else
     cprintf ("%s () \n", func->name->word);
+
+  begin_unwind_frame ("function-def");
   add_unwind_protect (reset_locals, 0);
 
   indent (indentation);
@@ -1305,8 +1307,7 @@ print_function_def (FUNCTION_DEF *func)
       was_heredoc = 0;		/* not printing any here-documents now */
     }
 
-  remove_unwind_protect ();	/* unwind_protect_pointer */
-  remove_unwind_protect ();	/* reset_locals */
+  discard_unwind_frame ("function-def");
 }
 
 /* Return the string representation of the named function.
@@ -1331,7 +1332,7 @@ named_function_string (char *name, COMMAND *command, int flags)
 
   if (name && *name)
     {
-      if (valid_function_name (name, 0) == 0)
+      if (valid_function_name (name, posixly_correct) == 0)
 	cprintf ("function ");
       cprintf ("%s ", name);
     }

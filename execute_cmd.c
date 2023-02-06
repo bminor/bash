@@ -4480,7 +4480,7 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
 	    builtin_is_special = 1;
 	}
       if (builtin == 0)
-	func = find_function (words->word->word);
+	func = (posixly_correct == 0 || absolute_program (words->word->word) == 0) ? find_function (words->word->word) : 0;
     }
 
   /* What happens in posix mode when an assignment preceding a command name
@@ -6022,12 +6022,12 @@ execute_intern_function (WORD_DESC *name, FUNCTION_DEF *funcdef)
   SHELL_VAR *var;
   char *t;
 
-  if (check_identifier (name, posixly_correct) == 0)
+  if (valid_function_word (name, posixly_correct) == 0)
     {
-      if (posixly_correct && interactive_shell == 0)
+      if (posixly_correct)
 	{
 	  last_command_exit_value = EX_BADUSAGE;
-	  jump_to_top_level (ERREXIT);
+	  jump_to_top_level (interactive_shell ? DISCARD : ERREXIT);
 	}
       return (EXECUTION_FAILURE);
     }
@@ -6037,14 +6037,6 @@ execute_intern_function (WORD_DESC *name, FUNCTION_DEF *funcdef)
       t = dequote_escapes (name->word);
       free (name->word);
       name->word = t;
-    }
-
-  /* Posix interpretation 383 */
-  if (posixly_correct && find_special_builtin (name->word))
-    {
-      internal_error (_("`%s': is a special builtin"), name->word);
-      last_command_exit_value = EX_BADUSAGE;
-      jump_to_top_level (interactive_shell ? DISCARD : ERREXIT);
     }
 
   var = find_function (name->word);

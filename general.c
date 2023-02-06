@@ -404,17 +404,52 @@ legal_alias_name (const char *string, int flags)
 }
 
 /* Return 1 if this is a valid identifer that can be used to declare a function
-   without the `function' reserved word. FLAGS is currently unused; a
-   placeholder for the future. */
+   without the `function' reserved word. FLAGS&1 means to reject POSIX
+   non-identifiers and reserved words; FLAGS&2 means to suppress the check
+   for ASSIGNMENT_WORD. So you can pass posixly_correct as FLAGS and get
+   POSIX checks. */
 int
 valid_function_name (const char *name, int flags)
 {
-  if (find_reserved_word (name) >= 0)
+  if ((flags & 1) && find_reserved_word (name) >= 0)
     return 0;
-  if (posixly_correct && (all_digits (name) || legal_identifier (name) == 0))
+  if ((flags & 1) && (all_digits (name) || legal_identifier (name) == 0))
     return 0;
-  if (assignment (name, 0))	/* difference between WORD and ASSIGNMENT_WORD */
+  /* pass flags & 2 to suppress this check */
+  if ((flags & 2) == 0 && assignment (name, 0))	/* difference between WORD and ASSIGNMENT_WORD */
     return 0;
+  return 1;
+}
+
+/* Return 1 if this is an identifier that can be used as a function name
+   when declaring a function. We don't allow `$' for historical reasons.
+   We allow quotes (for now), slashes, and pretty much everything else.
+   If FLAGS is non-zero (it's usually posixly_correct), we check the name
+   for additional posix restrictions using valid_function_name(). We pass
+   flags|2 to valid_function_name to suppress the check for an assignment
+   word, since we want to allow those here. */
+int
+valid_function_word (WORD_DESC *word, int flags)
+{
+  char *name;
+
+  name = word->word;
+  if ((word->flags & W_HASDOLLAR))		/* allow quotes for now */
+    {
+      internal_error (_("`%s': not a valid identifier"), name);
+      return (0);
+    }
+  /* POSIX interpretation 383 */
+  if (flags && find_special_builtin (name))
+    {
+      internal_error (_("`%s': is a special builtin"), name);
+      return (0);
+    }
+  if (flags && valid_function_name (name, flags|2) == 0)
+    {
+      internal_error (_("`%s': not a valid identifier"), name);
+      return (0);
+    }
   return 1;
 }
 

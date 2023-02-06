@@ -5176,7 +5176,7 @@ read_token_word (int character)
 	      strcpy (token + token_index, ttok);
 	      token_index += ttoklen;
 	      FREE (ttok);
-	      dollar_present = 1;
+	      dollar_present |= character == '$';
 	      all_digit_token = 0;
 	      goto next_character;
 	    }
