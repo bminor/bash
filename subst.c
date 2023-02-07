@@ -10518,7 +10518,11 @@ expand_subscript_string (const char *string, int quoted)
   oe = expand_no_split_dollar_star;
   ret = (char *)NULL;
 
+#if 0
   td.flags = W_NOPROCSUB|W_NOTILDE|W_NOSPLIT2;	/* XXX - W_NOCOMSUB? */
+#else
+  td.flags = W_NOPROCSUB|W_NOSPLIT2;	/* XXX - W_NOCOMSUB? */
+#endif
   td.word = savestring (string);		/* in case it's freed on error */
 
   expand_no_split_dollar_star = 1;
@@ -10587,6 +10591,7 @@ expand_array_subscript (const char *string, int *sindex, int quoted, int flags)
   exp = substring (string, si+1, ni);
   t = expand_subscript_string (exp, quoted & ~(Q_ARITH|Q_DOUBLE_QUOTES));
   free (exp);
+  /* XXX - use sh_single_quote here? */
   exp = t ? sh_backslash_quote (t, abstab, 0) : savestring ("");
   free (t);
 
@@ -12214,19 +12219,19 @@ make_internal_declare (char *word, char *option, char *cmd)
    ['expanded-ind']='expanded-value'. */
 
 static WORD_LIST *
-expand_oneword (char *value, int flags)
+expand_oneword (char *value, int atype)
 {
   WORD_LIST *l, *nl;
   char *t;
   int kvpair;
   
-  if (flags == 0)
+  if (atype == 0)
     {
       /* Indexed array */
-      l = expand_compound_array_assignment ((SHELL_VAR *)NULL, value, flags);
+      l = expand_compound_array_assignment ((SHELL_VAR *)NULL, value, atype);
       /* Now we quote the results of the expansion above to prevent double
 	 expansion. */
-      quote_compound_array_list (l, flags);
+      quote_compound_array_list (l, atype);
       return l;
     }
   else
@@ -12251,7 +12256,7 @@ expand_oneword (char *value, int flags)
 	  if ((nl->word->flags & W_ASSIGNMENT) == 0)
 	    t = sh_single_quote (nl->word->word ? nl->word->word : "");
 	  else
-	    t = expand_and_quote_assoc_word (nl->word->word, flags);
+	    t = expand_and_quote_assoc_word (nl->word->word, atype);
 	  free (nl->word->word);
 	  nl->word->word = t;
 	}
@@ -12267,7 +12272,7 @@ expand_oneword (char *value, int flags)
    handling, see expand_oneword() above. The return value is
    NAME[+]=( expanded-and-quoted-VALUE ). */
 static void
-expand_compound_assignment_word (WORD_LIST *tlist, int flags)
+expand_compound_assignment_word (WORD_LIST *tlist, int atype)
 {
   WORD_LIST *l;
   int wlen, oind, t;
@@ -12281,7 +12286,7 @@ expand_compound_assignment_word (WORD_LIST *tlist, int flags)
   value = extract_array_assignment_list (tlist->word->word + t + 1, &oind);
   /* This performs one round of expansion on the index/key and value and
      single-quotes each word in the result. */
-  l = expand_oneword (value, flags);
+  l = expand_oneword (value, atype);
   free (value);
 
   value = string_list (l);

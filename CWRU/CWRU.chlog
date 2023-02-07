@@ -5251,3 +5251,19 @@ execute_cmd.c
 print_cmd.c
 	- print_function_def,named_function_string: pass POSIXLY_CORRECT to
 	  valid_function_name as the FLAGS argument
+
+				    2/6
+				    ---
+subst.c
+	- expand_subscript_string: don't set W_NOTILDE in td.flags so we
+	  perform `normal' tilde expansion (expansion at the start of the
+	  word) on the array subscript
+	- expand_oneword,expand_compound_assignment_word: change second arg to
+	  ATYPE, which better reflects its use
+
+arrayfunc.c
+	- assign_assoc_from_kvlist,assign_compound_array_list,expand_and_quote_assoc_word:
+	  use expand_assignment_string_to_string instead of expand_subscript_string
+	  for the rhs of the assignment or the second word in the kvpair to
+	  be more consistent with how assignment statements behave (e.g.,
+	  tilde expansion). Fixes issue reported by maroloccio@gmail.com

@@ -597,7 +597,7 @@ assign_assoc_from_kvlist (SHELL_VAR *var, WORD_LIST *nlist, HASH_TABLE *h, int f
 	  continue;
 	}	      
 
-      aval = expand_subscript_string (v, 0);
+      aval = expand_assignment_string_to_string (v, 0);
       if (aval == 0)
 	{
 	  aval = (char *)xmalloc (1);
@@ -784,7 +784,7 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
       /* See above; we need to expand the value here */
       if (assoc_p (var))
 	{
-	  val = expand_subscript_string (val, 0);
+	  val = expand_assignment_string_to_string (val, 0);
 	  if (val == 0)
 	    {
 	      val = (char *)xmalloc (1);
@@ -964,7 +964,8 @@ expand_and_quote_assoc_word (char *w, int type)
     nword[i++] = w[ind++];
   nword[i++] = w[ind++];
 
-  t = expand_subscript_string (w+ind, 0);
+
+  t = expand_assignment_string_to_string (w+ind, 0);
   s = (t && strchr (t, CTLESC)) ? quote_escapes (t) : t;
   value = sh_single_quote (s ? s : "");
   if (s != t)
