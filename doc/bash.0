@@ -5386,27 +5386,37 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               %%bb     causes pprriinnttff to expand backslash escape sequences in the
                      corresponding _a_r_g_u_m_e_n_t in the same way as eecchhoo --ee.
               %%qq     causes  pprriinnttff  to output the corresponding _a_r_g_u_m_e_n_t in a
-                     format that can be reused as shell input.
-              %%QQ     like %%qq, but applies any supplied precision to the  _a_r_g_u_-
+                     format that can be reused as shell input.  %%qq and %%QQ  use
+                     the  $$''''  quoting style if any characters in the argument
+                     string require it, and backslash quoting  otherwise.   If
+                     the  format  string uses the _p_r_i_n_t_f alternate form, these
+                     two  formats  quote  the  argument  string  using  single
+                     quotes.
+              %%QQ     like  %%qq, but applies any supplied precision to the _a_r_g_u_-
                      _m_e_n_t before quoting it.
               %%((_d_a_t_e_f_m_t))TT
-                     causes  pprriinnttff  to  output the date-time string resulting
-                     from using _d_a_t_e_f_m_t as a format  string  for  _s_t_r_f_t_i_m_e(3).
+                     causes pprriinnttff to output the  date-time  string  resulting
+                     from  using  _d_a_t_e_f_m_t  as a format string for _s_t_r_f_t_i_m_e(3).
                      The corresponding _a_r_g_u_m_e_n_t is an integer representing the
-                     number of seconds since the epoch.  Two special  argument
-                     values  may  be used: -1 represents the current time, and
-                     -2 represents the time the shell was invoked.  If no  ar-
+                     number  of seconds since the epoch.  Two special argument
+                     values may be used: -1 represents the current  time,  and
+                     -2  represents the time the shell was invoked.  If no ar-
                      gument is specified, conversion behaves as if -1 had been
-                     given.  This is an exception to the usual  pprriinnttff  behav-
+                     given.   This  is an exception to the usual pprriinnttff behav-
                      ior.
 
-              The %b, %q, and %T directives all use the field width and preci-
+              The %b, %q, and %T specifiers all use the field width and preci-
               sion arguments from the format specification and write that many
               bytes from (or use that wide a field for) the expanded argument,
               which usually contains more characters than the original.
 
               The %n format specifier accepts a corresponding argument that is
               treated as a shell variable name.
+
+              The %s and %c format specifiers accept  an  l  (long)  modifier,
+              which forces them to convert the argument string to a wide-char-
+              acter string and apply any supplied field width and precision in
+              terms of characters, not bytes.
 
               Arguments  to non-string format specifiers are treated as C con-
               stants, except that a leading plus or minus sign is allowed, and

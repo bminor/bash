@@ -176,7 +176,7 @@ static int yy_stream_unget (int);
 
 static int shell_getc (int);
 static void shell_ungetc (int);
-static void discard_until (int);
+static int discard_until (int);
 
 static void push_string (char *, int, alias_t *);
 static void pop_string (void);
@@ -2822,7 +2822,7 @@ shell_ungetchar (void)
 
 /* Discard input until CHARACTER is seen, then push that character back
    onto the input stream. */
-static void
+static int
 discard_until (int character)
 {
   int c;
@@ -2832,6 +2832,7 @@ discard_until (int character)
 
   if (c != EOF)
     shell_ungetc (c);
+  return (c);
 }
 
 void
@@ -3440,7 +3441,13 @@ read_token (int command)
     {
       /* A comment.  Discard until EOL or EOF, and then return a newline. */
       parser_state |= PST_COMMENT;
-      discard_until ('\n');
+      character = discard_until ('\n');
+      if (character == EOF)
+	{
+	  parser_state &= ~PST_COMMENT;
+	  EOF_Reached = 1;
+	  return (yacc_EOF);		/* XXX */
+	}
       shell_getc (0);
       parser_state &= ~PST_COMMENT;
       character = '\n';	/* this will take the next if statement and return. */

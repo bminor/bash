@@ -280,6 +280,15 @@ fc_builtin (WORD_LIST *list)
 	  return (EXECUTION_FAILURE);
 	}
 
+      if (posixly_correct && list && list->next)
+	{
+	  builtin_error (_("too many arguments"));
+	  if (rlist)
+	    FREE_RLIST ();
+
+	  return (EXECUTION_FAILURE);
+	}
+
       if (rlist)
 	{
 	  newcom = fc_dosubs (command, rlist);

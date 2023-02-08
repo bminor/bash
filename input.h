@@ -67,6 +67,10 @@ extern int bash_input_fd_changed;
 #define beof(bp)	(((bp)->b_flag & B_EOF) != 0)	
 #define berror(bp)	(((bp)->b_flag & B_ERROR) != 0)
 
+#undef bclearerror
+
+#define bclearerror(bp)	((bp)->b_flag &= ~(B_ERROR|B_EOF))
+
 #endif /* BUFFERED_INPUT */
 
 typedef union {

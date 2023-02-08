@@ -5267,3 +5267,34 @@ arrayfunc.c
 	  for the rhs of the assignment or the second word in the kvpair to
 	  be more consistent with how assignment statements behave (e.g.,
 	  tilde expansion). Fixes issue reported by maroloccio@gmail.com
+
+				    2/7
+				    ---
+parse.y
+	- discard_until: now returns the last character read. If we get an
+	  EOF while processing a comment, return EOF
+	- shell_getc: if discard_until returns EOF, return yacc_EOF
+
+input.h
+	- bclearerror: new macro, clears the B_ERROR flag in the buffered
+	  stream BP
+
+input.c
+	- b_fill_buffer: try making errors `sticky': if the B_ERROR flag is
+	  set for the buffered stream, return EOF immediately. This is similar
+	  to what stdio does
+
+builtins/fc.def
+	- fc_builtin: in posix mode, if there are extra arguments supplied to
+	  -s (e.g. pat=rep first last), throw an error
+
+doc/{bash.1,bashref.texi}
+	- printf: document new altform for %q/%Q and %ls/%lc
+
+				    2/8
+				    ---
+bashline.c
+	- alias_expand_line: if alias_expand doesn't change rl_line_buffer,
+	  just return right away without changing rl_point. Inspired by a
+	  report from Addison Brendtro <addison.brendtro@gmail.com>
+	- history_expand_line: ditto

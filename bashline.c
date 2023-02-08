@@ -2741,6 +2741,13 @@ alias_expand_line (int count, int ignore)
 
   new_line = alias_expand (rl_line_buffer);
 
+  /* If we didn't expand anything, don't change anything. */
+  if (new_line && STREQ (new_line, rl_line_buffer))
+    {
+      free (new_line);
+      return (0);
+    }
+
   if (new_line)
     {
       set_up_new_line (new_line);
@@ -2762,6 +2769,13 @@ history_expand_line (int count, int ignore)
   char *new_line;
 
   new_line = history_expand_line_internal (rl_line_buffer);
+
+  /* If we didn't expand anything, don't change anything. */
+  if (new_line && STREQ (new_line, rl_line_buffer))
+    {
+      free (new_line);
+      return (0);
+    }
 
   if (new_line)
     {

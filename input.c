@@ -479,6 +479,10 @@ b_fill_buffer (BUFFERED_STREAM *bp)
   off_t o;
 
   CHECK_TERMSIG;
+
+  if (bp->b_flag & B_ERROR)	/* try making read errors `sticky' */
+    return EOF;
+
   /* In an environment where text and binary files are treated differently,
      compensate for lseek() on text files returning an offset different from
      the count of characters read() returns.  Text-mode streams have to be

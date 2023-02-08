@@ -4885,6 +4885,12 @@ corresponding @var{argument} in the same way as @code{echo -e}
 @item %q
 Causes @code{printf} to output the
 corresponding @var{argument} in a format that can be reused as shell input.
+@code{%q} and @code{%Q}P use the ANSI-C quoting style (@pxref{ANSI-C Quoting})
+if any characters
+in the argument string require it, and backslash quoting otherwise.
+If the format string uses the @code{printf} @var{alternate form}, these two
+formats quote the argument string using single quotes.
+
 @item %Q
 like @code{%q}, but applies any supplied precision to the @var{argument}
 before quoting it.
@@ -4900,13 +4906,17 @@ This is an exception to the usual @code{printf} behavior.
 @end table
 
 @noindent
-The %b, %q, and %T directives all use the field width and precision
+The %b, %q, and %T format specifiers all use the field width and precision
 arguments from the format specification and write that many bytes from    
 (or use that wide a field for) the expanded argument, which usually
 contains more characters than the original.
 
 The %n format specifier accepts a corresponding argument that is treated
 as a shell variable name.
+
+The %s and %c format specifiers accept an l (long) modifier, which forces
+them to convert the argument string to a wide-character string and apply
+any supplied field width and precision in terms of characters, not bytes.
 
 Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading
@@ -8422,6 +8432,10 @@ indication of whether or not a history entry has been modified.
 
 @item
 The default editor used by @code{fc} is @code{ed}.
+
+@item
+If there are too many arguments supplied to @code{fc -s}, @code{fc} prints
+an error message and returns failure.
 
 @item
 The @code{type} and @code{command} builtins will not report a non-executable
