@@ -4787,7 +4787,9 @@ The @var{option} can be any of the options accepted by @code{declare}.
 children.
 If @var{name} is @samp{-}, the set of shell options is made local to the
 function in which @code{local} is invoked: shell options changed using
-the @code{set} builtin inside the function are restored to their original
+the @code{set} builtin inside the function
+after the call to @code{local}
+are restored to their original
 values when the function returns.
 The restore is effected as if a series of @code{set} commands were executed
 to restore the values that were in place before the function.

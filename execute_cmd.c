@@ -121,7 +121,6 @@ extern int close (int);
 /* Static functions defined and used in this file. */
 static void close_pipes (int, int);
 static void do_piping (int, int);
-static void bind_lastarg (char *);
 static int shell_control_structure (enum command_type);
 static void cleanup_redirects (REDIRECT *);
 
@@ -4000,7 +3999,7 @@ execute_cond_command (COND_COM *cond_command)
 }
 #endif /* COND_COMMAND */
 
-static void
+void
 bind_lastarg (char *arg)
 {
   SHELL_VAR *var;

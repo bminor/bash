@@ -5272,8 +5272,9 @@ arrayfunc.c
 				    ---
 parse.y
 	- discard_until: now returns the last character read. If we get an
-	  EOF while processing a comment, return EOF
-	- shell_getc: if discard_until returns EOF, return yacc_EOF
+	  EOF while processing a comment, return EOF (rarely happens;
+	  shell_getc returns EOF only under certain circumstances)
+	- read_token: if discard_until returns EOF, return yacc_EOF
 
 input.h
 	- bclearerror: new macro, clears the B_ERROR flag in the buffered
@@ -5294,7 +5295,31 @@ doc/{bash.1,bashref.texi}
 				    2/8
 				    ---
 bashline.c
-	- alias_expand_line: if alias_expand doesn't change rl_line_buffer,
-	  just return right away without changing rl_point. Inspired by a
-	  report from Addison Brendtro <addison.brendtro@gmail.com>
-	- history_expand_line: ditto
+	- set_up_new__line: if the new line doesn't change rl_line_buffer,
+	  just return right away without changing rl_point. Affects
+	  alias-expand-line, history-expand-line, and history-and-alias-expand-line.
+	  Inspired by a report from
+	  Addison Brendtro <addison.brendtro@gmail.com>
+
+builtins/declare.def
+	- declare_internal: make multiple calls to `local -' at the same
+	  context have no effect after the first one. That way we don't keep
+	  overwriting the saved option set. Report and fix from
+	  Emanuele Torre <torreemanuele6@gmail.com>
+
+				   2/10
+				   ----
+execute_cmd.[ch]
+	- bind_lastarg: now a public function
+
+parse.y
+	- execute_variable_command: call bind_lastarg instead of bind_variable
+	  to avoid exporting $_ if allexport is set. Fix from
+	  Emanuele Torre <torreemanuele6@gmail.com>
+
+bashhist.c
+	- history_delimiting_chars: if we're parsing some kind of delimited
+	  construct that's *not* a quoted string, don't bother adding an extra
+	  newline to the history if the current history entry already ends in
+	  a newline. From https://savannah.gnu.org/support/?110838 via
+	  Ganapathi Kamath <hgkamath@hotmail.com>

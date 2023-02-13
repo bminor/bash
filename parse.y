@@ -2849,7 +2849,7 @@ execute_variable_command (const char *command, const char *vname)
   parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE);
 
   restore_parser_state (&ps);
-  bind_variable ("_", last_lastarg, 0);
+  bind_lastarg (last_lastarg);
   FREE (last_lastarg);
 
   if (token_to_read == '\n')	/* reset_parser was called */
@@ -5636,7 +5636,27 @@ history_delimiting_chars (const char *line)
     last_was_heredoc = 0;
 
   if (dstack.delimiter_depth != 0)
-    return ("\n");
+    {
+      char ch;
+      HIST_ENTRY *current;
+      size_t curlen;
+
+      ch = current_delimiter(dstack);
+      if (shellquote(ch))      
+	return ("\n");
+      else if (ch == '(')	/* ) and maybe for other non-quote-char delimiters */
+	{
+	  using_history ();
+	  current = previous_history ();
+	  curlen = current ? strlen (current->line) : 0;
+	  /* If we're not reading some kind of quoted string, don't bother
+	     adding a newline if the current history entry already ends in a
+	     newline. It's just extra. */
+	  return ((curlen > 0 && current->line[curlen - 1] == '\n') ? "" : "\n");
+	}
+      else
+	return ("\n");
+    }
 
   /* We look for current_command_line_count == 2 because we are looking to
      add the first line of the body of the here document (the second line

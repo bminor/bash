@@ -9278,7 +9278,9 @@ is used within a function, it causes the variable
 to have a visible scope restricted to that function and its children.
 If \fIname\fP is \-, the set of shell options is made local to the function
 in which \fBlocal\fP is invoked: shell options changed using the
-\fBset\fP builtin inside the function are restored to their original values
+\fBset\fP builtin inside the function
+after the call to \fBlocal\fP
+are restored to their original values
 when the function returns.
 The restore is effected as if a series of \fBset\fP commands were executed
 to restore the values that were in place before the function.

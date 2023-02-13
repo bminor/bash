@@ -120,4 +120,5 @@ extern void close_all_files (void);
 extern void restore_funcarray_state (struct func_array_state *);
 #endif
 
+extern void bind_lastarg (char *);
 #endif /* _EXECUTE_CMD_H_ */
