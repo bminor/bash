@@ -270,6 +270,36 @@ strip_trailing (char *string, int len, int newlines_only)
   string[len + 1] = '\0';
 }
 
+int
+str_firstdiff (const char *s, const char *t)
+{
+  int n;
+
+  if (s == 0 || t == 0 || *s == '\0' || *t == '\0')
+    return 0;
+  for (n = 0; s[n] && t[n] && s[n] == t[n]; n++)
+    ;
+  return n;
+}
+
+/* This returns the index in OLD of a common suffix of OLD and NEW */
+int
+str_lastsame (const char *old, const char *new)
+{
+  const char *o, *n;
+
+  if (old == 0 || *old == '\0' || new == 0 || *new == '\0')
+    return 0;	/* XXX */
+
+  o = old + STRLEN (old) - 1;
+  n = new + STRLEN (new) - 1;
+
+  while (o > old && n > new && (*o == *n))
+    o--, n--;
+
+  return (o - old);
+}
+
 /* A wrapper for bcopy that can be prototyped in general.h */
 void
 xbcopy (const void *s, void *d, size_t n)

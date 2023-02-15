@@ -169,6 +169,9 @@ extern char *strsub (const char *, const char *, const char *, int);
 extern char *strcreplace (const char *, int, const char *, int);
 extern void strip_leading (char *);
 extern void strip_trailing (char *, int, int);
+extern int str_firstdiff (const char *, const char *);
+extern int str_lastsame (const char *, const char *);
+
 extern void xbcopy (const void *, void *, size_t);
 
 /* Functions from version.c. */

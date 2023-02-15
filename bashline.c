@@ -2707,11 +2707,15 @@ maybe_make_readline_line (const char *new_line)
     }
 }
 
-/* Make NEW_LINE be the current readline line.  This frees NEW_LINE. */
+/* Make NEW_LINE be the current readline line.  This frees NEW_LINE. We use
+   several heuristics to decide where to put rl_point. */
+
 static void
 set_up_new_line (char *new_line)
 {
-  int old_point, at_end;
+
+  int old_point, old_end, dist, nb;
+  char *s, *t;
 
   /* If we didn't expand anything, don't change anything. */
   if (STREQ (new_line, rl_line_buffer))
@@ -2721,7 +2725,9 @@ set_up_new_line (char *new_line)
     }
 
   old_point = rl_point;
-  at_end = rl_point == rl_end;
+  old_end = rl_end;
+  dist = rl_end - rl_point;
+  nb = rl_end - old_end;
 
   /* If the line was history and alias expanded, then make that
      be one thing to undo. */
@@ -2729,14 +2735,31 @@ set_up_new_line (char *new_line)
   free (new_line);
 
   /* Place rl_point where we think it should go. */
-  if (at_end)
+  if (dist == 0)
     rl_point = rl_end;
-  else if (old_point < rl_end)
+  else if (old_point == 0)
     {
+      /* this is what the old code did, but separate it out so we can treat
+	 it differently */
+      rl_point = 0;
+      if (!whitespace (rl_line_buffer[rl_point]))
+	rl_forward_word (1, 0);
+    }
+  else if (rl_point < old_point+nb)
+    {
+      /* let's assume that this means the new point is within the changed region */
       rl_point = old_point;
       if (!whitespace (rl_line_buffer[rl_point]))
 	rl_forward_word (1, 0);
     }
+  else
+    rl_point = rl_end - dist;	/* try to put point the same distance from end */
+
+  if (rl_point < 0)
+    rl_point = 0;
+  else if (rl_point > rl_end)
+    rl_point = rl_end;
+  rl_mark = 0;		/* XXX */
 }
 
 #if defined (ALIAS)
