@@ -91,8 +91,8 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   fmtulong.c fmtullong.c fmtumax.c shmatch.c strnlen.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c mbschr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
-	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
-	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
+	   wcsdup.c fpurge.c zgetline.c mbscmp.c mbsncmp.c  uconvert.c \
+	   ufuncs.c casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
 	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
 	   strvis.c utf8.c random.c gettimeofday.c timers.c
 
@@ -107,7 +107,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
-	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
+	  fpurge.o zgetline.o mbscmp.o mbsncmp.o uconvert.o ufuncs.o casemod.o \
 	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o strvis.o \
 	  utf8.o random.o gettimeofday.o timers.o wcsnwidth.o ${LIBOBJS}
 
@@ -165,6 +165,7 @@ makepath.o: makepath.c
 mbscasecmp.o: mbscasecmp.c
 mbschr.o: mbschr.c
 mbscmp.o: mbscmp.c
+mbsncmp.o: mbsncmp.c
 memset.o: memset.c
 mktime.o: mktime.c
 netconn.o: netconn.c
@@ -247,6 +248,7 @@ makepath.o: ${BUILD_DIR}/config.h
 mbscasecmp.o: ${BUILD_DIR}/config.h
 mbschr.o: ${BUILD_DIR}/config.h
 mbscmp.o: ${BUILD_DIR}/config.h
+mbsncmp.o: ${BUILD_DIR}/config.h
 memset.o: ${BUILD_DIR}/config.h
 mktime.o: ${BUILD_DIR}/config.h
 netconn.o: ${BUILD_DIR}/config.h
@@ -606,6 +608,10 @@ mbscasecmp.o: ${topdir}/xmalloc.h
 mbscmp.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 mbscmp.o: ${BASHINCDIR}/stdc.h
 mbscmp.o: ${topdir}/xmalloc.h
+
+mbsncmp.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+mbsncmp.o: ${BASHINCDIR}/stdc.h
+mbsncmp.o: ${topdir}/xmalloc.h
 
 casemod.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 casemod.o: ${BASHINCDIR}/stdc.h

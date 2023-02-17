@@ -5327,3 +5327,69 @@ parse.y
 bashline.c
 	- set_up_new_line: add some more heuristics to try and usefully
 	  position rl_point
+
+				   2/16
+				   ----
+lib/readline/complete.c
+	- complete_fncmp: fix for case mapping `-' and `_' if the bytes do not
+	  form a valid multibyte character
+
+lib/readline/util.c
+	- new functions: _rl_strcaseeqn, like strcasencmp but with a flag to
+	  handle character mapping (-_) like completion-map-case wants, and
+	  _rl_charcasecmp, to do the same thing for two characters.
+	  Inspired by a patch from Brennan Vincent <brennan@umanwizard.com>
+
+lib/readline/mbutil.c
+	- new functions: _rl_mb_strcaseeqn and _rl_mb_charcasecmp, multibyte
+	  versions of the above
+	  Inspired by a patch from Brennan Vincent <brennan@umanwizard.com>
+
+lib/readline/{rlprivate.h,rlmbutil.h}
+	- extern declarations for the above functions
+
+lib/readline/complete.c
+	- complete_fncmp: use _rl_mb_strcaseeqn and _rl_strcaseeqn as
+	  appropriate, remove duplicated inline code
+	  Inspired by a patch from Brennan Vincent <brennan@umanwizard.com>
+
+lib/readline/{isearch.c,rlprivate.h}
+	- _rl_search_case_fold: new variable, will be used to indicate case-
+	  insensitive incremental and non-incremental searches
+
+lib/readline/bind.c
+	- search-ignore-case: new bindable variable, tied to _rl_search_case_fold
+	  Inspired by a patch from Brennan Vincent <brennan@umanwizard.com>
+
+lib/sh/mbsncmp.c
+	- mbsncmp(3) replacement
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: honor `search-ignore-case' variable and perform
+	  case-insensitive incremental searches if it's set
+	  Inspired by a patch from Brennan Vincent <brennan@umanwizard.com>
+
+lib/readline/histlib.h
+	- CASEFOLD_SEARCH: new flag for history searching, means to search
+	  strings case-insensitively
+
+lib/readline/histsearch.c
+	- history_search_internal: anchored searches honor CASEFOLD_SEARCH
+
+				   2/17
+				   ----
+lib/readline/histsearch.c
+	- history_search_internal: searches now honor CASEFOLD_SEARCH
+	- _hs_history_search: new function, just external interface to
+	  history_search_internal, allows the rest of the library to specify
+	  search flags
+
+lib/readline/histlib.h
+	- _hs_history_search: extern declaration
+
+lib/readline/search.c
+	- noninc_search_from_pos: use _hs_history_search, add CASEFOLD_SEARCH
+	  to flags if _rl_search_case_fold is non-zero
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- search-ignore-case: document new bindable variable

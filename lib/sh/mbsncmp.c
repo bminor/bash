@@ -1,6 +1,6 @@
-/* mbscmp - multibyte string comparison. */
+/* mbsncmp - multibyte string comparison. */
 
-/* Copyright (C) 1995-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#if !defined (HAVE_MBSCMP) && defined (HANDLE_MULTIBYTE)
+#if !defined (HAVE_MBSNCMP) && defined (HANDLE_MULTIBYTE)
 
 #include <stdlib.h>
 #include <stddef.h>
@@ -30,11 +30,9 @@
 
 extern int locale_utf8locale;
 
-extern int utf8_mbscmp (const char *, const char *);
-
-/* Compare MBS1 and MBS2.  */
+/* Compare MBS1 and MBS2 up to N multibyte characters. */
 int
-mbscmp (const char *mbs1, const char *mbs2)
+mbsncmp (const char *mbs1, const char *mbs2, size_t n)
 {
   int len1, len2, mb_cur_max;
   wchar_t c1, c2;
@@ -42,6 +40,9 @@ mbscmp (const char *mbs1, const char *mbs2)
 
   len1 = len2 = 0;
   mb_cur_max = MB_CUR_MAX;
+
+  if (n == 0)
+    return 0;
 
   do
     {
@@ -67,8 +68,11 @@ mbscmp (const char *mbs1, const char *mbs2)
 
       mbs1 += len1;
       mbs2 += len2;
+      n--;
+      if (c1 != c2)
+        break;
     }
-  while (c1 == c2);
+  while (n > 0);
 
   return c1 - c2;
 }
