@@ -5376,8 +5376,6 @@ lib/readline/histlib.h
 lib/readline/histsearch.c
 	- history_search_internal: anchored searches honor CASEFOLD_SEARCH
 
-				   2/17
-				   ----
 lib/readline/histsearch.c
 	- history_search_internal: searches now honor CASEFOLD_SEARCH
 	- _hs_history_search: new function, just external interface to
@@ -5393,3 +5391,30 @@ lib/readline/search.c
 
 doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
 	- search-ignore-case: document new bindable variable
+
+				   2/17
+				   ----
+config-top.h
+	- PATSUB_REPLACE_DEFAULT: macro set to 1 or 0 to set the default value
+	  of `patsub_replacement'. Can be overridden by -DPATSUB_REPLACE_DEFAULT=0
+	  in the `make' command
+
+builtins/shopt.def
+	- reset_shopt_options: reset patsub_replacement to PATSUB_REPLACE_DEFAULT
+
+subst.c
+	- patsub_replacement: initialize to PATSUB_REPLACE_DEFAULT
+
+parse.y
+	- shell_getc: only call clearerr(stdin) when yy_stream_get returns EOF
+	  if the shell is currently interactive (interactive != 0)
+	- shell_getc: if the shell is not interactive (interactive_shell == 0)
+	  and using stdio to read the script (bash_input.type == st_stream),
+	  set shell_input_line_terminator to READERR if ferror(stdin) is true
+	  after yy_stream_get returns EOF
+
+				   2/20
+				   ----
+doc/{bash.1,bashref.texi}
+	- update aliases description based on a bug-bash discussion
+	- update description of word splitting behavior when IFS is unset

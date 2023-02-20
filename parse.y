@@ -2437,11 +2437,12 @@ shell_getc (int remove_quoted_newline)
 
 	  if (c == EOF)
 	    {
-	      if (bash_input.type == st_stream)
+	      if (interactive && bash_input.type == st_stream)
 		clearerr (stdin);
 
 	      if (i == 0)
 		shell_input_line_terminator = EOF;
+
 #if defined (BUFFERED_INPUT)
 	      if (i == 0 && bash_input.type == st_bstream)
 		{
@@ -2450,7 +2451,14 @@ shell_getc (int remove_quoted_newline)
 		   if (bp && berror (bp))
 		     shell_input_line_terminator = READERR;
 		}
+	      else
 #endif
+	      if (i == 0 && interactive_shell == 0 && bash_input.type == st_stream && ferror (stdin))
+		shell_input_line_terminator = READERR;
+
+	      /* If we want to make read errors cancel execution of any partial
+		 line, take out the checks for i == 0 above and set i = 0 if
+		 shell_input_line_terminator == READERR. */
 
 	      shell_input_line[i] = '\0';
 	      break;

@@ -2733,9 +2733,10 @@ word splitting.
 The shell treats each character of @env{$IFS} as a delimiter, and splits
 the results of the other expansions into words using these characters
 as field terminators.
+
 If @env{IFS} is unset, or its value is exactly @code{<space><tab><newline>},
 the default, then sequences of
-@code{ <space>}, @code{<tab>}, and @code{<newline>}
+@code{space}, @code{tab}, and @code{newline}
 at the beginning and end of the results of the previous
 expansions are ignored, and any sequence of @env{IFS}
 characters not at the beginning or end serves to delimit words.
@@ -2748,7 +2749,10 @@ Any character in @env{IFS} that is not @env{IFS}
 whitespace, along with any adjacent @env{IFS}
 whitespace characters, delimits a field.  A sequence of @env{IFS}
 whitespace characters is also treated as a delimiter.
+
 If the value of @env{IFS} is null, no word splitting occurs.
+If @env{IFS} is unset, word splitting behaves as if it contained
+the default value @code{<space><tab><newline>}.
 
 Explicit null arguments (@code{""} or @code{''}) are retained
 and passed to commands as empty strings.
@@ -7614,14 +7618,19 @@ rules above.
 @section Aliases
 @cindex alias expansion
 
-@dfn{Aliases} allow a string to be substituted for a word when it is used
-as the first word of a simple command.
-The shell maintains a list of aliases that may be set and unset with
-the @code{alias} and @code{unalias} builtin commands.
+@dfn{Aliases} allow a string to be substituted for a word that is in
+a position in the input where it can be the first word of a simple
+command. Aliases have names and corresponding values that are set
+and unset using the @code{alias} and @code{unalias} builtin commands
+(@pxref{Shell Builtin Commands}).
 
-The first word of each simple command, if unquoted, is checked to see
-if it has an alias.
-If so, that word is replaced by the text of the alias.
+If the shell reads an unquoted word in the right position, it checks
+the word to see if it matches an alias name. If it matches, the shell
+replaces the word with the alias value, and reads that value as if it
+had been read instead of the word.
+The shell doesn't look at any characters following the word before
+attempting alias substitution. 
+
 The characters @samp{/}, @samp{$}, @samp{`}, @samp{=} and any of the
 shell metacharacters or quoting characters listed above may not appear
 in an alias name.
@@ -7633,6 +7642,7 @@ is not expanded a second time.
 This means that one may alias @code{ls} to @code{"ls -F"},
 for instance, and Bash does not try to recursively expand the
 replacement text.
+
 If the last character of the alias value is a
 @code{blank}, then the next command word following the
 alias is also checked for alias expansion.
@@ -7643,7 +7653,7 @@ command, and removed with the @code{unalias} command.
 There is no mechanism for using arguments in the replacement text,
 as in @code{csh}.
 If arguments are needed, use a shell function
-(@pxref{Shell Functions}).
+(@pxref{Shell Functions}) instead.
 
 Aliases are not expanded when the shell is not interactive,
 unless the @code{expand_aliases} shell option is set using

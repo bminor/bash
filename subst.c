@@ -189,7 +189,7 @@ int fail_glob_expansion;
 
 /* If non-zero, perform `&' substitution on the replacement string in the
    pattern substitution word expansion. */
-int patsub_replacement = 1;
+int patsub_replacement = PATSUB_REPLACE_DEFAULT;
 
 /* Extern functions and variables from different files. */
 extern struct fd_bitmap *current_fds_to_close;

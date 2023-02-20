@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jan 27 15:18:01 EST 2023
+.\"	Last Change: Mon Feb 20 09:59:47 EST 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 January 27" "GNU Bash 5.2"
+.TH BASH 1 "2023 February 20" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3648,6 +3648,7 @@ The shell treats each character of
 .B IFS
 as a delimiter, and splits the results of the other
 expansions into words using these characters as field terminators.
+.PP
 If
 .SM
 .B IFS
@@ -3656,10 +3657,10 @@ value is exactly
 .BR <space><tab><newline> ,
 the default, then
 sequences of
-.BR <space> ,
-.BR <tab> ,
+.BR space ,
+.BR tab ,
 and
-.B <newline>
+.B newline
 at the beginning and end of the results of the previous
 expansions are ignored, and
 any sequence of
@@ -3698,10 +3699,17 @@ A sequence of
 .SM
 .B IFS
 whitespace characters is also treated as a delimiter.
+.PP
 If the value of
 .SM
 .B IFS
 is null, no word splitting occurs.
+If
+.SM
+.B IFS
+is unset, word splitting behaves as if it contained the default value
+of 
+.BR <space><tab><newline> .
 .PP
 Explicit null arguments (\^\f3"\^"\fP or \^\f3\(aq\^\(aq\fP\^) are retained
 and passed to commands as empty strings.
@@ -4389,19 +4397,22 @@ or on file descriptor 0 if
 .I n
 is not specified.  If the file does not exist, it is created.
 .SH ALIASES
-\fIAliases\fP allow a string to be substituted for a word when it is used
-as the first word of a simple command.
-The shell maintains a list of aliases that may be set and unset with the
-.B alias
-and
-.B unalias
-builtin commands (see
+\fIAliases\fP allow a string to be substituted for a word that is in
+a position in the input where it can be the first word of a simple
+command. Aliases have names and corresponding values that are set
+and unset using the \fBalias\fP and \fBunalias\fP builtin commands
+(see
 .SM
 .B SHELL BUILTIN COMMANDS
 below).
-The first word of each simple command, if unquoted,
-is checked to see if it has an
-alias.  If so, that word is replaced by the text of the alias.
+.PP
+If the shell reads an unquoted word in the right position, it checks
+the word to see if it matches an alias name. If it matches, the shell
+replaces the word with the alias value, and reads that value as if it
+had been read instead of the word.
+The shell doesn't look at any characters following the word before
+attempting alias substitution. 
+.PP
 The characters \fB/\fP, \fB$\fP, \fB\`\fP, and \fB=\fP and
 any of the shell \fImetacharacters\fP or quoting characters
 listed above may not appear in an alias name.
@@ -4417,6 +4428,7 @@ to
 for instance, and
 .B bash
 does not try to recursively expand the replacement text.
+.PP
 If the last character of the alias value is a
 .IR blank ,
 then the next command
