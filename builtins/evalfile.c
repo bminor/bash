@@ -151,7 +151,7 @@ file_error_and_exit:
       (*errfunc) (_("%s: file is too large"), filename);
       close (fd);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
-    }      
+    }
 
   if (S_ISREG (finfo.st_mode) && file_size <= SSIZE_MAX)
     {
@@ -159,6 +159,8 @@ file_error_and_exit:
       nr = read (fd, string, file_size);
       if (nr >= 0)
 	string[nr] = '\0';
+      if (nr != file_size)
+	nr = -1;		/* XXX - didn't get the whole file */
     }
   else
     nr = zmapfd (fd, &string, 0);

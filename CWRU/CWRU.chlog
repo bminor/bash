@@ -5418,3 +5418,22 @@ parse.y
 doc/{bash.1,bashref.texi}
 	- update aliases description based on a bug-bash discussion
 	- update description of word splitting behavior when IFS is unset
+
+builtins/evalfile.c
+	- _evalfile: if reading the entire file doesn't return the same
+	  number of bytes as requested (the file size), treat this as a read
+	  error
+
+				   2/21
+				   ----
+parse.y
+	- yylex: if read_token returns < 0, return YYEOF if EOF_Reached = 1.
+	  Don't return yacc_EOF because that allows commands to be executed.
+	- grammar: add a production to handle YYEOF, treating it the same as
+	  yacc_EOF. Based on a report from
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
+jobs.c
+	- wait_for: if we're checking for window size changes, allow checks
+	  during trap commands while readline is active or `bind -x' command
+	  execution. Fix from Koichi Murase <myoga.murase@gmail.com>

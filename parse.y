@@ -466,6 +466,21 @@ inputunit:	simple_list simple_list_terminator
 			      YYABORT;
 			    }
 			}
+	|	error YYEOF
+			{
+			  global_command = (COMMAND *)NULL;
+			  if (last_command_exit_value == 0)
+			    last_command_exit_value = EX_BADUSAGE;	/* force error return */
+			  if (interactive && parse_and_execute_level == 0)
+			    {
+			      handle_eof_input_unit ();
+			      YYACCEPT;
+			    }
+			  else
+			    {
+			      YYABORT;
+			    }
+			}
 	|	yacc_EOF
 			{
 			  /* Case of EOF seen by itself.  Do ignoreeof or
@@ -2459,6 +2474,11 @@ shell_getc (int remove_quoted_newline)
 	      /* If we want to make read errors cancel execution of any partial
 		 line, take out the checks for i == 0 above and set i = 0 if
 		 shell_input_line_terminator == READERR. */
+	      /* XXX TAG: bash-5.3 austingroup interp 1629 */
+#if defined (FATAL_READERROR)
+	      if (shell_input_line_terminator == READERR)
+		i = 0;	/* no-op for now */
+#endif
 
 	      shell_input_line[i] = '\0';
 	      break;
@@ -2923,9 +2943,9 @@ yylex (void)
 
   if (current_token < 0)
 #if defined (YYERRCODE) && !defined (YYUNDEF)
-    current_token = YYERRCODE;
+    current_token = EOF_Reached ? YYEOF : YYERRCODE;
 #else
-    current_token = YYUNDEF;
+    current_token = EOF_Reached ? YYEOF : YYUNDEF;
 #endif
 
   return (current_token);

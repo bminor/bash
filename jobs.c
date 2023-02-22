@@ -3058,8 +3058,16 @@ if (job == NO_JOB)
 	  else
 #if defined (READLINE)
 	    /* We don't want to do this if we are running a process during
-	       programmable completion or a command bound to `bind -x'. */
-	    if (RL_ISSTATE (RL_STATE_COMPLETING|RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) == 0)
+	       programmable completion, but we do want to handle window size
+	       changes for traps while readline is active or a command bound
+	       to `bind -x'. */
+	    if (RL_ISSTATE (RL_STATE_COMPLETING) == 0)
+	      if (RL_ISSTATE(RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) != 0)
+		{
+		  if (check_window_size)
+		    get_new_window_size (0, (int *)0, (int *)0);
+		}
+	      else
 #endif
 	    get_tty_state ();
 
