@@ -31,11 +31,6 @@
    error messages about multiple directory arguments to `cd'. */
 #define CD_COMPLAINS
 
-/* Define BUFFERED_INPUT if you want the shell to do its own input
-   buffering, rather than using stdio.  Do not undefine this; it's
-   required to preserve semantics required by POSIX. */
-#define BUFFERED_INPUT
-
 /* Define ONESHOT if you want sh -c 'command' to avoid forking to execute
    `command' whenever possible.  This is a big efficiency improvement. */
 #define ONESHOT

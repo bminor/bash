@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -288,10 +288,8 @@ char **subshell_envp;
 
 char *exec_argv0;
 
-#if defined (BUFFERED_INPUT)
 /* The file descriptor from which the shell is reading input. */
 int default_buffered_input = -1;
-#endif
 
 /* The following two variables are not static so they can show up in $-. */
 int read_from_stdin;		/* -s flag supplied */
@@ -438,9 +436,7 @@ main (int argc, char **argv, char **env)
   command_execution_string = shell_script_filename = NULL;
   want_pending_command = locally_skip_execution = read_from_stdin = 0;
   default_input = stdin;
-#if defined (BUFFERED_INPUT)
   default_buffered_input = -1;
-#endif
 
   /* Fix for the `infinite process creation' bug when running shell scripts
      from startup files on System V. */
@@ -772,11 +768,7 @@ main (int argc, char **argv, char **env)
     {
       /* In this mode, bash is reading a script from stdin, which is a
 	 pipe or redirected file. */
-#if defined (BUFFERED_INPUT)
       default_buffered_input = fileno (stdin);	/* == 0 */
-#else
-      setbuf (default_input, NULL);
-#endif /* !BUFFERED_INPUT */
       read_from_stdin = 1;
     }
   else if (top_level_arg_index == argc)		/* arg index before startup files */
@@ -1672,22 +1664,8 @@ open_shell_script (char *script_name)
      not match with ours. */
   fd = move_to_high_fd (fd, 1, -1);
 
-#if defined (BUFFERED_INPUT)
   default_buffered_input = fd;
   SET_CLOSE_ON_EXEC (default_buffered_input);
-#else /* !BUFFERED_INPUT */
-  default_input = fdopen (fd, "r");
-
-  if (default_input == 0)
-    {
-      file_error (filename);
-      exit (EX_NOTFOUND);
-    }
-
-  SET_CLOSE_ON_EXEC (fd);
-  if (fileno (default_input) != fd)
-    SET_CLOSE_ON_EXEC (fileno (default_input));
-#endif /* !BUFFERED_INPUT */
 
   /* Just about the only way for this code to be executed is if something
      like `bash -i /dev/stdin' is executed. */
@@ -1696,12 +1674,7 @@ open_shell_script (char *script_name)
       dup2 (fd, 0);
       close (fd);
       fd = 0;
-#if defined (BUFFERED_INPUT)
       default_buffered_input = 0;
-#else
-      fclose (default_input);
-      default_input = stdin;
-#endif
     }
   else if (forced_interactive && fd_is_tty == 0)
     /* But if a script is called with something like `bash -i scriptname',
@@ -1721,20 +1694,16 @@ set_bash_input (void)
 {
   /* Make sure the fd from which we are reading input is not in
      no-delay mode. */
-#if defined (BUFFERED_INPUT)
   if (interactive == 0)
     sh_unset_nodelay_mode (default_buffered_input);
   else
-#endif /* !BUFFERED_INPUT */
     sh_unset_nodelay_mode (fileno (stdin));
 
   /* with_input_from_stdin really means `with_input_from_readline' */
   if (interactive && no_line_editing == 0)
     with_input_from_stdin ();
-#if defined (BUFFERED_INPUT)
   else if (interactive == 0)
     with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
-#endif /* BUFFERED_INPUT */
   else
     with_input_from_stream (default_input, dollar_vars[0]);
 }
@@ -1746,7 +1715,6 @@ set_bash_input (void)
 void
 unset_bash_input (int check_zero)
 {
-#if defined (BUFFERED_INPUT)
   if ((check_zero && default_buffered_input >= 0) ||
       (check_zero == 0 && default_buffered_input > 0))
     {
@@ -1754,13 +1722,6 @@ unset_bash_input (int check_zero)
       default_buffered_input = bash_input.location.buffered_fd = -1;
       bash_input.type = st_none;		/* XXX */
     }
-#else /* !BUFFERED_INPUT */
-  if (default_input)
-    {
-      fclose (default_input);
-      default_input = (FILE *)NULL;
-    }
-#endif /* !BUFFERED_INPUT */
 }
       
 

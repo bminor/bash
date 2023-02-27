@@ -574,6 +574,8 @@ show_func_attributes (char *name, int nodefs)
     return (1);
 }
 
+/* This is only called by readonly/export, so we can implement posix-mode
+   semantics for special variables. */
 void
 set_var_attribute (char *name, int attribute, int undo)
 {
@@ -584,6 +586,7 @@ set_var_attribute (char *name, int attribute, int undo)
     var = find_variable (name);
   else
     {
+      /* var=value readonly var */
       tv = find_tempenv_variable (name);
       /* XXX -- need to handle case where tv is a temp variable in a
 	 function-scope context, since function_env has been merged into
@@ -645,7 +648,7 @@ set_var_attribute (char *name, int attribute, int undo)
 	      if (var)
 		VSETATTR (var, att_invisible);
 	    }
-	  else if (var->context != 0)
+	  else if (var->context != 0 && local_p (var) == 0)
 	    VSETATTR (var, att_propagate);
 	}
     }

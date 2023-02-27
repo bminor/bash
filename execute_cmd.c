@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -90,9 +90,7 @@ extern int errno;
 #include <glob/strmatch.h>
 #include <tilde/tilde.h>
 
-#if defined (BUFFERED_INPUT)
-#  include "input.h"
-#endif
+#include "input.h"
 
 #if defined (ALIAS)
 #  include "alias.h"
@@ -1626,10 +1624,8 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
   if (should_redir_stdin && stdin_redir == 0)
     async_redirect_stdin ();
 
-#if defined (BUFFERED_INPUT)
   /* In any case, we are not reading our command input from stdin. */
   default_buffered_input = -1;
-#endif
 
   /* We can't optimize away forks if one of the commands executed by the
      subshell sets an exit trap, so we set CMD_NO_FORK for simple commands

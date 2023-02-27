@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,9 +54,7 @@ extern int errno;
 #include "redir.h"
 #include "trap.h"
 
-#if defined (BUFFERED_INPUT)
-#  include "input.h"
-#endif
+#include "input.h"
 
 #include "builtins/pipesize.h"
 
@@ -936,11 +934,9 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	      REDIRECTION_ERROR (r, errno, fd);
 	    }
 
-#if defined (BUFFERED_INPUT)
 	  /* inhibit call to sync_buffered_stream() for async processes */
 	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
 	    check_bash_input (redirector);
-#endif
 
 	  /* Make sure there is no pending output before we change the state
 	     of the underlying file descriptor, since the builtins use stdio
@@ -971,13 +967,11 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	      return (errno);
 	    }
 
-#if defined (BUFFERED_INPUT)
 	  /* Do not change the buffered stream for an implicit redirection
 	     of /dev/null to fd 0 for asynchronous commands without job
 	     control (r_inputa_direction). */
 	  if (ri == r_input_direction || ri == r_input_output)
 	    duplicate_buffered_stream (fd, redirector);
-#endif /* BUFFERED_INPUT */
 
 	  /*
 	   * If we're remembering, then this is the result of a while, for
@@ -995,11 +989,9 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 
       if (fd != redirector)
 	{
-#if defined (BUFFERED_INPUT)
 	  if (INPUT_REDIRECT (ri))
 	    close_buffered_fd (fd);
 	  else
-#endif /* !BUFFERED_INPUT */
 	    close (fd);		/* Don't close what we just opened! */
 	}
 
@@ -1057,9 +1049,8 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 		  REDIRECTION_ERROR (r, errno, fd);
 	        }
 
-#if defined (BUFFERED_INPUT)
 	      check_bash_input (redirector);
-#endif
+
 	      if (redirect->rflags & REDIR_VARASSIGN)
 		{
 		  if ((r = redir_varassign (redirect, redirector)) < 0)
@@ -1076,20 +1067,14 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 		  return (r);
 		}
 
-#if defined (BUFFERED_INPUT)
 	      duplicate_buffered_stream (fd, redirector);
-#endif
 
 	      if ((flags & RX_CLEXEC) && (redirector > 2))
 		SET_CLOSE_ON_EXEC (redirector);
 	    }
 
 	  if (fd != redirector)
-#if defined (BUFFERED_INPUT)
 	    close_buffered_fd (fd);
-#else
-	    close (fd);
-#endif
 	}
       break;
 
@@ -1131,11 +1116,11 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 		  REDIRECTION_ERROR (r, errno, -1);
 		}
 	    }
-#if defined (BUFFERED_INPUT)
+
 	  /* inhibit call to sync_buffered_stream() for async processes */
 	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
 	    check_bash_input (redirector);
-#endif
+
 	  if (redirect->rflags & REDIR_VARASSIGN)
 	    {
 	      if ((r = redir_varassign (redirect, redirector)) < 0)
@@ -1148,10 +1133,8 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	  else if (dup2 (redir_fd, redirector) < 0)
 	    return (errno);
 
-#if defined (BUFFERED_INPUT)
 	  if (ri == r_duplicating_input || ri == r_move_input)
 	    duplicate_buffered_stream (redir_fd, redirector);
-#endif /* BUFFERED_INPUT */
 
 	  /* First duplicate the close-on-exec state of redirectee.  dup2
 	     leaves the flag unset on the new descriptor, which means it
@@ -1218,14 +1201,10 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 #endif
 	  xtrace_fdchk (redirector);
 
-#if defined (BUFFERED_INPUT)
 	  /* inhibit call to sync_buffered_stream() for async processes */
 	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
 	    check_bash_input (redirector);
 	  r = close_buffered_fd (redirector);
-#else /* !BUFFERED_INPUT */
-	  r = close (redirector);
-#endif /* !BUFFERED_INPUT */
 
 	  if (r < 0 && (flags & RX_INTERNAL) && (errno == EIO || errno == ENOSPC))
 	    REDIRECTION_ERROR (r, errno, -1);

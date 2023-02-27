@@ -73,4 +73,14 @@ extern volatile sig_atomic_t terminating_signal;
   do { \
     if (sigterm_received) termsig_handler (SIGTERM); \
   } while (0)
+
+#define CHECK_WINCH \
+do { \
+  if (sigwinch_received) \
+    { \
+      sigwinch_received = 0; \
+      get_new_window_size (0, (int *)0, (int *)0); \
+    } \
+} while (0)
+
 #endif /* _QUIT_H_ */

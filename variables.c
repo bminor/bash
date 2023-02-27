@@ -4504,7 +4504,7 @@ propagate_temp_var (PTR_T data)
   SHELL_VAR *var;
 
   var = (SHELL_VAR *)data;
-  if (tempvar_p (var) && (var->attributes & att_propagate))
+  if (tempvar_p (var) && propagate_p (var))
     push_temp_var (data);
   else
     {
@@ -5307,7 +5307,7 @@ push_exported_var (PTR_T data)
      propagated, bind it in the previous scope before disposing it. */
   /* XXX - This isn't exactly right, because all tempenv variables have the
     export attribute set. */
-  if (tempvar_p (var) && exported_p (var) && (var->attributes & att_propagate))
+  if (tempvar_p (var) && exported_p (var) && propagate_p (var))
     {
       var->attributes &= ~att_tempvar;		/* XXX */
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);

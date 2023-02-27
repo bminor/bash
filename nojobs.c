@@ -3,7 +3,7 @@
 /* This file works under BSD, System V, minix, and Posix systems.  It does
    not implement job control. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,9 +34,7 @@
 #include <signal.h>
 #include <errno.h>
 
-#if defined (BUFFERED_INPUT)
-#  include "input.h"
-#endif
+#include "input.h"
 
 /* Need to include this up here for *_TTY_DRIVER definitions. */
 #include "shtty.h"
@@ -485,14 +483,12 @@ make_child (char *command, int flags)
   async_p = (flags & FORK_ASYNC);
   start_pipeline ();
 
-#if defined (BUFFERED_INPUT)
   /* If default_buffered_input is active, we are reading a script.  If
      the command is asynchronous, we have already duplicated /dev/null
      as fd 0, but have not changed the buffered stream corresponding to
      the old fd 0.  We don't want to sync the stream in this case. */
   if (default_buffered_input != -1 && (!async_p || default_buffered_input > 0))
     sync_buffered_stream (default_buffered_input);
-#endif /* BUFFERED_INPUT */
 
   /* Block SIGTERM here and unblock in child after fork resets the
      set of pending signals */
@@ -540,9 +536,7 @@ make_child (char *command, int flags)
 
   if (pid == 0)
     {
-#if defined (BUFFERED_INPUT)
       unset_bash_input (0);
-#endif /* BUFFERED_INPUT */
 
       CLRINTERRUPT;	/* XXX - children have their own interrupt state */
 

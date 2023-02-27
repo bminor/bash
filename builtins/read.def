@@ -103,9 +103,7 @@ $END
 #include <readline/readline.h>
 #endif
 
-#if defined (BUFFERED_INPUT)
-#  include "input.h"
-#endif
+#include "input.h"
 
 #include "shmbutil.h"
 #include "timer.h"
@@ -425,10 +423,8 @@ read_builtin (WORD_LIST *list)
 
   begin_unwind_frame ("read_builtin");
 
-#if defined (BUFFERED_INPUT)
   if (interactive == 0 && default_buffered_input >= 0 && fd_is_bash_input (fd))
     sync_buffered_stream (default_buffered_input);
-#endif
 
 #if 1
   input_is_tty = isatty (fd);

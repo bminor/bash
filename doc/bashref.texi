@@ -7741,8 +7741,12 @@ the optional subscript is supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
 
-Each @var{value} in the list undergoes all the shell expansions
-described above (@pxref{Shell Expansions}).
+Each @var{value} in the list undergoes the shell expansions
+described above (@pxref{Shell Expansions}),
+but @var{value}s that are valid variable assignments
+including the brackets and subscript do not undergo
+brace expansion and word splitting, as with individual
+variable assignments.
 
 When assigning to an associative array, the words in a compound assignment
 may be either assignment statements, for which the subscript is required,

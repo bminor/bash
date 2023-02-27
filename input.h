@@ -1,6 +1,6 @@
 /* input.h -- Structures and unions used for reading input. */
 
-/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,8 +27,6 @@ typedef int sh_cget_func_t (void);	/* sh_ivoidfunc_t */
 typedef int sh_cunget_func_t (int);	/* sh_intfunc_t */
 
 enum stream_type {st_none, st_stdin, st_stream, st_string, st_bstream};
-
-#if defined (BUFFERED_INPUT)
 
 /* Possible values for b_flag. */
 #undef B_EOF
@@ -71,14 +69,10 @@ extern int bash_input_fd_changed;
 
 #define bclearerror(bp)	((bp)->b_flag &= ~(B_ERROR|B_EOF))
 
-#endif /* BUFFERED_INPUT */
-
 typedef union {
   FILE *file;
   char *string;
-#if defined (BUFFERED_INPUT)
   int buffered_fd;
-#endif
 } INPUT_STREAM;
 
 typedef struct {
@@ -114,7 +108,6 @@ extern void restore_token_state (int *);
 extern int getc_with_restart (FILE *);
 extern int ungetc_with_restart (int, FILE *);
 
-#if defined (BUFFERED_INPUT)
 /* Functions from input.c. */
 extern int fd_is_bash_input (int);
 extern int set_bash_input_fd (int);
@@ -132,6 +125,5 @@ extern int sync_buffered_stream (int);
 extern int buffered_getchar (void);
 extern int buffered_ungetchar (int);
 extern void with_input_from_buffered_stream (int, char *);
-#endif /* BUFFERED_INPUT */
 
 #endif /* _INPUT_H_ */

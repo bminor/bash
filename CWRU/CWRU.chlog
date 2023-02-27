@@ -5437,3 +5437,40 @@ jobs.c
 	- wait_for: if we're checking for window size changes, allow checks
 	  during trap commands while readline is active or `bind -x' command
 	  execution. Fix from Koichi Murase <myoga.murase@gmail.com>
+
+				   2/22
+				   ----
+jobs.c
+	- wait_for: check for window size changes during programmable completion
+
+				   2/23
+				   ----
+execute_cmd.c,input.c,jobs.c,nojobs.c,parse.y,redir.c,shell.c
+builtins/{exec.def,read.def}
+input.h
+	- BUFFERED_INPUT: preprocessor #define is gone, this code is now
+	  unconditional
+
+				   2/24
+				   ----
+builtins/declare.def
+	- declare_internal: set the att_propagate flag on a variable that is
+	  marked as att_tempvar only if it's *not* marked att_local. The
+	  effect is that local variables with the same name as variables in
+	  the temporary environment are not propagated to the previous scope.
+	  From a report by Voldemar Lazarev <voldemar.lazarev@alludo.com>
+	  that prompted a bug-bash discussion
+
+builtins/setattr.def
+	- set_var_attribute: don't set local variables for which we are setting
+	  export or readonly to propagate back to the previous context, but
+	  make sure we preserve posix semantics
+
+parse.y
+	- read_token_word: if we're parsing the words of a compound assignment
+	  (parser_state & PST_COMPASSIGN), and we have a valid assignment
+	  statement as a word ([sub]=value), set W_NOBRACE in the word so we
+	  don't try and perform brace expansion on it. This makes ( [sub]=word )
+	  closer to name[sub]=word.
+	  From a report by Ilkka Virta <itvirta@iki.fi> back in July, 2020:
+	  https://lists.gnu.org/archive/html/bug-bash/2020-07/msg00133.html

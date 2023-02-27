@@ -223,10 +223,8 @@ exec_builtin (WORD_LIST *list)
     default_tty_job_signals ();		/* undo initialize_job_signals */
 #endif /* JOB_CONTROL */
 
-#if defined (BUFFERED_INPUT)
   if (default_buffered_input >= 0)
     sync_buffered_stream (default_buffered_input);
-#endif
 
   exit_value = shell_execve (command, args, env);
 

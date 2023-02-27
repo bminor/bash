@@ -990,7 +990,10 @@ restart_new_var_name:
       /* If we found this variable in the temporary environment, as with
 	 `var=value declare -x var', make sure it is treated identically
 	 to `var=value export var'.  Do the same for `declare -r' and
-	 `readonly'.  Preserve the attributes, except for att_tempvar. */
+	 `readonly'.  Preserve the attributes, except for att_tempvar.
+	 This doesn't happen in functions, since declare in shell functions
+	 always creates local variables (that inherit their value from the
+	 tempenv variable). We don't check variable_context; maybe we should. */
       /* XXX -- should this create a variable in the global scope, or
 	 modify the local variable flags?  ksh93 has it modify the
 	 global scope.
@@ -1001,6 +1004,7 @@ restart_new_var_name:
 	  SHELL_VAR *tv;
 	  char *tvalue;
 
+	  /* Temporary environment? Or in the local variable context? */
 	  tv = find_tempenv_variable (name_cell (var));
 	  if (tv)
 	    {
@@ -1009,12 +1013,15 @@ restart_new_var_name:
 	      if (tv)
 		{
 		  tv->attributes |= var->attributes & ~att_tempvar;
-		  if (tv->context > 0)
+		  if (tv->context > 0 && local_p (var) == 0)	/* just paranoia here */
 		    VSETATTR (tv, att_propagate);
 		}
 	      free (tvalue);
 	    }
-	  VSETATTR (var, att_propagate);
+	  /* XXX - don't propagate local variables back to a previous scope,
+	     even in posix mode. */
+	  if (local_p (var) == 0)
+	    VSETATTR (var, att_propagate);
 	}
 
       /* Turn on nameref attribute we deferred above. */

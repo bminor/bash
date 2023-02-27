@@ -1,6 +1,6 @@
 /* input.c -- functions to perform buffered input with synchronization. */
 
-/* Copyright (C) 1992-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -123,8 +123,6 @@ ungetc_with_restart (int c, FILE *stream)
   localbuf[--local_index] = c;
   return c;
 }
-
-#if defined (BUFFERED_INPUT)
 
 /* A facility similar to stdio, but input-only. */
 
@@ -653,4 +651,3 @@ main(int argc, char **argv)
 	exit(0);
 }
 #endif /* TEST */
-#endif /* BUFFERED_INPUT */

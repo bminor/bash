@@ -49,9 +49,7 @@
 #include <sys/param.h>
 #endif
 
-#if defined (BUFFERED_INPUT)
-#  include "input.h"
-#endif
+#include "input.h"
 
 /* Need to include this up here for *_TTY_DRIVER definitions. */
 #include "shtty.h"
@@ -2091,15 +2089,12 @@ make_child (char *command, int flags)
   async_p = (flags & FORK_ASYNC);
   forksleep = 1;
 
-#if defined (BUFFERED_INPUT)
   /* If default_buffered_input is active, we are reading a script.  If
      the command is asynchronous, we have already duplicated /dev/null
      as fd 0, but have not changed the buffered stream corresponding to
      the old fd 0.  We don't want to sync the stream in this case. */
-  if (default_buffered_input != -1 &&
-      (!async_p || default_buffered_input > 0))
+  if (default_buffered_input != -1 && (!async_p || default_buffered_input > 0))
     sync_buffered_stream (default_buffered_input);
-#endif /* BUFFERED_INPUT */
 
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
@@ -2153,12 +2148,11 @@ make_child (char *command, int flags)
 	 child process, go back and change callers who free `command' in
 	 the child process when this returns. */
       mypid = getpid ();
-#if defined (BUFFERED_INPUT)
+
       /* Close default_buffered_input if it's > 0.  We don't close it if it's
 	 0 because that's the file descriptor used when redirecting input,
 	 and it's wrong to close the file in that case. */
       unset_bash_input (0);
-#endif /* BUFFERED_INPUT */
 
       CLRINTERRUPT;	/* XXX - children have their own interrupt state */
 
@@ -3057,17 +3051,17 @@ if (job == NO_JOB)
 	    }
 	  else
 #if defined (READLINE)
-	    /* We don't want to do this if we are running a process during
-	       programmable completion, but we do want to handle window size
-	       changes for traps while readline is active or a command bound
-	       to `bind -x'. */
-	    if (RL_ISSTATE (RL_STATE_COMPLETING) == 0)
-	      if (RL_ISSTATE(RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) != 0)
-		{
-		  if (check_window_size)
-		    get_new_window_size (0, (int *)0, (int *)0);
-		}
-	      else
+	    /* We don't want to get the entire tty state if we are running
+	       while readline is active or has changed the terminal, but we
+	       can handle window size changes during programmable completion,
+	       traps while readline is active, or a command bound using
+	       `bind -x'. */
+	    if (RL_ISSTATE(RL_STATE_COMPLETING|RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) != 0)
+	      {
+		if (check_window_size)
+		  get_new_window_size (0, (int *)0, (int *)0);
+	      }
+	    else
 #endif
 	    get_tty_state ();
 

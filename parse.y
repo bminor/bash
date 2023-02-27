@@ -1509,7 +1509,6 @@ yy_ungetc (int c)
   return (*(bash_input.ungetter)) (c);
 }
 
-#if defined (BUFFERED_INPUT)
 #ifdef INCLUDE_UNUSED
 int
 input_file_descriptor (void)
@@ -1526,7 +1525,6 @@ input_file_descriptor (void)
     }
 }
 #endif
-#endif /* BUFFERED_INPUT */
 
 /* **************************************************************** */
 /*								    */
@@ -1756,9 +1754,7 @@ typedef struct stream_saver {
   struct stream_saver *next;
   BASH_INPUT bash_input;
   int line;
-#if defined (BUFFERED_INPUT)
   BUFFERED_STREAM *bstream;
-#endif /* BUFFERED_INPUT */
 } STREAM_SAVER;
 
 /* The globally known line number. */
@@ -1781,13 +1777,11 @@ push_stream (int reset_lineno)
 
   xbcopy ((char *)&bash_input, (char *)&(saver->bash_input), sizeof (BASH_INPUT));
 
-#if defined (BUFFERED_INPUT)
   saver->bstream = (BUFFERED_STREAM *)NULL;
   /* If we have a buffered stream, clear out buffers[fd]. */
   if (bash_input.type == st_bstream && bash_input.location.buffered_fd >= 0)
     saver->bstream = set_buffered_stream (bash_input.location.buffered_fd,
     					  (BUFFERED_STREAM *)NULL);
-#endif /* BUFFERED_INPUT */
 
   saver->line = line_number;
   bash_input.name = (char *)NULL;
@@ -1816,7 +1810,6 @@ pop_stream (void)
 		  saver->bash_input.name,
 		  saver->bash_input.location);
 
-#if defined (BUFFERED_INPUT)
       /* If we have a buffered stream, restore buffers[fd]. */
       /* If the input file descriptor was changed while this was on the
 	 save stack, update the buffered fd to the new file descriptor and
@@ -1836,7 +1829,6 @@ pop_stream (void)
 	  /* XXX could free buffered stream returned as result here. */
 	  set_buffered_stream (bash_input.location.buffered_fd, saver->bstream);
 	}
-#endif /* BUFFERED_INPUT */
 
       line_number = saver->line;
 
@@ -2334,11 +2326,7 @@ shell_getc (int remove_quoted_newline)
   QUIT;
 
   last_was_backslash = 0;
-  if (sigwinch_received)
-    {
-      sigwinch_received = 0;
-      get_new_window_size (0, (int *)0, (int *)0);
-    }
+  CHECK_WINCH;
       
   if (eol_ungetc_lookahead)
     {
@@ -2458,7 +2446,6 @@ shell_getc (int remove_quoted_newline)
 	      if (i == 0)
 		shell_input_line_terminator = EOF;
 
-#if defined (BUFFERED_INPUT)
 	      if (i == 0 && bash_input.type == st_bstream)
 		{
 		   BUFFERED_STREAM *bp;
@@ -2467,9 +2454,8 @@ shell_getc (int remove_quoted_newline)
 		     shell_input_line_terminator = READERR;
 		}
 	      else
-#endif
-	      if (i == 0 && interactive_shell == 0 && bash_input.type == st_stream && ferror (stdin))
-		shell_input_line_terminator = READERR;
+		if (i == 0 && interactive_shell == 0 && bash_input.type == st_stream && ferror (stdin))
+		  shell_input_line_terminator = READERR;
 
 	      /* If we want to make read errors cancel execution of any partial
 		 line, take out the checks for i == 0 above and set i = 0 if
@@ -5456,7 +5442,7 @@ got_token:
 	{
 	  the_word->flags |= W_NOSPLIT;
 	  if (parser_state & PST_COMPASSIGN)
-	    the_word->flags |= W_NOGLOB;	/* XXX - W_NOBRACE? */
+	    the_word->flags |= W_NOGLOB|W_NOBRACE;
 	}
     }
 
