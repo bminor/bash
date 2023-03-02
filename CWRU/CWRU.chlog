@@ -5474,3 +5474,25 @@ parse.y
 	  closer to name[sub]=word.
 	  From a report by Ilkka Virta <itvirta@iki.fi> back in July, 2020:
 	  https://lists.gnu.org/archive/html/bug-bash/2020-07/msg00133.html
+
+				   2/27
+				   ----
+lib/readline/display.c
+	- rl_redisplay: if HANDLE_MULTIBYTE is defined, do the special META_CHAR
+	  handling if wc_bytes == wc_width == 1
+
+execute_cmd.c
+	- eval_arith_for_expr: make sure we don't call make_word with a NULL
+	  string if expand_arith_string returns NULL. Report from
+	  F G <frank.graziano@gmail.com>
+
+arrayfunc.c
+	- assign_assoc_from_kvlist: added code, currently disabled, to perform
+	  all expansions, including word splitting, on the kv-pair word list
+
+				   2/28
+				   ----
+lib/readline/search.c
+	- rl_history_search_reinit: change check against history_string_size
+	  to account for history_string_size now being a size_t. Report and
+	  fix from Grisha Levit <grishalevit@gmail.com>

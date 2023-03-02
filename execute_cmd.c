@@ -2994,7 +2994,7 @@ eval_arith_for_expr (WORD_LIST *l, int *okp)
   temp = expand_arith_string (expr, Q_DOUBLE_QUOTES|Q_ARITH);
   if (l->next)
     free (expr);
-  new = make_word_list (make_word (temp), (WORD_LIST *)NULL);
+  new = make_word_list (make_word (temp ? temp : ""), (WORD_LIST *)NULL);
   free (temp);
 
   if (new)

@@ -621,7 +621,7 @@ rl_history_search_reinit (int flags)
   if (rl_point)
     {
       /* Allocate enough space for anchored and non-anchored searches */
-      if (_rl_history_search_len >= history_string_size - 2)
+      if (_rl_history_search_len + 2 >= history_string_size)
 	{
 	  history_string_size = _rl_history_search_len + 2;
 	  history_search_string = (char *)xrealloc (history_search_string, history_string_size);

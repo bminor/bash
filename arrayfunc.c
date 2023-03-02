@@ -575,13 +575,22 @@ expand_compound_array_assignment (SHELL_VAR *var, char *value, int flags)
 }
 
 #if ASSOC_KVPAIR_ASSIGNMENT
+/* If non-zero, we split the words in kv-pair compound array assignments in
+   addition to performing the other expansions. */
+int split_kvpair_assignments = 0;
+
+/* We have a set of key-value pairs that should be expanded and split
+   (because they are not assignment statements). They are not expanded
+   and split in expand_compound_array_assignment because assoc_p (var)
+   is true. We defer the expansion until now. */
 static void
 assign_assoc_from_kvlist (SHELL_VAR *var, WORD_LIST *nlist, HASH_TABLE *h, int flags)
 {
-  WORD_LIST *list;
+  WORD_LIST *list, *explist;
   char *akey, *aval, *k, *v;
 
-  for (list = nlist; list; list = list->next)
+  explist = split_kvpair_assignments ? expand_words_no_vars (nlist) : nlist;
+  for (list = explist; list; list = list->next)
     {
       k = list->word->word;
       v = list->next ? list->next->word->word : 0;
@@ -589,7 +598,7 @@ assign_assoc_from_kvlist (SHELL_VAR *var, WORD_LIST *nlist, HASH_TABLE *h, int f
       if (list->next)
         list = list->next;
 
-      akey = expand_subscript_string (k, 0);
+      akey = split_kvpair_assignments ? savestring (k) : expand_subscript_string (k, 0);
       if (akey == 0 || *akey == 0)
 	{
 	  err_badarraysub (k);
@@ -597,7 +606,7 @@ assign_assoc_from_kvlist (SHELL_VAR *var, WORD_LIST *nlist, HASH_TABLE *h, int f
 	  continue;
 	}	      
 
-      aval = expand_assignment_string_to_string (v, 0);
+      aval = split_kvpair_assignments ? savestring (v) : expand_assignment_string_to_string (v, 0);
       if (aval == 0)
 	{
 	  aval = (char *)xmalloc (1);
@@ -605,8 +614,12 @@ assign_assoc_from_kvlist (SHELL_VAR *var, WORD_LIST *nlist, HASH_TABLE *h, int f
 	}
 
       bind_assoc_var_internal (var, h, akey, aval, flags);
+
       free (aval);
     }
+
+  if (explist != nlist)
+    dispose_words (explist);
 }
 
 /* Return non-zero if L appears to be a key-value pair associative array
