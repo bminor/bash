@@ -5216,7 +5216,7 @@ builtins/printf.def
 builtins/set.def
 	- unset_builtin: since tokenize_array_reference modifies its NAME
 	  argument, we need to restore the original word if there is no
-	  array variable found with that name, so we can do ahead and try to
+	  array variable found with that name, so we can go ahead and try to
 	  unset a function with that wonky name. Inspired by a report from
 	  Emanuele Torre <torreemanuele6@gmail.com>
 
@@ -5295,7 +5295,7 @@ doc/{bash.1,bashref.texi}
 				    2/8
 				    ---
 bashline.c
-	- set_up_new__line: if the new line doesn't change rl_line_buffer,
+	- set_up_new_line: if the new line doesn't change rl_line_buffer,
 	  just return right away without changing rl_point. Affects
 	  alias-expand-line, history-expand-line, and history-and-alias-expand-line.
 	  Inspired by a report from
@@ -5496,3 +5496,41 @@ lib/readline/search.c
 	- rl_history_search_reinit: change check against history_string_size
 	  to account for history_string_size now being a size_t. Report and
 	  fix from Grisha Levit <grishalevit@gmail.com>
+
+				    3/2
+				    ---
+lib/readline/history.c
+	- _hs_search_history_data: search the history list for an entry with
+	  `data' matching the argument; return the index
+	- _hs_replace_history_data: search backwards through the history list
+	  from the end
+
+lib/readline/histlib.h
+	- _hs_search_history_data: extern declaration
+
+lib/readline/search.c
+	- make_history_line_current: make sure rl_undo_list doesn't appear in
+	  any history entries (it should be a private search string undo list)
+	  before freeing it
+
+lib/readline/misc.c
+	- _rl_free_saved_history_line: make sure the undo list in
+	  _rl_saved_line_for_history isn't rl_undo_list and doesn't appear in
+	  any history list entries as `data' before freeing it. Fixes core
+	  dump after SIGINT reported by Grisha Levit <grishalevit@gmail.com>
+
+parse.y,print_cmd.c
+	- changes for size_t when computing new amount for xrealloc
+
+				    3/3
+				    ---
+parse.y
+	- set_word_top: new inline function to check and set word_top; called
+	  from the appropriate places
+	- parse_dparen: call set_word_top before parsing an arith command or
+	  nested subshell. Fixes underflow issue reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+examples/loadables/kv.c
+	- kv: new loadable builtin, reads key-value pairs from stdin and assigns
+	  them to an associative array

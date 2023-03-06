@@ -184,6 +184,7 @@ static void free_string_list (void);
 
 static char *read_a_line (int);
 
+static int set_word_top (int);
 static int reserved_word_acceptable (int);
 static int yylex (void);
 
@@ -1097,7 +1098,6 @@ if_command:	IF compound_list THEN compound_list FI
 			  $$ = make_if_command ($2, $4, (COMMAND *)NULL);
   			  if (word_top >= 0) word_top--;
 			}
-			
 	|	IF compound_list THEN compound_list ELSE compound_list FI
 			{
 			  $$ = make_if_command ($2, $4, $6);
@@ -2575,7 +2575,7 @@ shell_getc (int remove_quoted_newline)
 	 not already end in an EOF character.  */
       if (shell_input_line_terminator != EOF && shell_input_line_terminator != READERR)
 	{
-	  if (shell_input_line_size < SIZE_MAX-3 && (shell_input_line_len+3 > shell_input_line_size))
+	  if (shell_input_line_size + 3 < SIZE_MAX && (shell_input_line_len+3 > shell_input_line_size))
 	    shell_input_line = (char *)xrealloc (shell_input_line,
 					1 + (shell_input_line_size += 2));
 
@@ -3039,11 +3039,7 @@ static int open_brace_count;
 		open_brace_count--; \
 \
 	      if (last_read_token == IF || last_read_token == WHILE || last_read_token == UNTIL) \
-		{ \
-		  if (word_top < MAX_COMPOUND_NEST) \
-		    word_top++; \
-		  word_lineno[word_top] = line_number; \
-		} \
+		set_word_top (last_read_token); \
 \
 	      if (posixly_correct) \
 		parser_state &= ~PST_ALEXPNEXT; \
@@ -4614,9 +4610,8 @@ parse_dparen (int c)
 #if defined (ARITH_FOR_COMMAND)
   if (last_read_token == FOR)
     {
-      if (word_top < MAX_COMPOUND_NEST)
-	word_top++;
-      arith_for_lineno = word_lineno[word_top] = line_number;
+      set_word_top (last_read_token);
+      arith_for_lineno = line_number;
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)
 	{
@@ -4635,6 +4630,8 @@ parse_dparen (int c)
     {
       sline = line_number;
 
+      if (last_read_token == IF || last_read_token == WHILE || last_read_token == UNTIL)
+	set_word_top (last_read_token);
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)	/* arithmetic command */
 	{
@@ -5506,11 +5503,22 @@ got_token:
     case CASE:
     case SELECT:
     case FOR:
-      if (word_top < MAX_COMPOUND_NEST)
-	word_top++;
-      word_lineno[word_top] = line_number;
       expecting_in_token++;
       break;
+    }
+  set_word_top (last_read_token);
+
+  return (result);
+}
+
+static inline int
+set_word_top (int t)
+{
+  switch (t)
+    {
+    case CASE:
+    case SELECT:
+    case FOR:
     case IF:
     case WHILE:
     case UNTIL:
@@ -5518,9 +5526,10 @@ got_token:
 	word_top++;
       word_lineno[word_top] = line_number;
       break;
+    default:
+      break;
     }
-
-  return (result);
+  return word_top;
 }
 
 /* Return 1 if TOKSYM is a token that after being read would allow

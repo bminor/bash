@@ -88,8 +88,10 @@ make_history_line_current (HIST_ENTRY *entry)
 
   xlist = _rl_saved_line_for_history ? (UNDO_LIST *)_rl_saved_line_for_history->data : 0;
   /* At this point, rl_undo_list points to a private search string list. */
-  if (rl_undo_list && rl_undo_list != (UNDO_LIST *)entry->data && rl_undo_list != xlist)
+  if (rl_undo_list && rl_undo_list != (UNDO_LIST *)entry->data && rl_undo_list != xlist &&
+	_hs_search_history_data ((histdata_t *)rl_undo_list) < 0)
     rl_free_undo_list ();
+  rl_undo_list = 0;	/* XXX */
 
   /* Now we create a new undo list with a single insert for this text.
      WE DON'T CHANGE THE ORIGINAL HISTORY ENTRY UNDO LIST */

@@ -477,7 +477,7 @@ indirection_level_string (void)
   /* Dynamically resize indirection_string so we have room for everything
      and we don't have to truncate ps4 */
   ineed = (ps4_firstc_len * indirection_level) + strlen (ps4);
-  if (ineed > indirection_stringsiz - 1)
+  if (ineed + 1 > indirection_stringsiz)
     {
       indirection_stringsiz = ineed + 1;
       indirection_string = xrealloc (indirection_string, indirection_stringsiz);
