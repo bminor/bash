@@ -251,8 +251,13 @@ trap_builtin (WORD_LIST *list)
 			break;
 
 		      case SIGQUIT:
-			/* Always ignore SIGQUIT. */
-			set_signal_handler (SIGQUIT, SIG_IGN);
+			/* Always ignore SIGQUIT, but allow a posix-mode shell
+			   that is running asynchronously and has ignored
+			   SIGQUIT to reset it to the default. POSIX interp 751. */
+			if (posixly_correct && signal_is_async_ignored (SIGQUIT))
+			  set_signal_handler (SIGQUIT, termsig_sighandler);
+			else
+			  set_signal_handler (SIGQUIT, SIG_IGN);
 			break;
 		      case SIGTERM:
 #if defined (JOB_CONTROL)

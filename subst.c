@@ -3299,7 +3299,7 @@ strip_trailing_ifs_whitespace (char *string, char *separators, int saw_escape)
   char *s;
 
   s = string + STRLEN (string) - 1;
-  while (s > string && ((spctabnl (*s) && isifs (*s)) ||
+  while (s > string && ((ifs_whitespace (*s) && isifs (*s)) ||
 			(saw_escape && *s == CTLESC && spctabnl (s[1]))))
     s--;
   *++s = '\0';

@@ -654,9 +654,17 @@ change_to_directory (char *newdir, int nolinks, int xattr)
 
   /* We're not in physical mode (nolinks == 0), but we failed to change to
      the canonicalized directory name (TDIR).  Try what the user passed
-     verbatim. If we succeed, reinitialize the_current_working_directory.
-     POSIX requires that we just fail here, so we do in posix mode. */
-  if (posixly_correct == 0 && chdir (newdir) == 0)
+     verbatim. If we succeed, reinitialize the_current_working_directory. */
+
+  /* The first block is step 9 in the POSIX cd algorithm. */
+  if (posixly_correct && ndlen < PATH_MAX && strlen (tdir) >= PATH_MAX)
+    r = chdir (newdir);
+  else if (posixly_correct == 0)
+    r = chdir (newdir);
+  else
+    r = -1;
+
+  if (r == 0)
     {
       t = resetpwd ("cd");
       if (t == 0)

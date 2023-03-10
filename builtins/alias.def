@@ -63,7 +63,7 @@ $END
 /* Flags for print_alias */
 #define AL_REUSABLE	0x01
 
-static void print_alias (alias_t *, int);
+static int print_alias (alias_t *, int);
 
 /* Hack the alias command in a Korn shell way. */
 int
@@ -103,13 +103,14 @@ alias_builtin (WORD_LIST *list)
       if (alias_list == 0)
 	return (EXECUTION_SUCCESS);
 
+      any_failed = EXECUTION_SUCCESS;
       for (offset = 0; alias_list[offset]; offset++)
-	print_alias (alias_list[offset], dflags);
+	if (any_failed = print_alias (alias_list[offset], dflags) != EXECUTION_SUCCESS)
+	  break;
 
       free (alias_list);	/* XXX - Do not free the strings. */
 
-      if (list == 0)
-	return (sh_chkwrite (EXECUTION_SUCCESS));
+      return (any_failed != EXECUTION_SUCCESS ? EXECUTION_FAILURE : sh_chkwrite (EXECUTION_SUCCESS));
     }
 
   any_failed = 0;
@@ -137,7 +138,10 @@ alias_builtin (WORD_LIST *list)
 	{
 	  t = find_alias (name);
 	  if (t)
-	    print_alias (t, dflags);
+	    {
+	      if (print_alias (t, dflags) != EXECUTION_SUCCESS)
+		return (EXECUTION_FAILURE);
+	    }
 	  else
 	    {
 	      sh_notfound (name);
@@ -221,7 +225,7 @@ unalias_builtin (WORD_LIST *list)
 }
 
 /* Output ALIAS in such a way as to allow it to be read back in. */
-static void
+static int
 print_alias (alias_t *alias, int flags)
 {
   char *value;
@@ -232,6 +236,6 @@ print_alias (alias_t *alias, int flags)
   printf ("%s=%s\n", alias->name, value);
   free (value);
 
-  fflush (stdout);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 #endif /* ALIAS */

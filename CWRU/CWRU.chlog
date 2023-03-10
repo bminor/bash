@@ -5534,3 +5534,40 @@ parse.y
 examples/loadables/kv.c
 	- kv: new loadable builtin, reads key-value pairs from stdin and assigns
 	  them to an associative array
+
+				    3/7
+				    ---
+builtins/trap.def
+	- trap_builtin: if trying to restore SIGQUIT to its default disposition,
+	  and the shell is in posix mode, set to SIG_DFL if the shell is
+	  running as an async command and signal_is_async_ignored (SIGQUIT) is
+	  true. Posix conformance issue 751
+
+				    3/8
+				    ---
+builtins/alias.def
+	- print_alias: now returns int. Check for write errors using sh_chkwrite
+	  and return EXECUTION_FAILURE if it fails
+	- alias_builtin: if print_alias returns EXECUTION_FAILURE, return
+	  EXECUTION_FAILURE immediately (write error). POSIX test conformance
+
+				    3/9
+				    ---
+builtins/cd.def
+	- change_to_directory: if we're not in physical mode and are in posix
+	  mode, add step 9 of the posix cd algorithm, which essentially tries
+	  the pathname the user supplied if it's shorter than PATH_MAX and the
+	  length of the canonicalized pathname is longer than PATH_MAX. This
+	  is basically what default bash mode does without the length checks.
+	  POSIX test conformance.
+
+subst.c
+	- strip_trailing_ifs_whitespace: use ifs_whitespace(*s) instead of
+	  spctabnl(*s) like word splitting and get_word_from_string. POSIX
+	  test conformance
+
+jobs.c
+	- wait_for: tweak change from 1/18 to make sure a J_ASYNC job isn't in
+	  the foreground (J_FOREGROUND) as it would be if it had been continued
+	  in the foreground with `fg'; if it is, we want to give the terminal
+	  back to shell_pgrp
