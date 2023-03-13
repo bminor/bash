@@ -122,6 +122,7 @@ extern void free_buffered_stream (BUFFERED_STREAM *);
 extern int close_buffered_stream (BUFFERED_STREAM *);
 extern int close_buffered_fd (int);
 extern int sync_buffered_stream (int);
+extern int fd_berror (int);
 extern int buffered_getchar (void);
 extern int buffered_ungetchar (int);
 extern void with_input_from_buffered_stream (int, char *);

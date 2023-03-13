@@ -620,7 +620,11 @@ rl_expand_prompt (char *prompt)
   local_prompt_invis_chars[0] = 0;
 
   if (prompt == 0 || *prompt == 0)
-    return (0);
+    {
+      local_prompt = xmalloc (sizeof (char));
+      local_prompt[0] = '\0';
+      return (0);
+    }
 
   p = strrchr (prompt, '\n');
   if (p == 0)

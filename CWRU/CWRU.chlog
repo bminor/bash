@@ -5571,3 +5571,64 @@ jobs.c
 	  the foreground (J_FOREGROUND) as it would be if it had been continued
 	  in the foreground with `fg'; if it is, we want to give the terminal
 	  back to shell_pgrp
+
+				   3/10
+				   ----
+input.c
+	- fd_berror: returns true if the file descriptor passed as an arg
+	  corresponds to a buffered stream with an error condition
+
+parse.y
+	- shell_getc: use fd_berror instead of inline code
+	- shell_getc: if yy_getc returns EOF, immediately set line[0] to NULL
+	  and set shell_input_line_terminator to READERR. Then exit immediately
+	  with status 128 if index == 0, line[index] == NULL, and READERR.
+	  Posix interp 1629
+
+config-top.h
+	- FATAL_READERROR: now defined to 1 by default
+
+lib/readline/display.c
+	- rl_expand_prompt: allocate an empty string for local_prompt if prompt
+	  is the NULL or empty string. Fixes seg fault with rl_message and
+	  empty prompt reported by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/histexpand.c
+	- history_expand: if hist_extract_single_quoted returns an index at or
+	  past the end of the string, correct the index and break the loop,
+	  which will cause a return. Report and fix from
+	  Grisha Levit <grishalevit@gmail.com>
+
+				   3/13
+				   ----
+lib/readline/vi_mode.c
+	- rl_domove_motion_callback: set the MOVE_FAILED flag in the context M
+	  if rl_dispatch returns non-zero and other movement-command-specific
+	  conditions are met. Right now, an unsuccessful `f' or `F' command
+	  is failure.
+	- _rl_vi_domove_motion_cleanup: if the command is `c' or `C', we don't
+	  enter insert mode if the MOVE_FAILED flag is set in the context M.
+	  This is how standalone vi works.
+
+lib/readline/kill.c
+	- rl_unix_filename_rubout: add some checks for rl_point > 0 before
+	  looking at rl_line_buffer[rl_point - 1]. Report and fix from
+	  Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: reset cxt->sline_index to 0 if it's past the
+	  end of the history string (sline_len). Fixes asan bug reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/histexpand.c
+	- history_tokenize_word: don't increment the string index past the
+	  NULL if the line ends in a backslash.Fixes asan bug reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/vi_mode.c
+	- rl_vi_yank_to,rl_vi_change_to,rl_vi_delete_to: if these are called
+	  with an existing valid vimvcxt, save it and allocate a new one for
+	  the current function call to use, then restore it before returning.
+	  This prevents referencing vimvcxt after freeing it in the case that
+	  these functions call each other recursively (e.g., y1y1, c1d1, etc.).
+	  Fixes asan bug reported by Grisha Levit <grishalevit@gmail.com>

@@ -196,8 +196,9 @@
 #define ASSOC_KVPAIR_ASSIGNMENT 1
 
 /* Define if you want read errors in non-interactive shells to be fatal
-   errors instead of the historical practice of treating them as EOF. */
-/* #define FATAL_READERROR	1 */
+   errors instead of the historical practice of treating them as EOF. The
+   next version of POSIX will require this (interp 1629). */
+#define FATAL_READERROR	1
 
 /* Define to 0 if you want the `patsub_replacement' shell option to be disabled
    by default. */

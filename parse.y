@@ -2446,20 +2446,13 @@ shell_getc (int remove_quoted_newline)
 	      if (i == 0)
 		shell_input_line_terminator = EOF;
 
-	      if (i == 0 && bash_input.type == st_bstream)
-		{
-		   BUFFERED_STREAM *bp;
-		   bp = get_buffered_stream (default_buffered_input);
-		   if (bp && berror (bp))
-		     shell_input_line_terminator = READERR;
-		}
-	      else
-		if (i == 0 && interactive_shell == 0 && bash_input.type == st_stream && ferror (stdin))
-		  shell_input_line_terminator = READERR;
+	      if (bash_input.type == st_bstream && fd_berror (default_buffered_input))
+		shell_input_line_terminator = READERR;
+	      else if (interactive_shell == 0 && bash_input.type == st_stream && ferror (stdin))
+		shell_input_line_terminator = READERR;
 
-	      /* If we want to make read errors cancel execution of any partial
-		 line, take out the checks for i == 0 above and set i = 0 if
-		 shell_input_line_terminator == READERR. */
+	      /* We want to make read errors cancel execution of any partial
+		 line, so we set i = 0 if shell_input_line_terminator == READERR. */
 	      /* XXX TAG: bash-5.3 austingroup interp 1629 */
 #if defined (FATAL_READERROR)
 	      if (shell_input_line_terminator == READERR)
@@ -2715,7 +2708,7 @@ pop_alias:
     {
 #if defined (FATAL_READERROR)
       report_error (_("script file read error: %s"), strerror (errno));
-      exit_shell (2);
+      exit_shell (128);		/* POSIX mandated error status */
 #else
       /* Treat read errors like EOF here. */
       return ((shell_input_line_index != 0) ? '\n' : EOF);

@@ -469,6 +469,15 @@ get_buffered_stream (int fd)
   return (buffers && fd < nbuffers) ? buffers[fd] : (BUFFERED_STREAM *)0;
 }
 
+int
+fd_berror (int fd)
+{
+  BUFFERED_STREAM *bp;
+
+  bp = get_buffered_stream (default_buffered_input);
+  return (bp && berror (bp));
+}
+
 /* Read a buffer full of characters from BP, a buffered stream. */
 static int
 b_fill_buffer (BUFFERED_STREAM *bp)
