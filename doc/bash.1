@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Feb 20 09:59:47 EST 2023
+.\"	Last Change: Tue Mar 14 16:19:06 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 February 20" "GNU Bash 5.2"
+.TH BASH 1 "2023 March 14" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4255,9 +4255,8 @@ This is semantically equivalent to
 This type of redirection instructs the shell to read input from the
 current source until a line containing only
 .I delimiter
-(with no trailing blanks)
-is seen.  All of
-the lines read up to that point are then used as the standard
+(with no trailing blanks) is seen.
+All of the lines read up to that point are then used as the standard
 input (or file descriptor \fIn\fP if \fIn\fP is specified) for a command.
 .PP
 The format of here-documents is:
@@ -4273,6 +4272,7 @@ The format of here-documents is:
 No parameter and variable expansion, command substitution,
 arithmetic expansion, or pathname expansion is performed on
 .IR word .
+.PP
 If any part of
 .I word
 is quoted, the
@@ -4280,7 +4280,9 @@ is quoted, the
 is the result of quote removal on
 .IR word ,
 and the lines in the here-document are not expanded.
-If \fIword\fP is unquoted,
+If \fIword\fP is unquoted, the
+.I delimiter
+is \fIword\fP itself,
 all lines of the here-document are subjected to
 parameter expansion, command substitution, and arithmetic expansion,
 the character sequence
@@ -6627,9 +6629,12 @@ The history expansion facilities are used to extract the last word,
 as if the "!$" history expansion had been specified.
 .TP
 .B shell\-expand\-line (M\-C\-e)
-Expand the line as the shell does.  This
-performs alias and history expansion as well as all of the shell
-word expansions.  See
+Expand the line by performing shell word expansions.
+This performs alias and history expansion,
+\fB$\fP\(aq\fIstring\fP\(aq and \fB$\fP\(dq\fIstring\fP\(dq quoting,
+tilde expansion, parameter and variable expansion, arithmetic expansion,
+word splitting, and quote removal.
+See
 .SM
 .B HISTORY EXPANSION
 below for a description of history expansion.

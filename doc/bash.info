@@ -1,9 +1,9 @@
 This is bash.info, produced by makeinfo version 6.8 from bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.2, 20 February 2023).
+Bash shell (version 5.2, 14 March 2023).
 
-   This is Edition 5.2, last updated 20 February 2023, of 'The GNU Bash
+   This is Edition 5.2, last updated 14 March 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.2.
 
    Copyright (C) 1988-2023 Free Software Foundation, Inc.
@@ -26,10 +26,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.2, 20 February 2023).  The Bash home page is
+Bash shell (version 5.2, 14 March 2023).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.2, last updated 20 February 2023, of 'The GNU Bash
+   This is Edition 5.2, last updated 14 March 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.2.
 
    Bash contains features that appear in other popular shells, and some
@@ -2326,19 +2326,23 @@ quotes for word splitting.
 
    The shell treats each character of '$IFS' as a delimiter, and splits
 the results of the other expansions into words using these characters as
-field terminators.  If 'IFS' is unset, or its value is exactly
-'<space><tab><newline>', the default, then sequences of ' <space>',
-'<tab>', and '<newline>' at the beginning and end of the results of the
-previous expansions are ignored, and any sequence of 'IFS' characters
-not at the beginning or end serves to delimit words.  If 'IFS' has a
-value other than the default, then sequences of the whitespace
-characters 'space', 'tab', and 'newline' are ignored at the beginning
-and end of the word, as long as the whitespace character is in the value
-of 'IFS' (an 'IFS' whitespace character).  Any character in 'IFS' that
-is not 'IFS' whitespace, along with any adjacent 'IFS' whitespace
-characters, delimits a field.  A sequence of 'IFS' whitespace characters
-is also treated as a delimiter.  If the value of 'IFS' is null, no word
-splitting occurs.
+field terminators.
+
+   If 'IFS' is unset, or its value is exactly '<space><tab><newline>',
+the default, then sequences of 'space', 'tab', and 'newline' at the
+beginning and end of the results of the previous expansions are ignored,
+and any sequence of 'IFS' characters not at the beginning or end serves
+to delimit words.  If 'IFS' has a value other than the default, then
+sequences of the whitespace characters 'space', 'tab', and 'newline' are
+ignored at the beginning and end of the word, as long as the whitespace
+character is in the value of 'IFS' (an 'IFS' whitespace character).  Any
+character in 'IFS' that is not 'IFS' whitespace, along with any adjacent
+'IFS' whitespace characters, delimits a field.  A sequence of 'IFS'
+whitespace characters is also treated as a delimiter.
+
+   If the value of 'IFS' is null, no word splitting occurs.  If 'IFS' is
+unset, word splitting behaves as if it contained the default value
+'<space><tab><newline>'.
 
    Explicit null arguments ('""' or '''') are retained and passed to
 commands as empty strings.  Unquoted implicit null arguments, resulting
@@ -2678,7 +2682,7 @@ This is semantically equivalent to
 --------------------
 
 This type of redirection instructs the shell to read input from the
-current source until a line containing only WORD (with no trailing
+current source until a line containing only DELIMITER (with no trailing
 blanks) is seen.  All of the lines read up to that point are then used
 as the standard input (or file descriptor N if N is specified) for a
 command.
@@ -2689,13 +2693,15 @@ command.
      DELIMITER
 
    No parameter and variable expansion, command substitution, arithmetic
-expansion, or filename expansion is performed on WORD.  If any part of
-WORD is quoted, the DELIMITER is the result of quote removal on WORD,
-and the lines in the here-document are not expanded.  If WORD is
-unquoted, all lines of the here-document are subjected to parameter
-expansion, command substitution, and arithmetic expansion, the character
-sequence '\newline' is ignored, and '\' must be used to quote the
-characters '\', '$', and '`'.
+expansion, or filename expansion is performed on WORD.
+
+   If any part of WORD is quoted, the DELIMITER is the result of quote
+removal on WORD, and the lines in the here-document are not expanded.
+If WORD is unquoted, DELIMITER is WORD itself, all lines of the
+here-document are subjected to parameter expansion, command
+substitution, and arithmetic expansion, the character sequence
+'\newline' is ignored, and '\' must be used to quote the characters '\',
+'$', and '`'.
 
    If the redirection operator is '<<-', then all leading tab characters
 are stripped from input lines and the line containing DELIMITER.  This
@@ -6702,8 +6708,10 @@ indexed arrays, if the optional subscript is supplied, that index is
 assigned to; otherwise the index of the element assigned is the last
 index assigned to by the statement plus one.  Indexing starts at zero.
 
-   Each VALUE in the list undergoes all the shell expansions described
-above (*note Shell Expansions::).
+   Each VALUE in the list undergoes the shell expansions described above
+(*note Shell Expansions::), but VALUEs that are valid variable
+assignments including the brackets and subscript do not undergo brace
+expansion and word splitting, as with individual variable assignments.
 
    When assigning to an associative array, the words in a compound
 assignment may be either assignment statements, for which the subscript
@@ -9411,9 +9419,10 @@ File: bash.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up: Bin
      Display version information about the current instance of Bash.
 
 'shell-expand-line (M-C-e)'
-     Expand the line as the shell does.  This performs alias and history
-     expansion as well as all of the shell word expansions (*note Shell
-     Expansions::).
+     Expand the line by performing shell word expansions.  This performs
+     alias and history expansion, $'STRING' and $"STRING" quoting, tilde
+     expansion, parameter and variable expansion, arithmetic expansion,
+     word splitting, and quote removal.
 
 'history-expand-line (M-^)'
      Perform history expansion on the current line.
@@ -12240,7 +12249,7 @@ D.4 Function Index
 * accept-line (Newline or Return):       Commands For History.
                                                               (line   6)
 * alias-expand-line ():                  Miscellaneous Commands.
-                                                              (line 131)
+                                                              (line 132)
 * backward-char (C-b):                   Commands For Moving. (line  15)
 * backward-delete-char (Rubout):         Commands For Text.   (line  17)
 * backward-kill-line (C-x Rubout):       Commands For Killing.
@@ -12302,7 +12311,7 @@ D.4 Function Index
 * dynamic-complete-history (M-<TAB>):    Commands For Completion.
                                                               (line  90)
 * edit-and-execute-command (C-x C-e):    Miscellaneous Commands.
-                                                              (line 140)
+                                                              (line 141)
 * end-kbd-macro (C-x )):                 Keyboard Macros.     (line   9)
 * end-of-file (usually C-d):             Commands For Text.   (line   6)
 * end-of-history (M->):                  Commands For History.
@@ -12324,9 +12333,9 @@ D.4 Function Index
 * glob-list-expansions (C-x g):          Miscellaneous Commands.
                                                               (line 110)
 * history-and-alias-expand-line ():      Miscellaneous Commands.
-                                                              (line 134)
+                                                              (line 135)
 * history-expand-line (M-^):             Miscellaneous Commands.
-                                                              (line 124)
+                                                              (line 125)
 * history-search-backward ():            Commands For History.
                                                               (line  57)
 * history-search-forward ():             Commands For History.
@@ -12340,7 +12349,7 @@ D.4 Function Index
 * insert-completions (M-*):              Commands For Completion.
                                                               (line  22)
 * insert-last-argument (M-. or M-_):     Miscellaneous Commands.
-                                                              (line 137)
+                                                              (line 138)
 * kill-line (C-k):                       Commands For Killing.
                                                               (line   6)
 * kill-region ():                        Commands For Killing.
@@ -12350,7 +12359,7 @@ D.4 Function Index
 * kill-word (M-d):                       Commands For Killing.
                                                               (line  23)
 * magic-space ():                        Miscellaneous Commands.
-                                                              (line 127)
+                                                              (line 128)
 * menu-complete ():                      Commands For Completion.
                                                               (line  26)
 * menu-complete-backward ():             Commands For Completion.
@@ -12603,138 +12612,138 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top894
-Node: Introduction2811
-Node: What is Bash?3024
-Node: What is a shell?4135
-Node: Definitions6670
-Node: Basic Shell Features9618
-Node: Shell Syntax10834
-Node: Shell Operation11857
-Node: Quoting13147
-Node: Escape Character14448
-Node: Single Quotes14930
-Node: Double Quotes15275
-Node: ANSI-C Quoting16550
-Node: Locale Translation17857
-Node: Creating Internationalized Scripts19165
-Node: Comments23279
-Node: Shell Commands23894
-Node: Reserved Words24829
-Node: Simple Commands25582
-Node: Pipelines26233
-Node: Lists29229
-Node: Compound Commands31021
-Node: Looping Constructs32030
-Node: Conditional Constructs34522
-Node: Command Grouping49007
-Node: Coprocesses50482
-Node: GNU Parallel53142
-Node: Shell Functions54056
-Node: Shell Parameters61938
-Node: Positional Parameters66323
-Node: Special Parameters67222
-Node: Shell Expansions70433
-Node: Brace Expansion72557
-Node: Tilde Expansion75288
-Node: Shell Parameter Expansion77906
-Node: Command Substitution96305
-Node: Arithmetic Expansion97657
-Node: Process Substitution98622
-Node: Word Splitting99739
-Node: Filename Expansion101680
-Node: Pattern Matching104426
-Node: Quote Removal109425
-Node: Redirections109717
-Node: Executing Commands119374
-Node: Simple Command Expansion120041
-Node: Command Search and Execution122148
-Node: Command Execution Environment124532
-Node: Environment127564
-Node: Exit Status129224
-Node: Signals131005
-Node: Shell Scripts134451
-Node: Shell Builtin Commands137475
-Node: Bourne Shell Builtins139510
-Node: Bash Builtins161705
-Node: Modifying Shell Behavior193701
-Node: The Set Builtin194043
-Node: The Shopt Builtin204638
-Node: Special Builtins220547
-Node: Shell Variables221523
-Node: Bourne Shell Variables221957
-Node: Bash Variables224058
-Node: Bash Features256870
-Node: Invoking Bash257880
-Node: Bash Startup Files263890
-Node: Interactive Shells269018
-Node: What is an Interactive Shell?269426
-Node: Is this Shell Interactive?270072
-Node: Interactive Shell Behavior270884
-Node: Bash Conditional Expressions274510
-Node: Shell Arithmetic279149
-Node: Aliases282090
-Node: Arrays284981
-Node: The Directory Stack291369
-Node: Directory Stack Builtins292150
-Node: Controlling the Prompt296407
-Node: The Restricted Shell299369
-Node: Bash POSIX Mode301976
-Node: Shell Compatibility Mode314839
-Node: Job Control323403
-Node: Job Control Basics323860
-Node: Job Control Builtins328859
-Node: Job Control Variables334651
-Node: Command Line Editing335804
-Node: Introduction and Notation337472
-Node: Readline Interaction339092
-Node: Readline Bare Essentials340280
-Node: Readline Movement Commands342066
-Node: Readline Killing Commands343023
-Node: Readline Arguments344941
-Node: Searching345982
-Node: Readline Init File348165
-Node: Readline Init File Syntax349423
-Node: Conditional Init Constructs373211
-Node: Sample Init File377404
-Node: Bindable Readline Commands380525
-Node: Commands For Moving381726
-Node: Commands For History383774
-Node: Commands For Text388765
-Node: Commands For Killing392411
-Node: Numeric Arguments395441
-Node: Commands For Completion396577
-Node: Keyboard Macros400765
-Node: Miscellaneous Commands401450
-Node: Readline vi Mode407392
-Node: Programmable Completion408296
-Node: Programmable Completion Builtins416073
-Node: A Programmable Completion Example426822
-Node: Using History Interactively432067
-Node: Bash History Facilities432748
-Node: Bash History Builtins435750
-Node: History Interaction440771
-Node: Event Designators444388
-Node: Word Designators445739
-Node: Modifiers447496
-Node: Installing Bash449301
-Node: Basic Installation450435
-Node: Compilers and Options454154
-Node: Compiling For Multiple Architectures454892
-Node: Installation Names456581
-Node: Specifying the System Type458687
-Node: Sharing Defaults459401
-Node: Operation Controls460071
-Node: Optional Features461026
-Node: Reporting Bugs472242
-Node: Major Differences From The Bourne Shell473583
-Node: GNU Free Documentation License490429
-Node: Indexes515603
-Node: Builtin Index516054
-Node: Reserved Word Index522878
-Node: Variable Index525323
-Node: Function Index542235
-Node: Concept Index556016
+Node: Top888
+Node: Introduction2799
+Node: What is Bash?3012
+Node: What is a shell?4123
+Node: Definitions6658
+Node: Basic Shell Features9606
+Node: Shell Syntax10822
+Node: Shell Operation11845
+Node: Quoting13135
+Node: Escape Character14436
+Node: Single Quotes14918
+Node: Double Quotes15263
+Node: ANSI-C Quoting16538
+Node: Locale Translation17845
+Node: Creating Internationalized Scripts19153
+Node: Comments23267
+Node: Shell Commands23882
+Node: Reserved Words24817
+Node: Simple Commands25570
+Node: Pipelines26221
+Node: Lists29217
+Node: Compound Commands31009
+Node: Looping Constructs32018
+Node: Conditional Constructs34510
+Node: Command Grouping48995
+Node: Coprocesses50470
+Node: GNU Parallel53130
+Node: Shell Functions54044
+Node: Shell Parameters61926
+Node: Positional Parameters66311
+Node: Special Parameters67210
+Node: Shell Expansions70421
+Node: Brace Expansion72545
+Node: Tilde Expansion75276
+Node: Shell Parameter Expansion77894
+Node: Command Substitution96293
+Node: Arithmetic Expansion97645
+Node: Process Substitution98610
+Node: Word Splitting99727
+Node: Filename Expansion101772
+Node: Pattern Matching104518
+Node: Quote Removal109517
+Node: Redirections109809
+Node: Executing Commands119499
+Node: Simple Command Expansion120166
+Node: Command Search and Execution122273
+Node: Command Execution Environment124657
+Node: Environment127689
+Node: Exit Status129349
+Node: Signals131130
+Node: Shell Scripts134576
+Node: Shell Builtin Commands137600
+Node: Bourne Shell Builtins139635
+Node: Bash Builtins161830
+Node: Modifying Shell Behavior193826
+Node: The Set Builtin194168
+Node: The Shopt Builtin204763
+Node: Special Builtins220672
+Node: Shell Variables221648
+Node: Bourne Shell Variables222082
+Node: Bash Variables224183
+Node: Bash Features256995
+Node: Invoking Bash258005
+Node: Bash Startup Files264015
+Node: Interactive Shells269143
+Node: What is an Interactive Shell?269551
+Node: Is this Shell Interactive?270197
+Node: Interactive Shell Behavior271009
+Node: Bash Conditional Expressions274635
+Node: Shell Arithmetic279274
+Node: Aliases282215
+Node: Arrays285106
+Node: The Directory Stack291666
+Node: Directory Stack Builtins292447
+Node: Controlling the Prompt296704
+Node: The Restricted Shell299666
+Node: Bash POSIX Mode302273
+Node: Shell Compatibility Mode315136
+Node: Job Control323700
+Node: Job Control Basics324157
+Node: Job Control Builtins329156
+Node: Job Control Variables334948
+Node: Command Line Editing336101
+Node: Introduction and Notation337769
+Node: Readline Interaction339389
+Node: Readline Bare Essentials340577
+Node: Readline Movement Commands342363
+Node: Readline Killing Commands343320
+Node: Readline Arguments345238
+Node: Searching346279
+Node: Readline Init File348462
+Node: Readline Init File Syntax349720
+Node: Conditional Init Constructs373508
+Node: Sample Init File377701
+Node: Bindable Readline Commands380822
+Node: Commands For Moving382023
+Node: Commands For History384071
+Node: Commands For Text389062
+Node: Commands For Killing392708
+Node: Numeric Arguments395738
+Node: Commands For Completion396874
+Node: Keyboard Macros401062
+Node: Miscellaneous Commands401747
+Node: Readline vi Mode407782
+Node: Programmable Completion408686
+Node: Programmable Completion Builtins416463
+Node: A Programmable Completion Example427212
+Node: Using History Interactively432457
+Node: Bash History Facilities433138
+Node: Bash History Builtins436140
+Node: History Interaction441161
+Node: Event Designators444778
+Node: Word Designators446129
+Node: Modifiers447886
+Node: Installing Bash449691
+Node: Basic Installation450825
+Node: Compilers and Options454544
+Node: Compiling For Multiple Architectures455282
+Node: Installation Names456971
+Node: Specifying the System Type459077
+Node: Sharing Defaults459791
+Node: Operation Controls460461
+Node: Optional Features461416
+Node: Reporting Bugs472632
+Node: Major Differences From The Bourne Shell473973
+Node: GNU Free Documentation License490819
+Node: Indexes515993
+Node: Builtin Index516444
+Node: Reserved Word Index523268
+Node: Variable Index525713
+Node: Function Index542625
+Node: Concept Index556406
 
 End Tag Table
 

@@ -188,7 +188,7 @@ sh_mkdoublequoted (const char *s, size_t slen, int flags)
 
   send = s + slen;
   mb_cur_max = flags ? MB_CUR_MAX : 1;
-  rlen = (flags == 0) ? slen + 3 : (2 * slen) + 1;
+  rlen = (flags == 0) ? slen + 3 : (2 * slen) + 3;
   ret = r = (char *)xmalloc (rlen);
 
   *r++ = '"';

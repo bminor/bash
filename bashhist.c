@@ -896,7 +896,7 @@ bash_add_history (char *line)
 	  curlen = strlen (current->line);
 
 	  if (dstack.delimiter_depth == 0 && current->line[curlen - 1] == '\\' &&
-	      current->line[curlen - 2] != '\\')
+	      (curlen < 2 || current->line[curlen - 2] != '\\'))
 	    {
 	      current->line[curlen - 1] = '\0';
 	      curlen--;
@@ -907,7 +907,7 @@ bash_add_history (char *line)
 	     entry ends with a newline, and we're going to add a semicolon,
 	     don't.  In some cases, it results in a syntax error (e.g., before
 	     a close brace), and it should not be needed. */
-	  if (dstack.delimiter_depth == 0 && current->line[curlen - 1] == '\n' && *chars_to_add == ';')
+	  if (dstack.delimiter_depth == 0 && curlen > 0 && current->line[curlen - 1] == '\n' && *chars_to_add == ';')
 	    chars_to_add++;
 
 	  new_line = (char *)xmalloc (1

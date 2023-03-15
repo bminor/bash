@@ -5632,3 +5632,32 @@ lib/readline/vi_mode.c
 	  This prevents referencing vimvcxt after freeing it in the case that
 	  these functions call each other recursively (e.g., y1y1, c1d1, etc.).
 	  Fixes asan bug reported by Grisha Levit <grishalevit@gmail.com>
+
+				   3/14
+				   ----
+bashhist.c
+	- bash_add_history: make sure curlen is large enough before checking
+	  curlen - 1 and curlen - 2, otherwise you can get buffer underflow.
+	  Fixes asan bug reported by Grisha Levit <grishalevit@gmail.com>
+
+bashline.c
+	- bash_spell_correct_shellword: don't bother trying to correct empty
+	  words. Fixes asan bug reported by Grisha Levit <grishalevit@gmail.com>
+
+lib/sh/shquote.c
+	- sh_mkdoublequoted: make sure to allocate enough memory for the
+	  pathological case: where every character in the string needs to be
+	  backslash-escaped because it's special within double quotes.
+	  Fixes asan bug reported by Grisha Levit <grishalevit@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- here documents: make sure the summary specifies the here-document is
+	  terminated by `delimiter'; specify what the delimiter is if the word
+	  is not quoted. Prompted by a help-bash post from
+	  goncholden <goncholden@protonmail.com>
+
+				   3/15
+				   ----
+doc/bash.1,lib/readline/doc/rluser.texi
+	- shell-expand-line: enumerate the specific expansions performed.
+	  From a request by Alex Bochannek <alex@bochannek.com>

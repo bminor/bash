@@ -3156,9 +3156,9 @@ This is semantically equivalent to
 
 @subsection Here Documents
 This type of redirection instructs the shell to read input from the
-current source until a line containing only @var{word}
-(with no trailing blanks) is seen.  All of
-the lines read up to that point are then used as the standard
+current source until a line containing only @var{delimiter}
+(with no trailing blanks) is seen.
+All of the lines read up to that point are then used as the standard
 input (or file descriptor @var{n} if @var{n} is specified) for a command.
 
 The format of here-documents is:
@@ -3170,10 +3170,13 @@ The format of here-documents is:
 
 No parameter and variable expansion, command substitution,
 arithmetic expansion, or filename expansion is performed on
-@var{word}.  If any part of @var{word} is quoted, the
+@var{word}.
+
+If any part of @var{word} is quoted, the
 @var{delimiter} is the result of quote removal on @var{word},
 and the lines in the here-document are not expanded.
 If @var{word} is unquoted,
+@var{delimiter} is @var{word} itself,
 all lines of the here-document are subjected to
 parameter expansion, command substitution, and arithmetic expansion,
 the character sequence @code{\newline} is ignored, and @samp{\}

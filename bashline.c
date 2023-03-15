@@ -1344,6 +1344,8 @@ bash_spell_correct_shellword (int count, int key)
 	break;
 
       text = rl_copy_text (wbeg, wend);
+      if (text == 0 || *text == 0)
+	break;
 
       newdir = dirspell (text);
       if (newdir)
