@@ -139,6 +139,7 @@
 
 /* Define as 1 if you want to enable code that implements multiple coprocs
    executing simultaneously */
+/* TAG: bash-5.3 */
 #ifndef MULTIPLE_COPROCS
 #  define MULTIPLE_COPROCS 0
 #endif

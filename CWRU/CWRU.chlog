@@ -5661,3 +5661,49 @@ doc/{bash.1,bashref.texi}
 doc/bash.1,lib/readline/doc/rluser.texi
 	- shell-expand-line: enumerate the specific expansions performed.
 	  From a request by Alex Bochannek <alex@bochannek.com>
+
+findcmd.c
+	- path_value: new function, returns normalized version of $PATH. Takes
+	  a single argument saying whether or not to look in the temporary
+	  environment first. Normalizes null $PATH (PATH=) into ".". From a
+	  bug-bash discussion started by Moshe Looks <moshe.looks@gmail.com>
+	- _find_user_command_in_path: use path_value()
+	- user_command_matches: use path_value()
+	- search_for_command: if PATH[0] == 0, set PATH = "." like path_value().
+	  This has the side effect of calling command_not_found_handle when
+	  PATH is the empty string and the command isn't in the current
+	  directory
+	- search_for_command: if path == 0, but we found an executable in the
+	  current directory, make sure to set dot_found_in_search before adding
+	  it to the command hash table
+
+findcmd.h
+	- path_value: extern declaration
+
+bashline.c
+	- command_word_completion_function: use path_value()
+
+builtins/enable.def
+	- dyn_load_builtin: use path_value for BASH_LOADABLES_PATH; it's cleaner
+	  though it doesn't change the behavior
+
+				   3/17
+				   ----
+bashline.c 
+	- bashline_reset: reset rl_filename_quoting_function, since there is a
+	  SIGINT code path where it could remain reset by glob completion.
+	  Reported by Grisha Levit <grishalevit@gmail.com>
+	- command_word_completion_function,command_subst_completion_function,
+	  glob_complete_word: set some static variables to NULL
+	  after freeing them so they don't potentially get freed twice after
+	  a SIGINT during completion
+	  Reported by Grisha Levit <grishalevit@gmail.com>
+
+parse.y
+	- read_token_word: when deciding how to quote translated strings, don't
+	  free ttok before comparing it to ttrans
+	  Reported by Grisha Levit <grishalevit@gmail.com>
+	- parse_matched_pair: same thing for freeing nestret
+	- read_token: if we return a newline, make sure we call set_word_top()
+	  if necessary.
+	  Fixes underflow reported by Grisha Levit <grishalevit@gmail.com>

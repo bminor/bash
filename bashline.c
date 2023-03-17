@@ -686,6 +686,8 @@ bashline_reset (void)
   rl_filename_quote_characters = default_filename_quote_characters;
   set_filename_bstab (rl_filename_quote_characters);
 
+  rl_filename_quoting_function = bash_quote_filename;
+
   set_directory_hook ();
   rl_filename_stat_hook = bash_filename_stat_hook;
 
@@ -1922,12 +1924,8 @@ executable_completion (const char *filename, int searching_path)
 
   /* This gets an unquoted filename, so we need to quote special characters
      in the filename before the completion hook gets it. */
-#if 0
-  f = savestring (filename);
-#else
   c = 0;
   f = bash_quote_filename ((char *)filename, SINGLE_MATCH, &c);
-#endif
   bash_directory_completion_hook (&f);
   
   r = searching_path ? executable_file (f) : executable_or_directory (f);
@@ -1970,6 +1968,7 @@ command_word_completion_function (const char *hint_text, int state)
 	free (dequoted_hint);
       if (hint)
 	free (hint);
+      dequoted_hint = hint = (char *)NULL;
 
       mapping_over = searching_path = 0;
       hint_is_dir = CMD_IS_DIR (hint_text);
@@ -2064,7 +2063,7 @@ command_word_completion_function (const char *hint_text, int state)
       if (rl_completion_found_quote && rl_completion_quote_character == 0)
 	dequoted_hint = bash_dequote_filename (hint, 0);
       
-      path = get_string_value ("PATH");
+      path = path_value ("PATH", 0);
       path_index = dot_in_path = 0;
 
       /* Initialize the variables for each type of command word. */
@@ -2252,6 +2251,7 @@ globword:
 	free (fnhint);
       if (filename_hint)
 	free (filename_hint);
+      fnhint = filename_hint = (char *)NULL;
 
       filename_hint = sh_makepath (current_path, hint, 0);
       /* Need a quoted version (though it doesn't matter much in most
@@ -2347,6 +2347,7 @@ globword:
 	  t1 = make_absolute (val, t);
 	  free (t);
 	  cval = sh_canonpath (t1, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+	  free (t1);
 	}
       else
 #endif
@@ -2397,7 +2398,10 @@ command_subst_completion_function (const char *text, int state)
       start_len = text - orig_start;
       filename_text = savestring (text);
       if (matches)
-	free (matches);
+	{
+	  free (matches);
+	  matches = (char **)NULL;
+	}
 
       /*
        * At this point we can entertain the idea of re-parsing
@@ -3873,9 +3877,11 @@ glob_complete_word (const char *text, int state)
     {
       rl_filename_completion_desired = 1;
       FREE (matches);
+      matches = (char **)NULL;
       if (globorig != globtext)
 	FREE (globorig);
       FREE (globtext);
+      globorig = globtext = (char *)NULL;
 
       ttext = bash_tilde_expand (text, 0);
 

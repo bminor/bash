@@ -336,7 +336,7 @@ dyn_load_builtin (WORD_LIST *list, int flags, char *filename)
   handle = 0;
   if (absolute_program (filename) == 0)
     {
-      loadables_path = get_string_value ("BASH_LOADABLES_PATH");
+      loadables_path = path_value ("BASH_LOADABLES_PATH", 1);
       if (loadables_path)
 	{
 	  load_path = find_in_path (filename, loadables_path, FS_NODIRS|FS_EXEC_PREFERRED);

@@ -3470,6 +3470,9 @@ read_token (int command)
       parser_state &= ~PST_ASSIGNOK;
       parser_state &= ~PST_CMDBLTIN;
 
+      if (last_read_token == IF || last_read_token == WHILE || last_read_token == UNTIL)
+	set_word_top (last_read_token);
+
       return (character);
     }
 
@@ -3906,7 +3909,6 @@ parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
 		  /* Locale expand $"..." here. */
 		  /* PST_NOEXPAND */
 		  ttrans = locale_expand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
-		  free (nestret);
 
 		  /* If we're supposed to single-quote translated strings,
 		     check whether the translated result is different from
@@ -3914,6 +3916,7 @@ parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
 		  if (singlequote_translations &&
 		        ((nestlen - 1) != ttranslen || STREQN (nestret, ttrans, ttranslen) == 0))
 		    {
+		      free (nestret);
 		      if ((rflags & P_DQUOTE) == 0)
 			nestret = sh_single_quote (ttrans);
 		      else if ((rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2) && (flags & P_DOLBRACE))
@@ -3923,7 +3926,10 @@ parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
 			nestret = sh_backslash_quote_for_double_quotes (ttrans, 0);
 		    }
 		  else
-		    nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
+		    {
+		      free (nestret);
+		      nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
+		    }
 		  free (ttrans);
 		  nestlen = strlen (nestret);
 		  retind -= 2;		/* back up before the $" */
@@ -5228,15 +5234,20 @@ read_token_word (int character)
 		  /* PST_NOEXPAND */
 		  /* Try to locale-expand the converted string. */
 		  ttrans = locale_expand (ttok, 0, ttoklen - 1, first_line, &ttranslen);
-		  free (ttok);
 
 		  /* Add the double quotes back (or single quotes if the user
 		     has set that option). */
 		  if (singlequote_translations &&
 		        ((ttoklen - 1) != ttranslen || STREQN (ttok, ttrans, ttranslen) == 0))
-		    ttok = sh_single_quote (ttrans);
+		    {
+		      free (ttok);
+		      ttok = sh_single_quote (ttrans);
+		    }
 		  else
-		    ttok = sh_mkdoublequoted (ttrans, ttranslen, 0);
+		    {
+		      free (ttok);
+		      ttok = sh_mkdoublequoted (ttrans, ttranslen, 0);
+		    }
 
 		  free (ttrans);
 		  ttrans = ttok;

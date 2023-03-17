@@ -248,6 +248,23 @@ find_path_file (const char *name)
   return (find_user_command_internal (name, FS_READABLE));
 }
 
+/* Get $PATH and normalize it. USE_TEMPENV, if non-zero, says to look in the
+   temporary environment first. Normalizing means converting PATH= into ".". */
+char *
+path_value (const char *pathvar, int use_tempenv)
+{
+  SHELL_VAR *var;
+  char *path;
+
+  var = use_tempenv ? find_variable_tempenv (pathvar) : find_variable (pathvar);
+  path = var ? value_cell (var) : (char *)NULL;
+
+  if (path == 0 || *path)
+    return (path);
+  else		/* *path == '\0' */
+    return ".";
+}
+
 static char *
 _find_user_command_internal (const char *name, int flags)
 {
@@ -256,12 +273,9 @@ _find_user_command_internal (const char *name, int flags)
 
   /* Search for the value of PATH in both the temporary environments and
      in the regular list of variables. */
-  if (var = find_variable_tempenv ("PATH"))	/* XXX could be array? */
-    path_list = value_cell (var);
-  else
-    path_list = (char *)NULL;
+  path_list = path_value ("PATH", 1);
 
-  if (path_list == 0 || *path_list == '\0')
+  if (path_list == 0)
     return (savestring (name));
 
   cmd = find_user_command_in_path (name, path_list, flags, (int *)0);
@@ -364,7 +378,11 @@ search_for_command (const char *pathname, int flags)
       if (flags & CMDSRCH_STDPATH)
 	path_list = conf_standard_path ();
       else if (temp_path || path)
-	path_list = value_cell (path);
+	{
+	  path_list = value_cell (path);
+	  if (path_list && *path_list == '\0')
+	    path_list = ".";
+	}
       else
 	path_list = 0;
 
@@ -377,6 +395,11 @@ search_for_command (const char *pathname, int flags)
 	     table unless it's an executable file in the current directory. */
 	  if (STREQ (command, pathname))
 	    {
+	      if (path_list == 0)
+		{
+		  dot_found_in_search = 1;
+		  st = file_status (pathname);
+		}
 	      if (st & FS_EXECABLE)
 	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	    }
@@ -439,8 +462,8 @@ user_command_matches (const char *name, int flags, int state)
 	  dot_found_in_search = 0;
 	  if (stat (".", &dotinfo) < 0)
 	    dotinfo.st_dev = dotinfo.st_ino = 0;	/* so same_file won't match */
-	  path_list = get_string_value ("PATH");
-      	  path_index = 0;
+	  path_list = path_value ("PATH", 0);
+	  path_index = 0;
 	}
 
       while (path_list && path_list[path_index])
@@ -573,7 +596,9 @@ find_in_path_element (const char *name, char *path, int flags, size_t name_len, 
 /* This does the dirty work for find_user_command_internal () and
    user_command_matches ().
    NAME is the name of the file to search for.
-   PATH_LIST is a colon separated list of directories to search.
+   PATH_LIST is a colon separated list of directories to search. It is the
+   caller's responsibility to pass a non-empty path if they want an empty
+   path to be treated specially.
    FLAGS contains bit fields which control the files which are eligible.
    Some values are:
       FS_EXEC_ONLY:		The file must be an executable to be found.
