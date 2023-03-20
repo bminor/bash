@@ -907,9 +907,7 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 	  if (m1 == 0 && (flags & FNM_PERIOD) && *s == '.')
 	    return (FNM_NOMATCH);
 
-	  if (m1 == 0 && (flags & FNM_DOTDOT) &&
-	      (SDOT_OR_DOTDOT (s) ||
-	       ((flags & FNM_PATHNAME) && s[-1] == L('/') && PDOT_OR_DOTDOT(s))))
+	  if (m1 == 0 && (flags & FNM_DOTDOT) && (SDOT_OR_DOTDOT (s)))
 	    return (FNM_NOMATCH);
 
 	  /* if srest > s, we are not at start of string */

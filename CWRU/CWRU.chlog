@@ -5707,3 +5707,21 @@ parse.y
 	- read_token: if we return a newline, make sure we call set_word_top()
 	  if necessary.
 	  Fixes underflow reported by Grisha Levit <grishalevit@gmail.com>
+
+lib/glob/sm_loop.c
+	- EXTMATCH: don't bother with FNM_PATHNAME checks; this function isn't
+	  called with a pathname.
+	  Fixes underflow reported by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/misc.c
+	- rl_maybe_replace_line: if we replace a history entry's data with
+	  rl_undo_list, we need to set rl_undo_list to 0, since we should not
+	  have rl_undo_list pointing to something from a history entry
+	  Fixes asan error reported by Grisha Levit <grishalevit@gmail.com>
+
+				   3/20
+				   ----
+lib/readline/histexpand.c
+	- postproc_subst_rhs: fix off-by-one error when reallocating new string
+	  for case where we're *not* substituting for `&'
+	  Fixes asan error reported by Grisha Levit <grishalevit@gmail.com>

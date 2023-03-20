@@ -509,7 +509,7 @@ postproc_subst_rhs (void)
 	  /* a single backslash protects the `&' from lhs interpolation */
 	  if (subst_rhs[i] == '\\' && subst_rhs[i + 1] == '&')
 	    i++;
-	  if (j >= new_size)
+	  if (j + 1 >= new_size)
 	    new = (char *)xrealloc (new, new_size *= 2);
 	  new[j++] = subst_rhs[i];
 	}
