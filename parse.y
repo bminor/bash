@@ -5644,7 +5644,7 @@ reset_readline_prompt (void)
 static const int no_semi_successors[] = {
   '\n', '{', '(', ')', ';', '&', '|',
   CASE, DO, ELSE, IF, SEMI_SEMI, SEMI_AND, SEMI_SEMI_AND, THEN, UNTIL,
-  WHILE, AND_AND, OR_OR, IN,
+  WHILE, AND_AND, OR_OR, IN, DOLPAREN,
   0
 };
 

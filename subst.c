@@ -2229,7 +2229,7 @@ skip_to_delim (const char *string, int start, const char *delims, int flags)
 	  if (string[i+1] == LPAREN)
 	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND|completeflag); /* ) */
 	  else
-	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
+	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC|completeflag);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 	  i = si;
 	  if (string[i] == '\0')	/* don't increment i past EOS in loop */

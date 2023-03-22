@@ -1602,10 +1602,24 @@ map_over_jobs (sh_job_map_func_t *func, int arg1, int arg2)
 void
 terminate_current_pipeline (void)
 {
+  PROCESS *p;
+
   if (pipeline_pgrp && pipeline_pgrp != shell_pgrp)
     {
       killpg (pipeline_pgrp, SIGTERM);
       killpg (pipeline_pgrp, SIGCONT);
+      killpg (pipeline_pgrp, SIGKILL);
+    }
+  else if (pipeline_pgrp && pipeline_pgrp == shell_pgrp && (p = the_pipeline))
+    {
+      do
+	{
+	  kill (p->pid, SIGTERM);
+	  kill (p->pid, SIGCONT);
+	  kill (p->pid, SIGKILL);
+	  p = p->next;
+	}
+      while (p != the_pipeline);
     }
 }
 

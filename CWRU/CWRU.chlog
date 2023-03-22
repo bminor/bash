@@ -5725,3 +5725,26 @@ lib/readline/histexpand.c
 	- postproc_subst_rhs: fix off-by-one error when reallocating new string
 	  for case where we're *not* substituting for `&'
 	  Fixes asan error reported by Grisha Levit <grishalevit@gmail.com>
+
+jobs.c
+	- terminate_current_pipeline: add a SIGKILL call in there in case the
+	  SIGTERM doesn't work
+	- terminate_current_pipeline: add a version that works when job control
+	  isn't enabled (pipeline_pgrp == shell_pgrp)
+
+subst.c
+	- skip_to_delim: pass completeflag (SX_COMPLETE) to extract_dollar_brace_string
+	  in case it includes a command substitution, since we want to inhibit
+	  error messages in this case
+
+parse.y
+	- no_semi_successors: add DOLPAREN to list since something like $(\n
+	  shouldn't have a semicolon added there.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   3/21
+				   ----
+pcomplete.c
+	- gen_globpat_matches: set noglob_dot_filenames here since we're not
+	  calling shell_glob_filename to do it
+	  From a report by Grisha Levit <grishalevit@gmail.com>
