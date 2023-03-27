@@ -1600,6 +1600,8 @@ get_word:
       if (nestdelim == 0 && delimiter == 0 && member (string[i], "<>$!@?+*") && string[i+1] == '(') /*)*/
 	{
 	  i += 2;
+	  if (string[i] == 0)
+	    break;		/* could just return i here */
 	  delimopen = '(';
 	  delimiter = ')';
 	  nestdelim = 1;

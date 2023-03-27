@@ -6,7 +6,7 @@
    chet@po.cwru.edu
 */
 
-/* Copyright (C) 2002-2005 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2005,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,12 +31,10 @@
 #include "bashansi.h"
 #include <stdio.h>
 
-void strprint();
+void strprint(char *);
 
 int
-main(argc, argv)
-int	argc;
-char	**argv;
+main(int argc, char **argv)
 {
 	register int	i;
 
@@ -49,8 +47,7 @@ char	**argv;
 }
 
 void
-strprint(str)
-char	*str;
+strprint(char *str)
 {
 	register unsigned char *s;
 

@@ -3,7 +3,7 @@ dnl Bash specific tests
 dnl
 dnl Some derived from PDKSH 5.1.3 autoconf tests
 dnl
-dnl Copyright (C) 1987-2021 Free Software Foundation, Inc.
+dnl Copyright (C) 1987-2023 Free Software Foundation, Inc.
 dnl
 
 dnl
@@ -435,6 +435,7 @@ AC_CACHE_VAL(bash_cv_sizeof_rlim_cur,
 #endif
 #include <stdlib.h>
 #include <sys/resource.h>
+int
 main()
 {
 struct rlimit r;
@@ -460,6 +461,7 @@ AC_CACHE_VAL(bash_cv_sizeof_quad_t,
 #include <stdint.h>
 #endif
 
+int
 main()
 {
 #if HAVE_QUAD_T
@@ -844,9 +846,7 @@ AC_CACHE_VAL(bash_cv_func_strcoll_broken,
 #include <stdlib.h>
 
 int
-main(c, v)
-int     c;
-char    *v[];
+main(int c, char **v)
 {
         int     r1, r2;
         char    *deflocale, *defcoll;
@@ -1348,15 +1348,13 @@ AC_CACHE_VAL(bash_cv_must_reinstall_sighandlers,
 #endif
 #include <stdlib.h>
 
-typedef void sigfunc();
+typedef void sigfunc(int);
 
 volatile int nsigint;
 
 #ifdef HAVE_POSIX_SIGNALS
 sigfunc *
-set_signal_handler(sig, handler)
-     int sig;
-     sigfunc *handler;
+set_signal_handler(int sig, sigfunc *handler)
 {
   struct sigaction act, oact;
   act.sa_handler = handler;
@@ -1371,8 +1369,7 @@ set_signal_handler(sig, handler)
 #endif
 
 void
-sigint(s)
-int s;
+sigint(int s)
 {
   nsigint++;
 }
@@ -1839,9 +1836,7 @@ bash_cv_wcwidth_broken,
 #include <wchar.h>
 
 int
-main(c, v)
-int     c;
-char    **v;
+main(int c, char **v)
 {
         int     w;
 
@@ -2159,9 +2154,7 @@ AC_CACHE_VAL(bash_cv_wexitstatus_offset,
 #include <sys/wait.h>
 
 int
-main(c, v)
-     int c;
-     char **v;
+main(int c, char **v)
 {
   pid_t pid, p;
   int s, i, n;

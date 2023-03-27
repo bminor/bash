@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete", "compgen", and "compopt" in Bash.
 
-Copyright (C) 1999-2022 Free Software Foundation, Inc.
+Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -650,7 +650,7 @@ compgen_builtin (WORD_LIST *list)
   STRINGLIST *sl;
   char *word, **matches;
   char *old_line;
-  int old_ind;
+  int old_ind, old_completion, old_quoting, old_suppress;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
@@ -692,6 +692,10 @@ compgen_builtin (WORD_LIST *list)
 
   rval = EXECUTION_FAILURE;
 
+  old_completion = rl_filename_completion_desired;
+  old_quoting = rl_filename_quoting_desired;
+  old_suppress = rl_completion_suppress_append;
+
   /* probably don't have to save these, just being safe */
   old_line = pcomp_line;
   old_ind = pcomp_ind;
@@ -719,6 +723,10 @@ compgen_builtin (WORD_LIST *list)
       sl = completions_to_stringlist (matches);
       strvec_dispose (matches);
     }
+
+  rl_filename_completion_desired = old_completion;
+  rl_filename_quoting_desired = old_quoting;
+  rl_completion_suppress_append = old_suppress;
 
   if (sl)
     {

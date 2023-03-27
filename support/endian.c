@@ -39,9 +39,8 @@ char nstring[9];
 /* Stuff "1234" into a long, and compare it against a character string
    "1234".  If the results are EQ, the machine is big endian like a 68000
    or Sparc, otherwise it is little endian, like a Vax, or 386. */
-main (argc, argv)
-     int argc;
-     char **argv;
+int
+main (int argc, char **argv)
 {
 #if defined (__STDC__)
   register size_t i;

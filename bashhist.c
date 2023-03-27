@@ -895,7 +895,7 @@ bash_add_history (char *line)
 	     newline, since that is what happens when the line is parsed. */
 	  curlen = strlen (current->line);
 
-	  if (dstack.delimiter_depth == 0 && current->line[curlen - 1] == '\\' &&
+	  if (dstack.delimiter_depth == 0 && curlen > 0 && current->line[curlen - 1] == '\\' &&
 	      (curlen < 2 || current->line[curlen - 2] != '\\'))
 	    {
 	      current->line[curlen - 1] = '\0';

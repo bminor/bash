@@ -45,7 +45,7 @@
 #include <pwd.h>
 
 #if !defined (HAVE_GETPW_DECLS)
-extern struct passwd *getpwuid ();
+extern struct passwd *getpwuid (uid_t);
 #endif /* !HAVE_GETPW_DECLS */
 
 char *

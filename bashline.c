@@ -919,7 +919,7 @@ hostnames_matching (const char *text)
 	continue;
 
       /* OK, it matches.  Add it to the list. */
-      if (nmatch >= (rsize - 1))
+      if (nmatch + 1 >= rsize)
 	{
 	  rsize = (rsize + 16) - (rsize % 16);
 	  result = strvec_resize (result, rsize);

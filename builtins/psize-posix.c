@@ -1,6 +1,6 @@
 /* psize-posix - display the pipe size on a Posix system. */
 
-/* Copyright 2008,2009,2022 Free Software Foundation, Inc.
+/* Copyright 2008,2009,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+int
 main(int c, char **v)
 {
 	char	*p;

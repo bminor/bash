@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2021,2022 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -789,9 +789,7 @@ array_to_kvpair_list (ARRAY *a)
 }
 
 ARRAY *
-array_assign_list (array, list)
-ARRAY	*array;
-WORD_LIST	*list;
+array_assign_list (ARRAY *array, WORD_LIST *list)
 {
 	register WORD_LIST *l;
 	register arrayind_t i;

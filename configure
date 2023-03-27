@@ -16609,9 +16609,7 @@ else $as_nop
 #include <wchar.h>
 
 int
-main(c, v)
-int     c;
-char    **v;
+main(int c, char **v)
 {
         int     w;
 
@@ -18796,6 +18794,7 @@ else $as_nop
 #endif
 #include <stdlib.h>
 #include <sys/resource.h>
+int
 main()
 {
 struct rlimit r;
@@ -18843,6 +18842,7 @@ else $as_nop
 #include <stdint.h>
 #endif
 
+int
 main()
 {
 #if HAVE_QUAD_T
@@ -19457,9 +19457,7 @@ else $as_nop
 #include <sys/wait.h>
 
 int
-main(c, v)
-     int c;
-     char **v;
+main(int c, char **v)
 {
   pid_t pid, p;
   int s, i, n;
@@ -20228,9 +20226,7 @@ else $as_nop
 #include <stdlib.h>
 
 int
-main(c, v)
-int     c;
-char    *v[];
+main(int c, char **v)
 {
         int     r1, r2;
         char    *deflocale, *defcoll;
@@ -20726,15 +20722,13 @@ else $as_nop
 #endif
 #include <stdlib.h>
 
-typedef void sigfunc();
+typedef void sigfunc(int);
 
 volatile int nsigint;
 
 #ifdef HAVE_POSIX_SIGNALS
 sigfunc *
-set_signal_handler(sig, handler)
-     int sig;
-     sigfunc *handler;
+set_signal_handler(int sig, sigfunc *handler)
 {
   struct sigaction act, oact;
   act.sa_handler = handler;
@@ -20749,8 +20743,7 @@ set_signal_handler(sig, handler)
 #endif
 
 void
-sigint(s)
-int s;
+sigint(int s)
 {
   nsigint++;
 }

@@ -1,6 +1,6 @@
 /* version.c -- distribution and version numbers. */
 
-/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,7 +57,7 @@ extern void show_shell_version (int);
 
 /* Give version information about this shell. */
 char *
-shell_version_string ()
+shell_version_string (void)
 {
   static char tt[32] = { '\0' };
 
@@ -80,8 +80,7 @@ shell_version_string ()
 }
 
 void
-show_shell_version (extended)
-     int extended;
+show_shell_version (int extended)
 {
   printf (_("GNU bash, version %s (%s)\n"), shell_version_string (), MACHTYPE);
   if (extended)

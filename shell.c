@@ -94,7 +94,7 @@ extern int get_tty_state (void);
 #endif
 
 #if !defined (HAVE_GETPW_DECLS)
-extern struct passwd *getpwuid ();
+extern struct passwd *getpwuid (uid_t);
 #endif /* !HAVE_GETPW_DECLS */
 
 #if !defined (errno)

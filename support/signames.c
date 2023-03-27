@@ -67,7 +67,7 @@ extern char *progname;
 #endif
 
 void
-initialize_signames ()
+initialize_signames (void)
 {
   register int i;
 #if defined (SIGRTMAX) || defined (SIGRTMIN)

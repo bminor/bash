@@ -1,6 +1,6 @@
 /* bashversion.c -- Display bash version information. */
 
-/* Copyright (C) 2001-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,15 +54,13 @@ char *shell_name = "bash";
 char *progname;
 
 static void
-usage()
+usage(void)
 {
   fprintf(stderr, "%s: usage: %s [-hrvpmlsx]\n", progname, progname);
 }
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   int opt, oflags;
   char dv[128], *rv;

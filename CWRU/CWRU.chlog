@@ -5819,3 +5819,41 @@ parse.y
 parse.y
 	- count_all_jobs: add extern definition if JOB_CONTROL is not defined.
 	  From Emanuele Torre <torreemanuele6@gmail.com>
+
+bashhist.c
+	- bash_add_history: make sure the current history line is not empty
+	  before checking what ended it.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/histexpand.c
+	- history_tokenize_word: break out of loop for incomplete command and
+	  process substitution or extended globbing patterns
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+bashline.c
+	- hostnames_matching: fix size_t issue when checking whether to realloc
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/sh/random.c
+	- genseed: use uintptr_t instead of u_bits32_t to silence compiler
+	  warnings. From Paul Eggert <eggert@cs.ucla.edu>
+
+aclocal.m4
+array2.c
+builtins/mkbuiltins.c,builtins/psize-posix.c,version.c
+builtins/getopts.def		    
+lib/readline/text.c,lib/readline/bind.c
+support/recho.c,support/mksignames.c,support/zecho.c,support/xcase.c
+support/printenv.c,support/signames.c,support/bashversion.c
+support/memtest.c,support/endian.c
+lib/glob/gm_loop.c
+	- some cleanups for function prototypes and other stdc requirements
+
+lib/readline/doc/{rltech.texi,hstech.texi}
+	- add prototypes and stdc requirements to the examples
+
+builtins/complete.def
+	- compgen_builtin: save and restore readline variables affecting how
+	  filename completions are treated in case someone uses compgen in
+	  the foreground.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

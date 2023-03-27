@@ -1,7 +1,7 @@
 This file is getopts.def, from which is created getopts.c.
 It implements the builtin "getopts" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -93,16 +93,14 @@ static int dogetopts (int, char **);
 /* getopts_reset is magic code for when OPTIND is reset.  N is the
    value that has just been assigned to OPTIND. */
 void
-getopts_reset (newind)
-     int newind;
+getopts_reset (int newind)
 {
   sh_optind = newind;
   sh_badopt = 0;
 }
 
 static int
-getopts_unbind_variable (name)
-     char *name;
+getopts_unbind_variable (char *name)
 {
 #if 0
   return (unbind_variable (name));
@@ -112,8 +110,7 @@ getopts_unbind_variable (name)
 }
 
 static int
-getopts_bind_variable (name, value)
-     char *name, *value;
+getopts_bind_variable (char *name, char *value)
 {
   SHELL_VAR *v;
 
@@ -159,9 +156,7 @@ getopts_bind_variable (name, value)
  */
 
 static int
-dogetopts (argc, argv)
-     int argc;
-     char **argv;
+dogetopts (int argc, char **argv)
 {
   int ret, special_error, old_opterr, i, n;
   char strval[2], numval[16];
@@ -312,8 +307,7 @@ dogetopts (argc, argv)
 
 /* The getopts builtin.  Build an argv, and call dogetopts with it. */
 int
-getopts_builtin (list)
-     WORD_LIST *list;
+getopts_builtin (WORD_LIST *list)
 {
   char **av;
   int ac, ret;

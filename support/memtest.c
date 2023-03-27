@@ -37,6 +37,7 @@ int interrupt_immediately = 0;
 
 static char	xp[64];
 
+int
 main(int c, char **v)
 {
 	char	*p;
