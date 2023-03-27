@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2016,2022 Free Software Foundation, Inc.
+   Copyright (C) 2016,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -261,6 +261,8 @@ stattime (time_t t, const char *timefmt)
 
   fmt = timefmt ? timefmt : DEFTIMEFMT;
   tm = localtime (&t);
+  if (tm == 0)
+    return (itos (t));
 
   ret = xmalloc (TIMELEN_MAX);
 

@@ -58,7 +58,7 @@ static FLIST *tee_flist;
 
 extern int interrupt_immediately;
 
-extern char *strerror ();
+extern char *strerror (int);
 
 int
 tee_builtin (WORD_LIST *list)

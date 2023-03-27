@@ -28,7 +28,7 @@
 #include "bashgetopt.h"
 #include "common.h"
 
-extern char *ttyname ();
+extern char *ttyname (int);
 
 int
 tty_builtin (WORD_LIST *list)

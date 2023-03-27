@@ -80,6 +80,12 @@ strftime_builtin (WORD_LIST *list)
     secs = NOW;
 
   t = localtime (&secs);
+  if (t == 0)
+    {
+      builtin_error ("%s: timestamp out of range", list && list->word->word ? list->word->word : "now");
+      return (EXECUTION_FAILURE);
+    }
+    	
 
   tbsize = strlen (format) * 4;
   tbuf = 0;

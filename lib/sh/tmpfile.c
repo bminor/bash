@@ -279,10 +279,11 @@ char *
 sh_mktmpdir (const char *nameroot, int flags)
 {
   char *filename;
+  int fd;
 #ifdef USE_MKDTEMP
   char *tdir, *dirname;
   const char *lroot;
-  int fd, tdlen;
+  int tdlen;
   
   filename = (char *)xmalloc (PATH_MAX + 1);
   tdir = get_tmpdir (flags);

@@ -73,6 +73,7 @@
 #  include "jobs.h"
 #else
 extern int cleanup_dead_jobs (void);
+extern int count_all_jobs (void);
 #endif /* JOB_CONTROL */
 
 #if defined (ALIAS)
@@ -85,7 +86,7 @@ typedef void *alias_t;
 #  ifndef _MINIX
 #    include <sys/param.h>
 #  endif
-#  include <time.h>
+#  include "posixtime.h"
 #  if defined (TM_IN_SYS_TIME)
 #    include <sys/types.h>
 #    include <sys/time.h>
@@ -5976,13 +5977,17 @@ decode_prompt_string (char *string)
 	    case '@':
 	    case 'A':
 	      /* Make the current time/date into a string. */
-	      (void) time (&the_time);
+	      the_time = getnow ();
 #if defined (HAVE_TZSET)
 	      sv_tz ("TZ");		/* XXX -- just make sure */
 #endif
 	      tm = localtime (&the_time);
-
-	      if (c == 'd')
+	      if (tm == 0)
+		{
+		  strcpy (timebuf, "??");
+		  tslen = 2;
+		}
+	      else if (c == 'd')
 		tslen = strftime (timebuf, sizeof (timebuf), "%a %b %d", tm);
 	      else if (c == 't')
 		tslen = strftime (timebuf, sizeof (timebuf), "%H:%M:%S", tm);
@@ -6005,22 +6010,36 @@ decode_prompt_string (char *string)
 	      if (string[1] != '{')		/* } */
 		goto not_escape;
 
-	      (void) time (&the_time);
+	      the_time = getnow ();
 	      tm = localtime (&the_time);
 	      string += 2;			/* skip { */
-	      timefmt = xmalloc (strlen (string) + 3);
-	      for (t = timefmt; *string && *string != '}'; )
-		*t++ = *string++;
-	      *t = '\0';
+	      t = string;
+	      while (*string && *string != '}')
+		string++;
 	      c = *string;	/* tested at add_string */
-	      if (timefmt[0] == '\0')
+	      if (tm)
 		{
-		  timefmt[0] = '%';
-		  timefmt[1] = 'X';	/* locale-specific current time */
-		  timefmt[2] = '\0';
+		  size_t tflen;
+		  tflen = string - t;
+		  timefmt = xmalloc (tflen + 3);
+		  memcpy (timefmt, t, tflen);
+		  timefmt[tflen] = '\0';
+
+		  if (timefmt[0] == '\0')
+		    {
+		      timefmt[0] = '%';
+		      timefmt[1] = 'X';	/* locale-specific current time */
+		      timefmt[2] = '\0';
+		    }
+
+		  tslen = strftime (timebuf, sizeof (timebuf), timefmt, tm);
+		  free (timefmt);
 		}
-	      tslen = strftime (timebuf, sizeof (timebuf), timefmt, tm);
-	      free (timefmt);
+	      else
+		{
+		  strcpy (timebuf, "??");
+		  tslen = 2;
+		}
 
 	      if (tslen == 0)
 		timebuf[0] = '\0';

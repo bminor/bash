@@ -2445,8 +2445,7 @@ find_function_def (const char *name)
 /* Return the value of VAR.  VAR is assumed to have been the result of a
    lookup without any subscript, if arrays are compiled into the shell. */
 char *
-get_variable_value (var)
-     SHELL_VAR *var;
+get_variable_value (SHELL_VAR *var)
 {
   if (var == 0)
     return ((char *)NULL);

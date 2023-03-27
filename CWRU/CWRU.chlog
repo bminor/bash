@@ -5748,3 +5748,74 @@ pcomplete.c
 	- gen_globpat_matches: set noglob_dot_filenames here since we're not
 	  calling shell_glob_filename to do it
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   3/22
+				   ----
+lib/readline/misc.c
+	- rl_maybe_replace_line: if we're replacing a history entry with the
+	  current line buffer and undo list, then zero out any undo list in
+	  _rl_saved_line_for_history, since we're not going to use it any more
+	  Fixes asan error reported by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/undo.c
+	- rl_free_undo_list: if we're freeing rl_undo_list, it can't be a
+	  valid value for data in _rl_saved_line_for_history
+	  Fixes asan error reported by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/complete.c
+	- display_matches: don't call rl_display_match_list if we received a
+	  signal during get_y_or_n and didn't jump out for some reason
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+	- rl_display_match_list: return if we received a signal during
+	  _rl_internal_pager (via get_y_or_n) and didn't jump out
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   3/23
+				   ----
+lib/readline/history.c
+	- history_truncate_file: don't bother trying to read the existing
+	  history file if we're just truncating it to 0 lines
+
+				   3/24
+				   ----
+lib/readline/history.c
+	- history_truncate_file: fix off-by-one error that resulted in the
+	  timestamp associated with the first history entry not being written
+	  to the truncated history file
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+parse.y	
+	- decode_prompt_string: do something rational if localtime() returns
+	  NULL (extraordinarily rare)
+  	  From a report by Paul Eggert <eggert@cs.ucla.edu>
+
+examples/loadables/stat.c
+	- stattime: ditto
+
+examples/loadables/strftime.c
+	- strftime_builtin: ditto
+
+lib/readline/examples/histexamp.c
+	- main: ditto
+
+include/posixtime.h
+	- getnow(): new inline function, calls gettimeofday and returns tv_sec;
+	  replacement for time(0). From Paul Eggert <eggert@cs.ucla.edu>
+
+general.h
+	- NOW: use a call to getnow() to standardize on gettimeofday for time
+	  information
+
+lib/readline/history.c
+	- include #posixtime.h for getnow()
+	- hist_inittime: use getnow() instead of calling time(0)
+
+parse.y
+	- posixtime.h: include instead of <time.h>
+	- decode_prompt_string: use getnow() instead of calling time(0)
+
+				   3/27
+				   ----
+parse.y
+	- count_all_jobs: add extern definition if JOB_CONTROL is not defined.
+	  From Emanuele Torre <torreemanuele6@gmail.com>

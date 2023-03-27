@@ -238,6 +238,9 @@ AC_CACHE_VAL(bash_cv_dup2_broken,
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 int
 main()
 {
