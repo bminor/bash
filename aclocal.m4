@@ -563,18 +563,8 @@ AC_CACHE_VAL(bash_cv_getenv_redef,
 #  include <unistd.h>
 #endif
 #include <stdlib.h>
-#ifndef __STDC__
-#  ifndef const
-#    define const
-#  endif
-#endif
 char *
-getenv (name)
-#if defined (__linux__) || defined (__bsdi__) || defined (convex)
-     const char *name;
-#else
-     char const *name;
-#endif /* !__linux__ && !__bsdi__ && !convex */
+getenv (const char *name)
 {
 return "42";
 }
@@ -613,16 +603,7 @@ AC_CACHE_CHECK([for standard-conformant putenv declaration], bash_cv_std_putenv,
 #if HAVE_STDDEF_H
 #include <stddef.h>
 #endif
-#ifndef __STDC__
-#  ifndef const
-#    define const
-#  endif
-#endif
-#ifdef PROTOTYPES
 extern int putenv (char *);
-#else
-extern int putenv ();
-#endif
 ]], [[return (putenv == 0);]] )],
 [bash_cv_std_putenv=yes], [bash_cv_std_putenv=no]
 )])
@@ -643,16 +624,7 @@ AC_CACHE_CHECK([for standard-conformant unsetenv declaration], bash_cv_std_unset
 #if HAVE_STDDEF_H
 #include <stddef.h>
 #endif
-#ifndef __STDC__
-#  ifndef const
-#    define const
-#  endif
-#endif
-#ifdef PROTOTYPES
 extern int unsetenv (const char *);
-#else
-extern int unsetenv ();
-#endif
 ]], [[return (unsetenv == 0);]] )],
 [bash_cv_std_unsetenv=yes], [bash_cv_std_unsetenv=no]
 )])

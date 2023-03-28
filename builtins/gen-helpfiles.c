@@ -1,6 +1,6 @@
 /* gen-helpfiles - create files containing builtin help text */
 
-/* Copyright (C) 2012-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -71,10 +71,6 @@
 #ifndef errno
 extern int errno;
 #endif
-
-#if !defined (__STDC__) && !defined (strcpy)
-extern char *strcpy ();
-#endif /* !__STDC__ && !strcpy */
 
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 

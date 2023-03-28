@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1119,6 +1119,7 @@ quote_string(char *s)
 	return savestring(s);
 }
 
+void
 print_element(ARRAY_ELEMENT *ae)
 {
 	char	lbuf[INT_STRLEN_BOUND (intmax_t) + 1];
@@ -1128,12 +1129,14 @@ print_element(ARRAY_ELEMENT *ae)
 		element_value(ae));
 }
 
+void
 print_array(ARRAY *a)
 {
 	printf("\n");
 	array_walk(a, print_element, (void *)NULL);
 }
 
+int
 main(int c, char **v)
 {
 	ARRAY	*a, *new_a, *copy_of_a;

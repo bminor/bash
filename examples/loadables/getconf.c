@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2021,2022 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2023 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software; you can redistribute it and/or modify
@@ -1135,7 +1135,7 @@ getconf_builtin (WORD_LIST *list)
     }
 
   list = loptend;
-  if ((aflag == 0 && list == 0) || (aflag && list) || list_length(list) > 2)
+  if ((aflag == 0 && list == 0) || (aflag && list) || list_length((GENERIC_LIST *)list) > 2)
     {
       builtin_usage();
       return (EX_USAGE);

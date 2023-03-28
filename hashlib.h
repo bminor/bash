@@ -24,11 +24,7 @@
 #include "stdc.h"
 
 #ifndef PTR_T
-#  ifdef __STDC__
-#    define PTR_T void *
-#  else
-#    define PTR_T char *
-#  endif
+#  define PTR_T void *
 #endif
 
 typedef struct bucket_contents {
@@ -80,13 +76,5 @@ extern unsigned int hash_string (const char *);
 /* flags for hash_search and hash_insert */
 #define HASH_NOSRCH	0x01
 #define HASH_CREATE	0x02
-
-#if !defined (NULL)
-#  if defined (__STDC__)
-#    define NULL ((void *) 0)
-#  else
-#    define NULL 0x0
-#  endif /* !__STDC__ */
-#endif /* !NULL */
 
 #endif /* _HASHLIB_H */

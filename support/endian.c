@@ -1,6 +1,6 @@
 /* endian.c -- A trick for determining the byte order of a machine. */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -42,11 +42,7 @@ char nstring[9];
 int
 main (int argc, char **argv)
 {
-#if defined (__STDC__)
   register size_t i;
-#else
-  register int i;
-#endif /* !__STDC__ */
   FILE *stream = (FILE *)NULL;
   char *stream_name = "stdout";
   union {

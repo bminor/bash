@@ -95,13 +95,8 @@ ansicstr (const char *string, size_t len, int flags, int *sawc, size_t *rlen)
 	{
 	  switch (c = *s++)
 	    {
-#if defined (__STDC__)
 	    case 'a': c = '\a'; break;
 	    case 'v': c = '\v'; break;
-#else
-	    case 'a': c = (int) 0x07; break;
-	    case 'v': c = (int) 0x0B; break;
-#endif
 	    case 'b': c = '\b'; break;
 	    case 'e': case 'E':		/* ESC -- non-ANSI */
 	      c = ESC; break;
@@ -257,14 +252,8 @@ ansic_quote (const char *str, int flags, int *rlen)
       switch (c)
 	{
 	case ESC: c = 'E'; break;
-#ifdef __STDC__
 	case '\a': c = 'a'; break;
 	case '\v': c = 'v'; break;
-#else
-	case 0x07: c = 'a'; break;
-	case 0x0b: c = 'v'; break;
-#endif
-
 	case '\b': c = 'b'; break;
 	case '\f': c = 'f'; break;
 	case '\n': c = 'n'; break;

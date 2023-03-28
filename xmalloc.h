@@ -1,6 +1,6 @@
 /* xmalloc.h -- defines for the `x' memory allocation functions */
 
-/* Copyright (C) 2001-2022 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -26,13 +26,7 @@
 
 /* Generic pointer type. */
 #ifndef PTR_T
-
-#if defined (__STDC__)
 #  define PTR_T	void *
-#else
-#  define PTR_T char *
-#endif
-
 #endif /* PTR_T */
 
 /* Allocation functions in xmalloc.c */

@@ -60,14 +60,6 @@
 #  define bcopy(s, d, n) ((void) memcpy ((d), (s), (n)))
 #endif /* !HAVE_BCOPY && !bcopy */
 
-#if !defined (NULL)
-#  if defined (__STDC__)
-#    define NULL ((void *) 0)
-#  else
-#    define NULL 0x0
-#  endif /* __STDC__ */
-#endif /* !NULL */
-
 #if !defined (FREE)
 #  define FREE(x)	if (x) free (x)
 #endif

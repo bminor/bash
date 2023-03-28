@@ -893,7 +893,7 @@ gen_wordlist_matches (COMPSPEC *cs, const char *text)
   l2 = expand_words_shellexp (l);
   dispose_words (l);
 
-  nw = list_length (l2);
+  nw = list_length ((GENERIC_LIST *)l2);
   sl = strlist_create (nw + 1);
 
   ntxt = bash_dequote_text (text);

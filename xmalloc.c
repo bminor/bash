@@ -1,6 +1,6 @@
 /* xmalloc.c -- safe versions of malloc and realloc */
 
-/* Copyright (C) 1991-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2016,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the GNU Bourne Again SHell.
 
@@ -40,11 +40,7 @@
 #include "bashintl.h"
 
 #if !defined (PTR_T)
-#  if defined (__STDC__)
-#    define PTR_T void *
-#  else
-#    define PTR_T char *
-#  endif /* !__STDC__ */
+#  define PTR_T void *
 #endif /* !PTR_T */
 
 #if HAVE_SBRK && !HAVE_DECL_SBRK

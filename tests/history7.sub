@@ -12,6 +12,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # test history file truncation for various values of $HISTFILESIZE
+. ./test-glue-functions
 
 : ${THIS_SH:=./bash}
 : ${TMPDIR:=/var/tmp}
@@ -25,19 +26,19 @@ rm -f $HISTFILE
 
 # exactly the number of lines
 ${THIS_SH} --norc -in <<<$'1\n2\n3' 
-wc -l < $HISTFILE
+wc -l < $HISTFILE | _cut_leading_spaces
 
 rm -f $HISTFILE
 
 # truncating to fewer lines
 ${THIS_SH} --norc -in <<<$'1\n2\n3\n4\n5' 
-wc -l < $HISTFILE
+wc -l < $HISTFILE | _cut_leading_spaces
 
 rm -f $HISTFILE
 
 # the history file contains fewer lines than $HISTFILESIZE
 ${THIS_SH} --norc -in <<<$'1\n2' 
-wc -l < $HISTFILE
+wc -l < $HISTFILE | _cut_leading_spaces
 
 rm -f $HISTFILE
 
@@ -46,21 +47,21 @@ unset HISTTIMEFORMAT
 
 # exactly the number of lines
 ${THIS_SH} --norc -in <<<$'e 1\ne 2\ne 3' 
-wc -l < $HISTFILE
+wc -l < $HISTFILE | _cut_leading_spaces
 cat $HISTFILE
 
 rm -f $HISTFILE
 
 # truncating to fewer lines
 ${THIS_SH} --norc -in <<<$'x 1\nx 2\nx 3\nx 4\nx 5' 
-wc -l < $HISTFILE
+wc -l < $HISTFILE | _cut_leading_spaces
 cat $HISTFILE
 
 rm -f $HISTFILE
 
 # the history file contains fewer lines than $HISTFILESIZE
 ${THIS_SH} --norc -in <<<$'y 1\ny 2' 
-wc -l < $HISTFILE
+wc -l < $HISTFILE | _cut_leading_spaces
 cat $HISTFILE
 
 rm -f $HISTFILE
@@ -68,6 +69,6 @@ rm -f $HISTFILE
 # we want to truncate the history file to zero length
 HISTFILESIZE=0
 ${THIS_SH} --norc -in <<<$'1\n2' 
-wc -l < $HISTFILE
+wc -l < $HISTFILE | _cut_leading_spaces
 
 rm -f $HISTFILE

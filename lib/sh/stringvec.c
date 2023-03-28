@@ -206,7 +206,7 @@ strvec_from_word_list (WORD_LIST *list, int alloc, int starting_index, int *ip)
   int count;
   char **array;
 
-  count = list_length (list);
+  count = list_length ((GENERIC_LIST *)list);
   array = (char **)xmalloc ((1 + count + starting_index) * sizeof (char *));
 
   for (count = 0; count < starting_index; count++)

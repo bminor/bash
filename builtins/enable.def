@@ -488,11 +488,7 @@ delete_builtin (struct builtin *b)
   struct builtin *new_shell_builtins;
 
   /* XXX - funky pointer arithmetic - XXX */
-#ifdef __STDC__
   ind = b - shell_builtins;
-#else
-  ind = ((int)b - (int)shell_builtins) / sizeof (struct builtin);
-#endif
   size = num_shell_builtins * sizeof (struct builtin);
   new_shell_builtins = (struct builtin *)xmalloc (size);
 

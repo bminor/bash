@@ -253,7 +253,7 @@ strlist_from_word_list (WORD_LIST *list, int alloc, int starting_index, int *ip)
         *ip = 0;
       return ((STRINGLIST *)0);
     }
-  slen = list_length (list);
+  slen = list_length ((GENERIC_LIST *)list);
   ret = (STRINGLIST *)xmalloc (sizeof (STRINGLIST));
   ret->list = strvec_from_word_list (list, alloc, starting_index, &len);
   ret->list_size = slen + starting_index;

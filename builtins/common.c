@@ -389,7 +389,7 @@ remember_args (WORD_LIST *list, int destructive)
     {
       dispose_words (rest_of_args);
       rest_of_args = copy_word_list (list);
-      posparam_count += list_length (list);
+      posparam_count += list_length ((GENERIC_LIST *)list);
     }
 
   if (destructive)

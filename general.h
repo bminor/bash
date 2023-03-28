@@ -45,15 +45,6 @@
 
 #include "xmalloc.h"
 
-/* NULL pointer type. */
-#if !defined (NULL)
-#  if defined (__STDC__)
-#    define NULL ((void *) 0)
-#  else
-#    define NULL 0x0
-#  endif /* !__STDC__ */
-#endif /* !NULL */
-
 /* Hardly used anymore */
 #define pointer_to_int(x)	(int)((char *)x - (char *)0)
 

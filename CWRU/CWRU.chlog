@@ -5848,6 +5848,7 @@ support/printenv.c,support/signames.c,support/bashversion.c
 support/memtest.c,support/endian.c
 lib/glob/gm_loop.c
 	- some cleanups for function prototypes and other stdc requirements
+	  From Paul Eggert <eggert@cs.ucla.edu>
 
 lib/readline/doc/{rltech.texi,hstech.texi}
 	- add prototypes and stdc requirements to the examples
@@ -5857,3 +5858,30 @@ builtins/complete.def
 	  filename completions are treated in case someone uses compgen in
 	  the foreground.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   3/28
+				   ----
+aclocal.m4
+builtins/enable.def,builtins/gen-helpfiles.c,builtins/help.def,builtins/printf.def
+general.h,hashlib.h
+include/ansi_stdlib.h,include/ocache.h
+lib/glob/collsyms.h,lib/glob/glob.c
+lib/readline/history.h,lib/readline/xmalloc.h
+xmalloc.c,xmalloc.h
+lib/sh/strtrans.c
+lib/tilde/tilde.c
+mksyntax.c
+support/endian.c
+	- don't bother with __STDC__ if we are just using C89 features like
+	  const, function prototypes, etc.
+	  From Paul Eggert <eggert@cs.ucla.edu>
+
+externs.h
+	- prototype the list functions that take GENERIC_LIST *
+	  From Paul Eggert <eggert@cs.ucla.edu>
+
+builtins/common.c,examples/loadables/getconf.c
+execute_cmd.c,pcomplete.c,subst.c
+lib/sh/stringlist.c,lib/sh/stringvec.c
+	- changes and casts now that the generic list functions are prototyped
+	  From Paul Eggert <eggert@cs.ucla.edu>
