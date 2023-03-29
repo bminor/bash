@@ -387,7 +387,7 @@ xbotch (PTR_T mem, int e, const char *s, const char *file, int line)
    assumed to not be busy; the caller (morecore()) checks for this. 
    BUSY[NU] must be set to 1. */
 static void
-bcoalesce (register int nu)
+bcoalesce (int nu)
 {
   register union mhead *mp, *mp1, *mp2;
   register int nbuck;
@@ -455,7 +455,7 @@ bcoalesce (register int nu)
    is assumed to be empty.  Must be called with signals blocked (e.g.,
    by morecore()).  BUSY[NU] must be set to 1. */
 static void
-bsplit (register int nu)
+bsplit (int nu)
 {
   register union mhead *mp;
   int nbuck, nblks, split_max;
@@ -616,7 +616,7 @@ morecore (int nu)
   sigset_t set, oset;
   int blocked_sigs;
 
-  /* Block all signals in case we are executed from a signal handler. */
+  /* Block signals in case we are executed from a signal handler. */
   blocked_sigs = 0;
 #ifdef SHELL
 #  if defined (SIGCHLD)

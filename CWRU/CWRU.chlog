@@ -5885,3 +5885,35 @@ execute_cmd.c,pcomplete.c,subst.c
 lib/sh/stringlist.c,lib/sh/stringvec.c
 	- changes and casts now that the generic list functions are prototyped
 	  From Paul Eggert <eggert@cs.ucla.edu>
+
+				   3/29
+				   ----
+aclocal.m4,configure.ac
+builtins/common.c,builtins/mkbuiltins.c,builtins/printf.def
+include/memalloc.h,include/stdc.h
+general.h,jobs.h
+pcomplete.c,print_cmd.c
+m4/iconv.m4
+lib/readline/bind.c,lib/readline/complete.c,lib/readline/display.c
+lib/readline/funmap.c,lib/readline/util.c,lib/readline/parens.c
+lib/readline/histlib.h
+lib/readline/readline.h,lib/readline/rldefs.h,lib/readline/rlstdc.h,lib/readline/rlprivate.h
+lib/sh/dprintf.c,lib/sh/snprintf.c,lib/sh/vprintf.c
+lib/malloc/shmalloc.h,lib/malloc/imalloc.h,lib/malloc/xmalloc.c
+lib/termcap/termcap.h
+	- stdarg: since we now assume C89 for prototypes at least, always
+	  prefer stdarg to old-style varargs
+	- SH_VA_START: now use plain old va_start
+	- don't bother with extern declarations for standard C89 functions
+	  From Paul Eggert <eggert@cs.ucla.edu>
+
+config-bot.h
+	- PREFER_STDARG: remove
+
+builtins/mkbuiltins.c
+execute_cmd.c,unwind_prot.c
+unwind_prot.h
+	- start on ANSI/ISO C changes for the unwind-protect framework
+	- introduce new unwind-protect function pointer type to replace
+	  Function
+	  From Paul Eggert <eggert@cs.ucla.edu>

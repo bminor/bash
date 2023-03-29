@@ -46,11 +46,7 @@
 #    endif /* !IBMESA */
 #  else  /* !HAVE_ALLOCA_H || C_ALLOCA */
 #    if !defined (alloca)
-#      if defined (__STDC__)
 extern void *alloca (size_t);
-#      else
-extern char *alloca ();
-#      endif /* !__STDC__ */
 #    endif /* !alloca */
 #  endif /* !HAVE_ALLOCA_H || C_ALLOCA */
 #endif /* !__GNUC__ || C_ALLOCA */

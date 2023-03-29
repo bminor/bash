@@ -24,15 +24,8 @@
 
 /* Generic pointer type. */
 #ifndef PTR_T
-
-#if defined (__STDC__)
 #  define PTR_T void *
-#else
-#  define PTR_T char *
-#endif
-
 #endif /* PTR_T */
-
 
 extern PTR_T sh_malloc (size_t, const char *, int);
 extern PTR_T sh_realloc (PTR_T, size_t, const char *, int);

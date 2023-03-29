@@ -25,11 +25,7 @@
 #include <stdio.h>
 
 #if !defined (NULL)
-#  if defined (__STDC__)
-#    define NULL ((void *)0)
-#  else
-#    define NULL 0x0
-#  endif /* __STDC__ */
+#  define NULL 0
 #endif /* !NULL */
 
 /*

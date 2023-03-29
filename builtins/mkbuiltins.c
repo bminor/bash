@@ -1,7 +1,7 @@
 /* mkbuiltins.c - Create builtins.c, builtext.h, and builtdoc.c from
    a single source file called builtins.def. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,11 +59,8 @@
 extern int errno;
 #endif
 
-static char *xmalloc (size_t), *xrealloc (void *, size_t);
-
-#if !defined (__STDC__) && !defined (strcpy)
-extern char *strcpy ();
-#endif /* !__STDC__ && !strcpy */
+static void *xmalloc (size_t);
+static void *xrealloc (void *, size_t);
 
 #define savestring(x) strcpy (xmalloc (1 + strlen (x)), (x))
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
@@ -456,7 +453,6 @@ array_free (ARRAY *array)
 /* **************************************************************** */
 
 /* The definition of a function. */
-typedef int Function ();
 typedef int mk_handler_func_t (char *, DEF_FILE *, char *);
 
 /* Structure handles processor directives. */
@@ -995,25 +991,25 @@ file_error (char *filename)
 
 static void memory_error_and_abort (void);
 
-static char *
+static void *
 xmalloc (size_t bytes)
 {
-  char *temp = (char *)malloc (bytes);
+  void *temp = malloc (bytes);
 
   if (!temp)
     memory_error_and_abort ();
   return (temp);
 }
 
-static char *
+static void *
 xrealloc (void *pointer, size_t bytes)
 {
-  char *temp;
+  void *temp;
 
   if (!pointer)
-    temp = (char *)malloc (bytes);
+    temp = malloc (bytes);
   else
-    temp = (char *)realloc (pointer, bytes);
+    temp = realloc (pointer, bytes);
 
   if (!temp)
     memory_error_and_abort ();

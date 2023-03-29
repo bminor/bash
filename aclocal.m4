@@ -69,11 +69,7 @@ AC_DEFUN(BASH_DECL_PRINTF,
 AC_CACHE_VAL(bash_cv_printf_declared,
 [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
-#ifdef __STDC__
 typedef int (*_bashfunc)(const char *, ...);
-#else
-typedef int (*_bashfunc)();
-#endif
 #include <stdlib.h>
 int
 main()
@@ -594,7 +590,6 @@ fi
 # We should check for putenv before calling this
 AC_DEFUN(BASH_FUNC_STD_PUTENV,
 [
-AC_REQUIRE([AC_C_PROTOTYPES])
 AC_CACHE_CHECK([for standard-conformant putenv declaration], bash_cv_std_putenv,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_STDLIB_H
@@ -615,7 +610,6 @@ fi
 # We should check for unsetenv before calling this
 AC_DEFUN(BASH_FUNC_STD_UNSETENV,
 [
-AC_REQUIRE([AC_C_PROTOTYPES])
 AC_CACHE_CHECK([for standard-conformant unsetenv declaration], bash_cv_std_unsetenv,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_STDLIB_H
@@ -2065,31 +2059,17 @@ AC_DEFUN([BASH_FUNC_VSNPRINTF],
   if test X$ac_cv_func_vsnprintf = Xyes; then
     AC_CACHE_CHECK([for standard-conformant vsnprintf], [bash_cv_func_vsnprintf],
       [AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 
 static int
-#if HAVE_STDARG_H
 foo(const char *fmt, ...)
-#else
-foo(format, va_alist)
-     const char *format;
-     va_dcl
-#endif
 {
   va_list args;
   int n;
 
-#if HAVE_STDARG_H
   va_start(args, fmt);
-#else
-  va_start(args);
-#endif
   n = vsnprintf(0, 0, fmt, args);
   va_end (args);
   return n;

@@ -29,11 +29,7 @@
 #  include <unistd.h>
 #endif
 
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #include "bashansi.h"
 #include "bashintl.h"
@@ -1446,7 +1442,7 @@ cprintf (const char *control, ...)
   size_t arg_len;
   va_list args;
 
-  SH_VA_START (args, control);
+  va_start (args, control);
 
   arg_len = strlen (control);
   the_printed_command_resize (arg_len + 1);
@@ -1544,28 +1540,13 @@ the_printed_command_resize (size_t length)
     }
 }
 
-#if defined (HAVE_VPRINTF)
-/* ``If vprintf is available, you may assume that vfprintf and vsprintf are
-     also available.'' */
-
 static void
 xprintf (const char *format, ...)
 {
   va_list args;
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stdout, format, args);
   va_end (args);
 }
-
-#else
-
-static void
-xprintf (format, arg1, arg2, arg3, arg4, arg5)
-     const char *format;
-{
-  printf (format, arg1, arg2, arg3, arg4, arg5);
-}
-
-#endif /* !HAVE_VPRINTF */

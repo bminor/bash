@@ -1,6 +1,6 @@
 /* dprintf -- printf to a file descriptor */
 
-/* Copyright (C) 2008-2010,2022 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2010,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -28,12 +28,7 @@
 #  include <unistd.h>
 #endif
 
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
-
+#include <stdarg.h>
 #include <stdio.h>
 
 int
@@ -52,7 +47,7 @@ dprintf(int fd, const char *format, ...)
       return -1;
     }
 
-  SH_VA_START (args, format);
+  va_start (args, format);
   rc = vfprintf (fp, format, args);
   fflush (fp);
   va_end (args);

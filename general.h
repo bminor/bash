@@ -249,11 +249,7 @@ typedef int sh_builtin_func_t (WORD_LIST *); /* sh_wlist_func_t */
 #define HIGH_FD_MAX	256
 
 /* The type of function passed as the fourth argument to qsort(3). */
-#ifdef __STDC__
 typedef int QSFUNC (const void *, const void *);
-#else
-typedef int QSFUNC ();
-#endif 
 
 /* Some useful definitions for Unix pathnames.  Argument convention:
    x == string, c == character */

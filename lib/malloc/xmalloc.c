@@ -33,13 +33,7 @@
 
 /* Generic pointer type. */
 #ifndef PTR_T
-
-#if defined (__STDC__)
 #  define PTR_T void *
-#else
-#  define PTR_T char *
-#endif
-
 #endif /* PTR_T */
 
 /* **************************************************************** */

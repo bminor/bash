@@ -57,11 +57,7 @@ long i00afunc ();
 #define ADDRESS_FUNCTION(arg) &(arg)
 #endif /* CRAY && CRAY_STACKSEG_END */
 
-#if __STDC__
 typedef void *pointer;
-#else
-typedef char *pointer;
-#endif
 
 #define	NULL	0
 

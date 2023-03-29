@@ -1,7 +1,7 @@
 /* stdc.h -- macros to make source compile on both ANSI C and K&R C
    compilers. */
 
-/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2021,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,12 +84,6 @@
 #  define INLINE inline
 #else
 #  define INLINE
-#endif
-
-#if defined (PREFER_STDARG)
-#  define SH_VA_START(va, arg)  va_start(va, arg)
-#else
-#  define SH_VA_START(va, arg)  va_start(va)
 #endif
 
 #endif /* !_STDC_H_ */

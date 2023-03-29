@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.048])dnl
+AC_REVISION([for Bash 5.2, version 5.049])dnl
 
 define(bashvers, 5.2)
 define(relstatus, maint)
@@ -759,7 +759,6 @@ AC_C_INLINE
 AC_C_BIGENDIAN
 AC_C_STRINGIZE
 AC_TYPE_LONG_DOUBLE
-AC_C_PROTOTYPES
 AC_C_CHAR_UNSIGNED
 AC_C_VOLATILE
 AC_C_RESTRICT
@@ -773,7 +772,7 @@ AC_HEADER_MAJOR
 
 BASH_HEADER_INTTYPES
 
-AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
+AC_CHECK_HEADERS(unistd.h stdlib.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
 		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
 		 regex.h syslog.h ulimit.h)

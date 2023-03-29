@@ -229,26 +229,12 @@ rl_tilde_expand (int ignore, int key)
   return (0);
 }
 
-#if defined (USE_VARARGS)
 void
-#if defined (PREFER_STDARG)
 _rl_ttymsg (const char *format, ...)
-#else
-_rl_ttymsg (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#if defined (PREFER_VARARGS)
-  char *format;
-#endif
 
-#if defined (PREFER_STDARG)
   va_start (args, format);
-#else
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   fprintf (stderr, "readline: ");
   vfprintf (stderr, format, args);
@@ -261,24 +247,11 @@ _rl_ttymsg (va_alist)
 }
 
 void
-#if defined (PREFER_STDARG)
 _rl_errmsg (const char *format, ...)
-#else
-_rl_errmsg (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#if defined (PREFER_VARARGS)
-  char *format;
-#endif
 
-#if defined (PREFER_STDARG)
   va_start (args, format);
-#else
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   fprintf (stderr, "readline: ");
   vfprintf (stderr, format, args);
@@ -287,28 +260,6 @@ _rl_errmsg (va_alist)
 
   va_end (args);
 }
-
-#else /* !USE_VARARGS */
-void
-_rl_ttymsg (format, arg1, arg2)
-     char *format;
-{
-  fprintf (stderr, "readline: ");
-  fprintf (stderr, format, arg1, arg2);
-  fprintf (stderr, "\n");
-
-  rl_forced_update_display ();
-}
-
-void
-_rl_errmsg (format, arg1, arg2)
-     char *format;
-{
-  fprintf (stderr, "readline: ");
-  fprintf (stderr, format, arg1, arg2);
-  fprintf (stderr, "\n");
-}
-#endif /* !USE_VARARGS */
 
 /* **************************************************************** */
 /*								    */
@@ -507,28 +458,14 @@ _rl_savestring (const char *s)
 }
 
 #if defined (DEBUG)
-#if defined (USE_VARARGS)
 static FILE *_rl_tracefp;
 
 void
-#if defined (PREFER_STDARG)
 _rl_trace (const char *format, ...)
-#else
-_rl_trace (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#if defined (PREFER_VARARGS)
-  char *format;
-#endif
 
-#if defined (PREFER_STDARG)
   va_start (args, format);
-#else
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   if (_rl_tracefp == 0)
     _rl_tropen ();
@@ -574,7 +511,6 @@ _rl_settracefp (FILE *fp)
 {
   _rl_tracefp = fp;
 }
-#endif
 #endif /* DEBUG */
 
 

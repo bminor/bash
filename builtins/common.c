@@ -34,12 +34,7 @@
 #include <signal.h>
 
 #include <errno.h>
-
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #include "../bashansi.h"
 #include "../bashintl.h"
@@ -100,19 +95,13 @@ builtin_error_prolog (void)
 }
 
 void
-#if defined (PREFER_STDARG)
 builtin_error (const char *format, ...)
-#else
-builtin_error (format, va_alist)
-     const char *format;
-     va_dcl
-#endif
 {
   va_list args;
 
   builtin_error_prolog ();
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   va_end (args);
@@ -120,20 +109,14 @@ builtin_error (format, va_alist)
 }
 
 void
-#if defined (PREFER_STDARG)
 builtin_warning (const char *format, ...)
-#else
-builtin_warning (format, va_alist)
-     const char *format;
-     va_dcl
-#endif
 {
   va_list args;
 
   builtin_error_prolog ();
   fprintf (stderr, _("warning: "));
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   va_end (args);

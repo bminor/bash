@@ -3,7 +3,7 @@
 /* I can't stand it anymore!  Please can't we just write the
    whole Unix system in lisp or something? */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -77,13 +77,12 @@ typedef union uwp {
   } sv;
 } UNWIND_ELT;
 
-static void without_interrupts (VFunction *, char *, char *);
-static void unwind_frame_discard_internal (char *, char *);
-static void unwind_frame_run_internal (char *, char *);
+static void unwind_frame_discard_internal (char *);
+static void unwind_frame_run_internal (char *);
 static void add_unwind_protect_internal (Function *, char *);
-static void remove_unwind_protect_internal (char *, char *);
-static void run_unwind_protects_internal (char *, char *);
-static void clear_unwind_protects_internal (char *, char *);
+static void remove_unwind_protect_internal (void);
+static void run_unwind_protects_internal (void);
+static void clear_unwind_protects_internal (int);
 static inline void restore_variable (SAVED_VAR *);
 static void unwind_protect_mem_internal (char *, char *);
 
@@ -108,19 +107,11 @@ uwp_init (void)
   ocache_create (uwcache, UNWIND_ELT, UWCACHESIZE);
 }
 
-/* Run a function without interrupts.  This relies on the fact that the
-   FUNCTION cannot call QUIT (). */
-static void
-without_interrupts (VFunction *function, char *arg1, char *arg2)
-{
-  (*function)(arg1, arg2);
-}
-
 /* Start the beginning of a region. */
 void
 begin_unwind_frame (char *tag)
 {
-  add_unwind_protect ((Function *)NULL, tag);
+  add_unwind_protect (NULL, tag);
 }
 
 /* Discard the unwind protects back to TAG. */
@@ -128,7 +119,7 @@ void
 discard_unwind_frame (char *tag)
 {
   if (unwind_protect_list)
-    without_interrupts (unwind_frame_discard_internal, tag, (char *)NULL);
+    unwind_frame_discard_internal (tag);
 }
 
 /* Run the unwind protects back to TAG. */
@@ -136,14 +127,14 @@ void
 run_unwind_frame (char *tag)
 {
   if (unwind_protect_list)
-    without_interrupts (unwind_frame_run_internal, tag, (char *)NULL);
+    unwind_frame_run_internal (tag);
 }
 
 /* Add the function CLEANUP with ARG to the list of unwindable things. */
 void
 add_unwind_protect (Function *cleanup, char *arg)
 {
-  without_interrupts (add_unwind_protect_internal, (char *)cleanup, arg);
+  add_unwind_protect_internal (cleanup, arg);
 }
 
 /* Remove the top unwind protect from the list. */
@@ -151,8 +142,7 @@ void
 remove_unwind_protect (void)
 {
   if (unwind_protect_list)
-    without_interrupts
-      (remove_unwind_protect_internal, (char *)NULL, (char *)NULL);
+    remove_unwind_protect_internal ();
 }
 
 /* Run the list of cleanup functions in unwind_protect_list. */
@@ -160,22 +150,15 @@ void
 run_unwind_protects (void)
 {
   if (unwind_protect_list)
-    without_interrupts
-      (run_unwind_protects_internal, (char *)NULL, (char *)NULL);
+    run_unwind_protects_internal ();
 }
 
 /* Erase the unwind-protect list.  If flags is 1, free the elements. */
 void
 clear_unwind_protect_list (int flags)
 {
-  char *flag;
-
   if (unwind_protect_list)
-    {
-      flag = flags ? "" : (char *)NULL;
-      without_interrupts
-        (clear_unwind_protects_internal, flag, (char *)NULL);
-    }
+    clear_unwind_protects_internal (flags);
 }
 
 int
@@ -218,7 +201,7 @@ add_unwind_protect_internal (Function *cleanup, char *arg)
 }
 
 static void
-remove_unwind_protect_internal (char *ignore1, char *ignore2)
+remove_unwind_protect_internal (void)
 {
   UNWIND_ELT *elt;
 
@@ -231,24 +214,24 @@ remove_unwind_protect_internal (char *ignore1, char *ignore2)
 }
 
 static void
-run_unwind_protects_internal (char *ignore1, char *ignore2)
+run_unwind_protects_internal (void)
 {
-  unwind_frame_run_internal ((char *) NULL, (char *) NULL);
+  unwind_frame_run_internal (NULL);
 }
 
 static void
-clear_unwind_protects_internal (char *flag, char *ignore)
+clear_unwind_protects_internal (int flag)
 {
   if (flag)
     {
       while (unwind_protect_list)
-	remove_unwind_protect_internal ((char *)NULL, (char *)NULL);
+	remove_unwind_protect_internal ();
     }
   unwind_protect_list = (UNWIND_ELT *)NULL;
 }
 
 static void
-unwind_frame_discard_internal (char *tag, char *ignore)
+unwind_frame_discard_internal (char *tag)
 {
   UNWIND_ELT *elt;
   int found;
@@ -281,7 +264,7 @@ restore_variable (SAVED_VAR *sv)
 }
 
 static void
-unwind_frame_run_internal (char *tag, char *ignore)
+unwind_frame_run_internal (char *tag)
 {
   UNWIND_ELT *elt;
   int found;
@@ -341,7 +324,7 @@ unwind_protect_mem_internal (char *var, char *psize)
 void
 unwind_protect_mem (char *var, int size)
 {
-  without_interrupts (unwind_protect_mem_internal, var, (char *) &size);
+  unwind_protect_mem_internal (var, (char *) &size);
 }
 
 #if defined (DEBUG)

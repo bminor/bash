@@ -36,17 +36,6 @@
 #  define HAVE_BSD_PGRP
 #endif
 
-/* Try this without testing __STDC__ for the time being. */
-#if defined (HAVE_STDARG_H)
-#  define PREFER_STDARG
-#  define USE_VARARGS
-#else
-#  if defined (HAVE_VARARGS_H)
-#    define PREFER_VARARGS
-#    define USE_VARARGS
-#  endif
-#endif
-
 #if defined (HAVE_SYS_SOCKET_H) && defined (HAVE_GETPEERNAME) && defined (HAVE_NETINET_IN_H)
 #  define HAVE_NETWORK
 #endif

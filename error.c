@@ -27,12 +27,7 @@
 #  include <unistd.h>
 #endif
 
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
-
+#include <stdarg.h>
 #include <stdio.h>
 
 #include <errno.h>
@@ -143,7 +138,7 @@ programming_error (const char *format, ...)
   give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -178,7 +173,7 @@ report_error (const char *format, ...)
 
   error_prolog (1);
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -199,7 +194,7 @@ fatal_error (const char *format, ...)
 
   error_prolog (0);
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -215,7 +210,7 @@ internal_error (const char *format, ...)
 
   error_prolog (1);
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -231,7 +226,7 @@ internal_warning (const char *format, ...)
   error_prolog (1);
   fprintf (stderr, _("warning: "));
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -248,7 +243,7 @@ internal_inform (const char *format, ...)
   /* TRANSLATORS: this is a prefix for informational messages. */
   fprintf (stderr, _("INFORM: "));
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -265,7 +260,7 @@ internal_debug (const char *format, ...)
   error_prolog (1);
   fprintf (stderr, _("DEBUG warning: "));
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -285,7 +280,7 @@ sys_error (const char *format, ...)
   e = errno;
   error_prolog (0);
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, ": %s\n", strerror (e));
@@ -319,7 +314,7 @@ parser_error (int lineno, const char *format, ...)
   else
     fprintf (stderr, "%s: %s:%s%d: ", ename, iname, gnu_error_format ? "" : _(" line "), lineno);
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -367,7 +362,7 @@ itrace (const char *format, ...)
 
   fprintf(stderr, "TRACE: pid %ld: ", (long)getpid());
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");
@@ -395,7 +390,7 @@ trace (const char *format, ...)
 
   fprintf(tracefp, "TRACE: pid %ld: ", (long)getpid());
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (tracefp, format, args);
   fprintf (tracefp, "\n");

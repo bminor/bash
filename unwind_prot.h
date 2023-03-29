@@ -1,6 +1,6 @@
 /* unwind_prot.h - Macros and functions for hacking unwind protection. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -21,6 +21,14 @@
 #if !defined (_UNWIND_PROT_H)
 #define _UNWIND_PROT_H
 
+/* Generic function type void (*) (void *) for all unwind cleanups. A
+   cleanup function does not return a value and takes a single generic
+   pointer argument. This type works fine for arbitrary pointers; if a
+   cleanup function needs to take an int argument, it's passed through
+   a cast to intptr_t, an integer type that's safe to convert to and
+   from a pointer. */
+typedef void sh_uwfunc_t (void *);
+
 extern void uwp_init (void);
 
 /* Run a function without interrupts. */
@@ -39,6 +47,7 @@ extern int unwind_protect_tag_on_stack (const char *);
 
 /* How to protect a variable.  */
 #define unwind_protect_var(X) unwind_protect_mem ((char *)&(X), sizeof (X))
+
 extern void unwind_protect_mem (char *, int);
 
 /* Backwards compatibility */

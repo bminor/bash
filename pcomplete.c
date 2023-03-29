@@ -31,11 +31,7 @@
 
 #include <signal.h>
 
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #include "posixtime.h"
 
@@ -198,7 +194,7 @@ debug_printf (const char *format, ...)
   if (progcomp_debug == 0)
     return;
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   fprintf (stdout, "DEBUG: ");
   vfprintf (stdout, format, args);

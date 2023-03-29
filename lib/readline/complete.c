@@ -77,11 +77,7 @@ extern int errno;
 #  include "colors.h"
 #endif
 
-#ifdef __STDC__
 typedef int QSFUNC (const void *, const void *);
-#else
-typedef int QSFUNC ();
-#endif
 
 #ifdef HAVE_LSTAT
 #  define LSTAT lstat

@@ -68,11 +68,7 @@ $END
 #  define INT_MIN		(-2147483647-1)
 #endif
 
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #include <stdio.h>
 #include <chartypes.h>
@@ -1229,7 +1225,7 @@ vbprintf (const char *format, ...)
   size_t nlen;
   int blen;
 
-  SH_VA_START (args, format);
+  va_start (args, format);
   blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
   va_end (args);
 
@@ -1238,7 +1234,7 @@ vbprintf (const char *format, ...)
     {
       vbsize = ((nlen + 63) >> 6) << 6;
       vbuf = (char *)xrealloc (vbuf, vbsize);
-      SH_VA_START (args, format);
+      va_start (args, format);
       blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
       va_end (args);
     }

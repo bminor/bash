@@ -77,7 +77,6 @@
 #endif
 #define HAVE_ISINF_IN_LIBC
 #define HAVE_ISNAN_IN_LIBC
-#define PREFER_STDARG
 #define HAVE_STRINGIZE
 #define HAVE_LIMITS_H
 #define HAVE_STDDEF_H
@@ -89,11 +88,7 @@
 
 #include <bashtypes.h>
 
-#if defined(PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #ifdef HAVE_LIMITS_H
 #  include <limits.h>
@@ -1669,7 +1664,7 @@ snprintf(char *string, size_t length, const char * format, ...)
   int rval;
   va_list args;
 
-  SH_VA_START(args, format);
+  va_start(args, format);
 
   if (string == 0 && length != 0)
     return 0;
@@ -1705,7 +1700,7 @@ asprintf(char **stringp, const char * format, ...)
   int rval;
   va_list args;
 
-  SH_VA_START(args, format);
+  va_start(args, format);
 
   rval = vasprintf (stringp, format, args);
 

@@ -123,7 +123,7 @@ static int shell_control_structure (enum command_type);
 static void cleanup_redirects (REDIRECT *);
 
 #if defined (JOB_CONTROL)
-static int restore_signal_mask (sigset_t *);
+static void restore_signal_mask (void *);
 #endif
 
 static int builtin_status (int);
@@ -505,10 +505,10 @@ dispose_partial_redirects (void)
 #if defined (JOB_CONTROL)
 /* A function to restore the signal mask to its proper value when the shell
    is interrupted or errors occur while creating a pipeline. */
-static int
-restore_signal_mask (sigset_t *set)
+static void
+restore_signal_mask (void *set)
 {
-  return (sigprocmask (SIG_SETMASK, set, (sigset_t *)NULL));
+  sigprocmask (SIG_SETMASK, set, NULL);
 }
 #endif /* JOB_CONTROL */
 
@@ -1103,7 +1103,7 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
     {
       nfifo = num_fifos ();
       if (nfifo > ofifo)
-	close_new_fifos ((void *)ofifo_list, osize);
+	close_new_fifos (ofifo_list, osize);
       free (ofifo_list);
       discard_unwind_frame ("internal_fifos");
     }
@@ -4908,8 +4908,11 @@ execute_builtin (sh_builtin_func_t *builtin, WORD_LIST *words, int flags, int su
 }
 
 static void
-maybe_restore_getopt_state (sh_getopt_state_t *gs)
+maybe_restore_getopt_state (void *arg)
 {
+  sh_getopt_state_t *gs;
+
+  gs = arg;
   /* If we have a local copy of OPTIND and it's at the right (current)
      context, then we restore getopt's internal state.  If not, we just
      let it go.  We know there is a local OPTIND if gs->gs_flags & 1.
