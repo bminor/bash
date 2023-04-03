@@ -1,6 +1,6 @@
 /* dispose_command.c -- dispose of a COMMAND structure. */
 
-/* Copyright (C) 1987-2009,2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -204,6 +204,12 @@ dispose_command (COMMAND *command)
   free (command);
 }
 
+void
+uw_dispose_command (void *command)
+{
+  dispose_command (command);
+}
+
 #if defined (COND_COMMAND)
 /* How to free a node in a conditional command. */
 void
@@ -270,6 +276,12 @@ dispose_words (WORD_LIST *list)
       ocache_free (wlcache, WORD_LIST, t);
 #endif
     }
+}
+
+void
+uw_dispose_words (void *list)
+{
+  dispose_words (list);
 }
 
 #ifdef INCLUDE_UNUSED

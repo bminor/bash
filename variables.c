@@ -5330,7 +5330,7 @@ push_exported_var (PTR_T data)
    variables in its temporary environment. In the first case, we call
    push_builtin_var, which does the right thing. */
 void
-pop_scope (int is_special)
+pop_scope (void *is_special)
 {
   VAR_CONTEXT *vcxt, *ret;
   int is_bltinenv;
@@ -5354,7 +5354,7 @@ pop_scope (int is_special)
   FREE (vcxt->name);
   if (vcxt->table)
     {
-      if (is_special)
+      if ((intptr_t) is_special)
 	hash_flush (vcxt->table, push_builtin_var);
       else
 	hash_flush (vcxt->table, push_exported_var);
@@ -5453,7 +5453,7 @@ push_context (char *name, int is_subshell, HASH_TABLE *tempvars)
 /* Only called when subshell == 0, so we don't need to check, and can
    unconditionally pop the dollar vars off the stack. */
 void
-pop_context (void)
+pop_context (void *ignore)
 {
   pop_dollar_vars ();
   variable_context--;
@@ -5590,6 +5590,12 @@ pop_args (void)
     array_pop (bash_argv_a);
   array_dispose_element (ce);
 #endif /* ARRAY_VARS && DEBUGGER */
+}
+
+void
+uw_pop_args (void *ignore)
+{
+  pop_args ();
 }
 
 /*************************************************

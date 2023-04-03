@@ -896,7 +896,7 @@ history_expand_internal (const char *string, int start, int qc, int *end_index_p
 #define ADD_CHAR(c) \
 	do \
 	  { \
-	    if (j >= result_len - 1) \
+	    if ((j + 1) >= result_len) \
 	      result = (char *)xrealloc (result, result_len += 64); \
 	    result[j++] = c; \
 	    result[j] = '\0'; \

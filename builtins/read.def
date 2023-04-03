@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -119,21 +119,24 @@ struct ttsave
 };
 
 #if defined (READLINE)
-static void reset_attempted_completion_function (char *);
+static void uw_reset_attempted_completion_function (void *);
 static int set_itext (void);
 static char *edit_line (char *, char *);
 static void set_eol_delim (int);
-static void reset_eol_delim (char *);
+static void reset_eol_delim (void *);
 static void set_readline_timeout (sh_timer *t, time_t, long);
+static void uw_bashline_reset_event_hook (void *);
 #endif
 static SHELL_VAR *bind_read_variable (char *, char *, int);
 #if defined (HANDLE_MULTIBYTE)
 static int read_mbchar (int, char *, int, int, int);
 #endif
 static void ttyrestore (struct ttsave *);
+static void uw_ttyrestore (void *);
 
 static sighandler sigalrm (int);
 static void reset_timeout (void);
+static void uw_reset_timeout (void *);
 
 /* Try this to see what the rest of the shell can do with the information. */
 sh_timer *read_timeout;
@@ -167,6 +170,12 @@ reset_timeout (void)
   rl_clear_timeout ();
 #endif
   read_timeout = 0;
+}
+
+static void
+uw_reset_timeout (void *ignore)
+{
+  reset_timeout ();
 }
 
 void
@@ -509,12 +518,12 @@ read_builtin (WORD_LIST *list)
 	}
       if (interactive_shell == 0)
 	initialize_terminating_signals ();
-      add_unwind_protect (reset_timeout, (char *)NULL);
+      add_unwind_protect (uw_reset_timeout, NULL);
 #if defined (READLINE)
       if (edit)
 	{
-	  add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
-	  add_unwind_protect (bashline_reset_event_hook, (char *)NULL);
+	  add_unwind_protect (uw_reset_attempted_completion_function, NULL);
+	  add_unwind_protect (uw_bashline_reset_event_hook, NULL);
 	  set_readline_timeout (read_timeout, tmsec, tmusec);
 	}
       else
@@ -538,7 +547,7 @@ read_builtin (WORD_LIST *list)
 	  if (delim != '\n')
 	    {
 	      set_eol_delim (delim);
-	      add_unwind_protect (reset_eol_delim, (char *)NULL);
+	      add_unwind_protect (reset_eol_delim, NULL);
 	    }
 	}
       else
@@ -555,7 +564,7 @@ read_builtin (WORD_LIST *list)
 	  if (i < 0)
 	    sh_ttyerror (1);
 	  tty_modified = 1;
-	  add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
+	  add_unwind_protect (uw_ttyrestore, &termsave);
 	  if (interactive_shell == 0)
 	    initialize_terminating_signals ();
 	}
@@ -573,7 +582,7 @@ read_builtin (WORD_LIST *list)
 	sh_ttyerror (1);
 
       tty_modified = 1;
-      add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
+      add_unwind_protect (uw_ttyrestore, &termsave);
       if (interactive_shell == 0)
 	initialize_terminating_signals ();
     }
@@ -840,7 +849,7 @@ add_char:
 	  if (nchars > 0)
 	    rl_num_chars_to_read = 0;
 	  if (delim != '\n')
-	    reset_eol_delim ((char *)NULL);
+	    reset_eol_delim (NULL);
 	}
       else
 #endif
@@ -1114,6 +1123,12 @@ ttyrestore (struct ttsave *ttp)
   tty_modified = 0;
 }
 
+static void
+uw_ttyrestore (void *ttp)
+{
+  ttyrestore (ttp);
+}
+
 void
 read_tty_cleanup (void)
 {
@@ -1133,10 +1148,16 @@ static rl_hook_func_t *old_startup_hook;
 static char *deftext;
 
 static void
-reset_attempted_completion_function (char *cp)
+uw_reset_attempted_completion_function (void *cp)
 {
   if (rl_attempted_completion_function == 0 && old_attempted_completion_function)
     rl_attempted_completion_function = old_attempted_completion_function;
+}
+
+static void
+uw_bashline_reset_event_hook (void *ignore)
+{
+  bashline_reset_event_hook ();
 }
 
 static int
@@ -1241,7 +1262,7 @@ set_eol_delim (int c)
 }
 
 static void
-reset_eol_delim (char *cp)
+reset_eol_delim (void *ignore)
 {
   Keymap cmap;
 

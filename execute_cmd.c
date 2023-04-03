@@ -59,6 +59,8 @@ extern int errno;
 
 #define NEED_FPURGE_DECL
 #define NEED_SH_SETLINEBUF_DECL
+#define NEED_CLOCK_FUNCS_DECL
+#define NEED_TIMEVAL_FUNCS_DECL
 
 #include "bashansi.h"
 #include "bashintl.h"
@@ -123,7 +125,7 @@ static int shell_control_structure (enum command_type);
 static void cleanup_redirects (REDIRECT *);
 
 #if defined (JOB_CONTROL)
-static void restore_signal_mask (void *);
+static void uw_restore_signal_mask (void *);
 #endif
 
 static int builtin_status (int);
@@ -345,6 +347,12 @@ dispose_fd_bitmap (struct fd_bitmap *fdbp)
 }
 
 void
+uw_dispose_fd_bitmap (void *fdbp)
+{
+  dispose_fd_bitmap (fdbp);
+}
+
+void
 close_fd_bitmap (struct fd_bitmap *fdbp)
 {
   int i;
@@ -358,6 +366,18 @@ close_fd_bitmap (struct fd_bitmap *fdbp)
 	    fdbp->bitmap[i] = 0;
 	  }
     }
+}
+
+static void
+uw_close_fd_bitmap (void *fdbp)
+{
+  close_fd_bitmap (fdbp);
+}
+
+void
+uw_close (void *fd)
+{
+  close ((intptr_t) fd);		/* XXX */
 }
 
 /* Return the line number of the currently executing command. */
@@ -403,7 +423,7 @@ execute_command (COMMAND *command)
   current_fds_to_close = (struct fd_bitmap *)NULL;
   bitmap = new_fd_bitmap (FD_BITMAP_DEFAULT_SIZE);
   begin_unwind_frame ("execute-command");
-  add_unwind_protect (dispose_fd_bitmap, (char *)bitmap);
+  add_unwind_protect (uw_dispose_fd_bitmap, (char *)bitmap);
 
   /* Just do the command, but not asynchronously. */
   result = execute_command_internal (command, 0, NO_PIPE, NO_PIPE, bitmap);
@@ -463,6 +483,18 @@ cleanup_redirects (REDIRECT *list)
   dispose_redirects (list);
 }
 
+static void
+uw_cleanup_redirects (void *list)
+{
+  cleanup_redirects (list);
+}
+
+static void
+uw_dispose_redirects (void *list)
+{
+  dispose_redirects (list);
+}
+
 void
 undo_partial_redirects (void)
 {
@@ -506,7 +538,7 @@ dispose_partial_redirects (void)
 /* A function to restore the signal mask to its proper value when the shell
    is interrupted or errors occur while creating a pipeline. */
 static void
-restore_signal_mask (void *set)
+uw_restore_signal_mask (void *set)
 {
   sigprocmask (SIG_SETMASK, set, NULL);
 }
@@ -826,10 +858,10 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
     begin_unwind_frame ("loop_redirections");
 
   if (my_undo_list)
-    add_unwind_protect ((Function *)cleanup_redirects, my_undo_list);
+    add_unwind_protect (uw_cleanup_redirects, my_undo_list);
 
   if (exec_undo_list)
-    add_unwind_protect ((Function *)dispose_redirects, exec_undo_list);
+    add_unwind_protect (uw_dispose_redirects, exec_undo_list);
 
   QUIT;
 
@@ -2438,11 +2470,23 @@ restore_stdin (int s)
     }
 }
 
+static void
+uw_restore_stdin (void *s)
+{
+  restore_stdin ((intptr_t)s);
+}
+
+static void
+uw_merge_temporary_env (void *ignore)
+{
+  merge_temporary_env ();
+}
+
 /* Catch-all cleanup function for lastpipe code for unwind-protects */
 static void
-lastpipe_cleanup (int s)
+uw_lastpipe_cleanup (void *s)
 {
-  set_jobs_list_frozen (s);
+  set_jobs_list_frozen ((intptr_t) s);
 }
 
 static int
@@ -2516,15 +2560,15 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
 	 unwind-protects are run, and the storage used for the
 	 bitmaps freed up. */
       begin_unwind_frame ("pipe-file-descriptors");
-      add_unwind_protect (dispose_fd_bitmap, fd_bitmap);
-      add_unwind_protect (close_fd_bitmap, fd_bitmap);
+      add_unwind_protect (uw_dispose_fd_bitmap, fd_bitmap);
+      add_unwind_protect (uw_close_fd_bitmap, fd_bitmap);
       if (prev >= 0)
-	add_unwind_protect (close, prev);
+	add_unwind_protect (uw_close, (void *) (intptr_t) prev);
       dummyfd = fildes[1];
-      add_unwind_protect (close, dummyfd);
+      add_unwind_protect (uw_close, (void *) (intptr_t) dummyfd);
 
 #if defined (JOB_CONTROL)
-      add_unwind_protect (restore_signal_mask, &oset);
+      add_unwind_protect (uw_restore_signal_mask, &oset);
 #endif /* JOB_CONTROL */
 
       if (ignore_return && cmd->value.Connection->first)
@@ -2568,11 +2612,11 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
 	{
 	  do_piping (prev, pipe_out);
 	  prev = NO_PIPE;
-	  add_unwind_protect (restore_stdin, lstdin);
+	  add_unwind_protect (uw_restore_stdin, (void *) (intptr_t) lstdin);
 	  lastpipe_flag = 1;
 	  old_frozen = freeze_jobs_list ();
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
-	  add_unwind_protect (lastpipe_cleanup, old_frozen);
+	  add_unwind_protect (uw_lastpipe_cleanup, (void *) (intptr_t) old_frozen);
 #if defined (JOB_CONTROL)
 	  UNBLOCK_CHILD (oset);		/* XXX */
 #endif
@@ -2581,7 +2625,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
 	cmd->flags |= CMD_LASTPIPE;
     }	  
   if (prev >= 0)
-    add_unwind_protect (close, prev);
+    add_unwind_protect (uw_close, (void *) (intptr_t) prev);
 
   exec_result = execute_command_internal (cmd, asynchronous, prev, pipe_out, fds_to_close);
 
@@ -2841,14 +2885,14 @@ execute_for_command (FOR_COM *for_command)
   list = releaser = expand_words_no_vars (for_command->map_list);
 
   begin_unwind_frame ("for");
-  add_unwind_protect (dispose_words, releaser);
+  add_unwind_protect (uw_dispose_words, releaser);
 
 #if 0
   if (lexical_scoping)
     {
       old_value = copy_variable (find_variable (identifier));
       if (old_value)
-	add_unwind_protect (dispose_variable, old_value);
+	add_unwind_protect (uw_dispose_variable, old_value);
     }
 #endif
 
@@ -3375,7 +3419,7 @@ execute_select_command (SELECT_COM *select_command)
     }
 
   begin_unwind_frame ("select");
-  add_unwind_protect (dispose_words, releaser);
+  add_unwind_protect (uw_dispose_words, releaser);
 
   if (select_command->flags & CMD_IGNORE_RETURN)
     select_command->action->flags |= CMD_IGNORE_RETURN;
@@ -4539,7 +4583,7 @@ itrace("execute_simple_command: posix mode tempenv assignment error");
       builtin = 0;
     }
 
-  add_unwind_protect (dispose_words, words);
+  add_unwind_protect (uw_dispose_words, words);
   QUIT;
 
   /* Bind the last word in this command to "$_" after execution. */
@@ -4798,7 +4842,7 @@ execute_builtin (sh_builtin_func_t *builtin, WORD_LIST *words, int flags, int su
 	{
 	  error_trap = savestring (error_trap);
 	  add_unwind_protect (xfree, error_trap);
-	  add_unwind_protect (set_error_trap, error_trap);
+	  add_unwind_protect (uw_set_error_trap, error_trap);
 	  restore_default_signal (ERROR_TRAP);
 	}
       exit_immediately_on_error = 0;
@@ -4838,7 +4882,7 @@ execute_builtin (sh_builtin_func_t *builtin, WORD_LIST *words, int flags, int su
 	  if (flags & CMD_COMMAND_BUILTIN)
 	    should_keep = 0;
 	  if (subshell == 0)
-	    add_unwind_protect (pop_scope, should_keep ? "1" : 0);
+	    add_unwind_protect (pop_scope, (void *) (intptr_t) should_keep);
           temporary_env = (HASH_TABLE *)NULL;	  
 	}
     }
@@ -4877,7 +4921,7 @@ execute_builtin (sh_builtin_func_t *builtin, WORD_LIST *words, int flags, int su
   if (posixly_correct && subshell == 0 && builtin == return_builtin && (flags & CMD_COMMAND_BUILTIN) == 0 && temporary_env)
     {
       begin_unwind_frame ("return_temp_env");
-      add_unwind_protect (merge_temporary_env, (char *)NULL);
+      add_unwind_protect (uw_merge_temporary_env, NULL);
     }
 
   executing_builtin++;
@@ -4908,7 +4952,7 @@ execute_builtin (sh_builtin_func_t *builtin, WORD_LIST *words, int flags, int su
 }
 
 static void
-maybe_restore_getopt_state (void *arg)
+uw_maybe_restore_getopt_state (void *arg)
 {
   sh_getopt_state_t *gs;
 
@@ -4938,6 +4982,12 @@ restore_funcarray_state (struct func_array_state *fa)
     array_pop (funcname_a);
 
   free (fa);
+}
+
+void
+uw_restore_funcarray_state (void *fa)
+{
+  restore_funcarray_state (fa);
 }
 #endif
 
@@ -4998,14 +5048,14 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
       /* This has to be before the pop_context(), because the unwinding of
 	 local variables may cause the restore of a local declaration of
 	 OPTIND to force a getopts state reset. */
-      add_unwind_protect (maybe_restore_getopt_state, gs);
-      add_unwind_protect (pop_context, (char *)NULL);
+      add_unwind_protect (uw_maybe_restore_getopt_state, gs);
+      add_unwind_protect (pop_context, NULL);
       unwind_protect_int (line_number);
       unwind_protect_int (line_number_for_err_trap);
       unwind_protect_int (function_line_number);
       unwind_protect_int (return_catch_flag);
       unwind_protect_jmp_buf (return_catch);
-      add_unwind_protect (dispose_command, (char *)tc);
+      add_unwind_protect (uw_dispose_command, (char *)tc);
       unwind_protect_pointer (this_shell_function);
       unwind_protect_int (funcnest);
       unwind_protect_int (loop_level);
@@ -5035,7 +5085,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
 	{
 	  debug_trap = savestring (debug_trap);
 	  add_unwind_protect (xfree, debug_trap);
-	  add_unwind_protect (maybe_set_debug_trap, debug_trap);
+	  add_unwind_protect (uw_maybe_set_debug_trap, debug_trap);
 	}
       restore_default_signal (DEBUG_TRAP);
     }
@@ -5047,7 +5097,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
 	{
 	  error_trap = savestring (error_trap);
 	  add_unwind_protect (xfree, error_trap);
-	  add_unwind_protect (maybe_set_error_trap, error_trap);
+	  add_unwind_protect (uw_maybe_set_error_trap, error_trap);
 	}
       restore_default_signal (ERROR_TRAP);
     }
@@ -5060,7 +5110,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
 	{
 	  return_trap = savestring (return_trap);
 	  add_unwind_protect (xfree, return_trap);
-	  add_unwind_protect (maybe_set_return_trap, return_trap);
+	  add_unwind_protect (uw_maybe_set_return_trap, return_trap);
 	}
       restore_default_signal (RETURN_TRAP);
     }
@@ -5088,7 +5138,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
   fa->funcname_a = (ARRAY *)funcname_a;
   fa->funcname_v = funcname_v;
   if (subshell == 0)
-    add_unwind_protect (restore_funcarray_state, fa);
+    add_unwind_protect (uw_restore_funcarray_state, fa);
 #endif
 
   /* The temporary environment for a function is supposed to apply to
@@ -5106,7 +5156,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
     {
       push_args (words->next);
       if (subshell == 0)
-	add_unwind_protect (pop_args, 0);
+	add_unwind_protect (uw_pop_args, 0);
     }
 
   /* Number of the line on which the function body starts. */
@@ -5205,7 +5255,7 @@ execute_shell_function (SHELL_VAR *var, WORD_LIST *words)
 
   bitmap = new_fd_bitmap (FD_BITMAP_DEFAULT_SIZE);
   begin_unwind_frame ("execute-shell-function");
-  add_unwind_protect (dispose_fd_bitmap, (char *)bitmap);
+  add_unwind_protect (uw_dispose_fd_bitmap, (char *)bitmap);
       
   ret = execute_function (var, words, 0, bitmap, 0, 0);
 
@@ -5386,7 +5436,7 @@ execute_builtin_or_function (WORD_LIST *words,
   if (saved_undo_list)
     {
       begin_unwind_frame ("saved-redirects");
-      add_unwind_protect (cleanup_redirects, (char *)saved_undo_list);
+      add_unwind_protect (uw_cleanup_redirects, (char *)saved_undo_list);
     }
 
   redirection_undo_list = (REDIRECT *)NULL;

@@ -118,7 +118,12 @@ extern void close_all_files (void);
 
 #if defined (ARRAY_VARS)
 extern void restore_funcarray_state (struct func_array_state *);
+extern void uw_restore_funcarray_state (void *);
 #endif
 
 extern void bind_lastarg (char *);
+
+extern void uw_dispose_fd_bitmap (void *);
+extern void uw_close (void *);
+
 #endif /* _EXECUTE_CMD_H_ */

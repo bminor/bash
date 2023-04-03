@@ -73,7 +73,6 @@ extern void initialize_traps (void);
 extern void run_pending_traps (void);
 
 extern void queue_sigchld_trap (int);
-extern void maybe_set_sigchld_trap (const char *);
 extern void set_impossible_sigchld_trap (void);
 extern void set_sigchld_trap (const char *);
 
@@ -81,9 +80,11 @@ extern void set_debug_trap (const char *);
 extern void set_error_trap (const char *);
 extern void set_return_trap (const char *);
 
-extern void maybe_set_debug_trap (const char *);
-extern void maybe_set_error_trap (const char *);
-extern void maybe_set_return_trap (const char *);
+extern void uw_set_error_trap (void *);
+extern void uw_maybe_set_sigchld_trap (void *);
+extern void uw_maybe_set_debug_trap (void *);
+extern void uw_maybe_set_error_trap (void *);
+extern void uw_maybe_set_return_trap (void *);
 
 extern void set_sigint_trap (const char *);
 extern void set_signal (int, const char *);

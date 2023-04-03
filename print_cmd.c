@@ -57,7 +57,8 @@ typedef void PFUNC (const char *, ...);
 static void cprintf (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
 static void xprintf (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
 
-static void reset_locals (void);
+static void uw_reset_locals (void *);
+
 static void newline (char *);
 static void indent (int);
 static void semicolon (void);
@@ -92,6 +93,11 @@ static void print_if_command (IF_COM *);
 static void print_cond_node (COND_COM *);
 #endif
 static void print_function_def (FUNCTION_DEF *);
+
+#ifdef DEBUG
+void debug_print_word_list (char *, WORD_LIST *, char *);
+void debug_print_cond_command (COND_COM *);
+#endif
 
 #define PRINTED_COMMAND_INITIAL_SIZE 64
 #define PRINTED_COMMAND_GROW_SIZE 128
@@ -1241,7 +1247,7 @@ print_redirection (REDIRECT *redirect)
 }
 
 static void
-reset_locals (void)
+uw_reset_locals (void *ignore)
 {
   inside_function_def = 0;
   indentation = 0;
@@ -1267,7 +1273,7 @@ print_function_def (FUNCTION_DEF *func)
     cprintf ("%s () \n", func->name->word);
 
   begin_unwind_frame ("function-def");
-  add_unwind_protect (reset_locals, 0);
+  add_unwind_protect (uw_reset_locals, 0);
 
   indent (indentation);
   cprintf ("{ \n");	/* } */

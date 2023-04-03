@@ -1,7 +1,7 @@
 This file is jobs.def, from which is created jobs.c.
 It implements the builtins "jobs" and "disown" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -206,7 +206,7 @@ execute_list_with_replacements (WORD_LIST *list)
   command->flags |= CMD_INHIBIT_EXPANSION;
   command->value.Simple->flags |= CMD_INHIBIT_EXPANSION;
 
-  add_unwind_protect (dispose_command, command);
+  add_unwind_protect (uw_dispose_command, command);
   result = execute_command (command);
   dispose_command (command);
 

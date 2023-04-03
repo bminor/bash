@@ -65,11 +65,11 @@ typedef struct {
 typedef union uwp {
   struct uwp_head {
     union uwp *next;
-    Function *cleanup;
+    sh_uwfunc_t *cleanup;
   } head;
   struct {
     struct uwp_head uwp_head;
-    char *v;
+    void *v;
   } arg;
   struct {
     struct uwp_head uwp_head;
@@ -79,12 +79,12 @@ typedef union uwp {
 
 static void unwind_frame_discard_internal (char *);
 static void unwind_frame_run_internal (char *);
-static void add_unwind_protect_internal (Function *, char *);
+static void add_unwind_protect_internal (sh_uwfunc_t *, void *);
 static void remove_unwind_protect_internal (void);
 static void run_unwind_protects_internal (void);
 static void clear_unwind_protects_internal (int);
-static inline void restore_variable (SAVED_VAR *);
-static void unwind_protect_mem_internal (char *, char *);
+static inline void restore_variable (void *);
+static void unwind_protect_mem_internal (void *, int);
 
 static UNWIND_ELT *unwind_protect_list = (UNWIND_ELT *)NULL;
 
@@ -132,7 +132,7 @@ run_unwind_frame (char *tag)
 
 /* Add the function CLEANUP with ARG to the list of unwindable things. */
 void
-add_unwind_protect (Function *cleanup, char *arg)
+add_unwind_protect (sh_uwfunc_t *cleanup, void *arg)
 {
   add_unwind_protect_internal (cleanup, arg);
 }
@@ -189,7 +189,7 @@ unwind_protect_tag_on_stack (const char *tag)
 /* **************************************************************** */
 
 static void
-add_unwind_protect_internal (Function *cleanup, char *arg)
+add_unwind_protect_internal (sh_uwfunc_t *cleanup, void *arg)
 {
   UNWIND_ELT *elt;
 
@@ -258,8 +258,10 @@ unwind_frame_discard_internal (char *tag)
    sv->desired_setting is a block of memory SIZE bytes long holding the
    value itself.  This block of memory is copied back into the variable. */
 static inline void
-restore_variable (SAVED_VAR *sv)
+restore_variable (void *arg)
 {
+  SAVED_VAR *sv;
+  sv = arg;
   FASTCOPY (sv->desired_setting, sv->variable, sv->size);
 }
 
@@ -286,7 +288,7 @@ unwind_frame_run_internal (char *tag)
 	}
       else
 	{
-	  if (elt->head.cleanup == (Function *) restore_variable)
+	  if (elt->head.cleanup == restore_variable)
 	    restore_variable (&elt->sv.v);
 	  else
 	    (*(elt->head.cleanup)) (elt->arg.v);
@@ -299,19 +301,17 @@ unwind_frame_run_internal (char *tag)
 }
 
 static void
-unwind_protect_mem_internal (char *var, char *psize)
+unwind_protect_mem_internal (void *var, int size)
 {
-  int size;
   size_t allocated;
   UNWIND_ELT *elt;
 
-  size = *(int *) psize;
   allocated = size + offsetof (UNWIND_ELT, sv.v.desired_setting[0]);
   if (allocated < sizeof (UNWIND_ELT))
     allocated = sizeof (UNWIND_ELT);
   elt = (UNWIND_ELT *)xmalloc (allocated);
   elt->head.next = unwind_protect_list;
-  elt->head.cleanup = (Function *) restore_variable;
+  elt->head.cleanup = restore_variable;
   elt->sv.v.variable = var;
   elt->sv.v.size = size;
   FASTCOPY (var, elt->sv.v.desired_setting, size);
@@ -324,7 +324,7 @@ unwind_protect_mem_internal (char *var, char *psize)
 void
 unwind_protect_mem (char *var, int size)
 {
-  unwind_protect_mem_internal (var, (char *) &size);
+  unwind_protect_mem_internal (var, size);
 }
 
 #if defined (DEBUG)
@@ -339,7 +339,7 @@ print_unwind_protect_tags (void)
   while (elt)
     {
       if (elt->head.cleanup == 0)
-        fprintf(stderr, "tag: %s\n", elt->arg.v);
+        fprintf(stderr, "tag: %s\n", (char *)elt->arg.v);
       elt = elt->head.next;
     }
 }

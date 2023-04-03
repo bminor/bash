@@ -247,7 +247,7 @@ file_error_and_exit:
   fa->funcname_a = funcname_a;
   fa->funcname_v = funcname_v;
   if (flags & FEVAL_UNWINDPROT)
-    add_unwind_protect (restore_funcarray_state, fa);
+    add_unwind_protect (uw_restore_funcarray_state, fa);
 
 #  if defined (DEBUGGER)
   /* Have to figure out a better way to do this when `source' is supplied
@@ -260,7 +260,7 @@ file_error_and_exit:
       tt[0] = '1'; tt[1] = '\0';
       array_push (bash_argc_a, tt);
       if (flags & FEVAL_UNWINDPROT)
-	add_unwind_protect (pop_args, 0);
+	add_unwind_protect (uw_pop_args, 0);
     }
 #  endif
 #endif

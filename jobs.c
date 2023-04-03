@@ -4148,7 +4148,7 @@ run_sigchld_trap (int nchild)
      in reverse order of adding.  We don't want maybe_set_sigchld_trap ()
      to reference freed memory. */
   add_unwind_protect (xfree, trap_command);
-  add_unwind_protect (maybe_set_sigchld_trap, trap_command);
+  add_unwind_protect (uw_maybe_set_sigchld_trap, trap_command);
 
   subst_assign_varlist = (WORD_LIST *)NULL;
   the_pipeline = (PROCESS *)NULL;

@@ -70,17 +70,36 @@ static int cat_file (REDIRECT *);
 
 #if defined (HISTORY)
 static void
-set_history_remembering (void)
+uw_set_history_remembering (void *ignore)
 {
   remember_on_history = enable_history_list;
 }
+
 #endif
 
 static void
-restore_lastcom (char *x)
+uw_restore_lastcom (void *x)
 {
   FREE (the_printed_command_except_trap);
   the_printed_command_except_trap = x;
+}
+
+static void
+uw_set_current_prompt_level (void *x)
+{
+  set_current_prompt_level ((intptr_t) x);
+}
+
+static void
+uw_pop_stream (void *x)
+{
+  pop_stream ();
+}
+
+static void
+uw_parser_restore_alias (void *x)
+{
+  parser_restore_alias ();
 }
 
 int
@@ -227,7 +246,7 @@ parse_prologue (char *string, int flags, char *tag)
 
 #if defined (HISTORY)
   if (parse_and_execute_level == 0)
-    add_unwind_protect (set_history_remembering, (char *)NULL);
+    add_unwind_protect (uw_set_history_remembering, (char *)NULL);
   else
     unwind_protect_int (remember_on_history);	/* can be used in scripts */
 #  if defined (BANG_HISTORY)
@@ -238,18 +257,18 @@ parse_prologue (char *string, int flags, char *tag)
   if (interactive_shell)
     {
       x = get_current_prompt_level ();
-      add_unwind_protect (set_current_prompt_level, x);
+      add_unwind_protect (uw_set_current_prompt_level, (void *) (intptr_t) x);
     }
 
   if (the_printed_command_except_trap)
     {
       lastcom = savestring (the_printed_command_except_trap);
-      add_unwind_protect (restore_lastcom, lastcom);
+      add_unwind_protect (uw_restore_lastcom, lastcom);
     }
 
-  add_unwind_protect (pop_stream, (char *)NULL);
+  add_unwind_protect (uw_pop_stream, (char *)NULL);
   if (parser_expanding_alias ())
-    add_unwind_protect (parser_restore_alias, (char *)NULL);
+    add_unwind_protect (uw_parser_restore_alias, (char *)NULL);
 
   if (orig_string && ((flags & SEVAL_NOFREE) == 0))
     add_unwind_protect (xfree, orig_string);
@@ -455,8 +474,8 @@ parse_and_execute (char *string, const char *from_file, int flags)
 
 	      bitmap = new_fd_bitmap (FD_BITMAP_SIZE);
 	      begin_unwind_frame ("pe_dispose");
-	      add_unwind_protect (dispose_fd_bitmap, bitmap);
-	      add_unwind_protect (dispose_command, command);	/* XXX */
+	      add_unwind_protect (uw_dispose_fd_bitmap, bitmap);
+	      add_unwind_protect (uw_dispose_command, command);	/* XXX */
 
 	      global_command = (COMMAND *)NULL;
 

@@ -150,9 +150,17 @@ typedef struct {
 #endif /* !__GNUC__ */
 
 /* String comparisons that possibly save a function call each. */
-#define STREQ(a, b) ((a)[0] == (b)[0] && strcmp(a, b) == 0)
-#define STREQN(a, b, n) ((n == 0) ? (1) \
-				  : ((a)[0] == (b)[0] && strncmp(a, b, n) == 0))
+static inline int
+STREQ(const char *a, const char *b)
+{
+  return ((a)[0] == (b)[0] && strcmp(a, b) == 0);
+}
+
+static inline int
+STREQN(const char *a, const char *b, size_t n)
+{
+  return ((n == 0) || ((a)[0] == (b)[0] && strncmp(a, b, n) == 0));
+}
 
 /* More convenience definitions that possibly save system or libc calls. */
 #define STRLEN(s) (((s) && (s)[0]) ? ((s)[1] ? ((s)[2] ? strlen(s) : 2) : 1) : 0)
@@ -176,15 +184,6 @@ typedef struct {
 	str = xrealloc (str, csize); \
       } \
   } while (0)
-
-/* Function pointers can be declared as (Function *)foo. */
-#if !defined (_FUNCTION_DEF)
-#  define _FUNCTION_DEF
-typedef int Function ();
-typedef void VFunction ();
-typedef char *CPFunction ();		/* no longer used */
-typedef char **CPPFunction ();		/* no longer used */
-#endif /* _FUNCTION_DEF */
 
 #ifndef SH_FUNCTION_TYPEDEF
 #  define SH_FUNCTION_TYPEDEF

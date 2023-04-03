@@ -732,7 +732,7 @@ sub_append_string (char *source, char *target, size_t *indx, size_t *size)
       size_t n, srclen;
 
       srclen = STRLEN (source);
-      if (srclen >= (*size - *indx))
+      if ((srclen + *indx) >= *size)
 	{
 	  n = srclen + *indx;
 	  n = (n + DEFAULT_ARRAY_SIZE) - (n % DEFAULT_ARRAY_SIZE);
@@ -6028,7 +6028,7 @@ static pid_t *dev_fd_list = (pid_t *)NULL;
 static int nfds;
 static int totfds;	/* The highest possible number of open files. */
 
-void
+static void
 clear_fifo (int i)
 {
   if (dev_fd_list[i])
@@ -6960,7 +6960,7 @@ command_substitute (char *string, int quoted, int flags)
 
       begin_unwind_frame ("read-comsub");
       dummyfd = fildes[0];
-      add_unwind_protect (close, dummyfd);
+      add_unwind_protect (uw_close, (void *) (intptr_t) dummyfd);
 
       /* Block SIGINT while we're reading from the pipe. If the child
 	 process gets a SIGINT, it will either handle it or die, and the

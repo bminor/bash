@@ -167,9 +167,15 @@ static void fc_addhist (char *);
 #endif
 
 static void
-set_verbose_flag (void)
+uw_set_verbose_flag (void *ignore)
 {
   echo_input_at_read = verbose_flag;
+}
+
+static void
+uw_unlink (void *fn)
+{
+  unlink ((const char *)fn);
 }
 
 /* String to execute on a file that we want to edit. */
@@ -525,8 +531,8 @@ fc_builtin (WORD_LIST *list)
      will be echoed as they are read by the parser. */
   begin_unwind_frame ("fc builtin");
   add_unwind_protect (xfree, fn);
-  add_unwind_protect (unlink, fn);
-  add_unwind_protect (set_verbose_flag, (char *)NULL);
+  add_unwind_protect (uw_unlink, fn);
+  add_unwind_protect (uw_set_verbose_flag, (char *)NULL);
   unwind_protect_int (suppress_debug_trap_verbose);
   echo_input_at_read = 1;
   suppress_debug_trap_verbose = 1;

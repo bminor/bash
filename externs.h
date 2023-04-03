@@ -201,8 +201,10 @@ extern long get_clk_tck (void);
 /* declarations for functions defined in lib/sh/clock.c */
 /* No prototypes so we don't have to have clock_t defined when this file
    is included. */
-extern void clock_t_to_secs ();
-extern void print_clock_t ();
+#ifdef NEED_CLOCK_FUNCS_DECL
+extern void clock_t_to_secs (clock_t, time_t *, int *);
+extern void print_clock_t (FILE *, clock_t);
+#endif
 
 /* Declarations for functions defined in lib/sh/dprintf.c */
 #if !defined (HAVE_DPRINTF)
@@ -484,8 +486,10 @@ extern char *sh_strvis (const char *);
 /* declarations for functions defined in lib/sh/timeval.c.  No prototypes
    so we don't have to count on having a definition of struct timeval in
    scope when this file is included. */
-extern void timeval_to_secs ();
-extern void print_timeval ();
+#ifdef NEED_TIMEVAL_FUNCS_DECL
+extern void timeval_to_secs (struct timeval *, time_t *, int *);
+extern void print_timeval (FILE *, struct timeval *);
+#endif
 
 /* declarations for functions defined in lib/sh/tmpfile.c */
 #define MT_USETMPDIR		0x0001

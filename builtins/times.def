@@ -43,7 +43,6 @@ $END
 
 #include <stdio.h>
 #include "../bashtypes.h"
-#include "../shell.h"
 
 #include <posixtime.h>
 
@@ -55,6 +54,10 @@ $END
 #  include <sys/resource.h>
 #endif
 
+#define NEED_CLOCK_FUNCS_DECL
+#define NEED_TIMEVAL_FUNCS_DECL
+
+#include "../shell.h"
 #include "common.h"
 
 /* Print the totals for system and user time used. */

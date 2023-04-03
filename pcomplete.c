@@ -135,7 +135,7 @@ static char *pcomp_filename_completion_function (const char *, int);
 static SHELL_VAR *bind_comp_words (WORD_LIST *);
 #endif
 static void bind_compfunc_variables (char *, int, WORD_LIST *, int, int);
-static void unbind_compfunc_variables (int);
+static void unbind_compfunc_variables (void *);		/* XXX uw_ */
 static WORD_LIST *build_arg_list (const char *, const char *, const char *, WORD_LIST *, int);
 static WORD_LIST *command_line_to_word_list (char *, int, int, int *, int *);
 
@@ -982,7 +982,7 @@ bind_compfunc_variables (char *line, int ind, WORD_LIST *lwords, int cw, int exp
 }
 
 static void
-unbind_compfunc_variables (int exported)
+unbind_compfunc_variables (void *exported)
 {
   unbind_variable_noref ("COMP_LINE");
   unbind_variable_noref ("COMP_POINT");
@@ -1033,6 +1033,18 @@ build_arg_list (const char *cmd, const char *cname, const char *text, WORD_LIST 
   cl->next = make_word_list (w, (WORD_LIST *)NULL);
 
   return ret;
+}
+
+static void
+uw_restore_parser_state (void *ps)
+{
+  restore_parser_state (ps);
+}
+
+static void
+uw_rl_set_signals (void *ignore)
+{
+  rl_set_signals ();
 }
 
 /* Build a command string with
@@ -1091,12 +1103,12 @@ gen_shell_function_matches (COMPSPEC *cs, const char *cmd, const char *text,
   pps = &ps;
   save_parser_state (pps);
   begin_unwind_frame ("gen-shell-function-matches");
-  add_unwind_protect (restore_parser_state, (char *)pps);
-  add_unwind_protect (dispose_words, (char *)cmdlist);
-  add_unwind_protect (unbind_compfunc_variables, (char *)0);
+  add_unwind_protect (uw_restore_parser_state, pps);
+  add_unwind_protect (uw_dispose_words, cmdlist);
+  add_unwind_protect (unbind_compfunc_variables, NULL);
   if (local_compgen == 0)
     {
-      add_unwind_protect (rl_set_signals, (char *)NULL);
+      add_unwind_protect (uw_rl_set_signals, (char *)NULL);
       rl_clear_signals ();
     }
 
@@ -1206,7 +1218,7 @@ gen_command_matches (COMPSPEC *cs, const char *cmd, const char *text,
   /* Now clean up and destroy everything. */
   dispose_words (cmdlist);
   free (cscmd);
-  unbind_compfunc_variables (1);
+  unbind_compfunc_variables ("");
 
   if (csbuf == 0 || *csbuf == '\0')
     {
@@ -1227,7 +1239,7 @@ gen_command_matches (COMPSPEC *cs, const char *cmd, const char *text,
 	  we++;
 	}
       t = substring (csbuf, ws, we);
-      if (sl->list_len >= sl->list_size - 1)
+      if (sl->list_len + 1 >= sl->list_size)
 	strlist_resize (sl, sl->list_size + 16);
       sl->list[sl->list_len++] = t;
       while (csbuf[we] == '\n') we++;

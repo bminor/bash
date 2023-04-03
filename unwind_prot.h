@@ -35,7 +35,7 @@ extern void uwp_init (void);
 extern void begin_unwind_frame (char *);
 extern void discard_unwind_frame (char *);
 extern void run_unwind_frame (char *);
-extern void add_unwind_protect (); /* Not portable to arbitrary C99 hosts.  */
+extern void add_unwind_protect (sh_uwfunc_t *, void *);
 extern void remove_unwind_protect (void);
 extern void run_unwind_protects (void);
 extern void clear_unwind_protect_list (int);

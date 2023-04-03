@@ -345,12 +345,12 @@ extern void dispose_var_context (VAR_CONTEXT *);
 extern VAR_CONTEXT *push_var_context (char *, int, HASH_TABLE *);
 extern void pop_var_context (void);
 extern VAR_CONTEXT *push_scope (int, HASH_TABLE *);
-extern void pop_scope (int);
+extern void pop_scope (void *);		/* XXX uw_ */
 
 extern void clear_dollar_vars (void);
 
 extern void push_context (char *, int, HASH_TABLE *);
-extern void pop_context (void);
+extern void pop_context (void *);	/* XXX uw_ */
 extern void push_dollar_vars (void);
 extern void pop_dollar_vars (void);
 extern void dispose_saved_dollar_vars (void);
@@ -359,6 +359,7 @@ extern void init_bash_argv (void);
 extern void save_bash_argv (void);
 extern void push_args (WORD_LIST *);
 extern void pop_args (void);
+extern void uw_pop_args (void *);
 
 extern void adjust_shell_level (int);
 extern void non_unsettable (char *);
@@ -367,6 +368,7 @@ extern void dispose_used_env_vars (void);
 extern void dispose_function_env (void);
 extern void dispose_builtin_env (void);
 extern void merge_temporary_env (void);
+extern void merge_function_temporary_env (void);
 extern void flush_temporary_env (void);
 extern void merge_builtin_env (void);
 extern void kill_all_local_variables (void);

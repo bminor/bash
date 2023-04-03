@@ -5917,3 +5917,30 @@ unwind_prot.h
 	- introduce new unwind-protect function pointer type to replace
 	  Function
 	  From Paul Eggert <eggert@cs.ucla.edu>
+
+				   3/30
+				   ----
+builtins/command.def,builtins/fc.def,builtins/read.def,builtins/source.def
+builtins/evalfile.c,builtins/evalstring.c
+dispose_cmd.c,execute_cmd.c,pcomplete.c,print_cmd.c,subst.c,jobs.c,variables.c
+dispose_cmd.h,general.h,trap.h
+unwind_prot.c,unwind_prot.h
+	- rest of work to convert unwind-protect framework to ANSI/ISO C.
+	  Convert unwind-protects to use new shim functions that obey the new
+	  unwind-protect function type
+	  From Paul Eggert <eggert@cs.ucla.edu>
+
+general.h
+	- STREQ, STREQN: now static inline functions to take advantage of arg
+	  type conversion
+
+pcomplete.c,subst.c
+lib/readline/histexpand.c,lib/readline/mbutil.c
+	- fix size_t subtractions in comparisons to avoid unsigned underflow
+
+externs.h
+execute_cmd.c
+builtins/times.h
+	- add prototypes for functions taking clock_t and timeval, make their
+	  declaration in externs.h conditional on NEED_CLOCK_FUNCS_DECL and
+	  NEED_TIMEVAL_FUNCS_DECL, respectively

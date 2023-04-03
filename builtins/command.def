@@ -1,7 +1,7 @@
 This file is command.def, from which is created command.c.
 It implements the builtin "command" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -131,7 +131,7 @@ command_builtin (WORD_LIST *list)
   command->flags |= COMMAND_BUILTIN_FLAGS;
   command->value.Simple->flags |= COMMAND_BUILTIN_FLAGS;
 
-  add_unwind_protect ((char *)dispose_command, command);
+  add_unwind_protect (uw_dispose_command, command);
   result = execute_command (command);
 
   run_unwind_frame ("command_builtin");

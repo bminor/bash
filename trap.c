@@ -652,10 +652,10 @@ set_sigchld_trap (const char *command_string)
    reset the disposition to the default and not have the original signal
    accidentally restored, undoing the user's command. */
 void
-maybe_set_sigchld_trap (const char *command_string)
+uw_maybe_set_sigchld_trap (void *command_string)
 {
   if ((sigmodes[SIGCHLD] & SIG_TRAPPED) == 0 && trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER)
-    set_signal (SIGCHLD, command_string);
+    set_signal (SIGCHLD, (const char *)command_string);
 }
 
 /* Temporarily set the SIGCHLD trap string to IMPOSSIBLE_TRAP_HANDLER.  Used
@@ -666,7 +666,7 @@ set_impossible_sigchld_trap (void)
 {
   restore_default_signal (SIGCHLD);
   change_signal (SIGCHLD, (char *)IMPOSSIBLE_TRAP_HANDLER);
-  sigmodes[SIGCHLD] &= ~SIG_TRAPPED;	/* maybe_set_sigchld_trap checks this */
+  sigmodes[SIGCHLD] &= ~SIG_TRAPPED;	/* uw_maybe_set_sigchld_trap checks this */
 }
 
 /* Act as if we received SIGCHLD NCHILD times and increment
@@ -705,7 +705,7 @@ set_debug_trap (const char *command)
    SIG_TRAPPED will be set and we don't bother restoring the original trap string.
    This is used by both functions and the source builtin. */
 void
-maybe_set_debug_trap (const char *command)
+uw_maybe_set_debug_trap (void *command)
 {
   trap_if_untrapped (DEBUG_TRAP, command);
 }
@@ -717,7 +717,13 @@ set_error_trap (const char *command)
 }
 
 void
-maybe_set_error_trap (const char *command)
+uw_set_error_trap (void *command)
+{
+  set_error_trap (command);
+}
+
+void
+uw_maybe_set_error_trap (void *command)
 {
   trap_if_untrapped (ERROR_TRAP, command);
 }
@@ -729,7 +735,7 @@ set_return_trap (const char *command)
 }
 
 void
-maybe_set_return_trap (const char *command)
+uw_maybe_set_return_trap (void *command)
 {
   trap_if_untrapped (RETURN_TRAP, command);
 }
