@@ -4063,7 +4063,7 @@ char *
 expand_string_dollar_quote (const char *string, int flags)
 {
   size_t slen, retind, retsize;
-  int sindex, c, peekc, news;
+  int sindex, c, peekc, news, tlen;
   char *ret, *trans, *t;
   size_t translen;
   const char *send;
@@ -4100,7 +4100,7 @@ expand_string_dollar_quote (const char *string, int flags)
 	    news = skip_single_quoted (string, slen, ++sindex, SX_COMPLETE);
 	  else
 	    news = skip_double_quoted (string, slen, ++sindex, SX_COMPLETE);
-	  translen = news - sindex - 1;
+	  translen = (news > sindex) ? news - sindex - 1 : 0;
 	  RESIZE_MALLOCED_BUFFER (ret, retind, translen + 3, retsize, 64);
 	  ret[retind++] = c;
 	  if (translen > 0)

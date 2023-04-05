@@ -756,7 +756,7 @@ open_redir_file (REDIRECT *r, char **fnp)
   fd = open(fn, O_RDONLY);
   if (fd < 0)
     {
-      file_error (fn);
+      internal_error ("%s: %s", fn, strerror (errno));
       free (fn);
       if (fnp)
 	*fnp = 0;

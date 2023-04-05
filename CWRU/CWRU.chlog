@@ -5944,3 +5944,28 @@ builtins/times.h
 	- add prototypes for functions taking clock_t and timeval, make their
 	  declaration in externs.h conditional on NEED_CLOCK_FUNCS_DECL and
 	  NEED_TIMEVAL_FUNCS_DECL, respectively
+
+				   3/31
+				   ----
+subst.c
+	- expand_string_dollar_quote: check for zero-length return from
+	  string_extract_{single,double}_quoted and avoid size_t underflow
+	  Fixes asan error reported by Grisha Levit <grishalevit@gmail.com>
+
+				    4/3
+				    ---
+builtins/evalstring.c
+	- open_redir_file: treat the case of failing to open the file as a
+	  non-fatal expansion error instead of a (fatal) redirection error.
+	  Report from Zev Weiss <zev@bewilderbeest.net>
+
+				    4/4
+				    ---
+lib/readline/vi_mode.c
+	- _rl_domove_motion_cleanup: d/D require the same special case as c/C
+	  so that a motion command that doesn't move the cursor consumes/deletes
+	  at least one character.
+	  From Emanuele Torre <torreemanuele6@gmail.com>
+	- _rl_domove_motion_cleanup: ditto for y/Y
+	- rl_domove_motion_callback: if t/T/;/, fail (return non-zero without
+	  moving point), flag the motion command as having failed (MOVE_FAILED)
