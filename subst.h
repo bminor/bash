@@ -350,6 +350,7 @@ extern int expanding_redir;
 extern int inherit_errexit;
 
 extern pid_t last_command_subst_pid;
+extern int last_command_subst_status;
 
 /* Evaluates to 1 if C is a character in $IFS. */
 #define isifs(c)	(ifs_cmap[(unsigned char)(c)] != 0)

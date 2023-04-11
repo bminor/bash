@@ -4123,7 +4123,7 @@ execute_null_command (REDIRECT *redirects, int pipe_in, int pipe_out, int async)
       if (r != 0)
 	return (EXECUTION_FAILURE);
       else if (last_command_subst_pid != NO_PID)
-	return (last_command_exit_value);
+	return (last_command_subst_status);
       else
 	return (EXECUTION_SUCCESS);
     }

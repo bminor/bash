@@ -74,6 +74,8 @@ volatile sig_atomic_t sigterm_received = 0;
 /* Set to the value of any terminating signal received. */
 volatile sig_atomic_t terminating_signal = 0;
 
+volatile int builtin_catch_sigpipe = 0;
+
 /* The environment at the top-level R-E loop.  We use this in
    the case of error return. */
 procenv_t top_level;
@@ -591,6 +593,9 @@ termsig_handler (int sig)
   handling_termsig = terminating_signal;	/* for termsig_sighandler */
   terminating_signal = 0;	/* keep macro from re-testing true. */
 
+  if (builtin_catch_sigpipe)
+    sigpipe_handler (sig);
+
   /* I don't believe this condition ever tests true. */
   if (sig == SIGINT && signal_is_trapped (SIGINT))
     run_interrupt_trap (0);
@@ -714,6 +719,7 @@ sigint_sighandler (int sig)
       set_exit_status (128 + sig);
       throw_to_top_level ();
     }
+
 #if defined (READLINE)
   /* Set the event hook so readline will call it after the signal handlers
      finish executing, so if this interrupted character input we can get
@@ -761,6 +767,15 @@ sigterm_sighandler (int sig)
   sigterm_received = 1;		/* XXX - counter? */
   SIGRETURN (0);
 }
+
+void
+sigpipe_handler (int sig)
+{
+  handling_termsig = 0;
+  builtin_catch_sigpipe = 0;
+  last_command_exit_value = 128 + sig;
+  throw_to_top_level ();
+}  
 
 /* Signal functions used by the rest of the code. */
 #if !defined (HAVE_POSIX_SIGNALS)

@@ -149,6 +149,7 @@ typedef WORD_LIST *EXPFUNC (const char *, int);
 /* Process ID of the last command executed within command substitution. */
 pid_t last_command_subst_pid = NO_PID;
 pid_t current_command_subst_pid = NO_PID;
+int last_command_subst_status = 0;
 
 /* Variables used to keep track of the characters in IFS. */
 SHELL_VAR *ifs_var;
@@ -6723,12 +6724,15 @@ command_substitute (char *string, int quoted, int flags)
 	  istring = optimize_cat_file (cmd->value.Simple->redirects, quoted, flags, &tflag);
 	  if (istring == &expand_param_error)
 	    {
-	      last_command_exit_value = EXECUTION_FAILURE;
+	      last_command_subst_status = EXECUTION_FAILURE;
 	      istring = 0;
 	    }
 	  else
-	    last_command_exit_value = EXECUTION_SUCCESS;	/* compat */
+	    last_command_subst_status = EXECUTION_SUCCESS;	/* compat */
 	  last_command_subst_pid = dollar_dollar_pid;
+
+	  if (posixly_correct == 0)	/* POSIX interp 1150 */
+	    last_command_exit_value = last_command_subst_status;	/* XXX */
 
 	  dispose_command (cmd);	  
 	  ret = alloc_word_desc ();
@@ -6974,9 +6978,12 @@ command_substitute (char *string, int quoted, int flags)
       UNBLOCK_SIGNAL (oset);
 
       current_command_subst_pid = pid;
-      last_command_exit_value = wait_for (pid, JWAIT_NOTERM);
+      last_command_subst_status = wait_for (pid, JWAIT_NOTERM);
       last_command_subst_pid = pid;
       last_made_pid = old_pid;
+
+      if (posixly_correct == 0)		/* POSIX interp 1150 */
+	last_command_exit_value = last_command_subst_status;	/* XXX */
 
 #if defined (JOB_CONTROL)
       /* If last_command_exit_value > 128, then the substituted command
@@ -7626,7 +7633,24 @@ parameter_brace_expand_rhs (char *name, char *value,
 	  return &expand_wdesc_error;
 	}
     }
-    
+  /* We check for this here instead of letting bind_variable do it so we can
+     satisfy the POSIX semantics of returning the final value assigned to the
+     variable, even after assignment transformations (uppercase, lowercase, etc.).
+     We need the final name to get the right value back. */
+  else if ((v = find_variable_last_nameref (name, 0)) && nameref_p (v))
+    {
+      temp = nameref_cell (v);
+      /* shouldn't happen at this point, but... */
+      if (temp == 0 || *temp == 0)
+	{
+	  report_error (_("%s: bad substitution"), name);
+	  free (t1);
+	  dispose_word (w);
+	  return &expand_wdesc_error;
+	}
+      vname = savestring (temp);
+    }
+
   arrayref = 0;
 #if defined (ARRAY_VARS)
   if (valid_array_reference (vname, 0))

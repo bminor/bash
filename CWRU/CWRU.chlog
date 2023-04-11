@@ -5969,3 +5969,35 @@ lib/readline/vi_mode.c
 	- _rl_domove_motion_cleanup: ditto for y/Y
 	- rl_domove_motion_callback: if t/T/;/, fail (return non-zero without
 	  moving point), flag the motion command as having failed (MOVE_FAILED)
+
+				    4/6
+				    ---
+subst.c
+	- command_substitute: save the return status of the child process in
+	  last_command_subst_status; don't assign to last_command_exit_value
+	  in posix mode (posix interp 1150)
+
+execute_cmd.c
+	- execute_null_command: a simple command without a command word but
+	  with command substitutions now returns last_command_subst_status.
+	  It may or may not have already modified $? depending on posix mode
+
+redir.c
+	- redir_varvalue: legal_number validity check should be == 0, not < 0
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   4/10
+				   ----
+subst.c
+	- parameter_brace_expand_rhs: check for namerefs in the variable name
+	  part of the ${name=word} expansion so we can go back and implement
+	  the POSIX semantics of returning "the final value of parameter."
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+sig.c,sig.h
+	- sigpipe_handler: clean up, set $?, and throw to top level on receipt
+	  of a SIGPIPE
+	- termsig_handler: if the variable builtin_catch_sigpipe is set (it's
+	  not set anywhere yet), call sigpipe_handler instead of terminating
+	  the shell. Still need to make sure a sighandler is installed for
+	  SIGPIPE even if initialize_terminating_signals isn't called

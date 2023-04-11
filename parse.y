@@ -5891,7 +5891,7 @@ decode_prompt_string (char *string)
   WORD_LIST *list;
   char *result, *t, *orig_string;
   struct dstack save_dstack;
-  int last_exit_value, last_comsub_pid;
+  int last_exit_value, last_comsub_pid, last_comsub_status;
 #if defined (PROMPT_STRING_DECODE)
   size_t result_size;
   size_t result_index;
@@ -6297,12 +6297,14 @@ not_escape:
     {
       last_exit_value = last_command_exit_value;
       last_comsub_pid = last_command_subst_pid;
+      last_comsub_status = last_command_subst_status;
       list = expand_prompt_string (result, Q_DOUBLE_QUOTES, 0);
       free (result);
       result = string_list (list);
       dispose_words (list);
       last_command_exit_value = last_exit_value;
       last_command_subst_pid = last_comsub_pid;
+      last_command_subst_status = last_comsub_status;
     }
   else
     {

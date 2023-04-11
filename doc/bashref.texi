@@ -8561,6 +8561,13 @@ undergoes expansion.
 That means, for example, that a backslash preceding a double quote
 character will escape it and the backslash will be removed.
 
+@item
+Command substitutions don't set the @samp{?} special parameter. The exit
+status of a simple command without a command word is still the exit status
+of the last command substitution that occurred while evaluating the variable
+assignments and redirections in that command, but that does not happen until
+after all of the assignments and redirections.
+
 @end enumerate
 
 There is other @sc{posix} behavior that Bash does not implement by

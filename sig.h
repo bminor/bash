@@ -108,6 +108,8 @@ extern volatile sig_atomic_t sigterm_received;
 extern int interrupt_immediately;	/* no longer used */
 extern int terminate_immediately;
 
+extern volatile int builtin_catch_sigpipe;	/* not used yet */
+
 /* Functions from sig.c. */
 extern sighandler termsig_sighandler (int);
 extern void termsig_handler (int);
@@ -125,6 +127,8 @@ extern void set_sigwinch_handler (void);
 extern void unset_sigwinch_handler (void);
 
 extern sighandler sigterm_sighandler (int);
+
+extern void sigpipe_handler (int);
 
 /* Functions defined in trap.c. */
 extern SigHandler *set_sigint_handler (void);
