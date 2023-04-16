@@ -46,7 +46,7 @@ cb_linehandler (char *line)
 }
 
 static char *
-cb_readline ()
+cb_readline (void)
 {
   fd_set fds;
   int r, err;
@@ -102,15 +102,13 @@ else if (RL_ISSTATE (RL_STATE_NSEARCH))
 }
 
 void
-sigint_sighandler (s)
-     int s;
+sigint_sighandler (int s)
 {
   saw_signal = s;
 }
 
 int
-sigint_handler (s)
-     int s;
+sigint_handler (int s)
 {
   rl_free_line_state ();
   rl_callback_sigcleanup ();

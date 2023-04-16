@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Mar 14 16:19:06 EDT 2023
+.\"	Last Change: Sat Apr 15 17:52:31 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 March 14" "GNU Bash 5.2"
+.TH BASH 1 "2023 April 15" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2248,6 +2248,32 @@ of the patterns in
 .BR GLOBIGNORE ,
 it is removed from the list of matches.
 .TP
+.B GLOBSORT
+Control how the results of pathname expansion are sorted.
+The value of this variable specifies the sort criteria and sort order for
+the results of pathname expansion.
+If this variable is unset or set to the null string, pathname expansion
+uses the historial behavior of sorting by name.
+If set, a valid value begins with an optional \fI+\fP, which is ignored,
+or \fI\-\fP, which reverses the sort order from ascending to descending,
+followed by a sort specifier.
+The valid sort specifiers are
+.IR name ,
+.IR size ,
+.IR mtime ,
+.IR atime ,
+.IR ctime ,
+and
+.IR blocks ,
+which sort the files on name, file size, modification time, access time,
+inode change time, and number of blocks, respectively.
+For example, a value of \fB\-mtime\fP sorts the results in descending
+order by modification time (newest first).
+If the sort specifier is missing, it defaults to \fIname\fP,
+so a value of \fI+\fP is equivalent to the null string,
+and a value of \fI-\fP sorts by name in descending order.
+Any invalid value restores the historical sorting behavior.
+.TP
 .B HISTCONTROL
 A colon-separated list of values controlling how commands are saved on
 the history list.
@@ -3858,6 +3884,12 @@ option is disabled when
 is unset.
 The pattern matching honors the setting of the \fBextglob\fP shell
 option.
+.PP
+The
+.SM
+.B GLOBSORT
+variable controls how the results of pathname expansion are sorted, as
+described above.
 .PP
 \fBPattern Matching\fP
 .PP

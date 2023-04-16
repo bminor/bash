@@ -431,6 +431,7 @@ extern void sv_opterr (const char *);
 extern void sv_locale (const char *);
 extern void sv_xtracefd (const char *);
 extern void sv_shcompat (const char *);
+extern void sv_globsort (const char *);
 
 #if defined (READLINE)
 extern void sv_comp_wordbreaks (const char *);

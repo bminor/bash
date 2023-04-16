@@ -58,6 +58,8 @@ extern int errno;
 
 extern pid_t dollar_dollar_pid;
 
+static int tmpunlink (const char *);
+
 static char *get_sys_tmpdir (void);
 static char *get_tmpdir (int);
 
@@ -134,6 +136,15 @@ sh_seedrand (void)
 #endif
 }
 
+static int
+tmpunlink (const char *fn)
+{
+  int r;
+
+  r = unlink (fn);
+  return r;
+}
+
 char *
 sh_mktmpname (const char *nameroot, int flags)
 {
@@ -181,7 +192,7 @@ sh_mktmpname (const char *nameroot, int flags)
 		(unsigned long) dollar_dollar_pid ^
 		x;
       sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
-      if (tmpnamelen > 0 && tmpnamelen < 32)
+      if (tmpnamelen > 0 && tmpnamelen < 32)		/* XXX */
 	filename[tdlen + 1 + tmpnamelen] = '\0';
 #  ifdef HAVE_LSTAT
       r = lstat (filename, &sb);
@@ -220,6 +231,13 @@ sh_mktmpfd (const char *nameroot, int flags, char **namep)
   else
     sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
   fd = mkstemp (filename);
+  if ((flags & MT_UNLINK) && tmpunlink (filename) < 0)
+    {
+      int e = errno;
+      close (fd);
+      fd = -1;
+      errno = e;
+    }
   if (fd < 0 || namep == 0)
     {
       free (filename);
@@ -227,6 +245,7 @@ sh_mktmpfd (const char *nameroot, int flags, char **namep)
     }
   if (namep)
     *namep = filename;
+
   return fd;
 #else /* !USE_MKSTEMP */
 #ifndef USE_URANDOM32
@@ -245,16 +264,27 @@ sh_mktmpfd (const char *nameroot, int flags, char **namep)
 		(unsigned long) dollar_dollar_pid ^
 		x;
       sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
-      if (tmpnamelen > 0 && tmpnamelen < 32)
+      if (tmpnamelen > 0 && tmpnamelen < 32)		/* XXX */
 	filename[tdlen + 1 + tmpnamelen] = '\0';
       fd = open (filename, BASEOPENFLAGS | ((flags & MT_READWRITE) ? O_RDWR : O_WRONLY), 0600);
     }
   while (fd < 0 && errno == EEXIST);
 
+  if ((flags & MT_UNLINK) && (tmpunlink (filename) < 0)
+    {
+      int e = errno;
+      close (fd);
+      fd = -1;
+      errno = e;
+    }
+  if (fd < 0 || namep == 0)
+    {
+      free (filename);
+      filename = NULL;
+    }
+
   if (namep)
     *namep = filename;
-  else
-    free (filename);
 
   return fd;
 #endif /* !USE_MKSTEMP */

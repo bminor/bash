@@ -849,14 +849,9 @@ static STRINGLIST *
 gen_globpat_matches (COMPSPEC *cs, const char *text)
 {
   STRINGLIST *sl;
-  int gflags;
 
-  noglob_dot_filenames = glob_dot_filenames == 0;
-  gflags = glob_star ? GX_GLOBSTAR : 0;
   sl = strlist_create (0);
-  sl->list = glob_filename (cs->globpat, gflags);
-  if (GLOB_FAILED (sl->list))
-    sl->list = (char **)NULL;
+  sl->list = noquote_glob_filename (cs->globpat);
   if (sl->list)
     sl->list_len = sl->list_size = strvec_len (sl->list);
   return sl;
@@ -1484,6 +1479,7 @@ pcomp_set_readline_variables (int flags, int nval)
      option is supposed to turn it off */
   if (flags & COPT_NOQUOTE)
     rl_filename_quoting_desired = 1 - nval;
+  /* Ditto */
   if (flags & COPT_NOSORT)
     rl_sort_completion_matches = 1 - nval;
 }

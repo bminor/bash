@@ -94,7 +94,8 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c mbsncmp.c  uconvert.c \
 	   ufuncs.c casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
 	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
-	   strvis.c utf8.c random.c gettimeofday.c timers.c
+	   strvis.c strlcpy.c strscpy.c utf8.c random.c gettimeofday.c \
+	   timers.c anonfile.c
 
 # The header files for this library.
 HSOURCES = 
@@ -109,6 +110,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o mbsncmp.o uconvert.o ufuncs.o casemod.o \
 	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o strvis.o \
+	  strscpy.o anonfile.o \
 	  utf8.o random.o gettimeofday.o timers.o wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
@@ -144,6 +146,7 @@ ${BUILD_DIR}/pathnames.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
 	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} pathnames.h )
 
 # rules for losing makes, like SunOS
+anonfile.o: anonfile.c
 casemod.o: casemod.c
 clktck.o: clktck.c
 clock.o: clock.c
@@ -200,6 +203,8 @@ strtoull.o: strtoull.c
 strtoumax.o: strtoumax.c
 strtrans.o: strtrans.c
 strvis.o: strvis.c
+strlcpy.o: strlcpy.c
+strscpy.o: strscpy.c
 timers.o: timers.c
 times.o: times.c
 timeval.o: timeval.c
@@ -227,6 +232,7 @@ strtoul.o: strtol.c
 strtoull.o: strtol.c
 
 # all files in the library depend on config.h
+anonfile.o: ${BUILD_DIR}/config.h
 casemod.o: ${BUILD_DIR}/config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
@@ -283,6 +289,8 @@ strtoull.o: ${BUILD_DIR}/config.h
 strtoumax.o: ${BUILD_DIR}/config.h
 strtrans.o: ${BUILD_DIR}/config.h
 strvis.o: ${BUILD_DIR}/config.h
+strlcpy.o: ${BUILD_DIR}/config.h
+strscpy.o: ${BUILD_DIR}/config.h
 timers.o: ${BUILD_DIR}/config.h
 times.o: ${BUILD_DIR}/config.h
 timeval.o: ${BUILD_DIR}/config.h
@@ -521,6 +529,14 @@ strvis.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
 strvis.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 strvis.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 
+strlcpy.o: ${topdir}/bashansi.h
+strlcpy.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
+strlcpy.o: ${BASHINCDIR}/typemax.h
+
+strscpy.o: ${topdir}/bashansi.h
+strscpy.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
+strscpy.o: ${BASHINCDIR}/typemax.h
+
 times.o: ${BASHINCDIR}/systimes.h
 times.o: ${BASHINCDIR}/posixtime.h
 
@@ -539,7 +555,6 @@ tmpfile.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 tmpfile.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 tmpfile.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
 
-uconvert.o: ${topdir}/bashtypes.h
 uconvert.o: ${BASHINCDIR}/chartypes.h
 uconvert.o: ${topdir}/shell.h ${topdir}/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
 uconvert.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
@@ -662,3 +677,14 @@ zmapfd.o: ${BASHINCDIR}/stdc.h
 zmapfd.o: ${topdir}/command.h
 zmapfd.o: ${topdir}/general.h
 zmapfd.o: ${topdir}/bashtypes.h ${BASHINCDIR}/chartypes.h ${topdir}/xmalloc.h
+
+anonfile.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+anonfile.o: ${topdir}/bashtypes.h
+anonfile.o: ${BASHINCDIR}/filecntl.h
+anonfile.o: ${topdir}/shell.h ${topdir}/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+anonfile.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
+anonfile.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h ${topdir}/conftypes.h
+anonfile.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
+anonfile.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
+anonfile.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
+anonfile.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h

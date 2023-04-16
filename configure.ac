@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.049])dnl
+AC_REVISION([for Bash 5.2, version 5.050])dnl
 
 define(bashvers, 5.2)
 define(relstatus, maint)
@@ -857,6 +857,9 @@ AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
 AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
 AC_CHECK_FUNCS(mkstemp mkdtemp)
 AC_CHECK_FUNCS(arc4random)
+AC_CHECK_FUNCS(strlcat)
+
+AC_CHECK_FUNCS(memfd_create shm_open shm_mkstemp)
 
 AC_REPLACE_FUNCS(getcwd memset)
 AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
@@ -864,6 +867,7 @@ AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoumax)
 AC_REPLACE_FUNCS(dprintf)
 AC_REPLACE_FUNCS(strchrnul)
 AC_REPLACE_FUNCS(strdup)
+AC_REPLACE_FUNCS(strlcpy)
 
 AC_CHECK_HEADERS(libaudit.h)
 AC_CHECK_DECLS([AUDIT_USER_TTY],,, [[#include <linux/audit.h>]])

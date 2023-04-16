@@ -5639,6 +5639,7 @@ static struct name_and_function special_vars[] = {
   { "FUNCNEST", sv_funcnest },
 
   { "GLOBIGNORE", sv_globignore },
+  { "GLOBSORT", sv_globsort },
 
 #if defined (HISTORY)
   { "HISTCONTROL", sv_history_control },
@@ -5831,6 +5832,13 @@ sv_globignore (const char *name)
 {
   if (privileged_mode == 0)
     setup_glob_ignore (name);
+}
+
+/* What to do when GLOBSORT changes. */
+void
+sv_globsort (const char *name)
+{
+  setup_globsort (name);
 }
 
 #if defined (READLINE)

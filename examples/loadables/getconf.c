@@ -43,6 +43,11 @@ extern int errno;
 #define VAL_SSIZE_MAX		-1004
 #define VAL_SIZE_MAX		-1005
 
+/* We don't want to collide with anything else. */
+#ifndef _CS_PATH
+#define _CS_PATH	-1001
+#endif
+
 struct conf
   {
     const char *name;
@@ -915,6 +920,31 @@ static int getconf_print (const struct conf *, const char *, int);
 static int getconf_all (void);
 static int getconf_one (WORD_LIST *);
 static int getconf_internal (const struct conf *, int);
+
+#ifndef HAVE_CONFSTR
+/* If we don't have confstr, this will only support `getconf PATH'. */
+
+static size_t
+confstr (int name, char *buf, size_t len)
+{
+  char *p;
+  size_t n;
+
+  switch (name)
+    {
+    case _CS_PATH:
+      p = conf_standard_path ();
+      n = STRLEN (p) + 1;
+      if (len != 0 && buf != 0)
+	strlcpy (buf, p, len);
+      free (p);
+      return n;
+    default:
+      errno = EINVAL;
+      return 0;
+    }
+}
+#endif /* !HAVE_CONFSTR */
 
 static int
 getconf_internal (const struct conf *c, int all)

@@ -1193,197 +1193,214 @@ PPAARRAAMMEETTEERRSS
               names to be ignored by  pathname  expansion.   If  a  file  name
               matched  by a pathname expansion pattern also matches one of the
               patterns in GGLLOOBBIIGGNNOORREE, it is removed from the list of matches.
+       GGLLOOBBSSOORRTT
+              Control how the results of pathname expansion are  sorted.   The
+              value  of this variable specifies the sort criteria and sort or-
+              der for the results of pathname expansion.  If this variable  is
+              unset  or  set  to  the null string, pathname expansion uses the
+              historial behavior of sorting by name.  If set,  a  valid  value
+              begins  with  an  optional  _+, which is ignored, or _-, which re-
+              verses the sort order from ascending to descending, followed  by
+              a  sort  specifier.   The  valid sort specifiers are _n_a_m_e, _s_i_z_e,
+              _m_t_i_m_e, _a_t_i_m_e, _c_t_i_m_e, and _b_l_o_c_k_s, which sort the files  on  name,
+              file  size,  modification  time, access time, inode change time,
+              and number of blocks, respectively.  For  example,  a  value  of
+              --mmttiimmee  sorts  the  results  in descending order by modification
+              time (newest first).  If the sort specifier is missing,  it  de-
+              faults  to  _n_a_m_e,  so  a  value  of  _+ is equivalent to the null
+              string, and a value of _- sorts by name in descending order.  Any
+              invalid value restores the historical sorting behavior.
        HHIISSTTCCOONNTTRROOLL
-              A colon-separated list of values controlling  how  commands  are
-              saved  on  the history list.  If the list of values includes _i_g_-
-              _n_o_r_e_s_p_a_c_e, lines which begin with  a  ssppaaccee  character  are  not
-              saved  in  the history list.  A value of _i_g_n_o_r_e_d_u_p_s causes lines
+              A  colon-separated  list  of values controlling how commands are
+              saved on the history list.  If the list of values  includes  _i_g_-
+              _n_o_r_e_s_p_a_c_e,  lines  which  begin  with  a ssppaaccee character are not
+              saved in the history list.  A value of _i_g_n_o_r_e_d_u_p_s  causes  lines
               matching the previous history entry to not be saved.  A value of
               _i_g_n_o_r_e_b_o_t_h is shorthand for _i_g_n_o_r_e_s_p_a_c_e and _i_g_n_o_r_e_d_u_p_s.  A value
               of _e_r_a_s_e_d_u_p_s causes all previous lines matching the current line
-              to  be  removed from the history list before that line is saved.
-              Any value not in the above list is ignored.  If  HHIISSTTCCOONNTTRROOLL  is
-              unset,  or does not include a valid value, all lines read by the
+              to be removed from the history list before that line  is  saved.
+              Any  value  not in the above list is ignored.  If HHIISSTTCCOONNTTRROOLL is
+              unset, or does not include a valid value, all lines read by  the
               shell parser are saved on the history list, subject to the value
-              of  HHIISSTTIIGGNNOORREE.  The second and subsequent lines of a multi-line
-              compound command are not tested, and are added  to  the  history
+              of HHIISSTTIIGGNNOORREE.  The second and subsequent lines of a  multi-line
+              compound  command  are  not tested, and are added to the history
               regardless of the value of HHIISSTTCCOONNTTRROOLL.
        HHIISSTTFFIILLEE
               The name of the file in which command history is saved (see HHIISS--
-              TTOORRYY below).  The default value is _~_/_._b_a_s_h___h_i_s_t_o_r_y.   If  unset,
+              TTOORRYY  below).   The default value is _~_/_._b_a_s_h___h_i_s_t_o_r_y.  If unset,
               the command history is not saved when a shell exits.
        HHIISSTTFFIILLEESSIIZZEE
               The maximum number of lines contained in the history file.  When
-              this variable is assigned a value, the  history  file  is  trun-
-              cated,  if  necessary,  to  contain  no more than that number of
-              lines by removing the oldest entries.  The history file is  also
-              truncated  to this size after writing it when a shell exits.  If
-              the value is 0, the history file  is  truncated  to  zero  size.
-              Non-numeric  values  and  numeric  values less than zero inhibit
-              truncation.  The shell sets the default value to  the  value  of
+              this  variable  is  assigned  a value, the history file is trun-
+              cated, if necessary, to contain no  more  than  that  number  of
+              lines  by removing the oldest entries.  The history file is also
+              truncated to this size after writing it when a shell exits.   If
+              the  value  is  0,  the  history file is truncated to zero size.
+              Non-numeric values and numeric values  less  than  zero  inhibit
+              truncation.   The  shell  sets the default value to the value of
               HHIISSTTSSIIZZEE after reading any startup files.
        HHIISSTTIIGGNNOORREE
-              A  colon-separated list of patterns used to decide which command
-              lines should be saved on the history list.  Each pattern is  an-
-              chored  at the beginning of the line and must match the complete
-              line (no implicit `**' is  appended).   Each  pattern  is  tested
-              against  the  line after the checks specified by HHIISSTTCCOONNTTRROOLL are
+              A colon-separated list of patterns used to decide which  command
+              lines  should be saved on the history list.  Each pattern is an-
+              chored at the beginning of the line and must match the  complete
+              line  (no  implicit  `**'  is  appended).  Each pattern is tested
+              against the line after the checks specified by  HHIISSTTCCOONNTTRROOLL  are
               applied.  In addition to the normal shell pattern matching char-
-              acters,  `&&'  matches the previous history line.  `&&' may be es-
-              caped using a backslash; the backslash  is  removed  before  at-
-              tempting  a  match.  The second and subsequent lines of a multi-
-              line compound command are not tested, and are added to the  his-
-              tory  regardless of the value of HHIISSTTIIGGNNOORREE.  The pattern match-
+              acters, `&&' matches the previous history line.  `&&' may  be  es-
+              caped  using  a  backslash;  the backslash is removed before at-
+              tempting a match.  The second and subsequent lines of  a  multi-
+              line  compound command are not tested, and are added to the his-
+              tory regardless of the value of HHIISSTTIIGGNNOORREE.  The pattern  match-
               ing honors the setting of the eexxttgglloobb shell option.
        HHIISSTTSSIIZZEE
-              The number of commands to remember in the command  history  (see
-              HHIISSTTOORRYY  below).   If  the value is 0, commands are not saved in
+              The  number  of commands to remember in the command history (see
+              HHIISSTTOORRYY below).  If the value is 0, commands are  not  saved  in
               the history list.  Numeric values less than zero result in every
-              command  being  saved  on  the history list (there is no limit).
-              The shell sets the  default  value  to  500  after  reading  any
+              command being saved on the history list  (there  is  no  limit).
+              The  shell  sets  the  default  value  to  500 after reading any
               startup files.
        HHIISSTTTTIIMMEEFFOORRMMAATT
-              If  this  variable  is  set and not null, its value is used as a
+              If this variable is set and not null, its value  is  used  as  a
               format string for _s_t_r_f_t_i_m_e(3) to print the time stamp associated
-              with  each  history  entry displayed by the hhiissttoorryy builtin.  If
-              this variable is set, time stamps are  written  to  the  history
-              file  so they may be preserved across shell sessions.  This uses
-              the history comment character  to  distinguish  timestamps  from
+              with each history entry displayed by the  hhiissttoorryy  builtin.   If
+              this  variable  is  set,  time stamps are written to the history
+              file so they may be preserved across shell sessions.  This  uses
+              the  history  comment  character  to distinguish timestamps from
               other history lines.
        HHOOMMEE   The home directory of the current user; the default argument for
               the ccdd builtin command.  The value of this variable is also used
               when performing tilde expansion.
        HHOOSSTTFFIILLEE
-              Contains  the  name  of  a file in the same format as _/_e_t_c_/_h_o_s_t_s
+              Contains the name of a file in the  same  format  as  _/_e_t_c_/_h_o_s_t_s
               that should be read when the shell needs to complete a hostname.
-              The  list  of possible hostname completions may be changed while
-              the shell is running; the next time hostname completion  is  at-
-              tempted  after  the  value is changed, bbaasshh adds the contents of
-              the new file to the existing list.  If HHOOSSTTFFIILLEE is set, but  has
-              no  value,  or  does  not name a readable file, bbaasshh attempts to
-              read _/_e_t_c_/_h_o_s_t_s to obtain the list of possible hostname  comple-
+              The list of possible hostname completions may be  changed  while
+              the  shell  is running; the next time hostname completion is at-
+              tempted after the value is changed, bbaasshh adds  the  contents  of
+              the  new file to the existing list.  If HHOOSSTTFFIILLEE is set, but has
+              no value, or does not name a readable  file,  bbaasshh  attempts  to
+              read  _/_e_t_c_/_h_o_s_t_s to obtain the list of possible hostname comple-
               tions.  When HHOOSSTTFFIILLEE is unset, the hostname list is cleared.
        IIFFSS    The _I_n_t_e_r_n_a_l _F_i_e_l_d _S_e_p_a_r_a_t_o_r that is used for word splitting af-
-              ter expansion and to  split  lines  into  words  with  the  rreeaadd
+              ter  expansion  and  to  split  lines  into  words with the rreeaadd
               builtin  command.   The  default  value  is  ``<space><tab><new-
               line>''.
        IIGGNNOORREEEEOOFF
               Controls the action of an interactive shell on receipt of an EEOOFF
               character as the sole input.  If set, the value is the number of
-              consecutive EEOOFF characters which must  be  typed  as  the  first
-              characters  on an input line before bbaasshh exits.  If the variable
-              exists but does not have a numeric value, or has no  value,  the
-              default  value  is  10.  If it does not exist, EEOOFF signifies the
+              consecutive  EEOOFF  characters  which  must  be typed as the first
+              characters on an input line before bbaasshh exits.  If the  variable
+              exists  but  does not have a numeric value, or has no value, the
+              default value is 10.  If it does not exist,  EEOOFF  signifies  the
               end of input to the shell.
        IINNPPUUTTRRCC
-              The filename for the rreeaaddlliinnee startup file, overriding  the  de-
+              The  filename  for the rreeaaddlliinnee startup file, overriding the de-
               fault of _~_/_._i_n_p_u_t_r_c (see RREEAADDLLIINNEE below).
        IINNSSIIDDEE__EEMMAACCSS
-              If  this  variable  appears  in  the  environment when the shell
-              starts, bbaasshh assumes that it is running inside  an  Emacs  shell
-              buffer  and  may disable line editing, depending on the value of
+              If this variable appears  in  the  environment  when  the  shell
+              starts,  bbaasshh  assumes  that it is running inside an Emacs shell
+              buffer and may disable line editing, depending on the  value  of
               TTEERRMM.
-       LLAANNGG   Used to determine the  locale  category  for  any  category  not
+       LLAANNGG   Used  to  determine  the  locale  category  for any category not
               specifically selected with a variable starting with LLCC__.
-       LLCC__AALLLL This  variable  overrides  the  value  of LLAANNGG and any other LLCC__
+       LLCC__AALLLL This variable overrides the value of  LLAANNGG  and  any  other  LLCC__
               variable specifying a locale category.
        LLCC__CCOOLLLLAATTEE
-              This variable determines the collation order used  when  sorting
-              the  results  of pathname expansion, and determines the behavior
-              of range expressions, equivalence  classes,  and  collating  se-
+              This  variable  determines the collation order used when sorting
+              the results of pathname expansion, and determines  the  behavior
+              of  range  expressions,  equivalence  classes, and collating se-
               quences within pathname expansion and pattern matching.
        LLCC__CCTTYYPPEE
-              This  variable  determines  the interpretation of characters and
-              the behavior of character classes within pathname expansion  and
+              This variable determines the interpretation  of  characters  and
+              the  behavior of character classes within pathname expansion and
               pattern matching.
        LLCC__MMEESSSSAAGGEESS
-              This  variable  determines  the locale used to translate double-
+              This variable determines the locale used  to  translate  double-
               quoted strings preceded by a $$.
        LLCC__NNUUMMEERRIICC
-              This variable determines the locale  category  used  for  number
+              This  variable  determines  the  locale category used for number
               formatting.
        LLCC__TTIIMMEE
-              This  variable  determines the locale category used for data and
+              This variable determines the locale category used for  data  and
               time formatting.
-       LLIINNEESS  Used by the sseelleecctt compound  command  to  determine  the  column
-              length  for  printing selection lists.  Automatically set if the
-              cchheecckkwwiinnssiizzee option is enabled or in an interactive  shell  upon
+       LLIINNEESS  Used  by  the  sseelleecctt  compound  command to determine the column
+              length for printing selection lists.  Automatically set  if  the
+              cchheecckkwwiinnssiizzee  option  is enabled or in an interactive shell upon
               receipt of a SSIIGGWWIINNCCHH.
-       MMAAIILL   If  this  parameter  is  set to a file or directory name and the
-              MMAAIILLPPAATTHH variable is not set, bbaasshh informs the user of  the  ar-
+       MMAAIILL   If this parameter is set to a file or  directory  name  and  the
+              MMAAIILLPPAATTHH  variable  is not set, bbaasshh informs the user of the ar-
               rival of mail in the specified file or Maildir-format directory.
        MMAAIILLCCHHEECCKK
-              Specifies  how often (in seconds) bbaasshh checks for mail.  The de-
-              fault is 60 seconds.  When it is time to  check  for  mail,  the
-              shell  does  so  before  displaying the primary prompt.  If this
-              variable is unset, or set to  a  value  that  is  not  a  number
+              Specifies how often (in seconds) bbaasshh checks for mail.  The  de-
+              fault  is  60  seconds.   When it is time to check for mail, the
+              shell does so before displaying the  primary  prompt.   If  this
+              variable  is  unset,  or  set  to  a  value that is not a number
               greater than or equal to zero, the shell disables mail checking.
        MMAAIILLPPAATTHH
               A colon-separated list of filenames to be checked for mail.  The
               message to be printed when mail arrives in a particular file may
-              be  specified by separating the filename from the message with a
-              `?'.  When used in the text of the message, $$__  expands  to  the
+              be specified by separating the filename from the message with  a
+              `?'.   When  used  in the text of the message, $$__ expands to the
               name of the current mailfile.  Example:
               MMAAIILLPPAATTHH='/var/mail/bfox?"You  have  mail":~/shell-mail?"$_  has
               mail!"'
-              BBaasshh can be configured to supply a default value for this  vari-
-              able  (there  is  no  value by default), but the location of the
+              BBaasshh  can be configured to supply a default value for this vari-
+              able (there is no value by default), but  the  location  of  the
               user  mail  files  that  it  uses  is  system  dependent  (e.g.,
               /var/mail/$$UUSSEERR).
        OOPPTTEERRRR If set to the value 1, bbaasshh displays error messages generated by
-              the ggeettooppttss builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS  below).
-              OOPPTTEERRRR  is  initialized to 1 each time the shell is invoked or a
+              the  ggeettooppttss builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
+              OOPPTTEERRRR is initialized to 1 each time the shell is invoked  or  a
               shell script is executed.
-       PPAATTHH   The search path for commands.  It is a colon-separated  list  of
-              directories  in  which the shell looks for commands (see CCOOMMMMAANNDD
-              EEXXEECCUUTTIIOONN below).  A zero-length (null) directory  name  in  the
+       PPAATTHH   The  search  path for commands.  It is a colon-separated list of
+              directories in which the shell looks for commands  (see  CCOOMMMMAANNDD
+              EEXXEECCUUTTIIOONN  below).   A  zero-length (null) directory name in the
               value of PPAATTHH indicates the current directory.  A null directory
-              name may appear as two adjacent colons,  or  as  an  initial  or
-              trailing  colon.   The  default path is system-dependent, and is
+              name  may  appear  as  two  adjacent colons, or as an initial or
+              trailing colon.  The default path is  system-dependent,  and  is
               set by the administrator who installs bbaasshh.  A common value is
               ``/usr/local/bin:/usr/lo-
               cal/sbin:/usr/bin:/usr/sbin:/bin:/sbin''.
        PPOOSSIIXXLLYY__CCOORRRREECCTT
-              If this variable is in the environment  when  bbaasshh  starts,  the
-              shell  enters _p_o_s_i_x _m_o_d_e before reading the startup files, as if
-              the ----ppoossiixx invocation option had been supplied.  If it  is  set
-              while  the  shell is running, bbaasshh enables _p_o_s_i_x _m_o_d_e, as if the
-              command _s_e_t _-_o _p_o_s_i_x had been executed.  When the  shell  enters
+              If  this  variable  is  in the environment when bbaasshh starts, the
+              shell enters _p_o_s_i_x _m_o_d_e before reading the startup files, as  if
+              the  ----ppoossiixx  invocation option had been supplied.  If it is set
+              while the shell is running, bbaasshh enables _p_o_s_i_x _m_o_d_e, as  if  the
+              command  _s_e_t  _-_o _p_o_s_i_x had been executed.  When the shell enters
               _p_o_s_i_x _m_o_d_e, it sets this variable if it was not already set.
        PPRROOMMPPTT__CCOOMMMMAANNDD
-              If  this variable is set, and is an array, the value of each set
-              element is executed as a command prior to issuing  each  primary
-              prompt.   If this is set but not an array variable, its value is
+              If this variable is set, and is an array, the value of each  set
+              element  is  executed as a command prior to issuing each primary
+              prompt.  If this is set but not an array variable, its value  is
               used as a command to execute instead.
        PPRROOMMPPTT__DDIIRRTTRRIIMM
-              If set to a number greater than zero, the value is used  as  the
+              If  set  to a number greater than zero, the value is used as the
               number of trailing directory components to retain when expanding
-              the \\ww and \\WW  prompt  string  escapes  (see  PPRROOMMPPTTIINNGG  below).
+              the  \\ww  and  \\WW  prompt  string  escapes (see PPRROOMMPPTTIINNGG below).
               Characters removed are replaced with an ellipsis.
-       PPSS00    The  value  of  this parameter is expanded (see PPRROOMMPPTTIINNGG below)
-              and displayed by interactive shells after reading a command  and
+       PPSS00    The value of this parameter is expanded  (see  PPRROOMMPPTTIINNGG  below)
+              and  displayed by interactive shells after reading a command and
               before the command is executed.
-       PPSS11    The  value  of  this parameter is expanded (see PPRROOMMPPTTIINNGG below)
-              and used as the primary prompt string.   The  default  value  is
+       PPSS11    The value of this parameter is expanded  (see  PPRROOMMPPTTIINNGG  below)
+              and  used  as  the  primary prompt string.  The default value is
               ``\\ss--\\vv\\$$ ''.
-       PPSS22    The  value of this parameter is expanded as with PPSS11 and used as
+       PPSS22    The value of this parameter is expanded as with PPSS11 and used  as
               the secondary prompt string.  The default is ``>> ''.
        PPSS33    The value of this parameter is used as the prompt for the sseelleecctt
               command (see SSHHEELLLL GGRRAAMMMMAARR above).
-       PPSS44    The  value  of  this  parameter  is expanded as with PPSS11 and the
+       PPSS44    The value of this parameter is expanded  as  with  PPSS11  and  the
               value is printed before each command bbaasshh displays during an ex-
               ecution trace.  The first character of the expanded value of PPSS44
               is replicated multiple times, as necessary, to indicate multiple
               levels of indirection.  The default is ``++ ''.
-       SSHHEELLLL  This  variable expands to the full pathname to the shell.  If it
-              is not set when the shell starts, bbaasshh assigns to  it  the  full
+       SSHHEELLLL  This variable expands to the full pathname to the shell.  If  it
+              is  not  set  when the shell starts, bbaasshh assigns to it the full
               pathname of the current user's login shell.
        TTIIMMEEFFOORRMMAATT
-              The  value of this parameter is used as a format string specify-
-              ing how the timing information for pipelines prefixed  with  the
-              ttiimmee  reserved word should be displayed.  The %% character intro-
-              duces an escape sequence that is expanded to  a  time  value  or
-              other  information.  The escape sequences and their meanings are
+              The value of this parameter is used as a format string  specify-
+              ing  how  the timing information for pipelines prefixed with the
+              ttiimmee reserved word should be displayed.  The %% character  intro-
+              duces  an  escape  sequence  that is expanded to a time value or
+              other information.  The escape sequences and their meanings  are
               as follows; the braces denote optional portions.
               %%%%        A literal %%.
               %%[[_p]][[ll]]RR  The elapsed time in seconds.
@@ -1391,77 +1408,77 @@ PPAARRAAMMEETTEERRSS
               %%[[_p]][[ll]]SS  The number of CPU seconds spent in system mode.
               %%PP        The CPU percentage, computed as (%U + %S) / %R.
 
-              The optional _p is a digit specifying the _p_r_e_c_i_s_i_o_n,  the  number
+              The  optional  _p is a digit specifying the _p_r_e_c_i_s_i_o_n, the number
               of fractional digits after a decimal point.  A value of 0 causes
               no decimal point or fraction to be output.  At most three places
-              after  the  decimal  point may be specified; values of _p greater
-              than 3 are changed to 3.  If _p is not specified, the value 3  is
+              after the decimal point may be specified; values  of  _p  greater
+              than  3 are changed to 3.  If _p is not specified, the value 3 is
               used.
 
-              The  optional ll specifies a longer format, including minutes, of
-              the form _M_Mm_S_S._F_Fs.  The value of _p determines  whether  or  not
+              The optional ll specifies a longer format, including minutes,  of
+              the  form  _M_Mm_S_S._F_Fs.   The value of _p determines whether or not
               the fraction is included.
 
-              If  this  variable  is not set, bbaasshh acts as if it had the value
-              $$''\\nnrreeaall\\tt%%33llRR\\nnuusseerr\\tt%%33llUU\\nnssyyss\\tt%%33llSS''.  If the value  is  null,
+              If this variable is not set, bbaasshh acts as if it  had  the  value
+              $$''\\nnrreeaall\\tt%%33llRR\\nnuusseerr\\tt%%33llUU\\nnssyyss\\tt%%33llSS''.   If  the value is null,
               no timing information is displayed.  A trailing newline is added
               when the format string is displayed.
        TTMMOOUUTT  If set to a value greater than zero, TTMMOOUUTT is treated as the de-
-              fault  timeout  for the rreeaadd builtin.  The sseelleecctt command termi-
+              fault timeout for the rreeaadd builtin.  The sseelleecctt  command  termi-
               nates if input does not arrive after TTMMOOUUTT seconds when input is
-              coming  from  a terminal.  In an interactive shell, the value is
+              coming from a terminal.  In an interactive shell, the  value  is
               interpreted as the number of seconds to wait for a line of input
               after issuing the primary prompt.  BBaasshh terminates after waiting
-              for that number of seconds if a complete line of input does  not
+              for  that number of seconds if a complete line of input does not
               arrive.
-       TTMMPPDDIIRR If  set, bbaasshh uses its value as the name of a directory in which
+       TTMMPPDDIIRR If set, bbaasshh uses its value as the name of a directory in  which
               bbaasshh creates temporary files for the shell's use.
        aauuttoo__rreessuummee
               This variable controls how the shell interacts with the user and
-              job  control.   If this variable is set, single word simple com-
+              job control.  If this variable is set, single word  simple  com-
               mands without redirections are treated as candidates for resump-
               tion of an existing stopped job.  There is no ambiguity allowed;
-              if there is more than one job beginning with the  string  typed,
-              the  job  most  recently  accessed  is  selected.  The _n_a_m_e of a
-              stopped job, in this context, is the command line used to  start
-              it.   If  set to the value _e_x_a_c_t, the string supplied must match
-              the name of a stopped job exactly;  if  set  to  _s_u_b_s_t_r_i_n_g,  the
-              string  supplied  needs  to  match  a substring of the name of a
-              stopped job.  The _s_u_b_s_t_r_i_n_g value provides functionality  analo-
-              gous  to the %%??  job identifier (see JJOOBB CCOONNTTRROOLL below).  If set
-              to any other value, the supplied string must be a  prefix  of  a
+              if  there  is more than one job beginning with the string typed,
+              the job most recently accessed  is  selected.   The  _n_a_m_e  of  a
+              stopped  job, in this context, is the command line used to start
+              it.  If set to the value _e_x_a_c_t, the string supplied  must  match
+              the  name  of  a  stopped  job exactly; if set to _s_u_b_s_t_r_i_n_g, the
+              string supplied needs to match a substring  of  the  name  of  a
+              stopped  job.  The _s_u_b_s_t_r_i_n_g value provides functionality analo-
+              gous to the %%??  job identifier (see JJOOBB CCOONNTTRROOLL below).  If  set
+              to  any  other  value, the supplied string must be a prefix of a
               stopped job's name; this provides functionality analogous to the
               %%_s_t_r_i_n_g job identifier.
        hhiissttcchhaarrss
-              The two or three characters which control history expansion  and
+              The  two or three characters which control history expansion and
               tokenization (see HHIISSTTOORRYY EEXXPPAANNSSIIOONN below).  The first character
-              is the _h_i_s_t_o_r_y _e_x_p_a_n_s_i_o_n character, the character which  signals
-              the  start  of  a  history  expansion, normally `!!'.  The second
-              character is the _q_u_i_c_k _s_u_b_s_t_i_t_u_t_i_o_n character, which is used  as
-              shorthand  for  re-running the previous command entered, substi-
-              tuting one string for another in the command.   The  default  is
-              `^^'.   The optional third character is the character which indi-
-              cates that the remainder of the line is a comment when found  as
-              the  first  character of a word, normally `##'.  The history com-
+              is  the _h_i_s_t_o_r_y _e_x_p_a_n_s_i_o_n character, the character which signals
+              the start of a history  expansion,  normally  `!!'.   The  second
+              character  is the _q_u_i_c_k _s_u_b_s_t_i_t_u_t_i_o_n character, which is used as
+              shorthand for re-running the previous command  entered,  substi-
+              tuting  one  string  for another in the command.  The default is
+              `^^'.  The optional third character is the character which  indi-
+              cates  that the remainder of the line is a comment when found as
+              the first character of a word, normally `##'.  The  history  com-
               ment character causes history substitution to be skipped for the
-              remaining  words on the line.  It does not necessarily cause the
+              remaining words on the line.  It does not necessarily cause  the
               shell parser to treat the rest of the line as a comment.
 
    AArrrraayyss
-       BBaasshh provides one-dimensional indexed and associative array  variables.
-       Any  variable may be used as an indexed array; the ddeeccllaarree builtin will
-       explicitly declare an array.  There is no maximum limit on the size  of
-       an  array, nor any requirement that members be indexed or assigned con-
-       tiguously.  Indexed arrays are  referenced  using  integers  (including
+       BBaasshh  provides one-dimensional indexed and associative array variables.
+       Any variable may be used as an indexed array; the ddeeccllaarree builtin  will
+       explicitly  declare an array.  There is no maximum limit on the size of
+       an array, nor any requirement that members be indexed or assigned  con-
+       tiguously.   Indexed  arrays  are  referenced using integers (including
        arithmetic expressions) and are zero-based; associative arrays are ref-
        erenced using arbitrary strings.  Unless otherwise noted, indexed array
        indices must be non-negative integers.
 
-       An  indexed  array is created automatically if any variable is assigned
+       An indexed array is created automatically if any variable  is  assigned
        to using the syntax _n_a_m_e[_s_u_b_s_c_r_i_p_t]=_v_a_l_u_e.  The _s_u_b_s_c_r_i_p_t is treated as
        an arithmetic expression that must evaluate to a number.  To explicitly
-       declare an indexed array, use ddeeccllaarree --aa _n_a_m_e (see SSHHEELLLL  BBUUIILLTTIINN  CCOOMM--
-       MMAANNDDSS  below).   ddeeccllaarree  --aa _n_a_m_e[[_s_u_b_s_c_r_i_p_t]] is also accepted; the _s_u_b_-
+       declare  an  indexed array, use ddeeccllaarree --aa _n_a_m_e (see SSHHEELLLL BBUUIILLTTIINN CCOOMM--
+       MMAANNDDSS below).  ddeeccllaarree --aa _n_a_m_e[[_s_u_b_s_c_r_i_p_t]] is also  accepted;  the  _s_u_b_-
        _s_c_r_i_p_t is ignored.
 
        Associative arrays are created using ddeeccllaarree --AA _n_a_m_e.
@@ -1469,159 +1486,159 @@ PPAARRAAMMEETTEERRSS
        Attributes may be specified for an array variable using the ddeeccllaarree and
        rreeaaddoonnllyy builtins.  Each attribute applies to all members of an array.
 
-       Arrays   are  assigned  to  using  compound  assignments  of  the  form
-       _n_a_m_e=((value_1 ... value_n)), where each _v_a_l_u_e may be  of  the  form  [_s_u_b_-
-       _s_c_r_i_p_t]=_s_t_r_i_n_g.   Indexed array assignments do not require anything but
-       _s_t_r_i_n_g.  Each _v_a_l_u_e in the list is expanded using the shell  expansions
+       Arrays  are  assigned  to  using  compound  assignments  of  the   form
+       _n_a_m_e=((value_1  ...  value_n)),  where  each _v_a_l_u_e may be of the form [_s_u_b_-
+       _s_c_r_i_p_t]=_s_t_r_i_n_g.  Indexed array assignments do not require anything  but
+       _s_t_r_i_n_g.   Each _v_a_l_u_e in the list is expanded using the shell expansions
        described below under EEXXPPAANNSSIIOONN, but _v_a_l_u_es that are valid variable as-
        signments including the brackets and subscript do not undergo brace ex-
-       pansion  and  word  splitting, as with individual variable assignments.
-       When assigning to indexed arrays, if the  optional  brackets  and  sub-
-       script  are supplied, that index is assigned to; otherwise the index of
-       the element assigned is the last index assigned  to  by  the  statement
+       pansion and word splitting, as with  individual  variable  assignments.
+       When  assigning  to  indexed  arrays, if the optional brackets and sub-
+       script are supplied, that index is assigned to; otherwise the index  of
+       the  element  assigned  is  the last index assigned to by the statement
        plus one.  Indexing starts at zero.
 
        When assigning to an associative array, the words in a compound assign-
-       ment may be either assignment statements, for which  the  subscript  is
-       required,  or  a list of words that is interpreted as a sequence of al-
-       ternating keys and values: _n_a_m_e=(( _k_e_y_1 _v_a_l_u_e_1 _k_e_y_2 _v_a_l_u_e_2 ...)).   These
-       are  treated  identically  to  _n_a_m_e=(( [_k_e_y_1]=_v_a_l_u_e_1 [_k_e_y_2]=_v_a_l_u_e_2 ...)).
-       The first word in the list determines how the remaining words  are  in-
-       terpreted;  all  assignments  in a list must be of the same type.  When
-       using key/value pairs, the keys may not be missing or  empty;  a  final
+       ment  may  be  either assignment statements, for which the subscript is
+       required, or a list of words that is interpreted as a sequence  of  al-
+       ternating  keys and values: _n_a_m_e=(( _k_e_y_1 _v_a_l_u_e_1 _k_e_y_2 _v_a_l_u_e_2 ...)).  These
+       are treated identically to  _n_a_m_e=((  [_k_e_y_1]=_v_a_l_u_e_1  [_k_e_y_2]=_v_a_l_u_e_2  ...)).
+       The  first  word in the list determines how the remaining words are in-
+       terpreted; all assignments in a list must be of the  same  type.   When
+       using  key/value  pairs,  the keys may not be missing or empty; a final
        missing value is treated like the empty string.
 
-       This  syntax is also accepted by the ddeeccllaarree builtin.  Individual array
-       elements may be assigned to using the _n_a_m_e[_s_u_b_s_c_r_i_p_t]=_v_a_l_u_e syntax  in-
-       troduced  above.   When  assigning to an indexed array, if _n_a_m_e is sub-
-       scripted by a negative number, that number is interpreted  as  relative
-       to  one  greater  than  the  maximum index of _n_a_m_e, so negative indices
+       This syntax is also accepted by the ddeeccllaarree builtin.  Individual  array
+       elements  may be assigned to using the _n_a_m_e[_s_u_b_s_c_r_i_p_t]=_v_a_l_u_e syntax in-
+       troduced above.  When assigning to an indexed array, if  _n_a_m_e  is  sub-
+       scripted  by  a negative number, that number is interpreted as relative
+       to one greater than the maximum index  of  _n_a_m_e,  so  negative  indices
        count back from the end of the array, and an index of -1 references the
        last element.
 
-       The  +=  operator will append to an array variable when assigning using
+       The += operator will append to an array variable when  assigning  using
        the compound assignment syntax; see PPAARRAAMMEETTEERRSS above.
 
-       Any element of an array may  be  referenced  using  ${_n_a_m_e[_s_u_b_s_c_r_i_p_t]}.
+       Any  element  of  an  array may be referenced using ${_n_a_m_e[_s_u_b_s_c_r_i_p_t]}.
        The braces are required to avoid conflicts with pathname expansion.  If
-       _s_u_b_s_c_r_i_p_t is @@ or **, the word expands to all members  of  _n_a_m_e.   These
-       subscripts  differ only when the word appears within double quotes.  If
+       _s_u_b_s_c_r_i_p_t  is  @@  or **, the word expands to all members of _n_a_m_e.  These
+       subscripts differ only when the word appears within double quotes.   If
        the word is double-quoted, ${_n_a_m_e[*]} expands to a single word with the
-       value  of each array member separated by the first character of the IIFFSS
+       value of each array member separated by the first character of the  IIFFSS
        special variable, and ${_n_a_m_e[@]} expands each element of _n_a_m_e to a sep-
-       arate  word.   When  there  are no array members, ${_n_a_m_e[@]} expands to
-       nothing.  If the double-quoted expansion occurs within a word, the  ex-
+       arate word.  When there are no array  members,  ${_n_a_m_e[@]}  expands  to
+       nothing.   If the double-quoted expansion occurs within a word, the ex-
        pansion of the first parameter is joined with the beginning part of the
-       original word, and the expansion of the last parameter is  joined  with
+       original  word,  and the expansion of the last parameter is joined with
        the last part of the original word.  This is analogous to the expansion
-       of the special parameters **  and  @@  (see  SSppeecciiaall  PPaarraammeetteerrss  above).
-       ${#_n_a_m_e[_s_u_b_s_c_r_i_p_t]}  expands  to  the length of ${_n_a_m_e[_s_u_b_s_c_r_i_p_t]}.  If
+       of  the  special  parameters  **  and  @@ (see SSppeecciiaall PPaarraammeetteerrss above).
+       ${#_n_a_m_e[_s_u_b_s_c_r_i_p_t]} expands to the length  of  ${_n_a_m_e[_s_u_b_s_c_r_i_p_t]}.   If
        _s_u_b_s_c_r_i_p_t is ** or @@, the expansion is the number of elements in the ar-
        ray.  If the _s_u_b_s_c_r_i_p_t used to reference an element of an indexed array
-       evaluates to a number less than zero, it is interpreted as relative  to
-       one  greater  than  the maximum index of the array, so negative indices
+       evaluates  to a number less than zero, it is interpreted as relative to
+       one greater than the maximum index of the array,  so  negative  indices
        count back from the end of the array, and an index of -1 references the
        last element.
 
        Referencing an array variable without a subscript is equivalent to ref-
-       erencing the array with a subscript of 0.  Any reference to a  variable
+       erencing  the array with a subscript of 0.  Any reference to a variable
        using a valid subscript is legal, and bbaasshh will create an array if nec-
        essary.
 
-       An array variable is considered set if a subscript has been assigned  a
+       An  array variable is considered set if a subscript has been assigned a
        value.  The null string is a valid value.
 
-       It  is possible to obtain the keys (indices) of an array as well as the
-       values.  ${!!_n_a_m_e[_@]} and ${!!_n_a_m_e[_*]} expand to the indices assigned  in
+       It is possible to obtain the keys (indices) of an array as well as  the
+       values.   ${!!_n_a_m_e[_@]} and ${!!_n_a_m_e[_*]} expand to the indices assigned in
        array variable _n_a_m_e.  The treatment when in double quotes is similar to
        the expansion of the special parameters _@ and _* within double quotes.
 
        The uunnsseett builtin is used to destroy arrays.  uunnsseett _n_a_m_e[_s_u_b_s_c_r_i_p_t] de-
        stroys the array element at index _s_u_b_s_c_r_i_p_t, for both indexed and asso-
-       ciative arrays.  Negative subscripts to indexed arrays are  interpreted
-       as  described  above.   Unsetting the last element of an array variable
-       does not unset the variable.  uunnsseett _n_a_m_e, where _n_a_m_e is an  array,  re-
+       ciative  arrays.  Negative subscripts to indexed arrays are interpreted
+       as described above.  Unsetting the last element of  an  array  variable
+       does  not  unset the variable.  uunnsseett _n_a_m_e, where _n_a_m_e is an array, re-
        moves the entire array.  uunnsseett _n_a_m_e[_s_u_b_s_c_r_i_p_t], where _s_u_b_s_c_r_i_p_t is ** or
        @@, behaves differently depending on whether _n_a_m_e is an indexed or asso-
-       ciative  array.   If _n_a_m_e is an associative array, this unsets the ele-
+       ciative array.  If _n_a_m_e is an associative array, this unsets  the  ele-
        ment with subscript ** or @@.  If _n_a_m_e is an indexed array, unset removes
        all of the elements but does not remove the array itself.
 
-       When  using  a  variable name with a subscript as an argument to a com-
-       mand, such as with uunnsseett, without using the word expansion  syntax  de-
+       When using a variable name with a subscript as an argument  to  a  com-
+       mand,  such  as with uunnsseett, without using the word expansion syntax de-
        scribed above, the argument is subject to pathname expansion.  If path-
        name expansion is not desired, the argument should be quoted.
 
-       The ddeeccllaarree, llooccaall, and rreeaaddoonnllyy builtins each accept a  --aa  option  to
-       specify  an indexed array and a --AA option to specify an associative ar-
-       ray.  If both options are supplied,  --AA  takes  precedence.   The  rreeaadd
-       builtin  accepts  a  --aa  option to assign a list of words read from the
+       The  ddeeccllaarree,  llooccaall,  and rreeaaddoonnllyy builtins each accept a --aa option to
+       specify an indexed array and a --AA option to specify an associative  ar-
+       ray.   If  both  options  are  supplied, --AA takes precedence.  The rreeaadd
+       builtin accepts a --aa option to assign a list of  words  read  from  the
        standard input to an array.  The sseett and ddeeccllaarree builtins display array
        values in a way that allows them to be reused as assignments.
 
 EEXXPPAANNSSIIOONN
        Expansion is performed on the command line after it has been split into
-       words.  There are seven kinds of expansion performed: _b_r_a_c_e  _e_x_p_a_n_s_i_o_n,
-       _t_i_l_d_e  _e_x_p_a_n_s_i_o_n,  _p_a_r_a_m_e_t_e_r  _a_n_d _v_a_r_i_a_b_l_e _e_x_p_a_n_s_i_o_n, _c_o_m_m_a_n_d _s_u_b_s_t_i_t_u_-
+       words.   There are seven kinds of expansion performed: _b_r_a_c_e _e_x_p_a_n_s_i_o_n,
+       _t_i_l_d_e _e_x_p_a_n_s_i_o_n, _p_a_r_a_m_e_t_e_r _a_n_d _v_a_r_i_a_b_l_e  _e_x_p_a_n_s_i_o_n,  _c_o_m_m_a_n_d  _s_u_b_s_t_i_t_u_-
        _t_i_o_n, _a_r_i_t_h_m_e_t_i_c _e_x_p_a_n_s_i_o_n, _w_o_r_d _s_p_l_i_t_t_i_n_g, and _p_a_t_h_n_a_m_e _e_x_p_a_n_s_i_o_n.
 
        The order of expansions is: brace expansion; tilde expansion, parameter
-       and  variable expansion, arithmetic expansion, and command substitution
-       (done in a left-to-right fashion); word splitting; and pathname  expan-
+       and variable expansion, arithmetic expansion, and command  substitution
+       (done  in a left-to-right fashion); word splitting; and pathname expan-
        sion.
 
        On systems that can support it, there is an additional expansion avail-
-       able: _p_r_o_c_e_s_s _s_u_b_s_t_i_t_u_t_i_o_n.  This is performed  at  the  same  time  as
-       tilde,  parameter,  variable, and arithmetic expansion and command sub-
+       able:  _p_r_o_c_e_s_s  _s_u_b_s_t_i_t_u_t_i_o_n.   This  is  performed at the same time as
+       tilde, parameter, variable, and arithmetic expansion and  command  sub-
        stitution.
 
-       After these expansions are performed, quote characters present  in  the
-       original  word  are  removed  unless  they  have been quoted themselves
+       After  these  expansions are performed, quote characters present in the
+       original word are removed  unless  they  have  been  quoted  themselves
        (_q_u_o_t_e _r_e_m_o_v_a_l).
 
-       Only brace expansion, word splitting, and pathname  expansion  can  in-
-       crease  the number of words of the expansion; other expansions expand a
-       single word to a single word.  The only exceptions to this are the  ex-
+       Only  brace  expansion,  word splitting, and pathname expansion can in-
+       crease the number of words of the expansion; other expansions expand  a
+       single  word to a single word.  The only exceptions to this are the ex-
        pansions  of  "$$@@"  and  "$${{_n_a_m_e[[@@]]}}",  and,  in  most  cases,  $$**  and
        $${{_n_a_m_e[[**]]}} as explained above (see PPAARRAAMMEETTEERRSS).
 
    BBrraaccee EExxppaannssiioonn
        _B_r_a_c_e _e_x_p_a_n_s_i_o_n is a mechanism by which arbitrary strings may be gener-
-       ated.   This  mechanism is similar to _p_a_t_h_n_a_m_e _e_x_p_a_n_s_i_o_n, but the file-
+       ated.  This mechanism is similar to _p_a_t_h_n_a_m_e _e_x_p_a_n_s_i_o_n, but  the  file-
        names generated need not exist.  Patterns to be brace expanded take the
        form of an optional _p_r_e_a_m_b_l_e, followed by either a series of comma-sep-
-       arated strings or a sequence expression between a pair of braces,  fol-
-       lowed  by  an  optional  _p_o_s_t_s_c_r_i_p_t.   The preamble is prefixed to each
+       arated  strings or a sequence expression between a pair of braces, fol-
+       lowed by an optional _p_o_s_t_s_c_r_i_p_t.  The  preamble  is  prefixed  to  each
        string contained within the braces, and the postscript is then appended
        to each resulting string, expanding left to right.
 
-       Brace  expansions  may  be nested.  The results of each expanded string
-       are not sorted;  left  to  right  order  is  preserved.   For  example,
+       Brace expansions may be nested.  The results of  each  expanded  string
+       are  not  sorted;  left  to  right  order  is  preserved.  For example,
        a{{d,c,b}}e expands into `ade ace abe'.
 
-       A  sequence expression takes the form {{_x...._y[[...._i_n_c_r]]}}, where _x and _y are
-       either integers or single letters, and _i_n_c_r, an optional increment,  is
+       A sequence expression takes the form {{_x...._y[[...._i_n_c_r]]}}, where _x and _y  are
+       either  integers or single letters, and _i_n_c_r, an optional increment, is
        an integer.  When integers are supplied, the expression expands to each
-       number between _x and _y, inclusive.  Supplied integers may  be  prefixed
-       with  _0  to force each term to have the same width.  When either _x or _y
-       begins with a zero, the shell attempts to force all generated terms  to
-       contain  the same number of digits, zero-padding where necessary.  When
-       letters are supplied, the expression expands to each character  lexico-
-       graphically  between  _x  and  _y, inclusive, using the default C locale.
-       Note that both _x and _y must be of the same type  (integer  or  letter).
-       When  the  increment  is supplied, it is used as the difference between
+       number  between  _x and _y, inclusive.  Supplied integers may be prefixed
+       with _0 to force each term to have the same width.  When either _x  or  _y
+       begins  with a zero, the shell attempts to force all generated terms to
+       contain the same number of digits, zero-padding where necessary.   When
+       letters  are supplied, the expression expands to each character lexico-
+       graphically between _x and _y, inclusive, using  the  default  C  locale.
+       Note  that  both  _x and _y must be of the same type (integer or letter).
+       When the increment is supplied, it is used as  the  difference  between
        each term.  The default increment is 1 or -1 as appropriate.
 
        Brace expansion is performed before any other expansions, and any char-
-       acters  special to other expansions are preserved in the result.  It is
-       strictly textual.  BBaasshh does not apply any syntactic interpretation  to
+       acters special to other expansions are preserved in the result.  It  is
+       strictly  textual.  BBaasshh does not apply any syntactic interpretation to
        the context of the expansion or the text between the braces.
 
-       A  correctly-formed  brace  expansion must contain unquoted opening and
+       A correctly-formed brace expansion must contain  unquoted  opening  and
        closing braces, and at least one unquoted comma or a valid sequence ex-
        pression.  Any incorrectly formed brace expansion is left unchanged.  A
-       {{ or ,, may be quoted with a backslash to prevent its  being  considered
-       part  of  a brace expression.  To avoid conflicts with parameter expan-
+       {{  or  ,, may be quoted with a backslash to prevent its being considered
+       part of a brace expression.  To avoid conflicts with  parameter  expan-
        sion, the string $${{ is not considered eligible for brace expansion, and
        inhibits brace expansion until the closing }}.
 
@@ -1632,36 +1649,36 @@ EEXXPPAANNSSIIOONN
        or
               chown root /usr/{ucb/{ex,edit},lib/{ex?.?*,how_ex}}
 
-       Brace expansion introduces a  slight  incompatibility  with  historical
-       versions  of sshh.  sshh does not treat opening or closing braces specially
-       when they appear as part of a word, and preserves them in  the  output.
-       BBaasshh  removes  braces  from  words as a consequence of brace expansion.
-       For example, a word entered to sshh as _f_i_l_e_{_1_,_2_} appears  identically  in
-       the  output.  The same word is output as _f_i_l_e_1 _f_i_l_e_2 after expansion by
-       bbaasshh.  If strict compatibility with sshh is desired, start bbaasshh with  the
+       Brace  expansion  introduces  a  slight incompatibility with historical
+       versions of sshh.  sshh does not treat opening or closing braces  specially
+       when  they  appear as part of a word, and preserves them in the output.
+       BBaasshh removes braces from words as a  consequence  of  brace  expansion.
+       For  example,  a word entered to sshh as _f_i_l_e_{_1_,_2_} appears identically in
+       the output.  The same word is output as _f_i_l_e_1 _f_i_l_e_2 after expansion  by
+       bbaasshh.   If strict compatibility with sshh is desired, start bbaasshh with the
        ++BB option or disable brace expansion with the ++BB option to the sseett com-
        mand (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
    TTiillddee EExxppaannssiioonn
-       If a word begins with an unquoted tilde character  (`~~'),  all  of  the
-       characters  preceding  the  first unquoted slash (or all characters, if
-       there is no unquoted slash) are considered a _t_i_l_d_e_-_p_r_e_f_i_x.  If none  of
-       the  characters  in  the tilde-prefix are quoted, the characters in the
-       tilde-prefix following the tilde are treated as a possible _l_o_g_i_n  _n_a_m_e.
-       If  this  login name is the null string, the tilde is replaced with the
-       value of the shell parameter HHOOMMEE.  If HHOOMMEE is unset, the  home  direc-
-       tory  of  the  user executing the shell is substituted instead.  Other-
-       wise, the tilde-prefix is replaced with the home  directory  associated
+       If  a  word  begins  with an unquoted tilde character (`~~'), all of the
+       characters preceding the first unquoted slash (or  all  characters,  if
+       there  is no unquoted slash) are considered a _t_i_l_d_e_-_p_r_e_f_i_x.  If none of
+       the characters in the tilde-prefix are quoted, the  characters  in  the
+       tilde-prefix  following the tilde are treated as a possible _l_o_g_i_n _n_a_m_e.
+       If this login name is the null string, the tilde is replaced  with  the
+       value  of  the shell parameter HHOOMMEE.  If HHOOMMEE is unset, the home direc-
+       tory of the user executing the shell is  substituted  instead.   Other-
+       wise,  the  tilde-prefix is replaced with the home directory associated
        with the specified login name.
 
-       If  the tilde-prefix is a `~+', the value of the shell variable PPWWDD re-
-       places the tilde-prefix.  If the tilde-prefix is a `~-', the  value  of
-       the  shell variable OOLLDDPPWWDD, if it is set, is substituted.  If the char-
-       acters following the tilde in the tilde-prefix consist of a  number  _N,
-       optionally  prefixed  by  a  `+' or a `-', the tilde-prefix is replaced
+       If the tilde-prefix is a `~+', the value of the shell variable PPWWDD  re-
+       places  the  tilde-prefix.  If the tilde-prefix is a `~-', the value of
+       the shell variable OOLLDDPPWWDD, if it is set, is substituted.  If the  char-
+       acters  following  the tilde in the tilde-prefix consist of a number _N,
+       optionally prefixed by a `+' or a `-',  the  tilde-prefix  is  replaced
        with the corresponding element from the directory stack, as it would be
        displayed by the ddiirrss builtin invoked with the tilde-prefix as an argu-
-       ment.  If the characters following the tilde in the  tilde-prefix  con-
+       ment.   If  the characters following the tilde in the tilde-prefix con-
        sist of a number without a leading `+' or `-', `+' is assumed.
 
        If the login name is invalid, or the tilde expansion fails, the word is
@@ -1670,140 +1687,140 @@ EEXXPPAANNSSIIOONN
        Each variable assignment is checked for unquoted tilde-prefixes immedi-
        ately following a :: or the first ==.  In these cases, tilde expansion is
        also performed.  Consequently, one may use filenames with tildes in as-
-       signments  to PPAATTHH, MMAAIILLPPAATTHH, and CCDDPPAATTHH, and the shell assigns the ex-
+       signments to PPAATTHH, MMAAIILLPPAATTHH, and CCDDPPAATTHH, and the shell assigns the  ex-
        panded value.
 
-       Bash also performs tilde expansion on words satisfying  the  conditions
+       Bash  also  performs tilde expansion on words satisfying the conditions
        of variable assignments (as described above under PPAARRAAMMEETTEERRSS) when they
-       appear as arguments to simple commands.  Bash does not do this,  except
+       appear  as arguments to simple commands.  Bash does not do this, except
        for the _d_e_c_l_a_r_a_t_i_o_n commands listed above, when in _p_o_s_i_x _m_o_d_e.
 
    PPaarraammeetteerr EExxppaannssiioonn
        The `$$' character introduces parameter expansion, command substitution,
-       or arithmetic expansion.  The parameter name or symbol to  be  expanded
-       may  be enclosed in braces, which are optional but serve to protect the
-       variable to be expanded from characters immediately following it  which
+       or  arithmetic  expansion.  The parameter name or symbol to be expanded
+       may be enclosed in braces, which are optional but serve to protect  the
+       variable  to be expanded from characters immediately following it which
        could be interpreted as part of the name.
 
-       When  braces  are  used, the matching ending brace is the first `}}' not
+       When braces are used, the matching ending brace is the  first  `}}'  not
        escaped by a backslash or within a quoted string, and not within an em-
-       bedded  arithmetic expansion, command substitution, or parameter expan-
+       bedded arithmetic expansion, command substitution, or parameter  expan-
        sion.
 
        ${_p_a_r_a_m_e_t_e_r}
-              The value of _p_a_r_a_m_e_t_e_r is substituted.  The braces are  required
-              when  _p_a_r_a_m_e_t_e_r  is  a  positional  parameter with more than one
+              The  value of _p_a_r_a_m_e_t_e_r is substituted.  The braces are required
+              when _p_a_r_a_m_e_t_e_r is a positional  parameter  with  more  than  one
               digit, or when _p_a_r_a_m_e_t_e_r is followed by a character which is not
               to be interpreted as part of its name.  The _p_a_r_a_m_e_t_e_r is a shell
-              parameter as described above PPAARRAAMMEETTEERRSS) or an  array  reference
+              parameter  as  described above PPAARRAAMMEETTEERRSS) or an array reference
               (AArrrraayyss).
 
-       If  the  first  character of _p_a_r_a_m_e_t_e_r is an exclamation point (!!), and
+       If the first character of _p_a_r_a_m_e_t_e_r is an exclamation  point  (!!),  and
        _p_a_r_a_m_e_t_e_r is not a _n_a_m_e_r_e_f, it introduces a level of indirection.  BBaasshh
        uses the value formed by expanding the rest of _p_a_r_a_m_e_t_e_r as the new _p_a_-
-       _r_a_m_e_t_e_r; this is then expanded and that value is used in  the  rest  of
-       the  expansion,  rather  than  the expansion of the original _p_a_r_a_m_e_t_e_r.
+       _r_a_m_e_t_e_r;  this  is  then expanded and that value is used in the rest of
+       the expansion, rather than the expansion  of  the  original  _p_a_r_a_m_e_t_e_r.
        This is known as _i_n_d_i_r_e_c_t _e_x_p_a_n_s_i_o_n.  The value is subject to tilde ex-
-       pansion,  parameter expansion, command substitution, and arithmetic ex-
-       pansion.  If _p_a_r_a_m_e_t_e_r is a nameref, this expands to the  name  of  the
-       parameter  referenced  by  _p_a_r_a_m_e_t_e_r instead of performing the complete
-       indirect expansion.  The exceptions  to  this  are  the  expansions  of
-       ${!!_p_r_e_f_i_x**}  and  ${!!_n_a_m_e[_@]}  described  below.  The exclamation point
-       must immediately follow the left brace in order to  introduce  indirec-
+       pansion, parameter expansion, command substitution, and arithmetic  ex-
+       pansion.   If  _p_a_r_a_m_e_t_e_r  is a nameref, this expands to the name of the
+       parameter referenced by _p_a_r_a_m_e_t_e_r instead of  performing  the  complete
+       indirect  expansion.   The  exceptions  to  this  are the expansions of
+       ${!!_p_r_e_f_i_x**} and ${!!_n_a_m_e[_@]} described  below.   The  exclamation  point
+       must  immediately  follow the left brace in order to introduce indirec-
        tion.
 
        In each of the cases below, _w_o_r_d is subject to tilde expansion, parame-
        ter expansion, command substitution, and arithmetic expansion.
 
        When not performing substring expansion, using the forms documented be-
-       low  (e.g.,  ::--),  bbaasshh  tests  for  a parameter that is unset or null.
-       Omitting the colon results in a test only for a parameter that  is  un-
+       low (e.g., ::--), bbaasshh tests for a  parameter  that  is  unset  or  null.
+       Omitting  the  colon results in a test only for a parameter that is un-
        set.
 
        ${_p_a_r_a_m_e_t_e_r::--_w_o_r_d}
-              UUssee  DDeeffaauulltt  VVaalluueess.  If _p_a_r_a_m_e_t_e_r is unset or null, the expan-
-              sion of _w_o_r_d is substituted.  Otherwise, the value of  _p_a_r_a_m_e_t_e_r
+              UUssee DDeeffaauulltt VVaalluueess.  If _p_a_r_a_m_e_t_e_r is unset or null,  the  expan-
+              sion  of _w_o_r_d is substituted.  Otherwise, the value of _p_a_r_a_m_e_t_e_r
               is substituted.
        ${_p_a_r_a_m_e_t_e_r::==_w_o_r_d}
-              AAssssiiggnn  DDeeffaauulltt  VVaalluueess.  If _p_a_r_a_m_e_t_e_r is unset or null, the ex-
-              pansion of _w_o_r_d is assigned to _p_a_r_a_m_e_t_e_r.  The value of  _p_a_r_a_m_e_-
-              _t_e_r  is then substituted.  Positional parameters and special pa-
+              AAssssiiggnn DDeeffaauulltt VVaalluueess.  If _p_a_r_a_m_e_t_e_r is unset or null,  the  ex-
+              pansion  of _w_o_r_d is assigned to _p_a_r_a_m_e_t_e_r.  The value of _p_a_r_a_m_e_-
+              _t_e_r is then substituted.  Positional parameters and special  pa-
               rameters may not be assigned to in this way.
        ${_p_a_r_a_m_e_t_e_r::??_w_o_r_d}
-              DDiissppllaayy EErrrroorr iiff NNuullll oorr UUnnsseett.  If _p_a_r_a_m_e_t_e_r is null or  unset,
-              the  expansion  of  _w_o_r_d (or a message to that effect if _w_o_r_d is
-              not present) is written to the standard error and the shell,  if
+              DDiissppllaayy  EErrrroorr iiff NNuullll oorr UUnnsseett.  If _p_a_r_a_m_e_t_e_r is null or unset,
+              the expansion of _w_o_r_d (or a message to that effect  if  _w_o_r_d  is
+              not  present) is written to the standard error and the shell, if
               it is not interactive, exits.  Otherwise, the value of _p_a_r_a_m_e_t_e_r
               is substituted.
        ${_p_a_r_a_m_e_t_e_r::++_w_o_r_d}
-              UUssee AAlltteerrnnaattee VVaalluuee.  If _p_a_r_a_m_e_t_e_r is null or unset, nothing  is
+              UUssee  AAlltteerrnnaattee VVaalluuee.  If _p_a_r_a_m_e_t_e_r is null or unset, nothing is
               substituted, otherwise the expansion of _w_o_r_d is substituted.
        ${_p_a_r_a_m_e_t_e_r::_o_f_f_s_e_t}
        ${_p_a_r_a_m_e_t_e_r::_o_f_f_s_e_t::_l_e_n_g_t_h}
-              SSuubbssttrriinngg  EExxppaannssiioonn.  Expands to up to _l_e_n_g_t_h characters of the
-              value of _p_a_r_a_m_e_t_e_r starting at the character specified  by  _o_f_f_-
-              _s_e_t.   If _p_a_r_a_m_e_t_e_r is @@ or **, an indexed array subscripted by @@
-              or **, or an associative array name, the results  differ  as  de-
-              scribed  below.   If _l_e_n_g_t_h is omitted, expands to the substring
+              SSuubbssttrriinngg EExxppaannssiioonn.  Expands to up to _l_e_n_g_t_h characters of  the
+              value  of  _p_a_r_a_m_e_t_e_r starting at the character specified by _o_f_f_-
+              _s_e_t.  If _p_a_r_a_m_e_t_e_r is @@ or **, an indexed array subscripted by  @@
+              or  **,  or  an associative array name, the results differ as de-
+              scribed below.  If _l_e_n_g_t_h is omitted, expands to  the  substring
               of the value of _p_a_r_a_m_e_t_e_r starting at the character specified by
               _o_f_f_s_e_t and extending to the end of the value.  _l_e_n_g_t_h and _o_f_f_s_e_t
               are arithmetic expressions (see AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN below).
 
-              If _o_f_f_s_e_t evaluates to a number less than  zero,  the  value  is
+              If  _o_f_f_s_e_t  evaluates  to  a number less than zero, the value is
               used as an offset in characters from the end of the value of _p_a_-
-              _r_a_m_e_t_e_r.  If _l_e_n_g_t_h evaluates to a number less than zero, it  is
+              _r_a_m_e_t_e_r.   If _l_e_n_g_t_h evaluates to a number less than zero, it is
               interpreted as an offset in characters from the end of the value
-              of _p_a_r_a_m_e_t_e_r rather than a number of characters, and the  expan-
-              sion  is  the  characters  between _o_f_f_s_e_t and that result.  Note
-              that a negative offset must be separated from the  colon  by  at
+              of  _p_a_r_a_m_e_t_e_r rather than a number of characters, and the expan-
+              sion is the characters between _o_f_f_s_e_t  and  that  result.   Note
+              that  a  negative  offset must be separated from the colon by at
               least one space to avoid being confused with the ::-- expansion.
 
-              If  _p_a_r_a_m_e_t_e_r is @@ or **, the result is _l_e_n_g_t_h positional parame-
-              ters beginning at _o_f_f_s_e_t.  A negative _o_f_f_s_e_t is  taken  relative
-              to  one  greater  than  the greatest positional parameter, so an
+              If _p_a_r_a_m_e_t_e_r is @@ or **, the result is _l_e_n_g_t_h positional  parame-
+              ters  beginning  at _o_f_f_s_e_t.  A negative _o_f_f_s_e_t is taken relative
+              to one greater than the greatest  positional  parameter,  so  an
               offset of -1 evaluates to the last positional parameter (or 0 if
-              there  are  no positional parameters).  It is an expansion error
+              there are no positional parameters).  It is an  expansion  error
               if _l_e_n_g_t_h evaluates to a number less than zero.
 
               If _p_a_r_a_m_e_t_e_r is an indexed array name subscripted by @ or *, the
-              result  is  the _l_e_n_g_t_h members of the array beginning with ${_p_a_-
-              _r_a_m_e_t_e_r[_o_f_f_s_e_t]}.  A negative _o_f_f_s_e_t is taken  relative  to  one
+              result is the _l_e_n_g_t_h members of the array beginning  with  ${_p_a_-
+              _r_a_m_e_t_e_r[_o_f_f_s_e_t]}.   A  negative  _o_f_f_s_e_t is taken relative to one
               greater than the maximum index of the specified array.  It is an
               expansion error if _l_e_n_g_t_h evaluates to a number less than zero.
 
               Substring expansion applied to an associative array produces un-
               defined results.
 
-              Substring  indexing  is zero-based unless the positional parame-
-              ters are used, in which case the indexing starts  at  1  by  de-
-              fault.   If _o_f_f_s_e_t is 0, and the positional parameters are used,
+              Substring indexing is zero-based unless the  positional  parame-
+              ters  are  used,  in  which case the indexing starts at 1 by de-
+              fault.  If _o_f_f_s_e_t is 0, and the positional parameters are  used,
               $$00 is prefixed to the list.
 
        ${!!_p_r_e_f_i_x**}
        ${!!_p_r_e_f_i_x@@}
-              NNaammeess mmaattcchhiinngg pprreeffiixx.  Expands to the names of variables  whose
+              NNaammeess  mmaattcchhiinngg pprreeffiixx.  Expands to the names of variables whose
               names begin with _p_r_e_f_i_x, separated by the first character of the
-              IIFFSS special variable.  When _@ is used and the expansion  appears
-              within  double  quotes, each variable name expands to a separate
+              IIFFSS  special variable.  When _@ is used and the expansion appears
+              within double quotes, each variable name expands to  a  separate
               word.
 
        ${!!_n_a_m_e[_@]}
        ${!!_n_a_m_e[_*]}
-              LLiisstt ooff aarrrraayy kkeeyyss.  If _n_a_m_e is an array  variable,  expands  to
-              the  list  of array indices (keys) assigned in _n_a_m_e.  If _n_a_m_e is
-              not an array, expands to 0 if _n_a_m_e is set  and  null  otherwise.
-              When  _@  is used and the expansion appears within double quotes,
+              LLiisstt  ooff  aarrrraayy  kkeeyyss.  If _n_a_m_e is an array variable, expands to
+              the list of array indices (keys) assigned in _n_a_m_e.  If  _n_a_m_e  is
+              not  an  array,  expands to 0 if _n_a_m_e is set and null otherwise.
+              When _@ is used and the expansion appears within  double  quotes,
               each key expands to a separate word.
 
        ${##_p_a_r_a_m_e_t_e_r}
-              PPaarraammeetteerr lleennggtthh.  The length in characters of the value of  _p_a_-
-              _r_a_m_e_t_e_r  is substituted.  If _p_a_r_a_m_e_t_e_r is ** or @@, the value sub-
-              stituted is the number of positional parameters.   If  _p_a_r_a_m_e_t_e_r
+              PPaarraammeetteerr  lleennggtthh.  The length in characters of the value of _p_a_-
+              _r_a_m_e_t_e_r is substituted.  If _p_a_r_a_m_e_t_e_r is ** or @@, the value  sub-
+              stituted  is  the number of positional parameters.  If _p_a_r_a_m_e_t_e_r
               is an array name subscripted by ** or @@, the value substituted is
               the number of elements in the array.  If _p_a_r_a_m_e_t_e_r is an indexed
-              array  name subscripted by a negative number, that number is in-
-              terpreted as relative to one greater than the maximum  index  of
-              _p_a_r_a_m_e_t_e_r,  so  negative  indices count back from the end of the
+              array name subscripted by a negative number, that number is  in-
+              terpreted  as  relative to one greater than the maximum index of
+              _p_a_r_a_m_e_t_e_r, so negative indices count back from the  end  of  the
               array, and an index of -1 references the last element.
 
        ${_p_a_r_a_m_e_t_e_r##_w_o_r_d}
@@ -1811,15 +1828,15 @@ EEXXPPAANNSSIIOONN
               RReemmoovvee mmaattcchhiinngg pprreeffiixx ppaatttteerrnn.  The _w_o_r_d is expanded to produce
               a pattern just as in pathname expansion, and matched against the
               expanded value of _p_a_r_a_m_e_t_e_r using the rules described under PPaatt--
-              tteerrnn  MMaattcchhiinngg  below.   If the pattern matches the beginning of
-              the value of _p_a_r_a_m_e_t_e_r, then the result of the expansion is  the
-              expanded  value  of _p_a_r_a_m_e_t_e_r with the shortest matching pattern
-              (the ``##'' case) or the longest  matching  pattern  (the  ``####''
-              case)  deleted.  If _p_a_r_a_m_e_t_e_r is @@ or **, the pattern removal op-
+              tteerrnn MMaattcchhiinngg below.  If the pattern matches  the  beginning  of
+              the  value of _p_a_r_a_m_e_t_e_r, then the result of the expansion is the
+              expanded value of _p_a_r_a_m_e_t_e_r with the shortest  matching  pattern
+              (the  ``##''  case)  or  the longest matching pattern (the ``####''
+              case) deleted.  If _p_a_r_a_m_e_t_e_r is @@ or **, the pattern removal  op-
               eration is applied to each positional parameter in turn, and the
               expansion is the resultant list.  If _p_a_r_a_m_e_t_e_r is an array vari-
-              able subscripted with @@ or **, the pattern removal  operation  is
-              applied  to  each member of the array in turn, and the expansion
+              able  subscripted  with @@ or **, the pattern removal operation is
+              applied to each member of the array in turn, and  the  expansion
               is the resultant list.
 
        ${_p_a_r_a_m_e_t_e_r%%_w_o_r_d}
@@ -1827,15 +1844,15 @@ EEXXPPAANNSSIIOONN
               RReemmoovvee mmaattcchhiinngg ssuuffffiixx ppaatttteerrnn.  The _w_o_r_d is expanded to produce
               a pattern just as in pathname expansion, and matched against the
               expanded value of _p_a_r_a_m_e_t_e_r using the rules described under PPaatt--
-              tteerrnn  MMaattcchhiinngg below.  If the pattern matches a trailing portion
-              of the expanded value of _p_a_r_a_m_e_t_e_r, then the result of  the  ex-
-              pansion  is  the  expanded  value of _p_a_r_a_m_e_t_e_r with the shortest
-              matching pattern (the ``%%'' case) or the longest  matching  pat-
-              tern  (the  ``%%%%''  case)  deleted.  If _p_a_r_a_m_e_t_e_r is @@ or **, the
-              pattern removal operation is applied to each positional  parame-
+              tteerrnn MMaattcchhiinngg below.  If the pattern matches a trailing  portion
+              of  the  expanded value of _p_a_r_a_m_e_t_e_r, then the result of the ex-
+              pansion is the expanded value of  _p_a_r_a_m_e_t_e_r  with  the  shortest
+              matching  pattern  (the ``%%'' case) or the longest matching pat-
+              tern (the ``%%%%'' case) deleted.  If _p_a_r_a_m_e_t_e_r is  @@  or  **,  the
+              pattern  removal operation is applied to each positional parame-
               ter in turn, and the expansion is the resultant list.  If _p_a_r_a_m_-
-              _e_t_e_r is an array variable subscripted with @@ or **,  the  pattern
-              removal  operation  is  applied  to  each member of the array in
+              _e_t_e_r  is  an array variable subscripted with @@ or **, the pattern
+              removal operation is applied to each  member  of  the  array  in
               turn, and the expansion is the resultant list.
 
        ${_p_a_r_a_m_e_t_e_r//_p_a_t_t_e_r_n//_s_t_r_i_n_g}
@@ -1843,116 +1860,116 @@ EEXXPPAANNSSIIOONN
        ${_p_a_r_a_m_e_t_e_r//##_p_a_t_t_e_r_n//_s_t_r_i_n_g}
        ${_p_a_r_a_m_e_t_e_r//%%_p_a_t_t_e_r_n//_s_t_r_i_n_g}
               PPaatttteerrnn ssuubbssttiittuuttiioonn.  The _p_a_t_t_e_r_n is expanded to produce a pat-
-              tern  just  as in pathname expansion.  _P_a_r_a_m_e_t_e_r is expanded and
-              the longest match of _p_a_t_t_e_r_n against its value is replaced  with
-              _s_t_r_i_n_g.   _s_t_r_i_n_g  undergoes tilde expansion, parameter and vari-
-              able expansion, arithmetic expansion, command and  process  sub-
-              stitution,  and quote removal.  The match is performed using the
+              tern just as in pathname expansion.  _P_a_r_a_m_e_t_e_r is  expanded  and
+              the  longest match of _p_a_t_t_e_r_n against its value is replaced with
+              _s_t_r_i_n_g.  _s_t_r_i_n_g undergoes tilde expansion, parameter  and  vari-
+              able  expansion,  arithmetic expansion, command and process sub-
+              stitution, and quote removal.  The match is performed using  the
               rules described under PPaatttteerrnn MMaattcchhiinngg below.  In the first form
-              above,  only  the  first  match  is  replaced.  If there are two
+              above, only the first match  is  replaced.   If  there  are  two
               slashes  separating  _p_a_r_a_m_e_t_e_r  and  _p_a_t_t_e_r_n  (the  second  form
-              above),  all  matches  of  _p_a_t_t_e_r_n are replaced with _s_t_r_i_n_g.  If
-              _p_a_t_t_e_r_n is preceded by ## (the third form above), it  must  match
+              above), all matches of _p_a_t_t_e_r_n are  replaced  with  _s_t_r_i_n_g.   If
+              _p_a_t_t_e_r_n  is  preceded by ## (the third form above), it must match
               at the beginning of the expanded value of _p_a_r_a_m_e_t_e_r.  If _p_a_t_t_e_r_n
-              is preceded by %% (the fourth form above), it must match  at  the
-              end  of  the  expanded  value of _p_a_r_a_m_e_t_e_r.  If the expansion of
-              _s_t_r_i_n_g is null, matches of _p_a_t_t_e_r_n are deleted.   If  _s_t_r_i_n_g  is
+              is  preceded  by %% (the fourth form above), it must match at the
+              end of the expanded value of _p_a_r_a_m_e_t_e_r.   If  the  expansion  of
+              _s_t_r_i_n_g  is  null,  matches of _p_a_t_t_e_r_n are deleted.  If _s_t_r_i_n_g is
               null, matches of _p_a_t_t_e_r_n are deleted and the // following _p_a_t_t_e_r_n
               may be omitted.
 
-              If the ppaattssuubb__rreeppllaacceemmeenntt shell option is enabled  using  sshhoopptt,
-              any  unquoted  instances  of  &&  in _s_t_r_i_n_g are replaced with the
+              If  the  ppaattssuubb__rreeppllaacceemmeenntt shell option is enabled using sshhoopptt,
+              any unquoted instances of && in  _s_t_r_i_n_g  are  replaced  with  the
               matching portion of _p_a_t_t_e_r_n.
 
               Quoting any part of _s_t_r_i_n_g inhibits replacement in the expansion
-              of  the  quoted portion, including replacement strings stored in
-              shell variables.  Backslash will escape && in _s_t_r_i_n_g;  the  back-
-              slash  is removed in order to permit a literal && in the replace-
-              ment string.  Backslash can also be used to escape a  backslash;
-              \\\\  results  in  a  literal backslash in the replacement.  Users
-              should take care if _s_t_r_i_n_g is double-quoted  to  avoid  unwanted
-              interactions  between  the  backslash  and double-quoting, since
-              backslash has special meaning  within  double  quotes.   Pattern
-              substitution  performs  the check for unquoted && after expanding
+              of the quoted portion, including replacement strings  stored  in
+              shell  variables.   Backslash will escape && in _s_t_r_i_n_g; the back-
+              slash is removed in order to permit a literal && in the  replace-
+              ment  string.  Backslash can also be used to escape a backslash;
+              \\\\ results in a literal backslash  in  the  replacement.   Users
+              should  take  care  if _s_t_r_i_n_g is double-quoted to avoid unwanted
+              interactions between the  backslash  and  double-quoting,  since
+              backslash  has  special  meaning  within double quotes.  Pattern
+              substitution performs the check for unquoted &&  after  expanding
               _s_t_r_i_n_g; shell programmers should quote any occurrences of && they
               want to be taken literally in the replacement and ensure any in-
               stances of && they want to be replaced are unquoted.
 
-              If the nnooccaasseemmaattcchh shell option is enabled, the  match  is  per-
-              formed  without regard to the case of alphabetic characters.  If
-              _p_a_r_a_m_e_t_e_r is @@ or **, the substitution operation  is  applied  to
-              each  positional parameter in turn, and the expansion is the re-
-              sultant list.  If _p_a_r_a_m_e_t_e_r is  an  array  variable  subscripted
-              with  @@ or **, the substitution operation is applied to each mem-
-              ber of the array in turn, and the  expansion  is  the  resultant
+              If  the  nnooccaasseemmaattcchh  shell option is enabled, the match is per-
+              formed without regard to the case of alphabetic characters.   If
+              _p_a_r_a_m_e_t_e_r  is  @@  or **, the substitution operation is applied to
+              each positional parameter in turn, and the expansion is the  re-
+              sultant  list.   If  _p_a_r_a_m_e_t_e_r  is an array variable subscripted
+              with @@ or **, the substitution operation is applied to each  mem-
+              ber  of  the  array  in turn, and the expansion is the resultant
               list.
 
        ${_p_a_r_a_m_e_t_e_r^^_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r^^^^_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r,,_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r,,,,_p_a_t_t_e_r_n}
-              CCaassee  mmooddiiffiiccaattiioonn.   This expansion modifies the case of alpha-
-              betic characters in _p_a_r_a_m_e_t_e_r.  The _p_a_t_t_e_r_n is expanded to  pro-
+              CCaassee mmooddiiffiiccaattiioonn.  This expansion modifies the case  of  alpha-
+              betic  characters in _p_a_r_a_m_e_t_e_r.  The _p_a_t_t_e_r_n is expanded to pro-
               duce a pattern just as in pathname expansion.  Each character in
-              the expanded value of _p_a_r_a_m_e_t_e_r is tested against _p_a_t_t_e_r_n,  and,
-              if  it  matches the pattern, its case is converted.  The pattern
-              should not attempt to match more than one character.  The ^^  op-
+              the  expanded value of _p_a_r_a_m_e_t_e_r is tested against _p_a_t_t_e_r_n, and,
+              if it matches the pattern, its case is converted.   The  pattern
+              should  not attempt to match more than one character.  The ^^ op-
               erator converts lowercase letters matching _p_a_t_t_e_r_n to uppercase;
               the ,, operator converts matching uppercase letters to lowercase.
-              The  ^^^^  and ,,,, expansions convert each matched character in the
-              expanded value; the ^^ and ,, expansions match  and  convert  only
-              the  first character in the expanded value.  If _p_a_t_t_e_r_n is omit-
-              ted, it is treated like a ??, which matches every character.   If
-              _p_a_r_a_m_e_t_e_r  is @@ or **, the case modification operation is applied
-              to each positional parameter in turn, and the expansion  is  the
-              resultant  list.   If _p_a_r_a_m_e_t_e_r is an array variable subscripted
-              with @@ or **, the case modification operation is applied to  each
-              member  of the array in turn, and the expansion is the resultant
+              The ^^^^ and ,,,, expansions convert each matched character  in  the
+              expanded  value;  the  ^^ and ,, expansions match and convert only
+              the first character in the expanded value.  If _p_a_t_t_e_r_n is  omit-
+              ted,  it is treated like a ??, which matches every character.  If
+              _p_a_r_a_m_e_t_e_r is @@ or **, the case modification operation is  applied
+              to  each  positional parameter in turn, and the expansion is the
+              resultant list.  If _p_a_r_a_m_e_t_e_r is an array  variable  subscripted
+              with  @@ or **, the case modification operation is applied to each
+              member of the array in turn, and the expansion is the  resultant
               list.
 
        ${_p_a_r_a_m_e_t_e_r@@_o_p_e_r_a_t_o_r}
               PPaarraammeetteerr ttrraannssffoorrmmaattiioonn.  The expansion is either a transforma-
-              tion  of  the  value of _p_a_r_a_m_e_t_e_r or information about _p_a_r_a_m_e_t_e_r
-              itself, depending on the value of _o_p_e_r_a_t_o_r.  Each _o_p_e_r_a_t_o_r is  a
+              tion of the value of _p_a_r_a_m_e_t_e_r or  information  about  _p_a_r_a_m_e_t_e_r
+              itself,  depending on the value of _o_p_e_r_a_t_o_r.  Each _o_p_e_r_a_t_o_r is a
               single letter:
 
-              UU      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
-                     with lowercase alphabetic characters converted to  upper-
+              UU      The expansion is a string that is the value of  _p_a_r_a_m_e_t_e_r
+                     with  lowercase alphabetic characters converted to upper-
                      case.
-              uu      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
+              uu      The expansion is a string that is the value of  _p_a_r_a_m_e_t_e_r
                      with the first character converted to uppercase, if it is
                      alphabetic.
-              LL      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
-                     with uppercase alphabetic characters converted to  lower-
+              LL      The expansion is a string that is the value of  _p_a_r_a_m_e_t_e_r
+                     with  uppercase alphabetic characters converted to lower-
                      case.
-              QQ      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
+              QQ      The expansion is a string that is the value of  _p_a_r_a_m_e_t_e_r
                      quoted in a format that can be reused as input.
-              EE      The expansion is a string that is the value of  _p_a_r_a_m_e_t_e_r
-                     with  backslash  escape  sequences  expanded  as with the
+              EE      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
+                     with backslash escape  sequences  expanded  as  with  the
                      $$''......'' quoting mechanism.
               PP      The expansion is a string that is the result of expanding
                      the value of _p_a_r_a_m_e_t_e_r as if it were a prompt string (see
                      PPRROOMMPPTTIINNGG below).
-              AA      The expansion is a string in the form  of  an  assignment
-                     statement  or  ddeeccllaarree  command  that, if evaluated, will
+              AA      The  expansion  is  a string in the form of an assignment
+                     statement or ddeeccllaarree command  that,  if  evaluated,  will
                      recreate _p_a_r_a_m_e_t_e_r with its attributes and value.
               KK      Produces a possibly-quoted version of the value of _p_a_r_a_m_-
                      _e_t_e_r, except that it prints the values of indexed and as-
-                     sociative arrays as a sequence of quoted key-value  pairs
+                     sociative  arrays as a sequence of quoted key-value pairs
                      (see AArrrraayyss above).
-              aa      The  expansion is a string consisting of flag values rep-
+              aa      The expansion is a string consisting of flag values  rep-
                      resenting _p_a_r_a_m_e_t_e_r's attributes.
-              kk      Like the K transformation, but expands the keys and  val-
-                     ues  of  indexed and associative arrays to separate words
+              kk      Like  the K transformation, but expands the keys and val-
+                     ues of indexed and associative arrays to  separate  words
                      after word splitting.
 
-              If _p_a_r_a_m_e_t_e_r is @@ or **, the operation is applied to  each  posi-
-              tional  parameter  in  turn,  and the expansion is the resultant
-              list.  If _p_a_r_a_m_e_t_e_r is an array variable subscripted with  @@  or
+              If  _p_a_r_a_m_e_t_e_r  is @@ or **, the operation is applied to each posi-
+              tional parameter in turn, and the  expansion  is  the  resultant
+              list.   If  _p_a_r_a_m_e_t_e_r is an array variable subscripted with @@ or
               **, the operation is applied to each member of the array in turn,
               and the expansion is the resultant list.
 
-              The result of the expansion is subject  to  word  splitting  and
+              The  result  of  the  expansion is subject to word splitting and
               pathname expansion as described below.
 
    CCoommmmaanndd SSuubbssttiittuuttiioonn
@@ -1966,131 +1983,134 @@ EEXXPPAANNSSIIOONN
        BBaasshh performs the expansion by executing _c_o_m_m_a_n_d in a subshell environ-
        ment and replacing the command substitution with the standard output of
        the command, with any trailing newlines deleted.  Embedded newlines are
-       not  deleted,  but they may be removed during word splitting.  The com-
-       mand substitution $$((ccaatt _f_i_l_e)) can be replaced  by  the  equivalent  but
+       not deleted, but they may be removed during word splitting.   The  com-
+       mand  substitution  $$((ccaatt  _f_i_l_e))  can be replaced by the equivalent but
        faster $$((<< _f_i_l_e)).
 
-       When  the  old-style  backquote form of substitution is used, backslash
-       retains its literal meaning except when followed by $$, ``,  or  \\.   The
+       When the old-style backquote form of substitution  is  used,  backslash
+       retains  its  literal  meaning except when followed by $$, ``, or \\.  The
        first backquote not preceded by a backslash terminates the command sub-
-       stitution.  When using the $(_c_o_m_m_a_n_d) form, all characters between  the
+       stitution.   When using the $(_c_o_m_m_a_n_d) form, all characters between the
        parentheses make up the command; none are treated specially.
 
        Command substitutions may be nested.  To nest when using the backquoted
        form, escape the inner backquotes with backslashes.
 
-       If the substitution appears within double quotes,  word  splitting  and
+       If  the  substitution  appears within double quotes, word splitting and
        pathname expansion are not performed on the results.
 
    AArriitthhmmeettiicc EExxppaannssiioonn
-       Arithmetic  expansion allows the evaluation of an arithmetic expression
-       and the substitution of the result.  The format for  arithmetic  expan-
+       Arithmetic expansion allows the evaluation of an arithmetic  expression
+       and  the  substitution of the result.  The format for arithmetic expan-
        sion is:
 
               $$((((_e_x_p_r_e_s_s_i_o_n))))
 
-       The  _e_x_p_r_e_s_s_i_o_n undergoes the same expansions as if it were within dou-
-       ble quotes, but double quote characters in _e_x_p_r_e_s_s_i_o_n are  not  treated
+       The _e_x_p_r_e_s_s_i_o_n undergoes the same expansions as if it were within  dou-
+       ble  quotes,  but double quote characters in _e_x_p_r_e_s_s_i_o_n are not treated
        specially and are removed.  All tokens in the expression undergo param-
-       eter and variable expansion, command substitution, and  quote  removal.
-       The  result  is  treated  as the arithmetic expression to be evaluated.
+       eter  and  variable expansion, command substitution, and quote removal.
+       The result is treated as the arithmetic  expression  to  be  evaluated.
        Arithmetic expansions may be nested.
 
-       The evaluation is performed according to the rules listed  below  under
+       The  evaluation  is performed according to the rules listed below under
        AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN.  If _e_x_p_r_e_s_s_i_o_n is invalid, bbaasshh prints a message
        indicating failure and no substitution occurs.
 
    PPrroocceessss SSuubbssttiittuuttiioonn
-       _P_r_o_c_e_s_s _s_u_b_s_t_i_t_u_t_i_o_n allows a process's input or output to be  referred
-       to  using  a  filename.   It takes the form of <<((_l_i_s_t)) or >>((_l_i_s_t)).  The
-       process _l_i_s_t is run asynchronously, and its input or output appears  as
+       _P_r_o_c_e_s_s  _s_u_b_s_t_i_t_u_t_i_o_n allows a process's input or output to be referred
+       to using a filename.  It takes the form of  <<((_l_i_s_t))  or  >>((_l_i_s_t)).   The
+       process  _l_i_s_t is run asynchronously, and its input or output appears as
        a filename.  This filename is passed as an argument to the current com-
-       mand as the result of the expansion.  If  the  >>((_l_i_s_t))  form  is  used,
-       writing  to  the file will provide input for _l_i_s_t.  If the <<((_l_i_s_t)) form
-       is used, the file passed as an argument should be read  to  obtain  the
+       mand  as  the  result  of  the expansion.  If the >>((_l_i_s_t)) form is used,
+       writing to the file will provide input for _l_i_s_t.  If the  <<((_l_i_s_t))  form
+       is  used,  the  file passed as an argument should be read to obtain the
        output of _l_i_s_t.  Process substitution is supported on systems that sup-
        port named pipes (_F_I_F_O_s) or the //ddeevv//ffdd method of naming open files.
 
-       When available, process substitution is performed  simultaneously  with
-       parameter  and variable expansion, command substitution, and arithmetic
+       When  available,  process substitution is performed simultaneously with
+       parameter and variable expansion, command substitution, and  arithmetic
        expansion.
 
    WWoorrdd SSpplliittttiinngg
-       The shell scans the results of parameter expansion,  command  substitu-
-       tion,  and arithmetic expansion that did not occur within double quotes
+       The  shell  scans the results of parameter expansion, command substitu-
+       tion, and arithmetic expansion that did not occur within double  quotes
        for _w_o_r_d _s_p_l_i_t_t_i_n_g.
 
-       The shell treats each character of IIFFSS as a delimiter, and  splits  the
-       results  of  the  other expansions into words using these characters as
+       The  shell  treats each character of IIFFSS as a delimiter, and splits the
+       results of the other expansions into words using  these  characters  as
        field terminators.
 
        If IIFFSS is unset, or its value is exactly <<ssppaaccee>><<ttaabb>><<nneewwlliinnee>>, the de-
-       fault,  then  sequences of ssppaaccee, ttaabb, and nneewwlliinnee at the beginning and
-       end of the results of the previous expansions are ignored, and any  se-
-       quence  of IIFFSS characters not at the beginning or end serves to delimit
-       words.  If IIFFSS has a value other than the default,  then  sequences  of
-       the  whitespace  characters  ssppaaccee, ttaabb, and nneewwlliinnee are ignored at the
-       beginning and end of the word, as long as the whitespace  character  is
-       in  the  value  of IIFFSS (an IIFFSS whitespace character).  Any character in
-       IIFFSS that is not IIFFSS whitespace, along with any adjacent IIFFSS  whitespace
-       characters,  delimits a field.  A sequence of IIFFSS whitespace characters
+       fault, then sequences of ssppaaccee, ttaabb, and nneewwlliinnee at the  beginning  and
+       end  of the results of the previous expansions are ignored, and any se-
+       quence of IIFFSS characters not at the beginning or end serves to  delimit
+       words.   If  IIFFSS  has a value other than the default, then sequences of
+       the whitespace characters ssppaaccee, ttaabb, and nneewwlliinnee are  ignored  at  the
+       beginning  and  end of the word, as long as the whitespace character is
+       in the value of IIFFSS (an IIFFSS whitespace character).   Any  character  in
+       IIFFSS  that is not IIFFSS whitespace, along with any adjacent IIFFSS whitespace
+       characters, delimits a field.  A sequence of IIFFSS whitespace  characters
        is also treated as a delimiter.
 
-       If the value of IIFFSS is null, no word splitting occurs.  If IIFFSS  is  un-
-       set,  word  splitting  behaves  as if it contained the default value of
+       If  the  value of IIFFSS is null, no word splitting occurs.  If IIFFSS is un-
+       set, word splitting behaves as if it contained  the  default  value  of
        <<ssppaaccee>><<ttaabb>><<nneewwlliinnee>>.
 
-       Explicit null arguments ("""" or '''') are retained and passed to  commands
+       Explicit  null arguments ("""" or '''') are retained and passed to commands
        as empty strings.  Unquoted implicit null arguments, resulting from the
        expansion of parameters that have no values, are removed.  If a parame-
        ter with no value is expanded within double quotes, a null argument re-
        sults and is retained and passed to a command as an empty string.  When
-       a  quoted  null  argument  appears as part of a word whose expansion is
+       a quoted null argument appears as part of a  word  whose  expansion  is
        non-null, the null argument is removed.  That is, the word -d'' becomes
        -d after word splitting and null argument removal.
 
        Note that if no expansion occurs, no splitting is performed.
 
    PPaatthhnnaammee EExxppaannssiioonn
-       After  word  splitting,  unless  the --ff option has been set, bbaasshh scans
-       each word for the characters **, ??, and [[.  If one of  these  characters
+       After word splitting, unless the --ff option has  been  set,  bbaasshh  scans
+       each  word  for the characters **, ??, and [[.  If one of these characters
        appears, and is not quoted, then the word is regarded as a _p_a_t_t_e_r_n, and
-       replaced with an alphabetically sorted list of filenames  matching  the
-       pattern  (see  PPaatttteerrnn  MMaattcchhiinngg  below).  If no matching filenames are
-       found, and the shell option nnuullllgglloobb is not enabled, the word  is  left
-       unchanged.   If  the  nnuullllgglloobb option is set, and no matches are found,
-       the word is removed.  If the ffaaiillgglloobb  shell  option  is  set,  and  no
-       matches  are  found, an error message is printed and the command is not
+       replaced  with  an alphabetically sorted list of filenames matching the
+       pattern (see PPaatttteerrnn MMaattcchhiinngg below).  If  no  matching  filenames  are
+       found,  and  the shell option nnuullllgglloobb is not enabled, the word is left
+       unchanged.  If the nnuullllgglloobb option is set, and no  matches  are  found,
+       the  word  is  removed.   If  the  ffaaiillgglloobb shell option is set, and no
+       matches are found, an error message is printed and the command  is  not
        executed.  If the shell option nnooccaasseegglloobb is enabled, the match is per-
-       formed  without  regard  to  the case of alphabetic characters.  When a
-       pattern is used for pathname expansion, the  character  ````..''''   at  the
-       start  of  a  name or immediately following a slash must be matched ex-
-       plicitly, unless the shell option ddoottgglloobb is set.  In  order  to  match
+       formed without regard to the case of  alphabetic  characters.   When  a
+       pattern  is  used  for  pathname expansion, the character ````..''''  at the
+       start of a name or immediately following a slash must  be  matched  ex-
+       plicitly,  unless  the  shell option ddoottgglloobb is set.  In order to match
        the filenames ````..''''  and ````....'''', the pattern must begin with ``.'' (for
-       example, ``.?''), even if ddoottgglloobb is set.  If  the  gglloobbsskkiippddoottss  shell
-       option  is enabled, the filenames ````..''''  and ````....''''  are never matched,
-       even if the pattern begins with a ````..''''.  When not matching  pathnames,
-       the  ````..''''   character is not treated specially.  When matching a path-
-       name, the slash character must always be matched explicitly by a  slash
-       in  the  pattern, but in other matching contexts it can be matched by a
-       special pattern character as described below  under  PPaatttteerrnn  MMaattcchhiinngg.
-       See  the  description of sshhoopptt below under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS for a
-       description of the nnooccaasseegglloobb, nnuullllgglloobb,  gglloobbsskkiippddoottss,  ffaaiillgglloobb,  and
+       example,  ``.?''),  even  if ddoottgglloobb is set.  If the gglloobbsskkiippddoottss shell
+       option is enabled, the filenames ````..''''  and ````....''''  are never  matched,
+       even  if the pattern begins with a ````..''''.  When not matching pathnames,
+       the ````..''''  character is not treated specially.  When matching  a  path-
+       name,  the slash character must always be matched explicitly by a slash
+       in the pattern, but in other matching contexts it can be matched  by  a
+       special  pattern  character  as described below under PPaatttteerrnn MMaattcchhiinngg.
+       See the description of sshhoopptt below under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS  for  a
+       description  of  the  nnooccaasseegglloobb, nnuullllgglloobb, gglloobbsskkiippddoottss, ffaaiillgglloobb, and
        ddoottgglloobb shell options.
 
-       The  GGLLOOBBIIGGNNOORREE  shell variable may be used to restrict the set of file
-       names matching a _p_a_t_t_e_r_n.  If GGLLOOBBIIGGNNOORREE is  set,  each  matching  file
-       name  that  also  matches  one of the patterns in GGLLOOBBIIGGNNOORREE is removed
-       from the list of matches.  If the nnooccaasseegglloobb option is set, the  match-
-       ing  against  the patterns in GGLLOOBBIIGGNNOORREE is performed without regard to
+       The GGLLOOBBIIGGNNOORREE shell variable may be used to restrict the set  of  file
+       names  matching  a  _p_a_t_t_e_r_n.   If GGLLOOBBIIGGNNOORREE is set, each matching file
+       name that also matches one of the patterns  in  GGLLOOBBIIGGNNOORREE  is  removed
+       from  the list of matches.  If the nnooccaasseegglloobb option is set, the match-
+       ing against the patterns in GGLLOOBBIIGGNNOORREE is performed without  regard  to
        case.  The filenames ````..''''  and ````....''''  are always ignored when GGLLOOBBIIGG--
-       NNOORREE  is  set  and not null.  However, setting GGLLOOBBIIGGNNOORREE to a non-null
+       NNOORREE is set and not null.  However, setting GGLLOOBBIIGGNNOORREE  to  a  non-null
        value has the effect of enabling the ddoottgglloobb shell option, so all other
-       filenames  beginning with a ````..''''  will match.  To get the old behavior
-       of ignoring filenames beginning with a ````..'''', make ````..**''''  one  of  the
+       filenames beginning with a ````..''''  will match.  To get the old  behavior
+       of  ignoring  filenames beginning with a ````..'''', make ````..**''''  one of the
        patterns in GGLLOOBBIIGGNNOORREE.  The ddoottgglloobb option is disabled when GGLLOOBBIIGGNNOORREE
        is unset.  The pattern matching honors the setting of the eexxttgglloobb shell
        option.
+
+       The GGLLOOBBSSOORRTT variable controls how the results  of  pathname  expansion
+       are sorted, as described above.
 
        PPaatttteerrnn MMaattcchhiinngg
 
@@ -4625,7 +4645,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               routine  call or _e_x_p_r does not correspond to a valid position in
               the call stack.
 
-       ccdd [--LL|[--PP [--ee]] [-@]] [_d_i_r]
+       ccdd [--LL|[--PP [--ee]]] [-@] [_d_i_r]
               Change the current directory to _d_i_r.  if _d_i_r  is  not  supplied,
               the  value of the HHOOMMEE shell variable is the default.  The vari-
               able CCDDPPAATTHH defines the search path for the directory containing
@@ -6718,4 +6738,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.2                     2023 March 14                         BASH(1)
+GNU Bash 5.2                     2023 April 15                         BASH(1)

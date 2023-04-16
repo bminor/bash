@@ -179,6 +179,10 @@ extern void show_shell_version (int);
 /* Functions from the bash library, lib/sh/libsh.a.  These should really
    go into a separate include file. */
 
+/* declarations for functions defined in lib/sh/anonfile.c */
+extern int anonopen (const char *, int);
+extern int anonclose (int, const char *);
+
 /* declarations for functions defined in lib/sh/casemod.c */
 extern char *sh_modcase (const char *, char *, int);
 
@@ -496,6 +500,7 @@ extern void print_timeval (FILE *, struct timeval *);
 #define MT_READWRITE		0x0002
 #define MT_USERANDOM		0x0004
 #define MT_TEMPLATE		0x0008
+#define MT_UNLINK		0x0010	/* unlink after opening */
 
 extern char *sh_mktmpname (const char *, int);
 extern int sh_mktmpfd (const char *, int, char **);

@@ -2838,6 +2838,10 @@ To get the old behavior of ignoring filenames beginning with a
 The @code{dotglob} option is disabled when @env{GLOBIGNORE}
 is unset.
 
+After the pattern is expanded and matched against filenames, the value of the
+@env{GLOBSORT} variable controls how the results are sorted, as described
+below (@pxref{Bash Variables}).
+
 @node Pattern Matching
 @subsubsection Pattern Matching
 @cindex pattern matching
@@ -6466,6 +6470,35 @@ of the patterns in @env{GLOBIGNORE}, it is removed from the list
 of matches.
 The pattern matching honors the setting of the @code{extglob} shell
 option.
+
+@item GLOBSORT
+Control how the results of filename expansion are sorted.
+The value of this variable specifies the sort criteria and sort order for
+the results of filename expansion.
+If this variable is unset or set to the null string, filename expansion
+uses the historial behavior of sorting by name.
+If set, a valid value begins with an optional @samp{+}, which is ignored,
+or @samp{-}, which reverses the sort order from ascending to descending,
+followed by a sort specifier.
+The valid sort specifiers are
+@samp{name},
+@samp{size},
+@samp{mtime},
+@samp{atime},
+@samp{ctime},
+and
+@samp{blocks},
+which sort the files on name, file size, modification time, access time,
+inode change time, and number of blocks, respectively.
+
+For example, a value of @code{-mtime} sorts the results in descending
+order by modification time (newest first).
+
+If the sort specifier is missing, it defaults to @var{name},
+so a value of @samp{+} is equivalent to the null string,
+and a value of @samp{-} sorts by name in descending order.
+
+Any invalid value restores the historical sorting behavior.
 
 @item GROUPS
 An array variable containing the list of groups of which the current    

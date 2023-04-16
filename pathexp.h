@@ -71,6 +71,8 @@ extern char *quote_globbing_chars (const char *);
    whether or not we've already performed quote removal. */
 extern char **shell_glob_filename (const char *, int);
 
+extern char **noquote_glob_filename (char *);
+
 /* Filename completion ignore.  Used to implement the "fignore" facility of
    tcsh, GLOBIGNORE (like ksh-93 FIGNORE), and EXECIGNORE.
 
@@ -101,5 +103,18 @@ extern void setup_ignore_patterns (struct ignorevar *);
 extern void setup_glob_ignore (const char *);
 extern int should_ignore_glob_matches (void);
 extern void ignore_glob_matches (char **);
+
+/* Definitions for glob sorting */
+#define STAT_NONE	0
+#define STAT_NAME	1
+#define STAT_SIZE	2
+#define STAT_MTIME	3
+#define STAT_ATIME	4
+#define STAT_CTIME	5
+#define STAT_BLOCKS	6
+
+#define STAT_REVERSE	128
+
+extern void setup_globsort (const char *);
 
 #endif

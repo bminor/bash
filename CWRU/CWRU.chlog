@@ -6001,3 +6001,33 @@ sig.c,sig.h
 	  not set anywhere yet), call sigpipe_handler instead of terminating
 	  the shell. Still need to make sure a sighandler is installed for
 	  SIGPIPE even if initialize_terminating_signals isn't called
+
+				   4/14
+				   ----
+lib/sh/tmpfile.c
+	- sh_mktmpfd: add support for MT_UNLINK flag, unlinks created filename
+	  before returning fd, fails if the unlink fails for some reason
+
+				   4/15
+				   ----
+pathexp.c,pathexp.h
+	- globsort: support for various glob sorting criteria as defined by
+	  the GLOBSORT variable: name, size, blocks, mtime, atime, ctime.
+	  Default is ascending sort by name, as is traditional. Based on an
+	  idea from Evan Gates <evan.gates@gmail.com>
+	- setup_globsort: parse the value of the GLOBSORT variable, find
+	  sorting type and whether or not it's ascending or descending
+	- noquote_glob_filename: glob_filename for programmable completion,
+	  doesn't call quote_string_for_globbing and honors GLOBSORT, dotglob,
+	  and globstar
+
+pcomplete.c
+	- gen_globpat_matches: call noquote_glob_filename, let that handle
+	  all the variables and GLOB_FAILED
+
+variables.c
+	- GLOBSORT: support for special variable, call setup_globsort on
+	  set or unset
+
+doc/bash.1,doc/bashref.texi
+	- GLOBSORT: document variable and its effects on pathname expansion

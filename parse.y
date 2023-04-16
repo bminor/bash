@@ -381,6 +381,8 @@ static FILE *yyerrstream;
 
 /* Special; never created by yylex; only set by parse_comsub and xparse_dolparen */
 %token DOLPAREN
+/* Special; never created by yylex; only set by parse_matched_pair/parse_comsub/xparse_dolparen */
+%token DOLBRACE
 
 /* The types that the various syntactical units return. */
 
@@ -1038,6 +1040,14 @@ comsub:		DOLPAREN compound_list ')'
 			  $$ = $2;
 			}
 	|	DOLPAREN newline_list ')'
+			{
+			  $$ = (COMMAND *)NULL;
+			}
+	|	DOLBRACE compound_list '}'
+			{
+			  $$ = $2;
+			}
+	|	DOLBRACE newline_list '}'
 			{
 			  $$ = (COMMAND *)NULL;
 			}

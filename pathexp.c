@@ -27,6 +27,9 @@
 #  include <unistd.h>
 #endif
 
+#include "posixstat.h"
+#include "stat-time.h"
+
 #include "bashansi.h"
 
 #include "shell.h"
@@ -36,11 +39,13 @@
 #include "shmbutil.h"
 #include "bashintl.h"
 
+
 #include <glob/strmatch.h>
 
 static int glob_name_is_acceptable (const char *);
 static void ignore_globbed_names (char **, sh_ignore_func_t *);
 static char *split_ignorespec (char *, int *);
+static void sh_sortglob (char **);
 	       
 #include <glob/glob.h>
 
@@ -396,7 +401,8 @@ quote_globbing_chars (const char *string)
   return temp;
 }
 
-/* Call the glob library to do globbing on PATHNAME. */
+/* Call the glob library to do globbing on PATHNAME, honoring all the shell
+   variables that control globbing. */
 char **
 shell_glob_filename (const char *pathname, int qflags)
 {
@@ -415,7 +421,7 @@ shell_glob_filename (const char *pathname, int qflags)
       if (should_ignore_glob_matches ())
 	ignore_glob_matches (results);
       if (results && results[0])
-	strvec_sort (results, 1);		/* posix sort */
+        sh_sortglob (results);
       else
 	{
 	  FREE (results);
@@ -425,6 +431,28 @@ shell_glob_filename (const char *pathname, int qflags)
 
   return (results);
 }
+
+#if defined (READLINE) && defined (PROGRAMMABLE_COMPLETION)
+char **
+noquote_glob_filename (char *pathname)
+{
+  char **results;
+  int gflags;
+
+  noglob_dot_filenames = glob_dot_filenames == 0;
+  gflags = glob_star ? GX_GLOBSTAR : 0;
+
+  results = glob_filename (pathname, gflags);
+
+  if (results && GLOB_FAILED (results))
+    results = (char **)NULL;
+
+  if (results && results[0])
+    sh_sortglob (results);
+
+  return (results);
+}
+#endif
 
 /* Stuff for GLOBIGNORE. */
 
@@ -614,4 +642,211 @@ setup_ignore_patterns (struct ignorevar *ivp)
     }
   ivp->ignores[numitems].val = (char *)NULL;
   ivp->num_ignores = numitems;
+}
+
+/* Functions to handle sorting glob results in different ways depending on
+   the value of the GLOBSORT variable. */
+
+static int glob_sorttype = STAT_NONE;
+
+static STRING_INT_ALIST sorttypes[] = {
+  { "name",	STAT_NAME },
+  { "size",	STAT_SIZE },
+  { "mtime",	STAT_MTIME },
+  { "atime",	STAT_ATIME },
+  { "ctime",	STAT_CTIME },
+  { "blocks",	STAT_BLOCKS },
+  { (char *)NULL,	-1 }
+};
+
+/* A subset of the fields in the posix stat struct -- the ones we need --
+   normalized to using struct timespec. */
+struct globstat {
+  off_t size;
+  struct timespec mtime;
+  struct timespec atime;
+  struct timespec ctime;
+  int blocks;
+};
+  
+struct globsort_t {
+  char *name;
+  struct globstat st;
+};
+
+static struct globstat glob_nullstat = { -1, { -1, -1 }, { -1, -1 }, { -1, -1 }, -1 };
+
+static inline int
+glob_findtype (char *t)
+{
+  int type;
+
+  type = find_string_in_alist (t, sorttypes, 0);
+  return (type == -1 ? STAT_NONE : type);
+}
+
+void
+setup_globsort (const char *varname)
+{
+  char *val;
+  int r, t;
+
+  glob_sorttype = STAT_NONE;
+  val = get_string_value (varname);
+  if (val == 0 || *val == 0)
+    return;
+
+  t = r = 0;
+  while (*val && whitespace (*val))
+    val++;			/* why not? */
+  if (*val == '+')
+    val++;			/* allow leading `+' but ignore it */
+  else if (*val == '-')
+    {
+      r = STAT_REVERSE;		/* leading `-' reverses sort order */
+      val++;
+    }
+
+  if (*val == 0)
+    {
+      /* A bare `+' means the default sort by name in ascending order; a bare
+         `-' means to sort by name in descending order. */
+      glob_sorttype = STAT_NAME | r;
+      return;
+    }
+
+  t = glob_findtype (val);
+  /* any other value is equivalent to the historical behavior */
+  glob_sorttype = (t == STAT_NONE) ? t : t | r;
+}
+
+static int
+globsort_namecmp (char **s1, char **s2)
+{
+  return ((glob_sorttype < STAT_REVERSE) ? strvec_posixcmp (s1, s2) : strvec_posixcmp (s2, s1));
+}
+
+static int
+globsort_sizecmp (struct globsort_t *g1, struct globsort_t *g2)
+{
+  return ((glob_sorttype < STAT_REVERSE) ? g1->st.size - g2->st.size : g2->st.size - g1->st.size);
+}
+
+static int
+globsort_timecmp (struct globsort_t *g1, struct globsort_t *g2)
+{
+  int t;
+  struct timespec t1, t2;
+
+  t = (glob_sorttype < STAT_REVERSE) ? glob_sorttype : glob_sorttype - STAT_REVERSE;
+  if (t == STAT_MTIME)
+    {
+      t1 = g1->st.mtime;
+      t2 = g2->st.mtime;
+    }
+  else if (t == STAT_ATIME)
+    {
+      t1 = g1->st.atime;
+      t2 = g2->st.atime;
+    }
+  else
+    {
+      t1 = g1->st.ctime;
+      t2 = g2->st.ctime;
+    }
+
+  return ((glob_sorttype < STAT_REVERSE) ? timespec_cmp (t1, t2) : timespec_cmp (t2, t1));
+}
+
+static int
+globsort_blockscmp (struct globsort_t *g1, struct globsort_t *g2)
+{
+  return ((glob_sorttype < STAT_REVERSE) ? g1->st.blocks - g2->st.blocks : g2->st.blocks - g1->st.blocks);
+}
+
+static struct globsort_t *
+globsort_buildarray (char **array, size_t len)
+{
+  struct globsort_t *ret;
+  int i;
+  struct stat st;
+
+  ret = (struct globsort_t *)xmalloc (len * sizeof (struct globsort_t));
+
+  for (i = 0; i < len; i++)
+    {
+      ret[i].name = array[i];
+      if (stat (array[i], &st) != 0)
+        ret[i].st = glob_nullstat;
+      else
+        {
+          ret[i].st.size = st.st_size;
+          ret[i].st.mtime = get_stat_mtime (&st);
+          ret[i].st.atime = get_stat_atime (&st);
+          ret[i].st.ctime = get_stat_ctime (&st);
+          ret[i].st.blocks = st.st_blocks;
+        }
+    }
+
+  return ret;
+}  
+          
+static inline void
+globsort_sortbyname (char **results)
+{
+  qsort (results, strvec_len (results), sizeof (char *), (QSFUNC *)globsort_namecmp);
+}
+
+static void
+globsort_sortarray (struct globsort_t *garray, size_t len)
+{
+  int t;
+  QSFUNC *sortfunc;
+
+  t = (glob_sorttype < STAT_REVERSE) ? glob_sorttype : glob_sorttype - STAT_REVERSE;
+
+  switch (t)
+    {
+    case STAT_SIZE:
+      sortfunc = (QSFUNC *)globsort_sizecmp;
+      break;
+    case STAT_ATIME:
+    case STAT_MTIME:
+    case STAT_CTIME:
+      sortfunc = (QSFUNC *)globsort_timecmp;
+      break;
+    case STAT_BLOCKS:
+      sortfunc = (QSFUNC *)globsort_blockscmp;
+      break;
+    default:
+      internal_error (_("invalid glob sort type"));
+      break;
+    }
+
+  qsort (garray, len, sizeof (struct globsort_t), sortfunc);
+}
+
+static void
+sh_sortglob (char **results)
+{
+  size_t rlen;
+  struct globsort_t *garray;
+
+  if (glob_sorttype == STAT_NONE || glob_sorttype == STAT_NAME)
+    globsort_sortbyname (results);	/* posix sort */
+  else if (glob_sorttype == (STAT_NAME|STAT_REVERSE))
+    globsort_sortbyname (results);	/* posix sort reverse order */
+  else
+    {
+      int i;
+
+      rlen = strvec_len (results);
+      /* populate an array of name/statinfo, sort it appropriately, copy the
+	 names from the sorted array back to RESULTS, and free the array */
+      garray = globsort_buildarray (results, rlen);
+      globsort_sortarray (garray, rlen);
+      for (i = 0; i < rlen; i++)
+        results[i] = garray[i].name;
+      free (garray);
+    }
 }
