@@ -87,7 +87,7 @@ struct _optflags {
 static int find_compact (char *);
 static int find_compopt (char *);
 
-static int build_actions (WORD_LIST *, struct _optflags *, unsigned long *, unsigned long *);
+static int build_actions (WORD_LIST *, struct _optflags *, unsigned long *, unsigned long *, char **);
 
 static int remove_cmd_completions (WORD_LIST *);
 
@@ -180,6 +180,8 @@ find_compopt (char *name)
    bitmap of compspec options (arguments to `-o').  PP, if non-null, gets 1
    if -p is supplied; RP, if non-null, gets 1 if -r is supplied.
    If either is null, the corresponding option generates an error.
+   VNAMEP is a pointer to a string to store the name of the output variable
+   supplied with the -V option.
    This also sets variables corresponding to options that take arguments as
    a side effect; the caller should ensure that those variables are set to
    NULL before calling build_actions.  Return value:
@@ -189,7 +191,7 @@ find_compopt (char *name)
 */
 
 static int
-build_actions (WORD_LIST *list, struct _optflags *flagp, unsigned long *actp, unsigned long *optp)
+build_actions (WORD_LIST *list, struct _optflags *flagp, unsigned long *actp, unsigned long *optp, char **vnamep)
 {
   int opt, ind, opt_given;
   unsigned long acts, copts;
@@ -199,7 +201,7 @@ build_actions (WORD_LIST *list, struct _optflags *flagp, unsigned long *actp, un
   opt_given = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:DEI")) != -1)
+  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:V:DEI")) != -1)
     {
       opt_given = 1;
       switch (opt)
@@ -341,6 +343,25 @@ build_actions (WORD_LIST *list, struct _optflags *flagp, unsigned long *actp, un
 	case 'S':
 	  Sarg = list_optarg;
 	  break;
+	case 'V':
+#if defined (ARRAY_VARS)
+	  if (vnamep)
+	    {
+	      *vnamep = list_optarg;
+	      if (legal_identifier (list_optarg) == 0)
+		{
+		  sh_invalidid (list_optarg);
+		  return (EX_USAGE);
+		}
+	    }
+	  else
+#endif
+	    {
+	      sh_invalidopt ("-V");
+	      builtin_usage ();
+	      return (EX_USAGE);
+	    }
+	  break;
 	case 'W':
 	  Warg = list_optarg;
 	  break;
@@ -385,7 +406,7 @@ complete_builtin (WORD_LIST *list)
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
      as a side effect if they are supplied as options. */
-  rval = build_actions (list, &oflags, &acts, &copts);
+  rval = build_actions (list, &oflags, &acts, &copts, (char **)NULL);
   if (rval == EX_USAGE)
     return (rval);
   opt_given = rval != EXECUTION_FAILURE;
@@ -630,12 +651,15 @@ print_cmd_completions (WORD_LIST *list)
 $BUILTIN compgen
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compgen_builtin
-$SHORT_DOC compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
+$SHORT_DOC compgen [-V varname] [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
 Display possible completions depending on the options.
 
 Intended to be used from within a shell function generating possible
-completions.  If the optional WORD argument is supplied, matches against
-WORD are generated.
+completions.  If the optional WORD argument is present, generate matches
+against WORD.
+
+If the -V option is supplied, store the possible completions in the indexed
+array VARNAME instead of printing them to the standard output.
 
 Exit Status:
 Returns success unless an invalid option is supplied or an error occurs.
@@ -651,6 +675,9 @@ compgen_builtin (WORD_LIST *list)
   char *word, **matches;
   char *old_line;
   int old_ind, old_completion, old_quoting, old_suppress;
+  SHELL_VAR *var;
+  char *varname;
+  WORD_LIST *alist;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
@@ -658,10 +685,11 @@ compgen_builtin (WORD_LIST *list)
   acts = copts = (unsigned long)0L;
   Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
   cs = (COMPSPEC *)NULL;
+  varname = 0;
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
      as a side effect if they are supplied as options. */
-  rval = build_actions (list, (struct _optflags *)NULL, &acts, &copts);
+  rval = build_actions (list, (struct _optflags *)NULL, &acts, &copts, &varname);
   if (rval == EX_USAGE)
     return (rval);
   if (rval == EXECUTION_FAILURE)
@@ -728,15 +756,29 @@ compgen_builtin (WORD_LIST *list)
   rl_filename_quoting_desired = old_quoting;
   rl_completion_suppress_append = old_suppress;
 
-  if (sl)
+#if defined (ARRAY_VARS)
+  if (varname)
     {
-      if (sl->list && sl->list_len)
+      var = builtin_find_indexed_array (varname, 1);
+      if (var && sl && sl->list && sl->list_len)
 	{
+	  alist = strlist_to_word_list (sl, 0, 0);
+	  assign_array_var_from_word_list (var, alist, 0);
+	  free (sl);
+	  sl = (STRINGLIST *)NULL;
+	  dispose_words (alist);
 	  rval = EXECUTION_SUCCESS;
-	  strlist_print (sl, (char *)NULL);
 	}
-      strlist_dispose (sl);
     }
+  else
+#endif
+  if (sl && sl->list && sl->list_len)
+    {
+      rval = EXECUTION_SUCCESS;
+      strlist_print (sl, (char *)NULL);
+    }
+  if (sl)
+    strlist_dispose (sl);
 
   compspec_dispose (cs);
   return (rval);

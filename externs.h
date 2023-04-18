@@ -412,6 +412,7 @@ extern STRINGLIST *strlist_prefix_suffix (STRINGLIST *, const char *, const char
 extern void strlist_print (STRINGLIST *, const char *);
 extern void strlist_walk (STRINGLIST *, sh_strlist_map_func_t *);
 extern void strlist_sort (STRINGLIST *);
+extern WORD_LIST *strlist_to_word_list (STRINGLIST *, int, int);
 
 /* declarations for functions defined in lib/sh/stringvec.c */
 

@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.8 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.2, 15 April 2023).
+Bash shell (version 5.2, 17 April 2023).
 
-   This is Edition 5.2, last updated 15 April 2023, of 'The GNU Bash
+   This is Edition 5.2, last updated 17 April 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.2.
 
    Copyright (C) 1988-2023 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.2, 15 April 2023).  The Bash home page is
+Bash shell (version 5.2, 17 April 2023).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.2, last updated 15 April 2023, of 'The GNU Bash
+   This is Edition 5.2, last updated 17 April 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.2.
 
    Bash contains features that appear in other popular shells, and some
@@ -9702,14 +9702,20 @@ command are to be completed, and two to modify the completion as it is
 happening.
 
 'compgen'
-          compgen [OPTION] [WORD]
+          compgen [-V VARNAME] [OPTION] [WORD]
 
      Generate possible completion matches for WORD according to the
      OPTIONs, which may be any option accepted by the 'complete' builtin
-     with the exception of '-p' and '-r', and write the matches to the
-     standard output.  When using the '-F' or '-C' options, the various
-     shell variables set by the programmable completion facilities,
-     while available, will not have useful values.
+     with the exceptions of '-p', '-r', '-D', '-E', and '-I', and write
+     the matches to the standard output.
+
+     If the '-V' option is supplied, 'compgen' stores the generated
+     completions into the indexed array variable VARNAME instead of
+     writing them to the standard output.
+
+     When using the '-F' or '-C' options, the various shell variables
+     set by the programmable completion facilities, while available,
+     will not have useful values.
 
      The matches will be generated in the same way as if the
      programmable completion code had generated them directly from a
@@ -9720,9 +9726,9 @@ happening.
      no matches were generated.
 
 'complete'
-          complete [-abcdefgjksuv] [-o COMP-OPTION] [-DEI] [-A ACTION] [-G GLOBPAT]
-          [-W WORDLIST] [-F FUNCTION] [-C COMMAND] [-X FILTERPAT]
-          [-P PREFIX] [-S SUFFIX] NAME [NAME ...]
+          complete [-abcdefgjksuv] [-o COMP-OPTION] [-DEI] [-A ACTION]
+          [-G GLOBPAT] [-W WORDLIST] [-F FUNCTION] [-C COMMAND]
+          [-X FILTERPAT] [-P PREFIX] [-S SUFFIX] NAME [NAME ...]
           complete -pr [-DEI] [NAME ...]
 
      Specify how arguments to each NAME should be completed.  If the
@@ -9922,10 +9928,10 @@ happening.
           not matching FILTERPAT is removed.
 
      The return value is true unless an invalid option is supplied, an
-     option other than '-p' or '-r' is supplied without a NAME argument,
-     an attempt is made to remove a completion specification for a NAME
-     for which no specification exists, or an error occurs adding a
-     completion specification.
+     option other than '-p', '-r', '-D', '-E', or '-I' is supplied
+     without a NAME argument, an attempt is made to remove a completion
+     specification for a NAME for which no specification exists, or an
+     error occurs adding a completion specification.
 
 'compopt'
           compopt [-o OPTION] [-DEI] [+o OPTION] [NAME]
@@ -11959,9 +11965,9 @@ D.1 Index of Shell Builtin Commands
 * compgen:                               Programmable Completion Builtins.
                                                               (line  12)
 * complete:                              Programmable Completion Builtins.
-                                                              (line  30)
+                                                              (line  36)
 * compopt:                               Programmable Completion Builtins.
-                                                              (line 238)
+                                                              (line 244)
 * continue:                              Bourne Shell Builtins.
                                                               (line  90)
 * declare:                               Bash Builtins.       (line 154)
@@ -12810,32 +12816,32 @@ Node: Miscellaneous Commands406286
 Node: Readline vi Mode412324
 Node: Programmable Completion413231
 Node: Programmable Completion Builtins421011
-Node: A Programmable Completion Example431763
-Node: Using History Interactively437011
-Node: Bash History Facilities437695
-Node: Bash History Builtins440700
-Node: History Interaction445724
-Node: Event Designators449344
-Node: Word Designators450698
-Node: Modifiers452458
-Node: Installing Bash454266
-Node: Basic Installation455403
-Node: Compilers and Options459125
-Node: Compiling For Multiple Architectures459866
-Node: Installation Names461558
-Node: Specifying the System Type463667
-Node: Sharing Defaults464384
-Node: Operation Controls465057
-Node: Optional Features466015
-Node: Reporting Bugs477234
-Node: Major Differences From The Bourne Shell478568
-Node: GNU Free Documentation License495417
-Node: Indexes520594
-Node: Builtin Index521048
-Node: Reserved Word Index527875
-Node: Variable Index530323
-Node: Function Index547311
-Node: Concept Index561095
+Node: A Programmable Completion Example431999
+Node: Using History Interactively437247
+Node: Bash History Facilities437931
+Node: Bash History Builtins440936
+Node: History Interaction445960
+Node: Event Designators449580
+Node: Word Designators450934
+Node: Modifiers452694
+Node: Installing Bash454502
+Node: Basic Installation455639
+Node: Compilers and Options459361
+Node: Compiling For Multiple Architectures460102
+Node: Installation Names461794
+Node: Specifying the System Type463903
+Node: Sharing Defaults464620
+Node: Operation Controls465293
+Node: Optional Features466251
+Node: Reporting Bugs477470
+Node: Major Differences From The Bourne Shell478804
+Node: GNU Free Documentation License495653
+Node: Indexes520830
+Node: Builtin Index521284
+Node: Reserved Word Index528111
+Node: Variable Index530559
+Node: Function Index547547
+Node: Concept Index561331
 
 End Tag Table
 

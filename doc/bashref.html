@@ -4,13 +4,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 2 December 2022).
+the Bash shell (version 5.2, 17 April 2023).
 
-This is Edition 5.2, last updated 2 December 2022,
+This is Edition 5.2, last updated 17 April 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
-Copyright (C) 1988-2022 Free Software Foundation, Inc.
+Copyright (C) 1988-2023 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 2 December 2022).
+the Bash shell (version 5.2, 17 April 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 2 December 2022,
+<p>This is Edition 5.2, last updated 17 April 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -220,7 +220,11 @@ reference on shell behavior.
     </ul></li>
     <li><a id="toc-Controlling-the-Prompt-1" href="#Controlling-the-Prompt">6.9 Controlling the Prompt</a></li>
     <li><a id="toc-The-Restricted-Shell-1" href="#The-Restricted-Shell">6.10 The Restricted Shell</a></li>
-    <li><a id="toc-Bash-POSIX-Mode-1" href="#Bash-POSIX-Mode">6.11 Bash POSIX Mode</a></li>
+    <li><a id="toc-Bash-and-POSIX" href="#Bash-POSIX-Mode">6.11 Bash and POSIX</a>
+    <ul class="no-bullet">
+      <li><a id="toc-What-is-POSIX_003f" href="#What-is-POSIX_003f">6.11.1 What is POSIX?</a></li>
+      <li><a id="toc-Bash-POSIX-Mode-1" href="#Bash-POSIX-Mode-1">6.11.2 Bash POSIX Mode</a></li>
+    </ul></li>
     <li><a id="toc-Shell-Compatibility-Mode-1" href="#Shell-Compatibility-Mode">6.12 Shell Compatibility Mode</a></li>
   </ul></li>
   <li><a id="toc-Job-Control-1" href="#Job-Control">7 Job Control</a>
@@ -703,7 +707,7 @@ of all characters within the quotes, with the exception of
 &lsquo;<samp>$</samp>&rsquo;, &lsquo;<samp>`</samp>&rsquo;, &lsquo;<samp>\</samp>&rsquo;,
 and, when history expansion is enabled, &lsquo;<samp>!</samp>&rsquo;.
 When the shell is in
-<small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>),
+<small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>),
 the &lsquo;<samp>!</samp>&rsquo; has no special meaning
 within double quotes, even when history expansion is enabled.
 The characters &lsquo;<samp>$</samp>&rsquo; and &lsquo;<samp>`</samp>&rsquo;
@@ -1085,7 +1089,7 @@ The statistics currently consist of elapsed (wall-clock) time and
 user and system time consumed by the command&rsquo;s execution.
 The <samp>-p</samp> option changes the output format to that specified
 by <small>POSIX</small>.
-When the shell is in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>),
+When the shell is in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>),
 it does not recognize <code>time</code> as a reserved word if the next
 token begins with a &lsquo;<samp>-</samp>&rsquo;.
 The <code>TIMEFORMAT</code> variable may be set to a format string that
@@ -1095,7 +1099,7 @@ The use of <code>time</code> as a reserved word permits the timing of
 shell builtins, shell functions, and pipelines.  An external
 <code>time</code> command cannot time these easily.
 </p>
-<p>When the shell is in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>), <code>time</code>
+<p>When the shell is in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>), <code>time</code>
 may be followed by a newline.  In this case, the shell displays the
 total user and system time consumed by the shell and its children.
 The <code>TIMEFORMAT</code> variable may be used to specify the format of
@@ -1886,7 +1890,7 @@ If the <code>function</code> reserved word is used, but the
 parentheses are not supplied, the braces are recommended.
 <var>compound-command</var> is executed whenever <var>fname</var> is specified as the
 name of a simple command.
-When the shell is in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>),
+When the shell is in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>),
 <var>fname</var> must be a valid shell name and
 may not be the same as one of the special builtins
 (see <a href="#Special-Builtins">Special Builtins</a>).
@@ -2091,7 +2095,7 @@ Assignment statements may also appear as arguments to the
 <code>alias</code>, 
 <code>declare</code>, <code>typeset</code>, <code>export</code>, <code>readonly</code>,
 and <code>local</code> builtin commands (<em>declaration</em> commands).
-When in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>), these builtins may appear
+When in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>), these builtins may appear
 in a command after one or more instances of the <code>command</code> builtin
 and retain these assignment statement properties.
 </p>
@@ -2708,7 +2712,7 @@ bcdef
 positional parameters beginning at <var>offset</var>.
 A negative <var>offset</var> is taken relative to one greater than the greatest
 positional parameter, so an offset of -1 evaluates to the last positional
-parameter.
+parameter (or 0 if there are no positional parameters).
 It is an expansion error if <var>length</var> evaluates to a number less than zero.
 </p>
 <p>The following examples illustrate substring expansion using positional
@@ -3164,9 +3168,10 @@ word splitting.
 <p>The shell treats each character of <code>$IFS</code> as a delimiter, and splits
 the results of the other expansions into words using these characters
 as field terminators.
-If <code>IFS</code> is unset, or its value is exactly <code>&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</code>,
+</p>
+<p>If <code>IFS</code> is unset, or its value is exactly <code>&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</code>,
 the default, then sequences of
-<code> &lt;space&gt;</code>, <code>&lt;tab&gt;</code>, and <code>&lt;newline&gt;</code>
+<code>space</code>, <code>tab</code>, and <code>newline</code>
 at the beginning and end of the results of the previous
 expansions are ignored, and any sequence of <code>IFS</code>
 characters not at the beginning or end serves to delimit words.
@@ -3179,7 +3184,10 @@ Any character in <code>IFS</code> that is not <code>IFS</code>
 whitespace, along with any adjacent <code>IFS</code>
 whitespace characters, delimits a field.  A sequence of <code>IFS</code>
 whitespace characters is also treated as a delimiter.
-If the value of <code>IFS</code> is null, no word splitting occurs.
+</p>
+<p>If the value of <code>IFS</code> is null, no word splitting occurs.
+If <code>IFS</code> is unset, word splitting behaves as if it contained
+the default value <code>&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</code>.
 </p>
 <p>Explicit null arguments (<code>&quot;&quot;</code> or <code>''</code>) are retained
 and passed to commands as empty strings.
@@ -3267,6 +3275,10 @@ To get the old behavior of ignoring filenames beginning with a
 &lsquo;<samp>.</samp>&rsquo;, make &lsquo;<samp>.*</samp>&rsquo; one of the patterns in <code>GLOBIGNORE</code>.
 The <code>dotglob</code> option is disabled when <code>GLOBIGNORE</code>
 is unset.
+</p>
+<p>After the pattern is expanded and matched against filenames, the value of the
+<code>GLOBSORT</code> variable controls how the results are sorted, as described
+below (see <a href="#Bash-Variables">Bash Variables</a>).
 </p>
 <ul class="section-toc">
 <li><a href="#Pattern-Matching" accesskey="1">Pattern Matching</a></li>
@@ -3487,7 +3499,7 @@ before the standard output was redirected to <var>dirlist</var>.
 <p>Bash handles several filenames specially when they are used in
 redirections, as described in the following table.
 If the operating system on which Bash is running provides these
-special files, bash will use them; otherwise it will emulate them
+special files, Bash will use them; otherwise it will emulate them
 internally with the behavior described below.
 </p>
 <dl compact="compact">
@@ -3639,9 +3651,9 @@ expansion of <var>word</var>.
 <div class="subsection" id="Here-Documents">
 <h4 class="subsection">3.6.6 Here Documents</h4>
 <p>This type of redirection instructs the shell to read input from the
-current source until a line containing only <var>word</var>
-(with no trailing blanks) is seen.  All of
-the lines read up to that point are then used as the standard
+current source until a line containing only <var>delimiter</var>
+(with no trailing blanks) is seen.
+All of the lines read up to that point are then used as the standard
 input (or file descriptor <var>n</var> if <var>n</var> is specified) for a command.
 </p>
 <p>The format of here-documents is:
@@ -3653,10 +3665,13 @@ input (or file descriptor <var>n</var> if <var>n</var> is specified) for a comma
 
 <p>No parameter and variable expansion, command substitution,
 arithmetic expansion, or filename expansion is performed on
-<var>word</var>.  If any part of <var>word</var> is quoted, the
+<var>word</var>.
+</p>
+<p>If any part of <var>word</var> is quoted, the
 <var>delimiter</var> is the result of quote removal on <var>word</var>,
 and the lines in the here-document are not expanded.
 If <var>word</var> is unquoted,
+<var>delimiter</var> is <var>word</var> itself,
 all lines of the here-document are subjected to
 parameter expansion, command substitution, and arithmetic expansion,
 the character sequence <code>\newline</code> is ignored, and &lsquo;<samp>\</samp>&rsquo;
@@ -3829,8 +3844,8 @@ Next: <a href="#Command-Execution-Environment" accesskey="n" rel="next">Command 
 <span id="index-command-search"></span>
 
 <p>After a command has been split into words, if it results in a
-simple command and an optional list of arguments, the following
-actions are taken.
+simple command and an optional list of arguments, the shell performs
+the following actions.
 </p>
 <ol>
 <li> If the command name contains no slashes, the shell attempts to
@@ -4322,7 +4337,7 @@ The return status is zero unless <var>n</var> is not greater than or equal to 1.
 </dd>
 <dt id='index-cd'><span><code>cd</code><a href='#index-cd' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example">cd [-L|[-P [-e]] [-@] [<var>directory</var>]
+<pre class="example">cd [-L|[-P [-e]]] [-@] [<var>directory</var>]
 </pre></div>
 
 <p>Change the current working directory to <var>directory</var>.
@@ -4740,7 +4755,7 @@ The return status is zero.
 </dd>
 <dt id='index-trap'><span><code>trap</code><a href='#index-trap' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example">trap [-lp] [<var>action</var>] [<var>sigspec</var> &hellip;]
+<pre class="example">trap [-Plp] [<var>action</var>] [<var>sigspec</var> &hellip;]
 </pre></div>
 
 <p>The <var>action</var> is a command that is read and executed when the
@@ -4760,6 +4775,13 @@ If <var>action</var> is not present and <samp>-p</samp> has been supplied,
 or, if no <var>sigspec</var>s are supplied, for all trapped signals,
 as a set of <code>trap</code> commands that can be reused as shell input to
 restore the current signal dispositions.
+The <samp>-P</samp> option behaves similarly, but displays only the actions
+associated with each <var>sigspec</var> argument.
+<samp>-P</samp> requires at least one <var>sigspec</var> argument.
+The <samp>-P</samp> or <samp>-p</samp> options to <code>trap</code> may be
+used in a subshell environment (e.g., command substitution) and,
+as long as they are used before <code>trap</code> is used to change a
+signal&rsquo;s handling, will display the state of its parent&rsquo;s traps.
 </p>
 <p>The <samp>-l</samp> option causes <code>trap</code> to print a list of signal names
 and their corresponding numbers.
@@ -5341,7 +5363,9 @@ The <var>option</var> can be any of the options accepted by <code>declare</code>
 children.
 If <var>name</var> is &lsquo;<samp>-</samp>&rsquo;, the set of shell options is made local to the
 function in which <code>local</code> is invoked: shell options changed using
-the <code>set</code> builtin inside the function are restored to their original
+the <code>set</code> builtin inside the function
+after the call to <code>local</code>
+are restored to their original
 values when the function returns.
 The restore is effected as if a series of <code>set</code> commands were executed
 to restore the values that were in place before the function.
@@ -5434,8 +5458,9 @@ plain characters, which are simply copied to standard output, character
 escape sequences, which are converted and copied to the standard output, and
 format specifications, each of which causes printing of the next successive
 <var>argument</var>.
-In addition to the standard <code>printf(1)</code> formats, <code>printf</code>
-interprets the following extensions:
+In addition to the standard <code>printf(3)</code> format characters
+<code>csndiouxXeEfFgGaA</code>,
+<code>printf</code> interprets the following additional format specifiers:
 </p>
 <dl compact="compact">
 <dt><span><code>%b</code></span></dt>
@@ -5446,7 +5471,13 @@ corresponding <var>argument</var> in the same way as <code>echo -e</code>
 <dt><span><code>%q</code></span></dt>
 <dd><p>Causes <code>printf</code> to output the
 corresponding <var>argument</var> in a format that can be reused as shell input.
-</p></dd>
+<code>%q</code> and <code>%Q</code>P use the ANSI-C quoting style (see <a href="#ANSI_002dC-Quoting">ANSI-C Quoting</a>)
+if any characters
+in the argument string require it, and backslash quoting otherwise.
+If the format string uses the <code>printf</code> <var>alternate form</var>, these two
+formats quote the argument string using single quotes.
+</p>
+</dd>
 <dt><span><code>%Q</code></span></dt>
 <dd><p>like <code>%q</code>, but applies any supplied precision to the <var>argument</var>
 before quoting it.
@@ -5463,10 +5494,17 @@ This is an exception to the usual <code>printf</code> behavior.
 </p></dd>
 </dl>
 
-<p>The %b, %q, and %T directives all use the field width and precision
+<p>The %b, %q, and %T format specifiers all use the field width and precision
 arguments from the format specification and write that many bytes from    
 (or use that wide a field for) the expanded argument, which usually
 contains more characters than the original.
+</p>
+<p>The %n format specifier accepts a corresponding argument that is treated
+as a shell variable name.
+</p>
+<p>The %s and %c format specifiers accept an l (long) modifier, which forces
+them to convert the argument string to a wide-character string and apply
+any supplied field width and precision in terms of characters, not bytes.
 </p>
 <p>Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading
@@ -5476,8 +5514,10 @@ the following character.
 <p>The <var>format</var> is reused as necessary to consume all of the <var>arguments</var>.
 If the <var>format</var> requires more <var>arguments</var> than are supplied, the
 extra format specifications behave as if a zero value or null string, as
-appropriate, had been supplied.  The return value is zero on success,
-non-zero on failure.
+appropriate, had been supplied.
+The return value is zero on success,
+non-zero if an invalid option is supplied or a write or assignment error
+occurs.
 </p>
 </dd>
 <dt id='index-read'><span><code>read</code><a href='#index-read' class='copiable-anchor'> &para;</a></span></dt>
@@ -5631,27 +5671,32 @@ if the <samp>-u</samp> option is supplied.
 command name.
 </p>
 <p>If the <samp>-t</samp> option is used, <code>type</code> prints a single word
-which is one of &lsquo;<samp>alias</samp>&rsquo;, &lsquo;<samp>function</samp>&rsquo;, &lsquo;<samp>builtin</samp>&rsquo;,
-&lsquo;<samp>file</samp>&rsquo; or &lsquo;<samp>keyword</samp>&rsquo;,
-if <var>name</var> is an alias, shell function, shell builtin,
-disk file, or shell reserved word, respectively.
+which is one of &lsquo;<samp>alias</samp>&rsquo;, &lsquo;<samp>keyword</samp>&rsquo;, &lsquo;<samp>function</samp>&rsquo;,
+&lsquo;<samp>builtin</samp>&rsquo;, or &lsquo;<samp>file</samp>&rsquo;,
+if <var>name</var> is an alias, shell reserved word, shell function,
+shell builtin, or executable disk file, respectively.
 If the <var>name</var> is not found, then nothing is printed, and
 <code>type</code> returns a failure status.
 </p>
 <p>If the <samp>-p</samp> option is used, <code>type</code> either returns the name
-of the disk file that would be executed, or nothing if <samp>-t</samp>
-would not return &lsquo;<samp>file</samp>&rsquo;.
+of the executable file that would be found by searching <code>$PATH</code>,
+or nothing if <samp>-t</samp> would not return &lsquo;<samp>file</samp>&rsquo;.
 </p>
 <p>The <samp>-P</samp> option forces a path search for each <var>name</var>, even if
 <samp>-t</samp> would not return &lsquo;<samp>file</samp>&rsquo;.
 </p>
-<p>If a command is hashed, <samp>-p</samp> and <samp>-P</samp> print the hashed value,
-which is not necessarily the file that appears first in <code>$PATH</code>.
+<p>If a <var>name</var> is present in the table of hashed commands,
+options <samp>-p</samp> and <samp>-P</samp> print the hashed value, which is not
+necessarily the file that appears first in <code>$PATH</code>.
 </p>
 <p>If the <samp>-a</samp> option is used, <code>type</code> returns all of the places
-that contain an executable named <var>file</var>.
-This includes aliases and functions, if and only if the <samp>-p</samp> option
-is not also used.
+that contain a command named <var>name</var>.
+This includes aliases, reserved words, functions, and builtins,
+but the path search options (<samp>-p</samp> and <samp>-P</samp>) can be supplied
+to restrict the output to executable files.
+If <samp>-a</samp> is supplied with <samp>-p</samp>, <code>type</code> does not look
+in the table of hashed commands, and only performs a <code>PATH</code>
+search for <var>name</var>.
 </p>
 <p>If the <samp>-f</samp> option is used, <code>type</code> does not attempt to find
 shell functions, as with the <code>command</code> builtin.
@@ -5804,7 +5849,7 @@ increments, except for
 <samp>-b</samp>,
 <samp>-k</samp>,
 <samp>-n</samp> and <samp>-u</samp>, which are unscaled values;
-and, when in <small>POSIX</small> Mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>),
+and, when in <small>POSIX</small> Mode (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>),
 <samp>-c</samp> and <samp>-f</samp>, which are in 512-byte increments.
 </p>
 <p>The return status is zero unless an invalid option or argument is supplied,
@@ -6036,7 +6081,7 @@ This option is disabled by default.
 <dt><span><code>posix</code></span></dt>
 <dd><p>Change the behavior of Bash where the default operation differs
 from the <small>POSIX</small> standard to match the standard
-(see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>).
+(see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>).
 This is intended to make Bash behave as a strict superset of that
 standard.
 </p>
@@ -6100,9 +6145,9 @@ shell will exit.
 <dt><span><code>-x</code></span></dt>
 <dd><p>Print a trace of simple commands, <code>for</code> commands, <code>case</code>
 commands, <code>select</code> commands, and arithmetic <code>for</code> commands
-and their arguments or associated word lists after they are
-expanded and before they are executed.  The value of the <code>PS4</code>
-variable is expanded and the resultant value is printed before
+and their arguments or associated word lists to standard error
+after they are expanded and before they are executed.
+The shell prints the expanded value of the <code>PS4</code> variable before
 the command and its expanded arguments.
 </p>
 </dd>
@@ -6334,7 +6379,7 @@ completed.
 This means that dollar signs in variable names that expand to directories
 will not be quoted;
 however, any dollar signs appearing in filenames will not be quoted, either.
-This is active only when bash is using backslashes to quote completed
+This is active only when Bash is using backslashes to quote completed
 filenames.
 This variable is set by default, which is the default Bash behavior in
 versions through 4.2.
@@ -6662,7 +6707,7 @@ environment after the command completes.
 
 <p>When Bash is not executing in <small>POSIX</small> mode, these builtins behave no
 differently than the rest of the Bash builtin commands.
-The Bash <small>POSIX</small> mode is described in <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>. 
+The Bash <small>POSIX</small> mode is described in <a href="#Bash-POSIX-Mode">Bash and POSIX</a>. 
 </p>
 <p>These are the <small>POSIX</small> special builtins:
 </p><div class="example">
@@ -6834,7 +6879,7 @@ subsequently reset.
 </dd>
 <dt id='index-BASH_005fARGC'><span><code>BASH_ARGC</code><a href='#index-BASH_005fARGC' class='copiable-anchor'> &para;</a></span></dt>
 <dd><p>An array variable whose values are the number of parameters in each
-frame of the current bash execution call stack.  The number of
+frame of the current Bash execution call stack.  The number of
 parameters to the current subroutine (shell function or script executed
 with <code>.</code> or <code>source</code>) is at the top of the stack.  When a
 subroutine is executed, the number of parameters passed is pushed onto
@@ -6849,7 +6894,7 @@ may result in inconsistent values.
 </p>
 </dd>
 <dt id='index-BASH_005fARGV'><span><code>BASH_ARGV</code><a href='#index-BASH_005fARGV' class='copiable-anchor'> &para;</a></span></dt>
-<dd><p>An array variable containing all of the parameters in the current bash
+<dd><p>An array variable containing all of the parameters in the current Bash
 execution call stack.  The final parameter of the last subroutine call
 is at the top of the stack; the first parameter of the initial call is
 at the bottom.  When a subroutine is executed, the parameters supplied
@@ -7129,7 +7174,7 @@ Emacs shell buffer and disables line editing.
 <dd><p>Expanded and executed similarly to <code>BASH_ENV</code>
 (see <a href="#Bash-Startup-Files">Bash Startup Files</a>)
 when an interactive shell is invoked in
-<small>POSIX</small> Mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>).
+<small>POSIX</small> Mode (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>).
 </p>
 </dd>
 <dt id='index-EPOCHREALTIME'><span><code>EPOCHREALTIME</code><a href='#index-EPOCHREALTIME' class='copiable-anchor'> &para;</a></span></dt>
@@ -7224,6 +7269,36 @@ of the patterns in <code>GLOBIGNORE</code>, it is removed from the list
 of matches.
 The pattern matching honors the setting of the <code>extglob</code> shell
 option.
+</p>
+</dd>
+<dt id='index-GLOBSORT'><span><code>GLOBSORT</code><a href='#index-GLOBSORT' class='copiable-anchor'> &para;</a></span></dt>
+<dd><p>Control how the results of filename expansion are sorted.
+The value of this variable specifies the sort criteria and sort order for
+the results of filename expansion.
+If this variable is unset or set to the null string, filename expansion
+uses the historial behavior of sorting by name.
+If set, a valid value begins with an optional &lsquo;<samp>+</samp>&rsquo;, which is ignored,
+or &lsquo;<samp>-</samp>&rsquo;, which reverses the sort order from ascending to descending,
+followed by a sort specifier.
+The valid sort specifiers are
+&lsquo;<samp>name</samp>&rsquo;,
+&lsquo;<samp>size</samp>&rsquo;,
+&lsquo;<samp>mtime</samp>&rsquo;,
+&lsquo;<samp>atime</samp>&rsquo;,
+&lsquo;<samp>ctime</samp>&rsquo;,
+and
+&lsquo;<samp>blocks</samp>&rsquo;,
+which sort the files on name, file size, modification time, access time,
+inode change time, and number of blocks, respectively.
+</p>
+<p>For example, a value of <code>-mtime</code> sorts the results in descending
+order by modification time (newest first).
+</p>
+<p>If the sort specifier is missing, it defaults to <var>name</var>,
+so a value of &lsquo;<samp>+</samp>&rsquo; is equivalent to the null string,
+and a value of &lsquo;<samp>-</samp>&rsquo; sorts by name in descending order.
+</p>
+<p>Any invalid value restores the historical sorting behavior.
 </p>
 </dd>
 <dt id='index-GROUPS'><span><code>GROUPS</code><a href='#index-GROUPS' class='copiable-anchor'> &para;</a></span></dt>
@@ -7477,7 +7552,7 @@ contain only a single command).
 </dd>
 <dt id='index-POSIXLY_005fCORRECT'><span><code>POSIXLY_CORRECT</code><a href='#index-POSIXLY_005fCORRECT' class='copiable-anchor'> &para;</a></span></dt>
 <dd><p>If this variable is in the environment when Bash starts, the shell
-enters <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>) before reading the
+enters <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>) before reading the
 startup files, as if the <samp>--posix</samp> invocation option had been supplied.
 If it is set while the shell is running, Bash enables <small>POSIX</small> mode,
 as if the command
@@ -7718,7 +7793,7 @@ Next: <a href="#Job-Control" accesskey="n" rel="next">Job Control</a>, Previous:
 <li><a href="#The-Directory-Stack" accesskey="8">The Directory Stack</a></li>
 <li><a href="#Controlling-the-Prompt" accesskey="9">Controlling the Prompt</a></li>
 <li><a href="#The-Restricted-Shell">The Restricted Shell</a></li>
-<li><a href="#Bash-POSIX-Mode">Bash POSIX Mode</a></li>
+<li><a href="#Bash-POSIX-Mode">Bash and POSIX</a></li>
 <li><a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a></li>
 </ul>
 <hr>
@@ -7799,7 +7874,7 @@ invoked as <code>sh</code>.
 <dd><p>Change the behavior of Bash where the default operation differs
 from the <small>POSIX</small> standard to match the standard.  This
 is intended to make Bash behave as a strict superset of that
-standard.  See <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>, for a description of the Bash
+standard.  See <a href="#Bash-POSIX-Mode">Bash and POSIX</a>, for a description of the Bash
 <small>POSIX</small> mode.
 </p>
 </dd>
@@ -8181,7 +8256,7 @@ or null in <code>${<var>var</var>:?<var>word</var>}</code> expansions
 shell to exit.
 
 </li><li> When running in <small>POSIX</small> mode, a special builtin returning an error
-status will not cause the shell to exit (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>).
+status will not cause the shell to exit (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>).
 
 </li><li> A failed <code>exec</code> will not cause the shell to exit
 (see <a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>).
@@ -8426,6 +8501,13 @@ equal-precedence operators.
 The levels are listed in order of decreasing precedence. 
 </p>
 <dl compact="compact">
+<dd><span id="index-arithmetic-operators"></span>
+<span id="index-unary-arithmetic-operators"></span>
+<span id="index-binary-arithmetic-operators"></span>
+<span id="index-conditional-arithmetic-operator"></span>
+<span id="index-bitwise-arithmetic-operators"></span>
+
+</dd>
 <dt><span><code><var>id</var>++ <var>id</var>--</code></span></dt>
 <dd><p>variable post-increment and post-decrement 
 </p>
@@ -8486,7 +8568,7 @@ The levels are listed in order of decreasing precedence.
 <dd><p>logical OR
 </p>
 </dd>
-<dt><span><code>expr ? expr : expr</code></span></dt>
+<dt><span><code>expr ? if-true-expr : if-false-expr</code></span></dt>
 <dd><p>conditional operator
 </p>
 </dd>
@@ -8542,15 +8624,20 @@ Next: <a href="#Arrays" accesskey="n" rel="next">Arrays</a>, Previous: <a href="
 <span id="Aliases-1"></span><h3 class="section">6.6 Aliases</h3>
 <span id="index-alias-expansion"></span>
 
-<p><em>Aliases</em> allow a string to be substituted for a word when it is used
-as the first word of a simple command.
-The shell maintains a list of aliases that may be set and unset with
-the <code>alias</code> and <code>unalias</code> builtin commands.
+<p><em>Aliases</em> allow a string to be substituted for a word that is in
+a position in the input where it can be the first word of a simple
+command. Aliases have names and corresponding values that are set
+and unset using the <code>alias</code> and <code>unalias</code> builtin commands
+(see <a href="#Shell-Builtin-Commands">Shell Builtin Commands</a>).
 </p>
-<p>The first word of each simple command, if unquoted, is checked to see
-if it has an alias.
-If so, that word is replaced by the text of the alias.
-The characters &lsquo;<samp>/</samp>&rsquo;, &lsquo;<samp>$</samp>&rsquo;, &lsquo;<samp>`</samp>&rsquo;, &lsquo;<samp>=</samp>&rsquo; and any of the
+<p>If the shell reads an unquoted word in the right position, it checks
+the word to see if it matches an alias name. If it matches, the shell
+replaces the word with the alias value, and reads that value as if it
+had been read instead of the word.
+The shell doesn&rsquo;t look at any characters following the word before
+attempting alias substitution. 
+</p>
+<p>The characters &lsquo;<samp>/</samp>&rsquo;, &lsquo;<samp>$</samp>&rsquo;, &lsquo;<samp>`</samp>&rsquo;, &lsquo;<samp>=</samp>&rsquo; and any of the
 shell metacharacters or quoting characters listed above may not appear
 in an alias name.
 The replacement text may contain any valid
@@ -8561,7 +8648,8 @@ is not expanded a second time.
 This means that one may alias <code>ls</code> to <code>&quot;ls -F&quot;</code>,
 for instance, and Bash does not try to recursively expand the
 replacement text.
-If the last character of the alias value is a
+</p>
+<p>If the last character of the alias value is a
 <code>blank</code>, then the next command word following the
 alias is also checked for alias expansion.
 </p>
@@ -8571,7 +8659,7 @@ command, and removed with the <code>unalias</code> command.
 <p>There is no mechanism for using arguments in the replacement text,
 as in <code>csh</code>.
 If arguments are needed, use a shell function
-(see <a href="#Shell-Functions">Shell Functions</a>).
+(see <a href="#Shell-Functions">Shell Functions</a>) instead.
 </p>
 <p>Aliases are not expanded when the shell is not interactive,
 unless the <code>expand_aliases</code> shell option is set using
@@ -8660,8 +8748,12 @@ the optional subscript is supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
 </p>
-<p>Each <var>value</var> in the list undergoes all the shell expansions
-described above (see <a href="#Shell-Expansions">Shell Expansions</a>).
+<p>Each <var>value</var> in the list undergoes the shell expansions
+described above (see <a href="#Shell-Expansions">Shell Expansions</a>),
+but <var>value</var>s that are valid variable assignments
+including the brackets and subscript do not undergo
+brace expansion and word splitting, as with individual
+variable assignments.
 </p>
 <p>When assigning to an associative array, the words in a compound assignment
 may be either assignment statements, for which the subscript is required,
@@ -9063,7 +9155,7 @@ word expansion.
 <div class="section" id="The-Restricted-Shell">
 <div class="header">
 <p>
-Next: <a href="#Bash-POSIX-Mode" accesskey="n" rel="next">Bash POSIX Mode</a>, Previous: <a href="#Controlling-the-Prompt" accesskey="p" rel="prev">Controlling the Prompt</a>, Up: <a href="#Bash-Features" accesskey="u" rel="up">Bash Features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
+Next: <a href="#Bash-POSIX-Mode" accesskey="n" rel="next">Bash and POSIX</a>, Previous: <a href="#Controlling-the-Prompt" accesskey="p" rel="prev">Controlling the Prompt</a>, Up: <a href="#Bash-Features" accesskey="u" rel="up">Bash Features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
 <span id="The-Restricted-Shell-1"></span><h3 class="section">6.10 The Restricted Shell</h3>
 <span id="index-restricted-shell"></span>
@@ -9128,9 +9220,69 @@ such as <code>jails</code>, <code>zones</code>, or <code>containers</code>.
 <p>
 Next: <a href="#Shell-Compatibility-Mode" accesskey="n" rel="next">Shell Compatibility Mode</a>, Previous: <a href="#The-Restricted-Shell" accesskey="p" rel="prev">The Restricted Shell</a>, Up: <a href="#Bash-Features" accesskey="u" rel="up">Bash Features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Bash-POSIX-Mode-1"></span><h3 class="section">6.11 Bash POSIX Mode</h3>
+<span id="Bash-and-POSIX"></span><h3 class="section">6.11 Bash and POSIX</h3>
+
+<ul class="section-toc">
+<li><a href="#What-is-POSIX_003f" accesskey="1">What is POSIX?</a></li>
+<li><a href="#Bash-POSIX-Mode-1" accesskey="2">Bash POSIX Mode</a></li>
+</ul>
+<div class="subsection" id="What-is-POSIX_003f">
+<h4 class="subsection">6.11.1 What is POSIX?</h4>
+<span id="index-POSIX-description"></span>
+
+<p><small>POSIX</small> is the name for a family of standards based on Unix.
+A number of Unix services, tools, and functions are part of the standard,
+ranging from the basic system calls and C library functions to common
+applications and tools to system administration and management.
+</p>
+<p>The <small>POSIX</small> Shell and Utilities standard was originally developed by
+IEEE Working Group 1003.2 (POSIX.2).
+The first edition of the 1003.2 standard was published in 1992.
+It was merged with the original IEEE 1003.1 Working Group and is
+currently maintained by the Austin Group (a joint working group of the
+IEEE, The Open Group and ISO/IEC SC22/WG15).
+Today the Shell and Utilities are a volume within the set of documents that
+make up IEEE Std 1003.1-2017, and thus the former POSIX.2 (from 1992)
+is now part of the current unified <small>POSIX</small> standard.
+</p>
+<p>The Shell and Utilities volume concentrates on the command
+interpreter interface and utility programs commonly executed from
+the command line or by other programs.
+The standard is freely available on the web at
+<a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/contents.html">https://pubs.opengroup.org/onlinepubs/9699919799/utilities/contents.html</a>.
+</p>
+<p>Bash is concerned with the aspects of the shell&rsquo;s behavior defined
+by the <small>POSIX</small> Shell and Utilities volume.  The shell command
+language has of course been standardized, including the basic flow
+control and program execution constructs, I/O redirection and
+pipelines, argument handling, variable expansion, and quoting.
+</p>
+<p>The <i>special</i> builtins, which must be implemented as part of the
+shell to provide the desired functionality, are specified as
+being part of the shell; examples of these are <code>eval</code> and
+<code>export</code>.
+Other utilities appear in the sections of POSIX not
+devoted to the shell which are commonly (and in some cases must
+be) implemented as builtin commands, such as
+<code>read</code> and <code>test</code>.
+POSIX also specifies aspects of the shell&rsquo;s interactive
+behavior, including job control and command
+line editing.
+Only vi-style line editing commands have been
+standardized; emacs editing commands were left out due to
+objections.
+</p>
+</div>
+<div class="subsection" id="Bash-POSIX-Mode-1">
+<h4 class="subsection">6.11.2 Bash POSIX Mode</h4>
 <span id="index-POSIX-Mode"></span>
 
+<p>Although Bash is an implementation of the <small>POSIX</small> shell
+specification, there are areas where the Bash default behavior
+differs from the specification.
+The Bash <em>posix mode</em> changes the Bash
+behavior in these areas so that it conforms to the standard more closely. 
+</p>
 <p>Starting Bash with the <samp>--posix</samp> command-line option or executing
 &lsquo;<samp>set -o posix</samp>&rsquo; while Bash is running will cause Bash to conform more
 closely to the <small>POSIX</small> standard by changing the behavior to
@@ -9198,6 +9350,10 @@ causes a fatal syntax error in non-interactive shells.
 </li><li> Function names may not be the same as one of the <small>POSIX</small> special
 builtins.
 
+</li><li> Even if a shell function whose name contains a slash was defined before
+entering <small>POSIX</small> mode, the shell will not execute a function whose name
+contains one or more slashes.
+
 </li><li> <small>POSIX</small> special builtins are found before shell functions
 during command lookup.
 
@@ -9231,6 +9387,11 @@ non-interactive shell exits.  The fatal errors are those listed in
 the <small>POSIX</small> standard, and include things like passing incorrect options,
 redirection errors, variable assignment errors for assignments preceding
 the command name, and so on.
+
+</li><li> The <code>unset</code> builtin with the <samp>-v</samp> option specified returns a
+fatal error if it attempts to unset a <code>readonly</code> or <code>non-unsettable</code>
+variable, or encounters a variable name argument that is an invalid identifier,
+which causes a non-interactive shell to exit.
 
 </li><li> A non-interactive shell exits with an error status if a variable
 assignment error occurs when no command name follows the assignment
@@ -9349,6 +9510,9 @@ indication of whether or not a history entry has been modified.
 
 </li><li> The default editor used by <code>fc</code> is <code>ed</code>.
 
+</li><li> If there are too many arguments supplied to <code>fc -s</code>, <code>fc</code> prints
+an error message and returns failure.
+
 </li><li> The <code>type</code> and <code>command</code> builtins will not report a non-executable
 file as having been found, though the shell will attempt to execute such a
 file if it is the only so-named file found in <code>$PATH</code>.
@@ -9381,6 +9545,18 @@ arguments corresponding to floating point conversion specifiers, instead of
 </li><li> Bash removes an exited background process&rsquo;s status from the list of such
 statuses after the <code>wait</code> builtin is used to obtain it.
 
+</li><li> A double quote character (&lsquo;<samp>&quot;</samp>&rsquo;) is treated specially when it appears
+in a backquoted command substitution in the body of a here-document that
+undergoes expansion.
+That means, for example, that a backslash preceding a double quote
+character will escape it and the backslash will be removed.
+
+</li><li> Command substitutions don&rsquo;t set the &lsquo;<samp>?</samp>&rsquo; special parameter. The exit
+status of a simple command without a command word is still the exit status
+of the last command substitution that occurred while evaluating the variable
+assignments and redirections in that command, but that does not happen until
+after all of the assignments and redirections.
+
 </li></ol>
 
 <p>There is other <small>POSIX</small> behavior that Bash does not implement by
@@ -9391,6 +9567,9 @@ Specifically:
 <li> The <code>fc</code> builtin checks <code>$EDITOR</code> as a program to edit history
 entries if <code>FCEDIT</code> is unset, rather than defaulting directly to
 <code>ed</code>.  <code>fc</code> uses <code>ed</code> if <code>EDITOR</code> is unset.
+
+</li><li> A non-interactive shell does not exit if a variable assignment preceding
+the <code>command</code> builtin or another non-special builtin fails.
 
 </li><li> As noted above, Bash requires the <code>xpg_echo</code> option to be enabled for
 the <code>echo</code> builtin to be fully conformant.
@@ -9403,10 +9582,11 @@ the <samp>--enable-strict-posix-default</samp> to <code>configure</code> when bu
 </p>
 <hr>
 </div>
+</div>
 <div class="section" id="Shell-Compatibility-Mode">
 <div class="header">
 <p>
-Previous: <a href="#Bash-POSIX-Mode" accesskey="p" rel="prev">Bash POSIX Mode</a>, Up: <a href="#Bash-Features" accesskey="u" rel="up">Bash Features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
+Previous: <a href="#Bash-POSIX-Mode" accesskey="p" rel="prev">Bash and POSIX</a>, Up: <a href="#Bash-Features" accesskey="u" rel="up">Bash Features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
 <span id="Shell-Compatibility-Mode-1"></span><h3 class="section">6.12 Shell Compatibility Mode</h3>
 <span id="index-Compatibility-Level"></span>
@@ -10729,6 +10909,12 @@ history lines may be modified and retain individual undo lists across
 calls to <code>readline()</code>.  The default is &lsquo;<samp>off</samp>&rsquo;.
 </p>
 </dd>
+<dt id='index-search_002dignore_002dcase'><span><code>search-ignore-case</code><a href='#index-search_002dignore_002dcase' class='copiable-anchor'> &para;</a></span></dt>
+<dd><p>If set to &lsquo;<samp>on</samp>&rsquo;, Readline performs incremental and non-incremental
+history list searches in a case-insensitive fashion.
+The default value is &lsquo;<samp>off</samp>&rsquo;.
+</p>
+</dd>
 <dt id='index-show_002dall_002dif_002dambiguous'><span><code>show-all-if-ambiguous</code><a href='#index-show_002dall_002dif_002dambiguous' class='copiable-anchor'> &para;</a></span></dt>
 <dd><p>This alters the default behavior of the completion functions.  If
 set to &lsquo;<samp>on</samp>&rsquo;, 
@@ -11989,9 +12175,11 @@ pathname expansion.
 </p>
 </dd>
 <dt id='index-shell_002dexpand_002dline-_0028M_002dC_002de_0029'><span><code>shell-expand-line (M-C-e)</code><a href='#index-shell_002dexpand_002dline-_0028M_002dC_002de_0029' class='copiable-anchor'> &para;</a></span></dt>
-<dd><p>Expand the line as the shell does.
-This performs alias and history expansion as well as all of the shell
-word expansions (see <a href="#Shell-Expansions">Shell Expansions</a>).
+<dd><p>Expand the line by performing shell word expansions.  
+This performs alias and history expansion,
+$&rsquo;<var>string</var>&rsquo; and $&quot;<var>string</var>&quot; quoting,
+tilde expansion, parameter and variable expansion, arithmetic expansion,  
+word splitting, and quote removal.  
 </p>
 </dd>
 <dt id='index-history_002dexpand_002dline-_0028M_002d_005e_0029'><span><code>history-expand-line (M-^)</code><a href='#index-history_002dexpand_002dline-_0028M_002d_005e_0029' class='copiable-anchor'> &para;</a></span></dt>
@@ -12235,15 +12423,26 @@ be completed, and two to modify the completion as it is happening.
 <dl compact="compact">
 <dt id='index-compgen'><span><code>compgen</code><a href='#index-compgen' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example"><code>compgen [<var>option</var>] [<var>word</var>]</code>
+<pre class="example"><code>compgen [-V <var>varname</var>] [<var>option</var>] [<var>word</var>]</code>
 </pre></div>
 
 <p>Generate possible completion matches for <var>word</var> according to
 the <var>option</var>s, which may be any option accepted by the
 <code>complete</code>
-builtin with the exception of <samp>-p</samp> and <samp>-r</samp>, and write
-the matches to the standard output.
-When using the <samp>-F</samp> or <samp>-C</samp> options, the various shell variables
+builtin with the exceptions of
+<samp>-p</samp>,
+<samp>-r</samp>,
+<samp>-D</samp>,
+<samp>-E</samp>,
+and
+<samp>-I</samp>,
+and write the matches to the standard output.
+</p>
+<p>If the <samp>-V</samp> option is supplied, <code>compgen</code> stores the generated
+completions into the indexed array variable <var>varname</var> instead of writing
+them to the standard output.
+</p>
+<p>When using the <samp>-F</samp> or <samp>-C</samp> options, the various shell variables
 set by the programmable completion facilities, while available, will not
 have useful values.
 </p>
@@ -12259,9 +12458,9 @@ matches were generated.
 </dd>
 <dt id='index-complete'><span><code>complete</code><a href='#index-complete' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example"><code>complete [-abcdefgjksuv] [-o <var>comp-option</var>] [-DEI] [-A <var>action</var>] [-G <var>globpat</var>]
-[-W <var>wordlist</var>] [-F <var>function</var>] [-C <var>command</var>] [-X <var>filterpat</var>]
-[-P <var>prefix</var>] [-S <var>suffix</var>] <var>name</var> [<var>name</var> &hellip;]</code>
+<pre class="example"><code>complete [-abcdefgjksuv] [-o <var>comp-option</var>] [-DEI] [-A <var>action</var>]
+[-G <var>globpat</var>] [-W <var>wordlist</var>] [-F <var>function</var>] [-C <var>command</var>]
+[-X <var>filterpat</var>] [-P <var>prefix</var>] [-S <var>suffix</var>] <var>name</var> [<var>name</var> &hellip;]</code>
 <code>complete -pr [-DEI] [<var>name</var> &hellip;]</code>
 </pre></div>
 
@@ -13319,7 +13518,7 @@ may remove or edit it.
 <p>If you want to build Bash in a directory separate from the source
 directory &ndash; to build for multiple architectures, for example &ndash;
 just use the full path to the configure script. The following commands
-will build bash in a directory under <samp>/usr/local/build</samp> from
+will build Bash in a directory under <samp>/usr/local/build</samp> from
 the source code in <samp>/usr/local/src/bash-4.4</samp>:
 </p>
 <div class="example">
@@ -13438,7 +13637,7 @@ or by specifying a value for the <code>prefix</code> &lsquo;<samp>make</samp>&rs
 variable when running &lsquo;<samp>make install</samp>&rsquo;
 (e.g., &lsquo;<samp>make install prefix=<var>PATH</var></samp>&rsquo;).
 The <code>prefix</code> variable provides a default for <code>exec_prefix</code> and
-other variables used when installing bash.
+other variables used when installing Bash.
 </p>
 <p>You can specify separate installation prefixes for
 architecture-specific files and architecture-independent files. 
@@ -13452,7 +13651,7 @@ you can specify these variables as arguments to <code>make</code>:
 &lsquo;<samp>make install exec_prefix=/</samp>&rsquo; will install <code>bash</code> and
 <code>bashbug</code> into <samp>/bin</samp> instead of the default <samp>/usr/local/bin</samp>.
 </p>
-<p>If you want to see the files bash will install and where it will install
+<p>If you want to see the files Bash will install and where it will install
 them without changing anything on your system, specify the variable
 <code>DESTDIR</code> as an argument to <code>make</code>. Its value should be the
 absolute directory path you&rsquo;d like to use as the root of your sample
@@ -13685,7 +13884,7 @@ builtins (see <a href="#Aliases">Aliases</a>).
 </p>
 </dd>
 <dt><span><code>--enable-alt-array-implementation</code></span></dt>
-<dd><p>This builds bash using an alternate implementation of arrays
+<dd><p>This builds Bash using an alternate implementation of arrays
 (see <a href="#Arrays">Arrays</a>) that provides faster access at the expense of using
 more memory (sometimes many times more, depending on how sparse an array is).
 </p>
@@ -13746,7 +13945,7 @@ This allows pipelines as well as shell builtins and functions to be timed.
 </p>
 </dd>
 <dt><span><code>--enable-debugger</code></span></dt>
-<dd><p>Include support for the bash debugger (distributed separately).
+<dd><p>Include support for the Bash debugger (distributed separately).
 </p>
 </dd>
 <dt><span><code>--enable-dev-fd-stat-broken</code></span></dt>
@@ -13872,7 +14071,7 @@ literals.
 </p>
 </dd>
 <dt><span><code>--enable-strict-posix-default</code></span></dt>
-<dd><p>Make Bash <small>POSIX</small>-conformant by default (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>).
+<dd><p>Make Bash <small>POSIX</small>-conformant by default (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>).
 </p>
 </dd>
 <dt><span><code>--enable-translatable-strings</code></span></dt>
@@ -13923,7 +14122,7 @@ The latest version of Bash is always available for FTP from
 </p>
 <p>Once you have determined that a bug actually exists, use the
 <code>bashbug</code> command to submit a bug report or use the form at the
-&lt;a href=&quot;https://savannah.gnu.org/projects/bash/&quot;&gt;Bash project page&lt;/a&gt;.
+<a href="https://savannah.gnu.org/projects/bash/">Bash project page</a>.
 If you have a fix, you are encouraged to submit that as well!
 Suggestions and &lsquo;philosophical&rsquo; bug reports may be mailed
 to <a href="mailto:bug-bash@gnu.org">bug-bash@gnu.org</a> or <a href="mailto:help-bash@gnu.org">help-bash@gnu.org</a>.
@@ -13966,7 +14165,7 @@ last version of the historical Bourne shell) as the baseline reference.
 </p>
 <ul>
 <li> Bash is <small>POSIX</small>-conformant, even where the <small>POSIX</small> specification
-differs from traditional <code>sh</code> behavior (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>).
+differs from traditional <code>sh</code> behavior (see <a href="#Bash-POSIX-Mode">Bash and POSIX</a>).
 
 </li><li> Bash has multi-character invocation options (see <a href="#Invoking-Bash">Invoking Bash</a>).
 
@@ -15340,6 +15539,7 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Variable-Index_vr_letter-G">G</th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-GLOBIGNORE"><code>GLOBIGNORE</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-GLOBSORT"><code>GLOBSORT</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-GROUPS"><code>GROUPS</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Variable-Index_vr_letter-H">H</th><td></td><td></td></tr>
@@ -15428,6 +15628,7 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td></td><td valign="top"><a href="#index-revert_002dall_002dat_002dnewline"><code>revert-all-at-newline</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Variable-Index_vr_letter-S">S</th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-search_002dignore_002dcase"><code>search-ignore-case</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-SECONDS"><code>SECONDS</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-SHELL"><code>SHELL</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-SHELLOPTS"><code>SHELLOPTS</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
@@ -15808,6 +16009,8 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
  &nbsp; 
 <a class="summary-letter" href="#Concept-Index_cp_letter-T"><b>T</b></a>
  &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-U"><b>U</b></a>
+ &nbsp; 
 <a class="summary-letter" href="#Concept-Index_cp_letter-V"><b>V</b></a>
  &nbsp; 
 <a class="summary-letter" href="#Concept-Index_cp_letter-W"><b>W</b></a>
@@ -15822,6 +16025,7 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
 <tr><td></td><td valign="top"><a href="#index-alias-expansion">alias expansion</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Aliases">Aliases</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-arithmetic-evaluation">arithmetic evaluation</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Arithmetic">Shell Arithmetic</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-arithmetic-expansion">arithmetic expansion</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Arithmetic-Expansion">Arithmetic Expansion</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-arithmetic-operators">arithmetic operators</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Arithmetic">Shell Arithmetic</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-arithmetic_002c-shell">arithmetic, shell</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Arithmetic">Shell Arithmetic</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-arrays">arrays</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Arrays">Arrays</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
@@ -15829,6 +16033,8 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
 <tr><td></td><td valign="top"><a href="#index-background">background</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Job-Control-Basics">Job Control Basics</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-Bash-configuration">Bash configuration</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Basic-Installation">Basic Installation</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-Bash-installation">Bash installation</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Basic-Installation">Basic Installation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-binary-arithmetic-operators">binary arithmetic operators</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Arithmetic">Shell Arithmetic</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-bitwise-arithmetic-operators">bitwise arithmetic operators</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Arithmetic">Shell Arithmetic</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-Bourne-shell">Bourne shell</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Basic-Shell-Features">Basic Shell Features</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-brace-expansion">brace expansion</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Brace-Expansion">Brace Expansion</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-builtin-1">builtin</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
@@ -15853,6 +16059,7 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
 <tr><td></td><td valign="top"><a href="#index-Compatibility-Level">Compatibility Level</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-Compatibility-Mode">Compatibility Mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-completion-builtins">completion builtins</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Programmable-Completion-Builtins">Programmable Completion Builtins</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-conditional-arithmetic-operator">conditional arithmetic operator</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Arithmetic">Shell Arithmetic</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-configuration">configuration</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Basic-Installation">Basic Installation</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-control-operator">control operator</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-coprocess">coprocess</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Coprocesses">Coprocesses</a></td></tr>
@@ -15936,6 +16143,7 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
 <tr><td></td><td valign="top"><a href="#index-pattern-matching">pattern matching</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Pattern-Matching">Pattern Matching</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-pipeline">pipeline</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Pipelines">Pipelines</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-POSIX">POSIX</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-POSIX-description">POSIX description</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-POSIX-Mode">Bash POSIX Mode</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-POSIX-Mode">POSIX Mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-POSIX-Mode">Bash POSIX Mode</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-process-group">process group</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-process-group-ID">process group ID</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
@@ -15973,6 +16181,9 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
 <tr><td></td><td valign="top"><a href="#index-tilde-expansion">tilde expansion</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Tilde-Expansion">Tilde Expansion</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-token">token</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-translation_002c-native-languages">translation, native languages</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Locale-Translation">Locale Translation</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th id="Concept-Index_cp_letter-U">U</th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-unary-arithmetic-operators">unary arithmetic operators</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Arithmetic">Shell Arithmetic</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Concept-Index_cp_letter-V">V</th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-variable_002c-shell">variable, shell</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Parameters">Shell Parameters</a></td></tr>
@@ -16023,6 +16234,8 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
 <a class="summary-letter" href="#Concept-Index_cp_letter-S"><b>S</b></a>
  &nbsp; 
 <a class="summary-letter" href="#Concept-Index_cp_letter-T"><b>T</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Concept-Index_cp_letter-U"><b>U</b></a>
  &nbsp; 
 <a class="summary-letter" href="#Concept-Index_cp_letter-V"><b>V</b></a>
  &nbsp; 

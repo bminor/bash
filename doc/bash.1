@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Apr 15 17:52:31 EDT 2023
+.\"	Last Change: Mon Apr 17 10:35:39 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 April 15" "GNU Bash 5.2"
+.TH BASH 1 "2023 April 17" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8105,12 +8105,21 @@ cannot be found, the exit status is 127.  Otherwise, the exit status of the
 builtin is the exit status of
 .IR command .
 .TP
-\fBcompgen\fP [\fIoption\fP] [\fIword\fP]
+\fBcompgen\fP [\fB\-V\fP \fIvarname\fP] [\fIoption\fP] [\fIword\fP]
 Generate possible completion matches for \fIword\fP according to
 the \fIoption\fPs, which may be any option accepted by the
 .B complete
-builtin with the exception of \fB\-p\fP and \fB\-r\fP, and write
-the matches to the standard output.
+builtin with the exceptions of
+.BR \-p ,
+.BR \-r ,
+.BR \-D ,
+.BR \-E ,
+and
+.BR \-I ,
+and write the matches to the standard output.
+If the \fB\-V\fP option is supplied, \fBcompgen\fP stores the generated
+completions into the indexed array variable \fIvarname\fP instead of writing
+them to the standard output.
 When using the \fB\-F\fP or \fB\-C\fP options, the various shell variables
 set by the programmable completion facilities, while available, will not
 have useful values.
@@ -8124,9 +8133,11 @@ will be displayed.
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
 .TP
-\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-DEI\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP]
+\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-DEI\fP] [\fB\-A\fP \fIaction\fP]
 .br
-[\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP] [\fB\-X\fP \fIfilterpat\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP] \fIname\fP [\fIname ...\fP]
+[\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP]
+.br
+[\fB\-X\fP \fIfilterpat\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP] \fIname\fP [\fIname ...\fP]
 .PD 0
 .TP
 \fBcomplete\fP \fB\-pr\fP [\fB\-DEI\fP] [\fIname\fP ...]
@@ -8345,7 +8356,14 @@ case, any completion not matching \fIfilterpat\fP is removed.
 .PD
 .PP
 The return value is true unless an invalid option is supplied, an option
-other than \fB\-p\fP or \fB\-r\fP is supplied without a \fIname\fP
+other than
+.BR \-p ,
+.BR \-r ,
+.BR \-D ,
+.BR \-E ,
+or
+.B \-I
+is supplied without a \fIname\fP
 argument, an attempt is made to remove a completion specification for
 a \fIname\fP for which no specification exists, or
 an error occurs adding a completion specification.
@@ -9109,7 +9127,7 @@ The return status is 0 unless no command matches
 .TP
 \fBhistory \-d\fP \fIoffset\fP
 .TP
-\fBhistory \-d\fP \fIstart\fP\-\fIend\fP
+\fBhistory \-d\fP \fIstart\fP-\fIend\fP
 .TP
 \fBhistory\fP \fB\-anrw\fP [\fIfilename\fP]
 .TP

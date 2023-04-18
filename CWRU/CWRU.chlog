@@ -6031,3 +6031,16 @@ variables.c
 
 doc/bash.1,doc/bashref.texi
 	- GLOBSORT: document variable and its effects on pathname expansion
+
+				   4/17
+				   ----
+builtins/complete.def
+	- build_actions: take an additional char ** arg VNAMEP; if it is non-
+	  null, accept a -V VARNAME option that names an indexed array
+	  variable in which to store the completions.
+	- compgen_builtin: if the -V option is supplied, store the possible
+	  completions into VARNAME instead of printing them on stdout. From a
+	  patch from Grisha Levit <grishalevit@gmail.com>
+
+doc/bash.1,lib/readline/doc/rluser.texi
+	- compgen: document new -V option

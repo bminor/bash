@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2022 December 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 April 17<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -54,7 +54,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2022 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2023 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -2842,6 +2842,39 @@ of the patterns in
 
 </FONT>
 it is removed from the list of matches.
+<DT><B>GLOBSORT</B>
+
+<DD>
+Control how the results of pathname expansion are sorted.
+The value of this variable specifies the sort criteria and sort order for
+the results of pathname expansion.
+If this variable is unset or set to the null string, pathname expansion
+uses the historial behavior of sorting by name.
+If set, a valid value begins with an optional <I>+</I>, which is ignored,
+or <I>-</I>, which reverses the sort order from ascending to descending,
+followed by a sort specifier.
+The valid sort specifiers are
+<I>name</I>,
+
+<I>size</I>,
+
+<I>mtime</I>,
+
+<I>atime</I>,
+
+<I>ctime</I>,
+
+and
+<I>blocks</I>,
+
+which sort the files on name, file size, modification time, access time,
+inode change time, and number of blocks, respectively.
+For example, a value of <B>-mtime</B> sorts the results in descending
+order by modification time (newest first).
+If the sort specifier is missing, it defaults to <I>name</I>,
+so a value of <I>+</I> is equivalent to the null string,
+and a value of <I>-</I> sorts by name in descending order.
+Any invalid value restores the historical sorting behavior.
 <DT><B>HISTCONTROL</B>
 
 <DD>
@@ -3479,11 +3512,15 @@ Arrays are assigned to using compound assignments of the form
 <I>name</I>=<B>(</B>value<I>1</I> ... value<I>n</I><B>)</B>, where each
 <I>value</I> may be of the form [<I>subscript</I>]=<I>string</I>.
 Indexed array assignments do not require anything but <I>string</I>.
-Each <I>value</I> in the list is expanded using all the shell expansions
+Each <I>value</I> in the list is expanded using the shell expansions
 described below under
-<FONT SIZE=-1><B>EXPANSION</B>.
+<FONT SIZE=-1><B>EXPANSION</B>,
 
 </FONT>
+but <I>value</I>s that are valid variable assignments
+including the brackets and subscript do not undergo
+brace expansion and word splitting, as with individual
+variable assignments.
 When assigning to indexed arrays, if the optional brackets and subscript
 are supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
@@ -4044,7 +4081,7 @@ If <I>parameter</I> is <B>@</B> or <B>*</B>, the result is <I>length</I>
 positional parameters beginning at <I>offset</I>.
 A negative <I>offset</I> is taken relative to one greater than the greatest
 positional parameter, so an offset of -1 evaluates to the last positional
-parameter.
+parameter (or 0 if there are no positional parameters).
 It is an expansion error if <I>length</I> evaluates to a number less than
 zero.
 <P>
@@ -4554,6 +4591,8 @@ The shell treats each character of
 </FONT>
 as a delimiter, and splits the results of the other
 expansions into words using these characters as field terminators.
+<P>
+
 If
 <FONT SIZE=-1><B>IFS</B>
 
@@ -4564,12 +4603,12 @@ value is exactly
 
 the default, then
 sequences of
-<B>&lt;space&gt;</B>,
+<B>space</B>,
 
-<B>&lt;tab&gt;</B>,
+<B>tab</B>,
 
 and
-<B>&lt;newline&gt;</B>
+<B>newline</B>
 
 at the beginning and end of the results of the previous
 expansions are ignored, and
@@ -4620,11 +4659,21 @@ A sequence of
 
 </FONT>
 whitespace characters is also treated as a delimiter.
+<P>
+
 If the value of
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
 is null, no word splitting occurs.
+If
+<FONT SIZE=-1><B>IFS</B>
+
+</FONT>
+is unset, word splitting behaves as if it contained the default value
+of 
+<B>&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</B>.
+
 <P>
 
 Explicit null arguments (<B>&quot;&quot;</B> or <B>aqaq</B>) are retained
@@ -4819,6 +4868,14 @@ option is disabled when
 is unset.
 The pattern matching honors the setting of the <B>extglob</B> shell
 option.
+<P>
+
+The
+<FONT SIZE=-1><B>GLOBSORT</B>
+
+</FONT>
+variable controls how the results of pathname expansion are sorted, as
+described above.
 <P>
 
 <B>Pattern Matching</B>
@@ -5348,9 +5405,8 @@ This type of redirection instructs the shell to read input from the
 current source until a line containing only
 <I>delimiter</I>
 
-(with no trailing blanks)
-is seen.  All of
-the lines read up to that point are then used as the standard
+(with no trailing blanks) is seen.
+All of the lines read up to that point are then used as the standard
 input (or file descriptor <I>n</I> if <I>n</I> is specified) for a command.
 <P>
 
@@ -5372,6 +5428,8 @@ No parameter and variable expansion, command substitution,
 arithmetic expansion, or pathname expansion is performed on
 <I>word</I>.
 
+<P>
+
 If any part of
 <I>word</I>
 
@@ -5382,7 +5440,10 @@ is the result of quote removal on
 <I>word</I>,
 
 and the lines in the here-document are not expanded.
-If <I>word</I> is unquoted,
+If <I>word</I> is unquoted, the
+<I>delimiter</I>
+
+is <I>word</I> itself,
 all lines of the here-document are subjected to
 parameter expansion, command substitution, and arithmetic expansion,
 the character sequence
@@ -5559,22 +5620,25 @@ is not specified.  If the file does not exist, it is created.
 <A NAME="lbBT">&nbsp;</A>
 <H3>ALIASES</H3>
 
-<I>Aliases</I> allow a string to be substituted for a word when it is used
-as the first word of a simple command.
-The shell maintains a list of aliases that may be set and unset with the
-<B>alias</B>
-
-and
-<B>unalias</B>
-
-builtin commands (see
+<I>Aliases</I> allow a string to be substituted for a word that is in
+a position in the input where it can be the first word of a simple
+command. Aliases have names and corresponding values that are set
+and unset using the <B>alias</B> and <B>unalias</B> builtin commands
+(see
 <FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
 
 </FONT>
 below).
-The first word of each simple command, if unquoted,
-is checked to see if it has an
-alias.  If so, that word is replaced by the text of the alias.
+<P>
+
+If the shell reads an unquoted word in the right position, it checks
+the word to see if it matches an alias name. If it matches, the shell
+replaces the word with the alias value, and reads that value as if it
+had been read instead of the word.
+The shell doesn't look at any characters following the word before
+attempting alias substitution. 
+<P>
+
 The characters <B>/</B>, <B>$</B>, <B>`</B>, and <B>=</B> and
 any of the shell <I>metacharacters</I> or quoting characters
 listed above may not appear in an alias name.
@@ -5593,6 +5657,8 @@ for instance, and
 <B>bash</B>
 
 does not try to recursively expand the replacement text.
+<P>
+
 If the last character of the alias value is a
 <I>blank</I>,
 
@@ -6256,8 +6322,8 @@ were no command substitutions, the command exits with a status of zero.
 <H3>COMMAND EXECUTION</H3>
 
 After a command has been split into words, if it results in a
-simple command and an optional list of arguments, the following
-actions are taken.
+simple command and an optional list of arguments, the shell performs
+the following actions.
 <P>
 
 If the command name contains no slashes, the shell attempts to
@@ -7915,6 +7981,11 @@ If set to <B>On</B>, readline will undo all changes to history lines
 before returning when <B>accept-line</B> is executed.  By default,
 history lines may be modified and retain individual undo lists across
 calls to <B>readline</B>.
+<DT><B>search-ignore-case (Off)       </B>
+
+<DD>
+If set to <B>On</B>, readline performs incremental and non-incremental
+history list searches in a case-insensitive fashion.
 <DT><B>show-all-if-ambiguous (Off)</B>
 
 <DD>
@@ -8363,9 +8434,12 @@ as if the &quot;!$&quot; history expansion had been specified.
 <DT><B>shell-expand-line (M-C-e)</B>
 
 <DD>
-Expand the line as the shell does.  This
-performs alias and history expansion as well as all of the shell
-word expansions.  See
+Expand the line by performing shell word expansions.
+This performs alias and history expansion,
+<B>$</B>aq<I>string</I>aq and <B>$</B>dq<I>string</I>dq quoting,
+tilde expansion, parameter and variable expansion, arithmetic expansion,
+word splitting, and quote removal.
+See
 <FONT SIZE=-1><B>HISTORY EXPANSION</B>
 
 </FONT>
@@ -10035,7 +10109,7 @@ current frame is frame 0.
 The return value is 0 unless the shell is not executing a subroutine
 call or <I>expr</I> does not correspond to a valid position in the
 call stack.
-<DT><B>cd</B> [<B>-L</B>|[<B>-P</B> [<B>-e</B>]] [-@]] [<I>dir</I>]<DD>
+<DT><B>cd</B> [<B>-L</B>|[<B>-P</B> [<B>-e</B>]]] [-@] [<I>dir</I>]<DD>
 Change the current directory to <I>dir</I>.
 if <I>dir</I> is not supplied, the value of the
 <FONT SIZE=-1><B>HOME</B>
@@ -10184,13 +10258,27 @@ cannot be found, the exit status is 127.  Otherwise, the exit status of the
 builtin is the exit status of
 <I>command</I>.
 
-<DT><B>compgen</B> [<I>option</I>] [<I>word</I>]<DD>
+<DT><B>compgen</B> [<B>-V</B> <I>varname</I>] [<I>option</I>] [<I>word</I>]<DD>
 Generate possible completion matches for <I>word</I> according to
 the <I>option</I>s, which may be any option accepted by the
 <B>complete</B>
 
-builtin with the exception of <B>-p</B> and <B>-r</B>, and write
-the matches to the standard output.
+builtin with the exceptions of
+<B>-p</B>,
+
+<B>-r</B>,
+
+<B>-D</B>,
+
+<B>-E</B>,
+
+and
+<B>-I</B>,
+
+and write the matches to the standard output.
+If the <B>-V</B> option is supplied, <B>compgen</B> stores the generated
+completions into the indexed array variable <I>varname</I> instead of writing
+them to the standard output.
 When using the <B>-F</B> or <B>-C</B> options, the various shell variables
 set by the programmable completion facilities, while available, will not
 have useful values.
@@ -10203,10 +10291,13 @@ will be displayed.
 <P>
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
-<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-DEI</B>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>]<DD>
+<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-DEI</B>] [<B>-A</B> <I>action</I>]<DD>
 <BR>
 
-[<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>] [<B>-X</B> <I>filterpat</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>] <I>name</I> [<I>name ...</I>]
+[<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>]
+<BR>
+
+[<B>-X</B> <I>filterpat</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>] <I>name</I> [<I>name ...</I>]
 
 <DT><B>complete</B> <B>-pr</B> [<B>-DEI</B>] [<I>name</I> ...]<DD>
 
@@ -11671,7 +11762,9 @@ is used within a function, it causes the variable
 to have a visible scope restricted to that function and its children.
 If <I>name</I> is -, the set of shell options is made local to the function
 in which <B>local</B> is invoked: shell options changed using the
-<B>set</B> builtin inside the function are restored to their original values
+<B>set</B> builtin inside the function
+after the call to <B>local</B>
+are restored to their original values
 when the function returns.
 The restore is effected as if a series of <B>set</B> commands were executed
 to restore the values that were in place before the function.
@@ -11875,8 +11968,10 @@ plain characters, which are simply copied to standard output, character
 escape sequences, which are converted and copied to the standard output, and
 format specifications, each of which causes printing of the next successive
 <I>argument</I>.
-In addition to the standard <I>printf</I>(1) format specifications,
-<B>printf</B> interprets the following extensions:
+In addition to the standard <I>printf</I>(3) format characters
+<B>csndiouxXeEfFgGaA</B>,
+
+<B>printf</B> interprets the following additional format specifiers:
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
@@ -11892,6 +11987,10 @@ in the same way as <B>echo -e</B>.
 <DD>
 causes <B>printf</B> to output the corresponding
 <I>argument</I> in a format that can be reused as shell input.
+<B>%q</B> and <B>%Q</B> use the <B>$''</B> quoting style if any characters
+in the argument string require it, and backslash quoting otherwise.
+If the format string uses the <I>printf</I> alternate form, these two
+formats quote the argument string using single quotes.
 <DT><B>%Q</B>
 
 <DD>
@@ -11912,10 +12011,19 @@ This is an exception to the usual <B>printf</B> behavior.
 </DL>
 <P>
 
-The %b, %q, and %T directives all use the field width and precision
+The %b, %q, and %T format specifiers all use the field width and precision
 arguments from the format specification and write that many bytes from
 (or use that wide a field for) the expanded argument, which usually
 contains more characters than the original.
+<P>
+
+The %n format specifier accepts a corresponding argument that is treated
+as a shell variable name.
+<P>
+
+The %s and %c format specifiers accept an l (long) modifier, which forces
+them to convert the argument string to a wide-character string and apply
+any supplied field width and precision in terms of characters, not bytes.
 <P>
 
 Arguments to non-string format specifiers are treated as C constants,
@@ -11928,7 +12036,9 @@ The <I>format</I> is reused as necessary to consume all of the <I>arguments</I>.
 If the <I>format</I> requires more <I>arguments</I> than are supplied, the
 extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.
-The return value is zero on success, non-zero on failure.
+The return value is zero on success,
+non-zero if an invalid option is supplied or a write or assignment error
+occurs.
 </DL>
 
 <DT><B>pushd</B> [<B>-n</B>] [+<I>n</I>] [-<I>n</I>]<DD>
@@ -12676,7 +12786,7 @@ arithmetic <B>for</B> command, display the expanded value of
 
 </FONT>
 followed by the command and its expanded arguments
-or associated word list.
+or associated word list, to standard error.
 <DT><B>-B</B>
 
 <DD>
@@ -13681,6 +13791,18 @@ or, if none are supplied, for all trapped signals,
 as a set of <B>trap</B> commands
 that can be reused as shell input to
 restore the current signal dispositions.
+The
+<B>-P</B>
+
+option behaves similarly, but displays only the actions
+associated with each <I>sigspec</I> argument.
+<B>-P</B>
+
+requires at least one <I>sigspec</I> argument.
+The <B>-P</B> or <B>-p</B> options to <B>trap</B> may be used
+in a subshell environment (e.g., command substitution) and, as
+long as they are used before <B>trap</B> is used to change a signal's
+handling, will display the state of its parent's traps.
 <P>
 
 
@@ -13835,21 +13957,24 @@ or
 if
 <I>name</I>
 
-is an alias, shell reserved word, function, builtin, or disk file,
+is an alias, shell reserved word, function, builtin, or executable disk file,
 respectively.
 If the
 <I>name</I>
 
-is not found, then nothing is printed, and an exit status of false
-is returned.
+is not found, then nothing is printed, and <B>type</B> returns a
+non-zero exit status.
 If the
 <B>-p</B>
 
 option is used,
 <B>type</B>
 
-either returns the name of the disk file
-that would be executed if
+either returns the name of the executable file
+that would be found by searching
+<B>$PATH</B>
+
+if
 <I>name</I>
 
 were specified as a command name,
@@ -13889,19 +14014,24 @@ If the
 option is used,
 <B>type</B>
 
-prints all of the places that contain
-an executable named
+prints all of the places that contain a command named
 <I>name</I>.
 
-This includes aliases and functions,
-if and only if the
-<B>-p</B>
-
-option is not also used.
-The table of hashed commands is not consulted
+This includes aliases, reserved words, functions, and builtins,
+but the path search options (<B>-p</B> and <B>-P</B>)
+can be supplied to restrict the output to executable files.
+<B>type</B> does not consult the table of hashed commands
 when using
-<B>-a</B>.
+<B>-a </B>
 
+with
+<B>-p</B>,
+
+and only performs a
+<FONT SIZE=-1><B>PATH</B>
+
+</FONT>
+search for <I>name</I>.
 The
 <B>-f</B>
 
@@ -14802,7 +14932,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2022 December 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2023 April 17<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14908,7 +15038,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20221202/doc/bash.1.<BR>
-Time: 02 December 2022 17:01:20 EST
+This document was created by man2html from /usr/local/src/bash/bash-20230416/doc/bash.1.<BR>
+Time: 17 April 2023 14:27:09 EDT
 </BODY>
 </HTML>
