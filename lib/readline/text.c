@@ -1229,11 +1229,12 @@ _rl_rubout_char (int count, int key)
       c = rl_line_buffer[--rl_point];
       rl_delete_text (rl_point, orig_point);
       /* The erase-at-end-of-line hack is of questionable merit now. */
-      if (rl_point == rl_end && ISPRINT ((unsigned char)c) && _rl_last_c_pos)
+      if (rl_point == rl_end && ISPRINT ((unsigned char)c) && _rl_last_c_pos && _rl_last_v_pos == 0)
 	{
 	  int l;
 	  l = rl_character_len (c, rl_point);
-	  _rl_erase_at_end_of_line (l);
+	  if (_rl_last_c_pos >= l)
+	    _rl_erase_at_end_of_line (l);
 	}
     }
   else

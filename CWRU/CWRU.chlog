@@ -6044,3 +6044,46 @@ builtins/complete.def
 
 doc/bash.1,lib/readline/doc/rluser.texi
 	- compgen: document new -V option
+
+				   4/18
+				   ----
+lib/readline/vi_mode.c
+	- rl_domove_read_callback: call _rl_arg_init before reading digit
+	  argument so prompt gets saved, both callback and non-callback modes
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+	- rl_vi_arg_dispatch: if we return 0 to end the digit argument and
+	  turn off NUMERICARG, call rl_restore_prompt
+
+lib/readline/histexpand.c
+	- history_expand_internal: make sure subst_lhs is not null before we
+	  call postproc_subst_rhs.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/display.c
+	- rl_redisplay: remove redundant code that ends up incrementing lpos
+	  too much for meta characters displayed as octal escape sequences.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   4/19
+				   ----
+bashline.c
+	- attempt_shell_completion: handle case where s > e after calls to
+	  find_cmd_start and find_cmd_end, respectively.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/display.c
+	- update_line: fix setting of `wsatend' when computing ols and nls in
+	  the multibyte case; this caused redisplay to print more characters
+	  than it needed
+	- update_line: fix calculation of visible_wrap_offset when moving up
+	  to line 0, trying to figure whether or not the visible prompt has
+	  any invisible characters. Fixes C locale issue reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+				   4/20
+				   ----
+lib/readline/text.c
+	- _rl_rubout_char: update erase-at-end-of-line hack to deal with the
+	  unlikely event that a character in a non-multibyte locale is
+	  displayed using an octal representation.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

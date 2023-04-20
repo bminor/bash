@@ -1090,6 +1090,7 @@ _rl_vi_arg_dispatch (int c)
     }
   else
     {
+      rl_restore_prompt ();
       rl_clear_message ();
       rl_stuff_char (key);
       return 0;		/* done */
@@ -1320,7 +1321,7 @@ rl_domove_read_callback (_rl_vimotion_cxt *m)
   /* Readine vi motion char starting numeric argument */
   else if (_rl_digit_p (c) && RL_ISSTATE (RL_STATE_CALLBACK) && RL_ISSTATE (RL_STATE_VIMOTION) && (RL_ISSTATE (RL_STATE_NUMERICARG) == 0))
     {
-      RL_SETSTATE (RL_STATE_NUMERICARG);
+      _rl_arg_init ();
       return (_rl_vi_arg_dispatch (c));
     }
 #endif
@@ -1330,7 +1331,7 @@ rl_domove_read_callback (_rl_vimotion_cxt *m)
       save = rl_numeric_arg;
       rl_numeric_arg = _rl_digit_value (c);
       rl_explicit_arg = 1;
-      RL_SETSTATE (RL_STATE_NUMERICARG);
+      _rl_arg_init ();
       rl_digit_loop1 ();
       rl_numeric_arg *= save;
       c = rl_vi_domove_getchar (m);

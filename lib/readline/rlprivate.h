@@ -526,6 +526,7 @@ extern int _rl_menu_complete_prefix_first;
 /* display.c */
 extern int _rl_vis_botlin;
 extern int _rl_last_c_pos;
+extern int _rl_last_v_pos;
 extern int _rl_suppress_redisplay;
 extern int _rl_want_redisplay;
 

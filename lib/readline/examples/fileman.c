@@ -292,7 +292,7 @@ com_list (arg)
   if (!arg)
     arg = "";
 
-  sprintf (syscom, "ls -FClg %s", arg);
+  snprintf (syscom, sizeof (syscom), "ls -FClg %s", arg);
   return (system (syscom));
 }
 
@@ -305,9 +305,9 @@ com_view (arg)
 
 #if defined (__MSDOS__)
   /* more.com doesn't grok slashes in pathnames */
-  sprintf (syscom, "less %s", arg);
+  snprintf (syscom, sizeof (syscom), "less %s", arg);
 #else
-  sprintf (syscom, "more %s", arg);
+  snprintf (syscom, sizeof (syscom), "more %s", arg);
 #endif
   return (system (syscom));
 }

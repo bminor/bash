@@ -313,6 +313,13 @@ The following list is what's changed when 'POSIX mode' is in effect:
      that a backslash preceding a double quote character will escape it
      and the backslash will be removed.
 
+  66. Command substitutions don't set the '?' special parameter.  The
+     exit status of a simple command without a command word is still the
+     exit status of the last command substitution that occurred while
+     evaluating the variable assignments and redirections in that
+     command, but that does not happen until after all of the
+     assignments and redirections.
+
 There is other POSIX behavior that Bash does not implement by default
 even when in POSIX mode.  Specifically:
 

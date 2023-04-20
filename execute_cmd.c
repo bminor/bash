@@ -239,6 +239,8 @@ int executing_builtin = 0;
 /* Non-zero if we are executing a command list (a;b;c, etc.) */
 int executing_list = 0;
 
+int executing_loop = 0;
+
 /* Non-zero if we should defer closing process substitution FDs. */
 int retain_fifos = 0;
 

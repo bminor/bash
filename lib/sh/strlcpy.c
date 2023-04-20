@@ -23,7 +23,7 @@
 #include <bashansi.h>
 
 size_t
-strlcpy(const char *dest, const const char *src, size_t size)
+strlcpy(char *dest, const const char *src, size_t size)
 {
   size_t ret;
 

@@ -1672,6 +1672,10 @@ attempt_shell_completion (const char *text, int start, int end)
 	      s1 = s = e1;
 	      break;
 	    }
+	  else if (s > e)
+	    {
+	      s = s1 = start; e = e1 = end;	/* reset */
+	    }
 	  /* Skip over assignment statements preceding a command name.  If we
 	     don't find a command name at all, we can perform command name
 	     completion.  If we find a partial command name, we should perform
