@@ -50,7 +50,7 @@ extern volatile int last_command_exit_value;
 extern int last_command_exit_signal;
 extern int builtin_ignoring_errexit;
 extern int executing_builtin;
-extern int executing_list;
+extern int interrupt_execution;
 extern int retain_fifos;
 extern int comsub_ignore_return;
 extern int subshell_level;

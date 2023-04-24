@@ -236,10 +236,9 @@ REDIRECT *exec_redirection_undo_list = (REDIRECT *)NULL;
    currently executing (e.g. `eval echo a' would have it set to 2). */
 int executing_builtin = 0;
 
-/* Non-zero if we are executing a command list (a;b;c, etc.) */
-int executing_list = 0;
-
-int executing_loop = 0;
+/* Non-zero if we are executing a command list (a;b;c, etc.) or a loop and we
+   should break out of it on a SIGINT. */
+int interrupt_execution = 0;
 
 /* Non-zero if we should defer closing process substitution FDs. */
 int retain_fifos = 0;
@@ -2740,7 +2739,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 	  if (command->value.Connection->second)
 	    command->value.Connection->second->flags |= CMD_IGNORE_RETURN;
 	}
-      executing_list++; retain_fifos++;
+      interrupt_execution++; retain_fifos++;
       QUIT;
 
 #if 1
@@ -2756,7 +2755,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
       exec_result = execute_command_internal (command->value.Connection->second,
 				      asynchronous, pipe_in, pipe_out,
 				      fds_to_close);
-      executing_list--; retain_fifos--;
+      interrupt_execution--; retain_fifos--;
       break;
 
     case '|':
@@ -2810,7 +2809,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 	 and the connector is OR_OR, then execute the second command,
 	 otherwise return. */
 
-      executing_list++; retain_fifos++;
+      interrupt_execution++; retain_fifos++;
       if (command->value.Connection->first)
 	command->value.Connection->first->flags |= CMD_IGNORE_RETURN;
 
@@ -2833,7 +2832,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 
 	  exec_result = execute_command (second);
 	}
-      executing_list--; retain_fifos--;
+      interrupt_execution--; retain_fifos--;
       break;
 
     default:
@@ -2880,7 +2879,7 @@ execute_for_command (FOR_COM *for_command)
       return (EXECUTION_FAILURE);
     }
 
-  loop_level++; retain_fifos++;
+  loop_level++; interrupt_execution++; retain_fifos++;
   identifier = for_command->name->word;
 
   line_number = for_command->line;	/* for expansion error messages */
@@ -2960,7 +2959,7 @@ execute_for_command (FOR_COM *for_command)
 	    {
 	      dispose_words (releaser);
 	      discard_unwind_frame ("for");
-	      loop_level--; retain_fifos--;
+	      loop_level--; interrupt_execution--; retain_fifos--;
 	      return (EXECUTION_FAILURE);
 	    }
 	}
@@ -2988,7 +2987,7 @@ execute_for_command (FOR_COM *for_command)
 	}
     }
 
-  loop_level--; retain_fifos--;
+  loop_level--; interrupt_execution--; retain_fifos--;
   line_number = save_line_number;
 
 #if 0
@@ -3092,7 +3091,7 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
   int expok, body_status, arith_lineno, save_lineno;
 
   body_status = EXECUTION_SUCCESS;
-  loop_level++;
+  loop_level++; interrupt_execution++;
   save_lineno = line_number;
 
   if (arith_for_command->flags & CMD_IGNORE_RETURN)
@@ -3167,7 +3166,7 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
 	}
     }
 
-  loop_level--;
+  loop_level--; interrupt_execution--;
   line_number = save_lineno;
 
   return (body_status);
@@ -3405,7 +3404,7 @@ execute_select_command (SELECT_COM *select_command)
 
   this_command_name = (char *)0;
 
-  loop_level++;
+  loop_level++; interrupt_execution++;
   identifier = select_command->name->word;
 
   /* command and arithmetic substitution, parameter and variable expansion,
@@ -3459,7 +3458,7 @@ execute_select_command (SELECT_COM *select_command)
 	    {
 	      dispose_words (releaser);
 	      discard_unwind_frame ("select");
-	      loop_level--;
+	      loop_level--; interrupt_execution--;
 	      line_number = save_line_number;
 	      return (EXECUTION_FAILURE);
 	    }
@@ -3493,7 +3492,7 @@ execute_select_command (SELECT_COM *select_command)
 #endif
     }
 
-  loop_level--;
+  loop_level--; interrupt_execution--;
   line_number = save_line_number;
 
   dispose_words (releaser);
@@ -3663,7 +3662,7 @@ execute_while_or_until (WHILE_COM *while_command, int type)
   int return_value, body_status;
 
   body_status = EXECUTION_SUCCESS;
-  loop_level++;
+  loop_level++; interrupt_execution++;
 
   while_command->test->flags |= CMD_IGNORE_RETURN;
   if (while_command->flags & CMD_IGNORE_RETURN)
@@ -3714,7 +3713,7 @@ execute_while_or_until (WHILE_COM *while_command, int type)
 	    break;
 	}
     }
-  loop_level--;
+  loop_level--; interrupt_execution--;
 
   return (body_status);
 }
@@ -5871,7 +5870,7 @@ initialize_subshell (void)
   /* We're no longer inside a shell function. */
   variable_context = return_catch_flag = funcnest = evalnest = sourcenest = 0;
 
-  executing_list = retain_fifos = 0;		/* XXX */
+  interrupt_execution = retain_fifos = 0;		/* XXX */
 
   /* If we're not interactive, close the file descriptor from which we're
      reading the current shell script. */

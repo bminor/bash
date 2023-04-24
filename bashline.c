@@ -3074,7 +3074,7 @@ name_is_acceptable (const char *name)
 
   for (nlen = strlen (name), p = fignore.ignores; p->val; p++)
     {
-      if (nlen > p->len && p->len > 0 && STREQ (p->val, &name[nlen - p->len]))
+      if (nlen >= p->len && p->len > 0 && STREQ (p->val, &name[nlen - p->len]))
 	return (0);
     }
 

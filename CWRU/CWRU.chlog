@@ -6087,3 +6087,19 @@ lib/readline/text.c
 	  unlikely event that a character in a non-multibyte locale is
 	  displayed using an octal representation.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c,execute_cmd.h,builtins/evalstring.c
+	- interrupt_execution: replaces `executing_list'
+	- interrupt_execution: set while executing while, for, until, select,
+	  and arithmetic for loops
+
+jobs.c
+	- wait_for: if a process dies due to a SIGINT while the shell is
+	  executing a loop or a list, act as if the shell got SIGINT. This
+	  is no longer dependent on the compatibility level
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+bashline.c
+	- name_is_acceptable: allow FIGNORE suffixes to match the entire
+	  pathname like tcsh does instead of requiring a non-empty prefix.
+	  From Emanuele Torre <torreemanuele6@gmail.com>

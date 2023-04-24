@@ -238,7 +238,7 @@ parse_prologue (char *string, int flags, char *tag)
   unwind_protect_int (line_number);
   unwind_protect_int (line_number_for_err_trap);
   unwind_protect_int (loop_level);
-  unwind_protect_int (executing_list);
+  unwind_protect_int (interrupt_execution);
   unwind_protect_int (comsub_ignore_return);
   unwind_protect_int (builtin_ignoring_errexit);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))

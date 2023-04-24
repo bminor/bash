@@ -396,7 +396,7 @@ top_level_cleanup (void)
 
   run_unwind_protects ();
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = retain_fifos = 0;
+  interrupt_execution = retain_fifos = 0;
   comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 }
 
@@ -463,7 +463,7 @@ throw_to_top_level (void)
 
   run_unwind_protects ();
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = retain_fifos = 0;
+  interrupt_execution = retain_fifos = 0;
   comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 
   if (interactive && print_newline)
@@ -630,7 +630,7 @@ termsig_handler (int sig)
 
   /* Reset execution context */
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = retain_fifos = 0;
+  interrupt_execution = retain_fifos = 0;
   comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 
   run_exit_trap ();	/* XXX - run exit trap possibly in signal context? */

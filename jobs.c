@@ -3089,10 +3089,11 @@ if (job == NO_JOB)
 		WIFSIGNALED (s) && WTERMSIG (s) == SIGINT)
 	    {
 	      /* If SIGINT is not trapped and the shell is in a for, while,
-		 or until loop, act as if the shell received SIGINT as
-		 well, so the loop can be broken.  This doesn't call the
-		 SIGINT signal handler; maybe it should. */
-	      if (signal_is_trapped (SIGINT) == 0 && (loop_level || (shell_compatibility_level > 32 && executing_list)))
+		 until, or arithmetic for loop, or is executing a compound list,
+		 act as if the shell received SIGINT as well, so the loop or
+		 list can be broken.  This doesn't call the SIGINT signal
+		 handler; maybe it should. */
+	      if (signal_is_trapped (SIGINT) == 0 && interrupt_execution)
 		ADDINTERRUPT;
 	      /* Call any SIGINT trap handler if the shell is running a loop, so
 		 the loop can be broken.  This seems more useful and matches the
