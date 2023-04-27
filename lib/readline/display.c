@@ -2831,7 +2831,7 @@ _rl_move_cursor_relative (int new, const char *data, const char *dataf)
 	 (prompt_last_invisible) in the last line.  IN_INVISLINE is the
 	 offset of DATA in invisible_line */
       in_invisline = 0;
-      if (data > invisible_line && data < invisible_line+inv_lbreaks[_rl_inv_botlin+1])
+      if (data > invisible_line && _rl_inv_botlin < inv_lbsize && data < invisible_line+inv_lbreaks[_rl_inv_botlin+1])
 	in_invisline = data - invisible_line;
 
       /* Use NEW when comparing against the last invisible character in the

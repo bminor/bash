@@ -369,7 +369,13 @@ extern int _rl_arg_callback (_rl_arg_cxt);
 extern void _rl_reset_argument (void);
 
 extern void _rl_start_using_history (void);
+#if defined (HIST_ENTRY_DEFINED)
+extern HIST_ENTRY *_rl_alloc_saved_line (void);
+extern void _rl_free_saved_line (HIST_ENTRY *);
+extern void _rl_unsave_line (HIST_ENTRY *);
+#endif
 extern int _rl_free_saved_history_line (void);
+
 extern void _rl_set_insert_mode (int, int);
 
 extern void _rl_revert_previous_lines (void);
@@ -405,6 +411,8 @@ extern int _rl_restore_tty_signals (void);
 /* search.c */
 extern int _rl_nsearch_callback (_rl_search_cxt *);
 extern int _rl_nsearch_cleanup (_rl_search_cxt *, int);
+
+extern void _rl_free_saved_search_line (void);
 
 /* signals.c */
 extern void _rl_signal_handler (int);

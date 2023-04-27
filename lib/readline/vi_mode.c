@@ -367,12 +367,12 @@ rl_vi_search (int count, int key)
   switch (key)
     {
     case '?':
-      _rl_free_saved_history_line ();
+      _rl_free_saved_search_line ();		/* just in case */
       rl_noninc_forward_search (count, key);
       break;
 
     case '/':
-      _rl_free_saved_history_line ();
+      _rl_free_saved_search_line ();
       rl_noninc_reverse_search (count, key);
       break;
 
@@ -1340,6 +1340,13 @@ rl_domove_read_callback (_rl_vimotion_cxt *m)
 	  m->motion = 0;
 	  return -1;
 	}
+      else if (member (c, vi_motion) == 0)
+	{
+	  m->motion = 0;
+	  RL_UNSETSTATE (RL_STATE_VIMOTION);
+	  RL_UNSETSTATE (RL_STATE_NUMERICARG);
+	  return (1);
+	}  
       m->motion = c;
       return (rl_domove_motion_callback (m));
     }
@@ -1364,6 +1371,7 @@ _rl_vi_domove_callback (_rl_vimotion_cxt *m)
   int c, r;
 
   m->motion = c = rl_vi_domove_getchar (m);
+
   if (c < 0)
     return 1;		/* EOF */
   r = rl_domove_read_callback (m);

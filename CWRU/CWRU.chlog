@@ -6103,3 +6103,63 @@ bashline.c
 	- name_is_acceptable: allow FIGNORE suffixes to match the entire
 	  pathname like tcsh does instead of requiring a non-empty prefix.
 	  From Emanuele Torre <torreemanuele6@gmail.com>
+
+				   4/23
+				   ----
+lib/readline/misc.c
+	- _rl_unsave_line: new function, takes a HIST_ENTRY * as an argument,
+	  generalized rl_maybe_unsave_line
+	- _rl_alloc_saved_line: allocate a new HIST_ENTRY *, populate it like
+	  rl_saved_line_for_history
+	- _rl_free_saved_line: free a saved HIST_ENTRY *
+	- _rl_free_saved_history_line: call _rl_free_saved_line
+	- _rl_previous_history_internal: new function, internals of
+	  rl_get_previous_history; change rl_get_previous_history to call it
+
+lib/readline/history.h
+	- HIST_ENTRY_DEFINED: define sentinel if HIST_ENTRY struct defined
+
+lib/readline/rlprivate.h
+	- _rl_alloc_saved_line,_rl_free_saved_line,_rl_unsave_line: new extern
+	  function definitions
+	- _rl_free_saved_search_line: new extern definition
+
+lib/readline/search.c
+	- _rl_saved_line_for_search: use private storage to save current line,
+	  avoid clashes with rl_saved_line_for_history
+	- _rl_free_saved_search_line,_rl_unsave_saved_search_line: new functions
+	  to manage _rl_saved_line_for_search
+	- noninc_dosearch,_rl_nsearch_abort: clean up _rl_saved_line_for_search
+	  instead of rl_saved_line_for_history
+	- rl_history_search_internal: allocate private _rl_saved_line_for_search;
+	  unsave or free it as appropriate
+	- _rl_history_search_reinit: free up any _rl_saved_line_for_search just
+	  in case
+
+lib/readline/vi_mode.c
+	- rl_vi_search: free _rl_saved_line_for_search, since that's what the
+	  non-incremental search functions use now
+	- rl_domove_read_callback: if we read a numeric argument, then a motion
+	  character, make sure the motion character is valid before returning
+	  it and going on
+	  From a report by minipython <599192367@qq.com>
+
+				   4/27
+				   ----
+lib/readline/display.c
+	- _rl_move_cursor_relative: when checking to see whether data is within
+	  the invisible line, make sure to stay within the invisible line
+	  line break boundaries
+
+lib/readline/search.c
+	- dispose_saved_search_line: new function, either unsave the saved
+	  search line (if we're not at the end of the history) or free it
+	  (if we are). Needs to be immediately followed by call to
+	  make_history_line_current, which resets rl_undo_list
+	- make_history_line_current: change strategy: rely on callers to
+	  manage _rl_saved_line_for_search and rl_undo_list; just copy the
+	  data from the passed history entry into the line buffer and reset
+	  rl_undo_list
+	- noninc_dosearch,rl_history_search_internal: call dispose_saved_search_line
+	  before calling make_history_line_current
+
