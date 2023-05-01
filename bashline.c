@@ -1695,10 +1695,12 @@ attempt_shell_completion (const char *text, int start, int end)
 	 end == index of where word to be completed ends
 	 if (s == start) we are doing command word completion for sure
 	 if (e1 == end) we are at the end of the command name and completing it */
-      if (start == 0 && end == 0 && e != 0 && text[0] == '\0')	/* beginning of non-empty line */
+      if (start == 0 && end == 0 && e != 0 && e1 < rl_end && text[0] == '\0')	/* beginning of non-empty line */
         foundcs = 0;
       else if (start == end && start == s1 && e != 0 && e1 > end)	/* beginning of command name, leading whitespace */
 	foundcs = 0;
+      else if (start == 0 && start == end && start < s1 && e != 0 && e1 > end && text[0] == '\0' && have_progcomps)	/* no command name, leading whitespace only */
+        prog_complete_matches = programmable_completions (EMPTYCMD, text, s, e, &foundcs);
       else if (e == 0 && e == s && text[0] == '\0' && have_progcomps)	/* beginning of empty line */
         prog_complete_matches = programmable_completions (EMPTYCMD, text, s, e, &foundcs);
       else if (start == end && text[0] == '\0' && s1 > start && whitespace (rl_line_buffer[start]))
@@ -1742,7 +1744,14 @@ attempt_shell_completion (const char *text, int start, int end)
       /* If we have defined a compspec for the initial (command) word, call
 	 it and process the results like any other programmable completion. */
       if (in_command_position && have_progcomps && foundcs == 0 && iw_compspec)
-	prog_complete_matches = programmable_completions (INITIALWORD, text, s, e, &foundcs);
+	{
+	  /* Do some sanity checking on S and E. Room for more here. */
+	  if (s > rl_point)
+	    s = rl_point;
+	  if (e > rl_end)
+	    e = rl_end;
+	  prog_complete_matches = programmable_completions (INITIALWORD, text, s, e, &foundcs);
+	}
 
       FREE (n);
       /* XXX - if we found a COMPSPEC for the command, just return whatever

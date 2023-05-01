@@ -983,6 +983,9 @@ rl_insert (int count, int c)
 	break;
     }
 
+  /* If we didn't insert n and there are pending bytes, we need to insert
+     them if _rl_insert_char didn't do that on its own. */
+
   if (n != (unsigned short)-2)		/* -2 = sentinel value for having inserted N */
     {
       /* setting rl_pending_input inhibits setting rl_last_func so we do it
@@ -992,7 +995,6 @@ rl_insert (int count, int c)
       rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
       r = rl_execute_next (n);
     }
-
   return r;
 }
 

@@ -647,15 +647,16 @@ setup_ignore_patterns (struct ignorevar *ivp)
 /* Functions to handle sorting glob results in different ways depending on
    the value of the GLOBSORT variable. */
 
-static int glob_sorttype = STAT_NONE;
+static int glob_sorttype = SORT_NONE;
 
 static STRING_INT_ALIST sorttypes[] = {
-  { "name",	STAT_NAME },
-  { "size",	STAT_SIZE },
-  { "mtime",	STAT_MTIME },
-  { "atime",	STAT_ATIME },
-  { "ctime",	STAT_CTIME },
-  { "blocks",	STAT_BLOCKS },
+  { "name",	SORT_NAME },
+  { "size",	SORT_SIZE },
+  { "mtime",	SORT_MTIME },
+  { "atime",	SORT_ATIME },
+  { "ctime",	SORT_CTIME },
+  { "blocks",	SORT_BLOCKS },
+  { "nosort",	SORT_NOSORT },
   { (char *)NULL,	-1 }
 };
 
@@ -682,7 +683,7 @@ glob_findtype (char *t)
   int type;
 
   type = find_string_in_alist (t, sorttypes, 0);
-  return (type == -1 ? STAT_NONE : type);
+  return (type == -1 ? SORT_NONE : type);
 }
 
 void
@@ -691,7 +692,7 @@ setup_globsort (const char *varname)
   char *val;
   int r, t;
 
-  glob_sorttype = STAT_NONE;
+  glob_sorttype = SORT_NONE;
   val = get_string_value (varname);
   if (val == 0 || *val == 0)
     return;
@@ -703,7 +704,7 @@ setup_globsort (const char *varname)
     val++;			/* allow leading `+' but ignore it */
   else if (*val == '-')
     {
-      r = STAT_REVERSE;		/* leading `-' reverses sort order */
+      r = SORT_REVERSE;		/* leading `-' reverses sort order */
       val++;
     }
 
@@ -711,25 +712,25 @@ setup_globsort (const char *varname)
     {
       /* A bare `+' means the default sort by name in ascending order; a bare
          `-' means to sort by name in descending order. */
-      glob_sorttype = STAT_NAME | r;
+      glob_sorttype = SORT_NAME | r;
       return;
     }
 
   t = glob_findtype (val);
   /* any other value is equivalent to the historical behavior */
-  glob_sorttype = (t == STAT_NONE) ? t : t | r;
+  glob_sorttype = (t == SORT_NONE) ? t : t | r;
 }
 
 static int
 globsort_namecmp (char **s1, char **s2)
 {
-  return ((glob_sorttype < STAT_REVERSE) ? strvec_posixcmp (s1, s2) : strvec_posixcmp (s2, s1));
+  return ((glob_sorttype < SORT_REVERSE) ? strvec_posixcmp (s1, s2) : strvec_posixcmp (s2, s1));
 }
 
 static int
 globsort_sizecmp (struct globsort_t *g1, struct globsort_t *g2)
 {
-  return ((glob_sorttype < STAT_REVERSE) ? g1->st.size - g2->st.size : g2->st.size - g1->st.size);
+  return ((glob_sorttype < SORT_REVERSE) ? g1->st.size - g2->st.size : g2->st.size - g1->st.size);
 }
 
 static int
@@ -738,13 +739,13 @@ globsort_timecmp (struct globsort_t *g1, struct globsort_t *g2)
   int t;
   struct timespec t1, t2;
 
-  t = (glob_sorttype < STAT_REVERSE) ? glob_sorttype : glob_sorttype - STAT_REVERSE;
-  if (t == STAT_MTIME)
+  t = (glob_sorttype < SORT_REVERSE) ? glob_sorttype : glob_sorttype - SORT_REVERSE;
+  if (t == SORT_MTIME)
     {
       t1 = g1->st.mtime;
       t2 = g2->st.mtime;
     }
-  else if (t == STAT_ATIME)
+  else if (t == SORT_ATIME)
     {
       t1 = g1->st.atime;
       t2 = g2->st.atime;
@@ -755,13 +756,13 @@ globsort_timecmp (struct globsort_t *g1, struct globsort_t *g2)
       t2 = g2->st.ctime;
     }
 
-  return ((glob_sorttype < STAT_REVERSE) ? timespec_cmp (t1, t2) : timespec_cmp (t2, t1));
+  return ((glob_sorttype < SORT_REVERSE) ? timespec_cmp (t1, t2) : timespec_cmp (t2, t1));
 }
 
 static int
 globsort_blockscmp (struct globsort_t *g1, struct globsort_t *g2)
 {
-  return ((glob_sorttype < STAT_REVERSE) ? g1->st.blocks - g2->st.blocks : g2->st.blocks - g1->st.blocks);
+  return ((glob_sorttype < SORT_REVERSE) ? g1->st.blocks - g2->st.blocks : g2->st.blocks - g1->st.blocks);
 }
 
 static struct globsort_t *
@@ -803,19 +804,19 @@ globsort_sortarray (struct globsort_t *garray, size_t len)
   int t;
   QSFUNC *sortfunc;
 
-  t = (glob_sorttype < STAT_REVERSE) ? glob_sorttype : glob_sorttype - STAT_REVERSE;
+  t = (glob_sorttype < SORT_REVERSE) ? glob_sorttype : glob_sorttype - SORT_REVERSE;
 
   switch (t)
     {
-    case STAT_SIZE:
+    case SORT_SIZE:
       sortfunc = (QSFUNC *)globsort_sizecmp;
       break;
-    case STAT_ATIME:
-    case STAT_MTIME:
-    case STAT_CTIME:
+    case SORT_ATIME:
+    case SORT_MTIME:
+    case SORT_CTIME:
       sortfunc = (QSFUNC *)globsort_timecmp;
       break;
-    case STAT_BLOCKS:
+    case SORT_BLOCKS:
       sortfunc = (QSFUNC *)globsort_blockscmp;
       break;
     default:
@@ -832,9 +833,12 @@ sh_sortglob (char **results)
   size_t rlen;
   struct globsort_t *garray;
 
-  if (glob_sorttype == STAT_NONE || glob_sorttype == STAT_NAME)
+  if (glob_sorttype == SORT_NOSORT || glob_sorttype == (SORT_NOSORT|SORT_REVERSE))
+    return;
+
+  if (glob_sorttype == SORT_NONE || glob_sorttype == SORT_NAME)
     globsort_sortbyname (results);	/* posix sort */
-  else if (glob_sorttype == (STAT_NAME|STAT_REVERSE))
+  else if (glob_sorttype == (SORT_NAME|SORT_REVERSE))
     globsort_sortbyname (results);	/* posix sort reverse order */
   else
     {

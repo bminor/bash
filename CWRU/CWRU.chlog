@@ -6040,7 +6040,8 @@ builtins/complete.def
 	  variable in which to store the completions.
 	- compgen_builtin: if the -V option is supplied, store the possible
 	  completions into VARNAME instead of printing them on stdout. From a
-	  patch from Grisha Levit <grishalevit@gmail.com>
+	  patch from Grisha Levit <grishalevit@gmail.com>, idea originally
+	  from konsolebox <konsolebox@gmail.com> back in 2/2022
 
 doc/bash.1,lib/readline/doc/rluser.texi
 	- compgen: document new -V option
@@ -6150,6 +6151,7 @@ lib/readline/display.c
 	- _rl_move_cursor_relative: when checking to see whether data is within
 	  the invisible line, make sure to stay within the invisible line
 	  line break boundaries
+	  From a report by minipython <599192367@qq.com>
 
 lib/readline/search.c
 	- dispose_saved_search_line: new function, either unsave the saved
@@ -6163,3 +6165,30 @@ lib/readline/search.c
 	- noninc_dosearch,rl_history_search_internal: call dispose_saved_search_line
 	  before calling make_history_line_current
 
+lib/readline/misc.c
+	- _rl_start_using_history: free the undo list associated with
+	  _rl_saved_line_for_history, if one exists. Have to watch out for
+	  this causing pointer aliasing problems, maybe add a call to
+	  _hs_search_history_data()
+
+				   4/28
+				   ----
+pathexp.c
+	- sh_globsort: a sort specifier of `nosort' disables sorting completely
+
+doc/bash.1,doc/bashref.texi
+	- GLOBSORT: document `nosort' sort specifier
+
+bashline.c
+	- attempt_shell_completion: attempt completion with the empty command
+	  for a null command word on a line with only whitespace following any
+	  optional assignment statements
+	- attempt_shell_completion: make sure that the start of the command
+	  word is not after rl_point before calling the programmable completion
+	  for the initial word.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/histexpand.c
+	- history_expand: don't read past the end of the string if it ends with
+	  an incomplete multibyte character
+	  From a report by Grisha Levit <grishalevit@gmail.com>

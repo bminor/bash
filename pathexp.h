@@ -105,15 +105,16 @@ extern int should_ignore_glob_matches (void);
 extern void ignore_glob_matches (char **);
 
 /* Definitions for glob sorting */
-#define STAT_NONE	0
-#define STAT_NAME	1
-#define STAT_SIZE	2
-#define STAT_MTIME	3
-#define STAT_ATIME	4
-#define STAT_CTIME	5
-#define STAT_BLOCKS	6
+#define SORT_NONE	0
+#define SORT_NAME	1
+#define SORT_SIZE	2
+#define SORT_MTIME	3
+#define SORT_ATIME	4
+#define SORT_CTIME	5
+#define SORT_BLOCKS	6
+#define SORT_NOSORT	7
 
-#define STAT_REVERSE	128
+#define SORT_REVERSE	128
 
 extern void setup_globsort (const char *);
 
