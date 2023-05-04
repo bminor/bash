@@ -398,6 +398,7 @@ top_level_cleanup (void)
   loop_level = continuing = breaking = funcnest = 0;
   interrupt_execution = retain_fifos = 0;
   comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
+  variable_context = 0;		/* XXX */
 }
 
 /* What to do when we've been interrupted, and it is safe to handle it. */
@@ -465,6 +466,7 @@ throw_to_top_level (void)
   loop_level = continuing = breaking = funcnest = 0;
   interrupt_execution = retain_fifos = 0;
   comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
+  variable_context = 0;
 
   if (interactive && print_newline)
     {

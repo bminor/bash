@@ -1016,14 +1016,21 @@ freeze_jobs_list (void)
   return 0;
 }
 
-void
+int
 unfreeze_jobs_list (void)
 {
+  return 0;
 }
 
 void
 set_jobs_list_frozen (int s)
 {
+}
+
+int
+jobs_list_frozen_status (void)
+{
+  return 0;
 }
 
 int

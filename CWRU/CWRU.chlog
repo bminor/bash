@@ -6192,3 +6192,68 @@ lib/readline/histexpand.c
 	- history_expand: don't read past the end of the string if it ends with
 	  an incomplete multibyte character
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				    5/1
+				    ---
+lib/readline/text.c
+	- _rl_insert_char: make sure to return 1 in all cases where there are
+	  pending bytes accumulating for a multibyte character
+	- _rl_insert_char: if the COUNT argument is 0, insert any pending
+	  bytes read so far. The idea is that these bytes were accumulating
+	  to compose a possible multibyte character, and the count of 0
+	  indicates that the current character doesn't contribute to that
+	  because it's bound to an editing command.
+	- rl_insert, rl_quoted_insert: make sure to call _rl_insert_char
+	  with a 0 count as appropriate to insert any accumulating bytes
+	  From a patch by Grisha Levit <grishalevit@gmail.com>
+
+sig.c
+	- top_level_cleanup,throw_to_top_level: set variable_context to 0, just
+	  to make sure
+
+execute_cmd.c
+	- function_misc_cleanup: new function, runs make_funcname_visible and
+	  unlink_fifo_list at the end of execute_function, replaces inline
+	  code
+	- uw_function_misc_cleanup: unwind-protect function, just calls
+	  function_misc_cleanup. Installed by execute_function.
+	  Partial fix for FUNCNAME bug reported by Grisha Levit <grishalevit@gmail.com>
+	- execute_builtin: run unwind-protects if evalnest exeeds max
+	- execute_builtin: run unwind-protects if sourcenest exeeds max
+
+parse.y
+	- parse_string_to_word_list: set current_token = '\n' on error
+	- parse_string_to_word_list: if we're executing and not running in
+	  parse_and_execute, call top_level_cleanup before we jump to the
+	  top level. Rest of fix for FUNCNAME bug
+	- parse_compound_assignment: set last_read_token and current_token to
+	  '\n' on parse error. Fix for alias expansion bug reported by
+	  Grisha Levit <grishalevit@gmail.com>
+	- parse_compound_assignment: if we're executing and not running in
+	  parse_and_execute, call top_level_cleanup before we jump to the
+	  top level
+
+				    5/2
+				    ---
+jobs.c
+	- run_sigchld_trap: don't freeze and unfreeze the jobs list; move it
+	  to the callers who are running this on SIGCHLD receipt and cannot
+	  deal with jobs disappearing from the list while they're running
+	- waitchld: if we are running the wait builtin, continue to run the
+	  SIGCHLD trap immediately upon signal receipt, but freeze and
+	  unfreeze the jobs list around the call to run_sigchld_trap().
+	  Fixes issue with `jobs' in a SIGCHLD trap not removing jobs from
+	  the jobs list reported by Guldrelokk <me@rarity.fan>
+
+				    5/4
+				    ---
+input.c
+	- fd_to_buffered_stream: make sure buffers[fd2] is non-null before
+	  turning on SHAREDBUF.
+	  From Emanuele Torre <torreemanuele6@gmail.com>
+
+eval.c
+	- reader_loop: save and restore EOF_Reached around expanding $PS0,
+	  setting it to 0 for the expansion so it doesn't affect things like
+	  command substitution.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

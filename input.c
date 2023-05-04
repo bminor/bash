@@ -359,7 +359,7 @@ duplicate_buffered_stream (int fd1, int fd2)
       buffers[fd2]->b_flag |= B_WASBASHINPUT;
     }
 
-  if (fd_is_bash_input (fd1) || (buffers[fd1] && (buffers[fd1]->b_flag & B_SHAREDBUF)))
+  if (buffers[fd2] && (fd_is_bash_input (fd1) || (buffers[fd1] && (buffers[fd1]->b_flag & B_SHAREDBUF))))
     buffers[fd2]->b_flag |= B_SHAREDBUF;
 
   return (fd2);

@@ -6683,10 +6683,15 @@ parse_string_to_word_list (char *s, int flags, const char *whom)
   if (wl == &parse_string_error)
     {
       set_exit_status (EXECUTION_FAILURE);
+      current_token = '\n';	/* XXX */
       if (interactive_shell == 0 && posixly_correct)
 	jump_to_top_level (FORCE_EOF);
       else
-	jump_to_top_level (DISCARD);
+	{
+	  if (executing && parse_and_execute_level == 0)
+	    top_level_cleanup ();
+	  jump_to_top_level (DISCARD);
+	}
     }
 
   return (REVERSE_LIST (wl, WORD_LIST *));
@@ -6749,11 +6754,15 @@ parse_compound_assignment (size_t *retlenp)
   if (wl == &parse_string_error)
     {
       set_exit_status (EXECUTION_FAILURE);
-      last_read_token = '\n';	/* XXX */
+      last_read_token = current_token = '\n';	/* XXX */
       if (interactive_shell == 0 && posixly_correct)
 	jump_to_top_level (FORCE_EOF);
       else
-	jump_to_top_level (DISCARD);
+	{
+	  if (executing && parse_and_execute_level == 0)
+	    top_level_cleanup ();
+	  jump_to_top_level (DISCARD);
+	}
     }
 
   if (wl)

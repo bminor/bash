@@ -3900,7 +3900,13 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
       else if (running_trap)
 	queue_sigchld_trap (children_exited);
       else if (this_shell_builtin == wait_builtin)
-	run_sigchld_trap (children_exited);	/* XXX */
+	{
+	  int o;
+	  o = jobs_list_frozen;
+	  jobs_list_frozen = 1;
+	  run_sigchld_trap (children_exited);	/* XXX */
+	  jobs_list_frozen = o;
+	}
       else
 	queue_sigchld_trap (children_exited);
     }
@@ -4158,7 +4164,6 @@ run_sigchld_trap (int nchild)
   running_trap = SIGCHLD + 1;
 
   set_impossible_sigchld_trap ();
-  jobs_list_frozen = 1;
   for (i = 0; i < nchild; i++)
     {
       parse_and_execute (savestring (trap_command), "trap", SEVAL_NOHIST|SEVAL_RESETLINE|SEVAL_NOOPTIMIZE);
@@ -4869,16 +4874,26 @@ freeze_jobs_list (void)
   return o;
 }
 
-void
+int
 unfreeze_jobs_list (void)
 {
+  int o;
+
+  o = jobs_list_frozen;
   jobs_list_frozen = 0;
+  return 0;
 }
 
 void
 set_jobs_list_frozen (int s)
 {
   jobs_list_frozen = s;
+}
+
+int
+jobs_list_frozen_status (void)
+{
+  return jobs_list_frozen;
 }
 
 /* Allow or disallow job control to take place. Returns the old value

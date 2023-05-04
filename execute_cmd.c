@@ -4893,8 +4893,9 @@ execute_builtin (sh_builtin_func_t *builtin, WORD_LIST *words, int flags, int su
       if (evalnest_max > 0 && evalnest >= evalnest_max)
 	{
 	  internal_error (_("eval: maximum eval nesting level exceeded (%d)"), evalnest);
+	  run_unwind_protects ();	/* XXX */
 	  evalnest = 0;
-	  jump_to_top_level (DISCARD);
+	  jump_to_top_level (DISCARD);	/* XXX - cleanup? */
 	}
       unwind_protect_int (evalnest);
       /* The test for subshell == 0 above doesn't make a difference */
@@ -4905,8 +4906,9 @@ execute_builtin (sh_builtin_func_t *builtin, WORD_LIST *words, int flags, int su
       if (sourcenest_max > 0 && sourcenest >= sourcenest_max)
 	{
 	  internal_error (_("%s: maximum source nesting level exceeded (%d)"), this_command_name, sourcenest);
+	  run_unwind_protects ();	/* XXX */
 	  sourcenest = 0;
-	  jump_to_top_level (DISCARD);
+	  jump_to_top_level (DISCARD);	/* XXX - cleanup? */
 	}
       unwind_protect_int (sourcenest);
       /* The test for subshell == 0 above doesn't make a difference */
@@ -4992,6 +4994,24 @@ uw_restore_funcarray_state (void *fa)
 }
 #endif
 
+static void
+function_misc_cleanup (void)
+{
+  if (variable_context == 0 || this_shell_function == 0)
+    {
+      make_funcname_visible (0);
+#if defined (PROCESS_SUBSTITUTION)
+      unlink_fifo_list ();
+#endif
+    }
+}
+
+static void
+uw_function_misc_cleanup (void *ignore)
+{
+  function_misc_cleanup ();
+}
+
 static int
 execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap *fds_to_close, int async, int subshell)
 {
@@ -5050,6 +5070,8 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
 	 local variables may cause the restore of a local declaration of
 	 OPTIND to force a getopts state reset. */
       add_unwind_protect (uw_maybe_restore_getopt_state, gs);
+      /* This also, because pop_context has to decrement variable_context */
+      add_unwind_protect (uw_function_misc_cleanup, NULL);      
       add_unwind_protect (pop_context, NULL);
       unwind_protect_int (line_number);
       unwind_protect_int (line_number_for_err_trap);
@@ -5235,14 +5257,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
     }
 #endif
 
-  if (variable_context == 0 || this_shell_function == 0)
-    {
-      make_funcname_visible (0);
-#if defined (PROCESS_SUBSTITUTION)
-      unlink_fifo_list ();
-#endif
-    }
-
+  function_misc_cleanup ();
   return (result);
 }
 

@@ -153,7 +153,10 @@ reader_loop (void)
 	      if (interactive && ps0_prompt)
 		{
 		  char *ps0_string;
+		  int old_eof;
 
+		  old_eof = EOF_Reached;
+		  EOF_Reached = 0;
 		  ps0_string = decode_prompt_string (ps0_prompt);
 		  if (ps0_string && *ps0_string)
 		    {
@@ -161,6 +164,7 @@ reader_loop (void)
 		      fflush (stderr);
 		    }
 		  free (ps0_string);
+		  EOF_Reached = old_eof;
 		}
 
 	      current_command_number++;

@@ -297,8 +297,9 @@ extern int give_terminal_to (pid_t, int);
 extern void run_sigchld_trap (int);
 
 extern int freeze_jobs_list (void);
-extern void unfreeze_jobs_list (void);
+extern int unfreeze_jobs_list (void);
 extern void set_jobs_list_frozen (int);
+extern int jobs_list_frozen_status (void);
 extern int set_job_control (int);
 extern void without_job_control (void);
 extern void end_job_control (void);
