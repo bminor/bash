@@ -4430,6 +4430,10 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
 	  coproc_closeall ();
 #endif
 
+#if defined (PROCESS_SUBSTITUTION)
+	  clear_fifo_list ();		/* subshells don't inherit fifos */
+#endif
+
 	  last_asynchronous_pid = old_last_async_pid;
 
 	  if (async)
@@ -4767,12 +4771,37 @@ execute_from_filesystem:
   /* The old code did not test already_forked and only did this if
      subshell_environment&SUBSHELL_COMSUB != 0 (comsubs and procsubs). Other
      uses of the no-fork optimization left FIFOs in $TMPDIR */
-  if (already_forked == 0 && (cmdflags & CMD_NO_FORK) && fifos_pending() > 0)
+  if (already_forked == 0 && (cmdflags & CMD_NO_FORK) && fifos_pending () > 0)
     cmdflags &= ~CMD_NO_FORK;
+
+  if (dofork && already_forked && (subshell_environment & SUBSHELL_PIPE) &&
+	(cmdflags & CMD_NO_FORK) && fifos_pending () > 0)
+#if 0
+    cmdflags &= ~CMD_NO_FORK;
+#else
+    ;	/* can't turn off nofork here, too many processes have the FIFOs open */
+#endif
 #endif
   result = execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
 			cmdflags);
+
+#if 0
+/* If we forked but still have to fork again to run the disk command, we
+   did so because we created FIFOs. We can't just execve the command in case
+   it dies of a signal without a chance to clean up the FIFOs, so we fork
+   again, then make sure we wait for the child from execute_disk_command(),
+   unlink the FIFOs we created, and exit ourselves. */
+if (dofork && already_forked && (cmdflags & CMD_NO_FORK) == 0)
+  {
+    result = wait_for (last_made_pid, 0);
+#if defined (PROCESS_SUBSTITUTION)
+    if (fifos_pending ())
+      unlink_fifo_list ();
+#endif
+    sh_exit (result & 0xFF);
+  }
+#endif
 
  return_result:
   bind_lastarg (lastarg);

@@ -934,6 +934,8 @@ add_one_character:
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
 	    ret = extract_command_subst (string, &si, (flags & SX_COMPLETE));
+	  else if (string[i + 1] == LBRACE && FUNSUB_CHAR (string[si]))
+	    ret = extract_function_subst (string, &si, Q_DOUBLE_QUOTES, (flags & SX_COMPLETE));
 	  else
 	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, 0);
 
@@ -1036,6 +1038,8 @@ skip_double_quoted (const char *string, size_t slen, int sind, int flags)
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
 	    ret = extract_command_subst (string, &si, SX_NOALLOC|(flags&SX_COMPLETE));
+	  else if (string[i + 1] == LBRACE && FUNSUB_CHAR (string[si]))
+	    ret = extract_function_subst (string, &si, Q_DOUBLE_QUOTES, (flags & SX_COMPLETE));
 	  else
 	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, SX_NOALLOC);
 
@@ -1256,6 +1260,25 @@ extract_command_subst (const char *string, int *sindex, int xflags)
     }
 }
 
+/* Take a ${Ccommand} where C is a character that introduces a function
+   substitution and extract the string. */
+char *
+extract_function_subst (const char *string, int *sindex, int quoted, int xflags)
+{
+  char *ret;
+  char *xstr;
+
+  if (string[*sindex] == LBRACE || (xflags & SX_COMPLETE))
+    return (extract_dollar_brace_string (string, sindex, quoted, xflags|SX_COMMAND));
+  else
+    {
+      xflags |= (no_longjmp_on_fatal_error ? SX_NOLONGJMP : 0);
+      xstr = (char *)string + *sindex;
+      ret = xparse_dolparen (string, xstr, sindex, xflags|SX_FUNSUB);
+      return ret;
+    }
+}
+
 /* Extract the $[ construct in STRING, and return a new string. (])
    Start extracting at (SINDEX) as if we had just seen "$[".
    Make (SINDEX) get the position of the matching "]". */
@@ -1387,6 +1410,16 @@ extract_delimited_string (const char *string, int *sindex, char *opener, char *a
         {
           si = i + 2;
           t = extract_command_subst (string, &si, flags|SX_NOALLOC);
+          CHECK_STRING_OVERRUN (i, si, slen, c);
+          i = si + 1;
+          continue;
+        }
+
+      /* Process alternate form of nested command substitution. */
+      if ((flags & SX_COMMAND) && string[i] == '$' && string[i+1] == LBRACE && FUNSUB_CHAR (string[i+2]))
+        {
+          si = i + 2;
+          t = extract_function_subst (string, &si, 0, flags|SX_NOALLOC);
           CHECK_STRING_OVERRUN (i, si, slen, c);
           i = si + 1;
           continue;
@@ -1641,16 +1674,22 @@ extract_heredoc_dolbrace_string (const char *string, int *sindex, int quoted, in
 
       /* Pass the contents of new-style command substitutions and
 	 arithmetic substitutions through verbatim. */
-      if (string[i] == '$' && string[i+1] == LPAREN)
+      if (string[i] == '$' && (string[i+1] == LPAREN || (string[i+1] == LBRACE && FUNSUB_CHAR (string[i+2]))))
 	{
+	  int open;
+
 	  si = i + 2;
-	  t = extract_command_subst (string, &si, flags);
+	  open = string[i+1];
+	  if (open == LPAREN)
+	    t = extract_command_subst (string, &si, flags);
+	  else
+	    t = extract_function_subst (string, &si, quoted, flags);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
 	  tlen = si - i - 2;
 	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
 	  result[result_index++] = c;
-	  result[result_index++] = LPAREN;
+	  result[result_index++] = open;
 	  strncpy (result + result_index, t, tlen);
 	  result_index += tlen;
 	  result[result_index++] = string[si];
@@ -1847,6 +1886,19 @@ extract_dollar_brace_string (const char *string, int *sindex, int quoted, int fl
 	{
 	  si = i + 2;
 	  t = extract_command_subst (string, &si, flags|SX_NOALLOC);
+
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
+	  i = si + 1;
+	  continue;
+	}
+
+      /* Pass the contents of foreground command substitutions (funsub/valsub)
+	 through verbatim. */
+      if (string[i] == '$' && string[i+1] == LBRACE && FUNSUB_CHAR (string[i+2]))
+	{
+	  si = i + 2;
+	  t = extract_function_subst (string, &si, quoted, flags|SX_NOALLOC);
 
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
@@ -2084,7 +2136,7 @@ skip_matched_pair (const char *string, int start, int open, int close, int flags
 	  if (string[si] == '\0')
 	    CQ_RETURN(si);
 
-	  /* XXX - extract_command_subst here? */
+	  /* XXX - extract_command_subst/extract_function_subst here? */
 	  if (string[i+1] == LPAREN)
 	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
 	  else
@@ -6693,6 +6745,52 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
   return istring;
 }
 
+WORD_DESC *
+function_substitute (char *string, int quoted, int flags)
+{
+  pid_t old_pipeline_pgrp;
+  char *istring, *s;
+  int fd;
+  int result, fildes[2], function_value, pflags, rc, tflag, fork_flags;
+  int valsub;
+  WORD_DESC *ret;
+  sigset_t set, oset;
+
+  istring = (char *)NULL;
+
+  /* In the case of no command to run, just return NULL. */
+  for (s = string; s && *s && (shellblank (*s) || *s == '\n'); s++)
+    ;
+  if (s == 0 || *s == 0)
+    return ((WORD_DESC *)NULL);
+
+  if (valsub = (*string == '|'))
+    string++;
+
+  /* Flags to pass to parse_and_execute() */
+  pflags = (interactive && sourcelevel == 0) ? SEVAL_RESETLINE : 0;
+
+#if defined (JOB_CONTROL)
+  old_pipeline_pgrp = pipeline_pgrp;
+  /* Don't reset the pipeline pgrp if we're already a subshell in a pipeline or
+     we've already forked to run a disk command (and are expanding redirections,
+     for example). */
+  if ((subshell_environment & (SUBSHELL_FORK|SUBSHELL_PIPE)) == 0)
+    pipeline_pgrp = shell_pgrp;
+  save_pipeline (1);
+  stop_making_children ();
+#endif /* JOB_CONTROL */
+
+  last_command_exit_value = EXECUTION_FAILURE;
+  report_error ("bad substitution: %s", string);
+
+  pipeline_pgrp = old_pipeline_pgrp;
+  restore_pipeline (1);
+
+  /* exp_jump_to_top_level (DISCARD); */
+  return ((WORD_DESC *)NULL);
+}
+
 /* Perform command substitution on STRING.  This returns a WORD_DESC * with the
    contained string possibly quoted. */
 WORD_DESC *
@@ -10277,6 +10375,30 @@ param_expand (char *string, int *sindex, int quoted,
       break;
 
     case LBRACE:
+      /* Foreground command substitution. */
+      if (FUNSUB_CHAR (string[zindex + 1]))
+	{
+	  /* We have to extract the contents of this command substitution. */
+	  t_index = zindex + 1;
+	  temp = extract_function_subst (string, &t_index, quoted, (pflags&PF_COMPLETE) ? SX_COMPLETE : 0);
+	  zindex = t_index;
+
+	  /* This is basically the same as the comsub code. */
+	  if (pflags & PF_NOCOMSUB)
+	  /* we need zindex+1 because string[zindex] == RPAREN */
+	    temp1 = substring (string, *sindex, zindex+1);
+	  else
+	    {
+	      tdesc = function_substitute (temp, quoted, pflags&PF_ASSIGNRHS);
+	      temp1 = tdesc ? tdesc->word : (char *)NULL;
+	      if (tdesc)
+		dispose_word_desc (tdesc);
+	    }
+	  FREE (temp);
+	  temp = temp1;
+	  break;
+	}
+
       tdesc = parameter_brace_expand (string, &zindex, quoted, pflags,
 				      quoted_dollar_at_p,
 				      contains_dollar_at);

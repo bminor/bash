@@ -811,7 +811,8 @@ $(srcdir)/configure:	$(srcdir)/configure.ac $(srcdir)/aclocal.m4 $(srcdir)/confi
 reconfig: force
 	sh $(srcdir)/configure -C
 
-loadables:
+# force loadables to wait until the shell is built
+loadables: .made
 	cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) all
 
 #newversion:	mkversion

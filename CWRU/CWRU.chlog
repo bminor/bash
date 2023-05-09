@@ -6257,3 +6257,48 @@ eval.c
 	  setting it to 0 for the expansion so it doesn't affect things like
 	  command substitution.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+parse.y
+	- parse_comsub: handle ${Ccommand; }, where C == space, tab, newline,
+	  or '|'
+	- read_token_word: understand ${Ccommand; } and call parse_comsub to
+	  parse the contents
+	- parse_matched_pair: understand ${Ccommand; } inside another paired
+	  construct
+	- new `funsub' production, like comsub but for ${Ccommand;} nofork
+	  command substitution
+
+execute_cmd.c
+	- execute_simple_command: if we fork because of pipes in or out, clear
+	  the fifo list, since subshell aren't supposed to inherit fifos
+
+				    5/8
+				    ---
+parser.h
+	- PST_FUNSUBST: new parser state, parsing the command in ${Ccommand;}.
+	  Primarily used to have read_token_word return `}' as a separate
+	  token even if it's not delimited like a reserved word
+
+subst.h
+	- SX_FUNSUB: new flag, tell xparse_dolparen we are parsing the command
+	  in a ${Ccommand;} nofork command substitution
+
+parse.y
+	- xparse_dolparen: handle parsing ${Ccommand;} nofork command
+	  substitution like parse_comsub
+	- read_token: if we're parsing a foreground command substitution,
+	  treat a word that begins with an unquoted `}' as a `}' token to
+	  terminate the ${Ccommand;} construct without requiring that the
+	  close brace be delimited like a reserved word
+	- no_semi_successors: add DOLBRACE
+	- reserved_word_acceptable: add DOLBRACE
+
+subst.c
+	- extract_function_subst: like extract_command_subst, but for nofork
+	  command substitutions; calls xparse_dolparen with the SX_FUNSUB
+	  flag to differentiate
+	- string_extract_double_quoted,extract_delimited_string,
+	  extract_heredoc_dolbrace_string,extract_dollar_brace_string,
+	  param_expand: call extract_function_subst as appropriate
+	- function_substitute: like command_substitute, but for nofork command
+	  substitutions. Just a stub for now

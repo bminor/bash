@@ -394,7 +394,7 @@ static FILE *yyerrstream;
 %type <command> cond_command
 %type <command> arith_for_command
 %type <command> coproc
-%type <command> comsub
+%type <command> comsub funsub
 %type <command> function_def function_body if_command elif_clause subshell
 %type <redirect> redirection redirection_list
 %type <element> simple_command_element
@@ -425,6 +425,14 @@ inputunit:	simple_list simple_list_terminator
 			{
 			  /* This is special; look at the production and how
 			     parse_comsub sets token_to_read */
+			  global_command = $1;
+			  eof_encountered = 0;
+			  YYACCEPT;
+			}
+	|	funsub
+			{
+			  /* This is special; look at the production and how
+			     parse_comsub/parse_valsub sets token_to_read */
 			  global_command = $1;
 			  eof_encountered = 0;
 			  YYACCEPT;
@@ -1043,7 +1051,9 @@ comsub:		DOLPAREN compound_list ')'
 			{
 			  $$ = (COMMAND *)NULL;
 			}
-	|	DOLBRACE compound_list '}'
+	;
+	
+funsub:		DOLBRACE compound_list '}'
 			{
 			  $$ = $2;
 			}
@@ -3983,7 +3993,16 @@ parse_dollar_word:
 	  if (ch == '(')		/* ) */
 	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
 	  else if (ch == '{')		/* } */
-	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|P_DOLBRACE|rflags);
+	    {
+	      int npeek;
+
+	      npeek = shell_getc (1);
+	      shell_ungetc (npeek);
+	      if (FUNSUB_CHAR (npeek))
+		nestret = parse_comsub (0, '{', '}', &nestlen, rflags|P_COMMAND);
+	      else
+		nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|P_DOLBRACE|rflags);
+	    }
 	  else if (ch == '[')		/* ] */
 	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags|P_ARITH);
 
@@ -4141,6 +4160,11 @@ dump_pflags (int flags)
       f &= ~PST_CMDSUBST;
       fprintf (stderr, "PST_CMDSUBST%s", f ? "|" : "");
     }
+  if (f & PST_FUNSUBST)
+    {
+      f &= ~PST_FUNSUBST;
+      fprintf (stderr, "PST_FUNSUBST%s", f ? "|" : "");
+    }
   if (f & PST_CASESTMT)
     {
       f &= ~PST_CASESTMT;
@@ -4248,7 +4272,7 @@ static char *
 parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 {
   int peekc, r;
-  int start_lineno, local_extglob, was_extpat;
+  int start_lineno, dolbrace_spec, local_extglob, was_extpat;
   char *ret, *tcmd;
   size_t retlen;
   sh_parser_state_t ps;
@@ -4261,8 +4285,19 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
     {
       peekc = shell_getc (1);
       shell_ungetc (peekc);
-      if (peekc == '(')		/*)*/
+      if (peekc == '(')		/* ) */
 	return (parse_matched_pair (qc, open, close, lenp, P_ARITH));
+    }
+  else if (open == '{')		/* } */
+    {
+      peekc = shell_getc (1);
+      if (FUNSUB_CHAR (peekc))
+	dolbrace_spec = peekc;
+      else
+	{
+	  shell_ungetc (peekc);
+	  return parse_matched_pair (qc, open, close, lenp, flags);
+	}
     }
 
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
@@ -4283,6 +4318,8 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
   parser_state &= ~(PST_CASEPAT|PST_ALEXPNEXT|PST_SUBSHELL|PST_REDIRLIST);
   /* State flags we want to set for this run through the parser. */
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN|PST_NOEXPAND;
+  if (open == '{')		/* } */
+    parser_state |= PST_FUNSUBST;
 
   /* leave pushed_string_list alone, since we might need to consume characters
      from it to satisfy this command substitution (in some perverse case). */
@@ -4312,7 +4349,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 #endif
 
   current_token = '\n';				/* XXX */
-  token_to_read = DOLPAREN;			/* let's trick the parser */
+  token_to_read = (open == '(') ? DOLPAREN : DOLBRACE;	/* let's trick the parser ) */
 
   r = yyparse ();
 
@@ -4381,17 +4418,33 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
 
   tcmd = print_comsub (parsed_command);		/* returns static memory */
   retlen = strlen (tcmd);
-  if (tcmd[0] == '(')			/* ) need a space to prevent arithmetic expansion */
-    retlen++;
-  ret = xmalloc (retlen + 2);
-  if (tcmd[0] == '(')			/* ) */
+  if (open == '(')			/* ) */
     {
-      ret[0] = ' ';
-      strcpy (ret + 1, tcmd);
+      if (tcmd[0] == '(')		/* ) need a space to prevent arithmetic expansion */
+	retlen++;
+      ret = xmalloc (retlen + 2);
+      if (tcmd[0] == '(')			/* ) */
+	{
+	  ret[0] = ' ';
+	  strcpy (ret + 1, tcmd);
+	}
+      else
+	strcpy (ret, tcmd);
     }
-  else
-    strcpy (ret, tcmd);
-  ret[retlen++] = ')';
+  else					/* open == '{' } */
+    {
+      int lastc;
+
+      lastc = tcmd[retlen - 1];
+      retlen++;
+      ret = xmalloc (retlen + 4);
+      ret[0] = (dolbrace_spec == '|') ? '|' : ' ';
+      strcpy (ret + 1, tcmd);		/* ( */
+      if (lastc != '\n' && lastc != ';' && lastc != '&' && lastc != ')')
+	ret[retlen++] = ';';
+      ret[retlen++] = ' ';
+    }
+  ret[retlen++] = close;
   ret[retlen] = '\0';
 
   dispose_command (parsed_command);
@@ -4412,7 +4465,7 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
 {
   sh_parser_state_t ps;
   sh_input_line_state_t ls;
-  int orig_ind, nc, sflags, start_lineno, local_extglob;
+  int orig_ind, nc, sflags, start_lineno, local_extglob, funsub, closer;
   char *ret, *ep, *ostring;
 
 /*debug_parser(1);*/
@@ -4432,6 +4485,8 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
 
 /*itrace("xparse_dolparen: size = %d shell_input_line = `%s' string=`%s'", shell_input_line_size, shell_input_line, string);*/
 
+  funsub = flags & SX_FUNSUB;
+
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
   if (flags & SX_NOLONGJMP)
     sflags |= SEVAL_NOLONGJMP;
@@ -4443,10 +4498,12 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
   pushed_string_list = (STRING_SAVER *)NULL;
 #endif
   /*(*/
-  parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
-  shell_eof_token = ')';
+  parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*{(*/
+  closer = shell_eof_token = funsub ? '}' : ')';
   if (flags & SX_COMPLETE)
     parser_state |= PST_NOERROR;
+  if (funsub)
+    parser_state |= PST_FUNSUBST;
 
   /* Don't expand aliases on this pass at all. Either parse_comsub() does it
      at parse time, in which case this string already has aliases expanded,
@@ -4458,7 +4515,10 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
   local_extglob = extended_glob;
 #endif
 
-  token_to_read = DOLPAREN;			/* let's trick the parser */
+  if (funsub && FUNSUB_CHAR (*string))
+    string++;
+
+  token_to_read = funsub ? DOLBRACE : DOLPAREN;			/* let's trick the parser */
 
   nc = parse_string (string, "command substitution", sflags, (COMMAND **)NULL, &ep);
 
@@ -4485,7 +4545,7 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
     {
       clear_shell_input_line ();	/* XXX */
       if (bash_input.type != st_string)	/* paranoia */
-	parser_state &= ~(PST_CMDSUBST|PST_EOFTOKEN);
+	parser_state &= ~(PST_CMDSUBST|PST_EOFTOKEN|PST_FUNSUBST);
       if ((flags & SX_NOLONGJMP) == 0)
 	jump_to_top_level (-nc);	/* XXX */
     }
@@ -4495,7 +4555,7 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
      and return it.  If flags & 1 (SX_NOALLOC) we can return NULL. */
 
   /*(*/
-  if (ep[-1] != ')')
+  if (ep[-1] != closer)
     {
 #if 0
       if (ep[-1] != '\n')
@@ -4516,7 +4576,7 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
     itrace("xparse_dolparen:%d: *indp (%d) < orig_ind (%d), orig_string = `%s'", line_number, *indp, orig_ind, ostring);
 #endif
 
-  if (base[*indp] != ')' && (flags & SX_NOLONGJMP) == 0)
+  if (base[*indp] != closer && (flags & SX_NOLONGJMP) == 0)
     {
       /*(*/
       if ((flags & SX_NOERROR) == 0)
@@ -5096,6 +5156,24 @@ read_token_word (int character)
 	    }
 	}
 
+      /* Just an awful special case. We want '}' to delimit the foreground
+	 command substitution construct ${Ccommand; } but since it's a word
+	 expansion, we need to join it with any potential following
+	 characters. We fake things out here and treat a word beginning with
+	 a close brace as the '}' reserved word, treat it as a separate
+	 token, terminate the command substitution, and go on reading
+	 characters into the same upper-layer token. */
+      if ((parser_state & PST_FUNSUBST) && token_index == 0 && quoted == 0 &&
+	    reserved_word_acceptable (last_read_token) &&
+	    MBTEST(character == '}'))
+	{
+	  RESIZE_MALLOCED_BUFFER (token, token_index, 2,
+				  token_buffer_size, TOKEN_DEFAULT_GROW_SIZE);
+	  token[token_index++] = character;
+	  all_digit_token = dollar_present = 0;
+	  goto got_token;
+	}
+
       /* Parse a matched pair of quote characters. */
       if MBTEST(shellquote (character))
 	{
@@ -5180,7 +5258,19 @@ read_token_word (int character)
 		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
 	    {
 	      if (peek_char == '{')		/* } */
-		ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE|P_DOLBRACE);
+		{
+		  int npeek;
+		  npeek = shell_getc (1);
+		  shell_ungetc (npeek);
+		  if (FUNSUB_CHAR (npeek))
+		    {
+		      push_delimiter (dstack, peek_char);
+		      ttok = parse_comsub (cd, '{', '}', &ttoklen, P_COMMAND);
+		      pop_delimiter (dstack);
+		    }
+		  else
+		    ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE|P_DOLBRACE);
+		}
 	      else if (peek_char == '(')		/* ) */
 		{
 		  /* XXX - push and pop the `(' as a delimiter for use by
@@ -5587,6 +5677,7 @@ reserved_word_acceptable (int toksym)
     case WHILE:
     case 0:
     case DOLPAREN:
+    case DOLBRACE:
       return 1;
     default:
 #if defined (COPROCESS_SUPPORT)
@@ -5655,7 +5746,7 @@ reset_readline_prompt (void)
 static const int no_semi_successors[] = {
   '\n', '{', '(', ')', ';', '&', '|',
   CASE, DO, ELSE, IF, SEMI_SEMI, SEMI_AND, SEMI_SEMI_AND, THEN, UNTIL,
-  WHILE, AND_AND, OR_OR, IN, DOLPAREN,
+  WHILE, AND_AND, OR_OR, IN, DOLPAREN, DOLBRACE,
   0
 };
 

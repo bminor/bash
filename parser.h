@@ -52,6 +52,7 @@
 #define PST_NOERROR	0x800000	/* don't print error messages in yyerror */
 #define PST_STRING	0x1000000	/* parsing a string to a command or word list */
 #define PST_CMDBLTIN	0x2000000	/* last token was the `command' builtin */
+#define PST_FUNSUBST	0x4000000	/* parsing a foreground command substitution */
 
 /* Definition of the delimiter stack.  Needed by parse.y and bashhist.c. */
 struct dstack {
@@ -74,6 +75,10 @@ struct dstack {
 
 #define DOLBRACE_QUOTE	0x40	/* single quote is special in double quotes */
 #define DOLBRACE_QUOTE2	0x80	/* single quote is semi-special in double quotes */
+
+/* characters that can appear following ${ to introduce a function or value
+   substitution (this is mksh terminology and needs to be changed). */
+#define FUNSUB_CHAR(n) ((n) == ' ' || (n) == '\t' || (n) == '\n' || (n) == '|')
 
 /* variable declarations from parse.y */
 extern struct dstack dstack;

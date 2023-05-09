@@ -66,7 +66,7 @@
 #define SX_NOCTLESC	0x0010	/* don't honor CTLESC quoting */
 #define SX_NOESCCTLNUL	0x0020	/* don't let CTLESC quote CTLNUL */
 #define SX_NOLONGJMP	0x0040	/* don't longjmp on fatal error */
-#define SX_ARITHSUB	0x0080	/* extracting $(( ... )) (currently unused) */
+#define SX_FUNSUB	0x0080	/* extracting ${ command; }; passed to xparse_dolparen */
 #define SX_POSIXEXP	0x0100	/* extracting new Posix pattern removal expansions in extract_dollar_brace_string */
 #define SX_WORD		0x0200	/* extracting word in ${param op word} */
 #define SX_COMPLETE	0x0400	/* extracting word for completion */
@@ -85,6 +85,9 @@ extern void unquote_bang (char *);
    Make (SINDEX) get the position just after the matching ")".
    XFLAGS is additional flags to pass to other extraction functions, */
 extern char *extract_command_subst (const char *, int *, int);
+
+/* Placeholder */
+extern char *extract_function_subst (const char *, int *, int, int);
 
 /* Extract the $[ construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "$[".
@@ -274,6 +277,7 @@ extern WORD_LIST *expand_words_no_vars (WORD_LIST *);
 extern WORD_LIST *expand_words_shellexp (WORD_LIST *);
 
 extern WORD_DESC *command_substitute (char *, int, int);
+extern WORD_DESC *function_substitute (char *, int, int);
 extern char *pat_subst (char *, char *, char *, int);
 
 #if defined (PROCESS_SUBSTITUTION)
