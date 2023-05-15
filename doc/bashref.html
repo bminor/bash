@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 17 April 2023).
+the Bash shell (version 5.2, 14 May 2023).
 
-This is Edition 5.2, last updated 17 April 2023,
+This is Edition 5.2, last updated 14 May 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 17 April 2023).
+the Bash shell (version 5.2, 14 May 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 17 April 2023,
+<p>This is Edition 5.2, last updated 14 May 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -737,8 +737,8 @@ Next: <a href="#Locale-Translation" accesskey="n" rel="next">Locale-Specific Tra
 <span id="ANSI_002dC-Quoting-1"></span><h4 class="subsubsection">3.1.2.4 ANSI-C Quoting</h4>
 <span id="index-quoting_002c-ANSI"></span>
 
-<p>Character sequences of the form $&rsquo;<var>string</var>&rsquo; are treated as a special
-kind of single quotes.
+<p>Character sequences of the form <code>$'<var>string</var>'</code> are treated as
+a special kind of single quotes.
 The sequence expands to <var>string</var>, with backslash-escaped characters
 in <var>string</var> replaced as specified by the ANSI C standard.
 Backslash escape sequences, if present, are decoded as follows:
@@ -3049,24 +3049,25 @@ Next: <a href="#Arithmetic-Expansion" accesskey="n" rel="next">Arithmetic Expans
 
 <p>Command substitution allows the output of a command to replace
 the command itself.
-Command substitution occurs when a command is enclosed as follows:
+The standard form of command substitution occurs when a command is
+enclosed as follows:
 </p><div class="example">
 <pre class="example">$(<var>command</var>)
 </pre></div>
-<p>or
+<p>or (deprecated)
 </p><div class="example">
-<pre class="example">`<var>command</var>`
+<pre class="example">`<var>command</var>`.
 </pre></div>
 
-<p>Bash performs the expansion by executing <var>command</var> in a subshell environment
-and replacing the command substitution with the standard output of the
-command, with any trailing newlines deleted.
+<p>Bash performs the expansion by executing <var>command</var> in a subshell
+environment and replacing the command substitution with the standard
+output of the command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
 word splitting.
 The command substitution <code>$(cat <var>file</var>)</code> can be
 replaced by the equivalent but faster <code>$(&lt; <var>file</var>)</code>.
 </p>
-<p>When the old-style backquote form of substitution is used,
+<p>With the old-style backquote form of substitution,
 backslash retains its literal meaning except when followed by
 &lsquo;<samp>$</samp>&rsquo;, &lsquo;<samp>`</samp>&rsquo;, or &lsquo;<samp>\</samp>&rsquo;. 
 The first backquote not preceded by a backslash terminates the
@@ -3074,11 +3075,70 @@ command substitution.
 When using the <code>$(<var>command</var>)</code> form, all characters between
 the parentheses make up the command; none are treated specially.
 </p>
+<p>There is an alternate form of command substitution:
+</p>
+<div class="example">
+<pre class="example">${<var>C</var> <var>command</var>; }
+</pre></div>
+
+<p>which executes <var>command</var> in the current execution environment.
+This means that side effects of <var>command</var> take effect immediately
+in the current execution environment and persist in the current 
+environment after the command completes (e.g., the <code>exit</code> builtin
+will exit the shell).
+</p>
+<p>The character <var>C</var> following the open brace must be a space, tab,
+newline, &lsquo;<samp>(</samp>&rsquo;, or &lsquo;<samp>|</samp>&rsquo;, and the close brace must be in a position
+where a reserved word may appear (i.e., preceded by a command terminator
+such as semicolon).
+Bash allows the close brace to be joined to the remaining characters in
+the word without being followed by a shell metacharacter as a reserved
+word would usually require.
+</p>
+<p>This type of command substitution superficially resembles executing an
+unnamed shell function: local variables are created as when a shell
+function is executing, and the <code>return</code> builtin forces
+<var>command</var> to complete;
+however, the rest of the execution environment,
+including the positional parameters, is shared with the caller.
+</p>
+<p>If the first character following the open brace is a &lsquo;<samp>(</samp>&rsquo;,
+<var>command</var> is executed in a subshell, and <var>command</var> must be
+terminated by a &lsquo;<samp>)</samp>&rsquo;. This is similar to the <code>(</code> compound
+command (see <a href="#Command-Grouping">Grouping Commands</a>).
+If the first character is a &lsquo;<samp>|</samp>&rsquo;, the construct expands to the
+value of the <code>REPLY</code> shell variable after <var>command</var> executes,
+without removing any trailing newlines,
+and the standard output of <var>command</var> remains the same as in the
+calling shell.
+Bash creates <code>REPLY</code> as an initially-unset local variable when
+<var>command</var> executes, and restores <code>REPLY</code> to the value it had
+before the command substitution after <var>command</var> completes,
+as with any local variable.
+</p>
+<p>For example, this construct expands to &lsquo;<samp>12345</samp>&rsquo;, and leaves the
+shell variable <code>X</code> unchanged in the current execution environment:
+</p>
+<div class="example">
+<pre class="example">${ local X=12345 ; echo $X; }
+</pre></div>
+
+<p>(not declaring <code>X</code> as local would modify its value in the current
+environment, as with normal shell function execution),
+while this construct does not require any output to expand to
+&lsquo;<samp>12345</samp>&rsquo;:
+</p>
+<div class="example">
+<pre class="example">${| REPLY=12345; }
+</pre></div>
+
+<p>and restores <code>REPLY</code> to the value it had before the command substitution.
+</p>
 <p>Command substitutions may be nested.  To nest when using the backquoted
 form, escape the inner backquotes with backslashes.
 </p>
-<p>If the substitution appears within double quotes, word splitting and
-filename expansion are not performed on the results.
+<p>If the substitution appears within double quotes, Bash does not perform
+word splitting and filename expansion on the results.
 </p>
 <hr>
 </div>
@@ -7294,6 +7354,9 @@ inode change time, and number of blocks, respectively.
 <p>For example, a value of <code>-mtime</code> sorts the results in descending
 order by modification time (newest first).
 </p>
+<p>A sort specifier of &lsquo;<samp>nosort</samp>&rsquo; disables sorting completely; the results
+are returned in the order they are read from the file system,.
+</p>
 <p>If the sort specifier is missing, it defaults to <var>name</var>,
 so a value of &lsquo;<samp>+</samp>&rsquo; is equivalent to the null string,
 and a value of &lsquo;<samp>-</samp>&rsquo; sorts by name in descending order.
@@ -9653,16 +9716,6 @@ and it is required for bash-5.1 and later versions.
 <dd><ul>
 <li> quoting the rhs of the <code>[[</code> command&rsquo;s regexp matching operator (=~)
 has no special effect
-</li></ul>
-
-</dd>
-<dt><span><code>compat32</code></span></dt>
-<dd><ul>
-<li> interrupting a command list such as &quot;a ; b ; c&quot; causes the execution
-of the next command in the list (in bash-4.0 and later versions,
-the shell acts as if it received the interrupt, so
-interrupting one command in a list aborts the execution of the
-entire list)
 </li></ul>
 
 </dd>

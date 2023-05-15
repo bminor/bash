@@ -2628,26 +2628,27 @@ expansion as described below.
 
 Command substitution allows the output of a command to replace
 the command itself.
-Command substitution occurs when a command is enclosed as follows:
+The standard form of command substitution occurs when a command is
+enclosed as follows:
 @example
 $(@var{command})
 @end example
 @noindent
-or
+or (deprecated)
 @example
-`@var{command}`
+`@var{command}`.
 @end example
 
 @noindent
-Bash performs the expansion by executing @var{command} in a subshell environment
-and replacing the command substitution with the standard output of the
-command, with any trailing newlines deleted.
+Bash performs the expansion by executing @var{command} in a subshell
+environment and replacing the command substitution with the standard
+output of the command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
 word splitting.
 The command substitution @code{$(cat @var{file})} can be
 replaced by the equivalent but faster @code{$(< @var{file})}.
 
-When the old-style backquote form of substitution is used,
+With the old-style backquote form of substitution,
 backslash retains its literal meaning except when followed by
 @samp{$}, @samp{`}, or @samp{\}. 
 The first backquote not preceded by a backslash terminates the
@@ -2655,11 +2656,73 @@ command substitution.
 When using the @code{$(@var{command})} form, all characters between
 the parentheses make up the command; none are treated specially.
 
+There is an alternate form of command substitution:
+
+@example
+$@{@var{C} @var{command}; @}
+@end example
+
+@noindent
+which executes @var{command} in the current execution environment.
+This means that side effects of @var{command} take effect immediately
+in the current execution environment and persist in the current 
+environment after the command completes (e.g., the @code{exit} builtin
+will exit the shell).
+
+The character @var{C} following the open brace must be a space, tab,
+newline, @samp{(}, or @samp{|}, and the close brace must be in a position
+where a reserved word may appear (i.e., preceded by a command terminator
+such as semicolon).
+Bash allows the close brace to be joined to the remaining characters in
+the word without being followed by a shell metacharacter as a reserved
+word would usually require.
+
+This type of command substitution superficially resembles executing an
+unnamed shell function: local variables are created as when a shell
+function is executing, and the @code{return} builtin forces
+@var{command} to complete;
+however, the rest of the execution environment,
+including the positional parameters, is shared with the caller.
+
+If the first character following the open brace is a @samp{(},
+@var{command} is executed in a subshell, and @var{command} must be
+terminated by a @samp{)}. This is similar to the @code{(} compound
+command (@pxref{Command Grouping}).
+If the first character is a @samp{|}, the construct expands to the
+value of the @code{REPLY} shell variable after @var{command} executes,
+without removing any trailing newlines,
+and the standard output of @var{command} remains the same as in the
+calling shell.
+Bash creates @code{REPLY} as an initially-unset local variable when
+@var{command} executes, and restores @code{REPLY} to the value it had
+before the command substitution after @var{command} completes,
+as with any local variable.
+
+For example, this construct expands to @samp{12345}, and leaves the
+shell variable @code{X} unchanged in the current execution environment:
+
+@example
+$@{ local X=12345 ; echo $X; @}
+@end example
+
+@noindent
+(not declaring @code{X} as local would modify its value in the current
+environment, as with normal shell function execution),
+while this construct does not require any output to expand to
+@samp{12345}:
+
+@example
+$@{| REPLY=12345; @}
+@end example
+
+@noindent
+and restores @code{REPLY} to the value it had before the command substitution.
+
 Command substitutions may be nested.  To nest when using the backquoted
 form, escape the inner backquotes with backslashes.
 
-If the substitution appears within double quotes, word splitting and
-filename expansion are not performed on the results.
+If the substitution appears within double quotes, Bash does not perform
+word splitting and filename expansion on the results.
 
 @node Arithmetic Expansion
 @subsection Arithmetic Expansion

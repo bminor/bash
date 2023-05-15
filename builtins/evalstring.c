@@ -531,7 +531,7 @@ parse_and_execute (char *string, const char *from_file, int flags)
 		 the global value of the flag (expaliases_flag) changes). */
 	      local_expalias = expand_aliases;
 	      local_alflag = expaliases_flag;
-	      if (subshell_environment & SUBSHELL_COMSUB)
+	      if ((subshell_environment & SUBSHELL_COMSUB) || executing_funsub)
 		expand_aliases = expaliases_flag;
 
 	      /* See if this is a candidate for $( <file ). */
@@ -552,7 +552,7 @@ parse_and_execute (char *string, const char *from_file, int flags)
 	      discard_unwind_frame ("pe_dispose");
 
 	      /* If the global value didn't change, we restore what we had. */
-	      if ((subshell_environment & SUBSHELL_COMSUB) && local_alflag == expaliases_flag)
+	      if (((subshell_environment & SUBSHELL_COMSUB) || executing_funsub) && local_alflag == expaliases_flag)
 		expand_aliases = local_expalias;
 
 	      if (flags & SEVAL_ONECMD)

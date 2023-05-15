@@ -78,7 +78,7 @@ struct dstack {
 
 /* characters that can appear following ${ to introduce a function or value
    substitution (this is mksh terminology and needs to be changed). */
-#define FUNSUB_CHAR(n) ((n) == ' ' || (n) == '\t' || (n) == '\n' || (n) == '|')
+#define FUNSUB_CHAR(n) ((n) == ' ' || (n) == '\t' || (n) == '\n' || (n) == '|' || (n) == '(')	/* ) */
 
 /* variable declarations from parse.y */
 extern struct dstack dstack;

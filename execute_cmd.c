@@ -2484,7 +2484,7 @@ uw_merge_temporary_env (void *ignore)
 }
 
 /* Catch-all cleanup function for lastpipe code for unwind-protects */
-static void
+void
 uw_lastpipe_cleanup (void *s)
 {
   set_jobs_list_frozen ((intptr_t) s);
@@ -5915,6 +5915,7 @@ initialize_subshell (void)
   variable_context = return_catch_flag = funcnest = evalnest = sourcenest = 0;
 
   interrupt_execution = retain_fifos = 0;		/* XXX */
+  executing_funsub = 0;					/* XXX */
 
   /* If we're not interactive, close the file descriptor from which we're
      reading the current shell script. */

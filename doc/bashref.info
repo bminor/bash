@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.8 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.2, 20 April 2023).
+Bash shell (version 5.2, 14 May 2023).
 
-   This is Edition 5.2, last updated 20 April 2023, of 'The GNU Bash
+   This is Edition 5.2, last updated 14 May 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.2.
 
    Copyright (C) 1988-2023 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.2, 20 April 2023).  The Bash home page is
+Bash shell (version 5.2, 14 May 2023).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.2, last updated 20 April 2023, of 'The GNU Bash
+   This is Edition 5.2, last updated 14 May 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.2.
 
    Bash contains features that appear in other popular shells, and some
@@ -419,8 +419,8 @@ File: bashref.info,  Node: ANSI-C Quoting,  Next: Locale Translation,  Prev: Dou
 3.1.2.4 ANSI-C Quoting
 ......................
 
-Character sequences of the form $'STRING' are treated as a special kind
-of single quotes.  The sequence expands to STRING, with
+Character sequences of the form '$'STRING'' are treated as a special
+kind of single quotes.  The sequence expands to STRING, with
 backslash-escaped characters in STRING replaced as specified by the ANSI
 C standard.  Backslash escape sequences, if present, are decoded as
 follows:
@@ -2240,11 +2240,11 @@ File: bashref.info,  Node: Command Substitution,  Next: Arithmetic Expansion,  P
 --------------------------
 
 Command substitution allows the output of a command to replace the
-command itself.  Command substitution occurs when a command is enclosed
-as follows:
+command itself.  The standard form of command substitution occurs when a
+command is enclosed as follows:
      $(COMMAND)
-or
-     `COMMAND`
+or (deprecated)
+     `COMMAND`.
 
 Bash performs the expansion by executing COMMAND in a subshell
 environment and replacing the command substitution with the standard
@@ -2253,17 +2253,64 @@ newlines are not deleted, but they may be removed during word splitting.
 The command substitution '$(cat FILE)' can be replaced by the equivalent
 but faster '$(< FILE)'.
 
-   When the old-style backquote form of substitution is used, backslash
-retains its literal meaning except when followed by '$', '`', or '\'.
-The first backquote not preceded by a backslash terminates the command
+   With the old-style backquote form of substitution, backslash retains
+its literal meaning except when followed by '$', '`', or '\'.  The first
+backquote not preceded by a backslash terminates the command
 substitution.  When using the '$(COMMAND)' form, all characters between
 the parentheses make up the command; none are treated specially.
+
+   There is an alternate form of command substitution:
+
+     ${C COMMAND; }
+
+which executes COMMAND in the current execution environment.  This means
+that side effects of COMMAND take effect immediately in the current
+execution environment and persist in the current environment after the
+command completes (e.g., the 'exit' builtin will exit the shell).
+
+   The character C following the open brace must be a space, tab,
+newline, '(', or '|', and the close brace must be in a position where a
+reserved word may appear (i.e., preceded by a command terminator such as
+semicolon).  Bash allows the close brace to be joined to the remaining
+characters in the word without being followed by a shell metacharacter
+as a reserved word would usually require.
+
+   This type of command substitution superficially resembles executing
+an unnamed shell function: local variables are created as when a shell
+function is executing, and the 'return' builtin forces COMMAND to
+complete; however, the rest of the execution environment, including the
+positional parameters, is shared with the caller.
+
+   If the first character following the open brace is a '(', COMMAND is
+executed in a subshell, and COMMAND must be terminated by a ')'.  This
+is similar to the '(' compound command (*note Command Grouping::).  If
+the first character is a '|', the construct expands to the value of the
+'REPLY' shell variable after COMMAND executes, without removing any
+trailing newlines, and the standard output of COMMAND remains the same
+as in the calling shell.  Bash creates 'REPLY' as an initially-unset
+local variable when COMMAND executes, and restores 'REPLY' to the value
+it had before the command substitution after COMMAND completes, as with
+any local variable.
+
+   For example, this construct expands to '12345', and leaves the shell
+variable 'X' unchanged in the current execution environment:
+
+     ${ local X=12345 ; echo $X; }
+
+(not declaring 'X' as local would modify its value in the current
+environment, as with normal shell function execution), while this
+construct does not require any output to expand to '12345':
+
+     ${| REPLY=12345; }
+
+and restores 'REPLY' to the value it had before the command
+substitution.
 
    Command substitutions may be nested.  To nest when using the
 backquoted form, escape the inner backquotes with backslashes.
 
-   If the substitution appears within double quotes, word splitting and
-filename expansion are not performed on the results.
+   If the substitution appears within double quotes, Bash does not
+perform word splitting and filename expansion on the results.
 
 
 File: bashref.info,  Node: Arithmetic Expansion,  Next: Process Substitution,  Prev: Command Substitution,  Up: Shell Expansions
@@ -12707,138 +12754,138 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top891
-Node: Introduction2805
-Node: What is Bash?3021
-Node: What is a shell?4135
-Node: Definitions6673
-Node: Basic Shell Features9624
-Node: Shell Syntax10843
-Node: Shell Operation11869
-Node: Quoting13162
-Node: Escape Character14466
-Node: Single Quotes14951
-Node: Double Quotes15299
-Node: ANSI-C Quoting16577
-Node: Locale Translation17887
-Node: Creating Internationalized Scripts19198
-Node: Comments23315
-Node: Shell Commands23933
-Node: Reserved Words24871
-Node: Simple Commands25627
-Node: Pipelines26281
-Node: Lists29280
-Node: Compound Commands31075
-Node: Looping Constructs32087
-Node: Conditional Constructs34582
-Node: Command Grouping49070
-Node: Coprocesses50548
-Node: GNU Parallel53211
-Node: Shell Functions54128
-Node: Shell Parameters62013
-Node: Positional Parameters66401
-Node: Special Parameters67303
-Node: Shell Expansions70517
-Node: Brace Expansion72644
-Node: Tilde Expansion75378
-Node: Shell Parameter Expansion77999
-Node: Command Substitution96401
-Node: Arithmetic Expansion97756
-Node: Process Substitution98724
-Node: Word Splitting99844
-Node: Filename Expansion101892
-Node: Pattern Matching104825
-Node: Quote Removal109827
-Node: Redirections110122
-Node: Executing Commands119815
-Node: Simple Command Expansion120485
-Node: Command Search and Execution122595
-Node: Command Execution Environment124982
-Node: Environment128017
-Node: Exit Status129680
-Node: Signals131464
-Node: Shell Scripts134913
-Node: Shell Builtin Commands137940
-Node: Bourne Shell Builtins139978
-Node: Bash Builtins162177
-Node: Modifying Shell Behavior194176
-Node: The Set Builtin194521
-Node: The Shopt Builtin205119
-Node: Special Builtins221031
-Node: Shell Variables222010
-Node: Bourne Shell Variables222447
-Node: Bash Variables224551
-Node: Bash Features258616
-Node: Invoking Bash259629
-Node: Bash Startup Files265642
-Node: Interactive Shells270773
-Node: What is an Interactive Shell?271184
-Node: Is this Shell Interactive?271833
-Node: Interactive Shell Behavior272648
-Node: Bash Conditional Expressions276277
-Node: Shell Arithmetic280919
-Node: Aliases283880
-Node: Arrays286774
-Node: The Directory Stack293337
-Node: Directory Stack Builtins294121
-Node: Controlling the Prompt298381
-Node: The Restricted Shell301346
-Node: Bash POSIX Mode303956
-Node: Shell Compatibility Mode319749
-Node: Job Control327993
-Node: Job Control Basics328453
-Node: Job Control Builtins333455
-Node: Job Control Variables339250
-Node: Command Line Editing340406
-Node: Introduction and Notation342077
-Node: Readline Interaction343700
-Node: Readline Bare Essentials344891
-Node: Readline Movement Commands346680
-Node: Readline Killing Commands347640
-Node: Readline Arguments349561
-Node: Searching350605
-Node: Readline Init File352791
-Node: Readline Init File Syntax354052
-Node: Conditional Init Constructs377843
-Node: Sample Init File382039
-Node: Bindable Readline Commands385163
-Node: Commands For Moving386367
-Node: Commands For History388418
-Node: Commands For Text393412
-Node: Commands For Killing397061
-Node: Numeric Arguments400094
-Node: Commands For Completion401233
-Node: Keyboard Macros405424
-Node: Miscellaneous Commands406112
-Node: Readline vi Mode412150
-Node: Programmable Completion413057
-Node: Programmable Completion Builtins420837
-Node: A Programmable Completion Example431825
-Node: Using History Interactively437073
-Node: Bash History Facilities437757
-Node: Bash History Builtins440762
-Node: History Interaction445786
-Node: Event Designators449406
-Node: Word Designators450760
-Node: Modifiers452520
-Node: Installing Bash454328
-Node: Basic Installation455465
-Node: Compilers and Options459187
-Node: Compiling For Multiple Architectures459928
-Node: Installation Names461620
-Node: Specifying the System Type463729
-Node: Sharing Defaults464446
-Node: Operation Controls465119
-Node: Optional Features466077
-Node: Reporting Bugs477296
-Node: Major Differences From The Bourne Shell478630
-Node: GNU Free Documentation License495479
-Node: Indexes520656
-Node: Builtin Index521110
-Node: Reserved Word Index527937
-Node: Variable Index530385
-Node: Function Index547373
-Node: Concept Index561157
+Node: Top887
+Node: Introduction2797
+Node: What is Bash?3013
+Node: What is a shell?4127
+Node: Definitions6665
+Node: Basic Shell Features9616
+Node: Shell Syntax10835
+Node: Shell Operation11861
+Node: Quoting13154
+Node: Escape Character14458
+Node: Single Quotes14943
+Node: Double Quotes15291
+Node: ANSI-C Quoting16569
+Node: Locale Translation17881
+Node: Creating Internationalized Scripts19192
+Node: Comments23309
+Node: Shell Commands23927
+Node: Reserved Words24865
+Node: Simple Commands25621
+Node: Pipelines26275
+Node: Lists29274
+Node: Compound Commands31069
+Node: Looping Constructs32081
+Node: Conditional Constructs34576
+Node: Command Grouping49064
+Node: Coprocesses50542
+Node: GNU Parallel53205
+Node: Shell Functions54122
+Node: Shell Parameters62007
+Node: Positional Parameters66395
+Node: Special Parameters67297
+Node: Shell Expansions70511
+Node: Brace Expansion72638
+Node: Tilde Expansion75372
+Node: Shell Parameter Expansion77993
+Node: Command Substitution96395
+Node: Arithmetic Expansion99987
+Node: Process Substitution100955
+Node: Word Splitting102075
+Node: Filename Expansion104123
+Node: Pattern Matching107056
+Node: Quote Removal112058
+Node: Redirections112353
+Node: Executing Commands122046
+Node: Simple Command Expansion122716
+Node: Command Search and Execution124826
+Node: Command Execution Environment127213
+Node: Environment130248
+Node: Exit Status131911
+Node: Signals133695
+Node: Shell Scripts137144
+Node: Shell Builtin Commands140171
+Node: Bourne Shell Builtins142209
+Node: Bash Builtins164408
+Node: Modifying Shell Behavior196407
+Node: The Set Builtin196752
+Node: The Shopt Builtin207350
+Node: Special Builtins223262
+Node: Shell Variables224241
+Node: Bourne Shell Variables224678
+Node: Bash Variables226782
+Node: Bash Features260847
+Node: Invoking Bash261860
+Node: Bash Startup Files267873
+Node: Interactive Shells273004
+Node: What is an Interactive Shell?273415
+Node: Is this Shell Interactive?274064
+Node: Interactive Shell Behavior274879
+Node: Bash Conditional Expressions278508
+Node: Shell Arithmetic283150
+Node: Aliases286111
+Node: Arrays289005
+Node: The Directory Stack295568
+Node: Directory Stack Builtins296352
+Node: Controlling the Prompt300612
+Node: The Restricted Shell303577
+Node: Bash POSIX Mode306187
+Node: Shell Compatibility Mode321980
+Node: Job Control330224
+Node: Job Control Basics330684
+Node: Job Control Builtins335686
+Node: Job Control Variables341481
+Node: Command Line Editing342637
+Node: Introduction and Notation344308
+Node: Readline Interaction345931
+Node: Readline Bare Essentials347122
+Node: Readline Movement Commands348911
+Node: Readline Killing Commands349871
+Node: Readline Arguments351792
+Node: Searching352836
+Node: Readline Init File355022
+Node: Readline Init File Syntax356283
+Node: Conditional Init Constructs380074
+Node: Sample Init File384270
+Node: Bindable Readline Commands387394
+Node: Commands For Moving388598
+Node: Commands For History390649
+Node: Commands For Text395643
+Node: Commands For Killing399292
+Node: Numeric Arguments402325
+Node: Commands For Completion403464
+Node: Keyboard Macros407655
+Node: Miscellaneous Commands408343
+Node: Readline vi Mode414381
+Node: Programmable Completion415288
+Node: Programmable Completion Builtins423068
+Node: A Programmable Completion Example434056
+Node: Using History Interactively439304
+Node: Bash History Facilities439988
+Node: Bash History Builtins442993
+Node: History Interaction448017
+Node: Event Designators451637
+Node: Word Designators452991
+Node: Modifiers454751
+Node: Installing Bash456559
+Node: Basic Installation457696
+Node: Compilers and Options461418
+Node: Compiling For Multiple Architectures462159
+Node: Installation Names463851
+Node: Specifying the System Type465960
+Node: Sharing Defaults466677
+Node: Operation Controls467350
+Node: Optional Features468308
+Node: Reporting Bugs479527
+Node: Major Differences From The Bourne Shell480861
+Node: GNU Free Documentation License497710
+Node: Indexes522887
+Node: Builtin Index523341
+Node: Reserved Word Index530168
+Node: Variable Index532616
+Node: Function Index549604
+Node: Concept Index563388
 
 End Tag Table
 

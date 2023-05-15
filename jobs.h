@@ -72,6 +72,7 @@ typedef struct process {
 
 struct pipeline_saver {
   struct process *pipeline;
+  int already_making_children;
   struct pipeline_saver *next;
 };
 

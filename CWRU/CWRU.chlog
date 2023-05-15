@@ -6302,3 +6302,32 @@ subst.c
 	  param_expand: call extract_function_subst as appropriate
 	- function_substitute: like command_substitute, but for nofork command
 	  substitutions. Just a stub for now
+
+				   5/11
+				   ----
+jobs.[ch]
+	- pipeline_saver: already_making_children now saved and restored as
+	  part of the struct; no longer need a separate variable
+	- save_pipeline,restore_pipeline: save already_making_children to struct
+
+parse.y
+	- parse_comsub,xparse_dolparen: handle `(' as the first char of a
+	  funsub (ksh93 supports that)
+
+subst.c
+	- function_substitute: complete implementation; handle both funsubs
+	  and valsubs (need different terminology); dummy up a fake shell
+	  function so local variables and `return' work; do the right thing
+	  with process groups
+	- executing_funsub: flag for the rest of the shell to know we're
+	  expanding a funsub; used by parse_and_execute
+
+builtins/evalstring.c
+	- parse_and_execute: check executing_funsub to do the right thing with
+	  alias expansion and posix mode
+
+				   5/12
+				   ----
+doc/bash.1,doc/bashref.texi
+	- function substitution (or lambda substitution, or nofork command
+	  substitution): document

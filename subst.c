@@ -192,6 +192,9 @@ int fail_glob_expansion;
    pattern substitution word expansion. */
 int patsub_replacement = PATSUB_REPLACE_DEFAULT;
 
+/* Are we executing a ${ command; } nofork comsub? */
+int executing_funsub = 0;
+
 /* Extern functions and variables from different files. */
 extern struct fd_bitmap *current_fds_to_close;
 extern int wordexp_only;
@@ -6745,18 +6748,89 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
   return istring;
 }
 
+static void
+uw_pop_var_context (void *ignore)
+{
+  pop_var_context ();
+}
+
+#if defined (ARRAY_VARS)
+static void
+uw_restore_pipestatus_array (void *a)
+{
+  restore_pipestatus_array (a);
+}
+#endif
+
+/* If S == -1, it's a special value saying to close stdin */
+static void
+restore_stdout (int fd)
+{
+  if (fd == -1)
+    close (1);
+  else
+    {
+      dup2 (fd, 1);
+      close (fd);
+    }
+}
+
+static void
+uw_restore_stdout (void *fd)
+{
+  restore_stdout ((intptr_t) fd);
+}
+
+static void
+uw_anonclose (void *fdesc)
+{
+  STRING_INT_ALIST *af;
+
+  af = (STRING_INT_ALIST *)fdesc;
+  anonclose (af->token, af->word);
+  free (af->word);
+}
+
+static void
+uw_unbind_variable (void *name)
+{
+  unbind_variable (name);
+}
+
+static void
+uw_restore_pipeline (void *discard)
+{
+  restore_pipeline ((intptr_t) discard);
+}
+
+static void
+uw_restore_errexit (void *eflag)
+{
+  change_flag ('e', (intptr_t) eflag ? FLAG_ON : FLAG_OFF);
+  set_shellopts ();
+}
+	
+static SHELL_VAR lambdafunc = { ".bash.lambda", 0, 0, 0, 0, 0, 0 };
+
 WORD_DESC *
 function_substitute (char *string, int quoted, int flags)
 {
-  pid_t old_pipeline_pgrp;
+  volatile int save_return_catch_flag, function_code;
+  int valsub, stdout_valid, saveout, old_frozen;
+  int result, pflags, tflag, was_trap;
   char *istring, *s;
-  int fd;
-  int result, fildes[2], function_value, pflags, rc, tflag, fork_flags;
-  int valsub;
   WORD_DESC *ret;
+  SHELL_VAR *v;
+  STRING_INT_ALIST anonf;
+  int afd;
+  char *afn;
   sigset_t set, oset;
+#if defined (ARRAY_VARS)
+  ARRAY *ps;
+#endif
 
-  istring = (char *)NULL;
+  if (valsub = (string && *string == '|'))
+    string++;
 
   /* In the case of no command to run, just return NULL. */
   for (s = string; s && *s && (shellblank (*s) || *s == '\n'); s++)
@@ -6764,31 +6838,164 @@ function_substitute (char *string, int quoted, int flags)
   if (s == 0 || *s == 0)
     return ((WORD_DESC *)NULL);
 
-  if (valsub = (*string == '|'))
-    string++;
-
+  istring = (char *)NULL;
   /* Flags to pass to parse_and_execute() */
   pflags = (interactive && sourcelevel == 0) ? SEVAL_RESETLINE : 0;
+  pflags |= SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE|SEVAL_NOOPTIMIZE;	/* XXX */
+
+  /* Let's get an anonymous file before we really try anything else. */
+  if (valsub == 0)
+    {
+      afd = anonopen ("sh-nfc", 0, &afn);	/* don't use filename yet */
+      if (afd < 0)
+	{
+	  sys_error ("%s", _("function_substitute: cannot open anonymous file for output"));
+	  exp_jump_to_top_level (DISCARD);		/* XXX */
+	}
+    }
+
+  begin_unwind_frame ("nofork comsub");
+
+  /* Save command and expansion state we need. */
+  if (valsub == 0)
+    {
+      anonf.word = afn;
+      anonf.token = afd;
+      add_unwind_protect (uw_anonclose, (void *)&anonf);
+    }
+  unwind_protect_int (executing_funsub);
+  unwind_protect_int (expand_aliases);
+  unwind_protect_pointer (subst_assign_varlist);
+  unwind_protect_pointer (temporary_env);
+  unwind_protect_pointer (this_shell_function);
+  add_unwind_protect (uw_pop_var_context, 0);
+
+#if defined (ARRAY_VARS)
+  ps = save_pipestatus_array ();
+  add_unwind_protect (uw_restore_pipestatus_array, ps);
+#endif
+  
+  subst_assign_varlist = 0;
+
+  push_context (lambdafunc.name, 1, temporary_env);		/* make local variables work */
+  temporary_env = 0;
+  this_shell_function = &lambdafunc;  
+
+  unwind_protect_int (verbose_flag);
+  change_flag ('v', FLAG_OFF);
+
+  /* When inherit_errexit option is not enabled, command substitution does
+     not inherit the -e flag.  It is enabled when Posix mode is enabled */
+  if (inherit_errexit == 0)
+    {
+      unwind_protect_int (builtin_ignoring_errexit);
+      builtin_ignoring_errexit = 0;
+      add_unwind_protect (uw_restore_errexit, (void *) (intptr_t) errexit_flag);
+      change_flag ('e', FLAG_OFF);
+    }
+  set_shellopts ();
+
+  if (valsub == 0)
+    {
+      fflush (stdout);
+      fpurge (stdout);
+
+      stdout_valid = sh_validfd (1);
+      saveout = stdout_valid ? move_to_high_fd (1, 1, -1) : -1;
+      add_unwind_protect (uw_restore_stdout, (void *) (intptr_t) saveout);
+
+      /* Redirect stdout to the anonymous file */
+      if (dup2 (afd, 1) < 0)
+	{
+	  sys_error ("%s", _("function_substitute: cannot duplicate anonymous file as standard output"));
+	  run_unwind_frame ("nofork comsub");
+	  exp_jump_to_top_level (DISCARD);
+	}
+#ifdef __CYGWIN__
+      freopen (NULL, "w", stdout);
+      sh_setlinebuf (stdout);
+#endif
+    }
+  else
+    {
+      v = make_local_variable ("REPLY", 0);		/* should be new instance */
+      /* We don't check $REPLY for readonly yet, but we could */
+      if (v)
+	add_unwind_protect (uw_unbind_variable, "REPLY");
+    }
+
+  old_frozen = freeze_jobs_list ();
+  add_unwind_protect (uw_lastpipe_cleanup, (void *) (intptr_t) old_frozen);
 
 #if defined (JOB_CONTROL)
-  old_pipeline_pgrp = pipeline_pgrp;
+  unwind_protect_var (pipeline_pgrp);
   /* Don't reset the pipeline pgrp if we're already a subshell in a pipeline or
      we've already forked to run a disk command (and are expanding redirections,
      for example). */
   if ((subshell_environment & (SUBSHELL_FORK|SUBSHELL_PIPE)) == 0)
     pipeline_pgrp = shell_pgrp;
   save_pipeline (1);
+  add_unwind_protect (uw_restore_pipeline, (void *) (intptr_t) 1);
   stop_making_children ();
 #endif /* JOB_CONTROL */
 
-  last_command_exit_value = EXECUTION_FAILURE;
-  report_error ("bad substitution: %s", string);
+  remove_quoted_escapes (string);
 
-  pipeline_pgrp = old_pipeline_pgrp;
-  restore_pipeline (1);
+  executing_funsub++;
+  if (expand_aliases)
+    expand_aliases = posixly_correct == 0;
 
-  /* exp_jump_to_top_level (DISCARD); */
-  return ((WORD_DESC *)NULL);
+  /* if we are in a position to accept return, we have to save the old values */
+  function_code = 0;
+  if (save_return_catch_flag = return_catch_flag)
+    {
+      unwind_protect_int (return_catch_flag);
+      unwind_protect_jmp_buf (return_catch);
+    }
+
+  was_trap = running_trap;
+
+  return_catch_flag++; 
+  function_code = setjmp_nosigs (return_catch);
+
+  if (function_code)
+    {
+      parse_and_execute_cleanup (was_trap);
+      result = return_catch_value;
+    }
+  else
+    result = parse_and_execute (string, "nofork comsub", pflags);
+
+  /* rewind back to the start of the file and read the contents */
+
+  if (valsub == 0)
+    {
+      /* We call anonclose as part of the outer nofork unwind-protects */
+      BLOCK_SIGNAL (SIGINT, set, oset);
+      lseek (afd, 0, SEEK_SET);
+      tflag = 0;
+      istring = read_comsub (afd, quoted, flags, &tflag);
+      UNBLOCK_SIGNAL (oset);
+    }
+  else
+    {
+      s = get_string_value ("REPLY");
+      istring = s ? savestring (s) : savestring ("");
+    }
+
+  run_unwind_frame ("nofork comsub");	/* restores stdout, job control stuff */
+
+  last_command_subst_status = result;
+  if (posixly_correct == 0)		/* POSIX interp 1150 */
+    last_command_exit_value = last_command_subst_status;
+  last_command_subst_pid = dollar_dollar_pid;
+  expand_aliases = expaliases_flag;
+
+  ret = alloc_word_desc ();
+  ret->word = istring;
+  ret->flags = tflag;
+
+  return (ret);
 }
 
 /* Perform command substitution on STRING.  This returns a WORD_DESC * with the
@@ -6985,10 +7192,10 @@ command_substitute (char *string, int quoted, int flags)
       /* When inherit_errexit option is not enabled, command substitution does
 	 not inherit the -e flag.  It is enabled when Posix mode is enabled */
       if (inherit_errexit == 0)
-        {
-          builtin_ignoring_errexit = 0;
+	{
+	  builtin_ignoring_errexit = 0;
 	  change_flag ('e', FLAG_OFF);
-        }
+	}
       set_shellopts ();
 
       /* If we are expanding a redirection, we can dispose of any temporary
@@ -7075,7 +7282,6 @@ command_substitute (char *string, int quoted, int flags)
       discard_unwind_frame ("read-comsub");
       UNBLOCK_SIGNAL (oset);
 
-      current_command_subst_pid = pid;
       last_command_subst_status = wait_for (pid, JWAIT_NOTERM);
       last_command_subst_pid = pid;
       last_made_pid = old_pid;

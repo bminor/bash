@@ -180,7 +180,7 @@ extern void show_shell_version (int);
    go into a separate include file. */
 
 /* declarations for functions defined in lib/sh/anonfile.c */
-extern int anonopen (const char *, int);
+extern int anonopen (const char *, int, char **);
 extern int anonclose (int, const char *);
 
 /* declarations for functions defined in lib/sh/casemod.c */

@@ -47,13 +47,13 @@ anonunlink (const char *fn)
 }
 
 int
-anonopen (const char *name, int flags)
+anonopen (const char *name, int flags, char **fn)
 {
   int fd, flag;
 
   /* Heuristic */
   flag = (name && *name == '/') ? MT_TEMPLATE : MT_USETMPDIR;
-  fd = sh_mktmpfd (name, flag|MT_USERANDOM|MT_READWRITE|MT_UNLINK, (char **)NULL);
+  fd = sh_mktmpfd (name, flag|MT_USERANDOM|MT_READWRITE|MT_UNLINK, fn);
   return fd;
 }
 

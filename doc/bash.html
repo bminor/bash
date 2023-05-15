@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 April 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 May 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2869,8 +2869,10 @@ and
 
 which sort the files on name, file size, modification time, access time,
 inode change time, and number of blocks, respectively.
-For example, a value of <B>-mtime</B> sorts the results in descending
+For example, a value of <I>-mtime</I> sorts the results in descending
 order by modification time (newest first).
+A sort specifier of <I>nosort</I> disables sorting completely; the results
+are returned in the order they are read from the file system,.
 If the sort specifier is missing, it defaults to <I>name</I>,
 so a value of <I>+</I> is equivalent to the null string,
 and a value of <I>-</I> sorts by name in descending order.
@@ -4463,16 +4465,17 @@ expansion as described below.
 <H4>Command Substitution</H4>
 
 <I>Command substitution</I> allows the output of a command to replace
-the command name.  There are two forms:
+the command itself.
+There are two standard forms:
 <DL COMPACT><DT><DD>
 <P>
 
 <B>$(</B><I>command</I><B>)</B>
 </DL>
 
-or
+or (deprecated)
 <DL COMPACT><DT><DD>
-<B>`</B><I>command</I><B>`</B>
+<B>`</B><I>command</I><B>`</B>.
 </DL>
 
 <P>
@@ -4488,7 +4491,7 @@ The command substitution <B>$(cat </B><I>file</I>) can be replaced by
 the equivalent but faster <B>$(&lt; </B><I>file</I>).
 <P>
 
-When the old-style backquote form of substitution is used,
+With the old-style backquote form of substitution,
 backslash retains its literal meaning except when followed by
 <B>$</B>,
 
@@ -4503,12 +4506,60 @@ When using the $(<I>command</I>) form, all characters between the
 parentheses make up the command; none are treated specially.
 <P>
 
+There is an alternate form of command substitution:
+<DL COMPACT><DT><DD>
+<P>
+
+<B>${</B><I>C</I> <I>command</I><B>;</B><B>}</B>
+</DL>
+
+<P>
+
+which executes <I>command</I> in the current execution environment.
+This means that side effects of <I>command</I> take effect immediately
+in the current execution environment and persist in the current 
+environment after the command completes (e.g., the <B>exit</B> builtin
+will exit the shell).
+<P>
+
+The character <I>C</I> following the open brace must be a space, tab,
+newline, <B>(</B>, or <B>|</B>, and the close brace must be in a position
+where a reserved word may appear (i.e., preceded by a command terminator
+such as semicolon).
+<B>Bash</B> allows the close brace to be joined to the remaining characters in
+the word without being followed by a shell metacharacter as a reserved
+word would usually require.
+<P>
+
+This type of command substitution superficially resembles executing an
+unnamed shell function: local variables are created as when a shell
+function is executing, and the <B>return</B> builtin forces
+<I>command</I> to complete;
+however, the rest of the execution environment,
+including the positional parameters, is shared with the caller.
+<P>
+
+If the first character following the open brace is a <B>(</B>,
+<I>command</I> is executed in a subshell, and <I>command</I> must be
+terminated by a <B>)</B>. This is similar to the <B>(</B> compound
+command (see <B>Compound Commands</B> above).
+If the first character is a <B>|</B>, the construct expands to the
+value of the <B>REPLY</B> shell variable after <I>command</I> executes,
+without removing any trailing newlines,
+and the standard output of <I>command</I> remains the same as in the
+calling shell.
+<B>Bash</B> creates <B>REPLY</B> as an initially-unset local variable when
+<I>command</I> executes, and restores <B>REPLY</B> to the value it had
+before the command substitution after <I>command</I> completes,
+as with any local variable.
+<P>
+
 Command substitutions may be nested.  To nest when using the backquoted form,
 escape the inner backquotes with backslashes.
 <P>
 
-If the substitution appears within double quotes, word splitting and
-pathname expansion are not performed on the results.
+If the substitution appears within double quotes, <B>bash</B> does not perform
+word splitting and pathname expansion on the results.
 <A NAME="lbBD">&nbsp;</A>
 <H4>Arithmetic Expansion</H4>
 
@@ -11999,7 +12050,7 @@ in the same way as <B>echo -e</B>.
 <DD>
 causes <B>printf</B> to output the corresponding
 <I>argument</I> in a format that can be reused as shell input.
-<B>%q</B> and <B>%Q</B> use the <B>$''</B> quoting style if any characters
+<B>%q</B> and <B>%Q</B> use the <B>$aqaq</B> quoting style if any characters
 in the argument string require it, and backslash quoting otherwise.
 If the format string uses the <I>printf</I> alternate form, these two
 formats quote the argument string using single quotes.
@@ -14944,7 +14995,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2023 April 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.2<TH ALIGN=CENTER width=33%>2023 May 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15050,7 +15101,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from bash.1.<BR>
-Time: 18 April 2023 10:26:09 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20230509/doc/bash.1.<BR>
+Time: 14 May 2023 15:37:14 EDT
 </BODY>
 </HTML>

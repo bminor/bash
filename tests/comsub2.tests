@@ -1,0 +1,122 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# initial set of tests for ${Ccommand; } nofork command substitution
+
+# basic functionality
+
+echo ${ printf '%s\n' aa bb cc dd; }
+echo AA${ printf '%s\n' aa bb cc dd; }BB
+
+echo ${ printf '%s\n' aa bb cc dd; return; echo ee ff; }
+echo ${ printf '%s\n' aa bb cc dd
+	}
+echo DDDDD${
+	printf '%s\n' aa bb cc dd
+}EEEEE
+unset x
+echo ${ printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
+echo outside: $x
+unset x
+echo ${ typeset x; printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
+echo outside: $x
+xx=${ typeset x; printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
+echo assignment: $?
+unset xx
+
+echo ${( echo abcde )}		# works in ksh93
+
+echo ${| echo 67890;  REPLY=12345; }		# works in mksh
+
+# basic job control
+set -m
+echo this should disappear | echo JOB${ printf '%s\n' aa bb cc dd; }CONTROL | cat
+set +m
+
+# command not found should still echo error messages to stderr
+echo NOT${ p; }FOUND
+
+# alias handling in command substitutions, default and posix mode
+alias p=printf
+echo "${ typeset x;
+	for f in 1 2; do p '%s\n' $f ; shopt expand_aliases; done
+ 	x=42 ; return; echo this should not be seen; }"
+echo outside: $x
+shopt expand_aliases
+
+set -o posix
+echo "${ typeset x;
+	for f in 1 2; do p '%s\n' $f ; shopt expand_aliases; done
+ 	x=42 ; return; echo this should not be seen; }"
+echo outside: $x
+shopt expand_aliases
+
+set +o posix
+
+shopt -s expand_aliases
+
+alias p=printf
+echo "${ typeset x;
+	for f in 1 2; do p '%s\n' $f ; /bin/echo xx ; shopt expand_aliases; done
+ 	x=42 ; return; echo ee ff; }"
+echo outside: $x
+shopt expand_aliases
+
+# more tests for value substitutions and local variables
+a=1 b=2
+a=${| local b ; a=12 ; b=22 ; REPLY=42 ; echo inside: $a $b $REPLY; }
+echo outside: $a $b
+unset a b
+
+# this form doesn't remove the trailing newlines
+REPLY=42
+a=${| REPLY=$'newlines\n\n'; }
+echo "$a"
+echo outside: $REPLY
+
+# how do we handle shift with these weird ksh93 function-like semantics?
+# ksh93 doesn't reset the positional parameters here
+set -- 1 2
+echo before: "$@"
+: "${ shift;}"
+echo after: "$@"
+
+set -- 1 2
+echo before: "$@"
+: "${| shift;}"
+echo after: "$@"
+
+set -- 1 2
+echo before: "$@"
+: "${( shift)}"
+echo after: "$@"
+
+# nested funsubs
+echo ${ echo X${ echo nested; }Y; }
+echo ${ echo a ; echo ${ echo nested; }; echo b; }
+
+# nested funsubs/comsubs
+x=${
+	echo ${ echo one;} $(echo two)
+}
+echo $x
+
+# mixing funsubs and arithmetic expansion
+echo $(( ${ echo 24 + 18; }))
+echo $(( ${ echo 14 + 18; }+ 10))
+echo ${ echo $(( 24+18 )); }
+
+# alias expansion and nested funsubs in other constructs
+${THIS_SH} ./comsub21.sub
+${THIS_SH} ./comsub22.sub

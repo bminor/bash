@@ -3807,7 +3807,7 @@ parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
 	count--;
       /* handle nested ${...} specially. */
       else if MBTEST(open != close && (tflags & LEX_WASDOL) && open == '{' && ch == open) /* } */
-	count++;
+	count++;		/* XXX */
       else if MBTEST(((flags & P_FIRSTCLOSE) == 0) && ch == open)	/* nested begin */
 	count++;
 
@@ -3961,10 +3961,21 @@ parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
 	      FREE (nestret);
 	    }
 	  else if ((flags & (P_ARRAYSUB|P_DOLBRACE)) && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
+	    /* This also handles ${ command; } */
 	    goto parse_dollar_word;
 	  else if ((flags & P_ARITH) && (tflags & LEX_WASDOL) && ch == '(') /*)*/
 	    /* $() inside $(( ))/$[ ] */
 	    goto parse_dollar_word;
+	  else if ((flags & P_ARITH) && (tflags & LEX_WASDOL) && ch == '{') /*)*/
+	    /* ${} inside $(( ))/$[ ] */
+	    {
+	      int npeek;
+	      npeek = shell_getc (1);
+	      shell_ungetc (npeek);
+	      if (FUNSUB_CHAR (npeek))
+		goto parse_dollar_word;
+	    }
+
 #if defined (PROCESS_SUBSTITUTION)
 	  /* XXX - technically this should only be recognized at the start of
 	     a word */
@@ -4272,7 +4283,7 @@ static char *
 parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 {
   int peekc, r;
-  int start_lineno, dolbrace_spec, local_extglob, was_extpat;
+  int start_lineno, dolbrace_spec, local_extglob, was_extpat, was_word;
   char *ret, *tcmd;
   size_t retlen;
   sh_parser_state_t ps;
@@ -4292,7 +4303,11 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
     {
       peekc = shell_getc (1);
       if (FUNSUB_CHAR (peekc))
-	dolbrace_spec = peekc;
+	{
+	  dolbrace_spec = peekc;
+	  if (dolbrace_spec == '(')	/* ksh93 compatibility ) */
+	    shell_ungetc (peekc);
+	}
       else
 	{
 	  shell_ungetc (peekc);
@@ -4308,6 +4323,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
   save_parser_state (&ps);
 
   was_extpat = (parser_state & PST_EXTPAT);
+  was_word = 0;
 
   /* State flags we don't want to persist into command substitutions. */
   parser_state &= ~(PST_REGEXP|PST_EXTPAT|PST_CONDCMD|PST_CONDEXPR|PST_COMPASSIGN);
@@ -4352,6 +4368,14 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
   token_to_read = (open == '(') ? DOLPAREN : DOLBRACE;	/* let's trick the parser ) */
 
   r = yyparse ();
+
+  if (open == '{')
+    {
+      if (current_token == shell_eof_token &&
+	    (last_read_token == ';' || last_read_token == '\n') &&
+	    (token_before_that == WORD || token_before_that == ASSIGNMENT_WORD))
+	was_word = 1;
+    }
 
   if (need_here_doc > 0)
     {
@@ -4442,6 +4466,8 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
       strcpy (ret + 1, tcmd);		/* ( */
       if (lastc != '\n' && lastc != ';' && lastc != '&' && lastc != ')')
 	ret[retlen++] = ';';
+      else if (lastc == ')' && was_word)	/* right paren can end a word */
+	ret[retlen++] = ';';
       ret[retlen++] = ' ';
     }
   ret[retlen++] = close;
@@ -4457,7 +4483,7 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
   return ret;
 }
 
-/* Recursively call the parser to parse a $(...) command substitution. This is
+/* Recursively call the parser to parse a command substitution. This is
    called by the word expansion code and so does not have to reset as much
    parser state before calling yyparse(). */
 char *
@@ -4515,7 +4541,7 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
   local_extglob = extended_glob;
 #endif
 
-  if (funsub && FUNSUB_CHAR (*string))
+  if (funsub && FUNSUB_CHAR (*string) && *string == '|')
     string++;
 
   token_to_read = funsub ? DOLBRACE : DOLPAREN;			/* let's trick the parser */
@@ -4531,7 +4557,7 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
   /* reset_parser() clears shell_input_line and associated variables, including
      parser_state, so we want to reset things, then restore what we need. */
   restore_input_line_state (&ls);
-  restore_parser_state (&ps);
+  restore_parser_state (&ps);	/* restores shell_eof_token */
 
 #if defined (EXTENDED_GLOB)
   extended_glob = local_extglob;
@@ -4580,7 +4606,7 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
     {
       /*(*/
       if ((flags & SX_NOERROR) == 0)
-	parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), ')');
+	parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), closer);
       jump_to_top_level (DISCARD);
     }
 

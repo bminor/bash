@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Apr 17 10:35:39 EDT 2023
+.\"	Last Change: Sun May 14 15:32:59 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 April 17" "GNU Bash 5.2"
+.TH BASH 1 "2023 May 14" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3581,14 +3581,15 @@ expansion as described below.
 .RE
 .SS Command Substitution
 \fICommand substitution\fP allows the output of a command to replace
-the command name.  There are two forms:
+the command itself.
+There are two standard forms:
 .RS
 .PP
 \fB$(\fP\fIcommand\fP\|\fB)\fP
 .RE
-or
+or (deprecated)
 .RS
-\fB\`\fP\fIcommand\fP\fB\`\fP
+\fB\`\fP\fIcommand\fP\fB\`\fP.
 .RE
 .PP
 .B Bash
@@ -3600,7 +3601,7 @@ word splitting.
 The command substitution \fB$(cat \fIfile\fP)\fR can be replaced by
 the equivalent but faster \fB$(< \fIfile\fP)\fR.
 .PP
-When the old-style backquote form of substitution is used,
+With the old-style backquote form of substitution,
 backslash retains its literal meaning except when followed by
 .BR $ ,
 .BR \` ,
@@ -3611,11 +3612,52 @@ command substitution.
 When using the $(\^\fIcommand\fP\|) form, all characters between the
 parentheses make up the command; none are treated specially.
 .PP
+There is an alternate form of command substitution:
+.RS
+.PP
+\fB${\fP\fIC\fP \fIcommand\fP\fB;\fP\|\fB}\fP
+.RE
+.PP
+which executes \fIcommand\fP in the current execution environment.
+This means that side effects of \fIcommand\fP take effect immediately
+in the current execution environment and persist in the current 
+environment after the command completes (e.g., the \fBexit\fP builtin
+will exit the shell).
+.PP
+The character \fIC\fP following the open brace must be a space, tab,
+newline, \fB(\fP, or \fB|\fP, and the close brace must be in a position
+where a reserved word may appear (i.e., preceded by a command terminator
+such as semicolon).
+\fBBash\fP allows the close brace to be joined to the remaining characters in
+the word without being followed by a shell metacharacter as a reserved
+word would usually require.
+.PP
+This type of command substitution superficially resembles executing an
+unnamed shell function: local variables are created as when a shell
+function is executing, and the \fBreturn\fP builtin forces
+\fIcommand\fP to complete;
+however, the rest of the execution environment,
+including the positional parameters, is shared with the caller.
+.PP
+If the first character following the open brace is a \fB(\fP,
+\fIcommand\fP is executed in a subshell, and \fIcommand\fP must be
+terminated by a \fB)\fP. This is similar to the \fB(\fP compound
+command (see \fBCompound Commands\fP above).
+If the first character is a \fB|\fP, the construct expands to the
+value of the \fBREPLY\fP shell variable after \fIcommand\fP executes,
+without removing any trailing newlines,
+and the standard output of \fIcommand\fP remains the same as in the
+calling shell.
+\fBBash\fP creates \fBREPLY\fP as an initially-unset local variable when
+\fIcommand\fP executes, and restores \fBREPLY\fP to the value it had
+before the command substitution after \fIcommand\fP completes,
+as with any local variable.
+.PP
 Command substitutions may be nested.  To nest when using the backquoted form,
 escape the inner backquotes with backslashes.
 .PP
-If the substitution appears within double quotes, word splitting and
-pathname expansion are not performed on the results.
+If the substitution appears within double quotes, \fBbash\fP does not perform
+word splitting and pathname expansion on the results.
 .SS Arithmetic Expansion
 Arithmetic expansion allows the evaluation of an arithmetic expression
 and the substitution of the result.  The format for arithmetic expansion is:
