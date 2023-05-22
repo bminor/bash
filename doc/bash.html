@@ -4510,25 +4510,28 @@ There is an alternate form of command substitution:
 <DL COMPACT><DT><DD>
 <P>
 
-<B>${</B><I>C</I> <I>command</I><B>;</B><B>}</B>
+<B>${</B><I>c</I> <I>command</I><B>;</B><B>}</B>
 </DL>
 
 <P>
 
-which executes <I>command</I> in the current execution environment.
-This means that side effects of <I>command</I> take effect immediately
-in the current execution environment and persist in the current 
-environment after the command completes (e.g., the <B>exit</B> builtin
-will exit the shell).
+which executes <I>command</I> in the current execution environment
+and captures its output, again with trailing newlines removed.
 <P>
 
-The character <I>C</I> following the open brace must be a space, tab,
+The character <I>c</I> following the open brace must be a space, tab,
 newline, <B>(</B>, or <B>|</B>, and the close brace must be in a position
 where a reserved word may appear (i.e., preceded by a command terminator
 such as semicolon).
 <B>Bash</B> allows the close brace to be joined to the remaining characters in
 the word without being followed by a shell metacharacter as a reserved
 word would usually require.
+<P>
+
+Any side effects of <I>command</I> take effect immediately
+in the current execution environment and persist in the current 
+environment after the command completes (e.g., the <B>exit</B> builtin
+will exit the shell).
 <P>
 
 This type of command substitution superficially resembles executing an
@@ -11192,6 +11195,8 @@ is supplied with a
 <I>name</I>
 
 that is not a function.
+<DT><B>false</B><DD>
+Does nothing, returns a non-zero status.
 <DT><B>fc</B> [<B>-e</B> <I>ename</I>] [<B>-lnr</B>] [<I>first</I>] [<I>last</I>]<DD>
 
 <DT><B>fc</B> <B>-s</B> [<I>pat</I>=<I>rep</I>] [<I>cmd</I>]<DD>
@@ -13993,6 +13998,8 @@ is invalid; otherwise
 <B>trap</B>
 
 returns true.
+<DT><B>true</B><DD>
+Does nothing, returns a 0 status.
 <DT><B>type</B> [<B>-aftpP</B>] <I>name</I> [<I>name</I> ...]<DD>
 With no options,
 indicate how each
@@ -15101,7 +15108,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20230509/doc/bash.1.<BR>
-Time: 14 May 2023 15:37:14 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20230515/doc/bash.1.<BR>
+Time: 20 May 2023 11:02:33 EDT
 </BODY>
 </HTML>

@@ -83,7 +83,7 @@ typedef void *alias_t;
 #endif /* ALIAS */
 
 #if defined (PROMPT_STRING_DECODE)
-#  ifndef _MINIX
+#  if !defined (_MINIX) || !defined (__MVS__)
 #    include <sys/param.h>
 #  endif
 #  include "posixtime.h"

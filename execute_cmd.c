@@ -3671,7 +3671,6 @@ execute_while_or_until (WHILE_COM *while_command, int type)
   while (1)
     {
       return_value = execute_command (while_command->test);
-      REAP ();
 
       /* Need to handle `break' in the test when we would break out of the
          loop.  The job control code will set `breaking' to loop_level
@@ -3699,6 +3698,8 @@ execute_while_or_until (WHILE_COM *while_command, int type)
       QUIT;
       body_status = execute_command (while_command->action);
       QUIT;
+
+      REAP ();
 
       if (breaking)
 	{

@@ -14,7 +14,7 @@
 # test the trap code
 
 trap 'echo exiting' 0
-trap 'echo aborting' 1 2 3 6 15
+trap 'echo aborting' HUP INT QUIT ABRT TERM
 
 # make sure a user-specified subshell runs the exit trap, but does not
 # inherit the exit trap from a parent shell

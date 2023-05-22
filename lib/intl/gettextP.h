@@ -164,11 +164,20 @@ extern int _nl_msg_cat_cntr;
 const char *_nl_locale_name (int category, const char *categoryname);
 #endif
 
+#ifdef __MVS__
+#  undef __locale
+#endif
+
 struct loaded_l10nfile *_nl_find_domain (const char *__dirname,
 						 char *__locale,
 						 const char *__domainname,
 					      struct binding *__domainbinding);
      internal_function;
+
+#ifdef __MVS__
+#  define __locale 1
+#endif
+
 void _nl_load_domain (struct loaded_l10nfile *__domain,
 			      struct binding *__domainbinding);
      internal_function;

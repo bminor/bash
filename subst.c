@@ -4611,11 +4611,8 @@ quote_escapes_internal (const char *string, int flags)
   quote_spaces = (ifs_value && *ifs_value == 0);
   nosplit = (flags & PF_NOSPLIT2);
 
-  for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
-    {
-      skip_ctlesc |= (nosplit == 0 && *s == CTLESC);
-      skip_ctlnul |= (nosplit == 0 && *s == CTLNUL);
-    }
+  skip_ctlesc = nosplit == 0 && ifs_cmap[CTLESC];
+  skip_ctlnul = nosplit == 0 && ifs_cmap[CTLNUL];
 
   t = result = (char *)xmalloc ((slen * 2) + 1);
   s = string;
@@ -6602,6 +6599,29 @@ process_substitute (char *string, int open_for_read_in_child)
 
 #define COMSUB_PIPEBUF	4096
 
+static inline int
+comsub_shouldquote (int c, int quoted, int flags, int skip_ctlesc, int skip_ctlnul)
+{
+  /* This is essentially quote_string inline */
+  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+    return 1;
+  else if ((flags & PF_ASSIGNRHS) && skip_ctlesc && c == CTLESC)
+    return 1;
+  else if ((flags & PF_ASSIGNRHS) && skip_ctlnul && c == CTLNUL)
+    return 1;
+  /* Escape CTLESC and CTLNUL in the output to protect those characters
+     from the rest of the word expansions (word splitting and globbing.)
+     This is essentially quote_escapes inline. */
+  else if (skip_ctlesc == 0 && c == CTLESC)
+    return 1;
+  else if (skip_ctlnul == 0 && c == CTLNUL)
+    return 1;
+  else if (c == ' ' && ifs_value && *ifs_value == 0)
+    return 1;
+  else
+    return 0;
+}
+
 static char *
 optimize_cat_file (REDIRECT *r, int quoted, int flags, int *flagp)
 {
@@ -6672,17 +6692,7 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
       /* Add the character to ISTRING, possibly after resizing it. */
       RESIZE_MALLOCED_BUFFER (istring, istring_index, locale_mb_cur_max+1, istring_size, 512);
 
-      /* This is essentially quote_string inline */
-      if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) /* || c == CTLESC || c == CTLNUL */)
-	istring[istring_index++] = CTLESC;
-      else if ((flags & PF_ASSIGNRHS) && skip_ctlesc && c == CTLESC)
-	istring[istring_index++] = CTLESC;
-      /* Escape CTLESC and CTLNUL in the output to protect those characters
-	 from the rest of the word expansions (word splitting and globbing.)
-	 This is essentially quote_escapes inline. */
-      else if (skip_ctlesc == 0 && c == CTLESC)
-	istring[istring_index++] = CTLESC;
-      else if ((skip_ctlnul == 0 && c == CTLNUL) || (c == ' ' && (ifs_value && *ifs_value == 0)))
+      if (comsub_shouldquote (c, quoted, flags, skip_ctlesc, skip_ctlnul))
 	istring[istring_index++] = CTLESC;
 
 #if defined (HANDLE_MULTIBYTE)
@@ -6751,7 +6761,10 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
 static void
 uw_pop_var_context (void *ignore)
 {
+  variable_context--;
   pop_var_context ();
+
+  sv_ifs ("IFS");		/* XXX here for now */
 }
 
 #if defined (ARRAY_VARS)
@@ -6808,6 +6821,41 @@ uw_restore_errexit (void *eflag)
 {
   change_flag ('e', (intptr_t) eflag ? FLAG_ON : FLAG_OFF);
   set_shellopts ();
+}
+
+/* Quote the output of nofork varsub command substitution in the way that the
+   caller of function_substitute expects. The caller guarantees that STRING
+   is non-null. This is equivalent to what read_comsub does to the output it
+   reads. The return value will be post-processed to turn "" into CTLNUL if
+   necessary. */
+static char *
+comsub_quote_string (char *string, int quoted, int flags)
+{
+  int skip_ctlesc, skip_ctlnul;
+  size_t ind, slen;
+  const char *send;
+  int i, c;
+  char *ret;
+  DECLARE_MBSTATE;
+
+  slen = strlen (string);
+  send = string + slen;
+
+  ret = (char *)xmalloc ((2 * slen) + 1);
+
+  skip_ctlesc = ifs_cmap[CTLESC];
+  skip_ctlnul = ifs_cmap[CTLNUL];
+    
+  for (i = 0, ind = 0; c = string[i]; )
+    {
+      if (comsub_shouldquote (c, quoted, flags, skip_ctlesc, skip_ctlnul))
+        ret[ind++] = CTLESC;
+
+      COPY_CHAR_I (ret, ind, string, send, i);
+    }
+
+  ret[ind] = '\0';
+  return ret;
 }
 	
 static SHELL_VAR lambdafunc = { ".bash.lambda", 0, 0, 0, 0, 0, 0 };
@@ -6980,7 +7028,7 @@ function_substitute (char *string, int quoted, int flags)
   else
     {
       s = get_string_value ("REPLY");
-      istring = s ? savestring (s) : savestring ("");
+      istring = s ? comsub_quote_string (s, quoted, flags) : savestring ("");
     }
 
   run_unwind_frame ("nofork comsub");	/* restores stdout, job control stuff */

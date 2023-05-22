@@ -3615,22 +3615,24 @@ parentheses make up the command; none are treated specially.
 There is an alternate form of command substitution:
 .RS
 .PP
-\fB${\fP\fIC\fP \fIcommand\fP\fB;\fP\|\fB}\fP
+\fB${\fP\fIc\fP \fIcommand\fP\fB;\fP\|\fB}\fP
 .RE
 .PP
-which executes \fIcommand\fP in the current execution environment.
-This means that side effects of \fIcommand\fP take effect immediately
-in the current execution environment and persist in the current 
-environment after the command completes (e.g., the \fBexit\fP builtin
-will exit the shell).
+which executes \fIcommand\fP in the current execution environment
+and captures its output, again with trailing newlines removed.
 .PP
-The character \fIC\fP following the open brace must be a space, tab,
+The character \fIc\fP following the open brace must be a space, tab,
 newline, \fB(\fP, or \fB|\fP, and the close brace must be in a position
 where a reserved word may appear (i.e., preceded by a command terminator
 such as semicolon).
 \fBBash\fP allows the close brace to be joined to the remaining characters in
 the word without being followed by a shell metacharacter as a reserved
 word would usually require.
+.PP
+Any side effects of \fIcommand\fP take effect immediately
+in the current execution environment and persist in the current 
+environment after the command completes (e.g., the \fBexit\fP builtin
+will exit the shell).
 .PP
 This type of command substitution superficially resembles executing an
 unnamed shell function: local variables are created as when a shell
@@ -8883,6 +8885,9 @@ is supplied with a
 .I name
 that is not a function.
 .TP
+\fBfalse\fP
+Does nothing, returns a non-zero status.
+.TP
 \fBfc\fP [\fB\-e\fP \fIename\fP] [\fB\-lnr\fP] [\fIfirst\fP] [\fIlast\fP]
 .PD 0
 .TP
@@ -11139,6 +11144,9 @@ The return status is false if any
 is invalid; otherwise
 .B trap
 returns true.
+.TP
+\fBtrue\fP
+Does nothing, returns a 0 status.
 .TP
 \fBtype\fP [\fB\-aftpP\fP] \fIname\fP [\fIname\fP ...]
 With no options,

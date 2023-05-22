@@ -298,6 +298,29 @@ initialize_signames (void)
   signal_names[SIGTHR] = "SIGTHR";
 #endif
 
+/* z/OS */
+#if defined(SIGABND)
+  signal_names[SIGABND] = "SIGABND";
+#endif
+#if defined(SIGIOERR)
+  signal_names[SIGIOERR] = "SIGIOERR";
+#endif
+#if defined(SIGTHSTOP)
+  signal_names[SIGTHSTOP] = "SIGTHSTOP";
+#endif
+#if defined(SIGTHCONT)
+  signal_names[SIGTHCONT] = "SIGTHCONT";
+#endif
+#if defined(SIGTRACE)
+  signal_names[SIGTRACE] = "SIGTRACE";
+#endif
+#if defined(SIGDCE)
+  signal_names[SIGDCE] = "SIGDCE";
+#endif
+#if defined(SIGDUMP)
+  signal_names[SIGDUMP] = "SIGDUMP";
+#endif
+
 /* Common */
 #if defined (SIGHUP)	/* hangup */
   signal_names[SIGHUP] = "SIGHUP";

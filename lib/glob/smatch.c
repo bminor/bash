@@ -139,7 +139,7 @@ rangecmp (int c1, int c2, int forcecoll)
 #if defined (HAVE_STRCOLL)
 /* Returns 1 if chars C and EQUIV collate equally in the current locale. */
 static int
-collequiv (int c, int equiv)
+collseqcmp (int c, int equiv)
 {
   if (charcmp (c, equiv, 1) == 0)
     return 1;
@@ -152,7 +152,7 @@ collequiv (int c, int equiv)
   
 }
 #else
-#  define collequiv(c, equiv)	((c) == (equiv))
+#  define collseqcmp(c, equiv)	((c) == (equiv))
 #endif
 
 #define _COLLSYM	_collsym
@@ -321,7 +321,7 @@ is_cclass (int c, const char *name)
 #define STRLEN(S)		strlen(S)
 #define STRCMP(S1, S2)		strcmp((S1), (S2))
 #define RANGECMP(C1, C2, F)	rangecmp((C1), (C2), (F))
-#define COLLEQUIV(C1, C2)	collequiv((C1), (C2))
+#define COLLEQUIV(C1, C2)	collseqcmp((C1), (C2))
 #define CTYPE_T			enum char_class
 #define IS_CCLASS(C, S)		is_cclass((C), (S))
 #include "sm_loop.c"
@@ -407,7 +407,7 @@ rangecmp_wc (wint_t c1, wint_t c2, int forcecoll)
 
 /* Returns 1 if wide chars C and EQUIV collate equally in the current locale. */
 static int
-collequiv_wc (wint_t c, wint_t equiv)
+collseqcmp_wc (wint_t c, wint_t equiv)
 {
   wchar_t s, p;
 
@@ -566,7 +566,7 @@ posix_cclass_only (char *pattern)
 #define STRLEN(S)		wcslen(S)
 #define STRCMP(S1, S2)		wcscmp((S1), (S2))
 #define RANGECMP(C1, C2, F)	rangecmp_wc((C1), (C2), (F))
-#define COLLEQUIV(C1, C2)	collequiv_wc((C1), (C2))
+#define COLLEQUIV(C1, C2)	collseqcmp_wc((C1), (C2))
 #define CTYPE_T			enum char_class
 #define IS_CCLASS(C, S)		is_wcclass((C), (S))
 #include "sm_loop.c"

@@ -373,11 +373,11 @@ main (int argc, char **argv, char **env)
 #endif
   volatile int locally_skip_execution;
   volatile int arg_index, top_level_arg_index;
-#ifdef __OPENNT
+#if defined (__OPENNT) || defined (__MVS__)
   char **env;
 
   env = environ;
-#endif /* __OPENNT */
+#endif /* __OPENNT || __MVS__ */
 
   USE_VAR(argc);
   USE_VAR(argv);

@@ -3267,8 +3267,17 @@ return_job:
       /* Make sure there is a background job to wait for */
       BLOCK_CHILD (set, oset);
       for (i = 0; i < js.j_jobslots; i++)
-	if (jobs[i] && RUNNING (i) && IS_FOREGROUND (i) == 0)
-	  break;
+	{
+	  if (jobs[i] && RUNNING (i) && IS_FOREGROUND (i) == 0)
+	    break;
+	  /* It's possible for there to be a dead job that was reaped when
+	     SIGCHLD was unblocked before this loop started. */
+	  else if ((flags & JWAIT_WAITING) && jobs[i] && IS_WAITING (i) == 0)
+	    continue;
+	  else if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i) == 0 && IS_FOREGROUND (i) == 0)
+	    goto return_job;
+	}
+
       if (i == js.j_jobslots)
 	{
 	  UNBLOCK_CHILD (oset);
@@ -4271,6 +4280,7 @@ notify_of_job_status (void)
 
 		      fprintf (stderr, "\n");
 		    }
+		  jobs[job]->flags |= J_NOTIFIED;
 		}
 	      else if (job_control)	/* XXX job control test added */
 		{
@@ -4282,6 +4292,8 @@ notify_of_job_status (void)
 			     _("(wd now: %s)\n"), polite_directory_format (dir));
 		}
 
+	      /* The code above and pretty_print_job take care of setting
+		 J_NOTIFIED as appropriate, but this is here for posterity. */
 	      jobs[job]->flags |= J_NOTIFIED;
 	      break;
 
@@ -4745,7 +4757,7 @@ mark_all_jobs_as_dead (void)
   BLOCK_CHILD (set, oset);
 
   /* XXX could use js.j_firstj here */
-  for (i = 0; i < js.j_jobslots; i++)
+  for (i = js.j_ndead = 0; i < js.j_jobslots; i++)
     if (jobs[i])
       {
 	jobs[i]->state = JDEAD;

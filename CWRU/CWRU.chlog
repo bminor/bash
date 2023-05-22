@@ -6331,3 +6331,61 @@ builtins/evalstring.c
 doc/bash.1,doc/bashref.texi
 	- function substitution (or lambda substitution, or nofork command
 	  substitution): document
+
+				   5/15
+				   ----
+subst.c
+	- function_substitute: make sure to decrement variable_context in the
+	  unwind-protects since we don't unwind_protect it individually.
+	  Report from Oguz <oguzismailuysal@gmail.com>
+
+				   5/17
+				   ----
+configure.ac
+	- i370 machines cannot use the bash malloc
+	  Patch from Igor Todorovski <itodorov@ca.ibm.com>
+
+support/signames.c
+	- initialize_signames: add support for z/OS signals.
+	  Patch from Igor Todorovski <itodorov@ca.ibm.com>
+
+lib/glob/smatch.c
+	- collseqcmp: new name for collequiv[_wc], that function apparently
+	  exists in libc on z/OS
+	  Patch from Igor Todorovski <itodorov@ca.ibm.com>
+
+jobs.c
+	- mark_all_jobs_as_dead: make sure to reset js.j_ndead to the right
+	  number of jobs in the array
+
+execute_cmd.c
+	- execute_while_or_until: move call to REAP() after the action
+	  executes, like other loop functions
+
+shell.c,parse.y,lib/intl/gettextP.h
+	- add some __MVS__ checks for z/OS systems
+
+				   5/18
+				   ----
+jobs.c
+	- wait_for_any_job: catch jobs that can terminate and be reaped
+	  when we call UNBLOCK_CHILD between the loop where we check the
+	  jobs list for dead jobs and the loop where we check for running
+	  jobs and poll for them with wait_for().
+	  Fixes bug reported by Aleksey Covacevice <aleksey.covacevice@gmail.com>
+
+				   5/20
+				   ----
+subst.c
+	- read_comsub: quote CTLNUL if it's in $IFS and we're parsing the
+	  RHS of an assignment statement
+	- comsub_quote_string: ditto
+	- comsub_shouldquote: break code that decides whether to CTLESC escape	
+	  a character read from a command substitution or $REPLY into its own
+	  inline function; change read_comsub/comsub_quote_string callers
+
+				   5/21
+				   ----
+subst.c
+	- quote_escapes_internal: use ifs_cmap instead of iterating through
+	  ifs_value to set skip_ctlesc and skip_ctlnul

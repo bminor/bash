@@ -29,15 +29,35 @@ unset x
 echo ${ printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
 echo outside: $x
 unset x
-echo ${ typeset x; printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
+echo ${ local x; printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
 echo outside: $x
-xx=${ typeset x; printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
+xx=${ local x; printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
 echo assignment: $?
 unset xx
+
+declare -i x
+y=${ :;}
+declare -i z
+unset -v x y z
+
+# variables can be local, but all function declarations are global
+func() { echo func-outside; }
+xx=${ func() { echo func-inside; }; }
+declare -f func
+xx=${ unset -f func; }
+declare -f func
 
 echo ${( echo abcde )}		# works in ksh93
 
 echo ${| echo 67890;  REPLY=12345; }		# works in mksh
+x=${| REPLY= ;}
+recho "$x"
+unset x
+x=${| :;}
+recho "$x"
+unset x
+
+echo ${ echo aa; },${ echo bb; }
 
 # basic job control
 set -m
@@ -49,17 +69,24 @@ echo NOT${ p; }FOUND
 
 # alias handling in command substitutions, default and posix mode
 alias p=printf
+alias e='echo aliasval'
 echo "${ typeset x;
 	for f in 1 2; do p '%s\n' $f ; shopt expand_aliases; done
+	unalias p
+	alias e='echo inside redefine'
  	x=42 ; return; echo this should not be seen; }"
 echo outside: $x
+alias p e
 shopt expand_aliases
 
+alias p=printf
 set -o posix
 echo "${ typeset x;
 	for f in 1 2; do p '%s\n' $f ; shopt expand_aliases; done
+	unalias p;
  	x=42 ; return; echo this should not be seen; }"
 echo outside: $x
+alias p
 shopt expand_aliases
 
 set +o posix
@@ -120,3 +147,6 @@ echo ${ echo $(( 24+18 )); }
 # alias expansion and nested funsubs in other constructs
 ${THIS_SH} ./comsub21.sub
 ${THIS_SH} ./comsub22.sub
+${THIS_SH} ./comsub23.sub
+${THIS_SH} ./comsub24.sub
+${THIS_SH} ./comsub25.sub

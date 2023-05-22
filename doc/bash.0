@@ -1997,19 +1997,21 @@ EEXXPPAANNSSIIOONN
 
        There is an alternate form of command substitution:
 
-              $${{_C _c_o_m_m_a_n_d;;}}
+              $${{_c _c_o_m_m_a_n_d;;}}
 
-       which executes _c_o_m_m_a_n_d in  the  current  execution  environment.   This
-       means  that side effects of _c_o_m_m_a_n_d take effect immediately in the cur-
-       rent execution environment and persist in the current environment after
-       the command completes (e.g., the eexxiitt builtin will exit the shell).
+       which executes _c_o_m_m_a_n_d in the current execution  environment  and  cap-
+       tures its output, again with trailing newlines removed.
 
-       The character _C following the open brace must be a space, tab, newline,
+       The character _c following the open brace must be a space, tab, newline,
        ((, or ||, and the close brace must be in a  position  where  a  reserved
        word  may  appear (i.e., preceded by a command terminator such as semi-
        colon).  BBaasshh allows the close brace to  be  joined  to  the  remaining
        characters  in the word without being followed by a shell metacharacter
        as a reserved word would usually require.
+
+       Any side effects of _c_o_m_m_a_n_d take effect immediately in the current exe-
+       cution  environment  and  persist  in the current environment after the
+       command completes (e.g., the eexxiitt builtin will exit the shell).
 
        This type of command substitution superficially resembles executing  an
        unnamed  shell  function:  local  variables are created as when a shell
@@ -5134,6 +5136,8 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               of  the  _n_a_m_e_s is not a valid shell variable name, or --ff is sup-
               plied with a _n_a_m_e that is not a function.
 
+       ffaallssee  Does nothing, returns a non-zero status.
+
        ffcc [--ee _e_n_a_m_e] [--llnnrr] [_f_i_r_s_t] [_l_a_s_t]
        ffcc --ss [_p_a_t=_r_e_p] [_c_m_d]
               The first form selects a range of commands from  _f_i_r_s_t  to  _l_a_s_t
@@ -6359,6 +6363,8 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               being  ignored  are reset to their original values in a subshell
               or subshell environment when one is created.  The return  status
               is false if any _s_i_g_s_p_e_c is invalid; otherwise ttrraapp returns true.
+
+       ttrruuee   Does nothing, returns a 0 status.
 
        ttyyppee [--aaffttppPP] _n_a_m_e [_n_a_m_e ...]
               With  no options, indicate how each _n_a_m_e would be interpreted if

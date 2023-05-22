@@ -2640,7 +2640,7 @@ or (deprecated)
 @end example
 
 @noindent
-Bash performs the expansion by executing @var{command} in a subshell
+Bash performs command substitution by executing @var{command} in a subshell
 environment and replacing the command substitution with the standard
 output of the command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
@@ -2659,23 +2659,25 @@ the parentheses make up the command; none are treated specially.
 There is an alternate form of command substitution:
 
 @example
-$@{@var{C} @var{command}; @}
+$@{@var{c} @var{command}; @}
 @end example
 
 @noindent
-which executes @var{command} in the current execution environment.
-This means that side effects of @var{command} take effect immediately
-in the current execution environment and persist in the current 
-environment after the command completes (e.g., the @code{exit} builtin
-will exit the shell).
+which executes @var{command} in the current execution environment
+and captures its output, again with trailing newlines removed.
 
-The character @var{C} following the open brace must be a space, tab,
+The character @var{c} following the open brace must be a space, tab,
 newline, @samp{(}, or @samp{|}, and the close brace must be in a position
 where a reserved word may appear (i.e., preceded by a command terminator
 such as semicolon).
 Bash allows the close brace to be joined to the remaining characters in
 the word without being followed by a shell metacharacter as a reserved
 word would usually require.
+
+Any side effects of @var{command} take effect immediately
+in the current execution environment and persist in the current 
+environment after the command completes (e.g., the @code{exit} builtin
+will exit the shell).
 
 This type of command substitution superficially resembles executing an
 unnamed shell function: local variables are created as when a shell
@@ -4012,6 +4014,14 @@ The return status is zero unless an invalid option is supplied, one of
 the names is not a valid shell variable name, or @option{-f} is supplied
 with a name that is not a shell function.
 
+@item false
+@btindex false
+@example
+false
+@end example
+
+Does nothing, returns a non-zero status.
+
 @item getopts
 @btindex getopts
 @example
@@ -4370,6 +4380,14 @@ values in a subshell or subshell environment when one is created.
 
 The return status is zero unless a @var{sigspec} does not specify a
 valid signal.
+
+@item true
+@btindex true
+@example
+true
+@end example
+
+Does nothing, returns a 0 status.
 
 @item umask
 @btindex umask

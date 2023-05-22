@@ -3059,7 +3059,7 @@ enclosed as follows:
 <pre class="example">`<var>command</var>`.
 </pre></div>
 
-<p>Bash performs the expansion by executing <var>command</var> in a subshell
+<p>Bash performs command substitution by executing <var>command</var> in a subshell
 environment and replacing the command substitution with the standard
 output of the command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
@@ -3078,22 +3078,24 @@ the parentheses make up the command; none are treated specially.
 <p>There is an alternate form of command substitution:
 </p>
 <div class="example">
-<pre class="example">${<var>C</var> <var>command</var>; }
+<pre class="example">${<var>c</var> <var>command</var>; }
 </pre></div>
 
-<p>which executes <var>command</var> in the current execution environment.
-This means that side effects of <var>command</var> take effect immediately
-in the current execution environment and persist in the current 
-environment after the command completes (e.g., the <code>exit</code> builtin
-will exit the shell).
+<p>which executes <var>command</var> in the current execution environment
+and captures its output, again with trailing newlines removed.
 </p>
-<p>The character <var>C</var> following the open brace must be a space, tab,
+<p>The character <var>c</var> following the open brace must be a space, tab,
 newline, &lsquo;<samp>(</samp>&rsquo;, or &lsquo;<samp>|</samp>&rsquo;, and the close brace must be in a position
 where a reserved word may appear (i.e., preceded by a command terminator
 such as semicolon).
 Bash allows the close brace to be joined to the remaining characters in
 the word without being followed by a shell metacharacter as a reserved
 word would usually require.
+</p>
+<p>Any side effects of <var>command</var> take effect immediately
+in the current execution environment and persist in the current 
+environment after the command completes (e.g., the <code>exit</code> builtin
+will exit the shell).
 </p>
 <p>This type of command substitution superficially resembles executing an
 unnamed shell function: local variables are created as when a shell
@@ -4527,6 +4529,14 @@ the names is not a valid shell variable name, or <samp>-f</samp> is supplied
 with a name that is not a shell function.
 </p>
 </dd>
+<dt id='index-false'><span><code>false</code><a href='#index-false' class='copiable-anchor'> &para;</a></span></dt>
+<dd><div class="example">
+<pre class="example">false
+</pre></div>
+
+<p>Does nothing, returns a non-zero status.
+</p>
+</dd>
 <dt id='index-getopts'><span><code>getopts</code><a href='#index-getopts' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
 <pre class="example">getopts <var>optstring</var> <var>name</var> [<var>arg</var> &hellip;]
@@ -4887,6 +4897,14 @@ values in a subshell or subshell environment when one is created.
 </p>
 <p>The return status is zero unless a <var>sigspec</var> does not specify a
 valid signal.
+</p>
+</dd>
+<dt id='index-true'><span><code>true</code><a href='#index-true' class='copiable-anchor'> &para;</a></span></dt>
+<dd><div class="example">
+<pre class="example">true
+</pre></div>
+
+<p>Does nothing, returns a 0 status.
 </p>
 </dd>
 <dt id='index-umask'><span><code>umask</code><a href='#index-umask' class='copiable-anchor'> &para;</a></span></dt>
@@ -15186,6 +15204,7 @@ Next: <a href="#Reserved-Word-Index" accesskey="n" rel="next">Index of Shell Res
 <tr><td></td><td valign="top"><a href="#index-export"><code>export</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Builtin-Index_bt_letter-F">F</th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-false"><code>false</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-fc"><code>fc</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-History-Builtins">Bash History Builtins</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-fg"><code>fg</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Job-Control-Builtins">Job Control Builtins</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
@@ -15234,6 +15253,7 @@ Next: <a href="#Reserved-Word-Index" accesskey="n" rel="next">Index of Shell Res
 <tr><td></td><td valign="top"><a href="#index-test"><code>test</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-times"><code>times</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-trap"><code>trap</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-true"><code>true</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-type"><code>type</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Builtins">Bash Builtins</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-typeset"><code>typeset</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Builtins">Bash Builtins</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
