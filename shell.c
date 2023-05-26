@@ -751,7 +751,7 @@ main (int argc, char **argv, char **env)
 	start_debugger ();
 
 #if defined (ONESHOT)
-      executing = 1;
+      executing = shell_initialized = 1;
       run_one_command (command_execution_string);
       exit_shell (last_command_exit_value);
 #else /* ONESHOT */

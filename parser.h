@@ -76,9 +76,13 @@ struct dstack {
 #define DOLBRACE_QUOTE	0x40	/* single quote is special in double quotes */
 #define DOLBRACE_QUOTE2	0x80	/* single quote is semi-special in double quotes */
 
-/* characters that can appear following ${ to introduce a function or value
-   substitution (this is mksh terminology and needs to be changed). */
+/* characters that can appear following ${ to introduce a nofork command
+   substitution. */
+#if 0
 #define FUNSUB_CHAR(n) ((n) == ' ' || (n) == '\t' || (n) == '\n' || (n) == '|' || (n) == '(')	/* ) */
+#else
+#define FUNSUB_CHAR(n) ((n) == ' ' || (n) == '\t' || (n) == '\n' || (n) == '|')
+#endif
 
 /* variable declarations from parse.y */
 extern struct dstack dstack;

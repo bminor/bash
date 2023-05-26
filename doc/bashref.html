@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 14 May 2023).
+the Bash shell (version 5.2, 23 May 2023).
 
-This is Edition 5.2, last updated 14 May 2023,
+This is Edition 5.2, last updated 23 May 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.2.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.2, 14 May 2023).
+the Bash shell (version 5.2, 23 May 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.2, last updated 14 May 2023,
+<p>This is Edition 5.2, last updated 23 May 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.2.
 </p>
@@ -3085,7 +3085,7 @@ the parentheses make up the command; none are treated specially.
 and captures its output, again with trailing newlines removed.
 </p>
 <p>The character <var>c</var> following the open brace must be a space, tab,
-newline, &lsquo;<samp>(</samp>&rsquo;, or &lsquo;<samp>|</samp>&rsquo;, and the close brace must be in a position
+newline, or &lsquo;<samp>|</samp>&rsquo;, and the close brace must be in a position
 where a reserved word may appear (i.e., preceded by a command terminator
 such as semicolon).
 Bash allows the close brace to be joined to the remaining characters in
@@ -3104,11 +3104,8 @@ function is executing, and the <code>return</code> builtin forces
 however, the rest of the execution environment,
 including the positional parameters, is shared with the caller.
 </p>
-<p>If the first character following the open brace is a &lsquo;<samp>(</samp>&rsquo;,
-<var>command</var> is executed in a subshell, and <var>command</var> must be
-terminated by a &lsquo;<samp>)</samp>&rsquo;. This is similar to the <code>(</code> compound
-command (see <a href="#Command-Grouping">Grouping Commands</a>).
-If the first character is a &lsquo;<samp>|</samp>&rsquo;, the construct expands to the
+<p>If the first character following the open brace
+is a &lsquo;<samp>|</samp>&rsquo;, the construct expands to the
 value of the <code>REPLY</code> shell variable after <var>command</var> executes,
 without removing any trailing newlines,
 and the standard output of <var>command</var> remains the same as in the
@@ -3122,7 +3119,9 @@ as with any local variable.
 shell variable <code>X</code> unchanged in the current execution environment:
 </p>
 <div class="example">
-<pre class="example">${ local X=12345 ; echo $X; }
+<pre class="example">
+
+${ local X=12345 ; echo $X; }
 </pre></div>
 
 <p>(not declaring <code>X</code> as local would modify its value in the current

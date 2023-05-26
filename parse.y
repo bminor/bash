@@ -305,6 +305,11 @@ static size_t shell_input_line_len;	/* strlen (shell_input_line) */
 /* Either zero or EOF. */
 static int shell_input_line_terminator;
 
+/* This implements one-character lookahead/lookbehind across physical input
+   lines, to avoid something being lost because it's pushed back with
+   shell_ungetc when we're at the start of a line. */
+static int eol_ungetc_lookahead = 0;
+
 /* The line number in a script on which a function definition starts. */
 static int function_dstart;
 static int save_dstart = -1;
@@ -401,7 +406,7 @@ static FILE *yyerrstream;
 %type <word_list> word_list pattern
 %type <pattern> pattern_list case_clause_sequence case_clause
 %type <number> timespec
-%type <number> list_terminator
+%type <number> list_terminator simple_list_terminator
 
 %start inputunit
 
@@ -1241,7 +1246,9 @@ list1:		list1 AND_AND newline_list list1
 	;
 
 simple_list_terminator:	'\n'
+		{ $$ = '\n'; }
 	|	yacc_EOF
+		{ $$ = yacc_EOF; }
 	;
 
 list_terminator:'\n'
@@ -1876,11 +1883,12 @@ save_token_state (void)
 {
   int *ret;
 
-  ret = (int *)xmalloc (4 * sizeof (int));
+  ret = (int *)xmalloc (5 * sizeof (int));
   ret[0] = last_read_token;
   ret[1] = token_before_that;
   ret[2] = two_tokens_ago;
   ret[3] = current_token;
+  ret[4] = token_to_read;
   return ret;
 }
 
@@ -1893,6 +1901,7 @@ restore_token_state (int *ts)
   token_before_that = ts[1];
   two_tokens_ago = ts[2];
   current_token = ts[3];
+  token_to_read = ts[4];
 }
 
 /*
@@ -2329,11 +2338,6 @@ static struct dstack temp_dstack = { (char *)NULL, 0, 0 };
    from shell_input_line; when that line is exhausted, it is time to
    read the next line.  This is called by read_token when the shell is
    processing normal command input. */
-
-/* This implements one-character lookahead/lookbehind across physical input
-   lines, to avoid something being lost because it's pushed back with
-   shell_ungetc when we're at the start of a line. */
-static int eol_ungetc_lookahead = 0;
 
 static int unquoted_backslash = 0;
 
@@ -3390,6 +3394,12 @@ reset_readahead_token (void)
     token_to_read = 0;
 }
 
+void
+unset_readahead_token (void)
+{
+  token_to_read = 0;
+}
+
 /* Read the next token.  Command can be READ (normal operation) or
    RESET (to normalize state). */
 static int
@@ -4305,8 +4315,13 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
       if (FUNSUB_CHAR (peekc))
 	{
 	  dolbrace_spec = peekc;
+#if 0
 	  if (dolbrace_spec == '(')	/* ksh93 compatibility ) */
 	    shell_ungetc (peekc);
+#else
+	  if (dolbrace_spec == '\n')
+	    shell_ungetc (peekc);	/* get PS2 prompting right */
+#endif
 	}
       else
 	{
@@ -4369,6 +4384,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 
   r = yyparse ();
 
+#if 0
   if (open == '{')
     {
       if (current_token == shell_eof_token &&
@@ -4376,6 +4392,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 	    (token_before_that == WORD || token_before_that == ASSIGNMENT_WORD))
 	was_word = 1;
     }
+#endif
 
   if (need_here_doc > 0)
     {
@@ -4455,6 +4472,11 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
       else
 	strcpy (ret, tcmd);
     }
+  else if (retlen == 0) 		/* open == '{' }, empty command */
+    {
+      ret = xmalloc (3);
+      ret[retlen++] = ' ';
+    }
   else					/* open == '{' } */
     {
       int lastc;
@@ -4464,9 +4486,7 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
       ret = xmalloc (retlen + 4);
       ret[0] = (dolbrace_spec == '|') ? '|' : ' ';
       strcpy (ret + 1, tcmd);		/* ( */
-      if (lastc != '\n' && lastc != ';' && lastc != '&' && lastc != ')')
-	ret[retlen++] = ';';
-      else if (lastc == ')' && was_word)	/* right paren can end a word */
+      if (lastc != '\n' && lastc != ';' && lastc != '&')
 	ret[retlen++] = ';';
       ret[retlen++] = ' ';
     }
@@ -5138,7 +5158,16 @@ read_token_word (int character)
   for (;;)
     {
       if (character == EOF)
-	goto got_token;
+	{
+	  /* delimit the current token, then return EOF if the shell is
+	     interactive. */
+	  if (interactive)
+	   {
+	     EOF_Reached = 1;
+	     token_to_read = yacc_EOF;
+	   }
+	  goto got_token;
+	}
 
       if (pass_next_character)
 	{
@@ -6667,6 +6696,25 @@ int eof_encountered = 0;
 /* The limit for eof_encountered. */
 int eof_encountered_limit = 10;
 
+int
+handle_ignoreeof (int reset_prompt)
+{
+  if (eof_encountered < eof_encountered_limit)
+    {
+      fprintf (stderr, _("Use \"%s\" to leave the shell.\n"),
+	       login_shell ? "logout" : "exit");
+      eof_encountered++;
+      /* Reset the parsing state. */
+      last_read_token = current_token = '\n';
+      if (reset_prompt)
+	/* Reset the prompt string to be $PS1. */
+	prompt_string_pointer = (char **)NULL;
+      prompt_again (0);
+      return 1;
+    }
+  return 0;
+}
+
 /* If we have EOF as the only input unit, this user wants to leave
    the shell.  If the shell is not interactive, then just leave.
    Otherwise, if ignoreeof is set, and we haven't done this the
@@ -6683,21 +6731,8 @@ handle_eof_input_unit (void)
 	EOF_Reached = 0;
 
       /* If the user wants to "ignore" eof, then let her do so, kind of. */
-      if (ignoreeof)
-	{
-	  if (eof_encountered < eof_encountered_limit)
-	    {
-	      fprintf (stderr, _("Use \"%s\" to leave the shell.\n"),
-		       login_shell ? "logout" : "exit");
-	      eof_encountered++;
-	      /* Reset the parsing state. */
-	      last_read_token = current_token = '\n';
-	      /* Reset the prompt string to be $PS1. */
-	      prompt_string_pointer = (char **)NULL;
-	      prompt_again (0);
-	      return;
-	    }
-	}
+      if (ignoreeof && handle_ignoreeof (1))
+	return;
 
       /* In this case EOF should exit the shell.  Do it now. */
       reset_parser ();

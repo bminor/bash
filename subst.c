@@ -1044,7 +1044,7 @@ skip_double_quoted (const char *string, size_t slen, int sind, int flags)
 	  else if (string[i + 1] == LBRACE && FUNSUB_CHAR (string[si]))
 	    ret = extract_function_subst (string, &si, Q_DOUBLE_QUOTES, (flags & SX_COMPLETE));
 	  else
-	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, SX_NOALLOC);
+	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, SX_NOALLOC|(flags&SX_COMPLETE));
 
 	  /* These can consume the entire string if they are unterminated */
 	  CHECK_STRING_OVERRUN (i, si, slen, c);

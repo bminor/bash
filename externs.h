@@ -113,6 +113,7 @@ extern char *xparse_dolparen (const char *, char *, int *, int);
 extern COMMAND *parse_string_to_command (char *, int);
 extern void reset_parser (void);
 extern void reset_readahead_token (void);
+extern void unset_readahead_token (void);
 extern WORD_LIST *parse_string_to_word_list (char *, int, const char *);
 
 extern int parser_will_prompt (void);
@@ -123,8 +124,9 @@ extern void free_pushed_string_input (void);
 extern int parser_expanding_alias (void);
 extern void parser_save_alias (void);
 extern void parser_restore_alias (void);
-
 extern void clear_shell_input_line (void);
+
+extern int handle_ignoreeof (int);
 
 extern char *decode_prompt_string (char *);
 

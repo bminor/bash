@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun May 14 15:32:59 EDT 2023
+.\"	Last Change: Tue May 23 11:29:30 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 May 14" "GNU Bash 5.2"
+.TH BASH 1 "2023 May 23" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3622,7 +3622,7 @@ which executes \fIcommand\fP in the current execution environment
 and captures its output, again with trailing newlines removed.
 .PP
 The character \fIc\fP following the open brace must be a space, tab,
-newline, \fB(\fP, or \fB|\fP, and the close brace must be in a position
+newline, or \fB|\fP, and the close brace must be in a position
 where a reserved word may appear (i.e., preceded by a command terminator
 such as semicolon).
 \fBBash\fP allows the close brace to be joined to the remaining characters in
@@ -3641,11 +3641,8 @@ function is executing, and the \fBreturn\fP builtin forces
 however, the rest of the execution environment,
 including the positional parameters, is shared with the caller.
 .PP
-If the first character following the open brace is a \fB(\fP,
-\fIcommand\fP is executed in a subshell, and \fIcommand\fP must be
-terminated by a \fB)\fP. This is similar to the \fB(\fP compound
-command (see \fBCompound Commands\fP above).
-If the first character is a \fB|\fP, the construct expands to the
+If the first character following the open brace
+is a \fB|\fP, the construct expands to the
 value of the \fBREPLY\fP shell variable after \fIcommand\fP executes,
 without removing any trailing newlines,
 and the standard output of \fIcommand\fP remains the same as in the

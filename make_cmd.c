@@ -738,7 +738,7 @@ make_function_def (WORD_DESC *name, COMMAND *command, int lineno, int lstart)
   temp->flags = 0;
   command->line = lstart;
 
-  /* Information used primarily for debugging. */
+  /* Information used primarily for debugging and error messages. */
   temp->source_file = 0;
 #if defined (ARRAY_VARS)
   GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
@@ -749,7 +749,16 @@ make_function_def (WORD_DESC *name, COMMAND *command, int lineno, int lstart)
      initialized come from the environment.  Otherwise default to "main"
      (usually functions being defined interactively) */
   if (temp->source_file == 0)
-    temp->source_file = shell_initialized ? "main" : "environment";
+    {
+      if (shell_initialized == 0)
+	temp->source_file = "environment";
+      else if (interactive_shell)
+	temp->source_file = "main";
+      else if (interactive == 0)	/* assume -c command */
+	temp->source_file = dollar_vars[0];
+      else
+	temp->source_file = shell_name;	/* this clause is never hit */
+    }
 
 #if defined (DEBUGGER)
   bind_function_def (name->word, temp, 0);

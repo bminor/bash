@@ -47,7 +47,7 @@ declare -f func
 xx=${ unset -f func; }
 declare -f func
 
-echo ${( echo abcde )}		# works in ksh93
+echo ${ ( echo abcde );}
 
 echo ${| echo 67890;  REPLY=12345; }		# works in mksh
 x=${| REPLY= ;}
@@ -126,7 +126,7 @@ echo after: "$@"
 
 set -- 1 2
 echo before: "$@"
-: "${( shift)}"
+: "${ ( shift) }"	# parse_comsub adds the closing semicolon anyway
 echo after: "$@"
 
 # nested funsubs

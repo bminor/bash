@@ -2667,7 +2667,7 @@ which executes @var{command} in the current execution environment
 and captures its output, again with trailing newlines removed.
 
 The character @var{c} following the open brace must be a space, tab,
-newline, @samp{(}, or @samp{|}, and the close brace must be in a position
+newline, or @samp{|}, and the close brace must be in a position
 where a reserved word may appear (i.e., preceded by a command terminator
 such as semicolon).
 Bash allows the close brace to be joined to the remaining characters in
@@ -2686,11 +2686,8 @@ function is executing, and the @code{return} builtin forces
 however, the rest of the execution environment,
 including the positional parameters, is shared with the caller.
 
-If the first character following the open brace is a @samp{(},
-@var{command} is executed in a subshell, and @var{command} must be
-terminated by a @samp{)}. This is similar to the @code{(} compound
-command (@pxref{Command Grouping}).
-If the first character is a @samp{|}, the construct expands to the
+If the first character following the open brace
+is a @samp{|}, the construct expands to the
 value of the @code{REPLY} shell variable after @var{command} executes,
 without removing any trailing newlines,
 and the standard output of @var{command} remains the same as in the
@@ -2704,6 +2701,7 @@ For example, this construct expands to @samp{12345}, and leaves the
 shell variable @code{X} unchanged in the current execution environment:
 
 @example
+
 $@{ local X=12345 ; echo $X; @}
 @end example
 

@@ -6389,3 +6389,56 @@ subst.c
 subst.c
 	- quote_escapes_internal: use ifs_cmap instead of iterating through
 	  ifs_value to set skip_ctlesc and skip_ctlnul
+
+				   5/23
+				   ----
+parser.h
+	- remove `(' from FUNSUB_CHARS
+
+parse.y
+	- parse_comsub: don't bother with `(' as one of the FUNSUB_CHARS
+
+doc/bash.1,doc/bashref.texi
+	- command substitution: remove mention of `(' as a valid character
+	  following the open brace in nofork command substitution
+
+				   5/24
+				   ----
+parse.y
+	- parse_comsub: avoid adding `;' to an empty ${ command substitution
+	- parse_comsub: if open == '{', push back a newline we read into
+	  peekc to get PS2 prompting right.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+subst.c
+	- skip_double_quoted: pass the SX_COMPLETE flag down to 
+	  extract_dollar_brace_string in case it contains an unclosed command
+	  substitution.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   5/25
+				   ----
+shell.c
+	- make sure shell_initialized is set to 1 before running -c command
+
+make_cmd.c
+	- make_function_def: initialize source_file to something other than
+	  `main' or `environment' if the shell is not interactive.
+	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+parse.y
+	- save_token_state,restore_token_state: save and restore token_to_read
+	- read_token_word: if we read EOF in an interactive shell, set
+	  token_to_read to yacc_EOF and EOF_Reached to 1 so the token will
+	  be delimited but the next call to read_token returns yacc_EOF
+	- handle_ignoreeof: broke the code that checks eof_encountered and
+	  possibly exceeds the ignoreeof limit out into a separate public
+	  function, called from handle_eof_input_unit
+
+eval.c
+	- reader_loop: if EOF_Reached is set in an interactive shell after
+	  parse_command and execute_command, and ignoreeof has been enabled,
+	  check for ignoreeof with handle_ignoreeof and reset EOF_Reached
+	  back to 0 if we should not exit. This can occur when EOF delimits
+	  a simple command (simple_command_terminator)
+	  From a report by Grisha Levit <grishalevit@gmail.com>
