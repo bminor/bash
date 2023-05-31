@@ -141,6 +141,10 @@ rangecmp (int c1, int c2, int forcecoll)
 static int
 collseqcmp (int c, int equiv)
 {
+  /* Make sure characters >= 0x80 are compared as bytes in a UTF-8 locale. */
+  if (locale_utf8locale && (UTF8_SINGLEBYTE (c) == 0 || UTF8_SINGLEBYTE (equiv) == 0))
+    return (c == equiv);
+
   if (charcmp (c, equiv, 1) == 0)
     return 1;
 
@@ -281,6 +285,9 @@ is_cclass (int c, const char *name)
   enum char_class char_class;
   int result;
 
+  if (locale_utf8locale && UTF8_SINGLEBYTE (c) == 0)
+    return -1;
+
   char_class = is_valid_cclass (name);
   if (char_class == CC_NO_CLASS)
     return -1;
@@ -291,9 +298,10 @@ is_cclass (int c, const char *name)
 
 /* Now include `sm_loop.c' for single-byte characters. */
 /* The result of FOLD is an `unsigned char' */
-# define FOLD(c) ((flags & FNM_CASEFOLD) \
-	? TOLOWER ((unsigned char)c) \
-	: ((unsigned char)c))
+# define FOLD(c) \
+  (((flags & FNM_CASEFOLD) && (locale_utf8locale == 0 || UTF8_SINGLEBYTE (c))) \
+    ? TOLOWER ((unsigned char)c) \
+    : ((unsigned char)c))
 
 #if !defined (__CYGWIN__)
 #  define ISDIRSEP(c)	((c) == '/')

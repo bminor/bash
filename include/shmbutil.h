@@ -55,6 +55,9 @@ extern int locale_utf8locale;	/* XXX */
 #define UTF8_MBFIRSTCHAR(c)	(((c) & 0xc0) == 0xc0)
 #define UTF8_MBCHAR(c)		(((c) & 0xc0) == 0x80)
 
+/* Is an eight-bit quantity a valid character in the current locale? */
+#define VALID_SINGLEBYTE_CHAR(c)  (locale_utf8locale == 0 || ((c) & 0x80) == 0)
+
 #else /* !HANDLE_MULTIBYTE */
 
 #undef MB_LEN_MAX
@@ -82,6 +85,8 @@ extern int locale_utf8locale;	/* XXX */
 
 #define UTF8_SINGLEBYTE(c)	(1)
 #define UTF8_MBFIRSTCHAR(c)	(0)
+
+#defined VALID_SINGLEBYTE_CHAR(c)  (1)
 
 #endif /* !HANDLE_MULTIBYTE */
 

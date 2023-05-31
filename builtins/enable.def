@@ -215,20 +215,23 @@ enable_builtin (WORD_LIST *list)
     {
       while (list)
 	{
-	  opt = enable_shell_command (list->word->word, flags & NFLAG);
+	  char *command;
+
+	  command = list->word->word;
+	  opt = enable_shell_command (command, flags & NFLAG);
 	  next = list->next;
 
 #if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
 	  /* If we try to enable a non-existent builtin, and we have dynamic
 	     loading, try the equivalent of `enable -f name name'. */
-	  if (opt == EX_NOTFOUND)
+	  if (*command && (flags & NFLAG) == 0 && opt == EX_NOTFOUND)
 	    {
 	      int dflags, r;
 	      
 	      dflags = ENABLED|SILENT|((flags & SFLAG) ? SPECIAL : 0);
 
 	      list->next = 0;
-	      r = dyn_load_builtin (list, dflags, list->word->word);
+	      r = dyn_load_builtin (list, dflags, command);
 	      list->next = next;
 	      if (r == EXECUTION_SUCCESS)
 		opt = r;
@@ -240,7 +243,7 @@ enable_builtin (WORD_LIST *list)
 
 	  if (opt == EX_NOTFOUND)
 	    {
-	      sh_notbuiltin (list->word->word);
+	      sh_notbuiltin (command);
 	      result = EXECUTION_FAILURE;
 	    }
 	  else if (opt != EXECUTION_SUCCESS)

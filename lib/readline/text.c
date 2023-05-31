@@ -853,7 +853,11 @@ _rl_insert_char (int count, int c)
       rl_insert_text (string);
       xfree (string);
 
+#if defined (HANDLE_MULTIBYTE)
       return (pending_bytes_length != 0);
+#else
+      return 0;
+#endif
     }
 
   if (count > TEXT_COUNT_MAX)
@@ -1112,6 +1116,8 @@ rl_quoted_insert (int count, int key)
 	r = _rl_insert_next (1);
       while (r == 0 && ++count < 0);
     }
+  else
+    r = _rl_insert_next (count);
 
   if (r == 1)
     _rl_insert_char (0, 0);	/* insert partial multibyte character */

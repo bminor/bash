@@ -6442,3 +6442,55 @@ eval.c
 	  back to 0 if we should not exit. This can occur when EOF delimits
 	  a simple command (simple_command_terminator)
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   5/27
+				   ----
+lib/readline/mbutil.c
+	- _rl_get_char_len: if SRC is "", make sure to return 0
+
+lib/readline/isearch.c
+	- _rl_isearch_callback: if _rl_search_getchar returns EOF, return 1
+	  to abort search; if it returns with RL_STATE_ISEARCH unset, return
+	  1 (handling a signal can turn it off via _rl_isearch_cleanup)
+
+				   5/29
+				   ----
+lib/readline/text.c
+	- _rl_insert_char, rl_quoted_insert: minor fixes from Grisha Levit
+
+builtins/printf.def
+	- bexpand: use the same calculation for the size of the return buffer
+	  as ansicstr().
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+locale.c
+	- locale_setblanks: work around problem with macOS where isblank(x)
+	  incorrectly returns true for characters 0x80-0xff in a UTF-8 locale
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+	- set_default_locale_vars,set_locale_vars,reset_locale_vars: make sure
+	  we call locale_setblanks after setting/resetting locale_utf8locale,
+	  since we use that in locale_setblanks
+
+lib/sh/smatch.c
+	- charseqcmp,is_cclass,FOLD: make sure we don't treat chars >= 0x80
+	  as valid in a UTF-8 locale, since they are multibyte characters.
+	  From a report by Grisha Levit <grishalevit@gmail.com> with a full
+	  explanation in http://www.openradar.me/FB9973780
+
+				   5/30
+				   ----
+builtins/enable.def
+	- enable_builtin: don't call dlopen with a null pathname, it will
+	  succeed. Report from Wiley Young <wyeth2485@gmail.com>
+
+lib/readline/readline.c
+	- _rl_dispatch_subseq: if a user binds do-lowercase-version to something
+	  that isn't an uppercase character, flag an error rather than recurse.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   5/31
+				   ----
+builtins/enable.def
+	- enable_builtin: don't try to load a builtin that's not found if
+	  the -n flag is supplied.
+	  From a report from Emanuele Torre <torreemanuele6@gmail.com>

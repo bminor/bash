@@ -112,9 +112,9 @@ set_default_locale_vars (void)
   if (val == 0 && lc_all && *lc_all)
     {
       setlocale (LC_CTYPE, lc_all);
-      locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
       locale_utf8locale = locale_isutf8 (lc_all);
+      locale_setblanks ();
 
 #    if defined (HANDLE_MULTIBYTE)
       locale_shiftstates = mblen ((char *)NULL, 0);
@@ -219,11 +219,11 @@ set_locale_var (const char *var, const char *value)
 	  else
 	    internal_warning(_("setlocale: LC_ALL: cannot change locale (%s): %s"), lc_all, strerror (errno));
 	}
-      locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
       /* if LC_ALL == "", reset_locale_vars has already called this */
       if (*lc_all && x)
 	locale_utf8locale = locale_isutf8 (lc_all);
+      locale_setblanks ();
 #  if defined (HANDLE_MULTIBYTE)
       locale_shiftstates = mblen ((char *)NULL, 0);
 #  else
@@ -243,11 +243,11 @@ set_locale_var (const char *var, const char *value)
       if (lc_all == 0 || *lc_all == '\0')
 	{
 	  x = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
-	  locale_setblanks ();
 	  locale_mb_cur_max = MB_CUR_MAX;
 	  /* if setlocale() returns NULL, the locale is not changed */
 	  if (x)
 	    locale_utf8locale = locale_isutf8 (x);
+	  locale_setblanks ();
 #if defined (HANDLE_MULTIBYTE)
 	  locale_shiftstates = mblen ((char *)NULL, 0);
 #else
@@ -396,10 +396,10 @@ reset_locale_vars (void)
     retval = 0;
 #  endif
 
-  locale_setblanks ();  
   locale_mb_cur_max = MB_CUR_MAX;
   if (x)
     locale_utf8locale = locale_isutf8 (x);
+  locale_setblanks ();  
 #  if defined (HANDLE_MULTIBYTE)
   locale_shiftstates = mblen ((char *)NULL, 0);
 #  else
@@ -575,6 +575,12 @@ locale_expand (const char *string, int start, int end, int lineno, size_t *lenp)
 }
 #endif
 
+/* Is character C in the [:blank:] class in the current locale? Work around
+   systems like macOS that treat some characters 0x80-0xff as blanks even in
+   a UTF-8 locale where they are multibyte characters. */
+#define locale_isblank(c) \
+  ((locale_utf8locale == 0 || ((c) & 0x80) == 0) && isblank ((unsigned char)(c)))
+
 /* Set every character in the <blank> character class to be a shell break
    character for the lexical analyzer when the locale changes. */
 static void
@@ -584,7 +590,7 @@ locale_setblanks (void)
 
   for (x = 0; x < sh_syntabsiz; x++)
     {
-      if (isblank ((unsigned char)x))
+      if (locale_isblank (x))
 	sh_syntaxtab[x] |= CSHBRK|CBLANK;
       else if (member (x, shell_break_chars))
 	{
