@@ -770,7 +770,14 @@ print_until_or_while (WHILE_COM *while_command, char *which)
   make_command_string_internal (while_command->test);
   PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
-  cprintf (" do\n");	/* was newline ("do\n"); */
+  if (was_heredoc)
+    {
+      indent (indentation);
+      cprintf ("do\n");
+      was_heredoc = 0;
+    }
+  else
+    cprintf (" do\n");	/* was newline ("do\n"); */
   indentation += indentation_amount;
   make_command_string_internal (while_command->action);
   PRINT_DEFERRED_HEREDOCS ("");
@@ -785,8 +792,16 @@ print_if_command (IF_COM *if_command)
   cprintf ("if ");
   skip_this_indent++;
   make_command_string_internal (if_command->test);
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
-  cprintf (" then\n");
+  if (was_heredoc)
+    {
+      indent (indentation_amount);
+      cprintf ("then\n");
+      was_heredoc = 0;
+    }
+  else
+    cprintf (" then\n");
   indentation += indentation_amount;
   make_command_string_internal (if_command->true_case);
   PRINT_DEFERRED_HEREDOCS ("");

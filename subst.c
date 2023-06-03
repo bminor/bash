@@ -4231,12 +4231,17 @@ expand_string_dollar_quote (const char *string, int flags)
 		  continue;
 		}
 	      trans = locale_expand (t, 0, news-sindex, 0, &translen);
-	      free (t);
 	      if (singlequote_translations &&
 		    ((news-sindex-1) != translen || STREQN (t, trans, translen) == 0))
-		t = sh_single_quote (trans);
+		{
+		  free (t);
+		  t = sh_single_quote (trans);
+		}
 	      else
-		t = sh_mkdoublequoted (trans, translen, 0);
+		{
+		  free (t);
+		  t = sh_mkdoublequoted (trans, translen, 0);
+		}
 	      sindex = news;
 	    }
 #endif /* TRANSLATABLE_STRINGS */

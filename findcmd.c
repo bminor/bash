@@ -117,7 +117,19 @@ file_status (const char *name)
 
   /* Determine whether this file exists or not. */
   if (stat (name, &finfo) < 0)
+#if defined (__MVS__) && defined (S_ISEXTL)
+    {
+      /* Workaround for z/OS not supporting stat on external links */
+      int old_errno = errno;
+      if (!(errno == ENOENT && lstat(name, &finfo) == 0 && S_ISEXTL(finfo.st_mode,finfo.st_genvalue)))
+	{
+	  errno = old_errno;	  /* lstat may reset errno */
+	  return (0);
+	}
+    }
+#else
     return (0);
+#endif
 
   /* If the file is a directory, then it is not "executable" in the
      sense of the shell. */

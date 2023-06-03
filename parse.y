@@ -2603,6 +2603,10 @@ shell_getc (int remove_quoted_newline)
 	     word expansion). */
 	  if (bash_input.type == st_string && expanding_alias() == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
 	    shell_input_line[shell_input_line_len] = '\\';
+	  else if (bash_input.type == st_bstream && expanding_alias() == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
+	    shell_input_line[shell_input_line_len] = '\\';
+	  else if (interactive == 0 && bash_input.type == st_stream && expanding_alias() == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
+	    shell_input_line[shell_input_line_len] = '\\';
 	  else
 	    shell_input_line[shell_input_line_len] = '\n';
 	  shell_input_line[shell_input_line_len + 1] = '\0';
@@ -4384,7 +4388,6 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 
   r = yyparse ();
 
-#if 0
   if (open == '{')
     {
       if (current_token == shell_eof_token &&
@@ -4392,7 +4395,6 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 	    (token_before_that == WORD || token_before_that == ASSIGNMENT_WORD))
 	was_word = 1;
     }
-#endif
 
   if (need_here_doc > 0)
     {
@@ -4486,7 +4488,9 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
       ret = xmalloc (retlen + 4);
       ret[0] = (dolbrace_spec == '|') ? '|' : ' ';
       strcpy (ret + 1, tcmd);		/* ( */
-      if (lastc != '\n' && lastc != ';' && lastc != '&')
+      if (was_word)
+	ret[retlen++] = ';';
+      else if (lastc != '\n' && lastc != ';' && lastc != '&')
 	ret[retlen++] = ';';
       ret[retlen++] = ' ';
     }
@@ -6853,9 +6857,10 @@ static char *
 parse_compound_assignment (size_t *retlenp)
 {
   WORD_LIST *wl, *rl;
-  int tok, orig_line_number, assignok;
+  int tok, orig_line_number, assignok, ea, restore_pushed_strings;
   sh_parser_state_t ps;
   char *ret;
+  STRING_SAVER *ss;
 
   orig_line_number = line_number;
   save_parser_state (&ps);
@@ -6878,6 +6883,12 @@ parse_compound_assignment (size_t *retlenp)
 
   esacs_needed_count = expecting_in_token = 0;
 
+  /* We're not pushing any new input here, we're reading from the current input
+     source. If that's an alias, we have to be prepared for the alias to get
+     popped out from underneath us. */
+  ss = (ea = expanding_alias ()) ? pushed_string_list : (STRING_SAVER *)NULL;
+  restore_pushed_strings = 0;
+    
   while ((tok = read_token (READ)) != ')')
     {
       if (tok == '\n')			/* Allow newlines in compound assignments */
@@ -6901,7 +6912,16 @@ parse_compound_assignment (size_t *retlenp)
       wl = make_word_list (yylval.word, wl);
     }
 
+  /* Check whether or not an alias got popped out from underneath us and
+     fix up after restore_parser_state. */
+  if (ea && ss && ss != pushed_string_list)
+    {
+      restore_pushed_strings = 1;
+      ss = pushed_string_list;
+    }
   restore_parser_state (&ps);
+  if (restore_pushed_strings)
+    pushed_string_list = ss;
 
   if (wl == &parse_string_error)
     {

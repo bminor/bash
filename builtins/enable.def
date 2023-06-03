@@ -435,6 +435,8 @@ dyn_load_builtin (WORD_LIST *list, int flags, char *filename)
       b->flags &= ~STATIC_BUILTIN;
       if (flags & SPECIAL)
 	b->flags |= SPECIAL_BUILTIN;
+      if (flags & DISABLED)
+	b->flags &= ~BUILTIN_ENABLED;
       b->handle = handle;
 
       if (old_builtin)

@@ -218,6 +218,7 @@ file_error_and_exit:
       if (flags & FEVAL_NONINT)
 	unwind_protect_int (interactive);
       unwind_protect_int (sourcelevel);
+      unwind_protect_int (retain_fifos);
     }
   else
     {
@@ -231,6 +232,8 @@ file_error_and_exit:
 
   return_catch_flag++;
   sourcelevel++;
+
+  retain_fifos++;			/* XXX */
 
 #if defined (ARRAY_VARS)
   array_push (bash_source_a, (char *)filename);
@@ -304,6 +307,7 @@ file_error_and_exit:
 #endif
       return_catch_flag--;
       sourcelevel--;
+      retain_fifos--;
       COPY_PROCENV (old_return_catch, return_catch);
     }
 

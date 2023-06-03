@@ -6494,3 +6494,57 @@ builtins/enable.def
 	- enable_builtin: don't try to load a builtin that's not found if
 	  the -n flag is supplied.
 	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+parse.y
+	- parse_comsub: use was_word code again to make sure we add a closing
+	  `;' if the last token parsed before the closing ';' or '\n' was a
+	  word, no matter what character ends it.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+aclocal.m4,configure.ac,findcmd.c
+	- IBM z/OS changes from Igor Todorovski <itodorov@ca.ibm.com>
+
+				    6/1
+				    ---
+parse.y
+	- shell_getc: if the shell is not interactive and reading from a
+	  buffered stream or stdin, and not expanding an alias, add a
+	  backslash to a line ending with <backslash><EOF> like we do when
+	  reading from a string. This prevents a backslash-newline from
+	  being discarded when we are removing backslash-newlines from the
+	  input, since we will add a newline to shell_input_line in this case.
+	  From a report by Rob Landley <rob@landley.net>
+
+parse.y
+	- parse_compound_assignment: check and compensate for an alias being
+	  popped out from underneath this function by read_token() (e.g.,
+	  alias L='m=("x")'. Since we don't push a new input source, we should
+	  never restore pushed_string_list from the saved parser state, but
+	  we check and only do this if we were expanding an alias when this
+	  function was called.
+	  From a report by Wiley Young <wyeth2485@gmail.com>
+
+				    6/2
+				    ---
+print_cmd.c
+	- print_if_command: make sure to print any pending here-documents after
+	  printing the test.
+	  From https://bugzilla.redhat.com/show_bug.cgi?id=2211214
+
+builtins/enable.def
+	- if -n is supplied with -f, attempt to load the builtin but mark it
+	  as disabled after loading.
+	  Suggested by Robert Elz <kre@munnari.OZ.AU>
+
+builtins/evalfile.c
+	- _evalfile: increment retain_fifos, so we don't delete any FIFOs or
+	  pipes we inherited before sourcing this file; restore original value
+	  before we return.
+	  From https://savannah.gnu.org/support/index.php?110883
+
+				    6/3
+				    ---
+subst.c
+	- expand_string_dollar_quote: if singlequote_translations is set, there
+	  is a chance for a use-after-free of `t'.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

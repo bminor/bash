@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.051])dnl
+AC_REVISION([for Bash 5.2, version 5.052])dnl
 
 define(bashvers, 5.2)
 define(relstatus, maint)
@@ -75,7 +75,6 @@ m68k-sysv)	opt_bash_malloc=no ;;	# fixes file descriptor leak in closedir
 *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
 # These need additional investigation
 sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
-i370-*)		opt_bash_malloc=no ;;	# IBM z/OS machines
 *-aix*)		opt_bash_malloc=no ;;	# AIX machines
 *-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
 # These lack a working sbrk(2)
@@ -93,6 +92,8 @@ riscv*-freebsd*)	opt_bash_malloc=no ;;
 *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
 *-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
 *-genode*)	opt_bash_malloc=no ;;	# Genode has no sbrk
+i370-openedition*)	opt_bash_malloc=no LOCAL_LIBS=-lzoslib LIBS_FOR_BUILD=-lzoslib ;;	# IBM z/OS machines
+i370-*)		opt_bash_malloc=no ;;	# generic (?) IBM 370 machines
 esac
 
 # memory scrambling on free()

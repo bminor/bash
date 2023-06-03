@@ -127,7 +127,29 @@ foo bar
 ./heredoc7.sub: line 29: foobar: command not found
 ./heredoc7.sub: line 30: EOF: command not found
 grep: *.c: No such file or directory
+foo () 
+{ 
+    echo begin;
+    if cat <<HERE
+contents
+HERE
+    then
+        echo 1 2;
+        echo 3 4;
+    fi
+}
+foo () 
+{ 
+    echo begin;
+    while read var <<HERE
+contents
+HERE
+    do
+        echo 1 2;
+        echo 3 4;
+    done
+}
 comsub here-string
-./heredoc.tests: line 156: warning: here-document at line 154 delimited by end-of-file (wanted `EOF')
+./heredoc.tests: line 159: warning: here-document at line 157 delimited by end-of-file (wanted `EOF')
 hi
 there

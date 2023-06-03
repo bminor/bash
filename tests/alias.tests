@@ -54,8 +54,11 @@ unalias foo bar baz
 alias foo='a=() b=""
 for i in 1; do echo hi; done'
 foo
-
 unalias foo
+
+alias L='m=("x")'
+L
+declare -p m
 
 ${THIS_SH} ./alias1.sub
 ${THIS_SH} ./alias2.sub
