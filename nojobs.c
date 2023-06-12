@@ -1038,3 +1038,9 @@ count_all_jobs (void)
 {
   return 0;
 }
+
+int
+job_control_active_p (void)
+{
+  return 0;
+}

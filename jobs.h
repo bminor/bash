@@ -309,6 +309,7 @@ extern void set_sigchld_handler (void);
 extern void ignore_tty_job_signals (void);
 extern void default_tty_job_signals (void);
 extern void get_original_tty_job_signals (void);
+extern int job_control_active_p (void);
 
 extern void init_job_stats (void);
 

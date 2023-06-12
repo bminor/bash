@@ -6548,3 +6548,24 @@ subst.c
 	- expand_string_dollar_quote: if singlequote_translations is set, there
 	  is a chance for a use-after-free of `t'.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				    6/7
+				    ---
+jobs.c,nojobs.c,jobs.h
+	- job_control_active_p: new function, returns 1 if job control is
+	  currently enabled and we have given away the terminal
+
+builtins/evalstring.c
+	- should_suppress_fork: don't optimize away the fork if job control is
+	  active because we need to call end_job_control and give the terminal
+	  back to the original process group when this command finishes. Call
+	  job_control_active_p() to check this.
+	  Report from Andrew Hamon <and.ham95@gmail.com>
+
+				    6/8
+				    ---
+shell.c
+	- ssh_run_startup_files: new variable, set by run_startup_files if
+	  the shell decides it's being run by ssh and runs bashrc (only if
+	  SSH_SOURCE_BASHRC is defined). Non-zero while the startup files
+	  are being run. Not used by any other part of the shell yet.

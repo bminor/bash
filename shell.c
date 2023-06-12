@@ -161,6 +161,8 @@ int autocd = 0;
 int startup_state = 0;
 int reading_shell_script = 0;
 
+int ssh_reading_startup_files = 0;
+
 /* Special debugging helper. */
 int debugging_login_shell = 0;
 
@@ -1128,6 +1130,7 @@ run_startup_files (void)
       if (isnetconn (fileno (stdin) && shell_level < 2)
 #endif
 	{
+	  ssh_reading_startup_files = 1;
 #ifdef SYS_BASHRC
 #  if defined (__OPENNT)
 	  maybe_execute_file (_prefixInstallPath(SYS_BASHRC, NULL, 0), 1);
@@ -1136,6 +1139,7 @@ run_startup_files (void)
 #  endif
 #endif
 	  maybe_execute_file (bashrc_file, 1);
+	  ssh_reading_startup_files = 0;
 	  return;
 	}
     }

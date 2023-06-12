@@ -100,6 +100,7 @@ extern int executing, login_shell;
 extern int interactive, interactive_shell;
 extern int startup_state;
 extern int reading_shell_script;
+extern int ssh_reading_startup_files;
 extern int shell_initialized;
 extern int bash_argv_initialized;
 extern int subshell_environment;

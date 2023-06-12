@@ -127,6 +127,7 @@ should_suppress_fork (COMMAND *command)
   return (startup_state == 2 && parse_and_execute_level == 1 &&
 	  *bash_input.location.string == '\0' &&
 	  parser_expanding_alias () == 0 &&
+	  job_control_active_p () == 0 &&
 	  should_optimize_fork (command, subshell));
 }
 

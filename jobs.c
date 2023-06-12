@@ -4977,6 +4977,12 @@ end_job_control (void)
     shell_pgrp = original_pgrp;
 }
 
+int
+job_control_active_p (void)
+{
+  return (job_control && original_pgrp != shell_pgrp && shell_pgrp == terminal_pgrp);
+}
+
 /* Restart job control by closing shell tty and reinitializing.  This is
    called after an exec fails in an interactive shell and we do not exit. */
 void
