@@ -932,12 +932,11 @@ builtin_bind_variable (char *name, char *value, int flags)
 #if defined (ARRAY_VARS)
   /* Callers are responsible for calling this with array references that have
      already undergone valid_array_reference checks (read, printf). */
-  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
-  bindflags = flags | (assoc_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;
-  if (flags & ASS_NOEXPAND)
-    vflags |= VA_NOEXPAND;
-  if (flags & ASS_ONEWORD)
-    vflags |= VA_ONEWORD;
+  /* XXX - should we unconditionally set ASS_NOEXPAND if the shell
+     compatibility level is > 52? */
+  bindflags = flags | (array_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;
+  vflags = convert_assign_flags_to_validarray_flags (flags);
+  vflags |= array_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
 
   if (valid_array_reference (name, vflags) == 0)
     v = bind_variable (name, value, flags);
@@ -1022,7 +1021,7 @@ builtin_arrayref_flags (WORD_DESC *w, int baseflags)
 
   vflags = baseflags;
 
-  /* Don't require assoc_expand_once if we have an argument that's already
+  /* Don't require array_expand_once if we have an argument that's already
      passed through valid_array_reference and been expanded once. That
      doesn't protect it from normal expansions like word splitting, so
      proper quoting is still required. */
@@ -1031,7 +1030,7 @@ builtin_arrayref_flags (WORD_DESC *w, int baseflags)
 
 #  if 0
   /* This is a little sketchier but handles quoted arguments. */
-  if (assoc_expand_once && (t =  strchr (w->word, '[')) && t[strlen(t) - 1] == ']')
+  if (array_expand_once && (t =  strchr (w->word, '[')) && t[strlen(t) - 1] == ']')
     vflags |= VA_ONEWORD|VA_NOEXPAND;
 #  endif
 
@@ -1050,12 +1049,12 @@ set_expand_once (int nval, int uwp)
 {
   int oa;
 
-  oa = assoc_expand_once;
+  oa = array_expand_once;
   if (shell_compatibility_level > 51)	/* XXX - internal */
     {
       if (uwp)
-	unwind_protect_int (assoc_expand_once);
-      assoc_expand_once = nval;
+	unwind_protect_int (array_expand_once);
+      array_expand_once = nval;
     }
   return oa;
 }

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue May 23 11:29:30 EDT 2023
+.\"	Last Change: Tue Jun 13 10:33:46 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 May 23" "GNU Bash 5.2"
+.TH BASH 1 "2023 June 13" "GNU Bash 5.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -10385,11 +10385,15 @@ The list of \fBshopt\fP options is:
 .if n .sp 1v
 .PD 0
 .TP 8
-.B assoc_expand_once
-If set, the shell suppresses multiple evaluation of associative array
-subscripts during arithmetic expression evaluation, while executing
+.B array_expand_once
+If set, the shell suppresses multiple evaluation of
+associative and indexed array subscripts
+during arithmetic expression evaluation, while executing
 builtins that can perform variable assignments,
 and while executing builtins that perform array dereferencing.
+.TP 8
+.B assoc_expand_once
+Deprecated; a synonym for \fBarray_expand_once\fP. 
 .TP 8
 .B autocd
 If set, a command name that is the name of a directory is executed as if

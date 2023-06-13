@@ -48,11 +48,8 @@ typedef struct element_state
 
 #if defined (ARRAY_VARS)
 
-/* This variable means to not expand associative array subscripts more than
-   once, when performing variable expansion. */
-extern int assoc_expand_once;
-
-/* The analog for indexed array subscripts */
+/* This variable means to not expand associative or indexed array subscripts
+   more than once, when performing variable expansion. */
 extern int array_expand_once;
 
 /* Flags for array_value_internal and callers array_value/get_array_value; also
@@ -135,6 +132,60 @@ extern void flush_eltstate (array_eltstate_t *);
 #define VA_ONEWORD	0
 #define VA_ALLOWALL	0
 
+#endif
+
+/* Functions to convert from other flag values to AV_ array variable flags */
+
+#if defined (ASS_NOEXPAND)
+static inline int
+convert_assign_flags_to_arrayval_flags (int aflags)
+{
+  int avflags;
+
+  avflags = 0;
+  if (aflags & ASS_NOEXPAND)
+    avflags |= AV_NOEXPAND;
+  if (aflags & ASS_ONEWORD)
+    avflags |= AV_ONEWORD;
+  if (aflags & ASS_NOEVAL)
+    avflags |= AV_NOEXPAND;
+  if (aflags & ASS_ALLOWALLSUB)
+    avflags |= AV_ATSTARKEYS;
+  return avflags;
+}
+#endif
+
+#if defined (VA_NOEXPAND)
+static inline int
+convert_validarray_flags_to_arrayval_flags (int vflags)
+{
+  int avflags;  
+
+  if (vflags & VA_NOEXPAND)
+    avflags |= AV_NOEXPAND;
+  if (vflags & VA_ONEWORD)
+    avflags |= AV_ONEWORD;
+  if (vflags & VA_ALLOWALL)
+    avflags |= AV_ATSTARKEYS;
+  return avflags;
+}
+#endif
+
+#if defined (ASS_NOEXPAND)
+static inline int
+convert_assign_flags_to_validarray_flags (int flags)
+{
+  int vflags;
+
+  vflags = 0;
+  if (flags & ASS_NOEXPAND)
+    vflags |= VA_NOEXPAND;
+  if (flags & ASS_ONEWORD)
+    vflags |= VA_ONEWORD;
+  if (flags & ASS_ALLOWALLSUB)
+    vflags |= VA_ALLOWALL;
+  return vflags;
+}
 #endif
 
 #endif /* !_ARRAYFUNC_H_ */

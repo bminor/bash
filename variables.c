@@ -3329,18 +3329,11 @@ bind_int_variable (const char *lhs, const char *rhs, int flags)
   isint = isarr = implicitarray = 0;
 #if defined (ARRAY_VARS)
   /* Don't rely on VA_NOEXPAND being 1, set it explicitly */
-  vflags = (flags & ASS_NOEXPAND) ? VA_NOEXPAND : 0;
-  if (flags & ASS_ONEWORD)
-    vflags |= VA_ONEWORD;
+  vflags = convert_assign_flags_to_validarray_flags (flags);
   if (valid_array_reference (lhs, vflags))
     {
       isarr = 1;
-      avflags = 0;
-      /* Common code to translate between assignment and reference flags. */
-      if (flags & ASS_NOEXPAND)
-	avflags |= AV_NOEXPAND;
-      if (flags & ASS_ONEWORD)
-	avflags |= AV_ONEWORD;
+      avflags = convert_assign_flags_to_arrayval_flags (flags);
       v = array_variable_part (lhs, avflags, (char **)0, (int *)0);
     }
   else if (legal_identifier (lhs) == 0)

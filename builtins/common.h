@@ -275,9 +275,9 @@ extern int wait_intr_flag;
 #if defined (ARRAY_VARS)
 #define SET_VFLAGS(wordflags, vflags, bindflags) \
   do { \
-    vflags = assoc_expand_once ?  VA_NOEXPAND : 0; \
-    bindflags = assoc_expand_once ? ASS_NOEXPAND : 0; \
-    if (assoc_expand_once && (wordflags & W_ARRAYREF)) \
+    vflags = array_expand_once ?  VA_NOEXPAND : 0; \
+    bindflags = array_expand_once ? ASS_NOEXPAND : 0; \
+    if (array_expand_once && (wordflags & W_ARRAYREF)) \
       vflags |= VA_ONEWORD|VA_NOEXPAND; \
     if (vflags & VA_NOEXPAND) \
       bindflags |= ASS_NOEXPAND; \

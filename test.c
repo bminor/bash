@@ -617,7 +617,7 @@ unary_test (char *op, char *arg, int flags)
 
     case 'v':
 #if defined (ARRAY_VARS)
-      aflags = assoc_expand_once ? AV_NOEXPAND : 0;
+      aflags = array_expand_once ? AV_NOEXPAND : 0;
       if (valid_array_reference (arg, aflags))
 	{
 	  char *t;

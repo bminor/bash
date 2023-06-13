@@ -6569,3 +6569,48 @@ shell.c
 	  the shell decides it's being run by ssh and runs bashrc (only if
 	  SSH_SOURCE_BASHRC is defined). Non-zero while the startup files
 	  are being run. Not used by any other part of the shell yet.
+
+				   6/12
+				   ----
+arrayfunc.h
+	- new inline functions to convert between assignment flags (ASS_*),
+	  array value flags (AV_*), and valid array flags (VA_*)
+
+shell.h
+	- include arrayfunc.h after subst.h and variables.h so all the values
+	  for the new inline functions are available
+
+variables.c
+	- bind_int_variable: use convert_assign_flags_to_validarray_flags and
+	  convert_assign_flags_to_arrayval flags instead of inline assignments
+
+builtins/common.c
+	- builtin_bind_variable: use convert_assign_flags_to_validarray_flags
+	  instead of inline assignments
+
+arrayfunc.c
+	- assign_array_element: use convert_assign_flags_to_arrayval_flags
+	  instead of inline code
+	- assign_array_element_internal: use convert_assign_flags_to_arrayval_flags
+	  to pass the right values to array_expand_index
+	- assign_array_var_from_string: since expand_compound_array_assignment
+	  performs one round of expansion on the subscripts, make sure to add
+	  ASS_NOEXPAND (if assoc_expand_once is set) and ASS_ALLOWALLSUB to the
+	  flags we pass to assign_compound_array_list
+	- unbind_array_index: use convert_validarray_flags_to_array_value_flags
+	  to pass the right values to array_expand_index
+	- array_expand_index: uncomment code tagged for bash-5.3 that checks
+	  AV_NOEXPAND and suppresses call to expand_arith_string if it's set.
+	  This set of changes extends assoc_expand_once to indexed arrays
+
+arrayfunc.[ch],execute_cmd.c,expr.c,test.c,builtins/common.c,builtins/mkbuiltins.c
+builtins/declare.def,builtins/set.def,builtins/shopt.def
+	- array_expand_once: new name for internal assoc_expand_once variable
+
+				   6/13
+				   ----
+builtins/shopt.def
+	- array_expand_once: new option, replaces assoc_expand_once
+
+doc/bash.1,doc/bashref.texi
+	- array_expand_once: document new shopt option

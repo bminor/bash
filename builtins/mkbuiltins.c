@@ -178,7 +178,7 @@ char *posix_builtins[] =
 };
 
 /* The builtin commands that can take array references as arguments and pay
-   attention to `assoc_expand_once'. These are the ones that don't assign
+   attention to `array_expand_once'. These are the ones that don't assign
    values, but need to avoid double expansions. */
 char *arrayvar_builtins[] =
 {

@@ -1,0 +1,86 @@
+# change behavior of shell builtins to extend assoc_expand_once to indexed
+# arrays
+
+export subscript='$(echo INJECTION! >&2 ; echo 0)'
+shopt -s array_expand_once
+
+printf -v a["$subscript"] %s hi
+declare -p a
+unset a
+
+printf -v "a[$subscript]" %s hi
+declare -p a
+
+a[0]=hi
+
+unset a["$subscript"]
+declare -p a
+
+unset a
+
+unset a["$subscript"]
+declare -p a
+
+unset -v a
+read a["$subscript"] <<<hi
+declare -p a
+
+declare -a a
+read a["$subscript"] <<<hi
+declare -p a
+
+unset -v a
+
+declare -a a
+
+{ sleep 1; exit 12; } & bgpid=$!
+wait -n -p a["$subscript"] $bgpid
+
+declare -p a
+
+unset -v a
+declare -a a
+
+declare -i a["$subscript"]=42
+declare -p a
+
+# this still won't work because the quotes prevent it from being recognized as
+# an assignment statement
+#declare -i "a[$subscript]"=42
+#declare -p a
+
+test -v a["$subscript"] && echo set
+[ -v a["$subscript"] ] && echo set
+
+let a["$subscript"]+=1
+unset -v a
+
+# these are all already arithmetic expression errors
+
+declare -a a
+
+(( a[$subscript]++ ))
+declare -p a
+: $(( a[$subscript]++ ))
+declare -p a
+
+a[$subscript]=hi
+declare -p a
+
+# length shortcuts for unset variables, so give it a value
+a[0]=zero
+echo ${#a[$subscript]}
+
+unset -v a
+
+# compound assignments should not perform double expansion
+
+a=( [$subscript]=hi )
+declare -p a
+
+declare -a a
+a=( [$subscript]=hi )
+declare -p a
+
+unset -v a
+

@@ -122,7 +122,6 @@ extern int debugging_mode;
 #endif
 
 #if defined (ARRAY_VARS)
-extern int assoc_expand_once;
 extern int array_expand_once;
 int expand_once_flag;
 #endif
@@ -146,7 +145,7 @@ static int shopt_set_complete_direxpand (char *, int);
 #endif
 
 #if defined (ARRAY_VARS)
-static int set_assoc_expand (char *, int);
+static int set_array_expand (char *, int);
 #endif
 
 #if defined (EXTENDED_GLOB)
@@ -180,7 +179,8 @@ static struct {
 } shopt_vars[] = {
   { "autocd", &autocd, (shopt_set_func_t *)NULL },
 #if defined (ARRAY_VARS)
-  { "assoc_expand_once", &expand_once_flag, set_assoc_expand },
+  { "array_expand_once", &expand_once_flag, set_array_expand },
+  { "assoc_expand_once", &expand_once_flag, set_array_expand },
 #endif
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
@@ -386,7 +386,7 @@ reset_shopt_options (void)
   glob_always_skip_dot_and_dotdot = 1;		/* new default as of bash-5.2 */
 
 #if defined (ARRAY_VARS)
-  expand_once_flag = assoc_expand_once = 0;
+  expand_once_flag = array_expand_once = 0;
 #endif
 
 #if defined (HISTORY)
@@ -914,12 +914,12 @@ initialize_bashopts (int no_bashopts)
 
 #if defined (ARRAY_VARS)
 static int
-set_assoc_expand (char *option_name, int mode)
+set_array_expand (char *option_name, int mode)
 {
 #if 0 /* leave this disabled */
   if (shell_compatibility_level <= 51)
 #endif
-    assoc_expand_once = expand_once_flag;
+    array_expand_once = expand_once_flag;
   return 0;
 }
 #endif

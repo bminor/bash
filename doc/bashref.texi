@@ -5700,11 +5700,15 @@ option.
 The list of @code{shopt} options is:
 @table @code
 
-@item assoc_expand_once
-If set, the shell suppresses multiple evaluation of associative array
-subscripts during arithmetic expression evaluation, while executing
+@item array_expand_once
+If set, the shell suppresses multiple evaluation of
+associative and indexed array subscripts
+during arithmetic expression evaluation, while executing
 builtins that can perform variable assignments,
 and while executing builtins that perform array dereferencing.
+
+@item assoc_expand_once
+Deprecated; a synonym for @code{array_expand_once}. 
 
 @item autocd
 If set, a command name that is the name of a directory is executed as if

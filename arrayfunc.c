@@ -45,11 +45,8 @@
 #  define RBRACK ']'
 #endif
 
-/* This variable means to not expand associative array subscripts more than
-   once, when performing variable expansion. */
-int assoc_expand_once = 0;
-
-/* Ditto for indexed array subscripts -- currently unused */
+/* This variable means to not expand associative or indexed array subscripts
+   more than once, when performing variable expansion. */
 int array_expand_once = 0;
 
 static SHELL_VAR *bind_array_var_internal (SHELL_VAR *, arrayind_t, char *, const char *, int);
@@ -317,11 +314,7 @@ assign_array_element (const char *name, const char *value, int flags, array_elts
   int sublen, isassoc, avflags;
   SHELL_VAR *entry;
 
-  avflags = 0;
-  if (flags & ASS_NOEXPAND)
-    avflags |= AV_NOEXPAND;
-  if (flags & ASS_ONEWORD)
-    avflags |= AV_ONEWORD;
+  avflags = convert_assign_flags_to_arrayval_flags (flags);
   vname = array_variable_name (name, avflags, &sub, &sublen);
 
   if (vname == 0)
@@ -358,6 +351,10 @@ assign_array_element (const char *name, const char *value, int flags, array_elts
   return entry;
 }
 
+/* Assign VALUE to the index computed from SUB of length SUBLEN of array
+   VNAME. NAME is the complete variable reference. FLAGS are ASS_ assignment
+   flags. ENTRY is the SHELL_VAR corresponding to VNAME. The caller
+   initializes ESTATEP, and we set it to the values we compute. */
 static SHELL_VAR *
 assign_array_element_internal (SHELL_VAR *entry, const char *name, char *vname,
 			       char *sub, int sublen, const char *value,
@@ -395,7 +392,11 @@ assign_array_element_internal (SHELL_VAR *entry, const char *name, char *vname,
     }
   else
     {
-      ind = array_expand_index (entry, sub, sublen, 0);
+      /* convert ASS_ flags to AV_FLAGS here */
+      int avflags;
+
+      avflags = convert_assign_flags_to_arrayval_flags (flags);
+      ind = array_expand_index (entry, sub, sublen, avflags);
       /* negative subscripts to indexed arrays count back from end */
       if (entry && ind < 0)
 	ind = (array_p (entry) ? array_max_index (array_cell (entry)) : 0) + 1 + ind;
@@ -745,7 +746,11 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 
 	  if (array_p (var))
 	    {
-	      ind = array_expand_index (var, w + 1, len, 0);
+	      int avflags;
+
+	      /* convert ASS_ FLAGS to AV_ flags here */
+	      avflags = convert_assign_flags_to_arrayval_flags (flags);
+	      ind = array_expand_index (var, w + 1, len, avflags);
 	      /* negative subscripts to indexed arrays count back from end */
 	      if (ind < 0)
 		ind = array_max_index (array_cell (var)) + 1 + ind;
@@ -829,17 +834,23 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 }
 
 /* Perform a compound array assignment:  VAR->name=( VALUE ).  The
-   VALUE has already had the parentheses stripped. */
+   VALUE has already had the parentheses stripped. FLAGS are ASS_
+   assignment flags. */
 SHELL_VAR *
 assign_array_var_from_string (SHELL_VAR *var, char *value, int flags)
 {
   WORD_LIST *nlist;
+  int aflags;
 
   if (value == 0)
     return var;
 
   nlist = expand_compound_array_assignment (var, value, flags);
-  assign_compound_array_list (var, nlist, flags);
+  /* This is were we set ASS_NOEXPAND and ASS_ONEWORD if we need to, since
+     expand_compound_array_assignment performs word expansions. Honors
+     array_expand_once; allows @ and * as associative array keys. */
+  aflags = flags | (array_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;
+  assign_compound_array_list (var, nlist, aflags);
 
   if (nlist)
     dispose_words (nlist);
@@ -1062,6 +1073,7 @@ unbind_array_element (SHELL_VAR *var, char *sub, int flags)
   arrayind_t ind;
   char *akey;
   ARRAY_ELEMENT *ae;
+  int avflags;
 
   /* Assume that the caller (unset_builtin) passes us a null-terminated SUB,
      so we don't have to use VA_ONEWORD or parse the subscript again with
@@ -1118,7 +1130,9 @@ unbind_array_element (SHELL_VAR *var, char *sub, int flags)
 	    }
 	  /* Fall through for behavior 3 */
 	}
-      ind = array_expand_index (var, sub, strlen (sub) + 1, 0);
+
+      avflags = convert_validarray_flags_to_arrayval_flags (flags);
+      ind = array_expand_index (var, sub, strlen (sub) + 1, avflags);
       /* negative subscripts to indexed arrays count back from end */
       if (ind < 0)
 	ind = array_max_index (array_cell (var)) + 1 + ind;
@@ -1134,7 +1148,8 @@ unbind_array_element (SHELL_VAR *var, char *sub, int flags)
   else	/* array_p (var) == 0 && assoc_p (var) == 0 */
     {
       akey = this_command_name;
-      ind = array_expand_index (var, sub, strlen (sub) + 1, 0);
+      avflags = convert_validarray_flags_to_arrayval_flags (flags);
+      ind = array_expand_index (var, sub, strlen (sub) + 1, avflags);
       this_command_name = akey;
       if (ind == 0)
 	{
@@ -1265,7 +1280,8 @@ valid_array_reference (const char *name, int flags)
   return tokenize_array_reference (name, flags, (char **)NULL);
 }
 
-/* Expand the array index beginning at S and extending LEN characters. */
+/* Expand the array index beginning at S and extending LEN characters. FLAGS
+   are AV_ flags saying how to compute the array value. */
 arrayind_t
 array_expand_index (SHELL_VAR *var, const char *s, int len, int flags)
 {
@@ -1276,8 +1292,12 @@ array_expand_index (SHELL_VAR *var, const char *s, int len, int flags)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-#if 0	/* TAG: maybe bash-5.2 */
+#if 1	/* TAG: bash-5.3 */
+#if 0
+  if (shell_compatibility_level <= 52 || (flags & AV_NOEXPAND) == 0)
+#else
   if ((flags & AV_NOEXPAND) == 0)
+#endif
     t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   else
     t = exp;

@@ -3900,7 +3900,7 @@ execute_cond_node (COND_COM *cond)
       result = unary_test (cond->op->word, arg1, varflag) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
 #if defined (ARRAY_VARS)
       if (varop)
-	assoc_expand_once = oa;
+	array_expand_once = oa;
 #endif
       if (arg1 != nullstr)
 	free (arg1);
@@ -4217,7 +4217,7 @@ fix_assignment_words (WORD_LIST *words)
 
 #if defined (ARRAY_VARS)
 /* Set W_ARRAYREF on words that are valid array references to a builtin that
-   accepts them. This is intended to completely replace assoc_expand_once in
+   accepts them. This is intended to completely replace array_expand_once in
    time. */
 static void
 fix_arrayref_words (WORD_LIST *words)

@@ -330,7 +330,7 @@ expr_bind_variable (const char *lhs, const char *rhs)
     return;		/* XXX */
 
 #if defined (ARRAY_VARS)
-  aflags = (assoc_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
+  aflags = (array_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
   aflags |= ASS_ALLOWALLSUB;		/* allow assoc[@]=value */
 #else
   aflags = 0;
@@ -352,13 +352,13 @@ expr_skipsubscript (char *vp, char *cp)
 
   isassoc = 0;
   entry = 0;
-  if (assoc_expand_once & already_expanded)
+  if (array_expand_once & already_expanded)
     {
       *cp = '\0';
       isassoc = legal_identifier (vp) && (entry = find_variable (vp)) && assoc_p (entry);
       *cp = '[';	/* ] */
     }
-  flags = (isassoc && assoc_expand_once && already_expanded) ? VA_NOEXPAND : 0;
+  flags = (isassoc && array_expand_once && already_expanded) ? VA_NOEXPAND : 0;
   return (skipsubscript (cp, 0, flags));
 }
 
@@ -1150,7 +1150,7 @@ expr_streval (char *tok, int e, struct lvalue *lvalue)
   initial_depth = expr_depth;
 
 #if defined (ARRAY_VARS)
-  tflag = (assoc_expand_once && already_expanded) ? AV_NOEXPAND : 0;	/* for a start */
+  tflag = (array_expand_once && already_expanded) ? AV_NOEXPAND : 0;	/* for a start */
 #endif
 
   /* [[[[[ */
