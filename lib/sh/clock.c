@@ -38,7 +38,7 @@ extern int locale_decpoint (void);
 extern long get_clk_tck (void);
 
 void
-clock_t_to_secs (clock_t t, time_t *sp, int *sfp)
+clock_t_to_secs (clock_t t, time_t *sp, long *sfp)
 {
   static long clk_tck = -1;
 
@@ -67,13 +67,14 @@ print_clock_t (FILE *fp, clock_t t)
 {
   time_t timestamp;
   long minutes;
-  int seconds, seconds_fraction;
+  int seconds;
+  long seconds_fraction;
 
   clock_t_to_secs (t, &timestamp, &seconds_fraction);
 
   minutes = timestamp / 60;
   seconds = timestamp % 60;
 
-  fprintf (fp, "%ldm%d%c%03ds",  minutes, seconds, locale_decpoint(), seconds_fraction);
+  fprintf (fp, "%ldm%d%c%03lds",  minutes, seconds, locale_decpoint(), seconds_fraction);
 }
 #endif /* HAVE_TIMES */

@@ -147,10 +147,10 @@ static int execute_cond_node (COND_COM *);
 static int execute_cond_command (COND_COM *);
 #endif
 #if defined (COMMAND_TIMING)
-static int mkfmt (char *, int, int, time_t, int);
+static int mkfmt (char *, int, int, time_t, long);
 static void print_formatted_time (FILE *, char *,
-				      time_t, int, time_t, int,
-				      time_t, int, int);
+				      time_t, long, time_t, long,
+				      time_t, long, int);
 static int time_command (COMMAND *, int, int, int, struct fd_bitmap *);
 #endif
 #if defined (ARITH_FOR_COMMAND)
@@ -1186,11 +1186,14 @@ extern int timeval_to_cpu (struct timeval *, struct timeval *, struct timeval *)
 #define POSIX_TIMEFORMAT "real %2R\nuser %2U\nsys %2S"
 #define BASH_TIMEFORMAT  "\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS"
 
-static const int precs[] = { 0, 100, 10, 1 };
+static const int precs[] = { 0, 100000, 10000, 1000, 100, 10, 1 };
+static const int maxvals[] = { 1, 10, 100, 1000, 10000, 100000, 10000000 };
 
 /* Expand one `%'-prefixed escape sequence from a time format string. */
-static int
-mkfmt (char *buf, int prec, int lng, time_t sec, int sec_fraction)
+/* SEC_FRACTION is in usecs. We normalize and round that based on the
+  precision. */
+int
+mkfmt (char *buf, int prec, int lng, time_t sec, long sec_fraction)
 {
   time_t min;
   char abuf[INT_STRLEN_BOUND(time_t) + 1];
@@ -1224,10 +1227,31 @@ mkfmt (char *buf, int prec, int lng, time_t sec, int sec_fraction)
     buf[ind++] = abuf[aind++];
 
   /* We want to add a decimal point and PREC places after it if PREC is
-     nonzero.  PREC is not greater than 3.  SEC_FRACTION is between 0
-     and 999. */
+     nonzero.  PREC is not greater than 6.  SEC_FRACTION is between 0
+     and 999999 (microseconds). */
   if (prec != 0)
     {
+      /* We round here because we changed timeval_to_secs to return
+	 microseconds and normalized clock_t_to_secs's fractional return
+	 value to microseconds, deferring the work to be done to now.
+
+	 sec_fraction is in microseconds. Take the value, cut off what we
+	 don't want, round up if necessary, then convert back to
+	 microseconds. */
+      if (prec != 6)
+	{
+	  int frac, rest, maxval;
+
+	  maxval = maxvals[6 - prec];
+	  frac = sec_fraction / maxval;
+	  rest = sec_fraction % maxval;
+
+	  if (rest >= maxval/2)
+	  frac++;
+
+	  sec_fraction = frac * (1000000 / maxvals[prec]);
+	}
+  
       buf[ind++] = locale_decpoint ();
       for (aind = 1; aind <= prec; aind++)
 	{
@@ -1262,13 +1286,13 @@ mkfmt (char *buf, int prec, int lng, time_t sec, int sec_fraction)
    resectively. */
 static void
 print_formatted_time (FILE *fp, char *format,
-		      time_t rs, int rsf, time_t us, int usf, time_t ss, int ssf,
+		      time_t rs, long rsf, time_t us, long usf, time_t ss, long ssf,
 		      int cpu)
 {
   int prec, lng, len;
   char *str, *s, ts[INT_STRLEN_BOUND (time_t) + sizeof ("mSS.FFFF")];
   time_t sum;
-  int sum_frac;
+  long sum_frac;
   int sindex, ssize;
 
   len = strlen (format);
@@ -1312,7 +1336,7 @@ print_formatted_time (FILE *fp, char *format,
 	  if (DIGIT (*s))		/* `precision' */
 	    {
 	      prec = *s++ - '0';
-	      if (prec > 3) prec = 3;
+	      if (prec > 6) prec = 6;
 	    }
 	  if (*s == 'l')		/* `length extender' */
 	    {
@@ -1348,8 +1372,8 @@ static int
 time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, struct fd_bitmap *fds_to_close)
 {
   int rv, posix_time, old_flags, nullcmd, code;
-  time_t rs, us, ss;
-  int rsf, usf, ssf;
+  time_t rs, us, ss;		/* seconds */
+  long rsf, usf, ssf;		/* microseconds */
   int cpu;
   char *time_format;
   volatile procenv_t save_top_level;
@@ -1417,7 +1441,8 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
     sh_longjmp (top_level, code);
 
   rs = us = ss = 0;
-  rsf = usf = ssf = cpu = 0;
+  rsf = usf = ssf = 0;
+  cpu = 0;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
 #  if defined (HAVE_STRUCT_TIMEZONE)
@@ -1429,15 +1454,15 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
   getrusage (RUSAGE_CHILDREN, &kidsa);
 
   difftimeval (&real, &before, &after);
-  timeval_to_secs (&real, &rs, &rsf);
+  timeval_to_secs (&real, &rs, &rsf, 1000000);
 
   addtimeval (&user, difftimeval(&after, &selfb.ru_utime, &selfa.ru_utime),
 		     difftimeval(&before, &kidsb.ru_utime, &kidsa.ru_utime));
-  timeval_to_secs (&user, &us, &usf);
+  timeval_to_secs (&user, &us, &usf, 1000000);
 
   addtimeval (&sys, difftimeval(&after, &selfb.ru_stime, &selfa.ru_stime),
 		    difftimeval(&before, &kidsb.ru_stime, &kidsa.ru_stime));
-  timeval_to_secs (&sys, &ss, &ssf);
+  timeval_to_secs (&sys, &ss, &ssf, 1000000);
 
   cpu = timeval_to_cpu (&real, &user, &sys);
 #else
@@ -1446,12 +1471,16 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
 
   real = tafter - tbefore;
   clock_t_to_secs (real, &rs, &rsf);
+  /* clock_t_to_secs returns RSF in milliseconds; multipy by 1000 to get microseconds. */
+  rsf *= 1000;
 
   user = (after.tms_utime - before.tms_utime) + (after.tms_cutime - before.tms_cutime);
   clock_t_to_secs (user, &us, &usf);
+  usf *= 1000;
 
   sys = (after.tms_stime - before.tms_stime) + (after.tms_cstime - before.tms_cstime);
   clock_t_to_secs (sys, &ss, &ssf);
+  ssf *= 1000;
 
   cpu = (real == 0) ? 0 : ((user + sys) * 10000) / real;
 

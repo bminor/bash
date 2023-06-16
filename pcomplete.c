@@ -1472,6 +1472,9 @@ pcomp_set_readline_variables (int flags, int nval)
      sure that readline knows it. */
   if (flags & COPT_FILENAMES)
     rl_filename_completion_desired = nval;
+  /* If we want to quote everything, not just filenames, tell readline. */
+  if (flags & COPT_FULLQUOTE)
+    rl_full_quoting_desired = nval;
   /* If the user doesn't want a space appended, tell readline. */
   if (flags & COPT_NOSPACE)
     rl_completion_suppress_append = nval;

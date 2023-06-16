@@ -208,7 +208,7 @@ extern long get_clk_tck (void);
 /* No prototypes so we don't have to have clock_t defined when this file
    is included. */
 #ifdef NEED_CLOCK_FUNCS_DECL
-extern void clock_t_to_secs (clock_t, time_t *, int *);
+extern void clock_t_to_secs (clock_t, time_t *, long *);
 extern void print_clock_t (FILE *, clock_t);
 #endif
 
@@ -494,7 +494,7 @@ extern char *sh_strvis (const char *);
    so we don't have to count on having a definition of struct timeval in
    scope when this file is included. */
 #ifdef NEED_TIMEVAL_FUNCS_DECL
-extern void timeval_to_secs (struct timeval *, time_t *, int *);
+extern void timeval_to_secs (struct timeval *, time_t *, long *, int);
 extern void print_timeval (FILE *, struct timeval *);
 #endif
 

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Jun 13 10:33:46 EDT 2023
+.\"	Last Change: Thu Jun 15 18:11:33 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 June 13" "GNU Bash 5.2"
+.TH BASH 1 "2023 June 15" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -588,8 +588,7 @@ total user and system time consumed by the shell and its children.
 The
 .SM
 .B TIMEFORMAT
-variable may be used to specify the format of
-the time information.
+variable specifies the format of the time information.
 .PP
 Each command in a multi-command pipeline,
 where pipes are created,
@@ -2658,8 +2657,8 @@ The CPU percentage, computed as (%U + %S) / %R.
 The optional \fIp\fP is a digit specifying the \fIprecision\fP,
 the number of fractional digits after a decimal point.
 A value of 0 causes no decimal point or fraction to be output.
-At most three places after the decimal point may be specified;
-values of \fIp\fP greater than 3 are changed to 3.
+At most six places after the decimal point may be specified;
+values of \fIp\fP greater than 6 are changed to 6.
 If \fIp\fP is not specified, the value 3 is used.
 .IP
 The optional \fBl\fP specifies a longer format, including
@@ -8219,6 +8218,7 @@ The arguments to the \fB\-G\fP, \fB\-W\fP, and \fB\-X\fP options
 should be quoted to protect them from expansion before the
 .B complete
 builtin is invoked.
+.sp 1
 .RS
 .PD 0
 .TP 8
@@ -8244,6 +8244,10 @@ Tell readline that the compspec generates filenames, so it can perform any
 filename\-specific processing (like adding a slash to directory names,
 quoting special characters, or suppressing trailing spaces).
 Intended to be used with shell functions.
+.TP 8
+.B fullquote
+Tell readline to quote all the completed words even if they are not
+filenames.
 .TP 8
 .B noquote
 Tell readline not to quote the completed words if they are filenames

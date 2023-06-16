@@ -795,8 +795,7 @@ shell builtins, shell functions, and pipelines.  An external
 When the shell is in @sc{posix} mode (@pxref{Bash POSIX Mode}), @code{time}
 may be followed by a newline.  In this case, the shell displays the
 total user and system time consumed by the shell and its children.
-The @env{TIMEFORMAT} variable may be used to specify the format of
-the time information.
+The @env{TIMEFORMAT} variable specifies the format of the time information.
 
 If the pipeline is not executed asynchronously (@pxref{Lists}), the
 shell waits for all commands in the pipeline to complete.
@@ -6959,8 +6958,8 @@ The CPU percentage, computed as (%U + %S) / %R.
 The optional @var{p} is a digit specifying the precision, the number of
 fractional digits after a decimal point.
 A value of 0 causes no decimal point or fraction to be output.
-At most three places after the decimal point may be specified; values
-of @var{p} greater than 3 are changed to 3.
+At most six places after the decimal point may be specified;
+values of @var{p} greater than 6 are changed to 6.
 If @var{p} is not specified, the value 3 is used. 
 
 The optional @code{l} specifies a longer format, including minutes, of

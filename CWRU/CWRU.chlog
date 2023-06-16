@@ -6614,3 +6614,66 @@ builtins/shopt.def
 
 doc/bash.1,doc/bashref.texi
 	- array_expand_once: document new shopt option
+
+				   6/15
+				   ----
+lib/readline/complete.c
+	- rl_full_quoting_desired: new application-settable variable, if set
+	  to non-zero by an application completion function, all completions
+	  will be quoted as if they were filenames, subject to the value of
+	  rl_filename_quote_characters. Initialized to 0 and reset to 0
+	  by set_completion_defaults.
+	  From a contribution by Grisha Levit <grishalevit@gmail.com>
+	- QUOTING_DESIRED: new macro to check whether we should quote completions
+
+lib/readline/readline.h
+	- rl_full_quoting_desired: extern declaration
+
+lib/readline/doc/rltech.texi
+	- rl_full_quoting_desired: document
+
+configure.ac
+	- bumped version to 5.3-devel
+
+pcomplete.h
+	- COPT_FULLQUOTE: new compspec option, for rl_full_quoting_desired
+
+pcomplete.c
+	- pcomp_set_readline_variables: set rl_full_quoting_desired according
+	  to COPT_FULLQUOTE
+
+builtins/complete.def
+	- fullquote: add new complete/compopt option value
+
+doc/bash.1,lib/readline/doc/rluser.texi
+	- fullquote: document new complete/compopt option
+
+lib/sh/timeval.c
+	- timeval_to_secs: sfp argument is now a long *; there is a new
+	  maxval argument (always 10^6 for now) that determines how to
+	  round; returns tv_usec in *sfp if maxval == 10^6; otherwise
+	  return value is basically tv_usec/maxval with rounding
+	- print_timeval: change argument type in call to timeval_to_secs
+
+lib/sh/clock.c
+	- clock_t_to_secs: sfp argument is now a long *
+	- print_clock_t: change argument type in call to clock_t_to_secs
+
+externs.h
+	- timeval_to_seconds, clock_t_to_seconds: change prototypes
+
+execute_cmd.c
+	- mkfmt,print_formatted_time: fractional seconds arguments are now
+	  longs
+	- mkfmt: accept precisions up to 6; since sec_fraction is in usecs,
+	  perform any necessary rounding for precisions < 6
+	- print_formatted_time: allow precision specifiers up to 6; default
+	  is still 3
+	- time_command: fractional seconds variables are now long; add new
+	  argument to timeval_to_secs (always 1000000)
+	- time_command: if we call clock_t_to_secs, multiply the return
+	  fractional seconds value by 1000 to convert it from msec to usec
+
+doc/bash.1,doc/bashref.texi
+	- TIMEFORMAT: document that the max precision is now 6
+	  From https://savannah.gnu.org/support/?110343

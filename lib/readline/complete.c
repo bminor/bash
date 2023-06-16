@@ -336,6 +336,15 @@ int rl_filename_completion_desired = 0;
    entry finder function. */
 int rl_filename_quoting_desired = 1;
 
+/* Non-zero means we should apply filename-type quoting to all completions
+   even if we are not otherwise treating the matches as filenames. This is
+   ALWAYS zero on entry, and can only be changed within a completion entry
+   finder function. */
+int rl_full_quoting_desired = 0;
+
+#define QUOTING_DESIRED() \
+  (rl_full_quoting_desired || (rl_filename_completion_desired && rl_filename_quoting_desired))
+
 /* This function, if defined, is called by the completer when real
    filename completion is done, after all the matching names have been
    generated. It is passed a (char**) known as matches in the code below.
@@ -512,6 +521,7 @@ set_completion_defaults (int what_to_do)
   /* Only the completion entry function can change these. */
   rl_filename_completion_desired = 0;
   rl_filename_quoting_desired = 1;
+  rl_full_quoting_desired = 0;
   rl_completion_type = what_to_do;
   rl_completion_suppress_append = rl_completion_suppress_quote = 0;
   rl_completion_append_character = ' ';
@@ -1408,10 +1418,8 @@ compute_lcd_of_matches (char **match_list, int matches, const char *text)
 		   check against the list of matches
 		FI */
 	  dtext = (char *)NULL;
-	  if (rl_filename_completion_desired &&
-	      rl_filename_dequoting_function &&
-	      rl_completion_found_quote &&
-	      rl_filename_quoting_desired)
+	  if (QUOTING_DESIRED() && rl_completion_found_quote &&
+		rl_filename_dequoting_function)
 	    {
 	      dtext = (*rl_filename_dequoting_function) ((char *)text, rl_completion_quote_character);
 	      text = dtext;
@@ -1766,9 +1774,7 @@ make_quoted_replacement (char *match, int mtype, char *qc)
      matches don't require a quoted substring. */
   replacement = match;
 
-  should_quote = match && rl_completer_quote_characters &&
-			rl_filename_completion_desired &&
-			rl_filename_quoting_desired;
+  should_quote = match && rl_completer_quote_characters && QUOTING_DESIRED();
 
   if (should_quote)
     should_quote = should_quote && (!qc || !*qc ||
@@ -1980,8 +1986,7 @@ compare_match (char *text, const char *match)
   char *temp;
   int r;
 
-  if (rl_filename_completion_desired && rl_filename_quoting_desired && 
-      rl_completion_found_quote && rl_filename_dequoting_function)
+  if (QUOTING_DESIRED() && rl_completion_found_quote && rl_filename_dequoting_function)
     {
       temp = (*rl_filename_dequoting_function) (text, rl_completion_quote_character);
       r = strcmp (temp, match);
@@ -2043,8 +2048,7 @@ rl_complete_internal (int what_to_do)
      strcmp directly. */
   /* nontrivial_lcd is set if the common prefix adds something to the word
      being completed. */
-  if (rl_filename_completion_desired && rl_filename_quoting_desired &&
-      rl_completion_found_quote && rl_filename_dequoting_function)
+  if (QUOTING_DESIRED() && rl_completion_found_quote && rl_filename_dequoting_function)
     {
       char *t;
       t = (*rl_filename_dequoting_function) (text, rl_completion_quote_character);
