@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 15 June 2023).
+the Bash shell (version 5.3, 16 June 2023).
 
-This is Edition 5.3, last updated 15 June 2023,
+This is Edition 5.3, last updated 16 June 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 15 June 2023).
+the Bash shell (version 5.3, 16 June 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 15 June 2023,
+<p>This is Edition 5.3, last updated 16 June 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.3.
 </p>
@@ -7066,6 +7066,15 @@ dynamically loadable builtins specified by the
 <code>enable</code> command.
 </p>
 </dd>
+<dt id='index-BASH_005fMONOSECONDS'><span><code>BASH_MONOSECONDS</code><a href='#index-BASH_005fMONOSECONDS' class='copiable-anchor'> &para;</a></span></dt>
+<dd><p>Each time this variable is referenced, it expands to the value returned
+by the system&rsquo;s monotonic clock, if one is available.
+If there is no monotonic clock, this is equivalent to <code>EPOCHSECONDS</code>.
+If <code>BASH_MONOSECONDS</code>
+is unset, it loses its special properties, even if it is
+subsequently reset.
+</p>
+</dd>
 <dt id='index-BASH_005fREMATCH'><span><code>BASH_REMATCH</code><a href='#index-BASH_005fREMATCH' class='copiable-anchor'> &para;</a></span></dt>
 <dd><p>An array variable whose members are assigned by the &lsquo;<samp>=~</samp>&rsquo; binary
 operator to the <code>[[</code> conditional command
@@ -7091,6 +7100,14 @@ The initial value is 0.
 If <code>BASH_SUBSHELL</code>
 is unset, it loses its special properties, even if it is
 subsequently reset.
+</p>
+</dd>
+<dt id='index-BASH_005fTRAPSIG'><span><code>BASH_TRAPSIG</code><a href='#index-BASH_005fTRAPSIG' class='copiable-anchor'> &para;</a></span></dt>
+<dd><p>Set to the signal number corresponding to the trap action being executed
+during its execution.
+See the description of <code>trap</code>
+(see <a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>)
+for information about signal numbers and trap execution.
 </p>
 </dd>
 <dt id='index-BASH_005fVERSINFO'><span><code>BASH_VERSINFO</code><a href='#index-BASH_005fVERSINFO' class='copiable-anchor'> &para;</a></span></dt>
@@ -15567,9 +15584,11 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td></td><td valign="top"><a href="#index-BASH_005fEXECUTION_005fSTRING"><code>BASH_EXECUTION_STRING</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-BASH_005fLINENO"><code>BASH_LINENO</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-BASH_005fLOADABLES_005fPATH"><code>BASH_LOADABLES_PATH</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-BASH_005fMONOSECONDS"><code>BASH_MONOSECONDS</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-BASH_005fREMATCH"><code>BASH_REMATCH</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-BASH_005fSOURCE"><code>BASH_SOURCE</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-BASH_005fSUBSHELL"><code>BASH_SUBSHELL</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-BASH_005fTRAPSIG"><code>BASH_TRAPSIG</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-BASH_005fVERSINFO"><code>BASH_VERSINFO</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-BASH_005fVERSION"><code>BASH_VERSION</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-BASH_005fXTRACEFD"><code>BASH_XTRACEFD</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>

@@ -3145,6 +3145,12 @@ if (job == NO_JOB)
 	  if (check_window_size)
 	    get_new_window_size (0, (int *)0, (int *)0);
 	}
+      else if (interactive_shell && interactive == 0 && check_window_size &&
+		(subshell_environment & (SUBSHELL_PAREN|SUBSHELL_ASYNC)) == SUBSHELL_PAREN &&
+		IS_FOREGROUND (job))
+	/* Make checkwinsize work in foreground subshells started from
+	   interactive shells. */
+	get_new_window_size (0, (int *)0, (int *)0);
 
       /* Moved here from set_job_status_and_cleanup, which is in the SIGCHLD
 	 signal handler path */

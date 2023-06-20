@@ -431,9 +431,14 @@ declare_internal (WORD_LIST *list, int local_var)
       /* Can't define functions using assignment statements */
       if (offset && (flags_on & att_function))	/* declare -f [-rix] foo=bar */
 	{
-	  builtin_error (_("cannot use `-f' to make functions"));
-	  free (name);
-	  return (EXECUTION_FAILURE);
+	  if (var = find_function (name))
+	    offset = 0;
+	  else
+	    {
+	      builtin_error (_("cannot use `-f' to make functions"));
+	      free (name);
+	      return (EXECUTION_FAILURE);
+	    }
 	}
 
       /* There should be a way, however, to let people look at a particular

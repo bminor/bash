@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.053])dnl
+AC_REVISION([for Bash 5.3, version 5.054])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -848,7 +848,7 @@ AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getentropy getgroups \
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions
-AC_CHECK_FUNCS(bcopy bzero confstr faccessat fnmatch \
+AC_CHECK_FUNCS(bcopy bzero clock_gettime confstr faccessat fnmatch \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
 		imaxdiv memmove pathconf putenv raise random regcomp regexec \
 		setenv setlinebuf setlocale setvbuf siginterrupt strchr \

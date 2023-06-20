@@ -6301,6 +6301,14 @@ A colon-separated list of directories in which the shell looks for
 dynamically loadable builtins specified by the
 @code{enable} command.
 
+@item BASH_MONOSECONDS
+Each time this variable is referenced, it expands to the value returned
+by the system's monotonic clock, if one is available.
+If there is no monotonic clock, this is equivalent to @env{EPOCHSECONDS}.
+If @env{BASH_MONOSECONDS}
+is unset, it loses its special properties, even if it is
+subsequently reset.
+
 @item BASH_REMATCH
 An array variable whose members are assigned by the @samp{=~} binary
 operator to the @code{[[} conditional command
@@ -6324,6 +6332,13 @@ The initial value is 0.
 If @env{BASH_SUBSHELL}
 is unset, it loses its special properties, even if it is
 subsequently reset.
+
+@item BASH_TRAPSIG
+Set to the signal number corresponding to the trap action being executed
+during its execution.
+See the description of @code{trap}
+(@pxref{Bourne Shell Builtins})
+for information about signal numbers and trap execution.
 
 @item BASH_VERSINFO
 A readonly array variable (@pxref{Arrays})

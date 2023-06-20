@@ -6677,3 +6677,37 @@ execute_cmd.c
 doc/bash.1,doc/bashref.texi
 	- TIMEFORMAT: document that the max precision is now 6
 	  From https://savannah.gnu.org/support/?110343
+
+				   6/16
+				   ----
+variables.c
+	- get_monoseconds: use clock_gettime to return the value of the
+	  system's monotonic clock, if available
+	- BASH_MONOSECONDS: a new dynamic variable that returns the value of
+	  get_monoseconds
+	  From a suggestion by William Kennington <wak@google.com>
+
+doc/bash.1,doc/bashref.texi
+	- BASH_MONOSECONDS: document
+
+trap.c
+	- save_bash_trapsig,set_bash_trapsig,restore_bash_trapsig: functions
+	  to manage value of BASH_TRAPSIG
+	- run_pending_traps: save and restore the value of BASH_TRAPSIG; set
+	  it to the numeric signal number of the trap being run while it's
+	  executing
+	  From a feature request by Eric Marceau <ericmarceau@rogers.com>
+	- _run_trap_internal,run_exit_trap: save and restore BASH_TRAPSIG;
+	  make sure it's set appropriately
+
+builtins/declare.def
+	- declare_internal: if declare is supplied -f and an argument that
+	  looks like an assignment statement, fail only if there is not a
+	  function with that name already defined.
+	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+	  back in 12/22
+
+jobs.c
+	- wait_for: make checkwinsize work in subshell commands started from
+	  interactive shells
+	  New feature request by Kerin Millar <kfm@plushkava.net>

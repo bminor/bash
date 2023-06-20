@@ -218,6 +218,8 @@ static SHELL_VAR *assign_seconds (SHELL_VAR *, char *, arrayind_t, char *);
 static SHELL_VAR *get_seconds (SHELL_VAR *);
 static SHELL_VAR *init_seconds_var (void);
 
+static SHELL_VAR *get_monoseconds (SHELL_VAR *);
+
 static SHELL_VAR *assign_random (SHELL_VAR *, char *, arrayind_t, char *);
 static SHELL_VAR *get_random (SHELL_VAR *);
 
@@ -1360,6 +1362,31 @@ init_seconds_var (void)
   return v;      
 }
 
+/* Functions for BASH_MONOSECONDS */
+static SHELL_VAR *
+get_monoseconds (SHELL_VAR *self)
+{
+  int ret;
+  intmax_t nval;
+  struct timeval tv;
+
+#if defined (HAVE_CLOCK_GETTIME) && defined (CLOCK_MONOTONIC)
+  struct timespec ts;
+
+  ret = clock_gettime (CLOCK_MONOTONIC, &ts);
+  if (ret == 0)
+    {
+      nval = ts.tv_sec;
+      return (set_int_value (self, nval, integer_p (self) != 0));
+    }
+#endif
+
+  /* Fall back to gettimeofday if clock_gettime not available or fails */
+  ret = gettimeofday (&tv, NULL);
+  nval = tv.tv_sec;      
+  return (set_int_value (self, nval, integer_p (self) != 0));
+}
+
 /* Functions for $RANDOM and $SRANDOM */
 
 int last_random_value;
@@ -1826,6 +1853,8 @@ initialize_dynamic_variables (void)
 
   INIT_DYNAMIC_VAR ("BASH_COMMAND", (char *)NULL, get_bash_command, (sh_var_assign_func_t *)NULL);
   INIT_DYNAMIC_VAR ("BASH_SUBSHELL", (char *)NULL, get_subshell, assign_subshell);
+
+  INIT_DYNAMIC_VAR ("BASH_MONOSECONDS", (char *)NULL, get_monoseconds, (sh_var_assign_func_t *)NULL);
 
   INIT_DYNAMIC_VAR ("RANDOM", (char *)NULL, get_random, assign_random);
   VSETATTR (v, att_integer);

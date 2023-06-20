@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Jun 15 18:11:33 EDT 2023
+.\"	Last Change: Fri Jun 16 11:36:28 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 June 15" "GNU Bash 5.3"
+.TH BASH 1 "2023 June 16" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1657,6 +1657,15 @@ matching the entire regular expression.
 The element with index \fIn\fP is the portion of the
 string matching the \fIn\fPth parenthesized subexpression.
 .TP
+.B BASH_MONOSECONDS
+Each time this variable is referenced, it expands to the value returned
+by the system's monotonic clock, if one is available.
+If there is no monotonic clock, this is equivalent to \fBEPOCHSECONDS\fP.
+If
+.B BASH_MONOSECONDS
+is unset, it loses its special properties, even if it is
+subsequently reset.
+.TP
 .B BASH_SOURCE
 An array variable whose members are the source filenames
 where the corresponding shell function names in the
@@ -1676,6 +1685,14 @@ If
 .B BASH_SUBSHELL
 is unset, it loses its special properties, even if it is
 subsequently reset.
+.TP
+.B BASH_TRAPSIG
+Set to the signal number corresponding to the trap action being executed
+during its execution.
+See the description of \fBtrap\fP under
+.SM
+.B SHELL BUILTIN COMMANDS
+below for information about signal numbers and trap execution.
 .TP
 .B BASH_VERSINFO
 A readonly array variable whose members hold version information for

@@ -293,6 +293,34 @@ decode_signal (const char *string, int flags)
   return (NO_SIG);
 }
 
+static char *
+save_bash_trapsig (void)
+{
+  char *ret;
+
+  if (ret = get_string_value ("BASH_TRAPSIG"))
+    ret = savestring (ret);
+  return ret;
+}
+
+static void
+set_bash_trapsig (int sig)
+{
+  bind_var_to_int ("BASH_TRAPSIG", sig, 0);
+}
+
+static void
+restore_bash_trapsig (char *oldval)
+{
+  if (oldval == 0)
+    unbind_variable_noref ("BASH_TRAPSIG");
+  else
+    {
+      bind_variable ("BASH_TRAPSIG", oldval, 0);
+      free (oldval);
+    }
+}
+
 /* Non-zero when we catch a trapped signal. */
 static int catch_flag;
 
@@ -308,6 +336,7 @@ run_pending_traps (void)
   volatile int save_return_catch_flag, function_code;
   procenv_t save_return_catch;
   char *trap_command, *old_trap;
+  char *old_trapsig;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -341,6 +370,7 @@ run_pending_traps (void)
 #endif
   old_running = running_trap;
   old_context = trap_return_context;
+  old_trapsig = save_bash_trapsig ();
 
   for (sig = 1; sig < NSIG; sig++)
     {
@@ -351,6 +381,8 @@ run_pending_traps (void)
 	  /* XXX - set last_command_exit_value = trap_saved_exit_value here? */
 	  running_trap = sig + 1;
 	  trap_return_context = funcnest + sourcenest;
+
+	  set_bash_trapsig (sig);
 
 	  if (sig == SIGINT)
 	    {
@@ -477,6 +509,7 @@ run_pending_traps (void)
 		    {
 		      running_trap = old_running;		/* XXX */
 		      trap_return_context = old_context;
+		      restore_bash_trapsig (old_trapsig);
 		      /* caller will set last_command_exit_value */
 		      sh_longjmp (return_catch, 1);
 		    }
@@ -492,6 +525,7 @@ run_pending_traps (void)
 #if defined (ARRAY_VARS)
   restore_pipestatus_array (ps);
 #endif
+  restore_bash_trapsig (old_trapsig);
   last_command_exit_value = old_exit_value;
 }
 
@@ -978,6 +1012,7 @@ int
 run_exit_trap (void)
 {
   char *trap_command;
+  char *old_trapsig;
   int code, function_code, retval;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
@@ -1003,6 +1038,9 @@ run_exit_trap (void)
       running_trap = 1;
       trap_return_context = funcnest + sourcenest;
 
+      old_trapsig = save_bash_trapsig ();
+      set_bash_trapsig (EXIT_TRAP);
+
       code = setjmp_nosigs (top_level);
 
       /* If we're in a function, make sure return longjmps come here, too. */
@@ -1027,6 +1065,7 @@ run_exit_trap (void)
 #if defined (ARRAY_VARS)
       array_dispose (ps);
 #endif
+      restore_bash_trapsig (old_trapsig);
 
       return retval;
     }
@@ -1052,6 +1091,7 @@ static int
 _run_trap_internal (int sig, char *tag)
 {
   char *trap_command, *old_trap;
+  char *old_trapsig;
   int trap_exit_value;
   volatile int save_return_catch_flag, function_code;
   int old_modes, old_running, old_int, old_context;
@@ -1088,6 +1128,9 @@ _run_trap_internal (int sig, char *tag)
       sigmodes[sig] |= SIG_INPROGRESS;
       sigmodes[sig] &= ~SIG_CHANGED;		/* just to be sure */
       trap_command =  savestring (old_trap);
+
+      old_trapsig = save_bash_trapsig ();
+      set_bash_trapsig (sig);
 
       running_trap = sig + 1;
       trap_return_context = funcnest + sourcenest;
@@ -1150,6 +1193,8 @@ _run_trap_internal (int sig, char *tag)
 
       if ((old_modes & SIG_INPROGRESS) == 0)
 	sigmodes[sig] &= ~SIG_INPROGRESS;
+
+      restore_bash_trapsig (old_trapsig);
 
       running_trap = old_running;
       interrupt_state = old_int;
