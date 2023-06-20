@@ -4297,7 +4297,8 @@ static char *
 parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 {
   int peekc, r;
-  int start_lineno, dolbrace_spec, local_extglob, was_extpat, was_word;
+  int start_lineno, dolbrace_spec, local_extglob, was_extpat;
+  int was_word, was_newline, was_semi, was_amp;
   char *ret, *tcmd;
   size_t retlen;
   sh_parser_state_t ps;
@@ -4342,7 +4343,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
   save_parser_state (&ps);
 
   was_extpat = (parser_state & PST_EXTPAT);
-  was_word = 0;
+  was_word = was_newline = was_semi = was_amp = 0;
 
   /* State flags we don't want to persist into command substitutions. */
   parser_state &= ~(PST_REGEXP|PST_EXTPAT|PST_CONDCMD|PST_CONDEXPR|PST_COMPASSIGN);
@@ -4390,10 +4391,14 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 
   if (open == '{')
     {
-      if (current_token == shell_eof_token &&
-	    (last_read_token == ';' || last_read_token == '\n') &&
-	    (token_before_that == WORD || token_before_that == ASSIGNMENT_WORD))
-	was_word = 1;
+      if (current_token == shell_eof_token)
+	{
+	  was_semi = last_read_token == ';';
+	  was_newline = last_read_token == '\n';
+	  was_amp = last_read_token == '&';
+
+	  was_word = (was_semi || was_newline) && (token_before_that == WORD || token_before_that == ASSIGNMENT_WORD);
+	}
     }
 
   if (need_here_doc > 0)
@@ -4488,7 +4493,9 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
       ret = xmalloc (retlen + 4);
       ret[0] = (dolbrace_spec == '|') ? '|' : ' ';
       strcpy (ret + 1, tcmd);		/* ( */
-      if (was_word)
+      if (was_newline)
+	ret[retlen++] = '\n';
+      else if (was_word || was_semi)
 	ret[retlen++] = ';';
       else if (lastc != '\n' && lastc != ';' && lastc != '&')
 	ret[retlen++] = ';';

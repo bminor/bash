@@ -436,7 +436,7 @@ binary_operator (void)
       ((w[0] == '>' || w[0] == '<') && w[1] == '\0') ||		/* <, > */
       (w[0] == '!' && w[1] == '=' && w[2] == '\0'))		/* != */
     {
-#if 0	/* TAG: bash-5.3 POSIX interp 375 11/9/2022 */
+#if 1	/* POSIX interp 375 11/9/2022 */
       value = binary_test (w, argv[pos], argv[pos + 2], (posixly_correct ? TEST_LOCALE : 0));
 #else
       value = binary_test (w, argv[pos], argv[pos + 2], 0);

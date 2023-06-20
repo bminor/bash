@@ -569,7 +569,7 @@ rl_vi_yank_pop (int count, int key)
     }
 
   l = strlen (rl_kill_ring[rl_kill_index]);
-#if 0 /* TAG:readline-8.3 8/29/2022 matteopaolini1995@gmail.com */
+#if 1
   origpoint = rl_point;
   n = rl_point - l + 1;
 #else
@@ -577,7 +577,7 @@ rl_vi_yank_pop (int count, int key)
 #endif
   if (n >= 0 && STREQN (rl_line_buffer + n, rl_kill_ring[rl_kill_index], l))
     {
-#if 0 /* TAG:readline-8.3 */
+#if 1
       rl_delete_text (n, n + l);		/* remember vi cursor positioning */
       rl_point = origpoint - l;
 #else

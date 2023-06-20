@@ -93,11 +93,11 @@ sh_regmatch (const char *string, const char *pattern, int flags)
   /* Store the parenthesized subexpressions in the array BASH_REMATCH.
      Element 0 is the portion that matched the entire regexp.  Element 1
      is the part that matched the first subexpression, and so on. */
-#if 1
+#if 0
+  /* This was the pre-bash-5.3 code. */
   unbind_global_variable_noref ("BASH_REMATCH");
   rematch = make_new_array_variable ("BASH_REMATCH");
 #else
-  /* TAG:bash-5.3 */
   rematch = builtin_find_indexed_array ("BASH_REMATCH", 1);
 #endif
   amatch = rematch ? array_cell (rematch) : (ARRAY *)0;

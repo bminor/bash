@@ -51,6 +51,15 @@ anonopen (const char *name, int flags, char **fn)
 {
   int fd, flag;
 
+#if defined (HAVE_MEMFD_CREATE)
+  /* "Names do not affect the behavior of the file descriptor." */
+  fd = memfd_create ("anonopen", 0);
+  if (fd >= 0)
+    return fd;
+  /* If memfd_create fails, we fall through to the unlinked-regular-file
+     implementation. */
+#endif
+
   /* Heuristic */
   flag = (name && *name == '/') ? MT_TEMPLATE : MT_USETMPDIR;
   fd = sh_mktmpfd (name, flag|MT_USERANDOM|MT_READWRITE|MT_UNLINK, fn);

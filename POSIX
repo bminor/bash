@@ -313,7 +313,10 @@ The following list is what's changed when 'POSIX mode' is in effect:
      that a backslash preceding a double quote character will escape it
      and the backslash will be removed.
 
-  66. Command substitutions don't set the '?' special parameter.  The
+  66. The 'test' builtin compares strings using the current locale when
+     processing the '<' and '>' binary operators.
+
+  67. Command substitutions don't set the '?' special parameter.  The
      exit status of a simple command without a command word is still the
      exit status of the last command substitution that occurred while
      evaluating the variable assignments and redirections in that

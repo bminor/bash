@@ -1863,8 +1863,7 @@ bash_default_completion (const char *text, int start, int end, int qc, int compf
 	      rl_completion_suppress_append = 1;
 	      rl_filename_completion_desired = 0;
 	    }
-#if 0
-	  /* TAG:bash-5.3 jidanni@jidanni.org 11/11/2022 */
+#if 1
 	  else if (matches[0] && matches[1] && STREQ (matches[0], matches[1]) &&
 	  	   matches[2] && STREQ (matches[1], matches[2]) && CMD_IS_DIR (matches[0]))
 #else

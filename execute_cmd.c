@@ -1705,9 +1705,8 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 
       dispose_redirects (command->redirects);
       command->redirects = (REDIRECT *)NULL;
-#if 0
+#if 1
 #if defined (PROCESS_SUBSTITUTION) && defined (JOB_CONTROL)
-      /* TAG: bash-5.3 kre 10/24/2022 */
       if (user_subshell && command->type == cm_subshell)
 	{
 	  procsub_clear ();

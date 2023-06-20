@@ -4276,6 +4276,11 @@ expr.c
 	  subscripts if the shell compatibility level is greater than 51.
 	  Prompted by report from Corey Hickey <bugfood-ml@fatooh.org>
 
+subst.c
+	- string_list_pos_params, param_expand: make sure that $* is treated
+	  the same as "$*" in here-document bodies that are being expanded.
+	  From https://lists.gnu.org/archive/html/bug-bash/2022-09/msg00002.html
+
 				   11/1
 				   ----
 lib/readline/readline.c
@@ -6750,4 +6755,45 @@ variables.c
 	- push_posix_tempvar_internal: call arrayar_copyval instead of using
 	  inline code
 
+				   6/19
+				   ----
+lib/sh/shmatch.c
+	- sh_regmatch: use builtin_find_indexed_array to allow a local copy
+	  of BASH_REMATCH.
+	  From https://lists.gnu.org/archive/html/bug-bash/2022-05/msg00052.html
+
+execute_cmd.c
+	- execute_in_subshell: tentative change to clear procsub list after
+	  performing redirections, so nothing in a redirection can affect
+	  what's in the subshell.
+	  From https://lists.gnu.org/archive/html/bug-bash/2022-10/msg00114.html
+
+test.c
+	- binary_operator: in posix mode, the < and > operators compare strings
+	  using the current locale (strcoll).
+	  From https://www.austingroupbugs.net/view.php?id=375
+
+bashline.c
+	- bash_default_completion: make sure that command completion adds the
+	  trailing `/' suffix for directories even if the directory name is
+	  the same as the common prefix of matches.
+	  From https://lists.gnu.org/archive/html/bug-bash/2022-11/msg00034.html
+
+lib/readline/kill.c
+	- rl_vi_yank_pop: make repeated invocations of vi-yank-pop cycle
+	  through the kill ring just like in emacs mode, even when point
+	  is at the end of the line.
+	  From https://lists.gnu.org/archive/html/bug-bash/2022-08/msg00105.html
+
+parse.y
+	- parse_comsub: set variables if the last token (last_read_token) is
+	  `;', `\n', or `&', in addition to was_word
+	- parse_comsub: if the last read token was a newline (was_newline),
+	  terminate the comsub with a newline instead of a semicolon; keeps
+	  the line numbers more consistent.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/sh/anonfile.c
+	- anonopen: use memfd_create if it is available, fall through to
+	  traditional Unix/POSIX implementation if it fails
 
