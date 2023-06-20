@@ -283,6 +283,8 @@ static SHELL_VAR *new_shell_variable (const char *);
 static SHELL_VAR *make_new_variable (const char *, HASH_TABLE *);
 static SHELL_VAR *bind_variable_internal (const char *, const char *, HASH_TABLE *, int, int);
 
+static void init_shell_variable (SHELL_VAR *);
+
 static void dispose_variable_value (SHELL_VAR *);
 static void free_variable_hash_data (PTR_T);
 
@@ -2657,6 +2659,21 @@ make_local_variable (const char *name, int flags)
     new_var = make_new_variable (name, vc->table);
   else
     {
+#if 0
+      /* This handles the case where a variable is found in both the temporary
+	 environment *and* declared as a local variable. If we want to avoid
+	 multiple entries with the same name in VC->table (that might mess up
+	 unset), we need to use the existing variable entry and destroy the
+	 current value. Currently disabled because it doesn't matter -- the
+	 right things happen. */
+      new_var = 0;
+      if (was_tmpvar && (new_var = hash_lookup (name, vc->table)))
+	{
+	  dispose_variable_value (new_var);
+	  init_variable (new_var);
+	}
+      if (new_var == 0)
+#endif
       new_var = make_new_variable (name, vc->table);
 
       /* If we found this variable in one of the temporary environments,
@@ -2716,15 +2733,9 @@ set_local_var_flags:
   return (new_var);
 }
 
-/* Create a new shell variable with name NAME. */
-static SHELL_VAR *
-new_shell_variable (const char *name)
+static void
+init_variable (SHELL_VAR *entry)
 {
-  SHELL_VAR *entry;
-
-  entry = (SHELL_VAR *)xmalloc (sizeof (SHELL_VAR));
-
-  entry->name = savestring (name);
   var_setvalue (entry, (char *)NULL);
   CLEAR_EXPORTSTR (entry);
 
@@ -2737,7 +2748,18 @@ new_shell_variable (const char *name)
      make_local_variable has the responsibility of changing the
      variable context. */
   entry->context = 0;
+}
 
+/* Create a new shell variable with name NAME. */
+static SHELL_VAR *
+new_shell_variable (const char *name)
+{
+  SHELL_VAR *entry;
+
+  entry = (SHELL_VAR *)xmalloc (sizeof (SHELL_VAR));
+
+  entry->name = savestring (name);
+  init_variable (entry);
   return (entry);
 }
 
@@ -3202,8 +3224,9 @@ bind_variable (const char *name, const char *value, int flags)
      and, if found, modify the value there before modifying it in the
      shell_variables table.  This allows sourced scripts to modify values
      given to them in a temporary environment while modifying the variable
-     value that the caller sees. */
-  if (temporary_env && value)		/* XXX - can value be null here? */
+     value that the caller sees. The caller can inhibit this by setting
+     ASS_NOTEMPENV in FLAGS. */
+  if (temporary_env && value && (flags & ASS_NOTEMPENV) == 0)	/* XXX - can value be null here? */
     bind_tempenv_variable (name, value);
 
   /* XXX -- handle local variables here. */
@@ -4493,6 +4516,11 @@ push_temp_var (PTR_T data)
 
   v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, ASS_FORCE|ASS_NOLONGJMP);
 
+#if defined (ARRAY_VARS)
+  if (v && (array_p (var) || assoc_p (var)))
+    arrayvar_copyval (var, v);
+#endif
+
   /* XXX - should we set the context here?  It shouldn't matter because of how
      assign_in_env works, but we do it anyway. */
   if (v)
@@ -5174,6 +5202,7 @@ push_posix_tempvar_internal (SHELL_VAR *var, int isbltin)
       set_current_options (value_cell (var));
       set_shellopts ();
     }
+
   /* This takes variable assignments preceding special builtins that can execute
      multiple commands (source, eval, etc.) and performs the equivalent of
      an assignment statement to modify the closest enclosing variable (the
@@ -5215,14 +5244,8 @@ push_posix_tempvar_internal (SHELL_VAR *var, int isbltin)
 
 #if defined (ARRAY_VARS)
   if (v && (array_p (var) || assoc_p (var)))
-    {
-      FREE (value_cell (v));
-      if (array_p (var))
-	var_setarray (v, array_copy (array_cell (var)));
-      else
-	var_setassoc (v, assoc_copy (assoc_cell (var)));
-    }
-#endif	  
+    arrayvar_copyval (var, v);
+#endif
 
   dispose_variable (var);
 }

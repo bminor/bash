@@ -1007,21 +1007,27 @@ restart_new_var_name:
       if ((flags_on & (att_exported|att_readonly)) && tempvar_p (var))
 	{
 	  SHELL_VAR *tv;
-	  char *tvalue;
 
 	  /* Temporary environment? Or in the local variable context? */
 	  tv = find_tempenv_variable (name_cell (var));
 	  if (tv)
 	    {
-	      tvalue = var_isset (var) ? savestring (value_cell (var)) : savestring ("");
-	      tv = bind_variable (name_cell (var), tvalue, 0);
+	      /* We don't bother with modifying the temporary env because
+		 we're already using it. */
+	      tv = bind_variable (name_cell (var), value_cell (var), ASS_NOTEMPENV);
+
 	      if (tv)
 		{
+#if defined (ARRAY_VARS)
+		  /* copy array value if array variable */
+		  if ((array_p (var) || assoc_p (var)))
+		    arrayvar_copyval (var, tv);
+#endif
+		  /* then copy attributes */
 		  tv->attributes |= var->attributes & ~att_tempvar;
 		  if (tv->context > 0 && local_p (var) == 0)	/* just paranoia here */
 		    VSETATTR (tv, att_propagate);
 		}
-	      free (tvalue);
 	    }
 	  /* XXX - don't propagate local variables back to a previous scope,
 	     even in posix mode. */

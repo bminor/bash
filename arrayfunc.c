@@ -142,6 +142,19 @@ convert_var_to_assoc (SHELL_VAR *var)
   return var;
 }
 
+/* Copy the array (ARRAY *) or assoc (HASH_TABLE *) from variable V1 to V2,
+   and return V2. */
+SHELL_VAR *
+arrayvar_copyval (SHELL_VAR *v1, SHELL_VAR *v2)
+{
+  FREE (value_cell (v2));
+  if (array_p (v1))
+    var_setarray (v2, array_copy (array_cell (v1)));
+  else if (assoc_p (v1))
+    var_setassoc (v2, assoc_copy (assoc_cell (v1)));
+  return v2;
+}
+
 char *
 make_array_variable_value (SHELL_VAR *entry, arrayind_t ind, const char *key, const char *value, int flags)
 {

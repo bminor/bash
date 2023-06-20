@@ -57,6 +57,7 @@
 #define ASS_NOINVIS	0x0400	/* don't resolve local invisible variables */
 #define ASS_ALLOWALLSUB	0x0800	/* allow * and @ as associative array keys */
 #define ASS_ONEWORD	0x1000	/* don't check array subscripts, assume higher level has done that */
+#define ASS_NOTEMPENV	0x2000	/* don't assign into temporary environment */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */

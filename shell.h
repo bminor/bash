@@ -109,6 +109,8 @@ extern int indirection_level;
 extern int shell_compatibility_level;
 extern int running_under_emacs;
 
+extern int pretty_print_mode;
+
 extern int posixly_correct;
 extern int no_line_editing;
 

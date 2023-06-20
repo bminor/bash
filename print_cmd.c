@@ -671,7 +671,7 @@ print_group_command (GROUP_COM *group_command)
   group_command_nesting++;
   cprintf ("{ ");
 
-  if (inside_function_def == 0)
+  if (inside_function_def == 0 /* && pretty_print_mode == 0 */)
     skip_this_indent++;
   else
     {
@@ -685,7 +685,7 @@ print_group_command (GROUP_COM *group_command)
   make_command_string_internal (group_command->command);
   PRINT_DEFERRED_HEREDOCS ("");
 
-  if (inside_function_def)
+  if (inside_function_def /* || pretty_print_mode */)
     {
       cprintf ("\n");
       indentation -= indentation_amount;
@@ -1446,9 +1446,11 @@ indent (int amount)
 static void
 semicolon (void)
 {
-  if (command_string_index > 0 &&
-       (the_printed_command[command_string_index - 1] == '&' ||
-	the_printed_command[command_string_index - 1] == '\n'))
+  if ((command_string_index > 0 &&
+	the_printed_command[command_string_index - 1] == '\n') ||
+      (command_string_index > 1 && 
+	the_printed_command[command_string_index - 1] == '&' &&
+	the_printed_command[command_string_index - 2] == ' '))
     return;
   cprintf (";");
 }

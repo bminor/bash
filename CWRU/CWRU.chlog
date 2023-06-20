@@ -6711,3 +6711,43 @@ jobs.c
 	- wait_for: make checkwinsize work in subshell commands started from
 	  interactive shells
 	  New feature request by Kerin Millar <kfm@plushkava.net>
+
+print_cmd.c
+	- semicolon: don't return immediately unless a preceding `&' is
+	  itself preceded by a space, as the rest of the printing code prints
+	  asynchronous commands.
+	  Report and patch by Grisha Levit <grishalevit@gmail.com>
+
+				   6/17
+				   ----
+arrayfunc.c
+	- arrayvar_copyval: copy an array or hash table from shell variable
+	  V1 to V2
+
+arrayfunc.h
+	- arrayvar_copyval: extern declaration
+
+subst.h
+	- ASS_NOTEMPENV: new flag for bind_variable and assignments
+
+variables.c
+	- bind_variable: if ASS_NOTEMPENV is in FLAGS, don't bother calling
+	  bind_tempenv_variable
+
+builtins/declare.def
+	- declare_internal: if we find the variable in the temporary
+	  environment, call bind_variable with the ASS_NOTEMPENV flag since
+	  we are already dealing with a variable from the temporary environment
+	- declare_internal: if we bind a new global variable because we're
+	  modifying a variable from the temporary environment, make sure to
+	  call arrayvar_copyval to copy array variables from the temporary
+	  environment to the global scope
+
+variables.c
+	- push_temp_var: if we are pushing an array variable, make sure to
+	  call arrayvar_copyval on the new variable
+	  Final fix for bug reported by Wiley Young <wyeth2485@gmail.com>
+	- push_posix_tempvar_internal: call arrayar_copyval instead of using
+	  inline code
+
+

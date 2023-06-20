@@ -73,6 +73,8 @@ extern int array_expand_once;
 extern SHELL_VAR *convert_var_to_array (SHELL_VAR *);
 extern SHELL_VAR *convert_var_to_assoc (SHELL_VAR *);
 
+extern SHELL_VAR *arrayvar_copyval (SHELL_VAR *, SHELL_VAR *);
+
 extern char *make_array_variable_value (SHELL_VAR *, arrayind_t, const char *, const char *, int);
 
 extern SHELL_VAR *bind_array_variable (const char *, arrayind_t, const char *, int);
