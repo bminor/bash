@@ -1402,6 +1402,12 @@ glob_filename (char *pathname, int flags)
 		free ((char *) array);
 	      else if ((dflags & GX_ALLDIRS) && filename[0] == '*' && filename[1] == '*' && filename[2] == '\0')
 		free (temp_results);	/* expanding ** case above */
+	      else if (array == temp_results)
+		/* If array == temp_results, either we assigned it above or
+		   glob_dir_to_array returned temp_results because the dirname
+		   was the empty string. In any case, we assume temp_results
+		   has not been freed, and free it here. */
+		free (temp_results);
 
 	      if (shouldbreak)
 		break;
@@ -1517,6 +1523,7 @@ only_filename:
 
       if (free_dirname)
 	free (directory_name);
+
       return (result);
     }
 

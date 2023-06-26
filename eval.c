@@ -183,7 +183,7 @@ reader_loop (void)
 		  current_command = (COMMAND *)NULL;
 		}
 	    }
-	  if (EOF_Reached && interactive && ignoreeof && parse_and_execute_level == 0)
+	  if (EOF_Reached && interactive && ignoreeof && parse_and_execute_level == 0 && code != EXITBLTIN)
 	    {
 	      if (handle_ignoreeof (1))
 		EOF_Reached = 0;

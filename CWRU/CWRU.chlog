@@ -6876,3 +6876,45 @@ lib/readline/complete.c
 	- rl_menu_complete: use _rl_free_match_list instead of just freeing
 	  MATCHES if we have too many possible completions to display.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   6/25
+				   ----
+eval.c
+	- reader_loop: make sure to allow exit builtin (code == EXITBLTIN) to
+	  exit the shell when ignoreeof is set
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   6/26
+				   ----
+lib/readline/complete.c
+	- complete_sigcleanarg_t: new struct to hold match list and saved line
+	  buffer for cleanup on receipt of SIGINT
+	- _rl_complete_sigcleanup: use new sigcleanarg_t struct and free both
+	  members
+	- rl_complete_internal: whenever we display the match list, set up to
+	  clean the matches and saved line buffer in the event of a SIGINT
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/signals.c
+	- _rl_handle_signal: if readline is compiled to include callbacks, only
+	  call rl_echo_signal_char if we're not in callback mode or the
+	  application has set rl_persistent_signal_handlers, leaving any
+	  application signal handler to call it (or not) otherwise.
+	  From a discussion with Andrew Burgess <aburgess@redhat.com>
+
+lib/glob/glob.c
+	- glob_filename: if ARRAY == TEMP_RESULTS, make sure to free TEMP_RESULTS
+	  after copying the filenames out of ARRAY, since we either assigned it
+	  directly or glob_dir_to_array returned it because the dirname was
+	  the empty string.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/rltypedefs.h
+	- Function: only compile in these obsolete typedefs if
+	  WANT_OBSOLETE_TYPEDEFS is defined
+
+print_cmd.c
+	- xtrace_print_assignment,xtrace_print_word_list: prioritize checking
+	  for characters that need $'...' printing over shell metacharacters
+	  so that strings containing both get the $'...' treatment
+	  From a report by Grisha Levit <grishalevit@gmail.com>

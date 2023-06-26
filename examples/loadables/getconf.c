@@ -274,9 +274,13 @@ static const struct conf vars[] =
 #ifdef _SC_AVPHYS_PAGES
     { "_AVPHYS_PAGES", _SC_AVPHYS_PAGES, SYSCONF },
 #endif
+#ifdef _NPROCESSORS_CONF
     { "_NPROCESSORS_CONF", _SC_NPROCESSORS_CONF, SYSCONF },
     { "_NPROCESSORS_ONLN", _SC_NPROCESSORS_ONLN, SYSCONF },
+#endif
+#ifdef _PHYS_PAGES
     { "_PHYS_PAGES", _SC_PHYS_PAGES, SYSCONF },
+#endif
 #ifdef _SC_ARG_MAX
     { "_POSIX_ARG_MAX", _SC_ARG_MAX, SYSCONF },
 #else
@@ -859,7 +863,9 @@ static const struct conf vars[] =
     { "SEM_VALUE_MAX", _SC_SEM_VALUE_MAX, SYSCONF },
 #endif
     { "SIGQUEUE_MAX", _SC_SIGQUEUE_MAX, SYSCONF },
+#ifdef _PC_FILESIZEBITS
     { "FILESIZEBITS", _PC_FILESIZEBITS, PATHCONF },
+#endif
 #ifdef _PC_ALLOC_SIZE_MIN
     { "POSIX_ALLOC_SIZE_MIN", _PC_ALLOC_SIZE_MIN, PATHCONF },
 #endif
@@ -875,7 +881,9 @@ static const struct conf vars[] =
 #ifdef _PC_REC_XFER_ALIGN
     { "POSIX_REC_XFER_ALIGN", _PC_REC_XFER_ALIGN, PATHCONF },
 #endif
+#ifdef _PC_SYMLINK_MAX
     { "SYMLINK_MAX", _PC_SYMLINK_MAX, PATHCONF },
+#endif
 #ifdef _PC_2_SYMLINKS
     { "POSIX2_SYMLINKS", _PC_2_SYMLINKS, PATHCONF },
 #endif

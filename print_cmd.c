@@ -514,10 +514,10 @@ xtrace_print_assignment (char *name, char *value, int assign_list, int xflags)
   /* VALUE should not be NULL when this is called. */
   if (*value == '\0' || assign_list)
     nval = value;
-  else if (sh_contains_shell_metas (value))
-    nval = sh_single_quote (value);
   else if (ansic_shouldquote (value))
     nval = ansic_quote (value, 0, (int *)0);
+  else if (sh_contains_shell_metas (value))
+    nval = sh_single_quote (value);
   else
     nval = value;
 
@@ -554,15 +554,15 @@ xtrace_print_word_list (WORD_LIST *list, int xtflags)
 	fprintf (xtrace_fp, "''%s", w->next ? " " : "");
       else if (xtflags & 2)
 	fprintf (xtrace_fp, "%s%s", t, w->next ? " " : "");
-      else if (sh_contains_shell_metas (t))
-	{
-	  x = sh_single_quote (t);
-	  fprintf (xtrace_fp, "%s%s", x, w->next ? " " : "");
-	  free (x);
-	}
       else if (ansic_shouldquote (t))
 	{
 	  x = ansic_quote (t, 0, (int *)0);
+	  fprintf (xtrace_fp, "%s%s", x, w->next ? " " : "");
+	  free (x);
+	}
+      else if (sh_contains_shell_metas (t))
+	{
+	  x = sh_single_quote (t);
 	  fprintf (xtrace_fp, "%s%s", x, w->next ? " " : "");
 	  free (x);
 	}
