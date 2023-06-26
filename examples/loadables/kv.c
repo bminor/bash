@@ -71,7 +71,7 @@ kvsplit (SHELL_VAR *v, char *line, char *dstring)
   else
     value = "";
 
-  return (bind_assoc_variable (v, name_cell (v), savestring (key), savestring (value), 0) != 0);
+  return (bind_assoc_variable (v, name_cell (v), savestring (key), value, 0) != 0);
 }
 
 int

@@ -206,7 +206,10 @@ bind_assoc_var_internal (SHELL_VAR *entry, HASH_TABLE *hash, char *key, const ch
   newval = make_array_variable_value (entry, 0, key, value, flags);
 
   if (entry->assign_func)
-    (*entry->assign_func) (entry, newval, 0, key);
+    {
+      (*entry->assign_func) (entry, newval, 0, key);
+      FREE (key);
+    }
   else
     assoc_insert (hash, key, newval);
 
@@ -958,6 +961,7 @@ quote_compound_array_word (char *w, int type)
   if (t != w+ind)
    free (t);
   strcpy (nword + i, value);
+  free (value);
 
   return nword;
 }

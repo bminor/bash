@@ -415,6 +415,7 @@ parse_and_execute (char *string, const char *from_file, int flags)
 		run_unwind_frame ("pe_dispose");
 	      last_result = last_command_exit_value = EXECUTION_FAILURE; /* XXX */
 	      set_pipestatus_from_exit (last_command_exit_value);
+	      
 	      if (subshell_environment)
 		{
 		  should_jump_to_top_level = 1;
@@ -468,6 +469,8 @@ parse_and_execute (char *string, const char *from_file, int flags)
 		      should_jump_to_top_level = 0;
 		      last_result = last_command_exit_value = EX_BADUSAGE;
 		      set_pipestatus_from_exit (last_command_exit_value);
+		      dispose_command (command);
+		      global_command = (COMMAND *)NULL;
 		      reset_parser ();
 		      break;
 		    }
@@ -766,6 +769,9 @@ open_redir_file (REDIRECT *r, char **fnp)
 
   if (fnp)
     *fnp = fn;
+  else
+    free (fn);
+
   return fd;
 }
 

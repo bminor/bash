@@ -1922,6 +1922,7 @@ bash_command_name_stat_hook (char **name)
   result = search_for_command (cname, 0);
   if (result)
     {
+      FREE (*name);
       *name = result;
       return 1;
     }

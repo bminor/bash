@@ -2868,7 +2868,7 @@ rl_menu_complete (int count, int ignore)
 	  if (rl_completion_query_items > 0 && match_list_size >= rl_completion_query_items)
 	    {
 	      rl_ding ();
-	      FREE (matches);
+	      _rl_free_match_list (matches);
 	      matches = (char **)0;
 	      full_completion = 1;
 	      return (0);

@@ -249,6 +249,7 @@ rl_gather_tyi (void)
   struct timeval timeout;
 #endif
 
+  result = -1;
   chars_avail = 0;
   input = 0;
   tty = fileno (rl_instream);

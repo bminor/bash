@@ -158,10 +158,9 @@ bindpwd (int no_symlinks)
   pwdvar = get_string_value ("PWD");
 
   tvar = bind_variable ("OLDPWD", pwdvar, 0);
-  if (tvar && readonly_p (tvar))
+  if (tvar == 0 || readonly_p (tvar))
     r = EXECUTION_FAILURE;
-
-  if (old_anm == 0 && array_needs_making && exported_p (tvar))
+  else if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
       update_export_env_inplace ("OLDPWD=", 7, pwdvar);
       array_needs_making = 0;

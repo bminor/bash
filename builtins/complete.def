@@ -678,7 +678,6 @@ compgen_builtin (WORD_LIST *list)
   int old_ind, old_completion, old_quoting, old_suppress;
   SHELL_VAR *var;
   char *varname;
-  WORD_LIST *alist;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
@@ -763,11 +762,7 @@ compgen_builtin (WORD_LIST *list)
       var = builtin_find_indexed_array (varname, 1);
       if (var && sl && sl->list && sl->list_len)
 	{
-	  alist = strlist_to_word_list (sl, 0, 0);
-	  assign_array_var_from_word_list (var, alist, 0);
-	  free (sl);
-	  sl = (STRINGLIST *)NULL;
-	  dispose_words (alist);
+	  array_from_argv (array_cell (var), sl->list, sl->list_len);
 	  rval = EXECUTION_SUCCESS;
 	}
     }

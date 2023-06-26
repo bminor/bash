@@ -6797,3 +6797,82 @@ lib/sh/anonfile.c
 	- anonopen: use memfd_create if it is available, fall through to
 	  traditional Unix/POSIX implementation if it fails
 
+				   6/20
+				   ----
+parse.y
+	- yy_string_unget: don't push EOF back to a string, like the other
+	  unget functions
+
+				   6/21
+				   ----
+parse.y
+	- read_a_line: don't push an EOF back into the string or line if the
+	  line ends in a backslash.
+	  From a report by Rob Landley <rob@landley.net>
+
+				   6/22
+				   ----
+lib/readline/input.c
+	- rl_gather_tyi: make sure result is initialized
+
+lib/readline/kill.c
+	- _rl_read_bracketed_paste_prefix: make sure key is initialized
+
+builtins/read.def
+	- read_builtin: make sure pass_next and saw_escape are initialized
+	  before a possible goto
+	- read_builtin: make sure to initialize prevset for very short
+	  timeouts
+
+subst.c
+	- function_substitute: make sure tflag is initialized even when we
+	  don't call read_comsub, since we return it in ret->flags
+	  All from a report by Grisha Levit <grishalevit@gmail.com>
+
+builtins/complete.def
+	- compgen_builtin: use array_from_argv to assign elements of the
+	  stringlist to the array variable.
+	  Update from Grisha Levit <grishalevit@gmail.com>
+
+builtins/cd.def
+	- bindpwd: fix seg fault from an unlikely set of circumstances
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+arrayfunc.h
+	- convert_validarray_flags_to_arrayval_flags: initialize avflags
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/sh/anonfile.c
+	- anonopen: set *fn if memfd_create is used
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   6/23
+				   ----
+arrayfunc.c
+	- bind_assoc_var_internal: free key to fix small leak if assign_func
+	  used
+	- quote_compound_array_word: free value to fix small leak
+
+builtins/evalstring.c
+	- parse_and_execute: free parsed command on failed function definition
+	  import
+	- open_redir_file: free FN if we're not passing it back to the caller
+
+subst.c
+	- param_expand: free TEMP1 in code paths that don't do it now
+
+
+bashline.c
+	- bash_command_name_stat_hook: if we modify *NAME, free the old value
+
+examples/loadables/{kv,stat}.c
+	- bind_assoc_variable is caller-free VALUE, so free when needed and
+	  don't allocate a new copy if not
+	  All from a report by Grisha Levit <grishalevit@gmail.com>
+
+				   6/24
+				   ----
+lib/readline/complete.c
+	- rl_menu_complete: use _rl_free_match_list instead of just freeing
+	  MATCHES if we have too many possible completions to display.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

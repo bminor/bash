@@ -163,6 +163,7 @@ convert_validarray_flags_to_arrayval_flags (int vflags)
 {
   int avflags;  
 
+  avflags = 0;
   if (vflags & VA_NOEXPAND)
     avflags |= AV_NOEXPAND;
   if (vflags & VA_ONEWORD)

@@ -779,7 +779,7 @@ _rl_read_bracketed_paste_prefix (int c)
   pbpref = BRACK_PASTE_PREF;		/* XXX - debugging */
   if (c != pbpref[0])
     return (0);
-  pbuf[ind = 0] = c;
+  pbuf[ind = 0] = key = c;
   while (ind < BRACK_PASTE_SLEN-1 &&
 	 (RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
          _rl_pushed_input_available () == 0 &&

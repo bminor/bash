@@ -7016,12 +7016,12 @@ function_substitute (char *string, int quoted, int flags)
 
   /* rewind back to the start of the file and read the contents */
 
+  tflag = 0;
   if (valsub == 0)
     {
       /* We call anonclose as part of the outer nofork unwind-protects */
       BLOCK_SIGNAL (SIGINT, set, oset);
       lseek (afd, 0, SEEK_SET);
-      tflag = 0;
       istring = read_comsub (afd, quoted, flags, &tflag);
       UNBLOCK_SIGNAL (oset);
     }
@@ -10840,6 +10840,7 @@ comsub:
 	    {
 	      chk_atstar (temp, quoted, pflags, quoted_dollar_at_p, contains_dollar_at);
 	      tdesc = parameter_brace_expand_word (temp, SPECIAL_VAR (temp, 0), quoted, pflags, 0);
+	      free (temp1);
 	      if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
 		return (tdesc);
 	      ret = tdesc;
@@ -10852,6 +10853,7 @@ comsub:
 	    {
 	      set_exit_status (EXECUTION_FAILURE);
 	      report_error (_("%s: invalid variable name for name reference"), temp);
+	      free (temp1);
 	      return (&expand_wdesc_error);	/* XXX */
 	    }
 	  else

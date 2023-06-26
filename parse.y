@@ -1696,6 +1696,9 @@ yy_string_get (void)
 static int
 yy_string_unget (int c)
 {
+  if (c == EOF && *bash_input.location.string == '\0')
+    return EOF;
+
   *(--bash_input.location.string) = c;
   return (c);
 }
@@ -2161,6 +2164,21 @@ read_a_line (int remove_quoted_newline)
 	    {
 	      line_number++;
 	      continue;	/* Make the unquoted \<newline> pair disappear. */
+	    }
+	  else if (peekc == EOF)
+	    {
+	      /* Don't push EOF back. */
+#if 1
+	      /* Leave this in for now, relies on how the expansion code
+		 treats an unescaped backslash at the end of a word. */
+	      RESIZE_MALLOCED_BUFFER (line_buffer, indx, 2, buffer_size, 128);
+	      if (expanding_alias() == 0 &&
+		   (bash_input.type == st_string || bash_input.type == st_bstream ||
+		   (interactive == 0 && bash_input.type == st_stream)))
+		line_buffer[indx++] = '\\';	/* like below in shell_getc */
+#endif
+	      line_buffer[indx++] = c;
+	      c = '\n';				/* force break below */
 	    }
 	  else
 	    {

@@ -403,6 +403,9 @@ read_builtin (WORD_LIST *list)
   input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
   input_string[0] = '\0';
 
+  pass_next = 0;	/* Non-zero signifies last char was backslash. */
+  saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
+
   /* More input and options validation */
   if (nflag == 1 && nchars == 0)
     {
@@ -428,6 +431,8 @@ read_builtin (WORD_LIST *list)
   sigemptyset (&chldset);
   sigprocmask (SIG_BLOCK, (sigset_t *)0, &chldset);
   sigaddset (&chldset, SIGCHLD);
+  sigemptyset (&prevset);
+  sigprocmask (SIG_SETMASK, (sigset_t *)0, &prevset);
 #endif
 
   begin_unwind_frame ("read_builtin");
@@ -463,9 +468,6 @@ read_builtin (WORD_LIST *list)
     add_unwind_protect (xfree, rlbuf);
 #endif
 
-  pass_next = 0;	/* Non-zero signifies last char was backslash. */
-  saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
-
   if (tmsec > 0 || tmusec > 0)
     {
       /* Turn off the timeout if stdin is a regular file (e.g. from
@@ -495,7 +497,9 @@ read_builtin (WORD_LIST *list)
       if (code)
 	{
 	  reset_timeout ();
+#if defined (SIGCHLD)
 	  sigprocmask (SIG_SETMASK, &prevset, (sigset_t *)0);
+#endif
 
 	  /* Tricky.  The top of the unwind-protect stack is the free of
 	     input_string.  We want to run all the rest and use input_string,

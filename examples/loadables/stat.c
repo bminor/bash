@@ -330,6 +330,7 @@ loadstat (char *vname, SHELL_VAR *var, char *fname, int flags, char *fmt, struct
       key = savestring (arraysubs[i]);
       value = statval (i, fname, flags, fmt, sp);
       v = bind_assoc_variable (var, vname, key, value, ASS_FORCE);
+      free (value);
     }
   return 0;
 }
