@@ -148,10 +148,17 @@ SHELL_VAR *
 arrayvar_copyval (SHELL_VAR *v1, SHELL_VAR *v2)
 {
   FREE (value_cell (v2));
+  VUNSETATTR (v2, (att_array | att_assoc));
   if (array_p (v1))
-    var_setarray (v2, array_copy (array_cell (v1)));
+    {
+      var_setarray (v2, array_copy (array_cell (v1)));
+      VSETATTR (v2, att_array);
+    }
   else if (assoc_p (v1))
-    var_setassoc (v2, assoc_copy (assoc_cell (v1)));
+    {
+      var_setassoc (v2, assoc_copy (assoc_cell (v1)));
+      VSETATTR (v2, att_assoc);
+    }
   return v2;
 }
 
@@ -698,7 +705,16 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
     }
 
   last_ind = (a && (flags & ASS_APPEND)) ? array_max_index (a) + 1 : 0;
+  if (a && last_ind < 0)	/* overflow */
+    {
+      char *num;
 
+      num = itos (last_ind);
+      report_error ("%s[%s]: %s", var->name, num, bash_badsub_errmsg);
+      free (num);
+      return;
+    }
+  
 #if ASSOC_KVPAIR_ASSIGNMENT
   if (assoc_p (var) && kvpair_assignment_p (nlist))
     {

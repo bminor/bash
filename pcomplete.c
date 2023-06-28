@@ -1030,18 +1030,6 @@ build_arg_list (const char *cmd, const char *cname, const char *text, WORD_LIST 
   return ret;
 }
 
-static void
-uw_restore_parser_state (void *ps)
-{
-  restore_parser_state (ps);
-}
-
-static void
-uw_rl_set_signals (void *ignore)
-{
-  rl_set_signals ();
-}
-
 /* Build a command string with
 	$0 == cs->funcname	(function to execute for completion list)
    	$1 == command name	(command being completed)

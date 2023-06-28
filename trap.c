@@ -1148,6 +1148,13 @@ _run_trap_internal (int sig, char *tag)
       save_tempenv = temporary_env;
       temporary_env = 0;	/* traps should not run with temporary env */
 
+      /* Will be restored by restore_parser_state */
+      if (shell_eof_token)
+	{
+	  reset_parser ();		/* resets parser-private state */
+	  shell_eof_token = 0;
+	}
+
 #if defined (JOB_CONTROL)
       if (sig != DEBUG_TRAP)	/* run_debug_trap does this */
 	save_pipeline (1);	/* XXX only provides one save level */

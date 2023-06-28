@@ -4428,6 +4428,34 @@ readline_set_char_offset (int ind, int *varp)
     }
 }
 
+void
+uw_restore_parser_state (void *ps)
+{
+  restore_parser_state (ps);
+}
+
+void
+uw_rl_set_signals (void *ignore)
+{
+  rl_set_signals ();
+}
+
+static void
+unbind_readline_variables (void)
+{
+  check_unbind_variable ("READLINE_LINE");
+  check_unbind_variable ("READLINE_POINT");
+  check_unbind_variable ("READLINE_MARK");
+  check_unbind_variable ("READLINE_ARGUMENT");
+  array_needs_making = 1;
+}
+
+static void
+uw_unbind_readline_variables (void *ignore)
+{
+  unbind_readline_variables ();
+}
+   
 int
 bash_execute_unix_command (int count, int key)
 {
@@ -4507,8 +4535,12 @@ bash_execute_unix_command (int count, int key)
     }
   array_needs_making = 1;
 
+  begin_unwind_frame ("execute-unix-command");
   save_parser_state (&ps);
   rl_clear_signals ();
+  add_unwind_protect (uw_unbind_readline_variables, 0);
+  add_unwind_protect (uw_restore_parser_state, &ps);
+  add_unwind_protect (uw_rl_set_signals, 0);
   r = parse_and_execute (savestring (cmd), "bash_execute_unix_command", SEVAL_NOHIST);
   rl_set_signals ();
   restore_parser_state (&ps);
@@ -4524,11 +4556,8 @@ bash_execute_unix_command (int count, int key)
   if (v && legal_number (value_cell (v), &mi))
     readline_set_char_offset (mi, &rl_mark);
 
-  check_unbind_variable ("READLINE_LINE");
-  check_unbind_variable ("READLINE_POINT");
-  check_unbind_variable ("READLINE_MARK");
-  check_unbind_variable ("READLINE_ARGUMENT");
-  array_needs_making = 1;
+  unbind_readline_variables ();
+  discard_unwind_frame ("execute-unix-command");
 
   /* and restore the readline buffer and display after command execution. */
   /* If we clear the last line of the prompt above, redraw only that last

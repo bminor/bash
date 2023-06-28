@@ -856,18 +856,20 @@ PPAARRAAMMEETTEERRSS
               tion to the sshhoopptt builtin below).  Setting  eexxttddeebbuugg  after  the
               shell has started to execute a script, or referencing this vari-
               able when eexxttddeebbuugg is not set, may result in  inconsistent  val-
-              ues.
+              ues.  Assignments to BBAASSHH__AARRGGCC have no effect, and it may not be
+              unset.
        BBAASSHH__AARRGGVV
-              An  array  variable containing all of the parameters in the cur-
+              An array variable containing all of the parameters in  the  cur-
               rent bbaasshh execution call stack.  The final parameter of the last
-              subroutine  call is at the top of the stack; the first parameter
+              subroutine call is at the top of the stack; the first  parameter
               of the initial call is at the bottom.  When a subroutine is exe-
-              cuted,  the  parameters supplied are pushed onto BBAASSHH__AARRGGVV.  The
-              shell sets BBAASSHH__AARRGGVV only when in extended debugging  mode  (see
-              the  description of the eexxttddeebbuugg option to the sshhoopptt builtin be-
+              cuted, the parameters supplied are pushed onto  BBAASSHH__AARRGGVV.   The
+              shell  sets  BBAASSHH__AARRGGVV only when in extended debugging mode (see
+              the description of the eexxttddeebbuugg option to the sshhoopptt builtin  be-
               low).  Setting eexxttddeebbuugg after the shell has started to execute a
-              script,  or  referencing this variable when eexxttddeebbuugg is not set,
-              may result in inconsistent values.
+              script, or referencing this variable when eexxttddeebbuugg is  not  set,
+              may  result  in  inconsistent  values.  Assignments to BBAASSHH__AARRGGVV
+              have no effect, and it may not be unset.
        BBAASSHH__AARRGGVV00
               When referenced, this variable expands to the name of the  shell
               or shell script (identical to $$00; see the description of special
@@ -896,29 +898,31 @@ PPAARRAAMMEETTEERRSS
               $${{BBAASSHH__LLIINNEENNOO[[_$_i]]}}  is  the  line  number  in  the  source  file
               ($${{BBAASSHH__SSOOUURRCCEE[[_$_i_+_1]]}})  where  $${{FFUUNNCCNNAAMMEE[[_$_i]]}}  was  called  (or
               $${{BBAASSHH__LLIINNEENNOO[[_$_i_-_1]]}} if referenced within  another  shell  func-
-              tion).  Use LLIINNEENNOO to obtain the current line number.
+              tion).   Use  LLIINNEENNOO to obtain the current line number.  Assign-
+              ments to BBAASSHH__LLIINNEENNOO have no effect, and it may not be unset.
        BBAASSHH__LLOOAADDAABBLLEESS__PPAATTHH
-              A  colon-separated  list of directories in which the shell looks
-              for dynamically loadable builtins specified by the  eennaabbllee  com-
+              A colon-separated list of directories in which the  shell  looks
+              for  dynamically  loadable builtins specified by the eennaabbllee com-
               mand.
        BBAASSHH__RREEMMAATTCCHH
-              An  array  variable  whose members are assigned by the ==~~ binary
-              operator to the [[[[ conditional command.  The element with  index
-              0  is  the portion of the string matching the entire regular ex-
+              An array variable whose members are assigned by  the  ==~~  binary
+              operator  to the [[[[ conditional command.  The element with index
+              0 is the portion of the string matching the entire  regular  ex-
               pression.  The element with index _n is the portion of the string
               matching the _nth parenthesized subexpression.
        BBAASSHH__MMOONNOOSSEECCOONNDDSS
-              Each  time  this variable is referenced, it expands to the value
-              returned by the system's monotonic clock, if one  is  available.
-              If  there is no monotonic clock, this is equivalent to EEPPOOCCHHSSEECC--
-              OONNDDSS.  If BBAASSHH__MMOONNOOSSEECCOONNDDSS is unset, it loses its special  prop-
+              Each time this variable is referenced, it expands to  the  value
+              returned  by  the system's monotonic clock, if one is available.
+              If there is no monotonic clock, this is equivalent to  EEPPOOCCHHSSEECC--
+              OONNDDSS.   If BBAASSHH__MMOONNOOSSEECCOONNDDSS is unset, it loses its special prop-
               erties, even if it is subsequently reset.
        BBAASSHH__SSOOUURRCCEE
-              An  array  variable whose members are the source filenames where
-              the corresponding shell function names  in  the  FFUUNNCCNNAAMMEE  array
+              An array variable whose members are the source  filenames  where
+              the  corresponding  shell  function  names in the FFUUNNCCNNAAMMEE array
               variable are defined.  The shell function $${{FFUUNNCCNNAAMMEE[[_$_i]]}} is de-
-              fined  in  the   file   $${{BBAASSHH__SSOOUURRCCEE[[_$_i]]}}   and   called   from
-              $${{BBAASSHH__SSOOUURRCCEE[[_$_i_+_1]]}}.
+              fined   in   the   file   $${{BBAASSHH__SSOOUURRCCEE[[_$_i]]}}   and  called  from
+              $${{BBAASSHH__SSOOUURRCCEE[[_$_i_+_1]]}}.  Assignments to BBAASSHH__SSOOUURRCCEE  have  no  ef-
+              fect, and it may not be unset.
        BBAASSHH__SSUUBBSSHHEELLLL
               Incremented  by one within each subshell or subshell environment
               when the shell begins executing in that environment.   The  ini-
@@ -6795,4 +6799,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.3                     2023 June 16                          BASH(1)
+GNU Bash 5.3                     2023 June 28                          BASH(1)

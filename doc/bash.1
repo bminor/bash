@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jun 16 11:36:28 EDT 2023
+.\"	Last Change: Wed Jun 28 14:06:27 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 June 16" "GNU Bash 5.3"
+.TH BASH 1 "2023 June 28" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1569,6 +1569,10 @@ builtin below).
 Setting \fBextdebug\fP after the shell has started to execute a script,
 or referencing this variable when \fBextdebug\fP is not set,
 may result in inconsistent values.
+Assignments to
+.SM
+.B BASH_ARGC
+have no effect, and it may not be unset.
 .TP
 .B BASH_ARGV
 An array variable containing all of the parameters in the current \fBbash\fP
@@ -1590,6 +1594,10 @@ builtin below).
 Setting \fBextdebug\fP after the shell has started to execute a script,
 or referencing this variable when \fBextdebug\fP is not set,
 may result in inconsistent values.
+Assignments to
+.SM
+.B BASH_ARGV
+have no effect, and it may not be unset.
 .TP
 .B BASH_ARGV0
 When referenced, this variable expands to the name of the shell or shell
@@ -1642,6 +1650,10 @@ Use
 .SM
 .B LINENO
 to obtain the current line number.
+Assignments to
+.SM
+.B BASH_LINENO
+have no effect, and it may not be unset.
 .TP
 .B BASH_LOADABLES_PATH
 A colon-separated list of directories in which the shell looks for
@@ -1676,6 +1688,10 @@ The shell function
 \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP is defined in the file
 \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fP and called from
 \fB${BASH_SOURCE[\fP\fI$i+1\fP\fB]}\fP.
+Assignments to
+.SM
+.B BASH_SOURCE
+have no effect, and it may not be unset.
 .TP
 .B BASH_SUBSHELL
 Incremented by one within each subshell or subshell environment when

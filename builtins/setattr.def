@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -588,9 +588,6 @@ set_var_attribute (char *name, int attribute, int undo)
     {
       /* var=value readonly var */
       tv = find_tempenv_variable (name);
-      /* XXX -- need to handle case where tv is a temp variable in a
-	 function-scope context, since function_env has been merged into
-	 the local variables table. */
       if (tv && tempvar_p (tv))
 	{
 	  tvalue = var_isset (tv) ? savestring (value_cell (tv)) : savestring ("");
@@ -629,6 +626,9 @@ set_var_attribute (char *name, int attribute, int undo)
 	}
       else
 	{
+	  /* Handle case where var is a temp variable in a function-scope
+	     context, since function_env has been merged into the local 
+	     variables table (see below). */
 	  var = find_variable_notempenv (name);
 	  if (var == 0)
 	    {
@@ -648,7 +648,13 @@ set_var_attribute (char *name, int attribute, int undo)
 	      if (var)
 		VSETATTR (var, att_invisible);
 	    }
+	  /* We don't want to do this for local variables or variables we found
+	     in previous temporary environment contexts. */
+#if 0
 	  else if (var->context != 0 && local_p (var) == 0)
+#else
+	  else if (var->context != 0 && local_p (var) == 0 && tempvar_p (var) == 0)
+#endif
 	    VSETATTR (var, att_propagate);
 	}
     }

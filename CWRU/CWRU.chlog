@@ -6918,3 +6918,58 @@ print_cmd.c
 	  for characters that need $'...' printing over shell metacharacters
 	  so that strings containing both get the $'...' treatment
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   6/27
+				   ----
+subst.c
+	- skip_double_quoted: make sure to call extract_function_subst with
+	  the SX_NOALLOC flag
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+trap.c
+	- _run_trap_internal: if we're running a trap but shell_eof_token is
+	  set, this means we're somehow running a trap while parsing a
+	  command substitution (weird set of circumstances). Call
+	  reset_parser and unset shell_eof_token if shell_eof_token is set
+	  From a report by Wiley Young <wyeth2485@gmail.com>
+
+builtins/setattr.def
+	- set_var_attribute: don't set the att_propagate attribute unless the
+	  variable whose attribute is being modified is in the temporary
+	  environment for this builtin, not any previous temporary environments
+	  (like the temp env for a function call, or a special builtin like
+	  `.')
+
+variables.c
+	- push_posix_temp_var: if we have an array variable we're trying to
+	  push up here, use arrayvar_copyval to copy the value correctly
+
+arrayfunc.c
+	- arrayvar_copyval: make sure that V2 ends up being the same type of
+	  array as V1 (att_array or att_assoc), since we're copying the value.
+	  Fixes issue reported by Grisha Levit <grishalevit@gmail.com>, but
+	  with the previous fix to set_var_attribute, it's not needed
+	- assign_compound_array_list: check for integer overflow if the max
+	  index of the array is already INT_MAX.
+	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   6/28
+				   ----
+pcomplete.c,bashline.c
+	- uw_restore_parser_state,uw_rl_set_signals: move to bashline.c so the
+	  general readline support can use them
+
+bashline.h
+	- uw_restore_parser_state,uw_rl_set_signals: extern declarations
+
+bashline.c
+	- unset_readline_variables,uw_unset_readline_variables: function to
+	  unset READLINE_{LINE,POINT,MARK,ARGUMENT} and its unwind-protect
+	  counterpart
+	- bash_execute_unix_command: add unwind-protect to free up allocated
+	  memory
+	  Report and patch by Grisha Levit <grishalevit@gmail.com>
+
+doc/bash.1,doc/bashref.texi
+	- BASH_ARGC,BASH_ARGV,BASH_SOURCE,BASH_LINENO: note that these variables
+	  may not be assigned to or unset

@@ -46,6 +46,9 @@ extern int bash_re_edit (const char *);
 extern void bashline_set_event_hook (void);
 extern void bashline_reset_event_hook (void);
 
+extern void uw_restore_parser_state (void *);
+extern void uw_rl_set_signals (void *);
+
 extern int bind_keyseq_to_unix_command (char *);
 extern int bash_execute_unix_command (int, int);
 extern int print_unix_command_map (void);
