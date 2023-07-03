@@ -2321,9 +2321,9 @@ rl_completion_matches (const char *text, rl_compentry_func_t *entry_function)
 char *
 rl_username_completion_function (const char *text, int state)
 {
-#if defined (_WIN32) || defined (__OPENNT)
+#if defined (_WIN32) || defined (__OPENNT) || !defined (HAVE_GETPWENT)
   return (char *)NULL;
-#else /* !_WIN32 && !__OPENNT) */
+#else /* !_WIN32 && !__OPENNT) && HAVE_GETPWENT */
   static char *username = (char *)NULL;
   static struct passwd *entry;
   static int namelen, first_char, first_char_loc;
@@ -2338,25 +2338,19 @@ rl_username_completion_function (const char *text, int state)
 
       username = savestring (&text[first_char_loc]);
       namelen = strlen (username);
-#if defined (HAVE_GETPWENT)
       setpwent ();
-#endif
     }
 
-#if defined (HAVE_GETPWENT)
   while (entry = getpwent ())
     {
       /* Null usernames should result in all users as possible completions. */
       if (namelen == 0 || (STREQN (username, entry->pw_name, namelen)))
 	break;
     }
-#endif
 
   if (entry == 0)
     {
-#if defined (HAVE_GETPWENT)
       endpwent ();
-#endif
       return ((char *)NULL);
     }
   else
@@ -2372,7 +2366,7 @@ rl_username_completion_function (const char *text, int state)
 
       return (value);
     }
-#endif /* !_WIN32 && !__OPENNT */
+#endif /* !_WIN32 && !__OPENNT && HAVE_GETPWENT */
 }
 
 /* Return non-zero if CONVFN matches FILENAME up to the length of FILENAME

@@ -7004,3 +7004,24 @@ configure.ac
 	- if --enable-static-link is supplied, add -static to LDFLAGS on
 	  Linux if opt_profiling isn't enabled
 	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+print_cmd.c
+	- make_command_string_internal: if we're recursively printing a list
+	  (connection) with more than two elements, don't print any deferred
+	  here-documents after the make_command_string_internal on the right
+	  side of the connection unless we're at the end of the list
+	  (printing_connection == 1). This way the caller gets to add the
+	  appropriate connector before printing the deferred here-documents.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+	- make_command_string_internal,print_group_command: after we call
+	  PRINT_DEFERRED_HEREDOCS and follow it with a closing `)' (subshell)
+	  or `}' (group command), we can set was_heredoc to 0 because we are
+	  no longer printing a here-document
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				    7/3
+				    ---
+lib/readline/complete.c
+	- rl_username_completion_function: simplify things by just skipping the
+	  function body if HAVE_GETPWENT is not defined.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

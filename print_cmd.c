@@ -327,7 +327,13 @@ make_command_string_internal (COMMAND *command)
 	    }
 
 	  make_command_string_internal (command->value.Connection->second);
-	  PRINT_DEFERRED_HEREDOCS ("");
+	  /* If this is a recursive call to make_command_string_internal to
+	     print a connection with more than two components, defer printing
+	     the here-document bodies until our caller can print the
+	     connector. Remember that the parser builds lists to be left-side
+	     heavy. */
+	  if (printing_connection == 1)
+	    PRINT_DEFERRED_HEREDOCS ("");
 	  printing_connection--;	  	  
 	  break;
 
@@ -345,6 +351,7 @@ make_command_string_internal (COMMAND *command)
 	  make_command_string_internal (command->value.Subshell->command);
 	  PRINT_DEFERRED_HEREDOCS ("");
 	  cprintf (" )");
+	  was_heredoc = 0;	/* last wasn't heredoc/newline */
 	  break;
 
 	case cm_coproc:
@@ -698,6 +705,7 @@ print_group_command (GROUP_COM *group_command)
     }
 
   cprintf ("}");
+  was_heredoc = 0;	/* last wasn't heredoc/newline */
 
   group_command_nesting--;
 }
@@ -1029,7 +1037,7 @@ print_redirection_list (REDIRECT *redirects)
   was_heredoc = 0;
   while (redirects)
     {
-      /* Defer printing the here document bodiess until we've printed the rest of the
+      /* Defer printing the here document bodies until we've printed the rest of the
          redirections, but print the headers in the order they're given.  */
       if (redirects->instruction == r_reading_until || redirects->instruction == r_deblank_reading_until)
 	{
