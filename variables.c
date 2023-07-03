@@ -464,7 +464,7 @@ initialize_shell_variables (char **env, int privmode)
 	  temp_string = extract_array_assignment_list (string, &string_length);
 	  temp_var = assign_array_from_string (tname, temp_string, 0);
 	  FREE (temp_string);
-	  if (temp_var)
+	  if (temp_var && noassign_p (temp_var) == 0)
 	    {
 	      VSETATTR (temp_var, (att_exported | att_imported));
 	      array_needs_making = 1;
@@ -484,6 +484,8 @@ initialize_shell_variables (char **env, int privmode)
 
 	  /* need to make sure it exists as an associative array first */
 	  temp_var = find_or_make_array_variable (tname, 2);
+	  if (temp_var && noassign_p (temp_var))
+	    temp_var = 0;
 	  if (temp_var)
 	    {
 	      string_length = 1;

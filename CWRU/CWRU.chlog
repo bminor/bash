@@ -6952,6 +6952,7 @@ arrayfunc.c
 	- assign_compound_array_list: check for integer overflow if the max
 	  index of the array is already INT_MAX.
 	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+	- assign_array_var_from_word_list: ditto
 
 				   6/28
 				   ----
@@ -6973,3 +6974,33 @@ bashline.c
 doc/bash.1,doc/bashref.texi
 	- BASH_ARGC,BASH_ARGV,BASH_SOURCE,BASH_LINENO: note that these variables
 	  may not be assigned to or unset
+
+				   6/29
+				   ----
+builtins/declare.def
+	- declare_internal: attempting to assign to a noassign variable is no
+	  longer an assignment error; the attempt is just ignored
+
+arrayfunc.c
+	- find_or_make_array_variable: take a new flag value, 4: means to
+	  return noassign variables as themselves instead of NULL without
+	  performing the assignment so the caller can handle them differently.
+	- assign_array_from_string: pass flags & 4 to find_or_make_array_variable
+	  so we can simply ignore attempted assignments to noassign array
+	  variables instead of treating them as assignment errors
+	  From a report by Kerin Millar <kfm@plushkava.net>
+
+expr.c
+	- exppower: only report negative exponent error if noeval == 0.
+	  Fixes issue reported by Steffen Nurpmeso <steffen@sdaoden.eu>
+
+				   6/30
+				   ----
+lib/sh/anonfile.c
+	- anonopen: add support for using shm_open or shm_mkstemp to create
+	  an anonymous file using POSIX shared memory
+
+configure.ac
+	- if --enable-static-link is supplied, add -static to LDFLAGS on
+	  Linux if opt_profiling isn't enabled
+	  From a report from Emanuele Torre <torreemanuele6@gmail.com>

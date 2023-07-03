@@ -960,11 +960,16 @@ exppower (void)
       readtok ();
       val2 = exppower ();	/* exponentiation is right-associative */
       lasttok = NUM;
-      if (val2 == 0)
-	return (1);
-      if (val2 < 0)
-	evalerror (_("exponent less than 0"));
-      val1 = ipow (val1, val2);
+      if (noeval == 0)
+	{
+	  if (val2 == 0)
+	    return (1);
+	  if (val2 < 0)
+	    evalerror (_("exponent less than 0"));
+	  val1 = ipow (val1, val2);
+	}
+      else
+	val1 = 1;
     }
   return (val1);
 }
@@ -1342,7 +1347,7 @@ readtok (void)
 	      e = ']';
 	    }
 	  else
-	    evalerror (bash_badsub_errmsg);
+	    evalerror (_(bash_badsub_errmsg));
 	}
 #endif /* ARRAY_VARS */
 
@@ -1442,11 +1447,10 @@ readtok (void)
 #endif
 	{
 	  /* This catches something like --FOO++ */
-	  /* TAG:bash-5.3 add gettext calls here or make this a separate function */
 	  if (c == '-')
-	    evalerror ("--: assignment requires lvalue");
+	    evalerror (_("--: assignment requires lvalue"));
 	  else
-	    evalerror ("++: assignment requires lvalue");
+	    evalerror (_("++: assignment requires lvalue"));
 	}
       else if ((c == '-' || c == '+') && c1 == c)
 	{
@@ -1465,9 +1469,9 @@ readtok (void)
 		 preinc and predec. */
 	      /* This catches something like --4++ */
 	      if (c == '-')
-		evalerror ("--: assignment requires lvalue");
+		evalerror (_("--: assignment requires lvalue"));
 	      else
-		evalerror ("++: assignment requires lvalue");
+		evalerror (_("++: assignment requires lvalue"));
 	    }
 #else
 	    cp--;	/* not preinc or predec, so unget the character */

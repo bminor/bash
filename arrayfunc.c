@@ -445,7 +445,8 @@ assign_array_element_internal (SHELL_VAR *entry, const char *name, char *vname,
    convert it to an indexed array.  If FLAGS&1 is non-zero, an existing
    variable is checked for the readonly or noassign attribute in preparation
    for assignment (e.g., by the `read' builtin).  If FLAGS&2 is non-zero, we
-   create an associative array. */
+   create an associative array. If FLAGS&4 is non-zero, we return noassign
+   variables instead of NULL because the caller wants to handle them. */
 SHELL_VAR *
 find_or_make_array_variable (const char *name, int flags)
 {
@@ -479,6 +480,8 @@ find_or_make_array_variable (const char *name, int flags)
     {
       if (readonly_p (var))
 	err_readonly (name);
+      if ((flags & 4) && noassign_p (var))
+	return (var);
       return ((SHELL_VAR *)NULL);
     }
   else if ((flags & 2) && array_p (var))
@@ -506,10 +509,11 @@ assign_array_from_string (const char *name, char *value, int flags)
   vflags = 1;
   if (flags & ASS_MKASSOC)
     vflags |= 2;
+  vflags |= 4;		/* we want to handle noassign variables ourselves */
 
   var = find_or_make_array_variable (name, vflags);
-  if (var == 0)
-    return ((SHELL_VAR *)NULL);
+  if (var == 0 || noassign_p (var))
+    return (var);
 
   return (assign_array_var_from_string (var, value, flags));
 }
@@ -525,6 +529,15 @@ assign_array_var_from_word_list (SHELL_VAR *var, WORD_LIST *list, int flags)
 
   a = array_cell (var);
   i = (flags & ASS_APPEND) ? array_max_index (a) + 1 : 0;
+  if (a && i < 0)	/* overflow */
+    {
+      char *num;
+
+      num = itos (i);
+      report_error ("%s[%s]: %s", var->name, num, bash_badsub_errmsg);
+      free (num);
+      return (var);		/* XXX */
+    }
 
   for (l = list; l; l = l->next, i++)
     bind_array_var_internal (var, i, 0, l->word->word, flags & ~ASS_APPEND);
@@ -705,15 +718,6 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
     }
 
   last_ind = (a && (flags & ASS_APPEND)) ? array_max_index (a) + 1 : 0;
-  if (a && last_ind < 0)	/* overflow */
-    {
-      char *num;
-
-      num = itos (last_ind);
-      report_error ("%s[%s]: %s", var->name, num, bash_badsub_errmsg);
-      free (num);
-      return;
-    }
   
 #if ASSOC_KVPAIR_ASSIGNMENT
   if (assoc_p (var) && kvpair_assignment_p (nlist))
@@ -736,6 +740,16 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	 existing values by default. */
       iflags = flags & ~ASS_APPEND;
       w = list->word->word;
+
+      if (array_p (var) && last_ind < 0)	/* overflow */
+	{
+	  char *num;
+
+	  num = itos (last_ind);
+	  report_error ("%s[%s]: %s", var->name, num, bash_badsub_errmsg);
+	  free (num);
+	  return;
+	}
 
       /* We have a word of the form [ind]=value */
       if ((list->word->flags & W_ASSIGNMENT) && w[0] == '[')

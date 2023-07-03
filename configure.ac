@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.054])dnl
+AC_REVISION([for Bash 5.3, version 5.055])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -515,7 +515,8 @@ if test "$opt_static_link" = yes; then
 	if test "$GCC" = "yes"; then
 		STATIC_LD="-static" 
 		case "$host_os" in
-		solaris2*|linux*)	;;
+		solaris2*)	;;
+		linux*)		test "$opt_profiling" = "no" && LDFLAGS="$LDFLAGS -static" ;;
 		*)		LDFLAGS="$LDFLAGS -static" ;;	# XXX experimental
 		esac
 	fi
@@ -843,7 +844,8 @@ AC_CHECK_FUNC(mkfifo, AC_DEFINE(HAVE_MKFIFO), AC_DEFINE(MKFIFO_MISSING))
 dnl checks for system calls
 AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getentropy getgroups \
 		gethostname getpagesize getpeername getrandom getrlimit \
-		getrusage gettimeofday kill killpg lstat pselect readlink \
+		getrusage gettimeofday kill killpg lstat nanosleep \
+		pselect readlink \
 		select setdtablesize setitimer tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 

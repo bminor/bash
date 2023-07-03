@@ -397,6 +397,14 @@ Z='a b'
 A=( X=$Z )
 declare -p A
 
+# tests for assigning to noassign array variables
+BASH_ARGC=(xxx) ; echo FIN1:$?
+BASH_ARGC=foio ; echo FIN2:$?
+declare BASH_ARGC=(xxx) ; echo FIN3:$?
+declare BASH_ARGC=foio ; echo FIN4:$?
+BASH_ARGV[1]=foo ; echo FIN5:$?
+declare BASH_ARGV[1]=foo ; echo FIN6:$?
+
 # tests for bash-3.1 problems
 ${THIS_SH} ./array5.sub
 

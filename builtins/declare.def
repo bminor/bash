@@ -844,8 +844,12 @@ restart_new_var_name:
       else if ((readonly_p (var) || noassign_p (var)) && offset)
 	{
 	  if (readonly_p (var))
-	    sh_readonly (name);
-	  assign_error++;
+	    {
+	      sh_readonly (name);
+	      assign_error++;
+	    }
+	  /* just ignore attempts to assign to noassign variables; returning
+	     EXECUTION_FAILURE would cause set -e to exit the shell. */
 	  NEXT_VARIABLE ();
 	}
 

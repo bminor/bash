@@ -35,21 +35,72 @@
 #include <shell.h>
 #include <bashansi.h>
 
-/* Placeholder for future use of memfd_create/shm_open/shm_mkstemp */
+static int anonunlink (const char *);
+
+#if defined (HAVE_SHM_OPEN)
+#ifndef O_NOFOLLOW
+#  define O_NOFOLLOW 0
+#endif
 
 static int
-anonunlink (const char *fn)
+anonshmunlink (const char *fn)
 {
-  int r;
-
-  r = unlink (fn);
-  return r;
+  return (shm_unlink (fn));
 }
+
+static int
+anonshmopen (const char *name, int flags, char **fn)
+{
+  int fd;
+  char *fname;
+
+  fd = -1;
+  if (fn)
+    *fn = 0;
+
+#if defined (HAVE_SHM_MKSTEMP)
+  fname = savestring ("/shm-XXXXXXXXXX");
+  fd = shm_mkstemp (fname);
+  if (fd < 0)
+    free (fname);
+#endif
+
+  if (fd < 0)
+    {
+      fname = sh_mktmpname (name, flags);
+      fd = shm_open (fname, O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW, 0600);
+    }
+
+  if (fd < 0)
+    {
+      free (fname);
+      return fd;
+    }
+
+  if (shm_unlink (fname) < 0)
+    {
+      int o;
+      o = errno;
+      free (fname);
+      close (fd);
+      errno = o;
+      return -1;
+    }
+
+  if (fn)
+    *fn = fname;
+  else
+    free (fname);
+
+  return fd;  
+}
+#endif
 
 int
 anonopen (const char *name, int flags, char **fn)
 {
   int fd, flag;
+  char *fname;
 
 #if defined (HAVE_MEMFD_CREATE)
   /* "Names do not affect the behavior of the file descriptor." */
@@ -60,12 +111,19 @@ anonopen (const char *name, int flags, char **fn)
 	*fn = 0;
       return fd;
     }
-  /* If memfd_create fails, we fall through to the unlinked-regular-file
+  /* If memfd_create fails, we fall through to the unlinked-shm-or-regular-file
      implementation. */
 #endif
 
   /* Heuristic */
   flag = (name && *name == '/') ? MT_TEMPLATE : MT_USETMPDIR;
+
+#if defined (HAVE_SHM_OPEN)
+  fd = anonshmopen (name, flag, fn);
+  if (fd >= 0)
+    return fd;		/* anonshmopen sets *FN appropriately */
+#endif
+
   fd = sh_mktmpfd (name, flag|MT_USERANDOM|MT_READWRITE|MT_UNLINK, fn);
   return fd;
 }
@@ -76,5 +134,14 @@ anonclose (int fd, const char *name)
   int r;
 
   r = close (fd);
+  return r;
+}
+
+static int
+anonunlink (const char *fn)
+{
+  int r;
+
+  r = unlink (fn);
   return r;
 }
