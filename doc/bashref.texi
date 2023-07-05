@@ -4077,15 +4077,16 @@ If @code{getopts} is silent, then a colon (@samp{:}) is placed in
 hash [-r] [-p @var{filename}] [-dt] [@var{name}]
 @end example
 
-Each time @code{hash} is invoked, it remembers the full pathnames of the
+Each time @code{hash} is invoked, it remembers the full filenames of the
 commands specified as @var{name} arguments,
 so they need not be searched for on subsequent invocations.
 The commands are found by searching through the directories listed in
 @env{$PATH}.
-Any previously-remembered pathname is discarded.
+Any previously-remembered filename is discarded.
 The @option{-p} option inhibits the path search, and @var{filename} is
 used as the location of @var{name}.
 The @option{-r} option causes the shell to forget all remembered locations.
+Assigning to the @env{PATH} variable also clears all hashed filenames.
 The @option{-d} option causes the shell to forget the remembered location
 of each @var{name}.
 If the @option{-t} option is supplied, the full pathname to which each

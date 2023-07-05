@@ -529,18 +529,21 @@ assign_array_var_from_word_list (SHELL_VAR *var, WORD_LIST *list, int flags)
 
   a = array_cell (var);
   i = (flags & ASS_APPEND) ? array_max_index (a) + 1 : 0;
-  if (a && i < 0)	/* overflow */
-    {
-      char *num;
-
-      num = itos (i);
-      report_error ("%s[%s]: %s", var->name, num, bash_badsub_errmsg);
-      free (num);
-      return (var);		/* XXX */
-    }
 
   for (l = list; l; l = l->next, i++)
-    bind_array_var_internal (var, i, 0, l->word->word, flags & ~ASS_APPEND);
+    {
+      if (a && i < 0)	/* overflow */
+	{
+	  char *num;
+
+	  num = itos (i);
+	  report_error ("%s[%s]: %s", var->name, num, bash_badsub_errmsg);
+	  free (num);
+	  return (var);		/* XXX */
+	}
+
+      bind_array_var_internal (var, i, 0, l->word->word, flags & ~ASS_APPEND);
+    }
 
   VUNSETATTR (var, att_invisible);	/* no longer invisible */
 
@@ -690,14 +693,14 @@ expand_and_quote_kvpair_word (const char *w)
 
    If this is an associative array, we perform the assignments into NHASH and
    set NHASH to be the value of VAR after processing the assignments in NLIST */
-void
+int
 assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 {
   ARRAY *a;
   HASH_TABLE *h, *nhash;
   WORD_LIST *list;
   char *w, *val, *nval, *savecmd;
-  int len, iflags, free_val;
+  int len, iflags, free_val, any_failed;
   arrayind_t ind, last_ind;
   char *akey;
 
@@ -706,6 +709,8 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 
   akey = (char *)0;
   ind = 0;
+
+  any_failed = 0;
 
   /* Now that we are ready to assign values to the array, kill the existing
      value. */
@@ -717,8 +722,6 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	nhash = assoc_create (h->nbuckets);
     }
 
-  last_ind = (a && (flags & ASS_APPEND)) ? array_max_index (a) + 1 : 0;
-  
 #if ASSOC_KVPAIR_ASSIGNMENT
   if (assoc_p (var) && kvpair_assignment_p (nlist))
     {
@@ -730,9 +733,11 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	  var_setassoc (var, nhash);
 	  assoc_dispose (h);
 	}
-      return;
+      return 1;		/* XXX - check return value */
     }
 #endif
+
+  last_ind = (a && (flags & ASS_APPEND)) ? array_max_index (a) + 1 : 0;
 
   for (list = nlist; list; list = list->next)
     {
@@ -740,16 +745,6 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	 existing values by default. */
       iflags = flags & ~ASS_APPEND;
       w = list->word->word;
-
-      if (array_p (var) && last_ind < 0)	/* overflow */
-	{
-	  char *num;
-
-	  num = itos (last_ind);
-	  report_error ("%s[%s]: %s", var->name, num, bash_badsub_errmsg);
-	  free (num);
-	  return;
-	}
 
       /* We have a word of the form [ind]=value */
       if ((list->word->flags & W_ASSIGNMENT) && w[0] == '[')
@@ -762,10 +757,11 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	  /* XXX - changes for `+=' */
  	  if (w[len] != ']' || (w[len+1] != '=' && (w[len+1] != '+' || w[len+2] != '=')))
 	    {
-	      if (assoc_p (var))
+	      if (assoc_p (var) || last_ind < 0)
 		{
 		  err_badarraysub (w);
-		  continue;
+		  any_failed++;
+		  break;
 		}
 	      nval = make_variable_value (var, w, flags);
 	      if (var->assign_func)
@@ -780,14 +776,16 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	  if (len == 1)
 	    {
 	      err_badarraysub (w);
-	      continue;
+	      any_failed++;
+	      break;
 	    }
 
 	  if (ALL_ELEMENT_SUB (w[1]) && len == 2 && array_p (var))
 	    {
 	      set_exit_status (EXECUTION_FAILURE);
 	      report_error (_("%s: cannot assign to non-numeric index"), w);
-	      continue;
+	      any_failed++;
+	      break;
 	    }
 
 	  if (array_p (var))
@@ -803,7 +801,8 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	      if (ind < 0)
 		{
 		  err_badarraysub (w);
-		  continue;
+		  any_failed++;
+		  break;
 		}
 
 	      last_ind = ind;
@@ -819,7 +818,8 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 		{
 		  err_badarraysub (w);
 		  FREE (akey);
-		  continue;
+		  any_failed++;
+		  break;
 		}
 	    }
 
@@ -836,12 +836,23 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	{
 	  set_exit_status (EXECUTION_FAILURE);
 	  report_error (_("%s: %s: must use subscript when assigning associative array"), var->name, w);
-	  continue;
+	  any_failed++;
+	  break;
 	}
       else		/* No [ind]=value, just a stray `=' */
 	{
 	  ind = last_ind;
 	  val = w;
+	}
+
+      if (array_p (var) && ind < 0)	/* overflow */
+	{
+	  char *num;
+
+	  num = itos (ind);
+	  report_error ("%s[%s]: %s", var->name, num, bash_badsub_errmsg);
+	  free (num);
+	  return 0;
 	}
 
       free_val = 0;
@@ -877,6 +888,8 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
       var_setassoc (var, nhash);
       assoc_dispose (h);
     }
+
+  return (any_failed ? 0 : 1);
 }
 
 /* Perform a compound array assignment:  VAR->name=( VALUE ).  The
@@ -886,7 +899,7 @@ SHELL_VAR *
 assign_array_var_from_string (SHELL_VAR *var, char *value, int flags)
 {
   WORD_LIST *nlist;
-  int aflags;
+  int aflags, r;
 
   if (value == 0)
     return var;
@@ -896,7 +909,7 @@ assign_array_var_from_string (SHELL_VAR *var, char *value, int flags)
      expand_compound_array_assignment performs word expansions. Honors
      array_expand_once; allows @ and * as associative array keys. */
   aflags = flags | (array_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;
-  assign_compound_array_list (var, nlist, aflags);
+  r = assign_compound_array_list (var, nlist, aflags);
 
   if (nlist)
     dispose_words (nlist);
@@ -904,7 +917,7 @@ assign_array_var_from_string (SHELL_VAR *var, char *value, int flags)
   if (var)
     VUNSETATTR (var, att_invisible);	/* no longer invisible */
 
-  return (var);
+  return (r == 0 ? (SHELL_VAR *)0 : var);
 }
 
 /* Quote globbing chars and characters in $IFS before the `=' in an assignment

@@ -2566,17 +2566,20 @@ rl_filename_completion_function (const char *text, int state)
       if (filename_len == 0)
 	{
 	  if (_rl_match_hidden_files == 0 && HIDDEN_FILE (convfn))
-	    continue;
+	    {
+	      if (convfn != dentry)
+		xfree (convfn);
+	      continue;
+	    }
 
 	  if (convfn[0] != '.' ||
 	       (convfn[1] && (convfn[1] != '.' || convfn[2])))
 	    break;
 	}
-      else
-	{
-	  if (complete_fncmp (convfn, convlen, filename, filename_len))
-	    break;
-	}
+      else if (complete_fncmp (convfn, convlen, filename, filename_len))
+	break;
+      else if (convfn != dentry)
+	xfree (convfn);
     }
 
   if (entry == 0)

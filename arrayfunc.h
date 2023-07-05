@@ -89,7 +89,7 @@ extern SHELL_VAR *assign_array_from_string  (const char *, char *, int);
 extern SHELL_VAR *assign_array_var_from_word_list (SHELL_VAR *, WORD_LIST *, int);
 
 extern WORD_LIST *expand_compound_array_assignment (SHELL_VAR *, char *, int);
-extern void assign_compound_array_list (SHELL_VAR *, WORD_LIST *, int);
+extern int assign_compound_array_list (SHELL_VAR *, WORD_LIST *, int);
 extern SHELL_VAR *assign_array_var_from_string (SHELL_VAR *, char *, int);
 
 extern char *expand_and_quote_assoc_word (char *, int);

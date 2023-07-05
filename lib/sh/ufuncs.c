@@ -41,11 +41,13 @@ extern int errno;
 #  include "stat-time.h"
 #endif
 
+#include "error.h"
+
 /* A version of `alarm' using setitimer if it's available. */
 
 #if defined (HAVE_SETITIMER)
 unsigned int
-falarm(unsigned int secs, unsigned int usecs)
+falarm (unsigned int secs, unsigned int usecs)
 {
   struct itimerval it, oit;
 
@@ -82,57 +84,93 @@ falarm (unsigned int secs, unsigned int usecs)
 /* A version of sleep using fractional seconds and select.  I'd like to use
    `usleep', but it's already taken */
 
+#if defined (HAVE_NANOSLEEP)
+static int
+nsleep (unsigned int sec, unsigned int usec)
+{
+  int r;
+  struct timespec req, rem;
+
+  req.tv_sec = sec;
+  req.tv_nsec = usec * 1000;
+
+  for (;;)
+    {
+      QUIT;
+      r = nanosleep (&req, &rem);
+      if (r == 0 || errno != EINTR)
+	return r;
+      req = rem;
+    }
+  return r;
+}	
+#endif
+
 #if defined (HAVE_TIMEVAL) && (defined (HAVE_SELECT) || defined (HAVE_PSELECT))
-int
-fsleep(unsigned int sec, unsigned int usec)
+static int
+ssleep (unsigned int sec, unsigned int usec)
 {
   int e, r;
   sigset_t blocked_sigs;
-#if defined (HAVE_PSELECT)
+#  if defined (HAVE_PSELECT)
   struct timespec ts;
-#else
+#  else
   sigset_t prevmask;
   struct timeval tv;
-#endif
+#  endif
 
   sigemptyset (&blocked_sigs);
 #  if defined (SIGCHLD)
   sigaddset (&blocked_sigs, SIGCHLD);
 #  endif
 
-#if defined (HAVE_PSELECT)
+#  if defined (HAVE_PSELECT)
   ts.tv_sec = sec;
   ts.tv_nsec = usec * 1000;
-#else
+#  else
   sigemptyset (&prevmask);
   tv.tv_sec = sec;
   tv.tv_usec = usec;
-#endif /* !HAVE_PSELECT */
+#  endif /* !HAVE_PSELECT */
 
   do
     {
-#if defined (HAVE_PSELECT)
+#  if defined (HAVE_PSELECT)
       r = pselect(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, &ts, &blocked_sigs);
-#else
+#  else
       sigprocmask (SIG_SETMASK, &blocked_sigs, &prevmask);
       r = select(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, &tv);
       sigprocmask (SIG_SETMASK, &prevmask, NULL);
-#endif
+#  endif
       e = errno;
       if (r < 0 && errno == EINTR)
-	return -1;		/* caller will handle */
+	return -1;		/* caller will handle XXX - QUIT;? */
       errno = e;
     }
   while (r < 0 && errno == EINTR);
 
   return r;
 }
-#else /* !HAVE_TIMEVAL || !HAVE_SELECT */
-int
-fsleep(unsigned int sec, unsigned int usec)
+#endif
+
+#if !defined (HAVE_SELECT)
+static int
+ancientsleep(unsigned int sec, unsigned int usec)
 {
   if (usec >= 500000)	/* round */
    sec++;
   return (sleep(sec));
 }
+#endif
+
+int
+fsleep(unsigned int sec, unsigned int usec)
+{
+#if defined (HAVE_NANOSLEEP)
+  return (nsleep (sec, usec));
+#elif defined (HAVE_TIMEVAL) && (defined (HAVE_SELECT) || defined (HAVE_PSELECT))
+  return (ssleep (sec, usec));
+#else /* !HAVE_TIMEVAL || !HAVE_SELECT */
+  return (ancientsleep (sec, usec));
 #endif /* !HAVE_TIMEVAL || !HAVE_SELECT */
+}

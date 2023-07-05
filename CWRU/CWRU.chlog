@@ -7025,3 +7025,53 @@ lib/readline/complete.c
 	- rl_username_completion_function: simplify things by just skipping the
 	  function body if HAVE_GETPWENT is not defined.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/sh/ufuncs.c
+	- fsleep: broke into three functions: nsleep, which uses nanosleep,
+	  ssleep, which uses select/pselect, and ancientsleep, which uses
+	  sleep. Prefer nanosleep, use the others depending on what's
+	  defined.
+	  From a report and patch by Grisha Levit <grishalevit@gmail.com>
+
+arrayfunc.c
+	- assign_compound_array_list: now behaves more like a series of
+	  assignment statements (a=(one two) is more like a[0]=one a[1]=two)
+	  in terms of error handling -- break after the first invalid
+	  assignment -- and return value -- now return int, 0 on failure and
+	  1 on success so the callers can throw assignment errors
+	- assign_compound_array_list: if we have an explicit [subscript]=value
+	  assignment, use the negative-indices-count-back-from-the-end strategy;
+	  otherwise use last_ind and throw an error on overflow. This is like
+	  standalone assignment statements
+	- assign_array_var_from_string: catch new return value from
+	  assign_compound_array_list; return NULL if assign_compound_array_list
+	  returns failure
+
+subst.c
+	- do_compound_assignment: if assign_compound_array_list or
+	  assign_array_var_from_string return error (0 or NULL, respectively),
+	  treat as an assignment error similar to assigning to a readonly
+	  variable
+	  Inspired by a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+arrayfunc.h
+	- assign_compound_array_list: new return type
+
+				    7/5
+				    ---
+builtins/enable.def
+	- enable_builtin: make sure dynamic builtin loading and unloading
+	  updates the `enabled' and `disabled' programmable completion lists.
+	  From a report and patch by Grisha Levit <grishalevit@gmail.com>
+
+doc/bash.1,doc/bashref.texi
+	- hash: add note that assigment to PATH clears the hash table.
+	  Report by Sebastian Carlos <sebaaa1754@gmail.com>
+
+lib/readline/complete.c
+	- rl_filename_completion_function: make sure the results of
+	  *rl_filename_rewrite_hook are freed consistently if the function
+	  returns newly-allocated memory
+	  From a report and patch by Grisha Levit <grishalevit@gmail.com>
+	  back in May
+

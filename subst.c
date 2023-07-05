@@ -3422,7 +3422,7 @@ static SHELL_VAR *
 do_compound_assignment (const char *name, char *value, int flags)
 {
   SHELL_VAR *v;
-  int mklocal, mkassoc, mkglobal, chklocal;
+  int mklocal, mkassoc, mkglobal, chklocal, r;
   WORD_LIST *list;
   char *newname;	/* used for local nameref references */
 
@@ -3447,9 +3447,11 @@ do_compound_assignment (const char *name, char *value, int flags)
       else if (v == 0 || (array_p (v) == 0 && assoc_p (v) == 0) || v->context != variable_context)
         v = make_local_array_variable (newname, 0);
       if (v)
-	assign_compound_array_list (v, list, flags);
+	r = assign_compound_array_list (v, list, flags);
       if (list)
 	dispose_words (list);
+      if (r == 0)		/* compound assignment error */
+	return ((SHELL_VAR *)0);
     }
   /* In a function but forcing assignment in global context. CHKLOCAL means to
      check for an existing local variable first. */
@@ -3478,9 +3480,11 @@ do_compound_assignment (const char *name, char *value, int flags)
       else if (v && mkassoc == 0 && array_p (v) == 0)
 	v = convert_var_to_array (v);
       if (v)
-	assign_compound_array_list (v, list, flags);
+	r = assign_compound_array_list (v, list, flags);
       if (list)
 	dispose_words (list);
+      if (r == 0)		/* compound assignment error */
+	return ((SHELL_VAR *)0);
     }
   else
     {

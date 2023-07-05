@@ -193,6 +193,8 @@ enable_builtin (WORD_LIST *list)
 	result = EXECUTION_FAILURE;	/* normalize return value */
 #if defined (PROGRAMMABLE_COMPLETION)
       set_itemlist_dirty (&it_builtins);
+      set_itemlist_dirty (&it_enabled);
+      set_itemlist_dirty (&it_disabled);
 #endif
     }
 #endif
@@ -208,6 +210,8 @@ enable_builtin (WORD_LIST *list)
 	}
 #if defined (PROGRAMMABLE_COMPLETION)
       set_itemlist_dirty (&it_builtins);
+      set_itemlist_dirty (&it_enabled);
+      set_itemlist_dirty (&it_disabled);
 #endif
     }
 #endif
@@ -237,6 +241,8 @@ enable_builtin (WORD_LIST *list)
 		opt = r;
 #if defined (PROGRAMMABLE_COMPLETION)
 	      set_itemlist_dirty (&it_builtins);
+	      set_itemlist_dirty (&it_enabled);
+	      set_itemlist_dirty (&it_disabled);
 #endif
 	    }
 #endif

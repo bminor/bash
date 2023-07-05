@@ -147,8 +147,7 @@ sleep_builtin (WORD_LIST *list)
 	 *
 	 * A heuristic: if the conversion failed, but the argument appears to
 	 * contain a GNU-like interval specifier (e.g. "1m30s"), try to parse
-	 * it. If we can't, return the right exit code to tell
-	 * execute_builtin to try and execute a disk command instead.
+	 * it. If we can't, it's an error.
 	 */
 	if (r == 0 && (strchr ("dhms", *ep) || strpbrk (list->word->word, "dhms")))
 		r = parse_gnutimefmt (list->word->word, &sec, &usec);
