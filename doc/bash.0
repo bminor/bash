@@ -2720,8 +2720,10 @@ CCOONNDDIITTIIOONNAALL EEXXPPRREESSSSIIOONNSS
        bolic links and operate on the target of the link, rather than the link
        itself.
 
-       When used with [[[[, the << and >> operators sort  lexicographically  using
-       the current locale.  The tteesstt command sorts using ASCII ordering.
+       When used with [[[[, or when the shell is in _p_o_s_i_x _m_o_d_e, the << and >>  op-
+       erators  sort  lexicographically  using  the  current locale.  When the
+       shell is not in _p_o_s_i_x _m_o_d_e, the tteesstt command sorts using  ASCII  order-
+       ing.
 
        --aa _f_i_l_e
               True if _f_i_l_e exists.
@@ -6317,8 +6319,10 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      The  expression  is  parsed  and  evaluated  according to
                      precedence using the rules listed above.
 
-              When used with tteesstt or [[, the << and  >>  operators  sort  lexico-
-              graphically using ASCII ordering.
+              If the shell is not in _p_o_s_i_x _m_o_d_e, when used with tteesstt or [[, the
+              <<  and  >> operators sort lexicographically using ASCII ordering.
+              When the shell is in _p_o_s_i_x _m_o_d_e, these operators sort using  the
+              current locale.
 
        ttiimmeess  Print  the  accumulated  user and system times for the shell and
               for processes run from the shell.  The return status is 0.
@@ -6800,4 +6804,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.3                     2023 June 28                          BASH(1)
+GNU Bash 5.3                      2023 July 7                          BASH(1)

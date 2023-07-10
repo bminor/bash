@@ -49,6 +49,10 @@ fff
 x=10 fff
 x=1 fff
 x=4 fff2
+# set this because variable assignments preceding functions should never
+# persist after the function returns, no matter what a builtin inside the
+# function does to them
+x=4
 x=11 fff3
 echo after fff3: x=$x
 x=12 fff4

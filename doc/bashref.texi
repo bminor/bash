@@ -4288,8 +4288,30 @@ The expression is parsed and evaluated according to precedence
 using the rules listed above.
 @end table
 
-When used with @code{test} or @samp{[}, the @samp{<} and @samp{>}
+If the shell is not in @sc{posix} mode,
+when used with @code{test} or @samp{[}, the @samp{<} and @samp{>}
 operators sort lexicographically using ASCII ordering.
+If the shell is in @sc{posix} mode, these operators use the current locale.
+
+The historical operator-precedence parsing with 4 or more arguments can
+lead to ambiguities when it encounters strings that look like primaries.
+The @sc{posix} standard has deprecated the @option{-a} and @option{-o}
+primaries and enclosing expressions within parentheses.
+Scripts should no longer use them.
+It's much more reliable to restrict test invocations to a single primary,
+and to replace uses of @option{-a} and @option{-o} with the shell's
+@code{&&} and @code{||} list operators. For example, use
+
+@example
+test -n string1 && test -n string2
+@end example
+
+@noindent
+instead of
+
+@example
+test -n string1 -a -n string2
+@end example
 
 @item times
 @btindex times
@@ -8699,6 +8721,11 @@ character will escape it and the backslash will be removed.
 @item
 The @code{test} builtin compares strings using the current locale when
 processing the @samp{<} and @samp{>} binary operators.
+
+@item
+The @code{test} builtin's @option{-t} unary primary requires an argument.
+Historical versions of @code{test} made the argument optional in certain
+cases, and bash attempts to accommodate those for backwards compatibility.
 
 @item
 Command substitutions don't set the @samp{?} special parameter. The exit

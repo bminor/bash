@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jun 28 14:06:27 EDT 2023
+.\"	Last Change: Fri Jul  7 15:07:53 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 June 28" "GNU Bash 5.3"
+.TH BASH 1 "2023 July 7" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4874,9 +4874,12 @@ Unless otherwise specified, primaries that operate on files follow symbolic
 links and operate on the target of the link, rather than the link itself.
 .if t .sp 0.5
 .if n .sp 1
-When used with \fB[[\fP, the \fB<\fP and \fB>\fP operators sort
+When used with \fB[[\fP,
+or when the shell is in \fIposix mode\fP,
+the \fB<\fP and \fB>\fP operators sort
 lexicographically using the current locale.
-The \fBtest\fP command sorts using ASCII ordering.
+When the shell is not in \fIposix mode\fP,
+the \fBtest\fP command sorts using ASCII ordering.
 .sp 1
 .PD 0
 .TP
@@ -11028,8 +11031,11 @@ using the rules listed above.
 .if t .sp 0.5
 .if n .sp 1
 .LP
-When used with \fBtest\fP or \fB[\fP, the \fB<\fP and \fB>\fP operators
+If the shell is not in \fIposix mode\fP, 
+when used with \fBtest\fP or \fB[\fP, the \fB<\fP and \fB>\fP operators
 sort lexicographically using ASCII ordering.
+When the shell is in \fIposix mode\fP, these operators sort using the
+current locale.
 .RE
 .PD
 .TP

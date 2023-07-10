@@ -70,6 +70,10 @@ extern int errno;
 #endif /* !STREQ */
 #define STRCOLLEQ(a, b) ((a)[0] == (b)[0] && strcoll ((a), (b)) == 0)
 
+/* Same as ISOPTION from builtins/common.h */
+#define ISPRIMARY(s, c)	(s[0] == '-' && s[1] == c && s[2] == '\0')
+#define ANDOR(s)  (s[0] == '-' && (s[1] == 'a' || s[1] == 'o') && s[2] == 0)
+
 #if !defined (R_OK)
 #define R_OK 4
 #define W_OK 2
@@ -184,7 +188,7 @@ or (void)
   int value, v2;
 
   value = and ();
-  if (pos < argc && argv[pos][0] == '-' && argv[pos][1] == 'o' && !argv[pos][2])
+  if (pos < argc && ISPRIMARY (argv[pos], 'o'))
     {
       advance (0);
       v2 = or ();
@@ -205,7 +209,7 @@ and (void)
   int value, v2;
 
   value = term ();
-  if (pos < argc && argv[pos][0] == '-' && argv[pos][1] == 'a' && !argv[pos][2])
+  if (pos < argc && ISPRIMARY (argv[pos], 'a'))
     {
       advance (0);
       v2 = and ();
@@ -477,7 +481,7 @@ unary_operator (void)
     return (FALSE);
 
   /* the only tricky case is `-t', which may or may not take an argument. */
-  if (op[1] == 't')
+  if (posixly_correct == 0 && op[1] == 't')
     {
       advance (0);
       if (pos < argc)
@@ -487,10 +491,13 @@ unary_operator (void)
 	      advance (0);
 	      return (unary_test (op, argv[pos - 1], 0));
 	    }
+	  else if (argc >= 5 && ANDOR (argv[pos]))
+	    return (unary_test (op, "1", 0));	  
 	  else
-	    return (FALSE);
+	    integer_expected_error (argv[pos]);
 	}
       else
+	/* this is not called when pos == argc; the one-argument code is used */
 	return (unary_test (op, "1", 0));
     }
 
@@ -603,7 +610,7 @@ unary_test (char *op, char *arg, int flags)
 
     case 't':	/* File fd is a terminal? */
       if (legal_number (arg, &r) == 0)
-	return (FALSE);
+	integer_expected_error (arg);
       return ((r == (int)r) && isatty ((int)r));
 
     case 'n':			/* True if arg has some length. */
@@ -761,8 +768,6 @@ two_arguments (void)
 
   return (0);
 }
-
-#define ANDOR(s)  (s[0] == '-' && (s[1] == 'a' || s[1] == 'o') && s[2] == 0)
 
 /* This could be augmented to handle `-t' as equivalent to `-t 1', but
    POSIX requires that `-t' be given an argument. */

@@ -117,7 +117,8 @@ COMMAND *global_command = (COMMAND *)NULL;
 /* Information about the current user. */
 struct user_info current_user =
 {
-  (uid_t)-1, (uid_t)-1, (gid_t)-1, (gid_t)-1,
+  (uid_t)-1, (uid_t)-1, (uid_t)-1,
+  (gid_t)-1, (gid_t)-1, (gid_t)-1,
   (char *)NULL, (char *)NULL, (char *)NULL
 };
 
@@ -1298,7 +1299,22 @@ uidget (void)
 {
   uid_t u;
 
-  u = getuid ();
+  u = current_user.uid;
+
+#if HAVE_SETRESUID
+  (void) getresuid (&current_user.uid, &current_user.euid, &current_user.saveuid);
+#else
+  current_user.uid = getuid ();
+  current_user.euid = geteuid ();
+#endif
+
+#if HAVE_SETRESGID
+  (void) getresgid (&current_user.gid, &current_user.egid, &current_user.savegid);
+#else
+  current_user.gid = getgid ();
+  current_user.egid = getegid ();
+#endif
+
   if (current_user.uid != u)
     {
       FREE (current_user.user_name);
@@ -1306,10 +1322,6 @@ uidget (void)
       FREE (current_user.home_dir);
       current_user.user_name = current_user.shell = current_user.home_dir = NULL;
     }
-  current_user.uid = u;
-  current_user.gid = getgid ();
-  current_user.euid = geteuid ();
-  current_user.egid = getegid ();
 
   /* See whether or not we are running setuid or setgid. */
   return (current_user.uid != current_user.euid) ||
@@ -1319,13 +1331,17 @@ uidget (void)
 void
 disable_priv_mode (void)
 {
-  int e;
+  int e, r;
 
+  r = 0;
 #if HAVE_SETRESUID
-  if (setresuid (current_user.uid, current_user.uid, current_user.uid) < 0)
+  if (current_user.euid != current_user.uid || current_user.saveuid != current_user.uid)
+    r = setresuid (current_user.uid, current_user.uid, current_user.uid) ;
 #else
-  if (setuid (current_user.uid) < 0)
+  if (current_user.euid != current_user.uid)
+    r = setuid (current_user.uid);
 #endif
+  if (r < 0)
     {
       e = errno;
       sys_error (_("cannot set uid to %d: effective uid %d"), current_user.uid, current_user.euid);
@@ -1334,15 +1350,23 @@ disable_priv_mode (void)
 	exit (e);
 #endif
     }
+
+  r = 0;
 #if HAVE_SETRESGID
-  if (setresgid (current_user.gid, current_user.gid, current_user.gid) < 0)
+  if (current_user.egid != current_user.gid || current_user.savegid != current_user.gid)
+    r = setresgid (current_user.gid, current_user.gid, current_user.gid);
 #else
-  if (setgid (current_user.gid) < 0)
+  if (current_user.egid != current_user.gid)
+    r = setgid (current_user.gid);
 #endif
+  if (r < 0)
     sys_error (_("cannot set gid to %d: effective gid %d"), current_user.gid, current_user.egid);
 
   current_user.euid = current_user.uid;
   current_user.egid = current_user.gid;
+
+  current_user.saveuid = current_user.uid;
+  current_user.savegid = current_user.gid;
 }
 
 #if defined (WORDEXP_OPTION)

@@ -7075,3 +7075,52 @@ lib/readline/complete.c
 	  From a report and patch by Grisha Levit <grishalevit@gmail.com>
 	  back in May
 
+				    7/6
+				    ---
+builtins/cd.def
+	- cd_builtin: if $OLDPWD is set by the user or script to something
+	  that's not a full pathname, allow it to use $CDPATH.
+	  From a report by Dustin Boyd <chronokitsune3233@gmail.com>
+
+				    7/7
+				    ---
+shell.h
+	- user_info: add members for saved uid and saved gid
+
+shell.c
+	- uidget: if we have setresuid/setresgid, get the saved uid and saved
+	  gid so we can set them if we disable privileged mode
+	- disable_priv_mode: only call setuid/setresuid and setgid/setresgid
+	  if the euid (egid) != uid (gid). If we have setresuid/setresgid,
+	  add a check whether the saved uid (gid) isn't the same as the real
+	  uid (gid). Potentially saves a couple of system calls.
+	  Fixes Android issue, patch by Grisha Levit <grishalevit@gmail.com>
+
+test.c
+	- unary_operator: only support historical handling of -t and its
+	  optional argument when not in posix mode
+	- unary_test: print an error if the argument to -t is not a number
+	- unary_operator: only make the argument to -t optional if the
+	  next argument is -a or -o and we are using the historical algorithm
+	  (argc >= 5), otherwise force it to be a number and print an error
+	  message if it's not
+	  From a report by Stephane Chazelas <stephane@chazelas.org>
+
+doc/bash.1,doc/bashref.texi
+	- added note about test/[ sorting using the current locale with the
+	  `<' and `>' operators when in posix mode
+	- added note about the integer argument to test -t being required
+	  when in posix mode
+	- added note recommending against the use of test with 5 or more
+	  arguments in favor of combining multiple instances of test with
+	  && or ||
+	  From a report by Stephane Chazelas <stephane@chazelas.org>
+
+				   7/10
+				   ----
+jobs.c
+	- start_job: turn off (on) the J_ASYNC flag depending on whether the
+	  job is being started in the foreground (background). It matters now
+	  that we use IS_ASYNC to determine whether to give the terminal
+	  back to the shell's process group.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

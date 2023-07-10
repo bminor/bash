@@ -148,8 +148,8 @@ struct fd_bitmap {
 
 /* Information about the current user. */
 struct user_info {
-  uid_t uid, euid;
-  gid_t gid, egid;
+  uid_t uid, euid, saveuid;
+  gid_t gid, egid, savegid;
   char *user_name;
   char *shell;		/* shell from the password file */
   char *home_dir;

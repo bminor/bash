@@ -3587,12 +3587,16 @@ start_job (int job, int foreground)
     {
       get_tty_state ();
       save_stty = shell_tty_info;
+      jobs[job]->flags &= ~J_ASYNC;	/* no longer async */
       /* Give the terminal to this job. */
       if (IS_JOBCONTROL (job))
 	give_terminal_to (jobs[job]->pgrp, 0);
     }
   else
-    jobs[job]->flags &= ~J_FOREGROUND;
+    {
+      jobs[job]->flags &= ~J_FOREGROUND;
+      jobs[job]->flags |= J_ASYNC;	/* running in background now */
+    }
 
   /* If the job is already running, then don't bother jump-starting it. */
   if (already_running == 0)

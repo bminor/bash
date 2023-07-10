@@ -314,9 +314,9 @@ cd_builtin (WORD_LIST *list)
   if (list == 0)
     {
       /* `cd' without arguments is equivalent to `cd $HOME' */
-      dirname = get_string_value ("HOME");
+      dirname = get_string_value ("HOME");	/* POSIX cd step 2 */
 
-      if (dirname == 0)
+      if (dirname == 0)			/* POSIX cd step 1 */
 	{
 	  builtin_error (_("HOME not set"));
 	  return (EXECUTION_FAILURE);
@@ -333,7 +333,7 @@ cd_builtin (WORD_LIST *list)
 #if 0
   else if (list->word->word[0] == '\0')
     {
-      builtin_error (_("null directory"));
+      builtin_error (_("null directory"));	/* POSIX cd implementation defined */
       return (EXECUTION_FAILURE);
     }
 #endif
@@ -347,19 +347,14 @@ cd_builtin (WORD_LIST *list)
 	  builtin_error (_("OLDPWD not set"));
 	  return (EXECUTION_FAILURE);
 	}
-#if 0
-      lflag = interactive ? LCD_PRINTPATH : 0;
-#else
-      lflag = LCD_PRINTPATH;		/* According to SUSv3 */
-#endif
+      lflag = LCD_PRINTPATH;		/* POSIX cd `-' operand */
     }
-  else if (absolute_pathname (list->word->word))
+  else
     dirname = list->word->word;
-  else if (privileged_mode == 0 && (cdpath = get_string_value ("CDPATH")))
-    {
-      dirname = list->word->word;
 
-      /* Find directory in $CDPATH. */
+  if (privileged_mode == 0 && absolute_pathname (dirname) == 0 && (cdpath = get_string_value ("CDPATH")))
+    {
+      /* Find directory in $CDPATH, POSIX cd step 5. */
       path_index = 0;
       while (path = extract_colon_unit (cdpath, &path_index))
 	{
@@ -390,8 +385,6 @@ cd_builtin (WORD_LIST *list)
 	    free (temp);
 	}
     }
-  else
-    dirname = list->word->word;
 
   /* When we get here, DIRNAME is the directory to change to.  If we
      chdir successfully, just return. */

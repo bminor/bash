@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 June 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 July 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -6160,9 +6160,12 @@ links and operate on the target of the link, rather than the link itself.
 <P>
 
 
-When used with <B>[[</B>, the <B>&lt;</B> and <B>&gt;</B> operators sort
+When used with <B>[[</B>,
+or when the shell is in <I>posix mode</I>,
+the <B>&lt;</B> and <B>&gt;</B> operators sort
 lexicographically using the current locale.
-The <B>test</B> command sorts using ASCII ordering.
+When the shell is not in <I>posix mode</I>,
+the <B>test</B> command sorts using ASCII ordering.
 <P>
 
 <DL COMPACT>
@@ -13849,8 +13852,11 @@ using the rules listed above.
 </DL>
 <P>
 
-When used with <B>test</B> or <B>[</B>, the <B>&lt;</B> and <B>&gt;</B> operators
+If the shell is not in <I>posix mode</I>, 
+when used with <B>test</B> or <B>[</B>, the <B>&lt;</B> and <B>&gt;</B> operators
 sort lexicographically using ASCII ordering.
+When the shell is in <I>posix mode</I>, these operators sort using the
+current locale.
 </DL>
 
 
@@ -15051,7 +15057,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 June 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 July 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15157,7 +15163,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20230703/doc/bash.1.<BR>
-Time: 05 July 2023 11:27:18 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20230705/doc/bash.1.<BR>
+Time: 07 July 2023 16:22:29 EDT
 </BODY>
 </HTML>
