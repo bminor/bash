@@ -2192,7 +2192,11 @@ globword:
 	  local_index = 0;
 		
 	  if (glob_matches[1] && rl_completion_type == TAB)	/* multiple matches are bad */
-	    return ((char *)NULL);
+	    {
+	      strvec_dispose (glob_matches);
+	      glob_matches = (char **)NULL;
+	      return ((char *)NULL);
+	    }
 	}
 
       while (val = glob_matches[local_index++])

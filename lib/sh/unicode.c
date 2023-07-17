@@ -35,6 +35,10 @@
 #  include <iconv.h>
 #endif
 
+#if HAVE_LANGINFO_CODESET
+#  include <langinfo.h>
+#endif
+
 #include <xmalloc.h>
 
 #ifndef USHORT_MAX
@@ -267,7 +271,7 @@ u32cconv (unsigned long c, char *s)
 	{
 #if HAVE_LOCALE_CHARSET
 	  charset = locale_charset ();
-#elif HAVE_NL_LANGINFO
+#elif HAVE_LANGINFO_CODESET
 	  charset = nl_langinfo (CODESET);
 #else
 	  charset = stub_charset ();

@@ -7124,3 +7124,22 @@ jobs.c
 	  that we use IS_ASYNC to determine whether to give the terminal
 	  back to the shell's process group.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+bashline.c
+	- command_word_completion_function: if we have a glob pattern that
+	  expands to multiple words, dispose of the list before returning NULL.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- makunbound: if we're unsetting a local variable, preserve the export
+	  attribute even if the variable's not in the temporary environment
+	  Tentative fix, compatible with other POSIX shells (except the BSD
+	  variants of ash)
+
+				   7/12
+				   ----
+lib/sh/unicode.c
+	- include <langinfo.h> if HAVE_LANGINFO_CODESET is defined, use
+	  nl_langinfo (CODESET) if HAVE_LANGINFO_CODESET is define, since
+	  we no longer check for nl_langinfo. This is what locale.c does.
+
