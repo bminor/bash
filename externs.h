@@ -339,7 +339,7 @@ extern int sh_setlinebuf (FILE *);
 extern int sh_eaccess (const char *, int);
 
 /* declarations for functions defined in lib/sh/shmatch.c */
-extern int sh_regmatch (const char *, const char *, int);
+extern int sh_regmatch (const char *, const char *, int, char **);
 
 /* defines for flags argument to sh_regmatch. */
 #define SHMAT_SUBEXP		0x001	/* save subexpressions in SH_REMATCH */

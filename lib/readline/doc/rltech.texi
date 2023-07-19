@@ -1348,14 +1348,19 @@ If @var{c} is a number, return the value it represents.
 Bind the key sequence @var{keyseq} to invoke the macro @var{macro}.
 The binding is performed in @var{map}.  When @var{keyseq} is invoked, the
 @var{macro} will be inserted into the line.  This function is deprecated;
-use @code{rl_generic_bind()} instead.
+use @code{rl_generic_bind} instead.
 @end deftypefun
 
 @deftypefun void rl_macro_dumper (int readable)
 Print the key sequences bound to macros and their values, using
 the current keymap, to @code{rl_outstream}.
-If @var{readable} is non-zero, the list is formatted in such a way
+If @var{readable} is greater than zero, the list is formatted in such a way
 that it can be made part of an @code{inputrc} file and re-read.
+If @var{readable} is less than zero, the list is printed in a
+"translated" form that can be used by applications that wish to bind
+key sequences directly without calling @code{rl_parse_and_bind}
+(e.g., by calling @code{rl_generic_bind}).
+
 @end deftypefun
 
 @deftypefun int rl_variable_bind (const char *variable, const char *value)

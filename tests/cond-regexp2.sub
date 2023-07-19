@@ -21,6 +21,16 @@
 
 [[ "\\" =~ [\\] ]] || echo bad 5
 
+[[ x =~ [z-a] ]] && echo bad 6
+
+[[ x =~ [[:invalid:]abc] ]] && echo bad 7
+
+exp='x\'
+[[ x =~ $exp ]] && echo bad 8
+
+exp='a(xb'
+[[ x =~ $exp ]] && echo bad 9
+
 [[ dog =~ [[=d=]].. ]] && echo ok 1
 [[ d.. =~ [[=d=]]\.\. ]] && echo ok 2
 [[ dog =~ ['[=d=]'].. ]] && echo ok 3	# dubious

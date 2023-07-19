@@ -1493,7 +1493,7 @@ getwidestr (size_t *lenp)
   mbs = garglist->word->word;
   slen = strlen (mbs);
   ws = (wchar_t *)xmalloc ((slen + 1) * sizeof (wchar_t));
-  mblength = mbsrtowcs (ws, &mbs, slen, &state);
+  mblength = mbsrtowcs (ws, &mbs, slen + 1, &state);
   if (lenp)
     *lenp = mblength;
 

@@ -2861,9 +2861,16 @@ _rl_macro_dumper_internal (int print_readably, Keymap map, char *prefix)
 	{
 	case ISMACR:
 	  keyname = _rl_get_keyname (key);
-	  out = _rl_untranslate_macro_value ((char *)map[key].function, 0);
+	  if (print_readably < 0)
+	    out = savestring ((char *)map[key].function);
+	  else
+	    out = _rl_untranslate_macro_value ((char *)map[key].function, 0);
 
-	  if (print_readably)
+	  if (print_readably < 0)
+	    fprintf (rl_outstream, "\"%s%s\": %s\n", prefix ? prefix : "",
+						         keyname,
+						         out ? out : "");
+	  else if (print_readably > 0)
 	    fprintf (rl_outstream, "\"%s%s\": \"%s\"\n", prefix ? prefix : "",
 						         keyname,
 						         out ? out : "");
@@ -2926,10 +2933,40 @@ rl_dump_macros (int count, int key)
 static char *
 _rl_get_string_variable_value (const char *name)
 {
-  static char numbuf[32];
+  static char numbuf[64];
   char *ret;
 
-  if (_rl_stricmp (name, "bell-style") == 0)
+  if (_rl_stricmp (name, "active-region-start-color") == 0)
+    {
+      if (_rl_active_region_start_color == 0)
+	return 0;
+      ret = _rl_untranslate_macro_value (_rl_active_region_start_color, 0);
+      if (ret)
+	{
+	  strncpy (numbuf, ret, sizeof (numbuf) - 1);
+	  xfree (ret);
+	  numbuf[sizeof(numbuf) - 1] = '\0';
+	}
+      else
+	numbuf[0] = '\0';
+      return numbuf;
+    }
+  else if (_rl_stricmp (name, "active-region-end-color") == 0)
+    {
+      if (_rl_active_region_end_color == 0)
+	return 0;
+      ret = _rl_untranslate_macro_value (_rl_active_region_end_color, 0);
+      if (ret)
+	{
+	  strncpy (numbuf, ret, sizeof (numbuf) - 1);
+	  xfree (ret);
+	  numbuf[sizeof(numbuf) - 1] = '\0';
+	}
+      else
+	numbuf[0] = '\0';
+      return numbuf;
+    }
+  else if (_rl_stricmp (name, "bell-style") == 0)
     {
       switch (_rl_bell_preference)
 	{
@@ -2963,7 +3000,7 @@ _rl_get_string_variable_value (const char *name)
     return (rl_get_keymap_name_from_edit_mode ());
   else if (_rl_stricmp (name, "history-size") == 0)
     {
-      sprintf (numbuf, "%d", history_is_stifled() ? history_max_entries : 0);
+      sprintf (numbuf, "%d", history_is_stifled() ? history_max_entries : -1);
       return (numbuf);
     }
   else if (_rl_stricmp (name, "isearch-terminators") == 0)

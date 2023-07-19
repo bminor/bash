@@ -76,7 +76,11 @@ match control-a 2
 match control-a 3
 match control-a 4
 match control-a 5
-./cond-regexp2.sub: line 18: [[: invalid regular expression `[\.'
+./cond-regexp2.sub: line 18: [[: invalid regular expression `[\.': brackets ([ ]) not balanced
+./cond-regexp2.sub: line 24: [[: invalid regular expression `[z-a]': invalid character range
+./cond-regexp2.sub: line 26: [[: invalid regular expression `[[:invalid:]abc]': invalid character class
+./cond-regexp2.sub: line 29: [[: invalid regular expression `x\': trailing backslash (\)
+./cond-regexp2.sub: line 32: [[: invalid regular expression `a(xb': parentheses not balanced
 ok 1
 ok 2
 ok 3

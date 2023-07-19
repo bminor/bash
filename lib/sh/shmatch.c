@@ -39,24 +39,36 @@
 #include "variables.h"
 #include "externs.h"
 
-extern int glob_ignore_case, match_ignore_case;
+extern int match_ignore_case;
 
 #if defined (ARRAY_VARS)
 extern SHELL_VAR *builtin_find_indexed_array (char *, int);
 #endif
 
+static char *
+strregerror (int err, const regex_t *regex_p)
+{
+  char *str;
+  size_t size;
+
+  size = regerror (err, regex_p, (char *)0, 0);
+  str = xmalloc (size);
+  (void)regerror (err, regex_p, str, size);
+
+  return str;
+}
+
 int
-sh_regmatch (const char *string, const char *pattern, int flags)
+sh_regmatch (const char *string, const char *pattern, int flags, char **errbuf)
 {
   regex_t regex = { 0 };
   regmatch_t *matches;
-  int rflags;
+  int rflags, reg_err;
 #if defined (ARRAY_VARS)
   SHELL_VAR *rematch;
   ARRAY *amatch;
-  int subexp_ind;
+  size_t subexp_ind, subexp_len;
   char *subexp_str;
-  int subexp_len;
 #endif
   int result;
 
@@ -71,8 +83,12 @@ sh_regmatch (const char *string, const char *pattern, int flags)
   rflags |= REG_NOSUB;
 #endif
 
-  if (regcomp (&regex, pattern, rflags))
-    return 2;		/* flag for printing a warning here. */
+  if (reg_err = regcomp (&regex, pattern, rflags))
+    {
+      if (errbuf)
+	*errbuf = strregerror (reg_err, &regex);
+      return 2;		/* flag for printing a warning here. */
+    }
 
 #if defined (ARRAY_VARS)
   matches = (regmatch_t *)malloc (sizeof (regmatch_t) * (regex.re_nsub + 1));
@@ -82,6 +98,7 @@ sh_regmatch (const char *string, const char *pattern, int flags)
 
   /* man regexec: NULL PMATCH ignored if NMATCH == 0 */
   if (regexec (&regex, string, matches ? regex.re_nsub + 1 : 0, matches, 0))
+    /* XXX - catch errors and fill in *errbuf here? */
     result = EXECUTION_FAILURE;
   else
     result = EXECUTION_SUCCESS;		/* match */

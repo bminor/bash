@@ -1155,7 +1155,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
        sseett [--aabbeeffhhkkmmnnppttuuvvxxBBCCEEHHPPTT] [--oo _o_p_t_i_o_n_-_n_a_m_e] [----] [--] [_a_r_g ...]
        sseett [++aabbeeffhhkkmmnnppttuuvvxxBBCCEEHHPPTT] [++oo _o_p_t_i_o_n_-_n_a_m_e] [----] [--] [_a_r_g ...]
-              Without options, display the name and value of each shell  vari-
+       sseett --oo
+       sseett ++oo Without options, display the name and value of each shell  vari-
               able  in a format that can be reused as input for setting or re-
               setting the currently-set variables.  Read-only variables cannot
               be  reset.  In _p_o_s_i_x _m_o_d_e, only shell variables are listed.  The
@@ -1270,10 +1271,10 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                               This also affects the editing interface used for
                               rreeaadd --ee.
                       xxttrraaccee  Same as --xx.
-                      If --oo is supplied with no _o_p_t_i_o_n_-_n_a_m_e, the values of the
-                      current  options are printed.  If ++oo is supplied with no
-                      _o_p_t_i_o_n_-_n_a_m_e, a series of sseett commands  to  recreate  the
-                      current  option  settings  is  displayed on the standard
+                      If --oo is supplied with no _o_p_t_i_o_n_-_n_a_m_e,  sseett  prints  the
+                      current  shell  option settings.  If ++oo is supplied with
+                      no _o_p_t_i_o_n_-_n_a_m_e, sseett prints a series of sseett  commands  to
+                      recreate  the  current  option  settings on the standard
                       output.
               --pp      Turn on _p_r_i_v_i_l_e_g_e_d mode.  In this  mode,  the  $$EENNVV  and
                       $$BBAASSHH__EENNVV  files  are not processed, shell functions are
@@ -1779,8 +1780,10 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      The  expression  is  parsed  and  evaluated  according to
                      precedence using the rules listed above.
 
-              When used with tteesstt or [[, the << and  >>  operators  sort  lexico-
-              graphically using ASCII ordering.
+              If the shell is not in _p_o_s_i_x _m_o_d_e, when used with tteesstt or [[, the
+              <<  and  >> operators sort lexicographically using ASCII ordering.
+              When the shell is in _p_o_s_i_x _m_o_d_e, these operators sort using  the
+              current locale.
 
        ttiimmeess  Print  the  accumulated  user and system times for the shell and
               for processes run from the shell.  The return status is 0.

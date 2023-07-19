@@ -3975,6 +3975,8 @@ execute_cond_node (COND_COM *cond)
 #if defined (COND_REGEXP)
       if (rmatch)
 	{
+	  char *errstr;
+
 	  mflags = SHMAT_PWARN;
 #if defined (ARRAY_VARS)
 	  mflags |= SHMAT_SUBEXP;
@@ -3988,9 +3990,16 @@ execute_cond_node (COND_COM *cond)
 	  free(t2);
 #endif
 
-	  result = sh_regmatch (arg1, arg2, mflags);
+	  errstr = NULL;
+	  result = sh_regmatch (arg1, arg2, mflags, &errstr);
 	  if (result == 2)
-	    builtin_error (_("invalid regular expression `%s'"), arg2);
+	    {
+	      if (errstr && *errstr)
+		builtin_error (_("invalid regular expression `%s': %s"), arg2, errstr);
+	      else
+		builtin_error (_("invalid regular expression `%s'"), arg2);
+	      free (errstr);
+	    }
 	}
       else
 #endif /* COND_REGEXP */

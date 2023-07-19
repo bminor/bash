@@ -5376,6 +5376,8 @@ parameters, or to display the names and values of shell variables.
 @example
 set [-abefhkmnptuvxBCEHPT] [-o @var{option-name}] [--] [-] [@var{argument} @dots{}]
 set [+abefhkmnptuvxBCEHPT] [+o @var{option-name}] [--] [-] [@var{argument} @dots{}]
+set -o
+set +o
 @end example
 
 If no options or arguments are supplied, @code{set} displays the names
@@ -5456,7 +5458,15 @@ This option is ignored by interactive shells.
 
 @item -o @var{option-name}
 
-Set the option corresponding to @var{option-name}:
+Set the option corresponding to @var{option-name}.
+If @option{-o} is supplied with no @var{option-name},
+@code{set} prints the current shell options settings.
+If @option{+o} is supplied with no @var{option-name},
+@code{set} prints a series of
+@code{set}
+commands to recreate the current option settings
+on the standard output.
+Valid option names are:
 
 @table @code
 @item allexport
