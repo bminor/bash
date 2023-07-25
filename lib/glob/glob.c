@@ -653,7 +653,7 @@ glob_vector (char *pat, char *dir, int flags)
   int hasglob;		/* return value from glob_pattern_p */
   int nalloca;
   struct globval *firstmalloc, *tmplink;
-  char *convfn;
+  char *convfn, *convpat;
 
   lastlink = 0;
   count = 0;
@@ -764,6 +764,10 @@ glob_vector (char *pat, char *dir, int flags)
       d = opendir (dir);
       if (d == NULL)
 	return ((char **) &glob_error_return);
+
+      convpat = fnx_fromfs (pat, patlen);
+      if (convpat != pat)
+	convpat = savestring (convpat);
 
       /* Compute the flags that will be passed to strmatch().  We don't
 	 need to do this every time through the loop. */
@@ -882,7 +886,7 @@ glob_vector (char *pat, char *dir, int flags)
 	    free (subdir);
 
 	  convfn = fnx_fromfs (dp->d_name, D_NAMLEN (dp));
-	  if (strmatch (pat, convfn, mflags) != FNM_NOMATCH)
+	  if (strmatch (convpat, convfn, mflags) != FNM_NOMATCH)
 	    {
 	      if (nalloca < ALLOCA_MAX)
 		{
@@ -924,6 +928,9 @@ glob_vector (char *pat, char *dir, int flags)
 	}
 
       (void) closedir (d);
+
+      if (convpat != pat)
+	free (convpat);
     }
 
   /* compat: if GX_ADDCURDIR, add the passed directory also.  Add an empty

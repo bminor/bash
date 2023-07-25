@@ -2177,6 +2177,14 @@ If @var{parameter} is unset or null, the expansion of
 $ v=123
 $ echo $@{v-unset@}
 123
+$ echo $@{v:-unset-or-null@}
+123
+$ unset v
+$ echo $@{v-unset@}
+unset
+$ v=
+$ echo $@{v:-unset-or-null@}
+unset-or-null
 @end example
 
 @item $@{@var{parameter}:=@var{word}@}

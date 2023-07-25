@@ -593,13 +593,7 @@ initialize_readline (void)
   /* Tell the completer that we want a crack first. */
   rl_attempted_completion_function = attempt_shell_completion;
 
-  /* Tell the completer that we might want to follow symbolic links or
-     do other expansion on directory names. */
-  set_directory_hook ();
-
-  rl_filename_rewrite_hook = bash_filename_rewrite_hook;
-
-  rl_filename_stat_hook = bash_filename_stat_hook;
+  bashline_set_filename_hooks ();
 
   /* Tell the filename completer we want a chance to ignore some names. */
   rl_ignore_some_completions_function = filename_completion_ignore;
@@ -688,8 +682,7 @@ bashline_reset (void)
 
   rl_filename_quoting_function = bash_quote_filename;
 
-  set_directory_hook ();
-  rl_filename_stat_hook = bash_filename_stat_hook;
+  bashline_set_filename_hooks ();
 
   bashline_reset_event_hook ();
 
@@ -1564,8 +1557,7 @@ attempt_shell_completion (const char *text, int start, int end)
   complete_fullquote = 1;		/* full filename quoting by default */
   rl_filename_quote_characters = default_filename_quote_characters;
   set_filename_bstab (rl_filename_quote_characters);
-  set_directory_hook ();
-  rl_filename_stat_hook = bash_filename_stat_hook;
+  bashline_set_filename_hooks ();
 
   rl_sort_completion_matches = 1;	/* sort by default */
 
@@ -3334,6 +3326,19 @@ restore_directory_hook (rl_icppfunc_t *hookf)
     rl_directory_completion_hook = hookf;
   else
     rl_directory_rewrite_hook = hookf;
+}
+
+/* Set the readline hooks that affect how directories and filenames are
+   converted. Extern so other parts of the shell can use. */
+void
+bashline_set_filename_hooks (void)
+{
+  /* Tell the completer that we might want to follow symbolic links or
+     do other expansion on directory names. */
+  set_directory_hook ();
+
+  rl_filename_rewrite_hook = bash_filename_rewrite_hook;
+  rl_filename_stat_hook = bash_filename_stat_hook;
 }
 
 /* Check whether not DIRNAME, with any trailing slash removed, exists.  If

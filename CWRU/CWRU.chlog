@@ -7201,3 +7201,57 @@ bashline.c
 	- print_unix_command_map: call rl_macro_dumper with an argument of -1
 	  so we can use the output directly in another call to bind -x.
 
+				   7/20
+				   ----
+pathexp.c
+	- quote_string_for_globbing: don't bother backslash-quoting multibyte
+	  characters. It matters for macOS and doesn't make a difference for
+	  other systems, and those aren't going to be special globbing chars.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/glob/glob.c
+	- glob_vector: normalize the pattern with fnx_fromfs so we make sure
+	  it's also in NFC on macOS (other systems don't care). This is a
+	  POSIX violation, but part of correcting the longtime HFS+ (and Finder)
+	  misfeature
+
+lib/readline/complete.c
+	- rl_filename_completion_function: if the application sets a filename
+	  rewrite hook, use it to rewrite the filename we're matching as well
+	  as filenames read with readdir().
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   7/21
+				   ----
+pathexp.c
+	- quote_string_for_globbing: see if we can get away without backslash-
+	  quoting single-byte characters that aren't CTLESC or characters
+	  that are special to EREs or BREs, even if they're quoted
+
+bashline.c
+	- bashline_set_filename_hooks: convenience function to set the
+	  directory hook and the filename rewrite and stat hooks; call from
+	  other places in the file so these are set consistently
+
+bashline.h
+	- bashline_set_filename_hooks: extern declaration
+
+builtins/complete.def
+	- compgen_builtin: make sure to set the directory and filename hooks
+	  so compgen called from a script works more like compgen called
+	  from a word completion context.
+	  Inspired by a report by Grisha Levit <grishalevit@gmail.com>
+
+doc/Makefile.in
+	- bash.pdf: use groff -T pdf to create, instead of creating postscript
+	  and then using ghostscript
+
+				   7/24
+				   ----
+jobs.c
+	- start_job: unconditionally send SIGCONT to the job we just started,
+	  even if we think it was already running, to reduce the window for a
+	  potential race condition, and only change the state to RUNNING if
+	  the SIGCONT succeeds or if the process has terminated so we can
+	  clean it up later.
+	  Report from Earl Chew <earl_chew@yahoo.com>

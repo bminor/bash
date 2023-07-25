@@ -3580,7 +3580,7 @@ start_job (int job, int foreground)
 
   /* Run the job. */
   if (already_running == 0)
-    set_job_running (job);
+    jobs[job]->flags |= J_NOTIFIED;
 
   /* Save the tty settings before we start the job in the foreground. */
   if (foreground)
@@ -3598,12 +3598,10 @@ start_job (int job, int foreground)
       jobs[job]->flags |= J_ASYNC;	/* running in background now */
     }
 
-  /* If the job is already running, then don't bother jump-starting it. */
-  if (already_running == 0)
-    {
-      jobs[job]->flags |= J_NOTIFIED;
-      killpg (jobs[job]->pgrp, SIGCONT);
-    }
+  /* Change job state to running only if the kill SIGCONT succeeds or if kill
+     says the process has terminated so we clean it up later. */
+  if (killpg (jobs[job]->pgrp, SIGCONT) >= 0 || errno == ESRCH)
+    set_job_running (job);
 
   if (foreground)
     {

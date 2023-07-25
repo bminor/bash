@@ -114,16 +114,16 @@
 \entry{kill ring}{123}{kill ring}
 \entry{initialization file, readline}{124}{initialization file, readline}
 \entry{variables, readline}{125}{variables, readline}
-\entry{programmable completion}{147}{programmable completion}
-\entry{completion builtins}{150}{completion builtins}
-\entry{History, how to use}{156}{History, how to use}
-\entry{command history}{157}{command history}
-\entry{history list}{157}{history list}
-\entry{history builtins}{157}{history builtins}
-\entry{history expansion}{159}{history expansion}
-\entry{event designators}{160}{event designators}
-\entry{history events}{160}{history events}
-\entry{installation}{163}{installation}
-\entry{configuration}{163}{configuration}
-\entry{Bash installation}{163}{Bash installation}
-\entry{Bash configuration}{163}{Bash configuration}
+\entry{programmable completion}{148}{programmable completion}
+\entry{completion builtins}{151}{completion builtins}
+\entry{History, how to use}{157}{History, how to use}
+\entry{command history}{158}{command history}
+\entry{history list}{158}{history list}
+\entry{history builtins}{158}{history builtins}
+\entry{history expansion}{160}{history expansion}
+\entry{event designators}{161}{event designators}
+\entry{history events}{161}{history events}
+\entry{installation}{164}{installation}
+\entry{configuration}{164}{configuration}
+\entry{Bash installation}{164}{Bash installation}
+\entry{Bash configuration}{164}{Bash configuration}

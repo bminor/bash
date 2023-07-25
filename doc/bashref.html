@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 16 June 2023).
+the Bash shell (version 5.3, 19 July 2023).
 
-This is Edition 5.3, last updated 16 June 2023,
+This is Edition 5.3, last updated 19 July 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 16 June 2023).
+the Bash shell (version 5.3, 19 July 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 16 June 2023,
+<p>This is Edition 5.3, last updated 19 July 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.3.
 </p>
@@ -2319,7 +2319,7 @@ command substitution.
 </p>
 <p>After these expansions are performed, quote characters present in the
 original word are removed unless they have been quoted themselves
-(<em>quote removal</em>).
+(<em>quote removal</em>). See <a href="#Quote-Removal">Quote Removal</a> for more details.
 </p>
 <p>Only brace expansion, word splitting, and filename expansion
 can increase the number of words of the expansion; other expansions
@@ -2328,9 +2328,6 @@ The only exceptions to this are the expansions of
 <code>&quot;$@&quot;</code> and <code>$*</code> (see <a href="#Special-Parameters">Special Parameters</a>), and
 <code>&quot;${<var>name</var>[@]}&quot;</code> and <code>${<var>name</var>[*]}</code>
 (see <a href="#Arrays">Arrays</a>).
-</p>
-<p>After all expansions, <code>quote removal</code> (see <a href="#Quote-Removal">Quote Removal</a>)
-is performed.
 </p>
 <ul class="section-toc">
 <li><a href="#Brace-Expansion" accesskey="1">Brace Expansion</a></li>
@@ -4595,15 +4592,16 @@ If <code>getopts</code> is silent, then a colon (&lsquo;<samp>:</samp>&rsquo;) i
 <pre class="example">hash [-r] [-p <var>filename</var>] [-dt] [<var>name</var>]
 </pre></div>
 
-<p>Each time <code>hash</code> is invoked, it remembers the full pathnames of the
+<p>Each time <code>hash</code> is invoked, it remembers the full filenames of the
 commands specified as <var>name</var> arguments,
 so they need not be searched for on subsequent invocations.
 The commands are found by searching through the directories listed in
 <code>$PATH</code>.
-Any previously-remembered pathname is discarded.
+Any previously-remembered filename is discarded.
 The <samp>-p</samp> option inhibits the path search, and <var>filename</var> is
 used as the location of <var>name</var>.
 The <samp>-r</samp> option causes the shell to forget all remembered locations.
+Assigning to the <code>PATH</code> variable also clears all hashed filenames.
 The <samp>-d</samp> option causes the shell to forget the remembered location
 of each <var>name</var>.
 If the <samp>-t</samp> option is supplied, the full pathname to which each
@@ -4808,9 +4806,30 @@ using the rules listed above.
 </p></dd>
 </dl>
 
-<p>When used with <code>test</code> or &lsquo;<samp>[</samp>&rsquo;, the &lsquo;<samp>&lt;</samp>&rsquo; and &lsquo;<samp>&gt;</samp>&rsquo;
+<p>If the shell is not in <small>POSIX</small> mode,
+when used with <code>test</code> or &lsquo;<samp>[</samp>&rsquo;, the &lsquo;<samp>&lt;</samp>&rsquo; and &lsquo;<samp>&gt;</samp>&rsquo;
 operators sort lexicographically using ASCII ordering.
+If the shell is in <small>POSIX</small> mode, these operators use the current locale.
 </p>
+<p>The historical operator-precedence parsing with 4 or more arguments can
+lead to ambiguities when it encounters strings that look like primaries.
+The <small>POSIX</small> standard has deprecated the <samp>-a</samp> and <samp>-o</samp>
+primaries and enclosing expressions within parentheses.
+Scripts should no longer use them.
+It&rsquo;s much more reliable to restrict test invocations to a single primary,
+and to replace uses of <samp>-a</samp> and <samp>-o</samp> with the shell&rsquo;s
+<code>&amp;&amp;</code> and <code>||</code> list operators. For example, use
+</p>
+<div class="example">
+<pre class="example">test -n string1 &amp;&amp; test -n string2
+</pre></div>
+
+<p>instead of
+</p>
+<div class="example">
+<pre class="example">test -n string1 -a -n string2
+</pre></div>
+
 </dd>
 <dt id='index-times'><span><code>times</code><a href='#index-times' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
@@ -5974,6 +5993,8 @@ parameters, or to display the names and values of shell variables.
 <dd><div class="example">
 <pre class="example">set [-abefhkmnptuvxBCEHPT] [-o <var>option-name</var>] [--] [-] [<var>argument</var> &hellip;]
 set [+abefhkmnptuvxBCEHPT] [+o <var>option-name</var>] [--] [-] [<var>argument</var> &hellip;]
+set -o
+set +o
 </pre></div>
 
 <p>If no options or arguments are supplied, <code>set</code> displays the names
@@ -6062,7 +6083,15 @@ This option is ignored by interactive shells.
 </dd>
 <dt><span><code>-o <var>option-name</var></code></span></dt>
 <dd>
-<p>Set the option corresponding to <var>option-name</var>:
+<p>Set the option corresponding to <var>option-name</var>.
+If <samp>-o</samp> is supplied with no <var>option-name</var>,
+<code>set</code> prints the current shell options settings.
+If <samp>+o</samp> is supplied with no <var>option-name</var>,
+<code>set</code> prints a series of
+<code>set</code>
+commands to recreate the current option settings
+on the standard output.
+Valid option names are:
 </p>
 <dl compact="compact">
 <dt><span><code>allexport</code></span></dt>
@@ -6972,6 +7001,7 @@ builtin).
 Setting <code>extdebug</code> after the shell has started to execute a script,
 or referencing this variable when <code>extdebug</code> is not set,
 may result in inconsistent values.
+Assignments to <code>BASH_ARGC</code> have no effect, and it may not be unset.
 </p>
 </dd>
 <dt id='index-BASH_005fARGV'><span><code>BASH_ARGV</code><a href='#index-BASH_005fARGV' class='copiable-anchor'> &para;</a></span></dt>
@@ -6987,6 +7017,7 @@ builtin).
 Setting <code>extdebug</code> after the shell has started to execute a script,
 or referencing this variable when <code>extdebug</code> is not set,
 may result in inconsistent values.
+Assignments to <code>BASH_ARGV</code> have no effect, and it may not be unset.
 </p>
 </dd>
 <dt id='index-BASH_005fARGV0'><span><code>BASH_ARGV0</code><a href='#index-BASH_005fARGV0' class='copiable-anchor'> &para;</a></span></dt>
@@ -7058,6 +7089,7 @@ where each corresponding member of <code>FUNCNAME</code> was invoked.
 <code>${FUNCNAME[$i]}</code> was called (or <code>${BASH_LINENO[$i-1]}</code> if
 referenced within another shell function). 
 Use <code>LINENO</code> to obtain the current line number.
+Assignments to <code>BASH_LINENO</code> have no effect, and it may not be unset.
 </p>
 </dd>
 <dt id='index-BASH_005fLOADABLES_005fPATH'><span><code>BASH_LOADABLES_PATH</code><a href='#index-BASH_005fLOADABLES_005fPATH' class='copiable-anchor'> &para;</a></span></dt>
@@ -7091,6 +7123,7 @@ corresponding shell function names in the <code>FUNCNAME</code> array
 variable are defined.
 The shell function <code>${FUNCNAME[$i]}</code> is defined in the file
 <code>${BASH_SOURCE[$i]}</code> and called from <code>${BASH_SOURCE[$i+1]}</code>
+Assignments to <code>BASH_SOURCE</code> have no effect, and it may not be unset.
 </p>
 </dd>
 <dt id='index-BASH_005fSUBSHELL'><span><code>BASH_SUBSHELL</code><a href='#index-BASH_005fSUBSHELL' class='copiable-anchor'> &para;</a></span></dt>
@@ -9652,6 +9685,13 @@ undergoes expansion.
 That means, for example, that a backslash preceding a double quote
 character will escape it and the backslash will be removed.
 
+</li><li> The <code>test</code> builtin compares strings using the current locale when
+processing the &lsquo;<samp>&lt;</samp>&rsquo; and &lsquo;<samp>&gt;</samp>&rsquo; binary operators.
+
+</li><li> The <code>test</code> builtin&rsquo;s <samp>-t</samp> unary primary requires an argument.
+Historical versions of <code>test</code> made the argument optional in certain
+cases, and bash attempts to accommodate those for backwards compatibility.
+
 </li><li> Command substitutions don&rsquo;t set the &lsquo;<samp>?</samp>&rsquo; special parameter. The exit
 status of a simple command without a command word is still the exit status
 of the last command substitution that occurred while evaluating the variable
@@ -10694,8 +10734,12 @@ the terminal&rsquo;s bell.
 </dd>
 <dt id='index-bind_002dtty_002dspecial_002dchars'><span><code>bind-tty-special-chars</code><a href='#index-bind_002dtty_002dspecial_002dchars' class='copiable-anchor'> &para;</a></span></dt>
 <dd><p>If set to &lsquo;<samp>on</samp>&rsquo; (the default), Readline attempts to bind the control
-characters   treated specially by the kernel&rsquo;s terminal driver to their
+characters that are
+treated specially by the kernel&rsquo;s terminal driver to their
 Readline equivalents.
+These override the default Readline bindings described here.
+Type &lsquo;<samp>stty -a</samp>&rsquo; at a Bash prompt to see your current terminal settings,
+including the special control characters (usually <code>cchars</code>).
 </p>
 </dd>
 <dt id='index-blink_002dmatching_002dparen'><span><code>blink-matching-paren</code><a href='#index-blink_002dmatching_002dparen' class='copiable-anchor'> &para;</a></span></dt>
@@ -11789,6 +11833,15 @@ If the insertion point is at the end of the line, this transposes
 the last two words on the line.
 </p>
 </dd>
+<dt id='index-shell_002dtranspose_002dwords-_0028M_002dC_002dt_0029'><span><code>shell-transpose-words (M-C-t)</code><a href='#index-shell_002dtranspose_002dwords-_0028M_002dC_002dt_0029' class='copiable-anchor'> &para;</a></span></dt>
+<dd><p>Drag the word before point past the word after point,
+moving point past that word as well.
+If the insertion point is at the end of the line, this transposes
+the last two words on the line.
+Word boundaries are the same as <code>shell-forward-word</code> and
+<code>shell-backward-word</code>.
+</p>
+</dd>
 <dt id='index-upcase_002dword-_0028M_002du_0029'><span><code>upcase-word (M-u)</code><a href='#index-upcase_002dword-_0028M_002du_0029' class='copiable-anchor'> &para;</a></span></dt>
 <dd><p>Uppercase the current (or following) word.  With a negative argument,
 uppercase the previous word, but do not move the cursor.
@@ -11872,15 +11925,6 @@ Word boundaries are the same as <code>shell-forward-word</code>.
 <dt id='index-shell_002dbackward_002dkill_002dword-_0028_0029'><span><code>shell-backward-kill-word ()</code><a href='#index-shell_002dbackward_002dkill_002dword-_0028_0029' class='copiable-anchor'> &para;</a></span></dt>
 <dd><p>Kill the word behind point.
 Word boundaries are the same as <code>shell-backward-word</code>.
-</p>
-</dd>
-<dt id='index-shell_002dtranspose_002dwords-_0028M_002dC_002dt_0029'><span><code>shell-transpose-words (M-C-t)</code><a href='#index-shell_002dtranspose_002dwords-_0028M_002dC_002dt_0029' class='copiable-anchor'> &para;</a></span></dt>
-<dd><p>Drag the word before point past the word after point,
-moving point past that word as well.
-If the insertion point is at the end of the line, this transposes
-the last two words on the line.
-Word boundaries are the same as <code>shell-forward-word</code> and
-<code>shell-backward-word</code>.
 </p>
 </dd>
 <dt id='index-unix_002dword_002drubout-_0028C_002dw_0029'><span><code>unix-word-rubout (C-w)</code><a href='#index-unix_002dword_002drubout-_0028C_002dw_0029' class='copiable-anchor'> &para;</a></span></dt>
@@ -16003,7 +16047,7 @@ Next: <a href="#Concept-Index" accesskey="n" rel="next">Concept Index</a>, Previ
 <tr><td></td><td valign="top"><a href="#index-shell_002dexpand_002dline-_0028M_002dC_002de_0029"><code>shell-expand-line (M-C-e)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-shell_002dforward_002dword-_0028M_002dC_002df_0029"><code>shell-forward-word (M-C-f)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-shell_002dkill_002dword-_0028M_002dC_002dd_0029"><code>shell-kill-word (M-C-d)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Killing">Commands For Killing</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-shell_002dtranspose_002dwords-_0028M_002dC_002dt_0029"><code>shell-transpose-words (M-C-t)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Killing">Commands For Killing</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-shell_002dtranspose_002dwords-_0028M_002dC_002dt_0029"><code>shell-transpose-words (M-C-t)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Text">Commands For Text</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-skip_002dcsi_002dsequence-_0028_0029"><code>skip-csi-sequence ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-spell_002dcorrect_002dword-_0028C_002dx-s_0029"><code>spell-correct-word (C-x s)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-start_002dkbd_002dmacro-_0028C_002dx-_0028_0029"><code>start-kbd-macro (C-x ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Keyboard-Macros">Keyboard Macros</a></td></tr>

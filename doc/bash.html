@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 July 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 July 19<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -7778,9 +7778,13 @@ If set to <B>audible</B>, readline attempts to ring the terminal's bell.
 <DT><B>bind-tty-special-chars (On)</B>
 
 <DD>
-If set to <B>On</B>, readline attempts to bind the control characters
-treated specially by the kernel's terminal driver to their readline
-equivalents.
+If set to <B>On</B> (the default), readline attempts to bind the control 
+characters that are  
+treated specially by the kernel's terminal driver to their  
+readline equivalents.
+These override the default readline bindings described here.
+Type <TT>stty -a</TT> at a bash prompt to see your current terminal settings,
+including the special control characters (usually <B>cchars</B>).
 <DT><B>blink-matching-paren (Off)</B>
 
 <DD>
@@ -12493,6 +12497,8 @@ before execution resumes after the function or script.
 <DT><B>set</B> [<B>-abefhkmnptuvxBCEHPT</B>] [<B>-o</B> <I>option-name</I>] [<B>--</B>] [<B>-</B>] [<I>arg</I> ...]<DD>
 
 <DT><B>set</B> [<B>+abefhkmnptuvxBCEHPT</B>] [<B>+o</B> <I>option-name</I>] [<B>--</B>] [<B>-</B>] [<I>arg</I> ...]<DD>
+<DT><B>set -o</B><DD>
+<DT><B>set +o</B><DD>
 
 Without options, display the name and value of each shell variable
 in a format that can be reused as input
@@ -12819,16 +12825,17 @@ Same as
 If
 <B>-o</B>
 
-is supplied with no <I>option-name</I>, the values of the current options are
-printed.
+is supplied with no <I>option-name</I>,
+<B>set</B> prints the current shell option settings.
 If
 <B>+o</B>
 
-is supplied with no <I>option-name</I>, a series of
+is supplied with no <I>option-name</I>,
+<B>set</B> prints a series of
 <B>set</B>
 
-commands to recreate the current option settings is displayed on
-the standard output.
+commands to recreate the current option settings
+on the standard output.
 </DL>
 
 <DT><B>-p</B>
@@ -15057,7 +15064,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 July 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 July 19<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15163,7 +15170,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20230705/doc/bash.1.<BR>
-Time: 07 July 2023 16:22:29 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20230719/doc/bash.1.<BR>
+Time: 23 July 2023 18:17:35 EDT
 </BODY>
 </HTML>

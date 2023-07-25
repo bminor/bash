@@ -7,8 +7,8 @@
 \entry{arrays}{102}
 \initial {B}
 \entry{background}{117}
-\entry{Bash configuration}{163}
-\entry{Bash installation}{163}
+\entry{Bash configuration}{164}
+\entry{Bash installation}{164}
 \entry{binary arithmetic operators}{100}
 \entry{bitwise arithmetic operators}{100}
 \entry{Bourne shell}{5}
@@ -18,7 +18,7 @@
 \entry{command editing}{122}
 \entry{command execution}{43}
 \entry{command expansion}{43}
-\entry{command history}{157}
+\entry{command history}{158}
 \entry{command search}{43}
 \entry{command substitution}{34}
 \entry{command timing}{10}
@@ -33,9 +33,9 @@
 \entry{comments, shell}{9}
 \entry{Compatibility Level}{113}
 \entry{Compatibility Mode}{113}
-\entry{completion builtins}{150}
+\entry{completion builtins}{151}
 \entry{conditional arithmetic operator}{100}
-\entry{configuration}{163}
+\entry{configuration}{164}
 \entry{control operator}{3}
 \entry{coprocess}{18}
 \initial {D}
@@ -44,7 +44,7 @@
 \entry{editing command lines}{122}
 \entry{environment}{45}
 \entry{evaluation, arithmetic}{100}
-\entry{event designators}{160}
+\entry{event designators}{161}
 \entry{execution environment}{44}
 \entry{exit status}{3, 45}
 \entry{expansion}{24}
@@ -63,15 +63,15 @@
 \entry{foreground}{117}
 \entry{functions, shell}{19}
 \initial {H}
-\entry{history builtins}{157}
-\entry{history events}{160}
-\entry{history expansion}{159}
-\entry{history list}{157}
-\entry{History, how to use}{156}
+\entry{history builtins}{158}
+\entry{history events}{161}
+\entry{history expansion}{160}
+\entry{history list}{158}
+\entry{History, how to use}{157}
 \initial {I}
 \entry{identifier}{3}
 \entry{initialization file, readline}{124}
-\entry{installation}{163}
+\entry{installation}{164}
 \entry{interaction, readline}{121}
 \entry{interactive shell}{95, 96}
 \entry{internationalization}{7}
@@ -108,7 +108,7 @@
 \entry{process group}{3}
 \entry{process group ID}{3}
 \entry{process substitution}{35}
-\entry{programmable completion}{147}
+\entry{programmable completion}{148}
 \entry{prompting}{106}
 \initial {Q}
 \entry{quoting}{6}

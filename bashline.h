@@ -56,6 +56,7 @@ extern int unbind_unix_command (char *);
 
 extern char **bash_default_completion (const char *, int, int, int, int);
 
+extern void bashline_set_filename_hooks (void);
 extern void set_directory_hook (void);
 
 /* Used by programmable completion code. */

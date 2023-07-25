@@ -211,6 +211,7 @@ quote_string_for_globbing (const char *pathname, int qflags)
   register int i, j;
   int cclass, collsym, equiv, c, last_was_backslash;
   int savei, savej;
+  unsigned char cc;
 
   temp = (char *)xmalloc (2 * strlen (pathname) + 1);
 
@@ -240,11 +241,29 @@ quote_string_for_globbing (const char *pathname, int qflags)
       else if (pathname[i] == CTLESC)
 	{
 convert_to_backslash:
+	  cc = pathname[i+1];
+
 	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
 	    continue;
+
 	  /* What to do if preceding char is backslash? */
-	  if (pathname[i+1] != CTLESC && (qflags & QGLOB_REGEXP) && ere_char (pathname[i+1]) == 0)
+
+	  /* We don't have to backslash-quote non-special ERE characters if
+	     we're quoting a regexp. */
+	  if (cc != CTLESC && (qflags & QGLOB_REGEXP) && ere_char (cc) == 0)
 	    continue;
+
+	  /* We don't have to backslash-quote non-special BRE characters if
+	     we're quoting a glob pattern. */
+	  if (cc != CTLESC && (qflags & QGLOB_REGEXP) == 0 && glob_char_p (pathname+i+1) == 0)
+	    continue;
+
+	  /* If we're in a multibyte locale, don't bother quoting multibyte
+	     characters. It matters if we're going to convert NFD to NFC on
+	     macOS, and doesn't make a difference on other systems. */
+	  if (cc != CTLESC && locale_utf8locale && UTF8_SINGLEBYTE (cc) == 0)
+	    continue;	/* probably don't need to check for UTF-8 locale */
+
 	  temp[j++] = '\\';
 	  i++;
 	  if (pathname[i] == '\0')

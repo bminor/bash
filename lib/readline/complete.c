@@ -2536,6 +2536,18 @@ rl_filename_completion_function (const char *text, int state)
 	}
       filename_len = strlen (filename);
 
+      /* Normalize the filename if the application has set a rewrite hook. */
+      if (*filename && rl_filename_rewrite_hook)
+	{
+	  temp = (*rl_filename_rewrite_hook) (filename, filename_len);
+	  if (temp != filename)
+	    {
+	      xfree (filename);
+	      filename = temp;
+	      filename_len = strlen (filename);
+	    }
+	}
+
       rl_filename_completion_desired = 1;
     }
 
