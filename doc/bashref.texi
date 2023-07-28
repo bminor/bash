@@ -4772,8 +4772,9 @@ backslash-escaped characters is enabled.
 The @option{-E} option disables the interpretation of these escape characters,
 even on systems where they are interpreted by default.
 The @code{xpg_echo} shell option may be used to
-dynamically determine whether or not @code{echo} expands these
-escape characters by default.
+dynamically determine whether or not @code{echo}
+interprets any options and
+expands these escape characters by default.
 @code{echo} does not interpret @option{--} to mean the end of options.
 
 @code{echo} interprets the following escape sequences:
@@ -6074,6 +6075,9 @@ leaving them open when the command completes.
 @item xpg_echo
 If set, the @code{echo} builtin expands backslash-escape sequences
 by default.
+If the @code{posix} shell option (@pxref{The Set Builtin}) is also enabled,
+@code{echo} does not
+interpret any options.
 
 @end table
 @end table

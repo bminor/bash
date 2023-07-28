@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 July 19<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 July 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -237,7 +237,7 @@ Execute commands from
 <I>file</I>
 
 instead of the standard personal initialization file
-<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>
+<I>ti/.bashrc</I>
 
 if the shell is interactive (see
 <FONT SIZE=-1><B>INVOCATION</B>
@@ -263,12 +263,12 @@ Do not read either the system-wide startup file
 <A HREF="file:/etc/profile"><I>/etc/profile</I></A>
 
 or any of the personal initialization files
-<A HREF="file:~/.bash_profile"><I>~/.bash_profile</I></A>,
+<I>ti/.bash_profile</I>,
 
-<A HREF="file:~/.bash_login"><I>~/.bash_login</I></A>,
+<I>ti/.bash_login</I>,
 
 or
-<A HREF="file:~/.profile"><I>~/.profile</I></A>.
+<I>ti/.profile</I>.
 
 By default,
 <B>bash</B>
@@ -282,7 +282,7 @@ below).
 
 <DD>
 Do not read and execute the personal initialization file
-<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>
+<I>ti/.bashrc</I>
 
 if the shell is interactive.
 This option is on by default if the shell is invoked as
@@ -418,8 +418,8 @@ is invoked as an interactive login shell, or as a non-interactive shell
 with the <B>--login</B> option, it first reads and
 executes commands from the file <A HREF="file:/etc/profile"><I>/etc/profile</I></A>, if that
 file exists.
-After reading that file, it looks for <A HREF="file:~/.bash_profile"><I>~/.bash_profile</I></A>,
-<A HREF="file:~/.bash_login"><I>~/.bash_login</I></A>, and <A HREF="file:~/.profile"><I>~/.profile</I></A>, in that order, and reads
+After reading that file, it looks for <I>ti/.bash_profile</I>,
+<I>ti/.bash_login</I>, and <I>ti/.profile</I>, in that order, and reads
 and executes commands from the first one that exists and is readable.
 The
 <B>--noprofile</B>
@@ -431,14 +431,14 @@ When an interactive login shell exits,
 or a non-interactive login shell executes the <B>exit</B> builtin command,
 <B>bash</B>
 
-reads and executes commands from the file <A HREF="file:~/.bash_logout"><I>~/.bash_logout</I></A>, if it
+reads and executes commands from the file <I>ti/.bash_logout</I>, if it
 exists.
 <P>
 
 When an interactive shell that is not a login shell is started,
 <B>bash</B>
 
-reads and executes commands from <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>, if that file exists.
+reads and executes commands from <I>ti/.bashrc</I>, if that file exists.
 This may be inhibited by using the
 <B>--norc</B>
 
@@ -446,7 +446,7 @@ option.
 The <B>--rcfile</B> <I>file</I> option will force
 <B>bash</B>
 
-to read and execute commands from <I>file</I> instead of <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>.
+to read and execute commands from <I>file</I> instead of <I>ti/.bashrc</I>.
 <P>
 
 When
@@ -493,7 +493,7 @@ read and execute commands from
 <A HREF="file:/etc/profile"><I>/etc/profile</I></A>
 
 and
-<A HREF="file:~/.profile"><I>~/.profile</I></A>,
+<I>ti/.profile</I>,
 
 in that order.
 The
@@ -563,7 +563,7 @@ If
 <B>bash</B>
 
 determines it is being run non-interactively in this fashion,
-it reads and executes commands from <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>,
+it reads and executes commands from <I>ti/.bashrc</I>,
 if that file exists and is readable.
 It will not do this if invoked as <B>sh</B>.
 The
@@ -976,7 +976,7 @@ to be matched as a string.
 <P>
 
 
-An additional binary operator, <B>=~</B>, is available, with the same
+An additional binary operator, <B>=ti</B>, is available, with the same
 precedence as <B>==</B> and <B>!=</B>.
 When it is used, the string to the right of the operator is considered
 a POSIX extended regular expression and matched accordingly
@@ -1003,7 +1003,7 @@ between brackets.
 
 
 The pattern will match if it matches any part of the string.
-Anchor the pattern using the <B>^</B> and <B>$</B> regular expression
+Anchor the pattern using the <B>ha</B> and <B>$</B> regular expression
 operators to force it to match the entire string.
 The array variable
 <FONT SIZE=-1><B>BASH_REMATCH</B>
@@ -2120,7 +2120,7 @@ command.
 <DT><B>BASH_REMATCH</B>
 
 <DD>
-An array variable whose members are assigned by the <B>=~</B> binary
+An array variable whose members are assigned by the <B>=ti</B> binary
 operator to the <B>[[</B> conditional command.
 The element with index 0 is the portion of the string
 matching the entire regular expression.
@@ -2727,7 +2727,7 @@ The current version is also a valid value.
 If this parameter is set when <B>bash</B> is executing a shell script,
 its value is interpreted as a filename containing commands to
 initialize the shell, as in
-<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>.
+<I>ti/.bashrc</I>.
 
 The value of
 <FONT SIZE=-1><B>BASH_ENV</B>
@@ -2778,7 +2778,7 @@ for destination directories specified by the
 
 command.
 A sample value is
-<TT>&quot;.:~:/usr&quot;</TT>.
+<TT>&quot;.:ti:/usr&quot;</TT>.
 
 <DT><B>CHILD_MAX</B>
 
@@ -2863,7 +2863,7 @@ A filename whose suffix matches one of the entries in
 </FONT>
 is excluded from the list of matched filenames.
 A sample value is
-<TT>&quot;.o:~&quot;</TT>.
+<TT>&quot;.o:ti&quot;</TT>.
 
 <DT><B>FUNCNEST</B>
 
@@ -2965,7 +2965,7 @@ The name of the file in which command history is saved (see
 <FONT SIZE=-1><B>HISTORY</B>
 
 </FONT>
-below).  The default value is <A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>.  If unset, the
+below).  The default value is <I>ti/.bash_history</I>.  If unset, the
 command history is not saved when a shell exits.
 <DT><B>HISTFILESIZE</B>
 
@@ -3105,7 +3105,7 @@ The filename for the
 
 startup file, overriding the default of
 
-<A HREF="file:~/.inputrc"><I>~/.inputrc</I></A>
+<I>ti/.inputrc</I>
 
 (see
 <FONT SIZE=-1><B>READLINE</B>
@@ -3206,7 +3206,7 @@ Example:
 <DL COMPACT><DT><DD>
 <P>
 
-<B>MAILPATH</B>=aq/var/mail/bfox?&quot;You have mail&quot;:~/shell-mail?&quot;$_ has mail!&quot;aq
+<B>MAILPATH</B>=aq/var/mail/bfox?&quot;You have mail&quot;:ti/shell-mail?&quot;$_ has mail!&quot;aq
 <P>
 
 <B>Bash</B>
@@ -3489,7 +3489,7 @@ expansion, normally `<B>!</B>'.
 The second character is the <I>quick substitution</I>
 character, which is used as shorthand for re-running the previous
 command entered, substituting one string for another in the command.
-The default is `<B>^</B>'.
+The default is `<B>ha</B>'.
 The optional third character is the character
 which indicates that the remainder of the line is a comment when found
 as the first character of a word, normally `<B>#</B>'.  The history
@@ -3898,7 +3898,7 @@ below).
 <A NAME="lbBA">&nbsp;</A>
 <H4>Tilde Expansion</H4>
 
-If a word begins with an unquoted tilde character (`<B>~</B>'), all of
+If a word begins with an unquoted tilde character (`<B>ti</B>'), all of
 the characters preceding the first unquoted slash (or all characters,
 if there is no unquoted slash) are considered a <I>tilde-prefix</I>.
 If none of the characters in the tilde-prefix are quoted, the
@@ -3919,12 +3919,12 @@ Otherwise, the tilde-prefix is replaced with the home directory
 associated with the specified login name.
 <P>
 
-If the tilde-prefix is a `~+', the value of the shell variable
+If the tilde-prefix is a `ti+', the value of the shell variable
 <FONT SIZE=-1><B>PWD</B>
 
 </FONT>
 replaces the tilde-prefix.
-If the tilde-prefix is a `~-', the value of the shell variable
+If the tilde-prefix is a `ti-', the value of the shell variable
 <FONT SIZE=-1><B>OLDPWD</B>,
 
 </FONT>
@@ -4364,9 +4364,9 @@ or
 
 the substitution operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
-<DT>${<I>parameter</I><B>^</B><I>pattern</I>}<DD>
+<DT>${<I>parameter</I><B>ha</B><I>pattern</I>}<DD>
 
-<DT>${<I>parameter</I><B>^^</B><I>pattern</I>}<DD>
+<DT>${<I>parameter</I><B>haha</B><I>pattern</I>}<DD>
 <DT>${<I>parameter</I><B>,</B><I>pattern</I>}<DD>
 <DT>${<I>parameter</I><B>,,</B><I>pattern</I>}<DD>
 
@@ -4377,11 +4377,11 @@ pathname expansion.
 Each character in the expanded value of <I>parameter</I> is tested against
 <I>pattern</I>, and, if it matches the pattern, its case is converted.
 The pattern should not attempt to match more than one character.
-The <B>^</B> operator converts lowercase letters matching <I>pattern</I>
+The <B>ha</B> operator converts lowercase letters matching <I>pattern</I>
 to uppercase; the <B>,</B> operator converts matching uppercase letters
 to lowercase.
-The <B>^^</B> and <B>,,</B> expansions convert each matched character in the
-expanded value; the <B>^</B> and <B>,</B> expansions match and convert only
+The <B>haha</B> and <B>,,</B> expansions convert each matched character in the
+expanded value; the <B>ha</B> and <B>,</B> expansions match and convert only
 the first character in the expanded value.
 If <I>pattern</I> is omitted, it is treated like a <B>?</B>, which matches
 every character.
@@ -5015,7 +5015,7 @@ is a
 <B>!</B>
 
 or a
-<B>^</B>
+<B>ha</B>
 
 then any character not enclosed is matched.
 The sorting order of characters in range expressions,
@@ -6033,7 +6033,7 @@ unary minus and plus
 
 <DD>
 variable pre-increment and pre-decrement
-<DT><B>! ~</B>
+<DT><B>! ti</B>
 
 <DD>
 logical and bitwise negation
@@ -6065,7 +6065,7 @@ equality and inequality
 
 <DD>
 bitwise AND
-<DT><B>^</B>
+<DT><B>ha</B>
 
 <DD>
 bitwise exclusive OR
@@ -6085,7 +6085,7 @@ logical OR
 
 <DD>
 conditional operator
-<DT><B>= *= /= %= += -= &lt;&lt;= &gt;&gt;= &amp;= ^= |=</B>
+<DT><B>= *= /= %= += -= &lt;&lt;= &gt;&gt;= &amp;= ha= |=</B>
 
 <DD>
 assignment
@@ -6834,10 +6834,10 @@ such as
 <FONT SIZE=-1><B>SIGINT</B>
 
 </FONT>
-(usually generated by <B>^C</B>) that users commonly intend to send
+(usually generated by <B>haC</B>) that users commonly intend to send
 to that command.
 This happens because the shell and the command are in the
-same process group as the terminal, and <B>^C</B> sends
+same process group as the terminal, and <B>haC</B> sends
 <FONT SIZE=-1><B>SIGINT</B>
 
 </FONT>
@@ -6986,7 +6986,7 @@ Typing the
 <I>suspend</I>
 
 character (typically
-<B>^Z</B>,
+<B>haZ</B>,
 
 Control-Z) while a process is running
 causes that process to be stopped and returns control to
@@ -6996,7 +6996,7 @@ Typing the
 <I>delayed suspend</I>
 
 character (typically
-<B>^Y</B>,
+<B>haY</B>,
 
 Control-Y) causes the process to be stopped when it
 attempts to read input from the terminal, and control to
@@ -7013,7 +7013,7 @@ command to continue it in the foreground, or
 the
 <B>kill</B>
 
-command to kill it.  A <B>^Z</B> takes effect immediately,
+command to kill it.  A <B>haZ</B> takes effect immediately,
 and has the additional side effect of causing pending output
 and typeahead to be discarded.
 <P>
@@ -7430,7 +7430,7 @@ The name of this file is taken from the value of the
 
 </FONT>
 variable.  If that variable is unset, the default is
-<A HREF="file:~/.inputrc"><I>~/.inputrc</I></A>.
+<I>ti/.inputrc</I>.
 
 If that file  does not exist or cannot be read, the ultimate default is
 <A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>.
@@ -7570,7 +7570,7 @@ are not recognized.
 &quot;\C-x\C-r&quot;: re-read-init-file
 <BR>
 
-&quot;\e[11~&quot;: &quot;Function Key 1&quot;
+&quot;\e[11ti&quot;: &quot;Function Key 1&quot;
 </DL>
 
 <P>
@@ -7587,7 +7587,7 @@ is bound to the function
 <B>re-read-init-file</B>,
 
 and
-<I>ESC [ 1 1 ~</I>
+<I>ESC [ 1 1 ti</I>
 
 is bound to insert the text
 <TT>Function Key 1</TT>.
@@ -8818,7 +8818,7 @@ Attempt to perform completion on the text before point.
 
 attempts completion treating the text as a variable (if the
 text begins with <B>$</B>), username (if the text begins with
-<B>~</B>), hostname (if the text begins with <B>@</B>), or
+<B>ti</B>), hostname (if the text begins with <B>@</B>), or
 command (including aliases and functions) in turn.  If none
 of these produces a match, filename completion is attempted.
 <DT><B>possible-completions (M-?)</B>
@@ -8869,12 +8869,12 @@ Attempt filename completion on the text before point.
 <DD>
 List the possible completions of the text before point,
 treating it as a filename.
-<DT><B>complete-username (M-~)</B>
+<DT><B>complete-username (M-ti)</B>
 
 <DD>
 Attempt completion on the text before point, treating
 it as a username.
-<DT><B>possible-username-completions (C-x ~)</B>
+<DT><B>possible-username-completions (C-x ti)</B>
 
 <DD>
 List the possible completions of the text before point,
@@ -9389,7 +9389,7 @@ the variable
 <FONT SIZE=-1><B>HISTFILE</B>
 
 </FONT>
-(default <A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>).
+(default <I>ti/.bash_history</I>).
 The file named by the value of
 <FONT SIZE=-1><B>HISTFILE</B>
 
@@ -9680,7 +9680,7 @@ The trailing <B>?</B> may be omitted if
 is followed immediately by a newline.
 If <I>string</I> is missing, the string from the most recent search is used;
 it is an error if there is no previous search string.
-<DT><B></B><FONT SIZE=+2><B>^</B></FONT><B></B><I>string1</I><FONT SIZE=+2>^</FONT><I>string2</I><FONT SIZE=+2>^</FONT>
+<DT><B></B><FONT SIZE=+2><B>ha</B></FONT><B></B><I>string1</I><FONT SIZE=+2>ha</FONT><I>string2</I><FONT SIZE=+2>ha</FONT>
 
 <DD>
 Quick substitution.  Repeat the previous command, replacing
@@ -9690,7 +9690,7 @@ with
 <I>string2</I>.
 
 Equivalent to
-``!!:s<FONT SIZE=+2>^</FONT><I>string1</I><FONT SIZE=+2>^</FONT><I>string2</I><FONT SIZE=+2>^</FONT>''
+``!!:s<FONT SIZE=+2>ha</FONT><I>string1</I><FONT SIZE=+2>ha</FONT><I>string2</I><FONT SIZE=+2>ha</FONT>''
 (see <B>Modifiers</B> below).
 <DT><B>!#</B>
 
@@ -9707,7 +9707,7 @@ A
 
 separates the event specification from the word designator.
 It may be omitted if the word designator begins with a
-<B>^</B>,
+<B>ha</B>,
 
 <B>$</B>,
 
@@ -9734,7 +9734,7 @@ word.
 
 <DD>
 The <I>n</I>th word.
-<DT><B>^</B>
+<DT><B>ha</B>
 
 <DD>
 The first argument.  That is, word 1.
@@ -10994,8 +10994,9 @@ the following backslash-escaped characters is enabled.  The
 option disables the interpretation of these escape characters,
 even on systems where they are interpreted by default.
 The <B>xpg_echo</B> shell option may be used to
-dynamically determine whether or not <B>echo</B> expands these
-escape characters by default.
+dynamically determine whether or not <B>echo</B>
+interprets any options
+and expands these escape characters by default.
 <B>echo</B>
 
 does not interpret <B>--</B> to mean the end of options.
@@ -13718,6 +13719,8 @@ instead of leaving them open when the command completes.
 <DD>
 If set, the <B>echo</B> builtin expands backslash-escape sequences
 by default.
+If the <B>posix</B> shell option is also enabled, <B>echo</B> does not
+interpret any options.
 </DL></DL>
 
 
@@ -14610,7 +14613,7 @@ and it is required for bash-5.1 and later versions.
 <DL COMPACT><DT><DD>
 <DL COMPACT>
 <DT>*<DD>
-quoting the rhs of the <B>[[</B> command's regexp matching operator (=~)
+quoting the rhs of the <B>[[</B> command's regexp matching operator (=ti)
 has no special effect
 </DL></DL>
 
@@ -14906,7 +14909,7 @@ script.
 <DT><I>The Gnu History Library</I>, Brian Fox and Chet Ramey<DD>
 <DT><I>Portable Operating System Interface (POSIX) Part 2: Shell and Utilities</I>, IEEE --<DD>
 <A HREF="http://pubs.opengroup.org/onlinepubs/9699919799/">http://pubs.opengroup.org/onlinepubs/9699919799/</A>
-<DT><A HREF="http://tiswww.case.edu/~chet/bash/POSIX">http://tiswww.case.edu/~chet/bash/POSIX</A> -- a description of posix mode<DD>
+<DT><A HREF="http://tiswww.case.edu/tichet/bash/POSIX">http://tiswww.case.edu/tichet/bash/POSIX</A> -- a description of posix mode<DD>
 <DT><I>sh</I>(1), <I>ksh</I>(1), <I>csh</I>(1)<DD>
 <DT><I>emacs</I>(1), <I>vi</I>(1)<DD>
 <DT><I>readline</I>(3)<DD>
@@ -14928,28 +14931,28 @@ The <B>bash</B> executable
 <DD>
 The systemwide initialization file, executed for login shells
 <DT>
-<A HREF="file:~/.bash_profile"><I>~/.bash_profile</I></A>
+<I>ti/.bash_profile</I>
 
 <DD>
 The personal initialization file, executed for login shells
 <DT>
-<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>
+<I>ti/.bashrc</I>
 
 <DD>
 The individual per-interactive-shell startup file
 <DT>
-<A HREF="file:~/.bash_logout"><I>~/.bash_logout</I></A>
+<I>ti/.bash_logout</I>
 
 <DD>
 The individual login shell cleanup file, executed when a login shell exits
 <DT>
-<A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>
+<I>ti/.bash_history</I>
 
 <DD>
 The default value of <B>HISTFILE</B>, the file in which bash saves the
 command history
 <DT>
-<A HREF="file:~/.inputrc"><I>~/.inputrc</I></A>
+<I>ti/.inputrc</I>
 
 <DD>
 Individual <I>readline</I> initialization file
@@ -15064,7 +15067,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 July 19<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 July 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15170,7 +15173,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20230719/doc/bash.1.<BR>
-Time: 23 July 2023 18:17:35 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20230724/doc/bash.1.<BR>
+Time: 27 July 2023 13:45:03 EDT
 </BODY>
 </HTML>

@@ -53,6 +53,7 @@ $END
 #include "../shell.h"
 #include "../execute_cmd.h"
 #include "../flags.h"
+#include "../parser.h"
 #include "bashgetopt.h"
 #include "common.h"
 
@@ -125,7 +126,7 @@ command_builtin (WORD_LIST *list)
 
   /* We don't want this to be reparsed (consider command echo 'foo &'), so
      just make a simple_command structure and call execute_command with it. */
-  command = make_bare_simple_command ();
+  command = make_bare_simple_command (line_number);
   command->value.Simple->words = (WORD_LIST *)copy_word_list (list);
   command->value.Simple->redirects = (REDIRECT *)NULL;
   command->flags |= COMMAND_BUILTIN_FLAGS;

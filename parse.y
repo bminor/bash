@@ -310,6 +310,9 @@ static int shell_input_line_terminator;
    shell_ungetc when we're at the start of a line. */
 static int eol_ungetc_lookahead = 0;
 
+static int simplecmd_lineno = -1;
+static int save_simple_lineno = -1;
+
 /* The line number in a script on which a function definition starts. */
 static int function_dstart;
 static int save_dstart = -1;
@@ -791,7 +794,11 @@ simple_command_element: WORD
 	|	ASSIGNMENT_WORD
 			{ $$.word = $1; $$.redirect = 0; }
 	|	redirection
-			{ $$.redirect = $1; $$.word = 0; }
+			{
+			  if (simplecmd_lineno == -1)
+			    simplecmd_lineno = line_number;	/* XXX */
+			  $$.redirect = $1; $$.word = 0;
+			}
 	;
 
 redirection_list: redirection
@@ -810,13 +817,13 @@ redirection_list: redirection
 	;
 
 simple_command:	simple_command_element
-			{ $$ = make_simple_command ($1, (COMMAND *)NULL); }
+			{ $$ = make_simple_command ($1, (COMMAND *)NULL, simplecmd_lineno); }
 	|	simple_command simple_command_element
-			{ $$ = make_simple_command ($2, $1); }
+			{ $$ = make_simple_command ($2, $1, line_number); }
 	;
 
 command:	simple_command
-			{ $$ = clean_simple_command ($1); }
+			{ $$ = clean_simple_command ($1); simplecmd_lineno = -1; }
 	|	shell_command
 			{ $$ = $1; }
 	|	shell_command redirection_list
@@ -999,7 +1006,7 @@ case_command:	CASE WORD newline_list IN newline_list ESAC
 	;
 
 function_def:	WORD '(' ')' newline_list function_body
-			{ $$ = make_function_def ($1, $5, function_dstart, function_bstart); function_dstart = save_dstart; }
+			{ $$ = make_function_def ($1, $5, function_dstart, function_bstart); function_dstart = save_dstart; simplecmd_lineno = -1; }
 	|	FUNCTION WORD '(' ')' newline_list function_body
 			{ $$ = make_function_def ($2, $6, function_dstart, function_bstart); function_dstart = save_dstart; }
 	|	FUNCTION WORD function_body
@@ -1362,7 +1369,7 @@ pipeline_command: pipeline
 			     terminate this, one to terminate the command) */
 			  x.word = 0;
 			  x.redirect = 0;
-			  $$ = make_simple_command (x, (COMMAND *)NULL);
+			  $$ = make_simple_command (x, (COMMAND *)NULL, line_number);
 			  $$->flags |= $1;
 			  /* XXX - let's cheat and push a newline back */
 			  if ($2 == '\n')
@@ -1383,7 +1390,7 @@ pipeline_command: pipeline
 			     terminate this, one to terminate the command) */
 			  x.word = 0;
 			  x.redirect = 0;
-			  $$ = make_simple_command (x, (COMMAND *)NULL);
+			  $$ = make_simple_command (x, (COMMAND *)NULL, line_number);
 			  $$->flags |= CMD_INVERT_RETURN;
 			  /* XXX - let's cheat and push a newline back */
 			  if ($2 == '\n')
@@ -3404,6 +3411,8 @@ reset_parser (void)
   redir_stack[0] = 0;
   esacs_needed_count = expecting_in_token = 0;
 
+  simplecmd_lineno = line_number;
+
   current_token = '\n';		/* XXX */
   last_read_token = '\n';
   token_to_read = '\n';
@@ -4315,7 +4324,8 @@ static char *
 parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 {
   int peekc, r;
-  int start_lineno, dolbrace_spec, local_extglob, was_extpat;
+  int dolbrace_spec, local_extglob, was_extpat;
+  int start_lineno, save_lineno;
   int was_word, was_newline, was_semi, was_amp;
   char *ret, *tcmd;
   size_t retlen;
@@ -4357,6 +4367,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 
   /*debug_parser(1);*/
   start_lineno = line_number;
+  save_lineno = simplecmd_lineno;
 
   save_parser_state (&ps);
 
@@ -4482,6 +4493,8 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
   restore_parser_state (&ps);
   pushed_string_list = saved_strings;
 
+  simplecmd_lineno = save_lineno;
+
   tcmd = print_comsub (parsed_command);		/* returns static memory */
   retlen = strlen (tcmd);
   if (open == '(')			/* ) */
@@ -4541,12 +4554,14 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
   sh_parser_state_t ps;
   sh_input_line_state_t ls;
   int orig_ind, nc, sflags, start_lineno, local_extglob, funsub, closer;
+  int save_lineno;
   char *ret, *ep, *ostring;
 
 /*debug_parser(1);*/
   orig_ind = *indp;
   ostring = string;
   start_lineno = line_number;
+  save_lineno = simplecmd_lineno;
 
   if (*string == 0)
     {
@@ -4612,6 +4627,8 @@ xparse_dolparen (const char *base, char *string, int *indp, int flags)
   extended_glob = local_extglob;
 #endif
   token_to_read = 0;
+
+  simplecmd_lineno = save_lineno;
 
   /* If parse_string returns < 0, we need to jump to top level with the
      negative of the return value. We abandon the rest of this input line
@@ -5681,6 +5698,10 @@ got_token:
 
   result = ((the_word->flags & (W_ASSIGNMENT|W_NOSPLIT)) == (W_ASSIGNMENT|W_NOSPLIT))
 		? ASSIGNMENT_WORD : WORD;
+
+  /* Are we potentially starting a simple command? */
+  if (command_token_position (last_read_token))
+    simplecmd_lineno = line_number;
 
   switch (last_read_token)
     {

@@ -780,7 +780,8 @@ printf_builtin (WORD_LIST *list)
 static void
 printf_erange (char *s)
 {
-  builtin_error (_("warning: %s: %s"), s, strerror(ERANGE));
+  builtin_error (_("%s: %s"), s, strerror(ERANGE));
+  conversion_error = 1;
 }
 
 /* We duplicate a lot of what printf(3) does here. */

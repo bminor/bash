@@ -61,6 +61,7 @@ $END
 #include "../shell.h"
 #include "../jobs.h"
 #include "../execute_cmd.h"
+#include "../parser.h"
 #include "bashgetopt.h"
 #include "common.h"
 
@@ -200,7 +201,7 @@ execute_list_with_replacements (WORD_LIST *list)
   /* Next make a new simple command and execute it. */
   begin_unwind_frame ("jobs_builtin");
 
-  command = make_bare_simple_command ();
+  command = make_bare_simple_command (line_number);
   command->value.Simple->words = copy_word_list (list);
   command->value.Simple->redirects = (REDIRECT *)NULL;
   command->flags |= CMD_INHIBIT_EXPANSION;

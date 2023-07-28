@@ -724,6 +724,8 @@ compgen_builtin (WORD_LIST *list)
   old_quoting = rl_filename_quoting_desired;
   old_suppress = rl_completion_suppress_append;
 
+  bashline_set_filename_hooks ();
+
   /* probably don't have to save these, just being safe */
   old_line = pcomp_line;
   old_ind = pcomp_ind;

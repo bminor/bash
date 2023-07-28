@@ -7255,3 +7255,45 @@ jobs.c
 	  the SIGCONT succeeds or if the process has terminated so we can
 	  clean it up later.
 	  Report from Earl Chew <earl_chew@yahoo.com>
+
+make_cmd.c
+	- make_simple_command,make_bare_simple_command: now take line number as
+	  an argument; used instead of line_number to set the line associated
+	  with the simple command
+
+make_cmd.h
+	- make_simple_command,make_bare_simple_command: change prototype
+
+parse.y,builtins/command.def,builtins.jobs.def
+	- make_simple_command,make_bare_simple_command: change callers
+
+				   7/25
+				   ----
+parse.y
+	- read_token_word: try to keep track of whether we are parsing the
+	  first word of a simple command and set simplecmd_lineno if we
+	  are. We start a simple command when we return ASSIGNMENT_WORD
+	  or WORD in a command token position. This gives better values for
+	  $LINENO in multi-line simple commands
+	- redirection: set simplecmd_lineno if it's -1, meaning this is a
+	  simple command with a leading redirection or a null command with
+	  only a redirection
+	- pass simplecmd_lineno to make_simple_command if we are starting a
+	  simple command (the first ELEMENT)
+	- parse_comsub,xparse_dolparen: save and restore simplecmd_lineno
+	- simple_command,function_def production: reset simplecmd_lineno to -1
+	  after parsing a simple command or a function declared as WORD()
+
+				   7/26
+				   ----
+doc/bash.1,doc/bashref.texi
+	- xpg_echo: add description of how this can be used to suppress echo
+	  option interpretation
+	  Inspired by report from Zachary Santer <zsanter@gmail.com>
+
+				   7/27
+				   ----
+builtins/printf.def
+	- printf_erange: make out-of-range errors conversion errors even if
+	  the conversion function fully consumes the argument.
+	  From a report by thomas@habets.se

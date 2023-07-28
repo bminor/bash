@@ -449,7 +449,7 @@ make_cond_command (COND_COM *cond_node)
 }
 
 COMMAND *
-make_bare_simple_command (void)
+make_bare_simple_command (int line)
 {
   COMMAND *command;
   SIMPLE_COM *temp;
@@ -458,7 +458,7 @@ make_bare_simple_command (void)
   command->value.Simple = temp = (SIMPLE_COM *)xmalloc (sizeof (SIMPLE_COM));
 
   temp->flags = 0;
-  temp->line = line_number;
+  temp->line = line;
   temp->words = (WORD_LIST *)NULL;
   temp->redirects = (REDIRECT *)NULL;
 
@@ -472,14 +472,14 @@ make_bare_simple_command (void)
 /* Return a command which is the connection of the word or redirection
    in ELEMENT, and the command * or NULL in COMMAND. */
 COMMAND *
-make_simple_command (ELEMENT element, COMMAND *command)
+make_simple_command (ELEMENT element, COMMAND *command, int line)
 {
   /* If we are starting from scratch, then make the initial command
      structure.  Also note that we have to fill in all the slots, since
      malloc doesn't return zeroed space. */
   if (command == 0)
     {
-      command = make_bare_simple_command ();
+      command = make_bare_simple_command (line);
       parser_state |= PST_REDIRLIST;
     }
 
