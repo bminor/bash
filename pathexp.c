@@ -175,6 +175,12 @@ glob_char_p (const char *s)
 {
   switch (*s)
     {
+    case '!':
+    case '^':
+    case '-':
+    case '.':
+    case ':':
+    case '=':
     case '*':
     case '[':
     case ']':
@@ -183,7 +189,6 @@ glob_char_p (const char *s)
       return 1;
     case '+':
     case '@':
-    case '!':
       if (s[1] == '(')	/*(*/
 	return 1;
       break;

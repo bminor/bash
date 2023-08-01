@@ -68,6 +68,9 @@ extern int errno;
 /* Variables exported by this file. */
 Keymap rl_binding_keymap;
 
+/* Functions exported by this file. */
+rl_macro_print_func_t *rl_macro_display_hook = (rl_macro_print_func_t *)NULL;
+
 static int _rl_skip_to_delim (char *, int, int);
 
 static void _rl_init_file_error (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
@@ -2861,16 +2864,19 @@ _rl_macro_dumper_internal (int print_readably, Keymap map, char *prefix)
 	{
 	case ISMACR:
 	  keyname = _rl_get_keyname (key);
-	  if (print_readably < 0)
-	    out = savestring ((char *)map[key].function);
-	  else
-	    out = _rl_untranslate_macro_value ((char *)map[key].function, 0);
+	  out = _rl_untranslate_macro_value ((char *)map[key].function, 0);
 
-	  if (print_readably < 0)
-	    fprintf (rl_outstream, "\"%s%s\": %s\n", prefix ? prefix : "",
-						         keyname,
-						         out ? out : "");
-	  else if (print_readably > 0)
+	  /* If the application wants to print macros, let it. Give it the
+	     ascii-fied value with backslash escapes, so it will have to use
+	     rl_macro_bind (with its call to rl_translate_keyseq) to get the
+	     same value back. */
+	  if (rl_macro_display_hook)
+	    {
+	      (*rl_macro_display_hook) (keyname, out, print_readably, prefix);
+	      break;
+	    }
+
+	  if (print_readably)
 	    fprintf (rl_outstream, "\"%s%s\": \"%s\"\n", prefix ? prefix : "",
 						         keyname,
 						         out ? out : "");

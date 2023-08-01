@@ -515,6 +515,15 @@ By default, this is set to @code{rl_deprep_terminal}
 (@pxref{Terminal Management}).
 @end deftypevar
 
+@deftypevar {void} rl_macro_display_hook 
+If set, this points to a function that @code{rl_macro_dumper} will call to
+display a key sequence bound to a macro.
+It is called with the key sequence, the "untranslated" macro value (i.e.,
+with backslash escapes included, as when passed to @code{rl_macro_bind}),
+the @code{readable} argument passed to @code{rl_macro_dumper}, and any
+prefix to display before the key sequence.
+@end deftypevar
+
 @deftypevar {Keymap} rl_executing_keymap
 This variable is set to the keymap (@pxref{Keymaps}) in which the
 currently executing Readline function was found.
@@ -1354,12 +1363,10 @@ use @code{rl_generic_bind} instead.
 @deftypefun void rl_macro_dumper (int readable)
 Print the key sequences bound to macros and their values, using
 the current keymap, to @code{rl_outstream}.
+If the application has assigned a value to @code{rl_macro_display_hook},
+@code{rl_macro_dumper} calls it instead of printing anything.
 If @var{readable} is greater than zero, the list is formatted in such a way
 that it can be made part of an @code{inputrc} file and re-read.
-If @var{readable} is less than zero, the list is printed in a
-"translated" form that can be used by applications that wish to bind
-key sequences directly without calling @code{rl_parse_and_bind}
-(e.g., by calling @code{rl_generic_bind}).
 
 @end deftypefun
 

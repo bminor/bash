@@ -4580,15 +4580,29 @@ bash_execute_unix_command (int count, int key)
   return 0;
 }
 
+/* This only has to handle macros/shell commandsfrom print_unix_command_map */
+static void
+print_unix_command (const char *kseq, const char *value, int readable, const char *prefix)
+{
+  if (readable)
+    fprintf (rl_outstream, "\"%s%s\" \"%s\"\n", prefix ? prefix : "", kseq, value ? value : "");
+  else
+    fprintf (rl_outstream, "%s%s outputs %s\n", prefix ? prefix : "", kseq, value ? value : "");
+}
+
 int
 print_unix_command_map (void)
 {
   Keymap save, cmd_xmap;
+  rl_macro_print_func_t *old_printer;
 
   save = rl_get_keymap ();
   cmd_xmap = get_cmd_xmap_from_keymap (save);
   rl_set_keymap (cmd_xmap);
-  rl_macro_dumper (-1);
+  old_printer = rl_macro_display_hook;
+  rl_macro_display_hook = print_unix_command;
+  rl_macro_dumper (1);
+  rl_macro_display_hook = old_printer;
   rl_set_keymap (save);
   return 0;
 }
@@ -4702,12 +4716,12 @@ bind_keyseq_to_unix_command (char *line)
 {
   Keymap kmap, cmd_xmap;
   char *kseq, *value;
-  int i, kstart;
+  int i, kstart, translate;
 
   kmap = rl_get_keymap ();
 
   /* We duplicate some of the work done by rl_parse_and_bind here, but
-     this code only has to handle `"keyseq": ["]command["]' and can
+     this code only has to handle `"keyseq"[:][ \t]+["]command["]' and can
      generate an error for anything else. */
   i = isolate_sequence (line, 0, 1, &kstart);
   if (i < 0)
@@ -4716,16 +4730,26 @@ bind_keyseq_to_unix_command (char *line)
   /* Create the key sequence string to pass to rl_generic_bind */
   kseq = substring (line, kstart, i);
 
-  for ( ; line[i] && line[i] != ':'; i++)
+  /* Allow colon or whitespace to separate the key sequence and command string. */
+  for ( ; line[i] && line[i] != ':' && whitespace (line[i]) == 0; i++)
     ;
-  if (line[i] != ':')
+  if (line[i] != ':' && whitespace (line[i]) == 0)
     {
-      builtin_error (_("%s: missing colon separator"), line);
+      builtin_error (_("%s: missing separator"), line);
       FREE (kseq);
       return -1;
     }
 
-  i = isolate_sequence (line, i + 1, 0, &kstart);
+  /* If we have a whitespace separator we're going to call rl_macro_bind so
+     we get the readline-translated version of the value (backslash-escapes
+     handled, etc.) */
+  translate = line[i] != ':';
+
+  /* Kind of tricky. If we use whitespace as a delimiter, we can backslash-
+     quote double quotes and have them preserved in the value. However, we
+     still want to be able to auto-detect quoted strings and only require
+     them with whitespace delimiters. */
+  i = isolate_sequence (line, i + 1, translate, &kstart);
   if (i < 0)
     {
       FREE (kseq);
@@ -4737,7 +4761,10 @@ bind_keyseq_to_unix_command (char *line)
 
   /* Save the command to execute and the key sequence in the CMD_XMAP */
   cmd_xmap = get_cmd_xmap_from_keymap (kmap);
-  rl_generic_bind (ISMACR, kseq, value, cmd_xmap);
+  if (translate)
+    rl_macro_bind (kseq, value, cmd_xmap);
+  else
+    rl_generic_bind (ISMACR, kseq, value, cmd_xmap);
 
   /* and bind the key sequence in the current keymap to a function that
      understands how to execute from CMD_XMAP */

@@ -7185,22 +7185,6 @@ lib/readline/bind.c
 	  can be reused as input.
 	  Fixes bind -v issue reported by Sebastian Carlos <sebaaa1754@gmail.com>
 
-				   7/19
-				   ----
-lib/readline/bind.c
-	- _rl_macro_dumper_internal: if print_readably is < 0, don't
-	  `untranslate' the macro value for an inputrc setting; leave it in
-	  such a way that `bind' can use it. Print the value without the
-	  enclosing double quotes.
-	  From a report by Grisha Levit <grishalevit@gmail.com>
-
-lib/readline/doc/rltech.texi
-	- rl_macro_dumper: document new semantics for print_readably
-
-bashline.c
-	- print_unix_command_map: call rl_macro_dumper with an argument of -1
-	  so we can use the output directly in another call to bind -x.
-
 				   7/20
 				   ----
 pathexp.c
@@ -7297,3 +7281,37 @@ builtins/printf.def
 	- printf_erange: make out-of-range errors conversion errors even if
 	  the conversion function fully consumes the argument.
 	  From a report by thomas@habets.se
+
+				   7/31
+				   ----
+lib/readline/rltypedefs.h
+	- rl_macro_print_func_t: typedef for a function to print macro key
+	  bindings
+
+lib/readline/bind.c
+	- rl_macro_display_hook: hook function to call if the application
+	  wants to display a key sequence bound to a macro
+	- rl_macro_dumper: if rl_macro_display_hook is non-NULL, call it to
+	  display the macro value (after `untranslating' it to add back any
+	  required backslashes)
+
+lib/readline/doc/rltech.texi
+	- rl_macro_display_hook: add description
+
+pathexp.c
+	- glob_char_p: add the characters that are special within BRE bracket
+	  expressions.
+	  Inspired by a report by Grisha Levit <grishalevit@gmail.com>
+
+bashline.c
+	- bind_keyseq_to_unix_command: allow whitespace to separate the keyseq
+	  and the command string, but require the command string to be
+	  surrounded by double quotes if it is. If we get a whitespace
+	  separator, call rl_macro_bind so we get the string `translated'
+	  according to how readline does it (backslash-escape sequences
+	  processed, etc.)
+	- print_unix_command: function to print a key sequence and a unix
+	  command bound to it from cmd_xmap, using a space separator
+	- print_unix_command_map: make sure to set rl_macro_display_hook to
+	  print_unix_command before calling rl_macro_dumper to print the
+	  bound command strings

@@ -4489,7 +4489,7 @@ Aliases are described in @ref{Aliases}.
 bind [-m @var{keymap}] [-lpsvPSVX]
 bind [-m @var{keymap}] [-q @var{function}] [-u @var{function}] [-r @var{keyseq}]
 bind [-m @var{keymap}] -f @var{filename}
-bind [-m @var{keymap}] -x @var{keyseq:shell-command}
+bind [-m @var{keymap}] -x @var{keyseq[: ]shell-command}
 bind [-m @var{keymap}] @var{keyseq:function-name}
 bind [-m @var{keymap}] @var{keyseq:readline-command}
 bind @var{readline-command-line}
@@ -4562,6 +4562,15 @@ Remove any current binding for @var{keyseq}.
 @item -x @var{keyseq:shell-command}
 Cause @var{shell-command} to be executed whenever @var{keyseq} is
 entered.
+The separator between @var{keyseq} and @var{shell-command} is either
+whitespace or a colon optionally followed by whitespace.
+If the separator is whitespace, @var{shell-command}
+must be enclosed in double quotes and Readline expands any of its
+special backslash-escapes in @var{shell-command} before saving it.
+If the separator is a colon, any enclosing double quotes are optional, and
+Readline does not expand the command string before saving it.
+Since the entire key binding expression must be a single argument, it
+should be enclosed in quotes.
 When @var{shell-command} is executed, the shell sets the
 @code{READLINE_LINE} variable to the contents of the Readline line
 buffer and the @code{READLINE_POINT} and @code{READLINE_MARK} variables

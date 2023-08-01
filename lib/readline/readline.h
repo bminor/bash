@@ -623,6 +623,8 @@ extern rl_voidfunc_t *rl_redisplay_function;
 extern rl_vintfunc_t *rl_prep_term_function;
 extern rl_voidfunc_t *rl_deprep_term_function;
 
+extern rl_macro_print_func_t *rl_macro_display_hook;
+
 /* Dispatch variables. */
 extern Keymap rl_executing_keymap;
 extern Keymap rl_binding_keymap;

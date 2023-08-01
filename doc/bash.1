@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jul 26 09:57:28 EDT 2023
+.\"	Last Change: Mon Jul 31 15:50:16 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
-.if !rzY .nr zY 0
+.\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 July 26" "GNU Bash 5.3"
+.TH BASH 1 "2023 July 31" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7918,7 +7918,7 @@ or was started without job control.
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fB\-f\fP \fIfilename\fP
 .TP
-\fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fB\-x\fP \fIkeyseq\fP:\fIshell\-command\fP
+\fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fB\-x\fP \fIkeyseq\fP[:] \fIshell\-command\fP
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fIkeyseq\fP:\fIfunction\-name\fP
 .TP
@@ -7994,9 +7994,18 @@ Unbind all keys bound to the named \fIfunction\fP.
 .B \-r \fIkeyseq\fP
 Remove any current binding for \fIkeyseq\fP.
 .TP
-.B \-x \fIkeyseq\fP:\fIshell\-command\fP
+.B \-x \fIkeyseq\fP[: ]\fIshell\-command\fP
 Cause \fIshell\-command\fP to be executed whenever \fIkeyseq\fP is
 entered.
+The separator between \fIkeyseq\fP and \fIshell\-command\fP is either
+whitespace or a colon optionally followed by whitespace.
+If the separator is whitespace, \fIshell\-command\fP
+must be enclosed in double quotes and \fBreadline\fP expands any of its
+special backslash-escapes in \fIshell\-command\fP before saving it.
+If the separator is a colon, any enclosing double quotes are optional, and
+\fBreadline\fP does not expand the command string before saving it.
+Since the entire key binding expression must be a single argument, it
+should be enclosed in quotes.
 When \fIshell\-command\fP is executed, the shell sets the
 .SM
 .B READLINE_LINE
