@@ -407,6 +407,12 @@ bash_delete_last_history (void)
   return r;
 }
 
+char *
+bash_default_histfile (void)
+{
+  return (bash_tilde_expand (posixly_correct ? "~/.sh_history" : "~/.bash_history", 0));
+}
+
 #ifdef INCLUDE_UNUSED
 /* Write the existing history out to the history file. */
 void

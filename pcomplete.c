@@ -1522,7 +1522,7 @@ gen_progcomp_completions (const char *ocmd, const char *cmd, const char *word,
   oldtxt = pcomp_curtxt;
 
   pcomp_curcs = cs;
-  pcomp_curcmd = cmd;
+  pcomp_curcmd = ocmd;
   pcomp_curtxt = word;
 
   ret = gen_compspec_completions (cs, cmd, word, start, end, foundp);

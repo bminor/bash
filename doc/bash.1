@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Jul 31 15:50:16 EDT 2023
+.\"	Last Change: Wed Aug  2 16:03:53 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 July 31" "GNU Bash 5.3"
+.TH BASH 1 "2023 August 2" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -792,7 +792,7 @@ indices. The element of
 .B BASH_REMATCH
 with index \fIn\fP is the portion of the
 string matching the \fIn\fPth parenthesized subexpression.
-Bash sets
+\fBBash\fP sets
 .SM
 .B BASH_REMATCH
 in the global scope; declaring it as a local variable will lead to
@@ -2199,7 +2199,7 @@ A sample value is
 .TP
 .B CHILD_MAX
 Set the number of exited child status values for the shell to remember.
-Bash will not allow this value to be decreased below a POSIX-mandated
+\fBBash\fP will not allow this value to be decreased below a POSIX-mandated
 minimum, and there is a maximum value (currently 8192) that this may
 not exceed.
 The minimum value is system-dependent.
@@ -2346,8 +2346,10 @@ not tested, and are added to the history regardless of the value of
 The name of the file in which command history is saved (see
 .SM
 .B HISTORY
-below).  The default value is \fI\(ti/.bash_history\fP.  If unset, the
-command history is not saved when a shell exits.
+below).
+\fBBash\fP assigns a default value of \fI\(ti/.bash_history\fP.
+If \fBHISTFILE\fP is unset or null,
+the command history is not saved when a shell exits.
 .TP
 .B HISTFILESIZE
 The maximum number of lines contained in the history file.  When this
@@ -3142,12 +3144,12 @@ and
 .BR CDPATH ,
 and the shell assigns the expanded value.
 .PP
-Bash also performs tilde expansion on words satisfying the conditions of
-variable assignments (as described above under
+\fBBash\fP also performs tilde expansion on words satisfying the conditions
+of variable assignments (as described above under
 .SM
 .BR PARAMETERS )
 when they appear as arguments to simple commands.
-Bash does not do this, except for the \fIdeclaration\fP commands listed
+\fBBash\fP does not do this, except for the \fIdeclaration\fP commands listed
 above, when in \fIposix mode\fP.
 .SS Parameter Expansion
 The `\fB$\fP' character introduces parameter expansion,
@@ -7460,8 +7462,8 @@ otherwise the history file is overwritten.
 If
 .SM
 .B HISTFILE
-is unset, or if the history file is unwritable, the history is
-not saved.
+is unset or null,
+or if the history file is unwritable, the history is not saved.
 If the
 .SM
 .B HISTTIMEFORMAT
@@ -7502,7 +7504,7 @@ list.  The
 and
 .SM
 .B HISTIGNORE
-variables may be set to cause the shell to save only a subset of the
+variables are used to cause the shell to save only a subset of the
 commands entered.
 The
 .B cmdhist
@@ -8817,7 +8819,7 @@ option means to load the new builtin command
 from shared object
 .IR filename ,
 on systems that support dynamic loading.
-Bash will use the value of the \fBBASH_LOADABLES_PATH\fP variable as a
+\fBBash\fP will use the value of the \fBBASH_LOADABLES_PATH\fP variable as a
 colon-separated list of directories in which to search for \fIfilename\fP.
 The default is system-dependent.
 The
@@ -9259,7 +9261,13 @@ If \fIfilename\fP is supplied, it is used as the
 name of the history file; if not, the value of
 .SM
 .B HISTFILE
-is used.  Options, if supplied, have the following meanings:
+is used.
+If \fIfilename\fP is not supplied and
+.SM
+.B HISTFILE
+is unset or null, the \fB\-a, \-n, \-r,\fP and \fB\-w\fP options
+have no effect.
+Options, if supplied, have the following meanings:
 .RS
 .PD 0
 .TP
@@ -11612,7 +11620,7 @@ to this variable (a decimal version number like 4.2, or an integer
 corresponding to the \fBcompat\fP\fINN\fP option, like 42) determines the
 compatibility level.
 .PP
-Starting with bash-4.4, Bash has begun deprecating older compatibility
+Starting with bash-4.4, \fBbash\fP has begun deprecating older compatibility
 levels.
 Eventually, the options will be removed in favor of
 .SM
@@ -11665,7 +11673,7 @@ entire list)
 the \fB<\fP and \fB>\fP operators to the \fB[[\fP command do not
 consider the current locale when comparing strings; they use ASCII
 ordering.
-Bash versions prior to bash-4.1 use ASCII collation and
+\fBBash\fP versions prior to bash-4.1 use ASCII collation and
 .IR strcmp (3);
 bash-4.1 and later use the current locale's collation sequence and
 .IR strcoll (3).

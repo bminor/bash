@@ -404,7 +404,7 @@ read_builtin (WORD_LIST *list)
   input_string[0] = '\0';
 
   pass_next = 0;	/* Non-zero signifies last char was backslash. */
-  saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
+  saw_escape = 0;	/* Non-zero is count of escape chars we added */
 
   /* More input and options validation */
   if (nflag == 1 && nchars == 0)
@@ -751,11 +751,14 @@ read_builtin (WORD_LIST *list)
       if (pass_next)
 	{
 	  pass_next = 0;
-	  if (c == '\n')
+	  if (c == '\n' || c == '\0')
 	    {
 	      if (skip_ctlesc == 0 && i > 0)
-		i--;		/* back up over the CTLESC */
-	      if (interactive && input_is_tty && raw == 0)
+		{
+		  i--;			/* back up over the CTLESC */
+		  saw_escape--;		/* one fewer CTLESC in the input */
+		}
+	      if (interactive && input_is_tty && raw == 0 && c == '\n')
 		print_ps2 = 1;
 	    }
 	  else
@@ -825,6 +828,17 @@ add_char:
       if (nchars > 0 && nr >= nchars)
 	break;
     }
+  /* Back up over trailing CTLESC if the input ends with an unescaped
+     backslash */
+  if (pass_next && skip_ctlesc == 0)
+    {
+      i--;
+      saw_escape--;		/* that CTLESC is no longer in the input */
+    }
+  /* I don't think this clause ever tests true. */
+  if (skip_ctlnul && saw_escape && i == 1 && input_string[0] == CTLNUL)
+    saw_escape = 0;		/* Avoid dequoting bare CTLNUL */
+
   input_string[i] = '\0';
   check_read_timeout ();
 

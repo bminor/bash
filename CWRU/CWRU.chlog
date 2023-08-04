@@ -7315,3 +7315,48 @@ bashline.c
 	- print_unix_command_map: make sure to set rl_macro_display_hook to
 	  print_unix_command before calling rl_macro_dumper to print the
 	  bound command strings
+
+				    8/1
+				    ---
+builtins/read.def
+	- read_builtin: saw_escape is now a count of CTLESCs we added to the
+	  input
+	- read_builtin: since we increment saw_escape when we add a CTLESC,
+	  decrement it when we remove one from the input (\\\n, \\\0)
+	- read_builtin: remove the CTLESC we added if we have a backslash-
+	  escaped NULL character ('\0')
+	- read_builtin: if the input ends with an unescaped newline, remove
+	  the CTLESC we added
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				    8/2
+				    ---
+builtins/history.def
+	- history_builtin: if history -[anrw] is used without a filename
+	  argument, and HISTFILE is unset or null, return success immediately
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+doc/{bash.1,bashref.texi},lib/readline/doc/hsuser.texi
+	- history: document that if filename is not supplied, and HISTFILE is
+	  unset or null, the [-anrw] options have no effect
+
+				    8/3
+				    ---
+pcomplete.c
+	- gen_progcomp_completions: if the actual compspec that's run is
+	  something different from what's typed (full pathname, alias, etc.),
+	  set pcomp_curcmd to the word corresponding to the actual compspec,
+	  instead of what was typed. This is what eventually gets used by
+	  the compopt builtin's output.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- execute_coproc: in parent, close /dev/fd FIFOs only if we're not
+	  executing a shell function, like other calls to unlink_fifo_list().
+	  Report from Hal Blackburn in
+	  https://savannah.gnu.org/support/index.php?110910
+
+subst.c
+	- do_compound_assignment: don't attempt to convert a global associative
+	  array to an indexed array with declare -g.
+	  From a report and patch by Grisha Levit <grishalevit@gmail.com>

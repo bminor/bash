@@ -2476,7 +2476,8 @@ execute_coproc (COMMAND *command, int pipe_in, int pipe_out, struct fd_bitmap *f
 
   close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
-  unlink_fifo_list ();
+  if (variable_context == 0)
+    unlink_fifo_list ();
 #endif
   stop_pipeline (1, (COMMAND *)NULL);
   DESCRIBE_PID (coproc_pid);

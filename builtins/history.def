@@ -46,7 +46,9 @@ Options:
   -s	append the ARGs to the history list as a single entry
 
 If FILENAME is given, it is used as the history file.  Otherwise,
-if HISTFILE has a value, that is used, else ~/.bash_history.
+if HISTFILE has a value, that is used. If FILENAME is not supplied
+and HISTFILE is unset or null, the -a, -n, -r, and -w options have
+no effect and return success.
 
 If the HISTTIMEFORMAT variable is set and not null, its value is used
 as a format string for strftime(3) to print the time stamp associated
@@ -266,6 +268,16 @@ history_builtin (WORD_LIST *list)
 
   filename = list ? list->word->word : get_string_value ("HISTFILE");
   result = EXECUTION_SUCCESS;
+
+  if (filename == 0 || *filename == 0)
+    {
+      if (interactive_shell == 0 || interactive)
+	if (list && filename == list->word->word)
+	  builtin_error (_("empty filename"));
+	else
+	  builtin_error (_("%s: parameter null or not set"), "HISTFILE");
+      return (interactive ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+    }
 
 #if defined (RESTRICTED_SHELL)
   if (restricted && strchr (filename, '/'))

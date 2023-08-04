@@ -125,7 +125,7 @@ static const struct conf vars[] =
 #ifdef _SC_CHAR_MAX
     { "CHAR_MAX", _SC_CHAR_MAX, SYSCONF },
 #else
-    { "CHAR_BIT", CHAR_MAX, CONSTANT },
+    { "CHAR_MAX", CHAR_MAX, CONSTANT },
 #endif
 #ifdef _SC_CHAR_MIN
     { "CHAR_MIN", _SC_CHAR_MIN, SYSCONF },
@@ -274,11 +274,13 @@ static const struct conf vars[] =
 #ifdef _SC_AVPHYS_PAGES
     { "_AVPHYS_PAGES", _SC_AVPHYS_PAGES, SYSCONF },
 #endif
-#ifdef _NPROCESSORS_CONF
+#ifdef _SC_NPROCESSORS_CONF
     { "_NPROCESSORS_CONF", _SC_NPROCESSORS_CONF, SYSCONF },
+#endif
+#ifdef _SC_NPROCESSORS_ONLN
     { "_NPROCESSORS_ONLN", _SC_NPROCESSORS_ONLN, SYSCONF },
 #endif
-#ifdef _PHYS_PAGES
+#ifdef _SC_PHYS_PAGES
     { "_PHYS_PAGES", _SC_PHYS_PAGES, SYSCONF },
 #endif
 #ifdef _SC_ARG_MAX
@@ -1057,12 +1059,12 @@ getconf_one (WORD_LIST *list)
       return (EXECUTION_FAILURE);
     }
 
-  if (c->call_name == PATHCONF && list->next == 0)
+  if (c->call == PATHCONF && list->next == 0)
     {
       builtin_usage ();
       return (EX_USAGE);
     }
-  else if (c->call_name != PATHCONF && list->next)
+  else if (c->call != PATHCONF && list->next)
     {
       builtin_usage ();
       return (EX_USAGE);

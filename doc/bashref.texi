@@ -5591,7 +5591,7 @@ Turning this option off causes the effective user
 and group ids to be set to the real user and group ids.
 
 @item -r
-Enable restricted shell mode.
+Enable restricted shell mode (@pxref{The Restricted Shell}).
 This option cannot be unset once it has been set.
 
 @item -t
@@ -6706,8 +6706,10 @@ not tested, and are added to the history regardless of the value of
 @env{HISTCONTROL}.
 
 @item HISTFILE
-The name of the file to which the command history is saved.  The
-default value is @file{~/.bash_history}.
+The name of the file to which the command history is saved.
+Bash assigns a default value of @file{~/.bash_history}.
+If @env{HISTFILE} is unset or null,
+the command history is not saved when a shell exits.
 
 @item HISTFILESIZE
 The maximum number of lines contained in the history file.
@@ -7158,6 +7160,7 @@ standard.  @xref{Bash POSIX Mode}, for a description of the Bash
 @sc{posix} mode.
 
 @item --restricted
+Equivalent to @option{-r}.
 Make the shell a restricted shell (@pxref{The Restricted Shell}).
 
 @item --verbose
@@ -8002,7 +8005,7 @@ and an index of -1 refers to the last element.
 Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0.
 Any reference to a variable using a valid subscript is legal, and
-@code{bash} will create an array if necessary.
+Bash will create an array if necessary.
 
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
@@ -8473,7 +8476,7 @@ name, rather than on all assignment statements on the line.
 
 @item
 The default history file is @file{~/.sh_history} (this is the
-default value of @env{$HISTFILE}).
+default value the shell assigns to @env{$HISTFILE}).
 
 @item
 Redirection operators do not perform filename expansion on the word
@@ -8756,7 +8759,7 @@ processing the @samp{<} and @samp{>} binary operators.
 @item
 The @code{test} builtin's @option{-t} unary primary requires an argument.
 Historical versions of @code{test} made the argument optional in certain
-cases, and bash attempts to accommodate those for backwards compatibility.
+cases, and Bash attempts to accommodate those for backwards compatibility.
 
 @item
 Command substitutions don't set the @samp{?} special parameter. The exit

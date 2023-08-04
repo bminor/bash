@@ -3446,8 +3446,7 @@ do_compound_assignment (const char *name, char *value, int flags)
 	v = make_local_assoc_variable (newname, 0);
       else if (v == 0 || (array_p (v) == 0 && assoc_p (v) == 0) || v->context != variable_context)
         v = make_local_array_variable (newname, 0);
-      if (v)
-	r = assign_compound_array_list (v, list, flags);
+      r = v? assign_compound_array_list (v, list, flags) : 0;
       if (list)
 	dispose_words (list);
       if (r == 0)		/* compound assignment error */
@@ -3473,14 +3472,13 @@ do_compound_assignment (const char *name, char *value, int flags)
       list = expand_compound_array_assignment (v, value, flags);
       if (v == 0 && mkassoc)
 	v = make_new_assoc_variable (newname);
-      else if (v && mkassoc && assoc_p (v) == 0)
+      else if (v && mkassoc && assoc_p (v) == 0)	/* convert array? */
 	v = convert_var_to_assoc (v);
       else if (v == 0)
 	v = make_new_array_variable (newname);
-      else if (v && mkassoc == 0 && array_p (v) == 0)
+      else if (v && mkassoc == 0 && array_p (v) == 0 && assoc_p (v) == 0)
 	v = convert_var_to_array (v);
-      if (v)
-	r = assign_compound_array_list (v, list, flags);
+      r = v ? assign_compound_array_list (v, list, flags) : 0;
       if (list)
 	dispose_words (list);
       if (r == 0)		/* compound assignment error */
