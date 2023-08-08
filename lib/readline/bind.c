@@ -526,8 +526,7 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 
   /* When there are incomplete prefixes \C- or \M- (has_control || has_meta)
      without base character at the end of SEQ, they are processed as the
-     prefixes for '\0'.
-  */
+     prefixes for '\0'. */
   for (i = l = 0; (c = seq[i]) || has_control || has_meta; i++)
     {
       /* Only backslashes followed by a non-null character are handled
@@ -624,11 +623,17 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 	  has_meta = 0;
 	}
 
-      /* If convert-meta is turned on, convert a meta char to a key sequence  */
+      /* If convert-meta is turned on, convert a meta char to a key sequence */
       if (META_CHAR (c) && _rl_convert_meta_chars_to_ascii)
 	{
-	  array[l++] = ESC;	/* ESC is meta-prefix */
-	  array[l++] = UNMETA (c);
+	  int x = UNMETA (c);
+	  if (x)
+	    {
+	      array[l++] = ESC;	/* ESC is meta-prefix */
+	      array[l++] = x;
+	    }
+	  else
+	    array[l++] = c;	/* just do the best we can without sticking a NUL in there. */
 	}
       else
 	array[l++] = (c);
@@ -680,7 +685,8 @@ char *
 rl_untranslate_keyseq (int seq)
 {
   static char kseq[16];
-  int i, c;
+  int i;
+  unsigned char c;
 
   i = 0;
   c = seq;
@@ -691,35 +697,22 @@ rl_untranslate_keyseq (int seq)
       kseq[i++] = '-';
       c = UNMETA (c);
     }
-  else if (c == ESC)
-    {
-      kseq[i++] = '\\';
-      c = 'e';
-    }
-  else if (CTRL_CHAR (c))
-    {
-      kseq[i++] = '\\';
-      kseq[i++] = 'C';
-      kseq[i++] = '-';
-      c = _rl_to_lower (UNCTRL (c));
-    }
-  else if (c == RUBOUT)
-    {
-      kseq[i++] = '\\';
-      kseq[i++] = 'C';
-      kseq[i++] = '-';
-      c = '?';
-    }
 
   if (c == ESC)
     {
       kseq[i++] = '\\';
       c = 'e';
     }
-  else if (c == '\\' || c == '"')
+  else if (CTRL_CHAR (c) || c == RUBOUT)
     {
       kseq[i++] = '\\';
+      kseq[i++] = 'C';
+      kseq[i++] = '-';
+      c = (c == RUBOUT) ? '?' : _rl_to_lower (UNCTRL (c));
     }
+
+  if (c == '\\' || c == '"')
+    kseq[i++] = '\\';
 
   kseq[i++] = (unsigned char) c;
   kseq[i] = '\0';
@@ -730,9 +723,9 @@ char *
 _rl_untranslate_macro_value (char *seq, int use_escapes)
 {
   char *ret, *r, *s;
-  int c;
+  unsigned char c;
 
-  r = ret = (char *)xmalloc (7 * strlen (seq) + 1);
+  r = ret = (char *)xmalloc (8 * strlen (seq) + 1);
   for (s = seq; *s; s++)
     {
       c = *s;
@@ -743,7 +736,9 @@ _rl_untranslate_macro_value (char *seq, int use_escapes)
 	  *r++ = '-';
 	  c = UNMETA (c);
 	}
-      else if (c == ESC)
+
+      /* We want to keep from printing literal control chars */
+      if (c == ESC)
 	{
 	  *r++ = '\\';
 	  c = 'e';
@@ -768,15 +763,10 @@ _rl_untranslate_macro_value (char *seq, int use_escapes)
  	  c = '?';
  	}
 
-      if (c == ESC)
-	{
-	  *r++ = '\\';
-	  c = 'e';
-	}
-      else if (c == '\\' || c == '"')
+      if (c == '\\' || c == '"')
 	*r++ = '\\';
 
-      *r++ = (unsigned char)c;
+      *r++ = c;
     }
   *r = '\0';
   return ret;
@@ -2574,16 +2564,12 @@ _rl_get_keyname (int key)
   char *keyname;
   int i, c;
 
-  keyname = (char *)xmalloc (8);
+  keyname = (char *)xmalloc (9);
 
   c = key;
   /* Since this is going to be used to write out keysequence-function
      pairs for possible inclusion in an inputrc file, we don't want to
      do any special meta processing on KEY. */
-
-#if 1
-  /* XXX - Experimental */
-  /* We might want to do this, but the old version of the code did not. */
 
   /* If this is an escape character, we don't want to do any more processing.
      Just add the special ESC key sequence and return. */
@@ -2594,28 +2580,23 @@ _rl_get_keyname (int key)
       keyname[2] = '\0';
       return keyname;
     }
-#endif
 
-  /* RUBOUT is translated directly into \C-? */
-  if (key == RUBOUT)
+  if (key == ANYOTHERKEY)
     {
-      keyname[0] = '\\';
-      keyname[1] = 'C';
-      keyname[2] = '-';
-      keyname[3] = '?';
-      keyname[4] = '\0';
+      keyname[0] = '\0';
       return keyname;
     }
 
   i = 0;
+
   /* Now add special prefixes needed for control characters.  This can
      potentially change C. */
-  if (CTRL_CHAR (c))
+  if (CTRL_CHAR (c) || c == RUBOUT)
     {
       keyname[i++] = '\\';
       keyname[i++] = 'C';
       keyname[i++] = '-';
-      c = _rl_to_lower (UNCTRL (c));
+      c = (c == RUBOUT) ? '?' : _rl_to_lower (UNCTRL (c));
     }
 
   /* XXX experimental code.  Turn the characters that are not ASCII or
@@ -2693,53 +2674,24 @@ rl_invoking_keyseqs_in_map (rl_command_func_t *function, Keymap map)
 	  {
 	    char **seqs;
 	    register int i;
+	    char *keyname;
+	    size_t knlen;
 
 	    /* Find the list of keyseqs in this map which have FUNCTION as
 	       their target.  Add the key sequences found to RESULT. */
-	    if (map[key].function)
-	      seqs =
-	        rl_invoking_keyseqs_in_map (function, FUNCTION_TO_KEYMAP (map, key));
-	    else
+	    if (map[key].function == 0)
 	      break;
 
+	    seqs = rl_invoking_keyseqs_in_map (function, FUNCTION_TO_KEYMAP (map, key));
 	    if (seqs == 0)
 	      break;
 
+	    keyname = _rl_get_keyname (key);
+	    knlen = RL_STRLEN (keyname);
+
 	    for (i = 0; seqs[i]; i++)
 	      {
-		char *keyname = (char *)xmalloc (6 + strlen (seqs[i]));
-
-		if (key == ESC)
-		  {
-		    /* If ESC is the meta prefix and we're converting chars
-		       with the eighth bit set to ESC-prefixed sequences, then
-		       we can use \M-.  Otherwise we need to use the sequence
-		       for ESC. */
-		    if (_rl_convert_meta_chars_to_ascii && map[ESC].type == ISKMAP)
-		      sprintf (keyname, "\\M-");
-		    else
-		      sprintf (keyname, "\\e");
-		  }
-		else
-		  {
-		    int c = key, l = 0;
-		    if (CTRL_CHAR (c) || c == RUBOUT)
-		      {
-			keyname[l++] = '\\';
-			keyname[l++] = 'C';
-			keyname[l++] = '-';
-			c = (c == RUBOUT) ? '?' : _rl_to_lower (UNCTRL (c));
-		      }
-
-		    if (c == '\\' || c == '"')
-		      keyname[l++] = '\\';
-
-		    keyname[l++] = (char) c;
-		    keyname[l++] = '\0';
-		  }
-		
-		strcat (keyname, seqs[i]);
-		xfree (seqs[i]);
+		char *x;
 
 		if (result_index + 2 > result_size)
 		  {
@@ -2747,10 +2699,16 @@ rl_invoking_keyseqs_in_map (rl_command_func_t *function, Keymap map)
 		    result = (char **)xrealloc (result, result_size * sizeof (char *));
 		  }
 
-		result[result_index++] = keyname;
+		x = xmalloc (knlen + RL_STRLEN (seqs[i]) + 1);
+		strcpy (x, keyname);
+		strcpy (x + knlen, seqs[i]);
+		xfree (seqs[i]);
+
+		result[result_index++] = x;
 		result[result_index] = (char *)NULL;
 	      }
 
+	    xfree (keyname);
 	    xfree (seqs);
 	  }
 	  break;
@@ -2765,6 +2723,56 @@ char **
 rl_invoking_keyseqs (rl_command_func_t *function)
 {
   return (rl_invoking_keyseqs_in_map (function, _rl_keymap));
+}
+
+void
+rl_print_keybinding (const char *name, Keymap kmap, int print_readably)
+{
+  rl_command_func_t *function;
+  char **invokers;
+
+  function = rl_named_function (name);
+  invokers = rl_invoking_keyseqs_in_map (function, kmap ? kmap : _rl_keymap);
+
+  if (print_readably)
+    {
+      if (!invokers)
+	fprintf (rl_outstream, "# %s (not bound)\n", name);
+      else
+	{
+	  register int j;
+
+	  for (j = 0; invokers[j]; j++)
+	    {
+	      fprintf (rl_outstream, "\"%s\": %s\n", invokers[j], name);
+	      xfree (invokers[j]);
+	    }
+
+	  xfree (invokers);
+	}
+    }
+  else
+    {
+      if (!invokers)
+	fprintf (rl_outstream, "%s is not bound to any keys\n", name);
+      else
+	{
+	  register int j;
+
+	  fprintf (rl_outstream, "%s can be found on ", name);
+
+	  for (j = 0; invokers[j] && j < 5; j++)
+	    fprintf (rl_outstream, "\"%s\"%s", invokers[j], invokers[j + 1] ? ", " : ".\n");
+
+	  if (j == 5 && invokers[j])
+	    fprintf (rl_outstream, "...\n");
+
+	  for (j = 0; invokers[j]; j++)
+	    xfree (invokers[j]);
+
+	  xfree (invokers);
+	}
+    }
 }
 
 /* Print all of the functions and their bindings to rl_outstream.  If
@@ -2782,58 +2790,7 @@ rl_function_dumper (int print_readably)
   fprintf (rl_outstream, "\n");
 
   for (i = 0; name = names[i]; i++)
-    {
-      rl_command_func_t *function;
-      char **invokers;
-
-      function = rl_named_function (name);
-      invokers = rl_invoking_keyseqs_in_map (function, _rl_keymap);
-
-      if (print_readably)
-	{
-	  if (!invokers)
-	    fprintf (rl_outstream, "# %s (not bound)\n", name);
-	  else
-	    {
-	      register int j;
-
-	      for (j = 0; invokers[j]; j++)
-		{
-		  fprintf (rl_outstream, "\"%s\": %s\n",
-			   invokers[j], name);
-		  xfree (invokers[j]);
-		}
-
-	      xfree (invokers);
-	    }
-	}
-      else
-	{
-	  if (!invokers)
-	    fprintf (rl_outstream, "%s is not bound to any keys\n",
-		     name);
-	  else
-	    {
-	      register int j;
-
-	      fprintf (rl_outstream, "%s can be found on ", name);
-
-	      for (j = 0; invokers[j] && j < 5; j++)
-		{
-		  fprintf (rl_outstream, "\"%s\"%s", invokers[j],
-			   invokers[j + 1] ? ", " : ".\n");
-		}
-
-	      if (j == 5 && invokers[j])
-		fprintf (rl_outstream, "...\n");
-
-	      for (j = 0; invokers[j]; j++)
-		xfree (invokers[j]);
-
-	      xfree (invokers);
-	    }
-	}
-    }
+    rl_print_keybinding (name, _rl_keymap, print_readably);
 
   xfree (names);
 }

@@ -4729,7 +4729,7 @@ run_builtin:
 	      setup_async_signals ();
 	    }
 
-	  if (async == 0)
+	  if (async == 0)		/* XXX why async == 0? */
 	    subshell_level++;
 	  execute_subshell_builtin_or_function
 	    (words, simple_command->redirects, builtin, func,

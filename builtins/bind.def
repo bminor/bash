@@ -116,14 +116,7 @@ bind_builtin (WORD_LIST *list)
   char *initfile, *map_name, *fun_name, *unbind_name, *remove_seq, *cmd_seq, *t;
 
   if (no_line_editing)
-    {
-#if 0
-      builtin_error (_("line editing not enabled"));
-      return (EXECUTION_FAILURE);
-#else
-      builtin_warning (_("line editing not enabled"));
-#endif
-    }
+    builtin_warning (_("line editing not enabled"));
 
   kmap = saved_keymap = (Keymap) NULL;
   flags = 0;
@@ -226,10 +219,37 @@ bind_builtin (WORD_LIST *list)
     rl_list_funmap_names ();
 
   if (flags & PFLAG)
-    rl_function_dumper (1);
+    {
+#if 0	/* TAG:bash-5.3 */
+      if (list == 0)
+	rl_function_dumper (1);
+      else
+	while (list)
+	  {
+	    rl_print_keybinding (list->word->word, kmap, 1);
+	    list = list->next;
+	  }
+#else
+      rl_function_dumper (1);
+#endif
+    }
 
   if (flags & PPFLAG)
-    rl_function_dumper (0);
+    {
+#if 0	/* TAG:bash-5.3 */
+      if (list == 0)
+	rl_function_dumper (0);
+      else
+	while (list)
+	  {
+	    rl_print_keybinding (list->word->word, kmap, 0);
+	    list = list->next;
+	  }
+#else
+      rl_function_dumper (0);
+#endif
+    }
+
 
   if (flags & SFLAG)
     rl_macro_dumper (1);

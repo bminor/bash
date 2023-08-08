@@ -7360,3 +7360,32 @@ subst.c
 	- do_compound_assignment: don't attempt to convert a global associative
 	  array to an indexed array with declare -g.
 	  From a report and patch by Grisha Levit <grishalevit@gmail.com>
+
+				    8/7
+				    ---
+lib/readline/bind.c
+	- rl_print_keybinding: new function, prints a the key bindings for a
+	  single function specified by name
+	- rl_function_dumper: call rl_print_keybinding for every function name
+
+lib/readline/readline.h
+	- rl_print_keybinding: extern declaration
+
+lib/readline/bind.c
+	- _rl_untranslate_macro_value: make sure characters betweeen 128 and
+	  159 (metafied control characters) are printed using the \M-\C-
+	  notation instead of directly writing the control character.
+	  From a report and patch by Grisha Levit <grishalevit@gmail.com>
+	- rl_get_keyname: if a key binding shadows a function or macro, print
+	  the ANYOTHERKEY binding as a null string
+	  From a report and patch by Grisha Levit <grishalevit@gmail.com>
+	- rl_untranslate_keyseq: make changes analogous to
+	  _rl_untranslate_macro_value so that we don't print control characters
+	  directly
+	- rl_invoking_keyseqs_in_map: if the key corresponds to a keymap, use
+	  _rl_get_keyname to get its text representation, so this function
+	  returns consistent results
+	- rl_translate_keyseq: if convert-meta is on, don't convert meta chars
+	  that are, e.g., \M-\C-@ (128) into \e followed by a NUL, resulting
+	  in truncated key sequences. Just don't honor convert-meta in this
+	  case

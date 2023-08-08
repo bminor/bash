@@ -926,9 +926,19 @@ Return an array of strings representing the key sequences used to
 invoke @var{function} in the keymap @var{map}.
 @end deftypefun
 
+@deftypefun void rl_print_keybinding (const char *name, Keymap map, int readable)
+Print key sequences bound to Readline function name @var{name} in
+keymap @var{map}.
+If @var{map} is NULL, this uses the current keymap.
+If @var{readable} is non-zero,
+the list is formatted in such a way that it can be made part of an
+@code{inputrc} file and re-read.
+@end deftypefun
+
 @deftypefun void rl_function_dumper (int readable)
 Print the Readline function names and the key sequences currently
-bound to them to @code{rl_outstream}.  If @var{readable} is non-zero,
+bound to them to @code{rl_outstream}.
+If @var{readable} is non-zero,
 the list is formatted in such a way that it can be made part of an
 @code{inputrc} file and re-read.
 @end deftypefun
