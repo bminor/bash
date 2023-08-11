@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Aug  2 16:03:53 EDT 2023
+.\"	Last Change: Thu Aug 10 10:49:52 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 August 2" "GNU Bash 5.3"
+.TH BASH 1 "2023 August 10" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7552,12 +7552,18 @@ The second is to select portions of that line for inclusion into
 the current one.
 The line selected from the history is the \fIevent\fP,
 and the portions of that line that are acted upon are \fIwords\fP.
-Various \fImodifiers\fP are available to manipulate the selected words.
+The \fIevent designator\fP selects the event, the optional
+\fIword designator\fP selects words from the event, and
+various optional \fImodifiers\fP are available to manipulate the
+selected words.
 The line is broken into words in the same fashion as when reading input,
 so that several \fImetacharacter\fP-separated words surrounded by
 quotes are considered one word.
+.PP
 History expansions are introduced by the appearance of the
 history expansion character, which is \^\fB!\fP\^ by default.
+History expansions may appear anywhere in the input, but do not nest.
+.PP
 Only backslash (\^\fB\e\fP\^) and single quotes can quote
 the history expansion character, but the history expansion character is
 also treated as quoted if it immediately precedes the closing double quote
@@ -7565,9 +7571,8 @@ in a double-quoted string.
 .PP
 Several characters inhibit history expansion if found immediately
 following the history expansion character, even if it is unquoted:
-space, tab, newline, carriage return, and \fB=\fP.
-If the \fBextglob\fP shell option is enabled, \fB(\fP will also
-inhibit expansion.
+space, tab, newline, carriage return, \fB=\fP,
+and the other shell metacharacters defined above.
 .PP
 Several shell options settable with the
 .B shopt
@@ -7616,6 +7621,10 @@ writing the history file.
 .SS Event Designators
 An event designator is a reference to a command line entry in the
 history list.
+The event designator
+consists of the portion of the word beginning with the history
+expansion character and ending with the word designator if present,
+or the end of the word.
 Unless the reference is absolute, events are relative to the current
 position in the history list.
 .PP

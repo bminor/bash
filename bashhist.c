@@ -193,6 +193,10 @@ int hist_verify;
 int dont_save_function_defs;
 
 #if defined (BANG_HISTORY)
+/* The usual history no-expand characters plus the shell metacharacters that
+   would result in an empty history event. */
+static char *bash_history_no_expand_chars = " \t\n\r=;&|()<>";
+
 static int bash_history_inhibit_expansion (char *, int);
 #endif
 #if defined (READLINE)
@@ -230,6 +234,7 @@ bash_history_inhibit_expansion (char *string, int i)
   else if (i > 1 && string[i - 1] == '$' && string[i] == '!')
     return (1);
 #if defined (EXTENDED_GLOB)
+  /* This is on all the time now; see bash_history_no_expand_characters above */
   else if (extended_glob && i > 1 && string[i+1] == '(' && member (')', string + i + 2))
     return (1);
 #endif
@@ -271,6 +276,7 @@ bash_initialize_history (void)
   history_search_delimiter_chars = ";&()|<>";
 #if defined (BANG_HISTORY)
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
+  history_no_expand_chars = bash_history_no_expand_chars;
   sv_histchars ("histchars");
 #endif
 }
@@ -282,6 +288,7 @@ bash_history_reinit (int interact)
   history_expansion = (interact == 0) ? histexp_flag : HISTEXPAND_DEFAULT;
   history_expansion_inhibited = (interact == 0) ? 1 - histexp_flag : 0;	/* changed in bash_history_enable() */
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
+  history_no_expand_chars = bash_history_no_expand_chars;
 #endif
   remember_on_history = enable_history_list;
 }
@@ -302,6 +309,7 @@ bash_history_enable (void)
 #if defined (BANG_HISTORY)
   history_expansion_inhibited = 0;
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
+  history_no_expand_chars = bash_history_no_expand_chars;
 #endif
   sv_history_control ("HISTCONTROL");
   sv_histignore ("HISTIGNORE");

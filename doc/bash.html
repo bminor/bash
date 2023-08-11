@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 July 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 August 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1027,7 +1027,7 @@ indices. The element of
 </FONT>
 with index <I>n</I> is the portion of the
 string matching the <I>n</I>th parenthesized subexpression.
-Bash sets
+<B>Bash</B> sets
 <FONT SIZE=-1><B>BASH_REMATCH</B>
 
 </FONT>
@@ -2784,7 +2784,7 @@ A sample value is
 
 <DD>
 Set the number of exited child status values for the shell to remember.
-Bash will not allow this value to be decreased below a POSIX-mandated
+<B>Bash</B> will not allow this value to be decreased below a POSIX-mandated
 minimum, and there is a maximum value (currently 8192) that this may
 not exceed.
 The minimum value is system-dependent.
@@ -2965,8 +2965,10 @@ The name of the file in which command history is saved (see
 <FONT SIZE=-1><B>HISTORY</B>
 
 </FONT>
-below).  The default value is <I>ti/.bash_history</I>.  If unset, the
-command history is not saved when a shell exits.
+below).
+<B>Bash</B> assigns a default value of <I>ti/.bash_history</I>.
+If <B>HISTFILE</B> is unset or null,
+the command history is not saved when a shell exits.
 <DT><B>HISTFILESIZE</B>
 
 <DD>
@@ -3966,13 +3968,13 @@ and
 and the shell assigns the expanded value.
 <P>
 
-Bash also performs tilde expansion on words satisfying the conditions of
-variable assignments (as described above under
+<B>Bash</B> also performs tilde expansion on words satisfying the conditions
+of variable assignments (as described above under
 <FONT SIZE=-1><B>PARAMETERS</B>)
 
 </FONT>
 when they appear as arguments to simple commands.
-Bash does not do this, except for the <I>declaration</I> commands listed
+<B>Bash</B> does not do this, except for the <I>declaration</I> commands listed
 above, when in <I>posix mode</I>.
 <A NAME="lbBB">&nbsp;</A>
 <H4>Parameter Expansion</H4>
@@ -9434,8 +9436,8 @@ If
 <FONT SIZE=-1><B>HISTFILE</B>
 
 </FONT>
-is unset, or if the history file is unwritable, the history is
-not saved.
+is unset or null,
+or if the history file is unwritable, the history is not saved.
 If the
 <FONT SIZE=-1><B>HISTTIMEFORMAT</B>
 
@@ -9486,7 +9488,7 @@ and
 <FONT SIZE=-1><B>HISTIGNORE</B>
 
 </FONT>
-variables may be set to cause the shell to save only a subset of the
+variables are used to cause the shell to save only a subset of the
 commands entered.
 The
 <B>cmdhist</B>
@@ -9560,7 +9562,8 @@ in a double-quoted string.
 
 Several characters inhibit history expansion if found immediately
 following the history expansion character, even if it is unquoted:
-space, tab, newline, carriage return, and <B>=</B>.
+space, tab, newline, carriage return,
+<B>=</B>, <B>;</B>, <B>&amp;</B>, and <B>|</B>.
 If the <B>extglob</B> shell option is enabled, <B>(</B> will also
 inhibit expansion.
 <P>
@@ -10018,7 +10021,7 @@ or was started without job control.
 
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] [<B>-q</B> <I>function</I>] [<B>-u</B> <I>function</I>] [<B>-r</B> <I>keyseq</I>]<DD>
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <B>-f</B> <I>filename</I><DD>
-<DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <B>-x</B> <I>keyseq</I>:<I>shell-command</I><DD>
+<DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <B>-x</B> <I>keyseq</I>[:] <I>shell-command</I><DD>
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <I>keyseq</I>:<I>function-name</I><DD>
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <I>keyseq</I>:<I>readline-command</I><DD>
 <DT><B>bind</B> <I>readline-command-line</I><DD>
@@ -10111,11 +10114,20 @@ Unbind all keys bound to the named <I>function</I>.
 
 <DD>
 Remove any current binding for <I>keyseq</I>.
-<DT><B>-x </B><I>keyseq</I>:<I>shell-command</I>
+<DT><B>-x </B><I>keyseq</I>[: ]<I>shell-command</I>
 
 <DD>
 Cause <I>shell-command</I> to be executed whenever <I>keyseq</I> is
 entered.
+The separator between <I>keyseq</I> and <I>shell-command</I> is either
+whitespace or a colon optionally followed by whitespace.
+If the separator is whitespace, <I>shell-command</I>
+must be enclosed in double quotes and <B>readline</B> expands any of its
+special backslash-escapes in <I>shell-command</I> before saving it.
+If the separator is a colon, any enclosing double quotes are optional, and
+<B>readline</B> does not expand the command string before saving it.
+Since the entire key binding expression must be a single argument, it
+should be enclosed in quotes.
 When <I>shell-command</I> is executed, the shell sets the
 <FONT SIZE=-1><B>READLINE_LINE</B>
 
@@ -11099,7 +11111,7 @@ from shared object
 <I>filename</I>,
 
 on systems that support dynamic loading.
-Bash will use the value of the <B>BASH_LOADABLES_PATH</B> variable as a
+<B>Bash</B> will use the value of the <B>BASH_LOADABLES_PATH</B> variable as a
 colon-separated list of directories in which to search for <I>filename</I>.
 The default is system-dependent.
 The
@@ -11637,7 +11649,14 @@ name of the history file; if not, the value of
 <FONT SIZE=-1><B>HISTFILE</B>
 
 </FONT>
-is used.  Options, if supplied, have the following meanings:
+is used.
+If <I>filename</I> is not supplied and
+<FONT SIZE=-1><B>HISTFILE</B>
+
+</FONT>
+is unset or null, the <B>-a, -n, -r,</B> and <B>-w</B> options
+have no effect.
+Options, if supplied, have the following meanings:
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
@@ -14578,7 +14597,7 @@ corresponding to the <B>compat</B><I>NN</I> option, like 42) determines the
 compatibility level.
 <P>
 
-Starting with bash-4.4, Bash has begun deprecating older compatibility
+Starting with bash-4.4, <B>bash</B> has begun deprecating older compatibility
 levels.
 Eventually, the options will be removed in favor of
 <FONT SIZE=-1><B>BASH_COMPAT</B>.
@@ -14639,7 +14658,7 @@ entire list)
 the <B>&lt;</B> and <B>&gt;</B> operators to the <B>[[</B> command do not
 consider the current locale when comparing strings; they use ASCII
 ordering.
-Bash versions prior to bash-4.1 use ASCII collation and
+<B>Bash</B> versions prior to bash-4.1 use ASCII collation and
 <I>strcmp</I>(3);
 
 bash-4.1 and later use the current locale's collation sequence and
@@ -15067,7 +15086,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 July 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 August 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15173,7 +15192,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20230724/doc/bash.1.<BR>
-Time: 27 July 2023 13:45:03 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20230808/doc/bash.1.<BR>
+Time: 09 August 2023 10:01:14 EDT
 </BODY>
 </HTML>

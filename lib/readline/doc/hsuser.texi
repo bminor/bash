@@ -284,14 +284,21 @@ expansion functions about quoting still in effect from previous lines.
 History expansion takes place in two parts.  The first is to determine
 which line from the history list should be used during substitution.
 The second is to select portions of that line for inclusion into the
-current one.  The line selected from the history is called the
-@dfn{event}, and the portions of that line that are acted upon are
-called @dfn{words}.  Various @dfn{modifiers} are available to manipulate
-the selected words.  The line is broken into words in the same fashion
+current one.
+
+The line selected from the history is called the @dfn{event},
+and the portions of that line that are acted upon are called @dfn{words}.
+The dfn{event designator} selects the event, the optional
+@dfn{word designator} selects words from the event, and
+various optional @dfn{modifiers} are available to manipulate the
+selected words.
+
+The line is broken into words in the same fashion
 that Bash does, so that several words
 surrounded by quotes are considered one word.
 History expansions are introduced by the appearance of the
 history expansion character, which is @samp{!} by default.
+History expansions may appear anywhere in the input, but do not nest.
 
 History expansion implements shell-like quoting conventions:
 a backslash can be used to remove the special handling for the next character;
@@ -349,6 +356,9 @@ An event designator is a reference to a command line entry in the
 history list.
 Unless the reference is absolute, events are relative to the current
 position in the history list.
+The event designator consists of the portion of the word beginning
+with the history expansion character, and ending with the word designator
+if one is present, or the end of the word.
 @cindex history events
 
 @table @asis
@@ -356,8 +366,9 @@ position in the history list.
 @item @code{!}
 @ifset BashFeatures
 Start a history substitution, except when followed by a space, tab,
-the end of the line, @samp{=} or @samp{(} (when the
-@code{extglob} shell option is enabled using the @code{shopt} builtin).
+the end of the line, @samp{=},
+or the rest of the shell metacharacters defined above
+(@pxref{Definitions}).
 @end ifset
 @ifclear BashFeatures
 Start a history substitution, except when followed by a space, tab,
@@ -402,6 +413,8 @@ The entire command line typed so far.
 @subsection Word Designators
 
 Word designators are used to select desired words from the event.
+They are optional; if the word designator isn't supplied, the history
+expansion uses the entire event.
 A @samp{:} separates the event specification from the word designator.  It
 may be omitted if the word designator begins with a @samp{^}, @samp{$},
 @samp{*}, @samp{-}, or @samp{%}.  Words are numbered from the beginning

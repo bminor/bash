@@ -803,6 +803,9 @@ pathnames.h:		Makefile $(srcdir)/pathnames.h.in
 	fi
 	@${RM} pathnames.tmp
 
+$(SDIR)/bashbug.sh: $(SDIR)/bashbug.sh.in
+	CONFIG_FILES=$(SDIR)/bashbug.sh CONFIG_HEADERS= $(SHELL) ./config.status
+
 # comment out for distribution
 $(srcdir)/configure:	$(srcdir)/configure.ac $(srcdir)/aclocal.m4 $(srcdir)/config.h.in
 	cd $(srcdir) && autoconf

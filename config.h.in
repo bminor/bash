@@ -1,6 +1,6 @@
 /* config.h -- Configuration file for bash. */
 
-/* Copyright (C) 1987-2009,2011-2012,2013-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009,2011-2012,2013-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1190,6 +1190,32 @@
 
 /* Additional defines for configuring lib/intl, maintained by autoscan/autoheader */
 
+/* System characteristics */
+#undef HAVE_LC_MESSAGE
+#undef HAVE_LOCALE_NULL
+#undef HAVE_NAMELESS_LOCALES
+#undef HAVE_PER_THREAD_LOCALE
+#undef HAVE_SOLARIS114_LOCALES 
+
+/* Compiler characteristics */
+#undef FLEXIBLE_ARRAY_MEMBER
+
+#undef HAVE_VISIBILITY
+
+#undef HAVE_BUILTIN_EXPECT
+
+#undef HAVE_WEAK_SYMBOLS
+
+#define _GL_ATTRIBUTE_MALLOC
+#define _GL_ATTRIBUTE_DEALLOC_FREE
+#define _GL_ATTRIBUTE_FALLTHROUGH
+#define _GL_ATTRIBUTE_PURE
+#define _GL_UNUSED
+
+#define _GL_INLINE_HEADER_BEGIN
+#define _GL_INLINE_HEADER_END
+#define _GL_EXTERN_INLINE
+
 /* Define if you have the <argz.h> header file. */
 #undef HAVE_ARGZ_H
 
@@ -1199,14 +1225,37 @@
 /* Define if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
+#undef HAVE_INTTYPES_H_WITH_UINTMAX
+
 /* Define if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
+
+#undef HAVE_STDINT_H_WITH_UINTMAX
 
 /* Define if you have the <stdio_ext.h> header file. */
 #undef HAVE_STDIO_EXT_H
 
+/* Define if you have the <threads.h> header file. */
+#undef HAVE_THREADS_H
+
+/* Declarations */
+#undef HAVE_DECL_FEOF_UNLOCKED 
+#undef HAVE_DECL_FGETS_UNLOCKED 
+#undef HAVE_DECL__SNPRINTF
+#undef HAVE_DECL__SNWPRINTF
+
 /* Define if you have the `dcgettext' function. */
 #undef HAVE_DCGETTEXT
+
+#undef HAVE_GETUID
+#undef HAVE_GETEUID
+
+#undef HAVE_GETGID
+#undef HAVE_GETEGID
+
+#undef HAVE_GETLOCALENAME_L
+#undef HAVE_GOOD_USELOCALE
+#undef HAVE_ICONV
 
 /* Define if you have the `localeconv' function. */
 #undef HAVE_LOCALECONV
@@ -1229,8 +1278,21 @@
 /* Define if you have the `nanosleep' function. */
 #undef HAVE_NANOSLEEP
 
+/* Define if you have the `newlocale' function. */
+#undef HAVE_NEWLOCALE
+
 /* Define if you have the `nl_langinfo' function. */
 #undef HAVE_NL_LANGINFO
+
+#undef HAVE_POSIX_PRINTF
+
+#undef HAVE_PTHREAD_API
+#undef HAVE_PTHREAD_MUTEX_RECURSIVE 
+#undef HAVE_PTHREAD_RWLOCK
+#undef HAVE_PTHREAD_RWLOCK_RDLOCK_PREFER_WRITER 
+
+#undef HAVE_SNPRINTF_RETVAL_C99 
+#undef HAVE_SNPRINTF_TRUNCATION_C99 
 
 /* Define if you have the `stpcpy' function. */
 #undef HAVE_STPCPY
@@ -1241,6 +1303,18 @@
 /* Define if you have the `strdup' function. */
 #undef HAVE_STRDUP
 
+#undef HAVE_TSEARCH
+
+/* Define if you have the `uselocale' function. */
+#undef HAVE_USELOCALE
+#undef HAVE_WORKING_USELOCALE
+
+#undef HAVE_WCSLEN
+#undef HAVE_WCSNLEN
+
+/* Define if you have the `wprintf' function. */
+#undef HAVE_WPRINTF
+
 /* Define if you have the `__argz_count' function. */
 #undef HAVE___ARGZ_COUNT
 
@@ -1249,6 +1323,14 @@
 
 /* Define if you have the `__argz_stringify' function. */
 #undef HAVE___ARGZ_STRINGIFY
+
+#undef HAVE___FSETLOCKING
+
+/* macOS specific defines */
+
+#undef HAVE_CFLOCALECOPYPREFERREDLANGUAGES
+
+#undef HAVE_CFPREFERENCESCOPYAPPVALUE
 
 /* End additions for lib/intl */
 

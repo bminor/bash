@@ -410,6 +410,7 @@ static FILE *yyerrstream;
 %type <pattern> pattern_list case_clause_sequence case_clause
 %type <number> timespec
 %type <number> list_terminator simple_list_terminator
+%type <number> nullcmd_terminator
 
 %start inputunit
 
@@ -1266,6 +1267,12 @@ list_terminator:'\n'
 		{ $$ = yacc_EOF; }
 	;
 
+nullcmd_terminator:	list_terminator
+		{ $$ = $1; }
+	|	'&'
+		{ $$ = '&'; }
+	;
+
 newline_list:
 	|	newline_list '\n'
 	;
@@ -1358,15 +1365,16 @@ pipeline_command: pipeline
 			    $2->flags |= $1;
 			  $$ = $2;
 			}
-	|	timespec list_terminator
+	|	timespec nullcmd_terminator
 			{
 			  ELEMENT x;
 
+			  /* POSIX interp 267 */
 			  /* Boy, this is unclean.  `time' by itself can
 			     time a null command.  We cheat and push a
-			     newline back if the list_terminator was a newline
-			     to avoid the double-newline problem (one to
-			     terminate this, one to terminate the command) */
+			     newline back if the nullcmd_terminator was a
+			     newline to avoid the double-newline problem (one
+			     to terminate this, one to terminate the command) */
 			  x.word = 0;
 			  x.redirect = 0;
 			  $$ = make_simple_command (x, (COMMAND *)NULL, line_number);
@@ -1376,18 +1384,21 @@ pipeline_command: pipeline
 			    token_to_read = '\n';
 			  else if ($2 == ';')
 			    token_to_read = ';';
+			  else if ($2 == '&')
+			    token_to_read = '&';
 			  parser_state &= ~PST_REDIRLIST;	/* make_simple_command sets this */
 			}
-	|	BANG list_terminator
+	|	BANG nullcmd_terminator
 			{
 			  ELEMENT x;
 
+			  /* POSIX interp 267 */
 			  /* This is just as unclean.  Posix says that `!'
 			     by itself should be equivalent to `false'.
-			     We cheat and push a
-			     newline back if the list_terminator was a newline
-			     to avoid the double-newline problem (one to
-			     terminate this, one to terminate the command) */
+			     We cheat and push a newline back if the
+			     nullcmd_terminator was a newline to avoid the
+			     double-newline problem (one to terminate this,
+			     one to terminate the command) */
 			  x.word = 0;
 			  x.redirect = 0;
 			  $$ = make_simple_command (x, (COMMAND *)NULL, line_number);
@@ -1395,8 +1406,10 @@ pipeline_command: pipeline
 			  /* XXX - let's cheat and push a newline back */
 			  if ($2 == '\n')
 			    token_to_read = '\n';
-			  if ($2 == ';')
+			  else if ($2 == ';')
 			    token_to_read = ';';
+			  else if ($2 == '&')
+			    token_to_read = '&';
 			  parser_state &= ~PST_REDIRLIST;	/* make_simple_command sets this */
 			}
 	;

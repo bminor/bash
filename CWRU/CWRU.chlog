@@ -7389,3 +7389,25 @@ lib/readline/bind.c
 	  that are, e.g., \M-\C-@ (128) into \e followed by a NUL, resulting
 	  in truncated key sequences. Just don't honor convert-meta in this
 	  case
+
+				    8/8
+				    ---
+bashhist.c
+	- bash_history_no_expand_chars: add the rest of the shell
+	  metacharacters so we don't get empty history events; tcsh does more
+	  or less the same thing
+	  Inspired by a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+				    8/9
+				    ---
+parse.y
+	- grammar: change bare `time' and `!' productions to use nullcmd_terminator,
+	  which is a list_terminator or a `&' to allow things like `time &'
+	  and `! &' which the original version of POSIX interp 267 (the one
+	  I implemented) says we should support
+
+				   8/11
+				   ----
+config.h.in
+	- added a number of new symbols to support importing a newer version
+	  of lib/intl from gnulib/gettext
