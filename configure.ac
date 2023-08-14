@@ -1,5 +1,5 @@
 dnl
-dnl Configure script for bash-5.2
+dnl Configure script for bash-5.3
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.055])dnl
+AC_REVISION([for Bash 5.3, version 5.056])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -722,11 +722,12 @@ dnl include files for gettext
 
 m4_include([m4/codeset.m4])
 m4_include([m4/extern-inline.m4])
+
+m4_include([m4/bison.m4])
 m4_include([m4/fcntl-o.m4])
+m4_include([m4/flexmember.m4])
 m4_include([m4/gettext.m4])
 m4_include([m4/glibc2.m4])
-m4_include([m4/glibc21.m4])
-m4_include([m4/host-cpu-c-abi.m4])
 m4_include([m4/iconv.m4])
 m4_include([m4/intdiv0.m4])
 m4_include([m4/intl.m4])
@@ -740,6 +741,7 @@ m4_include([m4/lcmessage.m4])
 m4_include([m4/lib-ld.m4])
 m4_include([m4/lib-link.m4])
 m4_include([m4/lib-prefix.m4])
+m4_include([m4/locale_h.m4])
 m4_include([m4/lock.m4])
 m4_include([m4/nls.m4])
 m4_include([m4/po.m4])
@@ -756,6 +758,9 @@ m4_include([m4/wchar_t.m4])
 m4_include([m4/wint_t.m4])
 m4_include([m4/xsize.m4])
 
+m4_include([m4/glibc21.m4])
+m4_include([m4/host-cpu-c-abi.m4])
+
 dnl C compiler characteristics
 AC_C_CONST
 AC_C_INLINE
@@ -767,7 +772,8 @@ AC_C_VOLATILE
 AC_C_RESTRICT
 
 dnl initialize GNU gettext
-BASH_GNU_GETTEXT([no-libtool], [need-ngettext], [lib/intl])
+dnl the use-libtool is a lie, we just use the standard Unix tools
+BASH_GNU_GETTEXT([use-libtool], [need-ngettext], [lib/intl])
 
 dnl header files
 AC_HEADER_DIRENT
@@ -919,6 +925,7 @@ dnl
 AC_CHECK_HEADERS([argz.h errno.h fcntl.h malloc.h stdio_ext.h])
 
 dnl AC_FUNC_MALLOC
+AC_DEFINE([HAVE_MALLOC])
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext mempcpy \
 		munmap mremap stpcpy strcspn])
@@ -1072,6 +1079,8 @@ BASH_FUNC_GETENV
 if test "$ac_cv_func_getcwd" = "yes"; then
 BASH_FUNC_GETCWD
 fi
+dnl either way this is correct
+AC_DEFINE([HAVE_GETCWD])
 BASH_FUNC_POSIX_SETJMP
 BASH_FUNC_STRCOLL
 BASH_FUNC_SNPRINTF

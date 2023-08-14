@@ -1,23 +1,18 @@
-/* explodename.c */
-
-/* Copyright (C) 1995-1998, 2000, 2001, 2005-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2016, 2020 Free Software Foundation, Inc.
    Contributed by Ulrich Drepper <drepper@gnu.ai.mit.edu>, 1995.
 
-   This file is part of GNU Bash.
-
-   Bash is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation; either version 2.1 of the License, or
    (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful,
+   This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
-*/
+   You should have received a copy of the GNU Lesser General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -40,32 +35,13 @@
 
 /* @@ end of prolog @@ */
 
-char *
-_nl_find_language (name)
-     const char *name;
-{
-  while (name[0] != '\0' && name[0] != '_' && name[0] != '@'
-	 && name[0] != '+' && name[0] != ',')
-    ++name;
-
-  return (char *) name;
-}
-
 
 int
-_nl_explode_name (name, language, modifier, territory, codeset,
-		  normalized_codeset, special, sponsor, revision)
-     char *name;
-     const char **language;
-     const char **modifier;
-     const char **territory;
-     const char **codeset;
-     const char **normalized_codeset;
-     const char **special;
-     const char **sponsor;
-     const char **revision;
+_nl_explode_name (char *name,
+		  const char **language, const char **modifier,
+		  const char **territory, const char **codeset,
+		  const char **normalized_codeset)
 {
-  enum { undecided, xpg, cen } syntax;
   char *cp;
   int mask;
 
@@ -73,40 +49,97 @@ _nl_explode_name (name, language, modifier, territory, codeset,
   *territory = NULL;
   *codeset = NULL;
   *normalized_codeset = NULL;
-  *special = NULL;
-  *sponsor = NULL;
-  *revision = NULL;
 
-  /* Now we determine the single parts of the locale name.  First
-     look for the language.  Termination symbols are `_' and `@' if
-     we use XPG4 style, and `_', `+', and `,' if we use CEN syntax.  */
+  /* Determine the individual parts of the locale name.
+     Accept the XPG syntax
+
+             language[_territory][.codeset][@modifier]
+
+     On AIX systems, also accept the same syntax with an uppercased language,
+     and a syntax similar to RFC 5646:
+
+             language[_script]_territory[.codeset]
+
+     where script is a four-letter code for a script, per ISO 15924.
+   */
+
   mask = 0;
-  syntax = undecided;
-  *language = cp = name;
-  cp = _nl_find_language (*language);
 
-  if (*language == cp)
+  /* First look for the language.  Termination symbols are `_', '.', and `@'.  */
+  *language = name;
+
+  cp = name;
+  while (cp[0] != '\0' && cp[0] != '_' && cp[0] != '@' && cp[0] != '.')
+    ++cp;
+
+  if (cp == name)
     /* This does not make sense: language has to be specified.  Use
        this entry as it is without exploding.  Perhaps it is an alias.  */
-    cp = strchr (*language, '\0');
-  else if (cp[0] == '_')
+    cp = strchr (name, '\0');
+  else
     {
-      /* Next is the territory.  */
-      cp[0] = '\0';
-      *territory = ++cp;
+      if (cp[0] == '_')
+	{
+	  *cp++ = '\0';
+#if defined _AIX
+	  /* Lowercase the language.  */
+	  {
+	    char *lcp;
 
-      while (cp[0] != '\0' && cp[0] != '.' && cp[0] != '@'
-	     && cp[0] != '+' && cp[0] != ',' && cp[0] != '_')
-	++cp;
+	    for (lcp = name; lcp < cp; lcp++)
+	      if (*lcp >= 'A' && *lcp <= 'Z')
+		*lcp += 'a' - 'A';
+	  }
 
-      mask |= TERRITORY;
+	  /* Next is the script or the territory.  It depends on whether
+	     there is another '_'.  */
+	  char *next = cp;
+
+	  while (cp[0] != '\0' && cp[0] != '_' && cp[0] != '@' && cp[0] != '.')
+	    ++cp;
+
+	  if (cp[0] == '_')
+	    {
+	      *cp++ = '\0';
+
+	      /* Next is the script.  Translate the script to a modifier.
+		 We don't need to support all of ISO 15924 here, only those
+		 scripts that actually occur:
+		   Latn -> latin
+		   Cyrl -> cyrillic
+		   Guru -> gurmukhi
+		   Hans -> (omitted, redundant with the territory CN or SG)
+		   Hant -> (omitted, redundant with the territory TW or HK)  */
+	      if (strcmp (next, "Latn") == 0)
+		*modifier = "latin";
+	      else if (strcmp (next, "Cyrl") == 0)
+		*modifier = "cyrillic";
+	      else if (strcmp (next, "Guru") == 0)
+		*modifier = "gurmukhi";
+	      else if (!(strcmp (next, "Hans") == 0
+			 || strcmp (next, "Hant") == 0))
+		*modifier = next;
+	      if (*modifier != NULL && (*modifier)[0] != '\0')
+		mask |= XPG_MODIFIER;
+	    }
+	  else
+	    cp = next;
+#endif
+
+	  /* Next is the territory.  */
+	  *territory = cp;
+
+	  while (cp[0] != '\0' && cp[0] != '.' && cp[0] != '@')
+	    ++cp;
+
+	  mask |= XPG_TERRITORY;
+	}
 
       if (cp[0] == '.')
 	{
 	  /* Next is the codeset.  */
-	  syntax = xpg;
-	  cp[0] = '\0';
-	  *codeset = ++cp;
+	  *cp++ = '\0';
+	  *codeset = cp;
 
 	  while (cp[0] != '\0' && cp[0] != '@')
 	    ++cp;
@@ -117,79 +150,31 @@ _nl_explode_name (name, language, modifier, territory, codeset,
 	    {
 	      *normalized_codeset = _nl_normalize_codeset (*codeset,
 							   cp - *codeset);
-	      if (strcmp (*codeset, *normalized_codeset) == 0)
+	      if (*normalized_codeset == NULL)
+		return -1;
+	      else if (strcmp (*codeset, *normalized_codeset) == 0)
 		free ((char *) *normalized_codeset);
 	      else
 		mask |= XPG_NORM_CODESET;
 	    }
 	}
-    }
 
-  if (cp[0] == '@' || (syntax != xpg && cp[0] == '+'))
-    {
-      /* Next is the modifier.  */
-      syntax = cp[0] == '@' ? xpg : cen;
-      cp[0] = '\0';
-      *modifier = ++cp;
-
-      while (syntax == cen && cp[0] != '\0' && cp[0] != '+'
-	     && cp[0] != ',' && cp[0] != '_')
-	++cp;
-
-      mask |= XPG_MODIFIER | CEN_AUDIENCE;
-    }
-
-  if (syntax != xpg && (cp[0] == '+' || cp[0] == ',' || cp[0] == '_'))
-    {
-      syntax = cen;
-
-      if (cp[0] == '+')
+      if (cp[0] == '@')
 	{
- 	  /* Next is special application (CEN syntax).  */
-	  cp[0] = '\0';
-	  *special = ++cp;
+	  /* Next is the modifier.  */
+	  *cp++ = '\0';
+	  *modifier = cp;
 
-	  while (cp[0] != '\0' && cp[0] != ',' && cp[0] != '_')
-	    ++cp;
-
-	  mask |= CEN_SPECIAL;
-	}
-
-      if (cp[0] == ',')
-	{
- 	  /* Next is sponsor (CEN syntax).  */
-	  cp[0] = '\0';
-	  *sponsor = ++cp;
-
-	  while (cp[0] != '\0' && cp[0] != '_')
-	    ++cp;
-
-	  mask |= CEN_SPONSOR;
-	}
-
-      if (cp[0] == '_')
-	{
- 	  /* Next is revision (CEN syntax).  */
-	  cp[0] = '\0';
-	  *revision = ++cp;
-
-	  mask |= CEN_REVISION;
+	  if (cp[0] != '\0')
+	    mask |= XPG_MODIFIER;
 	}
     }
 
-  /* For CEN syntax values it might be important to have the
-     separator character in the file name, not for XPG syntax.  */
-  if (syntax == xpg)
-    {
-      if (*territory != NULL && (*territory)[0] == '\0')
-	mask &= ~TERRITORY;
+  if (*territory != NULL && (*territory)[0] == '\0')
+    mask &= ~XPG_TERRITORY;
 
-      if (*codeset != NULL && (*codeset)[0] == '\0')
-	mask &= ~XPG_CODESET;
-
-      if (*modifier != NULL && (*modifier)[0] == '\0')
-	mask &= ~XPG_MODIFIER;
-    }
+  if (*codeset != NULL && (*codeset)[0] == '\0')
+    mask &= ~XPG_CODESET;
 
   return mask;
 }

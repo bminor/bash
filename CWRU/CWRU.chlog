@@ -7408,6 +7408,23 @@ parse.y
 
 				   8/11
 				   ----
-config.h.in
-	- added a number of new symbols to support importing a newer version
-	  of lib/intl from gnulib/gettext
+m4/bison.m4,m4/flexmember.m4,m4/locale_h.m4
+    - new m4 files from gettext-0.21.1
+
+m4/gettext.m4,m4/intl.m4
+m4/{codeset,extern-inline,fcntl-o,glibc2,glibc21,host-cpu-c-abi,iconv,intdiv0}.$
+m4/{intl-thread-locale,intlmacosx,intmax,inttypes-pri,inttypes,inttypes_h}.m4
+m4/{lcmessage,lib-ld,lib-link,lib-prefix,locale_h,lock,nls,po,printf-posix}.m4
+m4/{progtest,pthread_rwlock_rdlock,size_max,stdint_h,strtoimax,threadlib}.m4
+m4/{uintmax_t,ulonglong,visibility,wchar_t,wint_t,xsize}.m4
+    - updated m4 files from gettext-0.21.1
+        
+configure.ac,config.h.in
+        - updated autoconf files with changes for gettext-0.21.1
+
+MANIFEST
+	- updated distribution manifest with new files from gettext-0.21.1
+
+lib/sh/unicode.c
+	- u32cconv: prefer nl_langinfo to locale_charset like locale.c:
+	  locale_isutf8()

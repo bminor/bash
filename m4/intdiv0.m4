@@ -1,5 +1,5 @@
-# intdiv0.m4 serial 6 (gettext-0.18.2)
-dnl Copyright (C) 2002, 2007-2008, 2010-2019 Free Software Foundation, Inc.
+# intdiv0.m4 serial 9 (gettext-0.21.1)
+dnl Copyright (C) 2002, 2007-2008, 2010-2020 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -12,7 +12,7 @@ AC_DEFUN([gt_INTDIV0],
   AC_REQUIRE([AC_CANONICAL_HOST])dnl
 
   AC_CACHE_CHECK([whether integer division by zero raises SIGFPE],
-    gt_cv_int_divbyzero_sigfpe,
+    [gt_cv_int_divbyzero_sigfpe],
     [
       gt_cv_int_divbyzero_sigfpe=
 changequote(,)dnl
@@ -31,20 +31,23 @@ changequote([,])dnl
       if test -z "$gt_cv_int_divbyzero_sigfpe"; then
         AC_RUN_IFELSE(
           [AC_LANG_SOURCE([[
-#include <stdlib.h>
+#include <stdlib.h> /* for exit() */
 #include <signal.h>
+#if !(defined _WIN32 && !defined __CYGWIN__)
+#include <unistd.h> /* for _exit() */
+#endif
 
 static void
 sigfpe_handler (int sig)
 {
   /* Exit with code 0 if SIGFPE, with code 1 if any other signal.  */
-  exit (sig != SIGFPE);
+  _exit (sig != SIGFPE);
 }
 
 int x = 1;
 int y = 0;
 int z;
-int xnan;
+int inan;
 
 int main ()
 {
@@ -59,7 +62,7 @@ int main ()
 #endif
 
   z = x / y;
-  xnan = y / y;
+  inan = y / y;
   exit (2);
 }
 ]])],
@@ -79,8 +82,8 @@ changequote([,])dnl
       fi
     ])
   case "$gt_cv_int_divbyzero_sigfpe" in
-    *yes) value=1;;
-    *) value=0;;
+    *yes) value=1 ;;
+    *)    value=0 ;;
   esac
   AC_DEFINE_UNQUOTED([INTDIV0_RAISES_SIGFPE], [$value],
     [Define if integer division by zero raises signal SIGFPE.])

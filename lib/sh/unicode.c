@@ -262,17 +262,18 @@ u32cconv (unsigned long c, char *s)
 #endif
 
 #if HAVE_ICONV
-  /* this is mostly from coreutils-8.5/lib/unicodeio.c */
+  /* this is mostly from coreutils-8.5/lib/unicodeio.c but prefers nl_langinfo
+     to be consistent with locale.c:locale_isutf8() */
   if (u32init == 0)
     {
       utf8locale = locale_utf8locale;
       localconv = (iconv_t)-1;
       if (utf8locale == 0)
 	{
-#if HAVE_LOCALE_CHARSET
-	  charset = locale_charset ();
-#elif HAVE_LANGINFO_CODESET
+#if HAVE_LANGINFO_CODESET
 	  charset = nl_langinfo (CODESET);
+#elif HAVE_LOCALE_CHARSET
+	  charset = locale_charset ();
 #else
 	  charset = stub_charset ();
 #endif

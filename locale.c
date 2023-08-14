@@ -43,13 +43,17 @@
 extern int errno;
 #endif
 
+#if defined (HAVE_LOCALE_CHARSET)
+extern const char *locale_charset (void);
+#endif
+
+extern int dump_translatable_strings, dump_po_strings;
+
 int locale_utf8locale;
 int locale_mb_cur_max;	/* value of MB_CUR_MAX for current locale (LC_CTYPE) */
 int locale_shiftstates = 0;
 
 int singlequote_translations = 0;	/* single-quote output of $"..." */
-
-extern int dump_translatable_strings, dump_po_strings;
 
 /* The current locale when the program begins */
 static char *default_locale;
@@ -608,12 +612,17 @@ locale_setblanks (void)
 static int
 locale_isutf8 (char *lspec)
 {
+#if HAVE_LOCALE_CHARSET
+  const char *cp;
+#else
   char *cp, *encoding;
+#endif
 
 #if HAVE_LANGINFO_CODESET
   cp = nl_langinfo (CODESET);
   return (STREQ (cp, "UTF-8") || STREQ (cp, "utf8"));
 #elif HAVE_LOCALE_CHARSET
+  /* gettext claims this is superior to nl_langinfo on macOS */
   cp = locale_charset ();
   return (STREQ (cp, "UTF-8") || STREQ (cp, "utf8"));
 #else
