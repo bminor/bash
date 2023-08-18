@@ -56,7 +56,7 @@
 #if defined (HAVE_LOCALE_CHARSET)
 extern const char *locale_charset (void);
 #else
-extern char *get_locale_var (char *);
+extern char *get_locale_var (const char *);
 #endif
 
 extern int locale_utf8locale;

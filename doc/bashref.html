@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 19 July 2023).
+the Bash shell (version 5.3, 15 August 2023).
 
-This is Edition 5.3, last updated 19 July 2023,
+This is Edition 5.3, last updated 15 August 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 19 July 2023).
+the Bash shell (version 5.3, 15 August 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 19 July 2023,
+<p>This is Edition 5.3, last updated 15 August 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.3.
 </p>
@@ -2578,6 +2578,14 @@ is not null; if the colon is omitted, the operator tests only for existence.
 <pre class="example">$ v=123
 $ echo ${v-unset}
 123
+$ echo ${v:-unset-or-null}
+123
+$ unset v
+$ echo ${v-unset}
+unset
+$ v=
+$ echo ${v:-unset-or-null}
+unset-or-null
 </pre></div>
 
 </dd>
@@ -5003,7 +5011,7 @@ Aliases are described in <a href="#Aliases">Aliases</a>.
 <pre class="example">bind [-m <var>keymap</var>] [-lpsvPSVX]
 bind [-m <var>keymap</var>] [-q <var>function</var>] [-u <var>function</var>] [-r <var>keyseq</var>]
 bind [-m <var>keymap</var>] -f <var>filename</var>
-bind [-m <var>keymap</var>] -x <var>keyseq:shell-command</var>
+bind [-m <var>keymap</var>] -x <var>keyseq[: ]shell-command</var>
 bind [-m <var>keymap</var>] <var>keyseq:function-name</var>
 bind [-m <var>keymap</var>] <var>keyseq:readline-command</var>
 bind <var>readline-command-line</var>
@@ -5088,6 +5096,15 @@ initialization file.
 <dt><span><code>-x <var>keyseq:shell-command</var></code></span></dt>
 <dd><p>Cause <var>shell-command</var> to be executed whenever <var>keyseq</var> is
 entered.
+The separator between <var>keyseq</var> and <var>shell-command</var> is either
+whitespace or a colon optionally followed by whitespace.
+If the separator is whitespace, <var>shell-command</var>
+must be enclosed in double quotes and Readline expands any of its
+special backslash-escapes in <var>shell-command</var> before saving it.
+If the separator is a colon, any enclosing double quotes are optional, and
+Readline does not expand the command string before saving it.
+Since the entire key binding expression must be a single argument, it
+should be enclosed in quotes.
 When <var>shell-command</var> is executed, the shell sets the
 <code>READLINE_LINE</code> variable to the contents of the Readline line
 buffer and the <code>READLINE_POINT</code> and <code>READLINE_MARK</code> variables
@@ -5309,8 +5326,9 @@ backslash-escaped characters is enabled.
 The <samp>-E</samp> option disables the interpretation of these escape characters,
 even on systems where they are interpreted by default.
 The <code>xpg_echo</code> shell option may be used to
-dynamically determine whether or not <code>echo</code> expands these
-escape characters by default.
+dynamically determine whether or not <code>echo</code>
+interprets any options and
+expands these escape characters by default.
 <code>echo</code> does not interpret <samp>--</samp> to mean the end of options.
 </p>
 <p><code>echo</code> interprets the following escape sequences:
@@ -5617,7 +5635,7 @@ occurs.
 </dd>
 <dt id='index-read'><span><code>read</code><a href='#index-read' class='copiable-anchor'> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example">read [-ers] [-a <var>aname</var>] [-d <var>delim</var>] [-i <var>text</var>] [-n <var>nchars</var>]
+<pre class="example">read [-Eers] [-a <var>aname</var>] [-d <var>delim</var>] [-i <var>text</var>] [-n <var>nchars</var>]
     [-N <var>nchars</var>] [-p <var>prompt</var>] [-t <var>timeout</var>] [-u <var>fd</var>] [<var>name</var> &hellip;]
 </pre></div>
 
@@ -5659,6 +5677,13 @@ when it reads a NUL character.
 <dd><p>Readline (see <a href="#Command-Line-Editing">Command Line Editing</a>) is used to obtain the line.
 Readline uses the current (or default, if line editing was not previously
 active) editing settings, but uses Readline&rsquo;s default filename completion.
+</p>
+</dd>
+<dt><span><code>-E</code></span></dt>
+<dd><p>Readline (see <a href="#Command-Line-Editing">Command Line Editing</a>) is used to obtain the line.
+Readline uses the current (or default, if line editing was not previously
+active) editing settings, but uses Bash&rsquo;s default completion, including
+programmable completion.
 </p>
 </dd>
 <dt><span><code>-i <var>text</var></code></span></dt>
@@ -6226,7 +6251,7 @@ and group ids to be set to the real user and group ids.
 </p>
 </dd>
 <dt><span><code>-r</code></span></dt>
-<dd><p>Enable restricted shell mode.
+<dd><p>Enable restricted shell mode (see <a href="#The-Restricted-Shell">The Restricted Shell</a>).
 This option cannot be unset once it has been set.
 </p>
 </dd>
@@ -6784,6 +6809,9 @@ leaving them open when the command completes.
 <dt><span><code>xpg_echo</code></span></dt>
 <dd><p>If set, the <code>echo</code> builtin expands backslash-escape sequences
 by default.
+If the <code>posix</code> shell option (see <a href="#The-Set-Builtin">The Set Builtin</a>) is also enabled,
+<code>echo</code> does not
+interpret any options.
 </p>
 </dd>
 </dl>
@@ -7490,8 +7518,10 @@ not tested, and are added to the history regardless of the value of
 </p>
 </dd>
 <dt id='index-HISTFILE'><span><code>HISTFILE</code><a href='#index-HISTFILE' class='copiable-anchor'> &para;</a></span></dt>
-<dd><p>The name of the file to which the command history is saved.  The
-default value is <samp>~/.bash_history</samp>.
+<dd><p>The name of the file to which the command history is saved.
+Bash assigns a default value of <samp>~/.bash_history</samp>.
+If <code>HISTFILE</code> is unset or null,
+the command history is not saved when a shell exits.
 </p>
 </dd>
 <dt id='index-HISTFILESIZE'><span><code>HISTFILESIZE</code><a href='#index-HISTFILESIZE' class='copiable-anchor'> &para;</a></span></dt>
@@ -8013,7 +8043,8 @@ standard.  See <a href="#Bash-POSIX-Mode">Bash and POSIX</a>, for a description 
 </p>
 </dd>
 <dt><span><code>--restricted</code></span></dt>
-<dd><p>Make the shell a restricted shell (see <a href="#The-Restricted-Shell">The Restricted Shell</a>).
+<dd><p>Equivalent to <samp>-r</samp>.
+Make the shell a restricted shell (see <a href="#The-Restricted-Shell">The Restricted Shell</a>).
 </p>
 </dd>
 <dt><span><code>--verbose</code></span></dt>
@@ -8947,7 +8978,7 @@ and an index of -1 refers to the last element.
 <p>Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0.
 Any reference to a variable using a valid subscript is legal, and
-<code>bash</code> will create an array if necessary.
+Bash will create an array if necessary.
 </p>
 <p>An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
@@ -9468,7 +9499,7 @@ the normal Bash files.
 name, rather than on all assignment statements on the line.
 
 </li><li> The default history file is <samp>~/.sh_history</samp> (this is the
-default value of <code>$HISTFILE</code>).
+default value the shell assigns to <code>$HISTFILE</code>).
 
 </li><li> Redirection operators do not perform filename expansion on the word
 in the redirection unless the shell is interactive.
@@ -9690,7 +9721,7 @@ processing the &lsquo;<samp>&lt;</samp>&rsquo; and &lsquo;<samp>&gt;</samp>&rsqu
 
 </li><li> The <code>test</code> builtin&rsquo;s <samp>-t</samp> unary primary requires an argument.
 Historical versions of <code>test</code> made the argument optional in certain
-cases, and bash attempts to accommodate those for backwards compatibility.
+cases, and Bash attempts to accommodate those for backwards compatibility.
 
 </li><li> Command substitutions don&rsquo;t set the &lsquo;<samp>?</samp>&rsquo; special parameter. The exit
 status of a simple command without a command word is still the exit status
@@ -13074,8 +13105,8 @@ named by <code>$HISTFILE</code>.
 If the <code>histappend</code> shell option is set (see <a href="#Bash-Builtins">Bash Builtin Commands</a>),
 the lines are appended to the history file,
 otherwise the history file is overwritten.
-If <code>HISTFILE</code>
-is unset, or if the history file is unwritable, the history is not saved.
+If <code>HISTFILE</code> is unset or null,
+or if the history file is unwritable, the history is not saved.
 After saving the history, the history file is truncated
 to contain no more than <code>$HISTFILESIZE</code> lines.
 If <code>HISTFILESIZE</code> is unset, or set to null, a non-numeric value, or
@@ -13088,7 +13119,7 @@ When the history file is read, lines beginning with the history
 comment character followed immediately by a digit are interpreted
 as timestamps for the following history entry.
 </p>
-<p>The builtin command <code>fc</code> may be used to list or edit and re-execute
+<p>The <code>fc</code> builtin command may be used to list or edit and re-execute
 a portion of the history list.
 The <code>history</code> builtin may be used to display or modify the history
 list and manipulate the history file.
@@ -13097,8 +13128,9 @@ are available in each editing mode that provide access to the
 history list (see <a href="#Commands-For-History">Commands For Manipulating The History</a>).
 </p>
 <p>The shell allows control over which commands are saved on the history
-list.  The <code>HISTCONTROL</code> and <code>HISTIGNORE</code>
-variables may be set to cause the shell to save only a subset of the
+list.
+The <code>HISTCONTROL</code> and <code>HISTIGNORE</code>
+variables are used to cause the shell to save only a subset of the
 commands entered.
 The <code>cmdhist</code>
 shell option, if enabled, causes the shell to attempt to save each
@@ -13247,6 +13279,7 @@ the history list as a single entry.
 when any of the <samp>-w</samp>, <samp>-r</samp>, <samp>-a</samp>, or <samp>-n</samp> options
 is used, Bash uses <var>filename</var> as the history file.
 If not, then the value of the <code>HISTFILE</code> variable is used.
+If <code>HISTFILE</code> is unset or null, these options have no effect.
 </p>
 <p>The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
@@ -13283,14 +13316,21 @@ expansion functions about quoting still in effect from previous lines.
 <p>History expansion takes place in two parts.  The first is to determine
 which line from the history list should be used during substitution.
 The second is to select portions of that line for inclusion into the
-current one.  The line selected from the history is called the
-<em>event</em>, and the portions of that line that are acted upon are
-called <em>words</em>.  Various <em>modifiers</em> are available to manipulate
-the selected words.  The line is broken into words in the same fashion
+current one.
+</p>
+<p>The line selected from the history is called the <em>event</em>,
+and the portions of that line that are acted upon are called <em>words</em>.
+The line is broken into words in the same fashion
 that Bash does, so that several words
 surrounded by quotes are considered one word.
-History expansions are introduced by the appearance of the
+The <em>event designator</em> selects the event, the optional
+<em>word designator</em> selects words from the event, and
+various optional <em>modifiers</em> are available to manipulate the
+selected words.
+</p>
+<p>History expansions are introduced by the appearance of the
 history expansion character, which is &lsquo;<samp>!</samp>&rsquo; by default.
+History expansions may appear anywhere in the input, but do not nest.
 </p>
 <p>History expansion implements shell-like quoting conventions:
 a backslash can be used to remove the special handling for the next character;
@@ -13349,13 +13389,17 @@ Next: <a href="#Word-Designators" accesskey="n" rel="next">Word Designators</a>,
 history list.
 Unless the reference is absolute, events are relative to the current
 position in the history list.
+The event designator consists of the portion of the word beginning
+with the history expansion character, and ending with the word designator
+if one is present, or the end of the word.
 <span id="index-history-events"></span>
 </p>
 <dl compact="compact">
 <dt><span><code>!</code></span></dt>
 <dd><p>Start a history substitution, except when followed by a space, tab,
-the end of the line, &lsquo;<samp>=</samp>&rsquo; or &lsquo;<samp>(</samp>&rsquo; (when the
-<code>extglob</code> shell option is enabled using the <code>shopt</code> builtin).
+the end of the line, &lsquo;<samp>=</samp>&rsquo;,
+or the rest of the shell metacharacters defined above
+(see <a href="#Definitions">Definitions</a>).
 </p>
 </dd>
 <dt><span><code>!<var>n</var></code></span></dt>
@@ -13409,6 +13453,8 @@ Next: <a href="#Modifiers" accesskey="n" rel="next">Modifiers</a>, Previous: <a 
 <span id="Word-Designators-1"></span><h4 class="subsection">9.3.2 Word Designators</h4>
 
 <p>Word designators are used to select desired words from the event.
+They are optional; if the word designator isn&rsquo;t supplied, the history
+expansion uses the entire event.
 A &lsquo;<samp>:</samp>&rsquo; separates the event specification from the word designator.  It
 may be omitted if the word designator begins with a &lsquo;<samp>^</samp>&rsquo;, &lsquo;<samp>$</samp>&rsquo;,
 &lsquo;<samp>*</samp>&rsquo;, &lsquo;<samp>-</samp>&rsquo;, or &lsquo;<samp>%</samp>&rsquo;.  Words are numbered from the beginning
@@ -14527,7 +14573,8 @@ the <samp>-r</samp> option, and will use the <code>REPLY</code> variable as a
 default if no non-option arguments are supplied.
 The Bash <code>read</code> builtin
 also accepts a prompt string with the <samp>-p</samp> option and will use
-Readline to obtain the line when given the <samp>-e</samp> option.
+Readline to obtain the line when given the <samp>-e</samp> or <samp>-E</samp>
+options.
 The <code>read</code> builtin also has additional options to control input:
 the <samp>-s</samp> option will turn off echoing of input characters as
 they are read, the <samp>-t</samp> option will allow <code>read</code> to time out

@@ -381,6 +381,12 @@ uw_close (void *fd)
   close ((intptr_t) fd);		/* XXX */
 }
 
+static void
+uw_restore_lineno (void *line)
+{
+  line_number = (intptr_t) line;
+}
+
 /* Return the line number of the currently executing command. */
 int
 executing_line_number (void)
@@ -884,11 +890,15 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 	if (command->flags & CMD_STDIN_REDIR)
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
 
+	begin_unwind_frame ("simple_lineno");
+	add_unwind_protect (uw_restore_lineno, (void *) (intptr_t) save_line_number);
+
 	SET_LINE_NUMBER (command->value.Simple->line);
 	exec_result =
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
 				  asynchronous, fds_to_close);
 	line_number = save_line_number;
+	discard_unwind_frame ("simple_lineno");
 
 	/* The temporary environment should be used for only the simple
 	   command immediately following its definition. */
@@ -1085,6 +1095,9 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 #endif
 
       line_number_for_err_trap = save_line_number = line_number;	/* XXX */
+      begin_unwind_frame ("misc_compound");
+      add_unwind_protect (uw_restore_lineno, (void *) (intptr_t) save_line_number);
+
 #if defined (DPAREN_ARITHMETIC)
       if (command->type == cm_arith)
 	exec_result = execute_arith_command (command->value.Arith);
@@ -1099,6 +1112,7 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 	exec_result = execute_intern_function (command->value.Function_def->name,
 					       command->value.Function_def);
       line_number = save_line_number;
+      discard_unwind_frame ("misc_compound");
 
       if (was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
 	{
@@ -2916,6 +2930,7 @@ execute_for_command (FOR_COM *for_command)
 
   begin_unwind_frame ("for");
   add_unwind_protect (uw_dispose_words, releaser);
+  add_unwind_protect (uw_restore_lineno, (void *) (intptr_t) save_line_number);
 
 #if 0
   if (lexical_scoping)
@@ -3450,6 +3465,7 @@ execute_select_command (SELECT_COM *select_command)
 
   begin_unwind_frame ("select");
   add_unwind_protect (uw_dispose_words, releaser);
+  add_unwind_protect (uw_restore_lineno, (void *) (intptr_t) save_line_number);
 
   if (select_command->flags & CMD_IGNORE_RETURN)
     select_command->action->flags |= CMD_IGNORE_RETURN;
@@ -3594,6 +3610,7 @@ execute_case_command (CASE_COM *case_command)
 
   begin_unwind_frame ("case");
   add_unwind_protect (xfree, word);
+  add_unwind_protect (uw_restore_lineno, (void *) (intptr_t) save_line_number);
 
 #define EXIT_CASE()  goto exit_case_command
 
@@ -4432,7 +4449,7 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
 
   if (dofork)
     {
-      char *p;
+      char *p, *xc;
 
       /* Do this now, because execute_disk_command will do it anyway in the
 	 vast majority of cases. */
@@ -4441,7 +4458,8 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
       /* Don't let a DEBUG trap overwrite the command string to be saved with
 	 the process/job associated with this child. */
       fork_flags = async ? FORK_ASYNC : 0;
-      if (make_child (p = savestring (the_printed_command_except_trap), fork_flags) == 0)
+      xc = the_printed_command_except_trap;
+      if (make_child (p = xc ? savestring (xc) : savestring (""), fork_flags) == 0)
 	{
 	  already_forked = 1;
 	  cmdflags |= CMD_NO_FORK;

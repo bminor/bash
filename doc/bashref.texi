@@ -5063,7 +5063,7 @@ occurs.
 @item read
 @btindex read
 @example
-read [-ers] [-a @var{aname}] [-d @var{delim}] [-i @var{text}] [-n @var{nchars}]
+read [-Eers] [-a @var{aname}] [-d @var{delim}] [-i @var{text}] [-n @var{nchars}]
     [-N @var{nchars}] [-p @var{prompt}] [-t @var{timeout}] [-u @var{fd}] [@var{name} @dots{}]
 @end example
 
@@ -5103,6 +5103,12 @@ when it reads a NUL character.
 Readline (@pxref{Command Line Editing}) is used to obtain the line.
 Readline uses the current (or default, if line editing was not previously
 active) editing settings, but uses Readline's default filename completion.
+
+@item -E
+Readline (@pxref{Command Line Editing}) is used to obtain the line.
+Readline uses the current (or default, if line editing was not previously
+active) editing settings, but uses Bash's default completion, including
+programmable completion.
 
 @item -i @var{text}
 If Readline is being used to read the line, @var{text} is placed into
@@ -10244,7 +10250,8 @@ the @option{-r} option, and will use the @env{REPLY} variable as a
 default if no non-option arguments are supplied.
 The Bash @code{read} builtin
 also accepts a prompt string with the @option{-p} option and will use
-Readline to obtain the line when given the @option{-e} option.
+Readline to obtain the line when given the @option{-e} or @option{-E}
+options.
 The @code{read} builtin also has additional options to control input:
 the @option{-s} option will turn off echoing of input characters as
 they are read, the @option{-t} option will allow @code{read} to time out

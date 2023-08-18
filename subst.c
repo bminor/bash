@@ -371,6 +371,9 @@ static WORD_LIST *expand_declaration_argument (WORD_LIST *, WORD_LIST *);
 static WORD_LIST *shell_expand_word_list (WORD_LIST *, int);
 static WORD_LIST *expand_word_list_internal (WORD_LIST *, int);
 
+static void posix_variable_assignment_error (int);
+static void bash_variable_assignment_error (int);
+
 static int do_assignment_statements (WORD_LIST *, char *, int);
 
 /* **************************************************************** */
@@ -8023,14 +8026,14 @@ parameter_brace_expand_rhs (char *name, char *value,
       if ((v == 0 || readonly_p (v)) && interactive_shell == 0 && posixly_correct)
 	{
 	  last_command_exit_value = EXECUTION_FAILURE;
-	  exp_jump_to_top_level (FORCE_EOF);
+	  posix_variable_assignment_error (1);
 	}
       else
 	{
 	  if (vname != name)
 	    free (vname);
 	  last_command_exit_value = EX_BADUSAGE;
-	  exp_jump_to_top_level (DISCARD);
+	  bash_variable_assignment_error (0);
 	}
     }
 
@@ -12850,7 +12853,7 @@ expand_declaration_argument (WORD_LIST *tlist, WORD_LIST *wcmd)
       if (t == 0)
 	{
 	  last_command_exit_value = EXECUTION_FAILURE;
-	  exp_jump_to_top_level (DISCARD);
+	  bash_variable_assignment_error (0);
 	}
     }
 
@@ -12943,6 +12946,34 @@ shell_expand_word_list (WORD_LIST *tlist, int eflags)
   return (new_list);
 }
 
+/* Handle a variable assignment error in default mode. */
+static inline void
+bash_variable_assignment_error (int force_exit)
+{
+  if (interactive_shell == 0 && force_exit)
+    exp_jump_to_top_level (FORCE_EOF);
+  else if (interactive_shell == 0)
+    exp_jump_to_top_level (DISCARD);	/* XXX - maybe change later */
+  else
+    exp_jump_to_top_level (DISCARD);
+}
+
+/* Handle a variable assignment error in posix mode. */
+static inline void
+posix_variable_assignment_error (int force_exit)
+{
+#if defined (STRICT_POSIX)
+  if (posixly_correct && interactive_shell == 0)
+#else
+  if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
+#endif
+    exp_jump_to_top_level (FORCE_EOF);
+  else if (force_exit)
+    exp_jump_to_top_level (FORCE_EOF);
+  else
+    exp_jump_to_top_level (DISCARD);
+}
+
 /* Perform assignment statements optionally preceding a command name COMMAND.
    If COMMAND == NULL, is_nullcmd usually == 1. Follow the POSIX rules for
    variable assignment errors. */
@@ -12983,14 +13014,7 @@ do_assignment_statements (WORD_LIST *varlist, char *command, int is_nullcmd)
 	  if (is_nullcmd)	/* assignment statement */
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
-#if defined (STRICT_POSIX)
-	      if (posixly_correct && interactive_shell == 0)
-#else
-	      if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
-#endif
-	        exp_jump_to_top_level (FORCE_EOF);
-	      else
-		exp_jump_to_top_level (DISCARD);
+	      posix_variable_assignment_error (0);
 	    }
 	  /* In posix mode, assignment errors in the temporary environment
 	     cause a non-interactive shell executing a special builtin to
@@ -13004,14 +13028,9 @@ do_assignment_statements (WORD_LIST *varlist, char *command, int is_nullcmd)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
 #if defined (STRICT_POSIX)
-	      exp_jump_to_top_level ((interactive_shell == 0) ? FORCE_EOF : DISCARD);
+	      posix_variable_assignment_error (1);
 #else
-	      if (interactive_shell == 0 && is_special_builtin)
-		exp_jump_to_top_level (FORCE_EOF);
-	      else if (interactive_shell == 0)
-		exp_jump_to_top_level (DISCARD);	/* XXX - maybe change later */
-	      else
-		exp_jump_to_top_level (DISCARD);
+	      bash_variable_assignment_error (is_special_builtin);
 #endif
 	    }
 	  else

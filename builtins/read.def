@@ -22,7 +22,7 @@ $PRODUCES read.c
 
 $BUILTIN read
 $FUNCTION read_builtin
-$SHORT_DOC read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
+$SHORT_DOC read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
 Read a line from the standard input and split it into fields.
 
 Reads a single line from the standard input, or from file descriptor FD
@@ -41,6 +41,8 @@ Options:
   -d delim	continue until the first character of DELIM is read, rather
 		than newline
   -e	use Readline to obtain the line
+  -E	use Readline to obtain the line and use the bash default
+		completion instead of Readline's default completion
   -i text	use TEXT as the initial text for Readline
   -n nchars	return after reading NCHARS characters rather than waiting
 		for a newline, but honor a delimiter if fewer than
@@ -121,7 +123,7 @@ struct ttsave
 #if defined (READLINE)
 static void uw_reset_attempted_completion_function (void *);
 static int set_itext (void);
-static char *edit_line (char *, char *);
+static char *edit_line (char *, char *, int);
 static void set_eol_delim (int);
 static void reset_eol_delim (void *);
 static void set_readline_timeout (sh_timer *t, time_t, long);
@@ -215,7 +217,8 @@ read_builtin (WORD_LIST *list)
   size_t size;
   volatile int i;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
-  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd;
+  int edit, use_bash_completion;
+  int raw, nchars, silent, have_timeout, ignore_delim, fd;
   int lastsig, t_errno;
   int mb_cur_max;
   unsigned int tmsec, tmusec;
@@ -247,6 +250,7 @@ read_builtin (WORD_LIST *list)
   USE_VAR(input_is_pipe);
 /*  USE_VAR(raw); */
   USE_VAR(edit);
+  USE_VAR(use_bash_completion);
   USE_VAR(tmsec);
   USE_VAR(tmusec);
   USE_VAR(nchars);
@@ -268,6 +272,7 @@ read_builtin (WORD_LIST *list)
 
   i = 0;		/* Index into the string that we are reading. */
   raw = edit = 0;	/* Not reading raw input by default. */
+  use_bash_completion = 0;
   silent = 0;
   arrayname = prompt = (char *)NULL;
   fd = 0;		/* file descriptor to read from */
@@ -284,7 +289,7 @@ read_builtin (WORD_LIST *list)
   ignore_delim = nflag = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "ersa:d:i:n:p:t:u:N:")) != -1)
+  while ((opt = internal_getopt (list, "Eersa:d:i:n:p:t:u:N:")) != -1)
     {
       switch (opt)
 	{
@@ -302,6 +307,12 @@ read_builtin (WORD_LIST *list)
 	  edit = 1;
 #endif
 	  break;
+	case 'E':
+#if defined (READLINE)
+	  edit = use_bash_completion = 1;
+#endif
+	  break;
+
 	case 'i':
 #if defined (READLINE)
 	  itext = list_optarg;
@@ -649,7 +660,7 @@ read_builtin (WORD_LIST *list)
 	  if (rlbuf == 0)
 	    {
 	      reading = 1;
-	      rlbuf = edit_line (prompt ? prompt : "", itext);
+	      rlbuf = edit_line (prompt ? prompt : "", itext, use_bash_completion);
 	      reading = 0;
 	      rlind = 0;
 	    }
@@ -1197,7 +1208,7 @@ set_itext (void)
 }
 
 static char *
-edit_line (char *p, char *itext)
+edit_line (char *p, char *itext, int keep_completion_func)
 {
   char *ret;
   size_t len;
@@ -1206,7 +1217,10 @@ edit_line (char *p, char *itext)
     initialize_readline ();
 
   old_attempted_completion_function = rl_attempted_completion_function;
-  rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  /* If we don't indicate that we want to keep the attempted completion
+     function, reset it so we use the default readline word completion. */
+  if (keep_completion_func == 0)
+    rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   bashline_set_event_hook ();
   if (itext)
     {
@@ -1217,7 +1231,8 @@ edit_line (char *p, char *itext)
 
   ret = readline (p);
 
-  rl_attempted_completion_function = old_attempted_completion_function;
+  if (keep_completion_func == 0)
+    rl_attempted_completion_function = old_attempted_completion_function;
   old_attempted_completion_function = (rl_completion_func_t *)NULL;
   bashline_reset_event_hook ();
 

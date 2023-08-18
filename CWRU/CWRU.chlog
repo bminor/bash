@@ -7428,3 +7428,61 @@ MANIFEST
 lib/sh/unicode.c
 	- u32cconv: prefer nl_langinfo to locale_charset like locale.c:
 	  locale_isutf8()
+
+execute_cmd.c
+	- uw_restore_lineno: an unwind-protect fuction to restore a saved
+	  line_number
+	- execute_command: add an unwind-protect to restore line_number in
+	  case execute_simple_command longjmps back to top_level or a
+	  return context.
+	  Side effect of https://savannah.gnu.org/support/index.php?110919
+	- execute_for_command, execute_select_command, execute_case_command:
+	  add unwind-protect to restore line_number (could also do it for
+	  if, while, until but those don't modify line_number)
+	- execute_command_internal: add_unwind_protect to restore line number
+	  for arith, cond, function def commands
+
+				   8/14
+				   ----
+execute_cmd.c
+	- execute_simple_command: don't call savestring on the_printed_command_except_trap
+	  if it's NULL.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   8/15
+				   ----
+lib/readline/rltty.c
+	- prepare_terminal_settings: replace USE_XON_XOFF macro with private
+	  variable _rl_use_tty_xon_xoff (initially set to 1); if it's set to
+	  0 disable the tty start and stop characters. Prep for making it a
+	  bindable variable setting
+
+builtins/read.def
+	- edit_line: now takes a third argument saying whether or not to
+	  set rl_attempted_completion_function to NULL to use readline's
+	  default filename completion (the default)
+	- read_builtin: new option -E to use readline and use the bash
+	  default completion (that is, leave rl_attempted_completion_function
+	  unchanged)
+	  From a suggestion by konsolebox <konsolebox@gmail.com> back in 5/2021
+
+
+doc/bash.1,doc/bashref.texi
+	- read: document new -E option
+
+				   8/17
+				   ----
+aclocal.m4
+	- BASH_CHECK_LIB_TERMCAP: add a check for bash_cv_termcap_lib ==
+	  "libcurses"; set TERMCAP_LIB=-lcurses in this case
+
+				   8/18
+				   ----
+subst.c
+	- bash_variable_assignment_error: new function, implements default mode
+	  behavior for variable assignment errors
+	- posix_variable_assignment_error: new function, implements posix mode
+	  behavior for variable assignment errors
+	- parameter_brace_expand_rhs,expand_declaration_argument,
+	  do_assignment_statements: call posix_variable_assignment_error or
+	  bash_variable_assignment_error as appropriate

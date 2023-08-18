@@ -100,12 +100,13 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 .c.o:
 	$(SHOBJ_CC) $(SHOBJ_CFLAGS) $(CCFLAGS) $(INC) -c -o $@ $<
 
-
 ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
 	  tty pathchk tee head mkdir rmdir mkfifo mktemp printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid setpgid seq rm \
 	  accept csv dsv cut stat getconf kv
 OTHERPROG = necho hello cat pushd asort
+
+SUBDIRS = perl
 
 all:	$(SHOBJ_STATUS)
 
@@ -262,14 +263,20 @@ pushd:	pushd.o
 
 clean:
 	$(RM) $(ALLPROG) $(OTHERPROG) *.o
-	-( cd perl && ${MAKE} ${MFLAGS} $@ )
+	-for subdir in $(SUBDIRS); do \
+		( cd $$subdir && test -f Makefile && ${MAKE} ${MFLAGS} $@ ) ; \
+	done
 
 mostlyclean:	clean
-	-( cd perl && ${MAKE} ${MFLAGS} $@ )
+	-for subdir in $(SUBDIRS); do \
+		( cd $$subdir && test -f Makefile && ${MAKE} ${MFLAGS} $@ ) ; \
+	done
 
 distclean maintainer-clean: clean
 	$(RM) Makefile Makefile.inc Makefile.sample pushd.c
-	-( cd perl && ${MAKE} ${MFLAGS} $@ )
+	-for subdir in $(SUBDIRS); do \
+		( cd $$subdir && test -f Makefile && ${MAKE} ${MFLAGS} $@ ) ; \
+	done
 
 installdirs:
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(loadablesdir)

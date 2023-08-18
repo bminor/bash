@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Aug 10 10:49:52 EDT 2023
+.\"	Last Change: Tue Aug 15 16:02:58 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 August 10" "GNU Bash 5.3"
+.TH BASH 1 "2023 August 15" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7552,13 +7552,13 @@ The second is to select portions of that line for inclusion into
 the current one.
 The line selected from the history is the \fIevent\fP,
 and the portions of that line that are acted upon are \fIwords\fP.
+The line is broken into words in the same fashion as when reading input,
+so that several \fImetacharacter\fP-separated words surrounded by
+quotes are considered one word.
 The \fIevent designator\fP selects the event, the optional
 \fIword designator\fP selects words from the event, and
 various optional \fImodifiers\fP are available to manipulate the
 selected words.
-The line is broken into words in the same fashion as when reading input,
-so that several \fImetacharacter\fP-separated words surrounded by
-quotes are considered one word.
 .PP
 History expansions are introduced by the appearance of the
 history expansion character, which is \^\fB!\fP\^ by default.
@@ -9777,7 +9777,7 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-i\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-N\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
+\fBread\fP [\fB\-Eers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-i\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-N\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option,
 split into words as described
@@ -9827,15 +9827,31 @@ when it reads a NUL character.
 .B \-e
 If the standard input
 is coming from a terminal,
+\fBread\fP uses
 .B readline
 (see
 .SM
 .B READLINE
 .ie \n(zZ=1 in \fIbash(1)\fP)
 .el above)
-is used to obtain the line.
+to obtain the line.
 Readline uses the current (or default, if line editing was not previously
 active) editing settings, but uses readline's default filename completion.
+.TP
+.B \-E
+If the standard input
+is coming from a terminal,
+\fBread\fP uses
+.B readline
+(see
+.SM
+.B READLINE
+.ie \n(zZ=1 in \fIbash(1)\fP)
+.el above)
+to obtain the line.
+Readline uses the current (or default, if line editing was not previously
+active) editing settings, but uses bash's default completion, including
+programmable completion.
 .TP
 .B \-i \fItext\fP
 If

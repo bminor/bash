@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.056])dnl
+AC_REVISION([for Bash 5.3, version 5.057])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -927,7 +927,8 @@ AC_CHECK_HEADERS([argz.h errno.h fcntl.h malloc.h stdio_ext.h])
 dnl AC_FUNC_MALLOC
 AC_DEFINE([HAVE_MALLOC])
 AC_FUNC_MMAP
-AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext mempcpy \
+AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext \
+		locale_charset mempcpy \
 		munmap mremap stpcpy strcspn])
 
 INTL_DEP= INTL_INC= LIBINTL_H=
@@ -935,6 +936,8 @@ if test "x$USE_INCLUDED_LIBINTL" = "xyes"; then
 	INTL_DEP='${INTL_LIBDIR}/libintl.a'
 	INTL_INC='-I${INTL_LIBSRC} -I${INTL_BUILDDIR}'
 	LIBINTL_H='${INTL_BUILDDIR}/libintl.h'
+
+	AC_DEFINE([HAVE_LOCALE_CHARSET], 1)
 fi
 AC_SUBST(INTL_DEP)
 AC_SUBST(INTL_INC)

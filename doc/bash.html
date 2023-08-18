@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 August 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 August 15<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -9548,12 +9548,20 @@ The second is to select portions of that line for inclusion into
 the current one.
 The line selected from the history is the <I>event</I>,
 and the portions of that line that are acted upon are <I>words</I>.
-Various <I>modifiers</I> are available to manipulate the selected words.
 The line is broken into words in the same fashion as when reading input,
 so that several <I>metacharacter</I>-separated words surrounded by
 quotes are considered one word.
+The <I>event designator</I> selects the event, the optional
+<I>word designator</I> selects words from the event, and
+various optional <I>modifiers</I> are available to manipulate the
+selected words.
+<P>
+
 History expansions are introduced by the appearance of the
 history expansion character, which is <B>!</B> by default.
+History expansions may appear anywhere in the input, but do not nest.
+<P>
+
 Only backslash (<B>\</B>) and single quotes can quote
 the history expansion character, but the history expansion character is
 also treated as quoted if it immediately precedes the closing double quote
@@ -9562,10 +9570,8 @@ in a double-quoted string.
 
 Several characters inhibit history expansion if found immediately
 following the history expansion character, even if it is unquoted:
-space, tab, newline, carriage return,
-<B>=</B>, <B>;</B>, <B>&amp;</B>, and <B>|</B>.
-If the <B>extglob</B> shell option is enabled, <B>(</B> will also
-inhibit expansion.
+space, tab, newline, carriage return, <B>=</B>,
+and the other shell metacharacters defined above.
 <P>
 
 Several shell options settable with the
@@ -9632,6 +9638,10 @@ writing the history file.
 
 An event designator is a reference to a command line entry in the
 history list.
+The event designator
+consists of the portion of the word beginning with the history
+expansion character and ending with the word designator if present,
+or the end of the word.
 Unless the reference is absolute, events are relative to the current
 position in the history list.
 <P>
@@ -12268,7 +12278,7 @@ option is used, the pathname printed may contain symbolic links.
 The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
-<DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-i</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-N</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
+<DT><B>read</B> [<B>-Eers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-i</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-N</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
 <I>fd</I> supplied as an argument to the <B>-u</B> option,
 split into words as described
@@ -12328,6 +12338,7 @@ when it reads a NUL character.
 <DD>
 If the standard input
 is coming from a terminal,
+<B>read</B> uses
 <B>readline</B>
 
 (see
@@ -12336,9 +12347,27 @@ is coming from a terminal,
 </FONT>
 
 above)
-is used to obtain the line.
+to obtain the line.
 Readline uses the current (or default, if line editing was not previously
 active) editing settings, but uses readline's default filename completion.
+<DT><B>-E</B>
+
+<DD>
+If the standard input
+is coming from a terminal,
+<B>read</B> uses
+<B>readline</B>
+
+(see
+<FONT SIZE=-1><B>READLINE</B>
+
+</FONT>
+
+above)
+to obtain the line.
+Readline uses the current (or default, if line editing was not previously
+active) editing settings, but uses bash's default completion, including
+programmable completion.
 <DT><B>-i </B><I>text</I>
 
 <DD>
@@ -15086,7 +15115,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 August 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 August 15<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15192,7 +15221,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20230808/doc/bash.1.<BR>
-Time: 09 August 2023 10:01:14 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20230812/doc/bash.1.<BR>
+Time: 15 August 2023 16:12:02 EDT
 </BODY>
 </HTML>
