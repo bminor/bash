@@ -435,7 +435,6 @@ inputunit:	simple_list simple_list_terminator
 			  /* This is special; look at the production and how
 			     parse_comsub sets token_to_read */
 			  global_command = $1;
-			  eof_encountered = 0;
 			  YYACCEPT;
 			}
 	|	funsub
@@ -443,7 +442,6 @@ inputunit:	simple_list simple_list_terminator
 			  /* This is special; look at the production and how
 			     parse_comsub/parse_valsub sets token_to_read */
 			  global_command = $1;
-			  eof_encountered = 0;
 			  YYACCEPT;
 			}
 	|	'\n'

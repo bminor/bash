@@ -123,7 +123,7 @@ struct ttsave
 #if defined (READLINE)
 static void uw_reset_attempted_completion_function (void *);
 static int set_itext (void);
-static char *edit_line (char *, char *, int);
+static char *edit_line (char *, char *, unsigned char, int);
 static void set_eol_delim (int);
 static void reset_eol_delim (void *);
 static void set_readline_timeout (sh_timer *t, time_t, long);
@@ -144,7 +144,6 @@ static void uw_reset_timeout (void *);
 sh_timer *read_timeout;
 
 static int reading, tty_modified;
-static unsigned char delim;
 
 static struct ttsave termsave;
 
@@ -225,6 +224,7 @@ read_builtin (WORD_LIST *list)
   long ival, uval;
   intmax_t intval;
   char c;
+  unsigned char delim;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
   char *e, *t, *t1, *ps2, *tofree;
   struct stat tsb;
@@ -251,6 +251,7 @@ read_builtin (WORD_LIST *list)
 /*  USE_VAR(raw); */
   USE_VAR(edit);
   USE_VAR(use_bash_completion);
+  USE_VAR(delim);
   USE_VAR(tmsec);
   USE_VAR(tmusec);
   USE_VAR(nchars);
@@ -660,7 +661,7 @@ read_builtin (WORD_LIST *list)
 	  if (rlbuf == 0)
 	    {
 	      reading = 1;
-	      rlbuf = edit_line (prompt ? prompt : "", itext, use_bash_completion);
+	      rlbuf = edit_line (prompt ? prompt : "", itext, delim, use_bash_completion);
 	      reading = 0;
 	      rlind = 0;
 	    }
@@ -1208,7 +1209,7 @@ set_itext (void)
 }
 
 static char *
-edit_line (char *p, char *itext, int keep_completion_func)
+edit_line (char *p, char *itext, unsigned char delim, int keep_completion_func)
 {
   char *ret;
   size_t len;

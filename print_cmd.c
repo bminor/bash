@@ -965,6 +965,8 @@ print_simple_command (SIMPLE_COM *simple_command)
 {
   if (simple_command->words)
     command_print_word_list (simple_command->words, " ");
+  else
+    cprintf ("");
 
   if (simple_command->redirects)
     {

@@ -7486,3 +7486,34 @@ subst.c
 	- parameter_brace_expand_rhs,expand_declaration_argument,
 	  do_assignment_statements: call posix_variable_assignment_error or
 	  bash_variable_assignment_error as appropriate
+
+				   8/21
+				   ----
+lib/readline/misc.c
+	- _rl_arg_dispatch: add the digits or other characters to
+	  rl_executing_keyseq if we're not calling _rl_dispatch.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+print_cmd.c
+	- print_simple_command: make sure that the_printed_command[0] == '\0'
+	  if we're printing a null simple command with no words
+	  Patch by Grisha Levit <grishalevit@gmail.com>
+
+				   8/22
+				   ----
+builtins/read.def
+	- read_builtin: make `delim' variable local, pass to edit_line to
+	  set the last character of the returned line; change edit_line
+	  prototype.
+	  From a suggestion by Grisha Levit <grishalevit@gmail.com>
+
+				   8/23
+				   ----
+parse.y
+	- comsub and funsub productions: don't reset eof_encountered to 0 in
+	  the action
+
+subst.c
+	- function_substitute: unwind-protect eof_encountered so ignoreeof
+	  doesn't keep getting reset to 0 if PS1 includes a ${ ...;} command.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

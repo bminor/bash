@@ -150,6 +150,7 @@ _rl_arg_dispatch (_rl_arg_cxt cxt, int c)
 
   if (_rl_digit_p (c))
     {
+      _rl_add_executing_keyseq (key);
       r = _rl_digit_value (c);    	
       rl_numeric_arg = rl_explicit_arg ? (rl_numeric_arg * 10) +  r : r;
       rl_explicit_arg = 1;
@@ -157,6 +158,7 @@ _rl_arg_dispatch (_rl_arg_cxt cxt, int c)
     }
   else if (c == '-' && rl_explicit_arg == 0)
     {
+      _rl_add_executing_keyseq (key);
       rl_numeric_arg = 1;
       _rl_argcxt |= NUM_SAWMINUS;
       rl_arg_sign = -1;

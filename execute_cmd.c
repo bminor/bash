@@ -4401,6 +4401,8 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
 
   /* Remember what this command line looks like at invocation. */
   command_string_index = 0;
+  if (the_printed_command)
+    the_printed_command[0] = '\0';
   print_simple_command (simple_command);
 
 #if 0
