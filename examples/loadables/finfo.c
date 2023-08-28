@@ -53,7 +53,6 @@ extern int	errno;
 
 extern char	**make_builtin_argv (WORD_LIST *, int *);
 
-static int	octal(char *);
 static struct stat *getstat(char *);
 static int	printinfo(char *);
 static int	getperm(int);
@@ -96,17 +95,6 @@ static int	pmask;
 #define OPTIONS		"acdgiflmnopsuACGMP:U"
 
 static int
-octal(char *s)
-{
-	int	r;
-
-	r = *s - '0';
-	while (*++s >= '0' && *s <= '7')
-		r = (r * 8) + (*s - '0');
-	return r;
-}
-
-static int
 finfo_main(int argc, char **argv)
 {
 	register int	i;
@@ -136,7 +124,14 @@ finfo_main(int argc, char **argv)
 		case 'n': flags |= OPT_NLINK; break;
 		case 'o': flags |= OPT_OPERM; break;
 		case 'p': flags |= OPT_PERM; break;
-		case 'P': flags |= OPT_PMASK; pmask = octal(sh_optarg); break;
+		case 'P':
+			flags |= OPT_PMASK;
+			pmask = octal(sh_optarg);
+			if (pmask < 0) {
+				builtin_error ("invalid mode: %s", sh_optarg);
+				return(1);
+			}
+			break;
 		case 's': flags |= OPT_SIZE; break;
 		case 'u': flags |= OPT_UID; break;
 		case 'U': flags |= OPT_UID|OPT_ASCII; break;

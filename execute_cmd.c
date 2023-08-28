@@ -2954,9 +2954,6 @@ execute_for_command (FOR_COM *for_command)
       command_string_index = 0;
       print_for_command_head (for_command);
 
-      if (echo_command_at_execute)
-	xtrace_print_for_command_head (for_command);
-
       /* Save this command unless it's a trap command and we're not running
 	 a debug trap. */
       if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
@@ -2972,6 +2969,9 @@ execute_for_command (FOR_COM *for_command)
       if (debugging_mode && retval != EXECUTION_SUCCESS)
         continue;
 #endif
+
+      if (echo_command_at_execute)
+	xtrace_print_for_command_head (for_command);
 
       this_command_name = (char *)NULL;
       /* XXX - special ksh93 for command index variable handling */
@@ -3088,9 +3088,6 @@ eval_arith_for_expr (WORD_LIST *l, int *okp)
 
   if (new)
     {
-      if (echo_command_at_execute)
-	xtrace_print_arith_cmd (new);
-
       command_string_index = 0;
       print_arith_command (new);
       if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
@@ -3100,23 +3097,25 @@ eval_arith_for_expr (WORD_LIST *l, int *okp)
 	}
 
       r = run_debug_trap ();
+#if defined (DEBUGGER)
       /* In debugging mode, if the DEBUG trap returns a non-zero status, we
 	 skip the command. */
-      eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
-      this_command_name = "((";		/* )) for expression error messages */
-      
-#if defined (DEBUGGER)
-      if (debugging_mode == 0 || r == EXECUTION_SUCCESS)
-	expresult = evalexp (new->word->word, eflag, okp);
-      else
+      if (debugging_mode && r != EXECUTION_SUCCESS)
 	{
 	  expresult = 0;
 	  if (okp)
 	    *okp = 1;
+	  return (expresult);
 	}
-#else
-      expresult = evalexp (new->word->word, eflag, okp);
 #endif
+
+      if (echo_command_at_execute)
+	xtrace_print_arith_cmd (new);
+
+      eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
+      this_command_name = "((";		/* )) for expression error messages */
+
+      expresult = evalexp (new->word->word, eflag, okp);
       dispose_words (new);
     }
   else
@@ -3425,9 +3424,6 @@ execute_select_command (SELECT_COM *select_command)
   command_string_index = 0;
   print_select_command_head (select_command);
 
-  if (echo_command_at_execute)
-    xtrace_print_select_command_head (select_command);
-
 #if 0
   if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
 #else
@@ -3445,6 +3441,9 @@ execute_select_command (SELECT_COM *select_command)
   if (debugging_mode && retval != EXECUTION_SUCCESS)
     return (EXECUTION_SUCCESS);
 #endif
+
+  if (echo_command_at_execute)
+    xtrace_print_select_command_head (select_command);
 
   this_command_name = (char *)0;
 
@@ -3565,9 +3564,6 @@ execute_case_command (CASE_COM *case_command)
   command_string_index = 0;
   print_case_command_head (case_command);
 
-  if (echo_command_at_execute)
-    xtrace_print_case_command_head (case_command);
-
 #if 0
   if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
 #else
@@ -3588,6 +3584,9 @@ execute_case_command (CASE_COM *case_command)
       return (EXECUTION_SUCCESS);
     }
 #endif
+
+  if (echo_command_at_execute)
+    xtrace_print_case_command_head (case_command);
 
   /* Use the same expansions (the ones POSIX specifies) as the patterns;
      dequote the resulting string (as POSIX specifies) since the quotes in

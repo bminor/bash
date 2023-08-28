@@ -7517,3 +7517,19 @@ subst.c
 	- function_substitute: unwind-protect eof_encountered so ignoreeof
 	  doesn't keep getting reset to 0 if PS1 includes a ${ ...;} command.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   8/25
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarify the cases where arrayname[@] doesn't refer to all the
+	  elements of an associative array (the unset builtin and test/[/[[ -v
+	  for now)
+	  Inspired by https://savannah.gnu.org/support/index.php?110924
+
+				   8/28
+				   ----
+execute_cmd.c
+	- execute_for_command,execute_select_command,execute_arith_command,
+	  execute_case_command: fix up order in which BASH_COMMAND is set,
+	  the DEBUG trap is run, and PS4 is printed.
+	  From a report by Grisha Levit <grishalevit@gmail.com>

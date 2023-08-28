@@ -2864,7 +2864,9 @@ Any element of an array may be referenced using
 ${\fIname\fP[\fIsubscript\fP]}.  The braces are required to avoid
 conflicts with pathname expansion.  If
 \fIsubscript\fP is \fB@\fP or \fB*\fP, the word expands to
-all members of \fIname\fP.  These subscripts differ only when the
+all members of \fIname\fP,
+unless noted in the description of a builtin or word expansion.
+These subscripts differ only when the
 word appears within double quotes.  If the word is double-quoted,
 ${\fIname\fP[*]} expands to a single
 word with the value of each array member separated by the first
@@ -4978,6 +4980,12 @@ builtin below.
 True if the shell variable
 .I varname
 is set (has been assigned a value).
+If \fIvarname\fP is an indexed
+array variable name subscripted by \fI@\fP or \fI*\fP,
+this returns true if the array has any set elements.
+If \fIvarname\fP is an associative
+array variable name subscripted by \fI@\fP or \fI*\fP,
+this returns true if an element with that key is set.
 .TP
 .B \-R \fIvarname\fP
 True if the shell variable

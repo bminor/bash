@@ -1759,7 +1759,7 @@ When @samp{+=} is applied to an array variable using compound assignment
 (@pxref{Arrays}), the
 variable's value is not unset (as it is when using @samp{=}), and new
 values are appended to the array beginning at one greater than the array's
-maximum index (for indexed arrays),  or added as additional key-value pairs
+maximum index (for indexed arrays), or added as additional key-value pairs
 in an associative array.
 When applied to a string-valued variable, @var{value} is expanded and
 appended to the variable's value.
@@ -7664,6 +7664,12 @@ option to the @code{set} builtin (@pxref{The Set Builtin}).
 
 @item -v @var{varname}
 True if the shell variable @var{varname} is set (has been assigned a value).
+If @var{varname} is an indexed
+array variable name subscripted by @samp{@@} or @samp{*},
+this returns true if the array has any set elements.
+If @var{varname} is an associative
+array variable name subscripted by @samp{@@} or @samp{*},
+this returns true if an element with that key is set.
 
 @item -R @var{varname}
 True if the shell variable @var{varname} is set and is a name reference.
@@ -7983,7 +7989,9 @@ Any element of an array may be referenced using
 The braces are required to avoid
 conflicts with the shell's filename expansion operators.  If the
 @var{subscript} is @samp{@@} or @samp{*}, the word expands to all members
-of the array @var{name}.  These subscripts differ only when the word
+of the array @var{name}, unless otherwise noted in the description of a
+builtin or word expansion.
+These subscripts differ only when the word
 appears within double quotes.
 If the word is double-quoted,
 @code{$@{@var{name}[*]@}} expands to a single word with

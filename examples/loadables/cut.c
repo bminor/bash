@@ -503,22 +503,13 @@ cut_internal (int which, WORD_LIST *list)
     }
 
   if (array_name)
-    {      
-      v = find_or_make_array_variable (array_name, 1);
-      if (v == 0 || readonly_p (v) || noassign_p (v))
+    {
+      v = builtin_find_indexed_array (array_name, 1);
+      if (v == 0)
 	{
-	  if (v && readonly_p (v))
-	    err_readonly (array_name);
+	  free (poslist);
 	  return (EXECUTION_FAILURE);
 	}
-      else if (array_p (v) == 0)
-	{
-	  builtin_error ("%s: not an indexed array", array_name);
-	  return (EXECUTION_FAILURE);
-	}
-      if (invisible_p (v))
-	VUNSETATTR (v, att_invisible);
-      array_flush (array_cell (v));
     }
 
   op.flags = cutflags;
@@ -542,6 +533,7 @@ cut_internal (int which, WORD_LIST *list)
   else
     rval = cutfile (v, list, &op);
 
+  free (poslist);
   return (rval);
 }
 
