@@ -380,7 +380,7 @@ printf_builtin (WORD_LIST *list)
 
 	  if (*fmt != '%')
 	    {
-	      PC (*fmt);
+	      PC (*fmt);		/* should print entire multibyte char here */
 	      continue;
 	    }
 
@@ -465,11 +465,12 @@ printf_builtin (WORD_LIST *list)
 	  switch(convch)
 	    {
 	    case 'c':
+	    case 'C':
 	      {
 		char p;
 
 #if defined (HANDLE_MULTIBYTE)
-		if (longform)
+		if (longform || convch == 'C')
 		  {
 		    wchar_t wc, ws[2];
 		    int r;
@@ -490,10 +491,11 @@ printf_builtin (WORD_LIST *list)
 	      }
 
 	    case 's':
+	    case 'S':
 	      {
 		char *p;
 #if defined (HANDLE_MULTIBYTE)
-		if (longform)
+		if (longform || convch == 'S')
 		  {
 		    wchar_t *wp;
 		    size_t slen;
@@ -507,8 +509,38 @@ printf_builtin (WORD_LIST *list)
 		    break;
 		  }
 #endif
+#if 0	/*TAG:bash-5.4*/
+		if (altform == 0)
+#endif
+		  {
+		    p = getstr ();
+		    PF(start, p);
+		    break;
+		  }
+	      }
+	      /*FALLTHROUGH*/
+
+	    case 'b':		/* expand escapes in argument */
+	      {
+		char *p, *xp;
+		int rlen, r;
+
 		p = getstr ();
-		PF(start, p);
+		ch = rlen = r = 0;
+		xp = bexpand (p, strlen (p), &ch, &rlen);
+
+		if (xp)
+		  {
+		    /* Have to use printstr because of possible NUL bytes
+		       in XP -- printf does not handle that well. */
+		    r = printstr (start, xp, rlen, fieldwidth, precision);
+		    if (r < 0)
+		      retval = EXECUTION_FAILURE;
+		    free (xp);
+		  }
+
+		if (ch || r < 0)
+		  PRETURN (retval);
 		break;
 	      }
 
@@ -597,30 +629,6 @@ printf_builtin (WORD_LIST *list)
 			PRETURN (EXECUTION_FAILURE);
 		      }
 		  }
-		break;
-	      }
-
-	    case 'b':		/* expand escapes in argument */
-	      {
-		char *p, *xp;
-		int rlen, r;
-
-		p = getstr ();
-		ch = rlen = r = 0;
-		xp = bexpand (p, strlen (p), &ch, &rlen);
-
-		if (xp)
-		  {
-		    /* Have to use printstr because of possible NUL bytes
-		       in XP -- printf does not handle that well. */
-		    r = printstr (start, xp, rlen, fieldwidth, precision);
-		    if (r < 0)
-		      retval = EXECUTION_FAILURE;
-		    free (xp);
-		  }
-
-		if (ch || r < 0)
-		  PRETURN (retval);
 		break;
 	      }
 
@@ -1162,7 +1170,7 @@ bexpand (char *string, int len, int *sawc, int *lenp)
 #else
   ret = (char *)xmalloc (len + 1);
 #endif
-  temp = 0;
+
   for (r = ret, s = string; s && *s; )
     {
       c = *s++;
@@ -1171,6 +1179,8 @@ bexpand (char *string, int len, int *sawc, int *lenp)
 	  *r++ = c;
 	  continue;
 	}
+      /* output entire multibyte character here? */
+
       temp = 0;
 #if defined (HANDLE_MULTIBYTE)
       memset (mbch, '\0', sizeof (mbch));

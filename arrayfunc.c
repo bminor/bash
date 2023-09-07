@@ -889,6 +889,14 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
       assoc_dispose (h);
     }
 
+#if ARRAY_EXPORT
+  if (var && exported_p (var))
+    {
+      INVALIDATE_EXPORTSTR (var);
+      array_needs_making = 1;
+    }
+#endif
+
   return (any_failed ? 0 : 1);
 }
 

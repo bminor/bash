@@ -7533,3 +7533,33 @@ execute_cmd.c
 	  execute_case_command: fix up order in which BASH_COMMAND is set,
 	  the DEBUG trap is run, and PS4 is printed.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/colors.c
+	- RL_COLOR_PREFIX_EXTENSION: make sure the custom suffix has a leading
+	  `.'
+	  Report and fix from Stefan Klinger <readline-gnu.org@stefan-klinger.de>
+
+lib/readline/parse-colors.c
+	- free_color_ext_list: new function, called on parse error, frees the
+	  list of extensions
+	- rl_reparse_colors: new public function, frees old extension list and
+	  reparses (presumably new) value of LS_COLORS; some minimal checking
+	  to make sure the value has really changed
+
+				    9/1
+				    ---
+parse.y
+	- time_command_acceptable: make sure `time' is recognized as a
+	  reserved word after DOLPAREN and DOLBRACE.
+	  Report from Dima Korobskiy <dkroot2@gmail.com>
+
+builtins/printf.def
+	- printf_builtin: make 'C' equivalent to 'lc'; 'S' equivalent to 'ls'
+	  as POSIX specifies
+
+				    9/6
+				    ---
+eval.c
+	- parse_command: don't run pending traps if we're parsing a command
+	  substitution
+	  From a report from Emanuele Torre <torreemanuele6@gmail.com>

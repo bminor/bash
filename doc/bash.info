@@ -1,9 +1,9 @@
 This is bash.info, produced by makeinfo version 6.8 from bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 15 August 2023).
+Bash shell (version 5.3, 31 August 2023).
 
-   This is Edition 5.3, last updated 15 August 2023, of 'The GNU Bash
+   This is Edition 5.3, last updated 31 August 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.3.
 
    Copyright (C) 1988-2023 Free Software Foundation, Inc.
@@ -26,10 +26,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 15 August 2023).  The Bash home page is
+Bash shell (version 5.3, 31 August 2023).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.3, last updated 15 August 2023, of 'The GNU Bash
+   This is Edition 5.3, last updated 31 August 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.3.
 
    Bash contains features that appear in other popular shells, and some
@@ -4227,6 +4227,7 @@ standard.
      '%Q'
           like '%q', but applies any supplied precision to the ARGUMENT
           before quoting it.
+
      '%(DATEFMT)T'
           Causes 'printf' to output the date-time string resulting from
           using DATEFMT as a format string for 'strftime'(3).  The
@@ -6629,7 +6630,10 @@ link itself.
 
 '-v VARNAME'
      True if the shell variable VARNAME is set (has been assigned a
-     value).
+     value).  If VARNAME is an indexed array variable name subscripted
+     by '@' or '*', this returns true if the array has any set elements.
+     If VARNAME is an associative array variable name subscripted by '@'
+     or '*', this returns true if an element with that key is set.
 
 '-R VARNAME'
      True if the shell variable VARNAME is set and is a name reference.
@@ -6895,23 +6899,24 @@ above.
    Any element of an array may be referenced using '${NAME[SUBSCRIPT]}'.
 The braces are required to avoid conflicts with the shell's filename
 expansion operators.  If the SUBSCRIPT is '@' or '*', the word expands
-to all members of the array NAME.  These subscripts differ only when the
-word appears within double quotes.  If the word is double-quoted,
-'${NAME[*]}' expands to a single word with the value of each array
-member separated by the first character of the 'IFS' variable, and
-'${NAME[@]}' expands each element of NAME to a separate word.  When
-there are no array members, '${NAME[@]}' expands to nothing.  If the
-double-quoted expansion occurs within a word, the expansion of the first
-parameter is joined with the beginning part of the original word, and
-the expansion of the last parameter is joined with the last part of the
-original word.  This is analogous to the expansion of the special
-parameters '@' and '*'.  '${#NAME[SUBSCRIPT]}' expands to the length of
-'${NAME[SUBSCRIPT]}'.  If SUBSCRIPT is '@' or '*', the expansion is the
-number of elements in the array.  If the SUBSCRIPT used to reference an
-element of an indexed array evaluates to a number less than zero, it is
-interpreted as relative to one greater than the maximum index of the
-array, so negative indices count back from the end of the array, and an
-index of -1 refers to the last element.
+to all members of the array NAME, unless otherwise noted in the
+description of a builtin or word expansion.  These subscripts differ
+only when the word appears within double quotes.  If the word is
+double-quoted, '${NAME[*]}' expands to a single word with the value of
+each array member separated by the first character of the 'IFS'
+variable, and '${NAME[@]}' expands each element of NAME to a separate
+word.  When there are no array members, '${NAME[@]}' expands to nothing.
+If the double-quoted expansion occurs within a word, the expansion of
+the first parameter is joined with the beginning part of the original
+word, and the expansion of the last parameter is joined with the last
+part of the original word.  This is analogous to the expansion of the
+special parameters '@' and '*'.  '${#NAME[SUBSCRIPT]}' expands to the
+length of '${NAME[SUBSCRIPT]}'.  If SUBSCRIPT is '@' or '*', the
+expansion is the number of elements in the array.  If the SUBSCRIPT used
+to reference an element of an indexed array evaluates to a number less
+than zero, it is interpreted as relative to one greater than the maximum
+index of the array, so negative indices count back from the end of the
+array, and an index of -1 refers to the last element.
 
    Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0.  Any reference to a variable using a
@@ -12162,8 +12167,8 @@ D.1 Index of Shell Builtin Commands
                                                               (line  69)
 * pwd:                                   Bourne Shell Builtins.
                                                               (line 218)
-* read:                                  Bash Builtins.       (line 513)
-* readarray:                             Bash Builtins.       (line 616)
+* read:                                  Bash Builtins.       (line 514)
+* readarray:                             Bash Builtins.       (line 617)
 * readonly:                              Bourne Shell Builtins.
                                                               (line 228)
 * return:                                Bourne Shell Builtins.
@@ -12172,7 +12177,7 @@ D.1 Index of Shell Builtin Commands
 * shift:                                 Bourne Shell Builtins.
                                                               (line 268)
 * shopt:                                 The Shopt Builtin.   (line   9)
-* source:                                Bash Builtins.       (line 625)
+* source:                                Bash Builtins.       (line 626)
 * suspend:                               Job Control Builtins.
                                                               (line 116)
 * test:                                  Bourne Shell Builtins.
@@ -12183,12 +12188,12 @@ D.1 Index of Shell Builtin Commands
                                                               (line 389)
 * true:                                  Bourne Shell Builtins.
                                                               (line 451)
-* type:                                  Bash Builtins.       (line 630)
-* typeset:                               Bash Builtins.       (line 668)
-* ulimit:                                Bash Builtins.       (line 674)
+* type:                                  Bash Builtins.       (line 631)
+* typeset:                               Bash Builtins.       (line 669)
+* ulimit:                                Bash Builtins.       (line 675)
 * umask:                                 Bourne Shell Builtins.
                                                               (line 456)
-* unalias:                               Bash Builtins.       (line 780)
+* unalias:                               Bash Builtins.       (line 781)
 * unset:                                 Bourne Shell Builtins.
                                                               (line 474)
 * wait:                                  Job Control Builtins.
@@ -12918,84 +12923,84 @@ Node: Shell Scripts137014
 Node: Shell Builtin Commands140038
 Node: Bourne Shell Builtins142073
 Node: Bash Builtins165206
-Node: Modifying Shell Behavior198141
-Node: The Set Builtin198483
-Node: The Shopt Builtin209454
-Node: Special Builtins225589
-Node: Shell Variables226565
-Node: Bourne Shell Variables226999
-Node: Bash Variables229100
-Node: Bash Features264156
-Node: Invoking Bash265166
-Node: Bash Startup Files271202
-Node: Interactive Shells276330
-Node: What is an Interactive Shell?276738
-Node: Is this Shell Interactive?277384
-Node: Interactive Shell Behavior278196
-Node: Bash Conditional Expressions281822
-Node: Shell Arithmetic286461
-Node: Aliases289419
-Node: Arrays292310
-Node: The Directory Stack298868
-Node: Directory Stack Builtins299649
-Node: Controlling the Prompt303906
-Node: The Restricted Shell306868
-Node: Bash POSIX Mode309475
-Node: Shell Compatibility Mode325633
-Node: Job Control333874
-Node: Job Control Basics334331
-Node: Job Control Builtins339330
-Node: Job Control Variables345122
-Node: Command Line Editing346275
-Node: Introduction and Notation347943
-Node: Readline Interaction349563
-Node: Readline Bare Essentials350751
-Node: Readline Movement Commands352537
-Node: Readline Killing Commands353494
-Node: Readline Arguments355412
-Node: Searching356453
-Node: Readline Init File358636
-Node: Readline Init File Syntax359894
-Node: Conditional Init Constructs383916
-Node: Sample Init File388109
-Node: Bindable Readline Commands391230
-Node: Commands For Moving392431
-Node: Commands For History394479
-Node: Commands For Text399470
-Node: Commands For Killing403445
-Node: Numeric Arguments406146
-Node: Commands For Completion407282
-Node: Keyboard Macros411470
-Node: Miscellaneous Commands412155
-Node: Readline vi Mode418190
-Node: Programmable Completion419094
-Node: Programmable Completion Builtins426871
-Node: A Programmable Completion Example437988
-Node: Using History Interactively443233
-Node: Bash History Facilities443914
-Node: Bash History Builtins446922
-Node: History Interaction452010
-Node: Event Designators455820
-Node: Word Designators457355
-Node: Modifiers459217
-Node: Installing Bash461022
-Node: Basic Installation462156
-Node: Compilers and Options465875
-Node: Compiling For Multiple Architectures466613
-Node: Installation Names468302
-Node: Specifying the System Type470408
-Node: Sharing Defaults471122
-Node: Operation Controls471792
-Node: Optional Features472747
-Node: Reporting Bugs483963
-Node: Major Differences From The Bourne Shell485294
-Node: GNU Free Documentation License502149
-Node: Indexes527323
-Node: Builtin Index527774
-Node: Reserved Word Index534872
-Node: Variable Index537317
-Node: Function Index554448
-Node: Concept Index568166
+Node: Modifying Shell Behavior198142
+Node: The Set Builtin198484
+Node: The Shopt Builtin209455
+Node: Special Builtins225590
+Node: Shell Variables226566
+Node: Bourne Shell Variables227000
+Node: Bash Variables229101
+Node: Bash Features264157
+Node: Invoking Bash265167
+Node: Bash Startup Files271203
+Node: Interactive Shells276331
+Node: What is an Interactive Shell?276739
+Node: Is this Shell Interactive?277385
+Node: Interactive Shell Behavior278197
+Node: Bash Conditional Expressions281823
+Node: Shell Arithmetic286733
+Node: Aliases289691
+Node: Arrays292582
+Node: The Directory Stack299213
+Node: Directory Stack Builtins299994
+Node: Controlling the Prompt304251
+Node: The Restricted Shell307213
+Node: Bash POSIX Mode309820
+Node: Shell Compatibility Mode325978
+Node: Job Control334219
+Node: Job Control Basics334676
+Node: Job Control Builtins339675
+Node: Job Control Variables345467
+Node: Command Line Editing346620
+Node: Introduction and Notation348288
+Node: Readline Interaction349908
+Node: Readline Bare Essentials351096
+Node: Readline Movement Commands352882
+Node: Readline Killing Commands353839
+Node: Readline Arguments355757
+Node: Searching356798
+Node: Readline Init File358981
+Node: Readline Init File Syntax360239
+Node: Conditional Init Constructs384261
+Node: Sample Init File388454
+Node: Bindable Readline Commands391575
+Node: Commands For Moving392776
+Node: Commands For History394824
+Node: Commands For Text399815
+Node: Commands For Killing403790
+Node: Numeric Arguments406491
+Node: Commands For Completion407627
+Node: Keyboard Macros411815
+Node: Miscellaneous Commands412500
+Node: Readline vi Mode418535
+Node: Programmable Completion419439
+Node: Programmable Completion Builtins427216
+Node: A Programmable Completion Example438333
+Node: Using History Interactively443578
+Node: Bash History Facilities444259
+Node: Bash History Builtins447267
+Node: History Interaction452355
+Node: Event Designators456165
+Node: Word Designators457700
+Node: Modifiers459562
+Node: Installing Bash461367
+Node: Basic Installation462501
+Node: Compilers and Options466220
+Node: Compiling For Multiple Architectures466958
+Node: Installation Names468647
+Node: Specifying the System Type470753
+Node: Sharing Defaults471467
+Node: Operation Controls472137
+Node: Optional Features473092
+Node: Reporting Bugs484308
+Node: Major Differences From The Bourne Shell485639
+Node: GNU Free Documentation License502494
+Node: Indexes527668
+Node: Builtin Index528119
+Node: Reserved Word Index535217
+Node: Variable Index537662
+Node: Function Index554793
+Node: Concept Index568511
 
 End Tag Table
 

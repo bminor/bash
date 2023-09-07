@@ -3223,6 +3223,8 @@ time_command_acceptable (void)
     case TIME:		/* time time pipeline */
     case TIMEOPT:	/* time -p time pipeline */
     case TIMEIGN:	/* time -p -- ... */
+    case DOLPAREN:
+    case DOLBRACE:
       return 1;
     default:
       return 0;

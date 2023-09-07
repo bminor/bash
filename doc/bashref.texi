@@ -5023,6 +5023,7 @@ formats quote the argument string using single quotes.
 @item %Q
 like @code{%q}, but applies any supplied precision to the @var{argument}
 before quoting it.
+
 @item %(@var{datefmt})T
 Causes @code{printf} to output the date-time string resulting from using
 @var{datefmt} as a format string for @code{strftime}(3).
@@ -5046,6 +5047,11 @@ as a shell variable name.
 The %s and %c format specifiers accept an l (long) modifier, which forces
 them to convert the argument string to a wide-character string and apply
 any supplied field width and precision in terms of characters, not bytes.
+
+@ignore
+The %s format specifier understands the "altform" flag (#) and behaves   
+identically to the %b format specifier if it's supplied.
+@end ignore
 
 Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading

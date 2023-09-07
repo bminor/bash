@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Aug 15 16:02:58 EDT 2023
+.\"	Last Change: Thu Aug 31 15:47:46 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 August 15" "GNU Bash 5.3"
+.TH BASH 1 "2023 August 31" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -9696,6 +9696,9 @@ as a shell variable name.
 The %s and %c format specifiers accept an l (long) modifier, which forces
 them to convert the argument string to a wide-character string and apply
 any supplied field width and precision in terms of characters, not bytes.
+.\" .PP
+.\" The %s format specifier understands the "altform" flag (#) and behaves
+.\" identically to the %b format specifier if it's supplied.
 .PP
 Arguments to non-string format specifiers are treated as C constants,
 except that a leading plus or minus sign is allowed, and if the leading

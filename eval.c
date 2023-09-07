@@ -331,7 +331,8 @@ parse_command (void)
   int r;
 
   need_here_doc = 0;
-  run_pending_traps ();
+  if ((parser_state & (PST_CMDSUBST|PST_FUNSUBST)) == 0)
+    run_pending_traps ();
 
   /* Allow the execution of a random command just before the printing
      of each primary prompt.  If the shell variable PROMPT_COMMAND
