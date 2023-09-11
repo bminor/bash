@@ -7563,3 +7563,19 @@ eval.c
 	- parse_command: don't run pending traps if we're parsing a command
 	  substitution
 	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+				    9/8
+				    ---
+jobs.c
+	- stop_pipeline: don't have the parent set the terminal pgrp; rely on
+	  child processes to do it to avoid potential race conditions.
+	  From a discussion beginning at
+	  https://lists.gnu.org/archive/html/bug-bash/2023-08/msg00087.html
+
+builtins/printf.def
+	- bexpand: when parsing the string to be expanded, consume entire
+	  multibyte characters at a time, in case their encoding includes a
+	  '\\'
+	- printf_builtin: when parsing the format string, consume entire
+	  multibyte characters at a time unless they begin with '\\' or '%',
+	  to avoid characters whose encoding contains those characters

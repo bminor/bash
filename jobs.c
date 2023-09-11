@@ -717,8 +717,11 @@ stop_pipeline (int async, COMMAND *deferred)
 	   * in the background.
 	   *
 	   */
+	   /* 09/08/2023 - rely on child processes to set the terminal pgrp */
+#if 0
 	  if (job_control && newjob->pgrp && (subshell_environment&SUBSHELL_ASYNC) == 0 && running_in_background == 0)
 	    maybe_give_terminal_to (shell_pgrp, newjob->pgrp, 0);
+#endif
 	}
     }
 

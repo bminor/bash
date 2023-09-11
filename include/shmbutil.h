@@ -561,4 +561,25 @@ extern int locale_utf8locale;	/* XXX */
 	    goto add_string
 
 #endif /* HANDLE_MULTIBYTE */
+
+#if defined (HANDLE_MULTIBYTE)
+static inline size_t
+mbcharlen(char *s, size_t maxlen)
+{
+  size_t l;
+  DECLARE_MBSTATE;
+  
+  if (maxlen == 1 || is_basic (*s))
+    return 1;
+  else if (locale_utf8locale && UTF8_SINGLEBYTE (*s))
+    return (*s != 0);
+  else        
+    l = mbrlen (s, maxlen, &state);
+  if (MB_INVALIDCH (l))  
+    return (1);
+  return l;
+}
+#else  
+#define mbcharlen(s, n)      (1)
+#endif /* HANDLE_MULTIBYTE */
 #endif /* _SH_MBUTIL_H_ */

@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 15 August 2023).
+the Bash shell (version 5.3, 31 August 2023).
 
-This is Edition 5.3, last updated 15 August 2023,
+This is Edition 5.3, last updated 31 August 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 15 August 2023).
+the Bash shell (version 5.3, 31 August 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 15 August 2023,
+<p>This is Edition 5.3, last updated 31 August 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.3.
 </p>
@@ -2111,7 +2111,7 @@ When &lsquo;<samp>+=</samp>&rsquo; is applied to an array variable using compoun
 (see <a href="#Arrays">Arrays</a>), the
 variable&rsquo;s value is not unset (as it is when using &lsquo;<samp>=</samp>&rsquo;), and new
 values are appended to the array beginning at one greater than the array&rsquo;s
-maximum index (for indexed arrays),  or added as additional key-value pairs
+maximum index (for indexed arrays), or added as additional key-value pairs
 in an associative array.
 When applied to a string-valued variable, <var>value</var> is expanded and
 appended to the variable&rsquo;s value.
@@ -5594,7 +5594,8 @@ formats quote the argument string using single quotes.
 <dt><span><code>%Q</code></span></dt>
 <dd><p>like <code>%q</code>, but applies any supplied precision to the <var>argument</var>
 before quoting it.
-</p></dd>
+</p>
+</dd>
 <dt><span><code>%(<var>datefmt</var>)T</code></span></dt>
 <dd><p>Causes <code>printf</code> to output the date-time string resulting from using
 <var>datefmt</var> as a format string for <code>strftime</code>(3).
@@ -5619,6 +5620,7 @@ as a shell variable name.
 them to convert the argument string to a wide-character string and apply
 any supplied field width and precision in terms of characters, not bytes.
 </p>
+
 <p>Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the ASCII value of
@@ -8590,6 +8592,12 @@ option to the <code>set</code> builtin (see <a href="#The-Set-Builtin">The Set B
 </dd>
 <dt><span><code>-v <var>varname</var></code></span></dt>
 <dd><p>True if the shell variable <var>varname</var> is set (has been assigned a value).
+If <var>varname</var> is an indexed
+array variable name subscripted by &lsquo;<samp>@</samp>&rsquo; or &lsquo;<samp>*</samp>&rsquo;,
+this returns true if the array has any set elements.
+If <var>varname</var> is an associative
+array variable name subscripted by &lsquo;<samp>@</samp>&rsquo; or &lsquo;<samp>*</samp>&rsquo;,
+this returns true if an element with that key is set.
 </p>
 </dd>
 <dt><span><code>-R <var>varname</var></code></span></dt>
@@ -8950,7 +8958,9 @@ using the compound assignment syntax; see <a href="#Shell-Parameters">Shell Para
 The braces are required to avoid
 conflicts with the shell&rsquo;s filename expansion operators.  If the
 <var>subscript</var> is &lsquo;<samp>@</samp>&rsquo; or &lsquo;<samp>*</samp>&rsquo;, the word expands to all members
-of the array <var>name</var>.  These subscripts differ only when the word
+of the array <var>name</var>, unless otherwise noted in the description of a
+builtin or word expansion.
+These subscripts differ only when the word
 appears within double quotes.
 If the word is double-quoted,
 <code>${<var>name</var>[*]}</code> expands to a single word with

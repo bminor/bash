@@ -1,6 +1,6 @@
 /* fmtulong.c -- Convert unsigned long int to string. */
 
-/* Copyright (C) 1998-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2011,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,13 +57,9 @@ extern int errno;
 #define x_digs  "0123456789abcdef"
 #define X_digs  "0123456789ABCDEF"
 
-/* XXX -- assumes uppercase letters, lowercase letters, and digits are
-   contiguous */
-#define FMTCHAR(x) \
-  ((x) < 10) ? (x) + '0' \
-	     : (((x) < 36) ? (x) - 10 + 'a' \
-			   : (((x) < 62) ? (x) - 36 + 'A' \
-					 : (((x) == 62) ? '@' : '_')))
+static char * const all_digs = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@_";
+
+#define FMTCHAR(x) all_digs[(x)]
 
 #ifndef FL_PREFIX
 #  define FL_PREFIX	0x01	/* add 0x, 0X, or 0 prefix as appropriate */

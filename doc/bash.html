@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 August 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 August 31<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -3610,7 +3610,9 @@ Any element of an array may be referenced using
 ${<I>name</I>[<I>subscript</I>]}.  The braces are required to avoid
 conflicts with pathname expansion.  If
 <I>subscript</I> is <B>@</B> or <B>*</B>, the word expands to
-all members of <I>name</I>.  These subscripts differ only when the
+all members of <I>name</I>,
+unless noted in the description of a builtin or word expansion.
+These subscripts differ only when the
 word appears within double quotes.  If the word is double-quoted,
 ${<I>name</I>[*]} expands to a single
 word with the value of each array member separated by the first
@@ -6288,6 +6290,12 @@ True if the shell variable
 <I>varname</I>
 
 is set (has been assigned a value).
+If <I>varname</I> is an indexed
+array variable name subscripted by <I>@</I> or <I>*</I>,
+this returns true if the array has any set elements.
+If <I>varname</I> is an associative
+array variable name subscripted by <I>@</I> or <I>*</I>,
+this returns true if an element with that key is set.
 <DT><B>-R </B><I>varname</I>
 
 <DD>
@@ -12173,6 +12181,9 @@ as a shell variable name.
 The %s and %c format specifiers accept an l (long) modifier, which forces
 them to convert the argument string to a wide-character string and apply
 any supplied field width and precision in terms of characters, not bytes.
+
+
+
 <P>
 
 Arguments to non-string format specifiers are treated as C constants,
@@ -15115,7 +15126,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 August 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 August 31<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15221,7 +15232,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20230812/doc/bash.1.<BR>
-Time: 15 August 2023 16:12:02 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20230907/doc/bash.1.<BR>
+Time: 10 September 2023 17:14:39 EDT
 </BODY>
 </HTML>

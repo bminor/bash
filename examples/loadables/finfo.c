@@ -126,7 +126,7 @@ finfo_main(int argc, char **argv)
 		case 'p': flags |= OPT_PERM; break;
 		case 'P':
 			flags |= OPT_PMASK;
-			pmask = octal(sh_optarg);
+			pmask = read_octal(sh_optarg);
 			if (pmask < 0) {
 				builtin_error ("invalid mode: %s", sh_optarg);
 				return(1);

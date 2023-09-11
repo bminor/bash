@@ -268,7 +268,7 @@ printf_builtin (WORD_LIST *list)
   char convch, thisch, nextch, *format, *modstart, *precstart, *fmt, *start;
 #if defined (HANDLE_MULTIBYTE)
   char mbch[25];		/* 25 > MB_LEN_MAX, plus can handle 4-byte UTF-8 and large Unicode characters*/
-  int mbind, mblen;
+  int mbind, mblen, mb_cur_max;
 #endif
 #if defined (ARRAY_VARS)
   int arrayflags;
@@ -342,6 +342,8 @@ printf_builtin (WORD_LIST *list)
   if (format == 0 || *format == 0)
     return (EXECUTION_SUCCESS);
 
+  mb_cur_max = MB_CUR_MAX;
+
   /* Basic algorithm is to scan the format string for conversion
      specifications -- once one is found, find out if the field
      width or precision is a '*'; if it is, gather up value.  Note,
@@ -380,7 +382,16 @@ printf_builtin (WORD_LIST *list)
 
 	  if (*fmt != '%')
 	    {
-	      PC (*fmt);		/* should print entire multibyte char here */
+#if defined (HANDLE_MULTIBYTE)
+	      size_t l;
+	      int i;
+	      l = mbcharlen (fmt, mb_cur_max);
+	      for (i = 0; i < l; i++, fmt++)
+	        PC (*fmt);
+	      fmt--;	/* for loop will increment it for us again */
+#else	      
+	      PC (*fmt);
+#endif
 	      continue;
 	    }
 
@@ -1143,12 +1154,13 @@ tescape (char *estart, char *cp, int *lenp, int *sawc)
 static char *
 bexpand (char *string, int len, int *sawc, int *lenp)
 {
-  int temp;
-  char *ret, *r, *s, c;
+  int temp, c;
+  char *ret, *r, *s, *send;
 #if defined (HANDLE_MULTIBYTE)
   char mbch[25];
   int mbind, mblen;
 #endif
+  DECLARE_MBSTATE;
 
   if (string == 0 || len == 0)
     {
@@ -1171,15 +1183,21 @@ bexpand (char *string, int len, int *sawc, int *lenp)
   ret = (char *)xmalloc (len + 1);
 #endif
 
+  send = string + len;
   for (r = ret, s = string; s && *s; )
     {
-      c = *s++;
-      if (c != '\\' || *s == '\0')
+      if (s[1] == '\0')
 	{
-	  *r++ = c;
+	  *r++ = *s;
+	  break;
+	}
+      else if (*s != '\\')
+	{
+	  COPY_CHAR_P (r, s, send);
 	  continue;
 	}
-      /* output entire multibyte character here? */
+      else
+	s++;		/* *s == '\\' */
 
       temp = 0;
 #if defined (HANDLE_MULTIBYTE)
