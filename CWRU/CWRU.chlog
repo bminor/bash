@@ -7579,3 +7579,32 @@ builtins/printf.def
 	- printf_builtin: when parsing the format string, consume entire
 	  multibyte characters at a time unless they begin with '\\' or '%',
 	  to avoid characters whose encoding contains those characters
+
+				   9/11
+				   ----
+builtins/hash.def
+	- hash_builtin: if the -p option is supplied without a name to hash,
+	  it's an error
+
+hashcmd.c
+	- phash_remove: if the hash table is empty, return 1 like unalias does
+	  when the alias isn't in the hash table.
+	  Report from from Mike Jonkmans <bashbug@jonkmans.nl>
+
+				   9/13
+				   ----
+test.c
+	- binary_test,unary_test: now static
+	- cond_test: new function, calls binary_test or unary_test as appropriate
+	  and handles longjmps from test_syntax_error
+
+test.h
+	- cond_test: extern declaration
+
+execute_cmd.c
+	- execute_cond_node: call cond_test instead of binary_test or unary_test.
+	  From a report and patch fro Grisha Levit <grishalevit@gmail.com>
+
+doc/bash.1,doc/bashref.texi
+	- hash: add some text about the mutual exclusivity of the -t, -p, and
+	  -d options

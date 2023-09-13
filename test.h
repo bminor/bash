@@ -32,8 +32,7 @@
 extern int test_unop (char *);
 extern int test_binop (char *);
 
-extern int unary_test (char *, char *, int);
-extern int binary_test (char *, char *, char *, int);
+extern int cond_test (char *, char *, char *, int);
 
 extern int test_command (int, char **);
 

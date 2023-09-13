@@ -128,7 +128,7 @@
 \entry{shell, interactive}{97}
 \entry{signal}{4}
 \entry{signal handling}{46}
-\entry{special builtin}{4, 79}
+\entry{special builtin}{4, 80}
 \entry{startup files}{96}
 \entry{string translations}{7}
 \entry{suspending jobs}{118}

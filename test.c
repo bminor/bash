@@ -118,6 +118,9 @@ static void test_syntax_error (char *, char *) __attribute__((__noreturn__));
 static void beyond (void) __attribute__((__noreturn__));
 static void integer_expected_error (char *) __attribute__((__noreturn__));
 
+static int unary_test (char *, char *, int);
+static int binary_test (char *, char *, char *, int);
+
 static int unary_operator (void);
 static int binary_operator (void);
 static int two_arguments (void);
@@ -376,7 +379,7 @@ patcomp (char *string, char *pat, int op)
   return ((op == EQ) ? (m == 0) : (m != 0));
 }
 
-int
+static int
 binary_test (char *op, char *arg1, char *arg2, int flags)
 {
   int patmatch;
@@ -509,7 +512,7 @@ unary_operator (void)
   return (unary_test (op, argv[pos - 1], 0));
 }
 
-int
+static int
 unary_test (char *op, char *arg, int flags)
 {
   intmax_t r;
@@ -856,6 +859,23 @@ posixtest (void)
 
   return (value);
 }
+
+#if defined (COND_COMMAND)
+int
+cond_test (char *op, char *arg1, char *arg2, int flags)
+{
+  int code, ret;
+
+  code = setjmp_nosigs (test_exit_buf);
+
+  if (code)
+    return (test_error_return);
+
+  ret = arg2 ? binary_test (op, arg1, arg2, flags) : unary_test (op, arg1, flags);
+
+  return (ret ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+}
+#endif
 
 /*
  * [:

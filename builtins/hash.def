@@ -126,8 +126,16 @@ hash_builtin (WORD_LIST *list)
       return (EXECUTION_FAILURE);
     }
 
+  /* It's an error to specify a pathname to hash to, but no name to hash. */
+  if (pathname && list == 0)
+    {
+      builtin_usage ();
+      return (EX_USAGE);
+    }
+
   /* We want hash -r to be silent, but hash -- to print hashing info, so
      we test expunge_hash_table. */
+
   if (list == 0 && expunge_hash_table == 0)
     {
       opt = print_hashed_commands (list_portably);
@@ -144,7 +152,7 @@ hash_builtin (WORD_LIST *list)
   /* If someone runs `hash -r -t xyz' he will be disappointed. */
   if (list_targets)
     return (list_hashed_filename_targets (list, list_portably));
-      
+
 #if defined (RESTRICTED_SHELL)
   if (restricted && pathname)
     {

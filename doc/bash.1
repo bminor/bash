@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Aug 31 15:47:46 EDT 2023
+.\"	Last Change: Wed Sep 13 15:39:24 EDT 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 August 31" "GNU Bash 5.3"
+.TH BASH 1 "2023 September 13" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -9191,9 +9191,9 @@ the directories in
 and remembered.  Any previously-remembered pathname is discarded.
 If the
 .B \-p
-option is supplied, no path search is performed, and
+option is supplied, \fBhash\fP uses
 .I filename
-is used as the full filename of the command.
+as the full filename of the command.
 The
 .B \-r
 option causes the shell to forget all
@@ -9212,6 +9212,11 @@ The
 option causes output to be displayed in a format that may be reused as input.
 If no arguments are given, or if only \fB\-l\fP is supplied,
 information about remembered commands is printed.
+The \fB\-t\fP, \fB\-d\fP, and \fB\-p\fP options (the options that
+act on the \fIname\fP arguments) are mutually exclusive.
+Only one will be active.
+If more than one is supplied, \fB\-t\fP has higher priority than
+\fB\-p\fP, and both are higher priority than \fB\-d\fP.
 The return status is true unless a
 .I name
 is not found or an invalid option is supplied.

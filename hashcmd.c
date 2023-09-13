@@ -66,8 +66,11 @@ phash_remove (const char *filename)
 {
   register BUCKET_CONTENTS *item;
 
-  if (hashing_enabled == 0 || hashed_filenames == 0)
+  if (hashing_enabled == 0)
     return 0;
+
+  if (hashed_filenames == 0)
+    return 1;
 
   item = hash_remove (filename, hashed_filenames, 0);
   if (item)

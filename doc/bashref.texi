@@ -4105,6 +4105,11 @@ The @option{-l} option causes output to be displayed in a format
 that may be reused as input.
 If no arguments are given, or if only @option{-l} is supplied,
 information about remembered commands is printed.
+The @option{-t}, @option{-d}, and @option{-p} options (the options that
+act on the @var{name} arguments) are mutually exclusive.
+Only one will be active.
+If more than one is supplied, @option{-t} has higher priority than
+@option{-p}, and both are higher priority than @option{-d}.
 The return status is zero unless a @var{name} is not found or an invalid
 option is supplied.
 

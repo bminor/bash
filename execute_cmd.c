@@ -3942,7 +3942,7 @@ execute_cond_node (COND_COM *cond)
       if (varop)
 	oa = set_expand_once (0, 0);	/* no-op for compatibility levels <= 51 */
 #endif
-      result = unary_test (cond->op->word, arg1, varflag) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+      result = cond_test (cond->op->word, arg1, NULL, varflag);
 #if defined (ARRAY_VARS)
       if (varop)
 	array_expand_once = oa;
@@ -4022,9 +4022,7 @@ execute_cond_node (COND_COM *cond)
 #endif /* COND_REGEXP */
 	{
 	  extended_glob = 1;
-	  result = binary_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP|TEST_LOCALE)
-				  ? EXECUTION_SUCCESS
-				  : EXECUTION_FAILURE;
+	  result = cond_test (cond->op->word, arg1, arg2, TEST_PATMATCH|TEST_ARITHEXP|TEST_LOCALE);
 	  extended_glob = extglob_flag;
 	}
       if (arg1 != nullstr)
