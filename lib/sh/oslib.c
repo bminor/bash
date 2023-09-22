@@ -231,6 +231,7 @@ mkfifo (char *path, mode_t mode)
 #endif /* !HAVE_MKFIFO && PROCESS_SUBSTITUTION */
 
 #define DEFAULT_MAXGROUPS 64
+#define MIN_MAXGROUPS 32	/* work around macOS issue */
 
 int
 getmaxgroups (void)
@@ -256,6 +257,9 @@ getmaxgroups (void)
 
   if (maxgroups <= 0)
     maxgroups = DEFAULT_MAXGROUPS;
+
+  if (maxgroups < MIN_MAXGROUPS)
+    maxgroups = MIN_MAXGROUPS;
 
   return maxgroups;
 }

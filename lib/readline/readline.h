@@ -439,6 +439,7 @@ extern void rl_get_screen_size (int *, int *);
 extern void rl_reset_screen_size (void);
 
 extern char *rl_get_termcap (const char *);
+extern void rl_reparse_colors (void);
 
 /* Functions for character input. */
 extern int rl_stuff_char (int);

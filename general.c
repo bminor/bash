@@ -1162,7 +1162,7 @@ unquoted_tilde_word (const char *s)
    *LENP.  FLAGS tells whether or not we're in an assignment context --
    if so, `:' delimits the end of the tilde prefix as well. */
 char *
-bash_tilde_find_word (const char *s, int flags, int *lenp)
+bash_tilde_find_word (const char *s, int flags, size_t *lenp)
 {
   const char *r;
   char *ret;

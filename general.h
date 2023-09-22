@@ -344,7 +344,7 @@ extern char *printable_filename (char *, int);
 extern char *extract_colon_unit (char *, int *);
 
 extern void tilde_initialize (void);
-extern char *bash_tilde_find_word (const char *, int, int *);
+extern char *bash_tilde_find_word (const char *, int, size_t *);
 extern char *bash_tilde_expand (const char *, int);
 
 extern int group_member (gid_t);

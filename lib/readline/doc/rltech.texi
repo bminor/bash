@@ -1377,7 +1377,6 @@ If the application has assigned a value to @code{rl_macro_display_hook},
 @code{rl_macro_dumper} calls it instead of printing anything.
 If @var{readable} is greater than zero, the list is formatted in such a way
 that it can be made part of an @code{inputrc} file and re-read.
-
 @end deftypefun
 
 @deftypefun int rl_variable_bind (const char *variable, const char *value)
@@ -1411,6 +1410,10 @@ uses those capabilities to move around the screen line and perform other
 terminal-specific operations, like erasing a line.  Readline does not
 use all of a terminal's capabilities, and this function will return
 values for only those capabilities Readline uses.
+@end deftypefun
+
+@deftypefun {void} rl_reparse_colors (void)
+Read or re-read color definitions from @env{LS_COLORS}.
 @end deftypefun
 
 @deftypefun {void} rl_clear_history (void)

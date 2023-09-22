@@ -261,15 +261,15 @@ static SHELL_VAR *do_compound_assignment (const char *, char *, int);
 #endif
 static int do_assignment_internal (const WORD_DESC *, int);
 
-static char *string_extract_verbatim (const char *, size_t, int *, char *, int);
-static char *string_extract (const char *, int *, const char *, int);
-static char *string_extract_double_quoted (const char *, int *, int);
-static inline char *string_extract_single_quoted (const char *, int *, int);
-static inline int skip_single_quoted (const char *, size_t, int, int);
-static int skip_double_quoted (const char *, size_t, int, int);
-static char *extract_delimited_string (const char *, int *, char *, char *, char *, int);
-static char *extract_heredoc_dolbrace_string (const char *, int *, int, int);
-static char *extract_dollar_brace_string (const char *, int *, int, int);
+static char *string_extract_verbatim (const char *, size_t, size_t *, char *, int);
+static char *string_extract (const char *, size_t *, const char *, int);
+static char *string_extract_double_quoted (const char *, size_t *, int);
+static inline char *string_extract_single_quoted (const char *, size_t *, int);
+static inline size_t skip_single_quoted (const char *, size_t, size_t, int);
+static int skip_double_quoted (const char *, size_t, size_t, int);
+static char *extract_delimited_string (const char *, size_t *, char *, char *, char *, int);
+static char *extract_heredoc_dolbrace_string (const char *, size_t *, int, int);
+static char *extract_dollar_brace_string (const char *, size_t *, int, int);
 static int skip_matched_pair (const char *, int, int, int, int);
 
 static char *pos_params (const char *, int, int, int, int);
@@ -349,8 +349,8 @@ static char *parameter_brace_patsub (char *, char *, array_eltstate_t *, char *,
 static char *pos_params_casemod (char *, char *, int, int);
 static char *parameter_brace_casemod (char *, char *, array_eltstate_t *, int, char *, int, int, int);
 
-static WORD_DESC *parameter_brace_expand (char *, int *, int, int, int *, int *);
-static WORD_DESC *param_expand (char *, int *, int, int *, int *, int *, int *, int);
+static WORD_DESC *parameter_brace_expand (char *, size_t *, int, int, int *, int *);
+static WORD_DESC *param_expand (char *, size_t *, int, int *, int *, int *, int *, int);
 
 static WORD_LIST *expand_word_internal (WORD_DESC *, int, int, int *, int *);
 
@@ -641,8 +641,8 @@ quoted_strchr (char *s, int c, int flags)
 static int
 unquoted_member (int character, const char *string)
 {
-  size_t slen;
-  int sindex, c;
+  size_t slen, sindex;
+  int c;
   DECLARE_MBSTATE;
 
   slen = strlen (string);
@@ -680,8 +680,8 @@ unquoted_member (int character, const char *string)
 static int
 unquoted_substring (const char *substr, const char *string)
 {
-  size_t slen;
-  int sindex, c, sublen;
+  size_t sindex, slen, sublen;
+  int c;
   DECLARE_MBSTATE;
 
   if (substr == 0 || *substr == '\0')
@@ -779,11 +779,11 @@ sub_append_number (intmax_t number, char *target, size_t *indx, size_t *size)
    update SINDEX.  If (flags & SX_REQMATCH) is non-zero, the string must
    contain a closing character from CHARLIST. */
 static char *
-string_extract (const char *string, int *sindex, const char *charlist, int flags)
+string_extract (const char *string, size_t *sindex, const char *charlist, int flags)
 {
-  register int c, i;
+  int c;
   int found;
-  size_t slen;
+  size_t i, slen;
   char *temp;
   DECLARE_MBSTATE;
 
@@ -840,14 +840,13 @@ string_extract (const char *string, int *sindex, const char *charlist, int flags
    Backslashes between the embedded double quotes are processed.  If STRIPDQ
    is zero, an unquoted `"' terminates the string. */
 static char *
-string_extract_double_quoted (const char *string, int *sindex, int flags)
+string_extract_double_quoted (const char *string, size_t *sindex, int flags)
 {
-  size_t slen;
+  size_t i, j, t, si, slen;
   const char *send;
-  int j, i, t;
   unsigned char c;
   char *temp, *ret;		/* The new string we return. */
-  int pass_next, backquote, si;	/* State variables for the machine. */
+  int pass_next, backquote;	/* State variables for the machine. */
   int dquote;
   int stripdq;
   DECLARE_MBSTATE;
@@ -1003,11 +1002,12 @@ add_one_character:
 
 /* This should really be another option to string_extract_double_quoted. */
 static int
-skip_double_quoted (const char *string, size_t slen, int sind, int flags)
+skip_double_quoted (const char *string, size_t slen, size_t sind, int flags)
 {
-  int c, i;
+  int c;
+  size_t i, si;
   char *ret;
-  int pass_next, backquote, si;
+  int pass_next, backquote;
   DECLARE_MBSTATE;
 
   pass_next = backquote = 0;
@@ -1076,10 +1076,9 @@ skip_double_quoted (const char *string, size_t slen, int sind, int flags)
    the closing single quote. ALLOWESC allows the single quote to be quoted by
    a backslash; it's not used yet. */
 static inline char *
-string_extract_single_quoted (const char *string, int *sindex, int allowesc)
+string_extract_single_quoted (const char *string, size_t *sindex, int allowesc)
 {
-  register int i;
-  size_t slen;
+  size_t i, slen;
   char *t;
   int pass_next;
   DECLARE_MBSTATE;
@@ -1115,36 +1114,35 @@ string_extract_single_quoted (const char *string, int *sindex, int allowesc)
 /* Skip over a single-quoted string.  We overload the SX_COMPLETE flag to mean
    that we are splitting out words for completion and have encountered a $'...'
    string, which allows backslash-escaped single quotes. */
-static inline int
-skip_single_quoted (const char *string, size_t slen, int sind, int flags)
+static inline size_t
+skip_single_quoted (const char *string, size_t slen, size_t sind, int flags)
 {
-  register int c;
+  size_t si;
   DECLARE_MBSTATE;
 
-  c = sind;
-  while (string[c] && string[c] != '\'')
+  si = sind;
+  while (string[si] && string[si] != '\'')
     {
-      if ((flags & SX_COMPLETE) && string[c] == '\\' && string[c+1] == '\'' && string[c+2])
-	ADVANCE_CHAR (string, slen, c);
-      ADVANCE_CHAR (string, slen, c);
+      if ((flags & SX_COMPLETE) && string[si] == '\\' && string[si+1] == '\'' && string[si+2])
+	ADVANCE_CHAR (string, slen, si);
+      ADVANCE_CHAR (string, slen, si);
     }
 
-  if (string[c])
-    c++;
-  return c;
+  if (string[si])
+    si++;
+  return si;
 }
 
 /* Just like string_extract, but doesn't hack backslashes or any of
    that other stuff.  Obeys CTLESC quoting.  Used to do splitting on $IFS. */
 static char *
-string_extract_verbatim (const char *string, size_t slen, int *sindex, char *charlist, int flags)
+string_extract_verbatim (const char *string, size_t slen, size_t *sindex, char *charlist, int flags)
 {
-  register int i;
+  size_t i, c;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t *wcharlist;
   mbstate_t mbstmp;
 #endif
-  int c;
   char *temp;
   DECLARE_MBSTATE;
 
@@ -1250,7 +1248,7 @@ string_extract_verbatim (const char *string, size_t slen, int *sindex, char *cha
    Make (SINDEX) get the position of the matching ")". )
    XFLAGS is additional flags to pass to other extraction functions. */
 char *
-extract_command_subst (const char *string, int *sindex, int xflags)
+extract_command_subst (const char *string, size_t *sindex, int xflags)
 {
   char *ret;
   char *xstr;
@@ -1269,7 +1267,7 @@ extract_command_subst (const char *string, int *sindex, int xflags)
 /* Take a ${Ccommand} where C is a character that introduces a function
    substitution and extract the string. */
 char *
-extract_function_subst (const char *string, int *sindex, int quoted, int xflags)
+extract_function_subst (const char *string, size_t *sindex, int quoted, int xflags)
 {
   char *ret;
   char *xstr;
@@ -1289,7 +1287,7 @@ extract_function_subst (const char *string, int *sindex, int quoted, int xflags)
    Start extracting at (SINDEX) as if we had just seen "$[".
    Make (SINDEX) get the position of the matching "]". */
 char *
-extract_arithmetic_subst (const char *string, int *sindex)
+extract_arithmetic_subst (const char *string, size_t *sindex)
 {
   return (extract_delimited_string (string, sindex, "$[", "[", "]", 0)); /*]*/
 }
@@ -1299,7 +1297,7 @@ extract_arithmetic_subst (const char *string, int *sindex)
    Start extracting at (SINDEX) as if we had just seen "<(".
    Make (SINDEX) get the position of the matching ")". */ /*))*/
 char *
-extract_process_subst (const char *string, char *starter, int *sindex, int xflags)
+extract_process_subst (const char *string, char *starter, size_t *sindex, int xflags)
 {
 #if 0
   /* XXX - check xflags&SX_COMPLETE here? */
@@ -1319,9 +1317,9 @@ extract_process_subst (const char *string, char *starter, int *sindex, int xflag
    each caller verifies that the last character in STRING is a right paren,
    we don't even need to call extract_delimited_string. */
 char *
-extract_array_assignment_list (const char *string, int *sindex)
+extract_array_assignment_list (const char *string, size_t *sindex)
 {
-  int slen;
+  size_t slen;
   char *ret;
 
   slen = strlen (string);
@@ -1344,10 +1342,10 @@ extract_array_assignment_list (const char *string, int *sindex)
    contains a character string that can also match CLOSER and thus
    needs to be skipped. */
 static char *
-extract_delimited_string (const char *string, int *sindex, char *opener, char *alt_opener, char *closer, int flags)
+extract_delimited_string (const char *string, size_t *sindex, char *opener, char *alt_opener, char *closer, int flags)
 {
-  int i, c, si;
-  size_t slen;
+  int c;
+  size_t i, si, slen;
   char *t, *result;
   int pass_character, nesting_level, in_comment;
   size_t len_closer, len_opener, len_alt_opener;
@@ -1371,7 +1369,6 @@ extract_delimited_string (const char *string, int *sindex, char *opener, char *a
 	 the end of the string, catch it and cut the loop. */
       if (i > slen)
 	{
-	  i = slen;
 	  c = string[i = slen];
 	  break;
 	}
@@ -1522,11 +1519,11 @@ extract_delimited_string (const char *string, int *sindex, char *opener, char *a
    This needs to match the logic in parse.y:parse_matched_pair so we get
    consistent behavior between here-documents and double-quoted strings. */
 static char *
-extract_heredoc_dolbrace_string (const char *string, int *sindex, int quoted, int flags)
+extract_heredoc_dolbrace_string (const char *string, size_t *sindex, int quoted, int flags)
 {
-  register int i, c;
-  size_t slen, tlen, result_index, result_size;
-  int pass_character, nesting_level, si, dolbrace_state;
+  register int c;
+  size_t i, si, slen, tlen, result_index, result_size;
+  int pass_character, nesting_level, dolbrace_state;
   char *result, *t;
   const char *send;
   DECLARE_MBSTATE;
@@ -1809,11 +1806,11 @@ static int dbstate[PARAMEXPNEST_MAX];
    occurs inside double quotes. */
 /* XXX -- this is very similar to extract_delimited_string -- XXX */
 static char *
-extract_dollar_brace_string (const char *string, int *sindex, int quoted, int flags)
+extract_dollar_brace_string (const char *string, size_t *sindex, int quoted, int flags)
 {
   register int i, c;
-  size_t slen;
-  int pass_character, nesting_level, si, dolbrace_state;
+  size_t si, slen;
+  int pass_character, nesting_level, dolbrace_state;
   char *result, *t;
   DECLARE_MBSTATE;
 
@@ -2009,7 +2006,7 @@ char *
 de_backslash (char *string, int qflags)
 {
   register size_t slen;
-  register int i, j, prev_i;
+  register size_t i, j, prev_i;
   DECLARE_MBSTATE;
 
   slen = strlen (string);
@@ -2072,8 +2069,8 @@ unquote_bang (char *string)
 static int
 skip_matched_pair (const char *string, int start, int open, int close, int flags)
 {
-  int i, pass_next, backq, si, c, count, oldjmp;
-  size_t slen;
+  int pass_next, backq, c, count, oldjmp;
+  size_t i, si, slen;
   char *temp;
   DECLARE_MBSTATE;
 
@@ -2185,10 +2182,10 @@ skipsubscript (const char *string, int start, int flags)
 int
 skip_to_delim (const char *string, int start, const char *delims, int flags)
 {
-  int i, pass_next, backq, dquote, si, c, oldjmp;
+  int pass_next, backq, dquote, c, oldjmp;
   int invert, skipquote, skipcmd, noprocsub, completeflag;
   int arithexp, skipcol;
-  size_t slen;
+  size_t i, si, slen;
   char *temp, open[3];
   DECLARE_MBSTATE;
 
@@ -2363,9 +2360,9 @@ skip_to_delim (const char *string, int start, const char *delims, int flags)
 int
 skip_to_histexp (const char *string, int start, const char *delims, int flags)
 {
-  int i, pass_next, backq, dquote, c, oldjmp;
+  int pass_next, backq, dquote, c, oldjmp;
   int histexp_comsub, histexp_backq, old_dquote;
-  size_t slen;
+  size_t i, slen;
   DECLARE_MBSTATE;
 
   slen = strlen (string + start) + start;
@@ -3108,7 +3105,8 @@ list_string (char *string, char *separators, int quoted)
   WORD_LIST *result;
   WORD_DESC *t;
   char *current_word, *s;
-  int sindex, sh_style_split, whitesep, xflags, free_word;
+  int sh_style_split, whitesep, xflags, free_word;
+  size_t sindex;
   size_t slen;
 
   if (!string || !*string)
@@ -3149,7 +3147,8 @@ list_string (char *string, char *separators, int quoted)
 	skip sequences of whitespace characters as long as they are separators
      This obeys the field splitting rules in Posix.2. */
   slen = STRLEN (string);
-  for (result = (WORD_LIST *)NULL, sindex = 0; string[sindex]; )
+  result = NULL;
+  for (sindex = 0; sindex < slen; )
     {
       /* Don't need string length in ADVANCE_CHAR unless multibyte chars are
 	 possible, but need it in string_extract_verbatim for bounds checking */
@@ -3254,8 +3253,9 @@ get_word_from_string (char **stringp, char *separators, char **endptr)
 {
   register char *s;
   char *current_word;
-  int sindex, sh_style_split, whitesep, xflags;
+  int sh_style_split, whitesep, xflags;
   unsigned char local_cmap[UCHAR_MAX+1];	/* really only need single-byte chars here */
+  size_t sindex;
   size_t slen;
 
   if (!stringp || !*stringp || !**stringp)
@@ -3369,7 +3369,7 @@ list_string_with_quotes (char *string)
 {
   WORD_LIST *list;
   char *token, *s;
-  size_t s_len;
+  size_t slen;
   int c, i, tokstart, len;
 
   for (s = string; s && *s && spctabnl (*s); s++)
@@ -3377,7 +3377,7 @@ list_string_with_quotes (char *string)
   if (s == 0 || *s == 0)
     return ((WORD_LIST *)NULL);
 
-  s_len = strlen (s);
+  slen = strlen (s);
   tokstart = i = 0;
   list = (WORD_LIST *)NULL;
   while (1)
@@ -3390,9 +3390,9 @@ list_string_with_quotes (char *string)
 	    i++;
 	}
       else if (c == '\'')
-	i = skip_single_quoted (s, s_len, ++i, 0);
+	i = skip_single_quoted (s, slen, ++i, 0);
       else if (c == '"')
-	i = skip_double_quoted (s, s_len, ++i, 0);
+	i = skip_double_quoted (s, slen, ++i, 0);
       else if (c == 0 || spctabnl (c))
 	{
 	  /* We have found the end of a token.  Make a word out of it and
@@ -3515,7 +3515,7 @@ do_assignment_internal (const WORD_DESC *word, int expand)
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
   char *t;
-  int ni;
+  size_t ni;
 #endif
   char *string;
 
@@ -3542,7 +3542,8 @@ do_assignment_internal (const WORD_DESC *word, int expand)
 #if defined (ARRAY_VARS)
       if (expand && (word->flags & W_COMPASSIGN))
 	{
-	  assign_list = ni = 1;
+	  assign_list = 1;
+	  ni = 1;
 	  value = extract_array_assignment_list (temp, &ni);
 	}
       else
@@ -4119,7 +4120,8 @@ char *
 expand_string_dollar_quote (const char *string, int flags)
 {
   size_t slen, retind, retsize;
-  int sindex, c, peekc, news, tlen;
+  size_t sindex, news;
+  int c, peekc;
   char *ret, *trans, *t;
   size_t translen;
   const char *send;
@@ -7565,7 +7567,8 @@ parameter_brace_expand_word (char *name, int var_is_special, int quoted, int pfl
     }
   else if (var_is_special)      /* ${@} */
     {
-      int sindex;
+      size_t sindex;
+
       tt = (char *)xmalloc (2 + strlen (name));
       tt[sindex = 0] = '$';
       strcpy (tt + 1, name);
@@ -7845,7 +7848,8 @@ parameter_brace_expand_rhs (char *name, char *value,
   WORD_DESC *w;
   WORD_LIST *l, *tl;
   char *t, *t1, *temp, *vname, *newval;
-  int l_hasdollat, sindex, arrayref;
+  int l_hasdollat, arrayref;
+  size_t sindex;
   SHELL_VAR *v;
   array_eltstate_t es;
 
@@ -9013,8 +9017,8 @@ parameter_brace_substring (char *varname, char *value, array_eltstate_t *estatep
 static int
 shouldexp_replacement (const char *s)
 {
-  size_t slen;
-  int sindex, c;
+  size_t sindex, slen;
+  int c;
   DECLARE_MBSTATE;
 
   sindex = 0;
@@ -9636,13 +9640,14 @@ chk_arithsub (const char *s, int len)
 
 /* ${[#][!]name[[:][^[^]][,[,]]#[#]%[%]-=?+[word][:e1[:e2]]]} */
 static WORD_DESC *
-parameter_brace_expand (char *string, int *indexp, int quoted, int pflags, int *quoted_dollar_atp, int *contains_dollar_at)
+parameter_brace_expand (char *string, size_t *indexp, int quoted, int pflags, int *quoted_dollar_atp, int *contains_dollar_at)
 {
   int check_nullness, var_is_set, var_is_null, var_is_special;
   int want_substring, want_indir, want_patsub, want_casemod, want_attributes;
   char *name, *value, *temp, *temp1;
   WORD_DESC *tdesc, *ret;
-  int t_index, sindex, c, tflag, modspec, local_pflags, all_element_arrayref;
+  size_t t_index, sindex;
+  int c, tflag, modspec, local_pflags, all_element_arrayref;
   intmax_t number;
   array_eltstate_t es;
 
@@ -10322,12 +10327,13 @@ bad_substitution:
    the braces are used, parameter_brace_expand() does the work,
    possibly calling param_expand recursively. */
 static WORD_DESC *
-param_expand (char *string, int *sindex, int quoted,
+param_expand (char *string, size_t *sindex, int quoted,
 	      int *expanded_something, int *contains_dollar_at, int *quoted_dollar_at_p,
 	      int *had_quoted_null_p, int pflags)
 {
   char *temp, *temp1, uerror[3], *savecmd;
-  int zindex, t_index, expok, eflag;
+  size_t zindex, t_index;
+  int expok, eflag;
   unsigned char c;
   intmax_t number;
   SHELL_VAR *var;
@@ -10952,11 +10958,11 @@ expand_subscript_string (const char *string, int quoted)
    only expand it once, we quote the characters that would start another
    expansion and the bracket characters that are special to array subscripts. */
 static char *
-expand_array_subscript (const char *string, int *sindex, int quoted, int flags)
+expand_array_subscript (const char *string, size_t *sindex, int quoted, int flags)
 {
   char *ret, *exp, *t;
-  size_t slen;
-  int si, ni;
+  size_t si, slen;
+  int ni;
 
   si = *sindex;
   slen = STRLEN (string);
@@ -11070,7 +11076,7 @@ expand_word_internal (WORD_DESC *word, int quoted, int isexp, int *contains_doll
   size_t string_size;
 
   /* The index into STRING. */
-  int sindex;
+  size_t sindex;
 
   /* This gets 1 if we see a $@ while quoted. */
   int quoted_dollar_at;
@@ -11093,7 +11099,7 @@ expand_word_internal (WORD_DESC *word, int quoted, int isexp, int *contains_doll
   int assignoff;		/* If assignment, offset of `=' */
 
   register unsigned char c;	/* Current character. */
-  int t_index;			/* For calls to string_extract_xxx. */
+  size_t t_index;		/* For calls to string_extract_xxx. */
 
   char twochars[2];
 
@@ -12002,10 +12008,10 @@ set_word_flags:
 char *
 string_quote_removal (const char *string, int quoted)
 {
-  size_t slen;
+  size_t slen, sindex, tindex;
   char *r, *result_string, *temp;
   const char *send;
-  int sindex, tindex, dquote;
+  int dquote;
   unsigned char c;
   DECLARE_MBSTATE;
 
@@ -12678,7 +12684,8 @@ static void
 expand_compound_assignment_word (WORD_LIST *tlist, int atype)
 {
   WORD_LIST *l;
-  int wlen, oind, t;
+  size_t wlen, oind;
+  int t;
   char *value, *temp;
 
 /*itrace("expand_compound_assignment_word: original word = -%s-", tlist->word->word);*/

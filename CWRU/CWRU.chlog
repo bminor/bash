@@ -7608,3 +7608,47 @@ execute_cmd.c
 doc/bash.1,doc/bashref.texi
 	- hash: add some text about the mutual exclusivity of the -t, -p, and
 	  -d options
+
+				   9/14
+				   ----
+subst.c,subst.h,externs.h
+	- string_extract,string_extract_verbatim,string_extract_double_quoted,
+	  string_extract_single_quoted,skip_single_quoted,skip_double_quoted,
+	  extract_delimited_string,extract_heredoc_dolbrace_string,
+	  extract_dollar_brace_string,parameter_brace_expand,param_expand,
+	  extract_command_subst,extract_function_subst,extract_arithmetic_subst,
+	  extract_process_subst,extract_array_assignment_list,
+	  expand_array_subscript
+	  change function signatures to take size_t * instead of int * for
+	  arguments that are string indices or lengths, change callers
+	- unquoted_substring,unquoted_member,string_extract,
+	  string_extract_double_quoted,skip_double_quoted,
+	  string_extract_single_quoted,skip_single_quoted,
+	  string_extract_verbatim,extract_delimited_string,
+	  extract_heredoc_dolbrace_string,extract_dollar_brace_string,
+	  parameter_brace_expand,param_expand,skip_matched_pair,skip_to_delim,
+	  skip_to_histexp,list_string,expand_string_dollar_quote,
+	  parameter_brace_expand_rhs,expand_array_subscript,shouldexp_replacement,
+	  expand_array_subscript,string_quote_removal: change variables used
+	  for string indexes to size_t
+	  [merge from size_t branch]
+
+arrayfunc.c
+	- expand_compound_array_assignment: use size_t for string indices
+
+braces.c
+	- brace_gobbler: use size_t for string indices
+
+parse.y
+	- xparse_dolparen: change function signature to use size_t *
+	  instead of int * for string index, use size_t for string indices
+
+general.c, general.h
+	- bash_tilde_find_word: change function signature to use size_t *
+	  instead of int * for string index
+
+lib/readline/readline.h
+	- rl_reparse_colors: extern declaration
+
+lib/readline/doc/rltech.texi
+	- rl_reparse_colors: document as public function

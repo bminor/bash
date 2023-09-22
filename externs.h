@@ -109,7 +109,7 @@ extern char **brace_expand (char *);
 extern int yyparse (void);
 extern int return_EOF (void);
 extern void push_token (int);
-extern char *xparse_dolparen (const char *, char *, int *, int);
+extern char *xparse_dolparen (const char *, char *, size_t *, int);
 extern COMMAND *parse_string_to_command (char *, int);
 extern void reset_parser (void);
 extern void reset_readahead_token (void);

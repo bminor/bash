@@ -555,7 +555,7 @@ expand_compound_array_assignment (SHELL_VAR *var, char *value, int flags)
 {
   WORD_LIST *list, *nlist;
   char *val;
-  int ni;
+  size_t ni;
 
   /* This condition is true when invoked from the declare builtin with a
      command like

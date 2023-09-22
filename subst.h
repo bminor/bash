@@ -85,21 +85,21 @@ extern void unquote_bang (char *);
    Start extracting at (SINDEX) as if we had just seen "$(".
    Make (SINDEX) get the position just after the matching ")".
    XFLAGS is additional flags to pass to other extraction functions, */
-extern char *extract_command_subst (const char *, int *, int);
+extern char *extract_command_subst (const char *, size_t *, int);
 
 /* Placeholder */
-extern char *extract_function_subst (const char *, int *, int, int);
+extern char *extract_function_subst (const char *, size_t *, int, int);
 
 /* Extract the $[ construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "$[".
    Make (SINDEX) get the position just after the matching "]". */
-extern char *extract_arithmetic_subst (const char *, int *);
+extern char *extract_arithmetic_subst (const char *, size_t *);
 
 #if defined (PROCESS_SUBSTITUTION)
 /* Extract the <( or >( construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "<(".
    Make (SINDEX) get the position just after the matching ")". */
-extern char *extract_process_subst (const char *, char *, int *, int);
+extern char *extract_process_subst (const char *, char *, size_t *, int);
 #endif /* PROCESS_SUBSTITUTION */
 
 /* Extract the name of the variable to bind to from the assignment string. */
@@ -303,7 +303,7 @@ extern void reap_procsubs (void);
 extern WORD_LIST *list_string_with_quotes (char *);
 
 #if defined (ARRAY_VARS)
-extern char *extract_array_assignment_list (const char *, int *);
+extern char *extract_array_assignment_list (const char *, size_t *);
 #endif
 
 #if defined (COND_COMMAND)

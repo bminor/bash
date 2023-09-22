@@ -580,7 +580,7 @@ brace_gobbler (char *text, size_t tlen, int *indx, int satisfy)
 {
   register int i, c, quoted, level, commas, pass_next;
 #if defined (SHELL)
-  int si;
+  size_t si;
   char *t;
 #endif
   DECLARE_MBSTATE;
