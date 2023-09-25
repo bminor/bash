@@ -34,6 +34,21 @@ unalias hoowah
 
 # the iteration variable must be a valid identifier
 for 1 in a b c; do echo $1; done
+for f\1 in a b c ; do echo $f ; done
+
+# in posix mode, it's a fatal error
+(set -o posix
+for invalid-name in a b c; do echo $1; done; echo after posix for)
+(set -o posix
+for f\1 in a b c ; do echo $f ; done; echo after posix for 2)
+
+# same with select
+select 1 in a b c; do echo $REPLY; done
+select f\1 in a b c ; do echo $REPLY ; done
+select invalid-name in a b c; do echo $REPLY; done
+
+(set -o posix ; select 1 in a b c; do echo $REPLY; done; echo after posix select)
+(set -o posix ; select f\1 in a b c ; do echo $REPLY ; done ; echo after posix select 2)
 
 # try to rebind a read-only function
 func()
@@ -271,6 +286,8 @@ kill -INT
 
 # bad shell option names
 set -o trackall		# bash is not ksh
+set -q			# this is an error
+set -i			# this is not allowed
 
 # problem with versions through bash-4.2
 readonly xx=5

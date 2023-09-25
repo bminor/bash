@@ -3416,7 +3416,14 @@ execute_select_command (SELECT_COM *select_command)
   int retval, list_len, show_menu, save_line_number;
 
   if (check_identifier (select_command->name, 1) == 0)
-    return (EXECUTION_FAILURE);
+    {
+      if (posixly_correct && interactive_shell == 0)
+	{
+	  last_command_exit_value = EX_BADUSAGE;
+	  jump_to_top_level (ERREXIT);
+	}
+      return (EXECUTION_FAILURE);
+    }
 
   save_line_number = line_number;
   line_number = select_command->line;

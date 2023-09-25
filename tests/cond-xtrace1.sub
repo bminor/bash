@@ -1,0 +1,19 @@
+# printing conditional commands for xtrace
+
+set -x
+
+# error
+[[ -t X ]]
+# null operand
+[[ $b > 7 ]]
+
+# successful unary operator
+[[ -n X ]]
+
+# successful binary operator
+ivar=42
+[[ $ivar -eq 42 ]]
+
+# compound operator, displayed as two unary expressions
+
+[[ -n a && -n b ]]

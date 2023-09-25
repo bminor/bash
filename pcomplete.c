@@ -365,10 +365,10 @@ it_init_aliases (ITEMLIST *itp)
   sl->list[n] = (char *)NULL;
   sl->list_size = sl->list_len = n;
   itp->slist = sl;
+  free (alias_list);
 #else
   itp->slist = (STRINGLIST *)NULL;
 #endif
-  free (alias_list);
   return 1;
 }
 

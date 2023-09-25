@@ -183,7 +183,7 @@ redirection_error (REDIRECT *temp, int error, char *fn)
       oflags = temp->redirectee.filename->flags;
       if (posixly_correct && interactive_shell == 0)
 	temp->redirectee.filename->flags |= W_NOGLOB;
-      temp->redirectee.filename->flags |= W_NOCOMSUB;
+      temp->redirectee.filename->flags |= W_NOCOMSUB|W_NOPROCSUB;
       filename = allocname = redirection_expand (temp->redirectee.filename);
       temp->redirectee.filename->flags = oflags;
       if (filename == 0)

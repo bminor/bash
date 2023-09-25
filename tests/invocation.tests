@@ -1,0 +1,62 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+: ${THIS_SH:=./bash}
+
+# invocation modes and errors
+
+export BASH_ARGV0=this-bash
+
+${THIS_SH} .
+
+#${THIS_SH} --version -c 'exit 0' bash
+#${THIS_SH} --help -c 'exit 0' bash
+
+${THIS_SH} -c |& sed 's|^.*/bash|bash|'
+
+${THIS_SH} --badopt |& sed 's|^.*/bash|bash|'
+${THIS_SH} --initfile |& sed 's|^.*/bash|bash|'
+${THIS_SH} -q |& sed 's|^.*/bash|bash|'
+
+${THIS_SH} -c 'echo $0'
+
+{ ${THIS_SH} -c 'echo $-' bash | grep c >/dev/null; } && echo '$- for -c includes c'
+
+: ${TMPDIR:=/tmp}
+TDIR=$TMPDIR/invocation-$$
+mkdir $TDIR || exit 1
+SAVEPWD=$PWD
+
+# script that ends with a comment and no newline
+printf 'echo a # comment' > $TDIR/x23.in
+${THIS_SH} $TDIR/x23.in
+printf 'echo a' > $TDIR/x23.in
+${THIS_SH} $TDIR/x23.in
+rm -f $TDIR/x23.in
+
+# script with invalid interpreter
+cat > $TDIR/x23 <<EOF
+#! nosuchfile
+echo bad-interp
+EOF
+chmod +x $TDIR/x23
+
+# this is fine
+${THIS_SH} $TDIR/x23
+command cd -L $TDIR
+# but this results in a bad-interpreter error
+./x23
+
+cd $SAVEPWD
+rm -rf $TDIR

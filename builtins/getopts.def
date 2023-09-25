@@ -312,22 +312,15 @@ getopts_builtin (WORD_LIST *list)
   char **av;
   int ac, ret;
 
+  if (no_options (list))
+    return (EX_USAGE);
+  list = loptend;	/* skip over possible `--' */
+
   if (list == 0)
     {
       builtin_usage ();
       return EX_USAGE;
     }
-
-  reset_internal_getopt ();
-  if ((ret = internal_getopt (list, "")) != -1)
-    {
-      if (ret == GETOPT_HELP)
-	builtin_help ();
-      else
-	builtin_usage ();
-      return (EX_USAGE);
-    }
-  list = loptend;
 
   av = make_builtin_argv (list, &ac);
   ret = dogetopts (ac, av);

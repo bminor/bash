@@ -1,0 +1,38 @@
+# test expression evaluation with unset variables
+set -u
+
+( echo $(( a > 4 )) ; echo after 1 )	# error
+( echo $(( a[0] > 4 )); echo after 2)	# error
+
+set +u
+( echo $(( a > 4 )) ; echo after 3 $? )
+( echo $(( a[0] > 4 )); echo after 4 $?)
+
+# this is a recursion stack error
+a=b
+b=a
+echo $(( a + 7 ))
+
+# make sure command printing works for arithmetic expansions and commands
+set -x
+var=42
+
+echo $(( $var ))
+echo $?
+
+echo $(( $null ))
+echo $?
+
+(( $var ))
+echo $?
+
+(( $null ))
+echo $?
+
+set +x
+
+# invalid expressions in different cases
+x=4+
+declare -i x
+x+=7 y=4
+echo x = $x y = $y

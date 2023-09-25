@@ -7652,3 +7652,28 @@ lib/readline/readline.h
 
 lib/readline/doc/rltech.texi
 	- rl_reparse_colors: document as public function
+
+				   9/21
+				   ----
+pcomplete.c
+	- it_init_aliases: move the free (alias_list) inside #ifdef ALIAS.
+	  Report and fix from Mike Jonkmans <bashbug@jonkmans.nl>
+
+redir.c
+	- redirection_error: set W_NOPROCSUB in the word redirection_error
+	  creates to call redirection_expand
+
+builtins/bind.def
+	 - bind_builtin: use CASE_HELPOPT so the long doc gets printed when
+	   --help is supplied
+
+builtins/getopts.def
+	- getopts_builtin: change to use no_options()
+
+				   9/22
+				   ----
+execute_cmd.c
+	- execute_select_command: in posix mode, an invalid selection variable
+	  name is a fatal error, just like with `for'. This is compatible with
+	  ksh93 and mksh
+

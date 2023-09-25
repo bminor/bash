@@ -11,6 +11,8 @@ bar ()
 ./vredir.tests: line 19: v: readonly variable
 ./vredir.tests: line 19: v: cannot assign fd to variable
 42
+./vredir.tests: line 38: v: readonly variable
+./vredir.tests: line 38: v: cannot assign fd to variable
 bar is a function
 bar () 
 { 
@@ -98,4 +100,6 @@ swizzle ()
     exec {stdin}<&${fd[0]}-;
     exec {stdout}>&${fd[1]}-
 }
-./vredir8.sub: line 12: $fd: Bad file descriptor
+redir 2
+./vredir8.sub: line 33: $fd: Bad file descriptor
+./vredir8.sub: line 38: $fd: Bad file descriptor

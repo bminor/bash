@@ -76,6 +76,16 @@ echo $(echo $( echo nested )
 )
 )
 
+# empty comsubs, fork and nofork
+echo blank --$(
+)--
+echo blank --$()--
+
+echo blank --${ 
+}--
+echo blank --${  }--
+
+
 BUILDDIR=/builds/test
 read << EOC
 Dir: ${BUILDDIR#<(echo a)/}
