@@ -1,3 +1,5 @@
+t
+1
 t -a noexist
 1
 t -a run-all
@@ -136,6 +138,8 @@ t 700 -le 1000 -a -n "1" -a "20" = "20"
 0
 t ! \( 700 -le 1000 -a -n "1" -a "20" = "20" \)
 1
+t -n xx -a -z "" -a -t 0 -a -t
+0
 t /tmp/abc -nt /tmp/def
 1
 t /tmp/abc -ot /tmp/def
@@ -148,6 +152,18 @@ t /tmp/abc -ef /tmp/def
 1
 t /tmp/abc -ef /tmp/ghi
 0
+t noexist -ot /tmp/abc
+0
+t /tmp/abc -ot noexist
+1
+t noexist -nt /tmp/abc
+1
+t noexist -ef /tmp/abc
+1
+t -N noexist
+1
+t -N /tmp/abc
+1
 t -r /dev/fd/0
 0
 t -w /dev/fd/1
@@ -186,6 +202,8 @@ t -v set
 0
 t -v set
 0
+t -R UID
+1
 t xx -a yy
 0
 t xx -o ""
@@ -216,6 +234,8 @@ t ( -E )
 0
 t ( "" )
 1
+t ( -n xx )
+0
 t ! -z "$z"
 0
 t ! -n "$z"
@@ -274,7 +294,13 @@ b ( 1 = 2
 2
 ./test.tests: line 26: test: too many arguments
 2
-./test.tests: line 434: [: missing `]'
+./test.tests: line 26: test: syntax error: `-t' unexpected
+2
+./test.tests: line 26: test: argument expected
+2
+./test.tests: line 473: [: missing `]'
+2
+./test.tests: line 475: [: missing `]'
 2
 ./test.tests: line 26: test: (: unary operator expected
 2

@@ -21,9 +21,12 @@ type
 # this should be a usage error
 type -r ${THIS_SH}
 
-# these should behave identically
+# these should behave identically, but POSIX says command -v is silent if the name is not found
 type notthere
 command -v notthere
+
+# but this will produce an error message
+command -V notthere
 
 alias m=more
 
@@ -102,9 +105,7 @@ f() {
 type f | cat -v
 
 ${THIS_SH} type1.sub
-
 ${THIS_SH} type2.sub
-
 ${THIS_SH} type3.sub
-
 ${THIS_SH} type4.sub
+${THIS_SH} type5.sub

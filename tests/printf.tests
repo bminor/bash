@@ -60,6 +60,16 @@ printf "%s%10q\n" unquoted quoted
 
 printf "%q\n" 'this&that'
 
+# %Q is like %q but treats the precision differently
+S="a'b"
+S1="${S@Q}"
+T=';ls'
+
+printf 'echo %.2q%q\n' "$S" "$T"
+printf 'echo %.2Q%Q\n' "$S" "$T"	# note the difference
+# a different way to do it
+printf 'echo %.*s%q\n' ${#S1} "$S1" "$T"
+
 # make sure the format string is reused to use up arguments
 printf "%d " 1 2 3 4 5; printf "\n"
 
@@ -323,6 +333,13 @@ printf -v var "%b" @(hugo); echo "x${var}x"
 
 # make sure that missing arguments are always handled like the empty string
 printf "<%3s><%3b>\n"
+
+# let's test some out-of-range integer errors for POSIX-specified behavior
+TOOBIG=9223372036854775825
+TOOSMALL=-9223372036854775815
+
+printf '%d\n' "$TOOBIG"
+printf '%d\n' "$TOOSMALL"
 
 # tests variable assignment with -v
 ${THIS_SH} ./printf1.sub

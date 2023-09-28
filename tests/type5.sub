@@ -12,21 +12,30 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# test basic behavior of globskipdots
-TDIR=/tmp/dotglob-$$
+# make sure . is not in $PATH
+PATH=/bin:/usr/bin:/usr/local/bin
 
-{ mkdir $TDIR && cd -L $TDIR; } || exit 1
+# test type -P
 
-touch a b aa bb .a .b .aa .bb
+# executable in current directory
+TDIR=$TMPDIR/type-$$
+[ -d "$TDIR" ] || mkdir "$TDIR"
+cd -P "$TDIR" || exit 1
 
-echo *
-shopt -s dotglob
-echo *
+touch e ; chmod +x e; type -P e; rm -f e
 
-shopt -s globskipdots
-echo .*
-shopt -u globskipdots
-echo .*
+shopt -s expand_aliases
 
-cd $OLDPWD
-rm -rf $TDIR
+type cat
+alias cat='echo cat'
+type -f cat
+type -P cat
+
+# some random tests
+
+# the difference between posix and default modes
+type break
+set -o posix; type break; set +o posix
+
+cd "$OLDPWD"
+rm -rf "$TDIR"

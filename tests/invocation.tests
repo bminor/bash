@@ -16,8 +16,6 @@
 
 # invocation modes and errors
 
-export BASH_ARGV0=this-bash
-
 ${THIS_SH} .
 
 #${THIS_SH} --version -c 'exit 0' bash
@@ -29,9 +27,16 @@ ${THIS_SH} --badopt |& sed 's|^.*/bash|bash|'
 ${THIS_SH} --initfile |& sed 's|^.*/bash|bash|'
 ${THIS_SH} -q |& sed 's|^.*/bash|bash|'
 
-${THIS_SH} -c 'echo $0'
+export BASH_ARGV0=this-bash
+${THIS_SH} -c 'echo $0 $BASH_ARGV0'
+unset BASH_ARGV0
 
 { ${THIS_SH} -c 'echo $-' bash | grep c >/dev/null; } && echo '$- for -c includes c'
+
+# BASHOPTS
+${THIS_SH} ./invocation1.sub
+# SHELLOPTS
+${THIS_SH} ./invocation2.sub
 
 : ${TMPDIR:=/tmp}
 TDIR=$TMPDIR/invocation-$$

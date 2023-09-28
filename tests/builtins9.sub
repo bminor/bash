@@ -50,3 +50,10 @@ echo $?
 
 hash -r
 hash -p / root
+
+hash -r
+
+# assignment to BASH_CMDS[x] should be like hash -p
+BASH_CMDS[cat]=/nosuchfile
+hash -lt cat
+hash -d cat

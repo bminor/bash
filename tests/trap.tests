@@ -96,6 +96,8 @@ ${THIS_SH} ./trap7.sub
 # SIGCHLD traps
 ${THIS_SH} ./trap8.sub
 
+# return without argument in trap string 
+${THIS_SH} ./trap9.sub
 
 #
 # show that setting a trap on SIGCHLD is not disastrous.
@@ -110,6 +112,13 @@ sleep 7 & sleep 6 & sleep 5 &
 wait
 
 trap -p SIGCHLD
+trap -P SIGCHLD
+
+# all errors
+trap -p -P 
+trap -P
+trap ''
+trap -x
 
 # Now reset some of the signals the shell handles specially back to
 # their default values (with or without the SIG prefix)

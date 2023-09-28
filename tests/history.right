@@ -140,6 +140,8 @@ three
 one
 two
 three
+(exit 42)
+42
 5.3
 echo ${BASH_VERSION%\.*}
 5.3
@@ -341,3 +343,14 @@ $ 1
 $ 2
 $ exit
 0
+a
+b
+c
+d
+    1  echo a
+    2  echo c
+    3  echo d
+    4  history -d 2
+    5  history
+./history8.sub: line 15: history: 72: history position out of range
+./history8.sub: line 16: history: -72: history position out of range

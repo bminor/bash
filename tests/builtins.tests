@@ -71,6 +71,10 @@ for i in a b c; do
 done
 echo end
 
+# check arguments to break and continue that exceed the loop level
+for f in 1 2 3; do break -- 5; done
+for f in 1 2 3; do continue -- 5; done
+
 # check that `eval' re-evaluates arguments, but `builtin' and `command' do not
 AVAR='$BVAR'
 BVAR=foo
@@ -145,11 +149,18 @@ command -p hash rm
 # check out source/.
 
 # sourcing a zero-length-file had better not be an error
-rm -f /tmp/zero-length-file
-cp /dev/null /tmp/zero-length-file
-. /tmp/zero-length-file
+rm -f $TMPDIR/zero-length-file-$$
+cp /dev/null $TMPDIR/zero-length-file-$$
+. $TMPDIR/zero-length-file-$$
 echo $?
-rm /tmp/zero-length-file
+rm $TMPDIR/zero-length-file-$$
+
+# and sourcing a file that doesn't end in a newline had better work too
+SFILE=$TMPDIR/sourced-file-$$
+printf 'echo no-newline' > $SFILE
+. $SFILE
+rm -f $SFILE
+unset -v SFILE
 
 AVAR=AVAR
 
@@ -262,6 +273,13 @@ kill -l 4096
 # kill -l NAME should return the signal number
 kill -l ${sigone/SIG/}
 
+# kill -l NAME should work with and without the SIG prefix
+x=$(kill -l INT)
+y=$(kill -l SIGINT)
+
+[[ $x == $y ]] || echo kill -l error with SIG prefix
+unset -v x y
+
 # test behavior of shopt xpg_echo
 ${THIS_SH} ./builtins2.sub
 
@@ -285,6 +303,14 @@ ${THIS_SH} ./builtins8.sub
 
 # hash tests
 ${THIS_SH} ./builtins9.sub
+
+# help tests
+${THIS_SH} ./builtins10.sub
+
+shift 0	# succeeds silently
+
+options=$(set -o -B 2>&1 | wc -l)
+[[ $options -gt 3 ]] || echo 'set: bad -o option name parsing'
 
 # this must be last -- it is a fatal error
 exit status

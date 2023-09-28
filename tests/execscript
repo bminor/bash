@@ -43,6 +43,14 @@ echo $?
 ${THIS_SH} /
 echo $?
 
+# trying to exec a directory is a fatal error
+${THIS_SH} -c 'exec . ; default: after exec directory' bash
+POSIXLY_CORRECT=1 ${THIS_SH} -c 'exec . ; posix: after exec directory' posix-bash
+
+# even if preceded by `command'
+${THIS_SH} -c 'command exec . ; default: after command exec directory 2' bash
+POSIXLY_CORRECT=1 ${THIS_SH} -c 'command exec . ; posix: after command exec directory 2' posix-bash
+
 # try sourcing a directory
 . /
 echo $?

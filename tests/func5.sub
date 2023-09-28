@@ -12,6 +12,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# these are ok
+
 function a=2
 {
 	printf "FUNCNAME: %s\n" $FUNCNAME
@@ -22,6 +24,12 @@ function 11111
 	printf "FUNCNAME: %s\n" $FUNCNAME
 }
 
+# but this is still not
+function sys$read
+{
+	printf "FUNCNAME: %s\n" $FUNCNAME
+}
+	
 declare -f
 set -o posix
 declare -f
@@ -36,3 +44,11 @@ break()
 
 type break
 \break
+unset -f break
+
+# but in posix mode, declaring such a function is an error
+set -o posix
+break()
+{
+        echo FUNCNAME: $FUNCNAME
+}

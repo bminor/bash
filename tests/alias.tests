@@ -62,6 +62,10 @@ alias L='m=("x")'
 L
 declare -p m
 
+# invalid alias names generate errors
+alias '\$'=xx
+BASH_ALIASES['\$']=xx
+
 ${THIS_SH} ./alias1.sub
 ${THIS_SH} ./alias2.sub
 ${THIS_SH} ./alias3.sub

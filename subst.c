@@ -8139,6 +8139,7 @@ parameter_brace_expand_length (char *name)
   SHELL_VAR *var;
 
   var = (SHELL_VAR *)NULL;
+  number = 0;
 
   if (name[1] == '\0')			/* ${#} */
     number = number_of_args ();
@@ -8175,20 +8176,19 @@ parameter_brace_expand_length (char *name)
   else if (valid_array_reference (name + 1, 0))
     number = array_length_reference (name + 1);
 #endif /* ARRAY_VARS */
+  else if (legal_number (name + 1, &arg_index))		/* ${#1} */ 
+    {
+      t = get_dollar_var_value (arg_index);
+      if (t == 0 && unbound_vars_is_error)
+	return INTMAX_MIN;
+      number = MB_STRLEN (t);
+      FREE (t);
+    }
   else
     {
-      number = 0;
-
-      if (legal_number (name + 1, &arg_index))		/* ${#1} */
-	{
-	  t = get_dollar_var_value (arg_index);
-	  if (t == 0 && unbound_vars_is_error)
-	    return INTMAX_MIN;
-	  number = MB_STRLEN (t);
-	  FREE (t);
-	}
+      var = find_variable (name + 1);
 #if defined (ARRAY_VARS)
-      else if ((var = find_variable (name + 1)) && (invisible_p (var) == 0) && (array_p (var) || assoc_p (var)))
+      if (var && (invisible_p (var) == 0) && (array_p (var) || assoc_p (var)))
 	{
 	  if (assoc_p (var))
 	    t = assoc_reference (assoc_cell (var), "0");
@@ -8198,14 +8198,13 @@ parameter_brace_expand_length (char *name)
 	    return INTMAX_MIN;
 	  number = MB_STRLEN (t);
 	}
+      else
 #endif
-      /* Fast path for the common case of taking the length of a non-dynamic
-	 scalar variable value. */
-      else if ((var || (var = find_variable (name + 1))) &&
-      		invisible_p (var) == 0 &&
-		array_p (var) == 0 && assoc_p (var) == 0 &&
-		nameref_p (var) == 0 &&
-		var->dynamic_value == 0)
+      /* Fast path for the common case of taking the length of a scalar
+	 variable value. */
+      if (var && invisible_p (var) == 0 &&
+	     array_p (var) == 0 && assoc_p (var) == 0 &&
+	     nameref_p (var) == 0)
 	number = value_cell (var) ? MB_STRLEN (value_cell (var)) : 0;
       else if ((var = find_variable_last_nameref (name + 1, 0)) && nameref_p (var))
 	{

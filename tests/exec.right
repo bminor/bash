@@ -15,7 +15,11 @@ after exec1.sub: one two three
 126
 /: /: Is a directory
 126
-./execscript: line 47: .: /: is a directory
+bash: line 1: exec: .: cannot execute: Is a directory
+posix-bash: line 1: exec: .: cannot execute: Is a directory
+bash: line 1: exec: .: cannot execute: Is a directory
+posix-bash: line 1: exec: .: cannot execute: Is a directory
+./execscript: line 55: .: /: is a directory
 1
 126
 0
@@ -31,17 +35,17 @@ trap -- '' SIGTERM
 trap -- 'echo USR1' SIGUSR1
 USR1
 EXIT
-./execscript: line 71: notthere: command not found
-127
-./execscript: line 73: notthere: command not found
-127
-./execscript: line 75: notthere: command not found
+./execscript: line 79: notthere: command not found
 127
 ./execscript: line 81: notthere: command not found
 127
 ./execscript: line 83: notthere: command not found
 127
-./execscript: line 85: notthere: command not found
+./execscript: line 89: notthere: command not found
+127
+./execscript: line 91: notthere: command not found
+127
+./execscript: line 93: notthere: command not found
 127
 this is sh
 this is sh

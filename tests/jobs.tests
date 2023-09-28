@@ -32,6 +32,8 @@ ${THIS_SH} ./jobs5.sub
 ${THIS_SH} ./jobs6.sub
 
 ${THIS_SH} ./jobs7.sub
+# more disown -h tests
+${THIS_SH} ./jobs8.sub
 
 jobs
 echo $?
@@ -130,6 +132,9 @@ disown %1
 
 # this, however, is an error
 disown %2
+
+# this is definitely an error
+disown -h @12
 
 echo wait-for-non-child
 wait 1

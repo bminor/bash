@@ -1,6 +1,7 @@
 ./type.tests: line 22: type: -r: invalid option
 type: usage: type [-afptP] name [name ...]
 ./type.tests: line 25: type: notthere: not found
+./type.tests: line 29: command: notthere: not found
 function
 keyword
 builtin
@@ -24,7 +25,7 @@ func ()
 }
 while
 while is a shell keyword
-./type.tests: line 56: type: m: not found
+./type.tests: line 59: type: m: not found
 alias m='more'
 alias m='more'
 m is aliased to `more'
@@ -37,8 +38,8 @@ builtin
 builtin is a shell builtin
 /bin/sh
 /bin/sh is /bin/sh
-./type.tests: line 78: type: func: not found
-./type.tests: line 80: type: m: not found
+./type.tests: line 81: type: func: not found
+./type.tests: line 83: type: m: not found
 /bin/sh
 /tmp/bash
 bash is hashed (/tmp/bash)
@@ -133,3 +134,8 @@ EOF
  );
     echo "coprocs created"
 }
+cat is /bin/cat
+cat is aliased to `echo cat'
+/bin/cat
+break is a shell builtin
+break is a special shell builtin

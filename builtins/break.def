@@ -73,6 +73,9 @@ break_builtin (WORD_LIST *list)
 
   if (newbreak <= 0)
     {
+      /* skip over `--' option to get the right error message */
+      if (list && list->word && ISOPTION (list->word->word, '-'))
+	list = list->next;
       sh_erange (list->word->word, _("loop count"));
       breaking = loop_level;
       return (EXECUTION_FAILURE);
@@ -114,6 +117,9 @@ continue_builtin (WORD_LIST *list)
 
   if (newcont <= 0)
     {
+      /* skip over `--' option to get the right error message */
+      if (list && list->word && ISOPTION (list->word->word, '-'))
+	list = list->next;
       sh_erange (list->word->word, _("loop count"));
       breaking = loop_level;
       return (EXECUTION_FAILURE);

@@ -7677,3 +7677,19 @@ execute_cmd.c
 	  name is a fatal error, just like with `for'. This is compatible with
 	  ksh93 and mksh
 
+				   9/25
+				   ----
+subst.c
+	- parameter_brace_expand_length: rearrange the code slightly to reduce
+	  the number of find_variable calls. This matters if the variable is
+	  dynamic and produces a new value each time (e.g., RANDOM).
+
+				   9/26
+				   ----
+builtins/shift.def
+	- shift_builtin: if get_numeric_arg returns a number out of range and
+	  we're going to print an error message, make sure to skip over an
+	  argument of `--' so we can print the right argument
+
+builtins/break.def
+	- break_builtin,continue_builtin: ditto with get_numeric_arg and `--'

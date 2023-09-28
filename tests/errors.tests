@@ -50,6 +50,14 @@ select invalid-name in a b c; do echo $REPLY; done
 (set -o posix ; select 1 in a b c; do echo $REPLY; done; echo after posix select)
 (set -o posix ; select f\1 in a b c ; do echo $REPLY ; done ; echo after posix select 2)
 
+# even in functions
+bad-select()
+{
+        select $1 in a b c ; do echo $REPLY ; done
+}
+bad-select 'a b'
+unset -f bad-select
+
 # try to rebind a read-only function
 func()
 {
@@ -141,6 +149,10 @@ hash -p ${THIS_SH} ${THIS_SH##*/}
 # bad identifiers to declare/readonly/export
 export AA[4]
 readonly AA[4]
+export invalid-var=4
+readonly invalid-var=4
+export invalid-var
+readonly invalid-var
 
 declare -a AA
 unset AA[-2]
@@ -165,6 +177,7 @@ shift -2
 # bad shell options
 shopt -s no_such_option
 shopt no_such_option
+shopt -s -o no_such_option
 
 # non-octal digits for umask and other errors
 umask 09
@@ -208,6 +221,10 @@ cd -
 cd /bin/sh	# error - not a directory
 OLDPWD=/tmp/cd-notthere
 cd -
+# too many arguments
+cd one two three
+# cd doesn't like it if PWD is readonly
+${THIS_SH} -c 'readonly PWD ; cd / ; echo $?' bash
 
 # various `source/.' errors
 .
@@ -225,14 +242,31 @@ enable sh bash
 # try to set and unset shell options simultaneously
 shopt -s -u checkhash
 
+# error
+read -x
+
 # this is an error -- bad timeout spec
 read -t var < /dev/null
 
 # try to read into an invalid identifier
 read /bin/sh < /dev/null
+read A /bin/sh < /dev/null
 
 # try to read into a readonly variable
 read VAR < /dev/null
+
+# invalid file descriptor
+read -u XX < /dev/null
+read -u 42 < /dev/null
+
+# same with mapfile
+mapfile -u XX A < /dev/null
+mapfile -u 42 A < /dev/null
+unset -v A
+
+# invalid identifier arguments to mapfile
+mapfile '' </dev/null
+mapfile invalid-var < /dev/null
 
 # bad option to readonly/export
 readonly -x foo
@@ -283,6 +317,15 @@ kill -S
 kill -INT ''
 # argument required
 kill -INT
+# bad signal specification
+kill -l SIGBAD
+# bad signal specification
+kill -l BAD
+# bad process specification
+kill -HUP @12
+
+# cannot unset non-unsettable variables
+unset -v BASH_LINENO BASH_SOURCE
 
 # bad shell option names
 set -o trackall		# bash is not ksh

@@ -91,6 +91,7 @@ FOO=BAR
 FOO=BAR
 hash: hash table empty
 0
+no-newline
 AVAR
 foo
 in source.sub2, calling return
@@ -145,11 +146,11 @@ AVAR
 foo
 declare -x foo=""
 declare -x FOO="\$\$"
-./builtins.tests: line 228: declare: FOO: not found
+./builtins.tests: line 239: declare: FOO: not found
 declare -x FOO="\$\$"
 ok
 ok
-./builtins.tests: line 260: kill: 4096: invalid signal specification
+./builtins.tests: line 271: kill: 4096: invalid signal specification
 1
 a\n\n\nb
 a
@@ -291,6 +292,10 @@ u=rwx,g=rwx,o=rwx
 u=rwx,g=rwx,o=rwx
 u=rwx,g=rx,o=rx
 u=rwx,g=rx,o=rx
+u=rwx,g=rx,o=rx
+u=rwx,g=rx,o=rx
+u=rwx,g=rx,o=rx
+u=rwx,g=rx,o=rx
 hash: hash table empty
 ./builtins9.sub: line 19: hash: notthere: not found
 1
@@ -308,4 +313,136 @@ builtin hash -p /nosuchdir/nosuchfile cat
 0
 found
 ./builtins9.sub: line 52: hash: /: Is a directory
-./builtins.tests: line 290: exit: status: numeric argument required
+builtin hash -p /nosuchfile cat
+./builtins10.sub: line 17: help: -x: invalid option
+help: usage: help [-dms] [pattern ...]
+These shell commands are defined internally.  Type `help' to see this list.
+Type `help name' to find out more about the function `name'.
+Use `info bash' to find out more about the shell in general.
+Use `man -k' or `info' to find out more about commands not in this list.
+
+A star (*) next to a name means that the command is disabled.
+
+ ! PIPELINE                              history [-c] [-d offset] [n] or hist>
+ job_spec [&]                            if COMMANDS; then COMMANDS; [ elif C>
+ (( expression ))                        jobs [-lnprs] [jobspec ...] or jobs >
+ . filename [arguments]                  kill [-s sigspec | -n signum | -sigs>
+ :                                       let arg [arg ...]
+ [ arg... ]                              local [option] name[=value] ...
+ [[ expression ]]                        logout [n]
+ alias [-p] [name[=value] ... ]          mapfile [-d delim] [-n count] [-O or>
+ bg [job_spec ...]                       popd [-n] [+N | -N]
+ bind [-lpsvPSVX] [-m keymap] [-f file>  printf [-v var] format [arguments]
+ break [n]                               pushd [-n] [+N | -N | dir]
+ builtin [shell-builtin [arg ...]]       pwd [-LP]
+ caller [expr]                           read [-Eers] [-a array] [-d delim] [>
+ case WORD in [PATTERN [| PATTERN]...)>  readarray [-d delim] [-n count] [-O >
+ cd [-L|[-P [-e]]] [-@] [dir]            readonly [-aAf] [name[=value] ...] o>
+ command [-pVv] command [arg ...]        return [n]
+ compgen [-V varname] [-abcdefgjksuv] >  select NAME [in WORDS ... ;] do COMM>
+ complete [-abcdefgjksuv] [-pr] [-DEI]>  set [-abefhkmnptuvxBCEHPT] [-o optio>
+ compopt [-o|+o option] [-DEI] [name .>  shift [n]
+ continue [n]                            shopt [-pqsu] [-o] [optname ...]
+ coproc [NAME] command [redirections]    source filename [arguments]
+ declare [-aAfFgiIlnrtux] [name[=value>  suspend [-f]
+ dirs [-clpv] [+N] [-N]                  test [expr]
+ disown [-h] [-ar] [jobspec ... | pid >  time [-p] pipeline
+ echo [-neE] [arg ...]                   times
+ enable [-a] [-dnps] [-f filename] [na>  trap [-Plp] [[action] signal_spec ..>
+ eval [arg ...]                          true
+ exec [-cl] [-a name] [command [argume>  type [-afptP] name [name ...]
+ exit [n]                                typeset [-aAfFgiIlnrtux] name[=value>
+ export [-fn] [name[=value] ...] or ex>  ulimit [-SHabcdefiklmnpqrstuvxPRT] [>
+ false                                   umask [-p] [-S] [mode]
+ fc [-e ename] [-lnr] [first] [last] o>  unalias [-a] name [name ...]
+ fg [job_spec]                           unset [-f] [-v] [-n] [name ...]
+ for NAME [in WORDS ... ] ; do COMMAND>  until COMMANDS; do COMMANDS-2; done
+ for (( exp1; exp2; exp3 )); do COMMAN>  variables - Names and meanings of so>
+ function name { COMMANDS ; } or name >  wait [-fn] [-p var] [id ...]
+ getopts optstring name [arg ...]        while COMMANDS; do COMMANDS-2; done
+ hash [-lr] [-p pathname] [-dt] [name >  { COMMANDS ; }
+ help [-dms] [pattern ...]
+help: help [-dms] [pattern ...]
+shift - Shift positional parameters.
+shift: shift [n]
+    Shift positional parameters.
+    
+    Rename the positional parameters $N+1,$N+2 ... to $1,$2 ...  If N is
+    not given, it is assumed to be 1.
+    
+    Exit Status:
+    Returns success unless N is negative or greater than $#.
+builtin: builtin [shell-builtin [arg ...]]
+shift: shift [n]
+Shell commands matching keyword `read*'
+
+read: read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
+readarray: readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
+readonly: readonly [-aAf] [name[=value] ...] or readonly -p
+NAME
+    : - Null command.
+
+SYNOPSIS
+    :
+
+DESCRIPTION
+    Null command.
+    
+    No effect; the command does nothing.
+    
+    Exit Status:
+    Always succeeds.
+
+SEE ALSO
+    bash(1)
+
+IMPLEMENTATION
+    Copyright (C) 2022 Free Software Foundation, Inc.
+
+These shell commands are defined internally.  Type `help' to see this list.
+Type `help name' to find out more about the function `name'.
+Use `info bash' to find out more about the shell in general.
+Use `man -k' or `info' to find out more about commands not in this list.
+
+A star (*) next to a name means that the command is disabled.
+
+ ! PIPELINE                              history [-c] [-d offset] [n] or hist>
+ job_spec [&]                            if COMMANDS; then COMMANDS; [ elif C>
+ (( expression ))                        jobs [-lnprs] [jobspec ...] or jobs >
+ . filename [arguments]                  kill [-s sigspec | -n signum | -sigs>
+ :                                       let arg [arg ...]
+ [ arg... ]                              local [option] name[=value] ...
+ [[ expression ]]                        logout [n]
+ alias [-p] [name[=value] ... ]          mapfile [-d delim] [-n count] [-O or>
+ bg [job_spec ...]                       popd [-n] [+N | -N]
+ bind [-lpsvPSVX] [-m keymap] [-f file>  printf [-v var] format [arguments]
+ break [n]                               pushd [-n] [+N | -N | dir]
+ builtin [shell-builtin [arg ...]]       pwd [-LP]
+ caller [expr]                           read [-Eers] [-a array] [-d delim] [>
+ case WORD in [PATTERN [| PATTERN]...)>  readarray [-d delim] [-n count] [-O >
+ cd [-L|[-P [-e]]] [-@] [dir]            readonly [-aAf] [name[=value] ...] o>
+ command [-pVv] command [arg ...]        return [n]
+ compgen [-V varname] [-abcdefgjksuv] >  select NAME [in WORDS ... ;] do COMM>
+ complete [-abcdefgjksuv] [-pr] [-DEI]>  set [-abefhkmnptuvxBCEHPT] [-o optio>
+ compopt [-o|+o option] [-DEI] [name .>  shift [n]
+ continue [n]                            shopt [-pqsu] [-o] [optname ...]
+ coproc [NAME] command [redirections]    source filename [arguments]
+ declare [-aAfFgiIlnrtux] [name[=value>  suspend [-f]
+ dirs [-clpv] [+N] [-N]                  test [expr]
+ disown [-h] [-ar] [jobspec ... | pid >  time [-p] pipeline
+ echo [-neE] [arg ...]                   times
+ enable [-a] [-dnps] [-f filename] [na>  trap [-Plp] [[action] signal_spec ..>
+ eval [arg ...]                          true
+ exec [-cl] [-a name] [command [argume>  type [-afptP] name [name ...]
+ exit [n]                                typeset [-aAfFgiIlnrtux] name[=value>
+ export [-fn] [name[=value] ...] or ex>  ulimit [-SHabcdefiklmnpqrstuvxPRT] [>
+ false                                   umask [-p] [-S] [mode]
+ fc [-e ename] [-lnr] [first] [last] o>  unalias [-a] name [name ...]
+ fg [job_spec]                           unset [-f] [-v] [-n] [name ...]
+ for NAME [in WORDS ... ] ; do COMMAND>  until COMMANDS; do COMMANDS-2; done
+ for (( exp1; exp2; exp3 )); do COMMAN>  variables - Names and meanings of so>
+ function name { COMMANDS ; } or name >  wait [-fn] [-p var] [id ...]
+ getopts optstring name [arg ...]        while COMMANDS; do COMMANDS-2; done
+ hash [-lr] [-p pathname] [-dt] [name >  { COMMANDS ; }
+ help [-dms] [pattern ...]
+./builtins.tests: line 316: exit: status: numeric argument required

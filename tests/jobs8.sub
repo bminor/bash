@@ -12,21 +12,18 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# test basic behavior of globskipdots
-TDIR=/tmp/dotglob-$$
+# tests of disown -h
 
-{ mkdir $TDIR && cd -L $TDIR; } || exit 1
+set -m
 
-touch a b aa bb .a .b .aa .bb
+sleep 1&
+sleep 1&
+sleep 1&
 
-echo *
-shopt -s dotglob
-echo *
+disown -ah
 
-shopt -s globskipdots
-echo .*
-shopt -u globskipdots
-echo .*
+sleep 1&
+sleep 1&
+sleep 1&
 
-cd $OLDPWD
-rm -rf $TDIR
+disown -rh

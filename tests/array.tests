@@ -252,6 +252,9 @@ barray=(new1 new2 new3)
 echo "length = ${#barray[@]}"
 echo "value = ${barray[*]}"
 
+# the compound assignment syntax inherited from ksh93 has some quirks
+badarray=( metacharacters like & need to be quoted in compound assignments)
+
 # make sure the array code behaves correctly with respect to unset variables
 set -u
 ( echo ${#narray[4]} )

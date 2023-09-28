@@ -26,6 +26,10 @@ echo "\ a  b\ " | ( read -r x ; echo -"$x"- )
 echo " \ a  b\ " | ( read -r x y ; echo -"$x"-"$y"- )
 echo " \ a  b\ " | ( read -r x ; echo -"$x"- )
 
+# input ending in backslash
+printf 'abc\' | { read var ; recho "$var"; }
+printf 'abc\' | { read -r var ; recho "$var"; }
+
 # make sure that CTLESC and CTLNUL are passed through correctly
 echo $'\001' | ( read var ; recho "$var" )
 echo $'\001' | ( read ; recho "$REPLY" )

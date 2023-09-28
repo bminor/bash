@@ -11,22 +11,22 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# have to run through sed or grep to filter out version information
 
-# test basic behavior of globskipdots
-TDIR=/tmp/dotglob-$$
+# let's exercise print-help
+help -x
 
-{ mkdir $TDIR && cd -L $TDIR; } || exit 1
+help -- | sed 1d
 
-touch a b aa bb .a .b .aa .bb
+command help -s help
+builtin help -d shift
+shift --help
+help -s builtin shift
 
-echo *
-shopt -s dotglob
-echo *
+# this hasn't ever been very useful
+help -s 'read*'
 
-shopt -s globskipdots
-echo .*
-shopt -u globskipdots
-echo .*
+help -m : | grep -v version
 
-cd $OLDPWD
-rm -rf $TDIR
+LC_ALL=en_US.UTF-8
+help -- | sed 1d

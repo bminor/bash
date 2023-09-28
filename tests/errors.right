@@ -13,110 +13,137 @@ unalias: usage: unalias [-a] name [name ...]
 ./errors.tests: line 48: `invalid-name': not a valid identifier
 ./errors.tests: line 50: `1': not a valid identifier
 ./errors.tests: line 51: `f\1': not a valid identifier
+./errors.tests: line 55: `$1': not a valid identifier
 declare -fr func
-./errors.tests: line 64: func: readonly function
-./errors.tests: line 67: unset: -x: invalid option
+./errors.tests: line 72: func: readonly function
+./errors.tests: line 75: unset: -x: invalid option
 unset: usage: unset [-f] [-v] [-n] [name ...]
-./errors.tests: line 70: unset: func: cannot unset: readonly function
-./errors.tests: line 73: declare: func: readonly function
-./errors.tests: line 77: declare: -a: invalid option
-./errors.tests: line 78: declare: -i: invalid option
-./errors.tests: line 82: unset: XPATH: cannot unset: readonly variable
-./errors.tests: line 88: unset: cannot simultaneously unset a function and a variable
-./errors.tests: line 91: declare: -z: invalid option
+./errors.tests: line 78: unset: func: cannot unset: readonly function
+./errors.tests: line 81: declare: func: readonly function
+./errors.tests: line 85: declare: -a: invalid option
+./errors.tests: line 86: declare: -i: invalid option
+./errors.tests: line 90: unset: XPATH: cannot unset: readonly variable
+./errors.tests: line 96: unset: cannot simultaneously unset a function and a variable
+./errors.tests: line 99: declare: -z: invalid option
 declare: usage: declare [-aAfFgiIlnrtux] [name[=value] ...] or declare -p [-aAfFilnrtux] [name ...]
-./errors.tests: line 93: declare: `-z': not a valid identifier
-./errors.tests: line 94: declare: `/bin/sh': not a valid identifier
-./errors.tests: line 98: declare: cannot use `-f' to make functions
-./errors.tests: line 101: exec: -i: invalid option
+./errors.tests: line 101: declare: `-z': not a valid identifier
+./errors.tests: line 102: declare: `/bin/sh': not a valid identifier
+./errors.tests: line 106: declare: cannot use `-f' to make functions
+./errors.tests: line 109: exec: -i: invalid option
 exec: usage: exec [-cl] [-a name] [command [argument ...]] [redirection ...]
-./errors.tests: line 105: export: XPATH: not a function
-./errors.tests: line 108: break: only meaningful in a `for', `while', or `until' loop
-./errors.tests: line 109: continue: only meaningful in a `for', `while', or `until' loop
-./errors.tests: line 112: shift: label: numeric argument required
-./errors.tests: line 117: shift: too many arguments
-./errors.tests: line 123: let: expression expected
-./errors.tests: line 126: local: can only be used in a function
-./errors.tests: line 129: logout: not login shell: use `exit'
-./errors.tests: line 132: hash: notthere: not found
-./errors.tests: line 135: hash: -v: invalid option
+./errors.tests: line 113: export: XPATH: not a function
+./errors.tests: line 116: break: only meaningful in a `for', `while', or `until' loop
+./errors.tests: line 117: continue: only meaningful in a `for', `while', or `until' loop
+./errors.tests: line 120: shift: label: numeric argument required
+./errors.tests: line 125: shift: too many arguments
+./errors.tests: line 131: let: expression expected
+./errors.tests: line 134: local: can only be used in a function
+./errors.tests: line 137: logout: not login shell: use `exit'
+./errors.tests: line 140: hash: notthere: not found
+./errors.tests: line 143: hash: -v: invalid option
 hash: usage: hash [-lr] [-p pathname] [-dt] [name ...]
-./errors.tests: line 139: hash: hashing disabled
-./errors.tests: line 142: export: `AA[4]': not a valid identifier
-./errors.tests: line 143: readonly: `AA[4]': not a valid identifier
-./errors.tests: line 146: unset: [-2]: bad array subscript
-./errors.tests: line 150: AA: readonly variable
-./errors.tests: line 154: AA: readonly variable
-./errors.tests: line 162: shift: 5: shift count out of range
-./errors.tests: line 163: shift: -2: shift count out of range
-./errors.tests: line 166: shopt: no_such_option: invalid shell option name
-./errors.tests: line 167: shopt: no_such_option: invalid shell option name
-./errors.tests: line 170: umask: 09: octal number out of range
-./errors.tests: line 171: umask: `:': invalid symbolic mode character
-./errors.tests: line 172: umask: `:': invalid symbolic mode operator
-./errors.tests: line 175: umask: -i: invalid option
+./errors.tests: line 147: hash: hashing disabled
+./errors.tests: line 150: export: `AA[4]': not a valid identifier
+./errors.tests: line 151: readonly: `AA[4]': not a valid identifier
+./errors.tests: line 152: export: `invalid-var=4': not a valid identifier
+./errors.tests: line 153: readonly: `invalid-var=4': not a valid identifier
+./errors.tests: line 154: export: `invalid-var': not a valid identifier
+./errors.tests: line 155: readonly: `invalid-var': not a valid identifier
+./errors.tests: line 158: unset: [-2]: bad array subscript
+./errors.tests: line 162: AA: readonly variable
+./errors.tests: line 166: AA: readonly variable
+./errors.tests: line 174: shift: 5: shift count out of range
+./errors.tests: line 175: shift: -2: shift count out of range
+./errors.tests: line 178: shopt: no_such_option: invalid shell option name
+./errors.tests: line 179: shopt: no_such_option: invalid shell option name
+./errors.tests: line 180: shopt: no_such_option: invalid option name
+./errors.tests: line 183: umask: 09: octal number out of range
+./errors.tests: line 184: umask: `:': invalid symbolic mode character
+./errors.tests: line 185: umask: `:': invalid symbolic mode operator
+./errors.tests: line 188: umask: -i: invalid option
 umask: usage: umask [-p] [-S] [mode]
-./errors.tests: line 179: umask: `p': invalid symbolic mode character
-./errors.tests: line 188: VAR: readonly variable
-./errors.tests: line 191: declare: VAR: readonly variable
-./errors.tests: line 192: declare: VAR: readonly variable
-./errors.tests: line 194: declare: unset: not found
-./errors.tests: line 197: VAR: readonly variable
+./errors.tests: line 192: umask: `p': invalid symbolic mode character
+./errors.tests: line 201: VAR: readonly variable
+./errors.tests: line 204: declare: VAR: readonly variable
+./errors.tests: line 205: declare: VAR: readonly variable
+./errors.tests: line 207: declare: unset: not found
+./errors.tests: line 210: VAR: readonly variable
 comsub: -c: line 1: syntax error near unexpected token `)'
 comsub: -c: line 1: `: $( for z in 1 2 3; do )'
 comsub: -c: line 1: syntax error near unexpected token `done'
 comsub: -c: line 1: `: $( for z in 1 2 3; done )'
-./errors.tests: line 204: cd: HOME not set
-./errors.tests: line 205: cd: /tmp/xyz.bash: No such file or directory
-./errors.tests: line 207: cd: OLDPWD not set
-./errors.tests: line 208: cd: /bin/sh: Not a directory
-./errors.tests: line 210: cd: /tmp/cd-notthere: No such file or directory
-./errors.tests: line 213: .: filename argument required
+./errors.tests: line 217: cd: HOME not set
+./errors.tests: line 218: cd: /tmp/xyz.bash: No such file or directory
+./errors.tests: line 220: cd: OLDPWD not set
+./errors.tests: line 221: cd: /bin/sh: Not a directory
+./errors.tests: line 223: cd: /tmp/cd-notthere: No such file or directory
+./errors.tests: line 225: cd: too many arguments
+bash: line 1: PWD: readonly variable
+1
+./errors.tests: line 230: .: filename argument required
 .: usage: . filename [arguments]
-./errors.tests: line 214: source: filename argument required
+./errors.tests: line 231: source: filename argument required
 source: usage: source filename [arguments]
-./errors.tests: line 217: .: -i: invalid option
+./errors.tests: line 234: .: -i: invalid option
 .: usage: . filename [arguments]
-./errors.tests: line 220: set: -q: invalid option
+./errors.tests: line 237: set: -q: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 223: enable: sh: not a shell builtin
-./errors.tests: line 223: enable: bash: not a shell builtin
-./errors.tests: line 226: shopt: cannot set and unset shell options simultaneously
-./errors.tests: line 229: read: var: invalid timeout specification
-./errors.tests: line 232: read: `/bin/sh': not a valid identifier
-./errors.tests: line 235: VAR: readonly variable
-./errors.tests: line 238: readonly: -x: invalid option
+./errors.tests: line 240: enable: sh: not a shell builtin
+./errors.tests: line 240: enable: bash: not a shell builtin
+./errors.tests: line 243: shopt: cannot set and unset shell options simultaneously
+./errors.tests: line 246: read: -x: invalid option
+read: usage: read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
+./errors.tests: line 249: read: var: invalid timeout specification
+./errors.tests: line 252: read: `/bin/sh': not a valid identifier
+./errors.tests: line 253: read: `/bin/sh': not a valid identifier
+./errors.tests: line 256: VAR: readonly variable
+./errors.tests: line 259: read: XX: invalid file descriptor specification
+./errors.tests: line 260: read: 42: invalid file descriptor: Bad file descriptor
+./errors.tests: line 263: mapfile: XX: invalid file descriptor specification
+./errors.tests: line 264: mapfile: 42: invalid file descriptor: Bad file descriptor
+./errors.tests: line 268: mapfile: empty array variable name
+./errors.tests: line 269: mapfile: `invalid-var': not a valid identifier
+./errors.tests: line 272: readonly: -x: invalid option
 readonly: usage: readonly [-aAf] [name[=value] ...] or readonly -p
-./errors.tests: line 241: eval: -i: invalid option
+./errors.tests: line 275: eval: -i: invalid option
 eval: usage: eval [arg ...]
-./errors.tests: line 242: command: -i: invalid option
+./errors.tests: line 276: command: -i: invalid option
 command: usage: command [-pVv] command [arg ...]
-./errors.tests: line 245: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
-./errors.tests: line 246: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
-./errors.tests: line 249: trap: NOSIG: invalid signal specification
-./errors.tests: line 252: trap: -s: invalid option
+./errors.tests: line 279: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 280: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 283: trap: NOSIG: invalid signal specification
+./errors.tests: line 286: trap: -s: invalid option
 trap: usage: trap [-Plp] [[action] signal_spec ...]
-./errors.tests: line 258: return: can only `return' from a function or sourced script
-./errors.tests: line 262: break: 0: loop count out of range
-./errors.tests: line 266: continue: 0: loop count out of range
-./errors.tests: line 271: builtin: bash: not a shell builtin
-./errors.tests: line 275: bg: no job control
-./errors.tests: line 276: fg: no job control
-./errors.tests: line 279: kill: -s: option requires an argument
-./errors.tests: line 281: kill: S: invalid signal specification
-./errors.tests: line 283: kill: `': not a pid or valid job spec
+./errors.tests: line 292: return: can only `return' from a function or sourced script
+./errors.tests: line 296: break: 0: loop count out of range
+./errors.tests: line 300: continue: 0: loop count out of range
+./errors.tests: line 305: builtin: bash: not a shell builtin
+./errors.tests: line 309: bg: no job control
+./errors.tests: line 310: fg: no job control
+./errors.tests: line 313: kill: -s: option requires an argument
+./errors.tests: line 315: kill: S: invalid signal specification
+./errors.tests: line 317: kill: `': not a pid or valid job spec
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
-./errors.tests: line 288: set: trackall: invalid option name
-./errors.tests: line 289: set: -q: invalid option
+./errors.tests: line 321: kill: SIGBAD: invalid signal specification
+./errors.tests: line 323: kill: BAD: invalid signal specification
+./errors.tests: line 325: kill: @12: arguments must be process or job IDs
+./errors.tests: line 328: unset: BASH_LINENO: cannot unset
+./errors.tests: line 328: unset: BASH_SOURCE: cannot unset
+./errors.tests: line 331: set: trackall: invalid option name
+./errors.tests: line 332: set: -q: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 290: set: -i: invalid option
+./errors.tests: line 333: set: -i: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 294: xx: readonly variable
+./errors.tests: line 337: xx: readonly variable
 1
 ./errors1.sub: line 14: .: -i: invalid option
 .: usage: . filename [arguments]
 ./errors1.sub: line 22: shift: -4: shift count out of range
+./errors1.sub: line 23: shift: -4: shift count out of range
 ./errors1.sub: line 27: break: -1: loop count out of range
+./errors1.sub: line 28: continue: -1: loop count out of range
+./errors1.sub: line 29: break: -5: loop count out of range
+./errors1.sub: line 30: continue: -5: loop count out of range
 after f
 ./errors2.sub: line 3: ${$NO_SUCH_VAR}: bad substitution
 1
@@ -200,6 +227,7 @@ after non-special builtin: 0
 after special builtin: 0
 ./errors7.sub: line 27: x: readonly variable
 ./errors7.sub: line 29: x: readonly variable
+./errors7.sub: line 32: v: readonly variable
 ./errors7.sub: line 21: x: readonly variable
 after no such command: 1
 ./errors7.sub: line 23: x: readonly variable
@@ -207,6 +235,7 @@ after non-special builtin: 1
 ./errors7.sub: line 25: x: readonly variable
 ./errors7.sub: line 27: x: readonly variable
 ./errors7.sub: line 29: x: readonly variable
+./errors7.sub: line 32: v: readonly variable
 ./errors8.sub: eval: line 7: syntax error: unexpected end of file
 ok 1
 ./errors8.sub: line 8: v: readonly variable
@@ -238,4 +267,4 @@ sh: line 1: unset: `a-b': not a valid identifier
 sh: line 1: /nosuchfile: No such file or directory
 sh: line 1: trap: SIGNOSIG: invalid signal specification
 after trap
-./errors.tests: line 333: `!!': not a valid identifier
+./errors.tests: line 376: `!!': not a valid identifier
