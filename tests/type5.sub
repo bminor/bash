@@ -14,6 +14,7 @@
 
 # make sure . is not in $PATH
 PATH=/bin:/usr/bin:/usr/local/bin
+OPATH=$PATH
 
 # test type -P
 
@@ -36,6 +37,23 @@ type -P cat
 # the difference between posix and default modes
 type break
 set -o posix; type break; set +o posix
+
+# test with PATH empty and unset
+realdir=$(pwd -P)
+touch e ; chmod +x e
+
+PATH=
+type -p e
+unset PATH
+z=$(type -p e)
+
+case $z in
+*/e)	;;
+*)	echo 'type: unset PATH does not prefix with physical path to $PWD' ;;
+esac
+PATH=$OPATH
+
+rm -f e
 
 cd "$OLDPWD"
 rm -rf "$TDIR"

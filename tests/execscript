@@ -1,9 +1,25 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 export LC_ALL=C
 export LANG=C
 
 if [ $UID -eq 0 ]; then
         echo "execscript: the test suite should not be run as root" >&2
 fi
+
+# this should succeed silently
+$cmd &
 
 set -- one two three
 echo before exec1.sub: "$@"
@@ -20,6 +36,14 @@ export PATH
 
 notthere
 echo $?
+
+# now let's set up a command-not-found hook
+command_not_found_handle()
+{
+        echo we would do something here with $1
+}
+notthere a b c
+unset -f command_not_found_handle
 
 # this is iffy, since the error messages may vary from system to system
 # and /tmp might not exist

@@ -459,7 +459,7 @@ read_builtin (WORD_LIST *list)
 #endif
   if (input_is_tty == 0)
 #ifndef __CYGWIN__
-    input_is_pipe = (lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
+    input_is_pipe = fd_ispipe (fd);
 #else
     input_is_pipe = 1;
 #endif

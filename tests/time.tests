@@ -11,6 +11,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+: ${THIS_SH:=./bash}
+
+printf "time -c : :\n"
+time ${THIS_SH} -c :
+
 printf "time /dev/null:\n"
 time ${THIS_SH} /dev/null
 
@@ -27,10 +32,17 @@ time ${THIS_SH} /dev/null
 
 printf "\nksh time /dev/null:\n"
 TIMEFORMAT=$'\nreal\t%2lR\nuser\t%2lU\nsys\t%2lS'
-time ${THIS_SH} /dev/null
+time ${THIS_SH} < /dev/null
+
+time (:)
+(time :)
+
+times -x
 
 printf "\ntimes:\n"
 times
+echo
+times --
 
 printf "\ntime standalone:\n"
 { time ; echo after; } |& wc -l

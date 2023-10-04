@@ -34,10 +34,12 @@ onetwo
 + echo onetwo
 onetwo
 + set +x
+./set-x1.sub: line 18: BASH_XTRACEFD: 4: invalid value for trace file descriptor
 1
 2
 3
 4
++ exec
 + for f in a b c d e
 + echo a
 a
@@ -61,3 +63,10 @@ TRACEFILE:
 + echo 4
 + unset BASH_XTRACEFD
 =====
++ metas=(\| \& \; \( \) \< \> ' ' '	' '
+')
++ n=($@)
++ : '|' '&' ';' '(' ')' '<' '>' ' ' $'\t' $'\n'
++ DEFAULT_IFS=$' \t\n'
++ set +x
+declare -a metas=([0]="|" [1]="&" [2]=";" [3]="(" [4]=")" [5]="<" [6]=">" [7]=" " [8]=$'\t' [9]=$'\n')

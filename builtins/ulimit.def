@@ -746,6 +746,7 @@ printone (int limind, RLIMTYPE curlim, int pdesc)
     print_rlimtype ((curlim / factor), 1);
 }
 
+#ifdef NOTYET
 /* Set all limits to NEWLIM.  NEWLIM currently must be RLIM_INFINITY, which
    causes all limits to be set as high as possible depending on mode (like
    csh `unlimit').  Returns -1 if NEWLIM is invalid, 0 if all limits
@@ -783,5 +784,6 @@ set_all_limits (int mode, RLIMTYPE newlim)
       }
   return retval;
 }
+#endif /* NOTYET */
 
 #endif /* !_MINIX */

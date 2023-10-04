@@ -25,8 +25,15 @@ help -s builtin shift
 
 # this hasn't ever been very useful
 help -s 'read*'
+# but prefix matching is
+help -s rea
+
+help :
 
 help -m : | grep -v version
 
 LC_ALL=en_US.UTF-8
 help -- | sed 1d
+
+# maybe sometime in the future this will do something
+help -- bash

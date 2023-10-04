@@ -3449,7 +3449,7 @@ do_compound_assignment (const char *name, char *value, int flags)
 	v = make_local_assoc_variable (newname, 0);
       else if (v == 0 || (array_p (v) == 0 && assoc_p (v) == 0) || v->context != variable_context)
         v = make_local_array_variable (newname, 0);
-      r = v? assign_compound_array_list (v, list, flags) : 0;
+      r = v ? assign_compound_array_list (v, list, flags) : 0;
       if (list)
 	dispose_words (list);
       if (r == 0)		/* compound assignment error */
@@ -7416,11 +7416,14 @@ array_length_reference (const char *s)
   if (assoc_p (var))
     {
       t[len - 1] = '\0';
-      akey = expand_subscript_string (t, 0);	/* [ */
+      akey = expand_subscript_string (t, 0);
       t[len - 1] = RBRACK;
       if (akey == 0 || *akey == 0)
 	{
-	  err_badarraysub (t);
+	  char *t1;
+
+	  t1 = (t > s) ? t - 1 : t;		/* get the left bracket */
+	  err_badarraysub (t1);
 	  FREE (akey);
 	  return (-1);
 	}
@@ -7435,7 +7438,10 @@ array_length_reference (const char *s)
 	ind = array_max_index (array_cell (var)) + 1 + ind;
       if (ind < 0)
 	{
-	  err_badarraysub (t);
+	  char *t1;
+
+	  t1 = (t > s) ? t - 1 : t;		/* get the left bracket */
+	  err_badarraysub (t1);
 	  return (-1);
 	}
       if (array_p (var))

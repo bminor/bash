@@ -44,7 +44,7 @@
 #define Q_ARRAYSUB	 0x200	/* expanding indexed array subscript */
 
 /* Flag values controlling how assignment statements are treated. */
-#define ASS_APPEND	0x0001
+#define ASS_APPEND	0x0001	/* a+=b */
 #define ASS_MKLOCAL	0x0002
 #define ASS_MKASSOC	0x0004
 #define ASS_MKGLOBAL	0x0008	/* force global assignment */
@@ -58,6 +58,7 @@
 #define ASS_ALLOWALLSUB	0x0800	/* allow * and @ as associative array keys */
 #define ASS_ONEWORD	0x1000	/* don't check array subscripts, assume higher level has done that */
 #define ASS_NOTEMPENV	0x2000	/* don't assign into temporary environment */
+#define ASS_XTRACE	0x4000	/* print trace after compound assignment expansion */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */

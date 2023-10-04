@@ -128,3 +128,12 @@ trap
 
 trap - SIGCHLD
 wait
+
+trap 512	# error
+trap 0		# revert
+trap -p EXIT
+
+trap 'echo exiting' 0
+trap -P EXIT
+
+exit

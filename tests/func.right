@@ -184,11 +184,41 @@ function a=2 ()
     printf "FUNCNAME: %s\n" $FUNCNAME
 }
 FUNCNAME: a=2
+<(:)
+<(:) is a function
+<(:) () 
+{ 
+    echo $FUNCNAME
+}
 break is a function
 break () 
 { 
     echo FUNCNAME: $FUNCNAME
 }
 FUNCNAME: break
-./func5.sub: line 54: `break': is a special builtin
+break is a function
+break () 
+{ 
+    echo FUNCNAME: $FUNCNAME
+}
+break
+./func5.sub: line 69: `break': is a special builtin
+./func5.sub: line 75: `!!': not a valid identifier
+!! is a function
+!! () 
+{ 
+    fc -s "$@"
+}
+!! is a function
+function !! () 
+{ 
+    fc -s "$@"
+}
 5
+rfunc () 
+{ 
+    local -;
+    local var;
+    local -p
+}
+declare -fr rfunc

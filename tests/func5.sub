@@ -37,6 +37,13 @@ set +o posix
 
 a\=2
 
+<(:) ()
+{
+	echo $FUNCNAME
+}
+\<\(:\)
+type '<(:)'
+
 break()
 {
 	echo FUNCNAME: $FUNCNAME
@@ -44,11 +51,32 @@ break()
 
 type break
 \break
+# you can print them in posix mode
+set -o posix
+# posix mode should find special builtins first
+type break
+declare -F break
+set +o posix
 unset -f break
 
-# but in posix mode, declaring such a function is an error
-set -o posix
+# but in posix mode, declaring such a function is a fatal error
+( set -o posix
 break()
 {
         echo FUNCNAME: $FUNCNAME
 }
+echo after
+)
+
+# in posix mode, functions whose names are invalid identifiers are fatal errors
+( set -o posix
+!! () { fc -s "$@" ; }
+type \!\!
+)
+
+# but you can create such functions and print them in posix mode
+!! () { fc -s "$@" ; }
+type '!!'
+set -o posix
+type '!!'
+set +o posix

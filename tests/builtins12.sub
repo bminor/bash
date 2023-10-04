@@ -11,31 +11,30 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-: ${TMPDIR:=/var/tmp}
-TRACEFILE=$TMPDIR/bash-trace-$$
-trap 'rm -f $TRACEFILE' 0 1 2 3 6 15
+# pushd/popd/dirs tests
 
-BASH_XTRACEFD=4		# error, invalid FD
+cd /bin
+pushd /tmp
+dirs --
 
-exec 4>$TRACEFILE
-BASH_XTRACEFD=4
+pushd --
+pushd -x
 
-set -x
+popd --
+popd -x
 
-echo 1
-echo 2
-echo 3
-echo 4
+pushd /
+popd dir	# error
 
-unset BASH_XTRACEFD
-exec 4<&-		# no unset hooks yet
+dirs -p
+pushd --
 
-for f in a b c d e; do echo $f ; done
+pushd /bin
 
-set +x
+# out of range errors
+popd -8
+popd +8
 
-echo TRACEFILE:
-cat $TRACEFILE
-echo =====
-
-exit 0
+# this needs a fix to work right
+popd -- +8
+popd -- -8

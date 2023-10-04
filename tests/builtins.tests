@@ -15,10 +15,6 @@
 set +p
 set +o posix
 
-ulimit -S -c 0 2>/dev/null
-ulimit -c -S -- 1000 2>/dev/null
-ulimit -c 2>/dev/null
-
 # check that break breaks loops
 for i in a b c; do echo $i; break; echo bad-$i; done
 echo end-1
@@ -119,12 +115,16 @@ case "$(type -t test)" in
 builtin)	echo oops -- enable -n test failed ;;
 *)	echo enable -n test worked ;;
 esac
+enable -n | grep test
 
 enable test
 case "$(type -t test)" in
 builtin)	echo enable test worked ;;
 *)	echo oops -- enable test failed ;;
 esac
+
+enable -d notbuiltin
+enable -d test
 
 # test options to exec
 (exec -a specialname ${THIS_SH} -c 'echo $0' )
@@ -306,6 +306,12 @@ ${THIS_SH} ./builtins9.sub
 
 # help tests
 ${THIS_SH} ./builtins10.sub
+
+# ulimit tests
+${THIS_SH} ./builtins11.sub
+
+# pushd/popd/dirs
+${THIS_SH} ./builtins12.sub
 
 shift 0	# succeeds silently
 

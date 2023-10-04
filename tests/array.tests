@@ -228,6 +228,11 @@ unset xpath[nelem-1]
 nelem=${#xpath[@]}
 echo ${#xpath[@]} -- $nelem
 
+# error
+echo ${#xpath[-10]}
+# zero length for unset elements
+echo ${#xpath[42]}
+
 # arrays and things that look like index assignments
 array=(42 [1]=14 [2]=44)
 

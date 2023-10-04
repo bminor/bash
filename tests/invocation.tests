@@ -38,6 +38,11 @@ ${THIS_SH} ./invocation1.sub
 # SHELLOPTS
 ${THIS_SH} ./invocation2.sub
 
+# rudimentary pretty-print tests
+${THIS_SH} ./invocation3.sub
+
+${THIS_SH} --login -c 'logout'
+
 : ${TMPDIR:=/tmp}
 TDIR=$TMPDIR/invocation-$$
 mkdir $TDIR || exit 1
@@ -62,6 +67,10 @@ ${THIS_SH} $TDIR/x23
 command cd -L $TDIR
 # but this results in a bad-interpreter error
 ./x23
+
+# this should result in a cannot execute binary file error since ls is in $PATH
+PATH=/bin:/usr/bin
+${THIS_SH} ls |& sed 's|^.*: ||'
 
 cd $SAVEPWD
 rm -rf $TDIR

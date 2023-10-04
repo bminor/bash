@@ -208,11 +208,7 @@ unalias_builtin (WORD_LIST *list)
   aflag = 0;
   while (list)
     {
-      alias = find_alias (list->word->word);
-
-      if (alias)
-	remove_alias (alias->name);
-      else
+      if (remove_alias (list->word->word) < 0)
 	{
 	  sh_notfound (list->word->word);
 	  aflag++;

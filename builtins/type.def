@@ -367,6 +367,7 @@ describe_command (char *command, int dflags)
 	 probably doesn't exist.  Check whether or not the command is an
 	 executable file.  If it's not, don't report a match.  This is
 	 the default posix mode behavior */
+      /* This code path isn't executed any more as of 3/2023. */
       if (STREQ (full_path, command) || posixly_correct)
 	{
 	  f = file_status (full_path);

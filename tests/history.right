@@ -97,7 +97,7 @@ line 2 for history
 6	 HISTFILE=$TMPDIR/newhistory
 7	 echo displaying \$HISTFILE after history -a
 8	 cat $HISTFILE
-./history.tests: line 90: fc: no command found
+./history.tests: line 91: fc: no command found
    15  echo line 2 for history
    16  unset HISTSIZE
    17  unset HISTFILE
@@ -107,7 +107,7 @@ echo xx xb xc
 xx xb xc
 echo 44 48 4c
 44 48 4c
-./history.tests: line 105: fc: no command found
+./history.tests: line 106: fc: no command found
 aa
 bb
 cc
@@ -180,6 +180,8 @@ i
     4  echo g
     5  echo h
 
+./history3.sub: line 48: history: @42: invalid number
+./history3.sub: line 49: history: @42: numeric argument required
 
 0
 1
@@ -266,6 +268,22 @@ out of range 3
 12	 echo out of range 3
 out of range 4
 13	 fc -l 1 99
+a
+b
+c
+# out of range specs aren't errors
+echo a
+a
+d
+e
+1	 echo a
+2	 echo b
+3	 echo c
+4	 # out of range specs aren't errors
+5	 # out of range specs aren't errors
+6	 echo a
+7	 echo d
+8	 echo e
 1
 2
 3

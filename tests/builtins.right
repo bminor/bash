@@ -1,4 +1,3 @@
-1000
 a
 end-1
 a
@@ -84,7 +83,10 @@ enable times
 enable trap
 enable unset
 enable -n test worked
+enable -n test
 enable test worked
+./builtins.tests: line 126: enable: notbuiltin: not a shell builtin
+./builtins.tests: line 127: enable: test: not dynamically loaded
 specialname
 -specialname
 FOO=BAR
@@ -107,6 +109,7 @@ m n o p
 /tmp/bash-dir-a
 /tmp/bash-dir-a
 /tmp/bash-dir-a
+/
 ./source5.sub: line 23: /tmp/source-notthere: No such file or directory
 after bad source 1
 ./source5.sub: line 30: /tmp/source-notthere: No such file or directory
@@ -157,6 +160,8 @@ a
 
 
 b
+-p
+a	b	c
 before: f = 4
 inside
 after: f = 8 bar = 4
@@ -296,6 +301,7 @@ u=rwx,g=rx,o=rx
 u=rwx,g=rx,o=rx
 u=rwx,g=rx,o=rx
 u=rwx,g=rx,o=rx
+u=rwx,g=rx,o=x
 hash: hash table empty
 ./builtins9.sub: line 19: hash: notthere: not found
 1
@@ -379,6 +385,16 @@ Shell commands matching keyword `read*'
 read: read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
 readarray: readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
 readonly: readonly [-aAf] [name[=value] ...] or readonly -p
+read: read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
+readarray: readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
+readonly: readonly [-aAf] [name[=value] ...] or readonly -p
+:: :
+    Null command.
+    
+    No effect; the command does nothing.
+    
+    Exit Status:
+    Always succeeds.
 NAME
     : - Null command.
 
@@ -445,4 +461,32 @@ A star (*) next to a name means that the command is disabled.
  getopts optstring name [arg ...]        while COMMANDS; do COMMANDS-2; done
  hash [-lr] [-p pathname] [-dt] [name >  { COMMANDS ; }
  help [-dms] [pattern ...]
-./builtins.tests: line 316: exit: status: numeric argument required
+./builtins10.sub: line 39: help: no help topics match `bash'.  Try `help help' or `man -k bash' or `info bash'.
+unlimited
+unlimited
+./builtins11.sub: line 27: ulimit: +1999: invalid number
+0
+0
+./builtins11.sub: line 37: ulimit: -q: invalid option
+ulimit: usage: ulimit [-SHabcdefiklmnpqrstuvxPRT] [limit]
+./builtins11.sub: line 39: ulimit: max user processes: cannot modify limit: Operation not permitted
+/tmp /bin
+/tmp /bin
+/bin /tmp
+./builtins12.sub: line 21: pushd: -x: invalid number
+pushd: usage: pushd [-n] [+N | -N | dir]
+/tmp
+./builtins12.sub: line 24: popd: -x: invalid number
+popd: usage: popd [-n] [+N | -N]
+/ /tmp
+./builtins12.sub: line 27: popd: dir: invalid argument
+popd: usage: popd [-n] [+N | -N]
+/
+/tmp
+/tmp /
+/bin /tmp /
+./builtins12.sub: line 35: popd: -8: directory stack index out of range
+./builtins12.sub: line 36: popd: +8: directory stack index out of range
+/tmp /
+/
+./builtins.tests: line 322: exit: status: numeric argument required

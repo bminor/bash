@@ -83,7 +83,21 @@ hashall:interactive-comments
 braceexpand:hashall:interactive-comments:noglob
 braceexpand:hashall:interactive-comments:noglob
 ./invocation2.sub: line 50: SHELLOPTS: readonly variable
+for i in 1 2 3;
+do
+    select var in a b c;
+    do
+        echo $REPLY;
+    done <<< a; echo answer was $REPLY;
+done
+
+for ((i=1; i <= 3; i++ ))
+do
+    echo $(( 2**$i ));
+done
+
 a
 a
 bad-interp
 ./invocation.tests: ./x23: nosuchfile: bad interpreter: No such file or directory
+cannot execute binary file

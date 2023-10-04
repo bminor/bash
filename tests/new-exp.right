@@ -626,7 +626,6 @@ bash: line 1: ${x@C}: bad substitution
 <'ab cd'> 
 <'4'> <'ab cd'> 
 <> 
-argv[1] = <host(2)[5.3]$ >
 < 	
 >
 <' \t\n'>
@@ -649,7 +648,15 @@ i
 declare -i foo
 A
 declare -A foo
-./new-exp10.sub: line 118: ${V@}: bad substitution
+LOWER
+Lower
+argv[1] = <host(2)[5.3]$ >
+argv[1] = <~$ >
+argv[1] = <^A[0]~$ >
+argv[1] = <^A^G^B[0:1]~\$ >
+argv[1] = </ bash$ >
+argv[1] = <1^J/ bash$ >
+./new-exp10.sub: line 149: ${V@}: bad substitution
 abcxxxdef
 abcÃ¥def
 ḅć

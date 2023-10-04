@@ -22,6 +22,13 @@ printf --
 printf ""
 printf -- ""
 
+# this is an error
+printf -x
+
+# these are errors
+printf -v invalid-var 'abc\n'
+printf '%s\n%n' abc invalid-var
+
 # in the future this may mean to put the output into VAR, but for
 # now it is an error
 # 2005-03-15 no longer an error
@@ -341,9 +348,13 @@ TOOSMALL=-9223372036854775815
 printf '%d\n' "$TOOBIG"
 printf '%d\n' "$TOOSMALL"
 
+# invalid variable name
+
 # tests variable assignment with -v
 ${THIS_SH} ./printf1.sub
 ${THIS_SH} ./printf2.sub
 ${THIS_SH} ./printf3.sub
 ${THIS_SH} ./printf4.sub
 ${THIS_SH} ./printf5.sub
+# multibyte characters with %ls/%S and %lc/%C
+${THIS_SH} ./printf6.sub

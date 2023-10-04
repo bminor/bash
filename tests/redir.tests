@@ -19,6 +19,9 @@ export LANG=C
 # catch-all for remaining untested redirection stuff
 set +o posix
 
+# this should succeed silently
+cat </dev/null >/dev/null 2>&1
+
 echo abc > /tmp/redir-test
 cat /tmp/redir-test
 
@@ -205,7 +208,7 @@ ${THIS_SH} ./redir7.sub
 ${THIS_SH} ./redir8.sub
 
 exec 9>&2
-command exec 2>$TMPDIR/foo-$$
+command exec 2>>$TMPDIR/foo-$$
 echo whatsis >&2
 echo cat /tmp/foo
 cat $TMPDIR/foo-$$
@@ -214,7 +217,8 @@ exec 2>&9
 exec 9>&-
 
 ${THIS_SH} ./redir9.sub
-
 ${THIS_SH} ./redir10.sub
-
 ${THIS_SH} ./redir11.sub
+${THIS_SH} ./redir12.sub
+
+${THIS_SH} < ./redir13.in

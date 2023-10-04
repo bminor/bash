@@ -177,6 +177,8 @@ string_to_rlimtype (char *s)
 
   ret = 0;
   neg = 0;
+  /* ulimit_builtin doesn't allow leading whitespace or an optional
+     leading `+' or `-'. */
   while (s && *s && whitespace (*s))
     s++;
   if (s && (*s == '-' || *s == '+'))

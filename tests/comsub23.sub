@@ -61,3 +61,19 @@ echo $RANDOM ${ echo $RANDOM; }
 
 RANDOM=42
 echo $RANDOM $RANDOM
+
+# here-documents and other word expansions with comsub/funsub on the rhs
+
+exec 4<<EOF
+we should try rhs
+${word-$(echo comsub)}
+and
+${word-${ echo funsub; }}
+in here-documents
+EOF
+
+cat <&4
+exec 4<&-
+
+echo after all they ${word-$(echo work here)}
+echo and ${word-${ echo work here; }}

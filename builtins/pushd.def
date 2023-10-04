@@ -363,6 +363,30 @@ popd_builtin (WORD_LIST *list)
 	break;
     }
 
+#if 0
+  /* If we didn't find `which' but there are arguments remaining, assume we
+     got `--' */
+  if (which_word == 0 && list)
+    {
+      if (((direction = list->word->word[0]) == '+') || direction == '-')
+	{
+	  if (legal_number (list->word->word + 1, &which) == 0)
+	    {
+	      sh_invalidnum (list->word->word);
+	      builtin_usage ();
+	      return (EX_USAGE);
+	    }
+	  which_word = list->word->word;
+	}
+      else
+	{
+	  builtin_error (_("%s: invalid argument"), list->word->word);
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
+#endif
+
   if (which > directory_list_offset || (which < -directory_list_offset) || (directory_list_offset == 0 && which == 0))
     {
       pushd_error (directory_list_offset, which_word ? which_word : "");

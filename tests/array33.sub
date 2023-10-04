@@ -45,3 +45,8 @@ declare -p A
 # error to convert indexed to associative
 declare -A A=([1]=1)
 declare -p A
+
+# can't read into an associative array
+unset -v A
+declare -A A
+read -a A </dev/null

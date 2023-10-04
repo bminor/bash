@@ -226,7 +226,7 @@ history_builtin (WORD_LIST *list)
     {
       if (legal_number (delete_arg, &delete_offset) == 0)
 	{
-	  sh_erange (delete_arg, _("history position"));
+	  sh_invalidnum (delete_arg);
 	  return (EXECUTION_FAILURE);
 	}
       /* check for negative offsets, count back from end of list */

@@ -24,6 +24,7 @@ set +e
 set +o posix
 
 # various alias/unalias errors
+unalias
 
 # at some point, this may mean to `export' an alias, like ksh, but
 # for now it is an error
@@ -108,6 +109,9 @@ declare -f func='() { echo "this is func"; }'
 # bad option to exec -- this should not exit the script
 exec -i /bin/sh
 
+# trying to exec non-executable file is a fatal error
+( exec ./errors1.sub 2>/dev/null ; echo after failed exec )
+
 # try to export -f something that is not a function -- this should be
 # an error, not create an `invisible function'
 export -f XPATH
@@ -142,6 +146,9 @@ hash notthere
 # bad option to hash, although it may mean `verbose' at some future point
 hash -v
 
+# hash -d requires an argument
+hash -d
+
 # turn off hashing, then try to hash something
 set +o hashall
 hash -p ${THIS_SH} ${THIS_SH##*/}
@@ -173,6 +180,8 @@ AA=(one two three)
 shopt -s shift_verbose
 shift $(( $# + 5 ))
 shift -2
+shift -- $(( $# + 5 ))
+shift -- -2
 
 # bad shell options
 shopt -s no_such_option
@@ -225,6 +234,8 @@ cd -
 cd one two three
 # cd doesn't like it if PWD is readonly
 ${THIS_SH} -c 'readonly PWD ; cd / ; echo $?' bash
+# or if OLDPWD is readonly
+${THIS_SH} -c 'readonly OLDPWD ; cd / ; echo $?' bash
 
 # various `source/.' errors
 .
@@ -251,6 +262,7 @@ read -t var < /dev/null
 # try to read into an invalid identifier
 read /bin/sh < /dev/null
 read A /bin/sh < /dev/null
+read -a invalid-name < /dev/null
 
 # try to read into a readonly variable
 read VAR < /dev/null
@@ -301,6 +313,9 @@ for z in 1 2 3; do
 	echo $x
 done
 
+# invalid option
+builtin -x
+
 # builtin with non-builtin
 builtin bash
 
@@ -310,6 +325,7 @@ bg
 fg
 
 # argument required
+kill
 kill -s
 # bad argument
 kill -S

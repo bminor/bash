@@ -1,5 +1,10 @@
 printf: usage: printf [-v var] format [arguments]
 printf: usage: printf [-v var] format [arguments]
+./printf.tests: line 26: printf: -x: invalid option
+printf: usage: printf [-v var] format [arguments]
+./printf.tests: line 29: printf: `invalid-var': not a valid identifier
+abc
+./printf.tests: line 30: printf: `invalid-var': not a valid identifier
 10
 	one
 one\ctwo
@@ -33,7 +38,7 @@ A7
 --\"abcd\"--
 --\'abcd\'--
 --a\x--
-./printf.tests: line 105: printf: missing hex digit for \x
+./printf.tests: line 112: printf: missing hex digit for \x
 --\x--
 ----
 ----
@@ -94,12 +99,12 @@ A7
 26
 26
 26
-./printf.tests: line 229: printf: `%10': missing format character
-./printf.tests: line 230: printf: `M': invalid format character
-ab./printf.tests: line 233: printf: `y': invalid format character
-./printf.tests: line 236: printf: GNU: invalid number
+./printf.tests: line 236: printf: `%10': missing format character
+./printf.tests: line 237: printf: `M': invalid format character
+ab./printf.tests: line 240: printf: `y': invalid format character
+./printf.tests: line 243: printf: GNU: invalid number
 0
-./printf.tests: line 237: printf: GNU: invalid number
+./printf.tests: line 244: printf: GNU: invalid number
 0
 -
 (foo )(bar )
@@ -152,9 +157,9 @@ b
 xx
 xx
 <   ><   >
-./printf.tests: line 341: printf: 9223372036854775825: Result too large
+./printf.tests: line 348: printf: 9223372036854775825: Result too large
 9223372036854775807
-./printf.tests: line 342: printf: -9223372036854775815: Result too large
+./printf.tests: line 349: printf: -9223372036854775815: Result too large
 -9223372036854775808
 	one
 one\ctwo
@@ -325,3 +330,15 @@ hello  --
 hello --
 123 --
 6 --
+à²M-^Gà²³à²¿à²M-^Uà³M-^Fà²M-^Wà²³à³M-^A
+à²M-^Gà²³
+à²M-^G
+à²M-^Gà²³
+  à²M-^Gà²³
+à²M-^Gà²³  ---
+à²M-^G
+à²M-^G
+à²M-^G
+à²M-^G
+   à²M-^G
+à²M-^G   ---

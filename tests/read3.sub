@@ -36,3 +36,7 @@ echo abc | {
 
 read -n 1 < $0
 echo "$REPLY"
+
+# succeed if fd is valid
+read -n 0 var <<<'abc'
+echo $?
