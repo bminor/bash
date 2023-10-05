@@ -7603,7 +7603,7 @@ test.h
 
 execute_cmd.c
 	- execute_cond_node: call cond_test instead of binary_test or unary_test.
-	  From a report and patch fro Grisha Levit <grishalevit@gmail.com>
+	  From a report and patch from Grisha Levit <grishalevit@gmail.com>
 
 doc/bash.1,doc/bashref.texi
 	- hash: add some text about the mutual exclusivity of the -t, -p, and
@@ -7705,3 +7705,32 @@ builtins/history.def
 subst.c
 	- array_length_reference: include the open bracket in the error message
 	  passed to err_badarraysub; it looks cleaner
+
+				   10/2
+				   ----
+jobs.c
+	- delete_all_jobs: if we are clearing the jobs list, reset the stats
+	  about running and dead jobs and child processes
+	  Report from Koichi Murase <myoga.murase@gmail.com>
+
+				   10/4
+				   ----
+lib/readline/complete.c
+	- rl_completion_rewrite_hook: rewrite hook applied to the completion
+	  word before comparing against the possible completions from the
+	  file system (modified by rl_filename_rewrite_hook)
+	- rl_filename_completion_function: call rl_completion_rewrite_hook,
+	  if set by the calling application, on the filename portion of the
+	  word to be completed
+
+lib/readline/readline.h
+	- rl_completion_rewrite_hook: extern declaration
+
+bashline.c
+	- bash_set_filename_hooks: set rl_completion_rewrite_hook to
+	  bash_filename_rewrite_hook now that we've separated them
+	  From a report and patch from Grisha Levit <grishalevit@gmail.com>;
+	  original report from Stefan H. Holek <stefan@epy.co.at>
+
+lib/readline/doc/rltech.texi
+	- rl_completion_rewrite_hook: document

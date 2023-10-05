@@ -98,7 +98,7 @@ The following list is what's changed when 'POSIX mode' is in effect:
      command name, rather than on all assignment statements on the line.
 
   12. The default history file is '~/.sh_history' (this is the default
-     value of '$HISTFILE').
+     value the shell assigns to '$HISTFILE').
 
   13. Redirection operators do not perform filename expansion on the
      word in the redirection unless the shell is interactive.
@@ -119,7 +119,8 @@ The following list is what's changed when 'POSIX mode' is in effect:
      whose name contains one or more slashes.
 
   18. POSIX special builtins are found before shell functions during
-     command lookup.
+     command lookup, including output printed by the 'type' and
+     'command' builtins.
 
   19. When printing shell function definitions (e.g., by 'type'), Bash
      does not print the 'function' keyword.
@@ -171,7 +172,8 @@ The following list is what's changed when 'POSIX mode' is in effect:
 
   29. A non-interactive shell exits with an error status if the
      iteration variable in a 'for' statement or the selection variable
-     in a 'select' statement is a readonly variable.
+     in a 'select' statement is a readonly variable or has an invalid
+     name.
 
   30. Non-interactive shells exit if FILENAME in '.'  FILENAME is not
      found.
@@ -316,7 +318,12 @@ The following list is what's changed when 'POSIX mode' is in effect:
   66. The 'test' builtin compares strings using the current locale when
      processing the '<' and '>' binary operators.
 
-  67. Command substitutions don't set the '?' special parameter.  The
+  67. The 'test' builtin's '-t' unary primary requires an argument.
+     Historical versions of 'test' made the argument optional in certain
+     cases, and Bash attempts to accommodate those for backwards
+     compatibility.
+
+  68. Command substitutions don't set the '?' special parameter.  The
      exit status of a simple command without a command word is still the
      exit status of the last command substitution that occurred while
      evaluating the variable assignments and redirections in that

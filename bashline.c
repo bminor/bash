@@ -3338,6 +3338,7 @@ bashline_set_filename_hooks (void)
   set_directory_hook ();
 
   rl_filename_rewrite_hook = bash_filename_rewrite_hook;
+  rl_completion_rewrite_hook = bash_filename_rewrite_hook;
   rl_filename_stat_hook = bash_filename_stat_hook;
 }
 

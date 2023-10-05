@@ -46,18 +46,35 @@ type '<(:)'
 
 break()
 {
-	echo FUNCNAME: $FUNCNAME
+	echo inside function $FUNCNAME
 }
 
-type break
-\break
-# you can print them in posix mode
+testfunc()
+{
+	echo type
+	type break
+	type -t break
+	echo command -v
+	command -v break
+	echo command -V
+	command -V break
+
+	echo type -a
+	type -a break
+	echo declare
+	declare -f break
+	echo execution
+	break
+}
+
 set -o posix
-# posix mode should find special builtins first
-type break
-declare -F break
+echo posix mode:
+testfunc
+
 set +o posix
-unset -f break
+echo default mode:
+testfunc
+unset -f testfunc break
 
 # but in posix mode, declaring such a function is a fatal error
 ( set -o posix

@@ -190,20 +190,59 @@ FUNCNAME: a=2
 { 
     echo $FUNCNAME
 }
-break is a function
-break () 
-{ 
-    echo FUNCNAME: $FUNCNAME
-}
-FUNCNAME: break
-break is a function
-break () 
-{ 
-    echo FUNCNAME: $FUNCNAME
-}
+posix mode:
+type
+break is a special shell builtin
+builtin
+command -v
 break
-./func5.sub: line 69: `break': is a special builtin
-./func5.sub: line 75: `!!': not a valid identifier
+command -V
+break is a special shell builtin
+type -a
+break is a special shell builtin
+break is a function
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+declare
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+execution
+default mode:
+type
+break is a function
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+function
+command -v
+break
+command -V
+break is a function
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+type -a
+break is a function
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+break is a shell builtin
+declare
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+execution
+inside function break
+./func5.sub: line 86: `break': is a special builtin
+./func5.sub: line 92: `!!': not a valid identifier
 !! is a function
 !! () 
 { 

@@ -4,18 +4,18 @@ V=ಇಳಿಕೆಗಳು
 V2=${V:0:2}
 V3=${V:0:1}
 
-printf "%ls\n" "$V"
-printf "%ls\n" "$V2"
-printf "%lc\n" "$V"
-printf "%.2ls\n" "$V"
+printf "%ls\n" "$V" | hexdump -b
+printf "%ls\n" "$V2" | hexdump -b
+printf "%lc\n" "$V" | hexdump -b
+printf "%.2ls\n" "$V" | hexdump -b
 
-printf "%4.2ls\n" "$V"
-printf "%-4.2ls---\n" "$V"
+printf "%4.2ls\n" "$V" | hexdump -b
+printf "%-4.2ls---\n" "$V" | hexdump -b
 
-printf "%ls\n" "$V3"
-printf "%S\n" "$V3"
-printf "%lc\n" "$V3"
-printf "%C\n" "$V3"
+printf "%ls\n" "$V3" | hexdump -b
+printf "%S\n" "$V3" | hexdump -b
+printf "%lc\n" "$V3" | hexdump -b
+printf "%C\n" "$V3" | hexdump -b
 
-printf "%4.2lc\n" "$V3"
-printf "%-4.2lc---\n" "$V3"
+printf "%4.2lc\n" "$V3" | hexdump -b
+printf "%-4.2lc---\n" "$V3" | hexdump -b

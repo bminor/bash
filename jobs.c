@@ -4702,7 +4702,8 @@ delete_all_jobs (int running_only)
 	{
 	  free ((char *)jobs);
 	  js.j_jobslots = 0;
-	  js.j_firstj = js.j_lastj = js.j_njobs = 0;
+	  js.j_firstj = js.j_lastj = js.j_njobs = js.j_ndead = 0;
+	  js.c_reaped = js.c_injobs = js.c_living = 0;
 	}
     }
 
