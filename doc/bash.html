@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 August 31<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 October 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -680,7 +680,13 @@ command (only <B>in</B> and <B>do</B> are valid):
 <B>
 </B>
 
-!    case    coproc    do    done    elif    else    esac    fi    for    function    if    in    select    then    until    while    {    }    time    [[    ]]
+
+
+<BR>&nbsp;!&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;&nbsp;&nbsp;&nbsp;coproc&nbsp;&nbsp;&nbsp;&nbsp;do&nbsp;&nbsp;&nbsp;&nbsp;done&nbsp;&nbsp;&nbsp;&nbsp;elif&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;&nbsp;&nbsp;&nbsp;esac&nbsp;&nbsp;&nbsp;&nbsp;fi&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;&nbsp;&nbsp;&nbsp;select&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;&nbsp;&nbsp;&nbsp;until&nbsp;&nbsp;&nbsp;&nbsp;while&nbsp;&nbsp;&nbsp;&nbsp;{&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;&nbsp;&nbsp;time&nbsp;&nbsp;&nbsp;&nbsp;[[&nbsp;&nbsp;&nbsp;&nbsp;]]
+
+
+
+
 </DL>
 
 
@@ -3284,7 +3290,7 @@ not already set.
 If this variable is set, and is an array,
 the value of each set element is executed as a command
 prior to issuing each primary prompt.
-If this is set but not an array variable, 
+If this is set but not an array variable,
 its value is used as a command to execute instead.
 <DT><B>PROMPT_DIRTRIM</B>
 
@@ -3413,7 +3419,7 @@ included.
 <DT><DD>
 If this variable is not set, <B>bash</B> acts as if it had the
 value <B>$aq\nreal\t%3lR\nuser\t%3lU\nsys\t%3lSaq</B>.
-If the value is null, no timing information is displayed.
+If the value is null, <B>bash</B> does not display any timing information.
 A trailing newline is added when the format string is displayed.
 
 <DT><B>TMOUT</B>
@@ -3646,7 +3652,7 @@ array, and an index of -1 references the last element.
 
 Referencing an array variable without a subscript is equivalent to
 referencing the array with a subscript of 0.
-Any reference to a variable using a valid subscript is legal, and
+Any reference to a variable using a valid subscript is valid, and
 <B>bash</B>
 
 will create an array if necessary.
@@ -5060,8 +5066,6 @@ A
 
 may be matched by including it as the first character
 in the set.
-<BR>
-
 <P>
 
 
@@ -5086,8 +5090,6 @@ alnum   alpha   ascii   blank   cntrl   digit   graph   lower   print   punct   
 
 A character class matches any character belonging to that class.
 The <B>word</B> character class matches letters, digits, and the character _.
-<BR>
-
 <P>
 
 
@@ -5101,8 +5103,6 @@ an <I>equivalence class</I> can be specified using the syntax
 <B>[=</B><I>c</I><B>=]</B>, which matches all characters with the
 same collation weight (as defined by the current locale) as
 the character <I>c</I>.
-<BR>
-
 <P>
 
 
@@ -7921,8 +7921,8 @@ sequence into the mode string.
 <DT><B>enable-active-region (On)</B>
 
 <DD>
-The <I>point</I> is the current cursor position, and <I>mark</I> refers  
-to a saved cursor position.   
+The <I>point</I> is the current cursor position, and <I>mark</I> refers
+to a saved cursor position.
 The text between the point and mark is referred to as the <I>region</I>.  
 When this variable is set to <I>On</I>, readline allows certain commands
 to designate the region as <I>active</I>.  
@@ -7993,7 +7993,7 @@ regardless of what the terminal claims it can support.  The name
 is a synonym for this variable.
 The default is <I>Off</I>, but readline will set it to <I>On</I> if the
 locale contains eight-bit characters.
-This variable is dependent on the <B>LC_CTYPE</B> locale category, and 
+This variable is dependent on the <B>LC_CTYPE</B> locale category, and
 may change if the locale is changed.
 <DT><B>isearch-terminators (``C-[C-J'')</B>
 
@@ -8177,7 +8177,7 @@ The
 construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
 readline.  The text of the test, after any comparison operator,
-<BR>&nbsp;extends&nbsp;to&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;line;
+extends to the end of the line;
 unless otherwise noted, no characters are required to isolate it.
 <DL COMPACT><DT><DD>
 <DL COMPACT>
@@ -9345,7 +9345,7 @@ completion function would load completions dynamically:
 {
 <BR>
 
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>. &quot;/etc/bash_completion.d/$1.sh&quot; &gt;/dev/null 2&gt;&amp;1 &amp;&amp; return 124<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&quot;/etc/bash_completion.d/$1.sh&quot;&nbsp;&gt;/dev/null&nbsp;2&gt;&amp;1&nbsp;&amp;&amp;&nbsp;return&nbsp;124
 <BR>
 
 }
@@ -11566,10 +11566,10 @@ and remembered.  Any previously-remembered pathname is discarded.
 If the
 <B>-p</B>
 
-option is supplied, no path search is performed, and
+option is supplied, <B>hash</B> uses
 <I>filename</I>
 
-is used as the full filename of the command.
+as the full filename of the command.
 The
 <B>-r</B>
 
@@ -11592,6 +11592,11 @@ The
 option causes output to be displayed in a format that may be reused as input.
 If no arguments are given, or if only <B>-l</B> is supplied,
 information about remembered commands is printed.
+The <B>-t</B>, <B>-d</B>, and <B>-p</B> options (the options that
+act on the <I>name</I> arguments) are mutually exclusive.
+Only one will be active.
+If more than one is supplied, <B>-t</B> has higher priority than
+<B>-p</B>, and both are higher priority than <B>-d</B>.
 The return status is true unless a
 <I>name</I>
 
@@ -14600,7 +14605,7 @@ specified as a set of options to the shopt builtin (
 
 and so on).
 There is only one current
-compatibility level -- each option is mutually exclusive.
+compatibility level en each option is mutually exclusive.
 The compatibility level is intended to allow users to select behavior
 from previous versions that is incompatible with newer versions
 while they migrate scripts to use current features and
@@ -14682,11 +14687,9 @@ has no special effect
 <DL COMPACT><DT><DD>
 <DL COMPACT>
 <DT>*<DD>
-interrupting a command list such as &quot;a ; b ; c&quot; causes the execution
-of the next command in the list (in bash-4.0 and later versions,
-the shell acts as if it received the interrupt, so
-interrupting one command in a list aborts the execution of the
-entire list)
+the <B>&lt;</B> and <B>&gt;</B> operators to the <B>[[</B> command do not
+consider the current locale when comparing strings; they use ASCII
+ordering.
 </DL></DL>
 
 
@@ -14822,6 +14825,43 @@ when the <B>-l</B> option is supplied.
 The <B>unset</B> builtin treats attempts to unset array subscripts <B>@</B>
 and <B>*</B> differently depending on whether the array is indexed or
 associative, and differently than in previous versions.
+<DT>*<DD>
+arithmetic commands ( ((...)) ) and the expressions in an arithmetic for
+statement can be expanded more than once
+<DT>*<DD>
+expressions used as arguments to arithmetic operators in the <B>[[</B>
+conditional command can be expanded more than once
+<DT>*<DD>
+the expressions in substring parameter brace expansion can be
+expanded more than once
+<DT>*<DD>
+the expressions in the $(( ... )) word expansion can be expanded
+more than once
+<DT>*<DD>
+arithmetic expressions used as indexed array subscripts can be
+expanded more than once
+<DT>*<DD>
+<B>test -v</B>, when given an argument of <B>A[@]</B>, where <B>AP is
+an existing associative array, will return true if the array has any set
+elements.
+Bash-5.2 will look for and report on a key named @</B>.
+<DT>*<DD>
+the ${<I>parameter</I><B>[:]=</B><I>value</I>} word expansion will return
+<I>value</I>, before any variable-specific transformations have been
+performed (e.g., converting to lowercase).
+Bash-5.2 will return the final value assigned to the variable.
+<DT>*<DD>
+Parsing command substitutions will behave as if extended globbing
+(see the description of the
+<B>shopt</B>
+
+builtin above)
+is enabled, so that parsing a command substitution containing an extglob
+pattern (say, as part of a shell function) will not fail.
+This assumes the intent is to enable extglob before the command is executed
+and word expansions are performed.
+It will fail at word expansion time if extglob hasn't been
+enabled by the time the command is executed.
 </DL></DL>
 
 
@@ -14952,6 +14992,7 @@ These restrictions are enforced after any startup files are read.
 
 above),
 
+
 <B>rbash</B>
 
 turns off any restrictions in the shell spawned to execute the
@@ -14968,7 +15009,7 @@ script.
 <DT><I>The Gnu History Library</I>, Brian Fox and Chet Ramey<DD>
 <DT><I>Portable Operating System Interface (POSIX) Part 2: Shell and Utilities</I>, IEEE --<DD>
 <A HREF="http://pubs.opengroup.org/onlinepubs/9699919799/">http://pubs.opengroup.org/onlinepubs/9699919799/</A>
-<DT><A HREF="http://tiswww.case.edu/tichet/bash/POSIX">http://tiswww.case.edu/tichet/bash/POSIX</A> -- a description of posix mode<DD>
+<DT><A HREF="http://tiswww.case.edu/tichet/bash/POSIX">http://tiswww.case.edu/tichet/bash/POSIX</A> en a description of posix mode<DD>
 <DT><I>sh</I>(1), <I>ksh</I>(1), <I>csh</I>(1)<DD>
 <DT><I>emacs</I>(1), <I>vi</I>(1)<DD>
 <DT><I>readline</I>(3)<DD>
@@ -15034,7 +15075,7 @@ Chet Ramey, Case Western Reserve University
 <H3>BUG REPORTS</H3>
 
 If you find a bug in
-<B>bash,</B>
+<B>bash</B>,
 
 you should report it.  But first, you should
 make sure that it really is a bug, and that it appears in the latest
@@ -15126,7 +15167,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 August 31<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 October 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15232,7 +15273,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20230907/doc/bash.1.<BR>
-Time: 10 September 2023 17:14:39 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20231004/doc/bash.1.<BR>
+Time: 06 October 2023 16:59:04 EDT
 </BODY>
 </HTML>

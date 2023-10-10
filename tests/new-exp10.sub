@@ -51,6 +51,10 @@ E=$' \t\n'
 printf "<%s>" "${E@E}" ; echo
 printf "<%s>" "${E@Q}" ; echo
 
+v=$'\1\1'
+printf '%q\n' "${v@E}"
+unset -v v
+
 declare x
 declare -r x="ab 'cd' ef"
 printf "%s" "${x@A}" ; echo 

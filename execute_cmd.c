@@ -2912,8 +2912,11 @@ execute_for_command (FOR_COM *for_command)
 #endif
 
   save_line_number = line_number;
+  line_number = for_command->line;	/* for expansion error messages */
+
   if (check_identifier (for_command->name, 1) == 0)
     {
+      line_number = save_line_number;
       if (posixly_correct && interactive_shell == 0)
 	{
 	  last_command_exit_value = EX_BADUSAGE;
@@ -2925,7 +2928,6 @@ execute_for_command (FOR_COM *for_command)
   loop_level++; interrupt_execution++; retain_fifos++;
   identifier = for_command->name->word;
 
-  line_number = for_command->line;	/* for expansion error messages */
   list = releaser = expand_words_no_vars (for_command->map_list);
 
   begin_unwind_frame ("for");
@@ -3156,13 +3158,8 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
 
   /* Evaluate the initialization expression. */
   expresult = eval_arith_for_expr (arith_for_command->init, &expok);
-  if (expok == 0)
-    {
-      line_number = save_lineno;
-      return (EXECUTION_FAILURE);
-    }
 
-  while (1)
+  while (expok)
     {
       /* Evaluate the test expression. */
       line_number = arith_lineno;
@@ -3170,10 +3167,8 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
       line_number = save_lineno;
 
       if (expok == 0)
-	{
-	  body_status = EXECUTION_FAILURE;
-	  break;
-	}
+	break;
+
       REAP ();
       if (expresult == 0)
 	break;
@@ -3201,18 +3196,12 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
       line_number = arith_lineno;
       expresult = eval_arith_for_expr (arith_for_command->step, &expok);
       line_number = save_lineno;
-
-      if (expok == 0)
-	{
-	  body_status = EXECUTION_FAILURE;
-	  break;
-	}
     }
 
   loop_level--; interrupt_execution--;
   line_number = save_lineno;
 
-  return (body_status);
+  return (expok ? body_status : EXECUTION_FAILURE);
 }
 #endif
 

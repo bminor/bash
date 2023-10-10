@@ -7203,6 +7203,7 @@ lib/readline/complete.c
 	- rl_filename_completion_function: if the application sets a filename
 	  rewrite hook, use it to rewrite the filename we're matching as well
 	  as filenames read with readdir().
+	  [SUPERSEDED BY CHANGE OF 10/4/2023]
 	  From a report by Grisha Levit <grishalevit@gmail.com>
 
 				   7/21
@@ -7734,3 +7735,46 @@ bashline.c
 
 lib/readline/doc/rltech.texi
 	- rl_completion_rewrite_hook: document
+
+				   10/5
+				   ----
+lib/readline/complete.c
+	- rl_complete_internal: use `%' as an op character to indicate that
+	  we should just display the completions, like '?' in previous versions
+	  (nothing uses this yet)
+	- rl_possible_completions: set last_completion_failed to 0 before we
+	  pass '?' to rl_complete_internal so we don't worry about trying to
+	  insert a single completion
+
+				   10/6
+				   ----
+subst.c
+	- string_transform: use ansicstr directly for the `E' transformation
+	  so we don't accidentally remove too many escapes.
+	  From a report and patch from Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- execute_arith_for_command: make sure a failed init expression resets
+	  loop_level so break and continue work correctly
+	  From a report and patch from Grisha Levit <grishalevit@gmail.com>
+	- execute_for_command: set line_number for invalid identifier error
+	  messages; restore before returning error
+	  From a report and patch from Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/misc.c
+	- _rl_set_insert_mode: manage RL_STATE_OVERWRITE when modifiying
+	  insert mode
+
+doc/bash.1,doc/bashref.texi
+	- some style and formatting changes from Bjarni Ingi Gislason
+	  <bjarniig@simnet.is>
+
+subst.c
+	- getifs: now returns allocated memory to insulate it from changes to
+	  $IFS
+
+builtins/read.def
+	- read_builtin: since getifs now returns allocated memory, note when
+	  we need to free ifs_chars and free it before returning.
+	  Reported by Robert Elz <kre@munnari.OZ.AU> in
+	  https://www.austingroupbugs.net/view.php?id=1778#c6513

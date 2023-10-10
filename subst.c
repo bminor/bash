@@ -8608,7 +8608,7 @@ pos_params_assignment (WORD_LIST *list, int itype, int quoted)
 static char *
 string_transform (int xc, SHELL_VAR *v, char *s)
 {
-  char *ret, flags[MAX_ATTRIBUTES], *t;
+  char *ret, flags[MAX_ATTRIBUTES];
   int i;
 
   if (((xc == 'A' || xc == 'a') && v == 0))
@@ -8632,9 +8632,7 @@ string_transform (int xc, SHELL_VAR *v, char *s)
 	break;
       /* Transformations that modify the variable's value */
       case 'E':
-	t = ansiexpand (s, 0, strlen (s), 0);
-	ret = dequote_escapes (t);
-	free (t);
+	ret = ansicstr (s, strlen (s), 0, 0, 0);
 	break;
       case 'P':
 	ret = decode_prompt_string (s);
@@ -12174,7 +12172,7 @@ setifs (SHELL_VAR *v)
 char *
 getifs (void)
 {
-  return ifs_value;
+  return ifs_value ? savestring (ifs_value) : ifs_value;
 }
 
 /* This splits a single word into a WORD LIST on $IFS, but only if the word

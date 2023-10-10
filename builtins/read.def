@@ -218,6 +218,7 @@ read_builtin (WORD_LIST *list)
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
   int edit, use_bash_completion;
   int raw, nchars, silent, have_timeout, ignore_delim, fd;
+  int free_ifs;
   int lastsig, t_errno;
   int mb_cur_max;
   unsigned int tmsec, tmusec;
@@ -403,12 +404,18 @@ read_builtin (WORD_LIST *list)
     delim = -1;
 
   /* IF IFS is unset, we use the default of " \t\n". */
-  ifs_chars = getifs ();
-  if (ifs_chars == 0)		/* XXX - shouldn't happen */
-    ifs_chars = "";
+  free_ifs = 0;
   /* If we want to read exactly NCHARS chars, don't split on IFS */
   if (ignore_delim)
     ifs_chars = "";
+  else
+    {
+      ifs_chars = getifs ();
+      if (ifs_chars == 0)		/* XXX - shouldn't happen */
+	ifs_chars = "";
+      else
+	free_ifs = 1;
+    }
   for (skip_ctlesc = skip_ctlnul = 0, e = ifs_chars; *e; e++)
     skip_ctlesc |= *e == CTLESC, skip_ctlnul |= *e == CTLNUL;
 
@@ -1080,6 +1087,8 @@ assign_vars:
   else
     retval = EXECUTION_FAILURE;
 
+  if (free_ifs)
+    free (ifs_chars);
   FREE (tofree);
   free (orig_input_string);
 

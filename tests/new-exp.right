@@ -632,6 +632,7 @@ bash: line 1: ${x@C}: bad substitution
 < 	
 >
 <$' \t\n'>
+$'\001\001'
 declare -r x='ab '\''cd'\'' ef'
 set -- 'ab' 'cd ef' '' 'gh' 
 declare -a A=([0]="ab" [1]="cd ef" [2]="" [3]="gh") 
@@ -656,7 +657,7 @@ argv[1] = <^A[0]~$ >
 argv[1] = <^A^G^B[0:1]~\$ >
 argv[1] = </ bash$ >
 argv[1] = <1^J/ bash$ >
-./new-exp10.sub: line 149: ${V@}: bad substitution
+./new-exp10.sub: line 153: ${V@}: bad substitution
 abcxxxdef
 abcÃ¥def
 ḅć

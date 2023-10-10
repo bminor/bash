@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 31 August 2023).
+the Bash shell (version 5.3, 6 October 2023).
 
-This is Edition 5.3, last updated 31 August 2023,
+This is Edition 5.3, last updated 6 October 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 31 August 2023).
+the Bash shell (version 5.3, 6 October 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 31 August 2023,
+<p>This is Edition 5.3, last updated 6 October 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.3.
 </p>
@@ -4620,6 +4620,11 @@ The <samp>-l</samp> option causes output to be displayed in a format
 that may be reused as input.
 If no arguments are given, or if only <samp>-l</samp> is supplied,
 information about remembered commands is printed.
+The <samp>-t</samp>, <samp>-d</samp>, and <samp>-p</samp> options (the options that
+act on the <var>name</var> arguments) are mutually exclusive.
+Only one will be active.
+If more than one is supplied, <samp>-t</samp> has higher priority than
+<samp>-p</samp>, and both are higher priority than <samp>-d</samp>.
 The return status is zero unless a <var>name</var> is not found or an invalid
 option is supplied.
 </p>
@@ -7905,7 +7910,7 @@ The value of <var>p</var> determines whether or not the fraction is included.
 </p><div class="example">
 <pre class="example"><code>$'\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS'</code>
 </pre></div>
-<p>If the value is null, no timing information is displayed.
+<p>If the value is null, Bash does not display any timing information.
 A trailing newline is added when the format string is displayed.
 </p>
 </dd>
@@ -8987,7 +8992,7 @@ and an index of -1 refers to the last element.
 </p>
 <p>Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0.
-Any reference to a variable using a valid subscript is legal, and
+Any reference to a variable using a valid subscript is valid, and
 Bash will create an array if necessary.
 </p>
 <p>An array variable is considered set if a subscript has been assigned a
@@ -9530,7 +9535,8 @@ entering <small>POSIX</small> mode, the shell will not execute a function whose 
 contains one or more slashes.
 
 </li><li> <small>POSIX</small> special builtins are found before shell functions
-during command lookup.
+during command lookup, including output printed by the <code>type</code>
+and <code>command</code> builtins.
 
 </li><li> When printing shell function definitions (e.g., by <code>type</code>), Bash does
 not print the <code>function</code> keyword.
@@ -9583,7 +9589,7 @@ command in which the error occurred&quot;).
 
 </li><li> A non-interactive shell exits with an error status if the iteration
 variable in a <code>for</code> statement or the selection variable in a
-<code>select</code> statement is a readonly variable.
+<code>select</code> statement is a readonly variable or has an invalid name.
 
 </li><li> Non-interactive shells exit if <var>filename</var> in <code>.</code> <var>filename</var>
 is not found.
@@ -9944,7 +9950,7 @@ Bash-5.2 will look for and report on a key named &lsquo;<samp>@</samp>&rsquo;
 <var>value</var>, before any variable-specific transformations have been
 performed (e.g., converting to lowercase).
 Bash-5.2 will return the final value assigned to the variable.
-</li><li> Parsing command substitutions will behave as if extended glob
+</li><li> Parsing command substitutions will behave as if extended globbing
 (see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>)
 is enabled, so that parsing a command substitution containing an extglob
 pattern (say, as part of a shell function) will not fail.

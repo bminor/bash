@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.8 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 2 October 2023).
+Bash shell (version 5.3, 6 October 2023).
 
-   This is Edition 5.3, last updated 2 October 2023, of 'The GNU Bash
+   This is Edition 5.3, last updated 6 October 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.3.
 
    Copyright (C) 1988-2023 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 2 October 2023).  The Bash home page is
+Bash shell (version 5.3, 6 October 2023).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.3, last updated 2 October 2023, of 'The GNU Bash
+   This is Edition 5.3, last updated 6 October 2023, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.3.
 
    Bash contains features that appear in other popular shells, and some
@@ -6072,8 +6072,8 @@ Variables::).
 
      If this variable is not set, Bash acts as if it had the value
           $'\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS'
-     If the value is null, no timing information is displayed.  A
-     trailing newline is added when the format string is displayed.
+     If the value is null, Bash does not display any timing information.
+     A trailing newline is added when the format string is displayed.
 
 'TMOUT'
      If set to a value greater than zero, 'TMOUT' is treated as the
@@ -6925,7 +6925,7 @@ array, and an index of -1 refers to the last element.
 
    Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0.  Any reference to a variable using a
-valid subscript is legal, and Bash will create an array if necessary.
+valid subscript is valid, and Bash will create an array if necessary.
 
    An array variable is considered set if a subscript has been assigned
 a value.  The null string is a valid value.
@@ -7733,14 +7733,14 @@ required for bash-5.1 and later versions.
           before any variable-specific transformations have been
           performed (e.g., converting to lowercase).  Bash-5.2 will
           return the final value assigned to the variable.
-        * Parsing command substitutions will behave as if extended glob
-          (*note The Shopt Builtin::) is enabled, so that parsing a
-          command substitution containing an extglob pattern (say, as
-          part of a shell function) will not fail.  This assumes the
-          intent is to enable extglob before the command is executed and
-          word expansions are performed.  It will fail at word expansion
-          time if extglob hasn't been enabled by the time the command is
-          executed.
+        * Parsing command substitutions will behave as if extended
+          globbing (*note The Shopt Builtin::) is enabled, so that
+          parsing a command substitution containing an extglob pattern
+          (say, as part of a shell function) will not fail.  This
+          assumes the intent is to enable extglob before the command is
+          executed and word expansions are performed.  It will fail at
+          word expansion time if extglob hasn't been enabled by the time
+          the command is executed.
 
 
 File: bashref.info,  Node: Job Control,  Next: Command Line Editing,  Prev: Bash Features,  Up: Top
@@ -12937,77 +12937,77 @@ Node: Special Builtins226020
 Node: Shell Variables226999
 Node: Bourne Shell Variables227436
 Node: Bash Variables229540
-Node: Bash Features264599
-Node: Invoking Bash265612
-Node: Bash Startup Files271651
-Node: Interactive Shells276782
-Node: What is an Interactive Shell?277193
-Node: Is this Shell Interactive?277842
-Node: Interactive Shell Behavior278657
-Node: Bash Conditional Expressions282286
-Node: Shell Arithmetic287199
-Node: Aliases290160
-Node: Arrays293054
-Node: The Directory Stack299688
-Node: Directory Stack Builtins300472
-Node: Controlling the Prompt304732
-Node: The Restricted Shell307697
-Node: Bash POSIX Mode310307
-Node: Shell Compatibility Mode326564
-Node: Job Control334808
-Node: Job Control Basics335268
-Node: Job Control Builtins340270
-Node: Job Control Variables346065
-Node: Command Line Editing347221
-Node: Introduction and Notation348892
-Node: Readline Interaction350515
-Node: Readline Bare Essentials351706
-Node: Readline Movement Commands353495
-Node: Readline Killing Commands354455
-Node: Readline Arguments356376
-Node: Searching357420
-Node: Readline Init File359606
-Node: Readline Init File Syntax360867
-Node: Conditional Init Constructs384892
-Node: Sample Init File389088
-Node: Bindable Readline Commands392212
-Node: Commands For Moving393416
-Node: Commands For History395467
-Node: Commands For Text400461
-Node: Commands For Killing404439
-Node: Numeric Arguments407143
-Node: Commands For Completion408282
-Node: Keyboard Macros412473
-Node: Miscellaneous Commands413161
-Node: Readline vi Mode419199
-Node: Programmable Completion420106
-Node: Programmable Completion Builtins427886
-Node: A Programmable Completion Example439006
-Node: Using History Interactively444254
-Node: Bash History Facilities444938
-Node: Bash History Builtins447949
-Node: History Interaction453040
-Node: Event Designators456853
-Node: Word Designators458391
-Node: Modifiers460256
-Node: Installing Bash462064
-Node: Basic Installation463201
-Node: Compilers and Options466923
-Node: Compiling For Multiple Architectures467664
-Node: Installation Names469356
-Node: Specifying the System Type471465
-Node: Sharing Defaults472182
-Node: Operation Controls472855
-Node: Optional Features473813
-Node: Reporting Bugs485032
-Node: Major Differences From The Bourne Shell486366
-Node: GNU Free Documentation License503224
-Node: Indexes528401
-Node: Builtin Index528855
-Node: Reserved Word Index535956
-Node: Variable Index538404
-Node: Function Index555538
-Node: Concept Index569259
+Node: Bash Features264608
+Node: Invoking Bash265621
+Node: Bash Startup Files271660
+Node: Interactive Shells276791
+Node: What is an Interactive Shell?277202
+Node: Is this Shell Interactive?277851
+Node: Interactive Shell Behavior278666
+Node: Bash Conditional Expressions282295
+Node: Shell Arithmetic287208
+Node: Aliases290169
+Node: Arrays293063
+Node: The Directory Stack299697
+Node: Directory Stack Builtins300481
+Node: Controlling the Prompt304741
+Node: The Restricted Shell307706
+Node: Bash POSIX Mode310316
+Node: Shell Compatibility Mode326573
+Node: Job Control334821
+Node: Job Control Basics335281
+Node: Job Control Builtins340283
+Node: Job Control Variables346078
+Node: Command Line Editing347234
+Node: Introduction and Notation348905
+Node: Readline Interaction350528
+Node: Readline Bare Essentials351719
+Node: Readline Movement Commands353508
+Node: Readline Killing Commands354468
+Node: Readline Arguments356389
+Node: Searching357433
+Node: Readline Init File359619
+Node: Readline Init File Syntax360880
+Node: Conditional Init Constructs384905
+Node: Sample Init File389101
+Node: Bindable Readline Commands392225
+Node: Commands For Moving393429
+Node: Commands For History395480
+Node: Commands For Text400474
+Node: Commands For Killing404452
+Node: Numeric Arguments407156
+Node: Commands For Completion408295
+Node: Keyboard Macros412486
+Node: Miscellaneous Commands413174
+Node: Readline vi Mode419212
+Node: Programmable Completion420119
+Node: Programmable Completion Builtins427899
+Node: A Programmable Completion Example439019
+Node: Using History Interactively444267
+Node: Bash History Facilities444951
+Node: Bash History Builtins447962
+Node: History Interaction453053
+Node: Event Designators456866
+Node: Word Designators458404
+Node: Modifiers460269
+Node: Installing Bash462077
+Node: Basic Installation463214
+Node: Compilers and Options466936
+Node: Compiling For Multiple Architectures467677
+Node: Installation Names469369
+Node: Specifying the System Type471478
+Node: Sharing Defaults472195
+Node: Operation Controls472868
+Node: Optional Features473826
+Node: Reporting Bugs485045
+Node: Major Differences From The Bourne Shell486379
+Node: GNU Free Documentation License503237
+Node: Indexes528414
+Node: Builtin Index528868
+Node: Reserved Word Index535969
+Node: Variable Index538417
+Node: Function Index555551
+Node: Concept Index569272
 
 End Tag Table
 

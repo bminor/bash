@@ -7059,7 +7059,7 @@ If this variable is not set, Bash acts as if it had the value
 @example
 @code{$'\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS'}
 @end example
-If the value is null, no timing information is displayed.
+If the value is null, Bash does not display any timing information.
 A trailing newline is added when the format string is displayed.
 
 @item TMOUT
@@ -8029,7 +8029,7 @@ and an index of -1 refers to the last element.
 
 Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0.
-Any reference to a variable using a valid subscript is legal, and
+Any reference to a variable using a valid subscript is valid, and
 Bash will create an array if necessary.
 
 An array variable is considered set if a subscript has been assigned a
@@ -9012,7 +9012,7 @@ the $@{@var{parameter}[:]=@var{value}@} word expansion will return
 performed (e.g., converting to lowercase).
 Bash-5.2 will return the final value assigned to the variable.
 @item
-Parsing command substitutions will behave as if extended glob
+Parsing command substitutions will behave as if extended globbing
 (@pxref{The Shopt Builtin})
 is enabled, so that parsing a command substitution containing an extglob
 pattern (say, as part of a shell function) will not fail.

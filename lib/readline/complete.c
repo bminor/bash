@@ -473,6 +473,7 @@ rl_complete (int ignore, int invoking_key)
 int
 rl_possible_completions (int ignore, int invoking_key)
 {
+  last_completion_failed = 0;
   rl_completion_invoking_key = invoking_key;
   return (rl_complete_internal ('?'));
 }
@@ -2187,7 +2188,9 @@ rl_complete_internal (int what_to_do)
 	  append_to_match (matches[0], delimiter, quote_char, nontrivial_lcd);
 	  break;
 	}
-      
+      /*FALLTHROUGH*/
+
+    case '%':
       do_display = 1;
       break;
 

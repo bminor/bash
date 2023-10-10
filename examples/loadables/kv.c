@@ -117,12 +117,13 @@ kvfile (SHELL_VAR *v, int fd, char *delims, char *rs)
 int
 kv_builtin (WORD_LIST *list)
 {
-  int opt, rval;
+  int opt, rval, free_delims;
   char *array_name, *delims, *rs;
   SHELL_VAR *v;
 
   array_name = delims = rs = 0;
   rval = EXECUTION_SUCCESS;
+  free_delims = 0;
 
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "A:s:d:")) != -1)
@@ -163,7 +164,10 @@ kv_builtin (WORD_LIST *list)
     }
 
   if (delims == 0)
-    delims = getifs ();
+    {
+      delims = getifs ();
+      free_delims = 1;
+    }
   if (rs == 0)
     rs = "\n";
 
@@ -185,6 +189,8 @@ kv_builtin (WORD_LIST *list)
 
   rval = kvfile (v, 0, delims, rs);
 
+  if (free_delims)
+    free (delims);	/* getifs returns allocated memory */  
   return (rval > 0 ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
 

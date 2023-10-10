@@ -810,7 +810,10 @@ _rl_set_insert_mode (int im, int force)
   _rl_set_cursor (im, force);
 #endif
 
+  RL_UNSETSTATE (RL_STATE_OVERWRITE);
   rl_insert_mode = im;
+  if (rl_insert_mode == RL_IM_OVERWRITE)
+    RL_SETSTATE (RL_STATE_OVERWRITE);
 }
 
 /* Toggle overwrite mode.  A positive explicit argument selects overwrite
