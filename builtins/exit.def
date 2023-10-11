@@ -1,7 +1,7 @@
 This file is exit.def, from which is created exit.c.
 It implements the builtins "exit", and "logout" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -140,6 +140,8 @@ exit_or_logout (WORD_LIST *list)
      (list == 0), use the exit status we saved before running the trap
      commands (trap_saved_exit_value). */
   exit_value = (running_trap == 1 && list == 0) ? trap_saved_exit_value : get_exitstat (list);
+  if (exit_value > EX_SHERRBASE)	/* some kind of error */
+    return (exit_value);    
 
   bash_logout ();
 

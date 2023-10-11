@@ -69,7 +69,8 @@ break_builtin (WORD_LIST *list)
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
 
-  (void)get_numeric_arg (list, 1, &newbreak);
+  /* This will not return if an error is encountered. */
+  (void)get_numeric_arg (list, interactive_shell ? 2 : 1, &newbreak);
 
   if (newbreak <= 0)
     {
@@ -113,7 +114,8 @@ continue_builtin (WORD_LIST *list)
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
 
-  (void)get_numeric_arg (list, 1, &newcont);
+  /* This will not return if an error is encountered. */
+  (void)get_numeric_arg (list, interactive_shell ? 2 : 1, &newcont);
 
   if (newcont <= 0)
     {

@@ -7778,3 +7778,50 @@ builtins/read.def
 	  we need to free ifs_chars and free it before returning.
 	  Reported by Robert Elz <kre@munnari.OZ.AU> in
 	  https://www.austingroupbugs.net/view.php?id=1778#c6513
+
+				   10/7
+				   ----
+pathexp.c
+	- glob_char_p: add more of the extglob pattern characters; it doesn't
+	  hurt to quote them
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+	- unquoted_glob_pattern_p: don't treat a `(' immediately following a
+	  `/' as a potential globbing character
+	- unquoted_glob_pattern_p: only treat the extended glob characters
+	  followed by a `(' as a glob pattern if extended_glob is enabled
+	- unquoted_glob_pattern_p: an unquoted backslash isn't treated
+	  specially any more, but if it's followed by a CTLESC, you still
+	  don't treat the next character as an unquoted globbing char
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   10/9
+				   ----
+builtins/common.c
+	- get_numeric_arg: if fatal > 0, set the exit status to EX_USAGE
+	  and call jump_to_top_level with EXITPROG or DISCARD. We don't
+	  need to do everything that throw_to_top_level() does here (it's
+	  really meant for signals and other exceptional failure conditions).
+
+builtins/cd.def
+	- cd_builtin: exit with EX_USAGE on too many arguments
+
+builtins/shift.def
+	- shift_builtin: return EX_USAGE if get_numeric_arg returns 0,
+	  indicating that the argument wasn't a valid number
+
+builtins/history.def
+	- shift_builtin: return EX_USAGE if get_numeric_arg returns 0
+
+builtins/exit.def
+	- exit_or_logout: if get_exitstat (which calls get_numeric_arg) returns
+	  a value > EX_SHERRBASE, indicating an error, just return that to
+	  the caller and let the caller deal with it. This means that
+	  `exit xyz' is no longer a fatal error, but can potentially cause a
+	  non-interactive posix-mode shell to exit because exit is a special
+	  builtin
+
+builtins/return.def
+	- return_builtin: if a non-interactive shell in posix mode gets an
+	  invalid numeric arg from get_exitstat, return immediately and let
+	  the caller deal with exiting
+	  All prompted by a report by Martin Schulte <gnu@schrader-schulte.de>

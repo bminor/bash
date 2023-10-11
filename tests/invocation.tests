@@ -41,12 +41,14 @@ ${THIS_SH} ./invocation2.sub
 # rudimentary pretty-print tests
 ${THIS_SH} ./invocation3.sub
 
-${THIS_SH} --login -c 'logout'
-
 : ${TMPDIR:=/tmp}
 TDIR=$TMPDIR/invocation-$$
 mkdir $TDIR || exit 1
 SAVEPWD=$PWD
+
+echo 'echo this is bash_logout' > $TDIR/.bash_logout
+HOME=$TDIR ${THIS_SH} --login -c 'logout'
+rm -f $TDIR/.bash_logout
 
 # script that ends with a comment and no newline
 printf 'echo a # comment' > $TDIR/x23.in

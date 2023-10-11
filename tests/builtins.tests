@@ -318,7 +318,6 @@ shift 0	# succeeds silently
 options=$(set -o -B 2>&1 | wc -l)
 [[ $options -gt 3 ]] || echo 'set: bad -o option name parsing'
 
-# this must be last -- it is a fatal error
+# this no longer must be last -- it is no longer a fatal error
 exit status
-
-echo after bad exit
+echo after non-numeric arg to exit: $?

@@ -136,13 +136,18 @@ builtin_usage (void)
 /* Return if LIST is NULL else barf and jump to top_level.  Used by some
    builtins that do not accept arguments. */
 void
-no_args (WORD_LIST *list)
+no_args (WORD_LIST *list, int fatal)
 {
   if (list)
     {
       builtin_error (_("too many arguments"));
       top_level_cleanup ();
-      jump_to_top_level (DISCARD);
+      set_exit_status (EX_BADUSAGE);
+      /* for now, the caller determines whether this is a fatal error */
+      if (interactive_shell == 0 && fatal)
+	jump_to_top_level (EXITPROG);
+      else
+	jump_to_top_level (DISCARD);
     }
 }
 
@@ -491,15 +496,12 @@ get_numeric_arg (WORD_LIST *list, int fatal, intmax_t *count)
 	  sh_neednumarg (list->word->word ? list->word->word : "`'");
 	  if (fatal == 0)
 	    return 0;
-	  else if (fatal == 1)		/* fatal == 1; abort */
-	    throw_to_top_level ();
-	  else				/* fatal == 2; discard current command */
-	    {
-	      top_level_cleanup ();
-	      jump_to_top_level (DISCARD);
-	    }
+	  set_exit_status (EX_BADUSAGE);
+	  /* fatal == 1: abort; fatal == 2: discard current command */
+	  top_level_cleanup ();
+	  jump_to_top_level ((fatal == 1) ? EXITPROG : DISCARD);
 	}
-      no_args (list->next);
+      no_args (list->next, 0);
     }
 
   return (1);
@@ -536,9 +538,9 @@ get_exitstat (WORD_LIST *list)
   if (arg == 0 || legal_number (arg, &sval) == 0)
     {
       sh_neednumarg (list->word->word ? list->word->word : "`'");
-      return EX_BADUSAGE;
+      return EX_USAGE;
     }
-  no_args (list->next);
+  no_args (list->next, 0);
 
   status = sval & 255;
   return status;

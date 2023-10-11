@@ -362,7 +362,7 @@ display_history (WORD_LIST *list)
   if (list)
     {
       if (get_numeric_arg (list, 0, &limit) == 0)
-	return (EXECUTION_FAILURE);
+	return (EX_USAGE);
 
       if (limit < 0)
 	limit = -limit;

@@ -5,13 +5,8 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Oct  6 16:41:20 EDT 2023
+.\"	Last Change: Wed Oct 11 10:23:34 EDT 2023
 .\"
-.\" suggested by Bjarni Ingi Gislason <bjarniig@simnet.is>
-.if n \{\
-.kern 0
-.ss 12 0
-.\}
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
@@ -518,11 +513,7 @@ command (only \fBin\fP and \fBdo\fP are valid):
 .B
 .if n ! case  coproc  do done elif else esac fi for function if in select \
 then until while { } time [[ ]]
-.if t \{\
-.lg 0
- !    case    coproc    do    done    elif    else    esac    fi    for    function    if    in    select    then    until    while    {    }    time    [[    ]]
-.lg 1
-.\}
+.if t !    case    coproc    do    done    elif    else    esac    fi    for    function    if    in    select    then    until    while    {    }    time    [[    ]]
 .if t .RE
 .SH "SHELL GRAMMAR"
 This section describes the syntax of the various forms of shell commands.
@@ -4375,9 +4366,9 @@ This is semantically equivalent to
 (see \fBDuplicating File Descriptors\fP below).
 .SS Here Documents
 This type of redirection instructs the shell to read input from the
-current source until a line containing only
+current source until it reads a line containing only
 .I delimiter
-(with no trailing blanks) is seen.
+(with no trailing blanks).
 All of the lines read up to that point are then used as the standard
 input (or file descriptor \fIn\fP if \fIn\fP is specified) for a command.
 .PP
@@ -11638,7 +11629,7 @@ specified as a set of options to the shopt builtin (
 .BR compat41 ,
 and so on).
 There is only one current
-compatibility level \(en each option is mutually exclusive.
+compatibility level \(em each option is mutually exclusive.
 The compatibility level is intended to allow users to select behavior
 from previous versions that is incompatible with newer versions
 while they migrate scripts to use current features and
@@ -11980,10 +11971,10 @@ script.
 .TP
 \fIThe Gnu History Library\fP, Brian Fox and Chet Ramey
 .TP
-\fIPortable Operating System Interface (POSIX) Part 2: Shell and Utilities\fP, IEEE --
+\fIPortable Operating System Interface (POSIX) Part 2: Shell and Utilities\fP, IEEE \(em
 http://pubs.opengroup.org/onlinepubs/9699919799/
 .TP
-http://tiswww.case.edu/\(tichet/bash/POSIX \(en a description of posix mode
+http://tiswww.case.edu/\(tichet/bash/POSIX \(em a description of posix mode
 .TP
 \fIsh\fP(1), \fIksh\fP(1), \fIcsh\fP(1)
 .TP

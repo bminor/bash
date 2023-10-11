@@ -84,7 +84,7 @@ do { \
 extern void builtin_error (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
 extern void builtin_warning (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
 extern void builtin_usage (void);
-extern void no_args (WORD_LIST *);
+extern void no_args (WORD_LIST *, int);
 extern int no_options (WORD_LIST *);
 
 /* common error message functions */

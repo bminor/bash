@@ -67,11 +67,11 @@ unquoted_glob_pattern_p (char *string)
 {
   register int c;
   char *send;
-  int open, bsquote;
+  int open;
 
   DECLARE_MBSTATE;
 
-  open = bsquote = 0;
+  open = 0;
   send = string + strlen (string);
 
   while (c = *string++)
@@ -94,33 +94,23 @@ unquoted_glob_pattern_p (char *string)
 	case '/':
 	  if (open)
 	    open = 0;
+	  continue;
 
 	case '+':
 	case '@':
 	case '!':
-	  if (*string == '(')	/*)*/
+	  if (extended_glob && *string == '(')	/*)*/
 	    return (1);
 	  continue;
 
-	/* A pattern can't end with a backslash, but a backslash in the pattern
-	   can be special to the matching engine, so we note it in case we
-	   need it later. */
 	case '\\':
-	  if (*string != '\0' && *string != '/')
-	    {
-	      bsquote = 1;
-	      string++;
-	      continue;
-	    }
-	  else if (open && *string == '/')
-	    {
-	      string++;		/* quoted slashes in bracket expressions are ok */
-	      continue;
-	    }
-	  else if (*string == 0)
-	    return (0);
-	 	  
-	case CTLESC:
+	  /* Even after an unquoted backslash, CTLESC either quotes the next
+	     char or escapes a CTLESC or CTLNUL.  Either way, the character
+	     after it is not an unquoted globbing char. */
+	  if (*string == CTLESC)
+	    string++;
+	  /*FALLTHROUGH*/
+   	case CTLESC:
 	  if (*string++ == '\0')
 	    return (0);
 	}
@@ -136,11 +126,7 @@ unquoted_glob_pattern_p (char *string)
 #endif
     }
 
-#if 0
-  return (bsquote ? 2 : 0);
-#else
   return (0);
-#endif
 }
 
 /* Return 1 if C is a character that is `special' in a POSIX ERE and needs to
@@ -175,6 +161,14 @@ glob_char_p (const char *s)
 {
   switch (*s)
     {
+#if defined (EXTENDED_GLOB)
+    case '+':
+    case '@':
+      return (s[1] == '('); /*)*/
+    case '(':
+    case '|':
+    case ')':
+#endif
     case '!':
     case '^':
     case '-':
@@ -187,11 +181,6 @@ glob_char_p (const char *s)
     case '?':
     case '\\':
       return 1;
-    case '+':
-    case '@':
-      if (s[1] == '(')	/*(*/
-	return 1;
-      break;
     }
   return 0;
 }
