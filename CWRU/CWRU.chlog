@@ -6861,7 +6861,6 @@ builtins/evalstring.c
 subst.c
 	- param_expand: free TEMP1 in code paths that don't do it now
 
-
 bashline.c
 	- bash_command_name_stat_hook: if we modify *NAME, free the old value
 
@@ -7825,3 +7824,43 @@ builtins/return.def
 	  invalid numeric arg from get_exitstat, return immediately and let
 	  the caller deal with exiting
 	  All prompted by a report by Martin Schulte <gnu@schrader-schulte.de>
+
+				   10/13
+				   -----
+pathexp.c
+	- unquoted_glob_pattern_p: restore some of the special treatment of
+	  backslash followed by CTLESC removed on 10/7
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+parse.y
+	- parse_matched_pair: don't add an extra CTLESC after reading \CTLESC,
+	  like in other parts of the parser
+
+subst.c
+	- dequote_string: don't drop trailing CTLESC in a string with more
+	  than a single character
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+lib/sh/strtrans.c
+	- ansicstr: handle $'\c^A' and $'\c^?' correctly when being expanded
+	  by the parser (flags&2). The parser passes these as \c^A^A and
+	  \c^A^?, respectively, so we should strip the quoting CTLESC.
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+subst.[ch]
+	- extract_dollar_brace_string: now global so brace expansion can use it
+
+braces.c
+	- brace_gobbler: use extract_dollar_brace_string if we see ${ with
+	  the appropriate value of QUOTING, so we don't have to teach brace
+	  expansion more shell syntax.
+	  Report from Emanuele Torre <torreemanuele6@gmail.com>
+	- brace_gobbler: call the word extraction functions with SX_NOALLOC
+	  so we don't have to allocate memory we're just going to free
+
+				   10/16
+				   -----
+builtins/read.def
+	- read_builtin: return EX_MISCERROR (2) if there is an error trying
+	  to assign to one of the variables. This is what the newest POSIX
+	  draft specifies.

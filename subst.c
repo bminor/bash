@@ -269,7 +269,6 @@ static inline size_t skip_single_quoted (const char *, size_t, size_t, int);
 static int skip_double_quoted (const char *, size_t, size_t, int);
 static char *extract_delimited_string (const char *, size_t *, char *, char *, char *, int);
 static char *extract_heredoc_dolbrace_string (const char *, size_t *, int, int);
-static char *extract_dollar_brace_string (const char *, size_t *, int, int);
 static int skip_matched_pair (const char *, int, int, int, int);
 
 static char *pos_params (const char *, int, int, int, int);
@@ -1805,7 +1804,7 @@ static int dbstate[PARAMEXPNEST_MAX];
    gets the position of the matching `}'.  QUOTED is non-zero if this
    occurs inside double quotes. */
 /* XXX -- this is very similar to extract_delimited_string -- XXX */
-static char *
+char *
 extract_dollar_brace_string (const char *string, size_t *sindex, int quoted, int flags)
 {
   register int i, c;
@@ -4810,14 +4809,6 @@ dequote_string (const char *string)
       return (result);
     }
 
-  /* A string consisting of only a single CTLESC should pass through unchanged */
-  if (string[0] == CTLESC && string[1] == 0)
-    {
-      result[0] = CTLESC;
-      result[1] = '\0';
-      return (result);
-    }
-
   /* If no character in the string can be quoted, don't bother examining
      each character.  Just return a copy of the string passed to us. */
   if (strchr (string, CTLESC) == NULL)
@@ -4827,12 +4818,8 @@ dequote_string (const char *string)
   s = (char *)string;
   while (*s)
     {
-      if (*s == CTLESC)
-	{
-	  s++;
-	  if (*s == '\0')
-	    break;
-	}
+      if (*s == CTLESC && s[1])		/* don't drop trailing CTLESC */
+	s++;
       COPY_CHAR_P (t, s, send);
     }
 

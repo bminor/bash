@@ -500,7 +500,7 @@ read_builtin (WORD_LIST *list)
       read_timeout = shtimer_alloc ();
       read_timeout->flags = SHTIMER_LONGJMP;
 
-#if defined (HAVE_SELECT)
+#if defined (HAVE_SELECT) || defined (HAVE_PSELECT)
       read_timeout->flags |= (edit || posixly_correct) ? SHTIMER_ALARM : SHTIMER_SELECT;
 #else
       read_timeout->flags |= SHTIMER_ALARM;
@@ -966,7 +966,7 @@ assign_vars:
       else
 	var = bind_variable ("REPLY", input_string, 0);
       if (var == 0 || readonly_p (var) || noassign_p (var))
-	retval = EXECUTION_FAILURE;
+	retval = EX_MISCERROR;
       else
 	VUNSETATTR (var, att_invisible);
 
@@ -1027,7 +1027,7 @@ assign_vars:
       if (var == 0)
 	{
 	  free (orig_input_string);
-	  return (EXECUTION_FAILURE);
+	  return (EX_MISCERROR);
 	}
 
       stupidly_hack_special_variables (varname);

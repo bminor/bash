@@ -619,10 +619,9 @@ brace_gobbler (char *text, size_t tlen, int *indx, int satisfy)
       /* If compiling for the shell, treat ${...} like \{...} */
       if (c == '$' && text[i+1] == '{' && quoted != '\'')		/* } */
 	{
-	  pass_next = 1;
-	  i++;
-	  if (quoted == 0)
-	    level++;
+	  si = i + 2;
+	  t = extract_dollar_brace_string (text, &si, 0, SX_NOALLOC);
+	  i = si + 1;
 	  continue;
 	}
 #endif
@@ -657,10 +656,8 @@ brace_gobbler (char *text, size_t tlen, int *indx, int satisfy)
 	{
 comsub:
 	  si = i + 2;
-	  t = extract_command_subst (text, &si, 0);
-	  i = si;
-	  free (t);
-	  i++;
+	  t = extract_command_subst (text, &si, SX_NOALLOC);
+	  i = si + 1;
 	  continue;
 	}
 #endif

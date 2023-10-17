@@ -103,6 +103,15 @@ extern char *extract_arithmetic_subst (const char *, size_t *);
 extern char *extract_process_subst (const char *, char *, size_t *, int);
 #endif /* PROCESS_SUBSTITUTION */
 
+/* Extract a parameter expansion expression within ${ and } from STRING.
+   Obey the Posix.2 rules for finding the ending `}': count braces while
+   skipping over enclosed quoted strings and command substitutions.
+   SINDEX is the address of an int describing the current offset in STRING;
+   it should point to just after the first `{' found.  On exit, SINDEX
+   gets the position of the matching `}'.  QUOTED is non-zero if this
+   occurs inside double quotes. */
+extern char *extract_dollar_brace_string (const char *, size_t *, int, int);
+
 /* Extract the name of the variable to bind to from the assignment string. */
 extern char *assignment_name (const char *);
 

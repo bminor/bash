@@ -45,7 +45,7 @@
    that we're translating a string for `echo -e', and therefore should not
    treat a single quote as a character that may be escaped with a backslash.
    If (FLAGS&2) is non-zero, we're expanding for the parser and want to
-   quote CTLESC and CTLNUL with CTLESC.  If (flags&4) is non-zero, we want
+   quote CTLESC and CTLNUL with CTLESC.  If (FLAGS&4) is non-zero, we want
    to remove the backslash before any unrecognized escape sequence. */
 char *
 ansicstr (const char *string, size_t len, int flags, int *sawc, size_t *rlen)
@@ -198,7 +198,9 @@ ansicstr (const char *string, size_t len, int flags, int *sawc, size_t *rlen)
 		  s++;
 		  if ((flags & 2) && c == '\\' && c == *s)
 		    s++;	/* Posix requires $'\c\\' do backslash escaping */
-		  c = TOCTRL(c);
+		  else if ((flags & 2) && c == CTLESC && (*s == CTLESC || *s == CTLNUL))
+		    c = *s++;
+ 		  c = TOCTRL(c);
 		  break;
 		}
 		/*FALLTHROUGH*/

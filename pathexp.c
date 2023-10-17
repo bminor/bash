@@ -104,11 +104,15 @@ unquoted_glob_pattern_p (char *string)
 	  continue;
 
 	case '\\':
-	  /* Even after an unquoted backslash, CTLESC either quotes the next
-	     char or escapes a CTLESC or CTLNUL.  Either way, the character
-	     after it is not an unquoted globbing char. */
 	  if (*string == CTLESC)
-	    string++;
+	    {
+	      string++;
+	      /* If the CTLESC was quoting a CTLESC, skip it so that it's not
+		 treated as a quoting character */
+	      if (*string == CTLESC)
+		string++;
+	    }
+	  else
 	  /*FALLTHROUGH*/
    	case CTLESC:
 	  if (*string++ == '\0')

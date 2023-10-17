@@ -3834,9 +3834,7 @@ parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
 	      continue;
 	    }
 
-	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
-	  if MBTEST(ch == CTLESC)
-	    ret[retind++] = CTLESC;
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
 	  ret[retind++] = ch;
 	  continue;
 	}
