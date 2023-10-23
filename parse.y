@@ -3793,7 +3793,8 @@ parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
       if (ch == EOF)
 	{
 	  free (ret);
-	  parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), close);
+	  if ((parser_state & PST_NOERROR) == 0)
+	    parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), close);
 	  EOF_Reached = 1;	/* XXX */
 	  parser_state |= PST_NOERROR;	/* avoid redundant error message */
 	  return (&matched_pair_error);
@@ -4602,7 +4603,7 @@ xparse_dolparen (const char *base, char *string, size_t *indp, int flags)
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*{(*/
   closer = shell_eof_token = funsub ? '}' : ')';
-  if (flags & SX_COMPLETE)
+  if (flags & (SX_COMPLETE|SX_NOERROR))
     parser_state |= PST_NOERROR;
   if (funsub)
     parser_state |= PST_FUNSUBST;
@@ -4733,7 +4734,7 @@ parse_string_to_command (char *string, int flags)
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   pushed_string_list = (STRING_SAVER *)NULL;
 #endif
-  if (flags & SX_COMPLETE)
+  if (flags & (SX_COMPLETE|SX_NOERROR))
     parser_state |= PST_NOERROR;
 
   parser_state |= PST_STRING;

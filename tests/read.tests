@@ -96,6 +96,15 @@ echo " foo" | { IFS=$' \t\n' ; read line; recho "$line"; }
 
 echo " foo" | { IFS=$':' ; read line; recho "$line"; }
 
+# this leaves `b' readonly
+readonly b
+read a b c <<EOF
+a b c
+EOF
+
+# the latest POSIX draft says $? should be > 1
+echo a = $a b = $b c = $c stat = $?
+
 # test read -d delim behavior
 ${THIS_SH} ./read1.sub
 

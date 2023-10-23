@@ -3695,7 +3695,9 @@ copy_variable (SHELL_VAR *var)
 static void
 dispose_variable_value (SHELL_VAR *var)
 {
-  if (function_p (var))
+  if (nofree_p (var))
+    var_setvalue (var, (char *)NULL);
+  else if (function_p (var))
     dispose_command (function_cell (var));
 #if defined (ARRAY_VARS)
   else if (array_p (var))
@@ -3930,18 +3932,8 @@ makunbound (const char *name, VAR_CONTEXT *vc)
   if (old_var && local_p (old_var) &&
 	(old_var->context == variable_context || (localvar_unset && old_var->context < variable_context)))
     {
-      if (nofree_p (old_var))
-	var_setvalue (old_var, (char *)NULL);
-#if defined (ARRAY_VARS)
-      else if (array_p (old_var))
-	array_dispose (array_cell (old_var));
-      else if (assoc_p (old_var))
-	assoc_dispose (assoc_cell (old_var));
-#endif
-      else if (nameref_p (old_var))
-	FREE (nameref_cell (old_var));
-      else
-	FREE (value_cell (old_var));
+      dispose_variable_value (old_var);
+
 #if 0
       /* Reset the attributes.  Preserve the export attribute if the variable
 	 came from a temporary environment.  Make sure it stays local, and

@@ -32,3 +32,23 @@ recho $FOO
 recho ''
 recho ''
 recho ''
+
+# tests of backslash-escaped CTLESC
+
+recho "${_+\}"
+recho ${_+\}
+recho "${_+\\}"
+recho ${_+\\}
+recho "${_+}"
+recho ${_+}
+recho "${_+}"
+recho ${_+}
+
+recho $'\\\1'
+recho "\\"
+
+recho "\\"
+recho \\
+
+recho $'\c\\\001 \c\\\177'
+recho $'\c \c'

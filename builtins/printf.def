@@ -252,12 +252,12 @@ static size_t conv_bufsize;
 static inline int
 decodeprec (char *ps)
 {
-  int mpr;
+  intmax_t mpr;
 
   mpr = *ps++ - '0';
   while (DIGIT (*ps))
     mpr = (mpr * 10) + (*ps++ - '0');
-  return mpr;
+  return (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
 }
 
 int
@@ -416,6 +416,9 @@ printf_builtin (WORD_LIST *list)
 	      fmt++;
 	      have_fieldwidth = 1;
 	      fieldwidth = getint ();
+	      /* Handle field with overflow by ignoring it. */
+	      if (fieldwidth == INT_MAX || fieldwidth == INT_MIN)
+		  fieldwidth = 0;
 	    }
 	  else
 	    while (DIGIT (*fmt))
@@ -430,6 +433,10 @@ printf_builtin (WORD_LIST *list)
 		  fmt++;
 		  have_precision = 1;
 		  precision = getint ();
+		  /* Handle precision overflow by ignoring it. "A negative
+		     precision is treated as if it were missing." */
+		  if (precision == INT_MAX || precision == INT_MIN)
+		    precision = -1;
 		}
 	      else
 		{
@@ -490,7 +497,12 @@ printf_builtin (WORD_LIST *list)
 		    ws[0] = wc;
 		    ws[1] = L'\0';
 
-		    r = printwidestr (start, ws, 1, fieldwidth, precision);
+		    /* If %lc is supplied a null argument, posix interp 1647
+		       says it should produce a single null byte. */
+		    if (wc == L'\0')
+		      r = printstr (start, "", 1, fieldwidth, precision);
+		    else
+		      r = printwidestr (start, ws, 1, fieldwidth, precision);
 		    if (r < 0)
 		      PRETURN (EXECUTION_FAILURE);
 		    break;
@@ -514,7 +526,7 @@ printf_builtin (WORD_LIST *list)
 
 		    wp = getwidestr (&slen);
 		    r = printwidestr (start, wp, slen, fieldwidth, precision);
-		    free (wp);
+		    FREE (wp);
 		    if (r < 0)
 		      PRETURN (EXECUTION_FAILURE);
 		    break;
@@ -647,20 +659,19 @@ printf_builtin (WORD_LIST *list)
 	    case 'Q':
 	      {
 		char *p, *xp;
-		int r, mpr;
+		int r;
 		size_t slen;
 
 		r = 0;
 		p = getstr ();
 		/* Decode precision and apply it to the unquoted string. */
-		if (convch == 'Q' && precstart)
+		if (convch == 'Q' && (have_precision || precstart))
 		  {
-		    mpr = decodeprec (precstart);
-		    /* Error if precision > INT_MAX here? */
-		    precision = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
+		    if (precstart)
+		      precision = decodeprec (precstart);
 		    slen = strlen (p);
 		    /* printf precision works in bytes. */
-		    if (precision < slen)
+		    if (precision >= 0 && precision < slen)
 		      p[precision] = '\0';
 		  }
 		if (p && *p == 0)	/* XXX - getstr never returns null */
@@ -1336,17 +1347,31 @@ getstr (void)
   return ret;
 }
 
+/* Don't call getintmax here because it may consume an argument on error, and
+   we call this to get field width/precision arguments. */
 static int
 getint (void)
 {
   intmax_t ret;
-
-  ret = getintmax ();
+  char *ep;
 
   if (garglist == 0)
-    return ret;
+    return (0);
 
-  if (ret > INT_MAX)
+  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+    return asciicode ();
+
+  errno = 0;
+  ret = strtoimax (garglist->word->word, &ep, 0);
+
+  if (*ep)
+    {
+      sh_invalidnum (garglist->word->word);
+      conversion_error = 1;
+    }
+  else if (errno == ERANGE)
+    printf_erange (garglist->word->word);
+  else if (ret > INT_MAX)
     {
       printf_erange (garglist->word->word);
       ret = INT_MAX;
@@ -1357,6 +1382,7 @@ getint (void)
       ret = INT_MIN;
     }
 
+  garglist = garglist->next;
   return ((int)ret);
 }
 
@@ -1519,6 +1545,13 @@ getwidestr (size_t *lenp)
   size_t slen, mblength;
   DECLARE_MBSTATE;
 
+  if (garglist == 0)
+    {
+      if (lenp)
+	*lenp = 0;
+      return NULL;
+    }
+
   mbs = garglist->word->word;
   slen = strlen (mbs);
   ws = (wchar_t *)xmalloc ((slen + 1) * sizeof (wchar_t));
@@ -1547,6 +1580,9 @@ getwidechar (void)
   size_t slen, mblength;
   DECLARE_MBSTATE;
 
+  if (garglist == 0)
+    return L'\0';
+
   wc = 0;
   mblength = mbrtowc (&wc, garglist->word->word, locale_mb_cur_max, &state);
   if (MB_INVALIDCH (mblength))
@@ -1571,7 +1607,7 @@ convwidestr (wchar_t *ws, int prec)
 
   ts = (const wchar_t *)ws;
 
-  if (prec > 0)
+  if (prec >= 0)
     {
       rsize = prec * MB_CUR_MAX;
       ret = (char *)xmalloc (rsize + 1);

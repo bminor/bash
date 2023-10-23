@@ -7864,3 +7864,49 @@ builtins/read.def
 	- read_builtin: return EX_MISCERROR (2) if there is an error trying
 	  to assign to one of the variables. This is what the newest POSIX
 	  draft specifies.
+
+variables.c
+	- dispose_variable_value: do the right thing for att_nofree vars
+	- makunbound: call dispose_variable_value instead of using inline code
+
+braces.c
+	- brace_gobbler: make sure to set no_longjmp_on_fatal_error around
+	  calls to extract_dollar_brace_string
+
+				   10/17
+				   -----
+braces.c
+	- brace_gobbler: set SX_NOLONGJMP|SX_NOERROR in the flags passed
+	  to extract_command_subst; make sure no_longjmp_on_fatal_error
+	  is set before that call
+	- brace_gobbler: revert 10/13 change to use extract_dollar_brace_string
+
+				   10/20
+				   -----
+parse.y
+
+	- xparse_dolparen,parse_string_to_command: if SX_NOERROR is set in
+	  FLAGS, add PST_NOERROR to parser_state. Not much effect yet.
+	- parse_matched_pair: if PST_NOERROR is set in parser_state, don't
+	  print an error message if we hit EOF, just return an error. A start
+	  at using PST_NOERROR to suppress error messages, not just duplicate
+	  ones. We'll see how this goes before adding more
+
+builtins/printf.def
+	- decodeprec: decode the precision into an intmax_t; clamp the return
+	  value at INT_MAX
+	- printf_builtin: update to posix interp 1647 (even though it's about
+	  fprintf(3)) and output a NUL byte if %lc is supplied a null argument.
+	- printf_builtin: fix case where %Q is supplied with a precision in
+	  the format string
+	- printf_builtin: fix case where %Q is supplied with a precision
+	  greater than INT_MAX
+	- getwidestr,getwidechar: handle case where there is no argument
+	  supplied; return NULL or NUL
+	- convwidestr: allow a precedence of 0 for %ls
+	- getint: don't call getintmax any more, just use the same code style
+	  inline; getintmax will consume an extra argument on an error
+	  Report and patches from Grisha Levit <grishalevit@gmail.com>
+	- printf_builtin: handle field width and precision overflow from
+	  getint() by ignoring the argument (fieldwidth = 0, precision = -1)
+

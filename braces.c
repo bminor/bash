@@ -619,9 +619,30 @@ brace_gobbler (char *text, size_t tlen, int *indx, int satisfy)
       /* If compiling for the shell, treat ${...} like \{...} */
       if (c == '$' && text[i+1] == '{' && quoted != '\'')		/* } */
 	{
+#if 0
+	  /* If we want to inhibit brace expansion during parameter expansions,
+	     we need to skip over parameter expansions here. This is easier
+	     than teaching brace expansion about the idiosyncracies of shell
+	     word expansion. */
+	  int o, f;
+	  o = no_longjmp_on_fatal_error;
+	  no_longjmp_on_fatal_error = 1;
+	  f = (quoted == '"') ? Q_DOUBLE_QUOTES : 0;
 	  si = i + 2;
-	  t = extract_dollar_brace_string (text, &si, 0, SX_NOALLOC);
+	  t = extract_dollar_brace_string (text, &si, f, SX_NOALLOC|SX_NOLONGJMP|SX_COMPLETE|SX_NOERROR);
 	  i = si + 1;
+	  no_longjmp_on_fatal_error = o;
+	  if (i > tlen)
+	    {
+	      i = tlen;
+	      break;
+	    }
+#else
+	  pass_next = 1;
+	  i++;
+	  if (quoted == 0)
+	    level++;
+#endif
 	  continue;
 	}
 #endif
@@ -654,10 +675,24 @@ brace_gobbler (char *text, size_t tlen, int *indx, int satisfy)
       /* Pass new-style command and process substitutions through unchanged. */
       if ((c == '$' || c == '<' || c == '>') && text[i+1] == '(')			/* ) */
 	{
+	  int o;
+
 comsub:
+	  o = no_longjmp_on_fatal_error;
+	  no_longjmp_on_fatal_error = 1;
 	  si = i + 2;
-	  t = extract_command_subst (text, &si, SX_NOALLOC);
+#if 0
+	  t = extract_command_subst (text, &si, SX_NOALLOC|SX_NOLONGJMP|SX_NOERROR|SX_COMPLETE);
+#else
+	  t = extract_command_subst (text, &si, SX_NOALLOC|SX_NOLONGJMP|SX_NOERROR);
+#endif
 	  i = si + 1;
+	  no_longjmp_on_fatal_error = o;
+	  if (i > tlen)
+	    {
+	      i = tlen;
+	      break;
+	    }
 	  continue;
 	}
 #endif

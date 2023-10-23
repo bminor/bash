@@ -77,6 +77,9 @@ printf 'echo %.2Q%Q\n' "$S" "$T"	# note the difference
 # a different way to do it
 printf 'echo %.*s%q\n' ${#S1} "$S1" "$T"
 
+printf '%.1Q\n' '**'
+printf '%.*Q\n' 1 '**'
+
 # make sure the format string is reused to use up arguments
 printf "%d " 1 2 3 4 5; printf "\n"
 
@@ -341,14 +344,25 @@ printf -v var "%b" @(hugo); echo "x${var}x"
 # make sure that missing arguments are always handled like the empty string
 printf "<%3s><%3b>\n"
 
+# other format specifiers with missing arguments
+# 0
+printf '%d\n'
+# null char
+printf '%c\n'
+
+printf '%x\n'
+printf '%4.2f\n'
+
+printf '%b'
+printf '%q\n'
+printf '%Q\n'
+
 # let's test some out-of-range integer errors for POSIX-specified behavior
 TOOBIG=9223372036854775825
 TOOSMALL=-9223372036854775815
 
 printf '%d\n' "$TOOBIG"
 printf '%d\n' "$TOOSMALL"
-
-# invalid variable name
 
 # tests variable assignment with -v
 ${THIS_SH} ./printf1.sub
@@ -358,3 +372,4 @@ ${THIS_SH} ./printf4.sub
 ${THIS_SH} ./printf5.sub
 # multibyte characters with %ls/%S and %lc/%C
 ${THIS_SH} ./printf6.sub
+${THIS_SH} ./printf7.sub

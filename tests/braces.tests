@@ -49,6 +49,17 @@ echo ${var}{x,y}
 
 unset var varx vary
 
+# make sure ${ is parsed as a word expansion, since it may contain other
+# expansions
+a=4
+echo "${a#'$('\'}"
+echo "${a-'$('\'}"
+echo "${a+'$('\'}"
+
+echo "${a#aaaa'$(aaaa'aaa)aaa\'}"
+echo "${a#aaaa'$(aaaa)'aaaa\'}"
+unset -v a
+
 # new sequence brace operators
 echo {1..10}
 

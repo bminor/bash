@@ -407,6 +407,10 @@ Z='a b'
 A=( X=$Z )
 declare -p A
 
+# combine with brace expansion
+letters=( {0..9} )
+echo "${letters["{2..6}"]}"
+
 # tests for assigning to noassign array variables
 BASH_ARGC=(xxx) ; echo FIN1:$?
 BASH_ARGC=foio ; echo FIN2:$?
