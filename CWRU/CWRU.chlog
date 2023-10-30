@@ -7910,3 +7910,21 @@ builtins/printf.def
 	- printf_builtin: handle field width and precision overflow from
 	  getint() by ignoring the argument (fieldwidth = 0, precision = -1)
 
+				   10/26
+				   -----
+jobs.c
+	- wait_for: rearrange code that sets the SIGINT handler to
+	  wait_sigint_handler and saves the old handler to old_sigint_handler
+	  to avoid delay before assigning the handler
+	  Report from Wenlin Kang <wenlin.kang@windriver.com>
+	- wait_sigint_handler: if cur_sigint_handler (what restore_sigint_handler)
+	  just restored or ignored) is INVALID_SIGNAL_HANDLER, set the
+	  appropriate SIGINT handler with set_sigint_handler before sending
+	  ourselves SIGINT
+
+				   10/30
+				   -----
+general.c
+	- legal_number: use the same test (isspace(3)) to skip trailing
+	  whitespace that strtoimax uses to skip leading whitespace.
+	  Report and patch from Paul Eggert <eggert@cs.ucla.edu>

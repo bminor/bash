@@ -257,8 +257,9 @@ legal_number (const char *string, intmax_t *result)
   if (errno || ep == string)
     return 0;	/* errno is set on overflow or underflow */
 
-  /* Skip any trailing whitespace, since strtoimax does not. */
-  while (whitespace (*ep))
+  /* Skip any trailing whitespace, since strtoimax does not, using the same
+     test that strtoimax uses for leading whitespace. */
+  while (isspace ((unsigned char) *ep))
     ep++;
 
   /* If *string is not '\0' but *ep is '\0' on return, the entire string

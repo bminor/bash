@@ -214,7 +214,7 @@ extern void print_clock_t (FILE *, clock_t);
 
 /* Declarations for functions defined in lib/sh/dprintf.c */
 #if !defined (HAVE_DPRINTF)
-extern void dprintf (int, const char *, ...))  __attribute__((__format__ (printf, 2, 3));
+extern void dprintf (int, const char *, ...)  __attribute__((__format__ (printf, 2, 3));
 #endif
 
 /* Declarations for functions defined in lib/sh/fmtulong.c */

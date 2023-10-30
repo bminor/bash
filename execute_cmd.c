@@ -5422,7 +5422,7 @@ execute_subshell_builtin_or_function (WORD_LIST *words, REDIRECT *redirects,
       handler = set_sigint_handler ();
       if (handler == SIG_IGN && signal_is_async_ignored (SIGINT) &&
 	  signal_is_trapped (SIGINT) == 0 && signal_is_hard_ignored (SIGINT) == 0)
-	set_signal_handler (SIGINT, handler);
+	set_signal_handler (SIGINT, SIG_IGN);
     }
 
   if (fds_to_close)

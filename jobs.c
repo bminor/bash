@@ -2664,6 +2664,10 @@ wait_for_background_pids (struct procstat *ps)
 #define INVALID_SIGNAL_HANDLER (SigHandler *)wait_for_background_pids
 static SigHandler *old_sigint_handler = INVALID_SIGNAL_HANDLER;
 
+/* The current SIGINT handler as set by restore_sigint_handler. Only valid
+   immediately after restore_sigint_handler, used for continuations. */
+static SigHandler *cur_sigint_handler = INVALID_SIGNAL_HANDLER;   
+
 static int wait_sigint_received;
 static int child_caught_sigint;
 
@@ -2681,6 +2685,7 @@ wait_sigint_cleanup (void)
 static void
 restore_sigint_handler (void)
 {
+  cur_sigint_handler = old_sigint_handler;
   if (old_sigint_handler != INVALID_SIGNAL_HANDLER)
     {
       set_signal_handler (SIGINT, old_sigint_handler);
@@ -2703,8 +2708,7 @@ wait_sigint_handler (int sig)
       restore_sigint_handler ();
       /* If we got a SIGINT while in `wait', and SIGINT is trapped, do
 	 what POSIX.2 says (see builtins/wait.def for more info). */
-      if (this_shell_builtin && this_shell_builtin == wait_builtin &&
-	  signal_is_trapped (SIGINT) &&
+      if (signal_is_trapped (SIGINT) &&
 	  ((sigint_handler = trap_to_sighandler (SIGINT)) == trap_handler))
 	{
 	  trap_handler (SIGINT);	/* set pending_traps[SIGINT] */
@@ -2727,6 +2731,8 @@ wait_sigint_handler (int sig)
     {
       set_exit_status (128+SIGINT);
       restore_sigint_handler ();
+      if (cur_sigint_handler == INVALID_SIGNAL_HANDLER)
+	set_sigint_handler ();		/* XXX - only do this in one place */
       kill (getpid (), SIGINT);
     }
 
@@ -2876,11 +2882,13 @@ wait_for (pid_t pid, int flags)
     {
       SigHandler *temp_sigint_handler;
 
-      temp_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
-      if (temp_sigint_handler == wait_sigint_handler)
-	internal_debug ("wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = %d", running_trap);
-      else
-	old_sigint_handler = temp_sigint_handler;
+      temp_sigint_handler = old_sigint_handler;
+      old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
+      if (old_sigint_handler == wait_sigint_handler)
+	{
+	  internal_debug ("wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = %d", running_trap);
+	  old_sigint_handler = temp_sigint_handler;
+	}
       waiting_for_child = 0;
       if (old_sigint_handler == SIG_IGN)
 	set_signal_handler (SIGINT, old_sigint_handler);
@@ -4105,7 +4113,7 @@ set_job_status_and_cleanup (int job)
 		 SIGINT (if we reset the sighandler to the default).
 		 In this case, we have to fix things up.  What a crock. */
 	      if (temp_handler == trap_handler && signal_is_trapped (SIGINT) == 0)
-		  temp_handler = trap_to_sighandler (SIGINT);
+		temp_handler = trap_to_sighandler (SIGINT);
 	      restore_sigint_handler ();
 	      if (temp_handler == SIG_DFL)
 		termsig_handler (SIGINT);	/* XXX */
