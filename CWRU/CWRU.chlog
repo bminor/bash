@@ -7946,3 +7946,30 @@ subst.c
 	  single-element vector with a copy of the original word so we can
 	  add it to the result list unchanged.
 	  Inspired by https://savannah.gnu.org/support/?110948
+
+				   11/3
+				   ----
+lib/readline/text.c
+	- readstr: set of functions to read a string from the keyboard, using
+	  rl_line_buffer for temporary storage, with minimal editing and an
+	  optional caller-supplied completion function. Doesn't use the
+	  callback framework yet since none of the functions are public
+	- rl_execute_named_command: new bindable function to read a bindable
+	  command name (from the funmap_names array) and execute it, with
+	  command name completion on SPACE and TAB
+
+lib/readline/readline.h
+	- rl_execute_named_command: new extern declaration
+
+lib/readline/rlprivate.h
+	- new extern declarations for the readstr function framework
+
+lib/readline/funmap.c
+	- execute-named-command: new bindable function name
+
+lib/readline/emacs_keymap.c
+	- rl_execute_named_function: bound to M-x by default
+
+lib/readline/doc/rluser.texi
+	- execute-named-command: document as bindable function name with its
+	  default binding to M-x in emacs mode
