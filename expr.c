@@ -355,7 +355,7 @@ expr_skipsubscript (char *vp, char *cp)
   if (array_expand_once & already_expanded)
     {
       *cp = '\0';
-      isassoc = legal_identifier (vp) && (entry = find_variable (vp)) && assoc_p (entry);
+      isassoc = valid_identifier (vp) && (entry = find_variable (vp)) && assoc_p (entry);
       *cp = '[';	/* ] */
     }
   flags = (isassoc && array_expand_once && already_expanded) ? VA_NOEXPAND : 0;

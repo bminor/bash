@@ -1,6 +1,6 @@
 /* eaccess.c - eaccess replacement for the shell, plus other access functions. */
 
-/* Copyright (C) 2006-2020,2022 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2020,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -94,7 +94,7 @@ sh_stat (const char *path, struct stat *finfo)
       intmax_t fd;
       int r;
 
-      if (legal_number (path + 8, &fd) && fd == (int)fd)
+      if (valid_number (path + 8, &fd) && fd == (int)fd)
         {
           r = fstat ((int)fd, finfo);
           if (r == 0 || errno != EBADF)

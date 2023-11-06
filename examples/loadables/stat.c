@@ -87,7 +87,7 @@ getstat (const char *fname, int flags, struct stat *sp)
 
   if (strncmp (fname, "/dev/fd/", 8) == 0)
     {
-      if ((legal_number(fname + 8, &lfd) == 0) || (int)lfd != lfd)
+      if ((valid_number(fname + 8, &lfd) == 0) || (int)lfd != lfd)
 	{
 	  errno = EINVAL;
 	  return -1;

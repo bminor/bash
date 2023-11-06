@@ -114,7 +114,7 @@ getopts_bind_variable (char *name, char *value)
 {
   SHELL_VAR *v;
 
-  if (legal_identifier (name))
+  if (valid_identifier (name))
     {
       v = bind_variable (name, value, 0);
       if (v && (readonly_p (v) || noassign_p (v)))

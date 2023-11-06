@@ -481,7 +481,7 @@ expand_seqterm (char *text, size_t tlen)
 
   /* Now figure out whether LHS and RHS are integers or letters.  Both
      sides have to match. */
-  lhs_t = (legal_number (lhs, &tl)) ? ST_INT :
+  lhs_t = (valid_number (lhs, &tl)) ? ST_INT :
   		((ISALPHA (lhs[0]) && lhs[1] == 0) ?  ST_CHAR : ST_BAD);
 
   /* Decide on rhs and whether or not it looks like the user specified

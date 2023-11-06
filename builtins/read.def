@@ -344,7 +344,7 @@ read_builtin (WORD_LIST *list)
 	  delim = -1;
 	case 'n':
 	  nflag = 1;
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
 	      sh_invalidnum (list_optarg);
@@ -354,7 +354,7 @@ read_builtin (WORD_LIST *list)
 	    nchars = intval;
 	  break;
 	case 'u':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
 	      builtin_error (_("%s: invalid file descriptor specification"), list_optarg);
@@ -389,10 +389,10 @@ read_builtin (WORD_LIST *list)
 #if defined (ARRAY_VARS)
   if (list)
     SET_VFLAGS (list->word->flags, vflags, bindflags);
-  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
+  if (list && valid_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   bindflags = 0;
-  if (list && legal_identifier (list->word->word) == 0)
+  if (list && valid_identifier (list->word->word) == 0)
 #endif
     {
       sh_invalidid (list->word->word);
@@ -988,9 +988,9 @@ assign_vars:
       varname = list->word->word;
 #if defined (ARRAY_VARS)
       SET_VFLAGS (list->word->flags, vflags, bindflags);
-      if (legal_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
+      if (valid_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
 #else
-      if (legal_identifier (varname) == 0)
+      if (valid_identifier (varname) == 0)
 #endif
 	{
 	  sh_invalidid (varname);
@@ -1037,9 +1037,9 @@ assign_vars:
   /* Now assign the rest of the line to the last variable argument. */
 #if defined (ARRAY_VARS)
   SET_VFLAGS (list->word->flags, vflags, bindflags);
-  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
+  if (valid_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
-  if (legal_identifier (list->word->word) == 0)
+  if (valid_identifier (list->word->word) == 0)
 #endif
     {
       sh_invalidid (list->word->word);

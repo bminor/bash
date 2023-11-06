@@ -299,14 +299,14 @@ extern void print_rlimtype (RLIMTYPE, int);
 #endif
 
 extern int all_digits (const char *);
-extern int legal_number (const char *, intmax_t *);
-extern int legal_identifier (const char *);
+extern int valid_number (const char *, intmax_t *);
+extern int valid_identifier (const char *);
 extern int importable_function_name (const char *, size_t);
 extern int exportable_function_name (const char *);
 extern int check_identifier (WORD_DESC *, int);
 extern int valid_nameref_value (const char *, int);
 extern int check_selfref (const char *, char *, int);
-extern int legal_alias_name (const char *, int);
+extern int valid_alias_name (const char *, int);
 extern int valid_function_name (const char *, int);
 extern int valid_function_word (WORD_DESC *, int);
 extern int line_isblank (const char *);

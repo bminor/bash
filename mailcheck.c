@@ -100,7 +100,7 @@ time_to_check_mail (void)
 
   /* Negative number, or non-numbers (such as empty string) cause no
      checking to take place. */
-  if (temp == 0 || legal_number (temp, &seconds) == 0 || seconds < 0)
+  if (temp == 0 || valid_number (temp, &seconds) == 0 || seconds < 0)
     return (0);
 
   now = NOW;

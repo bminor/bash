@@ -450,7 +450,7 @@ declare_internal (WORD_LIST *list, int local_var)
 	  /* Should we restrict this when the shell is in posix mode even if
 	     the function was created before the shell entered posix mode?
 	     Previous versions of the shell enforced the restriction. */
-	  if (posixly_correct && legal_identifier (name) == 0)
+	  if (posixly_correct && valid_identifier (name) == 0)
 	    {
 	      sh_invalidid (name);
 	      assign_error++;
@@ -577,7 +577,7 @@ restart_new_var_name:
 #endif
 
       /* Ensure the argument is a valid, well-formed shell identifier. */
-      if (legal_identifier (name) == 0)
+      if (valid_identifier (name) == 0)
 	{
 	  sh_invalidid (name);
 	  assign_error++;

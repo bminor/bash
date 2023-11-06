@@ -5168,7 +5168,7 @@ token_is_ident (char *t, int i)
 
   c = t[i];
   t[i] = '\0';
-  r = legal_identifier (t);
+  r = valid_identifier (t);
   t[i] = c;
   return r;
 }
@@ -5601,7 +5601,7 @@ got_token:
 		    last_read_token == LESS_AND ||
 		    last_read_token == GREATER_AND))
       {
-	if (legal_number (token, &lvalue) && (int)lvalue == lvalue)
+	if (valid_number (token, &lvalue) && (int)lvalue == lvalue)
 	  {
 	    yylval.number = lvalue;
 	    return (NUMBER);
@@ -5692,9 +5692,9 @@ got_token:
       /* can use token; already copied to the_word */
       token[token_index-1] = '\0';
 #if defined (ARRAY_VARS)
-      if (legal_identifier (token+1) || valid_array_reference (token+1, 0))
+      if (valid_identifier (token+1) || valid_array_reference (token+1, 0))
 #else
-      if (legal_identifier (token+1))
+      if (valid_identifier (token+1))
 #endif
 	{
 	  strcpy (the_word->word, token+1);

@@ -64,5 +64,8 @@ unset -v VAR
 
 # out of range inline precisions
 
-printf "%.${TOOBIG}s\n" XY
+# can't test %s, too many varying implementations
+#printf "%.${TOOBIG}s\n" XY
+printf -v VAR "%.${TOOBIG}s\n" XY
+echo $VAR
 printf "%.${TOOBIG}Q\n" XY

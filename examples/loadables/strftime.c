@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -67,7 +67,7 @@ strftime_builtin (WORD_LIST *list)
 
   if (list && list->word->word)
     {
-      n = legal_number (list->word->word, &i);
+      n = valid_number (list->word->word, &i);
       if (n == 0 || i < 0 || i != (time_t)i)
 	{
 	  sh_invalidnum (list->word->word);

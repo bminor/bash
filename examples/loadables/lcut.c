@@ -2,7 +2,7 @@
 	  print them to the standard output */
 
 /*
-   Copyright (C) 2020,2022 Free Software Foundation, Inc.
+   Copyright (C) 2020,2022,2023 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ getlist (char *arg, struct cutpos **opp)
         s = BOL;
       else
 	{
-	  if (legal_number (ntok, &num) == 0 || (int)num != num || num <= 0)
+	  if (valid_number (ntok, &num) == 0 || (int)num != num || num <= 0)
 	    {
 	      builtin_error ("%s: invalid list value", ntok);
 	      *opp = poslist;
@@ -106,7 +106,7 @@ getlist (char *arg, struct cutpos **opp)
 	e = EOL;
       else
 	{
-	  if (legal_number (ltok, &num) == 0 || (int)num != num || num <= 0)
+	  if (valid_number (ltok, &num) == 0 || (int)num != num || num <= 0)
 	    {
 	      builtin_error ("%s: invalid list value", ltok);
 	      *opp = poslist;

@@ -152,7 +152,7 @@ internal_getopt(WORD_LIST *list, char *opts)
 				list_optflags = 0;
 			}
 		} else {
-			if (lcurrent->next && legal_number(lcurrent->next->word->word, (intmax_t *)0)) {
+			if (lcurrent->next && valid_number(lcurrent->next->word->word, (intmax_t *)0)) {
 				lcurrent = lcurrent->next;
 				list_optarg = lcurrent->word->word;
 				list_optflags = lcurrent->word->flags;

@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2017-2022 Free Software Foundation, Inc.
+   Copyright (C) 2017-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -327,7 +327,7 @@ fdflags_builtin (WORD_LIST *list)
   opt = EXECUTION_SUCCESS;
   for (l = list; l; l = l->next)
     {
-      if (legal_number (l->word->word, &inum) == 0 || inum < 0)
+      if (valid_number (l->word->word, &inum) == 0 || inum < 0)
 	{
 	  builtin_error ("%s: invalid file descriptor", l->word->word);
 	  opt = EXECUTION_FAILURE;

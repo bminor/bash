@@ -5,7 +5,7 @@
  * chet@ins.CWRU.Edu
  */
 
-/* Copyright (C) 1987-2020,2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -117,7 +117,7 @@ _getserv (const char *serv, int proto, unsigned short *pp)
   intmax_t l;
   unsigned short s;
 
-  if (legal_number (serv, &l))
+  if (valid_number (serv, &l))
     {
       s = (unsigned short)(l & 0xFFFF);
       if (s != l)

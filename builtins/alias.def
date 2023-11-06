@@ -1,7 +1,7 @@
 This file is alias.def, from which is created alias.c
 It implements the builtins "alias" and "unalias" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -126,7 +126,7 @@ alias_builtin (WORD_LIST *list)
 	  name[offset] = '\0';
 	  value = name + offset + 1;
 
-	  if (legal_alias_name (name, 0) == 0)
+	  if (valid_alias_name (name, 0) == 0)
 	    {
 	      builtin_error (_("`%s': invalid alias name"), name);
 	      any_failed++;

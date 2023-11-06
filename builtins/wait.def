@@ -153,10 +153,10 @@ wait_builtin (WORD_LIST *list)
       int arrayflags;
 
       SET_VFLAGS (vflags, arrayflags, bindflags);
-      if (legal_identifier (vname) == 0 && valid_array_reference (vname, arrayflags) == 0)
+      if (valid_identifier (vname) == 0 && valid_array_reference (vname, arrayflags) == 0)
 #else
       bindflags = 0;
-      if (legal_identifier (vname) == 0)
+      if (valid_identifier (vname) == 0)
 #endif
 	{
 	  sh_invalidid (vname);
@@ -254,7 +254,7 @@ wait_builtin (WORD_LIST *list)
       w = list->word->word;
       if (DIGIT (*w))
 	{
-	  if (legal_number (w, &pid_value) && pid_value == (pid_t)pid_value)
+	  if (valid_number (w, &pid_value) && pid_value == (pid_t)pid_value)
 	    {
 	      pid = (pid_t)pid_value;
 	      status = wait_for_single_pid (pid, wflags|JWAIT_PERROR);
@@ -342,7 +342,7 @@ set_waitlist (WORD_LIST *list)
   for (l = list; l; l = l->next)
     {
       job = NO_JOB;
-      job = (l && legal_number (l->word->word, &pid) && pid == (pid_t) pid)
+      job = (l && valid_number (l->word->word, &pid) && pid == (pid_t) pid)
 		? get_job_by_pid ((pid_t) pid, 0, 0)
 		: get_job_spec (l);
       if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))

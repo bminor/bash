@@ -4559,11 +4559,11 @@ bash_execute_unix_command (int count, int key)
   maybe_make_readline_line (v ? value_cell (v) : 0);
 
   v = find_variable ("READLINE_POINT");
-  if (v && legal_number (value_cell (v), &mi))
+  if (v && valid_number (value_cell (v), &mi))
     readline_set_char_offset (mi, &rl_point);
 
   v = find_variable ("READLINE_MARK");
-  if (v && legal_number (value_cell (v), &mi))
+  if (v && valid_number (value_cell (v), &mi))
     readline_set_char_offset (mi, &rl_mark);
 
   unbind_readline_variables ();

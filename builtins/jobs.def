@@ -280,7 +280,7 @@ disown_builtin (WORD_LIST *list)
   do
     {
       BLOCK_CHILD (set, oset);
-      job = (list && legal_number (list->word->word, &pid_value) && pid_value == (pid_t) pid_value)
+      job = (list && valid_number (list->word->word, &pid_value) && pid_value == (pid_t) pid_value)
 		? get_job_by_pid ((pid_t) pid_value, 0, 0)
 		: get_job_spec (list);
 

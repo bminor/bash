@@ -491,7 +491,7 @@ get_numeric_arg (WORD_LIST *list, int fatal, intmax_t *count)
   if (list)
     {
       arg = list->word->word;
-      if (arg == 0 || (legal_number (arg, count) == 0))
+      if (arg == 0 || (valid_number (arg, count) == 0))
 	{
 	  sh_neednumarg (list->word->word ? list->word->word : "`'");
 	  if (fatal == 0)
@@ -535,7 +535,7 @@ get_exitstat (WORD_LIST *list)
     }
 
   arg = list->word->word;
-  if (arg == 0 || legal_number (arg, &sval) == 0)
+  if (arg == 0 || valid_number (arg, &sval) == 0)
     {
       sh_neednumarg (list->word->word ? list->word->word : "`'");
       return EX_USAGE;
@@ -770,7 +770,7 @@ display_signal_list (WORD_LIST *list, int forcecols)
   /* List individual signal names or numbers. */
   while (list)
     {
-      if (legal_number (list->word->word, &lsignum))
+      if (valid_number (list->word->word, &lsignum))
 	{
 	  /* This is specified by Posix.2 so that exit statuses can be
 	     mapped into signal numbers. */
@@ -969,7 +969,7 @@ builtin_find_indexed_array (char *array_name, int flags)
 {
   SHELL_VAR *entry;
 
-  if ((flags & 2) && legal_identifier (array_name) == 0)
+  if ((flags & 2) && valid_identifier (array_name) == 0)
     {
       sh_invalidid (array_name);
       return (SHELL_VAR *)NULL;

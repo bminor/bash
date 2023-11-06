@@ -213,6 +213,7 @@ pretty_print_loop (void)
 
   global_posix_mode = posixly_correct;
   last_was_newline = 0;
+  unset_readahead_token ();
   while (EOF_Reached == 0)
     {
       code = setjmp_nosigs (top_level);

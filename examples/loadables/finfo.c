@@ -161,7 +161,7 @@ getstat(char *f)
 	intmax_t lfd;
 
 	if (strncmp(f, "/dev/fd/", 8) == 0) {
-		if ((legal_number(f + 8, &lfd) == 0) || (int)lfd != lfd) {
+		if ((valid_number(f + 8, &lfd) == 0) || (int)lfd != lfd) {
 			builtin_error("%s: invalid fd", f + 8);
 			return ((struct stat *)0);
 		}
@@ -495,7 +495,7 @@ base_pathname(char *p)
 }
 
 int
-legal_number (char *string, long result)
+valid_number (char *string, long result)
 {
   int sign;
   long value;

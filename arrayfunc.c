@@ -1294,7 +1294,7 @@ tokenize_array_reference (const char *name, int flags, char **subp)
   if (t)
     {
       *t = '\0';
-      r = legal_identifier (name);
+      r = valid_identifier (name);
       if (flags & VA_NOEXPAND)	/* Don't waste a lookup if we don't need one */
 	isassoc = (entry = find_variable (name)) && assoc_p (entry);      
       *t = '[';

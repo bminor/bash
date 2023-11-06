@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -241,7 +241,7 @@ all_digits (const char *string)
    valid number.  Stuff the converted number into RESULT if RESULT is
    not null. */
 int
-legal_number (const char *string, intmax_t *result)
+valid_number (const char *string, intmax_t *result)
 {
   intmax_t value;
   char *ep;
@@ -277,11 +277,11 @@ legal_number (const char *string, intmax_t *result)
   return (0);
 }
 
-/* Return 1 if this token is a legal shell `identifier'; that is, it consists
+/* Return 1 if this token is a valid shell `identifier'; that is, it consists
    solely of letters, digits, and underscores, and does not begin with a
    digit. */
 int
-legal_identifier (const char *name)
+valid_identifier (const char *name)
 {
   register const char *s;
   unsigned char c;
@@ -310,9 +310,9 @@ valid_nameref_value (const char *name, int flags)
 
   /* valid identifier */
 #if defined (ARRAY_VARS)  
-  if (legal_identifier (name) || (flags != 2 && valid_array_reference (name, 0)))
+  if (valid_identifier (name) || (flags != 2 && valid_array_reference (name, 0)))
 #else
-  if (legal_identifier (name))
+  if (valid_identifier (name))
 #endif
     return 1;
 
@@ -356,7 +356,7 @@ check_identifier (WORD_DESC *word, int check_word)
       internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
     }
-  else if (check_word && (all_digits (word->word) || legal_identifier (word->word) == 0))
+  else if (check_word && (all_digits (word->word) || valid_identifier (word->word) == 0))
     {
       internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
@@ -379,7 +379,7 @@ importable_function_name (const char *string, size_t len)
     return 0;
   if (shellblank (*string) || shellblank(string[len-1]))
     return 0;
-  return (posixly_correct ? legal_identifier (string) : 1);
+  return (posixly_correct ? valid_identifier (string) : 1);
 }
 
 int
@@ -396,7 +396,7 @@ exportable_function_name (const char *string)
    essentially all characters except those which must be quoted to the
    parser (which disqualifies them from alias expansion anyway) and `/'. */
 int
-legal_alias_name (const char *string, int flags)
+valid_alias_name (const char *string, int flags)
 {
   register const char *s;
 
@@ -416,7 +416,7 @@ valid_function_name (const char *name, int flags)
 {
   if ((flags & 1) && find_reserved_word (name) >= 0)
     return 0;
-  if ((flags & 1) && (all_digits (name) || legal_identifier (name) == 0))
+  if ((flags & 1) && (all_digits (name) || valid_identifier (name) == 0))
     return 0;
   /* pass flags & 2 to suppress this check */
   if ((flags & 2) == 0 && assignment (name, 0))	/* difference between WORD and ASSIGNMENT_WORD */
@@ -943,7 +943,7 @@ trim_pathname (char *name, int maxlen)
   v = get_string_value ("PROMPT_DIRTRIM");
   if (v == 0 || *v == 0)
     return name;
-  if (legal_number (v, &nskip) == 0 || nskip <= 0)
+  if (valid_number (v, &nskip) == 0 || nskip <= 0)
     return name;
 
   /* Skip over tilde prefix */

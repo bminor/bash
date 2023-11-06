@@ -598,7 +598,7 @@ redir_special_open (int spec, char *filename, int flags, int mode, enum r_instru
     {
 #if !defined (HAVE_DEV_FD)
     case RF_DEVFD:
-      if (all_digits (filename+8) && legal_number (filename+8, &lfd) && lfd == (int)lfd)
+      if (all_digits (filename+8) && valid_number (filename+8, &lfd) && lfd == (int)lfd)
 	{
 	  fd = lfd;
 	  fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
@@ -800,7 +800,7 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
       else if (all_digits (redirectee_word))
 	{
 	  sd = redirect->redirector;
-	  if (legal_number (redirectee_word, &lfd) && (int)lfd == lfd)
+	  if (valid_number (redirectee_word, &lfd) && (int)lfd == lfd)
 	    rd.dest = lfd;
 	  else
 	    rd.dest = -1;	/* XXX */
@@ -1459,7 +1459,7 @@ redir_varvalue (REDIRECT *redir)
   if (val == 0 || *val == 0)
     return -1;
 
-  if (legal_number (val, &vmax) == 0)
+  if (valid_number (val, &vmax) == 0)
     return -1;
 
   i = vmax;	/* integer truncation */

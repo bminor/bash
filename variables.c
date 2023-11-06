@@ -419,7 +419,7 @@ initialize_shell_variables (char **env, int privmode)
 	  /* Don't import function names that are invalid identifiers from the
 	     environment in posix mode, though we still allow them to be defined as
 	     shell variables. */
-	  if (absolute_program (tname) == 0 && (posixly_correct == 0 || legal_identifier (tname)))
+	  if (absolute_program (tname) == 0 && (posixly_correct == 0 || valid_identifier (tname)))
 	    parse_and_execute (temp_string, tname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_FUNCDEF|SEVAL_ONECMD);
 	  else
 	    free (temp_string);		/* parse_and_execute does this */
@@ -514,7 +514,7 @@ initialize_shell_variables (char **env, int privmode)
 	      if (temp_var)
 		VUNSETATTR (temp_var, att_readonly);
 	    }
-	  if (legal_identifier (name))
+	  if (valid_identifier (name))
 	    {
 	      temp_var = bind_variable (name, string, 0);
 	      if (temp_var)
@@ -859,7 +859,7 @@ adjust_shell_level (int change)
   SHELL_VAR *temp_var;
 
   old_SHLVL = get_string_value ("SHLVL");
-  if (old_SHLVL == 0 || *old_SHLVL == '\0' || legal_number (old_SHLVL, &old_level) == 0)
+  if (old_SHLVL == 0 || *old_SHLVL == '\0' || valid_number (old_SHLVL, &old_level) == 0)
     old_level = 0;
 
   shell_level = old_level + change;
@@ -1333,7 +1333,7 @@ assign_seconds (SHELL_VAR *self, char *value, arrayind_t unused, char *key)
   if (integer_p (self))
     nval = evalexp (value, 0, &expok);
   else
-    expok = legal_number (value, &nval);
+    expok = valid_number (value, &nval);
   seconds_value_assigned = expok ? nval : 0;
   gettimeofday (&shellstart, NULL);
   shell_start_time = shellstart.tv_sec;
@@ -1359,7 +1359,7 @@ init_seconds_var (void)
   v = find_variable ("SECONDS");
   if (v)
     {
-      if (legal_number (value_cell(v), &seconds_value_assigned) == 0)
+      if (valid_number (value_cell(v), &seconds_value_assigned) == 0)
 	seconds_value_assigned = 0;
     }
   INIT_DYNAMIC_VAR ("SECONDS", (v ? value_cell (v) : (char *)NULL), get_seconds, assign_seconds);
@@ -1405,7 +1405,7 @@ assign_random (SHELL_VAR *self, char *value, arrayind_t unused, char *key)
   if (integer_p (self))
     seedval = evalexp (value, 0, &expok);
   else
-    expok = legal_number (value, &seedval);
+    expok = valid_number (value, &seedval);
   if (expok == 0)
     return (self);
   sbrand (seedval);
@@ -1457,7 +1457,7 @@ assign_lineno (SHELL_VAR *var, char *value, arrayind_t unused, char *key)
 {
   intmax_t new_value;
 
-  if (value == 0 || *value == '\0' || legal_number (value, &new_value) == 0)
+  if (value == 0 || *value == '\0' || valid_number (value, &new_value) == 0)
     new_value = 0;
   line_number = line_number_base = new_value;
   return (set_int_value (var, line_number, integer_p (var) != 0));
@@ -1478,7 +1478,7 @@ assign_subshell (SHELL_VAR *var, char *value, arrayind_t unused, char *key)
 {
   intmax_t new_value;
 
-  if (value == 0 || *value == '\0' || legal_number (value, &new_value) == 0)
+  if (value == 0 || *value == '\0' || valid_number (value, &new_value) == 0)
     new_value = 0;
   subshell_level = new_value;
   return var;
@@ -1790,7 +1790,7 @@ get_aliasvar (SHELL_VAR *self)
 static SHELL_VAR *
 assign_aliasvar (SHELL_VAR *self, char *value, arrayind_t ind, char *key)
 {
-  if (legal_alias_name (key, 0) == 0)
+  if (valid_alias_name (key, 0) == 0)
     {
        report_error (_("`%s': invalid alias name"), key);
        return (self);
@@ -2204,7 +2204,7 @@ find_variable_nameref_for_create (const char *name, int flags)
     }
   if (var && nameref_p (var))
     {
-      if (legal_identifier (nameref_cell (var)) == 0)
+      if (valid_identifier (nameref_cell (var)) == 0)
 	{
 	  sh_invalidid (nameref_cell (var) ? nameref_cell (var) : "");
 	  return ((SHELL_VAR *)INVALID_NAMEREF_VALUE);
@@ -3390,7 +3390,7 @@ bind_int_variable (const char *lhs, const char *rhs, int flags)
       avflags = convert_assign_flags_to_arrayval_flags (flags);
       v = array_variable_part (lhs, avflags, (char **)0, (int *)0);
     }
-  else if (legal_identifier (lhs) == 0)
+  else if (valid_identifier (lhs) == 0)
     {
       sh_invalidid (lhs);
       return ((SHELL_VAR *)NULL);      
@@ -3547,7 +3547,7 @@ assign_in_env (const WORD_DESC *word, int flags)
 	  aflags |= ASS_APPEND;
 	}
 
-      if (legal_identifier (name) == 0)
+      if (valid_identifier (name) == 0)
 	{
 	  sh_invalidid (name);
 	  free (name);
@@ -5628,7 +5628,7 @@ pop_args (void)
   GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
 
   ce = array_unshift_element (bash_argc_a);
-  if (ce == 0 || legal_number (element_value (ce), &i) == 0)
+  if (ce == 0 || valid_number (element_value (ce), &i) == 0)
     i = 0;
 
   for ( ; i > 0; i--)
@@ -5858,7 +5858,7 @@ sv_funcnest (const char *name)
   v = find_variable (name);
   if (v == 0)
     funcnest_max = 0;
-  else if (legal_number (value_cell (v), &num) == 0)
+  else if (valid_number (value_cell (v), &num) == 0)
     funcnest_max = 0;
   else
     funcnest_max = num;
@@ -5938,7 +5938,7 @@ sv_winsize (const char *name)
     rl_reset_screen_size ();
   else
     {
-      if (legal_number (value_cell (v), &xd) == 0)
+      if (valid_number (value_cell (v), &xd) == 0)
 	return;
       winsize_assignment = 1;
       d = xd;			/* truncate */
@@ -5980,7 +5980,7 @@ sv_histsize (const char *name)
 
   if (temp && *temp)
     {
-      if (legal_number (temp, &num))
+      if (valid_number (temp, &num))
 	{
 	  hmax = num;
 	  if (hmax < 0 && name[4] == 'S')

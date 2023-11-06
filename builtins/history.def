@@ -1,7 +1,7 @@
 This file is history.def, from which is created history.c.
 It implements the builtin "history" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -187,7 +187,7 @@ history_builtin (WORD_LIST *list)
     {
       intmax_t delete_start, delete_end;
       *range++ = '\0';
-      if (legal_number (delete_arg, &delete_start) == 0 || legal_number (range, &delete_end) == 0)
+      if (valid_number (delete_arg, &delete_start) == 0 || valid_number (range, &delete_end) == 0)
 	{
 	  range[-1] = '-';
 	  sh_erange (delete_arg, _("history position"));
@@ -224,7 +224,7 @@ history_builtin (WORD_LIST *list)
     }
   else if (flags & DFLAG)
     {
-      if (legal_number (delete_arg, &delete_offset) == 0)
+      if (valid_number (delete_arg, &delete_offset) == 0)
 	{
 	  sh_invalidnum (delete_arg);
 	  return (EXECUTION_FAILURE);

@@ -351,9 +351,9 @@ arithcomp (char *s, char *t, int op, int flags)
     }
   else
     {
-      if (legal_number (s, &l) == 0)
+      if (valid_number (s, &l) == 0)
 	integer_expected_error (s);
-      if (legal_number (t, &r) == 0)
+      if (valid_number (t, &r) == 0)
 	integer_expected_error (t);
     }
 
@@ -489,7 +489,7 @@ unary_operator (void)
       advance (0);
       if (pos < argc)
 	{
-	  if (legal_number (argv[pos], &r))
+	  if (valid_number (argv[pos], &r))
 	    {
 	      advance (0);
 	      return (unary_test (op, argv[pos - 1], 0));
@@ -612,7 +612,7 @@ unary_test (char *op, char *arg, int flags)
 #endif
 
     case 't':	/* File fd is a terminal? */
-      if (legal_number (arg, &r) == 0)
+      if (valid_number (arg, &r) == 0)
 	integer_expected_error (arg);
       return ((r == (int)r) && isatty ((int)r));
 
@@ -650,7 +650,7 @@ unary_test (char *op, char *arg, int flags)
 	  flush_eltstate (&es);
 	  return ret;
 	}
-      else if (legal_number (arg, &r))		/* -v n == is $n set? */
+      else if (valid_number (arg, &r))		/* -v n == is $n set? */
 	return ((r >= 0 && r <= number_of_args()) ? TRUE : FALSE);
       v = find_variable (arg);
       if (v && invisible_p (v) == 0 && array_p (v))

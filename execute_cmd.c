@@ -2428,7 +2428,7 @@ execute_coproc (COMMAND *command, int pipe_in, int pipe_out, struct fd_bitmap *f
   /* expand name without splitting - could make this dependent on a shopt option */
   name = expand_string_unsplit_to_string (command->value.Coproc->name, 0);
   /* Optional check -- could be relaxed */
-  if (legal_identifier (name) == 0)
+  if (valid_identifier (name) == 0)
     {
       internal_error (_("`%s': not a valid identifier"), name);
       free (name);
@@ -3381,7 +3381,7 @@ select_query (WORD_LIST *list, int list_len, char *prompt, int print_menu)
 	  print_menu = 1;
 	  continue;
 	}
-      if (legal_number (repl_string, &reply) == 0)
+      if (valid_number (repl_string, &reply) == 0)
 	return "";
       if (reply < 1 || reply > list_len)
 	return "";

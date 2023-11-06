@@ -287,9 +287,9 @@ printf_builtin (WORD_LIST *list)
 	  bindflags = 0;
 #if defined (ARRAY_VARS)
 	  SET_VFLAGS (list_optflags, arrayflags, bindflags);
-	  retval = legal_identifier (vname) || valid_array_reference (vname, arrayflags);
+	  retval = valid_identifier (vname) || valid_array_reference (vname, arrayflags);
 #else
-	  retval = legal_identifier (vname);
+	  retval = valid_identifier (vname);
 #endif
 	  if (retval)
 	    {
@@ -644,7 +644,7 @@ printf_builtin (WORD_LIST *list)
 		var = getstr ();
 		if (var && *var)
 		  {
-		    if (legal_identifier (var))
+		    if (valid_identifier (var))
 		      bind_var_to_int (var, tw, 0);
 		    else
 		      {

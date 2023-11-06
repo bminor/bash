@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -227,7 +227,7 @@ pushd_builtin (WORD_LIST *list)
 	break;
       else if (((direction = list->word->word[0]) == '+') || direction == '-')
 	{
-	  if (legal_number (list->word->word + 1, &num) == 0)
+	  if (valid_number (list->word->word + 1, &num) == 0)
 	    {
 	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
@@ -339,7 +339,7 @@ popd_builtin (WORD_LIST *list)
 	}
       else if (((direction = list->word->word[0]) == '+') || direction == '-')
 	{
-	  if (legal_number (list->word->word + 1, &which) == 0)
+	  if (valid_number (list->word->word + 1, &which) == 0)
 	    {
 	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
@@ -370,7 +370,7 @@ popd_builtin (WORD_LIST *list)
     {
       if (((direction = list->word->word[0]) == '+') || direction == '-')
 	{
-	  if (legal_number (list->word->word + 1, &which) == 0)
+	  if (valid_number (list->word->word + 1, &which) == 0)
 	    {
 	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
@@ -461,7 +461,7 @@ dirs_builtin (WORD_LIST *list)
       else if (*list->word->word == '+' || *list->word->word == '-')
 	{
 	  int sign;
-	  if (legal_number (w = list->word->word + 1, &i) == 0)
+	  if (valid_number (w = list->word->word + 1, &i) == 0)
 	    {
 	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
@@ -628,7 +628,7 @@ get_dirstack_from_string (char *string)
       sign = (*string == '-') ? -1 : 1;
       string++;
     }
-  if (legal_number (string, &i) == 0)
+  if (valid_number (string, &i) == 0)
     return ((char *)NULL);
 
   index_flag = 0;

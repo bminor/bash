@@ -4,7 +4,7 @@
 
    Originally contributed by Jason Vas Dias <jason.vas.dias@gmail.com>
    
-   Copyright (C) 2018-2022 Free Software Foundation, Inc.
+   Copyright (C) 2018-2023 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ setpgid_builtin (WORD_LIST *list)
       return (EX_USAGE);
     }
       
-  if (legal_number (pidstr, &pid_arg) == 0)
+  if (valid_number (pidstr, &pid_arg) == 0)
     {
       builtin_error ("%s: pid argument must be numeric", pidstr);
       return (EXECUTION_FAILURE);
@@ -81,7 +81,7 @@ setpgid_builtin (WORD_LIST *list)
     }
   pid = pid_arg;
 
-  if (legal_number (pgidstr, &pgid_arg) == 0)
+  if (valid_number (pgidstr, &pgid_arg) == 0)
     {
       builtin_error ("%s: pgrp argument must be numeric", pgidstr);
       return (EXECUTION_FAILURE);

@@ -243,7 +243,7 @@ mapfile_builtin (WORD_LIST *list)
 	  delim = *list_optarg;
 	  break;
 	case 'u':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
 	      builtin_error (_("%s: invalid file descriptor specification"), list_optarg);
@@ -260,7 +260,7 @@ mapfile_builtin (WORD_LIST *list)
 	  break;	  
 
 	case 'n':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid line count"), list_optarg);
@@ -271,7 +271,7 @@ mapfile_builtin (WORD_LIST *list)
 	  break;
 
 	case 'O':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid array origin"), list_optarg);
@@ -288,7 +288,7 @@ mapfile_builtin (WORD_LIST *list)
 	  callback = list_optarg;
 	  break;
 	case 'c':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval <= 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid callback quantum"), list_optarg);
@@ -298,7 +298,7 @@ mapfile_builtin (WORD_LIST *list)
 	    callback_quantum = intval;
 	  break;
 	case 's':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid line count"), list_optarg);
@@ -330,7 +330,7 @@ mapfile_builtin (WORD_LIST *list)
   else
     array_name = list->word->word;
   
-  if (legal_identifier (array_name) == 0)
+  if (valid_identifier (array_name) == 0)
     {
       sh_invalidid (array_name);
       return (EXECUTION_FAILURE);

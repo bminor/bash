@@ -7453,7 +7453,7 @@ valid_brace_expansion_word (const char *name, int var_is_special)
   else if (valid_array_reference (name, 0))
     return 1;
 #endif /* ARRAY_VARS */
-  else if (legal_identifier (name))
+  else if (valid_identifier (name))
     return 1;
   else
     return 0;
@@ -7547,7 +7547,7 @@ parameter_brace_expand_word (char *name, int var_is_special, int quoted, int pfl
 #endif
 
   /* Handle multiple digit arguments, as in ${11}. */  
-  if (legal_number (name, &arg_index))
+  if (valid_number (name, &arg_index))
     {
       tt = get_dollar_var_value (arg_index);
       if (tt)
@@ -7685,7 +7685,7 @@ expand_arrayref:
       else
 #endif
       /* y=2 ; typeset -n x=y; echo ${x} is not the same as echo ${2} in ksh */
-      if (temp && *temp && legal_identifier (temp) == 0)
+      if (temp && *temp && valid_identifier (temp) == 0)
         {
 	  set_exit_status (EXECUTION_FAILURE);
 	  report_error (_("%s: invalid variable name for name reference"), temp);
@@ -7779,7 +7779,7 @@ parameter_brace_expand_indir (char *name, int var_is_special, int quoted, int pf
      is ok.  Indirect references to array references, as explained above, are
      ok (currently).  Only references to unset variables are errors at this
      point. */
-  if (legal_identifier (name) && v == 0)
+  if (valid_identifier (name) && v == 0)
     {
       report_error (_("%s: invalid indirect expansion"), name);
       w = alloc_word_desc ();
@@ -7979,7 +7979,7 @@ parameter_brace_expand_rhs (char *name, char *value,
 	  dispose_word (w);
 	  return &expand_wdesc_error;
 	}
-      if (legal_identifier (vname) == 0)
+      if (valid_identifier (vname) == 0)
 	{
 	  report_error (_("%s: invalid variable name"), vname);
 	  free (vname);
@@ -8118,7 +8118,7 @@ valid_length_expression (const char *name)
 #if defined (ARRAY_VARS)
 	  valid_array_reference (name + 1, 0) ||		/* ${#a[7]} */
 #endif
-	  legal_identifier (name + 1));				/* ${#PS1} */
+	  valid_identifier (name + 1));				/* ${#PS1} */
 }
 
 /* Handle the parameter brace expansion that requires us to return the
@@ -8169,7 +8169,7 @@ parameter_brace_expand_length (char *name)
   else if (valid_array_reference (name + 1, 0))
     number = array_length_reference (name + 1);
 #endif /* ARRAY_VARS */
-  else if (legal_number (name + 1, &arg_index))		/* ${#1} */ 
+  else if (valid_number (name + 1, &arg_index))		/* ${#1} */ 
     {
       t = get_dollar_var_value (arg_index);
       if (t == 0 && unbound_vars_is_error)
@@ -10851,7 +10851,7 @@ comsub:
 	  else
 #endif
 	  /* y=2 ; typeset -n x=y; echo $x is not the same as echo $2 in ksh */
-	  if (temp && *temp && legal_identifier (temp) == 0)
+	  if (temp && *temp && valid_identifier (temp) == 0)
 	    {
 	      set_exit_status (EXECUTION_FAILURE);
 	      report_error (_("%s: invalid variable name for name reference"), temp);
@@ -12534,6 +12534,12 @@ brace_expand_word_list (WORD_LIST *tlist, int eflags)
       if (mbschr (tlist->word->word, LBRACE))
 	{
 	  expansions = brace_expand (tlist->word->word);
+	  if (expansions == 0)
+	    {
+	      expansions = strvec_create (2);
+	      expansions[0] = savestring (tlist->word->word);
+	      expansions[1] = NULL;
+	    }
 
 	  for (eindex = 0; temp_string = expansions[eindex]; eindex++)
 	    {

@@ -897,7 +897,7 @@ unset_builtin (WORD_LIST *list)
 
       /* Get error checking out of the way first.  The low-level functions
 	 just perform the unset, relying on the caller to verify. */
-      valid_id = legal_identifier (name);
+      valid_id = valid_identifier (name);
 
       /* Whether or not we are in posix mode, if neither -f nor -v appears,
 	 skip over trying to unset variables with invalid names and just

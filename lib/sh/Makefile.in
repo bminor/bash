@@ -95,7 +95,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   ufuncs.c casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
 	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
 	   strvis.c strlcpy.c strscpy.c utf8.c random.c gettimeofday.c \
-	   timers.c anonfile.c
+	   timers.c anonfile.c compat.c
 
 # The header files for this library.
 HSOURCES = 
@@ -110,7 +110,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o mbsncmp.o uconvert.o ufuncs.o casemod.o \
 	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o strvis.o \
-	  strscpy.o anonfile.o \
+	  strscpy.o anonfile.o compat.o \
 	  utf8.o random.o gettimeofday.o timers.o wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
@@ -150,6 +150,7 @@ anonfile.o: anonfile.c
 casemod.o: casemod.c
 clktck.o: clktck.c
 clock.o: clock.c
+compat.o: compat.c
 eaccess.o: eaccess.c
 dprintf.o: dprintf.c
 fmtullong.o: fmtullong.c
@@ -236,6 +237,7 @@ anonfile.o: ${BUILD_DIR}/config.h
 casemod.o: ${BUILD_DIR}/config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
+compat.o: ${BUILD_DIR}/config.h
 eaccess.o: ${BUILD_DIR}/config.h
 dprintf.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h
@@ -688,3 +690,14 @@ anonfile.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
 anonfile.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 anonfile.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 anonfile.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
+
+compat.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+compat.o: ${topdir}/bashtypes.h
+compat.o: ${BASHINCDIR}/filecntl.h
+compat.o: ${topdir}/shell.h ${topdir}/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+compat.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
+compat.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h ${topdir}/conftypes.h
+compat.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
+compat.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
+compat.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
+compat.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h

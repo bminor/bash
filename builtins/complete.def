@@ -349,7 +349,7 @@ build_actions (WORD_LIST *list, struct _optflags *flagp, unsigned long *actp, un
 	  if (vnamep)
 	    {
 	      *vnamep = list_optarg;
-	      if (legal_identifier (list_optarg) == 0)
+	      if (valid_identifier (list_optarg) == 0)
 		{
 		  sh_invalidid (list_optarg);
 		  return (EX_USAGE);

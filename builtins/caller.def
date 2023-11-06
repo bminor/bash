@@ -2,7 +2,7 @@ This file is caller.def, from which is created caller.c.  It implements the
 builtin "caller" in Bash.
 
 Copyright (C) 2002-2008 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008-2019,2022 Free Software Foundation, Inc.
+Copyright (C) 2008-2019,2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -108,7 +108,7 @@ caller_builtin (WORD_LIST *list)
   if (funcname_a == 0 || array_empty (funcname_a))
     return (EXECUTION_FAILURE);
 
-  if (legal_number (list->word->word, &num))
+  if (valid_number (list->word->word, &num))
     {
       lineno_s = array_reference (bash_lineno_a, num);
       source_s = array_reference (bash_source_a, num+1);

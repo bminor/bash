@@ -238,20 +238,20 @@ decode_signal (const char *string, int flags)
   intmax_t sig;
   char *name;
 
-  if (legal_number (string, &sig))
+  if (valid_number (string, &sig))
     return ((sig >= 0 && sig < NSIG) ? (int)sig : NO_SIG);
 
 #if defined (SIGRTMIN) && defined (SIGRTMAX)
   if (STREQN (string, "SIGRTMIN+", 9) || ((flags & DSIG_NOCASE) && strncasecmp (string, "SIGRTMIN+", 9) == 0))
     {
-      if (legal_number (string+9, &sig) && sig >= 0 && sig <= SIGRTMAX - SIGRTMIN)
+      if (valid_number (string+9, &sig) && sig >= 0 && sig <= SIGRTMAX - SIGRTMIN)
 	return (SIGRTMIN + sig);
       else
 	return NO_SIG;
     }
   else if (STREQN (string, "RTMIN+", 6) || ((flags & DSIG_NOCASE) && strncasecmp (string, "RTMIN+", 6) == 0))
     {
-      if (legal_number (string+6, &sig) && sig >= 0 && sig <= SIGRTMAX - SIGRTMIN)
+      if (valid_number (string+6, &sig) && sig >= 0 && sig <= SIGRTMAX - SIGRTMIN)
 	return (SIGRTMIN + sig);
       else
 	return NO_SIG;

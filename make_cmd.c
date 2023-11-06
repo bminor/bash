@@ -702,7 +702,7 @@ make_redirection (REDIRECTEE source, enum r_instruction instruction, REDIRECTEE 
       if (w->word[wlen] == '-')		/* Yuck */
         {
           w->word[wlen] = '\0';
-	  if (all_digits (w->word) && legal_number (w->word, &lfd) && lfd == (int)lfd)
+	  if (all_digits (w->word) && valid_number (w->word, &lfd) && lfd == (int)lfd)
 	    {
 	      dispose_word (w);
 	      temp->instruction = (instruction == r_duplicating_input_word) ? r_move_input : r_move_output;

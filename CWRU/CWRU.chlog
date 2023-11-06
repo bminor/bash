@@ -7928,3 +7928,21 @@ general.c
 	- legal_number: use the same test (isspace(3)) to skip trailing
 	  whitespace that strtoimax uses to skip leading whitespace.
 	  Report and patch from Paul Eggert <eggert@cs.ucla.edu>
+
+general.c,general.h
+	- legal_number: renamed to valid_number, changed all callers
+	- legal_identifier: renamed to valid_identifier, changed all callers
+	- legal_alias_name: renamed to valid_alias_name, changed all callers
+
+lib/sh/compat.c
+	- legal_number: definition of legal_number here for backwards compat
+	  with old loadable builtins
+	- legal_identifier: definition of legal_identifier here for backwards
+	  compat with old loadable builtins
+	- legal_alias_name: same
+
+subst.c
+	- brace_expand_word_list: if brace_expand returns NULL, dummy up a
+	  single-element vector with a copy of the original word so we can
+	  add it to the result list unchanged.
+	  Inspired by https://savannah.gnu.org/support/?110948
