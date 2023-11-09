@@ -5465,6 +5465,7 @@ time_command_acceptable ()
     case TIME:		/* time time pipeline */
     case TIMEOPT:	/* time -p time pipeline */
     case TIMEIGN:	/* time -p -- ... */
+    case DOLPAREN:
       return 1;
     default:
       return 0;
