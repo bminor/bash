@@ -1693,7 +1693,7 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  t = extract_command_subst (string, &si, flags);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
-	  tlen = si - i - 1;
+	  tlen = si - i - 2;
 	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
 	  result[result_index++] = c;
 	  result[result_index++] = LPAREN;
@@ -1713,7 +1713,7 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  t = extract_process_subst (string, (string[i] == '<' ? "<(" : ">)"), &si, flags);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
-	  tlen = si - i - 1;
+	  tlen = si - i - 2;
 	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
 	  result[result_index++] = c;
 	  result[result_index++] = LPAREN;
