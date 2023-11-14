@@ -559,6 +559,11 @@ extern void zsyncfd (int);
 /* declarations for functions defined in lib/sh/zwrite.c */
 extern int zwrite (int, char *, size_t);
 
+/* compatibility functions for existing loadable builtins, from compat.c */
+extern int legal_number (const char *, intmax_t *);
+extern int legal_identifier (const char *);
+extern int legal_alias_name (const char *, int);
+
 /* declarations for functions defined in lib/glob/gmisc.c */
 extern int match_pattern_char (char *, char *, int);
 extern int umatchlen (char *, size_t);

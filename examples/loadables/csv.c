@@ -129,7 +129,7 @@ csv_builtin (WORD_LIST *list)
   if (array_name == 0)
     array_name = CSV_ARRAY_DEFAULT;
 
-  if (legal_identifier (array_name) == 0)
+  if (valid_identifier (array_name) == 0)
     {
       sh_invalidid (array_name);
       return (EXECUTION_FAILURE);

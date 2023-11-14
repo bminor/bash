@@ -41,6 +41,11 @@ Options controlling dynamic loading:
 
 Without options, each NAME is enabled.
 
+On systems with dynamic loading, the shell variable BASH_LOADABLES_PATH
+defines a search path for the directory containing FILENAMEs that do
+not contain a slash. It may include "." to force a search of the current
+directory.
+
 To use the `test' found in $PATH instead of the shell builtin
 version, type `enable -n test'.
 
@@ -363,11 +368,18 @@ dyn_load_builtin (WORD_LIST *list, int flags, char *filename)
 
   /* Fall back to current directory for now */
   if (handle == 0)
+    {
+      char *openname;
+
+      openname = absolute_program (filename) ? filename : make_absolute (filename, ".");
 #if defined (_AIX)
-    handle = dlopen (filename, RTLD_NOW|RTLD_GLOBAL);
+      handle = dlopen (openname, RTLD_NOW|RTLD_GLOBAL);
 #else
-    handle = dlopen (filename, RTLD_LAZY);
+      handle = dlopen (openname, RTLD_LAZY);
 #endif /* !_AIX */
+      if (openname != filename)
+	free (openname);
+    }
 
   if (handle == 0)
     {

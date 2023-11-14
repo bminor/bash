@@ -7973,3 +7973,25 @@ lib/readline/emacs_keymap.c
 lib/readline/doc/rluser.texi
 	- execute-named-command: document as bindable function name with its
 	  default binding to M-x in emacs mode
+
+				   11/6
+				   ----
+lib/readline/search.c
+	- _rl_nsearch_dispatch: use ^V/^Q for rl_quoted_insert into the
+	  search string
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: use ^V or anything bound to rl_quoted_insert
+	  for rl_quoted_insert into the search string
+
+lib/readline/terminal.c
+	- add support for new BE/BD and PS/PE bracketed-paste capabilities.
+	  Nothing uses them yet.
+
+				   11/10
+				   -----
+builtins/enable.def
+	- dyn_load_builtin: if we don't find a pathname argument without a
+	  slash in BASH_LOADABLES_PATH, convert it to a pathname with a slash
+	  before calling dlopen, to force the loader to look in the current
+	  directory (Linux, for example, will not).

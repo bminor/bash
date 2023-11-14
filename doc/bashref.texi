@@ -4852,8 +4852,10 @@ each builtin with an indication of whether or not it is enabled.
 The @option{-f} option means to load the new builtin command @var{name}
 from shared object @var{filename}, on systems that support dynamic loading.
 Bash will use the value of the @env{BASH_LOADABLES_PATH} variable as a
-colon-separated list of directories in which to search for @var{filename}.
-The default is system-dependent.
+colon-separated list of directories in which to search for @var{filename},
+if @var{filename} does not contain a slash.
+The default is system-dependent,
+and may include "." to force a search of the current directory.
 The @option{-d} option will delete a builtin loaded with @option{-f}.
 
 If there are no options, a list of the shell builtins is displayed.
@@ -6048,8 +6050,10 @@ instead of double quotes.
 If the string is not translated, this has no effect.
 
 @item nullglob
-If set, Bash allows filename patterns which match no
-files to expand to a null string, rather than themselves.
+If set, filename expansion patterns which match no files
+(@pxref{Filename Expansion})
+expand to nothing and are removed,
+rather than expanding to themselves.
 
 @item patsub_replacement
 If set, Bash

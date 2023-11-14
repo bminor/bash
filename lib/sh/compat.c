@@ -45,3 +45,9 @@ legal_alias_name (const char *string, int flags)
 {
   return (valid_alias_name (string, flags));
 }
+
+int
+compat_init (void)
+{
+  return 0;
+}

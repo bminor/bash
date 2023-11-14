@@ -172,8 +172,9 @@ char *localvar_builtins[] =
 /* The builtin commands that are special to the POSIX search order. */
 char *posix_builtins[] =
 {
-  "alias", "bg", "cd", "command", "false", "fc", "fg", "getopts", "jobs",
-  "kill", "newgrp", "pwd", "read", "true", "umask", "unalias", "wait",
+  "alias", "bg", "cd", "command", "false", "fc", "fg", "getopts", "hash",
+  "jobs", "kill", "newgrp", "pwd", "read", "true", "type", "ulimit",
+  "umask", "unalias", "wait",
   (char *)NULL
 };
 

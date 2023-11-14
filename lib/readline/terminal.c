@@ -185,6 +185,12 @@ static char *_rl_term_kN;
 static char *_rl_term_vs;	/* very visible */
 static char *_rl_term_ve;	/* normal */
 
+/* Bracketed paste */
+static char *_rl_term_BE;	/* enable */
+static char *_rl_term_BD;	/* disable */
+static char *_rl_term_PS;	/* paste start */
+static char *_rl_term_PE;	/* paste end */
+
 /* User-settable color sequences to begin and end the active region. Defaults
    are rl_term_so and rl_term_se on non-dumb terminals. */
 char *_rl_active_region_start_color = NULL;
@@ -415,9 +421,13 @@ struct _tc_string {
 static const struct _tc_string tc_strings[] =
 {
   { "@7", &_rl_term_at7 },
+  { "BD", &_rl_term_BD },
+  { "BE", &_rl_term_BE },
   { "DC", &_rl_term_DC },
   { "E3", &_rl_term_clrscroll },
   { "IC", &_rl_term_IC },
+  { "PE", &_rl_term_PE },
+  { "PS", &_rl_term_PS },
   { "ce", &_rl_term_clreol },
   { "cl", &_rl_term_clrpag },
   { "cr", &_rl_term_cr },
@@ -497,6 +507,7 @@ _rl_init_terminal_io (const char *terminal_name)
   _rl_term_kh = _rl_term_kH = _rl_term_at7 = _rl_term_kI = (char *)NULL;
   _rl_term_kN = _rl_term_kP = (char *)NULL;
   _rl_term_so = _rl_term_se = (char *)NULL;
+  _rl_term_BD = _rl_term_BE = _rl_term_PE = _rl_term_PS = (char *)NULL;
 #if defined(HACK_TERMCAP_MOTION)
   _rl_term_forward_char = (char *)NULL;
 #endif
@@ -567,6 +578,7 @@ _rl_init_terminal_io (const char *terminal_name)
 
       /* Assume generic unknown terminal can't handle the enable/disable
 	 escape sequences */
+      _rl_term_BD = _rl_term_BE = _rl_term_PE = _rl_term_PS = (char *)NULL;
       _rl_enable_bracketed_paste = 0;
 
       /* No terminal so/se capabilities. */

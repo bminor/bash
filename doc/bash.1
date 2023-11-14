@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Nov  1 09:34:21 EDT 2023
+.\"	Last Change: Mon Nov  6 10:19:40 EST 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 November 1" "GNU Bash 5.3"
+.TH BASH 1 "2023 November 6" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8839,8 +8839,10 @@ from shared object
 .IR filename ,
 on systems that support dynamic loading.
 \fBBash\fP will use the value of the \fBBASH_LOADABLES_PATH\fP variable as a
-colon-separated list of directories in which to search for \fIfilename\fP.
-The default is system-dependent.
+colon-separated list of directories in which to search for \fIfilename\fP,
+if \fIfilename\fP does not contain a slash.
+The default is system-dependent,
+and may include "." to force a search of the current directory.
 The
 .B \-d
 option will delete a builtin previously loaded with
@@ -10896,14 +10898,13 @@ instead of double quotes.
 If the string is not translated, this has no effect.
 .TP 8
 .B nullglob
-If set,
-.B bash
-allows patterns which match no
-files (see
+If set, pathname expansion patterns which match no files
+(see
 .B Pathname Expansion
 .ie \n(zZ=1 in \fIbash(1)\fP)
 .el above)
-to expand to a null string, rather than themselves.
+expand to nothing and are removed,
+rather than expanding to themselves.
 .TP 8
 .B patsub_replacement
 If set, \fBbash\fP
