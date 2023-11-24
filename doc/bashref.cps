@@ -108,7 +108,7 @@
 \entry{process group}{3}
 \entry{process group ID}{3}
 \entry{process substitution}{35}
-\entry{programmable completion}{149}
+\entry{programmable completion}{150}
 \entry{prompting}{107}
 \initial {Q}
 \entry{quoting}{6}

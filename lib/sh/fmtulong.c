@@ -54,8 +54,8 @@
 extern int errno;
 #endif
 
-#define x_digs  "0123456789abcdef"
-#define X_digs  "0123456789ABCDEF"
+static char const x_digs[16] = "0123456789abcdef";
+static char const X_digs[16] = "0123456789ABCDEF";
 
 static char * const all_digs = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@_";
 

@@ -2190,7 +2190,8 @@ rl_complete_internal (int what_to_do)
 	}
       /*FALLTHROUGH*/
 
-    case '%':
+    case '%':			/* used by menu_complete */
+    case '|':			/* add this for unconditional display */
       do_display = 1;
       break;
 

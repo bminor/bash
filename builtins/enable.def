@@ -347,38 +347,32 @@ dyn_load_builtin (WORD_LIST *list, int flags, char *filename)
 #define RTLD_LAZY 1
 #endif
 
-  handle = 0;
-  if (absolute_program (filename) == 0)
-    {
-      loadables_path = path_value ("BASH_LOADABLES_PATH", 1);
-      if (loadables_path)
-	{
-	  load_path = find_in_path (filename, loadables_path, FS_NODIRS|FS_EXEC_PREFERRED);
-	  if (load_path)
-	    {
 #if defined (_AIX)
-	      handle = dlopen (load_path, RTLD_NOW|RTLD_GLOBAL);
+#  define DLFLAGS (RTLD_NOW|RTLD_GLOBAL)
 #else
-	      handle = dlopen (load_path, RTLD_LAZY);
+#  define DLFLAGS RTLD_LAZY
 #endif /* !_AIX */
-	      free (load_path);
-	    }
+
+  handle = 0;
+  if (absolute_program (filename))
+    handle = dlopen (filename, DLFLAGS);
+  else if (loadables_path = path_value ("BASH_LOADABLES_PATH", 1))
+    {
+      /* If we have a loadables path, don't fall back to the current directory. */
+      load_path = find_in_path (filename, loadables_path, FS_NODIRS|FS_EXEC_PREFERRED);
+      if (load_path)
+	{
+	  handle = dlopen (load_path, DLFLAGS);
+	  free (load_path);
 	}
     }
-
-  /* Fall back to current directory for now */
-  if (handle == 0)
+  else		/* no loadables path, look in current directory */
     {
       char *openname;
 
-      openname = absolute_program (filename) ? filename : make_absolute (filename, ".");
-#if defined (_AIX)
-      handle = dlopen (openname, RTLD_NOW|RTLD_GLOBAL);
-#else
-      handle = dlopen (openname, RTLD_LAZY);
-#endif /* !_AIX */
-      if (openname != filename)
-	free (openname);
+      openname = make_absolute (filename, ".");
+      handle = dlopen (openname, DLFLAGS);
+      free (openname);
     }
 
   if (handle == 0)

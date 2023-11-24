@@ -164,6 +164,7 @@ printone(int fd, int p, int verbose)
   if ((f = getflags(fd, p)) == -1)
     return;
 
+  /* maybe make the file descriptor printing optional if only one argument */
   printf ("%d:", fd);
 
   for (i = 0; i < N_FLAGS; i++)
@@ -224,15 +225,13 @@ parseflags(char *s, int *p, int *n)
 }
 
 static void
-setone(int fd, char *v, int verbose)
+setone(int fd, int pos, int neg, int verbose)
 {
-  int f, n, pos, neg, cloexec;
+  int f, n, cloexec;
 
   f = getflags(fd, 1);
   if (f == -1)
     return;
-
-  parseflags(v, &pos, &neg);
 
   cloexec = -1;
 
@@ -281,6 +280,7 @@ int
 fdflags_builtin (WORD_LIST *list)
 {
   int opt, maxfd, i, num, verbose, setflag;
+  int pos, neg;
   char *setspec;
   WORD_LIST *l;
   intmax_t inum;
@@ -311,6 +311,9 @@ fdflags_builtin (WORD_LIST *list)
   if (list == 0 && setflag)
     return (EXECUTION_SUCCESS);
 
+  if (setflag)
+    parseflags (setspec, &pos, &neg);
+
   if (list == 0)
     {
       maxfd = getmaxfd ();
@@ -335,12 +338,12 @@ fdflags_builtin (WORD_LIST *list)
 	}
       num = inum;		/* truncate to int */
       if (setflag)
-	setone (num, setspec, verbose);
+	setone (num, pos, neg, verbose);
       else
 	printone (num, 1, verbose);
     }
 
-  return (opt);
+  return (sh_chkwrite (opt));
 }
 
 char *fdflags_doc[] =

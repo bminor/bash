@@ -290,7 +290,7 @@ local_wcsnlen (const wchar_t *s, size_t maxlen)
 static size_t
 wctomb_fallback (char *s, wchar_t wc)
 {
-  static char hex[16] = "0123456789ABCDEF";
+  static char const hex[16] = "0123456789ABCDEF";
 
   s[0] = '\\';
   if (sizeof (wchar_t) > 2 && wc > 0xffff)

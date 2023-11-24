@@ -997,10 +997,13 @@ internal_free (PTR_T mem, const char *file, int line, int flags)
 #if defined (USE_MMAP)
   if (nunits > malloc_mmap_threshold)
     {
+      int o;
+      o = errno;
       munmap (p, binsize (nunits));
 #if defined (MALLOC_STATS)
       _mstats.nlesscore[nunits]++;
 #endif
+      errno = o;		/* POSIX says free preserves errno */
       goto free_return;
     }
 #endif
@@ -1015,7 +1018,10 @@ internal_free (PTR_T mem, const char *file, int line, int flags)
 	 there's already a block on the free list. */
       if ((nunits >= LESSCORE_FRC) || busy[nunits] || nextf[nunits] != 0)
 	{
+	  int o;
+	  o = errno;
 	  lesscore (nunits);
+	  errno = o;
 	  /* keeps the tracing and registering code in one place */
 	  goto free_return;
 	}

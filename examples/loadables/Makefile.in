@@ -103,7 +103,7 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
 	  tty pathchk tee head mkdir rmdir mkfifo mktemp printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid setpgid seq rm \
-	  accept csv dsv cut stat getconf kv
+	  accept csv dsv cut stat getconf kv strptime
 OTHERPROG = necho hello cat pushd asort
 
 SUBDIRS = perl
@@ -235,6 +235,9 @@ cut:	cut.o
 strftime:	strftime.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ strftime.o $(SHOBJ_LIBS)
 
+strptime:	strptime.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ strptime.o $(SHOBJ_LIBS)
+
 mypid:	mypid.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ mypid.o $(SHOBJ_LIBS)
 
@@ -308,6 +311,14 @@ uninstall-unsupported:
 install:	install-$(SHOBJ_STATUS)
 uninstall:	uninstall-$(SHOBJ_STATUS)
 
+OBJS = print.o truefalse.o accept.o sleep.o finfo.o getconf.o logname.o \
+       basename.o dirname.o tty.o pathchk.o tee.o head.o rmdir.o necho.o \
+       hello.o cat.o csv.o dsv.o kv.o cut.o printenv.o id.o whoami.o uname.o \
+       sync.o push.o mkdir.o mktemp.o realpath.o strftime.o setpgid.o stat.o \
+       fdflags.o seq.o asort.o strptime.o        
+
+${OBJS}:	${BUILD_DIR}/config.h
+
 print.o: print.c
 truefalse.o: truefalse.c
 accept.o: accept.c
@@ -344,3 +355,4 @@ stat.o: stat.c
 fdflags.o: fdflags.c
 seq.o: seq.c
 asort.o: asort.c
+strptime.o: strptime.c

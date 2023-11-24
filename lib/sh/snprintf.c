@@ -173,9 +173,6 @@ extern char *fmtullong (unsigned long long int, int, char *, size_t, int);
 
 #define ASBUFSIZE	128
 
-#define x_digs	"0123456789abcdef"
-#define X_digs	"0123456789ABCDEF"
-
 static char intbuf[INT_STRLEN_BOUND(unsigned long) + 1];
 
 static int decpoint;

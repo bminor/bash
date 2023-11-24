@@ -6705,6 +6705,9 @@ trap.c
 	- _run_trap_internal,run_exit_trap: save and restore BASH_TRAPSIG;
 	  make sure it's set appropriately
 
+doc/bash.1,doc/bashref.texi
+	- BASH_TRAPSIG: document
+
 builtins/declare.def
 	- declare_internal: if declare is supplied -f and an argument that
 	  looks like an assignment statement, fail only if there is not a
@@ -7995,3 +7998,34 @@ builtins/enable.def
 	  slash in BASH_LOADABLES_PATH, convert it to a pathname with a slash
 	  before calling dlopen, to force the loader to look in the current
 	  directory (Linux, for example, will not).
+
+				   11/14
+				   -----
+examples/loadables/fdflags.c
+	- fdflags_builtin: only parse the setspec once, since parsing uses
+	  strtok.
+	  Report and patch from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   11/15
+				   -----
+builtins/enable.def
+	- dyn_load_builtin: if BASH_LOADABLES_PATH is set, use only it: don't
+	  fall back to looking in the current directory. This changes the
+	  historical behavior and brings the path behavior more in line with
+	  PATH, but not CDPATH.
+
+				   11/20
+				   -----
+lib/readline/complete.c
+	- rl_complete_internal: add `|' as a character for rl_complete_internal
+	  that also just displays the completions, since `%' is overloaded by
+	  rl_menu_complete
+
+				   11/23
+				   -----
+examples/loadables/strptime.c
+	- strptime: new loadable builtin, interface to strptime(3). Takes a
+	  date-time string as its arguments and tries to parse it according
+	  to a number of built-in formats. If successful, it outputs the
+	  result as a number of seconds since the epoch. Understands some
+	  handy shorthands like "now" and "tomorrow".

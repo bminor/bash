@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.057])dnl
+AC_REVISION([for Bash 5.3, version 5.059])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -884,6 +884,7 @@ AC_CHECK_DECLS([AUDIT_USER_TTY],,, [[#include <linux/audit.h>]])
 
 AC_CHECK_DECLS([confstr])
 AC_CHECK_DECLS([printf])
+AC_CHECK_DECLS([brk])
 AC_CHECK_DECLS([sbrk])
 AC_CHECK_DECLS([setregid])
 AC_CHECK_DECLS([strcpy])
@@ -898,7 +899,7 @@ AC_CHECK_DECLS([strtold], [
 	[AC_COMPILE_IFELSE(
 		[AC_LANG_PROGRAM(
 		[[#include <stdlib.h>]],
-		[[long double r; char *foo, bar; r = strtold(foo, &bar);]]
+		[[long double r; char *foo, *bar; r = strtold(foo, &bar);]]
 	)],
 	[bash_cv_strtold_broken=no],[bash_cv_strtold_broken=yes])
         ]
@@ -1072,6 +1073,7 @@ BASH_STAT_TIME
 
 dnl checks for system calls
 BASH_FUNC_SBRK
+BASH_FUNC_BRK
 
 dnl presence and behavior of C library functions
 BASH_FUNC_STRSIGNAL
