@@ -6857,7 +6857,7 @@ static SHELL_VAR lambdafunc = { ".bash.lambda", 0, 0, 0, 0, 0, 0 };
 WORD_DESC *
 function_substitute (char *string, int quoted, int flags)
 {
-  volatile int save_return_catch_flag, function_code;
+  volatile int function_code;
   int valsub, stdout_valid, saveout, old_frozen;
   int result, pflags, tflag, was_trap;
   char *istring, *s;
@@ -6867,6 +6867,8 @@ function_substitute (char *string, int quoted, int flags)
   int afd;
   char *afn;
   sigset_t set, oset;
+  sh_getopt_state_t *gs;
+  SHELL_VAR *gv;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -6896,6 +6898,8 @@ function_substitute (char *string, int quoted, int flags)
 	}
     }
 
+  gs = sh_getopt_save_istate ();
+
   begin_unwind_frame ("nofork comsub");
 
   /* Save command and expansion state we need. */
@@ -6912,6 +6916,7 @@ function_substitute (char *string, int quoted, int flags)
   unwind_protect_pointer (this_shell_function);
   unwind_protect_int (eof_encountered);
   add_unwind_protect (uw_pop_var_context, 0);
+  add_unwind_protect (uw_maybe_restore_getopt_state, gs);
 
 #if defined (ARRAY_VARS)
   ps = save_pipestatus_array ();
@@ -6990,11 +6995,9 @@ function_substitute (char *string, int quoted, int flags)
 
   /* if we are in a position to accept return, we have to save the old values */
   function_code = 0;
-  if (save_return_catch_flag = return_catch_flag)
-    {
-      unwind_protect_int (return_catch_flag);
-      unwind_protect_jmp_buf (return_catch);
-    }
+  unwind_protect_int (return_catch_flag);
+  if (return_catch_flag)
+    unwind_protect_jmp_buf (return_catch);
 
   was_trap = running_trap;
 
@@ -7025,6 +7028,11 @@ function_substitute (char *string, int quoted, int flags)
       s = get_string_value ("REPLY");
       istring = s ? comsub_quote_string (s, quoted, flags) : savestring ("");
     }
+
+  /* Check for local OPTIND and note for cleanup */
+  gv = find_variable ("OPTIND");
+  if (gv && gv->context == variable_context)
+    gs->gs_flags |= 1;
 
   run_unwind_frame ("nofork comsub");	/* restores stdout, job control stuff */
 

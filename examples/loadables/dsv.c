@@ -2,7 +2,7 @@
 	 array with the fields */
 
 /*
-   Copyright (C) 2022 Free Software Foundation, Inc.
+   Copyright (C) 2022,2023 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -203,7 +203,7 @@ dsv_builtin (WORD_LIST *list)
   if (array_name == 0)
     array_name = DSV_ARRAY_DEFAULT;
 
-  if (legal_identifier (array_name) == 0)
+  if (valid_identifier (array_name) == 0)
     {
       sh_invalidid (array_name);
       return (EXECUTION_FAILURE);

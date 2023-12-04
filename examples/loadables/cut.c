@@ -477,7 +477,7 @@ cut_internal (int which, WORD_LIST *list)
     }
   list = loptend;
 
-  if (array_name && (legal_identifier (array_name) == 0))
+  if (array_name && (valid_identifier (array_name) == 0))
     {
       sh_invalidid (array_name);
       return (EXECUTION_FAILURE);

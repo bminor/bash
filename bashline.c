@@ -4484,7 +4484,7 @@ bash_execute_unix_command (int count, int key)
   kslen = rl_key_sequence_length;
 
   /* If we have a numeric argument, chop it off the front of the key sequence */
-  if (count > 1 || rl_explicit_arg)
+  if (count != 1 || rl_explicit_arg)
     {
       i = rl_trim_arg_from_keyseq (rl_executing_keyseq, rl_key_sequence_length, rl_get_keymap ());
       if (i > 0)
@@ -4536,7 +4536,7 @@ bash_execute_unix_command (int count, int key)
   if (v)
     VSETATTR (v, att_exported);
 
-  if (count > 1 || rl_explicit_arg)
+  if (count != 1 || rl_explicit_arg)
     {
       value = inttostr (count, ibuf, sizeof (ibuf));
       v = bind_int_variable ("READLINE_ARGUMENT", value, 0);

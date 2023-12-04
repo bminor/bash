@@ -5035,7 +5035,7 @@ execute_builtin (sh_builtin_func_t *builtin, WORD_LIST *words, int flags, int su
   return (result);
 }
 
-static void
+void
 uw_maybe_restore_getopt_state (void *arg)
 {
   sh_getopt_state_t *gs;

@@ -98,9 +98,21 @@ static const struct
 #  define O_NOSIGPIPE 0
 #endif
 
+#ifndef O_NDELAY
+/* Solaris has this */
+#  define O_NDELAY 0
+#endif
+
+#ifndef O_LARGEFILE
+/* HP-UX has this */
+#  define O_LARGEFILE 0
+#endif
+
 #ifndef O_CLOEXEC
+#  define IGNOREFLAGS (O_RDONLY|O_WRONLY|O_RDWR)
 #  define ALLFLAGS (O_APPEND|O_ASYNC|O_SYNC|O_NONBLOCK|O_FSYNC|O_DSYNC|\
-	O_RSYNC|O_ALT_IO|O_DIRECT|O_NOATIME|O_NOSIGPIPE)
+	O_RSYNC|O_ALT_IO|O_DIRECT|O_NOATIME|O_NOSIGPIPE|O_NDELAY|O_LARGEFILE|\
+	IGNOREFLAGS)
 
 /* An unused bit in the file status flags word we can use to pass around the
    state of close-on-exec. */

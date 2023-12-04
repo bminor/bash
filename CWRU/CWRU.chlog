@@ -8029,3 +8029,57 @@ examples/loadables/strptime.c
 	  to a number of built-in formats. If successful, it outputs the
 	  result as a number of seconds since the epoch. Understands some
 	  handy shorthands like "now" and "tomorrow".
+
+				   11/24
+				   -----
+tests/unicode1.sub
+	- update the driver function using namerefs and ${!x[@]}
+	- zh_TW.BIG5: fixed some problems with the test encodings.
+	  Report and patches from Grisha Levit <grishalevit@gmail.com>
+
+				   11/25
+				   -----
+tests/glob2.sub
+	- zh_HK.big5hkscs -> zh_TW.big5 to work around macOS 14 issues with
+	  BSD-based locale definition
+
+bashline.c
+	- bash_execute_unix_command: check count != 1 instead of count > 1 to
+	  handle negative arguments
+
+lib/readline/bind.c
+	- rl_trim_arg_from_keyseq: change the parsing_digits logic to handle
+	  multiple instances of `-' the same way rl_digit_loop does (collapse
+	  to 1)
+	- rl_trim_arg_from_keyseq: fix typo to correctly recognize a `-'
+	  after a key sequence bound to universal-argument
+	- rl_trim_arg_from_keyseq: trim negative argument for a key sequence
+	  that is shadowed by a longer key sequence (ANYOTHERKEY)
+	  Report and patches from Grisha Levit <grishalevit@gmail.com>
+
+				   11/27
+				   -----
+support/shobj-conf
+	- solaris2: change PIC option for non-gcc Solaris 2 builds
+
+lib/malloc/malloc.c
+	- binsize: make sure indexing into binsizes casts to size_t (unsigned)
+
+examples/loadables/getconf.c
+	- protect more of the _SC defines with #ifdefs for different systems
+
+examples/loadables/fdflags.c
+	- ALLFLAGS: add some more flag values from Solaris/AIX/HP-UX
+
+				   11/28
+				   -----
+subst.c
+	- function_substitute: unwind return_catch_flag unconditionally
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+	- function_substitute: save getopts state and restore it if the
+	  funsub declares a local copy of OPTIND
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/display.c
+	- rl_redisplay: make sure lpos is initialized to 0 if local_prompt is
+	  NULL

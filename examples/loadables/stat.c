@@ -371,7 +371,7 @@ stat_builtin (WORD_LIST *list)
 	}
     }
 
-  if (legal_identifier (aname) == 0)
+  if (valid_identifier (aname) == 0)
     {
       sh_invalidid (aname);
       return (EXECUTION_FAILURE);

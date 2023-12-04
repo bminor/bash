@@ -75,7 +75,7 @@ mktemp_builtin (WORD_LIST *list)
 
   if (varname)			/* check for validity, not readonly */
     {
-      if (legal_identifier (varname) == 0)
+      if (valid_identifier (varname) == 0)
 	{
 	  if (qflag == 0)
 	    sh_invalidid (varname);

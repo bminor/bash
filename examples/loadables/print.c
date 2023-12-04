@@ -109,7 +109,7 @@ print_builtin (WORD_LIST *list)
 	case 'p':
 	  break;	/* NOP */
 	case 'u':
-	  if (all_digits (list_optarg) && legal_number (list_optarg, &lfd) && lfd == (int)lfd)
+	  if (all_digits (list_optarg) && valid_number (list_optarg, &lfd) && lfd == (int)lfd)
 	    ofd = lfd;
 	  else
 	    {

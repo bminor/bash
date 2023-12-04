@@ -22,7 +22,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009,2021,2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2021,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -122,7 +122,7 @@ realpath_builtin(WORD_LIST *list)
 	}
 
 #if defined (ARRAY_VARS)
-	if (aflag && legal_identifier (aname) == 0) {
+	if (aflag && valid_identifier (aname) == 0) {
 		sh_invalidid(aname);
 		return (EXECUTION_FAILURE);
 	}

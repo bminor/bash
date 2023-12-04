@@ -121,6 +121,7 @@ extern void restore_funcarray_state (struct func_array_state *);
 extern void uw_restore_funcarray_state (void *);
 #endif
 
+extern void uw_maybe_restore_getopt_state (void *);
 extern void uw_lastpipe_cleanup (void *);
 
 extern void bind_lastarg (char *);

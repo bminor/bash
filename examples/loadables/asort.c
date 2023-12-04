@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2020,2022 Free Software Foundation, Inc.
+   Copyright (C) 2020,2022,2023 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -210,7 +210,7 @@ asort_builtin(WORD_LIST *list)
         return EX_USAGE;
     }
 
-    if (legal_identifier (list->word->word) == 0) {
+    if (valid_identifier (list->word->word) == 0) {
         sh_invalidid (list->word->word);
         return EXECUTION_FAILURE;
     }
@@ -220,7 +220,7 @@ asort_builtin(WORD_LIST *list)
             builtin_usage();
             return EX_USAGE;
         }
-        if (legal_identifier (list->next->word->word) == 0) {
+        if (valid_identifier (list->next->word->word) == 0) {
             sh_invalidid (list->next->word->word);
             return EXECUTION_FAILURE;
         }

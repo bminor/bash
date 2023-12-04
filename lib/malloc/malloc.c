@@ -299,7 +299,7 @@ static const unsigned long binsizes[NBUCKETS] = {
 };
 
 /* binsizes[x] == (1 << ((x) + 5)) */
-#define binsize(x)	binsizes[(x)]
+#define binsize(x)	binsizes[(size_t) (x)]
 
 #define MAXALLOC_SIZE	binsizes[NBUCKETS-1]
 
