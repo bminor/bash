@@ -46,6 +46,7 @@ typedef struct var_context {
 #define VC_FUNCENV	0x04	/* also function if name != NULL */
 #define VC_BLTNENV	0x08	/* builtin_env */
 #define VC_TEMPENV	0x10	/* temporary_env */
+#define VC_SPECTEMPENV	0x20	/* temporary environment preceding a posix special builtin */
 
 #define VC_TEMPFLAGS	(VC_FUNCENV|VC_BLTNENV|VC_TEMPENV)
 
@@ -324,6 +325,7 @@ extern SHELL_VAR *bind_var_to_int (const char *, intmax_t, int);
 
 extern int assign_in_env (const WORD_DESC *, int);
 
+extern int posix_unbind_tempvar (const char *);
 extern int unbind_variable (const char *);
 extern int check_unbind_variable (const char *);
 extern int unbind_nameref (const char *);

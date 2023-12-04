@@ -8083,3 +8083,29 @@ subst.c
 lib/readline/display.c
 	- rl_redisplay: make sure lpos is initialized to 0 if local_prompt is
 	  NULL
+
+shell.c
+	- run_startup_files: make sure ssh_reading_startup_files is set to 0
+	  in more places; still dependent on SSH_SOURCE_BASHRC
+
+builtins/evalstring.c
+	- should_suppress_fork: make sure ssh_reading_startup_files is 0 in
+	  order to suppress a fork. It will never be non-zero unless someone
+	  enables SSH_SOURCE_BASHRC.
+	  Fixes https://issues.redhat.com/browse/RHEL-5653
+
+variables.c
+	- posix_unbind_tempvar: new function to implement POSIX interp 1009,
+	  which says that `x=4 unset x' not only unsets the variable in the
+	  temporary environment but the most recent scope as well.
+
+variables.h
+	- posix_unbind_tempvar: extern declaration
+
+builtins/set.def
+	- unset_builtin: if we are unsetting a variable that is in some
+	  temporary environment, and the shell is in posix mode, call
+	  posix_unbind_tempvar to implement the right posix behavior
+
+doc/bashref.texi
+	- update posix mode section with change to unset for interp 1009

@@ -118,6 +118,8 @@ should_optimize_fork (COMMAND *command, int subshell)
 /* This has extra tests to account for STARTUP_STATE == 2, which is for
    -c command but has been extended to command and process substitution
    (basically any time you call parse_and_execute in a subshell). */
+/* ssh_reading_startup_files will never be non-zero unless someone goes
+   and uncomments SSH_SOURCE_BASHRC in config-top.h */
 int
 should_suppress_fork (COMMAND *command)
 {
@@ -128,6 +130,7 @@ should_suppress_fork (COMMAND *command)
 	  *bash_input.location.string == '\0' &&
 	  parser_expanding_alias () == 0 &&
 	  job_control_active_p () == 0 &&
+	  ssh_reading_startup_files == 0 &&
 	  should_optimize_fork (command, subshell));
 }
 

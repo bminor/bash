@@ -3730,6 +3730,47 @@ dispose_variable (SHELL_VAR *var)
   free (var);
 }
 
+/* placeholder function to work out the right semantics */
+
+/* POSIX interp 1009 says to unset the tempvar variable and unset it at
+   the previous scope (or the current scope if the variable is a local
+   var at the current scope). So we destroy the temp var, then call
+   unbind_variable again with that variable out of the way. We assume this
+   is called from unset_builtin with the shell in posix mode. */
+int
+posix_unbind_tempvar (const char *name)
+{
+  SHELL_VAR *v;
+  int r;
+
+  /* We need a way to differentiate between variable assignments preceding
+     a function and variable assignments preceding a special builtin.
+     We test the head of the variables chain: shell_variables->flags. If it
+     contains VC_FUNCENV, this is a temp environment preceding a function
+     call; if it contains VC_BLTNENV, it's a temp environment preceding a
+     shell builtin of interest (including unset). So we see if NAME is a
+     shell variable in a temp environment preceding a special builtin. If
+     not, we just unset the variable as normal. */
+  v = vc_isbltnenv (shell_variables) ? hash_lookup (name, shell_variables->table) : 0;
+  if (v == 0 || tempvar_p (v) == 0)
+    return (unbind_variable (name));
+
+  /* We know NAME is a temporary variable in a temporary environment
+     preceding a special builtin of interest (unset). */
+  /* tempvar variables can't be namerefs, so don't worry about that. */
+  r = makunbound (name, shell_variables);
+
+  /* Now that we've removed the temporary variable, we have to implement
+     the POSIX semantics for assignments preceding a special builtin:
+     "if an assigned variable is further modified by the utility, the
+     modifications made by the utility shall persist." So we unset it at
+     the first previous context where we find it. */
+  unbind_variable (name);
+
+  /* Always return the status of unbinding the temporary environment entry. */
+  return r;
+}
+
 /* Unset the shell variable referenced by NAME.  Unsetting a nameref variable
    unsets the variable it resolves to but leaves the nameref alone. */
 int

@@ -305,6 +305,24 @@ f: 3
 global: declare -rx c="3"
 f1: 4
 global: declare -- b="8"
+f1: x = local
+f2: x = local
+after f2: x = global
+default after f1: x = global
+f1: x = local
+f2: x = local
+after f2: x = unset
+localvar_unset after f1: x = global
+f1: x = temp
+after f1: x = global
+1009: after bash unset: x = global
+1009: after posix unset: x = unset
+f1: x = local
+after unset f1: x = local
+1009: after bash f1: x = global
+f1: x = local
+after unset f1: x = unset
+1009: after posix f1: x = global
 a=z
 a=b
 a=z

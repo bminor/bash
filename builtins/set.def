@@ -1016,9 +1016,13 @@ unset_builtin (WORD_LIST *list)
 #endif
 		tem = unbind_variable (nameref_cell (var));
 	    }
+	  else if (posixly_correct && var && tempvar_p (var))
+	    tem = posix_unbind_tempvar (name);
 	  else
 	    tem = unbind_variable (name);
 	}
+      else if (posixly_correct && unset_function == 0 && nameref == 0 && var && tempvar_p (var))
+	tem = posix_unbind_tempvar (name);
       else
 	tem = unset_function ? unbind_func (name) : (nameref ? unbind_nameref (name) : unbind_variable (name));
 

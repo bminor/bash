@@ -7401,12 +7401,19 @@ startup files.
      variable, or encounters a variable name argument that is an invalid
      identifier, which causes a non-interactive shell to exit.
 
-  27. A non-interactive shell exits with an error status if a variable
+  27. When asked to unset a variable that appears in an assignment
+     statement preceding the command, the 'unset' builtin attempts to
+     unset a variable of the same name in the current or previous scope
+     as well.  This implements the required "if an assigned variable is
+     further modified by the utility, the modifications made by the
+     utility shall persist" behavior.
+
+  28. A non-interactive shell exits with an error status if a variable
      assignment error occurs when no command name follows the assignment
      statements.  A variable assignment error occurs, for example, when
      trying to assign a value to a readonly variable.
 
-  28. A non-interactive shell exits with an error status if a variable
+  29. A non-interactive shell exits with an error status if a variable
      assignment error occurs in an assignment statement preceding a
      special builtin, but not with any other simple command.  For any
      other simple command, the shell aborts execution of that command,
@@ -7414,160 +7421,160 @@ startup files.
      perform any further processing of the command in which the error
      occurred").
 
-  29. A non-interactive shell exits with an error status if the
+  30. A non-interactive shell exits with an error status if the
      iteration variable in a 'for' statement or the selection variable
      in a 'select' statement is a readonly variable or has an invalid
      name.
 
-  30. Non-interactive shells exit if FILENAME in '.'  FILENAME is not
+  31. Non-interactive shells exit if FILENAME in '.'  FILENAME is not
      found.
 
-  31. Non-interactive shells exit if a syntax error in an arithmetic
+  32. Non-interactive shells exit if a syntax error in an arithmetic
      expansion results in an invalid expression.
 
-  32. Non-interactive shells exit if a parameter expansion error occurs.
+  33. Non-interactive shells exit if a parameter expansion error occurs.
 
-  33. Non-interactive shells exit if there is a syntax error in a script
+  34. Non-interactive shells exit if there is a syntax error in a script
      read with the '.' or 'source' builtins, or in a string processed by
      the 'eval' builtin.
 
-  34. While variable indirection is available, it may not be applied to
+  35. While variable indirection is available, it may not be applied to
      the '#' and '?' special parameters.
 
-  35. Expanding the '*' special parameter in a pattern context where the
+  36. Expanding the '*' special parameter in a pattern context where the
      expansion is double-quoted does not treat the '$*' as if it were
      double-quoted.
 
-  36. Assignment statements preceding POSIX special builtins persist in
+  37. Assignment statements preceding POSIX special builtins persist in
      the shell environment after the builtin completes.
 
-  37. The 'command' builtin does not prevent builtins that take
+  38. The 'command' builtin does not prevent builtins that take
      assignment statements as arguments from expanding them as
      assignment statements; when not in POSIX mode, assignment builtins
      lose their assignment statement expansion properties when preceded
      by 'command'.
 
-  38. The 'bg' builtin uses the required format to describe each job
+  39. The 'bg' builtin uses the required format to describe each job
      placed in the background, which does not include an indication of
      whether the job is the current or previous job.
 
-  39. The output of 'kill -l' prints all the signal names on a single
+  40. The output of 'kill -l' prints all the signal names on a single
      line, separated by spaces, without the 'SIG' prefix.
 
-  40. The 'kill' builtin does not accept signal names with a 'SIG'
+  41. The 'kill' builtin does not accept signal names with a 'SIG'
      prefix.
 
-  41. The 'export' and 'readonly' builtin commands display their output
+  42. The 'export' and 'readonly' builtin commands display their output
      in the format required by POSIX.
 
-  42. The 'trap' builtin displays signal names without the leading
+  43. The 'trap' builtin displays signal names without the leading
      'SIG'.
 
-  43. The 'trap' builtin doesn't check the first argument for a possible
+  44. The 'trap' builtin doesn't check the first argument for a possible
      signal specification and revert the signal handling to the original
      disposition if it is, unless that argument consists solely of
      digits and is a valid signal number.  If users want to reset the
      handler for a given signal to the original disposition, they should
      use '-' as the first argument.
 
-  44. 'trap -p' without arguments displays signals whose dispositions
+  45. 'trap -p' without arguments displays signals whose dispositions
      are set to SIG_DFL and those that were ignored when the shell
      started, not just trapped signals.
 
-  45. The '.' and 'source' builtins do not search the current directory
+  46. The '.' and 'source' builtins do not search the current directory
      for the filename argument if it is not found by searching 'PATH'.
 
-  46. Enabling POSIX mode has the effect of setting the
+  47. Enabling POSIX mode has the effect of setting the
      'inherit_errexit' option, so subshells spawned to execute command
      substitutions inherit the value of the '-e' option from the parent
      shell.  When the 'inherit_errexit' option is not enabled, Bash
      clears the '-e' option in such subshells.
 
-  47. Enabling POSIX mode has the effect of setting the 'shift_verbose'
+  48. Enabling POSIX mode has the effect of setting the 'shift_verbose'
      option, so numeric arguments to 'shift' that exceed the number of
      positional parameters will result in an error message.
 
-  48. When the 'alias' builtin displays alias definitions, it does not
+  49. When the 'alias' builtin displays alias definitions, it does not
      display them with a leading 'alias ' unless the '-p' option is
      supplied.
 
-  49. When the 'set' builtin is invoked without options, it does not
+  50. When the 'set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  50. When the 'set' builtin is invoked without options, it displays
+  51. When the 'set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  51. When the 'cd' builtin is invoked in logical mode, and the pathname
+  52. When the 'cd' builtin is invoked in logical mode, and the pathname
      constructed from '$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, 'cd' will fail
      instead of falling back to physical mode.
 
-  52. When the 'cd' builtin cannot change a directory because the length
+  53. When the 'cd' builtin cannot change a directory because the length
      of the pathname constructed from '$PWD' and the directory name
      supplied as an argument exceeds 'PATH_MAX' when all symbolic links
      are expanded, 'cd' will fail instead of attempting to use only the
      supplied directory name.
 
-  53. The 'pwd' builtin verifies that the value it prints is the same as
+  54. The 'pwd' builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the '-P' option.
 
-  54. When listing the history, the 'fc' builtin does not include an
+  55. When listing the history, the 'fc' builtin does not include an
      indication of whether or not a history entry has been modified.
 
-  55. The default editor used by 'fc' is 'ed'.
+  56. The default editor used by 'fc' is 'ed'.
 
-  56. If there are too many arguments supplied to 'fc -s', 'fc' prints
+  57. If there are too many arguments supplied to 'fc -s', 'fc' prints
      an error message and returns failure.
 
-  57. The 'type' and 'command' builtins will not report a non-executable
+  58. The 'type' and 'command' builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in '$PATH'.
 
-  58. The 'vi' editing mode will invoke the 'vi' editor directly when
+  59. The 'vi' editing mode will invoke the 'vi' editor directly when
      the 'v' command is run, instead of checking '$VISUAL' and
      '$EDITOR'.
 
-  59. When the 'xpg_echo' option is enabled, Bash does not attempt to
+  60. When the 'xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to 'echo' as options.  Each argument is
      displayed, after escape characters are converted.
 
-  60. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
+  61. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
      and '-f' options.
 
-  61. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
+  62. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
      interrupt the 'wait' builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  62. The 'read' builtin may be interrupted by a signal for which a trap
+  63. The 'read' builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      'read', the trap handler executes and 'read' returns an exit status
      greater than 128.
 
-  63. The 'printf' builtin uses 'double' (via 'strtod') to convert
+  64. The 'printf' builtin uses 'double' (via 'strtod') to convert
      arguments corresponding to floating point conversion specifiers,
      instead of 'long double' if it's available.  The 'L' length
      modifier forces 'printf' to use 'long double' if it's available.
 
-  64. Bash removes an exited background process's status from the list
+  65. Bash removes an exited background process's status from the list
      of such statuses after the 'wait' builtin is used to obtain it.
 
-  65. A double quote character ('"') is treated specially when it
+  66. A double quote character ('"') is treated specially when it
      appears in a backquoted command substitution in the body of a
      here-document that undergoes expansion.  That means, for example,
      that a backslash preceding a double quote character will escape it
      and the backslash will be removed.
 
-  66. The 'test' builtin compares strings using the current locale when
+  67. The 'test' builtin compares strings using the current locale when
      processing the '<' and '>' binary operators.
 
-  67. The 'test' builtin's '-t' unary primary requires an argument.
+  68. The 'test' builtin's '-t' unary primary requires an argument.
      Historical versions of 'test' made the argument optional in certain
      cases, and Bash attempts to accommodate those for backwards
      compatibility.
 
-  68. Command substitutions don't set the '?' special parameter.  The
+  69. Command substitutions don't set the '?' special parameter.  The
      exit status of a simple command without a command word is still the
      exit status of the last command substitution that occurred while
      evaluating the variable assignments and redirections in that
@@ -12968,61 +12975,61 @@ Node: Directory Stack Builtins300543
 Node: Controlling the Prompt304800
 Node: The Restricted Shell307762
 Node: Bash POSIX Mode310369
-Node: Shell Compatibility Mode326623
-Node: Job Control334868
-Node: Job Control Basics335325
-Node: Job Control Builtins340324
-Node: Job Control Variables346116
-Node: Command Line Editing347269
-Node: Introduction and Notation348937
-Node: Readline Interaction350557
-Node: Readline Bare Essentials351745
-Node: Readline Movement Commands353531
-Node: Readline Killing Commands354488
-Node: Readline Arguments356406
-Node: Searching357447
-Node: Readline Init File359630
-Node: Readline Init File Syntax360888
-Node: Conditional Init Constructs384910
-Node: Sample Init File389103
-Node: Bindable Readline Commands392224
-Node: Commands For Moving393425
-Node: Commands For History395473
-Node: Commands For Text400464
-Node: Commands For Killing404439
-Node: Numeric Arguments407140
-Node: Commands For Completion408276
-Node: Keyboard Macros412464
-Node: Miscellaneous Commands413149
-Node: Readline vi Mode419515
-Node: Programmable Completion420419
-Node: Programmable Completion Builtins428196
-Node: A Programmable Completion Example439313
-Node: Using History Interactively444558
-Node: Bash History Facilities445239
-Node: Bash History Builtins448247
-Node: History Interaction453335
-Node: Event Designators457145
-Node: Word Designators458680
-Node: Modifiers460542
-Node: Installing Bash462347
-Node: Basic Installation463481
-Node: Compilers and Options467200
-Node: Compiling For Multiple Architectures467938
-Node: Installation Names469627
-Node: Specifying the System Type471733
-Node: Sharing Defaults472447
-Node: Operation Controls473117
-Node: Optional Features474072
-Node: Reporting Bugs485289
-Node: Major Differences From The Bourne Shell486620
-Node: GNU Free Documentation License503475
-Node: Indexes528649
-Node: Builtin Index529100
-Node: Reserved Word Index536198
-Node: Variable Index538643
-Node: Function Index555774
-Node: Concept Index569630
+Node: Shell Compatibility Mode327011
+Node: Job Control335256
+Node: Job Control Basics335713
+Node: Job Control Builtins340712
+Node: Job Control Variables346504
+Node: Command Line Editing347657
+Node: Introduction and Notation349325
+Node: Readline Interaction350945
+Node: Readline Bare Essentials352133
+Node: Readline Movement Commands353919
+Node: Readline Killing Commands354876
+Node: Readline Arguments356794
+Node: Searching357835
+Node: Readline Init File360018
+Node: Readline Init File Syntax361276
+Node: Conditional Init Constructs385298
+Node: Sample Init File389491
+Node: Bindable Readline Commands392612
+Node: Commands For Moving393813
+Node: Commands For History395861
+Node: Commands For Text400852
+Node: Commands For Killing404827
+Node: Numeric Arguments407528
+Node: Commands For Completion408664
+Node: Keyboard Macros412852
+Node: Miscellaneous Commands413537
+Node: Readline vi Mode419903
+Node: Programmable Completion420807
+Node: Programmable Completion Builtins428584
+Node: A Programmable Completion Example439701
+Node: Using History Interactively444946
+Node: Bash History Facilities445627
+Node: Bash History Builtins448635
+Node: History Interaction453723
+Node: Event Designators457533
+Node: Word Designators459068
+Node: Modifiers460930
+Node: Installing Bash462735
+Node: Basic Installation463869
+Node: Compilers and Options467588
+Node: Compiling For Multiple Architectures468326
+Node: Installation Names470015
+Node: Specifying the System Type472121
+Node: Sharing Defaults472835
+Node: Operation Controls473505
+Node: Optional Features474460
+Node: Reporting Bugs485677
+Node: Major Differences From The Bourne Shell487008
+Node: GNU Free Documentation License503863
+Node: Indexes529037
+Node: Builtin Index529488
+Node: Reserved Word Index536586
+Node: Variable Index539031
+Node: Function Index556162
+Node: Concept Index570018
 
 End Tag Table
 

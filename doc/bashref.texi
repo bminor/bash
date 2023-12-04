@@ -8592,6 +8592,13 @@ variable, or encounters a variable name argument that is an invalid identifier,
 which causes a non-interactive shell to exit.
 
 @item
+When asked to unset a variable that appears in an assignment statement
+preceding the command, the @code{unset} builtin attempts to unset a variable
+of the same name in the current or previous scope as well.
+This implements the required "if an assigned variable is further modified
+by the utility, the modifications made by the utility shall persist" behavior.
+
+@item
 A non-interactive shell exits with an error status if a variable
 assignment error occurs when no command name follows the assignment
 statements.

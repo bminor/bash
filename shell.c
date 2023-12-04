@@ -695,6 +695,7 @@ main (int argc, char **argv, char **env)
     arg_index = bind_args (argv, arg_index, argc, 1);	/* $1 ... $n */
 
   /* The startup files are run with `set -e' temporarily disabled. */
+  ssh_reading_startup_files = 0;		/* paranoia */
   if (locally_skip_execution == 0 && running_setuid == 0)
     {
       char *t;
@@ -1113,7 +1114,7 @@ run_startup_files (void)
 #if 1	/* TAG:bash-5.3 andrew.gregory.8@gmail.com 2/21/2022 */
   /* get the rshd/sshd case out of the way first. */
   if (interactive_shell == 0 && no_rc == 0 && login_shell == 0 &&
-      act_like_sh == 0 && command_execution_string)
+      act_like_sh == 0 && command_execution_string && shell_level < 2)
     {
 #ifdef SSH_SOURCE_BASHRC
       run_by_ssh = (find_variable ("SSH_CLIENT") != (SHELL_VAR *)0) ||
@@ -1123,6 +1124,7 @@ run_startup_files (void)
 #endif
 #endif
 
+      ssh_reading_startup_files = 0;
       /* If we were run by sshd or we think we were run by rshd, execute
 	 ~/.bashrc if we are a top-level shell. */
 #if 1	/* TAG:bash-5.3 */
