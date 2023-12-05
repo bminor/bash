@@ -295,6 +295,9 @@ int parser_state;
 static REDIRECT *redir_stack[HEREDOC_MAX];
 int need_here_doc;
 
+/* Are we reading a here-document from a string? (alias) */
+int heredoc_string;
+
 /* Where shell input comes from.  History expansion is performed on each
    line when the shell is interactive. */
 static char *shell_input_line = (char *)NULL;
@@ -2143,7 +2146,8 @@ read_a_line (int remove_quoted_newline)
       /* Allow immediate exit if interrupted during input. */
       QUIT;
 
-      c = yy_getc ();
+      /* If we're reading the here-document from an alias, use shell_getc */
+      c = heredoc_string ? shell_getc (0) : yy_getc ();
 
       /* Ignore null bytes in input. */
       if (c == 0)
@@ -2155,7 +2159,13 @@ read_a_line (int remove_quoted_newline)
 	  if (interactive && bash_input.type == st_stream)
 	    clearerr (stdin);
 	  if (indx == 0)
-	    return ((char *)NULL);
+	    {
+	      /* if we use shell_getc, that increments line_number on eof */
+	      if (heredoc_string)
+		line_number--;
+
+	      return ((char *)NULL);
+	    }
 	  c = '\n';
 	}
 
@@ -2177,10 +2187,12 @@ read_a_line (int remove_quoted_newline)
       else if (c == '\\' && remove_quoted_newline)
 	{
 	  QUIT;
-	  peekc = yy_getc ();
+	  /* If we're reading the here-document from an alias, use shell_getc */
+	  peekc = heredoc_string ? shell_getc (0) : yy_getc ();
 	  if (peekc == '\n')
 	    {
-	      line_number++;
+	      if (heredoc_string == 0)
+		line_number++;
 	      continue;	/* Make the unquoted \<newline> pair disappear. */
 	    }
 	  else if (peekc == EOF)
@@ -2200,7 +2212,11 @@ read_a_line (int remove_quoted_newline)
 	    }
 	  else
 	    {
-	      yy_ungetc (peekc);
+	      if (heredoc_string)
+		shell_ungetc (peekc);
+	      else
+		yy_ungetc (peekc);
+
 	      pass_next = 1;
 	      line_buffer[indx++] = c;		/* Preserve the backslash. */
 	    }
@@ -2691,12 +2707,13 @@ next_alias_char:
      return the space that will delimit the token and postpone the pop_string.
      This set of conditions duplicates what used to be in mk_alexpansion ()
      below, with the addition that we don't add a space if we're currently
-     reading a quoted string or in a shell comment. */
+     reading a quoted string or in a shell comment or here-document. */
 #ifndef OLD_ALIAS_HACK
   if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE &&
       pushed_string_list->flags != PSH_DPAREN &&
       (parser_state & PST_COMMENT) == 0 &&
       (parser_state & PST_ENDALIAS) == 0 &&	/* only once */
+      heredoc_string == 0 &&
       shell_input_line_index > 0 &&
       shellblank (shell_input_line[shell_input_line_index-1]) == 0 &&
       shell_input_line[shell_input_line_index-1] != '\n' &&
@@ -3027,6 +3044,7 @@ gather_here_documents (void)
   while (need_here_doc > 0)
     {
       parser_state |= PST_HEREDOC;
+      heredoc_string = expanding_alias () && (shell_input_line_index < shell_input_line_len);
       make_here_document (redir_stack[r++], line_number);
       parser_state &= ~PST_HEREDOC;
       need_here_doc--;

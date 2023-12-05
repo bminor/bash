@@ -103,6 +103,7 @@ extern int shell_eof_token;
 extern int current_token;
 extern int parser_state;
 extern int need_here_doc;
+extern int heredoc_string;
 
 extern int ignoreeof;
 extern int eof_encountered;

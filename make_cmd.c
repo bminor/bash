@@ -573,7 +573,11 @@ make_here_document (REDIRECT *temp, int lineno)
 
       here_doc_first_line = 0;
       line = full_line;
-      line_number++;
+
+      /* if read_secondary_line uses shell_getc, that handles incrementing
+	 line_number where necessary. */
+      if (heredoc_string == 0)
+	line_number++;
 
       /* If set -v is in effect, echo the line read.  read_secondary_line/
 	 read_a_line leaves the newline at the end, so don't print another. */

@@ -8109,3 +8109,35 @@ builtins/set.def
 
 doc/bashref.texi
 	- update posix mode section with change to unset for interp 1009
+
+				   12/1
+				   ----
+lib/readline/readline.c
+	- _rl_subseq_result: add check before _rl_do_lowercase_version that
+	  _rl_to_lower actually results in a different key sequence
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if the function bound to a key and the function
+	  bound to the result of _rl_to_lower for that key are both
+	  rl_do_lowercase_version, just insert the key into the search string
+
+				   12/5
+				   ----
+parse.y,parser.h
+	- heredoc_string: new variable to indicate whether or not we're reading
+	  a here-document from an alias (a pushed string). Set in
+	  gather_here_documents individually for each call to
+	  make_here_document.
+
+parse.y
+	- read_a_line: if heredoc_string is non-zero, use shell_getc instead
+	  of yy_getc to get the right alias processing
+	- shell_getc: if heredoc_string is non-zero, don't add a space to the
+	  end of the alias -- it can mess up the here-document delimiter if
+	  the next character is a newline
+	  Report and sample patch from gldrk <me@rarity.fan>
+
+parse.y,make_cmd.c
+	- read_a_line,make_here_document: if we're using shell_getc to read
+	  the body of a here-document, let it manage line_number
