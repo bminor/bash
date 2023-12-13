@@ -355,7 +355,9 @@ make_command_string_internal (COMMAND *command)
 	  break;
 
 	case cm_coproc:
-	  cprintf ("coproc %s ", command->value.Coproc->name);
+	  cprintf ("coproc ");
+	  if (command->value.Coproc->command->type != cm_simple)
+	    cprintf ("%s ", command->value.Coproc->name);
 	  skip_this_indent++;
 	  make_command_string_internal (command->value.Coproc->command);
 	  break;

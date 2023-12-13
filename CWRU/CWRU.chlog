@@ -8141,3 +8141,34 @@ parse.y
 parse.y,make_cmd.c
 	- read_a_line,make_here_document: if we're using shell_getc to read
 	  the body of a here-document, let it manage line_number
+
+				   12/8
+				   ----
+bashline.c
+	- bash_dequote_filename: fix an off-by-one error that didn't remove a
+	  closing single quote in a filename if it was backslash-escaped.
+	  Report by Ole Tange <ota@prosa.dk>, fix from Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/terminal.c
+	- _rl_check_ansi_terminal: check whether or not rl_terminal_name
+	  appears to be an ANSI/ECMA-48 terminal. Check some common terminal
+	  types and then check whether some common terminal capabilities
+	  (ce, nd, ho, up) begin with CSI (ESC-[) and then have a correct
+	  subsequent character
+	- _rl_term_isansi: new variable, holds readline's idea about whether
+	  the value of rl_terminal_name is an ANSI/ECMA-48 terminal. Initialized
+	  to RL_ANSI_TERM_DEFAULT; set to the result of _rl_check_ansi_terminal
+	  if initialized to 0 and on a `non-dumb' terminal
+	  From an idea by John Tsiombikas <nuclear@mutantstargoat.com> in 11/2023
+
+lib/readline/rlconf.h
+	- RL_ANSI_TERM_DEFAULT: define to 1 (yes) or 0 (no) to tell readline
+	  whether or not to assume it's running on an ANSI/ECMA-48 terminal.
+	  The default is 1 (yes)
+
+				   12/11
+				   -----
+print_cmd.c
+	- make_command_string_internal: when printing a coproc, print the
+	  coproc name only if the coproc command is not a simple command.
+	  Report from Albert Akchurin <ackbeat@gmail.com>

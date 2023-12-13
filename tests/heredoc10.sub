@@ -16,30 +16,40 @@
 shopt -s expand_aliases
 
 # single alias definition contains entire here-document
-alias 'foo=cat <<EOF
+alias 'heredoc=cat <<EOF
 hello
 world
 EOF'
-foo
+heredoc
 
 # here-document body continues after alias definition
-alias 'foo=cat <<EOF
+alias 'headplus=cat <<EOF
 hello'
-foo
+headplus
 world
 EOF
 
+unalias heredoc headplus
+
+alias head='cat <<END'
+
+head
+here-doc line 1
+here-doc line 2
+END
+
 # here-document delimiter in one alias, body in another
-shopt -s expand_aliases
-alias c='cat <<\END' d='c
+alias head='cat <<\END' body='head
 here-document
 END'
-d
+body
 
 # make sure delimiter is recognized whether the alias ends with a newline or not
 shopt -s expand_aliases
-alias c='cat <<\END' d='c
+alias head='cat <<\END' body='head
 here-document
 END
 '
-d
+body
+
+unalias head body

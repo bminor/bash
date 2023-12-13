@@ -134,6 +134,11 @@ EOF
  );
     echo "coprocs created"
 }
+mkcoprocs is a function
+mkcoprocs () 
+{ 
+    coproc cat -u - & read -u ${COPROC[0]} msg
+}
 cat is /bin/cat
 cat is aliased to `echo cat'
 /bin/cat

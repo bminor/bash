@@ -4077,15 +4077,13 @@ bash_dequote_filename (char *text, int quote_char)
   ret = (char *)xmalloc (l + 1);
   for (quoted = quote_char, p = text, r = ret; p && *p; p++)
     {
-      /* Allow backslash-escaped characters to pass through unscathed. */
-      if (*p == '\\')
+      /* Allow backslash-escaped characters to pass through unscathed. Backslashes
+	 aren't special in single quotes. */
+      if (quoted != '\'' && *p == '\\')
 	{
-	  /* Backslashes are preserved within single quotes. */
-	  if (quoted == '\'')
-	    *r++ = *p;
 	  /* Backslashes are preserved within double quotes unless the
 	     character is one that is defined to be escaped */
-	  else if (quoted == '"' && ((sh_syntaxtab[(unsigned char)p[1]] & CBSDQUOTE) == 0))
+	  if (quoted == '"' && ((sh_syntaxtab[(unsigned char)p[1]] & CBSDQUOTE) == 0))
 	    *r++ = *p;
 
 	  *r++ = *++p;
