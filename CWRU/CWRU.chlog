@@ -8172,3 +8172,34 @@ print_cmd.c
 	- make_command_string_internal: when printing a coproc, print the
 	  coproc name only if the coproc command is not a simple command.
 	  Report from Albert Akchurin <ackbeat@gmail.com>
+
+				   12/14
+				   -----
+doc/bash.1,doc/bashref.texi
+	- bind: clarify meaning of `re-read' as being individual arguments
+	  to `bind'.
+	  Report from Dan Jacobson <jidanni@jidanni.org>
+	- history expansion: add that the quick substitution character is
+	  only active when it's the first character on the line.
+	  Suggested by Dale R. Worley <worley@alum.mit.edu>
+
+lib/readline/histexpand.c
+	- history_expand: if history_quoting_state is "'", don't try to
+	  interpret the quick substitution syntax at the start of the string.
+	  Report from Sundeep Agarwal <learnbyexample.net@gmail.com>
+
+execute_cmd.c,execute_cmd.h
+	- save_lastarg: new function, returns saved value of $_ in allocated
+	  memory
+
+parse.y
+	- execute_variable_command: instead of inline code, call save_lastarg
+
+mailcheck.c
+	- check_mail: instead of inline code, call save_lastarg
+	- check_mail: instead of calling bind_variable, use bind_lastarg
+
+parse.y
+	- decode_prompt_string: use save_lastarg() and bind_lastarg() to preserve
+	  the value of $_ across prompt string decoding.
+	  Patch from Grisha Levit <grishalevit@gmail.com>

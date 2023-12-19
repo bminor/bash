@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Nov  6 10:19:40 EST 2023
+.\"	Last Change: Thu Dec 14 11:05:39 EST 2023
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2023 November 6" "GNU Bash 5.3"
+.TH BASH 1 "2023 December 14" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2771,7 +2771,8 @@ the character which signals the start of a history
 expansion, normally `\fB!\fP'.
 The second character is the \fIquick substitution\fP
 character, which is used as shorthand for re-running the previous
-command entered, substituting one string for another in the command.
+command entered, substituting one string for another in the command,
+when it appears as the first character on the line.
 The default is `\fB\(ha\fP'.
 The optional third character is the character
 which indicates that the remainder of the line is a comment when found
@@ -7584,6 +7585,17 @@ following the history expansion character, even if it is unquoted:
 space, tab, newline, carriage return, \fB=\fP,
 and the other shell metacharacters defined above.
 .PP
+There is a special abbreviation for substitution, active when the
+\fIquick substitution\fP character (described above under
+.BR histchars )
+is the first character on the line.
+It selects the previous history entry, using an event designator
+equivalent to \fB!!\fP,
+and substitutes one string for another in that line.
+It is described below under \fBEvent Designators\fP.
+This is the only history expansion that does not begin with the history
+expansion character.
+.PP
 Several shell options settable with the
 .B shopt
 builtin may be used to tailor the behavior of history expansion.
@@ -7960,6 +7972,12 @@ initialization file such as
 .IR .inputrc ,
 but each binding or command must be passed as a separate argument;
 e.g., '"\eC\-x\eC\-r": re\-read\-init\-file'.
+In the following descriptions, output available to be re-read is formatted
+as commands that would appear in a
+.B readline
+initialization file or that would be supplied as individual arguments to a
+.B bind
+command.
 Options, if supplied, have the following meanings:
 .RS
 .PD 0

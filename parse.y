@@ -2931,9 +2931,7 @@ execute_variable_command (const char *command, const char *vname)
   sh_parser_state_t ps;
 
   save_parser_state (&ps);
-  last_lastarg = get_string_value ("_");
-  if (last_lastarg)
-    last_lastarg = savestring (last_lastarg);
+  last_lastarg = save_lastarg ();
 
   parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE);
 
@@ -6126,7 +6124,7 @@ char *
 decode_prompt_string (char *string)
 {
   WORD_LIST *list;
-  char *result, *t, *orig_string;
+  char *result, *t, *orig_string, *last_lastarg;
   struct dstack save_dstack;
   int last_exit_value, last_comsub_pid, last_comsub_status;
 #if defined (PROMPT_STRING_DECODE)
@@ -6535,10 +6533,13 @@ not_escape:
       last_exit_value = last_command_exit_value;
       last_comsub_pid = last_command_subst_pid;
       last_comsub_status = last_command_subst_status;
+      last_lastarg = save_lastarg ();
       list = expand_prompt_string (result, Q_DOUBLE_QUOTES, 0);
       free (result);
       result = string_list (list);
       dispose_words (list);
+      bind_lastarg (last_lastarg);
+      free (last_lastarg);
       last_command_exit_value = last_exit_value;
       last_command_subst_pid = last_comsub_pid;
       last_command_subst_status = last_comsub_status;

@@ -124,6 +124,7 @@ extern void uw_restore_funcarray_state (void *);
 extern void uw_maybe_restore_getopt_state (void *);
 extern void uw_lastpipe_cleanup (void *);
 
+extern char *save_lastarg (void);
 extern void bind_lastarg (char *);
 
 extern void uw_dispose_fd_bitmap (void *);

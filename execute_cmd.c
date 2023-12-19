@@ -4089,6 +4089,17 @@ execute_cond_command (COND_COM *cond_command)
 }
 #endif /* COND_COMMAND */
 
+char *
+save_lastarg (void)
+{
+  char *v;
+
+  v = get_string_value ("_");
+  if (v)
+    v = savestring (v);
+  return v;
+}
+
 void
 bind_lastarg (char *arg)
 {

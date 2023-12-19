@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 October 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2023 December 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -187,7 +187,9 @@ signals the end of options and disables further option processing.
 Any arguments after the
 <B>--</B>
 
-are treated as filenames and arguments.  An argument of
+are treated as a shell script filename (see below)
+and arguments passed to that script.
+An argument of
 <B>-</B>
 
 is equivalent to <B>--</B>.
@@ -330,7 +332,7 @@ nor the
 <B>-s</B>
 
 option has been supplied, the first argument is assumed to
-be the name of a file containing shell commands.
+be the name of a file containing shell commands (a <I>shell script</I>).
 If
 <B>bash</B>
 
@@ -2889,7 +2891,7 @@ Control how the results of pathname expansion are sorted.
 The value of this variable specifies the sort criteria and sort order for
 the results of pathname expansion.
 If this variable is unset or set to the null string, pathname expansion
-uses the historial behavior of sorting by name.
+uses the historical behavior of sorting by name.
 If set, a valid value begins with an optional <I>+</I>, which is ignored,
 or <I>-</I>, which reverses the sort order from ascending to descending,
 followed by a sort specifier.
@@ -3490,7 +3492,8 @@ the character which signals the start of a history
 expansion, normally `<B>!</B>'.
 The second character is the <I>quick substitution</I>
 character, which is used as shorthand for re-running the previous
-command entered, substituting one string for another in the command.
+command entered, substituting one string for another in the command,
+when it appears as the first character on the line.
 The default is `<B>ha</B>'.
 The optional third character is the character
 which indicates that the remainder of the line is a comment when found
@@ -9576,6 +9579,19 @@ space, tab, newline, carriage return, <B>=</B>,
 and the other shell metacharacters defined above.
 <P>
 
+There is a special abbreviation for substitution, active when the
+<I>quick substitution</I> character (described above under
+<B>histchars</B>)
+
+is the first character on the line.
+It selects the previous history entry, using an event designator
+equivalent to <B>!!</B>,
+and substitutes one string for another in that line.
+It is described below under <B>Event Designators</B>.
+This is the only history expansion that does not begin with the history
+expansion character.
+<P>
+
 Several shell options settable with the
 <B>shopt</B>
 
@@ -10056,6 +10072,14 @@ initialization file such as
 
 but each binding or command must be passed as a separate argument;
 e.g., '&quot;\C-x\C-r&quot;: re-read-init-file'.
+In the following descriptions, output available to be re-read is formatted
+as commands that would appear in a
+<B>readline</B>
+
+initialization file or that would be supplied as individual arguments to a
+<B>bind</B>
+
+command.
 Options, if supplied, have the following meanings:
 <DL COMPACT><DT><DD>
 
@@ -11124,8 +11148,10 @@ from shared object
 
 on systems that support dynamic loading.
 <B>Bash</B> will use the value of the <B>BASH_LOADABLES_PATH</B> variable as a
-colon-separated list of directories in which to search for <I>filename</I>.
-The default is system-dependent.
+colon-separated list of directories in which to search for <I>filename</I>,
+if <I>filename</I> does not contain a slash.
+The default is system-dependent,
+and may include &quot;.&quot; to force a search of the current directory.
 The
 <B>-d</B>
 
@@ -13682,16 +13708,14 @@ If the string is not translated, this has no effect.
 <DT><B>nullglob</B>
 
 <DD>
-If set,
-<B>bash</B>
-
-allows patterns which match no
-files (see
+If set, pathname expansion patterns which match no files
+(see
 <B>Pathname Expansion</B>
 
 
 above)
-to expand to a null string, rather than themselves.
+expand to nothing and are removed,
+rather than expanding to themselves.
 <DT><B>patsub_replacement</B>
 
 <DD>
@@ -15161,7 +15185,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 October 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2023 December 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15267,7 +15291,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20231007/doc/bash.1.<BR>
-Time: 11 October 2023 10:25:11 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20231212/doc/bash.1.<BR>
+Time: 14 December 2023 16:39:25 EST
 </BODY>
 </HTML>

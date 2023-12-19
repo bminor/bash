@@ -4531,23 +4531,28 @@ synonym); @code{emacs} is equivalent to @code{emacs-standard}.
 List the names of all Readline functions.
 
 @item -p
-Display Readline function names and bindings in such a way that they
-can be used as input or in a Readline initialization file.
+Display Readline function names and bindings
+in such a way that they can be used as
+an argument to a subsequent @code{bind} command
+or in a Readline initialization file.
 
 @item -P
 List current Readline function names and bindings.
 
 @item -v
-Display Readline variable names and values in such a way that they
-can be used as input or in a Readline initialization file.
+Display Readline variable names and values
+in such a way that they can be used as
+an argument to a subsequent @code{bind} command
+or in a Readline initialization file.
 
 @item -V
 List current Readline variable names and values.
 
 @item -s
 Display Readline key sequences bound to macros and the strings they output
-in such a way that they can be used as input or in a Readline
-initialization file.
+in such a way that they can be used as
+an argument to a subsequent @code{bind} command
+or in a Readline initialization file.
 
 @item -S
 Display Readline key sequences bound to macros and the strings they output.
@@ -4590,7 +4595,8 @@ reflected in the editing state.
 
 @item -X
 List all key sequences bound to shell commands and the associated commands
-in a format that can be reused as input.
+in a format that can be reused as
+an argument to a subsequent @code{bind} command.
 @end table
 
 @noindent
@@ -6689,13 +6695,17 @@ Up to three characters which control history expansion, quick
 substitution, and tokenization (@pxref{History Interaction}).
 The first character is the
 @dfn{history expansion} character, that is, the character which signifies the
-start of a history expansion, normally @samp{!}.  The second character is the
-character which signifies `quick substitution' when seen as the first
-character on a line, normally @samp{^}.  The optional third character is the
+start of a history expansion, normally @samp{!}.
+The second character is the
+character which signifies "quick substitution" when seen as the first
+character on a line, normally @samp{^}.
+The optional third character is the
 character which indicates that the remainder of the line is a comment when
-found as the first character of a word, usually @samp{#}.  The history
+found as the first character of a word, usually @samp{#}.
+The history
 comment character causes history substitution to be skipped for the
-remaining words on the line.  It does not necessarily cause the shell
+remaining words on the line.
+It does not necessarily cause the shell
 parser to treat the rest of the line as a comment.
 
 @item HISTCMD

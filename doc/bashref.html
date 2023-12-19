@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 6 October 2023).
+the Bash shell (version 5.3, 14 December 2023).
 
-This is Edition 5.3, last updated 6 October 2023,
+This is Edition 5.3, last updated 14 December 2023,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 6 October 2023).
+the Bash shell (version 5.3, 14 December 2023).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 6 October 2023,
+<p>This is Edition 5.3, last updated 14 December 2023,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.3.
 </p>
@@ -5055,8 +5055,10 @@ synonym); <code>emacs</code> is equivalent to <code>emacs-standard</code>.
 </p>
 </dd>
 <dt><span><code>-p</code></span></dt>
-<dd><p>Display Readline function names and bindings in such a way that they
-can be used as input or in a Readline initialization file.
+<dd><p>Display Readline function names and bindings
+in such a way that they can be used as
+an argument to a subsequent <code>bind</code> command
+or in a Readline initialization file.
 </p>
 </dd>
 <dt><span><code>-P</code></span></dt>
@@ -5064,8 +5066,10 @@ can be used as input or in a Readline initialization file.
 </p>
 </dd>
 <dt><span><code>-v</code></span></dt>
-<dd><p>Display Readline variable names and values in such a way that they
-can be used as input or in a Readline initialization file.
+<dd><p>Display Readline variable names and values
+in such a way that they can be used as
+an argument to a subsequent <code>bind</code> command
+or in a Readline initialization file.
 </p>
 </dd>
 <dt><span><code>-V</code></span></dt>
@@ -5074,8 +5078,9 @@ can be used as input or in a Readline initialization file.
 </dd>
 <dt><span><code>-s</code></span></dt>
 <dd><p>Display Readline key sequences bound to macros and the strings they output
-in such a way that they can be used as input or in a Readline
-initialization file.
+in such a way that they can be used as
+an argument to a subsequent <code>bind</code> command
+or in a Readline initialization file.
 </p>
 </dd>
 <dt><span><code>-S</code></span></dt>
@@ -5125,7 +5130,8 @@ reflected in the editing state.
 </dd>
 <dt><span><code>-X</code></span></dt>
 <dd><p>List all key sequences bound to shell commands and the associated commands
-in a format that can be reused as input.
+in a format that can be reused as
+an argument to a subsequent <code>bind</code> command.
 </p></dd>
 </dl>
 
@@ -5411,8 +5417,10 @@ each builtin with an indication of whether or not it is enabled.
 <p>The <samp>-f</samp> option means to load the new builtin command <var>name</var>
 from shared object <var>filename</var>, on systems that support dynamic loading.
 Bash will use the value of the <code>BASH_LOADABLES_PATH</code> variable as a
-colon-separated list of directories in which to search for <var>filename</var>.
-The default is system-dependent.
+colon-separated list of directories in which to search for <var>filename</var>,
+if <var>filename</var> does not contain a slash.
+The default is system-dependent,
+and may include &quot;.&quot; to force a search of the current directory.
 The <samp>-d</samp> option will delete a builtin loaded with <samp>-f</samp>.
 </p>
 <p>If there are no options, a list of the shell builtins is displayed.
@@ -6754,8 +6762,10 @@ If the string is not translated, this has no effect.
 </p>
 </dd>
 <dt><span><code>nullglob</code></span></dt>
-<dd><p>If set, Bash allows filename patterns which match no
-files to expand to a null string, rather than themselves.
+<dd><p>If set, filename expansion patterns which match no files
+(see <a href="#Filename-Expansion">Filename Expansion</a>)
+expand to nothing and are removed,
+rather than expanding to themselves.
 </p>
 </dd>
 <dt><span><code>patsub_replacement</code></span></dt>
@@ -6856,8 +6866,8 @@ The Bash <small>POSIX</small> mode is described in <a href="#Bash-POSIX-Mode">Ba
 </p>
 <p>These are the <small>POSIX</small> special builtins:
 </p><div class="example">
-<pre class="example">break : . continue eval exec exit export readonly return set<!-- /@w -->
-shift trap unset<!-- /@w -->
+<pre class="example">break : . source continue eval exec exit export readonly return set<!-- /@w -->
+shift times trap unset<!-- /@w -->
 </pre></div>
 
 <hr>
@@ -7442,7 +7452,7 @@ option.
 The value of this variable specifies the sort criteria and sort order for
 the results of filename expansion.
 If this variable is unset or set to the null string, filename expansion
-uses the historial behavior of sorting by name.
+uses the historical behavior of sorting by name.
 If set, a valid value begins with an optional &lsquo;<samp>+</samp>&rsquo;, which is ignored,
 or &lsquo;<samp>-</samp>&rsquo;, which reverses the sort order from ascending to descending,
 followed by a sort specifier.
@@ -7484,13 +7494,17 @@ subsequently reset.
 substitution, and tokenization (see <a href="#History-Interaction">History Expansion</a>).
 The first character is the
 <em>history expansion</em> character, that is, the character which signifies the
-start of a history expansion, normally &lsquo;<samp>!</samp>&rsquo;.  The second character is the
-character which signifies &lsquo;quick substitution&rsquo; when seen as the first
-character on a line, normally &lsquo;<samp>^</samp>&rsquo;.  The optional third character is the
+start of a history expansion, normally &lsquo;<samp>!</samp>&rsquo;.
+The second character is the
+character which signifies &quot;quick substitution&quot; when seen as the first
+character on a line, normally &lsquo;<samp>^</samp>&rsquo;.
+The optional third character is the
 character which indicates that the remainder of the line is a comment when
-found as the first character of a word, usually &lsquo;<samp>#</samp>&rsquo;.  The history
+found as the first character of a word, usually &lsquo;<samp>#</samp>&rsquo;.
+The history
 comment character causes history substitution to be skipped for the
-remaining words on the line.  It does not necessarily cause the shell
+remaining words on the line.
+It does not necessarily cause the shell
 parser to treat the rest of the line as a comment.
 </p>
 </dd>
@@ -8130,8 +8144,15 @@ that may be reused as input.
 <dt><span><code>--</code></span></dt>
 <dd><p>A <code>--</code> signals the end of options and disables further option
 processing.
-Any arguments after the <code>--</code> are treated as filenames and arguments.
-</p></dd>
+Any arguments after the <code>--</code>
+are treated as a shell script filename (see <a href="#Shell-Scripts">Shell Scripts</a>)
+and arguments passed to that script.
+</p>
+</dd>
+<dt><span><code>-</code></span></dt>
+<dd><p>Equivalent to <code>--</code>.
+</p>
+</dd>
 </dl>
 
 <span id="index-login-shell"></span>
@@ -9573,6 +9594,12 @@ the command name, and so on.
 fatal error if it attempts to unset a <code>readonly</code> or <code>non-unsettable</code>
 variable, or encounters a variable name argument that is an invalid identifier,
 which causes a non-interactive shell to exit.
+
+</li><li> When asked to unset a variable that appears in an assignment statement
+preceding the command, the <code>unset</code> builtin attempts to unset a variable
+of the same name in the current or previous scope as well.
+This implements the required &quot;if an assigned variable is further modified
+by the utility, the modifications made by the utility shall persist&quot; behavior.
 
 </li><li> A non-interactive shell exits with an error status if a variable
 assignment error occurs when no command name follows the assignment
@@ -12395,6 +12422,14 @@ as the editor, in that order.
 
 
 </dd>
+<dt id='index-execute_002dnamed_002dcommand-_0028M_002dx_0029'><span><code>execute-named-command (M-x)</code><a href='#index-execute_002dnamed_002dcommand-_0028M_002dx_0029' class='copiable-anchor'> &para;</a></span></dt>
+<dd><p>Read a bindable readline command name from the input and execute the
+function to which it&rsquo;s bound, as if the key sequence to which it was
+bound appeared in the input.
+If this function is supplied with a numeric argument, it passes that
+argument to the function it executes.
+</p>
+</dd>
 </dl>
 
 <hr>
@@ -13362,6 +13397,16 @@ history expansion character, but the history expansion character is
 also treated as quoted if it immediately precedes the closing double quote
 in a double-quoted string. 
 </p>
+<p>There is a special abbreviation for substitution, active when the
+<var>quick substitution</var> character (default &lsquo;<samp>^</samp>&rsquo;)
+is the first character on the line.
+It selects the previous history list entry, using an event designator
+equivalent to <code>!!</code>,
+and substitutes one string for another in that line.
+It is described below (see <a href="#Event-Designators">Event Designators</a>).
+This is the only history expansion that does not begin with the history
+expansion character.
+</p>
 <p>Several shell options settable with the <code>shopt</code>
 builtin (see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>) may be used to tailor
 the behavior of history expansion.  If the
@@ -14204,7 +14249,7 @@ instance of the shell from the environment.  This option is enabled by
 default.
 </p>
 </dd>
-<dt><span><code>--enable-glob-asciirange-default</code></span></dt>
+<dt><span><code>--enable-glob-asciiranges-default</code></span></dt>
 <dd><p>Set the default value of the <code>globasciiranges</code> shell option described
 above under <a href="#The-Shopt-Builtin">The Shopt Builtin</a> to be enabled.
 This controls the behavior of character ranges when used in pattern matching
@@ -16034,6 +16079,7 @@ Next: <a href="#Concept-Index" accesskey="n" rel="next">Concept Index</a>, Previ
 <tr><td></td><td valign="top"><a href="#index-end_002dof_002dhistory-_0028M_002d_003e_0029"><code>end-of-history (M-&gt;)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-History">Commands For History</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-end_002dof_002dline-_0028C_002de_0029"><code>end-of-line (C-e)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-exchange_002dpoint_002dand_002dmark-_0028C_002dx-C_002dx_0029"><code>exchange-point-and-mark (C-x C-x)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-execute_002dnamed_002dcommand-_0028M_002dx_0029"><code>execute-named-command (M-x)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Function-Index_fn_letter-F">F</th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-fetch_002dhistory-_0028_0029"><code>fetch-history ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-History">Commands For History</a></td></tr>

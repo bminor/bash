@@ -418,9 +418,7 @@ check_mail (void)
   int i, use_user_notification;
   char *dollar_underscore, *temp;
 
-  dollar_underscore = get_string_value ("_");
-  if (dollar_underscore)
-    dollar_underscore = savestring (dollar_underscore);
+  dollar_underscore = save_lastarg ();
 
   for (i = 0; i < mailfiles_count; i++)
     {
@@ -481,7 +479,7 @@ check_mail (void)
 
   if (dollar_underscore)
     {
-      bind_variable ("_", dollar_underscore, 0);
+      bind_lastarg (dollar_underscore);
       free (dollar_underscore);
     }
   else
