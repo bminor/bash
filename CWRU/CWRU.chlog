@@ -8203,3 +8203,35 @@ parse.y
 	- decode_prompt_string: use save_lastarg() and bind_lastarg() to preserve
 	  the value of $_ across prompt string decoding.
 	  Patch from Grisha Levit <grishalevit@gmail.com>
+
+				   12/21
+				   -----
+lib/readline/doc/readline.3
+	- updates to some vi-mode bindings
+	  Patch from Josh Brobst <josh@brob.st>
+
+builtins/setattr.def
+	- set_or_show_attributes: in posix mode, supplying an argument that is
+	  not an identifier when not acting on functions is a utility error.
+	  This will cause a non-interactive shell to exit
+
+				   12/27
+				   -----
+print_cmd.c
+	- command_print_word_list,print_select_command_head,print_case_command_head,
+	  print_function_def: if we're in pretty-print mode, dequote words
+	  before printing them
+	  Report from Seth Sabar <sethsabar@gmail.com>
+
+shell.c
+	- execute_profile_file,execute_bashrc_file: separate the (duplicated)
+	  code that sources the various profile and bashrc files out into
+	  separate functions
+	- find_bashrc_file: new function, returns the name of the interactive
+	  shell startup file that should be executed if --rcfile (--init-file)
+	  is not supplied; currently returns DEFAULT_BASHRC
+	- bashrc_file: default to NULL, making it just the filename supplied as
+	  an argument to --rcfile/--init-file
+	- execute_bashrc_file: execute whatever find_bashrc_file() returns
+	  if bashrc_file is NULL
+	  From a patch from Allison Karlitskaya <allison.karlitskaya@redhat.com>

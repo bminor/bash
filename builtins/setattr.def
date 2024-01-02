@@ -121,7 +121,7 @@ int
 set_or_show_attributes (WORD_LIST *list, int attribute, int nodefs)
 {
   register SHELL_VAR *var;
-  int assign, undo, any_failed, assign_error, opt;
+  int assign, undo, any_failed, assign_error, util_error, opt, retval;
   int functions_only, arrays_only, assoc_only;
   int aflags;
   char *name;
@@ -133,7 +133,9 @@ set_or_show_attributes (WORD_LIST *list, int attribute, int nodefs)
 #endif
 
   functions_only = arrays_only = assoc_only = 0;
-  undo = any_failed = assign_error = 0;
+  undo = any_failed = assign_error = util_error = 0;
+  retval = EXECUTION_SUCCESS;
+
   /* Read arguments from the front of the list. */
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, ATTROPTS)) != -1)
@@ -216,6 +218,11 @@ set_or_show_attributes (WORD_LIST *list, int attribute, int nodefs)
 	      sh_invalidid (name);
 	      if (assign)
 		assign_error++;
+	      else if (posixly_correct)
+		{
+		  util_error++;
+		  break;		/* exit immediately on bad identifier */
+		}
 	      else
 		any_failed++;
 	      list = list->next;
@@ -338,9 +345,15 @@ set_or_show_attributes (WORD_LIST *list, int attribute, int nodefs)
 	}
     }
 
-  return (assign_error ? EX_BADASSIGN
-		       : ((any_failed == 0) ? EXECUTION_SUCCESS
-  					    : EXECUTION_FAILURE));
+  /* various failure modes */
+  if (assign_error)
+    retval = EX_BADASSIGN;
+  else if (util_error)		/* only posix mode sets this */
+    retval = EX_UTILERROR;
+  else if (any_failed)
+    retval = EXECUTION_FAILURE;
+
+  return (retval);
 }
 
 /* Show all variable variables (v == 1) or functions (v == 0) with

@@ -45,106 +45,100 @@ exec: usage: exec [-cl] [-a name] [command [argument ...]] [redirection ...]
 hash: usage: hash [-lr] [-p pathname] [-dt] [name ...]
 ./errors.tests: line 153: hash: -d: option requires an argument
 ./errors.tests: line 157: hash: hashing disabled
-./errors.tests: line 160: export: `AA[4]': not a valid identifier
-./errors.tests: line 161: readonly: `AA[4]': not a valid identifier
-./errors.tests: line 162: export: `invalid-var=4': not a valid identifier
-./errors.tests: line 163: readonly: `invalid-var=4': not a valid identifier
-./errors.tests: line 164: export: `invalid-var': not a valid identifier
-./errors.tests: line 165: readonly: `invalid-var': not a valid identifier
-./errors.tests: line 168: unset: [-2]: bad array subscript
-./errors.tests: line 172: AA: readonly variable
-./errors.tests: line 176: AA: readonly variable
-./errors.tests: line 184: shift: 5: shift count out of range
-./errors.tests: line 185: shift: -2: shift count out of range
-./errors.tests: line 186: shift: 5: shift count out of range
-./errors.tests: line 187: shift: -2: shift count out of range
-./errors.tests: line 190: shopt: no_such_option: invalid shell option name
-./errors.tests: line 191: shopt: no_such_option: invalid shell option name
-./errors.tests: line 192: shopt: no_such_option: invalid option name
-./errors.tests: line 195: umask: 09: octal number out of range
-./errors.tests: line 196: umask: `:': invalid symbolic mode character
-./errors.tests: line 197: umask: `:': invalid symbolic mode operator
-./errors.tests: line 200: umask: -i: invalid option
+./errors.tests: line 160: unset: [-2]: bad array subscript
+./errors.tests: line 164: AA: readonly variable
+./errors.tests: line 168: AA: readonly variable
+./errors.tests: line 176: shift: 5: shift count out of range
+./errors.tests: line 177: shift: -2: shift count out of range
+./errors.tests: line 178: shift: 5: shift count out of range
+./errors.tests: line 179: shift: -2: shift count out of range
+./errors.tests: line 182: shopt: no_such_option: invalid shell option name
+./errors.tests: line 183: shopt: no_such_option: invalid shell option name
+./errors.tests: line 184: shopt: no_such_option: invalid option name
+./errors.tests: line 187: umask: 09: octal number out of range
+./errors.tests: line 188: umask: `:': invalid symbolic mode character
+./errors.tests: line 189: umask: `:': invalid symbolic mode operator
+./errors.tests: line 192: umask: -i: invalid option
 umask: usage: umask [-p] [-S] [mode]
-./errors.tests: line 204: umask: `p': invalid symbolic mode character
-./errors.tests: line 213: VAR: readonly variable
-./errors.tests: line 216: declare: VAR: readonly variable
-./errors.tests: line 217: declare: VAR: readonly variable
-./errors.tests: line 219: declare: unset: not found
-./errors.tests: line 222: VAR: readonly variable
+./errors.tests: line 196: umask: `p': invalid symbolic mode character
+./errors.tests: line 205: VAR: readonly variable
+./errors.tests: line 208: declare: VAR: readonly variable
+./errors.tests: line 209: declare: VAR: readonly variable
+./errors.tests: line 211: declare: unset: not found
+./errors.tests: line 214: VAR: readonly variable
 comsub: -c: line 1: syntax error near unexpected token `)'
 comsub: -c: line 1: `: $( for z in 1 2 3; do )'
 comsub: -c: line 1: syntax error near unexpected token `done'
 comsub: -c: line 1: `: $( for z in 1 2 3; done )'
-./errors.tests: line 229: cd: HOME not set
-./errors.tests: line 230: cd: /tmp/xyz.bash: No such file or directory
-./errors.tests: line 232: cd: OLDPWD not set
-./errors.tests: line 233: cd: /bin/sh: Not a directory
-./errors.tests: line 235: cd: /tmp/cd-notthere: No such file or directory
-./errors.tests: line 237: cd: too many arguments
+./errors.tests: line 221: cd: HOME not set
+./errors.tests: line 222: cd: /tmp/xyz.bash: No such file or directory
+./errors.tests: line 224: cd: OLDPWD not set
+./errors.tests: line 225: cd: /bin/sh: Not a directory
+./errors.tests: line 227: cd: /tmp/cd-notthere: No such file or directory
+./errors.tests: line 229: cd: too many arguments
 bash: line 1: PWD: readonly variable
 1
 bash: line 1: OLDPWD: readonly variable
 1
-./errors.tests: line 244: .: filename argument required
+./errors.tests: line 236: .: filename argument required
 .: usage: . filename [arguments]
-./errors.tests: line 245: source: filename argument required
+./errors.tests: line 237: source: filename argument required
 source: usage: source filename [arguments]
-./errors.tests: line 248: .: -i: invalid option
+./errors.tests: line 240: .: -i: invalid option
 .: usage: . filename [arguments]
-./errors.tests: line 251: set: -q: invalid option
+./errors.tests: line 243: set: -q: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 254: enable: sh: not a shell builtin
-./errors.tests: line 254: enable: bash: not a shell builtin
-./errors.tests: line 257: shopt: cannot set and unset shell options simultaneously
-./errors.tests: line 260: read: -x: invalid option
+./errors.tests: line 246: enable: sh: not a shell builtin
+./errors.tests: line 246: enable: bash: not a shell builtin
+./errors.tests: line 249: shopt: cannot set and unset shell options simultaneously
+./errors.tests: line 252: read: -x: invalid option
 read: usage: read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
-./errors.tests: line 263: read: var: invalid timeout specification
-./errors.tests: line 266: read: `/bin/sh': not a valid identifier
-./errors.tests: line 267: read: `/bin/sh': not a valid identifier
-./errors.tests: line 268: read: `invalid-name': not a valid identifier
-./errors.tests: line 271: VAR: readonly variable
-./errors.tests: line 274: read: XX: invalid file descriptor specification
-./errors.tests: line 275: read: 42: invalid file descriptor: Bad file descriptor
-./errors.tests: line 278: mapfile: XX: invalid file descriptor specification
-./errors.tests: line 279: mapfile: 42: invalid file descriptor: Bad file descriptor
-./errors.tests: line 283: mapfile: empty array variable name
-./errors.tests: line 284: mapfile: `invalid-var': not a valid identifier
-./errors.tests: line 287: readonly: -x: invalid option
+./errors.tests: line 255: read: var: invalid timeout specification
+./errors.tests: line 258: read: `/bin/sh': not a valid identifier
+./errors.tests: line 259: read: `/bin/sh': not a valid identifier
+./errors.tests: line 260: read: `invalid-name': not a valid identifier
+./errors.tests: line 263: VAR: readonly variable
+./errors.tests: line 266: read: XX: invalid file descriptor specification
+./errors.tests: line 267: read: 42: invalid file descriptor: Bad file descriptor
+./errors.tests: line 270: mapfile: XX: invalid file descriptor specification
+./errors.tests: line 271: mapfile: 42: invalid file descriptor: Bad file descriptor
+./errors.tests: line 275: mapfile: empty array variable name
+./errors.tests: line 276: mapfile: `invalid-var': not a valid identifier
+./errors.tests: line 279: readonly: -x: invalid option
 readonly: usage: readonly [-aAf] [name[=value] ...] or readonly -p
-./errors.tests: line 290: eval: -i: invalid option
+./errors.tests: line 282: eval: -i: invalid option
 eval: usage: eval [arg ...]
-./errors.tests: line 291: command: -i: invalid option
+./errors.tests: line 283: command: -i: invalid option
 command: usage: command [-pVv] command [arg ...]
-./errors.tests: line 294: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
-./errors.tests: line 295: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
-./errors.tests: line 298: trap: NOSIG: invalid signal specification
-./errors.tests: line 301: trap: -s: invalid option
+./errors.tests: line 286: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 287: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 290: trap: NOSIG: invalid signal specification
+./errors.tests: line 293: trap: -s: invalid option
 trap: usage: trap [-Plp] [[action] signal_spec ...]
-./errors.tests: line 307: return: can only `return' from a function or sourced script
-./errors.tests: line 311: break: 0: loop count out of range
-./errors.tests: line 315: continue: 0: loop count out of range
-./errors.tests: line 320: builtin: -x: invalid option
+./errors.tests: line 299: return: can only `return' from a function or sourced script
+./errors.tests: line 303: break: 0: loop count out of range
+./errors.tests: line 307: continue: 0: loop count out of range
+./errors.tests: line 312: builtin: -x: invalid option
 builtin: usage: builtin [shell-builtin [arg ...]]
-./errors.tests: line 323: builtin: bash: not a shell builtin
-./errors.tests: line 327: bg: no job control
-./errors.tests: line 328: fg: no job control
+./errors.tests: line 315: builtin: bash: not a shell builtin
+./errors.tests: line 319: bg: no job control
+./errors.tests: line 320: fg: no job control
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
-./errors.tests: line 332: kill: -s: option requires an argument
-./errors.tests: line 334: kill: S: invalid signal specification
-./errors.tests: line 336: kill: `': not a pid or valid job spec
+./errors.tests: line 324: kill: -s: option requires an argument
+./errors.tests: line 326: kill: S: invalid signal specification
+./errors.tests: line 328: kill: `': not a pid or valid job spec
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
-./errors.tests: line 340: kill: SIGBAD: invalid signal specification
-./errors.tests: line 342: kill: BAD: invalid signal specification
-./errors.tests: line 344: kill: @12: arguments must be process or job IDs
-./errors.tests: line 347: unset: BASH_LINENO: cannot unset
-./errors.tests: line 347: unset: BASH_SOURCE: cannot unset
-./errors.tests: line 350: set: trackall: invalid option name
-./errors.tests: line 351: set: -q: invalid option
+./errors.tests: line 332: kill: SIGBAD: invalid signal specification
+./errors.tests: line 334: kill: BAD: invalid signal specification
+./errors.tests: line 336: kill: @12: arguments must be process or job IDs
+./errors.tests: line 339: unset: BASH_LINENO: cannot unset
+./errors.tests: line 339: unset: BASH_SOURCE: cannot unset
+./errors.tests: line 342: set: trackall: invalid option name
+./errors.tests: line 343: set: -q: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 352: set: -i: invalid option
+./errors.tests: line 344: set: -i: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 356: xx: readonly variable
+./errors.tests: line 348: xx: readonly variable
 1
 ./errors1.sub: line 14: .: -i: invalid option
 .: usage: . filename [arguments]
@@ -308,6 +302,34 @@ errors: line 3: break: too many arguments
 after break: 2
 errors: line 3: continue: too many arguments
 after continue: 2
+bash: line 1: readonly: `non-identifier': not a valid identifier
+after: 1
+bash: line 1: export: `non-identifier': not a valid identifier
+after: 1
+bash: line 1: readonly: `non-identifier': not a valid identifier
+bash: line 1: readonly: `invalid+ident': not a valid identifier
+after: 1
+bash: line 1: export: `non-identifier': not a valid identifier
+bash: line 1: export: `invalid+ident': not a valid identifier
+after: 1
+sh: line 1: readonly: `non-identifier': not a valid identifier
+sh: line 1: export: `non-identifier': not a valid identifier
+sh: line 1: readonly: `non-identifier': not a valid identifier
+sh: line 1: export: `non-identifier': not a valid identifier
+bash: line 1: readonly: `non-identifier': not a valid identifier
+command: 1
+bash: line 1: export: `non-identifier': not a valid identifier
+command: 1
+sh: line 1: readonly: `non-identifier': not a valid identifier
+command: 1
+sh: line 1: export: `non-identifier': not a valid identifier
+command: 1
+bash: line 1: export: `AA[4]': not a valid identifier
+array: 1
+bash: line 1: readonly: `AA[4]': not a valid identifier
+array: 1
+sh: line 1: export: `AA[4]': not a valid identifier
+sh: line 1: readonly: `AA[4]': not a valid identifier
 bash: line 1: return: can only `return' from a function or sourced script
 after return
 bash: line 1: return: can only `return' from a function or sourced script
@@ -316,4 +338,4 @@ sh: line 1: unset: `a-b': not a valid identifier
 sh: line 1: /nosuchfile: No such file or directory
 sh: line 1: trap: SIGNOSIG: invalid signal specification
 after trap
-./errors.tests: line 398: `!!': not a valid identifier
+./errors.tests: line 393: `!!': not a valid identifier

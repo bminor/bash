@@ -156,14 +156,6 @@ hash -d
 set +o hashall
 hash -p ${THIS_SH} ${THIS_SH##*/}
 
-# bad identifiers to declare/readonly/export
-export AA[4]
-readonly AA[4]
-export invalid-var=4
-readonly invalid-var=4
-export invalid-var
-readonly invalid-var
-
 declare -a AA
 unset AA[-2]
 
@@ -375,6 +367,9 @@ ${THIS_SH} ./errors9.sub
 
 # invalid numeric arguments and too many arguments
 ${THIS_SH} ./errors10.sub
+
+# invalid identifiers to readonly/export
+${THIS_SH} ./errors11.sub
 
 ${THIS_SH} -c 'return ; echo after return' bash
 ${THIS_SH} -o posix -c 'return ; echo after return' bash

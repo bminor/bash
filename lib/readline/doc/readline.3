@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Jul 17 16:46:23 EDT 2023
+.\"	Last Change: Thu Dec 21 09:29:52 EST 2023
 .\"
-.TH READLINE 3 "2023 July 17" "GNU Readline 8.3"
+.TH READLINE 3 "2023 December 21" "GNU Readline 8.3"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -1464,15 +1464,17 @@ VI Insert Mode functions
 "C-I"  complete
 "C-J"  accept-line
 "C-M"  accept-line
+"C-N"  menu-complete
+"C-P"  menu-complete-backward
 "C-R"  reverse-search-history
 "C-S"  forward-search-history
 "C-T"  transpose-chars
 "C-U"  unix-line-discard
 "C-V"  quoted-insert
-"C-W"  unix-word-rubout
+"C-W"  vi-unix-word-rubout
 "C-Y"  yank
 "C-["  vi-movement-mode
-"C-_"  undo
+"C-_"  vi-undo
 "\^ " to "\(ti"  self-insert
 "C-?"  backward-delete-char
 .PP
@@ -1494,7 +1496,7 @@ VI Command Mode functions
 "C-T"  transpose-chars
 "C-U"  unix-line-discard
 "C-V"  quoted-insert
-"C-W"  unix-word-rubout
+"C-W"  vi-unix-word-rubout
 "C-Y"  yank
 "C-_"  vi-undo
 "\^ "  forward-char
@@ -1528,7 +1530,7 @@ VI Command Mode functions
 "T"  vi-char-search
 "U"  revert-line
 "W"  vi-next-word
-"X"  backward-delete-char
+"X"  vi-rubout
 "Y"  vi-yank-to
 "\e"  vi-complete
 "\(ha"  vi-first-print
@@ -1543,7 +1545,7 @@ VI Command Mode functions
 "h"  backward-char
 "i"  vi-insertion-mode
 "j"  next-history
-"k"  prev-history
+"k"  previous-history
 "l"  forward-char
 "m"  vi-set-mark
 "n"  vi-search-again

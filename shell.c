@@ -196,8 +196,8 @@ int have_devfd = HAVE_DEV_FD;
 int have_devfd = 0;
 #endif
 
-/* The name of the .(shell)rc file. */
-static char *bashrc_file = DEFAULT_BASHRC;
+/* The name of the .(shell)rc file, DEFAULT_BASHRC is sourced by default */
+static char *bashrc_file;
 
 /* Non-zero means to act more like the Bourne shell on startup. */
 static int act_like_sh;
@@ -321,6 +321,8 @@ static void add_shopt_to_alist (char *, int);
 static void run_shopt_alist (void);
 
 static void execute_env_file (char *);
+static void execute_profile_file (void);
+static void execute_bashrc_file (void);
 static void run_startup_files (void);
 static int open_shell_script (char *);
 static void set_bash_input (void);
@@ -1090,6 +1092,7 @@ set_exit_status (int s)
 */
 
 static void
+
 execute_env_file (char *env_file)
 {
   char *fn;
@@ -1103,6 +1106,50 @@ execute_env_file (char *env_file)
     }
 }
 
+/* Execute /etc/profile and one of the personal login shell initialization files. */
+static void
+execute_profile_file (void)
+{
+  maybe_execute_file (SYS_PROFILE, 1);
+
+  if (act_like_sh)	/* sh */
+    maybe_execute_file ("~/.profile", 1);
+  else if ((maybe_execute_file ("~/.bash_profile", 1) == 0) &&
+	   (maybe_execute_file ("~/.bash_login", 1) == 0))	/* bash */
+    maybe_execute_file ("~/.profile", 1);
+}
+
+/* Return the name of the default interactive shell startup file. We just
+   return the name of the historical bash startup file, but we could look
+   at a BASHRC variable or some more elaborate scheme. */
+static inline char *
+find_bashrc_file (void)
+{
+  return DEFAULT_BASHRC;
+}
+
+static void
+execute_bashrc_file (void)
+{
+#ifdef SYS_BASHRC
+#  if defined (__OPENNT)
+  maybe_execute_file (_prefixInstallPath(SYS_BASHRC, NULL, 0), 1);
+#  else
+  maybe_execute_file (SYS_BASHRC, 1);
+#  endif
+#endif
+
+  if (bashrc_file)
+    maybe_execute_file (bashrc_file, 1);
+  else
+    {
+      char *fn;
+
+      if (fn = find_bashrc_file ())
+	maybe_execute_file (fn, 1);	/* don't have to free this yet */
+    }
+}
+
 static void
 run_startup_files (void)
 {
@@ -1111,7 +1158,7 @@ run_startup_files (void)
 #endif
   int sourced_login, run_by_ssh;
 
-#if 1	/* TAG:bash-5.3 andrew.gregory.8@gmail.com 2/21/2022 */
+  /* TAG:bash-5.3 andrew.gregory.8@gmail.com 2/21/2022 */
   /* get the rshd/sshd case out of the way first. */
   if (interactive_shell == 0 && no_rc == 0 && login_shell == 0 &&
       act_like_sh == 0 && command_execution_string && shell_level < 2)
@@ -1121,7 +1168,6 @@ run_startup_files (void)
 		   (find_variable ("SSH2_CLIENT") != (SHELL_VAR *)0);
 #else
       run_by_ssh = 0;
-#endif
 #endif
 
       ssh_reading_startup_files = 0;
@@ -1134,14 +1180,7 @@ run_startup_files (void)
 #endif
 	{
 	  ssh_reading_startup_files = 1;
-#ifdef SYS_BASHRC
-#  if defined (__OPENNT)
-	  maybe_execute_file (_prefixInstallPath(SYS_BASHRC, NULL, 0), 1);
-#  else
-	  maybe_execute_file (SYS_BASHRC, 1);
-#  endif
-#endif
-	  maybe_execute_file (bashrc_file, 1);
+	  execute_bashrc_file ();
 	  ssh_reading_startup_files = 0;
 	  return;
 	}
@@ -1170,15 +1209,7 @@ run_startup_files (void)
       /* Execute /etc/profile and one of the personal login shell
 	 initialization files. */
       if (no_profile == 0)
-	{
-	  maybe_execute_file (SYS_PROFILE, 1);
-
-	  if (act_like_sh)	/* sh */
-	    maybe_execute_file ("~/.profile", 1);
-	  else if ((maybe_execute_file ("~/.bash_profile", 1) == 0) &&
-		   (maybe_execute_file ("~/.bash_login", 1) == 0))	/* bash */
-	    maybe_execute_file ("~/.profile", 1);
-	}
+	execute_profile_file ();
 
       sourced_login = 1;
     }
@@ -1203,32 +1234,13 @@ run_startup_files (void)
 	  /* We don't execute .bashrc for login shells. */
 	  no_rc++;
 
-	  /* Execute /etc/profile and one of the personal login shell
-	     initialization files. */
 	  if (no_profile == 0)
-	    {
-	      maybe_execute_file (SYS_PROFILE, 1);
-
-	      if (act_like_sh)	/* sh */
-		maybe_execute_file ("~/.profile", 1);
-	      else if ((maybe_execute_file ("~/.bash_profile", 1) == 0) &&
-		       (maybe_execute_file ("~/.bash_login", 1) == 0))	/* bash */
-		maybe_execute_file ("~/.profile", 1);
-	    }
+	    execute_profile_file ();
 	}
 
       /* bash */
       if (act_like_sh == 0 && no_rc == 0)
-	{
-#ifdef SYS_BASHRC
-#  if defined (__OPENNT)
-	  maybe_execute_file (_prefixInstallPath(SYS_BASHRC, NULL, 0), 1);
-#  else
-	  maybe_execute_file (SYS_BASHRC, 1);
-#  endif
-#endif
-	  maybe_execute_file (bashrc_file, 1);
-	}
+	execute_bashrc_file ();
       /* sh */
       else if (act_like_sh && privileged_mode == 0 && sourced_env++ == 0)
 	execute_env_file (get_string_value ("ENV"));
@@ -2009,7 +2021,7 @@ shell_reinitialize (void)
 
   /* Ensure that the default startup file is used.  (Except that we don't
      execute this file for reinitialized shells). */
-  bashrc_file = DEFAULT_BASHRC;
+  bashrc_file = NULL;
 
   /* Delete all variables and functions.  They will be reinitialized when
      the environment is parsed. */

@@ -585,7 +585,17 @@ xtrace_print_word_list (WORD_LIST *list, int xtflags)
 static void
 command_print_word_list (WORD_LIST *list, char *separator)
 {
-  _print_word_list (list, separator, cprintf);
+  WORD_LIST *nlist;
+
+  /* A start at removing CTLESC from commands that haven't been expanded. */
+  if (pretty_print_mode)
+    {
+      nlist = list ? dequote_list (list) : list;
+      _print_word_list (nlist, separator, cprintf);
+      /* we're just pretty-printing, so this can be destructive */
+    }
+  else
+    _print_word_list (list, separator, cprintf);
 }
 
 void
@@ -645,7 +655,12 @@ print_arith_for_command (ARITH_FOR_COM *arith_for_command)
 void
 print_select_command_head (SELECT_COM *select_command)
 {
-  cprintf ("select %s in ", select_command->name->word);
+  WORD_DESC *w;
+
+  w = (pretty_print_mode) ? dequote_word (select_command->name) : select_command->name;
+  /* we're just pretty-printing, so this can be destructive */
+
+  cprintf ("select %s in ", w->word);
   command_print_word_list (select_command->map_list, " ");
 }
 
@@ -715,7 +730,12 @@ print_group_command (GROUP_COM *group_command)
 void
 print_case_command_head (CASE_COM *case_command)
 {
-  cprintf ("case %s in ", case_command->word->word);
+  WORD_DESC *w;
+
+  w = (pretty_print_mode) ? dequote_word (case_command->word) : case_command->word;
+  /* we're just pretty-printing, so this can be destructive */
+
+  cprintf ("case %s in ", w->word);
 }
 
 void
@@ -1288,16 +1308,20 @@ print_function_def (FUNCTION_DEF *func)
 {
   COMMAND *cmdcopy;
   REDIRECT *func_redirects;
+  WORD_DESC *w;
+
+  w = pretty_print_mode ? dequote_word (func->name) : func->name;
+  /* we're just pretty-printing, so this can be destructive */      
 
   func_redirects = NULL;
   /* When in posix mode, print functions as posix specifies them, but prefix
      `function' to words that are not valid POSIX identifiers. */
   if (posixly_correct == 0)
-    cprintf ("function %s () \n", func->name->word);
-  else if (valid_function_name (func->name->word, posixly_correct) == 0)
-    cprintf ("function %s () \n", func->name->word);
+    cprintf ("function %s () \n", w->word);
+  else if (valid_function_name (w->word, posixly_correct) == 0)
+    cprintf ("function %s () \n", w->word);
   else
-    cprintf ("%s () \n", func->name->word);
+    cprintf ("%s () \n", w->word);
 
   begin_unwind_frame ("function-def");
   add_unwind_protect (uw_reset_locals, 0);

@@ -8275,7 +8275,8 @@ matches were generated.
 \fBcomplete\fP \fB\-pr\fP [\fB\-DEI\fP] [\fIname\fP ...]
 .PD
 Specify how arguments to each \fIname\fP should be completed.
-If the \fB\-p\fP option is supplied, or if no options are supplied,
+If the \fB\-p\fP option is supplied, or if no options or \fIname\fPs
+are supplied,
 existing completion specifications are printed in a way that allows
 them to be reused as input.
 The \fB\-r\fP option removes a completion specification for
@@ -11688,11 +11689,11 @@ Eventually, the options will be removed in favor of
 .SM
 .BR BASH_COMPAT .
 .PP
-Bash-5.0 is the final version for which there will be an individual shopt
-option for the previous version. Users should use
+Bash-5.0 was the final version for which there will be an individual shopt
+option for the previous version. Users should control the compatibility
+level with 
 .SM
-.B BASH_COMPAT
-on bash-5.0 and later versions.
+.BR BASH_COMPAT .
 .PP
 The following table describes the behavior changes controlled by each
 compatibility level setting.

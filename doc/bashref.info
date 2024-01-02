@@ -7470,114 +7470,119 @@ startup files.
   42. The 'export' and 'readonly' builtin commands display their output
      in the format required by POSIX.
 
-  43. The 'trap' builtin displays signal names without the leading
+  43. If the 'export' and 'readonly' builtin commands get an argument
+     that is not a valid identifier, and they are not operating on shell
+     functions, they return an error.  This will cause a non-interactive
+     shell to exit because these are special builtins.
+
+  44. The 'trap' builtin displays signal names without the leading
      'SIG'.
 
-  44. The 'trap' builtin doesn't check the first argument for a possible
+  45. The 'trap' builtin doesn't check the first argument for a possible
      signal specification and revert the signal handling to the original
      disposition if it is, unless that argument consists solely of
      digits and is a valid signal number.  If users want to reset the
      handler for a given signal to the original disposition, they should
      use '-' as the first argument.
 
-  45. 'trap -p' without arguments displays signals whose dispositions
+  46. 'trap -p' without arguments displays signals whose dispositions
      are set to SIG_DFL and those that were ignored when the shell
      started, not just trapped signals.
 
-  46. The '.' and 'source' builtins do not search the current directory
+  47. The '.' and 'source' builtins do not search the current directory
      for the filename argument if it is not found by searching 'PATH'.
 
-  47. Enabling POSIX mode has the effect of setting the
+  48. Enabling POSIX mode has the effect of setting the
      'inherit_errexit' option, so subshells spawned to execute command
      substitutions inherit the value of the '-e' option from the parent
      shell.  When the 'inherit_errexit' option is not enabled, Bash
      clears the '-e' option in such subshells.
 
-  48. Enabling POSIX mode has the effect of setting the 'shift_verbose'
+  49. Enabling POSIX mode has the effect of setting the 'shift_verbose'
      option, so numeric arguments to 'shift' that exceed the number of
      positional parameters will result in an error message.
 
-  49. When the 'alias' builtin displays alias definitions, it does not
+  50. When the 'alias' builtin displays alias definitions, it does not
      display them with a leading 'alias ' unless the '-p' option is
      supplied.
 
-  50. When the 'set' builtin is invoked without options, it does not
+  51. When the 'set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  51. When the 'set' builtin is invoked without options, it displays
+  52. When the 'set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  52. When the 'cd' builtin is invoked in logical mode, and the pathname
+  53. When the 'cd' builtin is invoked in logical mode, and the pathname
      constructed from '$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, 'cd' will fail
      instead of falling back to physical mode.
 
-  53. When the 'cd' builtin cannot change a directory because the length
+  54. When the 'cd' builtin cannot change a directory because the length
      of the pathname constructed from '$PWD' and the directory name
      supplied as an argument exceeds 'PATH_MAX' when all symbolic links
      are expanded, 'cd' will fail instead of attempting to use only the
      supplied directory name.
 
-  54. The 'pwd' builtin verifies that the value it prints is the same as
+  55. The 'pwd' builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the '-P' option.
 
-  55. When listing the history, the 'fc' builtin does not include an
+  56. When listing the history, the 'fc' builtin does not include an
      indication of whether or not a history entry has been modified.
 
-  56. The default editor used by 'fc' is 'ed'.
+  57. The default editor used by 'fc' is 'ed'.
 
-  57. If there are too many arguments supplied to 'fc -s', 'fc' prints
+  58. If there are too many arguments supplied to 'fc -s', 'fc' prints
      an error message and returns failure.
 
-  58. The 'type' and 'command' builtins will not report a non-executable
+  59. The 'type' and 'command' builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in '$PATH'.
 
-  59. The 'vi' editing mode will invoke the 'vi' editor directly when
+  60. The 'vi' editing mode will invoke the 'vi' editor directly when
      the 'v' command is run, instead of checking '$VISUAL' and
      '$EDITOR'.
 
-  60. When the 'xpg_echo' option is enabled, Bash does not attempt to
+  61. When the 'xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to 'echo' as options.  Each argument is
      displayed, after escape characters are converted.
 
-  61. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
+  62. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
      and '-f' options.
 
-  62. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
+  63. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
      interrupt the 'wait' builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  63. The 'read' builtin may be interrupted by a signal for which a trap
+  64. The 'read' builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      'read', the trap handler executes and 'read' returns an exit status
      greater than 128.
 
-  64. The 'printf' builtin uses 'double' (via 'strtod') to convert
+  65. The 'printf' builtin uses 'double' (via 'strtod') to convert
      arguments corresponding to floating point conversion specifiers,
      instead of 'long double' if it's available.  The 'L' length
      modifier forces 'printf' to use 'long double' if it's available.
 
-  65. Bash removes an exited background process's status from the list
+  66. Bash removes an exited background process's status from the list
      of such statuses after the 'wait' builtin is used to obtain it.
 
-  66. A double quote character ('"') is treated specially when it
+  67. A double quote character ('"') is treated specially when it
      appears in a backquoted command substitution in the body of a
      here-document that undergoes expansion.  That means, for example,
      that a backslash preceding a double quote character will escape it
      and the backslash will be removed.
 
-  67. The 'test' builtin compares strings using the current locale when
+  68. The 'test' builtin compares strings using the current locale when
      processing the '<' and '>' binary operators.
 
-  68. The 'test' builtin's '-t' unary primary requires an argument.
+  69. The 'test' builtin's '-t' unary primary requires an argument.
      Historical versions of 'test' made the argument optional in certain
      cases, and Bash attempts to accommodate those for backwards
      compatibility.
 
-  69. Command substitutions don't set the '?' special parameter.  The
+  70. Command substitutions don't set the '?' special parameter.  The
      exit status of a simple command without a command word is still the
      exit status of the last command substitution that occurred while
      evaluating the variable assignments and redirections in that
@@ -7643,9 +7648,9 @@ compatibility level.
 compatibility levels.  Eventually, the options will be removed in favor
 of 'BASH_COMPAT'.
 
-   Bash-5.0 is the final version for which there will be an individual
-shopt option for the previous version.  Users should use 'BASH_COMPAT'
-on bash-5.0 and later versions.
+   Bash-5.0 was the final version for which there will be an individual
+shopt option for the previous version.  Users should control the
+compatibility level with 'BASH_COMPAT'.
 
    The following table describes the behavior changes controlled by each
 compatibility level setting.  The 'compat'NN tag is used as shorthand
@@ -12986,61 +12991,61 @@ Node: Directory Stack Builtins300937
 Node: Controlling the Prompt305197
 Node: The Restricted Shell308162
 Node: Bash POSIX Mode310772
-Node: Shell Compatibility Mode327417
-Node: Job Control335665
-Node: Job Control Basics336125
-Node: Job Control Builtins341127
-Node: Job Control Variables346922
-Node: Command Line Editing348078
-Node: Introduction and Notation349749
-Node: Readline Interaction351372
-Node: Readline Bare Essentials352563
-Node: Readline Movement Commands354352
-Node: Readline Killing Commands355312
-Node: Readline Arguments357233
-Node: Searching358277
-Node: Readline Init File360463
-Node: Readline Init File Syntax361724
-Node: Conditional Init Constructs385749
-Node: Sample Init File389945
-Node: Bindable Readline Commands393069
-Node: Commands For Moving394273
-Node: Commands For History396324
-Node: Commands For Text401318
-Node: Commands For Killing405296
-Node: Numeric Arguments408000
-Node: Commands For Completion409139
-Node: Keyboard Macros413330
-Node: Miscellaneous Commands414018
-Node: Readline vi Mode420387
-Node: Programmable Completion421294
-Node: Programmable Completion Builtins429074
-Node: A Programmable Completion Example440194
-Node: Using History Interactively445442
-Node: Bash History Facilities446126
-Node: Bash History Builtins449137
-Node: History Interaction454228
-Node: Event Designators458480
-Node: Word Designators460018
-Node: Modifiers461883
-Node: Installing Bash463691
-Node: Basic Installation464828
-Node: Compilers and Options468550
-Node: Compiling For Multiple Architectures469291
-Node: Installation Names470983
-Node: Specifying the System Type473092
-Node: Sharing Defaults473809
-Node: Operation Controls474482
-Node: Optional Features475440
-Node: Reporting Bugs486660
-Node: Major Differences From The Bourne Shell487994
-Node: GNU Free Documentation License504852
-Node: Indexes530029
-Node: Builtin Index530483
-Node: Reserved Word Index537584
-Node: Variable Index540032
-Node: Function Index557166
-Node: Concept Index571025
+Node: Shell Compatibility Mode327689
+Node: Job Control335940
+Node: Job Control Basics336400
+Node: Job Control Builtins341402
+Node: Job Control Variables347197
+Node: Command Line Editing348353
+Node: Introduction and Notation350024
+Node: Readline Interaction351647
+Node: Readline Bare Essentials352838
+Node: Readline Movement Commands354627
+Node: Readline Killing Commands355587
+Node: Readline Arguments357508
+Node: Searching358552
+Node: Readline Init File360738
+Node: Readline Init File Syntax361999
+Node: Conditional Init Constructs386024
+Node: Sample Init File390220
+Node: Bindable Readline Commands393344
+Node: Commands For Moving394548
+Node: Commands For History396599
+Node: Commands For Text401593
+Node: Commands For Killing405571
+Node: Numeric Arguments408275
+Node: Commands For Completion409414
+Node: Keyboard Macros413605
+Node: Miscellaneous Commands414293
+Node: Readline vi Mode420662
+Node: Programmable Completion421569
+Node: Programmable Completion Builtins429349
+Node: A Programmable Completion Example440469
+Node: Using History Interactively445717
+Node: Bash History Facilities446401
+Node: Bash History Builtins449412
+Node: History Interaction454503
+Node: Event Designators458755
+Node: Word Designators460293
+Node: Modifiers462158
+Node: Installing Bash463966
+Node: Basic Installation465103
+Node: Compilers and Options468825
+Node: Compiling For Multiple Architectures469566
+Node: Installation Names471258
+Node: Specifying the System Type473367
+Node: Sharing Defaults474084
+Node: Operation Controls474757
+Node: Optional Features475715
+Node: Reporting Bugs486935
+Node: Major Differences From The Bourne Shell488269
+Node: GNU Free Documentation License505127
+Node: Indexes530304
+Node: Builtin Index530758
+Node: Reserved Word Index537859
+Node: Variable Index540307
+Node: Function Index557441
+Node: Concept Index571300
 
 End Tag Table
 
