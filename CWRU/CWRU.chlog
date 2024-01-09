@@ -8235,3 +8235,28 @@ shell.c
 	- execute_bashrc_file: execute whatever find_bashrc_file() returns
 	  if bashrc_file is NULL
 	  From a patch from Allison Karlitskaya <allison.karlitskaya@redhat.com>
+
+				 1/3/2024
+				 --------
+print_cmd.c
+	- print_case_clauses: if we're printing a comsub for subsequent parsing,
+	  don't add a newline before the first case clause, since it adds a
+	  token after the `in' that will allow reserved words to be parsed.
+	  Report from Oguz <oguzismailuysal@gmail.com>
+
+				    1/5
+				    ---
+lib/readline/doc/rltech.texi,lib/readline/doc/readline.3
+	- Note that since quoted characters are possible, the line readline()
+	  returns may contain embedded newlines.
+	  From a report by Martin Buck <mb-tmp-tah.bet@gromit.dyndns.org>
+
+				    1/8
+				    ---
+parse.y
+	- parse_compound_assignment,parse_string_to_word_list: if we call
+	  reset_parser, directly or indirectly via yyerror, make sure to set
+	  the pushed_strings member of the saved parser state to NULL, since
+	  reset_parser already freed it and we don't want to try and restore
+	  it in restore_parser_state.
+	  From a report by Nathan Mills <the.true.nathan.mills@gmail.com>

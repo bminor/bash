@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Dec 21 09:29:52 EST 2023
+.\"	Last Change: Fri Jan  5 11:02:00 EST 2024
 .\"
-.TH READLINE 3 "2023 December 21" "GNU Readline 8.3"
+.TH READLINE 3 "2024 January 5" "GNU Readline 8.3"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -34,8 +34,8 @@ readline \- get a line from a user with editing
 \fBreadline\fP (\fIconst char *prompt\fP);
 .fi
 .SH COPYRIGHT
-.if n Readline is Copyright (C) 1989\-2023 Free Software Foundation,  Inc.
-.if t Readline is Copyright \(co 1989\-2023 Free Software Foundation, Inc.
+.if n Readline is Copyright (C) 1989\-2024 Free Software Foundation,  Inc.
+.if t Readline is Copyright \(co 1989\-2024 Free Software Foundation, Inc.
 .SH DESCRIPTION
 .LP
 .B readline
@@ -50,6 +50,9 @@ The line returned is allocated with
 the caller must free it when finished.  The line returned
 has the final newline removed, so only the text of the line
 remains.
+Since it's possible to enter characters into the line while quoting
+them to disable any \fBreadline\fP editing function they might normally have,
+this line may include embedded newlines and other special characters.
 .LP
 .B readline
 offers editing capabilities while the user is entering the

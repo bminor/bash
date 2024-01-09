@@ -172,6 +172,11 @@ UBSAN_XLDFLAGS = -fsanitize=undefined
 GCOV_XCFLAGS = -fprofile-arcs -ftest-coverage
 GCOV_XLDFLAGS = -fprofile-arcs -ftest-coverage
 
+# these need CC=clang
+LSAN_CC = clang
+LSAN_XCFLAGS = -fsanitize=leak -fno-common -fno-omit-frame-pointer -fno-optimize-sibling-calls
+LSAN_XLDFLAGS = -fsanitize=leak
+
 INCLUDES = -I. @RL_INCLUDE@ -I$(srcdir) -I$(BASHINCDIR) -I$(LIBSRC) $(INTL_INC)
 
 # Maybe add: -Wextra
@@ -634,12 +639,23 @@ ubsan:
 valgrind:
 	${MAKE} ${MFLAGS} ADDON_CFLAGS='-DDISABLE_MALLOC_WRAPPERS' ADDON_LDFLAGS= .made
 
+lsan:
+	${MAKE} ${MFLAGS} CC=${LSAN_CC} ADDON_CFLAGS='${LSAN_XCFLAGS}' ADDON_LDFLAGS='${LSAN_XLDFLAGS}' .made
+
 # cheating
 gcov:
 	${MAKE} ${MFLAGS} CFLAGS=-g ADDON_CFLAGS='${GCOV_XCFLAGS}' ADDON_LDFLAGS='${GCOV_XLDFLAGS}' .made
 
+
 # have to make this separate because making tests depend on $(PROGRAM)
 asan-tests: asan  $(TESTS_SUPPORT)
+	@-test -d tests || mkdir tests
+	@cp $(TESTS_SUPPORT) tests
+	@( cd $(srcdir)/tests && \
+		BUILD_DIR=$(BUILD_DIR) PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
+
+# have to make this separate because making tests depend on $(PROGRAM)
+lsan-tests: lsan  $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests
 	@cp $(TESTS_SUPPORT) tests
 	@( cd $(srcdir)/tests && \

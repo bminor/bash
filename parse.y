@@ -6894,6 +6894,7 @@ parse_string_to_word_list (char *s, int flags, const char *whom)
 	  orig_current_token = current_token;
 	  current_token = tok;
 	  yyerror (NULL);	/* does the right thing */
+	  ps.pushed_strings = NULL;	/* freed by reset_parser */
 	  current_token = orig_current_token;
 	  if (wl)
 	    dispose_words (wl);
@@ -6980,8 +6981,12 @@ parse_compound_assignment (size_t *retlenp)
 	  current_token = tok;	/* for error reporting */
 	  if (tok == yacc_EOF)	/* ( */
 	    parser_error (orig_line_number, _("unexpected EOF while looking for matching `)'"));
+	    /* XXX - reset_parser here, even at EOF? */
 	  else
-	    yyerror(NULL);	/* does the right thing */
+	    {
+	      yyerror(NULL);	/* does the right thing */
+	      ps.pushed_strings = NULL;		/* freed by reset_parser */
+	    }
 	  if (wl)
 	    dispose_words (wl);
 	  wl = &parse_string_error;

@@ -759,10 +759,18 @@ print_case_command (CASE_COM *case_command)
 static void
 print_case_clauses (PATTERN_LIST *clauses)
 {
+  int first = 1;
+
   indentation += indentation_amount;
   while (clauses)
     {
-      newline ("");
+      /* If we're printing a comsub, the result will be reparsed later, so
+	 we don't want to insert a newline after the `in': that could cause
+	 the parser to parse a reserved word in error, since the newline
+	 inserts a token after the `in'. */
+      if (printing_comsub == 0 || first == 0)
+	newline ("");
+      first = 0;
       command_print_word_list (clauses->patterns, " | ");
       cprintf (")\n");
       indentation += indentation_amount;
