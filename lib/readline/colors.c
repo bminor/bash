@@ -73,7 +73,7 @@
 static bool is_colored (enum indicator_no type);
 static void restore_default_color (void);
 
-#define RL_COLOR_PREFIX_EXTENSION	"readline-colored-completion-prefix"
+#define RL_COLOR_PREFIX_EXTENSION	".readline-colored-completion-prefix"
 
 COLOR_EXT_TYPE *_rl_color_ext_list = 0;
 
