@@ -109,7 +109,7 @@ sh_stat (const char *path, struct stat *finfo)
      effectively a no-op. */
       pbuf = xrealloc (pbuf, sizeof (DEV_FD_PREFIX) + strlen (path + 8));
       strcpy (pbuf, DEV_FD_PREFIX);
-      strcat (pbuf, path + 8);
+      strcpy (pbuf + sizeof (DEV_FD_PREFIX) - 1, path + 8);
       return (stat (pbuf, finfo));
 #endif /* !HAVE_DEV_FD */
     }

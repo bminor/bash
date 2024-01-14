@@ -6995,21 +6995,11 @@ parse_compound_assignment (size_t *retlenp)
       wl = make_word_list (yylval.word, wl);
     }
 
-  /* Check whether or not an alias got popped out from underneath us and
-     fix up after restore_parser_state. */
-  if (ea && ss && ss != pushed_string_list)
-    {
-      restore_pushed_strings = 1;
-      ss = pushed_string_list;
-    }
-  restore_parser_state (&ps);
-  if (restore_pushed_strings)
-    pushed_string_list = ss;
-
   if (wl == &parse_string_error)
     {
       set_exit_status (EXECUTION_FAILURE);
       last_read_token = current_token = '\n';	/* XXX */
+      /* This will eventually call reset_parser */
       if (interactive_shell == 0 && posixly_correct)
 	jump_to_top_level (FORCE_EOF);
       else
@@ -7019,6 +7009,20 @@ parse_compound_assignment (size_t *retlenp)
 	  jump_to_top_level (DISCARD);
 	}
     }
+
+  /* Check whether or not an alias got popped out from underneath us and
+     fix up after restore_parser_state. */
+  if (ea && ss && ss != pushed_string_list)
+    {
+      restore_pushed_strings = 1;
+      ss = pushed_string_list;
+      /* Don't bother with restoring the pushed string list from ps if we're
+	 just going to overwrite it. */
+      ps.pushed_strings = NULL;
+    }
+  restore_parser_state (&ps);
+  if (restore_pushed_strings)
+    pushed_string_list = ss;
 
   if (wl)
     {

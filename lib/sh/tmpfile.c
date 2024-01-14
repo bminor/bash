@@ -169,7 +169,7 @@ sh_mktmpname (const char *nameroot, int flags)
   if (flags & MT_TEMPLATE)
     strcpy (filename, nameroot);
   else
-    sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
+    snprintf (filename, PATH_MAX, "%s/%s.XXXXXX", tdir, lroot);
   if (mktemp (filename) == 0)
     {
       free (filename);
@@ -191,7 +191,7 @@ sh_mktmpname (const char *nameroot, int flags)
 		(unsigned long) time ((time_t *)0) ^
 		(unsigned long) dollar_dollar_pid ^
 		x;
-      sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
+      snprintf (filename, PATH_MAX, "%s/%s-%lu", tdir, lroot, filenum);
       if (tmpnamelen > 0 && tmpnamelen < 32)		/* XXX */
 	filename[tdlen + 1 + tmpnamelen] = '\0';
 #  ifdef HAVE_LSTAT
@@ -229,7 +229,7 @@ sh_mktmpfd (const char *nameroot, int flags, char **namep)
   if (flags & MT_TEMPLATE)
     strcpy (filename, nameroot);
   else
-    sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
+    snprintf (filename, PATH_MAX, "%s/%s.XXXXXX", tdir, lroot);
   fd = mkstemp (filename);
   if ((flags & MT_UNLINK) && tmpunlink (filename) < 0)
     {
@@ -263,7 +263,7 @@ sh_mktmpfd (const char *nameroot, int flags, char **namep)
 		(unsigned long) time ((time_t *)0) ^
 		(unsigned long) dollar_dollar_pid ^
 		x;
-      sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
+      snprintf (filename, PATH_MAX, "%s/%s-%lu", tdir, lroot, filenum);
       if (tmpnamelen > 0 && tmpnamelen < 32)		/* XXX */
 	filename[tdlen + 1 + tmpnamelen] = '\0';
       fd = open (filename, BASEOPENFLAGS | ((flags & MT_READWRITE) ? O_RDWR : O_WRONLY), 0600);
@@ -329,7 +329,7 @@ sh_mktmpdir (const char *nameroot, int flags)
   if (flags & MT_TEMPLATE)
     strcpy (filename, nameroot);
   else
-    sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
+    snprintf (filename, PATH_MAX, "%s/%s.XXXXXX", tdir, lroot);
   dirname = mkdtemp (filename);
   if (dirname == 0)
     {

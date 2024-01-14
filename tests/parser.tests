@@ -7,6 +7,9 @@ case x in x) if ((1)); then :; fi esac
 case x in x) if ((true ) ); then :; fi ;; esac
 case x in x) if ((true ) ); then :; fi esac
 
+# problem with bash-5.2
+${THIS_SH} -c '((X=([))]' bash
+
 # this has to be in a separate file to get desired EOF behavior
 ${THIS_SH} ./parser1.sub
 

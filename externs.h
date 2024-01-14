@@ -212,6 +212,9 @@ extern void clock_t_to_secs (clock_t, time_t *, long *);
 extern void print_clock_t (FILE *, clock_t);
 #endif
 
+/* Declarations for functions defined in lib/sh/compat.c */
+extern int compat_init (void);
+
 /* Declarations for functions defined in lib/sh/dprintf.c */
 #if !defined (HAVE_DPRINTF)
 extern void dprintf (int, const char *, ...)  __attribute__((__format__ (printf, 2, 3)));

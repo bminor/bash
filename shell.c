@@ -624,6 +624,8 @@ main (int argc, char **argv, char **env)
 	gnu_error_format = 1;
     }
 
+  compat_init ();
+
   top_level_arg_index = arg_index;
   old_errexit_flag = exit_immediately_on_error;
 

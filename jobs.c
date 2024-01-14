@@ -3247,7 +3247,8 @@ wait_for_any_job (int flags, struct procstat *ps)
   int i, r;
   sigset_t set, oset;
 
-  if (jobs_list_frozen)
+  /* Allow funsubs to run this, but don't remove jobs from the jobs table. */
+  if (jobs_list_frozen && executing_funsub == 0)
     return -1;
 
   /* First see if there are any unnotified dead jobs that we can report on */
@@ -3266,8 +3267,11 @@ return_job:
 	      ps->pid = pid;
 	      ps->status = r;
 	    }
-	  notify_of_job_status ();		/* XXX */
-	  delete_job (i, 0);
+	  if (jobs_list_frozen == 0)		/* must be running a funsub to get here */
+	    {
+	      notify_of_job_status ();		/* XXX */
+	      delete_job (i, 0);
+	    }
 #if defined (COPROCESS_SUPPORT)
 	  coproc_reap ();
 #endif

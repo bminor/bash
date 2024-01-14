@@ -8260,3 +8260,47 @@ parse.y
 	  reset_parser already freed it and we don't want to try and restore
 	  it in restore_parser_state.
 	  From a report by Nathan Mills <the.true.nathan.mills@gmail.com>
+
+				   1/10
+				   ----
+builtins/hash.def, builtins/ulimit.def
+	- add some calls to sh_chkwrite where there is builtin output
+
+lib/sh/eaccess.c
+	- sh_stat: use strcpy/strcpy when constructing pbuf instead of
+	  strcpy/strcat
+
+lib/sh/tmpfile.c
+	- sh_mktmpname,sh_mktmpfd,sh_mktmpdir: use snprintf (filename, PATH_MAX, ...)
+	  instead of sprintf (filename, ...)
+
+				   1/11
+				   ----
+configure.ac
+	- unconditionally AC_DEFINE(PGRP_PIPE), to prevent the problem with a
+	  pipeline and a DEBUG trap containing an external command described
+	  in https://lists.gnu.org/archive/html/bug-bash/2024-01/msg00037.html
+
+				   1/12
+				   ----
+jobs.c
+	- wait_for_any_job: if we're executing a funsub/varsub, do the wait
+	  even if the jobs list is frozen, but don't remove the job from the
+	  table or change its notification status
+	  Report from Oguz <oguzismailuysal@gmail.com>
+
+subst.c
+	- uw_unbind_variable: unset the first instance of the named variable,
+	  don't follow namerefs. This is for REPLY in a varsub if it's made
+	  a nameref.
+	  Report from Oguz <oguzismailuysal@gmail.com>
+
+shell.c
+	- main: call compat_init() so the linker drags in the old compatibility
+	  functions from lib/sh/compat.c. Primarily for use by existing loadable
+	  builtins
+
+parse.y
+	- parse_compound_assignment: handle error case (wl == &parse_string_error)
+	  before restoring the parser state from ps
+	  Report from Grisha Levit <grishalevit@gmail.com>

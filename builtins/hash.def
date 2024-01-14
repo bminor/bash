@@ -123,7 +123,7 @@ hash_builtin (WORD_LIST *list)
   if (list == 0 && (delete || list_targets))
     {
       sh_needarg (delete ? "-d" : "-t");
-      return (EXECUTION_FAILURE);
+      return (sh_chkwrite (EXECUTION_FAILURE));
     }
 
   /* It's an error to specify a pathname to hash to, but no name to hash. */
@@ -299,5 +299,5 @@ list_hashed_filename_targets (WORD_LIST *list, int fmt)
       free (target);
     }
 
-  return (all_found ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+  return (sh_chkwrite (all_found ? EXECUTION_SUCCESS : EXECUTION_FAILURE));
 }

@@ -6801,7 +6801,7 @@ uw_anonclose (void *fdesc)
 static void
 uw_unbind_variable (void *name)
 {
-  unbind_variable (name);
+  unbind_variable_noref (name);
 }
 
 static void

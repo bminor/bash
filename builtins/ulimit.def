@@ -437,7 +437,7 @@ ulimit_builtin (WORD_LIST *list)
     if (ulimit_internal (cmdlist[c].cmd, cmdlist[c].arg, mode, ncmd > 1) == EXECUTION_FAILURE)
       return (EXECUTION_FAILURE);
 
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 
 static int
