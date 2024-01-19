@@ -1635,9 +1635,9 @@ are a result of the sequence of function calls that caused execution
 to reach the current function.
 The value of a variable that a function sees depends
 on its value within its caller, if any, whether that caller is
-the "global" scope or another shell function.
+the global scope or another shell function.
 This is also the value that a local variable
-declaration "shadows", and the value that is restored when the function
+declaration shadows, and the value that is restored when the function
 returns.
 
 For example, if a variable @env{var} is declared as local in function
@@ -2871,7 +2871,7 @@ In order to match the filenames @samp{.} and @samp{..},
 the pattern must begin with @samp{.} (for example, @samp{.?}),
 even if @code{dotglob} is set.
 If the @code{globskipdots} shell option is enabled, the filenames
-@samp{.} and @samp{..} are never matched, even if the pattern begins
+@samp{.} and @samp{..} never match, even if the pattern begins
 with a @samp{.}.
 When not matching filenames, the @samp{.} character is not treated specially.
 
@@ -2935,8 +2935,8 @@ directories and subdirectories.
 @item ?
 Matches any single character.
 @item [@dots{}]
-Matches any one of the enclosed characters.  A pair of characters
-separated by a hyphen denotes a @var{range expression};
+Matches any one of the enclosed characters.
+A pair of characters separated by a hyphen denotes a @var{range expression};
 any character that falls between those two characters, inclusive,
 using the current locale's collating sequence and character set,
 is matched.  If the first character following the
@@ -3548,9 +3548,14 @@ commands that are invoked as part of a pipeline are also executed
 in a subshell environment.  Changes made to the subshell environment
 cannot affect the shell's execution environment.
 
-Subshells spawned to execute command substitutions inherit the value of
-the @option{-e} option from the parent shell.  When not in @sc{posix} mode,
-Bash clears the @option{-e} option in such subshells.
+When the shell is in @sc{posix} mode,
+subshells spawned to execute command substitutions inherit the value of
+the @option{-e} option from the parent shell.
+When not in @sc{posix} mode,
+Bash clears the @option{-e} option in such subshells
+See the description of the @code{inherit_errexit} shell option
+(@pxref{Bash Builtins}) for how to control this behavior when not
+in @sc{posix} mode.
 
 If a command is followed by a @samp{&} and job control is not active, the
 default standard input for the command is the empty file @file{/dev/null}.
@@ -3894,8 +3899,8 @@ Change the current working directory to @var{directory}.
 If @var{directory} is not supplied, the value of the @env{HOME}
 shell variable is used.
 If the shell variable
-@env{CDPATH} exists, it is used as a search path:
-each directory name in @env{CDPATH} is searched for
+@env{CDPATH} exists, @code{cd} uses it as a search path:
+{cd} searches each directory name in @env{CDPATH} for
 @var{directory}, with alternative directory names in @env{CDPATH}
 separated by a colon (@samp{:}).
 If @var{directory} begins with a slash, @env{CDPATH} is not used.
@@ -4067,17 +4072,19 @@ If the variable @env{OPTERR}
 is set to 0, no error messages will be displayed, even if the first
 character of @code{optstring} is not a colon.
 
-If an invalid option is seen,
-@code{getopts} places @samp{?} into @var{name} and, if not silent,
+If @code{getopts} detects an invalid option, it
+places @samp{?} into @var{name} and, if not silent,
 prints an error message and unsets @env{OPTARG}.
-If @code{getopts} is silent, the option character found is placed in
-@env{OPTARG} and no diagnostic message is printed.
+If @code{getopts} is silent, it assigns the option character found
+to @env{OPTARG} and does not print a diagnostic message.
 
-If a required argument is not found, and @code{getopts}
-is not silent, a question mark (@samp{?}) is placed in @var{name},
-@code{OPTARG} is unset, and a diagnostic message is printed.
-If @code{getopts} is silent, then a colon (@samp{:}) is placed in
-@var{name} and @env{OPTARG} is set to the option character found.
+If a required argument is not found,
+and @code{getopts} is not silent,
+it sets the value of @var{name} to a question mark (@samp{?}),
+unsets @code{OPTARG}, and prints a diagnostic message.
+If @code{getopts} is silent,
+it sets the value of @var{name} to a colon (@samp{:}),
+and sets @env{OPTARG} to the option character found.
 
 @item hash
 @btindex hash
@@ -5185,6 +5192,9 @@ The exit status is greater than 128 if the timeout is exceeded.
 @item -u @var{fd}
 Read input from file descriptor @var{fd}.
 @end table
+
+Other than the case where @var{delim} is the empty string, @code{read}
+ignores any NUL characters in the input.
 
 If no @var{name}s are supplied, the line read,
 without the ending delimiter but otherwise unmodified,
@@ -6352,7 +6362,7 @@ level is set to the default for the current version.
 If @env{BASH_COMPAT} is set to a value that is not one of the valid
 compatibility levels, the shell prints an error message and sets the
 compatibility level to the default for the current version.
-The valid values correspond to the compatibility levels
+A subset of the valid values correspond to the compatibility levels
 described below (@pxref{Shell Compatibility Mode}).
 For example, 4.2 and 42 are valid values that correspond
 to the @code{compat42} @code{shopt} option
@@ -6442,7 +6452,7 @@ The patch level.
 The build version.
 
 @item BASH_VERSINFO[4]
-The release status (e.g., @code{beta1}).
+The release status (e.g., @code{beta}).
 
 @item BASH_VERSINFO[5]
 The value of @env{MACHTYPE}.
@@ -6785,7 +6795,7 @@ The shell sets the default value to 500 after reading any startup files.
 
 @item HISTTIMEFORMAT
 If this variable is set and not null, its value is used as a format string
-for @code{strftime} to print the time stamp associated with each history
+for @code{strftime}(3) to print the time stamp associated with each history
 entry displayed by the @code{history} builtin.
 If this variable is set, time stamps are written to the history file so
 they may be preserved across shell sessions.
@@ -7038,7 +7048,7 @@ The @samp{%} character introduces an
 escape sequence that is expanded to a time value or other
 information.
 The escape sequences and their meanings are as
-follows; the braces denote optional portions. 
+follows; the brackets denote optional portions. 
 
 @table @code
 
@@ -7862,7 +7872,8 @@ rules above.
 
 @dfn{Aliases} allow a string to be substituted for a word that is in
 a position in the input where it can be the first word of a simple
-command. Aliases have names and corresponding values that are set
+command.
+Aliases have names and corresponding values that are set
 and unset using the @code{alias} and @code{unalias} builtin commands
 (@pxref{Shell Builtin Commands}).
 
@@ -9111,7 +9122,7 @@ terminal's; such processes are immune to keyboard-generated
 signals.  Only foreground processes are allowed to read from or, if
 the user so specifies with @code{stty tostop}, write to the terminal.
 Background processes which attempt to
-read from (write to when @code{stty tostop} is in effect) the
+read from (write to when @code{tostop} is in effect) the
 terminal are sent a @code{SIGTTIN} (@code{SIGTTOU})
 signal by the kernel's terminal driver,
 which, unless caught, suspends the process. 

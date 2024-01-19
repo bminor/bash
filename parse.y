@@ -1470,6 +1470,12 @@ timespec:	TIME
 #  define expanding_alias() 0
 #endif
 
+#if defined (DPAREN_ARITHMETIC)
+#  define parsing_dparen() (pushed_string_list && (pushed_string_list->flags & PSH_DPAREN))
+#else
+#  define parsing_dparen() 0
+#endif
+
 /* Global var is non-zero when end of file has been reached. */
 int EOF_Reached = 0;
 
@@ -6965,7 +6971,7 @@ parse_compound_assignment (size_t *retlenp)
   /* We're not pushing any new input here, we're reading from the current input
      source. If that's an alias, we have to be prepared for the alias to get
      popped out from underneath us. */
-  ss = (ea = expanding_alias ()) ? pushed_string_list : (STRING_SAVER *)NULL;
+  ss = (ea = (expanding_alias () || parsing_dparen ())) ? pushed_string_list : (STRING_SAVER *)NULL;
   restore_pushed_strings = 0;
     
   while ((tok = read_token (READ)) != ')')

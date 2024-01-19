@@ -391,7 +391,10 @@ binary_test (char *op, char *arg1, char *arg2, int flags)
   else if ((op[0] == '>' || op[0] == '<') && op[1] == '\0')
     {
 #if defined (HAVE_STRCOLL)
-      if (shell_compatibility_level > 40 && (flags & TEST_LOCALE))
+      /* POSIX interp 375 */
+      if (posixly_correct && (flags & TEST_LOCALE))
+	return ((op[0] == '>') ? (strcoll (arg1, arg2) > 0) : (strcoll (arg1, arg2) < 0));
+      else if (shell_compatibility_level > 40 && (flags & TEST_LOCALE))
 	return ((op[0] == '>') ? (strcoll (arg1, arg2) > 0) : (strcoll (arg1, arg2) < 0));
       else
 #endif
@@ -443,11 +446,8 @@ binary_operator (void)
       ((w[0] == '>' || w[0] == '<') && w[1] == '\0') ||		/* <, > */
       (w[0] == '!' && w[1] == '=' && w[2] == '\0'))		/* != */
     {
-#if 1	/* POSIX interp 375 11/9/2022 */
+      /* POSIX interp 375 11/9/2022 */
       value = binary_test (w, argv[pos], argv[pos + 2], (posixly_correct ? TEST_LOCALE : 0));
-#else
-      value = binary_test (w, argv[pos], argv[pos + 2], 0);
-#endif
       pos += 3;
       return (value);
     }

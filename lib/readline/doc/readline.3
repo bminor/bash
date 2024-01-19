@@ -6,15 +6,22 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jan  5 11:02:00 EST 2024
+.\"	Last Change: Thu Jan 18 11:05:44 EST 2024
 .\"
-.TH READLINE 3 "2024 January 5" "GNU Readline 8.3"
+.TH READLINE 3 "2024 January 18" "GNU Readline 8.3"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
 .\"
 .de FN
-\fI\|\\$1\|\fP
+\%\fI\|\\$1\|\fP
+..
+.de Q
+.ie \n(.g \(lq\\$1\(rq\\$2
+.el \{
+.  if t ``\\$1''\\$2
+.  if n "\\$1"\\$2
+.\}
 ..
 .SH NAME
 readline \- get a line from a user with editing
@@ -141,7 +148,7 @@ or
 .RS
 C\-Meta\-u: universal\-argument
 .RE
-.sp
+.LP
 into the
 .I inputrc
 would make M\-C\-u execute the readline command
@@ -179,7 +186,7 @@ whitespace between the name and the colon.
 When using the form \fBkeyname\fP:\^\fIfunction-name\fP or \fImacro\fP,
 .I keyname
 is the name of a key spelled out in English.  For example:
-.sp
+.PP
 .RS
 Control\-u: universal\-argument
 .br
@@ -199,8 +206,7 @@ and
 .I C\-o
 is bound to run the macro
 expressed on the right hand side (that is, to insert the text
-.if t \f(CW> output\fP
-.if n ``> output''
+.Q "> output"
 into the line).
 .PP
 In the second form, \fB"keyseq"\fP:\^\fIfunction\-name\fP or \fImacro\fP,
@@ -212,7 +218,7 @@ an entire key sequence may be specified by placing the sequence
 within double quotes.  Some GNU Emacs style key escapes can be
 used, as in the following example, but the symbolic character names
 are not recognized.
-.sp
+.PP
 .RS
 "\eC\-u": universal\-argument
 .br
@@ -231,8 +237,7 @@ is bound to the function
 and
 .I "ESC [ 1 1 \(ti"
 is bound to insert the text
-.if t \f(CWFunction Key 1\fP.
-.if n ``Function Key 1''.
+.Q "Function Key 1" .
 .PP
 The full set of GNU Emacs style escape sequences available when specifying
 key sequences is
@@ -352,19 +357,24 @@ It is output to the terminal before displaying the text in the active region.
 This variable is reset to the default value whenever the terminal type changes.
 The default value is the string that puts the terminal in standout mode,
 as obtained from the terminal's terminfo description.
-A sample value might be \f(CW"\ee[01;33m"\fP.
+A sample value might be
+.Q "\ee[01;33m" .
 .TP
 .B active\-region\-end\-color
-A string variable that "undoes" the effects of \fBactive\-region\-start\-color\fP
-and restores "normal" terminal display appearance after displaying text
-in the active region.
+A string variable that
+.Q undoes
+the effects of \fBactive\-region\-start\-color\fP
+and restores
+.Q normal
+terminal display appearance after displaying text in the active region.
 This string must not take up any physical character positions on the display,
 so it should consist only of terminal escape sequences.
 It is output to the terminal after displaying the text in the active region.
 This variable is reset to the default value whenever the terminal type changes.
 The default value is the string that restores the terminal from standout mode,
 as obtained from the terminal's terminfo description.
-A sample value might be \f(CW"\ee[0m\fP".
+A sample value might be
+.Q "\ee[0m" .
 .TP
 .B bell\-style (audible)
 Controls what happens when readline wants to ring the terminal bell.
@@ -378,7 +388,9 @@ characters that are
 treated specially by the kernel's terminal driver to their
 readline equivalents.
 These override the default readline bindings described here.
-Type \f(CWstty -a\fP at a bash prompt to see your current terminal settings,
+Type
+.Q "stty -a"
+at a \fBbash\fP prompt to see your current terminal settings,
 including the special control characters (usually \fBcchars\fP).
 .TP
 .B blink\-matching\-paren (Off)
@@ -391,7 +403,8 @@ common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the \fBLS_COLORS\fP
 environment variable.
 If there is a color definition in \fB$LS_COLORS\fP for the custom suffix
-"readline-colored-completion-prefix", readline uses this color for
+.Q readline-colored-completion-prefix ,
+readline uses this color for
 the common prefix instead of its default.
 .TP
 .B colored\-stats (Off)
@@ -752,7 +765,7 @@ file can test for a particular value.
 This could be used to bind key sequences to functions useful for
 a specific program.  For instance, the following command adds a
 key sequence that quotes the current or previous word in \fBbash\fP:
-.sp 1
+.PP
 .RS
 .nf
 \fB$if\fP Bash
@@ -781,8 +794,8 @@ the test fails.
 This directive takes a single filename as an argument and reads commands
 and bindings from that file.  For example, the following directive
 would read \fI/etc/inputrc\fP:
-.sp 1
 .RS
+.PP
 .nf
 \fB$include\fP \^ \fI/etc/inputrc\fP
 .fi 
@@ -977,7 +990,9 @@ insert the \fIn\fPth word from the previous command (the words
 in the previous command begin with word 0).  A negative argument
 inserts the \fIn\fPth word from the end of the previous command.
 Once the argument \fIn\fP is computed, the argument is extracted
-as if the "!\fIn\fP" history expansion had been specified.
+as if the
+.Q !\fIn\fP
+history expansion had been specified.
 .TP
 .B
 yank\-last\-arg (M\-.\^, M\-_\^)
@@ -991,15 +1006,16 @@ Any numeric argument supplied to these successive calls determines
 the direction to move through the history.  A negative argument switches
 the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
-as if the "!$" history expansion had been specified.
+as if the
+.Q !$
+history expansion had been specified.
 .PD
 .SS Commands for Changing Text
 .PD 0
 .TP
 .B \fIend\-of\-file\fP (usually C\-d)
 The character indicating end-of-file as set, for example, by
-.if t \f(CWstty\fP.
-.if n ``stty''.
+.IR stty (1).
 If this character is read when there are no characters
 on the line, and point is at the beginning of the line, readline
 interprets it as the end of input and returns
@@ -1280,7 +1296,9 @@ character.  A negative argument searches for subsequent occurrences.
 Read enough characters to consume a multi-key sequence such as those
 defined for keys like Home and End.  Such sequences begin with a
 Control Sequence Indicator (CSI), usually ESC\-[.  If this sequence is
-bound to "\e[", keys producing such sequences will have no effect
+bound to
+.Q \e[ ,
+keys producing such sequences will have no effect
 unless explicitly bound to a readline command, instead of inserting
 stray characters into the editing buffer.  This is unbound by default,
 but usually bound to ESC\-[.
@@ -1363,7 +1381,7 @@ variable).
 .ta 2.5i
 .sp
 Emacs Standard bindings
-.sp
+.PP
 "C-@"  set-mark
 "C-A"  beginning-of-line
 "C-B"  backward-char
@@ -1395,7 +1413,7 @@ Emacs Standard bindings
 "C-?"  backward-delete-char
 .PP
 Emacs Meta bindings
-.sp
+.PP
 "M-C-G"  abort
 "M-C-H"  backward-kill-word
 "M-C-I"  tab-insert
@@ -1443,7 +1461,7 @@ Emacs Meta bindings
 "M-_"  yank-last-arg
 .PP
 Emacs Control-X bindings
-.sp
+.PP
 "C-XC-G"  abort
 "C-XC-R"  re-read-init-file
 "C-XC-U"  undo
@@ -1452,16 +1470,14 @@ Emacs Control-X bindings
 "C-X)"  end-kbd-macro
 "C-XE"  call-last-kbd-macro
 "C-XC-?"  backward-kill-line
-.sp
 .RE
 .SS VI Mode bindings
 .RS +.6i
 .nf
 .ta 2.5i
-.sp
 .PP
 VI Insert Mode functions
-.sp
+.PP
 "C-D"  vi-eof-maybe
 "C-H"  backward-delete-char
 "C-I"  complete
@@ -1482,7 +1498,7 @@ VI Insert Mode functions
 "C-?"  backward-delete-char
 .PP
 VI Command Mode functions
-.sp
+.PP
 "C-D"  vi-eof-maybe
 "C-E"  emacs-editing-mode
 "C-G"  abort

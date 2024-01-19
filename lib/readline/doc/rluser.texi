@@ -323,13 +323,14 @@ the line, thereby executing the command from the history list.
 A movement command will terminate the search, make the last line found
 the current line, and begin editing.
 
-Readline remembers the last incremental search string.  If two
-@kbd{C-r}s are typed without any intervening characters defining a new
-search string, any remembered search string is used.
+Readline remembers the last incremental search string.
+If two @kbd{C-r}s are typed without any intervening characters defining
+a new search string, Readline uses any remembered search string.
 
 Non-incremental searches read the entire search string before starting
-to search for matching history lines.  The search string may be
-typed by the user or be part of the contents of the current line.
+to search for matching history lines.
+The search string may be typed by the user or be part of the contents of
+the current line.
 
 @node Readline Init File
 @section Readline Init File
@@ -2502,9 +2503,11 @@ complete -o filenames -o nospace -o bashdefault -F _comp_cd cd
 @noindent
 Since we'd like Bash and Readline to take care of some
 of the other details for us, we use several other options to tell Bash
-and Readline what to do.  The @option{-o filenames} option tells Readline
+and Readline what to do.
+The @option{-o filenames} option tells Readline
 that the possible completions should be treated as filenames, and quoted
-appropriately.  That option will also cause Readline to append a slash to
+appropriately.
+That option will also cause Readline to append a slash to
 filenames it can determine are directories (which is why we might want to
 extend @code{_comp_cd} to append a slash if we're using directories found
 via @var{CDPATH}: Readline can't tell those completions are directories).
@@ -2512,9 +2515,10 @@ The @option{-o nospace} option tells Readline to not append a space
 character to the directory name, in case we want to append to it.
 The @option{-o bashdefault} option brings in the rest of the "Bash default"
 completions -- possible completions that Bash adds to the default Readline
-set.  These include things like command name completion, variable completion
-for words beginning with @samp{$} or @samp{$@{}, completions containing pathname
-expansion patterns (@pxref{Filename Expansion}), and so on.
+set.
+These include things like command name completion, variable completion
+for words beginning with @samp{$} or @samp{$@{}, completions containing
+pathname expansion patterns (@pxref{Filename Expansion}), and so on.
 
 Once installed using @code{complete}, @code{_comp_cd} will be called every
 time we attempt word completion for a @code{cd} command.
@@ -2523,8 +2527,8 @@ Many more examples -- an extensive collection of completions for most of
 the common GNU, Unix, and Linux commands -- are available as part of the
 bash_completion project.  This is installed by default on many GNU/Linux
 distributions.  Originally written by Ian Macdonald, the project now lives
-at @url{https://github.com/scop/bash-completion/}.  There are ports for
-other systems such as Solaris and Mac OS X.
+at @url{https://github.com/scop/bash-completion/}.
+There are ports for other systems such as Solaris and Mac OS X.
 
 An older version of the bash_completion package is distributed with bash
 in the @file{examples/complete} subdirectory.

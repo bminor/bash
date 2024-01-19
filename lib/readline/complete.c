@@ -1355,6 +1355,7 @@ compute_lcd_of_matches (char **match_list, int matches, const char *text)
   int low;		/* Count of max-matched characters. */
   int lx;
   char *dtext;		/* dequoted TEXT, if needed */
+  size_t len1, len2;
 #if defined (HANDLE_MULTIBYTE)
   int v;
   size_t v1, v2;
@@ -1381,6 +1382,9 @@ compute_lcd_of_matches (char **match_list, int matches, const char *text)
 	  memset (&ps2, 0, sizeof (mbstate_t));
 	}
 #endif
+      len1 = strlen (match_list[i]);
+      len2 = strlen (match_list[i + 1]);
+
       for (si = 0; (c1 = match_list[i][si]) && (c2 = match_list[i + 1][si]); si++)
 	{
 	    if (_rl_completion_case_fold)
@@ -1391,8 +1395,8 @@ compute_lcd_of_matches (char **match_list, int matches, const char *text)
 #if defined (HANDLE_MULTIBYTE)
 	    if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	      {
-		v1 = MBRTOWC (&wc1, match_list[i]+si, strlen (match_list[i]+si), &ps1);
-		v2 = MBRTOWC (&wc2, match_list[i+1]+si, strlen (match_list[i+1]+si), &ps2);
+		v1 = MBRTOWC (&wc1, match_list[i]+si, len1 - si, &ps1);
+		v2 = MBRTOWC (&wc2, match_list[i+1]+si, len2 - si, &ps2);
 		if (MB_INVALIDCH (v1) || MB_INVALIDCH (v2))
 		  {
 		    if (c1 != c2)	/* do byte comparison */

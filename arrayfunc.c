@@ -1056,7 +1056,6 @@ expand_and_quote_assoc_word (char *w, int type)
     nword[i++] = w[ind++];
   nword[i++] = w[ind++];
 
-
   t = expand_assignment_string_to_string (w+ind, 0);
   s = (t && strchr (t, CTLESC)) ? quote_escapes (t) : t;
   value = sh_single_quote (s ? s : "");

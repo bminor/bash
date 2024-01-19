@@ -8304,3 +8304,33 @@ parse.y
 	- parse_compound_assignment: handle error case (wl == &parse_string_error)
 	  before restoring the parser state from ps
 	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   1/13
+				   ----
+lib/readline/complete.c
+	- compute_lcd_of_matches: move a strlen out of a call to MBRTOWC by
+	  computing the length of the entire string once and then using an
+	  offset from it while going through the loop
+
+				   1/15
+				   ----
+parse.y
+	- parse_compound_assignment: treat parsing a string following (( (read
+	  by parse_dparen but not an arithmetic command) the same as
+	  expanding an alias when fixing up the pushed string list
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   1/18
+				   ----
+doc/bash.1
+	- typos and style fixes to satisfy groff warnings; remove uses of the
+	  `CW' constant-width font; use .EX/.EE for examples; use consistent
+	  style for double-quoted strings; fix inconsistent inter-paragraph
+	  spacing
+	  Fixes from G. Branden Robinson <g.branden.robinson@gmail.com>
+
+				   1/19
+				   ----
+test.c
+	- binary_test: make sure all calls in posix mode use TEST_LOCALE for
+	  locale-specific string comparisons
