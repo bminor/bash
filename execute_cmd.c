@@ -1725,6 +1725,9 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     return_code = (return_code == EXECUTION_SUCCESS) ? EXECUTION_FAILURE
 						     : EXECUTION_SUCCESS;
 
+  /* Check for terminating signals before we return to our caller, which we
+     expect to exit immediately anyway. */
+  CHECK_TERMSIG;
 
   /* If we were explicitly placed in a subshell with (), we need
      to do the `shell cleanup' things, such as running traps[0]. */

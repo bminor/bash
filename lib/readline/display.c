@@ -2683,11 +2683,8 @@ rl_forced_update_display (void)
   register char *temp;
 
   if (visible_line)
-    {
-      temp = visible_line;
-      while (*temp)
-	*temp++ = '\0';
-    }
+    memset (visible_line, 0, line_size);
+
   rl_on_new_line ();
   forced_display++;
   (*rl_redisplay_function) ();
