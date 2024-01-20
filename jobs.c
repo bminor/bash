@@ -3077,9 +3077,13 @@ if (job == NO_JOB)
       /* Don't modify terminal pgrp if we are running in background or a
 	 subshell.  Make sure subst.c:command_substitute uses the same
 	 conditions to determine whether or not it should undo this and
-	 give the terminal to pipeline_pgrp. */
-      
+	 give the terminal to pipeline_pgrp. We don't give the terminal
+	 back to shell_pgrp if an async job in the background exits because
+	 we never gave it to that job in the first place. An async job in
+	 the foreground is one we started in the background and foregrounded
+	 with `fg', and gave it the terminal. */
       if ((flags & JWAIT_NOTERM) == 0 && running_in_background == 0 &&
+	  (job == NO_JOB || IS_ASYNC (job) == 0 || IS_FOREGROUND (job)) &&
 	  (subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0)
 	give_terminal_to (shell_pgrp, 0);
     }
@@ -3623,6 +3627,7 @@ start_job (job, foreground)
     {
       get_tty_state ();
       save_stty = shell_tty_info;
+      jobs[job]->flags &= ~J_ASYNC;	/* no longer async */
       /* Give the terminal to this job. */
       if (IS_JOBCONTROL (job))
 	give_terminal_to (jobs[job]->pgrp, 0);

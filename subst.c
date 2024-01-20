@@ -1693,7 +1693,7 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  t = extract_command_subst (string, &si, flags);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
-	  tlen = si - i - 1;
+	  tlen = si - i - 2;
 	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
 	  result[result_index++] = c;
 	  result[result_index++] = LPAREN;
@@ -1713,7 +1713,7 @@ extract_heredoc_dolbrace_string (string, sindex, quoted, flags)
 	  t = extract_process_subst (string, (string[i] == '<' ? "<(" : ">)"), &si, flags);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
 
-	  tlen = si - i - 1;
+	  tlen = si - i - 2;
 	  RESIZE_MALLOCED_BUFFER (result, result_index, tlen + 4, result_size, 64);
 	  result[result_index++] = c;
 	  result[result_index++] = LPAREN;
@@ -10802,7 +10802,11 @@ expand_subscript_string (string, quoted)
   oe = expand_no_split_dollar_star;
   ret = (char *)NULL;
 
+#if 0
   td.flags = W_NOPROCSUB|W_NOTILDE|W_NOSPLIT2;	/* XXX - W_NOCOMSUB? */
+#else
+  td.flags = W_NOPROCSUB|W_NOSPLIT2;	/* XXX - W_NOCOMSUB? */
+#endif
   td.word = savestring (string);		/* in case it's freed on error */
 
   expand_no_split_dollar_star = 1;

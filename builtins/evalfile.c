@@ -266,7 +266,7 @@ file_error_and_exit:
 #endif
 
   /* set the flags to be passed to parse_and_execute */
-  pflags = SEVAL_RESETLINE;
+  pflags = SEVAL_RESETLINE|SEVAL_NOOPTIMIZE;
   pflags |= (flags & FEVAL_HISTORY) ? 0 : SEVAL_NOHIST;
 
   if (flags & FEVAL_BUILTIN)

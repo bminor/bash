@@ -452,6 +452,21 @@ inputunit:	simple_list simple_list_terminator
 			      YYABORT;
 			    }
 			}
+	|	error YYEOF
+			{
+			  global_command = (COMMAND *)NULL;
+			  if (last_command_exit_value == 0)
+			    last_command_exit_value = EX_BADUSAGE;	/* force error return */
+			  if (interactive && parse_and_execute_level == 0)
+			    {
+			      handle_eof_input_unit ();
+			      YYACCEPT;
+			    }
+			  else
+			    {
+			      YYABORT;
+			    }
+			}
 	|	yacc_EOF
 			{
 			  /* Case of EOF seen by itself.  Do ignoreeof or
@@ -2897,9 +2912,9 @@ yylex ()
 
   if (current_token < 0)
 #if defined (YYERRCODE) && !defined (YYUNDEF)
-    current_token = YYERRCODE;
+    current_token = EOF_Reached ? YYEOF : YYERRCODE;
 #else
-    current_token = YYerror;
+    current_token = EOF_Reached ? YYEOF : YYUNDEF;
 #endif
 
   return (current_token);
@@ -3135,6 +3150,7 @@ time_command_acceptable ()
     case TIME:		/* time time pipeline */
     case TIMEOPT:	/* time -p time pipeline */
     case TIMEIGN:	/* time -p -- ... */
+    case DOLPAREN:
       return 1;
     default:
       return 0;
@@ -3694,6 +3710,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  free (ret);
 	  parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), close);
 	  EOF_Reached = 1;	/* XXX */
+	  parser_state |= PST_NOERROR;  /* avoid redundant error message */
 	  return (&matched_pair_error);
 	}
 
@@ -4156,6 +4173,7 @@ parse_comsub (qc, open, close, lenp, flags)
       expand_aliases = ps.expand_aliases;
 
       /* yyparse() has already called yyerror() and reset_parser() */
+      parser_state |= PST_NOERROR;
       return (&matched_pair_error);
     }
   else if (r != 0)

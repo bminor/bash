@@ -420,11 +420,19 @@ declare_internal (list, local_var)
 
       if (local_var && variable_context && STREQ (name, "-"))
 	{
+	  int o;
+
+	  o = localvar_inherit;
+	  localvar_inherit = 0;
 	  var = make_local_variable ("-", 0);
-	  FREE (value_cell (var));		/* just in case */
-	  value = get_current_options ();
-	  var_setvalue (var, value);
-	  VSETATTR (var, att_invisible);
+	  localvar_inherit = o;
+
+	  if (value_cell (var) == NULL)		/* no duplicate instances */
+	    {
+	      value = get_current_options ();
+	      var_setvalue (var, value);
+	      VSETATTR (var, att_invisible);
+	    }
 	  NEXT_VARIABLE ();
 	}
 
