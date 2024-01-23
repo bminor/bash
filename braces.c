@@ -115,6 +115,8 @@ brace_expand (char *text)
   do
     {
       c = brace_gobbler (text, tlen, &i, '{');	/* } */
+      if (i >= tlen)
+	break;
       c1 = c;
       /* Verify that c begins a valid brace expansion word.  If it doesn't, we
 	 go on.  Loop stops when there are no more open braces in the word. */
@@ -225,7 +227,7 @@ brace_expand (char *text)
       tack = expand_seqterm (amble, alen);
       if (tack)
 	goto add_tack;
-      else if (text[i + 1])
+      else if (i < tlen && text[i + 1])
 	{
 	  /* If the sequence expansion fails (e.g., because the integers
 	     overflow), but there is more in the string, try and process
@@ -635,6 +637,7 @@ brace_gobbler (char *text, size_t tlen, int *indx, int satisfy)
 	  if (i > tlen)
 	    {
 	      i = tlen;
+	      c = 0;
 	      break;
 	    }
 #else
@@ -691,6 +694,7 @@ comsub:
 	  if (i > tlen)
 	    {
 	      i = tlen;
+	      c = 0;
 	      break;
 	    }
 	  continue;

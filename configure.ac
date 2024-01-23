@@ -5,7 +5,7 @@ dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2024 Free Software Foundation, Inc.
+# Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.060])dnl
+AC_REVISION([for Bash 5.3, version 5.059])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -1030,11 +1030,8 @@ fi
 
 dnl behavior of system calls and library functions
 BASH_FUNC_DUP2_CLOEXEC_CHECK
+BASH_SYS_PGRP_SYNC
 BASH_SYS_SIGNAL_VINTAGE
-
-dnl https://lists.gnu.org/archive/html/bug-bash/2024-01/msg00047.html
-dnl BASH_SYS_PGRP_SYNC
-AC_DEFINE(PGRP_PIPE)
 
 dnl checking for the presence of certain library symbols
 BASH_SYS_ERRLIST

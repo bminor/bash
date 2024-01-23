@@ -8334,3 +8334,40 @@ doc/bash.1
 test.c
 	- binary_test: make sure all calls in posix mode use TEST_LOCALE for
 	  locale-specific string comparisons
+
+shell.c
+	- find_bashrc_file: remove
+
+				   1/20
+				   ----
+shell.c
+	- exit_shell: don't try to call rl_deprep_terminal, regardless of the
+	  readline state we inherited, if bash_readline_initialized is 0
+	  Fixes bug reported by Oguz <oguzismailuysal@gmail.com>
+	- shell_reinitialize: reset startup_state and reading_shell_script to 0;
+	  reset debugging_mode to 0
+
+				   1/22
+				   ----
+builtins/shopt.def
+	- reset_shopt_options: reset debugging_mode to 0
+
+builtins/set.def
+	- reset_shell_options: reset interactive_comments to 1
+
+braces.c
+	- brace_expand: if the first call to brace_gobbler consumes the entire
+	  string, don't try to call it again
+	- brace_expand: check that i < tlen before checking to see if
+	  expand_seqterm left more of the string unconsumed
+	- brace_gobbler: if extract_command_subst hits the end of the string
+	  without closing the command substitution, make sure we return 0 as
+	  well as set *i = tlen
+	  From a fuzzing report by Nathan Mills <the.true.nathan.mills@gmail.com>
+
+				   1/23
+				   ----
+subst.c
+	- function_substitute: unwind-protect current_builtin and this_shell_builtin
+	  like we do this_shell_function
+	  From a fuzzing report by Nathan Mills <the.true.nathan.mills@gmail.com>

@@ -49,6 +49,7 @@
 #include "flags.h"
 #include "jobs.h"
 #include "execute_cmd.h"
+#include "builtins.h"
 #include "filecntl.h"
 #include "trap.h"
 #include "pathexp.h"
@@ -6914,6 +6915,8 @@ function_substitute (char *string, int quoted, int flags)
   unwind_protect_pointer (subst_assign_varlist);
   unwind_protect_pointer (temporary_env);
   unwind_protect_pointer (this_shell_function);
+  unwind_protect_pointer (this_shell_builtin);
+  unwind_protect_pointer (current_builtin);
   unwind_protect_int (eof_encountered);
   add_unwind_protect (uw_pop_var_context, 0);
   add_unwind_protect (uw_maybe_restore_getopt_state, gs);

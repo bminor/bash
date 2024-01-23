@@ -430,6 +430,10 @@ reset_shopt_options (void)
   xpg_echo = 0;
 #endif /* DEFAULT_ECHO_TO_XPG */
 
+#if defined (DEBUGGER)
+  debugging_mode = 0;
+#endif
+
   shopt_login_shell = login_shell;
 }
 

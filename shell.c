@@ -984,8 +984,11 @@ exit_shell (int s)
 
   /* Clean up the terminal if we are in a state where it's been modified. */
 #if defined (READLINE)
-  if (RL_ISSTATE (RL_STATE_TERMPREPPED) && rl_deprep_term_function)
+  if (bash_readline_initialized && RL_ISSTATE (RL_STATE_TERMPREPPED) && rl_deprep_term_function)
+{
+itrace("exit_shell: calling rl_deprep_term_function");
     (*rl_deprep_term_function) ();
+}
 #endif
   if (read_tty_modified ())
     read_tty_cleanup ();
@@ -1121,15 +1124,6 @@ execute_profile_file (void)
     maybe_execute_file ("~/.profile", 1);
 }
 
-/* Return the name of the default interactive shell startup file. We just
-   return the name of the historical bash startup file, but we could look
-   at a BASHRC variable or some more elaborate scheme. */
-static inline char *
-find_bashrc_file (void)
-{
-  return DEFAULT_BASHRC;
-}
-
 static void
 execute_bashrc_file (void)
 {
@@ -1144,12 +1138,7 @@ execute_bashrc_file (void)
   if (bashrc_file)
     maybe_execute_file (bashrc_file, 1);
   else
-    {
-      char *fn;
-
-      if (fn = find_bashrc_file ())
-	maybe_execute_file (fn, 1);	/* don't have to free this yet */
-    }
+    maybe_execute_file (DEFAULT_BASHRC, 1);
 }
 
 static void
@@ -2004,12 +1993,24 @@ shell_reinitialize (void)
   no_rc = no_profile = 1;
 
   /* Things that get 0. */
-  login_shell = make_login_shell = interactive = executing = 0;
-  debugging = do_version = line_number = last_command_exit_value = 0;
-  forced_interactive = interactive_shell = 0;
+  login_shell = make_login_shell = executing = 0;
+  debugging = debugging_mode = 0;
+  do_version = line_number = last_command_exit_value = 0;
+  forced_interactive = interactive_shell = interactive = 0;
   subshell_environment = running_in_background = 0;
   expand_aliases = expaliases_flag = 0;
   bash_argv_initialized = 0;
+
+  /* 20240120 */
+  startup_state = reading_shell_script = 0;
+  /* XXX - inherit posixly_correct? */
+
+  /* The shell has never done this. Should it? */
+#if 0
+  reset_shell_flags ();
+  reset_shell_options ();
+  reset_shopt_options ();
+#endif
 
   /* XXX - should we set jobs_m_flag to 0 here? */
 
