@@ -363,7 +363,7 @@ rl_callback_sigcleanup (void)
   if (RL_ISSTATE (RL_STATE_ISEARCH))
     _rl_isearch_cleanup (_rl_iscxt, 0);
   else if (RL_ISSTATE (RL_STATE_NSEARCH))
-    _rl_nsearch_cleanup (_rl_nscxt, 0);
+    _rl_nsearch_sigcleanup (_rl_nscxt, 0);
   else if (RL_ISSTATE (RL_STATE_VIMOTION))
     RL_UNSETSTATE (RL_STATE_VIMOTION);
   else if (RL_ISSTATE (RL_STATE_NUMERICARG))
@@ -373,6 +373,9 @@ rl_callback_sigcleanup (void)
     }
   else if (RL_ISSTATE (RL_STATE_MULTIKEY))
     RL_UNSETSTATE (RL_STATE_MULTIKEY);
+  else if (RL_ISSTATE (RL_STATE_READSTR))
+    _rl_readstr_sigcleanup (_rl_rscxt, 0);
+
   if (RL_ISSTATE (RL_STATE_CHARSEARCH))
     RL_UNSETSTATE (RL_STATE_CHARSEARCH);
 

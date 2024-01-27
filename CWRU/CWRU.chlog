@@ -8371,3 +8371,68 @@ subst.c
 	- function_substitute: unwind-protect current_builtin and this_shell_builtin
 	  like we do this_shell_function
 	  From a fuzzing report by Nathan Mills <the.true.nathan.mills@gmail.com>
+
+				   1/24
+				   ----
+braces.c
+	- brace_gobbler: handle nofork command substitutions; skip over any
+	  enclosed command and any braces it contains
+
+bashline.c
+	- check_redir: return 0 if we're in a nofork comsub, so we will attempt
+	  command word completion if appropriate
+
+				   1/26
+				   ----
+lib/readline/readline.h
+	- RL_STATE_READSTR: new state flag saying we are reading an arbitrary
+	  string from the keyboard using rl_readstr
+
+lib/readline/rlprivate.h
+	- READSTR_FREEPMT: new context state flag for rl_readstr; indicates
+	  that we have allocated a new prompt with _rl_make_prompt_for_search
+	  and we should free it with rl_restore_prompt because rl_clear_message
+	  will not do it
+
+lib/readline/text.c
+	- _rl_readstr_init,_rl_readstr_cleanup: set and unset RL_STATE_READSTR
+	- _rl_unsave_saved_readstr_line: free any rl_undo_list, which we may
+	  have accumulated while reading the string, before restoring the line
+	  Fixes leaks reported by sparrowhawk996@gmail.com.
+	- _rl_readstr_init: set the READSTR_FREEPMT context flag after we
+	  call _rl_make_prompt_for_search, which calls rl_save_prompt
+	- _rl_readstr_sigcleanup: new function to call from signal cleanup;
+	  restores prompt and calls _rl_readstr_cleanup to free the readstr
+	  context
+	- _rl_readstr_restore: if the RL_READSTR_FREEPMT flag is set in the
+	  context, call rl_restore_prompt to deallocate the prompt we created
+
+lib/readline/callback.c
+	- rl_callback_sigcleanup: call _rl_readstr_sigcleanup to deallocate
+	  readstr state on a signal
+
+lib/readline/text.c
+	- rl_execute_named_command: free COMMAND before returning
+
+				   1/27
+				   ----
+lib/readline/rlprivate.h
+	- SF_FREEPMT: new flag for non-incremental search contexts: means we
+	  saved the prompt data with _rl_make_prompt_for_search and need to
+	  restore it with rl_restore_prompt, since rl_clear_message will not
+
+lib/readline/search.c
+	- _rl_nsearch_sigcleanup: new function that if calls rl_restore_prompt
+	  to clean up the saved prompt data if necessary before calling the
+	  context cleanup function, avoids memory leak
+	- _rl_nsearch_init: set the SF_FREEPMPT flag after calling
+	  _rl_make_prompt_from_search so we can clean it up properly on errors
+	- _rl_nsearch_abort,_rl_nsearch_dosearch: call rl_restore_prompt only
+	  if cxt->sflags includes SF_FREEPMT, manage SF_FREEPMT state
+
+lib/readline/signals.c
+	- _rl_state_sigcleanup: call _rl_nsearch_sigcleanup
+
+lib/readline/callback.c
+	- _rl_callback_sigcleanup: call _rl_nsearch_sigcleanup
+

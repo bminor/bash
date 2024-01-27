@@ -1971,10 +1971,13 @@ _rl_rscxt_dispose (_rl_readstr_cxt *cxt, int flags)
   xfree (cxt);
 }
 
+/* This isn't used yet */
 void
 _rl_free_saved_readstr_line ()
 {
   if (_rl_saved_line_for_readstr)
+    /* This doesn't free any saved undo list, if it needs to,
+       rl_clear_history shows how to do it. */
     _rl_free_saved_line (_rl_saved_line_for_readstr);
   _rl_saved_line_for_readstr = (HIST_ENTRY *)NULL;
 }
@@ -1983,7 +1986,10 @@ void
 _rl_unsave_saved_readstr_line ()
 {
   if (_rl_saved_line_for_readstr)
-    _rl_unsave_line (_rl_saved_line_for_readstr);
+    {
+      _rl_free_undo_list (rl_undo_list);
+      _rl_unsave_line (_rl_saved_line_for_readstr);	/* restores rl_undo_list */
+    }
   _rl_saved_line_for_readstr = (HIST_ENTRY *)NULL;
 }
 
@@ -2004,8 +2010,11 @@ _rl_readstr_init (int pchar, int flags)
   rl_end = rl_point = 0;
 
   p = _rl_make_prompt_for_search (pchar ? pchar : '@');
+  cxt->flags |= READSTR_FREEPMT;
   rl_message ("%s", p);
   xfree (p);
+
+  RL_SETSTATE (RL_STATE_READSTR);
 
   _rl_rscxt = cxt;  
 
@@ -2018,6 +2027,8 @@ _rl_readstr_cleanup (_rl_readstr_cxt *cxt, int r)
   _rl_rscxt_dispose (cxt, 0);
   _rl_rscxt = 0;
 
+  RL_UNSETSTATE (RL_STATE_READSTR);
+
   return (r != 1);
 }
 
@@ -2027,11 +2038,22 @@ _rl_readstr_restore (_rl_readstr_cxt *cxt)
   _rl_unsave_saved_readstr_line ();	/* restores rl_undo_list */
   rl_point = cxt->save_point;
   rl_mark = cxt->save_mark;
-  rl_restore_prompt ();		/* _rl_make_prompt_for_search saved it */
+  if (cxt->flags & READSTR_FREEPMT)
+    rl_restore_prompt ();		/* _rl_make_prompt_for_search saved it */
+  cxt->flags &= ~READSTR_FREEPMT;
   rl_clear_message ();
   _rl_fix_point (1);
 }
 
+int
+_rl_readstr_sigcleanup (_rl_readstr_cxt *cxt, int r)
+{
+  if (cxt->flags & READSTR_FREEPMT)
+    rl_restore_prompt ();		/* _rl_make_prompt_for_search saved it */
+  cxt->flags &= ~READSTR_FREEPMT;
+  return (_rl_readstr_cleanup (cxt, r));
+}
+  
 int   
 _rl_readstr_getchar (_rl_readstr_cxt *cxt)
 {
@@ -2130,7 +2152,7 @@ _rl_readstr_dispatch (_rl_readstr_cxt *cxt, int c)
       break;
 
     case ' ':
-      if ((cxt->flags & RL_READSTR_NOSPACE) == 0)
+      if ((cxt->flags & READSTR_NOSPACE) == 0)
 	{
 	  _rl_insert_char (1, c);
 	  break;
@@ -2273,7 +2295,7 @@ _rl_read_command_name ()
   char *ret;
   int c, r;
 
-  cxt = _rl_readstr_init ('!', RL_READSTR_NOSPACE);
+  cxt = _rl_readstr_init ('!', READSTR_NOSPACE);
   cxt->compfunc = _rl_readcmd_complete;
 
   /* skip callback stuff for now */
@@ -2344,5 +2366,6 @@ rl_execute_named_command (int count, int key)
       r = 1;
     }
 
+  free (command);
   return r;
 }

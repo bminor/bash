@@ -286,6 +286,7 @@ _rl_nsearch_init (int dir, int pchar)
   rl_end = rl_point = 0;
 
   p = _rl_make_prompt_for_search (pchar ? pchar : ':');
+  cxt->sflags |= SF_FREEPMT;
   rl_message ("%s", p);
   xfree (p);
 
@@ -313,11 +314,22 @@ _rl_nsearch_abort (_rl_search_cxt *cxt)
   _rl_unsave_saved_search_line ();
   rl_point = cxt->save_point;
   rl_mark = cxt->save_mark;
-  rl_restore_prompt ();
+  if (cxt->sflags & SF_FREEPMT)
+    rl_restore_prompt ();		/* _rl_make_prompt_for_search saved it */
+  cxt->sflags &= ~SF_FREEPMT;
   rl_clear_message ();
   _rl_fix_point (1);
 
   RL_UNSETSTATE (RL_STATE_NSEARCH);
+}
+
+int
+_rl_nsearch_sigcleanup (_rl_search_cxt *cxt, int r)
+{
+  if (cxt->sflags & SF_FREEPMT)
+    rl_restore_prompt ();		/* _rl_make_prompt_for_search saved it */
+  cxt->sflags &= ~SF_FREEPMT;
+  return (_rl_nsearch_cleanup (cxt, r));
 }
 
 /* Process just-read character C according to search context CXT.  Return -1
@@ -427,7 +439,9 @@ _rl_nsearch_dosearch (_rl_search_cxt *cxt)
 	{
 	  _rl_free_saved_search_line ();
 	  rl_ding ();
-	  rl_restore_prompt ();
+	  if (cxt->sflags & SF_FREEPMT)
+	    rl_restore_prompt ();
+	  cxt->sflags &= ~SF_FREEPMT;
 	  RL_UNSETSTATE (RL_STATE_NSEARCH);
 	  return -1;
 	}
@@ -452,7 +466,9 @@ _rl_nsearch_dosearch (_rl_search_cxt *cxt)
 #endif
     }
 
-  rl_restore_prompt ();
+  if (cxt->sflags & SF_FREEPMT)
+    rl_restore_prompt ();
+  cxt->sflags &= ~SF_FREEPMT;
   return (noninc_dosearch (noninc_search_string, cxt->direction, cxt->sflags&SF_PATTERN));
 }
 

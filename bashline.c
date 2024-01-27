@@ -1385,17 +1385,18 @@ bash_spell_correct_shellword (int count, int key)
 static inline int
 check_redir (int ti)
 {
-  register int this_char, prev_char;
+  int this_char, prev_char, next_char;
 
   /* Handle the two character tokens `>&', `<&', and `>|'.
      We are not in a command position after one of these. */
   this_char = rl_line_buffer[ti];
   prev_char = (ti > 0) ? rl_line_buffer[ti - 1] : 0;
+  next_char = (ti < rl_end) ? rl_line_buffer[ti + 1] : 0;
 
   if ((this_char == '&' && (prev_char == '<' || prev_char == '>')) ||
       (this_char == '|' && prev_char == '>'))
     return (1);
-  else if (this_char == '{' && prev_char == '$') /*}*/
+  else if (this_char == '{' && prev_char == '$' && FUNSUB_CHAR (next_char) == 0) /*}*/
     return (1);
 #if 0	/* Not yet */
   else if (this_char == '(' && prev_char == '$') /*)*/
@@ -1788,6 +1789,8 @@ bash_default_completion (const char *text, int start, int end, int qc, int compf
   if (*text == '$')
     {
       if (qc != '\'' && text[1] == '(') /* ) */
+	matches = rl_completion_matches (text, command_subst_completion_function);
+      else if (qc != '\'' && text[1] == '{' && FUNSUB_CHAR (text[2])) /* } */
 	matches = rl_completion_matches (text, command_subst_completion_function);
       else
 	{
@@ -2401,6 +2404,8 @@ command_subst_completion_function (const char *text, int state)
 	text++;
       else if (*text == '$' && text[1] == '(')	/* ) */
 	text += 2;
+      else if (*text == '$' && text[1] == '{' && FUNSUB_CHAR (text[2])) /*}*/
+	text += 3;	/* nofork command substitution */
       /* If the text was quoted, suppress any quote character that the
 	 readline completion code would insert. */
       rl_completion_suppress_quote = 1;
