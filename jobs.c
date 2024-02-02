@@ -965,8 +965,10 @@ bgp_prune (void)
 }
 #endif
 
-/* External interface to bgp_add; takes care of blocking and unblocking
-   SIGCHLD. Not really used. */
+/* External interface to bgp_add/bgp_search/bgp_delete; takes care of blocking
+   and unblocking SIGCHLD if needed. If retrieve_proc_status or delete_proc_status
+   is called with BLOCK non-zero, the caller must block and unblock SIGCHLD. */
+
 void
 save_proc_status (pid_t pid, int status)
 {
@@ -975,6 +977,32 @@ save_proc_status (pid_t pid, int status)
   BLOCK_CHILD (set, oset);
   bgp_add (pid, status);
   UNBLOCK_CHILD (oset);  
+}
+
+int
+retrieve_proc_status (pid_t pid, int block)
+{
+  int r;
+  sigset_t set, oset;
+
+  if (block)
+    BLOCK_CHILD (set, oset);
+  r = bgp_search (pid);
+  if (block)
+    UNBLOCK_CHILD (oset);
+  return r;
+}
+
+void
+delete_proc_status (pid_t pid, int block)
+{
+  sigset_t set, oset;
+
+  if (block)
+    BLOCK_CHILD (set, oset);
+  bgp_delete (pid);
+  if (block)
+    UNBLOCK_CHILD (oset);
 }
 
 #if defined (PROCESS_SUBSTITUTION)
@@ -3270,8 +3298,14 @@ return_job:
 	  if (jobs_list_frozen == 0)		/* must be running a funsub to get here */
 	    {
 	      notify_of_job_status ();		/* XXX */
+#if 1 /* TAG: bash-5.3 kre@munnari.oz.au 01/30/2024 */
+	      delete_job (i, posixly_correct ? DEL_NOBGPID : 0);
+#else
 	      delete_job (i, 0);
+#endif
 	    }
+	  else
+	    jobs[i]->flags |= J_NOTIFIED;	/* clean up later */
 #if defined (COPROCESS_SUPPORT)
 	  coproc_reap ();
 #endif
@@ -4305,7 +4339,7 @@ notify_of_job_status (void)
 		    }
 		  jobs[job]->flags |= J_NOTIFIED;
 		}
-	      else if (job_control)	/* XXX job control test added */
+	      else if (job_control)
 		{
 		  if (dir == 0)
 		    dir = current_working_directory ();
@@ -4315,8 +4349,16 @@ notify_of_job_status (void)
 			     _("(wd now: %s)\n"), polite_directory_format (dir));
 		}
 
-	      /* The code above and pretty_print_job take care of setting
-		 J_NOTIFIED as appropriate, but this is here for posterity. */
+	      /* This is where we set J_NOTIFIED for background jobs in
+		 non-interactive shells without job control enabled that are
+		 killed by SIGINT or SIGTERM (DONT_REPORT_SIGTERM) or SIGPIPE
+		 (DONT_REPORT_SIGPIPE) as long as those signals are not
+		 trapped, or that exit cleanly. 
+		 Interactive shells without job control enabled are handled
+		 above. */
+	      /* XXX - if we want to arrange to keep these jobs in the jobs
+		 list, instead of making them eligible to move to bgpids,
+		 this is where to change things. */
 	      jobs[job]->flags |= J_NOTIFIED;
 	      break;
 

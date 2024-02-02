@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2023 Free Software Foundation, Inc.
+Copyright (C) 1997-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -105,6 +105,50 @@ $END
 extern int errno;
 #endif
 
+/* We free the buffer used by mklong() if it's `too big'. */
+#define PRETURN(value) \
+  do \
+    { \
+      QUIT; \
+      retval = value; \
+      if (conv_bufsize > 4096 ) \
+	{ \
+	  free (conv_buf); \
+	  conv_bufsize = 0; \
+	  conv_buf = 0; \
+	} \
+      if (vflag) \
+	{ \
+	  SHELL_VAR *v; \
+	  v = builtin_bind_variable  (vname, vbuf, bindflags); \
+	  stupidly_hack_special_variables (vname); \
+	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
+	    retval = EXECUTION_FAILURE; \
+	  if (vbsize > 4096) \
+	    { \
+	      free (vbuf); \
+	      vbsize = 0; \
+	      vbuf = 0; \
+	    } \
+	  else if (vbuf) \
+	    vbuf[0] = 0; \
+	} \
+      else \
+	{ \
+	  if (ferror (stdout) == 0) \
+	    fflush (stdout); \
+	  QUIT; \
+	  if (ferror (stdout)) \
+	    { \
+	      sh_wrerror (); \
+	      clearerr (stdout); \
+	      retval = EXECUTION_FAILURE; \
+	    } \
+	} \
+      return (retval); \
+    } \
+  while (0)
+
 #define PC(c) \
   do { \
     char b[2]; \
@@ -120,7 +164,9 @@ extern int errno;
 #define PF(f, func) \
   do { \
     int nw; \
-    clearerr (stdout); \
+    if (vflag == 0) \
+      clearerr (stdout); \
+    errno = 0; \
     if (have_fieldwidth && have_precision) \
       nw = vflag ? vbprintf (f, fieldwidth, precision, func) : printf (f, fieldwidth, precision, func); \
     else if (have_fieldwidth) \
@@ -129,55 +175,16 @@ extern int errno;
       nw = vflag ? vbprintf (f, precision, func) : printf (f, precision, func); \
     else \
       nw = vflag ? vbprintf (f, func) : printf (f, func); \
+    if (nw < 0 || ferror (stdout)) \
+      { \
+	QUIT; \
+	if (vflag) \
+	  builtin_error ("%s", strerror (errno)); \
+	PRETURN (EXECUTION_FAILURE); \
+      } \
     tw += nw; \
     QUIT; \
-    if (ferror (stdout)) \
-      { \
-	sh_wrerror (); \
-	clearerr (stdout); \
-	return (EXECUTION_FAILURE); \
-      } \
   } while (0)
-
-/* We free the buffer used by mklong() if it's `too big'. */
-#define PRETURN(value) \
-  do \
-    { \
-      QUIT; \
-      if (vflag) \
-	{ \
-	  SHELL_VAR *v; \
-	  v = builtin_bind_variable  (vname, vbuf, bindflags); \
-	  stupidly_hack_special_variables (vname); \
-	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
-	    return (EXECUTION_FAILURE); \
-	} \
-      if (conv_bufsize > 4096 ) \
-	{ \
-	  free (conv_buf); \
-	  conv_bufsize = 0; \
-	  conv_buf = 0; \
-	} \
-      if (vbsize > 4096) \
-	{ \
-	  free (vbuf); \
-	  vbsize = 0; \
-	  vbuf = 0; \
-	} \
-      else if (vbuf) \
-	vbuf[0] = 0; \
-      if (ferror (stdout) == 0) \
-	fflush (stdout); \
-      QUIT; \
-      if (ferror (stdout)) \
-	{ \
-	  sh_wrerror (); \
-	  clearerr (stdout); \
-	  return (EXECUTION_FAILURE); \
-	} \
-      return (value); \
-    } \
-  while (0)
 
 #define SKIP1 "#'-+ 0"
 #define LENMODS "hjlLtz"
@@ -242,7 +249,7 @@ static int vflag = 0;
 static int bindflags = 0;
 static char *vbuf, *vname;
 static size_t vbsize;
-static int vblen;
+static size_t vblen;
 
 static intmax_t tw;
 
@@ -329,6 +336,7 @@ printf_builtin (WORD_LIST *list)
       return ((v == 0 || readonly_p (v) || noassign_p (v)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
     }
 
+  /* If the format string is empty after preprocessing, return immediately. */
   if (list->word->word == 0 || list->word->word[0] == '\0')
     return (EXECUTION_SUCCESS);
 
@@ -337,10 +345,6 @@ printf_builtin (WORD_LIST *list)
   retval = EXECUTION_SUCCESS;
 
   garglist = orig_arglist = list->next;
-
-  /* If the format string is empty after preprocessing, return immediately. */
-  if (format == 0 || *format == 0)
-    return (EXECUTION_SUCCESS);
 
   mb_cur_max = MB_CUR_MAX;
 
@@ -793,7 +797,7 @@ printf_builtin (WORD_LIST *list)
 	  modstart[1] = nextch;
 	}
 
-      if (ferror (stdout))
+      if (vflag == 0 && ferror (stdout))
 	{
 	  /* PRETURN will print error message. */
 	  PRETURN (EXECUTION_FAILURE);
@@ -928,7 +932,7 @@ printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
   for (; padlen < 0; padlen++)
     PC (' ');
 
-  return (ferror (stdout) ? -1 : 0);
+  return ((vflag == 0 && ferror (stdout)) ? -1 : 0);
 }
 
 #if defined (HANDLE_MULTIBYTE)
@@ -1035,7 +1039,7 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
     PC (' ');
 
   free (string);
-  return (ferror (stdout) ? -1 : 0);
+  return ((vflag == 0 && ferror (stdout)) ? -1 : 0);
 }
 #endif
   
@@ -1261,7 +1265,7 @@ vbadd (char *buf, int blen)
 
 #ifdef DEBUG
   if  (strlen (vbuf) != vblen)
-    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, (int)strlen (vbuf));
+    internal_error  ("printf:vbadd: vblen (%zu) != strlen (vbuf) (%zu)", vblen, strlen (vbuf));
 #endif
 
   return vbuf;
@@ -1277,6 +1281,8 @@ vbprintf (const char *format, ...)
   va_start (args, format);
   blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
   va_end (args);
+  if (blen < 0)
+    return (blen);
 
   nlen = vblen + blen + 1;
   if (nlen >= vbsize)
@@ -1286,6 +1292,8 @@ vbprintf (const char *format, ...)
       va_start (args, format);
       blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
       va_end (args);
+      if (blen < 0)
+	return (blen);
     }
 
   vblen += blen;
@@ -1293,7 +1301,7 @@ vbprintf (const char *format, ...)
 
 #ifdef DEBUG
   if  (strlen (vbuf) != vblen)
-    internal_error  ("printf:vbprintf: vblen (%d) != strlen (vbuf) (%d)", vblen, (int)strlen (vbuf));
+    internal_error  ("printf:vbprintf: vblen (%zu) != strlen (vbuf) (%zu)", vblen, strlen (vbuf));
 #endif
   
   return (blen);

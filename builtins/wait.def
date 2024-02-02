@@ -92,6 +92,7 @@ int wait_intr_flag;
 
 static int set_waitlist (WORD_LIST *);
 static void unset_waitlist (void);
+static int check_bgpids (WORD_LIST *, struct procstat *);
 
 /* Wait for the pid in LIST to stop or die.  If no arguments are given, then
    wait for all of the active background processes of the shell and return
@@ -210,6 +211,21 @@ wait_builtin (WORD_LIST *list)
 #if defined (JOB_CONTROL)
   if (nflag)
     {
+#if 0	/* TAG:bash-5.3 stevenpelley@gmail.com 01/22/2024 */
+      /* First let's see if there are any requested pids that have already
+	 been removed from the jobs list and saved on bgpids. */
+      if (list)
+	{
+	  status = check_bgpids (list, &pstat);
+	  if (status != -1)
+	    {
+	      if (vname)
+		builtin_bind_var_to_int (vname, pstat.pid, bindflags);
+	      WAIT_RETURN (status);	      
+	    }
+	}
+#endif
+
       if (list)
 	{
 	  opt = set_waitlist (list);
@@ -342,7 +358,7 @@ set_waitlist (WORD_LIST *list)
   for (l = list; l; l = l->next)
     {
       job = NO_JOB;
-      job = (l && valid_number (l->word->word, &pid) && pid == (pid_t) pid)
+      job = (l && l->word && valid_number (l->word->word, &pid) && pid == (pid_t) pid)
 		? get_job_by_pid ((pid_t) pid, 0, 0)
 		: get_job_spec (l);
       if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))
@@ -376,4 +392,41 @@ unset_waitlist (void)
       jobs[i]->flags &= ~J_WAITING;
   UNBLOCK_CHILD (oset);
 }
+
+#if 0 /* TAG:bash-5.3 */
+static int
+check_bgpids (WORD_LIST *list, struct procstat *pstat)
+{
+  sigset_t set, oset;
+  pid_t pid;
+  intmax_t ipid;
+  WORD_LIST *l;
+  int r, s;
+
+  r = -1;
+
+  BLOCK_CHILD (set, oset);
+  for (l = list; l; l = l->next)
+    {
+      if (l && valid_number (l->word->word, &ipid) && ipid == (pid_t) ipid)
+        pid = ipid;
+      else
+	continue;	/* skip job ids for now */
+
+      if ((s = retrieve_proc_status (pid, 0)) != -1)
+	{
+	  pstat->pid = pid;
+	  pstat->status = r = s;
+	  /* If running in posix mode, `wait -n pid' deletes pid from bgpids,
+	     just like `wait pid'. */
+	  if (posixly_correct)
+	    delete_proc_status (pid, 0);
+	  break;
+	}
+    }
+  UNBLOCK_CHILD (oset);
+
+  return r;
+}
+#endif
 #endif

@@ -8436,3 +8436,70 @@ lib/readline/signals.c
 lib/readline/callback.c
 	- _rl_callback_sigcleanup: call _rl_nsearch_sigcleanup
 
+				   1/29
+				   ----
+builtins/cd.def
+	- change_to_directory: don't try to canonicalize a NULL path that's
+	  NULL after make_absolute.
+	  From a report by Kerin Millar <kfm@plushkava.net>
+
+jobs.c
+	- retrieve_proc_status,delete_proc_status: external interfaces to
+	  bgp_search and bgp_delete, respectively; these take an argument
+	  that says whether or not to block SIGCHLD
+
+jobs.h
+	- retrieve_proc_status,delete_proc_status: extern declarations
+
+builtins/wait.def
+	- check_bgpids: new function to check whether a requested PID is in
+	  the bgpids table (retrieve_proc_status) and optionally delete it
+	  if it is (posixly_correct delete_proc_status) while returning its
+	  status. If the PID isn't in the bgpids table, return -1
+	- wait_builtin: if -n is supplied with pid/job arguments, use
+	  check_bgpids to check the bgpids table for any of the requested
+	  pids. Tagged for bash-5.3, might need another option
+	  From a report by Steven Pelley <stevenpelley@gmail.com>
+
+				   1/30
+				   ----
+redir.c
+	- redir_open: assume the AFS bug with O_CREAT and existing files in
+	  protected directories has been fixed over the years, so take out
+	  the workaround.
+	  From a report by Etienne Champetier <champetier.etienne@gmail.com>
+
+jobs.c
+	- wait_for_any_job: if the jobs list is frozen and we're running a
+	  funsub, mark the job as notified so it gets cleaned up later
+	- wait_for_any_job: if we're in posix mode, we should remove the job
+	  from the job list and not add it to the bgpids list, as posix
+	  requires
+
+builtins/set.def
+	- set_shellopts: use ASS_FORCE in the call to bind_variable so we
+	  don't have to mess with temporarily turning off readonly
+
+builtins/shopt.def
+	- set_bashopts: same
+	  Report by Emanuele Torre <torreemanuele6@gmail.com>
+
+				    2/1
+				    ---
+builtins/printf.def
+	- vblen: make it a size_t to avoid going negative on underflow
+	- clearerr, ferror, fflush: don't test these if vflag is set and we're
+	  writing to a string (multiple places)
+	- vbprintf: pass through failure returns (< 0) from vsnprintf to the
+	  caller(s) so we can return on errors
+	- printf_builtin: remove redundant test for empty or missing format
+	  string
+	- PF: call builtin_error if vflag is set, sh_wrerror otherwise
+	  (via PRETURN)
+	- PF: use PRETURN so we can get partial output to the variable on
+	  error (if vflag is set)
+	- PRETURN: free conv_buf before attempting the write (it would get
+	  cleaned up on the next call, but why not)
+	- PRETURN: clean up vbuf only if vflag is set, and clean it up on
+	  error (it would get cleaned up on the next call, but...)
+	  Fixes from Grisha Levit <grishalevit@gmail.com>

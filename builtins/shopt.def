@@ -849,17 +849,12 @@ set_bashopts (void)
 
   v = find_variable ("BASHOPTS");
 
-  /* Turn off the read-only attribute so we can bind the new value, and
-     note whether or not the variable was exported. */
-  if (v)
-    {
-      VUNSETATTR (v, att_readonly);
-      exported = exported_p (v);
-    }
-  else
-    exported = 0;
+  /* Note whether or not the variable was exported so we can adjust after the
+     assignment. */
+  exported = v ? exported_p (v) : 0;
 
-  v = bind_variable ("BASHOPTS", value, 0);
+  /* ASS_FORCE so we don't have to temporarily turn off readonly */
+  v = bind_variable ("BASHOPTS", value, ASS_FORCE);
 
   /* Turn the read-only attribute back on, and turn off the export attribute
      if it was set implicitly by mark_modified_vars and SHELLOPTS was not

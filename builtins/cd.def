@@ -538,8 +538,11 @@ change_to_directory (char *newdir, int nolinks, int xattr)
   /* TDIR is either the canonicalized absolute pathname of NEWDIR
      (nolinks == 0) or the absolute physical pathname of NEWDIR
      (nolinks != 0). */
-  tdir = nolinks ? sh_physpath (t, 0)
-		 : sh_canonpath (t, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+  if (t && *t)
+    tdir = nolinks ? sh_physpath (t, 0)
+		   : sh_canonpath (t, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+  else
+    tdir = NULL;
 
   ndlen = strlen (newdir);
 

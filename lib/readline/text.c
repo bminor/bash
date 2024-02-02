@@ -2093,6 +2093,9 @@ _rl_readstr_dispatch (_rl_readstr_cxt *cxt, int c)
   if (c < 0)
     c = CTRL ('C');  
 
+  /* could consider looking up the function bound to they key and dispatching
+     off that, but you want most characters inserted by default without having
+     to quote. */
   switch (c)
     {
     case CTRL('W'):
@@ -2167,6 +2170,12 @@ _rl_readstr_dispatch (_rl_readstr_cxt *cxt, int c)
 	  return -1;
 	}
       break;
+
+#if 0
+    case CTRL('_'):
+      rl_do_undo ();
+      break;
+#endif
 
     default:
 #if defined (HANDLE_MULTIBYTE)

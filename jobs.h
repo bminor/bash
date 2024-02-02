@@ -237,6 +237,8 @@ extern int discard_pipeline (PROCESS *);
 extern void append_process (char *, pid_t, int, int);
 
 extern void save_proc_status (pid_t, int);
+extern int retrieve_proc_status (pid_t, int);
+extern void delete_proc_status (pid_t, int);
 
 extern PROCESS *procsub_add (PROCESS *);
 extern PROCESS *procsub_search (pid_t);
