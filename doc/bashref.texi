@@ -1999,8 +1999,6 @@ where @var{x} and @var{y} are either integers or letters,
 and @var{incr}, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 @var{x} and @var{y}, inclusive.
-Supplied integers may be prefixed with @samp{0} to force each term to have the
-same width.
 When either @var{x} or @var{y} begins with a zero, the shell
 attempts to force all generated terms to contain the same number of digits,
 zero-padding where necessary.
@@ -4313,10 +4311,12 @@ The expression is parsed and evaluated according to precedence
 using the rules listed above.
 @end table
 
+If the shell is in @sc{posix} mode, or if the expression is part
+of the @code{[[} command,
+the @samp{<} and @samp{>} operators sort using the current locale.
 If the shell is not in @sc{posix} mode,
-when used with @code{test} or @samp{[}, the @samp{<} and @samp{>}
-operators sort lexicographically using ASCII ordering.
-If the shell is in @sc{posix} mode, these operators use the current locale.
+the @code{test} and @samp{[} commands
+sort lexicographically using ASCII ordering.
 
 The historical operator-precedence parsing with 4 or more arguments can
 lead to ambiguities when it encounters strings that look like primaries.
@@ -6771,9 +6771,11 @@ after reading any startup files.
 
 @item HISTIGNORE
 A colon-separated list of patterns used to decide which command
-lines should be saved on the history list.  Each pattern is
+lines should be saved on the history list.
+Each pattern is
 anchored at the beginning of the line and must match the complete
-line (no implicit @samp{*} is appended).  Each pattern is tested
+line (Bash will not implicitly append a @samp{*}).
+Each pattern is tested
 against the line after the checks specified by @env{HISTCONTROL}
 are applied.  In addition to the normal shell pattern matching
 characters, @samp{&} matches the previous history line.  @samp{&}

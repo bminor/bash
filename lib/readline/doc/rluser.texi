@@ -405,11 +405,12 @@ set editing-mode vi
 @end example
 
 Variable names and values, where appropriate, are recognized without regard
-to case.  Unrecognized variable names are ignored.
+to case.
+Unrecognized variable names are ignored.
 
 Boolean variables (those that can be set to on or off) are set to on if
-the value is null or empty, @var{on} (case-insensitive), or 1.  Any other
-value results in the variable being set to off.
+the value is null or empty, @var{on} (case-insensitive), or 1.
+Any other value results in the variable being set to off.
 
 @ifset BashFeatures
 The @w{@code{bind -V}} command lists the current Readline variable names
@@ -723,11 +724,11 @@ The default is @samp{off}.
 
 @item match-hidden-files
 @vindex match-hidden-files
-This variable, when set to @samp{on}, causes Readline to match files whose
+This variable, when set to @samp{on}, forces Readline to match files whose
 names begin with a @samp{.} (hidden files) when performing filename
 completion.
-If set to @samp{off}, the leading @samp{.} must be
-supplied by the user in the filename to be completed.
+If set to @samp{off}, the user must include the leading @samp{.}
+in the filename to be completed.
 This variable is @samp{on} by default.
 
 @item menu-complete-display-prefix

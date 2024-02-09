@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jan 19 11:53:57 EST 2024
+.\"	Last Change: Mon Feb  5 14:37:12 EST 2024
 .\"
-.TH HISTORY 3 "2024 January 19" "GNU History 8.3"
+.TH HISTORY 3 "2024 February 5" "GNU History 8.3"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -18,7 +18,7 @@
 ..
 .de Q
 .ie \n(.g \(lq\\$1\(rq\\$2
-.el \{
+.el \{\
 .  if t ``\\$1''\\$2
 .  if n "\\$1"\\$2
 .\}
@@ -53,7 +53,7 @@ history \- GNU History Library
 Many programs read input from the user a line at a time.  The GNU
 History library is able to keep track of those lines, associate arbitrary
 data with each line, and utilize information from previous lines in
-composing new ones. 
+composing new ones.
 .PP
 .SH "HISTORY EXPANSION"
 The history library supports a history expansion feature that
@@ -78,7 +78,7 @@ and the portions of that line that are acted upon are \fIwords\fP.
 Various \fImodifiers\fP are available to manipulate the selected words.
 The line is broken into words in the same fashion as \fBbash\fP
 does when reading input,
-so that several words that would otherwise be separated 
+so that several words that would otherwise be separated
 are considered one word when surrounded by quotes (see the
 description of \fBhistory_tokenize()\fP below).
 .PP
@@ -118,7 +118,8 @@ Refer to the current command minus
 .IR n .
 .TP
 .B !!
-Refer to the previous command.  This is a synonym for `!\-1'.
+Refer to the previous command.  This is a synonym for
+.Q !\-1 .
 .TP
 .B !\fIstring\fR
 Refer to the most recent command
@@ -182,15 +183,22 @@ The last word.  This is usually the last argument, but will expand to the
 zeroth word if there is only one word in the line.
 .TP
 .B %
-The first word matched by the most recent `?\fIstring\fR?' search,
+The first word matched by the most recent
+.Q ?\fIstring\fR?
+search,
 if the search string begins with a character that is part of a word.
 .TP
 .I x\fB\-\fPy
-A range of words; `\-\fIy\fR' abbreviates `0\-\fIy\fR'.
+A range of words;
+.Q \-\fIy\fR
+abbreviates
+.Q 0\-\fIy\fR .
 .TP
 .B *
-All of the words but the zeroth.  This is a synonym
-for `\fI1\-$\fP'.  It is not an error to use
+All of the words but the zeroth.
+This is a synonym for
+.Q \fI1\-$\fP .
+It is not an error to use
 .B *
 if there is just one
 word in the event; the empty string is returned in that case.
@@ -207,7 +215,8 @@ If a word designator is supplied without an event specification, the
 previous command is used as the event.
 .SS Modifiers
 After the optional word designator, there may appear a sequence of
-one or more of the following modifiers, each preceded by a `:'.
+one or more of the following modifiers, each preceded by a
+.Q : .
 These modify, or edit, the word or words selected from the history event.
 .PP
 .PD 0
@@ -279,17 +288,26 @@ is deleted.
 Repeat the previous substitution.
 .TP
 .B g
-Cause changes to be applied over the entire event line.  This is
-used in conjunction with `\fB:s\fP' (e.g., `\fB:gs/\fIold\fP/\fInew\fP/\fR')
-or `\fB:&\fP'.  If used with
-`\fB:s\fP', any delimiter can be used
-in place of /, and the final delimiter is optional
+Cause changes to be applied over the entire event line.
+This is used in conjunction with
+.Q \fB:s\fP
+(e.g.,
+.Q \fB:gs/\fIold\fP/\fInew\fP/\fR )
+or
+.Q \fB:&\fP .
+If used with
+.Q \fB:s\fP ,
+any delimiter can be used in place of /,
+and the final delimiter is optional
 if it is the last character of the event line.
 An \fBa\fP may be used as a synonym for \fBg\fP.
 .TP
 .B G
-Apply the following `\fBs\fP' or `\fB&\fP' modifier once to each word
-in the event line.
+Apply the following
+.Q \fBs\fP
+ or
+.Q \fB&\fP
+modifier once to each word in the event line.
 .PD
 .SH "PROGRAMMING WITH HISTORY FUNCTIONS"
 This section describes how to use the History library in other programs.
@@ -500,8 +518,8 @@ offset.  The search is anchored: matching lines must begin with
 \fIstring\fP.  If \fIdirection\fP is less than 0, then the search is
 through previous entries, otherwise through subsequent entries.
 If \fIstring\fP is found, then the
-current history index is set to that entry, and the return value is 0. 
-Otherwise, nothing is changed, and a -1 is returned. 
+current history index is set to that entry, and the return value is 0.
+Otherwise, nothing is changed, and a -1 is returned.
 
 .Fn3 int history_search_pos "const char *string" "int direction" "int pos"
 Search for \fIstring\fP in the history list, starting at \fIpos\fP, an
@@ -632,7 +650,7 @@ This is disabled by default.
 
 .Vb "char *" history_word_delimiters
 The characters that separate tokens for \fBhistory_tokenize()\fP.
-The default value is \fB"\ \et\en()<>;&|"\fP.
+The default value is \fB\(dq\ \et\en()<>;&|\(dq\fP.
 
 .Vb "char *" history_no_expand_chars
 The list of characters which inhibit history expansion if found immediately
@@ -674,7 +692,7 @@ It is intended for use by applications like \fBbash\fP that use the history
 expansion character for additional purposes.
 By default, this variable is set to \fBNULL\fP.
 .SH FILES
-.PD 0 
+.PD 0
 .TP
 .FN \(ti/.history
 Default filename for reading and writing saved history
