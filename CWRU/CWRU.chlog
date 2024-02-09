@@ -1,4 +1,4 @@
-
+\
 				 12/6/2020
 				 ---------
 
@@ -8561,3 +8561,13 @@ bashline.c
 doc/bash.1,lib/readline/doc/readline.3
 	- minor updates to handle old versions of troff and groff warnings
 	  Fixes from G. Branden Robinson <g.branden.robinson@gmail.com>
+
+				    2/7
+				    ---
+jobs.c
+	- notify_of_job_status: in non-interactive shells, if we're not going
+	  to print information about a terminated background job
+	  (SIGINT/SIGTERM/SIGPIPE), don't mark it as notified, in the same
+	  way that we don't mark background jobs that exit cleanly as notified
+	  Inspired by a discussion with Robert Elz <kre@munnari.oz.au> and
+	  https://lists.gnu.org/archive/html/bug-bash/2024-01/msg00189.html

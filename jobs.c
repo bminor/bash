@@ -4282,6 +4282,19 @@ notify_of_job_status (void)
 		((DEADJOB (job) && IS_FOREGROUND (job) == 0) || STOPPED (job)))
 	    continue;
 	  
+	  /* Do the same thing and don't print anything or mark as notified
+	     for the signals we're not going to report on */
+	  else if (startup_state == 0 && DEADJOB (job) && IS_FOREGROUND (job) == 0 &&
+		WIFSIGNALED (s) && (termsig == SIGINT
+#if defined (DONT_REPORT_SIGTERM)
+		|| termsig == SIGTERM
+#endif
+#if defined (DONT_REPORT_SIGPIPE)
+		|| termsig == SIGPIPE
+#endif
+		))
+	    continue;
+
 	  /* If job control is disabled, don't print the status messages.
 	     Mark dead jobs as notified so that they get cleaned up.  If
 	     startup_state == 2 and subshell_environment has the
@@ -4304,7 +4317,7 @@ notify_of_job_status (void)
 
 	  /* Print info on jobs that are running in the background,
 	     and on foreground jobs that were killed by anything
-	     except SIGINT (and possibly SIGPIPE). */
+	     except SIGINT (and possibly SIGTERM and SIGPIPE). */
 	  switch (JOBSTATE (job))
 	    {
 	    case JDEAD:
@@ -4324,6 +4337,7 @@ notify_of_job_status (void)
 		}
 	      else if (IS_FOREGROUND (job))
 		{
+		  /* foreground jobs, interactive and non-interactive shells */
 #if !defined (DONT_REPORT_SIGPIPE)
 		  if (termsig && WIFSIGNALED (s) && termsig != SIGINT)
 #else
@@ -4337,10 +4351,13 @@ notify_of_job_status (void)
 
 		      fprintf (stderr, "\n");
 		    }
+		  /* foreground jobs that exit cleanly */
 		  jobs[job]->flags |= J_NOTIFIED;
 		}
 	      else if (job_control)
 		{
+		  /* background jobs with job control, interactive and
+		     non-interactive shells */
 		  if (dir == 0)
 		    dir = current_working_directory ();
 		  pretty_print_job (job, JLIST_STANDARD, stderr);
@@ -4349,16 +4366,9 @@ notify_of_job_status (void)
 			     _("(wd now: %s)\n"), polite_directory_format (dir));
 		}
 
-	      /* This is where we set J_NOTIFIED for background jobs in
-		 non-interactive shells without job control enabled that are
-		 killed by SIGINT or SIGTERM (DONT_REPORT_SIGTERM) or SIGPIPE
-		 (DONT_REPORT_SIGPIPE) as long as those signals are not
-		 trapped, or that exit cleanly. 
-		 Interactive shells without job control enabled are handled
+	      /* Interactive shells without job control enabled are handled
 		 above. */
-	      /* XXX - if we want to arrange to keep these jobs in the jobs
-		 list, instead of making them eligible to move to bgpids,
-		 this is where to change things. */
+	      /* XXX - this is a catch-all in case we missed a state */
 	      jobs[job]->flags |= J_NOTIFIED;
 	      break;
 

@@ -45,7 +45,7 @@
    when a job like `cat jobs.c | exit 1' terminates due to a SIGPIPE. */
 #define DONT_REPORT_SIGPIPE
 
-/* Define DONT_REPORT_SIGTERM if you don't want to see `Terminates' message
+/* Define DONT_REPORT_SIGTERM if you don't want to see `Terminated' message
    when a job exits due to SIGTERM, since that's the default signal sent
    by the kill builtin. */
 #define DONT_REPORT_SIGTERM
