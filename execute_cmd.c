@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -207,6 +207,9 @@ char *this_command_name;
    a debugger to know where exactly the program is currently executing. */
 char *the_printed_command_except_trap;
 
+/* Used to compute the correct line number. */
+COMMAND *currently_executing_command;
+
 /* For catching RETURN in a function. */
 int return_catch_flag;
 int return_catch_value;
@@ -266,8 +269,6 @@ int executing_command_builtin = 0;
 struct stat SB;		/* used for debugging */
 
 static int special_builtin_failed;
-
-static COMMAND *currently_executing_command;
 
 /* The line number that the currently executing function starts on. */
 static int function_line_number;

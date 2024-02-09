@@ -1,6 +1,6 @@
 /* callback.c -- functions to use readline as an X `callback' mechanism. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -323,6 +323,15 @@ rl_callback_handler_remove (void)
   rl_linefunc = NULL;
   RL_UNSETSTATE (RL_STATE_CALLBACK);
   RL_CHECK_SIGNALS ();
+
+  /* Do what we need to do to manage the undo list if we haven't already done
+     it in rl_callback_read_char(). If there's no undo list, we don't need to
+     do anything. It doesn't matter if we try to revert all previous lines a
+     second time; none of the history entries will have an undo list. */
+  if (rl_undo_list)
+    readline_common_teardown ();
+  /* At this point, rl_undo_list == NULL. */
+
   if (in_handler)
     {
       in_handler = 0;

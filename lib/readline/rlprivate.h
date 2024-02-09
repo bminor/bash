@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2024 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -270,10 +270,11 @@ extern char *_rl_savestring (const char *);
  * Undocumented private functions					 *
  *************************************************************************/
 
-#if defined(READLINE_CALLBACKS)
+#if defined (READLINE_CALLBACKS)
 
 /* readline.c */
 extern void readline_internal_setup (void);
+extern void readline_common_teardown (void);
 extern char *readline_internal_teardown (int);
 extern int readline_internal_char (void);
 

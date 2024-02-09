@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -606,6 +606,7 @@ initialize_readline (void)
   rl_bind_key_if_unbound_in_map ('@', posix_edit_macros, vi_movement_keymap);
 #  endif
 
+  rl_add_defun ("bash-vi-complete", bash_vi_complete, -1);
   rl_bind_key_in_map ('\\', bash_vi_complete, vi_movement_keymap);
   rl_bind_key_in_map ('*', bash_vi_complete, vi_movement_keymap);
   rl_bind_key_in_map ('=', bash_vi_complete, vi_movement_keymap);
@@ -4012,10 +4013,38 @@ bash_specific_completion (int what_to_do, rl_compentry_func_t *generator)
 #endif	/* SPECIFIC_COMPLETION_FUNCTIONS */
 
 #if defined (VI_MODE)
+/* This does pretty much what _rl_vi_advance_point does. */
+static inline int
+vi_advance_point (void)
+{
+  int point;
+  DECLARE_MBSTATE;
+
+  point = rl_point;
+  if (rl_point < rl_end)
+#if defined (HANDLE_MULTIBYTE)
+    {
+      if (locale_mb_cur_max == 1)
+	rl_point++;
+      else
+	{
+	  point = rl_point;
+	  ADVANCE_CHAR (rl_line_buffer, rl_end, rl_point);
+	  if (point == rl_point || rl_point > rl_end)
+	    rl_point = rl_end;
+	}
+    }
+#else
+    rl_point++:
+#endif
+  return point;
+}
+
 /* Completion, from vi mode's point of view.  This is a modified version of
    rl_vi_complete which uses the bash globbing code to implement what POSIX
-   specifies, which is to append a `*' and attempt filename generation (which
-   has the side effect of expanding any globbing characters in the word). */
+   specifies, which is to optinally append a `*' and attempt filename
+   generation (which has the side effect of expanding any globbing characters
+   in the word). */
 static int
 bash_vi_complete (int count, int key)
 {
@@ -4027,7 +4056,7 @@ bash_vi_complete (int count, int key)
     {
       if (!whitespace (rl_line_buffer[rl_point + 1]))
 	rl_vi_end_word (1, 'E');
-      rl_point++;
+      vi_advance_point ();
     }
 
   /* Find boundaries of current word, according to vi definition of a

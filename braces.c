@@ -1,7 +1,7 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2020,2022-2023 Free Software Foundation, Inc.
-
+/* Copyright (C) 1987-2020,2022-2024 Free Software Foundation, Inc.
+`
    This file is part of GNU Bash, the Bourne Again SHell.
 
    Bash is free software: you can redistribute it and/or modify

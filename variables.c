@@ -503,25 +503,18 @@ initialize_shell_variables (char **env, int privmode)
 #  endif /* ARRAY_EXPORT */
 #endif
 	{
-	  ro = 0;
-	  /* If we processed a command-line option that caused SHELLOPTS to be
-	     set, it may already be set (and read-only) by the time we process
-	     the shell's environment. */
-	  if (/* posixly_correct &&*/ STREQ (name, "SHELLOPTS"))
-	    {
-	      temp_var = find_variable ("SHELLOPTS");
-	      ro = temp_var && readonly_p (temp_var);
-	      if (temp_var)
-		VUNSETATTR (temp_var, att_readonly);
-	    }
+	  /* If we processed a command-line option that caused SHELLOPTS or
+	     BASHOPTS to be set, it may already be set (and read-only) by the
+	     time we process the shell's environment. */
+	  ro = STREQ (name, "SHELLOPTS") || STREQ (name, "BASHOPTS");
 	  if (valid_identifier (name))
 	    {
-	      temp_var = bind_variable (name, string, 0);
+	      temp_var = bind_variable (name, string, ro ? ASS_FORCE : 0);
 	      if (temp_var)
 		{
 		  VSETATTR (temp_var, (att_exported | att_imported));
 		  if (ro)
-		    VSETATTR (temp_var, att_readonly);
+		    VSETATTR (temp_var, att_readonly);	/* just make sure */
 		}
 	    }
 	  else
@@ -981,8 +974,8 @@ set_ppid (void)
   name = inttostr (getppid (), namebuf, sizeof(namebuf));
   temp_var = find_variable ("PPID");
   if (temp_var)
-    VUNSETATTR (temp_var, (att_readonly | att_exported));
-  temp_var = bind_variable ("PPID", name, 0);
+    VUNSETATTR (temp_var, att_exported);
+  temp_var = bind_variable ("PPID", name, ASS_FORCE);
   VSETATTR (temp_var, (att_readonly | att_integer));
 }
 

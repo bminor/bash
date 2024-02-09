@@ -8503,3 +8503,55 @@ builtins/printf.def
 	- PRETURN: clean up vbuf only if vflag is set, and clean it up on
 	  error (it would get cleaned up on the next call, but...)
 	  Fixes from Grisha Levit <grishalevit@gmail.com>
+
+				    2/2
+				    ---
+doc/bash.1,doc/bashref.texi
+	- word expansions: make it clearer that quote removal is one of the
+	  shell word expansions
+
+execute_cmd.c,execute_cmd.h
+	- currently_executing_command: no longer static, so other parts of
+	  the shell can save and restore it if necessary
+
+subst.c
+	- function_substitute: unwind-protect currently_executing_command,
+	  since parse_and_execute can overwrite it in the current shell
+	  execution context.
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/readline.c
+	- readline_common_teardown: new function from the guts of
+	  readline_internal_teardown, manages and deallocates rl_undo_list.
+
+lib/readline/callback.c
+	- rl_callback_handler_remove: if we're removing the line handler
+	  while we still have an undo list, we didn't call
+	  readline_internal_teardown. Call readline_common_teardown to manage
+	  the undo list in case we are calling this from a signal handler
+	  but not exiting the program.
+	  Fixes leaks reported by sparrowhawk996@gmail.com.
+
+variables.c
+	- initialize_shell_variables: use ASS_FORCE when binding SHELLOPTS or
+	  BASHOPTS if we get them from the environment, in case they've
+	  already been created as shell variables and set to readonly (like
+	  changes from 1/30)
+	- set_ppid: use ASS_FORCE in the call to bind_variable instead of
+	  temporarily turning off att_readonly
+
+subst.c
+	- extract_delimited_string: pass FLAGS down to skip_single_quoted and
+	  skip_double_quoted so we propagate SX_COMMAND and SX_COMPLETE
+	  properly.
+	  Fixes bug reported by A4-Tacks <wdsjxhno1001@163.com>
+
+				    2/3
+				    ---
+bashline.c
+	- initialize_readline: add `bash-vi-complete' as a bindable command
+	  name so users can bind other key sequences to it
+	- vi_advance_point: function to advance point by one character even
+	  in the presence of multibyte characters 
+	- bash_vi_complete: call vi_advance_point instead of just incrementing
+	  rl_point

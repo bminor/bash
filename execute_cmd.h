@@ -63,6 +63,7 @@ extern int stdin_redir;
 extern int line_number_for_err_trap;
 
 extern char *the_printed_command_except_trap;
+extern COMMAND *currently_executing_command;
 
 extern char *this_command_name;
 extern SHELL_VAR *this_shell_function;

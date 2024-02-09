@@ -1,5 +1,7 @@
 @comment %**start of header (This is for running Texinfo on a region.)
+@ifclear BashFeatures
 @setfilename rluser.info
+@end ifclear
 @comment %**end of header (This is for running Texinfo on a region.)
 
 @ignore
@@ -1874,8 +1876,10 @@ Display version information about the current instance of Bash.
 Expand the line by performing shell word expansions.  
 This performs alias and history expansion,
 $'@var{string}' and $"@var{string}" quoting,
-tilde expansion, parameter and variable expansion, arithmetic expansion,  
+tilde expansion, parameter and variable expansion, arithmetic expansion,
+command and proces substitution,
 word splitting, and quote removal.  
+An explicit argument suppresses command and process substitution.
 
 @item history-expand-line (M-^)
 Perform history expansion on the current line.

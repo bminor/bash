@@ -1911,7 +1911,8 @@ to the filename used to invoke Bash, as given by argument zero.
 @cindex expansion
 
 Expansion is performed on the command line after it has been split into
-@code{token}s.  There are seven kinds of expansion performed:
+@code{token}s.
+Bash performs these expansions:
 
 @itemize @bullet
 @item brace expansion
@@ -1921,6 +1922,7 @@ Expansion is performed on the command line after it has been split into
 @item arithmetic expansion
 @item word splitting
 @item filename expansion
+@item quote removal
 @end itemize
 
 @menu
@@ -1943,7 +1945,8 @@ brace expansion;
 tilde expansion, parameter and variable expansion, arithmetic expansion,
 and command substitution (done in a left-to-right fashion);
 word splitting;
-and filename expansion.
+filename expansion;
+and quote removal.
 
 On systems that can support it, there is an additional expansion
 available: @dfn{process substitution}.
@@ -1951,9 +1954,11 @@ This is performed at the
 same time as tilde, parameter, variable, and arithmetic expansion and
 command substitution.
 
-After these expansions are performed, quote characters present in the
-original word are removed unless they have been quoted themselves
-(@dfn{quote removal}). @xref{Quote Removal} for more details.
+@dfn{Quote removal} is always performed last.
+It removes quote characters present in the original word,
+not ones resulting from one of the other expansions,
+unless they have been quoted themselves.
+@xref{Quote Removal} for more details.
 
 Only brace expansion, word splitting, and filename expansion
 can increase the number of words of the expansion; other expansions
@@ -3900,7 +3905,7 @@ If @var{directory} is not supplied, the value of the @env{HOME}
 shell variable is used.
 If the shell variable
 @env{CDPATH} exists, @code{cd} uses it as a search path:
-{cd} searches each directory name in @env{CDPATH} for
+@code{cd} searches each directory name in @env{CDPATH} for
 @var{directory}, with alternative directory names in @env{CDPATH}
 separated by a colon (@samp{:}).
 If @var{directory} begins with a slash, @env{CDPATH} is not used.

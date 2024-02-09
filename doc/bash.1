@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Jan 18 11:41:18 EST 2024
+.\"	Last Change: Fri Feb  2 09:38:21 EST 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 January 18" "GNU Bash 5.3"
+.TH BASH 1 "2024 February 2" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2978,22 +2978,24 @@ builtins display array values in a way that allows them to be
 reused as assignments.
 .SH EXPANSION
 Expansion is performed on the command line after it has been split into
-words.  There are seven kinds of expansion performed:
+words.  The shell performs these expansions:
 .IR "brace expansion" ,
 .IR "tilde expansion" ,
 .IR "parameter and variable expansion" ,
 .IR "command substitution" ,
 .IR "arithmetic expansion" ,
 .IR "word splitting" ,
+.IR "pathname expansion" ,
 and
-.IR "pathname expansion" .
+.IR "quote removal .
 .PP
 The order of expansions is:
 brace expansion;
 tilde expansion, parameter and variable expansion, arithmetic expansion,
 and command substitution (done in a left-to-right fashion);
 word splitting;
-and pathname expansion.
+pathname expansion;
+and quote removal.
 .PP
 On systems that can support it, there is an additional expansion
 available: \fIprocess substitution\fP.
@@ -3001,9 +3003,10 @@ This is performed at the
 same time as tilde, parameter, variable, and arithmetic expansion and
 command substitution.
 .PP
-After these expansions are performed, quote characters present in the
-original word are removed unless they have been quoted themselves
-(\fIquote removal\fP).
+\fIQuote removal\fP is always performed last.
+It removes quote characters present in the original word,
+not ones resulting from one of the other expansions,
+unless they have been quoted themselves.
 .PP
 Only brace expansion, word splitting, and pathname expansion
 can increase the number of words of the expansion; other expansions
@@ -6825,7 +6828,9 @@ Expand the line by performing shell word expansions.
 This performs alias and history expansion,
 \fB$\fP\(aq\fIstring\fP\(aq and \fB$\fP\(dq\fIstring\fP\(dq quoting,
 tilde expansion, parameter and variable expansion, arithmetic expansion,
+command and process substitution,
 word splitting, and quote removal.
+An explicit argument suppresses command and process substitution.
 See
 .SM
 .B HISTORY EXPANSION

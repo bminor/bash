@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1299,15 +1299,20 @@ extract_arithmetic_subst (const char *string, size_t *sindex)
 char *
 extract_process_subst (const char *string, char *starter, size_t *sindex, int xflags)
 {
+  char *ret;
+  char *xstr;
 #if 0
   /* XXX - check xflags&SX_COMPLETE here? */
-  return (extract_delimited_string (string, sindex, starter, "(", ")", SX_COMMAND));
+  if (flags & SX_COMPLETE)
+    return (extract_delimited_string (string, sindex, starter, "(", ")", SX_COMMAND));
+  else
 #else
-  char *xstr;
-
-  xflags |= (no_longjmp_on_fatal_error ? SX_NOLONGJMP : 0);
-  xstr = (char *)string + *sindex;
-  return (xparse_dolparen (string, xstr, sindex, xflags));
+    {
+      xflags |= (no_longjmp_on_fatal_error ? SX_NOLONGJMP : 0);
+      xstr = (char *)string + *sindex;
+      ret = xparse_dolparen (string, xstr, sindex, xflags);
+      return ret;
+    }
 #endif
 }
 #endif /* PROCESS_SUBSTITUTION */
@@ -1344,7 +1349,7 @@ extract_array_assignment_list (const char *string, size_t *sindex)
 static char *
 extract_delimited_string (const char *string, size_t *sindex, char *opener, char *alt_opener, char *closer, int flags)
 {
-  int c;
+  int c, xflags;
   size_t i, si, slen;
   char *t, *result;
   int pass_character, nesting_level, in_comment;
@@ -1472,8 +1477,8 @@ extract_delimited_string (const char *string, size_t *sindex, char *opener, char
       if (c == '\'' || c == '"')
 	{
 	  si = i + 1;
-	  i = (c == '\'') ? skip_single_quoted (string, slen, si, 0)
-			  : skip_double_quoted (string, slen, si, 0);
+	  i = (c == '\'') ? skip_single_quoted (string, slen, si, flags)
+			  : skip_double_quoted (string, slen, si, flags);
 	  continue;
 	}
 
@@ -6917,6 +6922,7 @@ function_substitute (char *string, int quoted, int flags)
   unwind_protect_pointer (this_shell_function);
   unwind_protect_pointer (this_shell_builtin);
   unwind_protect_pointer (current_builtin);
+  unwind_protect_pointer (currently_executing_command);
   unwind_protect_int (eof_encountered);
   add_unwind_protect (uw_pop_var_context, 0);
   add_unwind_protect (uw_maybe_restore_getopt_state, gs);
@@ -6992,6 +6998,7 @@ function_substitute (char *string, int quoted, int flags)
 
   remove_quoted_escapes (string);
 
+  currently_executing_command = NULL;
   executing_funsub++;
   if (expand_aliases)
     expand_aliases = posixly_correct == 0;
