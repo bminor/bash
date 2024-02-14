@@ -2901,7 +2901,7 @@ rl_dump_macros (int count, int key)
 static char *
 _rl_get_string_variable_value (const char *name)
 {
-  static char numbuf[64];
+  static char numbuf[64];	/* more than enough for INTMAX_MAX */
   char *ret;
 
   if (_rl_stricmp (name, "active-region-start-color") == 0)
@@ -2951,24 +2951,40 @@ _rl_get_string_variable_value (const char *name)
     return (_rl_comment_begin ? _rl_comment_begin : RL_COMMENT_BEGIN_DEFAULT);
   else if (_rl_stricmp (name, "completion-display-width") == 0)
     {
+#if defined (HAVE_VSNPRINTF)
+      snprintf (numbuf, sizeof (numbuf), "%d", _rl_completion_columns);
+#else
       sprintf (numbuf, "%d", _rl_completion_columns);
+#endif
       return (numbuf);
     }
   else if (_rl_stricmp (name, "completion-prefix-display-length") == 0)
     {
+#if defined (HAVE_VSNPRINTF)
+      snprintf (numbuf, sizeof (numbuf), "%d", _rl_completion_prefix_display_length);
+#else
       sprintf (numbuf, "%d", _rl_completion_prefix_display_length);
+#endif
       return (numbuf);
     }
   else if (_rl_stricmp (name, "completion-query-items") == 0)
     {
+#if defined (HAVE_VSNPRINTF)
+      snprintf (numbuf, sizeof (numbuf), "%d", rl_completion_query_items);
+#else
       sprintf (numbuf, "%d", rl_completion_query_items);
+#endif
       return (numbuf);
     }
   else if (_rl_stricmp (name, "editing-mode") == 0)
     return (rl_get_keymap_name_from_edit_mode ());
   else if (_rl_stricmp (name, "history-size") == 0)
     {
+#if defined (HAVE_VSNPRINTF)
+      snprintf (numbuf, sizeof (numbuf), "%d", history_is_stifled() ? history_max_entries : -1);
+#else
       sprintf (numbuf, "%d", history_is_stifled() ? history_max_entries : -1);
+#endif
       return (numbuf);
     }
   else if (_rl_stricmp (name, "isearch-terminators") == 0)
@@ -2995,7 +3011,11 @@ _rl_get_string_variable_value (const char *name)
     }
   else if (_rl_stricmp (name, "keyseq-timeout") == 0)
     {
-      sprintf (numbuf, "%d", _rl_keyseq_timeout);    
+#if defined (HAVE_VSNPRINTF)
+      snprintf (numbuf, sizeof (numbuf), "%d", _rl_keyseq_timeout);
+#else
+      sprintf (numbuf, "%d", _rl_keyseq_timeout);
+#endif
       return (numbuf);
     }
   else if (_rl_stricmp (name, "emacs-mode-string") == 0)

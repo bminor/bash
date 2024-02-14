@@ -4706,6 +4706,10 @@ itrace("execute_simple_command: posix mode tempenv assignment error");
     }
 #endif /* JOB_CONTROL */
 
+  /* unwind-protect this since we will call dispose_words on words if we run
+     the unwind-protects. */
+  unwind_protect_string (this_command_name);
+
 run_builtin:
   /* Remember the name of this command globally. */
   this_command_name = words->word->word;
@@ -5286,6 +5290,10 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
   if (shell_compatibility_level > 43)
     loop_level = 0;
 
+  /* unwind-protect this because execute_command_internal will overwrite it
+     with something we will free if unwind-protects are run */
+  if (subshell == 0)
+    unwind_protect_pointer (currently_executing_command);
   fc = tc;
 
   from_return_trap = 0;
@@ -5324,6 +5332,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
 	  currently_executing_command = save_current;
 	}
 #else
+      currently_executing_command = save_current;
       result = execute_command_internal (fc, 0, NO_PIPE, NO_PIPE, fds_to_close);
 
       save_current = currently_executing_command;

@@ -8571,3 +8571,39 @@ jobs.c
 	  way that we don't mark background jobs that exit cleanly as notified
 	  Inspired by a discussion with Robert Elz <kre@munnari.oz.au> and
 	  https://lists.gnu.org/archive/html/bug-bash/2024-01/msg00189.html
+
+				    2/9
+				    ---
+lib/readline/history.c
+	- DEFAULT_HISTORY_GROW_SIZE: bump up to 256
+	- real_history, real_history_size: the true history array and its
+	  allocated size. the_history begins a user-visible window into this
+	  list, extending for history_size entries
+	- history_list_grow_size: compute how much to extend the history list;
+	  increase by roughly sqrt(history_size), don't extend by less than
+	  (new) DEFAULT_HISTORY_GROW_SIZE
+	- history_list_resize: possibly resize/realloc real_history and reset
+	  the_history to real_history and history_size to real_history_size
+	- advance_history: make the `window' that the_history provides into
+	  real_history advance to simulate dropping an initial entry; don't
+	  need to memmove all the entries any more
+	- add_history: call advance_history as necessary to move the_history
+	  window
+	- add_history: call history_list_resize as necessary
+	Report and initial patch from Casey Johnson <strykre@hotmail.com>
+
+				   2/12
+				   ----
+bashline.c,lib/readline/bind.c,lib/readline/display.c
+	- replace some sprintf calls with snprintf to appease clang
+
+execute_cmd.c
+	- execute_simple_command: unwind-protect this_command_name, since we
+	  assign it to something we will free if unwind-protects are run
+	- execute_function: unwind-protect currently_executing_command, since
+	  execute_command_internal will change it to something will will free
+	  if unwind-protects are run
+	  Report from Grisha Levit <grishalevit@gmail.com>
+	- execute_function: if we didn't compile with debugger support, restore
+	  currently_executing_command after run_debug_trap, like in other
+	  cases

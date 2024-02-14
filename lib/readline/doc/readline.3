@@ -10,6 +10,19 @@
 .\"
 .TH READLINE 3 "2024 February 5" "GNU Readline 8.3"
 .\"
+.ie \n(.g \{\
+.ds ' \(aq
+.ds " \(dq
+.ds ^ \(ha
+.ds ~ \(ti
+.\}
+.el \{\
+.ds ' '
+.ds " ""\" two adjacent quotes and no space before this comment
+.ds ^ ^
+.ds ~ ~
+.\}
+.
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
 .\"
@@ -126,7 +139,7 @@ file (the \fIinputrc\fP file).
 The name of this file is taken from the value of the
 .B INPUTRC
 environment variable.  If that variable is unset, the default is
-.IR \(ti/.inputrc .
+.IR \*~/.inputrc .
 If that file  does not exist or cannot be read, the ultimate default is
 .IR /etc/inputrc .
 When a program which uses the readline library starts up, the
@@ -192,7 +205,7 @@ is the name of a key spelled out in English.  For example:
 .nf
 Control-u: universal\-argument
 Meta-Rubout: backward\-kill\-word
-Control-o: \(dq> output\(dq
+Control-o: \*"> output\*"
 .fi
 .EE
 .RE
@@ -212,7 +225,7 @@ expressed on the right hand side (that is, to insert the text
 into the line).
 .PP
 In the second form,
-\fB\(dqkeyseq\(dq\fP:\^\fIfunction\-name\fP or \fImacro\fP,
+\fB\*"keyseq\*"\fP:\^\fIfunction\-name\fP or \fImacro\fP,
 .B keyseq
 differs from
 .B keyname
@@ -225,9 +238,9 @@ are not recognized.
 .RS
 .EX
 .nf
-\(dq\eC\-u\(dq: universal\-argument
-\(dq\eC\-x\eC\-r\(dq: re\-read\-init\-file
-\(dq\ee[11\(ti\(dq: \(dqFunction Key 1\(dq
+\*"\eC\-u\*": universal\-argument
+\*"\eC\-x\eC\-r\*": re\-read\-init\-file
+\*"\ee[11\*~\*": \*"Function Key 1\*"
 .fi
 .EE
 .RE
@@ -240,7 +253,7 @@ is again bound to the function
 is bound to the function
 .BR re\-read\-init\-file ,
 and
-.I "ESC [ 1 1 \(ti"
+.I "ESC [ 1 1 \*~"
 is bound to insert the text
 .Q "Function Key 1" .
 .PP
@@ -261,11 +274,11 @@ an escape character
 .B \e\e
 backslash
 .TP
-.B \e\(dq
-literal \(dq, a double quote
+.B \e\*"
+literal \*", a double quote
 .TP
-.B \e\(aq
-literal \(aq, a single quote
+.B \e\*'
+literal \*', a single quote
 .RE
 .PD
 .PP
@@ -313,7 +326,7 @@ be used to indicate a macro definition.  Unquoted text
 is assumed to be a function name.
 In the macro body, the backslash escapes described above are expanded.
 Backslash will quote any other character in the macro text,
-including \(dq and \(aq.
+including \*" and \*'.
 .PP
 .B Bash
 allows the current readline key bindings to be displayed or modified
@@ -792,7 +805,7 @@ key sequence that quotes the current or previous word in \fBbash\fP:
 .nf
 \fB$if\fP Bash
 # Quote the current or previous word
-\(dq\eC-xq\(dq: \(dq\eeb\e\(dq\eef\e\(dq\(dq
+\*"\eC-xq\*": \*"\eeb\e\*"\eef\e\*"\*"
 \fB$endif\fP
 .fi
 .EE
@@ -1206,7 +1219,7 @@ The actual completion performed is application-specific.
 .BR Bash ,
 for instance, attempts completion treating the text as a variable
 (if the text begins with \fB$\fP), username (if the text begins with
-\fB\(ti\fP), hostname (if the text begins with \fB@\fP), or
+\fB\*~\fP), hostname (if the text begins with \fB@\fP), or
 command (including aliases and functions) in turn.  If none
 of these produces a match, filename completion is attempted.
 .BR Gdb ,
@@ -1440,7 +1453,7 @@ Emacs Standard bindings
 "C-_"  undo
 "\^ " to "/"  self-insert
 "0"  to "9"  self-insert
-":"  to "\(ti"  self-insert
+":"  to "\*~"  self-insert
 "C-?"  backward-delete-char
 .PP
 Emacs Meta bindings
@@ -1487,7 +1500,7 @@ Emacs Meta bindings
 "M-U"  upcase-word
 "M-Y"  yank-pop
 "M-\e"  delete-horizontal-space
-"M-\(ti"  tilde-expand
+"M-\*~"  tilde-expand
 "M-C-?"  backward-kill-word
 "M-_"  yank-last-arg
 .PP
@@ -1525,7 +1538,7 @@ VI Insert Mode functions
 "C-Y"  yank
 "C-["  vi-movement-mode
 "C-_"  vi-undo
-"\^ " to "\(ti"  self-insert
+"\^ " to "\*~"  self-insert
 "C-?"  backward-delete-char
 .PP
 VI Command Mode functions
@@ -1583,7 +1596,7 @@ VI Command Mode functions
 "X"  vi-rubout
 "Y"  vi-yank-to
 "\e"  vi-complete
-"\(ha"  vi-first-print
+"\*^"  vi-first-print
 "_"  vi-yank-arg
 "`"  vi-goto-mark
 "a"  vi-append-mode
@@ -1608,7 +1621,7 @@ VI Command Mode functions
 "x"  vi-delete
 "y"  vi-yank-to
 "|"  vi-column
-"\(ti"  vi-change-case
+"\*~"  vi-change-case
 .RE
 .SH "SEE ALSO"
 .PD 0
@@ -1622,7 +1635,7 @@ VI Command Mode functions
 .SH FILES
 .PD 0
 .TP
-.FN \(ti/.inputrc
+.FN \*~/.inputrc
 Individual \fBreadline\fP initialization file
 .PD
 .SH AUTHORS

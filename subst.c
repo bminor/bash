@@ -8536,6 +8536,7 @@ string_var_assignment (SHELL_VAR *v, char *s)
 
   val = (v && (invisible_p (v) || var_isset (v) == 0)) ? (char *)NULL : sh_quote_reusable (s, 0);
   i = var_attribute_string (v, 0, flags);
+  /* i = strlen (flags) */
   if (i == 0 && val == 0)
     return (char *)NULL;
 
@@ -8586,6 +8587,7 @@ array_var_assignment (SHELL_VAR *v, int itype, int quoted, int atype)
     return val;
 
   i = var_attribute_string (v, 0, flags);
+  /* i == strlen (flags) */
   ret = (char *)xmalloc (i + STRLEN (val) + strlen (v->name) + 16);
   if (val)
     sprintf (ret, "declare -%s %s=%s", flags, v->name, val);

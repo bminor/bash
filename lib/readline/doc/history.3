@@ -10,6 +10,19 @@
 .\"
 .TH HISTORY 3 "2024 February 5" "GNU History 8.3"
 .\"
+.ie \n(.g \{\
+.ds ' \(aq
+.ds " \(dq
+.ds ^ \(ha
+.ds ~ \(ti
+.\}
+.el \{\
+.ds ' '
+.ds " ""\" two adjacent quotes and no space before this comment
+.ds ^ ^
+.ds ~ ~
+.\}
+.
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
 .\"
@@ -88,7 +101,7 @@ Only backslash (\^\fB\e\fP\^) and single quotes can quote
 the history expansion character.
 .PP
 There is a special abbreviation for substitution, active when the
-\fIquick substitution\fP character (default \fB\(ha\fP)
+\fIquick substitution\fP character (default \fB\*^\fP)
 is the first character on the line.
 It selects the previous history list entry, using an event designator
 equivalent to \fB!!\fP,
@@ -138,13 +151,13 @@ is followed immediately by a newline.
 If \fIstring\fP is missing, the string from the most recent search is used;
 it is an error if there is no previous search string.
 .TP
-.B \d\s+2\(ha\s-2\u\fIstring1\fP\d\s+2\(ha\s-2\u\fIstring2\fP\d\s+2\(ha\s-2\u
+.B \d\s+2\*^\s-2\u\fIstring1\fP\d\s+2\*^\s-2\u\fIstring2\fP\d\s+2\*^\s-2\u
 Quick substitution.  Repeat the last command, replacing
 .I string1
 with
 .IR string2 .
 Equivalent to
-.Q !!:s\d\s+2\(ha\s-2\u\fIstring1\fP\d\s+2\(ha\s-2\u\fIstring2\fP\d\s+2\(ha\s-2\u
+.Q !!:s\d\s+2\*^\s-2\u\fIstring1\fP\d\s+2\*^\s-2\u\fIstring2\fP\d\s+2\*^\s-2\u
 (see \fBModifiers\fP below).
 .TP
 .B !#
@@ -156,7 +169,7 @@ A
 .B :
 separates the event specification from the word designator.
 It may be omitted if the word designator begins with a
-.BR \(ha ,
+.BR \*^ ,
 .BR $ ,
 .BR * ,
 .BR \- ,
@@ -175,7 +188,7 @@ word.
 .I n
 The \fIn\fRth word.
 .TP
-.B \(ha
+.B \*^
 The first argument.  That is, word 1.
 .TP
 .B $
@@ -533,7 +546,7 @@ This section documents the functions for managing a history file.
 
 .Fn1 int read_history "const char *filename"
 Add the contents of \fIfilename\fP to the history list, a line at a time.
-If \fIfilename\fP is \fBNULL\fP, then read from \fI\(ti/.history\fP.
+If \fIfilename\fP is \fBNULL\fP, then read from \fI\*~/.history\fP.
 Returns 0 if successful, or \fBerrno\fP if not.
 
 .Fn3 int read_history_range "const char *filename" "int from" "int to"
@@ -541,25 +554,25 @@ Read a range of lines from \fIfilename\fP, adding them to the history list.
 Start reading at line \fIfrom\fP and end at \fIto\fP.
 If \fIfrom\fP is zero, start at the beginning.  If \fIto\fP is less than
 \fIfrom\fP, then read until the end of the file.  If \fIfilename\fP is
-\fBNULL\fP, then read from \fI\(ti/.history\fP.  Returns 0 if successful,
+\fBNULL\fP, then read from \fI\*~/.history\fP.  Returns 0 if successful,
 or \fBerrno\fP if not.
 
 .Fn1 int write_history "const char *filename"
 Write the current history to \fIfilename\fP, overwriting \fIfilename\fP
 if necessary.
-If \fIfilename\fP is \fBNULL\fP, then write the history list to \fI\(ti/.history\fP.
+If \fIfilename\fP is \fBNULL\fP, then write the history list to \fI\*~/.history\fP.
 Returns 0 on success, or \fBerrno\fP on a read or write error.
 
 
 .Fn2 int append_history "int nelements" "const char *filename"
 Append the last \fInelements\fP of the history list to \fIfilename\fP.
-If \fIfilename\fP is \fBNULL\fP, then append to \fI\(ti/.history\fP.
+If \fIfilename\fP is \fBNULL\fP, then append to \fI\*~/.history\fP.
 Returns 0 on success, or \fBerrno\fP on a read or write error.
 
 .Fn2 int history_truncate_file "const char *filename" "int nlines"
 Truncate the history file \fIfilename\fP, leaving only the last
 \fInlines\fP lines.
-If \fIfilename\fP is \fBNULL\fP, then \fI\(ti/.history\fP is truncated.
+If \fIfilename\fP is \fBNULL\fP, then \fI\*~/.history\fP is truncated.
 Returns 0 on success, or \fBerrno\fP on failure.
 
 .SS History Expansion
@@ -640,7 +653,7 @@ Setting this to 0 inhibits history expansion.
 
 .Vb char history_subst_char
 The character that invokes word substitution if found at the start of
-a line.  The default is \fB\(ha\fP.
+a line.  The default is \fB\*^\fP.
 
 .Vb char history_comment_char
 During tokenization, if this character is seen as the first character
@@ -650,7 +663,7 @@ This is disabled by default.
 
 .Vb "char *" history_word_delimiters
 The characters that separate tokens for \fBhistory_tokenize()\fP.
-The default value is \fB\(dq\ \et\en()<>;&|\(dq\fP.
+The default value is \fB\*"\ \et\en()<>;&|\*"\fP.
 
 .Vb "char *" history_no_expand_chars
 The list of characters which inhibit history expansion if found immediately
@@ -672,10 +685,10 @@ The default value is 0.
 
 .Vb int history_quoting_state
 An application may set this variable to indicate that the current line
-being expanded is subject to existing quoting. If set to \fI\(aq\fP, the
+being expanded is subject to existing quoting. If set to \fI\*'\fP, the
 history expansion function will assume that the line is single-quoted and
 inhibit expansion until it reads an unquoted closing single quote; if set
-to \fI\(dq\fP, history expansion will assume the line is double quoted until
+to \fI\*"\fP, history expansion will assume the line is double quoted until
 it reads an unquoted closing double quote. If set to zero, the default,
 the history expansion function will assume the line is not quoted and
 treat quote characters within the line as described above.
@@ -694,7 +707,7 @@ By default, this variable is set to \fBNULL\fP.
 .SH FILES
 .PD 0
 .TP
-.FN \(ti/.history
+.FN \*~/.history
 Default filename for reading and writing saved history
 .PD
 .SH "SEE ALSO"

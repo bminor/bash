@@ -39,6 +39,19 @@
 .\" .}f
 .\" ..
 .\"
+.ie \n(.g \{\
+.ds ' \(aq
+.ds " \(dq
+.ds ^ \(ha
+.ds ~ \(ti
+.\}
+.el \{\
+.ds ' '
+.ds " ""\" two adjacent quotes and no space before this comment
+.ds ^ ^
+.ds ~ ~
+.\}
+.
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
 .\" \% at the beginning of the string protects the filename from hyphenation.
@@ -212,7 +225,7 @@ Display a usage message on standard output and exit successfully.
 Execute commands from
 .I file
 instead of the standard personal initialization file
-.I \(ti/.bashrc
+.I \*~/.bashrc
 if the shell is interactive (see
 .SM
 .B INVOCATION
@@ -230,10 +243,10 @@ library to read command lines when the shell is interactive.
 Do not read either the system-wide startup file
 .FN /etc/profile
 or any of the personal initialization files
-.IR \(ti/.bash_profile ,
-.IR \(ti/.bash_login ,
+.IR \*~/.bash_profile ,
+.IR \*~/.bash_login ,
 or
-.IR \(ti/.profile .
+.IR \*~/.profile .
 By default,
 .B bash
 reads these files when it is invoked as a login shell (see
@@ -243,7 +256,7 @@ below).
 .TP
 .B \-\-norc
 Do not read and execute the personal initialization file
-.I \(ti/.bashrc
+.I \*~/.bashrc
 if the shell is interactive.
 This option is on by default if the shell is invoked as
 .BR sh .
@@ -342,8 +355,8 @@ is invoked as an interactive login shell, or as a non-interactive shell
 with the \fB\-\-login\fP option, it first reads and
 executes commands from the file \fI/etc/profile\fP, if that
 file exists.
-After reading that file, it looks for \fI\(ti/.bash_profile\fP,
-\fI\(ti/.bash_login\fP, and \fI\(ti/.profile\fP, in that order, and reads
+After reading that file, it looks for \fI\*~/.bash_profile\fP,
+\fI\*~/.bash_login\fP, and \fI\*~/.profile\fP, in that order, and reads
 and executes commands from the first one that exists and is readable.
 The
 .B \-\-noprofile
@@ -352,18 +365,18 @@ option may be used when the shell is started to inhibit this behavior.
 When an interactive login shell exits,
 or a non-interactive login shell executes the \fBexit\fP builtin command,
 .B bash
-reads and executes commands from the file \fI\(ti/.bash_logout\fP, if it
+reads and executes commands from the file \fI\*~/.bash_logout\fP, if it
 exists.
 .PP
 When an interactive shell that is not a login shell is started,
 .B bash
-reads and executes commands from \fI\(ti/.bashrc\fP, if that file exists.
+reads and executes commands from \fI\*~/.bashrc\fP, if that file exists.
 This may be inhibited by using the
 .B \-\-norc
 option.
 The \fB\-\-rcfile\fP \fIfile\fP option will force
 .B bash
-to read and execute commands from \fIfile\fP instead of \fI\(ti/.bashrc\fP.
+to read and execute commands from \fIfile\fP instead of \fI\*~/.bashrc\fP.
 .PP
 When
 .B bash
@@ -378,7 +391,7 @@ behaves as if the following command were executed:
 .PP
 .RS
 .EX
-if [ \-n \(dq$BASH_ENV\(dq ]; then . \(dq$BASH_ENV\(dq; fi
+if [ \-n \*"$BASH_ENV\*" ]; then . \*"$BASH_ENV\*"; fi
 .EE
 .RE
 .PP
@@ -400,7 +413,7 @@ shell with the \fB\-\-login\fP option, it first attempts to
 read and execute commands from
 .I /etc/profile
 and
-.IR \(ti/.profile ,
+.IR \*~/.profile ,
 in that order.
 The
 .B \-\-noprofile
@@ -451,7 +464,7 @@ or the secure shell daemon \fIsshd\fP.
 If
 .B bash
 determines it is being run non-interactively in this fashion,
-it reads and executes commands from \fI\(ti/.bashrc\fP,
+it reads and executes commands from \fI\*~/.bashrc\fP,
 if that file exists and is readable.
 It will not do this if invoked as \fBsh\fP.
 The
@@ -770,7 +783,7 @@ The return value is 0 if the string matches (\fB==\fP) or does not match
 Any part of the pattern may be quoted to force the quoted portion
 to be matched as a string.
 .IP
-An additional binary operator, \fB=\(ti\fP, is available, with the same
+An additional binary operator, \fB=\*~\fP, is available, with the same
 precedence as \fB==\fP and \fB!=\fP.
 When it is used, the string to the right of the operator is considered
 a POSIX extended regular expression and matched accordingly
@@ -795,7 +808,7 @@ since normal quoting and pattern characters lose their meanings
 between brackets.
 .IP
 The pattern will match if it matches any part of the string.
-Anchor the pattern using the \fB\(ha\fP and \fB$\fP regular expression
+Anchor the pattern using the \fB\*^\fP and \fB$\fP regular expression
 operators to force it to match the entire string.
 The array variable
 .SM
@@ -1157,7 +1170,7 @@ retains its special meaning only when followed by one of the following
 characters:
 .BR $ ,
 .BR \` ,
-\^\fB\(dq\fP\^,
+\^\fB\*"\fP\^,
 .BR \e ,
 or
 .BR <newline> .
@@ -1180,7 +1193,7 @@ quotes (see
 .B PARAMETERS
 below).
 .PP
-Character sequences of the form \fB$\fP\(aq\fIstring\fP\(aq are treated
+Character sequences of the form \fB$\fP\*'\fIstring\fP\*' are treated
 as a special variant of single quotes.
 The sequence expands to \fIstring\fP, with backslash-escaped characters
 in \fIstring\fP replaced as specified by the ANSI C standard.
@@ -1217,10 +1230,10 @@ vertical tab
 .B \e\e
 backslash
 .TP
-.B \e\(aq
+.B \e\*'
 single quote
 .TP
-.B \e\(dq
+.B \e\*"
 double quote
 .TP
 .B \e?
@@ -1250,7 +1263,7 @@ a control-\fIx\fP character
 The expanded result is single-quoted, as if the dollar sign had
 not been present.
 .PP
-A double-quoted string preceded by a dollar sign (\fB$\fP\(dq\fIstring\fP\(dq)
+A double-quoted string preceded by a dollar sign (\fB$\fP\*"\fIstring\fP\*")
 will cause the string to be translated according to the current locale.
 The \fIgettext\fP infrastructure performs the lookup and
 translation, using the \fBLC_MESSAGES\fP, \fBTEXTDOMAINDIR\fP,
@@ -1430,9 +1443,9 @@ with the value of each parameter separated by the first character of the
 .B IFS
 special variable.
 That is,
-.B \(dq$*\(dq
+.B \*"$*\*"
 is equivalent to
-.BR \(dq$1\fIc\fP$2\fIc\fP.\|.\|.\(dq ,
+.BR \*"$1\fIc\fP$2\fIc\fP.\|.\|.\*" ,
 where
 .I c
 is the first character of the value of the
@@ -1458,15 +1471,15 @@ with each positional parameter separated by a space.
 When the expansion occurs within double quotes,
 each parameter expands to a separate word.
 That is,
-.B \&\(dq$@\(dq
+.B \&\*"$@\*"
 is equivalent to
-.B \&\(dq\&$1\&\(dq\ \(dq$2\(dq\ .\|.\|.
+.B \&\*"\&$1\&\*"\ \*"$2\*"\ .\|.\|.
 If the double-quoted expansion occurs within a word, the expansion of
 the first parameter is joined with the beginning part of the original
 word, and the expansion of the last parameter is joined with the last
 part of the original word.
 When there are no positional parameters,
-.B \&\(dq$@\(dq
+.B \&\*"$@\*"
 and
 .B $@
 expand to nothing (i.e., they are removed).
@@ -1696,7 +1709,7 @@ dynamically loadable builtins specified by the
 command.
 .TP
 .B BASH_REMATCH
-An array variable whose members are assigned by the \fB=\(ti\fP binary
+An array variable whose members are assigned by the \fB=\*~\fP binary
 operator to the \fB[[\fP conditional command.
 The element with index 0 is the portion of the string
 matching the entire regular expression.
@@ -2187,7 +2200,7 @@ The current version is also a valid value.
 If this parameter is set when \fBbash\fP is executing a shell script,
 its value is interpreted as a filename containing commands to
 initialize the shell, as in
-.IR \(ti/.bashrc .
+.IR \*~/.bashrc .
 The value of
 .SM
 .B BASH_ENV
@@ -2227,7 +2240,7 @@ for destination directories specified by the
 .B cd
 command.
 A sample value is
-.Q .:\(ti:/usr .
+.Q .:\*~:/usr .
 .TP
 .B CHILD_MAX
 Set the number of exited child status values for the shell to remember.
@@ -2296,7 +2309,7 @@ A filename whose suffix matches one of the entries in
 .B FIGNORE
 is excluded from the list of matched filenames.
 A sample value is
-.Q .o:\(ti .
+.Q .o:\*~ .
 .TP
 .B FUNCNEST
 If set to a numeric value greater than 0, defines a maximum function
@@ -2377,7 +2390,7 @@ The name of the file in which command history is saved (see
 .SM
 .B HISTORY
 below).
-\fBBash\fP assigns a default value of \fI\(ti/.bash_history\fP.
+\fBBash\fP assigns a default value of \fI\*~/.bash_history\fP.
 If \fBHISTFILE\fP is unset or null,
 the command history is not saved when a shell exits.
 .TP
@@ -2498,7 +2511,7 @@ signifies the end of input to the shell.
 The filename for the
 .B readline
 startup file, overriding the default of
-.FN \(ti/.inputrc
+.FN \*~/.inputrc
 (see
 .SM
 .B READLINE
@@ -2580,7 +2593,7 @@ Example:
 .RS
 .PP
 .EX
-\fBMAILPATH\fP=\(aq/var/mail/bfox?\(dqYou have mail\(dq:\(ti/shell\-mail?\(dq$_ has mail!\(dq\(aq
+\fBMAILPATH\fP=\*'/var/mail/bfox?\*"You have mail\*":\*~/shell\-mail?\*"$_ has mail!\*"\*'
 .EE
 .PP
 .B Bash
@@ -2744,7 +2757,7 @@ The value of \fIp\fP determines whether or not the fraction is
 included.
 .IP
 If this variable is not set, \fBbash\fP acts as if it had the
-value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\et%3lS\(aq\fP.
+value \fB$\*'\enreal\et%3lR\enuser\et%3lU\ensys\et%3lS\*'\fP.
 If the value is null, \fBbash\fP does not display any timing information.
 A trailing newline is added when the format string is displayed.
 .PD 0
@@ -2812,7 +2825,7 @@ character, which is used as shorthand for re-running the previous
 command entered, substituting one string for another in the command,
 when it appears as the first character on the line.
 The default is
-.Q \fB\(ha\fP .
+.Q \fB\*^\fP .
 The optional third character is the character which indicates that
 the remainder of the line is a comment when found as the first character
 of a word, normally
@@ -3037,9 +3050,9 @@ Only brace expansion, word splitting, and pathname expansion
 can increase the number of words of the expansion; other expansions
 expand a single word to a single word.
 The only exceptions to this are the expansions of
-.B \&\(dq$@\(dq
+.B \&\*"$@\*"
 and
-.B \&\(dq${\fIname\fP[@]}\(dq\c \" keep leading \& for AT&T troff
+.B \&\*"${\fIname\fP[@]}\*"\c \" keep leading \& for AT&T troff
 .BR \& , \" .BR + \& + \*" doesn't work with AT&T troff
 and, in most cases, \fB$*\fP and \fB${\fP\fIname\fP\fB[*]}\fP
 as explained above (see
@@ -3146,7 +3159,7 @@ command (see
 below).
 .SS Tilde Expansion
 If a word begins with an unquoted tilde character (\c
-.Q \fB\(ti\fP ),
+.Q \fB\*~\fP ),
 all of
 the characters preceding the first unquoted slash (or all characters,
 if there is no unquoted slash) are considered a \fItilde-prefix\fP.
@@ -3166,13 +3179,13 @@ Otherwise, the tilde-prefix is replaced with the home directory
 associated with the specified login name.
 .PP
 If the tilde-prefix is a
-.Q \(ti+ ,
+.Q \*~+ ,
 the value of the shell variable
 .SM
 .B PWD
 replaces the tilde-prefix.
 If the tilde-prefix is a
-.Q \(ti\- ,
+.Q \*~\- ,
 the value of the shell variable
 .SM
 .BR OLDPWD ,
@@ -3580,10 +3593,10 @@ or
 the substitution operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 .TP
-${\fIparameter\fP\fB\(ha\fP\fIpattern\fP}
+${\fIparameter\fP\fB\*^\fP\fIpattern\fP}
 .PD 0
 .TP
-${\fIparameter\fP\fB\(ha\(ha\fP\fIpattern\fP}
+${\fIparameter\fP\fB\*^\*^\fP\fIpattern\fP}
 .TP
 ${\fIparameter\fP\fB,\fP\fIpattern\fP}
 .TP
@@ -3596,11 +3609,11 @@ pathname expansion.
 Each character in the expanded value of \fIparameter\fP is tested against
 \fIpattern\fP, and, if it matches the pattern, its case is converted.
 The pattern should not attempt to match more than one character.
-The \fB\(ha\fP operator converts lowercase letters matching \fIpattern\fP
+The \fB\*^\fP operator converts lowercase letters matching \fIpattern\fP
 to uppercase; the \fB,\fP operator converts matching uppercase letters
 to lowercase.
-The \fB\(ha\(ha\fP and \fB,,\fP expansions convert each matched character in the
-expanded value; the \fB\(ha\fP and \fB,\fP expansions match and convert only
+The \fB\*^\*^\fP and \fB,,\fP expansions convert each matched character in the
+expanded value; the \fB\*^\fP and \fB,\fP expansions match and convert only
 the first character in the expanded value.
 If \fIpattern\fP is omitted, it is treated like a \fB?\fP, which matches
 every character.
@@ -3648,7 +3661,7 @@ format that can be reused as input.
 .TP
 .B E
 The expansion is a string that is the value of \fIparameter\fP with backslash
-escape sequences expanded as with the \fB$\(aq\fP.\|.\|.\%\fB\(aq\fP
+escape sequences expanded as with the \fB$\*'\fP.\|.\|.\%\fB\*'\fP
 quoting mechanism.
 .TP
 .B P
@@ -3900,8 +3913,8 @@ is unset, word splitting behaves as if it contained the default value
 of
 .BR <space><tab><newline> .
 .PP
-Explicit null arguments (\^\f3\(dq\^\(dq\fP or
-\^\f3\(aq\^\(aq\fP\^) are retained
+Explicit null arguments (\^\f3\*"\^\*"\fP or
+\^\f3\*'\^\*'\fP\^) are retained
 and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
@@ -3911,7 +3924,7 @@ and passed to a command as an empty string.
 When a quoted null argument appears as part of a word whose expansion is
 non-null, the null argument is removed.
 That is, the word
-.Q "\-d\(aq\^\(aq"
+.Q "\-d\*'\^\*'"
 becomes
 .Q \-d
 after word splitting and null argument removal.
@@ -4095,7 +4108,7 @@ is matched.  If the first character following the
 is a
 .B !
 or a
-.B \(ha
+.B \*^
 then any character not enclosed is matched.
 The sorting order of characters in range expressions,
 and the characters included in the range,
@@ -4225,8 +4238,8 @@ strings instead of a single long string, may be faster.
 After the preceding expansions, all unquoted occurrences of the
 characters
 .BR \e ,
-.BR \(aq ,
-and \^\f3\(dq\fP\^ that did not result from one of the above
+.BR \*' ,
+and \^\f3\*"\fP\^ that did not result from one of the above
 expansions are removed.
 .SH REDIRECTION
 Before a command is executed, its input and output
@@ -4873,7 +4886,7 @@ unary minus and plus
 .B ++\fIid\fP \-\-\fIid\fP
 variable pre-increment and pre-decrement
 .TP
-.B ! \(ti
+.B ! \*~
 logical and bitwise negation
 .TP
 .B **
@@ -4897,7 +4910,7 @@ equality and inequality
 .B &
 bitwise AND
 .TP
-.B \(ha
+.B \*^
 bitwise exclusive OR
 .TP
 .B |
@@ -4912,7 +4925,7 @@ logical OR
 .B \fIexpr\fP?\fIexpr\fP:\fIexpr\fP
 conditional operator
 .TP
-.B "= *= /= %= += \-= <<= >>= &= \(ha= |="
+.B "= *= /= %= += \-= <<= >>= &= \*^= |="
 assignment
 .TP
 .B \fIexpr1\fP , \fIexpr2\fP
@@ -5525,10 +5538,10 @@ command to complete, the shell receives keyboard-generated signals
 such as
 .SM
 .B SIGINT
-(usually generated by \fB\(haC\fP) that users commonly intend to send
+(usually generated by \fB\*^C\fP) that users commonly intend to send
 to that command.
 This happens because the shell and the command are in the
-same process group as the terminal, and \fB\(haC\fP sends
+same process group as the terminal, and \fB\*^C\fP sends
 .SM
 .B SIGINT
 to all processes in that process group.
@@ -5641,14 +5654,14 @@ contains facilities to use it.
 Typing the
 .I suspend
 character (typically
-.BR \(haZ ,
+.BR \*^Z ,
 Control-Z) while a process is running
 causes that process to be stopped and returns control to
 .BR bash .
 Typing the
 .I "delayed suspend"
 character (typically
-.BR \(haY ,
+.BR \*^Y ,
 Control-Y) causes the process to be stopped when it
 attempts to read input from the terminal, and control to
 be returned to
@@ -5660,7 +5673,7 @@ command to continue it in the background, the
 command to continue it in the foreground, or
 the
 .B kill
-command to kill it.  A \fB\(haZ\fP takes effect immediately,
+command to kill it.  A \fB\*^Z\fP takes effect immediately,
 and has the additional side effect of causing pending output
 and typeahead to be discarded.
 .PP
@@ -5980,7 +5993,7 @@ The name of this file is taken from the value of the
 .SM
 .B INPUTRC
 variable.  If that variable is unset, the default is
-.IR \(ti/.inputrc .
+.IR \*~/.inputrc .
 If that file  does not exist or cannot be read, the ultimate default is
 .IR /etc/inputrc .
 When a program which uses the readline library starts up, the
@@ -6047,7 +6060,7 @@ is the name of a key spelled out in English.  For example:
 .nf
 Control-u: universal\-argument
 Meta-Rubout: backward-kill-word
-Control-o: \(dq> output\(dq
+Control-o: \*"> output\*"
 .fi
 .EE
 .RE
@@ -6067,7 +6080,7 @@ expressed on the right hand side (that is, to insert the text
 into the line).
 .PP
 In the second form,
-\fB\(dqkeyseq\(dq\fP:\^\fIfunction\-name\fP or \fImacro\fP,
+\fB\*"keyseq\*"\fP:\^\fIfunction\-name\fP or \fImacro\fP,
 .B keyseq
 differs from
 .B keyname
@@ -6080,9 +6093,9 @@ are not recognized.
 .RS
 .EX
 .nf
-\(dq\eC\-u\(dq: universal\-argument
-\(dq\eC\-x\eC\-r\(dq: re\-read\-init\-file
-\(dq\ee[11\(ti\(dq: \(dqFunction Key 1\(dq
+\*"\eC\-u\*": universal\-argument
+\*"\eC\-x\eC\-r\*": re\-read\-init\-file
+\*"\ee[11\*~\*": \*"Function Key 1\*"
 .fi
 .EE
 .RE
@@ -6095,7 +6108,7 @@ is again bound to the function
 is bound to the function
 .BR re\-read\-init\-file ,
 and
-.I "ESC [ 1 1 \(ti"
+.I "ESC [ 1 1 \*~"
 is bound to insert the text
 .Q "Function Key 1" .
 .PP
@@ -6115,11 +6128,11 @@ an escape character
 .B \e\e
 backslash
 .TP
-.B \e\(dq
-literal \(dq
+.B \e\*"
+literal \*"
 .TP
-.B \e\(aq
-literal \(aq
+.B \e\*'
+literal \*'
 .RE
 .PD
 .PP
@@ -6167,7 +6180,7 @@ be used to indicate a macro definition.
 Unquoted text is assumed to be a function name.
 In the macro body, the backslash escapes described above are expanded.
 Backslash will quote any other character in the macro text,
-including \(dq and \(aq.
+including \*" and \*'.
 .PP
 .B Bash
 allows the current readline key bindings to be displayed or modified
@@ -6650,7 +6663,7 @@ key sequence that quotes the current or previous word in \fBbash\fP:
 .nf
 \fB$if\fP Bash
 # Quote the current or previous word
-\(dq\eC-xq\(dq: \(dq\eeb\e\(dq\eef\e\(dq\(dq
+\*"\eC-xq\*": \*"\eeb\e\*"\eef\e\*"\*"
 \fB$endif\fP
 .fi
 .EE
@@ -6907,7 +6920,7 @@ history expansion had been specified.
 .B shell\-expand\-line (M\-C\-e)
 Expand the line by performing shell word expansions.
 This performs alias and history expansion,
-\fB$\fP\(aq\fIstring\fP\(aq and \fB$\fP\(dq\fIstring\fP\(dq quoting,
+\fB$\fP\*'\fIstring\fP\*' and \fB$\fP\*"\fIstring\fP\*" quoting,
 tilde expansion, parameter and variable expansion, arithmetic expansion,
 command and process substitution,
 word splitting, and quote removal.
@@ -6917,7 +6930,7 @@ See
 .B HISTORY EXPANSION
 below for a description of history expansion.
 .TP
-.B history\-expand\-line (M\-\(ha)
+.B history\-expand\-line (M\-\*^)
 Perform history expansion on the current line.
 See
 .SM
@@ -7126,7 +7139,7 @@ Attempt to perform completion on the text before point.
 .B Bash
 attempts completion treating the text as a variable (if the
 text begins with \fB$\fP), username (if the text begins with
-\fB\(ti\fP), hostname (if the text begins with \fB@\fP), or
+\fB\*~\fP), hostname (if the text begins with \fB@\fP), or
 command (including aliases and functions) in turn.  If none
 of these produces a match, filename completion is attempted.
 .TP
@@ -7171,11 +7184,11 @@ Attempt filename completion on the text before point.
 List the possible completions of the text before point,
 treating it as a filename.
 .TP
-.B complete\-username (M\-\(ti)
+.B complete\-username (M\-\*~)
 Attempt completion on the text before point, treating
 it as a username.
 .TP
-.B possible\-username\-completions (C\-x \(ti)
+.B possible\-username\-completions (C\-x \*~)
 List the possible completions of the text before point,
 treating it as a username.
 .TP
@@ -7547,7 +7560,7 @@ completion function would load completions dynamically:
 .nf
 _completion_loader()
 {
-  . \(dq/etc/bash_completion.d/$1.sh\(dq \c
+  . \*"/etc/bash_completion.d/$1.sh\*" \c
 .if \n(LL<80n \{\
 \e
 .br
@@ -7598,7 +7611,7 @@ On startup, the history is initialized from the file named by
 the variable
 .SM
 .B HISTFILE
-(default \fI\(ti/.bash_history\fP).
+(default \fI\*~/.bash_history\fP).
 The file named by the value of
 .SM
 .B HISTFILE
@@ -7847,13 +7860,13 @@ is followed immediately by a newline.
 If \fIstring\fP is missing, the string from the most recent search is used;
 it is an error if there is no previous search string.
 .TP
-.B \d\s+2\(ha\s-2\u\fIstring1\fP\d\s+2\(ha\s-2\u\fIstring2\fP\d\s+2\(ha\s-2\u
+.B \d\s+2\*^\s-2\u\fIstring1\fP\d\s+2\*^\s-2\u\fIstring2\fP\d\s+2\*^\s-2\u
 Quick substitution.  Repeat the previous command, replacing
 .I string1
 with
 .IR string2 .
 Equivalent to
-.Q !!:s\d\s+2\(ha\s-2\u\fIstring1\fP\d\s+2\(ha\s-2\u\fIstring2\fP\d\s+2\(ha\s-2\u
+.Q !!:s\d\s+2\*^\s-2\u\fIstring1\fP\d\s+2\*^\s-2\u\fIstring2\fP\d\s+2\*^\s-2\u
 (see \fBModifiers\fP below).
 .TP
 .B !#
@@ -7865,7 +7878,7 @@ A
 .B :
 separates the event specification from the word designator.
 It may be omitted if the word designator begins with a
-.BR \(ha ,
+.BR \*^ ,
 .BR $ ,
 .BR * ,
 .BR \- ,
@@ -7884,7 +7897,7 @@ word.
 .I n
 The \fIn\fRth word.
 .TP
-.B \(ha
+.B \*^
 The first argument.  That is, word 1.
 .TP
 .B $
@@ -8150,7 +8163,7 @@ Each non-option argument is a command as it would appear in a
 initialization file such as
 .IR .inputrc ,
 but each binding or command must be passed as a separate argument;
-e.g., \(aq\(dq\eC\-x\eC\-r\(dq: re\-read\-init\-file\(aq.
+e.g., \*'\*"\eC\-x\eC\-r\*": re\-read\-init\-file\*'.
 In the following descriptions, output available to be re-read is formatted
 as commands that would appear in a
 .B readline
@@ -9250,7 +9263,7 @@ In the second form, \fIcommand\fP is re-executed after each instance
 of \fIpat\fP is replaced by \fIrep\fP.
 \fICommand\fP is interpreted the same as \fIfirst\fP above.
 A useful alias to use with this is
-.Q "r=\(dqfc \-s\(dq" ,
+.Q "r=\*"fc \-s\*"" ,
 so that typing
 .Q "r cc"
 runs the last command beginning with
@@ -9885,7 +9898,7 @@ in the same way as \fBecho \-e\fP.
 .B %q
 causes \fBprintf\fP to output the corresponding
 \fIargument\fP in a format that can be reused as shell input.
-\fB%q\fP and \fB%Q\fP use the \fB$\(aq\(aq\fP quoting style if any characters
+\fB%q\fP and \fB%Q\fP use the \fB$\*'\*'\fP quoting style if any characters
 in the argument string require it, and backslash quoting otherwise.
 If the format string uses the \fIprintf\fP alternate form, these two
 formats quote the argument string using single quotes.
@@ -10939,7 +10952,7 @@ under
 \fBPathname Expansion\fP are enabled.
 .TP 8
 .B extquote
-If set, \fB$\fP\(aq\fIstring\fP\(aq and \fB$\fP\(dq\fIstring\fP\(dq quoting is
+If set, \fB$\fP\*'\fIstring\fP\*' and \fB$\fP\*"\fIstring\fP\*" quoting is
 performed within \fB${\fP\fIparameter\fP\fB}\fP expansions
 enclosed in double quotes.  This option is enabled by default.
 .TP 8
@@ -11121,7 +11134,7 @@ or when filtering possible completions as part of programmable completion.
 If set,
 .B bash
 encloses the translated results of
-.BR $\(dq .\|.\|.\& \(dq
+.BR $\*" .\|.\|.\& \*"
 quoting in single quotes instead of double quotes.
 If the string is not translated, this has no effect.
 .TP 8
@@ -11913,7 +11926,7 @@ and it is required for bash-5.1 and later versions.
 .PD 0
 .RS
 .IP \(bu
-quoting the rhs of the \fB[[\fP command's regexp matching operator (=\(ti)
+quoting the rhs of the \fB[[\fP command's regexp matching operator (=\*~)
 has no special effect
 .RE
 .PD
@@ -11979,7 +11992,7 @@ are not special within double-quoted word expansions
 .IP \(bu
 the shell does not print a warning message if an attempt is made to
 use a quoted compound assignment as an argument to declare
-(e.g., declare \-a foo=\(aq(1 2)\(aq). Later versions warn that this usage is
+(e.g., declare \-a foo=\*'(1 2)\*'). Later versions warn that this usage is
 deprecated
 .IP \(bu
 word expansion errors are considered non-fatal errors that cause the
@@ -12200,7 +12213,7 @@ script.
 \fIPortable Operating System Interface (POSIX) Part 2: Shell and Utilities\fP, IEEE \(em
 http://pubs.opengroup.org/onlinepubs/9699919799/
 .TP
-http://tiswww.case.edu/\(tichet/bash/POSIX \(em a description of posix mode
+http://tiswww.case.edu/\*~chet/bash/POSIX \(em a description of posix mode
 .TP
 \fIsh\fP(1), \fIksh\fP(1), \fIcsh\fP(1)
 .TP
@@ -12217,20 +12230,20 @@ The \fBbash\fP executable
 .FN /etc/profile
 The systemwide initialization file, executed for login shells
 .TP
-.FN \(ti/.bash_profile
+.FN \*~/.bash_profile
 The personal initialization file, executed for login shells
 .TP
-.FN \(ti/.bashrc
+.FN \*~/.bashrc
 The individual per-interactive-shell startup file
 .TP
-.FN \(ti/.bash_logout
+.FN \*~/.bash_logout
 The individual login shell cleanup file, executed when a login shell exits
 .TP
-.FN \(ti/.bash_history
+.FN \*~/.bash_history
 The default value of \fBHISTFILE\fP, the file in which bash saves the
 command history
 .TP
-.FN \(ti/.inputrc
+.FN \*~/.inputrc
 Individual \fIreadline\fP initialization file
 .PD
 .SH AUTHORS

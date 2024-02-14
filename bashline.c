@@ -949,8 +949,11 @@ edit_and_execute_command (int count, int c, int editing_mode, const char *edit_c
 
   if (rl_explicit_arg)
     {
-      command = (char *)xmalloc (strlen (edit_command) + 8);
-      sprintf (command, "%s %d", edit_command, count);
+      size_t clen;
+      /* 32 exceeds strlen (itos (INTMAX_MAX)) (19) */
+      clen = strlen (edit_command) + 32;
+      command = (char *)xmalloc (clen);
+      snprintf (command, clen, "%s %d", edit_command, count);
     }
   else
     {

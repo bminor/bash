@@ -1125,7 +1125,11 @@ rl_redisplay (void)
 	      char obuf[5];
 	      int olen;
 
+#if defined (HAVE_VSNPRINTF)
+	      olen = snprintf (obuf, sizeof (obuf), "\\%o", c);
+#else
 	      olen = sprintf (obuf, "\\%o", c);
+#endif
 	  
 	      for (temp = 0; temp < olen; temp++)
 		{
