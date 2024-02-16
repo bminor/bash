@@ -1553,7 +1553,14 @@ yy_input_name (void)
 static int
 yy_getc (void)
 {
+#ifndef __MSYS__
   return (*(bash_input.getter)) ();
+#else
+  int c;
+  /* skip \r entirely on MSYS */
+  while ((c = (*(bash_input.getter)) ()) == '\r');
+  return c;
+#endif
 }
 
 /* Call this to unget C.  That is, to make C the next character
@@ -2520,6 +2527,11 @@ shell_getc (int remove_quoted_newline)
 	    }
 	  else
 	    RESIZE_MALLOCED_BUFFER (shell_input_line, i, 2, shell_input_line_size, 256);
+
+#ifdef __MSYS__
+	  if (c == '\r')
+	    continue;
+#endif
 
 	  if (c == EOF)
 	    {

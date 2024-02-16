@@ -26,6 +26,8 @@
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
+extern int optind;
+extern char *optarg;
 #endif
 
 #include "bashansi.h"
@@ -40,9 +42,6 @@
 #define SFLAG	0x0010
 #define LFLAG	0x0020
 #define XFLAG	0x0040
-
-extern int optind;
-extern char *optarg;
 
 extern char *dist_version;
 extern int patch_level;

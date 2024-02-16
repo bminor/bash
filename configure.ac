@@ -1,11 +1,11 @@
 dnl
 dnl Configure script for bash-5.3
 dnl
-dnl report bugs to chet@po.cwru.edu
+dnl report bugs to chet.ramey@case.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2023 Free Software Foundation, Inc.
+# Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.059])dnl
+AC_REVISION([for Bash 5.3, version 5.061])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -76,7 +76,7 @@ m68k-sysv)	opt_bash_malloc=no ;;	# fixes file descriptor leak in closedir
 # These need additional investigation
 sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-aix*)		opt_bash_malloc=no ;;	# AIX machines
-*-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
+*-cygwin*|msys*) opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
 # These lack a working sbrk(2)
 aarch64-freebsd*)	opt_bash_malloc=no ;;
 riscv*-freebsd*)	opt_bash_malloc=no ;;
@@ -464,6 +464,9 @@ if test "x$cross_compiling" = "xyes"; then
     *-cygwin*)
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
 	;;
+    *-msys*)
+	cross_cache=${srcdir}/cross-build/msys32.cache
+	;;
     *-mingw*)
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
 	;;
@@ -605,7 +608,7 @@ if test $opt_readline = yes; then
 		# section for OS versions that don't allow unresolved symbols
 		# to be compiled into dynamic libraries.
 		case "$host_os" in
-		cygwin*)	TILDE_LIB= ;;
+		cygwin*|msys*)	TILDE_LIB= ;;
 		esac
 	else
 		RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
@@ -717,6 +720,7 @@ m4_include([m4/stat-time.m4])
 m4_include([m4/timespec.m4])
 
 m4_include([m4/strtoimax.m4])
+m4_include([m4/unlocked-io.m4])
 
 dnl include files for gettext
 
@@ -1092,6 +1096,7 @@ BASH_FUNC_SNPRINTF
 BASH_FUNC_VSNPRINTF
 
 BASH_FUNC_STRTOIMAX
+BASH_FUNC_UNLOCKED_IO
 
 dnl If putenv or unsetenv is not present, set the right define so the
 dnl prototype and declaration in lib/sh/getenv.c will be standard-conformant
@@ -1202,7 +1207,7 @@ freebsd*|midnightbsd*)	LOCAL_CFLAGS='-DHEREDOC_PIPESIZE=4096' ;;
 *qnx[[67]]*)	LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
-cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
+cygwin*|msys*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO -D_POSIX_SOURCE -D_ALL_SOURCE -DRECYCLES_PIDS" ;;
 *openstep*)	LOCAL_CFLAGS="-D__APPLE_CC__" ;;
 esac

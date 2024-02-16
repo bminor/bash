@@ -29,12 +29,12 @@
 
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
+#else
+extern int optind;
+extern char *optarg;
 #endif
 
 #include "syntax.h"
-
-extern int optind;
-extern char *optarg;
 
 #ifndef errno
 extern int errno;

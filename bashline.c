@@ -798,7 +798,11 @@ snarf_hosts_from_file (const char *filename)
   char *temp, buffer[256], name[256];
   register int i, start;
 
+#ifdef __MSYS__
+  file = fopen (filename, "rt");
+#else
   file = fopen (filename, "r");
+#endif
   if (file == 0)
     return;
 
@@ -3129,6 +3133,19 @@ test_for_directory (const char *name)
   int r;
 
   fn = bash_tilde_expand (name, 0);
+
+#if __CYGWIN
+  /* stat("//server") can only be successful as a directory, but can take
+     seconds to time out on failure.  It is much faster to assume that
+     "//server" is a valid name than it is to wait for a stat, even if it
+     gives false positives on bad names.  */
+  if (fn[0] == '/' && fn[1] == '/' && ! strchr (&fn[2], '/'))
+    {
+      free (fn);
+      return 1;
+    }
+#endif
+
   r = file_isdir (fn);
   free (fn);
 

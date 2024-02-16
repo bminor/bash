@@ -88,7 +88,6 @@ $END
 
 #ifdef __CYGWIN__
 #  include <fcntl.h>
-#  include <io.h>
 #endif
 
 #include "../bashintl.h"
@@ -642,10 +641,6 @@ read_builtin (WORD_LIST *list)
       fprintf (stderr, "%s", prompt);
       fflush (stderr);
     }
-
-#if defined (__CYGWIN__) && defined (O_TEXT)
-  setmode (0, O_TEXT);
-#endif
 
   ps2 = 0;
   for (print_ps2 = eof = retval = 0;;)

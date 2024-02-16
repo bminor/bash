@@ -43,6 +43,10 @@
 #include "posixstat.h"
 #include "bashintl.h"
 
+#ifdef __CYGWIN__
+#  define NEED_SH_SETLINEBUF_DECL
+#endif
+
 #include "shell.h"
 #include "parser.h"
 #include "redir.h"
@@ -6744,6 +6748,17 @@ read_comsub (int fd, int quoted, int flags, int *rflag)
 	      /* If the newline was quoted, remove the quoting char. */
 	      if (istring[istring_index - 1] == CTLESC)
 		--istring_index;
+
+#ifdef __MSYS__
+	      if (istring_index > 0 && istring[istring_index - 1] == '\r')
+		{
+		  --istring_index;
+
+		  /* If the carriage return was quoted, remove the quoting char. */
+		  if (istring[istring_index - 1] == CTLESC)
+		    --istring_index;
+		}
+#endif
 	    }
 	  else
 	    break;
@@ -7139,6 +7154,28 @@ command_substitute (char *string, int quoted, int flags)
       sys_error ("%s", _("cannot make pipe for command substitution"));
       goto error_exit;
     }
+
+#ifdef __CYGWIN__
+ /* Passing a pipe through std fds can cause hangs when talking to a
+    non-cygwin child.  Move it.  */
+  if (fildes[0] < 3)
+    {
+      int fd = fcntl (fildes[0], F_DUPFD, 3);
+      close (fildes[0]);
+      fildes[0] = fd;
+    }
+  if (fildes[1] < 3)
+    {
+      int fd = fcntl (fildes[1], F_DUPFD, 3);
+      close (fildes[1]);
+      fildes[1] = fd;
+    }
+  if (fildes[0] < 0 || fildes[1] < 0)
+    {
+      sys_error (_("cannot make pipe for command substitution"));
+      goto error_exit;
+    }
+#endif /* __CYGWIN__ */
 
 #if defined (JOB_CONTROL)
   old_pipeline_pgrp = pipeline_pgrp;

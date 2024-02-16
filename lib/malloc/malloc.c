@@ -322,7 +322,7 @@ static PTR_T internal_valloc (size_t, const char *, int, int);
 static PTR_T internal_remap (PTR_T, size_t, int, int);
 
 #if defined (botch)
-extern void botch ();
+extern void botch (const char *, ...);
 #else
 static void botch (const char *, const char *, int);
 #endif

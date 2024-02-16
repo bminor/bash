@@ -690,6 +690,9 @@ static char *
 fc_readline (FILE *stream)
 {
   register int c;
+#ifdef __MSYS__
+  register int d;
+#endif
   int line_len = 0, lindex = 0;
   char *line = (char *)NULL;
 
@@ -697,6 +700,11 @@ fc_readline (FILE *stream)
     {
       if ((lindex + 2) >= line_len)
 	line = (char *)xrealloc (line, (line_len += 128));
+
+#ifdef __MSYS__
+      if (d == '\r')
+	lindex--;
+#endif
 
       if (c == '\n')
 	{
@@ -706,6 +714,10 @@ fc_readline (FILE *stream)
 	}
       else
 	line[lindex++] = c;
+
+#ifdef __MSYS__
+      d = c;
+#endif
     }
 
   if (!lindex)

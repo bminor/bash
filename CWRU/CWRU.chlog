@@ -8607,3 +8607,36 @@ execute_cmd.c
 	- execute_function: if we didn't compile with debugger support, restore
 	  currently_executing_command after run_debug_trap, like in other
 	  cases
+
+				   2/13
+				   ----
+builtins/declare.def
+	- declare_invalid_opts: move the code that checks for invalid option
+	  combinations to its own function; it returns 0 for no errors and
+	  a return code for declare_internal to return otherwise
+	  Inspired by report from Grisha Levit <grishalevit@gmail.com>
+	- declare_invalid_opts: make -A -a and -A +A/-a +a option combinations
+	  invalid
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   2/14
+				   ----
+bashline.c,general.c,subst.c,lib/sh/pathphys.c,builtins/read.def,
+support/bashversion.c
+	- changes for cygwin and msys (no new features)
+
+bashline.c,builtins/fc.def,general.c,parse.y,stringlib.c,subst.c,variables.c
+	- MSYS-specific changes to support \r\n line endings and DOS-style
+	  paths
+
+configure.ac,cross-build/msys32.cache,support/config.rpath,support/shobj-conf
+	- MSYS-specific build options
+
+configure.ac,config.h.in,m4/unlocked-io.m4,general.h,include/unlocked-io.h
+MANIFEST
+	- adapt Gnulib's unlocked-io module for faster stdio functions.
+	  From Grisha Levit <grishalevit@gmail.com>
+
+lib/malloc/malloc.c,lib/malloc/table.h,lib/sh/strlcpy.c
+	- fixes for ISO C 23
+	  Patch from Collin Funk <collin.funk1@gmail.com>

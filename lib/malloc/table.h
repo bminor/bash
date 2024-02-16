@@ -60,7 +60,7 @@ typedef struct mr_table {
 extern mr_table_t *mr_table_entry (PTR_T);
 extern void mregister_alloc (const char *, PTR_T, size_t, const char *, int);
 extern void mregister_free (PTR_T, int, const char *, int);
-extern void mregister_describe_mem ();
+extern void mregister_describe_mem (PTR_T, FILE *);	/* needs stdio.h */
 extern void mregister_dump_table (void);
 extern void mregister_table_init (void);
 

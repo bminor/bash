@@ -77,6 +77,10 @@ sh_physpath (char *path, int flags)
   ssize_t r;
   size_t linklen;
 
+#ifdef __CYGWIN__
+  return realpath (path, NULL);
+#endif
+
   linklen = strlen (path);
 
 #if 0
@@ -100,13 +104,8 @@ sh_physpath (char *path, int flags)
 
   /* This always gets an absolute pathname. */
 
-  /* POSIX.2 says to leave a leading `//' alone.  On cygwin, we skip over any
-     leading `x:' (dos drive name). */
-#if defined (__CYGWIN__)
-  qbase = (ISALPHA((unsigned char)workpath[0]) && workpath[1] == ':') ? workpath + 3 : workpath + 1;
-#else
+  /* POSIX.2 says to leave a leading `//' alone. */
   qbase = workpath + 1;
-#endif
   double_slash_path = DOUBLE_SLASH (workpath);
   qbase += double_slash_path;
 
@@ -212,11 +211,7 @@ error:
 	    {
 	      q = result;
 	      /* Duplicating some code here... */
-#if defined (__CYGWIN__)
-	      qbase = (ISALPHA((unsigned char)workpath[0]) && workpath[1] == ':') ? workpath + 3 : workpath + 1;
-#else
 	      qbase = workpath + 1;
-#endif
 	      double_slash_path = DOUBLE_SLASH (workpath);
 	      qbase += double_slash_path;
     

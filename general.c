@@ -826,7 +826,12 @@ absolute_pathname (const char *string)
 int
 absolute_program (const char *string)
 {
+#ifndef __MSYS__
   return ((char *)mbschr (string, '/') != (char *)NULL);
+#else
+  return ((char *)mbschr (string, '/') != (char *)NULL ||
+	  (char *)mbschr (string, '\\') != (char *)NULL)
+#endif
 }
 
 /* **************************************************************** */
@@ -850,7 +855,7 @@ make_absolute (const char *string, const char *dot_path)
       char pathbuf[PATH_MAX + 1];
 
       /* WAS cygwin_conv_to_full_posix_path (string, pathbuf); */
-      cygwin_conv_path (CCP_WIN_A_TO_POSIX, string, pathbuf, PATH_MAX);
+      cygwin_conv_path (CCP_WIN_A_TO_POSIX | CCP_ABSOLUTE, string, pathbuf, PATH_MAX);
       result = savestring (pathbuf);
     }
 #else

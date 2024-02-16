@@ -263,7 +263,13 @@ strip_trailing (char *string, int len, int newlines_only)
     {
       if ((newlines_only && string[len] == '\n') ||
 	  (!newlines_only && whitespace (string[len])))
-	len--;
+	{
+	  len--;
+#ifdef __MSYS__
+	  if (newlines_only && string[len + 1] == '\n' && string[len] == '\r')
+	    len--;
+#endif
+	}
       else
 	break;
     }

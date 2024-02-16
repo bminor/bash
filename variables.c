@@ -2550,6 +2550,20 @@ set_if_not (const char *name, const char *value)
 {
   SHELL_VAR *v;
 
+#ifdef __MSYS__
+  /* Remove trailing \r from value */
+  {
+    char *tpos;
+    if (value && *value)
+      {
+	tpos = strchr (value, '\0');
+	tpos--;
+	if (*tpos == '\r')
+	  *tpos = '\0';
+      }
+  }
+#endif
+
   if (shell_variables == 0)
     create_variable_tables ();
 

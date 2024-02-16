@@ -218,6 +218,45 @@ declare_transform_name (char *name, int flags_on, int flags_off)
   return (newname);
 }
 
+/* Some option combinations that don't make any sense */
+static int
+declare_invalid_opts (int flags_on, int flags_off)
+{
+  if ((flags_on & att_function) && (flags_on & (att_array|att_assoc|att_integer|att_nameref)))
+    {
+      char *optchar;
+
+      if (flags_on & att_nameref)
+	optchar = "-n";
+      else if (flags_on & att_integer)
+	optchar = "-i";
+      else if (flags_on & att_assoc)
+	optchar = "-A";
+      else if (flags_on & att_array)
+	optchar = "-a";
+
+      sh_invalidopt (optchar);	
+      return (EXECUTION_FAILURE);
+    }
+  else if ((flags_on & att_assoc) && (flags_off & att_assoc))
+    {
+      sh_invalidopt ("-A");
+      return (EX_BADUSAGE);
+    }
+  else if ((flags_on & att_array) && (flags_off & att_array))
+    {
+      sh_invalidopt ("-a");
+      return (EX_BADUSAGE);
+    }
+  else if ((flags_on & att_assoc) && (flags_on & att_array))
+    {
+      sh_invalidopt ("-a");
+      return (EX_BADUSAGE);
+    }
+
+  return 0;
+}
+
 /* The workhorse function. */
 static int
 declare_internal (WORD_LIST *list, int local_var)
@@ -244,6 +283,10 @@ declare_internal (WORD_LIST *list, int local_var)
 	case 'a':
 #if defined (ARRAY_VARS)
 	  *flags |= att_array;
+#if 0
+	  if (flags == &flags_on)
+	    *flags &= ~att_assoc;	/* last one wins */
+#endif
 	  break;
 #else
 	  builtin_usage ();
@@ -252,6 +295,10 @@ declare_internal (WORD_LIST *list, int local_var)
 	case 'A':
 #if defined (ARRAY_VARS)
 	  *flags |= att_assoc;
+#if 0
+	  if (flags == &flags_on)
+	    *flags &= ~att_array;	/* last one wins */
+#endif
 	  break;
 #else
 	  builtin_usage ();
@@ -359,24 +406,11 @@ declare_internal (WORD_LIST *list, int local_var)
       return (sh_chkwrite (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS));
     }
 
-  /* Some option combinations that don't make any sense */
-  if ((flags_on & att_function) && (flags_on & (att_array|att_assoc|att_integer|att_nameref)))
-    {
-      char *optchar;
-
-      if (flags_on & att_nameref)
-	optchar = "-n";
-      else if (flags_on & att_integer)
-	optchar = "-i";
-      else if (flags_on & att_assoc)
-	optchar = "-A";
-      else if (flags_on & att_array)
-	optchar = "-a";
-
-      sh_invalidopt (optchar);	
-      return (EXECUTION_FAILURE);
-    }
-
+  /* check for some invalid option combinations that are usage errors */
+  opt = declare_invalid_opts (flags_on, flags_off);
+  if (opt != 0)
+    return (opt);
+  
 #define NEXT_VARIABLE() free (name); list = list->next; continue
 
   /* There are arguments left, so we are making variables. */
