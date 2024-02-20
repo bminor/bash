@@ -1555,6 +1555,12 @@ array_value_internal (const char *s, int quoted, int flags, array_eltstate_t *es
 	  retval = quote_string (temp);
 	  free (temp);
 	}
+      else if (t[0] == '*' && quoted == 0 && (flags & AV_ASSIGNRHS))
+	{
+	  temp = string_list_dollar_star (l, quoted, PF_ASSIGNRHS);
+	  retval = quote_nosplit (temp);
+	  free (temp);
+	}
       else	/* ${name[@]} or unquoted ${name[*]} */
 	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);
 

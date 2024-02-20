@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -243,8 +243,9 @@ extern char *quote_escapes (const char *);
 /* And remove such quoted special characters. */
 extern char *remove_quoted_escapes (char *);
 
-/* Quote escape characters on the rhs of a word expansion. */
-extern char *quote_rhs (const char *);
+/* Quote escape characters in contexts where word splitting won't be
+   performed, e.g.,  on the rhs of a word expansion. */
+extern char *quote_nosplit (const char *);
 
 /* Remove CTLNUL characters from STRING unless they are quoted with CTLESC. */
 extern char *remove_quoted_nulls (char *);

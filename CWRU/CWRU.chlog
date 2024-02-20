@@ -8640,3 +8640,64 @@ MANIFEST
 lib/malloc/malloc.c,lib/malloc/table.h,lib/sh/strlcpy.c
 	- fixes for ISO C 23
 	  Patch from Collin Funk <collin.funk1@gmail.com>
+
+				   2/16
+				   ----
+jobs.c
+	- waitchld: note whether or not we are executing in a signal handler
+	  context and break out of the loop if we receive a terminating
+	  signal instead of calling termsig_handler, which can execute unsafe
+	  functions
+	  From https://issues.redhat.com/browse/RHEL-22295
+
+variables.h
+	- valid_readonly_attrs,invalid_readonly_attrs: new defines for declare
+	  to use to validate attempts to modify attributes of readonly
+	  variables
+
+builtins/declare.def
+	- declare_internal: reject attempts to modify (set or unset) attributes	
+	  in invalid_readonly_attrs for readonly variables.
+	  From a discussion with Grisha Levit <grishalevit@gmail.com>
+
+				   2/17
+				   ----
+variables.h
+	- add att_readonly to valid_readonly_attrs; it's valid to use
+	  declare -r var ; declare -r var
+
+Makefile.in,builtins/Makefile.in
+	- add unlocked-io.h to dependencies and variable contents where
+	  appropriate
+	- add additional include files to INSTALLED_INCFILES
+
+builtins/pushd.def,examples/loadables/necho.c
+	- fix order of includes to get unlocked-io.h
+	  From Grisha Levit <grishalevit@gmail.com>
+
+subst.c,subst.h
+	- rename quote_rhs -> quote_nosplit
+
+subst.c
+	- quote_var_value: break the code that quotes a variable value ($x,
+	  ${x}, ${x[n]}, etc.) into a separate inline function and call it
+	  from param_expand and parameter_brace_expand_word so they do it
+	  consistently
+	- param_expand: quote $* appropriately using quote_nosplit if we are
+	  in a place where word splitting will not occur (PF_NOSPLIT2),
+	  expand_no_split_dollar_star == 1 but quoted is 0
+	- quote_var_value: use quote_nosplit if we are in a place where word
+	  splitting will not occur (PF_NOSPLIT2) but quoted == 0.
+	  Fixes bug with IFS=$'\1' reported by alex xmb sw ratchev <fxmbsw7@gmail.com>
+
+arrayfunc.c
+	- array_value: make sure to quote ${A[*]} appropriately if not quoted
+	  (quoted == 0) and in a place where word splitting does not occur
+	  (flags & AV_ASSIGNRHS); the caller expects array_value to quote in
+	  this case
+
+subst.c
+	- parameter_brace_expand_word: make sure to call array_value with
+	  AV_ASSIGNRHS if we are expanding unquoted ${A[*]} in a place where
+	  word splitting does not occur with a non-null $IFS; array_value will
+	  quote appropriately here

@@ -4651,7 +4651,7 @@ quote_escapes (const char *string)
 }
 
 char *
-quote_rhs (const char *string)
+quote_nosplit (const char *string)
 {
   return (quote_escapes_internal (string, PF_NOSPLIT2));
 }
@@ -5000,6 +5000,31 @@ word_list_remove_quoted_nulls (WORD_LIST *list)
       remove_quoted_nulls (t->word->word);
       t->word->flags &= ~W_HASQUOTEDNULL;
     }
+}
+
+/* Quote TEMP appropriately using CTLESC. TEMP is a variable value ($x,
+   ${x[a]}, etc.). This is used in param_expand and parameter_brace_expand_word */
+static inline char *
+quote_var_value (char *temp, int quoted, int pflags)
+{
+  char *ret;
+
+  if (temp == 0)
+    ret = temp;
+  else if (*temp == 0)
+    ret = savestring ("");	/* QUOTED_NULL later */
+  else if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+    ret = quote_string (temp);
+  else if (pflags & PF_ASSIGNRHS)
+    ret = quote_nosplit (temp);
+  else if (expand_no_split_dollar_star && quoted == 0 && (pflags & PF_NOSPLIT2) && ifs_is_set && ifs_is_null == 0)
+    /* This test might be too specific; we only want to quote CTLESC
+       in IFS under specific circumstances */
+    ret = quote_nosplit (temp);	/* XXX */
+  else
+    ret = quote_escapes (temp);
+
+  return ret;
 }
 
 /* **************************************************************** */
@@ -7395,6 +7420,8 @@ command_substitute (char *string, int quoted, int flags)
 	kill (getpid (), SIGINT);
 #endif /* JOB_CONTROL */
 
+      CHECK_TERMSIG;
+
       ret = alloc_word_desc ();
       ret->word = istring;
       ret->flags = tflag;
@@ -7665,6 +7692,8 @@ expand_arrayref:
 	    temp = array_value (name, quoted, 0, &es);
 	  else if (tt[0] == '*' && tt[1] == RBRACK && expand_no_split_dollar_star && ifs_is_null)
 	    temp = array_value (name, Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT, 0, &es);
+	  else if (tt[0] == '*' && tt[1] == RBRACK && expand_no_split_dollar_star && ifs_is_set && ifs_is_null == 0 && quoted == 0)
+	    temp = array_value (name, quoted, AV_ASSIGNRHS, &es);
 	  else if (tt[0] == '*' && tt[1] == RBRACK)
 	    temp = array_value (name, quoted, 0, &es);
 	  else
@@ -7676,9 +7705,7 @@ expand_arrayref:
 	temp = array_value (name, quoted, 0, &es);
       if (es.subtype == 0 && temp)
 	{
-	  temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
-		    ? quote_string (temp)
-		    : quote_escapes (temp);
+	  temp = quote_var_value (temp, quoted, pflags);
 	  rflags |= W_ARRAYIND;
 	}
       /* Note that array[*] and array[@] expanded to a quoted null string by
@@ -7712,16 +7739,11 @@ expand_arrayref:
 	  else if (array_p (var))
 	    temp = array_reference (array_cell (var), 0);
 	  else
-	    temp = value_cell (var);
-#else
-	  temp = value_cell (var);
 #endif
+	    temp = value_cell (var);
 
-	  if (temp)
-	    temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
-		      ? quote_string (temp)
-		      : ((pflags & PF_ASSIGNRHS) ? quote_rhs (temp)
-						 : quote_escapes (temp));
+	  temp = quote_var_value (temp, quoted, pflags);
+
 	  FREE (tt);
 	}
       else
@@ -10557,6 +10579,18 @@ param_expand (char *string, size_t *sindex, int quoted,
 		tflag |= W_SAWQUOTEDNULL;
 	      FREE (temp1);
 	    }
+	  else if (expand_no_split_dollar_star && quoted == 0 && ifs_is_set && ifs_is_null == 0 && (pflags & PF_NOSPLIT2))
+	    {
+	      /* no splitting (conditional command, pattern expansion, array
+		 subscripts, case command word), IFS set to non-null value */
+	      temp1 = string_list_dollar_star (list, quoted, 0);
+	      temp = temp1 ? quote_nosplit (temp1) : temp1;
+
+	      /* XXX - tentative - note that we saw a quoted null here */
+	      if (temp1 && *temp1 == 0 && QUOTED_NULL (temp))
+		tflag |= W_SAWQUOTEDNULL;
+	      FREE (temp1);
+	    }
 	  /* XXX - should we check ifs_is_set here as well? */
 #  if defined (HANDLE_MULTIBYTE)
 	  else if (expand_no_split_dollar_star && ifs_firstc[0] == 0)
@@ -10864,26 +10898,18 @@ comsub:
 	{
 #if defined (ARRAY_VARS)
 	  if (assoc_p (var) || array_p (var))
-	    {
-	      temp = array_p (var) ? array_reference (array_cell (var), 0)
-				   : assoc_reference (assoc_cell (var), "0");
-	      if (temp)
-		temp = (*temp && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
-			  ? quote_string (temp)
-			  : quote_escapes (temp);
-	      else if (unbound_vars_is_error)
-		goto unbound_variable;
-	    }
+	    temp = array_p (var) ? array_reference (array_cell (var), 0)
+				 : assoc_reference (assoc_cell (var), "0");
 	  else
 #endif
-	    {
-	      temp = value_cell (var);
+	    /* $X */
+	    temp = value_cell (var);
 
-	      temp = (*temp && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
-			? quote_string (temp)
-			: ((pflags & PF_ASSIGNRHS) ? quote_rhs (temp)
-						   : quote_escapes (temp));
-	    }
+	  /* Quote the value appropriately */
+	  if (temp == 0 && unbound_vars_is_error)
+	    goto unbound_variable;
+	  else
+	    temp = quote_var_value (temp, quoted, pflags);
 
 	  free (temp1);
 

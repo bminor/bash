@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987-2023 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -116,6 +116,10 @@ $END
 #include <config.h>
 
 #if defined (PUSHD_AND_POPD)
+#ifdef LOADABLE_BUILTIN
+#  include "builtins.h"
+#endif
+
 #include <stdio.h>
 #if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
@@ -139,10 +143,6 @@ $END
 #include "maxpath.h"
 #include "common.h"
 #include "builtext.h"
-
-#ifdef LOADABLE_BUILTIN
-#  include "builtins.h"
-#endif
 
 #if !defined (errno)
 extern int errno;

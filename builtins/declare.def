@@ -672,6 +672,10 @@ restart_new_var_name:
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }
+	  /* See below; ksh93 doesn't allow the nameref attribute to be removed
+	     from a readonly nameref that has a value, even if it doesn't
+	     reference an existing variable, so we don't allow it for
+	     compatibility. */
 	  if (var && nameref_p (var) && readonly_p (var) && nameref_cell (var) && (flags_off & att_nameref))
 	    {
 	      sh_readonly (name);
@@ -711,7 +715,7 @@ restart_new_var_name:
 	  if (refvar && nameref_p (refvar) == 0)
 	    refvar = 0;
 	  /* If the nameref is readonly but doesn't have a value, ksh93
-	     allows the nameref attribute to be removed.  If it's readonly
+	     allows the nameref attribute to be removed. If it's readonly
 	     and has a value, even if the value doesn't reference an
 	     existing variable, we disallow the modification */
 	  if (refvar && nameref_cell (refvar) && readonly_p (refvar))
@@ -886,6 +890,18 @@ restart_new_var_name:
 	     EXECUTION_FAILURE would cause set -e to exit the shell. */
 	  NEXT_VARIABLE ();
 	}
+#if 1
+      /* TAG:bash-5.3 20240216 */
+      /* Cannot set or unset invalid attributes on readonly variables */
+      else if (readonly_p (var) && ((flags_on & invalid_readonly_attrs) || (flags_off & invalid_readonly_attrs)))
+	{
+	  /* The restrictions on namerefs and readonly variables are handled
+	     above. */
+	  sh_readonly (name_cell (var));
+	  any_failed++;
+	  NEXT_VARIABLE ();
+	}
+#endif
 
 #if defined (ARRAY_VARS)
       /* Array variable error checking. */

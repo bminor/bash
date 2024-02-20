@@ -115,9 +115,17 @@ typedef struct _vlist {
 #define att_capcase	0x0000400	/* word capitalized on assignment */
 #define att_nameref	0x0000800	/* word is a name reference */
 
+#define attmask_user	0x0000fff
+
 #define user_attrs	(att_exported|att_readonly|att_integer|att_local|att_trace|att_uppercase|att_lowercase|att_capcase|att_nameref)
 
-#define attmask_user	0x0000fff
+/* These define attributes you can set on readonly variables using declare.
+   You're allowed to set the readonly attribute on a readonly variable.
+   declare checks whether it gets +r explicitly, before testing these.
+   att_nameref is in there because declare performs its own validation due
+   to some ksh93 quirks. */
+#define valid_readonly_attrs	(att_exported|att_local|att_nameref|att_trace|att_readonly)
+#define invalid_readonly_attrs	(~valid_readonly_attrs & attmask_user)
 
 /* Internal attributes used for bookkeeping */
 #define att_invisible	0x0001000	/* cannot see */

@@ -3778,13 +3778,16 @@ waitchld (pid_t wpid, int block)
   WAIT status;
   PROCESS *child;
   pid_t pid;
-  int ind;
+  int ind, sighandler_context;
 
   int call_set_current, last_stopped_job, job, children_exited, waitpid_flags;
   static int wcontinued = WCONTINUED;	/* run-time fix for glibc problem */
 
   call_set_current = children_exited = 0;
   last_stopped_job = NO_JOB;
+
+  /* We save this because we modify sigchld below */
+  sighandler_context = sigchld != 0;
 
   do
     {
@@ -3797,6 +3800,8 @@ waitchld (pid_t wpid, int block)
 	waitpid_flags |= WNOHANG;
 
       /* Check for terminating signals and exit the shell if we receive one */
+      if (sighandler_context && terminating_signal)
+	break;
       CHECK_TERMSIG;
       /* Check for a trapped signal interrupting the wait builtin and jump out */
       CHECK_WAIT_INTR;
@@ -3844,6 +3849,8 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 #endif
       /* If waitpid returns 0, there are running children.  If it returns -1,
 	 the only other error POSIX says it can return is EINTR. */
+      if (sighandler_context && terminating_signal)
+	break;
       CHECK_TERMSIG;
       CHECK_WAIT_INTR;
 
@@ -3981,7 +3988,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
      that has just changed state.  If we notify asynchronously, and the job
      that this process belongs to is no longer running, then notify the user
      of that fact now. */
-  if (asynchronous_notification && interactive && executing_builtin == 0)
+  if (children_exited && asynchronous_notification && interactive && executing_builtin == 0)
     notify_of_job_status ();
 
   return (children_exited);

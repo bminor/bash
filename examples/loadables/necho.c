@@ -20,10 +20,11 @@
    You should have received a copy of the GNU General Public License
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <config.h>
 
-#include <stdio.h>
 #include "builtins.h"
 #include "shell.h"
+#include <stdio.h>
 
 int
 necho_builtin (WORD_LIST *list)
