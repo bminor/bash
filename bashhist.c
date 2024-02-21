@@ -336,7 +336,8 @@ load_history (void)
 
   if (hf && *hf && file_exists (hf))
     {
-      read_history (hf);
+      while (read_history (hf) == EINTR)	/* 0 on success */
+	QUIT;
       /* We have read all of the lines from the history file, even if we
 	 read more lines than $HISTSIZE.  Remember the total number of lines
 	 we read so we don't count the last N lines as new over and over

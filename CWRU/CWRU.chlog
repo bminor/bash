@@ -8678,6 +8678,9 @@ builtins/pushd.def,examples/loadables/necho.c
 subst.c,subst.h
 	- rename quote_rhs -> quote_nosplit
 
+				   2/19
+				   ----
+
 subst.c
 	- quote_var_value: break the code that quotes a variable value ($x,
 	  ${x}, ${x[n]}, etc.) into a separate inline function and call it
@@ -8701,3 +8704,30 @@ subst.c
 	  AV_ASSIGNRHS if we are expanding unquoted ${A[*]} in a place where
 	  word splitting does not occur with a non-null $IFS; array_value will
 	  quote appropriately here
+	- parameter_brace_expand_word,param_expand: use quote_var_value when
+	  expanding $N and ${N}
+
+doc/bash.1,doc/bashref.texi
+	- HISTIGNORE: clarify the description a little to emphasize that lines
+	  matching one of the patterns are not saved in the history list
+	  From https://savannah.gnu.org/support/index.php?111020
+
+				   2/20
+				   ----
+builtins/evalfile.c
+	- FEVAL_RETRY: if set in FLAGS, _evalfile will retry an interrupted
+	  open
+	- _evalfile: if open() returns -1, FEVAL_RETRY is set in FLAGS, and
+	  errno == EINTR, retry the open after checking for interrupts or
+	  terminating signals
+	- maybe_execute_file,force_execute_file: pass FEVAL_RETRY in flags
+
+bashhist.c
+	- load_history: retry read_history if it returns EINTR after checking
+	  for interrupts or terminating signals 
+
+lib/readline/bind.c
+	- _rl_read_init_file: retry the open once if it's interrupted due to a
+	  signal. If we are at a point where readline has installed its
+	  signal handlers, check for signals readline handles
+	  From a patch from Grisha Levit <grishalevit@gmail.com>

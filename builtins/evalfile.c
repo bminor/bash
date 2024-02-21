@@ -68,6 +68,7 @@ extern int errno;
 #define FEVAL_CHECKBINARY	0x040
 #define FEVAL_REGFILE		0x080
 #define FEVAL_NOPUSHARGS	0x100
+#define FEVAL_RETRY		0x200
 
 /* How many `levels' of sourced files we have. */
 int sourcelevel = 0;
@@ -96,17 +97,16 @@ _evalfile (const char *filename, int flags)
 
   USE_VAR(pflags);
 
-#if defined (ARRAY_VARS)
-  GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
-  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
-  GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
-#  if defined (DEBUGGER)
-  GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
-  GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
-#  endif
-#endif
-
-  fd = open (filename, O_RDONLY);
+  errno = 0;
+  do
+    {
+      fd = open (filename, O_RDONLY);
+      i = errno;
+      if (fd < 0 && i == EINTR)
+        QUIT;
+      errno = i;
+    }
+  while (fd < 0 && errno == EINTR && (flags & FEVAL_RETRY));
 
   if (fd < 0 || (fstat (fd, &finfo) == -1))
     {
@@ -236,6 +236,14 @@ file_error_and_exit:
   retain_fifos++;			/* XXX */
 
 #if defined (ARRAY_VARS)
+  GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
+  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
+  GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
+#  if defined (DEBUGGER)
+  GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
+  GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
+#  endif
+
   array_push (bash_source_a, (char *)filename);
   t = itos (executing_line_number ());
   array_push (bash_lineno_a, t);
@@ -326,7 +334,7 @@ maybe_execute_file (const char *fname, int force_noninteractive)
   int result, flags;
 
   filename = bash_tilde_expand (fname, 0);
-  flags = FEVAL_ENOENTOK;
+  flags = FEVAL_ENOENTOK|FEVAL_RETRY;
   if (force_noninteractive)
     flags |= FEVAL_NONINT;
   result = _evalfile (filename, flags);
@@ -341,7 +349,7 @@ force_execute_file (const char *fname, int force_noninteractive)
   int result, flags;
 
   filename = bash_tilde_expand (fname, 0);
-  flags = 0;
+  flags = FEVAL_RETRY;
   if (force_noninteractive)
     flags |= FEVAL_NONINT;
   result = _evalfile (filename, flags);

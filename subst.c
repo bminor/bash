@@ -7632,12 +7632,7 @@ parameter_brace_expand_word (char *name, int var_is_special, int quoted, int pfl
   if (valid_number (name, &arg_index))
     {
       tt = get_dollar_var_value (arg_index);
-      if (tt)
- 	temp = (*tt && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
- 		  ? quote_string (tt)
- 		  : quote_escapes (tt);
-      else
-        temp = (char *)NULL;
+      temp = quote_var_value (tt, quoted, pflags);
       FREE (tt);
     }
   else if (var_is_special)      /* ${@} */
@@ -10443,13 +10438,7 @@ param_expand (char *string, size_t *sindex, int quoted,
 	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
-      if (temp1)
-	temp = (*temp1 && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
-		  ? quote_string (temp1)
-		  : quote_escapes (temp1);
-      else
-	temp = (char *)NULL;
-
+      temp = quote_var_value (temp1, quoted, pflags);
       break;
 
     /* $$ -- pid of the invoking shell. */
@@ -10907,7 +10896,7 @@ comsub:
 
 	  /* Quote the value appropriately */
 	  if (temp == 0 && unbound_vars_is_error)
-	    goto unbound_variable;
+	    goto unbound_variable;	/* can happen if array[0] is not set */
 	  else
 	    temp = quote_var_value (temp, quoted, pflags);
 

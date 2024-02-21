@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Feb  5 10:51:21 EST 2024
+.\"	Last Change: Mon Feb 19 16:52:45 EST 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 February 5" "GNU Bash 5.3"
+.TH BASH 1 "2024 February 19" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2408,7 +2408,12 @@ after reading any startup files.
 .TP
 .B HISTIGNORE
 A colon-separated list of patterns used to decide which command lines
-should be saved on the history list.  Each pattern is anchored at the
+should be saved on the history list.
+If a command line matches one of the patterns in the value of
+.SM
+.BR HISTIGNORE ,
+it is not saved on the history list.
+Each pattern is anchored at the
 beginning of the line and must match the complete line
 (\fBbash\fP will not  implicitly append a
 .Q \fB*\fP ).

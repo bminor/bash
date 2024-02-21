@@ -168,9 +168,8 @@ history_filename (const char *filename)
 
   if (home == 0)
     return (NULL);
-  else
-    home_len = strlen (home);
 
+  home_len = strlen (home);
   return_val = (char *)xmalloc (2 + home_len + 8); /* strlen(".history") == 8 */
   strcpy (return_val, home);
   return_val[home_len] = '/';
@@ -282,7 +281,10 @@ read_history_range (const char *filename, int from, int to)
 
   buffer = last_ts = (char *)NULL;
   input = history_filename (filename);
-  file = input ? open (input, O_RDONLY|O_BINARY, 0666) : -1;
+  if (input == 0)
+    return 0;
+  errno = 0;
+  file = open (input, O_RDONLY|O_BINARY, 0666);
 
   if ((file < 0) || (fstat (file, &finfo) == -1))
     goto error_and_exit;
@@ -524,8 +526,10 @@ history_truncate_file (const char *fname, int lines)
 
   buffer = (char *)NULL;
   filename = history_filename (fname);
+  if (filename == 0)
+    return 0;
   tempname = 0;
-  file = filename ? open (filename, O_RDONLY|O_BINARY, 0666) : -1;
+  file = open (filename, O_RDONLY|O_BINARY, 0666);
   rv = exists = 0;
 
   orig_lines = lines;

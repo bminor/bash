@@ -1,3 +1,17 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 set aa bb cc -- dd ; f=$'\1' IFS=$f
 
 recho "$f$*$f"
@@ -41,3 +55,44 @@ A=( aa bb cc -- dd ); f=$'\1' IFS=$f
 
 [[ ${f}${A[*]}${f} == $f${A[*]}$f ]] && echo ok 23
 [[ ${A[*]} == ${A[*]} ]] && echo ok 24
+
+# now test $N/${N}/${A[N]}
+set aa bb $'\1' cc -- dd ; f=$'\1' IFS=$f
+
+[[ $3$*$3 == $3$*$3 ]] && echo ok 25
+[[ $3$*$3 == ${3}${*}${3} ]] && echo ok 26
+[[ $3$*$3 == $3${*}${3} ]] && echo ok 27
+[[ $* == *$3* ]]&& echo ok 28
+[[ $* == *${3}* ]]&& echo ok 29
+
+# now use an array instead of $*
+A=( aa bb $'\1' cc -- dd )
+
+[[ ${A[2]}${A[*]}${A[2]} == ${A[2]}${A[*]}${A[2]} ]] && echo ok 30
+[[ ${A[2]}$*${A[2]} == ${A[2]}${*}${A[2]} ]] && echo ok 31
+[[ ${A[2]}$*${A[2]} == ${A[2]}${*}${A[2]} ]] && echo ok 32
+[[ $* == *${A[2]}* ]]&& echo ok 33
+[[ $* == *${A[2]}* ]]&& echo ok 34
+
+unset -v A
+
+set -- aa bb cc -- dd
+case $* in
+"$*")	echo ok 35;;
+*)	echo bad 35;;
+esac
+
+case $f in
+$f)	echo ok 36;;
+*)	echo bad 36;;
+esac
+
+case $f$*$f in
+$f"$*"$f)	echo ok 37;;
+*)	echo bad 37;;
+esac
+
+case $f$*$f in
+*$f--$f*)	echo ok 38;;
+*)	echo bad 38;;
+esac
