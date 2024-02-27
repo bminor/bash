@@ -172,11 +172,16 @@ _rl_wcwidth (WCHAR_T wc)
     }
 }
 
-/* Unicode combining characters range from U+0300 to U+036F */
-#define UNICODE_COMBINING_CHAR(x) ((x) >= 768 && (x) <= 879)
+/* Unicode combining characters as of version 15.1 */
+#define UNICODE_COMBINING_CHAR(x) \
+	(((x) >= 0x0300 && (x) <= 0x036F) || \
+	 ((x) >= 0x1AB0 && (x) <= 0x1AFF) || \
+	 ((x) >= 0x1DC0 && (x) <= 0x1DFF) || \
+	 ((x) >= 0x20D0 && (x) <= 0x20FF) || \
+	 ((x) >= 0xFE20 && (x) <= 0xFE2F))
 
 #if defined (WCWIDTH_BROKEN)
-#  define WCWIDTH(wc)	((_rl_utf8locale && UNICODE_COMBINING_CHAR(wc)) ? 0 : _rl_wcwidth(wc))
+#  define WCWIDTH(wc)	((_rl_utf8locale && UNICODE_COMBINING_CHAR((int)wc)) ? 0 : _rl_wcwidth(wc))
 #else
 #  define WCWIDTH(wc)	_rl_wcwidth(wc)
 #endif
@@ -186,6 +191,8 @@ _rl_wcwidth (WCHAR_T wc)
 #else
 #  define IS_COMBINING_CHAR(x)	(WCWIDTH(x) == 0)
 #endif
+
+#define IS_BASE_CHAR(x)		(iswgraph(x) && WCWIDTH(x) > 0)
 
 #define UTF8_SINGLEBYTE(c)	(((c) & 0x80) == 0)
 #define UTF8_MBFIRSTCHAR(c)	(((c) & 0xc0) == 0xc0)

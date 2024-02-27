@@ -368,7 +368,7 @@ static WORD_LIST *glob_expand_word_list (WORD_LIST *, int);
 static WORD_LIST *brace_expand_word_list (WORD_LIST *, int);
 #endif
 #if defined (ARRAY_VARS)
-static int make_internal_declare (char *, char *, char *);
+static int make_internal_declare (const char *, const char *, const char *, const char *);
 static void expand_compound_assignment_word (WORD_LIST *, int);
 static WORD_LIST *expand_declaration_argument (WORD_LIST *, WORD_LIST *);
 #endif
@@ -12654,7 +12654,7 @@ brace_expand_word_list (WORD_LIST *tlist, int eflags)
    the list of options to supply to `declare'. CMD is the declaration command
    we are expanding right now; it's unused currently. */
 static int
-make_internal_declare (char *word, char *option, char *cmd)
+make_internal_declare (const char *word, const char *opts_on, const char *opts_off, const char *cmd)
 {
   int t, r;
   WORD_LIST *wl;
@@ -12671,7 +12671,10 @@ make_internal_declare (char *word, char *option, char *cmd)
     }
 
   wl = make_word_list (w, (WORD_LIST *)NULL);
-  wl = make_word_list (make_word (option), wl);
+  if (*opts_on)
+    wl = make_word_list (make_word (opts_on), wl);
+  if (*opts_off)
+    wl = make_word_list (make_word (opts_off), wl);
 
   r = declare_builtin (wl);
 
@@ -12810,96 +12813,74 @@ expand_compound_assignment_word (WORD_LIST *tlist, int atype)
 static WORD_LIST *
 expand_declaration_argument (WORD_LIST *tlist, WORD_LIST *wcmd)
 {
-  char opts[16], omap[128];
-  int t, opti, oind, skip, inheriting;
+  char opts_on[16], opts_off[16], omap[128];
+  int t, i_on, i_off, oind, skip, inheriting;
   WORD_LIST *l;
 
-  inheriting = localvar_inherit;
-  opti = 0;
-  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_CHKLOCAL|W_ASSIGNARRAY))
-    opts[opti++] = '-';
+  memset (omap, '\0', sizeof (omap));
 
-  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL)) == (W_ASSIGNASSOC|W_ASSNGLOBAL))
-    {
-      opts[opti++] = 'g';
-      opts[opti++] = 'A';
-    }
-  else if (tlist->word->flags & W_ASSIGNASSOC)
-    {
-      opts[opti++] = 'A';
-    }
-  else if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
-    {
-      opts[opti++] = 'g';
-      opts[opti++] = 'a';
-    }
+  if (tlist->word->flags & W_ASSIGNASSOC)
+    omap['A'] = 1;
   else if (tlist->word->flags & W_ASSIGNARRAY)
-    {
-      opts[opti++] = 'a';
-    }
-  else if (tlist->word->flags & W_ASSNGLOBAL)
-    opts[opti++] = 'g';
+    omap['a'] = 1;
 
+  if (tlist->word->flags & W_ASSNGLOBAL)
+    omap['g'] = 1;
   if (tlist->word->flags & W_CHKLOCAL)
-    opts[opti++] = 'G';
+    omap['G'] = 1;
 
   /* If we have special handling note the integer attribute and others
      that transform the value upon assignment.  What we do is take all
      of the option arguments and scan through them looking for options
-     that cause such transformations, and add them to the `opts' array. */
+     that cause such transformations, and add them to either the `opts_on'
+     or `opts_off' array as appropriate. */
 
-  memset (omap, '\0', sizeof (omap));
   for (l = wcmd->next; l != tlist; l = l->next)
     {
       int optchar;
 
       if (l->word->word[0] != '-' && l->word->word[0] != '+')
 	break;	/* non-option argument */
-      if (l->word->word[0] == '-' && l->word->word[1] == '-' && l->word->word[2] == 0)
+      if (l->word->word[1] == 0)
+        break;	/* handle `local -'; let `declare +' be an error */
+
+      if (ISOPTION (l->word->word, '-'))
 	break;	/* -- signals end of options */
+
       optchar = l->word->word[0];
       for (oind = 1; l->word->word[oind]; oind++)
 	switch (l->word->word[oind])
 	  {
 	    case 'I':
-	      inheriting = 1;
 	    case 'i':
 	    case 'l':
 	    case 'u':
 	    case 'c':
-	      omap[l->word->word[oind]] = 1;
-	      if (opti == 0)
-		opts[opti++] = optchar;
+	      omap[l->word->word[oind]] |= (optchar == '-' ? 1 : 2);
 	      break;
 	    default:
 	      break;
 	  }
     }
 
+  i_on = i_off = 0;
   for (oind = 0; oind < sizeof (omap); oind++)
-    if (omap[oind])
-      opts[opti++] = oind;
-
-  /* If there are no -a/-A options, but we have a compound assignment,
-     we have a choice: we can set opts[0]='-', opts[1]='a', since the
-     default is to create an indexed array, and call
-     make_internal_declare with that, or we can just skip the -a and let
-     declare_builtin deal with it.  Once we're here, we're better set
-     up for the latter, since we don't want to deal with looking up
-     any existing variable here -- better to let declare_builtin do it.
-     We need the variable created, though, especially if it's local, so
-     we get the scoping right before we call do_word_assignment.
-     To ensure that make_local_declare gets called, we add `--' if there
-     aren't any options. */
-  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSIGNARRAY)) == 0)
     {
-      if (opti == 0)
+      if (omap[oind] & 1)	/* on options */
 	{
-	  opts[opti++] = '-';
-          opts[opti++] = '-';
+	  if (i_on == 0)
+	    opts_on[i_on++] = '-';
+	  opts_on[i_on++] = oind;
+	}
+      if (omap[oind] & 2)	/* off options */
+	{
+	  if (i_off == 0)
+	    opts_off[i_off++] = '+';
+	  opts_off[i_off++] = oind;
 	}
     }
-  opts[opti] = '\0';
+
+  opts_on[i_on] = opts_off[i_off] = '\0';
 
   /* This isn't perfect, but it's a start. Improvements later. We expand
      tlist->word->word and single-quote the results to avoid multiple
@@ -12910,17 +12891,15 @@ expand_declaration_argument (WORD_LIST *tlist, WORD_LIST *wcmd)
   expand_compound_assignment_word (tlist, (tlist->word->flags & W_ASSIGNASSOC) ? 1 : 0);
 
   skip = 0;
-  if (opti > 0)
+  /* We always call make_internal_declare */
+  t = make_internal_declare (tlist->word->word, opts_on, opts_off, wcmd ? wcmd->word->word : (char *)0);
+  if (t != EXECUTION_SUCCESS)
     {
-      t = make_internal_declare (tlist->word->word, opts, wcmd ? wcmd->word->word : (char *)0);
-      if (t != EXECUTION_SUCCESS)
-	{
-	  last_command_exit_value = t;
-	  if (tlist->word->flags & W_FORCELOCAL)	/* non-fatal error */
-	    skip = 1;
-	  else
-	    exp_jump_to_top_level (DISCARD);
-	}
+      last_command_exit_value = t;
+      if (tlist->word->flags & W_FORCELOCAL)	/* non-fatal error */
+	skip = 1;
+      else
+	exp_jump_to_top_level (DISCARD);
     }
 
   if (skip == 0)

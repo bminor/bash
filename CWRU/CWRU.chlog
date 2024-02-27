@@ -8731,3 +8731,22 @@ lib/readline/bind.c
 	  signal. If we are at a point where readline has installed its
 	  signal handlers, check for signals readline handles
 	  From a patch from Grisha Levit <grishalevit@gmail.com>
+
+				   2/21
+				   ----
+subst.c
+	- make_internal_declare: now takes two strings of option arguments:
+	  those to turn on (`-') and those to turn off (`+')
+	- expand_declaration_argument: simplify the code; handle `-' and `+'
+	  optionsns; always call make_internal_declare
+	  From a patch from Grisha Levit <grishalevit@gmail.com>
+
+				   2/22
+				   ----
+aclocal.m4
+	- add additional character to test for broken wcwidth (0x200b)
+
+lib/readline/display.c
+	- update_line: use IS_COMBINING_CHAR instead of UNICODE_COMBINING_CHAR
+	  plus WCWIDTH; it doesn't make sense on systems where wcwidth isn't
+	  broken

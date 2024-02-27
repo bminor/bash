@@ -216,11 +216,13 @@ _rl_find_next_mbchar_internal (const char *string, int seed, int count, int find
 
   if (find_non_zero)
     {
-      tmp = MBRTOWC (&wc, string + point, strlen (string + point), &ps);
+      len = strlen (string + point);
+      tmp = MBRTOWC (&wc, string + point, len, &ps);
       while (MB_NULLWCH (tmp) == 0 && MB_INVALIDCH (tmp) == 0 && WCWIDTH (wc) == 0)
 	{
 	  point += tmp;
-	  tmp = MBRTOWC (&wc, string + point, strlen (string + point), &ps);
+	  len -= tmp;
+	  tmp = MBRTOWC (&wc, string + point, len, &ps);
 	}
     }
 
@@ -261,11 +263,16 @@ _rl_find_prev_utf8char (const char *string, int seed, int find_non_zero)
       save = prev;
 
       /* Move back until we're not in the middle of a multibyte char */
+#if 0
       if (UTF8_MBCHAR (b))
 	{
 	  while (prev > 0 && (b = (unsigned char)string[--prev]) && UTF8_MBCHAR (b))
 	    ;
 	}
+#else
+      while (prev > 0 && (b = (unsigned char)string[--prev]) && UTF8_MBFIRSTCHAR (b) == 0)
+	;
+#endif
 
       if (UTF8_MBFIRSTCHAR (b))
 	{

@@ -1263,17 +1263,19 @@ PPAARRAAMMEETTEERRSS
               HHIISSTTSSIIZZEE after reading any startup files.
        HHIISSTTIIGGNNOORREE
               A colon-separated list of patterns used to decide which  command
-              lines  should be saved on the history list.  Each pattern is an-
-              chored at the beginning of the line and must match the  complete
-              line  (bbaasshh will not  implicitly append a "**").  Each pattern is
-              tested against the line after the checks specified  by  HHIISSTTCCOONN--
-              TTRROOLL  are  applied.   In  addition  to  the normal shell pattern
-              matching characters, "&&" matches the previous history  line.   A
-              backslash  will  escape the "&&"; the backslash is removed before
-              attempting a match.  The second and subsequent lines of a multi-
-              line compound command are not tested, and are added to the  his-
-              tory  regardless of the value of HHIISSTTIIGGNNOORREE.  The pattern match-
-              ing honors the setting of the eexxttgglloobb shell option.
+              lines  should  be  saved on the history list.  If a command line
+              matches one of the patterns in the value of  HHIISSTTIIGGNNOORREE,  it  is
+              not  saved on the history list.  Each pattern is anchored at the
+              beginning of the line and must match  the  complete  line  (bbaasshh
+              will  not   implicitly  append  a  "**").  Each pattern is tested
+              against the line after the checks specified by  HHIISSTTCCOONNTTRROOLL  are
+              applied.  In addition to the normal shell pattern matching char-
+              acters, "&&" matches the previous history line.  A backslash will
+              escape  the  "&&";  the  backslash is removed before attempting a
+              match.  The second and subsequent lines of a multi-line compound
+              command are not tested, and are added to the history  regardless
+              of  the  value  of  HHIISSTTIIGGNNOORREE.  The pattern matching honors the
+              setting of the eexxttgglloobb shell option.
        HHIISSTTSSIIZZEE
               The number of commands to remember in the command  history  (see
               HHIISSTTOORRYY  below).   If  the value is 0, commands are not saved in
@@ -6891,4 +6893,4 @@ BBUUGGSS
 
        There may be only one active coprocess at a time.
 
-GNU Bash 5.3                    2024 February 5                        _B_A_S_H(1)
+GNU Bash 5.3                   2024 February 19                        _B_A_S_H(1)

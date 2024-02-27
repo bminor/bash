@@ -11,13 +11,19 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+
+# Filter stdin to remove builtin array variables that are
+# automatically set and possibly contain values that vary.
+ignore_builtin_arrays()
+{
+	grep -v -e BASH_VERSINFO= -e PIPESTATUS= -e GROUPS=
+}
+
 # this is needed so that the bad assignments (b[]=bcde, for example) do not
 # cause fatal shell errors when in posix mode
 set +o posix
 
 set +a
-# The calls to egrep -v are to filter out builtin array variables that are
-# automatically set and possibly contain values that vary.
 
 # first make sure we handle the basics
 x=()
@@ -61,7 +67,7 @@ echo ${a[@]}
 echo ${a[*]}
 
 # this should print out values, too
-declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+declare -a | ignore_builtin_arrays
 
 unset a[7]
 echo ${a[*]}
@@ -92,11 +98,11 @@ echo ${a[@]}
 readonly a[5]
 readonly a
 # these two lines should output `declare' commands
-readonly -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
-declare -ar | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+readonly -a | ignore_builtin_arrays
+declare -ar | ignore_builtin_arrays
 # this line should output `readonly' commands, even for arrays
 set -o posix
-readonly -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+readonly -a | ignore_builtin_arrays
 set +o posix
 
 declare -a d='([1]="" [2]="bdef" [5]="hello world" "test")'
@@ -111,7 +117,7 @@ b=([0]=this [1]=is [2]=a [3]=test [4]="$PS1" [5]=$pass)
 
 echo ${b[@]:2:3}
 
-declare -pa | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+declare -pa | ignore_builtin_arrays
 
 a[3]="this is a test"
 
@@ -131,7 +137,7 @@ d=([1]="test test" [-65]=negative )
 unset d[12]
 unset e[*]
 
-declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+declare -a | ignore_builtin_arrays
 
 ps1='hello'
 unset ps1[2]
@@ -157,7 +163,7 @@ echo ${vv[0]} ${vv[3]}
 echo ${vv[@]}
 unset vv
 
-declare -a | egrep -v '(BASH_VERSINFO|PIPESTATUS|GROUPS)'
+declare -a | ignore_builtin_arrays
 
 export rv
 #set
