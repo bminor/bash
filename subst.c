@@ -252,6 +252,9 @@ static WORD_LIST *expand_string_for_pat (const char *, int, int *, int *);
 
 static char *quote_escapes_internal (const char *, int);
 
+static char *quote_ifs (const char *);
+static WORD_LIST *list_quote_ifs (WORD_LIST *);
+
 static WORD_LIST *list_quote_escapes (WORD_LIST *);
 static WORD_LIST *list_dequote_escapes (WORD_LIST *);
 
@@ -4478,6 +4481,8 @@ expand_string_for_rhs (const char *string, int quoted, int op, int pflags, int *
   /* This was further clarified on the austin-group list in March, 2017 and
      in Posix bug 1129 */
   old_nosplit = expand_no_split_dollar_star;
+  /* The check against ifs_is_null is so we don't split this time through,
+     since we will split the (possibly-quoted) results of this function. */
   expand_no_split_dollar_star = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || op == '=' || ifs_is_null == 0;	/* XXX - was 1 */
   td.flags = W_EXPANDRHS;		/* expanding RHS of ${paramOPword} */
   td.flags |= W_NOSPLIT2;		/* no splitting, remove "" and '' */
@@ -4884,6 +4889,7 @@ dequote_list (WORD_LIST *list)
 	tlist->word->flags &= ~W_HASQUOTEDNULL;
       free (tlist->word->word);
       tlist->word->word = s;
+      tlist->word->flags &= ~W_QUOTED;		/* no longer quoted */
     }
   return list;
 }
@@ -4903,6 +4909,47 @@ remove_quoted_escapes (char *string)
     }
 
   return (string);
+}
+
+/* Use CTLESC to quote IFS characters in STRING. Not used yet. */
+static char *
+quote_ifs (const char *string)
+{
+  const char *s, *send;
+  char *t, *result;
+  size_t slen;
+  DECLARE_MBSTATE; 
+
+  slen = strlen (string);
+  send = string + slen;
+
+  t = result = (char *)xmalloc ((slen * 2) + 1);
+  s = string;
+
+  while (*s)
+    {
+      if (isifs (*s))
+	*t++ = CTLESC;
+      COPY_CHAR_P (t, s, send);
+    }
+  *t = '\0';
+
+  return (result);
+}
+
+static WORD_LIST *
+list_quote_ifs (WORD_LIST *list)
+{
+  WORD_LIST *w;
+  char *t;
+
+  for (w = list; w; w = w->next)
+    {
+      t = w->word->word;
+      w->word->word = quote_ifs (t);
+      free (t);
+    }
+  return list;
 }
 
 /* Remove quoted $IFS characters from STRING.  Quoted IFS characters are
@@ -7986,6 +8033,8 @@ parameter_brace_expand_rhs (char *name, char *value,
 	  temp = string_list (l);
 	  if (temp && (QUOTED_NULL (temp) == 0) && (l->word->flags & W_SAWQUOTEDNULL))
 	    w->flags |= W_SAWQUOTEDNULL;	/* XXX */
+	  if (temp && (l->word->flags & W_QUOTED) && quoted == 0)
+	    w->flags |= W_QUOTED;
 	}
 
       /* If we have a quoted null result (QUOTED_NULL(temp)) and the word is
@@ -10524,6 +10573,7 @@ param_expand (char *string, size_t *sindex, int quoted,
 	  temp = string_list_dollar_star (list, quoted, 0);
 	  if (temp)
 	    {
+	      /* Q_HERE_DOCUMENT as well? */
 	      temp1 = (quoted & Q_DOUBLE_QUOTES) ? quote_string (temp) : temp;
 	      if (*temp == 0)
 		tflag |= W_HASQUOTEDNULL;
@@ -10593,11 +10643,7 @@ param_expand (char *string, size_t *sindex, int quoted,
 	      temp = string_list_dollar_at (list, quoted, 0);
 	      /* Set W_SPLITSPACE to make sure the individual positional
 		 parameters are split into separate arguments */
-#if 0
-	      if (quoted == 0 && (ifs_is_set == 0 || ifs_is_null))
-#else	/* change with bash-5.0 */
 	      if (quoted == 0 && ifs_is_null)
-#endif
 		tflag |= W_SPLITSPACE;
 	      /* If we're not quoted but we still don't want word splitting, make
 		 we quote the IFS characters to protect them from splitting (e.g.,
@@ -11437,6 +11483,12 @@ add_string:
 	  if (tword && (tword->flags & W_SAWQUOTEDNULL))
 	    had_quoted_null = 1;		/* XXX */
 
+	  /* This loses tword->flags. If quoted == 0 but (tword->flags & W_QUOTED),
+	     we need to note that somewhere. It means that the result will be
+	     split, but this portion should not be. It only really matters if
+	     $IFS contains $'\001', since usually quoting with CTLESC will
+	     inhibit the word splitting. */
+
 	  temp = tword ? tword->word : (char *)NULL;
 	  dispose_word_desc (tword);
 
@@ -11724,12 +11776,21 @@ add_twochars:
 	     will cause word splitting. */
 	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && quoted == 0 && (word->flags & (W_NOSPLIT|W_EXPANDRHS|W_ASSIGNRHS)) == W_EXPANDRHS)
 	    {
+	      /* Don't add a quoted null character if it would eventually be
+		 used as a word delimiter when splitting. */
+	      if (isifs (CTLNUL))
+		continue;
 	      c = CTLNUL;
 	      sindex--;
 	      had_quoted_null = 1;
 	      goto add_character;
 	    }
 	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && (word->flags & (W_NOSPLIT|W_NOSPLIT2)))
+	    continue;
+
+	  /* Throw away a quoted null instead of adding a character that
+	     would eventually be a word delimiter when splitting. */
+	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && had_quoted_null && isifs(CTLNUL))
 	    continue;
 
 	add_quoted_string:

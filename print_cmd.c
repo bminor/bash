@@ -771,6 +771,14 @@ print_case_clauses (PATTERN_LIST *clauses)
       if (printing_comsub == 0 || first == 0)
 	newline ("");
       first = 0;
+      /* "The grammar shows that reserved words can be used as patterns,
+	 even if one is the first word on a line. Obviously, the reserved
+	 word esac cannot be used in this manner." */
+      /* If the first word of the pattern list is literal "esac", the only
+	 way it could have gotten through the parser is to have been
+	 preceded by a left paren. */
+      if (STREQ (clauses->patterns->word->word, "esac"))
+	cprintf("(");
       command_print_word_list (clauses->patterns, " | ");
       cprintf (")\n");
       indentation += indentation_amount;

@@ -8750,3 +8750,30 @@ lib/readline/display.c
 	- update_line: use IS_COMBINING_CHAR instead of UNICODE_COMBINING_CHAR
 	  plus WCWIDTH; it doesn't make sense on systems where wcwidth isn't
 	  broken
+
+				   2/27
+				   ----
+print_cmd.c
+	- print_case_clauses: if one of the case command pattern lists begins
+	  with the word `esac' (unquoted), precede the pattern list with `(',
+	  since it had to be there originally to get through the parser.
+	  Report by Emanuele Torre <torreemanuele6@gmail.com>
+
+				   2/29
+				   ----
+general.c,general.h
+	- string_to_rlimtype: takes a second ENDP argument, like strtol, so
+	  the caller doesn't have to check that the string is all digits,
+	  but can optionally check for and disallow a 0x prefix
+
+				    3/2
+				    ---
+subst.c
+	- dequote_list: unset the W_QUOTED flag in the word after dequoting it
+	- parameter_brace_expand_rhs: if the word in the list returned by
+	  expand_string_for_rhs has W_QUOTED set, but the string being
+	  expanded was not quoted, turn on the W_QUOTED in the returned word
+	  so we can potentially avoid word splitting
+	- expand_word_internal: if CTLNUL is a IFS character, don't add quoted
+	  null strings to istring if we're going to be word splitting, since
+	  they will be treated as word delimiters

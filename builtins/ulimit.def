@@ -94,6 +94,7 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 #include "pipesize.h"
+#include <chartypes.h>
 
 #if !defined (errno)
 extern int errno;
@@ -131,7 +132,7 @@ extern int errno;
 
 #if !defined (RLIMTYPE)
 #  define RLIMTYPE long
-#  define string_to_rlimtype(s) strtol(s, (char **)NULL, 10)
+#  define string_to_rlimtype(s, ep) strtol(s, ep, 10)
 #  define print_rlimtype(num, nl) printf ("%ld%s", num, nl ? "\n" : "")
 #endif
 
@@ -473,9 +474,16 @@ ulimit_internal (int cmd, char *cmdarg, int mode, int multiple)
     real_limit = soft_limit;
   else if (STREQ (cmdarg, "unlimited"))
     real_limit = RLIM_INFINITY;
-  else if (all_digits (cmdarg))
+  else if (DIGIT (*cmdarg) && (cmdarg[1] == 0 || DIGIT (cmdarg[1])))
     {
-      limit = string_to_rlimtype (cmdarg);
+      char *endp;
+      limit = string_to_rlimtype (cmdarg, &endp);
+      if (*endp != '\0')
+	{
+	  sh_invalidnum (cmdarg);
+	  return (EXECUTION_FAILURE);
+	}
+
       block_factor = BLOCKSIZE(limits[limind].block_factor);
       real_limit = limit * block_factor;
 

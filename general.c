@@ -170,15 +170,17 @@ set_posix_options (const char *bitmap)
 
 #if defined (RLIMTYPE)
 RLIMTYPE
-string_to_rlimtype (char *s)
+string_to_rlimtype (const char *string, char **ep)
 {
   RLIMTYPE ret;
   int neg;
+  const char *s;
 
   ret = 0;
   neg = 0;
+  s = string;
   /* ulimit_builtin doesn't allow leading whitespace or an optional
-     leading `+' or `-'. */
+     leading `+' or `-', so the caller has to check. */
   while (s && *s && whitespace (*s))
     s++;
   if (s && (*s == '-' || *s == '+'))
@@ -188,6 +190,8 @@ string_to_rlimtype (char *s)
     }
   for ( ; s && *s && DIGIT (*s); s++)
     ret = (ret * 10) + TODIGIT (*s);
+  if (ep)
+    *ep = (char *)s;
   return (neg ? -ret : ret);
 }
 

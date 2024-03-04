@@ -297,7 +297,7 @@ extern void set_posix_options (const char *);
 extern void save_posix_options (void);
 
 #if defined (RLIMTYPE)
-extern RLIMTYPE string_to_rlimtype (char *);
+extern RLIMTYPE string_to_rlimtype (const char *, char **);
 extern void print_rlimtype (RLIMTYPE, int);
 #endif
 
