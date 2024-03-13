@@ -4288,10 +4288,11 @@ notify_of_job_status (void)
 	  if (startup_state == 0 && WIFSIGNALED (s) == 0 &&
 		((DEADJOB (job) && IS_FOREGROUND (job) == 0) || STOPPED (job)))
 	    continue;
-	  
+
 	  /* Do the same thing and don't print anything or mark as notified
-	     for the signals we're not going to report on */
-	  else if (startup_state == 0 && DEADJOB (job) && IS_FOREGROUND (job) == 0 &&
+	     for the signals we're not going to report on. This is the opposite
+	     of the first two cases under case JDEAD below. */
+	  else if (interactive_shell == 0 && DEADJOB (job) && IS_FOREGROUND (job) == 0 &&
 		WIFSIGNALED (s) && (termsig == SIGINT
 #if defined (DONT_REPORT_SIGTERM)
 		|| termsig == SIGTERM
@@ -4299,7 +4300,13 @@ notify_of_job_status (void)
 #if defined (DONT_REPORT_SIGPIPE)
 		|| termsig == SIGPIPE
 #endif
-		))
+		|| signal_is_trapped (termsig)))
+	    continue;
+
+	  /* hang onto the status if the shell is running -c command */
+	  else if (startup_state == 2 && subshell_environment == 0 &&
+		WIFSIGNALED (s) == 0 &&
+		((DEADJOB (job) && IS_FOREGROUND (job) == 0) || STOPPED (job)))
 	    continue;
 
 	  /* If job control is disabled, don't print the status messages.
@@ -4376,7 +4383,11 @@ notify_of_job_status (void)
 	      /* Interactive shells without job control enabled are handled
 		 above. */
 	      /* XXX - this is a catch-all in case we missed a state */
-	      jobs[job]->flags |= J_NOTIFIED;
+	      else
+{
+internal_debug("notify_of_job_status: catch-all setting J_NOTIFIED on job %d (%d), startup state = %d", job, jobs[job]->flags, startup_state);
+		jobs[job]->flags |= J_NOTIFIED;
+}
 	      break;
 
 	    case JSTOPPED:

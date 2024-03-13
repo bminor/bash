@@ -25,7 +25,7 @@ static void *initialbrk;
 static void *curbrk;
 
 static int
-brkinit (void)
+initbrk (void)
 {
   if (initialbrk == 0)
     {

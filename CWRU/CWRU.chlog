@@ -8777,3 +8777,33 @@ subst.c
 	- expand_word_internal: if CTLNUL is a IFS character, don't add quoted
 	  null strings to istring if we're going to be word splitting, since
 	  they will be treated as word delimiters
+
+				    3/6
+				    ---
+examples/loadables/getconf.c
+	- getconf_builtin,getconf_all: changes for POSIX interp 1808 proposal
+	  to allow an optional pathname argument with -a that forces its use
+	  for pathconf variables
+	  https://www.austingroupbugs.net/view.php?id=1808
+
+				   3/11
+				   ----
+builtins/printf.def
+	- printf_builtin: %lc/%ls (%C/%S) should only work on wide characters
+	  when in a locale where MB_CUR_MAX > 1.
+	  Report by Emanuele Torre <torreemanuele6@gmail.com>
+
+				   3/12
+				   ----
+jobs.c
+	- notify_of_job_status: don't mark terminated background jobs or stopped
+	  jobs as notified in shells started to run -c command
+	  From a report by Greg Wooledge <greg@wooledge.org>
+	- notify_of_job_status: make the final marking the dead job as notified
+	  a true catch-all so we can put a debugging message in there to see
+	  if there are other missing cases
+	- notify_of_job_status: don't mark terminated jobs that died due to
+	  a signal the shell trapped (on the assumption that the shell
+	  received the signal, too) as notified, since we don't report on it
+	  in the JDEAD case if the signal is trapped
+

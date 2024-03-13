@@ -941,7 +941,7 @@ static const struct conf vars[] =
   };
 
 static int getconf_print (const struct conf *, const char *, int);
-static int getconf_all (void);
+static int getconf_all (WORD_LIST *);
 static int getconf_one (WORD_LIST *);
 static int getconf_internal (const struct conf *, int);
 
@@ -1035,17 +1035,23 @@ getconf_internal (const struct conf *c, int all)
 }
     
 static int
-getconf_all (void)
+getconf_all (WORD_LIST *list)
 {
   const struct conf *c;
   char *path;
   int r;
 
   r = EXECUTION_SUCCESS;
+  path = list ? list->word->word : 0;
   for (c = vars; c->name != NULL; ++c)
     {
+      if (c->call == PATHCONF && path == 0)
+	continue;	/* Don't print pathconf vars if no path supplied */
+#if 0
+      if (c->call != PATHCONF && path)
+	continue;	/* Only print pathconf vars if path supplied */
+#endif
       printf("%-35s", c->name);
-      path = "/";		/* XXX for now */
       if (getconf_print (c, path, 1) == EXECUTION_FAILURE)
         r = EXECUTION_FAILURE;
     }
@@ -1189,13 +1195,19 @@ getconf_builtin (WORD_LIST *list)
     }
 
   list = loptend;
-  if ((aflag == 0 && list == 0) || (aflag && list) || list_length((GENERIC_LIST *)list) > 2)
+  if ((aflag == 0 && list == 0) || (list && list_length((GENERIC_LIST *)list) > 2))
     {
       builtin_usage();
       return (EX_USAGE);
     }
+  else if (aflag && list && (list->word == 0 || list->word->word == 0 || *list->word->word == 0))
+    {
+      /* No null pathnames with -a */
+      builtin_usage();
+      return (EX_USAGE);
+    }
 
-  r = aflag ? getconf_all () : getconf_one (list);
+  r = aflag ? getconf_all (list) : getconf_one (list);
   return r;
 }
 
@@ -1212,6 +1224,6 @@ struct builtin getconf_struct = {
 	getconf_builtin,
 	BUILTIN_ENABLED,
 	getconf_doc,
-	"getconf -[ah] or getconf [-v spec] sysvar or getconf [-v spec] pathvar pathname",
+	"getconf -[ah] [file] or getconf [-v spec] sysvar or getconf [-v spec] pathvar pathname",
 	0
 };

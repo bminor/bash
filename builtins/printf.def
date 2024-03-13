@@ -492,7 +492,7 @@ printf_builtin (WORD_LIST *list)
 		char p;
 
 #if defined (HANDLE_MULTIBYTE)
-		if (longform || convch == 'C')
+		if ((longform || convch == 'C') && locale_mb_cur_max > 1)
 		  {
 		    wchar_t wc, ws[2];
 		    int r;
@@ -522,7 +522,7 @@ printf_builtin (WORD_LIST *list)
 	      {
 		char *p;
 #if defined (HANDLE_MULTIBYTE)
-		if (longform || convch == 'S')
+		if ((longform || convch == 'S') && locale_mb_cur_max > 1)
 		  {
 		    wchar_t *wp;
 		    size_t slen;
