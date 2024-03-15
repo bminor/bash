@@ -8807,3 +8807,47 @@ jobs.c
 	  received the signal, too) as notified, since we don't report on it
 	  in the JDEAD case if the signal is trapped
 
+				   3/13
+				   ----
+builtins/printf.def
+	- PF: print an error message if printf returns an error or leaves
+	  ferror(stdout) true
+	  From a report by Paul Eggert <eggert@cs.ucla.edu>
+
+				   3/14
+				   ----
+builtins/printf.def
+	- getint: now takes an int argument and returns it if the conversion
+	  overflows an int; changed callers in printf_builtin
+	- getint: consolidate checks for overflow. This changes the behavior
+	  if the argument overflows an intmax_t: it returns a field width of
+	  0 (the overflow result) instead of -1, which changes how printf
+	  behaves. This is consistent with the behavior when the argument
+	  overflows an int
+	- printf_builtin: change check for overflow of [LONG_MIN..LONG_MAX]
+	  for %d/%i to be explicit instead of relying on integer overflow of p
+	- printstr,printwidestr: print message if field width or precision
+	  overflow, since we don't call printf
+	- printstr,printwidestr: set field width and precision on integer
+	  overflow the way we do in printf_builtin
+	  From a report by Paul Eggert <eggert@cs.ucla.edu>
+
+bashtypes.h
+	- PRIdMAX: move redefinition here after including inttypes.h
+
+builtins/printf.def,examples/loadables/seq.c,examples/loadables/getconf.h
+	- remove PRIdMAX redefinitions, since it's now fixed in bashtypes.h
+	  From a report by Paul Eggert <eggert@cs.ucla.edu>
+
+				   3/15
+				   ----
+include/stdckdint.in.h,include/intprops-internal.h
+	- new files, from gnulib
+
+configure.ac
+	- stdckdint.h: create in the build directory if the system doesn't
+	  provide one by copying ${srcdir}/include/stdckdint.in.h; make
+	  sure we don't create a new one every time, changing the timestamp
+
+Makefile.in
+	- CREATED_HEADERS: add stdckdint.h

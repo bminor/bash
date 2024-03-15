@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.061])dnl
+AC_REVISION([for Bash 5.3, version 5.062])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -788,6 +788,7 @@ BASH_HEADER_INTTYPES
 AC_CHECK_HEADERS(unistd.h stdlib.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
 		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
+		 stdckdint.h \
 		 regex.h syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h sys/ioctl.h \
 		 sys/mman.h sys/param.h sys/random.h sys/socket.h sys/stat.h \
@@ -1351,5 +1352,13 @@ AC_CONFIG_FILES([Makefile builtins/Makefile lib/readline/Makefile \
 
 dnl Makefile uses this timestamp file to record whether config.h is up to date.
 AC_CONFIG_COMMANDS([stamp-h], [echo timestamp > stamp-h])
+
+if test "$ac_cv_header_stdckdint_h" = yes; then
+	rm -f stdckdint.h
+elif cmp ${srcdir}/include/stdckdint.in.h stdckdint.h 2>/dev/null; then
+	:
+else
+	cp ${srcdir}/include/stdckdint.in.h stdckdint.h
+fi
 
 AC_OUTPUT

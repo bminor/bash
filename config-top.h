@@ -1,6 +1,6 @@
 /* config-top.h - various user-settable options not under the control of autoconf. */
 
-/* Copyright (C) 2002-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

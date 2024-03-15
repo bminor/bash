@@ -2,7 +2,7 @@
  * mksyntax.c - construct shell syntax table for fast char attribute lookup.
  */
 
-/* Copyright (C) 2000-2009,2012,2022-2023 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2009,2012,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

@@ -89,18 +89,6 @@ $END
 #include "bashgetopt.h"
 #include "common.h"
 
-#if defined (PRI_MACROS_BROKEN)
-#  undef PRIdMAX
-#endif
-
-#if !defined (PRIdMAX)
-#  if HAVE_LONG_LONG
-#    define PRIdMAX	"lld"
-#  else
-#    define PRIdMAX	"ld"
-#  endif
-#endif
-
 #if !defined (errno)
 extern int errno;
 #endif
@@ -154,7 +142,7 @@ extern int errno;
     char b[2]; \
     tw++; \
     b[0] = c; b[1] = '\0'; \
-    if (vflag) \
+   if (vflag) \
       vbadd (b, 1); \
     else \
       putchar (c); \
@@ -178,8 +166,7 @@ extern int errno;
     if (nw < 0 || (vflag == 0 && ferror (stdout))) \
       { \
 	QUIT; \
-	if (vflag) \
-	  builtin_error ("%s", strerror (errno)); \
+	builtin_error ("%s", strerror (errno)); \
 	PRETURN (EXECUTION_FAILURE); \
       } \
     tw += nw; \
@@ -203,7 +190,8 @@ extern int asprintf (char **, const char *, ...) __attribute__((__format__ (prin
 extern int vsnprintf (char *, size_t, const char *, va_list) __attribute__((__format__ (printf, 3, 0)));
 #endif
 
-static void printf_erange (char *);
+static inline void printf_erange (char *);
+static inline void report_erange (char *, char *);
 static int printstr (char *, char *, int, int, int);
 static int tescape (char *, char *, int *, int *);
 static char *bexpand (char *, int, int *, int *);
@@ -212,7 +200,7 @@ static int vbprintf (const char *, ...) __attribute__((__format__ (printf, 1, 2)
 static char *mklong (char *, char *, size_t);
 static int getchr (void);
 static char *getstr (void);
-static int  getint (void);
+static int  getint (int);
 static intmax_t getintmax (void);
 static uintmax_t getuintmax (void);
 
@@ -260,11 +248,21 @@ static inline int
 decodeprec (char *ps)
 {
   intmax_t mpr;
+  int pr;
+  char *s;
 
+  s = ps;		/* error checking */
   mpr = *ps++ - '0';
   while (DIGIT (*ps))
     mpr = (mpr * 10) + (*ps++ - '0');
-  return (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
+  if (mpr < 0 || mpr > INT_MAX)
+    {
+#if 0
+      report_erange (s, ps);
+#endif
+      return -1;
+    }    
+  return (pr = mpr);
 }
 
 int
@@ -419,10 +417,9 @@ printf_builtin (WORD_LIST *list)
 	    {
 	      fmt++;
 	      have_fieldwidth = 1;
-	      fieldwidth = getint ();
-	      /* Handle field with overflow by ignoring it. */
-	      if (fieldwidth == INT_MAX || fieldwidth == INT_MIN)
-		  fieldwidth = 0;
+	      /* Handle field with overflow by ignoring fieldwidth for now.
+		 getint() prints a message. */
+	      fieldwidth = getint (0);
 	    }
 	  else
 	    while (DIGIT (*fmt))
@@ -436,11 +433,10 @@ printf_builtin (WORD_LIST *list)
 		{
 		  fmt++;
 		  have_precision = 1;
-		  precision = getint ();
-		  /* Handle precision overflow by ignoring it. "A negative
-		     precision is treated as if it were missing." */
-		  if (precision == INT_MAX || precision == INT_MIN)
-		    precision = -1;
+		  /* Handle precision overflow by ignoring precision for now.
+		     getint() prints a message.
+		     "A negative precision is treated as if it were missing." */
+		  precision = getint (-1);
 		}
 	      else
 		{
@@ -712,8 +708,8 @@ printf_builtin (WORD_LIST *list)
 		long p;
 		intmax_t pp;
 
-		p = pp = getintmax ();
-		if (p != pp)
+		pp = getintmax ();
+		if (pp < LONG_MIN || pp > LONG_MAX)
 		  {
 		    f = mklong (start, PRIdMAX, sizeof (PRIdMAX) - 2);
 		    PF (f, pp);
@@ -724,6 +720,7 @@ printf_builtin (WORD_LIST *list)
 		       in "long".  This also works around some long
 		       long and/or intmax_t library bugs in the common
 		       case, e.g. glibc 2.2 x86.  */
+		    p = pp;
 		    f = mklong (start, "l", 1);
 		    PF (f, p);
 		  }
@@ -811,11 +808,22 @@ printf_builtin (WORD_LIST *list)
   PRETURN (retval);
 }
 
-static void
+static inline void
 printf_erange (char *s)
 {
   builtin_error (_("%s: %s"), s, strerror(ERANGE));
   conversion_error = 1;
+}
+
+static inline void
+report_erange (char *s, char *e)
+{
+  unsigned char sc;
+
+  sc = *e;
+  *e = 0;
+  printf_erange (s);
+  *e = sc;
 }
 
 /* We duplicate a lot of what printf(3) does here. */
@@ -830,9 +838,7 @@ printf_erange (char *s)
 static int
 printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
 {
-#if 0
   char *s;
-#endif
   int padlen, nc, ljust, i;
   int fw, pr;			/* fieldwidth and precision */
   intmax_t mfw, mpr;
@@ -872,11 +878,18 @@ printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
     }
   else if (DIGIT (*fmt))
     {
+      s = fmt;
       mfw = *fmt++ - '0';
       while (DIGIT (*fmt))
 	mfw = (mfw * 10) + (*fmt++ - '0');
-      /* Error if fieldwidth > INT_MAX here? */
-      fw = (mfw < 0 || mfw > INT_MAX) ? INT_MAX : mfw;
+      /* Error if fieldwidth > INT_MAX here */
+      if (mfw < 0 || mfw > INT_MAX)
+	{
+	  report_erange (s, fmt);
+	  fw = 0;
+	}
+      else
+	fw = mfw;
     }
 
   /* get precision, if present. doesn't handle negative precisions */
@@ -890,11 +903,18 @@ printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
 	}
       else if (DIGIT (*fmt))
 	{
+	  s = fmt;
 	  mpr = *fmt++ - '0';
 	  while (DIGIT (*fmt))
 	    mpr = (mpr * 10) + (*fmt++ - '0');
-	  /* Error if precision > INT_MAX here? */
-	  pr = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
+	  /* Error if precision > INT_MAX here */
+	  if (mpr < 0 || mpr > INT_MAX)
+	    {
+	      report_erange (s, fmt);
+	      pr = -1;
+	    }
+	  else
+	    pr = mpr;
 	  if (pr < precision && precision < INT_MAX)
 	    pr = precision;		/* XXX */
 	}
@@ -940,9 +960,7 @@ printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
 static int
 printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int precision)
 {
-#if 0
   char *s;
-#endif
   char *string;
   int padlen, nc, ljust, i;
   int fw, pr;			/* fieldwidth and precision */
@@ -986,8 +1004,14 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
       mfw = *fmt++ - '0';
       while (DIGIT (*fmt))
 	mfw = (mfw * 10) + (*fmt++ - '0');
-      /* Error if fieldwidth > INT_MAX here? */
-      fw = (mfw < 0 || mfw > INT_MAX) ? INT_MAX : mfw;
+      /* Error if fieldwidth > INT_MAX here */
+      if (mfw < 0 || mfw > INT_MAX)
+	{
+	  report_erange (s, fmt);
+	  fw = 0; 
+	}
+      else
+	fw = mfw;
     }
 
   /* get precision, if present. doesn't handle negative precisions */
@@ -1004,8 +1028,14 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
 	  mpr = *fmt++ - '0';
 	  while (DIGIT (*fmt))
 	    mpr = (mpr * 10) + (*fmt++ - '0');
-	  /* Error if precision > INT_MAX here? */
-	  pr = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
+	  /* Error if precision > INT_MAX here */
+	  if (mpr < 0 || mpr > INT_MAX)
+	    {
+	      report_erange (s, fmt);
+	      pr = -1;
+            }
+          else
+            pr = mpr;
 	  if (pr < precision && precision < INT_MAX)
 	    pr = precision;		/* XXX */
 	}
@@ -1358,10 +1388,11 @@ getstr (void)
 /* Don't call getintmax here because it may consume an argument on error, and
    we call this to get field width/precision arguments. */
 static int
-getint (void)
+getint (int overflow_retval)
 {
   intmax_t ret;
   char *ep;
+  int overflow;
 
   if (garglist == 0)
     return (0);
@@ -1371,27 +1402,18 @@ getint (void)
 
   errno = 0;
   ret = strtoimax (garglist->word->word, &ep, 0);
+  overflow = (errno == ERANGE) || (ret < INT_MIN || ret > INT_MAX);
 
   if (*ep)
     {
       sh_invalidnum (garglist->word->word);
       conversion_error = 1;
     }
-  else if (errno == ERANGE)
+  else if (overflow)
     printf_erange (garglist->word->word);
-  else if (ret > INT_MAX)
-    {
-      printf_erange (garglist->word->word);
-      ret = INT_MAX;
-    }
-  else if (ret < INT_MIN)
-    {
-      printf_erange (garglist->word->word);
-      ret = INT_MIN;
-    }
 
   garglist = garglist->next;
-  return ((int)ret);
+  return (overflow ? overflow_retval : (int)ret);
 }
 
 static intmax_t

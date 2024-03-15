@@ -1,6 +1,6 @@
 /* execute_cmd.h - functions from execute_cmd.c. */
 
-/* Copyright (C) 1993-2017,2022 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2017,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
