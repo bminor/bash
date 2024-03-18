@@ -1,6 +1,6 @@
 /* bashansi.h -- Typically included information required by picky compilers. */
 
-/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,5 +34,15 @@
 #else
 #  include "ansi_stdlib.h"
 #endif /* !HAVE_STDLIB_H */
+
+/* Prefer stdbool.h if we have it, maybe have to rethink this later */
+#if defined (HAVE_STDBOOL_H)
+#  include <stdbool.h>
+#else
+#  ifndef HAVE_C_BOOL
+#    undef bool
+typedef unsigned char bool;
+#  endif
+#endif
 
 #endif /* !_BASHANSI_H_ */

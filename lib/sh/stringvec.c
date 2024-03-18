@@ -27,6 +27,7 @@
 #endif
 
 #include <bashansi.h>
+#include <stdckdint.h>
 #include <stdio.h>
 #include <chartypes.h>
 
@@ -36,33 +37,41 @@
 char **
 strvec_create (size_t n)
 {
-  return ((char **)xmalloc ((n) * sizeof (char *)));
+  size_t nbytes;
+
+  return ckd_mul (&nbytes, n, sizeof (char *)) ? NULL : xmalloc (nbytes);
 }
 
 /* Allocate an array of strings with room for N members. */
 char **
 strvec_mcreate (size_t n)
 {
-  return ((char **)malloc ((n) * sizeof (char *)));
+  size_t nbytes;
+
+  return ckd_mul (&nbytes, n, sizeof (char *)) ? NULL : malloc (nbytes);
 }
 
 char **
 strvec_resize (char **array, size_t nsize)
 {
-  return ((char **)xrealloc (array, nsize * sizeof (char *)));
+  size_t nbytes;
+
+  return ckd_mul (&nbytes, nsize, sizeof (char *)) ? NULL : (char **)xrealloc (array, nbytes);
 }
 
 char **
 strvec_mresize (char **array, size_t nsize)
 {
-  return ((char **)realloc (array, nsize * sizeof (char *)));
+  size_t nbytes;
+
+  return ckd_mul (&nbytes, nsize, sizeof (char *)) ? NULL : (char **)realloc (array, nbytes);
 }
 
 /* Return the length of ARRAY, a NULL terminated array of char *. */
 size_t
 strvec_len (char * const *array)
 {
-  register int i;
+  register size_t i;
 
   for (i = 0; array[i]; i++);
   return (i);
@@ -72,7 +81,7 @@ strvec_len (char * const *array)
 void
 strvec_flush (char **array)
 {
-  register int i;
+  register size_t i;
 
   if (array == 0)
     return;

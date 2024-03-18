@@ -70,6 +70,7 @@ $END
 
 #include <stdarg.h>
 
+#include <stdckdint.h>
 #include <stdio.h>
 #include <chartypes.h>
 
@@ -245,24 +246,29 @@ static char *conv_buf;
 static size_t conv_bufsize;
 
 static inline int
-decodeprec (char *ps)
+decodeint (char **str, int diagnose, int overflow_return)
 {
-  intmax_t mpr;
-  int pr;
-  char *s;
+  int pr, v;
+  char *ps;
 
-  s = ps;		/* error checking */
-  mpr = *ps++ - '0';
-  while (DIGIT (*ps))
-    mpr = (mpr * 10) + (*ps++ - '0');
-  if (mpr < 0 || mpr > INT_MAX)
+  ps = *str;
+  pr = *ps++ - '0';
+  v = 0;
+
+  /* use C23 macros to check overflow */
+  for (; DIGIT (*ps); ps++)
     {
-#if 0
-      report_erange (s, ps);
-#endif
+      v |= ckd_mul (&pr, pr, 10);
+      v |= ckd_add (&pr, pr, *ps - '0');
+    }
+  if (v && diagnose)
+    {
+      report_erange (*str, ps);
       return -1;
-    }    
-  return (pr = mpr);
+    }
+
+  *str = ps;
+  return (v ? overflow_return : pr);
 }
 
 int
@@ -668,7 +674,11 @@ printf_builtin (WORD_LIST *list)
 		if (convch == 'Q' && (have_precision || precstart))
 		  {
 		    if (precstart)
-		      precision = decodeprec (precstart);
+		      {
+			char *prec;
+			prec = precstart;
+		        precision = decodeint (&prec, 0, -1);
+		      }
 		    slen = strlen (p);
 		    /* printf precision works in bytes. */
 		    if (precision >= 0 && precision < slen)
@@ -838,10 +848,11 @@ report_erange (char *s, char *e)
 static int
 printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
 {
+#if 0
   char *s;
+#endif
   int padlen, nc, ljust, i;
   int fw, pr;			/* fieldwidth and precision */
-  intmax_t mfw, mpr;
 
   if (string == 0)
     string = "";
@@ -854,8 +865,6 @@ printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
 
   ljust = fw = 0;
   pr = -1;
-  mfw = 0;
-  mpr = -1;
 
   /* skip flags */
   while (strchr (SKIP1, *fmt))
@@ -877,20 +886,7 @@ printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
 	}
     }
   else if (DIGIT (*fmt))
-    {
-      s = fmt;
-      mfw = *fmt++ - '0';
-      while (DIGIT (*fmt))
-	mfw = (mfw * 10) + (*fmt++ - '0');
-      /* Error if fieldwidth > INT_MAX here */
-      if (mfw < 0 || mfw > INT_MAX)
-	{
-	  report_erange (s, fmt);
-	  fw = 0;
-	}
-      else
-	fw = mfw;
-    }
+    fw = decodeint (&fmt, 1, 0);
 
   /* get precision, if present. doesn't handle negative precisions */
   if (*fmt == '.')
@@ -903,20 +899,11 @@ printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
 	}
       else if (DIGIT (*fmt))
 	{
-	  s = fmt;
-	  mpr = *fmt++ - '0';
-	  while (DIGIT (*fmt))
-	    mpr = (mpr * 10) + (*fmt++ - '0');
-	  /* Error if precision > INT_MAX here */
-	  if (mpr < 0 || mpr > INT_MAX)
-	    {
-	      report_erange (s, fmt);
-	      pr = -1;
-	    }
-	  else
-	    pr = mpr;
+	  pr = decodeint (&fmt, 1, -1);
+	  /* pr < precision means we adjusted precision in printf_builtin
+	     for the quoted string length (%Q), so we use the adjusted value */
 	  if (pr < precision && precision < INT_MAX)
-	    pr = precision;		/* XXX */
+	    pr = precision;
 	}
       else
 	pr = 0;		/* "a null digit string is treated as zero" */
@@ -964,7 +951,6 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
   char *string;
   int padlen, nc, ljust, i;
   int fw, pr;			/* fieldwidth and precision */
-  intmax_t mfw, mpr;
 
   if (wstring == 0)
     wstring = L"";
@@ -977,8 +963,6 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
 
   ljust = fw = 0;
   pr = -1;
-  mfw = 0;
-  mpr = -1;
 
   /* skip flags */
   while (strchr (SKIP1, *fmt))
@@ -1000,19 +984,7 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
 	}
     }
   else if (DIGIT (*fmt))
-    {
-      mfw = *fmt++ - '0';
-      while (DIGIT (*fmt))
-	mfw = (mfw * 10) + (*fmt++ - '0');
-      /* Error if fieldwidth > INT_MAX here */
-      if (mfw < 0 || mfw > INT_MAX)
-	{
-	  report_erange (s, fmt);
-	  fw = 0; 
-	}
-      else
-	fw = mfw;
-    }
+    fw = decodeint (&fmt, 1, 0);
 
   /* get precision, if present. doesn't handle negative precisions */
   if (*fmt == '.')
@@ -1025,19 +997,11 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
 	}
       else if (DIGIT (*fmt))
 	{
-	  mpr = *fmt++ - '0';
-	  while (DIGIT (*fmt))
-	    mpr = (mpr * 10) + (*fmt++ - '0');
-	  /* Error if precision > INT_MAX here */
-	  if (mpr < 0 || mpr > INT_MAX)
-	    {
-	      report_erange (s, fmt);
-	      pr = -1;
-            }
-          else
-            pr = mpr;
+	  pr = decodeint (&fmt, 1, -1);
+	  /* pr < precision means we adjusted precision in printf_builtin
+	     for the quoted string length (%Q), so we use the adjusted value */
 	  if (pr < precision && precision < INT_MAX)
-	    pr = precision;		/* XXX */
+	    pr = precision;
 	}
       else
 	pr = 0;		/* "a null digit string is treated as zero" */

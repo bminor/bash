@@ -164,7 +164,7 @@ extern int find_string_in_alist (char *, STRING_INT_ALIST *, int);
 extern char *find_token_in_alist (int, STRING_INT_ALIST *, int);
 extern int find_index_in_alist (char *, STRING_INT_ALIST *, int);
 
-extern char *substring (const char *, int, int);
+extern char *substring (const char *, size_t, size_t);
 extern char *strsub (const char *, const char *, const char *, int);
 extern char *strcreplace (const char *, int, const char *, int);
 extern void strip_leading (char *);

@@ -8851,3 +8851,48 @@ configure.ac
 
 Makefile.in
 	- CREATED_HEADERS: add stdckdint.h
+
+stringlib.c,externs.h
+	- substring: now takes size_t arguments for START and END
+
+lib/sh/stringvec.c
+	- strvec_create,strvec_mcreate,strvec_resize,strvec_mresize: use
+	  ckd_mul to avoid size_t overflow
+	- strvec_len,strvec_flush: use size_t variable as array index
+	  From a report by Paul Eggert <eggert@cs.ucla.edu>
+
+bashansi.h
+	- stdbool.h: include if we have it, typedef bool as unsigned char if
+	  we don't and HAVE_C_BOOL isn't defined
+
+
+m4/c-bool.m4
+	- autoconf check for `bool' from gnulib
+
+configure.ac
+	- include m4/c-bool.m4, call gl_C_BOOL; don't explicitly check for
+	  stdbool.h using AC_CHECK_HEADERS any more
+
+config.h.in
+	- HAVE_C_BOOL: define
+
+				   3/16
+				   ----
+
+builtins/printf.def
+	- decodeprec: now decodeint, takes new arguments: a char ** that is
+	  the string to parse and update, an argument saying whether or not
+	  to print an error message on overflow, and an argument that should
+	  be the return value on overflow; use ckd_* macros to check overflow
+	- printstr, printwidestr: use a different mechanism to check overflow;
+	  call decodeint to get precision and field width
+
+braces.c
+	- include stdckdint.h for the ckd_* overflow checking macros
+	- mkseq: the width argument is now size_t
+	- mkseq: perform overflow detection using the ckd_* macros
+	- mkseq: perform zero-padding directly instead of using asprintf; the
+	  sprintf family has trouble when width > INT_MAX
+	- expand_seqterm: use size_t instead of int for length and width
+	  variables
+	  From a report by Paul Eggert <eggert@cs.ucla.edu>

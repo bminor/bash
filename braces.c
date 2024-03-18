@@ -32,6 +32,7 @@
 #endif
 
 #include <errno.h>
+#include <stdckdint.h>
 
 #include "bashansi.h"
 #include "bashintl.h"
@@ -77,7 +78,7 @@ static const int brace_arg_separator = ',';
 static int brace_gobbler (char *, size_t, int *, int);
 static char **expand_amble (char *, size_t, int);
 static char **expand_seqterm (char *, size_t);
-static char **mkseq (intmax_t, intmax_t, intmax_t, int, int);
+static char **mkseq (intmax_t, intmax_t, intmax_t, int, size_t);
 static char **array_concat (char **, char **);
 
 #if 0
@@ -349,51 +350,37 @@ expand_amble (char *text, size_t tlen, int flags)
 #define ST_ZINT	3
 
 static char **
-mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, int width)
+mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, size_t width)
 {
-  intmax_t n, prevn;
-  int i, nelem;
+  intmax_t prevn, n, abs_incr;
+  size_t nelem, i;
   char **result, *t;
+  char lbuf[INT_BUFSIZE_BOUND (uintmax_t)];
 
   if (incr == 0)
     incr = 1;
 
-  if (start > end && incr > 0)
-    incr = -incr;
-  else if (start < end && incr < 0)
-    {
-      if (incr == INTMAX_MIN)		/* Don't use -INTMAX_MIN */
-	return ((char **)NULL);
-      incr = -incr;
-    }
-
-  /* Check that end-start will not overflow INTMAX_MIN, INTMAX_MAX.  The +3
-     and -2, not strictly necessary, are there because of the way the number
-     of elements and value passed to strvec_create() are calculated below. */
-  if (SUBOVERFLOW (end, start, INTMAX_MIN+3, INTMAX_MAX-2))
+  abs_incr = incr;
+  if (incr < 0 && ckd_sub (&abs_incr, 0, incr))
     return ((char **)NULL);
 
-  prevn = sh_imaxabs (end - start);
-  /* Need to check this way in case INT_MAX == INTMAX_MAX */
-  if (INT_MAX == INTMAX_MAX && (ADDOVERFLOW (prevn, 2, INT_MIN, INT_MAX)))
-    return ((char **)NULL);
-  /* Make sure the assignment to nelem below doesn't end up <= 0 due to
-     intmax_t overflow */
-  else if (ADDOVERFLOW ((prevn/sh_imaxabs(incr)), 1, INTMAX_MIN, INTMAX_MAX))
+  /* Make sure incr agrees with start and end */
+  if ((start < end) == (incr < 0) && ckd_sub (&incr, 0, incr))
     return ((char **)NULL);
 
-  /* XXX - TOFIX: potentially allocating a lot of extra memory if
-     imaxabs(incr) != 1 */
-  /* Instead of a simple nelem = prevn + 1, something like:
-  	nelem = (prevn / imaxabs(incr)) + 1;
-     would work */
-  if ((prevn / sh_imaxabs (incr)) > INT_MAX - 3)	/* check int overflow */
+  /* prevn = sh_imaxabs (end - start); */
+  if (start < end ? ckd_sub (&prevn, end, start) : ckd_sub (&prevn, start, end))
     return ((char **)NULL);
-  nelem = (prevn / sh_imaxabs(incr)) + 1;
-  result = strvec_mcreate (nelem + 1);
+
+  /* nelem = floor (abs ((end - start) / incr)) plus 1 for first element plus
+     trailing null. Account for trailing null up here for overflow check */
+  if (ckd_add (&nelem, prevn / abs_incr, 2))
+    return ((char **)NULL);
+
+  result = strvec_mcreate (nelem);
   if (result == 0)
     {
-      internal_error (_("brace expansion: failed to allocate memory for %u elements"), (unsigned int)nelem);
+      internal_error (_("brace expansion: failed to allocate memory for %s elements"), uinttostr (nelem - 1, lbuf, sizeof (lbuf)));
       return ((char **)NULL);
     }
 
@@ -415,9 +402,23 @@ mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, int width)
 	result[i++] = t = itos (n);
       else if (type == ST_ZINT)
 	{
-	  int len, arg;
-	  arg = n;
-	  len = asprintf (&t, "%0*d", width, arg);
+	  size_t tlen;
+
+	  t = itos (n);
+	  tlen = strlen (t);
+	  if (tlen < width)	/* zero-pad the result directly to avoid sprintf */
+	    {
+	      char *t0;
+	      t0 = t;
+	      t = realloc (t, width + 1);
+	      if (t == 0)
+		free (t0);
+	      else
+		{
+		  memmove (t + (width - tlen), t, tlen + 1);
+		  memset (t + (n < 0), '0', width - tlen);
+		}
+	    }
 	  result[i++] = t;
 	}
       else
@@ -433,23 +434,19 @@ mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, int width)
       /* We failed to allocate memory for this number, so we bail. */
       if (t == 0)
 	{
-	  char *p, lbuf[INT_STRLEN_BOUND(intmax_t) + 1];
+	  char *p;
 
 	  /* Easier to do this than mess around with various intmax_t printf
 	     formats (%ld? %lld? %jd?) and PRIdMAX. */
-	  p = inttostr (n, lbuf, sizeof (lbuf));
+	  p = uinttostr (n, lbuf, sizeof (lbuf));
 	  internal_error (_("brace expansion: failed to allocate memory for `%s'"), p);
 	  strvec_dispose (result);
 	  return ((char **)NULL);
 	}
 
-      /* Handle overflow and underflow of n+incr */
-      if (ADDOVERFLOW (n, incr, INTMAX_MIN, INTMAX_MAX))
-        break;
-
       n += incr;
 
-      if ((incr < 0 && n < end) || (incr > 0 && n > end))
+      if (i == nelem - 1)
 	break;
     }
   while (1);
@@ -462,7 +459,8 @@ static char **
 expand_seqterm (char *text, size_t tlen)
 {
   char *t, *lhs, *rhs;
-  int lhs_t, rhs_t, lhs_l, rhs_l, width;
+  int lhs_t, rhs_t;
+  size_t lhs_l, rhs_l, width;
   intmax_t lhs_v, rhs_v, incr;
   intmax_t tl, tr;
   char **result, *ep, *oep;

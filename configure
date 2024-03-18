@@ -2988,6 +2988,7 @@ as_fn_append ac_header_c_list " sys/types.h sys_types_h HAVE_SYS_TYPES_H"
 as_fn_append ac_header_c_list " unistd.h unistd_h HAVE_UNISTD_H"
 as_fn_append ac_header_c_list " wchar.h wchar_h HAVE_WCHAR_H"
 as_fn_append ac_header_c_list " minix/config.h minix_config_h HAVE_MINIX_CONFIG_H"
+as_fn_append ac_header_c_list " stdbool.h stdbool_h HAVE_STDBOOL_H"
 gt_needs="$gt_needs need-ngettext"
 as_fn_append ac_header_c_list " sys/param.h sys_param_h HAVE_SYS_PARAM_H"
 as_fn_append ac_func_c_list " getpagesize HAVE_GETPAGESIZE"
@@ -7111,6 +7112,12 @@ fi
 
 
 
+# Check for bool that conforms to C2023.
+
+
+
+
+
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for an ANSI C-conforming const" >&5
 printf %s "checking for an ANSI C-conforming const... " >&6; }
 if test ${ac_cv_c_const+y}
@@ -7665,6 +7672,43 @@ printf "%s\n" "$ac_cv_c_restrict" >&6; }
    *)  printf "%s\n" "#define restrict $ac_cv_c_restrict" >>confdefs.h
  ;;
  esac
+
+
+
+
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for bool, true, false" >&5
+printf %s "checking for bool, true, false... " >&6; }
+if test ${gl_cv_c_bool+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+          #if true == false
+           #error "true == false"
+          #endif
+          extern bool b;
+          bool b = true == false;
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  gl_cv_c_bool=yes
+else $as_nop
+  gl_cv_c_bool=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $gl_cv_c_bool" >&5
+printf "%s\n" "$gl_cv_c_bool" >&6; }
+  if test "$gl_cv_c_bool" = yes; then
+
+printf "%s\n" "#define HAVE_C_BOOL 1" >>confdefs.h
+
+  fi
+
+
+
 
 
 
@@ -9068,8 +9112,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:9071: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:9072: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:9115: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:9116: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -9095,7 +9139,7 @@ rm -rf conftest*
 
           ;;
       esac
-      echo "$as_me:9098: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:9142: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -9249,7 +9293,7 @@ fi
 
         fi
       fi
-      echo "$as_me:9252: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:9296: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 printf %s "checking whether POSIX threads API is available... " >&6; }
@@ -9477,8 +9521,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:9480: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:9481: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:9524: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:9525: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -9504,7 +9548,7 @@ rm -rf conftest*
 
           ;;
       esac
-      echo "$as_me:9507: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:9551: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -9658,7 +9702,7 @@ fi
 
         fi
       fi
-      echo "$as_me:9661: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:9705: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 printf %s "checking whether POSIX threads API is available... " >&6; }
@@ -14490,12 +14534,6 @@ ac_fn_c_check_header_compile "$LINENO" "dlfcn.h" "ac_cv_header_dlfcn_h" "$ac_inc
 if test "x$ac_cv_header_dlfcn_h" = xyes
 then :
   printf "%s\n" "#define HAVE_DLFCN_H 1" >>confdefs.h
-
-fi
-ac_fn_c_check_header_compile "$LINENO" "stdbool.h" "ac_cv_header_stdbool_h" "$ac_includes_default"
-if test "x$ac_cv_header_stdbool_h" = xyes
-then :
-  printf "%s\n" "#define HAVE_STDBOOL_H 1" >>confdefs.h
 
 fi
 ac_fn_c_check_header_compile "$LINENO" "stddef.h" "ac_cv_header_stddef_h" "$ac_includes_default"

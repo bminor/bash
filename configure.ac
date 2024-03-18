@@ -765,6 +765,8 @@ m4_include([m4/xsize.m4])
 m4_include([m4/glibc21.m4])
 m4_include([m4/host-cpu-c-abi.m4])
 
+m4_include([m4/c-bool.m4])
+
 dnl C compiler characteristics
 AC_C_CONST
 AC_C_INLINE
@@ -774,6 +776,8 @@ AC_TYPE_LONG_DOUBLE
 AC_C_CHAR_UNSIGNED
 AC_C_VOLATILE
 AC_C_RESTRICT
+
+gl_C_BOOL
 
 dnl initialize GNU gettext
 dnl the use-libtool is a lie, we just use the standard Unix tools
@@ -787,7 +791,7 @@ BASH_HEADER_INTTYPES
 
 AC_CHECK_HEADERS(unistd.h stdlib.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
-		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
+		 stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
 		 stdckdint.h \
 		 regex.h syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h sys/ioctl.h \

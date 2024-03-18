@@ -115,9 +115,9 @@ find_index_in_alist (char *string, STRING_INT_ALIST *alist, int flags)
 /* Cons a new string from STRING starting at START and ending at END,
    not including END. */
 char *
-substring (const char *string, int start, int end)
+substring (const char *string, size_t start, size_t end)
 {
-  int len;
+  size_t len;
   char *result;
 
   len = end - start;
