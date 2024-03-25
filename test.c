@@ -74,6 +74,9 @@ extern int errno;
 #define ISPRIMARY(s, c)	(s[0] == '-' && s[1] == c && s[2] == '\0')
 #define ANDOR(s)  (s[0] == '-' && (s[1] == 'a' || s[1] == 'o') && s[2] == 0)
 
+/* single-character tokens like `!', `(', and `)' */
+#define ISTOKEN(s, c)	(s[0] == (c) && s[1] == '\0')
+
 #if !defined (R_OK)
 #define R_OK 4
 #define W_OK 2
@@ -125,7 +128,7 @@ static int unary_operator (void);
 static int binary_operator (void);
 static int two_arguments (void);
 static int three_arguments (void);
-static int posixtest (void);
+static int posixtest (int);
 
 static int expr (void);
 static int term (void);
@@ -264,8 +267,16 @@ term (void)
   /* A paren-bracketed argument. */
   if (argv[pos][0] == '(' && argv[pos][1] == '\0') /* ) */
     {
+      int nargs;
+
       advance (1);
-      value = expr ();
+      /* Steal an idea from coreutils and scan forward to check where the right
+	 paren appears to prevent some ambiguity. If we find a valid sub-
+	 expression that has 1-4 arguments, call posixtest on it ( */
+      for (nargs = 1; pos + nargs < argc && ISTOKEN (argv[pos+nargs], ')') == 0; nargs++)
+	;
+      /* only do this if we have a valid parenthesized expression */
+      value = (pos + nargs < argc && nargs <= 4) ? posixtest (nargs) : expr ();
       if (argv[pos] == 0) /* ( */
 	test_syntax_error (_("`)' expected"), (char *)NULL);
       else if (argv[pos][0] != ')' || argv[pos][1]) /* ( */
@@ -758,7 +769,10 @@ static int
 two_arguments (void)
 {
   if (argv[pos][0] == '!' && argv[pos][1] == '\0')
-    return (argv[pos + 1][0] == '\0');
+    {
+      advance (0);
+      return (argv[pos++][0] == '\0');
+    }
   else if (argv[pos][0] == '-' && argv[pos][1] && argv[pos][2] == '\0')
     {
       if (test_unop (argv[pos]))
@@ -782,28 +796,25 @@ three_arguments (void)
   int value;
 
   if (test_binop (argv[pos+1]))
-    {
-      value = binary_operator ();
-      pos = argc;
-    }
+    value = binary_operator ();
   else if (ANDOR (argv[pos+1]))
     {
       if (argv[pos+1][1] == 'a')
 	value = ONE_ARG_TEST(argv[pos]) && ONE_ARG_TEST(argv[pos+2]);
       else
 	value = ONE_ARG_TEST(argv[pos]) || ONE_ARG_TEST(argv[pos+2]);
-      pos = argc;
+      pos += 3;
     }
   else if (argv[pos][0] == '!' && argv[pos][1] == '\0')
     {
       advance (1);
       value = !two_arguments ();
-      pos = argc;
     }
-  else if (argv[pos][0] == '(' && argv[pos+2][0] == ')')
+  else if (ISTOKEN (argv[pos], '(') && ISTOKEN (argv[pos+2], ')'))
     {
-      value = ONE_ARG_TEST(argv[pos+1]);
-      pos = argc;
+      advance (0);
+      value = ONE_ARG_TEST(argv[pos]);
+      pos += 2;
     }
   else
     test_syntax_error (_("%s: binary operator expected"), argv[pos+1]);
@@ -813,25 +824,23 @@ three_arguments (void)
 
 /* This is an implementation of a Posix.2 proposal by David Korn. */
 static int
-posixtest (void)
+posixtest (int nargs)
 {
   int value;
 
-  switch (argc - 1)	/* one extra passed in */
+  switch (nargs)
     {
       case 0:
 	value = FALSE;
-	pos = argc;
 	break;
 
       case 1:
 	value = ONE_ARG_TEST(argv[1]);
-	pos = argc;
+	advance (0);
 	break;
 
       case 2:
 	value = two_arguments ();
-	pos = argc;
 	break;
 
       case 3:
@@ -845,11 +854,11 @@ posixtest (void)
 	    value = !three_arguments ();
 	    break;
 	  }
-	else if (argv[pos][0] == '(' && argv[pos][1] == '\0' && argv[argc-1][0] == ')' && argv[argc-1][1] == '\0')
+	else if (ISTOKEN (argv[pos], '(') && ISTOKEN (argv[pos+3], ')'))
 	  {
 	    advance (1);
 	    value = two_arguments ();
-	    pos = argc;
+	    advance (0);
 	    break;
 	  }
 	/* FALLTHROUGH */
@@ -916,7 +925,7 @@ test_command (int margc, char **margv)
     test_exit (SHELL_BOOLEAN (FALSE));
 
   noeval = 0;
-  value = posixtest ();
+  value = posixtest (argc - 1);
 
   if (pos != argc)
     {

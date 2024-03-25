@@ -193,9 +193,9 @@ extern int vsnprintf (char *, size_t, const char *, va_list) __attribute__((__fo
 
 static inline void printf_erange (char *);
 static inline void report_erange (char *, char *);
-static int printstr (char *, char *, int, int, int);
+static int printstr (char *, char *, size_t, int, int);
 static int tescape (char *, char *, int *, int *);
-static char *bexpand (char *, int, int *, int *);
+static char *bexpand (char *, size_t, int *, size_t *);
 static char *vbadd (char *, int);
 static int vbprintf (const char *, ...) __attribute__((__format__ (printf, 1, 2)));
 static char *mklong (char *, char *, size_t);
@@ -552,10 +552,12 @@ printf_builtin (WORD_LIST *list)
 	    case 'b':		/* expand escapes in argument */
 	      {
 		char *p, *xp;
-		int rlen, r;
+		size_t rlen;
+		int r;
 
 		p = getstr ();
-		ch = rlen = r = 0;
+		ch = r = 0;
+		rlen = 0;
 		xp = bexpand (p, strlen (p), &ch, &rlen);
 
 		if (xp)
@@ -846,7 +848,7 @@ report_erange (char *s, char *e)
    Returns -1 on detectable write error, 0 otherwise. */
 
 static int
-printstr (char *fmt, char *string, int len, int fieldwidth, int precision)
+printstr (char *fmt, char *string, size_t len, int fieldwidth, int precision)
 {
 #if 0
   char *s;
@@ -1161,7 +1163,7 @@ tescape (char *estart, char *cp, int *lenp, int *sawc)
 }
 
 static char *
-bexpand (char *string, int len, int *sawc, int *lenp)
+bexpand (char *string, size_t len, int *sawc, size_t *lenp)
 {
   int temp, c;
   char *ret, *r, *s, *send;

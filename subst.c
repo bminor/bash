@@ -8639,15 +8639,26 @@ string_var_assignment (SHELL_VAR *v, char *s)
 
   val = (v && (invisible_p (v) || var_isset (v) == 0)) ? (char *)NULL : sh_quote_reusable (s, 0);
   i = var_attribute_string (v, 0, flags);
+#if 0	/*TAG: notyet */
+  if (v && local_p (v) == 0 && variable_context > 0)
+    flags[i++] = 'g';
+#endif
   /* i = strlen (flags) */
-  if (i == 0 && val == 0)
+  if (i == 0 && val == 0 && (local_p (v) == 0 || v->context != variable_context))
     return (char *)NULL;
 
   ret = (char *)xmalloc (i + STRLEN (val) + strlen (v->name) + 16 + MAX_ATTRIBUTES);
+  
   if (i > 0 && val == 0)
-    sprintf (ret, "declare -%s %s", flags, v->name);
+    sprintf (ret, "declare -%s %s", flags, v->name);	/* just attributes, unset */
   else if (i > 0)
-    sprintf (ret, "declare -%s %s=%s", flags, v->name, val);
+    sprintf (ret, "declare -%s %s=%s", flags, v->name, val);	/* attributes, set */
+#if 1 /*TAG: tentative */
+  else if (i == 0 && val && local_p (v) && variable_context == v->context)
+    sprintf (ret, "declare %s=%s", v->name, val);	/* set local variable at current scope */
+  else if (i == 0 && val == 0 && local_p (v) && variable_context == v->context)
+    sprintf (ret, "declare %s", v->name);	/* unset local variable at current scope, unset */
+#endif
   else
     sprintf (ret, "%s=%s", v->name, val);
   free (val);

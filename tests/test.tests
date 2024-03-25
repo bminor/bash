@@ -494,4 +494,15 @@ t -t /dev/tty4444444...
 # fixed in bash-4.0-beta
 t -t ' '
 
+# ambiguous parenthesized test expressions with more than 4 arguments
+
+t true -a \( ! -a \)
+t true -a \( -n foo \)
+t true -a \( foo \)
+
+t 1 = 1 -a \( \)
+t \( \)
+
+t 1 = 1 -a \( \) -a -n ""
+
 ${THIS_SH} ./test1.sub

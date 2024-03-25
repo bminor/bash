@@ -8830,14 +8830,14 @@ builtins/printf.def
 	  overflow, since we don't call printf
 	- printstr,printwidestr: set field width and precision on integer
 	  overflow the way we do in printf_builtin
-	  From a report by Paul Eggert <eggert@cs.ucla.edu>
+	  From a report and patch by Paul Eggert <eggert@cs.ucla.edu>
 
 bashtypes.h
 	- PRIdMAX: move redefinition here after including inttypes.h
 
 builtins/printf.def,examples/loadables/seq.c,examples/loadables/getconf.h
 	- remove PRIdMAX redefinitions, since it's now fixed in bashtypes.h
-	  From a report by Paul Eggert <eggert@cs.ucla.edu>
+	  From a report and patch by Paul Eggert <eggert@cs.ucla.edu>
 
 				   3/15
 				   ----
@@ -8895,4 +8895,31 @@ braces.c
 	  sprintf family has trouble when width > INT_MAX
 	- expand_seqterm: use size_t instead of int for length and width
 	  variables
-	  From a report by Paul Eggert <eggert@cs.ucla.edu>
+	  From a report and patch by Paul Eggert <eggert@cs.ucla.edu>
+
+				   3/18
+				   ----
+builtins/printf.def
+	- printstr,bexpand: changed size/length arguments to be size_t; changed
+	  callers
+
+subst.c
+	- string_var_assignment: if the variable is a local variable at the
+	  current scope, output a declare command even if there are no
+	  attributes or value. Still tagged as tentative
+
+				   3/23
+				   ----
+test.c
+	- posixtest: takes an argument, the number of test arguments to parse
+	- two_arguments,three_arguments: use advance() instead of accessing
+	  and manipulating pos directly
+	- posixtest,three_arguments,two_arguments: don't set pos = argc
+	  directly, rely on functions to advance pos appropriately
+	  Picked up from coreutils test
+	- term: if we see a left paren, scan forward for a closing right paren
+	  and use posixtest() if there are 1-4 arguments between the parens to
+	  avoid ambiguous behavior for expressions like true -a \( ! -a \),
+	  which a user would expect to return false instead of an error
+	  message
+	  Picked up from coreutils test
