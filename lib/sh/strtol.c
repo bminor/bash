@@ -1,6 +1,6 @@
 /* strtol - convert string representation of a number into a long integer value. */
 
-/* Copyright (C) 1991-2001,2022 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,10 +41,6 @@ extern int errno;
 
 #include <stdc.h>
 #include <bashansi.h>
-
-#ifndef NULL
-#  define NULL 0
-#endif
 
 /* Nonzero if we are defining `strtoul' or `strtoull', operating on
    unsigned integers.  */

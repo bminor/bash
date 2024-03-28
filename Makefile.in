@@ -1,4 +1,4 @@
-# Makefile for bash-5.3, version 5.4
+# Makefile for bash-5.3, version 5.5
 #
 # Copyright (C) 1996-2024 Free Software Foundation, Inc.
 
@@ -583,6 +583,8 @@ CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
 		  mksignames$(EXEEXT) lsignames.h \
 		  mksyntax${EXEEXT} syntax.c $(VERSPROG) $(VERSOBJ) \
 		  buildversion.o mksignames.o signames.o buildsignames.o
+CREATED_MACOS = recho.dSYM zecho.dSYM printenv.dSYM xcase.dSYM \
+		 bashversion.dSYM mksyntax.dSYM ${DEFDIR}/psize.aux.dSYM
 CREATED_CONFIGURE = config.h config.cache config.status config.log \
 		    stamp-h po/POTFILES config.status.lineno
 CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
@@ -949,6 +951,7 @@ clean:	basic-clean
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_SUPPORT)
+	$(RM) -rf $(CREATED_MACOS)
 
 mostlyclean: basic-clean
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
@@ -970,7 +973,8 @@ distclean:	basic-clean maybe-clean
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_CONFIGURE) tags TAGS 
-	$(RM) $(CREATED_SUPPORT) Makefile $(CREATED_MAKEFILES) pathnames.h
+	$(RM) $(CREATED_SUPPORT) Makefile $(CREATED_MAKEFILES) $(CREATED_HEADERS)
+	$(RM) -rf $(CREATED_MACOS)
 
 maintainer-clean:	basic-clean
 	@echo This command is intended for maintainers to use.
@@ -984,8 +988,9 @@ maintainer-clean:	basic-clean
 	done
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
-	$(RM) $(CREATED_CONFIGURE) $(CREATED_MAKEFILES)
-	$(RM) $(CREATED_SUPPORT) Makefile pathnames.h
+	$(RM) $(CREATED_CONFIGURE) Makefile $(CREATED_MAKEFILES) tags TAGS
+	$(RM) $(CREATED_SUPPORT) $(CREATED_HEADERS)
+	$(RM) -rf $(CREATED_MACOS)
 
 maybe-clean:
 	-if test X"`cd $(topdir) && pwd -P`" != X"`cd $(BUILD_DIR) && pwd -P`" ; then \

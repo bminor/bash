@@ -267,15 +267,23 @@ term (void)
   /* A paren-bracketed argument. */
   if (argv[pos][0] == '(' && argv[pos][1] == '\0') /* ) */
     {
-      int nargs;
+      int nargs, count;
 
       advance (1);
       /* Steal an idea from coreutils and scan forward to check where the right
 	 paren appears to prevent some ambiguity. If we find a valid sub-
-	 expression that has 1-4 arguments, call posixtest on it ( */
-      for (nargs = 1; pos + nargs < argc && ISTOKEN (argv[pos+nargs], ')') == 0; nargs++)
-	;
-      /* only do this if we have a valid parenthesized expression */
+	 expression that has 1-4 arguments, call posixtest on it. Handle
+	 nested subexpressions. ( */
+      for (nargs = count = 1; pos + nargs < argc; nargs++)
+	{
+	  if (ISTOKEN (argv[pos+nargs], ')'))
+	    count--;
+	  else if (ISTOKEN (argv[pos+nargs], '('))	/*)*/
+	    count++;
+	  if (count == 0)
+	    break;
+	}
+      /* only use posixtest if we have a valid parenthesized expression */
       value = (pos + nargs < argc && nargs <= 4) ? posixtest (nargs) : expr ();
       if (argv[pos] == 0) /* ( */
 	test_syntax_error (_("`)' expected"), (char *)NULL);

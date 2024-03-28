@@ -9,7 +9,7 @@
    Unix snprintf implementation.
    derived from inetutils/libinetutils/snprintf.c Version 1.1
 
-   Copyright (C) 2001-2022 Free Software Foundation, Inc.
+   Copyright (C) 2001-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -94,9 +94,6 @@
 #  include <limits.h>
 #endif
 #include <bashansi.h>
-#ifdef HAVE_STDDEF_H
-#  include <stddef.h>
-#endif
 #include <chartypes.h>
 
 #ifdef HAVE_STDINT_H

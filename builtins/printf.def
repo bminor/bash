@@ -262,10 +262,7 @@ decodeint (char **str, int diagnose, int overflow_return)
       v |= ckd_add (&pr, pr, *ps - '0');
     }
   if (v && diagnose)
-    {
-      report_erange (*str, ps);
-      return -1;
-    }
+    report_erange (*str, ps);
 
   *str = ps;
   return (v ? overflow_return : pr);
@@ -699,8 +696,12 @@ printf_builtin (WORD_LIST *list)
 		    slen = strlen (xp);
 		    if (convch == 'Q')
 		      {
-			if (slen > precision)
-			  precision = slen;
+		        /* check for string length overflow when adjusting precision */
+			if (ckd_add (&precision, slen, 0))
+			  {
+			    builtin_error (_("%%Q: string length: %s"), strerror (ERANGE));
+			    precision = -1;
+			  }
 		      }		    
 		    /* Use printstr to get fieldwidth and precision right. */
 		    r = printstr (start, xp, slen, fieldwidth, precision);
@@ -904,7 +905,7 @@ printstr (char *fmt, char *string, size_t len, int fieldwidth, int precision)
 	  pr = decodeint (&fmt, 1, -1);
 	  /* pr < precision means we adjusted precision in printf_builtin
 	     for the quoted string length (%Q), so we use the adjusted value */
-	  if (pr < precision && precision < INT_MAX)
+	  if (pr < precision)
 	    pr = precision;
 	}
       else
@@ -1002,7 +1003,7 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
 	  pr = decodeint (&fmt, 1, -1);
 	  /* pr < precision means we adjusted precision in printf_builtin
 	     for the quoted string length (%Q), so we use the adjusted value */
-	  if (pr < precision && precision < INT_MAX)
+	  if (pr < precision)
 	    pr = precision;
 	}
       else

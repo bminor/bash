@@ -333,6 +333,9 @@ extern void seedrand (void);			/* seed generator randomly */
 extern void seedrand32 (void);
 extern u_bits32_t get_urandom32 (void);
 
+/* declarations for functions defined in lib/sh/reallocarray.c */
+extern void *reallocarray (void *, size_t, size_t);
+
 /* declarations for functions defined in lib/sh/setlinebuf.c */
 #ifdef NEED_SH_SETLINEBUF_DECL
 extern int sh_setlinebuf (FILE *);
@@ -429,7 +432,7 @@ extern void strvec_flush (char **);
 extern void strvec_dispose (char **);
 extern int strvec_remove (char **, const char *);
 extern size_t strvec_len (char * const *);
-extern int strvec_search (char **, const char *);
+extern ptrdiff_t strvec_search (char **, const char *);
 extern char **strvec_copy (char * const *);
 extern int strvec_posixcmp (char **, char **);
 extern int strvec_strcmp (char **, char **);

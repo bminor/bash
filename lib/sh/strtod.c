@@ -1,6 +1,6 @@
 /* strtod.c - convert string to double-precision floating-point value. */
 
-/* Copyright (C) 1991, 1992, 2022 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1992, 2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -40,10 +40,6 @@ extern int errno;
 #endif
 
 #include <bashansi.h>
-
-#ifndef NULL
-#  define NULL 0
-#endif
 
 #ifndef HUGE_VAL
 #  define HUGE_VAL HUGE

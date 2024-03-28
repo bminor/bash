@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.062])dnl
+AC_REVISION([for Bash 5.3, version 5.063])dnl
 
 define(bashvers, 5.3)
 define(relstatus, devel)
@@ -887,6 +887,7 @@ AC_REPLACE_FUNCS(dprintf)
 AC_REPLACE_FUNCS(strchrnul)
 AC_REPLACE_FUNCS(strdup)
 AC_REPLACE_FUNCS(strlcpy)
+AC_REPLACE_FUNCS(reallocarray)
 
 AC_CHECK_HEADERS(libaudit.h)
 AC_CHECK_DECLS([AUDIT_USER_TTY],,, [[#include <linux/audit.h>]])

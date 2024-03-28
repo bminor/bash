@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Feb 19 16:52:45 EST 2024
+.\"	Last Change: Mon Mar 25 10:56:35 EDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 February 19" "GNU Bash 5.3"
+.TH BASH 1 "2024 March 25" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3683,6 +3683,7 @@ Produces a possibly-quoted version of the value of \fIparameter\fP,
 except that it prints the values of
 indexed and associative arrays as a sequence of quoted key-value pairs
 (see \fBArrays\fP above).
+The keys and values are quoted in a format that can be reused as input.
 .TP
 .B a
 The expansion is a string consisting of flag values representing

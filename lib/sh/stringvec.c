@@ -37,34 +37,26 @@
 char **
 strvec_create (size_t n)
 {
-  size_t nbytes;
-
-  return ckd_mul (&nbytes, n, sizeof (char *)) ? NULL : xmalloc (nbytes);
+  return ((char **)xreallocarray (NULL, n, sizeof (char *)));
 }
 
 /* Allocate an array of strings with room for N members. */
 char **
 strvec_mcreate (size_t n)
 {
-  size_t nbytes;
-
-  return ckd_mul (&nbytes, n, sizeof (char *)) ? NULL : malloc (nbytes);
+  return ((char **)reallocarray (NULL, n, sizeof (char *)));
 }
 
 char **
 strvec_resize (char **array, size_t nsize)
 {
-  size_t nbytes;
-
-  return ckd_mul (&nbytes, nsize, sizeof (char *)) ? NULL : (char **)xrealloc (array, nbytes);
+  return ((char **)xreallocarray (array, nsize, sizeof (char *)));
 }
 
 char **
 strvec_mresize (char **array, size_t nsize)
 {
-  size_t nbytes;
-
-  return ckd_mul (&nbytes, nsize, sizeof (char *)) ? NULL : (char **)realloc (array, nbytes);
+  return ((char **)reallocarray (array, nsize, sizeof (char *)));
 }
 
 /* Return the length of ARRAY, a NULL terminated array of char *. */
@@ -103,7 +95,7 @@ strvec_dispose (char **array)
 int
 strvec_remove (char **array, const char *name)
 {
-  register int i, j;
+  size_t i, j;
   char *x;
 
   if (array == 0)
@@ -123,10 +115,10 @@ strvec_remove (char **array, const char *name)
 
 /* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
    ARRAY should be NULL terminated. */
-int
+ptrdiff_t
 strvec_search (char **array, const char *name)
 {
-  int i;
+  size_t i;
 
   for (i = 0; array[i]; i++)
     if (STREQ (name, array[i]))
@@ -139,8 +131,7 @@ strvec_search (char **array, const char *name)
 char **
 strvec_copy (char * const *array)
 {
-  int i;
-  size_t len;
+  size_t i, len;
   char **ret;
 
   len = strvec_len (array);
@@ -212,7 +203,7 @@ strvec_sort (char **array, int posix)
 char **
 strvec_from_word_list (WORD_LIST *list, int alloc, int starting_index, int *ip)
 {
-  int count;
+  size_t count;
   char **array;
 
   count = list_length ((GENERIC_LIST *)list);
@@ -239,7 +230,7 @@ strvec_to_word_list (char **array, int alloc, int starting_index)
 {
   WORD_LIST *list;
   WORD_DESC *w;
-  int i, count;
+  size_t i, count;
 
   if (array == 0 || array[0] == 0)
     return (WORD_LIST *)NULL;

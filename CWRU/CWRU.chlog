@@ -8920,6 +8920,80 @@ test.c
 	- term: if we see a left paren, scan forward for a closing right paren
 	  and use posixtest() if there are 1-4 arguments between the parens to
 	  avoid ambiguous behavior for expressions like true -a \( ! -a \),
-	  which a user would expect to return false instead of an error
-	  message
-	  Picked up from coreutils test
+	  which, though it's horribly ambiguous,  a user would expect to
+	  return false instead of an error message
+	  Picked up from coreutils-9.2 test
+
+				   3/25
+				   ----
+bashansi.c
+	- HAVE_C_BOOL: prefer if defined, fall back to stdbool.h if bool isn't
+	  a compiler builtin
+
+braces.c
+	- mkseq: simplify break condition
+
+builtins/printf.def
+	- decodeint: let the caller decide what to do with an overflow return,
+	  don't return -1 after calling report_erange(). This will honor a
+	  precision even if the field width overflows
+	- printf_builtin: check for overflow when adjusting precision for
+	  string length with %Q
+	- printstr,printwidestr: now that the code uses decodeint, we don't
+	  need to check the precision against INT_MAX
+
+bashansi.h
+	- include stddef.h if we have it, otherwise define replacements for
+	  NULL and offsetof()
+
+builtins/help.def,lib/sh/fmtulong.c,lib/sh/getcwd.c,lib/sh/makepath.c,
+lib/sh/snprintf.c,lib/sh/strtod.c,lib/sh/strtol.c,unwind_prot.c,
+lib/readline/shell.c
+	- include bashansi.h instead of stddef.h, or remove a stddef.h include
+	  if bashansi.h is already included
+	- remove extra definitions that appear in stddef.h or bashansi.h
+
+lib/sh/reallocarray.c,externs.h
+	- implementation of reallocarray(), originally from OpenBSD, from
+	  Paul Eggert
+
+configure.ac
+	- use AC_REPLACE_FUNCS for reallocarray
+
+xmalloc.c,xmalloc.h
+	- xreallocarray: implementation of reallocarray that uses xrealloc
+	- sh_xreallocarray: implementation of reallocarray that uses
+	  sh_xrealloc and has file and line information for error messages
+
+lib/sh/stringvec.c
+	- strvec_create, strvec_resize: rewrite in terms of xreallocarray
+	- strvec_mcreate, strvec_mresize: rewrite in terms of reallocarray
+	- strvec_remove, strvec_search, strvec_copy, strvec_from_word_list,
+	  strvec_to_word_list: use size_t instead of int where appropriate
+
+lib/sh/stringvec.c,externs.h
+	- strvec_search: return a value of type ptrdiff_t, since size_t is
+	  unsigned and we want to return -1 if not found
+
+	  All from a report and patch by Paul Eggert <eggert@cs.ucla.edu>
+
+test.c
+	- term: change paren scan algorithm to count open and close parens so
+	  we handle nested subexpressions. Still not compatible in the case
+	  of something like test true -a \( ! -a \) \)
+
+				   3/27
+				   ----
+parse.y
+	- flush_parser_state: new function, deallocates the members of a
+	  parser state struct that are dynamically allocated
+	- parse_comsub: call flush_parser_state in places where we will
+	  return an error or jump to the top level
+	  Fixes memory leaks on error reported by bug_reports00@protonmail.com
+
+Makefile.in
+	- CREATED_MACOS: list of dSYM directories created by building and
+	  testing
+	- distclean,maintainer-clean: remove $(CREATED_HEADERS) and
+	  $(CREATED_MACOS)
+	- maintainer-clean: remove ctags/etags files

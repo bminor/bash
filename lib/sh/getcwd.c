@@ -1,6 +1,6 @@
 /* getcwd.c -- get pathname of current directory */
 
-/* Copyright (C) 1991, 2022 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 2022, 2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -62,10 +62,6 @@ extern int errno;
 
 #if !defined (HAVE_LSTAT)
 #  define lstat stat
-#endif
-
-#if !defined (NULL)
-#  define NULL 0
 #endif
 
 /* If the d_fileno member of a struct dirent doesn't return anything useful,

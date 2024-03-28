@@ -399,7 +399,7 @@ mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, size_t width)
       QUIT;
 #endif
       if (type == ST_INT)
-	result[i++] = t = itos (n);
+	t = itos (n);
       else if (type == ST_ZINT)
 	{
 	  size_t tlen;
@@ -419,7 +419,6 @@ mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, size_t width)
 		  memset (t + (n < 0), '0', width - tlen);
 		}
 	    }
-	  result[i++] = t;
 	}
       else
 	{
@@ -428,8 +427,9 @@ mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, size_t width)
 	      t[0] = n;
 	      t[1] = '\0';
 	    }
-	  result[i++] = t;
 	}
+
+      result[i++] = t;
 
       /* We failed to allocate memory for this number, so we bail. */
       if (t == 0)
@@ -445,11 +445,8 @@ mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, size_t width)
 	}
 
       n += incr;
-
-      if (i == nelem - 1)
-	break;
     }
-  while (1);
+  while (i < nelem - 1);
 
   result[i] = (char *)0;
   return (result);

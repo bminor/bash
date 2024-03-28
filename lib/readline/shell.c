@@ -67,10 +67,6 @@
 extern struct passwd *getpwuid (uid_t);
 #endif /* HAVE_GETPWUID && !HAVE_GETPW_DECLS */
 
-#ifndef NULL
-#  define NULL 0
-#endif
-
 #ifndef CHAR_BIT
 #  define CHAR_BIT 8
 #endif

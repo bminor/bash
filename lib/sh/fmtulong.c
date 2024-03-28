@@ -1,6 +1,6 @@
 /* fmtulong.c -- Convert unsigned long int to string. */
 
-/* Copyright (C) 1998-2011,2023 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2011,2023-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,9 +31,6 @@
 #endif
 
 #include <bashansi.h>
-#ifdef HAVE_STDDEF_H
-#  include <stddef.h>
-#endif
 
 #ifdef HAVE_STDINT_H
 #  include <stdint.h>

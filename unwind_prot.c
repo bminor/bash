@@ -3,7 +3,7 @@
 /* I can't stand it anymore!  Please can't we just write the
    whole Unix system in lisp or something? */
 
-/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,14 +33,6 @@
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
-#endif
-
-#if defined (HAVE_STDDEF_H)
-#  include <stddef.h>
-#endif
-
-#ifndef offsetof
-#  define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 #endif
 
 #include "command.h"

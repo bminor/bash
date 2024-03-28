@@ -1,6 +1,6 @@
 /* makepath.c - glue PATH and DIR together into a full pathname. */
 
-/* Copyright (C) 1987-2020,2022-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,10 +31,6 @@
 #include "shell.h"
 
 #include <tilde/tilde.h>
-
-#ifndef NULL
-#  define NULL 0
-#endif
 
 /* MAKE SURE THESE AGREE WITH ../../externs.h. */
 

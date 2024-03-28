@@ -29,11 +29,8 @@
 #  include <unistd.h>
 #endif
 
-#if defined (HAVE_STDLIB_H)
-#  include <stdlib.h>
-#else
-#  include "ansi_stdlib.h"
-#endif /* HAVE_STDLIB_H */
+#include "bashansi.h"
+#include <stdckdint.h>
 
 #include "error.h"
 
@@ -131,6 +128,22 @@ xrealloc (PTR_T pointer, size_t bytes)
   return (temp);
 }
 
+/* Reallocate the storage addressed by POINTER so that it is of
+   size NMEMB*SIZE, preserving contents like realloc does.
+   If POINTER is null, allocate new storage.  This is like
+   glibc reallocarray except that it never returns a null pointer;
+   if storage is exhausted it reports an error and exits. */
+PTR_T
+xreallocarray (PTR_T ptr, size_t nmemb, size_t size)
+{
+  size_t nbytes;
+
+  if (ckd_mul (&nbytes, nmemb, size))
+    allocerr ("xreallocarray", (size_t)-1);
+	        
+  return xrealloc (ptr, nbytes);
+}
+
 /* Use this as the function to call when adding unwind protects so we
    don't need to know what free() returns. */
 void
@@ -190,6 +203,17 @@ sh_xrealloc (PTR_T pointer, size_t bytes, char *file, int line)
     sh_allocerr ("xrealloc", bytes, file, line);
 
   return (temp);
+}
+
+PTR_T
+sh_xreallocarray (PTR_T ptr, size_t nmemb, size_t size, const char *file, int line)
+{
+  size_t nbytes;
+
+  if (ckd_mul (&nbytes, nmemb, size))
+    sh_allocerr ("xreallocarray", (size_t)-1, file, line);
+	        
+  return sh_xrealloc (ptr, nbytes, file, line);
 }
 
 void

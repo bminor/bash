@@ -4497,6 +4497,8 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
       /* yyparse() has already called yyerror() and reset_parser(), so we set
 	 PST_NOERROR to avoid a redundant error message. */
       parser_state |= PST_NOERROR;
+
+      flush_parser_state (&ps);
       return (&matched_pair_error);
     }
   else if (r != 0)
@@ -4513,6 +4515,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 	  shell_eof_token = ps.eof_token;
 	  expand_aliases = ps.expand_aliases;
 
+	  flush_parser_state (&ps);
 	  jump_to_top_level (DISCARD);	/* XXX - return (&matched_pair_error)? */
 	}
     }
@@ -4529,6 +4532,7 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
       shell_eof_token = ps.eof_token;
       expand_aliases = ps.expand_aliases;
 
+      flush_parser_state (&ps);
       return (&matched_pair_error);
     }
 
@@ -7189,6 +7193,27 @@ restore_parser_state (sh_parser_state_t *ps)
   token = ps->token;
   token_buffer_size = ps->token_buffer_size;
   shell_eof_token = ps->eof_token;
+}
+
+/* Free the parts of a parser state struct that have allocated memory. */
+void
+flush_parser_state (sh_parser_state_t *ps)
+{
+  if (ps == 0)
+    return;
+
+  FREE (ps->token_state);
+  ps->token_state = 0;
+
+  if (ps->pipestatus)
+    array_dispose (ps->pipestatus);
+  ps->pipestatus = 0;
+
+  /* We want to free the saved token and leave the current token for error
+     reporting and cleanup. */
+  FREE (ps->token);
+  ps->token = 0;
+  ps->token_buffer_size = 0;
 }
 
 sh_input_line_state_t *
