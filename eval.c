@@ -1,6 +1,6 @@
 /* eval.c -- reading and evaluating commands. */
 
-/* Copyright (C) 1996-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -157,7 +157,7 @@ reader_loop (void)
 
 		  old_eof = EOF_Reached;
 		  EOF_Reached = 0;
-		  ps0_string = decode_prompt_string (ps0_prompt);
+		  ps0_string = decode_prompt_string (ps0_prompt, 1);
 		  if (ps0_string && *ps0_string)
 		    {
 		      fprintf (stderr, "%s", ps0_string);
@@ -329,7 +329,7 @@ execute_prompt_command (void)
 int
 parse_command (void)
 {
-  int r;
+  int r, old_parsing;
 
   need_here_doc = 0;
   if ((parser_state & (PST_CMDSUBST|PST_FUNSUBST)) == 0)
@@ -352,11 +352,14 @@ parse_command (void)
 	send_pwd_to_eterm ();	/* Yuck */
     }
 
+  old_parsing = parsing_command;
+  parsing_command = 1;
   current_command_line_count = 0;
   r = yyparse ();
 
   if (need_here_doc)
     gather_here_documents ();
+  parsing_command = old_parsing;
 
   return (r);
 }

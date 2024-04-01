@@ -4491,12 +4491,6 @@ readline_set_char_offset (int ind, int *varp)
 }
 
 void
-uw_restore_parser_state (void *ps)
-{
-  restore_parser_state (ps);
-}
-
-void
 uw_rl_set_signals (void *ignore)
 {
   rl_set_signals ();

@@ -460,7 +460,7 @@ indirection_level_string (void)
     return (indirection_string);
 
   old = change_flag ('x', FLAG_OFF);
-  ps4 = decode_prompt_string (ps4);
+  ps4 = decode_prompt_string (ps4, 1);
   if (old)
     change_flag ('x', FLAG_ON);
 

@@ -170,6 +170,9 @@ int debugging_login_shell = 0;
 /* The environment that the shell passes to other commands. */
 char **shell_environment;
 
+/* Non-zero when we are parsing a command, managed by parse_command/parse_comsub */
+int parsing_command = 0;
+
 /* Non-zero when we are executing a top-level command. */
 int executing = 0;
 

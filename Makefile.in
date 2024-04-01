@@ -586,7 +586,8 @@ CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
 CREATED_MACOS = recho.dSYM zecho.dSYM printenv.dSYM xcase.dSYM \
 		 bashversion.dSYM mksyntax.dSYM ${DEFDIR}/psize.aux.dSYM
 CREATED_CONFIGURE = config.h config.cache config.status config.log \
-		    stamp-h po/POTFILES config.status.lineno
+		    stamp-h po/POTFILES config.status.lineno \
+		    stdckdint.h
 CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
 		    lib/readline/Makefile lib/glob/Makefile \
 		    lib/sh/Makefile lib/tilde/Makefile lib/malloc/Makefile \
@@ -595,7 +596,7 @@ CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
 		    examples/loadables/perl/Makefile support/Makefile \
 		    lib/intl/Makefile po/Makefile po/Makefile.in
 CREATED_HEADERS = signames.h config.h pathnames.h version.h y.tab.h \
-		  ${DEFDIR}/builtext.h stdckdint.h
+		  ${DEFDIR}/builtext.h
 
 OTHER_DOCS = $(srcdir)/CHANGES $(srcdir)/COMPAT $(srcdir)/NEWS $(srcdir)/POSIX \
 	$(srcdir)/RBASH $(srcdir)/README
@@ -988,7 +989,7 @@ maintainer-clean:	basic-clean
 	done
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
-	$(RM) $(CREATED_CONFIGURE) Makefile $(CREATED_MAKEFILES) tags TAGS
+	$(RM) $(CREATED_CONFIGURE) Makefile $(CREATED_MAKEFILES)
 	$(RM) $(CREATED_SUPPORT) $(CREATED_HEADERS)
 	$(RM) -rf $(CREATED_MACOS)
 

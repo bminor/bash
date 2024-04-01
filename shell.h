@@ -97,6 +97,7 @@ extern char *command_execution_string;
 
 extern int debugging_mode;
 extern int executing, login_shell;
+extern int parsing_command;
 extern int interactive, interactive_shell;
 extern int startup_state;
 extern int reading_shell_script;
@@ -175,6 +176,7 @@ typedef struct _sh_parser_state_t
   /* parsing state */
   int parser_state;
   int *token_state;
+  int parsing_command;
 
   char *token;
   size_t token_buffer_size;
@@ -240,6 +242,7 @@ extern char *parser_remaining_input (void);
 extern sh_parser_state_t *save_parser_state (sh_parser_state_t *);
 extern void restore_parser_state (sh_parser_state_t *);
 extern void flush_parser_state (sh_parser_state_t *);
+extern void uw_restore_parser_state (void *);
 
 extern sh_input_line_state_t *save_input_line_state (sh_input_line_state_t *);
 extern void restore_input_line_state (sh_input_line_state_t *);

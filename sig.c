@@ -468,6 +468,8 @@ throw_to_top_level (void)
   comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
   variable_context = 0;
 
+  executing = parsing_command = 0;
+
   if (interactive && print_newline)
     {
       fflush (stdout);

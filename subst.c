@@ -6961,9 +6961,10 @@ function_substitute (char *string, int quoted, int flags)
   char *afn;
   sigset_t set, oset;
   sh_getopt_state_t *gs;
+  sh_parser_state_t ps;
   SHELL_VAR *gv;
 #if defined (ARRAY_VARS)
-  ARRAY *ps;
+  ARRAY *psa;
 #endif
 
   if (valsub = (string && *string == '|'))
@@ -7014,9 +7015,18 @@ function_substitute (char *string, int quoted, int flags)
   add_unwind_protect (uw_pop_var_context, 0);
   add_unwind_protect (uw_maybe_restore_getopt_state, gs);
 
+  if (parsing_command)
+    {
+      save_parser_state (&ps);
+      add_unwind_protect (uw_restore_parser_state, &ps);
+    }
+      
 #if defined (ARRAY_VARS)
-  ps = save_pipestatus_array ();
-  add_unwind_protect (uw_restore_pipestatus_array, ps);
+  if (parsing_command == 0)
+    {
+      psa = save_pipestatus_array ();
+      add_unwind_protect (uw_restore_pipestatus_array, psa);
+    }
 #endif
   
   subst_assign_varlist = 0;
@@ -8756,7 +8766,7 @@ string_transform (int xc, SHELL_VAR *v, char *s)
 	ret = ansicstr (s, strlen (s), 0, 0, 0);
 	break;
       case 'P':
-	ret = decode_prompt_string (s);
+	ret = decode_prompt_string (s, 0);
 	break;
       case 'Q':
 	ret = sh_quote_reusable (s, 0);

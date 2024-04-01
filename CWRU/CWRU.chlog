@@ -8997,3 +8997,44 @@ Makefile.in
 	- distclean,maintainer-clean: remove $(CREATED_HEADERS) and
 	  $(CREATED_MACOS)
 	- maintainer-clean: remove ctags/etags files
+
+				   3/28
+				   ----
+bashline.c,bashline.h
+	- uw_restore_parser_state: moved to parse.y and declaration to shell.h
+
+shell.c,shell.h
+	- parsing_command: new flag, set to 1 when calling yyparse; saved and
+	  restored by save_parser_state/restore_parser_state
+
+parse.y,shell.h
+	- parsing_command: new element of sh_parser_state_t
+
+sig.c
+	- throw_to_top_level: reset executing and parsing_command to 0
+
+parse.y
+	- parse_comsub: set parsing_command to 1 before calling yyparse()
+
+eval.c
+	- parse_command: set parsing_command to 1 before calling yyparse(),
+	  restore old value when yyparse returns
+
+subst.c
+	- function_substitute: if we are parsing a command, save the parser
+	  state with save_parser_state and add an unwind-protect to restore it
+	  From a report from Grisha Levit <grishalevit@gmail.com>
+	- function_substitute: only save and restore the pipestatus array if
+	  we are not parsing a command, since save_parser_state saves it
+
+parse.y,externs.h
+	- decode_prompt_string: now takes an additional argument to determine
+	  whether this is expanding PS[0124] or the @P transformation
+	- decode_prompt_string: keep track of the (last) real prompt string
+	  being decoded so a @P expansion embedded in the prompt returns the
+	  same result as the prompt string itself for the \! and \# expansions
+	  From a patch from Grisha Levit <grishalevit@gmail.com>
+
+parse.y,print_cmd.c,eval.c,subst.c
+	- decode_prompt_string: changed all callers
+

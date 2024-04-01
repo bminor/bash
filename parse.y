@@ -4462,6 +4462,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
   current_token = '\n';				/* XXX */
   token_to_read = (open == '(') ? DOLPAREN : DOLBRACE;	/* let's trick the parser ) */
 
+  parsing_command = 1;	/* saved as part of sh_parser_state_t */
   r = yyparse ();
 
   if (open == '{')
@@ -5879,7 +5880,7 @@ reset_readline_prompt (void)
   if (prompt_string_pointer)
     {
       temp_prompt = (*prompt_string_pointer)
-			? decode_prompt_string (*prompt_string_pointer)
+			? decode_prompt_string (*prompt_string_pointer, 1)
 			: (char *)NULL;
 
       if (temp_prompt == 0)
@@ -6040,7 +6041,7 @@ prompt_again (int force)
     prompt_string_pointer = &ps1_prompt;
 
   temp_prompt = *prompt_string_pointer
-			? decode_prompt_string (*prompt_string_pointer)
+			? decode_prompt_string (*prompt_string_pointer, 1)
 			: (char *)NULL;
 
   if (temp_prompt == 0)
@@ -6140,13 +6141,16 @@ prompt_history_number (char *pmt)
 	\\	a backslash
 	\[	begin a sequence of non-printing chars
 	\]	end a sequence of non-printing chars
+
+  IS_PROMPT is non-zero if we are decoding one of the PS[0124] prompt strings
+  instead of an arbitrary string applying the @P transformation.
 */
 #define PROMPT_GROWTH 48
 char *
-decode_prompt_string (char *string)
+decode_prompt_string (char *string, int is_prompt)
 {
   WORD_LIST *list;
-  char *result, *t, *orig_string, *last_lastarg;
+  char *result, *t, *last_lastarg;
   struct dstack save_dstack;
   int last_exit_value, last_comsub_pid, last_comsub_status;
 #if defined (PROMPT_STRING_DECODE)
@@ -6159,11 +6163,16 @@ decode_prompt_string (char *string)
   char timebuf[128];
   char *timefmt;
   size_t tslen;
+  static char *decoding_prompt;
 
   result = (char *)xmalloc (result_size = PROMPT_GROWTH);
   result[result_index = 0] = 0;
   temp = (char *)NULL;
-  orig_string = string;
+
+  /* Keep track of which (real) prompt string is being decoded so that we can
+     process embedded ${var@P} expansions correctly. */
+  if (is_prompt)
+    decoding_prompt = string;
 
   while (c = *string++)
     {
@@ -6179,7 +6188,7 @@ decode_prompt_string (char *string)
 #if !defined (HISTORY)
 		temp = savestring ("1");
 #else /* HISTORY */
-		temp = itos (prompt_history_number (orig_string));
+		temp = itos (prompt_history_number (decoding_prompt));
 #endif /* HISTORY */
 		string--;	/* add_string increments string again. */
 		goto add_string;
@@ -6440,7 +6449,7 @@ decode_prompt_string (char *string)
 	      n = current_command_number;
 	      /* If we have already incremented current_command_number (PS4,
 		 ${var@P}), compensate */
-	      if (orig_string != ps0_prompt && orig_string != ps1_prompt && orig_string != ps2_prompt)
+	      if (decoding_prompt != ps0_prompt && decoding_prompt != ps1_prompt && decoding_prompt != ps2_prompt)
 		n--;
 	      temp = itos (n);
 	      goto add_string;
@@ -6449,7 +6458,7 @@ decode_prompt_string (char *string)
 #if !defined (HISTORY)
 	      temp = savestring ("1");
 #else /* HISTORY */
-	      temp = itos (prompt_history_number (orig_string));
+	      temp = itos (prompt_history_number (decoding_prompt));
 #endif /* HISTORY */
 	      goto add_string;
 
@@ -6574,6 +6583,10 @@ not_escape:
     }
 
   dstack = save_dstack;
+#if defined (PROMPT_STRING_DECODE)
+  if (is_prompt)
+    decoding_prompt = (char *)NULL;
+#endif
 
   return (result);
 }
@@ -7081,6 +7094,8 @@ save_parser_state (sh_parser_state_t *ps)
   ps->parser_state = parser_state;
   ps->token_state = save_token_state ();
 
+  ps->parsing_command = parsing_command;
+
   ps->input_line_terminator = shell_input_line_terminator;
   ps->eof_encountered = eof_encountered;
   ps->eol_lookahead = eol_ungetc_lookahead;
@@ -7143,6 +7158,7 @@ restore_parser_state (sh_parser_state_t *ps)
       restore_token_state (ps->token_state);
       free (ps->token_state);
     }
+  parsing_command = ps->parsing_command;
 
   shell_input_line_terminator = ps->input_line_terminator;
   eof_encountered = ps->eof_encountered;
@@ -7193,6 +7209,12 @@ restore_parser_state (sh_parser_state_t *ps)
   token = ps->token;
   token_buffer_size = ps->token_buffer_size;
   shell_eof_token = ps->eof_token;
+}
+
+void
+uw_restore_parser_state (void *ps)
+{
+  restore_parser_state (ps);
 }
 
 /* Free the parts of a parser state struct that have allocated memory. */

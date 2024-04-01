@@ -206,7 +206,7 @@ sh_xrealloc (PTR_T pointer, size_t bytes, char *file, int line)
 }
 
 PTR_T
-sh_xreallocarray (PTR_T ptr, size_t nmemb, size_t size, const char *file, int line)
+sh_xreallocarray (PTR_T ptr, size_t nmemb, size_t size, char *file, int line)
 {
   size_t nbytes;
 

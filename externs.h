@@ -128,7 +128,7 @@ extern void clear_shell_input_line (void);
 
 extern int handle_ignoreeof (int);
 
-extern char *decode_prompt_string (char *);
+extern char *decode_prompt_string (char *, int);
 
 extern int get_current_prompt_level (void);
 extern void set_current_prompt_level (int);
