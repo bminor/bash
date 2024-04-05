@@ -2296,6 +2296,7 @@ coproc_active (void)
   return ((sh_coproc.c_flags & COPROC_DEAD) ? NO_PID : sh_coproc.c_pid);
 #endif
 }
+
 void
 coproc_setvars (struct coproc *cp)
 {
@@ -6072,14 +6073,14 @@ shell_execve (char *command, char **args, char **env)
 	      interp = getinterp (sample, sample_len, (int *)NULL);
 	      ilen = strlen (interp);
 	      errno = i;
-	      if (interp[ilen - 1] == '\r')
+	      if (interp > 0 && interp[ilen - 1] == '\r')
 		{
 		  interp = xrealloc (interp, ilen + 2);
 		  interp[ilen - 1] = '^';
 		  interp[ilen] = 'M';
 		  interp[ilen + 1] = '\0';
 		}
-	      sys_error (_("%s: %s: bad interpreter"), command, interp ? interp : "");
+	      sys_error (_("%s: %s: bad interpreter"), command, interp);
 	      FREE (interp);
 	      return (EX_NOEXEC);
 	    }

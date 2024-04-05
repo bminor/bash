@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Mar 25 10:56:35 EDT 2024
+.\"	Last Change: Fri Mar 29 11:54:22 EDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 March 25" "GNU Bash 5.3"
+.TH BASH 1 "2024 March 29" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -47,6 +47,7 @@
 .\}
 .el \{\
 .ds ' '
+.\" not usable in macro arguments on AT&T troff (DWB, Solaris 10)
 .ds " ""\" two adjacent quotes and no space before this comment
 .ds ^ ^
 .ds ~ ~
@@ -89,12 +90,13 @@ bash \- GNU Bourne-Again SHell
 .if t Bash is Copyright \(co 1989-2023 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
-is an \fBsh\fR-compatible command language interpreter that
+is an \fBsh\fP-compatible command language interpreter that
 executes commands read from the standard input or from a file.
 .B Bash
 also incorporates useful features from the \fIKorn\fP and \fIC\fP
 shells (\fBksh\fP and \fBcsh\fP).
 .PP
+POSIX is the name for a family of computing standards based on Unix.
 .B Bash
 is intended to be a conformant implementation of the
 Shell and Utilities portion of the IEEE POSIX specification
@@ -103,9 +105,9 @@ Shell and Utilities portion of the IEEE POSIX specification
 can be configured to be POSIX-conformant by default.
 .SH OPTIONS
 All of the single-character shell options documented in the
-description of the \fBset\fR builtin command, including \fB\-o\fP,
+description of the \fBset\fP builtin command, including \fB\-o\fP,
 can be used as options when the shell is invoked.
-In addition, \fBbash\fR
+In addition, \fBbash\fP
 interprets the following options when it is invoked:
 .PP
 .PD 0
@@ -3030,7 +3032,7 @@ words.  The shell performs these expansions:
 .IR "word splitting" ,
 .IR "pathname expansion" ,
 and
-.IR "quote removal .
+.IR "quote removal" .
 .PP
 The order of expansions is:
 brace expansion;
@@ -3919,8 +3921,8 @@ is unset, word splitting behaves as if it contained the default value
 of
 .BR <space><tab><newline> .
 .PP
-Explicit null arguments (\^\f3\*"\^\*"\fP or
-\^\f3\*'\^\*'\fP\^) are retained
+Explicit null arguments (\^\fB\*"\^\*"\fP or
+\^\fB\*'\^\*'\fP\^) are retained
 and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
@@ -4245,7 +4247,7 @@ After the preceding expansions, all unquoted occurrences of the
 characters
 .BR \e ,
 .BR \*' ,
-and \^\f3\*"\fP\^ that did not result from one of the above
+and \^\fB\*"\fP\^ that did not result from one of the above
 expansions are removed.
 .SH REDIRECTION
 Before a command is executed, its input and output
@@ -5959,11 +5961,12 @@ options to the
 builtin.
 .SS "Readline Notation"
 In this section, the Emacs-style notation is used to denote
-keystrokes.  Control keys are denoted by C\-\fIkey\fR, e.g., C\-n
-means Control\-N.  Similarly,
+keystrokes.
+Control keys are denoted by C\-\fIkey\fP, e.g., C\-n means Control\-N.
+Similarly,
 .I meta
-keys are denoted by M\-\fIkey\fR, so M\-x means Meta\-X.  (On keyboards
-without a
+keys are denoted by M\-\fIkey\fP, so M\-x means Meta\-X.
+(On keyboards without a
 .I meta
 key, M\-\fIx\fP means ESC \fIx\fP, i.e., press the Escape key
 then the
@@ -6300,7 +6303,7 @@ environment variable.
 .\" finesse.  We require `\c`, and while the single-font macros don't
 .\" honor input trap continuation, the font alternation macros do.
 .TP
-.BR comment\-begin\ (\c
+.BR comment\-begin\ ( \c
 .Q \fB#\fP \fB)\fP
 The string that is inserted when the readline
 .B insert\-comment
@@ -6452,7 +6455,7 @@ locale contains eight-bit characters.
 This variable is dependent on the \fBLC_CTYPE\fP locale category, and
 may change if the locale is changed.
 .TP
-.BR isearch\-terminators\ (\c
+.BR isearch\-terminators\ ( \c
 .Q \fBC\-[C\-J\fP \fB)\fP
 The string of characters that should terminate an incremental
 search without subsequently executing the character as a command.
@@ -7839,11 +7842,11 @@ newline, carriage return, =
 or ( (when the \fBextglob\fP shell option is enabled using
 the \fBshopt\fP builtin).
 .TP
-.B !\fIn\fR
+.B !\fIn\fP
 Refer to command line
 .IR n .
 .TP
-.B !\-\fIn\fR
+.B !\-\fIn\fP
 Refer to the current command minus
 .IR n .
 .TP
@@ -7851,12 +7854,12 @@ Refer to the current command minus
 Refer to the previous command.  This is a synonym for
 .Q !\-1 .
 .TP
-.B !\fIstring\fR
+.B !\fIstring\fP
 Refer to the most recent command preceding the current position in the
 history list starting with
 .IR string .
 .TP
-.B !?\fIstring\fR\fB[?]\fR
+.B !?\fIstring\fR\fB[?]\fP
 Refer to the most recent command preceding the current position in the
 history list containing
 .IR string .
@@ -7901,7 +7904,7 @@ The zeroth word.  For the shell, this is the command
 word.
 .TP
 .I n
-The \fIn\fRth word.
+The \fIn\fPth word.
 .TP
 .B \*^
 The first argument.  That is, word 1.
@@ -7912,15 +7915,15 @@ zeroth word if there is only one word in the line.
 .TP
 .B %
 The first word matched by the most recent
-.Q ?\fIstring\fR?'
+.Q ?\fIstring\fP?'
 search,
 if the search string begins with a character that is part of a word.
 .TP
 .I x\fB\-\fPy
 A range of words;
-.Q \-\fIy\fR
+.Q \-\fIy\fP
 abbreviates
-.Q 0\-\fIy\fR .
+.Q 0\-\fIy\fP .
 .TP
 .B *
 All of the words but the zeroth.
@@ -8003,7 +8006,7 @@ substituted, or, if no previous history substitutions took place,
 the last
 .I string
 in a
-.B !?\fIstring\fR\fB[?]\fR
+.B !?\fIstring\fP[?]
 search.
 If
 .I new
@@ -12285,7 +12288,7 @@ ALL bug reports should include:
 .PP
 .PD 0
 .TP 20
-The version number of \fBbash\fR
+The version number of \fBbash\fP
 .TP
 The hardware and operating system
 .TP

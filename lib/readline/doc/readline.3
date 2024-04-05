@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Feb  5 10:50:56 EST 2024
+.\"	Last Change: Fri Mar 29 11:54:44 EDT 2024
 .\"
-.TH READLINE 3 "2024 February 5" "GNU Readline 8.3"
+.TH READLINE 3 "2024 March 29" "GNU Readline 8.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -18,6 +18,7 @@
 .\}
 .el \{\
 .ds ' '
+.\" not usable in macro arguments on AT&T troff (DWB, Solaris 10)
 .ds " ""\" two adjacent quotes and no space before this comment
 .ds ^ ^
 .ds ~ ~
@@ -100,11 +101,12 @@ treated as a newline.
 .SH NOTATION
 .LP
 An Emacs-style notation is used to denote
-keystrokes.  Control keys are denoted by C\-\fIkey\fR, e.g., C\-n
-means Control\-N.  Similarly,
+keystrokes.
+Control keys are denoted by C\-\fIkey\fP, e.g., C\-n means Control\-N.
+Similarly,
 .I meta
-keys are denoted by M\-\fIkey\fR, so M\-x means Meta\-X.  (On keyboards
-without a
+keys are denoted by M\-\fIkey\fP, so M\-x means Meta\-X.
+(On keyboards without a
 .I meta
 key, M\-\fIx\fP means ESC \fIx\fP, i.e., press the Escape key
 then the
@@ -437,7 +439,7 @@ environment variable.
 .\" finesse.  We require `\c`, and while the single-font macros don't
 .\" honor input trap continuation, the font alternation macros do.
 .TP
-.BR comment\-begin\ (\c
+.BR comment\-begin\ ( \c
 .Q \fB#\fP \fB)\fP
 The string that is inserted when the
 .B insert\-comment
@@ -588,7 +590,7 @@ locale contains eight-bit characters.
 This variable is dependent on the \fBLC_CTYPE\fP locale category, and
 may change if the locale is changed.
 .TP
-.BR isearch\-terminators\ (\c
+.BR isearch\-terminators\ ( \c
 .Q \fBC\-[C\-J\fP \fB)\fP
 The string of characters that should terminate an incremental
 search without subsequently executing the character as a command.
