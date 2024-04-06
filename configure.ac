@@ -24,7 +24,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_REVISION([for Bash 5.3, version 5.063])dnl
 
 define(bashvers, 5.3)
-define(relstatus, devel)
+define(relstatus, alpha)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -568,7 +568,8 @@ AC_SUBST(CPPFLAGS_FOR_BUILD)
 AC_SUBST(LDFLAGS_FOR_BUILD)
 AC_SUBST(LIBS_FOR_BUILD)
 
-AC_PROG_GCC_TRADITIONAL
+dnl This macro is obsolete
+dnl AC_PROG_GCC_TRADITIONAL
 
 dnl BEGIN READLINE and HISTORY LIBRARY SECTION
 dnl prepare to allow bash to be linked against an already-installed readline

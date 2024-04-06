@@ -184,7 +184,7 @@ static char *getinterp (char *, int, int *);
 static void initialize_subshell (void);
 static int execute_in_subshell (COMMAND *, int, int, int, struct fd_bitmap *);
 #if defined (COPROCESS_SUPPORT)
-static void coproc_setstatus (struct coproc *, int);
+static void coproc_setstatus (struct coproc *, WAIT);
 static int execute_coproc (COMMAND *, int, int, struct fd_bitmap *);
 #endif
 
@@ -2185,7 +2185,11 @@ coproc_reap (void)
 
   cp = &sh_coproc;		/* XXX - will require changes for multiple coprocs */
   if (cp && (cp->c_flags & COPROC_DEAD))
+{
+INTERNAL_DEBUG (("coproc_reap: deleting %d", cp->c_pid));
+
     coproc_dispose (cp);
+}
 #endif
 }
 
@@ -2255,13 +2259,27 @@ coproc_fdrestore (struct coproc *cp)
   cp->c_wfd = cp->c_wsave;
 }
 
+/* Translate an exit status encoded in WAIT into a coproc state */
+static inline int
+coproc_getstate (WAIT status)
+{
+  if (WIFEXITED (status) || WIFSIGNALED (status))
+    return COPROC_DEAD;
+  else if (WIFSTOPPED (status))
+    return (COPROC_STOPPED|COPROC_RUNNING);
+  else if (WIFCONTINUED (status))
+    return COPROC_RUNNING;
+  else
+    return COPROC_DEAD;		/* defaults to terminated */    
+}
+
 static void
-coproc_setstatus (struct coproc *cp, int status)
+coproc_setstatus (struct coproc *cp, WAIT status)
 {
   cp->c_lock = 4;
-  cp->c_status = status;
-  cp->c_flags |= COPROC_DEAD;
-  cp->c_flags &= ~COPROC_RUNNING;
+  cp->c_status = process_exit_status (status);
+  cp->c_flags &= ~(COPROC_DEAD|COPROC_STOPPED|COPROC_FOREGROUND|COPROC_RUNNING);
+  cp->c_flags |= coproc_getstate (status);
   /* Don't dispose the coproc or unset the COPROC_XXX variables because
      this is executed in a signal handler context.  Wait until coproc_reap
      takes care of it. */
@@ -2269,7 +2287,7 @@ coproc_setstatus (struct coproc *cp, int status)
 }
 
 void
-coproc_pidchk (pid_t pid, int status)
+coproc_pidchk (pid_t pid, WAIT status)
 {
   struct coproc *cp;
 
@@ -2417,11 +2435,19 @@ execute_coproc (COMMAND *command, int pipe_in, int pipe_out, struct fd_bitmap *f
   Coproc *cp;
   char *tcmd, *p, *name;
   sigset_t set, oset;
+#if !MULTIPLE_COPROCS
+  int oldrfd, oldwfd;
+#endif
 
   /* XXX -- can be removed after changes to handle multiple coprocs */
 #if !MULTIPLE_COPROCS
+  oldrfd = oldwfd = -1;
   if (sh_coproc.c_pid != NO_PID && (sh_coproc.c_rfd >= 0 || sh_coproc.c_wfd >= 0))
-    internal_warning (_("execute_coproc: coproc [%d:%s] still exists"), sh_coproc.c_pid, sh_coproc.c_name);
+    {
+      internal_warning (_("execute_coproc: coproc [%d:%s] still exists"), sh_coproc.c_pid, sh_coproc.c_name);
+      oldrfd = sh_coproc.c_rfd;
+      oldwfd = sh_coproc.c_wfd;
+    }
   coproc_init (&sh_coproc);
 #endif
 
@@ -2456,6 +2482,15 @@ execute_coproc (COMMAND *command, int pipe_in, int pipe_out, struct fd_bitmap *f
     {
       close (rpipe[0]);
       close (wpipe[1]);
+
+#if !MULTIPLE_COPROCS
+      /* Do this here instead of letting execute_in_subshell call
+	 coproc_closeall since we've already overwritten sh_coproc */
+      if (oldrfd != -1)
+	close (oldrfd);
+      if (oldwfd != -1)
+	close (oldwfd);
+#endif
 
 #if defined (JOB_CONTROL)
       FREE (p);

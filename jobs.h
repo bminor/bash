@@ -281,6 +281,8 @@ extern int set_tty_state (void);
 extern int job_exit_status (int);
 extern int job_exit_signal (int);
 
+extern int process_exit_status (WAIT);
+
 extern int wait_for_single_pid (pid_t, int);
 extern int wait_for_background_pids (struct procstat *);
 extern int wait_for (pid_t, int);

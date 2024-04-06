@@ -3,11 +3,13 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 February 5<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 March 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
+
+
 
 
 
@@ -85,6 +87,7 @@ also incorporates useful features from the <I>Korn</I> and <I>C</I>
 shells (<B>ksh</B> and <B>csh</B>).
 <P>
 
+POSIX is the name for a family of computing standards based on Unix.
 <B>Bash</B>
 
 is intended to be a conformant implementation of the
@@ -3030,7 +3033,13 @@ after reading any startup files.
 
 <DD>
 A colon-separated list of patterns used to decide which command lines
-should be saved on the history list.  Each pattern is anchored at the
+should be saved on the history list.
+If a command line matches one of the patterns in the value of
+<FONT SIZE=-1><B>HISTIGNORE</B>,
+
+</FONT>
+it is not saved on the history list.
+Each pattern is anchored at the
 beginning of the line and must match the complete line
 (<B>bash</B> will not  implicitly append a
 
@@ -3810,7 +3819,7 @@ words.  The shell performs these expansions:
 <I>pathname expansion</I>,
 
 and
-<I>quote removal .</I>
+<I>quote removal</I>.
 
 <P>
 
@@ -4569,6 +4578,7 @@ Produces a possibly-quoted version of the value of <I>parameter</I>,
 except that it prints the values of
 indexed and associative arrays as a sequence of quoted key-value pairs
 (see <B>Arrays</B> above).
+The keys and values are quoted in a format that can be reused as input.
 <DT><B>a</B>
 
 <DD>
@@ -7508,12 +7518,13 @@ builtin.
 <H4>Readline Notation</H4>
 
 In this section, the Emacs-style notation is used to denote
-keystrokes.  Control keys are denoted by C-<I>key</I>, e.g., C-n
-means Control-N.  Similarly,
+keystrokes.
+Control keys are denoted by C-<I>key</I>, e.g., C-n means Control-N.
+Similarly,
 <I>meta</I>
 
-keys are denoted by M-<I>key</I>, so M-x means Meta-X.  (On keyboards
-without a
+keys are denoted by M-<I>key</I>, so M-x means Meta-X.
+(On keyboards without a
 <I>meta</I>
 
 key, M-<I>x</I> means ESC <I>x</I>, i.e., press the Escape key
@@ -10112,7 +10123,7 @@ the last
 <I>string</I>
 
 in a
-<B>!?</B><I>string</I><B>[?]</B>
+<B>!?</B><I>string</I>[?]
 
 search.
 If
@@ -15460,7 +15471,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 February 5<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 March 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15566,7 +15577,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20240209/doc/bash.1.<BR>
-Time: 13 February 2024 10:19:05 EST
+This document was created by man2html from /usr/local/src/bash/bash-20240402/doc/bash.1.<BR>
+Time: 04 April 2024 17:50:28 EDT
 </BODY>
 </HTML>

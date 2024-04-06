@@ -1,3 +1,640 @@
+This document details the changes between this version, bash-5.3-alpha, and
+the previous version, bash-5.2-release.
+
+1. Changes to Bash
+
+a. Stop checking for new mail if an interactive shell is in the middle of
+   programmable completion or readline command dispatching.
+
+b. Changes to multibyte character translation to handle shift states better.
+
+c. Fixed a bug with subshell command execution that caused it to set LINENO
+   incorrectly.
+
+d. Fixed a bug that caused some array subscript references in arithmetic
+   expansions to seg fault.
+
+e. Don't report on foreground jobs that we won't notify the user about if
+   jobs is run from a trap handler or a `bind -x' command.
+
+f. Fixed a bug where temporarily turning on `extglob' while parsing a command
+   substitution in compatibility mode could leave it set.
+
+g. Fixed a bug where nested word expansions confused the state parser and
+   resulted in quotes being required where they should not have been.
+
+h. Fixed a bug where nested function definitions resulted in `display -F'
+   printing incorrect line numbers.
+
+i. Fixed the message printed when the shell gets ENOENT from execve: specific
+   message about a bad interpreter before the generic error message.
+
+j. Fixed a spurious debug message when errexit is set and the shell is
+   exiting from an eval command in a shell function.
+
+k. Fixed a bug where a pending signal would cause pattern matching to fail in
+   an exit trap.
+
+l. Fixed a crash caused by  a null replacement string in pattern replacement.
+
+m. Fixed a bug in interactive shells where a SIGINT received while parsing a
+   command substitution would leave the expand_aliases option disabled.
+
+n. Fixed a bug with command printing when printing multiple shell functions
+   with here-documents inside a command substitution.
+
+o. Fixed a bug with expanding aliases while parsing command substitutions
+   inside another word expansion.
+
+p. Fixed a bug with alias expansion in posix mode in an eval command inside a
+   command substitution.
+
+q. Fixed a bug that caused the parser not to reset correctly if it encountered
+   a syntax error while trying to read a WORD token.
+
+r. Fixed a bug that caused `<(' and `>(' to trigger process substitution inside
+   an arithmetic expression.
+
+s. Fixed a bug that caused the shell to unlink FIFOs used for process
+   substitution before a compound command completes.
+
+t. Fixed a bug that caused the read builtin to not recognize some negative
+   fractional arguments.
+
+u. Fixed a bug that caused subshells not to run the EXIT trap if a signal
+   arrived after the command and before returning to the caller.
+
+v. Fixed a bug where `wait' without arguments could wait for inherited
+   process substitutions, which are not children of this shell.
+
+w. Fixed a bug with expanding $* in a here-document body.
+
+x. Fixed a bug where `declare -p' in a shell function would show the wrong
+   command for `local -'.
+
+y. Change for POSIX interpretation 1602 about the default return status for
+   `return' in a trap command.
+
+z. Fixed a bug that caused double evaluation of a dynamic variable like
+   $RANDOM when using certain parameter expansions.
+
+aa. Fixed a bug where `read -e -t' would cause an interactive shell to exit.
+
+bb. Fixed a number of bugs with pathname expansion/pattern matching and
+    slashes in bracket expressions.
+
+cc. Fixed several bugs with optimizing out forks.
+
+dd. Fixed a memory leak when referencing unset associative array elements.
+
+ee. System-specific changes for: WIN32
+
+ff. Perform more cleanup if the shell exceeds maximum function nesting level.
+
+gg. Fixed a bug that caused `eval' to run the ERR trap in commands where it
+    should not.
+
+hh. Fixed nameref expansion where nameref values are valid length expansion
+    expressions but invalid identifiers.
+
+ii. Fixed an error that caused syntax errors when expanding nested word
+    expansions inside a here-document.
+
+jj. POSIX special builtins now exit the shell in posix mode on more failure
+    cases.
+
+kk. Brace expansion is interruptible at more spots, so long expansions can
+    be interrupted more quickly.
+
+ll. Fixed a crash caused by running `set -o emacs' in `bash -c command'.
+
+mm. Fixed a bug that caused bash to reset the terminal process group before
+    a command exited if it received a SIGINT in a non-interactive shell.
+
+nn. Significant changes to the source code to make it C23-conformant, including
+    C23 undefined behavior.
+
+oo. Treat read(2) errors while reading input as immediately fatal errors
+    instead of the traditional EOF; POSIX interp 1629
+
+pp. Fix to allow asynchronous commands to use `trap' to reset signals that
+    are ignored during the command; POSIX interp 751.
+
+qq. Fix a posix-mode bug with alias expansion when checking for reserved
+    words and the previous alias expansion ends with a space.
+
+rr. Programmable completion now creates empty elements in COMP_WORDS if the
+    cursor is on whitespace just preceding a word.
+
+ss. Fixed a bug that prevented aliases ending with a space from alias
+    expanding the next word if more than two aliases are expanded from a
+    single word.
+
+tt. Fixed a bug that caused the shell to give the terminal to the shell's
+    process group when reaping a background job.
+
+uu. Command printing is more consistent when to print `function' before a
+    shell function name.
+
+vv. Fixed a bug that caused unset not to remove a function named a[b] if
+    there was no array variable a.
+
+ww. Posix mode doesn't perform function lookup for function names containing
+    a slash.
+
+xx. <( and >( can now be used in funtion names.
+
+yy. Fixed a bug that caused tilde expansion not to be performed on some
+    array subscripts.
+
+zz. Fixed key-value pair associative array assignment to be more consistent
+    with compound array assignment, and indexed array assignment (a=(zero one))
+    to be more consistent with explicitly assigning indices one by one.
+
+aaa. In posix mode, extra arguments to `fc' are now an error.
+
+bbb. The bash readline commands that perform history and alias expansion try
+     to place point closer to where it was in the unexpanded line.
+
+ccc. Fixed multiple invocations of `local -' in the same shell function to
+     have the same effect as one.
+
+ddd. Don't export $_ if allexport is set.
+
+eee. Don't add extra newlines to the history if parsing a delimited construct.
+
+fff. Dynamically-loaded builtins cannot have slashes in their names, since
+     they'll never be called.
+
+ggg. Fixed a bug that could cause reading EOF while parsing a quoted string
+     to terminate the shell.
+
+hhh. Fixed a bug that caused local variables with the same name as variables
+     in `declare's temporary environment to be propagated back to the caller.
+
+iii. Don't try to perform brace expansion on assignment statements in compound
+     assignments.
+
+jjj. Fixed a bug that could cause a crash while evaluating an arithmetic for
+     command if one of the expressions expands to NULL.
+
+kkk. In posix mode, cd tries to change to what the user typed if the
+     canonicalized version of that pathname is longer than PATH_MAX.
+
+lll. Fixes for some errors revealed by address sanitizer.
+
+mmm. If fork(2) fails, kill the current pipeline processes with SIGKILL after
+     SIGTERM, in case they're ignoring SIGTERM.
+
+nnn. Fix to adding command substitutions to history to avoid adding semicolons
+     where they shouldn't be.
+
+ooo. Programmable completion and compgen honor the setting of `dotglob'.
+
+ppp. Use gettimeofday(2) to get time information instead of using time(3).
+
+qqq. Save and restore readline variables affecting filename completions in
+     case someone runs `compgen' in the foreground.
+
+rrr. Treat the failure to open file in $(<file) as a non-fatal expansion
+     error instead of a fatal redirection error.
+
+sss. In posix mode, command substitution doesn't affect $? except when
+     specified for commands consisting solely of assignment statements.
+
+ttt. Fix {var}>&- so it doesn't silently close stdin if var is not a number.
+
+uuu. Follow namerefs in ${name=word} so the shell can implement the POSIX
+     semantics of returning "the final value of parameter."
+
+vvv. Bash performs better nameref loop detection in several lookup cases.
+
+www. SIGINT will now break out of loops if a process executed in the loop dies
+     due to SIGINT, not just if the loop body is a list. This is no longer
+     dependent on the compatibility level.
+
+xxx. FIGNORE suffixes can now match the entire pathname, like tcsh, instead
+     of requiring a non-empty prefix.
+
+yyy. Fix bug that caused FUNCNAME not to be reset after a parse error with
+     compound assignments to local variables.
+
+zzz. Fix bug that caused `jobs' not to remove jobs from the list in a SIGCHLD
+     trap.
+
+aaaa. Fix bug that caused `ignoreeof' to be ignored if EOF is read at a
+      secondary prompt or while parsing a command substitution.
+
+bbbb. Fixes to removing jobs from the jobs table when the user isn't notified;
+      has effects of fixing issues with `wait -n' not finding jobs.
+
+cccc. Fixes to loadable builtin processing so that we never pass a null
+      pathname or try to load a builtin that's not found if the -n option is
+      supplied.
+
+dddd. Work around system-specific problems (macOS) where isblank(3) returns
+      true for characters >= 0x80 in a UTF-8 locale.
+
+eeee. Fix for crash while parsing alias expansions that include compound
+      assignments.
+
+ffff. Fixe for non-interactive shells reading a script file that ends with
+      backslash preceding EOF.
+
+gggg. Fix to command printing when here-documents are attached to compound
+      commands in lists.
+
+hhhh. Fix bug with sourcing `files' created by process substitutions inside
+      a `.' script.
+
+iiii. Fixes to declare builtin to treat arguments to declare -f that look like
+      assignment statements or array references as function names.
+
+jjjj. Fixed a variable conversion problem when exporting a variable in the
+      temporary environment back to the calling scope.
+
+kkkk. BASH_REMATCH can now be a local variable.
+
+llll. Subshell commands clear process substitutions so anything created by a
+      redirection doesn't affect the subshell.
+
+mmmm. Fixes for several small memory leaks.
+
+nnnn. The shell simply ignores attempts to assign to `noassign' variables
+      instead of treating them as an assignment error and possibly causing
+      the shell to exit.
+
+oooo. If the cd builtin uses $OLDPWD, allow it to use $CDPATH if the user has
+      set it to something that's not a full pathname.
+
+pppp. The test builtin only supports the optional argument to -t if parsing
+      an expression with more than four aguments and not in posix mode.
+
+qqqq. Changes to filename quoting and rewriting to deal with NFC and NFD
+      Unicode forms (primarily for macOS).
+
+rrrr. Send SIGCONT to a job we've just restarted with fg or bg, even if we
+      think it's already running.
+
+ssss. Fixes for setting the line number associated with a simple command.
+
+tttt. Many changes for integer overflow and out-of-range arguments to printf.
+
+uuuu. Fixes for the read builtin and unescaped backslashes preceding NULs or
+      the end of the input.
+
+vvvv. The -[anrw] options to the history builtin should have no effect if
+      HISTFILE is unset or null.
+
+wwww. If programmable completion uses something different than what the user
+      typed as the command name (full pathname, alias, etc.), display what's
+      actually used in `compopt' output.
+
+xxxx. Fix bug with closing /dev/fd process substitutions in shell functions.
+
+yyyy. Fix bug with `declare -g' trying to convert a global associative array
+      to an indexed array.
+
+zzzz. Fix bash history expansion characters so we don't get empty history
+      events.
+
+aaaaa. Allow `time' and `!' reserved words to be followed by `&', which POSIX
+       interp 267 says is required.
+
+bbbbb. Upgrade intl library to the one from gettext-0.21.1.
+
+ccccc. Fix line number in the event that a simple command jumps back to the
+       top level on error.
+
+ddddd. Make the order of setting BASH_COMMAND, running the DEBUG trap, and
+       printing PS4 consistent across all command types.
+
+eeeee. Rely on child processes to set the terminal process group instead of
+       having the parent do it as well.
+
+fffff. Fix `printf' to consume entire multibyte characters in the format string,
+       in case the encoding contains `/' or `%'.
+
+ggggg. Fix `hash' to return 1 if -d is supplied and the hash table is empty.
+
+hhhhh. Fix `select' command to be like `for' in that an invalid selection
+       variable is a fatal error in posix mode.
+
+iiiii. Fix to parameter length expansion to avoid expanding dynamic variables
+       (e.g., RANDOM) more than once.
+
+jjjjj. Fix to `shift', `break', and `continue' to skip over a `--' when
+       printing an invalid argument error message.
+
+kkkkk. Fix bug that caused an invalid arithmetic expression in an arithmetic
+       `for' command to leave the loop level set to the wrong value, preventing
+       `break' and `continue' from working.
+
+lllll. Fix problem with removing escapes in the `E' variable transformation.
+
+mmmmm. Fix bug with word splitting if `read' assigns to IFS.
+
+nnnnn. Fix posix-mode cases where failure of special builtins did not cause
+       the shell to exit.
+
+ooooo. Some fixes to cases where the shell quotes characters that are special
+       internally.
+
+ppppp. Fix error with read builtin trying to assign to a readonly variable.
+
+qqqqq. Fix a slight race condition when bash receives a SIGINT while waiting
+       for a foreground job.
+
+rrrrr. Fix integer parsing to accept more whitespace characters after the
+       digit string -- the same ones we accept before the digits.
+
+sssss. Fix a crash when attempting to brace-expand a very large list of
+       strings fails.
+
+ttttt. Fix dynamic loading of builtins not to look in the current directory
+       if looking in BASH_LOADABLES_PATH is not successful, like $PATH
+       searching.
+
+uuuuu. Fix `bind -x' commands to understand negative argument counts.
+
+vvvvv. Disable fork optimization if the shell is running startup files because
+       SSH_SOURCE_BASHRC was enabled; prevents infinite recursion.
+
+wwwww. Fix `unset' builtin to implement POSIX interp 1009, which says that
+       unsetting a variable in the temporary environment unsets the variable
+       in the enclosing scope also, in posix mode.
+
+xxxxx. Fix parser to read here-document body from the current alias, if that's
+       where input is being read from.
+
+yyyyy. Fix an off-by-one error that caused completion to fail for certain
+       pathnames containing backslash-quoted single-quotes.
+
+zzzzz. Fix command printing to print a coproc name only if the coproc command
+       is not a simple command.
+
+aaaaaa. Fix prompt string decoding to preserve the value of $_.
+
+bbbbbb. In posix mode, supplying a non-identifier as a function name to `export'
+        or `readonly' should cause the shell to exit, since these are special
+        builtins.
+
+cccccc. Fix a crash that happens due to accessing freed memory if the parser
+        encounters a syntax error while parsing an alias or a compound
+        assignment.
+
+dddddd. Fix a bug that could cause errors while executing a DEBUG trap in a
+        pipeline.
+
+eeeeee. Fix a bug where exiting a subshell should not try to restore the
+        terminal settings if that subshell didn't reinitialize them.
+
+ffffff. Remove long-lived workaround for old AFS bug that causes problems with
+        modern implementations.
+
+gggggg. Fix a bug that caused an assignment error to BASHOPTS or SHELLOPTS to
+        remove the variable's readonly attribute.
+
+hhhhhh. Fix for a crash if a pathname argument to `cd' is NULL and the current
+        directory has been removed.
+
+iiiiii. Fix a bug with shell-expand-line readline command that caused it to
+        interpret quoted single quotes incorrectly when inside $'...'.
+
+jjjjjj. Fix to the declare builtin to catch more invalid option combinations.
+
+kkkkkk. Fix to avoid unsafe execution of the EXIT trap if a terminating signal
+        arrives while bash is waiting for a foreground process.
+
+llllll. Fixed a bug that allowed attribute changes to readonly variables that
+        changed the effects of attempted assignments.
+
+mmmmmm. Fix bug that caused quoting errors if $* was expanded in a context
+        where word splitting was not performed. 
+
+oooooo. Fix bug that caused declare commands with `-' and `+' options and an
+        assignment statement to be misinterpreted.
+
+pppppp. Retry opening startup files if the open is interrupted by a signal
+        and is not automatically restarted.
+
+qqqqqq. Fix printing a case command where one of the case command lists begins
+        with the word `esac'.
+
+rrrrrr. Fix for history and command number expansion when expanding a prompt
+        string that contains the @P variable transformation.
+
+ssssss. Fix a bug that could cause the shell to hang if a script used multiple
+        coprocesses without manually closing file descriptors associated with
+        existing coprocesses.
+
+2. Changes to Readline
+
+a. Fixed a bug in clearing the visible line structure before redisplay.
+
+b. Fix a bug where setlocale(3) returning NULL caused a crash.
+
+c. Fixed signal checking in callback mode to handle signals that arrive before
+   readline restore's the application's signal handlers.
+
+d. Fixed a bug with word completion where the directory name needs to be
+   dequoted and tilde-expanded.
+
+e. Fixed a bug that caused compilation to fail on systems with select but not
+   pselect.
+
+f. System-specific changes for: WIN32, z/OS, Cygwin, MSYS
+
+g. Fixed a bug that caused word completion mismatches if the quoted text the
+   user typed was longer than the unquoted match.
+
+h. Fixes for freeing undo lists that might appear in history list entries
+   after non-incremental searches.
+
+i. Fixes for some errors revealed by address sanitizer.
+
+j. In vi mode, if an `f' or `F' move command associated with a `c' or `C'
+   command fails, don't enter insert mode.
+
+k. Fixed bug with truncating a history file containing timestamps that caused
+   the timestamp associated with the first history entry not to be written.
+
+l. Fix vi-mode so that a motion command attached to d/D, y/Y, or t/T must
+   consume or delete at least one character.
+
+m. Fix a redisplay error when displaying meta characters as octal sequences
+   and other C locale issues.
+
+n. Fix error that caused characters composing an incomplete multibyte
+   character not to be inserted into the line.
+
+o. In callback mode, let the application echo the signal characters (e.g., ^C)
+   when the application's signal handlers are installed.
+
+p. Added some support for lines that consume more than the physical number of
+   screen lines.
+
+q. Make sure dump-variables returns the string values for active-region-start-color
+   and active-region-end-color if they're set.
+
+r. Fixes to how characters between 128 and 159 are printed when displaying
+   macro values (use symbolic notation instead of directly printing the
+   character).
+
+s. Don't convert meta characters that contain NULL (\M-\C-@) to actual NULs,
+   which prematurely terminates the macro value.
+
+t. Fix typo in the readline color prefix extension that it uses for coloring
+   filename prefixes when displaying possible completions.
+
+u. Call the filename rewrite hook on the word being completed before comparing
+   it against possible completions from the file system to get consistent
+   strings.
+
+v. Fix infinite recursion that can happen if someone binds a key that doesn't
+   have a different upper and lower case represenation to do-lowercase-version.
+
+w. Check for non-ANSI (dumb) terminals a little more thoroughly.
+
+x. Don't attempt to history-expand the `quick substitution' character at the
+   beginning of a line if the application has set the quoting state to single
+   quotes.
+
+y. Fix small memory leak if non-incremental or incremental search is
+   interrupted by a signal.
+
+z. Loading very large history files should be much faster.
+
+aa. Retry opening startup files if the open is interrupted by a signal
+    and is not automatically restarted.
+
+3. New Features in Bash
+
+a. When checking whether a script file argument is a binary file, check the
+   first two lines of a script if the first line begins with `#!'.
+
+b. Bash does a better job of preserving user-supplied quotes around a word
+   completion, instead of requoting it.
+
+c. Bash reports the starting line number in an error message about an
+   unterminated compound command like `if' without a `fi'.
+
+d. Implement the POSIX requirement that running the `jobs' builtin removes
+   jobs from the jobs list.
+
+f. Call bash signal handlers while executing programmable completion commands,
+   instead of readline's.
+
+g. Print an error message if a regular expression used with [[ fails to compile.
+
+h. The `umask' builtin now has additional features for full POSIX conformance.
+
+i. `type -a -P' reports both hashed pathnames and the result of a $PATH search.
+
+j. `trap' has a new -P option that prints the trap action associated with each
+   signal argument.
+
+k. The `command' builtin preceding a declaration builtin (e.g., `declare')
+   preserves the special asisgnment statement parsing for the declation
+   builtin. This is a new POSIX requirement.
+
+l. `printf' uses the `alternate form' for %q and %Q to force single quoting.
+
+m. `printf' now interprets %ls (%S) and %lc (%C)nas referring to wide strings
+   and characters, respectively, when in a multibyte locale.
+
+n. The shell can be compiled with a different default value for the
+   patsub_replacement option.
+
+o. Check for window size changes during trap commands, `bind -x' commands,
+   and programmable completion.
+
+p. Treat a NULL value for $PATH as equivalent to ".".
+
+p. New loadable builtins: kv, strptime
+
+q. GLOBSORT: new variable to specify how to sort the results of pathname
+   expansion (name, size, blocks, mtime, atime, ctime, none) in ascending
+   or descending order.
+
+r. `compgen' has a new option: -V varname. If supplied, it stores the generated
+   completions into VARNAME instead of printing them on stdout.
+
+s. New form of command substitution: ${ command; } or ${|command;} to capture
+   the output of COMMAND without forking a child process and using pipes.
+
+t. array_expand_once: new shopt option, replaces assoc_expand_once
+
+u. complete/compopt new option: fullquote; sets rl_full_quoting_desired so all
+   possible completions are quoted as if they were filenames.
+
+v. Command timing now allows precisions up to 6 digits instead of 3 in
+   $TIMEFORMAT.
+
+w. BASH_MONOSECONDS: new dynamic variable that returns the value of the
+   system's monotonic clock, if one is available.
+
+x. BASH_TRAPSIG: new variable, set to the numeric signal number of the trap
+   being executed while it's running.
+
+y. The checkwinsize option can be used in subshell commands started from
+   interactive shells.
+
+z. In posix mode, the test command < and > binary primaries compare strings
+   using the current locale.
+
+aa. bind -x allows new key binding syntax: separate the key sequence and the
+    command string with whitespace, but require the command string to be
+    double-quoted if this is used. This allows different quoting options for
+    the command string.
+
+bb. Print commands bound to key sequences using `bind -x' with the new key
+    binding syntax it allows.
+
+cc. `read' has a new `-E' option to use readline but with the default bash
+    completion (including programmable completion).
+
+dd. New bindable readline command name: `bash-vi-complete'.
+
+ee. New test builtin behavior when parsing a parenthesized subexpression and
+    test was given more than 4 arguments: scan forward for a closing paren and
+    call posixtest() if there are 4 or fewer arguments between the parentheses.
+    Added for compatibility with coreutils test, dependent on the shell
+    compatibility level. Such expressions remain ambiguous.
+
+4. New Features in Readline
+
+a. Output a newline if there is no prompt and readline reads an empty line.
+
+b. The history library falls back to stdio when writing the history list if
+   mmap fails.
+
+c. New bindable variable `search-ignore-case', causes readline to perform
+   case-insensitive incremental and non-incremental history searches.
+
+d. rl_full_quoting_desired: new application-settable variable, causes all
+   completions to be quoted as if they were filenames.
+
+e. rl_macro_display_hook: new application-settable function pointer, used if
+   the application wants to print macro values itself instead of letting
+   readline do it
+
+f. rl_reparse_colors: new application-callable function, reparses $LS_COLORS
+   (presumably after the user changes it)
+
+g. rl_completion_rewrite_hook: new application-settable function pointer,
+   called to modify the word being completed before comparing it against
+   pathnames from the file system.
+
+h. execute-named-command: a new bindable command that reads the name of a
+   readline command from the standard input and executes it. Bound to M-x
+   in emacs mode by default.
+
+i. Incremental and non-incremental searches now allow ^V/^Q (or, in the former
+   case, anything bound to quoted-insert) to quote characters in the search
+   string.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.2-release, and
 the previous version, bash-5.2-rc4.
 

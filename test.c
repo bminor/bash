@@ -284,7 +284,10 @@ term (void)
 	    break;
 	}
       /* only use posixtest if we have a valid parenthesized expression */
-      value = (pos + nargs < argc && nargs <= 4) ? posixtest (nargs) : expr ();
+      if (shell_compatibility_level > 52 && pos + nargs < argc && nargs <= 4)
+	value = posixtest (nargs);
+      else
+	value = expr ();
       if (argv[pos] == 0) /* ( */
 	test_syntax_error (_("`)' expected"), (char *)NULL);
       else if (argv[pos][0] != ')' || argv[pos][1]) /* ( */

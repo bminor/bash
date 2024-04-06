@@ -2,7 +2,7 @@
 # Output a system dependent set of variables, describing how to set the
 # run time search path of shared libraries in an executable.
 #
-#   Copyright 1996-2018 Free Software Foundation, Inc.
+#   Copyright 1996-2024 Free Software Foundation, Inc.
 #   Taken from GNU libtool, 2001
 #   Originally by Gordon Matzigkeit <gord@gnu.ai.mit.edu>, 1996
 #
@@ -57,7 +57,7 @@ else
     aix*)
       wl='-Wl,'
       ;;
-    mingw* | cygwin* | msys* | pw32* | os2* | cegcc*)
+    mingw* | cygwin* | pw32* | os2* | cegcc*)
       ;;
     hpux9* | hpux10* | hpux11*)
       wl='-Wl,'
@@ -149,7 +149,7 @@ hardcode_direct=no
 hardcode_minus_L=no
 
 case "$host_os" in
-  cygwin* | msys* | mingw* | pw32* | cegcc*)
+  cygwin* | mingw* | pw32* | cegcc*)
     # FIXME: the MSVC++ port hasn't been tested in a loooong time
     # When not using gcc, we currently assume that we are using
     # Microsoft Visual C++.
@@ -198,7 +198,7 @@ if test "$with_gnu_ld" = yes; then
         ld_shlibs=no
       fi
       ;;
-    cygwin* | msys* | mingw* | pw32* | cegcc*)
+    cygwin* | mingw* | pw32* | cegcc*)
       # hardcode_libdir_flag_spec is actually meaningless, as there is
       # no search path for DLLs.
       hardcode_libdir_flag_spec='-L$libdir'
@@ -348,7 +348,7 @@ else
       ;;
     bsdi[45]*)
       ;;
-    cygwin* | msys* | mingw* | pw32* | cegcc*)
+    cygwin* | mingw* | pw32* | cegcc*)
       # When not using gcc, we currently assume that we are using
       # Microsoft Visual C++.
       # hardcode_libdir_flag_spec is actually meaningless, as there is
@@ -371,7 +371,7 @@ else
       hardcode_direct=yes
       hardcode_minus_L=yes
       ;;
-    freebsd* | dragonfly*)
+    freebsd* | dragonfly* | midnightbsd*)
       hardcode_libdir_flag_spec='-R$libdir'
       hardcode_direct=yes
       ;;
@@ -533,7 +533,7 @@ case "$host_os" in
   bsdi[45]*)
     library_names_spec='$libname$shrext'
     ;;
-  cygwin* | msys* | mingw* | pw32* | cegcc*)
+  cygwin* | mingw* | pw32* | cegcc*)
     shrext=.dll
     library_names_spec='$libname.dll.a $libname.lib'
     ;;
@@ -547,7 +547,7 @@ case "$host_os" in
   freebsd[23].*)
     library_names_spec='$libname$shrext$versuffix'
     ;;
-  freebsd* | dragonfly*)
+  freebsd* | dragonfly* | midnightbsd*)
     library_names_spec='$libname$shrext'
     ;;
   gnu*)

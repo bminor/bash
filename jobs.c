@@ -261,7 +261,6 @@ static int job_last_running (int);
 static int most_recent_job_in_state (int, JOB_STATE);
 static int find_job (pid_t, int, PROCESS **);
 static int print_job (JOB *, int, int, int);
-static int process_exit_status (WAIT);
 static int process_exit_signal (WAIT);
 static int set_job_status_and_cleanup (int);
 
@@ -2775,7 +2774,7 @@ process_exit_signal (WAIT status)
   return (WIFSIGNALED (status) ? WTERMSIG (status) : 0);
 }
 
-static int
+int
 process_exit_status (WAIT status)
 {
   if (WIFSIGNALED (status))
@@ -2821,7 +2820,7 @@ raw_job_exit_status (int job)
       do
 	{
 	  if (WSTATUS (p->status) != EXECUTION_SUCCESS)
-	    fail = WSTATUS(p->status);
+	    fail = WSTATUS (p->status);
 	  p = p->next;
 	}
       while (p != jobs[job]->pipe);
@@ -3889,7 +3888,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
       child = find_process (pid, 1, &job);	/* want living procs only */
 
 #if defined (COPROCESS_SUPPORT)
-      coproc_pidchk (pid, WSTATUS(status));
+      coproc_pidchk (pid, status);
 #endif
 
 #if defined (PROCESS_SUBSTITUTION)

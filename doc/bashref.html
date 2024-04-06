@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 2 February 2024).
+the Bash shell (version 5.3, 5 April 2024).
 
-This is Edition 5.3, last updated 2 February 2024,
+This is Edition 5.3, last updated 5 April 2024,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 2 February 2024).
+the Bash shell (version 5.3, 5 April 2024).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 2 February 2024,
+<p>This is Edition 5.3, last updated 5 April 2024,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -827,7 +827,7 @@ and <code class="code">TEXTDOMAIN</code> shell variables, as explained below.
 See the gettext documentation for additional details not covered here.
 If the current locale is <code class="code">C</code> or <code class="code">POSIX</code>,
 if there are no translations available,
-of if the string is not translated,
+or if the string is not translated,
 the dollar sign is ignored.
 Since this is a form of double quoting, the string remains double-quoted
 by default, whether or not it is translated and replaced.
@@ -3021,6 +3021,7 @@ evaluated, will recreate <var class="var">parameter</var> with its attributes an
 except that it prints the values of
 indexed and associative arrays as a sequence of quoted key-value pairs
 (see <a class="pxref" href="#Arrays">Arrays</a>).
+The keys and values are quoted in a format that can be reused as input.
 </p></dd>
 <dt><code class="code">a</code></dt>
 <dd><p>The expansion is a string consisting of flag values representing
@@ -7577,6 +7578,8 @@ after reading any startup files.
 <dt><a id="index-HISTIGNORE"></a><span><code class="code">HISTIGNORE</code><a class="copiable-link" href="#index-HISTIGNORE"> &para;</a></span></dt>
 <dd><p>A colon-separated list of patterns used to decide which command
 lines should be saved on the history list.
+If a command line matches one of the patterns in the value of
+<code class="code">HISTIGNORE</code>, it is not saved on the history list.
 Each pattern is
 anchored at the beginning of the line and must match the complete
 line (Bash will not implicitly append a &lsquo;<samp class="samp">*</samp>&rsquo;).
@@ -9730,8 +9733,8 @@ falling back to physical mode.
 </li><li> When the <code class="code">cd</code> builtin cannot change a directory because the
 length of the pathname 
 constructed from <code class="code">$PWD</code> and the directory name supplied as an argument
-exceeds <code class="code">PATH_MAX</code> when all symbolic links are expanded, <code class="code">cd</code> will
-fail instead of attempting to use only the supplied directory name.
+exceeds <code class="code">PATH_MAX</code> when canonicalized, <code class="code">cd</code> will
+attempt to use the supplied directory name.
 
 </li><li> The <code class="code">pwd</code> builtin verifies that the value it prints is the same as the
 current directory, even if it is not asked to check the file system with the
@@ -9741,6 +9744,8 @@ current directory, even if it is not asked to check the file system with the
 indication of whether or not a history entry has been modified.
 
 </li><li> The default editor used by <code class="code">fc</code> is <code class="code">ed</code>.
+
+</li><li> <code class="code">fc</code> treats extra arguments as an error instead of ignoring them.
 
 </li><li> If there are too many arguments supplied to <code class="code">fc -s</code>, <code class="code">fc</code> prints
 an error message and returns failure.
@@ -10010,6 +10015,14 @@ and word expansions are performed.
 It will fail at word expansion time if extglob hasn&rsquo;t been
 enabled by the time the command is executed.
 </li></ul>
+
+</dd>
+<dt><code class="code">compat52 (set using BASH_COMPAT)</code></dt>
+<dd><ul class="itemize mark-bullet">
+<li>The <code class="code">test</code> builtin uses its historical algorithm to parse parenthesized
+subexpressions when given five or more arguments.
+</li></ul>
+
 </dd>
 </dl>
 
@@ -14542,22 +14555,31 @@ which expands to the substring of <code class="code">var</code>&rsquo;s value of
 </li><li>The expansion
 <code class="code">${<var class="var">var</var>/[/]</code><var class="var">pattern</var><code class="code">[/</code><var class="var">replacement</var><code class="code">]}</code>,
 which matches <var class="var">pattern</var> and replaces it with <var class="var">replacement</var> in
-the value of <var class="var">var</var>, is available (see <a class="pxref" href="#Shell-Parameter-Expansion">Shell Parameter Expansion</a>).
+the value of <var class="var">var</var>, is available (see <a class="pxref" href="#Shell-Parameter-Expansion">Shell Parameter Expansion</a>),
+with a mechanism to use the matched text in <var class="var">replacement</var>.
 
 </li><li>The expansion <code class="code">${!<var class="var">prefix</var>*}</code> expansion, which expands to
 the names of all shell variables whose names begin with <var class="var">prefix</var>,
 is available (see <a class="pxref" href="#Shell-Parameter-Expansion">Shell Parameter Expansion</a>).
 
 </li><li>Bash has indirect variable expansion using <code class="code">${!word}</code>
-(see <a class="pxref" href="#Shell-Parameter-Expansion">Shell Parameter Expansion</a>).
+(see <a class="pxref" href="#Shell-Parameter-Expansion">Shell Parameter Expansion</a>) and implements the <code class="code">nameref</code>
+variable attribute for automatic indirect variable expansion.
 
 </li><li>Bash can expand positional parameters beyond <code class="code">$9</code> using
 <code class="code">${<var class="var">num</var>}</code>.
+
+</li><li>Bash includes a set of parameter transformation word expansions of the
+form <code class="code">${var@X}</code>, where &lsquo;<samp class="samp">X</samp>&rsquo; specifies the transformation.
 
 </li><li>The <small class="sc">POSIX</small> <code class="code">$()</code> form of command substitution
 is implemented (see <a class="pxref" href="#Command-Substitution">Command Substitution</a>),
 and preferred to the Bourne shell&rsquo;s <code class="code">``</code> (which
 is also implemented for backwards compatibility).
+
+</li><li>Bash implements a variant of command substitution that runs the enclosed
+command in the current shell execution environment
+(<code class="code">${ <var class="var">command</var>;}</code>).
 
 </li><li>Bash has process substitution (see <a class="pxref" href="#Process-Substitution">Process Substitution</a>).
 
@@ -14565,8 +14587,15 @@ is also implemented for backwards compatibility).
 current user (<code class="env">UID</code>, <code class="env">EUID</code>, and <code class="env">GROUPS</code>), the current host
 (<code class="env">HOSTTYPE</code>, <code class="env">OSTYPE</code>, <code class="env">MACHTYPE</code>, and <code class="env">HOSTNAME</code>),
 and the instance of Bash that is running (<code class="env">BASH</code>,
-<code class="env">BASH_VERSION</code>, and <code class="env">BASH_VERSINFO</code>).  See <a class="xref" href="#Bash-Variables">Bash Variables</a>,
-for details.
+<code class="env">BASH_VERSION</code>, and <code class="env">BASH_VERSINFO</code>).
+See <a class="xref" href="#Bash-Variables">Bash Variables</a>, for details.
+
+</li><li>Bash uses many variables to provide functionality and customize shell
+behavior that the Bourne shell does not.
+Examples include <code class="env">RANDOM</code>, <code class="env">SRANDOM</code>, <code class="env">EPOCHSECONDS</code>,
+<code class="env">GLOBSORT</code>, <code class="env">TIMEFORMAT</code>, <code class="env">BASHPID</code>, <code class="env">BASH_XTRACEFD</code>,
+<code class="env">GLOBIGNORE</code>, <code class="env">HISTIGNORE</code>, and <code class="env">BASH_VERSION</code>.
+See <a class="xref" href="#Bash-Variables">Bash Variables</a>, for a complete list.
 
 </li><li>The <code class="env">IFS</code> variable is used to split only the results of expansion,
 not all words (see <a class="pxref" href="#Word-Splitting">Word Splitting</a>).
@@ -14605,7 +14634,7 @@ operator, for directing standard output and standard error to the same
 file (see <a class="pxref" href="#Redirections">Redirections</a>).
 
 </li><li>Bash includes the &lsquo;<samp class="samp">&lt;&lt;&lt;</samp>&rsquo; redirection operator, allowing a string to
-be used as the standard input to a command.
+be used as the standard input to a command (see <a class="pxref" href="#Redirections">Redirections</a>).
 
 </li><li>Bash implements the &lsquo;<samp class="samp">[n]&lt;&amp;<var class="var">word</var></samp>&rsquo; and &lsquo;<samp class="samp">[n]&gt;&amp;<var class="var">word</var></samp>&rsquo;
 redirection operators, which move one file descriptor to another.
@@ -14628,6 +14657,9 @@ physical modes.
 access to that builtin&rsquo;s functionality within the function via the
 <code class="code">builtin</code> and <code class="code">command</code> builtins (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
 
+</li><li>Bash implements support for dynamically loading builtin commands from
+shared objects.
+
 </li><li>The <code class="code">command</code> builtin allows selective disabling of functions
 when command lookup is performed (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
 
@@ -14642,6 +14674,15 @@ command, and what the zeroth argument to the command is to be
 </li><li>Shell functions may be exported to children via the environment
 using <code class="code">export -f</code> (see <a class="pxref" href="#Shell-Functions">Shell Functions</a>).
 
+</li><li>Bash decodes a number of backslash-escape sequences in the prompt string
+variables (<code class="code">PS0</code>, <code class="code">PS1</code>, <code class="code">PS2</code>, and <code class="code">PS4</code>).
+
+</li><li>Bash expands and displays the <code class="code">PS0</code> prompt string variable.
+
+</li><li>Bash runs commands from the <code class="code">PROMPT_COMMAND</code> array variable before
+issuing each primary prompt.
+
+</li><li>Bash decodes a number of backslash-escaped characters 
 </li><li>The Bash <code class="code">export</code>, <code class="code">readonly</code>, and <code class="code">declare</code> builtins can
 take a <samp class="option">-f</samp> option to act on shell functions, a <samp class="option">-p</samp> option to
 display variables with various attributes set in a format that can be
@@ -14656,6 +14697,9 @@ searching the <code class="env">$PATH</code>, using &lsquo;<samp class="samp">ha
 
 </li><li>Bash includes a <code class="code">help</code> builtin for quick reference to shell
 facilities (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
+
+</li><li>Bash includes the <code class="code">mapfile</code> builtin to quickly read the contents
+of a file into an indexed array variable.
 
 </li><li>The <code class="code">printf</code> builtin is available to display formatted output
 (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
@@ -14687,13 +14731,18 @@ to be set and unset at shell invocation (see <a class="pxref" href="#Invoking-Ba
 </li><li>Bash has much more optional behavior controllable with the <code class="code">set</code>
 builtin (see <a class="pxref" href="#The-Set-Builtin">The Set Builtin</a>).
 
-</li><li>The &lsquo;<samp class="samp">-x</samp>&rsquo; (<samp class="option">xtrace</samp>) option displays commands other than
+</li><li>The <samp class="option">-x</samp> (<samp class="option">xtrace</samp>) option displays commands other than
 simple commands when performing an execution trace
 (see <a class="pxref" href="#The-Set-Builtin">The Set Builtin</a>).
 
 </li><li>The <code class="code">test</code> builtin (see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>)
 is slightly different, as it implements the <small class="sc">POSIX</small> algorithm,
 which specifies the behavior based on the number of arguments.
+
+</li><li>The Bash <code class="code">wait</code> builtin has a <samp class="option">-n</samp> option to wait for the
+next child to exit, possibly selecting from a list of supplied jobs,
+and the <samp class="option">-p</samp> option to store information about a terminated
+child process in a shell variable.
 
 </li><li>Bash includes the <code class="code">caller</code> builtin, which displays the context of
 any active subroutine call (a shell function or a script executed with
@@ -14820,6 +14869,11 @@ only for certain failures, as enumerated in the <small class="sc">POSIX</small> 
 
 </li><li>The SVR4.2 shell behaves differently when invoked as <code class="code">jsh</code>
 (it turns on job control).
+
+</li><li>If the <code class="code">lastpipe</code> option is enabled, and job control is not active,
+Bash runs the last element of a pipeline in the current shell execution
+environment.
+
 </li></ul>
 
 <hr>

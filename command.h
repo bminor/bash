@@ -366,6 +366,8 @@ typedef struct subshell_com {
 
 #define COPROC_RUNNING	0x01
 #define COPROC_DEAD	0x02
+#define COPROC_STOPPED	0x04
+#define COPROC_FOREGROUND	0x08	/* why would you want to do this? */
 
 typedef struct coproc {
   char *c_name;

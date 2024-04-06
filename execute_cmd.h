@@ -105,7 +105,10 @@ extern void coproc_fdclose (struct coproc *, int);
 extern void coproc_checkfd (struct coproc *, int);
 extern void coproc_fdchk (int);
 
-extern void coproc_pidchk (pid_t, int);
+#if defined _POSIXWAIT_H_
+extern void coproc_pidchk (pid_t, WAIT);
+extern void coproc_setstate (pid_t, WAIT);
+#endif
 
 extern void coproc_fdsave (struct coproc *);
 extern void coproc_fdrestore (struct coproc *);

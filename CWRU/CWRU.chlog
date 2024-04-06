@@ -9051,3 +9051,57 @@ lib/readline/doc/history.3
 	- fix some paragraph spacing and other layout/spacing/hyphenation
 	  issues
 	  Fixes from G. Branden Robinson <g.branden.robinson@gmail.com>
+
+				    4/1
+				    ---
+execute_cmd.c
+	- shell_execve: minor changes to code that checks the #! interpreter
+	  name
+
+execute_cmd.c
+	- execute_coproc: if MULTIPLE_COPROCS is not defined, close any old
+	  file descriptors corresponding to sh_coproc. The user can still
+	  copy them from the coproc array if desired; this prevents the shell
+	  from hanging if a second coproc inherits file descriptors from a
+	  previous one
+	  From a report by Carl Edquist <edquist@cs.wisc.edu>
+
+jobs.c,nojobs.c,jobs.h
+	- process_exit_status: no longer static, public function with an
+	  extern declaration
+
+				    4/2
+				    ---
+execute_cmd.c,execute_cmd.h
+	- coproc_pidchk: now takes a full WAIT status word as a second
+	  argument instead of just the exit status; arranged the prototype
+	  to only be included if the source file includes posixwait.h for WAIT
+
+jobs.c
+	- waitchld: call coproc_pidchk with a WAIT second argument (like
+	  nojobs.c does)
+
+command.h
+	- COPROC_STOPPED,COPROC_FOREGROUND: new flags values for coproc
+
+execute_cmd.c
+	- coproc_setstatus: now takes a full WAIT status word as the second
+	  argument, passed from coproc_pidchk
+	- coproc_setstatus: use process_exit_status to translate a WAIT into
+	  an int status, doing proper termsig+128 handling
+	- coproc_getstate: take a WAIT and return the appropriate COPROC_
+	  status flag (DEAD, STOPPED, etc.)
+	- coproc_setstatus: use coproc_getstate to set cp->c_flags
+
+				    4/4
+				    ---
+configure.ac
+	- changed release status to bash-5.3-alpha
+	- AC_PROG_GCC_TRADITIONAL: removed, since it no longer is supported
+	  in autoconf-2.72 (which MacPorts upgraded me to)
+
+test.c
+	- term: made change of 3/25 dependent on the compatibility level
+
+support/config.guess,support/config.sub,support/config.rpath
+	- new versions, imported from gnulib

@@ -8767,8 +8767,8 @@ falling back to physical mode.
 When the @code{cd} builtin cannot change a directory because the
 length of the pathname 
 constructed from @code{$PWD} and the directory name supplied as an argument
-exceeds @code{PATH_MAX} when all symbolic links are expanded, @code{cd} will
-fail instead of attempting to use only the supplied directory name.
+exceeds @code{PATH_MAX} when canonicalized, @code{cd} will
+attempt to use the supplied directory name.
 
 @item
 The @code{pwd} builtin verifies that the value it prints is the same as the
@@ -8781,6 +8781,9 @@ indication of whether or not a history entry has been modified.
 
 @item
 The default editor used by @code{fc} is @code{ed}.
+
+@item
+@code{fc} treats extra arguments as an error instead of ignoring them.
 
 @item
 If there are too many arguments supplied to @code{fc -s}, @code{fc} prints
@@ -9076,6 +9079,14 @@ and word expansions are performed.
 It will fail at word expansion time if extglob hasn't been
 enabled by the time the command is executed.
 @end itemize
+
+@item compat52 (set using BASH_COMPAT)
+@itemize @bullet
+@item
+The @code{test} builtin uses its historical algorithm to parse parenthesized
+subexpressions when given five or more arguments.
+@end itemize
+
 @end table
 
 @node Job Control
@@ -10170,7 +10181,8 @@ which expands to the substring of @code{var}'s value of length
 The expansion
 @code{$@{@var{var}/[/]}@var{pattern}@code{[/}@var{replacement}@code{]@}},
 which matches @var{pattern} and replaces it with @var{replacement} in
-the value of @var{var}, is available (@pxref{Shell Parameter Expansion}).
+the value of @var{var}, is available (@pxref{Shell Parameter Expansion}),
+with a mechanism to use the matched text in @var{replacement}.
 
 @item
 The expansion @code{$@{!@var{prefix}*@}} expansion, which expands to
@@ -10179,17 +10191,27 @@ is available (@pxref{Shell Parameter Expansion}).
 
 @item
 Bash has indirect variable expansion using @code{$@{!word@}}
-(@pxref{Shell Parameter Expansion}).
+(@pxref{Shell Parameter Expansion}) and implements the @code{nameref}
+variable attribute for automatic indirect variable expansion.
 
 @item
 Bash can expand positional parameters beyond @code{$9} using
 @code{$@{@var{num}@}}.
 
 @item
+Bash includes a set of parameter transformation word expansions of the
+form @code{$@{var@@X@}}, where @samp{X} specifies the transformation.
+
+@item
 The @sc{posix} @code{$()} form of command substitution
 is implemented (@pxref{Command Substitution}),
 and preferred to the Bourne shell's @code{``} (which
 is also implemented for backwards compatibility).
+
+@item
+Bash implements a variant of command substitution that runs the enclosed
+command in the current shell execution environment
+(@code{$@{ @var{command};@}}).
 
 @item
 Bash has process substitution (@pxref{Process Substitution}).
@@ -10199,8 +10221,16 @@ Bash automatically assigns variables that provide information about the
 current user (@env{UID}, @env{EUID}, and @env{GROUPS}), the current host
 (@env{HOSTTYPE}, @env{OSTYPE}, @env{MACHTYPE}, and @env{HOSTNAME}),
 and the instance of Bash that is running (@env{BASH},
-@env{BASH_VERSION}, and @env{BASH_VERSINFO}).  @xref{Bash Variables},
-for details.
+@env{BASH_VERSION}, and @env{BASH_VERSINFO}).
+@xref{Bash Variables}, for details.
+
+@item
+Bash uses many variables to provide functionality and customize shell
+behavior that the Bourne shell does not.
+Examples include @env{RANDOM}, @env{SRANDOM}, @env{EPOCHSECONDS},
+@env{GLOBSORT}, @env{TIMEFORMAT}, @env{BASHPID}, @env{BASH_XTRACEFD},
+@env{GLOBIGNORE}, @env{HISTIGNORE}, and @env{BASH_VERSION}.
+@xref{Bash Variables}, for a complete list.
 
 @item
 The @env{IFS} variable is used to split only the results of expansion,
@@ -10249,7 +10279,7 @@ file (@pxref{Redirections}).
 
 @item
 Bash includes the @samp{<<<} redirection operator, allowing a string to
-be used as the standard input to a command.
+be used as the standard input to a command (@pxref{Redirections}).
 
 @item
 Bash implements the @samp{[n]<&@var{word}} and @samp{[n]>&@var{word}}
@@ -10279,6 +10309,10 @@ access to that builtin's functionality within the function via the
 @code{builtin} and @code{command} builtins (@pxref{Bash Builtins}).
 
 @item
+Bash implements support for dynamically loading builtin commands from
+shared objects.
+
+@item
 The @code{command} builtin allows selective disabling of functions
 when command lookup is performed (@pxref{Bash Builtins}).
 
@@ -10297,6 +10331,19 @@ Shell functions may be exported to children via the environment
 using @code{export -f} (@pxref{Shell Functions}).
 
 @item
+Bash decodes a number of backslash-escape sequences in the prompt string
+variables (@code{PS0}, @code{PS1}, @code{PS2}, and @code{PS4}).
+
+@item
+Bash expands and displays the @code{PS0} prompt string variable.
+
+@item
+Bash runs commands from the @code{PROMPT_COMMAND} array variable before
+issuing each primary prompt.
+
+@item
+Bash decodes a number of backslash-escaped characters 
+@item
 The Bash @code{export}, @code{readonly}, and @code{declare} builtins can
 take a @option{-f} option to act on shell functions, a @option{-p} option to
 display variables with various attributes set in a format that can be
@@ -10313,6 +10360,10 @@ searching the @env{$PATH}, using @samp{hash -p}
 @item
 Bash includes a @code{help} builtin for quick reference to shell
 facilities (@pxref{Bash Builtins}).
+
+@item
+Bash includes the @code{mapfile} builtin to quickly read the contents
+of a file into an indexed array variable.
 
 @item
 The @code{printf} builtin is available to display formatted output
@@ -10350,7 +10401,7 @@ Bash has much more optional behavior controllable with the @code{set}
 builtin (@pxref{The Set Builtin}).
 
 @item
-The @samp{-x} (@option{xtrace}) option displays commands other than
+The @option{-x} (@option{xtrace}) option displays commands other than
 simple commands when performing an execution trace
 (@pxref{The Set Builtin}).
 
@@ -10358,6 +10409,12 @@ simple commands when performing an execution trace
 The @code{test} builtin (@pxref{Bourne Shell Builtins})
 is slightly different, as it implements the @sc{posix} algorithm,
 which specifies the behavior based on the number of arguments.
+
+@item
+The Bash @code{wait} builtin has a @option{-n} option to wait for the
+next child to exit, possibly selecting from a list of supplied jobs,
+and the @option{-p} option to store information about a terminated
+child process in a shell variable.
 
 @item
 Bash includes the @code{caller} builtin, which displays the context of
@@ -10505,6 +10562,12 @@ only for certain failures, as enumerated in the @sc{posix} standard.
 @item 
 The SVR4.2 shell behaves differently when invoked as @code{jsh}
 (it turns on job control).
+
+@item
+If the @code{lastpipe} option is enabled, and job control is not active,
+Bash runs the last element of a pipeline in the current shell execution
+environment.
+
 @end itemize
 
 @node GNU Free Documentation License

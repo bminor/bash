@@ -597,7 +597,7 @@ termsig_handler (int sig)
   handling_termsig = terminating_signal;	/* for termsig_sighandler */
   terminating_signal = 0;	/* keep macro from re-testing true. */
 
-  if (builtin_catch_sigpipe)
+  if (sig == SIGPIPE && builtin_catch_sigpipe)
     sigpipe_handler (sig);
 
   /* I don't believe this condition ever tests true. */
