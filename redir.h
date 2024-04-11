@@ -31,6 +31,7 @@
 #define RX_USER		0x10
 #define RX_SAVCLEXEC	0x20	/* set close-on-exec off in restored fd even though saved on has it on */
 #define RX_SAVEFD	0x40	/* fd used to save another even if < SHELL_FD_BASE */
+#define RX_EXPANDED	0x80	/* this redirection has already been expanded */
 
 extern void redirection_error (REDIRECT *, int, char *);
 extern int do_redirections (REDIRECT *, int);

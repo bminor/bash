@@ -330,13 +330,11 @@ cd_builtin (WORD_LIST *list)
       return (EX_USAGE);
     }
 #endif
-#if 0
   else if (list->word->word[0] == '\0')
     {
       builtin_error (_("null directory"));	/* POSIX cd implementation defined */
       return (EXECUTION_FAILURE);
     }
-#endif
   else if (list->word->word[0] == '-' && list->word->word[1] == '\0')
     {
       /* This is `cd -', equivalent to `cd $OLDPWD' */

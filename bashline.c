@@ -1969,6 +1969,7 @@ command_word_completion_function (const char *hint_text, int state)
   static int mapping_over, local_index, searching_path, hint_is_dir;
   static int old_glob_ignore_case, globpat;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
+  static int orig_found_quote;
 #if defined (ALIAS)
   static alias_t **alias_list = (alias_t **)NULL;
 #endif /* ALIAS */
@@ -2078,7 +2079,9 @@ command_word_completion_function (const char *hint_text, int state)
 
       if (rl_completion_found_quote && rl_completion_quote_character == 0)
 	dequoted_hint = bash_dequote_filename (hint, 0);
-      
+
+      orig_found_quote = rl_completion_found_quote;
+
       path = path_value ("PATH", 0);
       path_index = dot_in_path = 0;
 
@@ -2242,6 +2245,8 @@ globword:
     {
       char *current_path;
 
+      rl_completion_found_quote = orig_found_quote;
+
       /* Get the next directory from the path.  If there is none, then we
 	 are all done. */
       if (path == 0 || path[path_index] == 0 ||
@@ -2273,13 +2278,28 @@ globword:
 	free (filename_hint);
       fnhint = filename_hint = (char *)NULL;
 
-      filename_hint = sh_makepath (current_path, hint, 0);
+      /* We can have characters that need to be quoted in either the $PATH
+	 element or the dequoted filename. Since we only want to call a
+	 quoting function on the entire path once, and we've already dequoted
+	 the hint text we were passed (dequoted_hint), build the path using
+	 the dequoted hint text and quote it if we need to. Readline will only
+	 call the dequoting function if rl_completion_found_quote != 0, so
+	 we have to force it. */
+
+      filename_hint = sh_makepath (current_path, dequoted_hint, 0);
       /* Need a quoted version (though it doesn't matter much in most
 	 cases) because rl_filename_completion_function dequotes the
 	 filename it gets, assuming that it's been quoted as part of
 	 the input line buffer. */
+#if 1
       if (strpbrk (filename_hint, "\"'\\"))
-	fnhint = sh_backslash_quote (filename_hint, filename_bstab, 0);
+#else
+      if (strpbrk (filename_hint, rl_filename_quote_characters))
+#endif
+	{
+	  fnhint = sh_backslash_quote (filename_hint, filename_bstab, 0);
+	  rl_completion_found_quote = 4;	/* just has to be non-zero */
+	}
       else
 	fnhint = filename_hint;
       free (current_path);		/* XXX */
@@ -2333,10 +2353,20 @@ globword:
 	  if (temp)
 	    {
 	      temp++;
+#if 0
+	      /* We're comparing an unquoted filename read from the directory
+		 (temp, returned by rl_filename_completion_function) against
+		 the possibly-quoted hint text. We should compare against
+		 the dequoted hint text. */
 	      if (igncase == 0)
 		freetemp = match = strncmp (temp, hint, hint_len) == 0;
 	      else
 		freetemp = match = strncasecmp (temp, hint, hint_len) == 0;
+#else
+	      /* Why duplicate the comparison rl_filename_completion_function
+		 already performs? */
+	      freetemp = match = 1;
+#endif
 	      if (match)
 		temp = savestring (temp);
 	    }

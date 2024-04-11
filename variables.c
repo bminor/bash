@@ -3982,16 +3982,10 @@ makunbound (const char *name, VAR_CONTEXT *vc)
     {
       dispose_variable_value (old_var);
 
-#if 0
       /* Reset the attributes.  Preserve the export attribute if the variable
 	 came from a temporary environment.  Make sure it stays local, and
 	 make it invisible. */ 
       old_var->attributes = (exported_p (old_var) && tempvar_p (old_var)) ? att_exported : 0;
-#else	/* TAG:bash-5.3 look at this again */
-      /* Reset the attributes, but preserve the export attribute.
-	 Make sure it stays local, and make it invisible. */ 
-      old_var->attributes = exported_p (old_var) ? att_exported : 0;
-#endif
       VSETATTR (old_var, att_local);
       VSETATTR (old_var, att_invisible);
       var_setvalue (old_var, (char *)NULL);

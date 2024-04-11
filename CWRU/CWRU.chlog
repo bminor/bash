@@ -9105,3 +9105,54 @@ test.c
 
 support/config.guess,support/config.sub,support/config.rpath
 	- new versions, imported from gnulib
+
+				    4/5
+				    ---
+doc/bashref.texi
+	- update compatibility, posix mode, and bourne shell sections for
+	  bash-5.3-alpha release
+
+version.c
+	- update copyright date to 2024
+
+[bash-5.3-alpha frozen]
+
+				    4/6
+				    ---
+builtins/cd.def
+	- cd_builtin: a null pathname argument is now an error; POSIX interp
+	  1047
+
+variables.c
+	- makunbound: revert change from 7/10/2023 about preserving the export
+	  attribute when unsetting a local variable in light of POSIX interp
+	  1806
+
+				    4/8
+				    ---
+bashline.c
+	- command_word_completion_function: we don't need to perform an extra
+	  comparison against what rl_filename_completion_function returns if
+	  we are searching $PATH for executable completions
+	- command_word_completion_function: if a directory name from $PATH
+	  contains characters that need to be quoted, quote them and set
+	  rl_completion_found_quote to force rl_filename_completion_function
+	  to dequote the entire pathname
+	- command_word_completion_function: since the directory name from $PATH
+	  is not quoted, use the dequoted hint to construct the full pathname
+	  to pass to rl_filename_completion_function (possibly after quoting it
+	  From https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=306043
+
+				   4/10
+				   ----
+redir.h
+	- RX_EXPANDED: flag set when translating redirects to their final form;
+	  indicates the redirection should not be expanded again
+
+redir.c
+	- do_redirection_internal: when translating a redirect into
+	  r_err_and_out, set the RX_EXPANDED flag so the filename doesn't
+	  get expanded again.
+	  Fixes bug reported by squeaky <q7d9y9muja@liamekaens.com>
+
+	  

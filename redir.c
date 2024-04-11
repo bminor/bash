@@ -829,6 +829,7 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	  sd = redirect->redirector;
 	  rd.filename = make_bare_word (redirectee_word);
 	  new_redirect = make_redirection (sd, r_err_and_out, rd, 0);
+	  new_redirect->flags |= RX_EXPANDED;	/* we already expanded this */
 	}
       else
 	{
@@ -883,7 +884,10 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	  oflags = redirectee->flags;
 	  redirectee->flags |= W_NOGLOB;
 	}
-      redirectee_word = redirection_expand (redirectee);
+      if ((redirect->flags & RX_EXPANDED) == 0)
+	redirectee_word = redirection_expand (redirectee);
+      else
+	redirectee_word = savestring (redirectee->word);
       if (posixly_correct && interactive_shell == 0)
 	redirectee->flags = oflags;
 
