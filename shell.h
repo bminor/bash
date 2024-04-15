@@ -215,6 +215,7 @@ typedef struct _sh_parser_state_t
 
   int esacs_needed;
   int expecting_in;
+  int incmd;
 
   /* structures affecting the parser */
   void *pushed_strings;

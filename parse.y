@@ -3035,6 +3035,7 @@ static int esacs_needed_count;
 /* When non-zero, we can read IN as an acceptable token, regardless of how
    many newlines we read. */
 static int expecting_in_token;
+static int expecting_in_command;	/* XXX - maybe save previous? */
 
 static void
 push_heredoc (REDIRECT *r)
@@ -3119,12 +3120,15 @@ static int open_brace_count;
 	      if (word_token_alist[i].token == ESAC) { \
 		parser_state &= ~(PST_CASEPAT|PST_CASESTMT); \
 		esacs_needed_count--; \
-	      } else if (word_token_alist[i].token == CASE) \
+	      } else if (word_token_alist[i].token == CASE) { \
 		parser_state |= PST_CASESTMT; \
-	      else if (word_token_alist[i].token == COND_END) \
+		expecting_in_command = CASE; \
+	      } else if (word_token_alist[i].token == COND_END) \
 		parser_state &= ~(PST_CONDCMD|PST_CONDEXPR); \
 	      else if (word_token_alist[i].token == COND_START) \
 		parser_state |= PST_CONDCMD; \
+	      else if (word_token_alist[i].token == FOR)  \
+		expecting_in_command = FOR; \
 	      else if (word_token_alist[i].token == '{') \
 		open_brace_count++; \
 	      else if (word_token_alist[i].token == '}' && open_brace_count) \
@@ -3300,19 +3304,20 @@ special_case_tokens (const char *tokstr)
   /* Posix grammar rule 6 */
   if ((last_read_token == WORD) &&
 #if defined (SELECT_COMMAND)
-      ((token_before_that == FOR) || (token_before_that == CASE) || (token_before_that == SELECT)) &&
+      (token_before_that == FOR || token_before_that == CASE || token_before_that == SELECT) &&
 #else
-      ((token_before_that == FOR) || (token_before_that == CASE)) &&
+      (token_before_that == FOR || token_before_that == CASE) &&
 #endif
       (tokstr[0] == 'i' && tokstr[1] == 'n' && tokstr[2] == 0))
     {
-      if (token_before_that == CASE)
+      if (expecting_in_command == CASE)
 	{
 	  parser_state |= PST_CASEPAT;
 	  esacs_needed_count++;
 	}
       if (expecting_in_token)
 	expecting_in_token--;
+      expecting_in_command = 0;
       return (IN);
     }
 
@@ -3322,12 +3327,13 @@ special_case_tokens (const char *tokstr)
   if (expecting_in_token && (last_read_token == WORD || last_read_token == '\n') &&
       (tokstr[0] == 'i' && tokstr[1] == 'n' && tokstr[2] == 0))
     {
-      if (parser_state & PST_CASESTMT)
+      if (expecting_in_command == CASE && (parser_state & PST_CASESTMT))
 	{
 	  parser_state |= PST_CASEPAT;
 	  esacs_needed_count++;
 	}
       expecting_in_token--;
+      expecting_in_command = 0;
       return (IN);
     }
   /* Posix grammar rule 6, third word in FOR: for i; do command-list; done */
@@ -3335,6 +3341,7 @@ special_case_tokens (const char *tokstr)
     (tokstr[0] == 'd' && tokstr[1] == 'o' && tokstr[2] == '\0'))
     {
       expecting_in_token--;
+      expecting_in_command = 0;
       return (DO);
     }
 
@@ -3349,6 +3356,7 @@ special_case_tokens (const char *tokstr)
     {
       if (expecting_in_token)
 	expecting_in_token--;
+      expecting_in_command = 0;
       return (DO);
     }
 
@@ -3457,6 +3465,7 @@ reset_parser (void)
   need_here_doc = 0;
   redir_stack[0] = 0;
   esacs_needed_count = expecting_in_token = 0;
+  expecting_in_command = 0;
 
   simplecmd_lineno = line_number;
 
@@ -4422,8 +4431,9 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
 
   /* State flags we don't want to persist into command substitutions. */
   parser_state &= ~(PST_REGEXP|PST_EXTPAT|PST_CONDCMD|PST_CONDEXPR|PST_COMPASSIGN);
-  /* Could do PST_CASESTMT too, but that also affects history. Setting
-     expecting_in_token below should take care of the parsing requirements.
+  /* Could do PST_CASESTMT too, but that also affects history. Ditto for
+     PST_FORCMD. Setting expecting_in_token and expecting_in_command below
+     should take care of the parsing requirements.
      Unsetting PST_REDIRLIST isn't strictly necessary because of how we set
      token_to_read below, but we do it anyway. */
   parser_state &= ~(PST_CASEPAT|PST_ALEXPNEXT|PST_SUBSHELL|PST_REDIRLIST);
@@ -4442,6 +4452,7 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
   /* These are reset by reset_parser() */
   need_here_doc = 0;
   esacs_needed_count = expecting_in_token = 0;
+  expecting_in_command = 0;
 
   /* We want to expand aliases on this pass if we're in posix mode, since the
      standard says you have to take aliases into account when looking for the
@@ -5763,8 +5774,9 @@ got_token:
       function_dstart = line_number;
       break;
     case CASE:
-    case SELECT:
     case FOR:
+      expecting_in_command = last_read_token;
+    case SELECT:
       expecting_in_token++;
       break;
     }
@@ -6996,6 +7008,7 @@ parse_compound_assignment (size_t *retlenp)
   parser_state |= PST_COMPASSIGN;
 
   esacs_needed_count = expecting_in_token = 0;
+  expecting_in_command = 0;
 
   /* We're not pushing any new input here, we're reading from the current input
      source. If that's an alias, we have to be prepared for the alias to get
@@ -7126,6 +7139,7 @@ save_parser_state (sh_parser_state_t *ps)
 
   ps->esacs_needed = esacs_needed_count;
   ps->expecting_in = expecting_in_token;
+  ps->incmd = expecting_in_command;
 
   if (need_here_doc == 0)
     ps->redir_stack[0] = 0;
@@ -7190,6 +7204,7 @@ restore_parser_state (sh_parser_state_t *ps)
 
   esacs_needed_count = ps->esacs_needed;
   expecting_in_token = ps->expecting_in;
+  expecting_in_command = ps->incmd;
 
 #if 0
   for (i = 0; i < HEREDOC_MAX; i++)

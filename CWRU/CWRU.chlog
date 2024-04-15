@@ -9155,4 +9155,25 @@ redir.c
 	  get expanded again.
 	  Fixes bug reported by squeaky <q7d9y9muja@liamekaens.com>
 
-	  
+				   4/12
+				   ----
+parse.y
+	- expecting_in_command: new variable, set to FOR or CASE depending on
+	  which command is expecting the IN token to follow it
+	- {save,restore}_parser_state: save and restore expecting_in_command
+	  in `incmd' member
+	- special_case_tokens: for POSIX rule 6, check expecting_in_token
+	  instead of last_read_token/token_before_that for case/for command
+	  and whether we should return IN and maybe set PST_CASEPAT
+	- special_case_tokens: reset expecting_in_command before returning DO
+	- read_token_word: set expecting_in_command if last_read_token was
+	  CASE or FOR and we are returning a WORD
+	- reset_parser: reset expecting_in_command
+	- parse_comsub,parse_compound_assignment: reset expecting_in_command
+	  Fixes bug reported by nbowler@draconx.ca
+
+parser.h
+	- incmd: new member of parser_state, saves and restores the value of
+	  expecting_in_command
+	- PST_FORCMD: new parser state, used to say if we're parsing a `for'
+	  command and waiting for an IN token (not used yet)

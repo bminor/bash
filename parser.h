@@ -53,6 +53,7 @@
 #define PST_STRING	0x1000000	/* parsing a string to a command or word list */
 #define PST_CMDBLTIN	0x2000000	/* last token was the `command' builtin */
 #define PST_FUNSUBST	0x4000000	/* parsing a foreground command substitution */
+#define PST_FORCMD	0x8000000	/* parsing for command -- not used yet */
 
 /* Definition of the delimiter stack.  Needed by parse.y and bashhist.c. */
 struct dstack {

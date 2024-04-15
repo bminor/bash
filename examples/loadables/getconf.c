@@ -1042,12 +1042,12 @@ getconf_all (WORD_LIST *list)
   int r;
 
   r = EXECUTION_SUCCESS;
-  path = list ? list->word->word : 0;
+  path = list ? list->word->word : "/";
   for (c = vars; c->name != NULL; ++c)
     {
+#if 0
       if (c->call == PATHCONF && path == 0)
 	continue;	/* Don't print pathconf vars if no path supplied */
-#if 0
       if (c->call != PATHCONF && path)
 	continue;	/* Only print pathconf vars if path supplied */
 #endif
