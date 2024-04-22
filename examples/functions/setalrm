@@ -1,0 +1,66 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# setalrm - set a timer to fire in N seconds and send SIGALRM to the shell
+#
+# usage: setalrm [-c] N
+#
+# -c means to reset the trap on ALRM if the timer is canceled
+#
+# If N = 0, we cancel any pending alarm by killing the background timeout
+# process. Any value greater than 0 sets a timeout for N seconds. Values
+# of N less than zero are errors.
+
+declare -i alrmpid=
+
+setalrm()
+{
+	local untrap=
+	local setalrm_usage="setalrm: usage: setalrm [-c] N"
+
+	while getopts c opt; do
+		case $opt in
+		c)	untrap=1 ;;
+		*)	echo "$setalrm_usage" >&2 ; return 2;;
+		esac
+	done
+
+	shift $(( $OPTIND - 1 ))
+
+	if [[ -z $1 ]]; then
+		echo "$setalrm_usage" >&2
+		return 2
+	fi
+
+	if (( $1 < 0 )); then
+		echo "setalrm: timeout must be greater than zero" >& 2
+		return 2
+	fi
+
+	if [[ $1 -eq 0 ]] && [[ -n "$alrmpid" ]]; then
+		kill -TERM $alrmpid ; es=$?
+		alrmpid=
+		if [ -n "$untrap" ]; then
+			trap - ALRM	# caller saves if desired
+		fi
+		return $es
+	fi
+
+	# setting alarm
+	{ trap - ALRM ; sleep $1; kill -ALRM $$; } &
+	alrmpid=$!
+	return 0
+}
+
+		

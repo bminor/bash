@@ -378,8 +378,8 @@ static WORD_LIST *expand_declaration_argument (WORD_LIST *, WORD_LIST *);
 static WORD_LIST *shell_expand_word_list (WORD_LIST *, int);
 static WORD_LIST *expand_word_list_internal (WORD_LIST *, int);
 
-static void posix_variable_assignment_error (int);
-static void bash_variable_assignment_error (int);
+static inline void posix_variable_assignment_error (int);
+static inline void bash_variable_assignment_error (int);
 
 static int do_assignment_statements (WORD_LIST *, char *, int);
 
@@ -11147,6 +11147,34 @@ expand_array_subscript (const char *string, size_t *sindex, int quoted, int flag
 }
 #endif
 
+/* Handle a variable assignment error in default mode. */
+static inline void
+bash_variable_assignment_error (int force_exit)
+{
+  if (interactive_shell == 0 && force_exit)
+    exp_jump_to_top_level (FORCE_EOF);
+  else if (interactive_shell == 0)
+    exp_jump_to_top_level (DISCARD);	/* XXX - maybe change later */
+  else
+    exp_jump_to_top_level (DISCARD);
+}
+
+/* Handle a variable assignment error in posix mode. */
+static inline void
+posix_variable_assignment_error (int force_exit)
+{
+#if defined (STRICT_POSIX)
+  if (posixly_correct && interactive_shell == 0)
+#else
+  if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
+#endif
+    exp_jump_to_top_level (FORCE_EOF);
+  else if (force_exit)
+    exp_jump_to_top_level (FORCE_EOF);
+  else
+    exp_jump_to_top_level (DISCARD);
+}
+
 void
 invalidate_cached_quoted_dollar_at (void)
 {
@@ -13081,34 +13109,6 @@ shell_expand_word_list (WORD_LIST *tlist, int eflags)
     new_list = REVERSE_LIST (new_list, WORD_LIST *);
 
   return (new_list);
-}
-
-/* Handle a variable assignment error in default mode. */
-static inline void
-bash_variable_assignment_error (int force_exit)
-{
-  if (interactive_shell == 0 && force_exit)
-    exp_jump_to_top_level (FORCE_EOF);
-  else if (interactive_shell == 0)
-    exp_jump_to_top_level (DISCARD);	/* XXX - maybe change later */
-  else
-    exp_jump_to_top_level (DISCARD);
-}
-
-/* Handle a variable assignment error in posix mode. */
-static inline void
-posix_variable_assignment_error (int force_exit)
-{
-#if defined (STRICT_POSIX)
-  if (posixly_correct && interactive_shell == 0)
-#else
-  if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
-#endif
-    exp_jump_to_top_level (FORCE_EOF);
-  else if (force_exit)
-    exp_jump_to_top_level (FORCE_EOF);
-  else
-    exp_jump_to_top_level (DISCARD);
 }
 
 /* Perform assignment statements optionally preceding a command name COMMAND.
