@@ -1,6 +1,6 @@
 /* stringlib.c - Miscellaneous string functions. */
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,10 +48,7 @@
 /* Find STRING in ALIST, a list of string key/int value pairs.  If FLAGS
    is 1, STRING is treated as a pattern and matched using strmatch. */
 int
-find_string_in_alist (string, alist, flags)
-     char *string;
-     STRING_INT_ALIST *alist;
-     int flags;
+find_string_in_alist (char *string, STRING_INT_ALIST *alist, int flags)
 {
   register int i;
   int r;
@@ -75,10 +72,7 @@ find_string_in_alist (string, alist, flags)
    corresponding string.  Allocates memory for the returned
    string.  FLAGS is currently ignored, but reserved. */
 char *
-find_token_in_alist (token, alist, flags)
-     int token;
-     STRING_INT_ALIST *alist;
-     int flags;
+find_token_in_alist (int token, STRING_INT_ALIST *alist, int flags)
 {
   register int i;
 
@@ -87,14 +81,11 @@ find_token_in_alist (token, alist, flags)
       if (alist[i].token == token)
         return (savestring (alist[i].word));
     }
-  return ((char *)NULL);
+  return (NULL);
 }
 
 int
-find_index_in_alist (string, alist, flags)
-     char *string;
-     STRING_INT_ALIST *alist;
-     int flags;
+find_index_in_alist (char *string, STRING_INT_ALIST *alist, int flags)
 {
   register int i;
   int r;
@@ -124,12 +115,10 @@ find_index_in_alist (string, alist, flags)
 /* Cons a new string from STRING starting at START and ending at END,
    not including END. */
 char *
-substring (string, start, end)
-     const char *string;
-     int start, end;
+substring (const char *string, size_t start, size_t end)
 {
-  register int len;
-  register char *result;
+  size_t len;
+  char *result;
 
   len = end - start;
   result = (char *)xmalloc (len + 1);
@@ -142,25 +131,28 @@ substring (string, start, end)
    replace all occurrences, otherwise replace only the first.
    This returns a new string; the caller should free it. */
 char *
-strsub (string, pat, rep, global)
-     char *string, *pat, *rep;
-     int global;
+strsub (const char *string, const char *pat, const char *rep, int global)
 {
   size_t patlen, replen, templen, tempsize, i;
   int repl;
-  char *temp, *r;
+  char *temp, *r;;
 
   patlen = strlen (pat);
   replen = strlen (rep);
-  for (temp = (char *)NULL, i = templen = tempsize = 0, repl = 1; string[i]; )
+  for (temp = NULL, i = templen = tempsize = 0, repl = 1; string[i]; )
     {
       if (repl && STREQN (string + i, pat, patlen))
 	{
 	  if (replen)
 	    RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
 
-	  for (r = rep; *r; )	/* can rep == "" */
+#if 0
+	  for (r = (char *)rep; *r; )	/* can rep == "" */
 	    temp[templen++] = *r++;
+#else
+	  memcpy (temp + templen, rep, replen);
+	  templen += replen;
+#endif
 
 	  i += patlen ? patlen : 1;	/* avoid infinite recursion */
 	  repl = global != 0;
@@ -183,13 +175,10 @@ strsub (string, pat, rep, global)
    globbing.  Backslash may be used to quote C. If (FLAGS & 2) we allow
    backslash to escape backslash as well. */
 char *
-strcreplace (string, c, text, flags)
-     char *string;
-     int c;
-     const char *text;
-     int flags;
+strcreplace (const char *string, int c, const char *text, int flags)
 {
-  char *ret, *p, *r, *t;
+  char *ret, *r, *t;
+  const char *p;
   size_t len, rlen, ind, tlen;
   int do_glob, escape_backslash;
 
@@ -248,8 +237,7 @@ strcreplace (string, c, text, flags)
 /* Remove all leading whitespace from STRING.  This includes
    newlines.  STRING should be terminated with a zero. */
 void
-strip_leading (string)
-     char *string;
+strip_leading (char *string)
 {
   char *start = string;
 
@@ -269,27 +257,58 @@ strip_leading (string)
    newlines.  If NEWLINES_ONLY is non-zero, only trailing newlines
    are removed.  STRING should be terminated with a zero. */
 void
-strip_trailing (string, len, newlines_only)
-     char *string;
-     int len;
-     int newlines_only;
+strip_trailing (char *string, int len, int newlines_only)
 {
   while (len >= 0)
     {
       if ((newlines_only && string[len] == '\n') ||
 	  (!newlines_only && whitespace (string[len])))
-	len--;
+	{
+	  len--;
+#ifdef __MSYS__
+	  if (newlines_only && string[len + 1] == '\n' && string[len] == '\r')
+	    len--;
+#endif
+	}
       else
 	break;
     }
   string[len + 1] = '\0';
 }
 
+int
+str_firstdiff (const char *s, const char *t)
+{
+  int n;
+
+  if (s == 0 || t == 0 || *s == '\0' || *t == '\0')
+    return 0;
+  for (n = 0; s[n] && t[n] && s[n] == t[n]; n++)
+    ;
+  return n;
+}
+
+/* This returns the index in OLD of a common suffix of OLD and NEW */
+int
+str_lastsame (const char *old, const char *new)
+{
+  const char *o, *n;
+
+  if (old == 0 || *old == '\0' || new == 0 || *new == '\0')
+    return 0;	/* XXX */
+
+  o = old + STRLEN (old) - 1;
+  n = new + STRLEN (new) - 1;
+
+  while (o > old && n > new && (*o == *n))
+    o--, n--;
+
+  return (o - old);
+}
+
 /* A wrapper for bcopy that can be prototyped in general.h */
 void
-xbcopy (s, d, n)
-     char *s, *d;
-     int n;
+xbcopy (const void *s, void *d, size_t n)
 {
   FASTCOPY (s, d, n);
 }

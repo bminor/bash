@@ -26,6 +26,10 @@ echo "\ a  b\ " | ( read -r x ; echo -"$x"- )
 echo " \ a  b\ " | ( read -r x y ; echo -"$x"-"$y"- )
 echo " \ a  b\ " | ( read -r x ; echo -"$x"- )
 
+# input ending in backslash
+printf 'abc\' | { read var ; recho "$var"; }
+printf 'abc\' | { read -r var ; recho "$var"; }
+
 # make sure that CTLESC and CTLNUL are passed through correctly
 echo $'\001' | ( read var ; recho "$var" )
 echo $'\001' | ( read ; recho "$REPLY" )
@@ -92,6 +96,15 @@ echo " foo" | { IFS=$' \t\n' ; read line; recho "$line"; }
 
 echo " foo" | { IFS=$':' ; read line; recho "$line"; }
 
+# this leaves `b' readonly
+readonly b
+read a b c <<EOF
+a b c
+EOF
+
+# the latest POSIX draft says $? should be > 1
+echo a = $a b = $b c = $c stat = $?
+
 # test read -d delim behavior
 ${THIS_SH} ./read1.sub
 
@@ -115,3 +128,9 @@ ${THIS_SH} ./read7.sub
 
 # test behavior of read -n and read -d on regular files
 ${THIS_SH} ./read8.sub
+
+# test behavior of trailing IFS whitespace - POSIX conformance
+${THIS_SH} ./read9.sub
+
+# test behavior of read builtin modifying $IFS
+${THIS_SH} ./read10.sub

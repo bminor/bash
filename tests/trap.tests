@@ -14,7 +14,7 @@
 # test the trap code
 
 trap 'echo exiting' 0
-trap 'echo aborting' 1 2 3 6 15
+trap 'echo aborting' HUP INT QUIT ABRT TERM
 
 # make sure a user-specified subshell runs the exit trap, but does not
 # inherit the exit trap from a parent shell
@@ -90,6 +90,15 @@ ${THIS_SH} ./trap4.sub
 # Return trap issues
 ${THIS_SH} ./trap6.sub
 
+# eval and ERR trap
+${THIS_SH} ./trap7.sub
+
+# SIGCHLD traps
+${THIS_SH} ./trap8.sub
+
+# return without argument in trap string 
+${THIS_SH} ./trap9.sub
+
 #
 # show that setting a trap on SIGCHLD is not disastrous.
 #
@@ -103,6 +112,13 @@ sleep 7 & sleep 6 & sleep 5 &
 wait
 
 trap -p SIGCHLD
+trap -P SIGCHLD
+
+# all errors
+trap -p -P 
+trap -P
+trap ''
+trap -x
 
 # Now reset some of the signals the shell handles specially back to
 # their default values (with or without the SIG prefix)
@@ -112,3 +128,12 @@ trap
 
 trap - SIGCHLD
 wait
+
+trap 512	# error
+trap 0		# revert
+trap -p EXIT
+
+trap 'echo exiting' 0
+trap -P EXIT
+
+exit

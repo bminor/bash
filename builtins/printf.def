@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2021 Free Software Foundation, Inc.
+Copyright (C) 1997-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,8 +35,8 @@ sequences, which are converted and copied to the standard output; and
 format specifications, each of which causes printing of the next successive
 argument.
 
-In addition to the standard format specifications described in printf(1),
-printf interprets:
+In addition to the standard format characters csndiouxXeEfFgGaA described
+in printf(3), printf interprets:
 
   %b	expand backslash escape sequences in the corresponding argument
   %q	quote the argument in a way that can be reused as shell input
@@ -68,12 +68,9 @@ $END
 #  define INT_MIN		(-2147483647-1)
 #endif
 
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
+#include <stdarg.h>
 
+#include <stdckdint.h>
 #include <stdio.h>
 #include <chartypes.h>
 
@@ -93,28 +90,60 @@ $END
 #include "bashgetopt.h"
 #include "common.h"
 
-#if defined (PRI_MACROS_BROKEN)
-#  undef PRIdMAX
-#endif
-
-#if !defined (PRIdMAX)
-#  if HAVE_LONG_LONG
-#    define PRIdMAX	"lld"
-#  else
-#    define PRIdMAX	"ld"
-#  endif
-#endif
-
 #if !defined (errno)
 extern int errno;
 #endif
+
+/* We free the buffer used by mklong() if it's `too big'. */
+#define PRETURN(value) \
+  do \
+    { \
+      QUIT; \
+      retval = value; \
+      if (conv_bufsize > 4096 ) \
+	{ \
+	  free (conv_buf); \
+	  conv_bufsize = 0; \
+	  conv_buf = 0; \
+	} \
+      if (vflag) \
+	{ \
+	  SHELL_VAR *v; \
+	  v = builtin_bind_variable  (vname, vbuf, bindflags); \
+	  stupidly_hack_special_variables (vname); \
+	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
+	    retval = EXECUTION_FAILURE; \
+	  if (vbsize > 4096) \
+	    { \
+	      free (vbuf); \
+	      vbsize = 0; \
+	      vbuf = 0; \
+	    } \
+	  else if (vbuf) \
+	    vbuf[0] = 0; \
+	} \
+      else \
+	{ \
+	  if (ferror (stdout) == 0) \
+	    fflush (stdout); \
+	  QUIT; \
+	  if (ferror (stdout)) \
+	    { \
+	      sh_wrerror (); \
+	      clearerr (stdout); \
+	      retval = EXECUTION_FAILURE; \
+	    } \
+	} \
+      return (retval); \
+    } \
+  while (0)
 
 #define PC(c) \
   do { \
     char b[2]; \
     tw++; \
     b[0] = c; b[1] = '\0'; \
-    if (vflag) \
+   if (vflag) \
       vbadd (b, 1); \
     else \
       putchar (c); \
@@ -124,7 +153,9 @@ extern int errno;
 #define PF(f, func) \
   do { \
     int nw; \
-    clearerr (stdout); \
+    if (vflag == 0) \
+      clearerr (stdout); \
+    errno = 0; \
     if (have_fieldwidth && have_precision) \
       nw = vflag ? vbprintf (f, fieldwidth, precision, func) : printf (f, fieldwidth, precision, func); \
     else if (have_fieldwidth) \
@@ -133,55 +164,15 @@ extern int errno;
       nw = vflag ? vbprintf (f, precision, func) : printf (f, precision, func); \
     else \
       nw = vflag ? vbprintf (f, func) : printf (f, func); \
+    if (nw < 0 || (vflag == 0 && ferror (stdout))) \
+      { \
+	QUIT; \
+	builtin_error ("%s", strerror (errno)); \
+	PRETURN (EXECUTION_FAILURE); \
+      } \
     tw += nw; \
     QUIT; \
-    if (ferror (stdout)) \
-      { \
-	sh_wrerror (); \
-	clearerr (stdout); \
-	return (EXECUTION_FAILURE); \
-      } \
   } while (0)
-
-/* We free the buffer used by mklong() if it's `too big'. */
-#define PRETURN(value) \
-  do \
-    { \
-      QUIT; \
-      if (vflag) \
-	{ \
-	  SHELL_VAR *v; \
-	  v = builtin_bind_variable  (vname, vbuf, bindflags); \
-	  stupidly_hack_special_variables (vname); \
-	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
-	    return (EXECUTION_FAILURE); \
-	} \
-      if (conv_bufsize > 4096 ) \
-	{ \
-	  free (conv_buf); \
-	  conv_bufsize = 0; \
-	  conv_buf = 0; \
-	} \
-      if (vbsize > 4096) \
-	{ \
-	  free (vbuf); \
-	  vbsize = 0; \
-	  vbuf = 0; \
-	} \
-      else if (vbuf) \
-	vbuf[0] = 0; \
-      if (ferror (stdout) == 0) \
-	fflush (stdout); \
-      QUIT; \
-      if (ferror (stdout)) \
-	{ \
-	  sh_wrerror (); \
-	  clearerr (stdout); \
-	  return (EXECUTION_FAILURE); \
-	} \
-      return (value); \
-    } \
-  while (0)
 
 #define SKIP1 "#'-+ 0"
 #define LENMODS "hjlLtz"
@@ -193,25 +184,26 @@ extern int errno;
 extern time_t shell_start_time;
 
 #if !HAVE_ASPRINTF
-extern int asprintf PARAMS((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
+extern int asprintf (char **, const char *, ...) __attribute__((__format__ (printf, 2, 3)));
 #endif
 
 #if !HAVE_VSNPRINTF
-extern int vsnprintf PARAMS((char *, size_t, const char *, va_list)) __attribute__((__format__ (printf, 3, 0)));
+extern int vsnprintf (char *, size_t, const char *, va_list) __attribute__((__format__ (printf, 3, 0)));
 #endif
 
-static void printf_erange PARAMS((char *));
-static int printstr PARAMS((char *, char *, int, int, int));
-static int tescape PARAMS((char *, char *, int *, int *));
-static char *bexpand PARAMS((char *, int, int *, int *));
-static char *vbadd PARAMS((char *, int));
-static int vbprintf PARAMS((const char *, ...)) __attribute__((__format__ (printf, 1, 2)));
-static char *mklong PARAMS((char *, char *, size_t));
-static int getchr PARAMS((void));
-static char *getstr PARAMS((void));
-static int  getint PARAMS((void));
-static intmax_t getintmax PARAMS((void));
-static uintmax_t getuintmax PARAMS((void));
+static inline void printf_erange (char *);
+static inline void report_erange (char *, char *);
+static int printstr (char *, char *, size_t, int, int);
+static int tescape (char *, char *, int *, int *);
+static char *bexpand (char *, size_t, int *, size_t *);
+static char *vbadd (char *, int);
+static int vbprintf (const char *, ...) __attribute__((__format__ (printf, 1, 2)));
+static char *mklong (char *, char *, size_t);
+static int getchr (void);
+static char *getstr (void);
+static int  getint (int);
+static intmax_t getintmax (void);
+static uintmax_t getuintmax (void);
 
 #if defined (HAVE_LONG_DOUBLE) && HAVE_DECL_STRTOLD && !defined(STRTOLD_BROKEN)
 typedef long double floatmax_t;
@@ -224,10 +216,18 @@ typedef double floatmax_t;
 #  define FLOATMAX_CONV	""
 #  define strtofltmax	strtod
 #endif
-static double getdouble PARAMS((void));
-static floatmax_t getfloatmax PARAMS((void));
+static double getdouble (void);
+static floatmax_t getfloatmax (void);
 
-static intmax_t asciicode PARAMS((void));
+static intmax_t asciicode (void);
+
+#if defined (HANDLE_MULTIBYTE)
+static wchar_t *getwidestr (size_t *);
+static wint_t getwidechar (void);
+static char *convwidestr (wchar_t *, int);
+static char *convwidechar (wint_t, int);
+static int printwidestr (char *, wchar_t *, size_t, int, int);
+#endif
 
 static WORD_LIST *garglist, *orig_arglist;
 static int retval;
@@ -238,23 +238,45 @@ static int vflag = 0;
 static int bindflags = 0;
 static char *vbuf, *vname;
 static size_t vbsize;
-static int vblen;
+static size_t vblen;
 
 static intmax_t tw;
 
 static char *conv_buf;
 static size_t conv_bufsize;
 
+static inline int
+decodeint (char **str, int diagnose, int overflow_return)
+{
+  int pr, v;
+  char *ps;
+
+  ps = *str;
+  pr = *ps++ - '0';
+  v = 0;
+
+  /* use C23 macros to check overflow */
+  for (; DIGIT (*ps); ps++)
+    {
+      v |= ckd_mul (&pr, pr, 10);
+      v |= ckd_add (&pr, pr, *ps - '0');
+    }
+  if (v && diagnose)
+    report_erange (*str, ps);
+
+  *str = ps;
+  return (v ? overflow_return : pr);
+}
+
 int
-printf_builtin (list)
-     WORD_LIST *list;
+printf_builtin (WORD_LIST *list)
 {
   int ch, fieldwidth, precision;
-  int have_fieldwidth, have_precision, use_Lmod, altform;
+  int have_fieldwidth, have_precision, use_Lmod, altform, longform;
   char convch, thisch, nextch, *format, *modstart, *precstart, *fmt, *start;
 #if defined (HANDLE_MULTIBYTE)
   char mbch[25];		/* 25 > MB_LEN_MAX, plus can handle 4-byte UTF-8 and large Unicode characters*/
-  int mbind, mblen;
+  int mbind, mblen, mb_cur_max;
 #endif
 #if defined (ARRAY_VARS)
   int arrayflags;
@@ -273,9 +295,9 @@ printf_builtin (list)
 	  bindflags = 0;
 #if defined (ARRAY_VARS)
 	  SET_VFLAGS (list_optflags, arrayflags, bindflags);
-	  retval = legal_identifier (vname) || valid_array_reference (vname, arrayflags);
+	  retval = valid_identifier (vname) || valid_array_reference (vname, arrayflags);
 #else
-	  retval = legal_identifier (vname);
+	  retval = valid_identifier (vname);
 #endif
 	  if (retval)
 	    {
@@ -315,6 +337,7 @@ printf_builtin (list)
       return ((v == 0 || readonly_p (v) || noassign_p (v)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
     }
 
+  /* If the format string is empty after preprocessing, return immediately. */
   if (list->word->word == 0 || list->word->word[0] == '\0')
     return (EXECUTION_SUCCESS);
 
@@ -324,9 +347,7 @@ printf_builtin (list)
 
   garglist = orig_arglist = list->next;
 
-  /* If the format string is empty after preprocessing, return immediately. */
-  if (format == 0 || *format == 0)
-    return (EXECUTION_SUCCESS);
+  mb_cur_max = MB_CUR_MAX;
 
   /* Basic algorithm is to scan the format string for conversion
      specifications -- once one is found, find out if the field
@@ -341,7 +362,7 @@ printf_builtin (list)
       for (fmt = format; *fmt; fmt++)
 	{
 	  precision = fieldwidth = 0;
-	  have_fieldwidth = have_precision = altform = 0;
+	  have_fieldwidth = have_precision = altform = longform = 0;
 	  precstart = 0;
 
 	  if (*fmt == '\\')
@@ -366,7 +387,16 @@ printf_builtin (list)
 
 	  if (*fmt != '%')
 	    {
+#if defined (HANDLE_MULTIBYTE)
+	      size_t l;
+	      int i;
+	      l = mbcharlen (fmt, mb_cur_max);
+	      for (i = 0; i < l; i++, fmt++)
+	        PC (*fmt);
+	      fmt--;	/* for loop will increment it for us again */
+#else	      
 	      PC (*fmt);
+#endif
 	      continue;
 	    }
 
@@ -390,7 +420,9 @@ printf_builtin (list)
 	    {
 	      fmt++;
 	      have_fieldwidth = 1;
-	      fieldwidth = getint ();
+	      /* Handle field with overflow by ignoring fieldwidth for now.
+		 getint() prints a message. */
+	      fieldwidth = getint (0);
 	    }
 	  else
 	    while (DIGIT (*fmt))
@@ -404,7 +436,10 @@ printf_builtin (list)
 		{
 		  fmt++;
 		  have_precision = 1;
-		  precision = getint ();
+		  /* Handle precision overflow by ignoring precision for now.
+		     getint() prints a message.
+		     "A negative precision is treated as if it were missing." */
+		  precision = getint (-1);
 		}
 	      else
 		{
@@ -431,6 +466,7 @@ printf_builtin (list)
 	  while (*fmt && strchr (LENMODS, *fmt))
 	    {
 	      use_Lmod |= USE_LONG_DOUBLE && *fmt == 'L';
+	      longform |= *fmt == 'l';
 	      fmt++;
 	    }
 	    
@@ -450,27 +486,97 @@ printf_builtin (list)
 	  switch(convch)
 	    {
 	    case 'c':
+	    case 'C':
 	      {
 		char p;
 
+#if defined (HANDLE_MULTIBYTE)
+		if ((longform || convch == 'C') && locale_mb_cur_max > 1)
+		  {
+		    wchar_t wc, ws[2];
+		    int r;
+
+		    wc = getwidechar ();
+		    ws[0] = wc;
+		    ws[1] = L'\0';
+
+		    /* If %lc is supplied a null argument, posix interp 1647
+		       says it should produce a single null byte. */
+		    if (wc == L'\0')
+		      r = printstr (start, "", 1, fieldwidth, precision);
+		    else
+		      r = printwidestr (start, ws, 1, fieldwidth, precision);
+		    if (r < 0)
+		      PRETURN (EXECUTION_FAILURE);
+		    break;
+		  }
+#endif
 		p = getchr ();
 		PF(start, p);
 		break;
 	      }
 
 	    case 's':
+	    case 'S':
 	      {
 		char *p;
+#if defined (HANDLE_MULTIBYTE)
+		if ((longform || convch == 'S') && locale_mb_cur_max > 1)
+		  {
+		    wchar_t *wp;
+		    size_t slen;
+		    int r;
+
+		    wp = getwidestr (&slen);
+		    r = printwidestr (start, wp, slen, fieldwidth, precision);
+		    FREE (wp);
+		    if (r < 0)
+		      PRETURN (EXECUTION_FAILURE);
+		    break;
+		  }
+#endif
+#if 0	/*TAG:bash-5.4*/
+		if (altform == 0)
+#endif
+		  {
+		    p = getstr ();
+		    PF(start, p);
+		    break;
+		  }
+	      }
+	      /*FALLTHROUGH*/
+
+	    case 'b':		/* expand escapes in argument */
+	      {
+		char *p, *xp;
+		size_t rlen;
+		int r;
 
 		p = getstr ();
-		PF(start, p);
+		ch = r = 0;
+		rlen = 0;
+		xp = bexpand (p, strlen (p), &ch, &rlen);
+
+		if (xp)
+		  {
+		    /* Have to use printstr because of possible NUL bytes
+		       in XP -- printf does not handle that well. */
+		    r = printstr (start, xp, rlen, fieldwidth, precision);
+		    if (r < 0)
+		      retval = EXECUTION_FAILURE;
+		    free (xp);
+		  }
+
+		if (ch || r < 0)
+		  PRETURN (retval);
 		break;
 	      }
 
 	    case '(':
 	      {
 		char *timefmt, timebuf[TIMELEN_MAX], *t;
-		int n;
+		size_t n;
+		int r;
 		intmax_t arg;
 		time_t secs;
 		struct tm *tm;
@@ -530,16 +636,9 @@ printf_builtin (list)
 		/* convert to %s format that preserves fieldwidth and precision */
 		modstart[0] = 's';
 		modstart[1] = '\0';
-		n = printstr (start, timebuf, strlen (timebuf), fieldwidth, precision);	/* XXX - %s for now */
-		if (n < 0)
-		  {
-		    if (ferror (stdout) == 0)
-		      {
-			sh_wrerror ();
-			clearerr (stdout);
-		      }
-		    PRETURN (EXECUTION_FAILURE);
-		  }
+		r = printstr (start, timebuf, strlen (timebuf), fieldwidth, precision);	/* XXX - %s for now */
+		if (r < 0)
+		  PRETURN (EXECUTION_FAILURE);
 		break;
 	      }
 
@@ -550,7 +649,7 @@ printf_builtin (list)
 		var = getstr ();
 		if (var && *var)
 		  {
-		    if (legal_identifier (var))
+		    if (valid_identifier (var))
 		      bind_var_to_int (var, tw, 0);
 		    else
 		      {
@@ -561,80 +660,52 @@ printf_builtin (list)
 		break;
 	      }
 
-	    case 'b':		/* expand escapes in argument */
-	      {
-		char *p, *xp;
-		int rlen, r;
-
-		p = getstr ();
-		ch = rlen = r = 0;
-		xp = bexpand (p, strlen (p), &ch, &rlen);
-
-		if (xp)
-		  {
-		    /* Have to use printstr because of possible NUL bytes
-		       in XP -- printf does not handle that well. */
-		    r = printstr (start, xp, rlen, fieldwidth, precision);
-		    if (r < 0)
-		      {
-			if (ferror (stdout) == 0)
-			  {
-		            sh_wrerror ();
-			    clearerr (stdout);
-			  }
-		        retval = EXECUTION_FAILURE;
-		      }
-		    free (xp);
-		  }
-
-		if (ch || r < 0)
-		  PRETURN (retval);
-		break;
-	      }
-
 	    case 'q':		/* print with shell quoting */
 	    case 'Q':
 	      {
 		char *p, *xp;
-		int r, mpr;
+		int r;
 		size_t slen;
 
 		r = 0;
 		p = getstr ();
 		/* Decode precision and apply it to the unquoted string. */
-		if (convch == 'Q' && precstart)
+		if (convch == 'Q' && (have_precision || precstart))
 		  {
-		    mpr = *precstart++ - '0';
-		    while (DIGIT (*precstart))
-		      mpr = (mpr * 10) + (*precstart++ - '0');
-		    /* Error if precision > INT_MAX here? */
-		    precision = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
+		    if (precstart)
+		      {
+			char *prec;
+			prec = precstart;
+		        precision = decodeint (&prec, 0, -1);
+		      }
 		    slen = strlen (p);
 		    /* printf precision works in bytes. */
-		    if (precision < slen)
+		    if (precision >= 0 && precision < slen)
 		      p[precision] = '\0';
 		  }
 		if (p && *p == 0)	/* XXX - getstr never returns null */
 		  xp = savestring ("''");
 		else if (ansic_shouldquote (p))
 		  xp = ansic_quote (p, 0, (int *)0);
+		else if (altform)
+		  xp = sh_single_quote (p);
 		else
 		  xp = sh_backslash_quote (p, 0, 3);
 		if (xp)
 		  {
+		    slen = strlen (xp);
 		    if (convch == 'Q')
 		      {
-			slen = strlen (xp);
-			if (slen > precision)
-			  precision = slen;
+		        /* check for string length overflow when adjusting precision */
+			if (ckd_add (&precision, slen, 0))
+			  {
+			    builtin_error (_("%%Q: string length: %s"), strerror (ERANGE));
+			    precision = -1;
+			  }
 		      }		    
 		    /* Use printstr to get fieldwidth and precision right. */
-		    r = printstr (start, xp, strlen (xp), fieldwidth, precision);
-		    if (r < 0)
-		      {
-			sh_wrerror ();
-			clearerr (stdout);
-		      }
+		    r = printstr (start, xp, slen, fieldwidth, precision);
+		    /* Let PRETURN print the error message. */
 		    free (xp);
 		  }
 
@@ -650,8 +721,8 @@ printf_builtin (list)
 		long p;
 		intmax_t pp;
 
-		p = pp = getintmax ();
-		if (p != pp)
+		pp = getintmax ();
+		if (pp < LONG_MIN || pp > LONG_MAX)
 		  {
 		    f = mklong (start, PRIdMAX, sizeof (PRIdMAX) - 2);
 		    PF (f, pp);
@@ -662,6 +733,7 @@ printf_builtin (list)
 		       in "long".  This also works around some long
 		       long and/or intmax_t library bugs in the common
 		       case, e.g. glibc 2.2 x86.  */
+		    p = pp;
 		    f = mklong (start, "l", 1);
 		    PF (f, p);
 		  }
@@ -735,7 +807,7 @@ printf_builtin (list)
 	  modstart[1] = nextch;
 	}
 
-      if (ferror (stdout))
+      if (vflag == 0 && ferror (stdout))
 	{
 	  /* PRETURN will print error message. */
 	  PRETURN (EXECUTION_FAILURE);
@@ -749,28 +821,41 @@ printf_builtin (list)
   PRETURN (retval);
 }
 
-static void
-printf_erange (s)
-     char *s;
+static inline void
+printf_erange (char *s)
 {
-  builtin_error (_("warning: %s: %s"), s, strerror(ERANGE));
+  builtin_error (_("%s: %s"), s, strerror(ERANGE));
+  conversion_error = 1;
+}
+
+static inline void
+report_erange (char *s, char *e)
+{
+  unsigned char sc;
+
+  sc = *e;
+  *e = 0;
+  printf_erange (s);
+  *e = sc;
 }
 
 /* We duplicate a lot of what printf(3) does here. */
+/* FMT: format
+   STRING: expanded string argument
+   LEN: length of expanded string
+   FIELDWIDTH: argument for width of `*'
+   PRECISION: argument for precision of `*'
+
+   Returns -1 on detectable write error, 0 otherwise. */
+
 static int
-printstr (fmt, string, len, fieldwidth, precision)
-     char *fmt;			/* format */
-     char *string;		/* expanded string argument */
-     int len;			/* length of expanded string */
-     int fieldwidth;		/* argument for width of `*' */
-     int precision;		/* argument for precision of `*' */
+printstr (char *fmt, char *string, size_t len, int fieldwidth, int precision)
 {
 #if 0
   char *s;
 #endif
   int padlen, nc, ljust, i;
   int fw, pr;			/* fieldwidth and precision */
-  intmax_t mfw, mpr;
 
   if (string == 0)
     string = "";
@@ -783,8 +868,6 @@ printstr (fmt, string, len, fieldwidth, precision)
 
   ljust = fw = 0;
   pr = -1;
-  mfw = 0;
-  mpr = -1;
 
   /* skip flags */
   while (strchr (SKIP1, *fmt))
@@ -806,13 +889,7 @@ printstr (fmt, string, len, fieldwidth, precision)
 	}
     }
   else if (DIGIT (*fmt))
-    {
-      mfw = *fmt++ - '0';
-      while (DIGIT (*fmt))
-	mfw = (mfw * 10) + (*fmt++ - '0');
-      /* Error if fieldwidth > INT_MAX here? */
-      fw = (mfw < 0 || mfw > INT_MAX) ? INT_MAX : mfw;
-    }
+    fw = decodeint (&fmt, 1, 0);
 
   /* get precision, if present. doesn't handle negative precisions */
   if (*fmt == '.')
@@ -825,13 +902,11 @@ printstr (fmt, string, len, fieldwidth, precision)
 	}
       else if (DIGIT (*fmt))
 	{
-	  mpr = *fmt++ - '0';
-	  while (DIGIT (*fmt))
-	    mpr = (mpr * 10) + (*fmt++ - '0');
-	  /* Error if precision > INT_MAX here? */
-	  pr = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
-	  if (pr < precision && precision < INT_MAX)
-	    pr = precision;		/* XXX */
+	  pr = decodeint (&fmt, 1, -1);
+	  /* pr < precision means we adjusted precision in printf_builtin
+	     for the quoted string length (%Q), so we use the adjusted value */
+	  if (pr < precision)
+	    pr = precision;
 	}
       else
 	pr = 0;		/* "a null digit string is treated as zero" */
@@ -867,8 +942,103 @@ printstr (fmt, string, len, fieldwidth, precision)
   for (; padlen < 0; padlen++)
     PC (' ');
 
-  return (ferror (stdout) ? -1 : 0);
+  return ((vflag == 0 && ferror (stdout)) ? -1 : 0);
 }
+
+#if defined (HANDLE_MULTIBYTE)
+/* A wide-character version of printstr */
+static int
+printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int precision)
+{
+  char *s;
+  char *string;
+  int padlen, nc, ljust, i;
+  int fw, pr;			/* fieldwidth and precision */
+
+  if (wstring == 0)
+    wstring = L"";
+
+#if 0
+  s = fmt;
+#endif
+  if (*fmt == '%')
+    fmt++;
+
+  ljust = fw = 0;
+  pr = -1;
+
+  /* skip flags */
+  while (strchr (SKIP1, *fmt))
+    {
+      if (*fmt == '-')
+	ljust = 1;
+      fmt++;
+    }
+
+  /* get fieldwidth, if present.  rely on caller to clamp fieldwidth at INT_MAX */
+  if (*fmt == '*')
+    {
+      fmt++;
+      fw = fieldwidth;
+      if (fw < 0)
+	{
+	  fw = -fw;
+	  ljust = 1;
+	}
+    }
+  else if (DIGIT (*fmt))
+    fw = decodeint (&fmt, 1, 0);
+
+  /* get precision, if present. doesn't handle negative precisions */
+  if (*fmt == '.')
+    {
+      fmt++;
+      if (*fmt == '*')
+	{
+	  fmt++;
+	  pr = precision;
+	}
+      else if (DIGIT (*fmt))
+	{
+	  pr = decodeint (&fmt, 1, -1);
+	  /* pr < precision means we adjusted precision in printf_builtin
+	     for the quoted string length (%Q), so we use the adjusted value */
+	  if (pr < precision)
+	    pr = precision;
+	}
+      else
+	pr = 0;		/* "a null digit string is treated as zero" */
+    }
+
+  /* chars from wide string to print */
+  nc = (pr >= 0 && pr <= len) ? pr : len;
+
+  padlen = fw - nc;
+  if (padlen < 0)
+    padlen = 0;
+  if (ljust)
+    padlen = -padlen;
+
+  /* leading pad characters */
+  for (; padlen > 0; padlen--)
+    PC (' ');
+
+  /* convert WSTRING to multibyte character STRING, honoring PRECISION */
+  string = convwidestr (wstring, pr);
+
+  /* output STRING, assuming that convwidestr has taken care of the precision
+     and returned only the necessary bytes. */
+  for (i = 0; string[i]; i++)
+    PC (string[i]);
+
+  /* output any necessary trailing padding */
+  for (; padlen < 0; padlen++)
+    PC (' ');
+
+  free (string);
+  return ((vflag == 0 && ferror (stdout)) ? -1 : 0);
+}
+#endif
   
 /* Convert STRING by expanding the escape sequences specified by the
    POSIX standard for printf's `%b' format string.  If SAWC is non-null,
@@ -884,10 +1054,7 @@ printstr (fmt, string, len, fieldwidth, precision)
    do the \c short-circuiting, and \c is treated as an unrecognized escape
    sequence; we also bypass the other processing specific to %b arguments.  */
 static int
-tescape (estart, cp, lenp, sawc)
-     char *estart;
-     char *cp;
-     int *lenp, *sawc;
+tescape (char *estart, char *cp, int *lenp, int *sawc)
 {
   register char *p;
   int temp, c, evalue;
@@ -899,11 +1066,7 @@ tescape (estart, cp, lenp, sawc)
 
   switch (c = *p++)
     {
-#if defined (__STDC__)
       case 'a': *cp = '\a'; break;
-#else
-      case 'a': *cp = '\007'; break;
-#endif
 
       case 'b': *cp = '\b'; break;
 
@@ -1001,16 +1164,15 @@ tescape (estart, cp, lenp, sawc)
 }
 
 static char *
-bexpand (string, len, sawc, lenp)
-     char *string;
-     int len, *sawc, *lenp;
+bexpand (char *string, size_t len, int *sawc, size_t *lenp)
 {
-  int temp;
-  char *ret, *r, *s, c;
+  int temp, c;
+  char *ret, *r, *s, *send;
 #if defined (HANDLE_MULTIBYTE)
   char mbch[25];
   int mbind, mblen;
 #endif
+  DECLARE_MBSTATE;
 
   if (string == 0 || len == 0)
     {
@@ -1023,15 +1185,32 @@ bexpand (string, len, sawc, lenp)
       return (ret);
     }
 
+#if defined (HANDLE_MULTIBYTE)
+  /* same logic as lib/sh/strtrans.c:ansicstr() */
+  temp = 4*len + 4;
+  if (temp < 12)
+    temp = 12;			/* ensure enough for eventual u32cesc */
+  ret = (char *)xmalloc (temp);
+#else
   ret = (char *)xmalloc (len + 1);
+#endif
+
+  send = string + len;
   for (r = ret, s = string; s && *s; )
     {
-      c = *s++;
-      if (c != '\\' || *s == '\0')
+      if (s[1] == '\0')
 	{
-	  *r++ = c;
+	  *r++ = *s;
+	  break;
+	}
+      else if (*s != '\\')
+	{
+	  COPY_CHAR_P (r, s, send);
 	  continue;
 	}
+      else
+	s++;		/* *s == '\\' */
+
       temp = 0;
 #if defined (HANDLE_MULTIBYTE)
       memset (mbch, '\0', sizeof (mbch));
@@ -1061,9 +1240,7 @@ bexpand (string, len, sawc, lenp)
 }
 
 static char *
-vbadd (buf, blen)
-     char *buf;
-     int blen;
+vbadd (char *buf, int blen)
 {
   size_t nlen;
 
@@ -1085,37 +1262,35 @@ vbadd (buf, blen)
 
 #ifdef DEBUG
   if  (strlen (vbuf) != vblen)
-    internal_error  ("printf:vbadd: vblen (%d) != strlen (vbuf) (%d)", vblen, (int)strlen (vbuf));
+    internal_error  ("printf:vbadd: vblen (%zu) != strlen (vbuf) (%zu)", vblen, strlen (vbuf));
 #endif
 
   return vbuf;
 }
 
 static int
-#if defined (PREFER_STDARG)
 vbprintf (const char *format, ...)
-#else
-vbprintf (format, va_alist)
-  const char *format;
-  va_dcl
-#endif
 {
   va_list args;
   size_t nlen;
   int blen;
 
-  SH_VA_START (args, format);
+  va_start (args, format);
   blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
   va_end (args);
+  if (blen < 0)
+    return (blen);
 
   nlen = vblen + blen + 1;
   if (nlen >= vbsize)
     {
       vbsize = ((nlen + 63) >> 6) << 6;
       vbuf = (char *)xrealloc (vbuf, vbsize);
-      SH_VA_START (args, format);
+      va_start (args, format);
       blen = vsnprintf (vbuf + vblen, vbsize - vblen, format, args);
       va_end (args);
+      if (blen < 0)
+	return (blen);
     }
 
   vblen += blen;
@@ -1123,17 +1298,14 @@ vbprintf (format, va_alist)
 
 #ifdef DEBUG
   if  (strlen (vbuf) != vblen)
-    internal_error  ("printf:vbprintf: vblen (%d) != strlen (vbuf) (%d)", vblen, (int)strlen (vbuf));
+    internal_error  ("printf:vbprintf: vblen (%zu) != strlen (vbuf) (%zu)", vblen, strlen (vbuf));
 #endif
   
   return (blen);
 }
 
 static char *
-mklong (str, modifiers, mlen)
-     char *str;
-     char *modifiers;
-     size_t mlen;
+mklong (char *str, char *modifiers, size_t mlen)
 {
   size_t len, slen;
 
@@ -1155,7 +1327,7 @@ mklong (str, modifiers, mlen)
 }
 
 static int
-getchr ()
+getchr (void)
 {
   int ret;
 
@@ -1168,7 +1340,7 @@ getchr ()
 }
 
 static char *
-getstr ()
+getstr (void)
 {
   char *ret;
 
@@ -1180,32 +1352,39 @@ getstr ()
   return ret;
 }
 
+/* Don't call getintmax here because it may consume an argument on error, and
+   we call this to get field width/precision arguments. */
 static int
-getint ()
+getint (int overflow_retval)
 {
   intmax_t ret;
-
-  ret = getintmax ();
+  char *ep;
+  int overflow;
 
   if (garglist == 0)
-    return ret;
+    return (0);
 
-  if (ret > INT_MAX)
-    {
-      printf_erange (garglist->word->word);
-      ret = INT_MAX;
-    }
-  else if (ret < INT_MIN)
-    {
-      printf_erange (garglist->word->word);
-      ret = INT_MIN;
-    }
+  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+    return asciicode ();
 
-  return ((int)ret);
+  errno = 0;
+  ret = strtoimax (garglist->word->word, &ep, 0);
+  overflow = (errno == ERANGE) || (ret < INT_MIN || ret > INT_MAX);
+
+  if (*ep)
+    {
+      sh_invalidnum (garglist->word->word);
+      conversion_error = 1;
+    }
+  else if (overflow)
+    printf_erange (garglist->word->word);
+
+  garglist = garglist->next;
+  return (overflow ? overflow_retval : (int)ret);
 }
 
 static intmax_t
-getintmax ()
+getintmax (void)
 {
   intmax_t ret;
   char *ep;
@@ -1240,7 +1419,7 @@ getintmax ()
 }
 
 static uintmax_t
-getuintmax ()
+getuintmax (void)
 {
   uintmax_t ret;
   char *ep;
@@ -1271,7 +1450,7 @@ getuintmax ()
 }
 
 static double
-getdouble ()
+getdouble (void)
 {
   double ret;
   char *ep;
@@ -1298,7 +1477,7 @@ getdouble ()
 }
 
 static floatmax_t
-getfloatmax ()
+getfloatmax (void)
 {
   floatmax_t ret;
   char *ep;
@@ -1330,7 +1509,7 @@ getfloatmax ()
 
 /* NO check is needed for garglist here. */
 static intmax_t
-asciicode ()
+asciicode (void)
 {
   register intmax_t ch;
 #if defined (HANDLE_MULTIBYTE)
@@ -1343,7 +1522,7 @@ asciicode ()
 #if defined (HANDLE_MULTIBYTE)
   slen = strlen (garglist->word->word+1);
   wc = 0;
-  mblength = mbtowc (&wc, garglist->word->word+1, slen);
+  mblength = mbrtowc (&wc, garglist->word->word+1, slen, &state);
   if (mblength > 0)
     ch = wc;		/* XXX */
   else
@@ -1353,3 +1532,125 @@ asciicode ()
   garglist = garglist->next;
   return (ch);
 }
+
+#if defined (HANDLE_MULTIBYTE)
+static wchar_t *
+getwidestr (size_t *lenp)
+{
+  wchar_t *ws;
+  const char *mbs;
+  size_t slen, mblength;
+  DECLARE_MBSTATE;
+
+  if (garglist == 0)
+    {
+      if (lenp)
+	*lenp = 0;
+      return NULL;
+    }
+
+  mbs = garglist->word->word;
+  slen = strlen (mbs);
+  ws = (wchar_t *)xmalloc ((slen + 1) * sizeof (wchar_t));
+  mblength = mbsrtowcs (ws, &mbs, slen + 1, &state);
+  if (lenp)
+    *lenp = mblength;
+
+  if (MB_INVALIDCH (mblength))
+    {
+      int i;
+      for (i = 0; i < slen; i++)
+	ws[i] = (wchar_t)garglist->word->word[i];
+      ws[slen] = L'\0';
+      if (lenp)
+	*lenp = slen;
+    }
+
+  garglist = garglist->next;
+  return (ws);
+}
+
+static wint_t
+getwidechar (void)
+{
+  wchar_t wc;
+  size_t slen, mblength;
+  DECLARE_MBSTATE;
+
+  if (garglist == 0)
+    return L'\0';
+
+  wc = 0;
+  mblength = mbrtowc (&wc, garglist->word->word, locale_mb_cur_max, &state);
+  if (MB_INVALIDCH (mblength))
+    wc = (wchar_t)garglist->word->word[0];
+
+  garglist = garglist->next;
+  return (wc);
+}
+
+/* The basic approach is to take the wide character string, apply any
+   precision in terms of characters (otherwise the precision is useless),
+   compute the size of the output buffer, call wcsrtombs to convert back
+   to multibyte characters, and return the result. */
+static char *
+convwidestr (wchar_t *ws, int prec)
+{
+  const wchar_t *ts;
+  wchar_t wc;
+  char *ret;
+  size_t rlen, rsize;
+  DECLARE_MBSTATE;
+
+  ts = (const wchar_t *)ws;
+
+  if (prec >= 0)
+    {
+      rsize = prec * MB_CUR_MAX;
+      ret = (char *)xmalloc (rsize + 1);
+#if defined (HAVE_WCSNRTOMBS)
+      rlen = wcsnrtombs (ret, &ts, prec, rsize, &state);
+#else
+      wc = ws[prec];
+      ws[prec] = L'\0';
+      rlen = wcsrtombs (ret, &ts, rsize, &state);
+      ws[prec] = wc;
+#endif
+    }
+  else
+    {
+      rlen = wcsrtombs (NULL, &ts, 0, &state);
+      if (rlen != (size_t)-1)
+	{
+	  memset (&state, '\0', sizeof (mbstate_t));
+	  ret = (char *)xmalloc (rlen + 1);
+	  rlen = wcsrtombs (ret, &ts, rlen, &state);
+	}
+      else
+	ret = (char *)xmalloc (1);
+    }
+  if (MB_INVALIDCH (rlen))
+    rlen = 0;
+
+  ret[rlen] = '\0';
+  return ret;
+}
+
+static char *
+convwidechar (wint_t wi, int prec)
+{
+  wchar_t wc;
+  char *ret;
+  size_t rlen;
+  DECLARE_MBSTATE;
+
+  wc = (wchar_t)wi;
+  ret = (char *)xmalloc (MB_LEN_MAX + 1);
+  rlen = wcrtomb (ret, wc, &state);
+  if (MB_INVALIDCH (rlen))
+    rlen = 0;
+
+  ret[rlen] = '\0';
+  return ret;
+}
+#endif

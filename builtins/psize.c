@@ -1,6 +1,6 @@
 /* psize.c - Find pipe size. */
 
-/* Copyright (C) 1987, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1987, 1991, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,17 +48,14 @@ extern int errno;
 int nw;
 
 sighandler
-sigpipe (sig)
-     int sig;
+sigpipe (int sig)
 {
   fprintf (stderr, "%d\n", nw);
   exit (0);
 }
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   char buf[128];
   register int i;

@@ -38,6 +38,9 @@ abcde
 30
 40
 50
+declare -x var="60"
+outside
+assignment
 |0|10|
 10
 |0|10|
@@ -159,6 +162,8 @@ inside func: var=two
 outside 2.1: var=global
 inside func1: var=value
 outside 3.0: var=value
+inside func1: var=func
+outside 3.5: var=outside
 inside func2: var=global
 outside 4.0: var=outside
 foo: hello world
@@ -186,6 +191,12 @@ declare -a a=([0]="X" [1]="Y")
 declare -a s=([0]="X" [1]="Y")
 declare -a a=([0]="XY")
 declare -a s=([0]="XY")
+declare -A v=([1]="one" [0]="7" )
+declare -a v=([0]="7" [1]="1")
+./varenv14.sub: line 77: declare: array: cannot convert indexed to associative array
+declare -a array=([0]="1" [1]="2" [2]="3" [3]="list" [4]="of" [5]="four" [6]="words")
+./varenv14.sub: line 85: declare: assoc: cannot convert associative to indexed array
+declare -A assoc=([four]="words" [two]="2" [three]="3" [one]="1" [list]="of" )
 f: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
 f1: after: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
 done: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100
@@ -263,6 +274,7 @@ ignoreeof      	on
 ignoreeof      	off
 ignoreeof      	on
 10
+local -
 match 1
 trap -- 'echo trap:$FUNCNAME' EXIT
 trap:f
@@ -272,6 +284,50 @@ trap -- 'echo trap:$FUNCNAME' EXIT
 trap:f
 trap -- 'echo trap:$FUNCNAME' EXIT
 trap:f
+declare -rx x="4"
+declare -rx y="5"
+f:3
+f1:3
+global1:bcde
+f:3
+f1:3
+global2:bcde
+f:3
+f1:3
+global:bcde
+f:3
+f1:3
+global:bcde
+f:3
+bcde
+f:3
+bcde
+f1:3
+global: bcde
+f1:3
+global: 3
+f: 3
+global: declare -rx c="3"
+f1: 4
+global: declare -- b="8"
+f1: x = local
+f2: x = local
+after f2: x = global
+default after f1: x = global
+f1: x = local
+f2: x = local
+after f2: x = unset
+localvar_unset after f1: x = global
+f1: x = temp
+after f1: x = global
+1009: after bash unset: x = global
+1009: after posix unset: x = unset
+f1: x = local
+after unset f1: x = local
+1009: after bash f1: x = global
+f1: x = local
+after unset f1: x = unset
+1009: after posix f1: x = global
 a=z
 a=b
 a=z

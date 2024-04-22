@@ -133,6 +133,13 @@ echo ${foo:-'string \'}
 echo "${foo:-string \\}"
 echo ${foo:-string \\\}}
 
+: ${TMPDIR:=/tmp}
+
+${THIS_SH} -c 'echo escape\'
+printf 'echo escape\' > $TMPDIR/quote-$$
+${THIS_SH} $TMPDIR/quote-$$
+rm -f $TMPDIR/quote-$$
+
 ${THIS_SH} ./quote1.sub
 ${THIS_SH} ./quote2.sub
 ${THIS_SH} ./quote3.sub

@@ -32,3 +32,12 @@ bar[1]=set
 typeset -a qux
 [[ -v qux ]] || echo qux: unset array: ok
 [[ -v qux[0] ]] || echo qux: unset array element 0: ok
+
+unset -v a
+a[1]=set
+
+[[ -v a ]] ; echo $?
+[[ -v a[1] ]] ; echo $?
+[[ -v a[@] ]] ; echo $?
+
+[[ ${#a[@]} > 0 ]]; echo $?

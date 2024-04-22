@@ -1,7 +1,7 @@
-'This file is wait.def, from which is created wait.c.
+This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -90,8 +90,9 @@ extern int wait_signal_received;
 procenv_t wait_intr_buf;
 int wait_intr_flag;
 
-static int set_waitlist PARAMS((WORD_LIST *));
-static void unset_waitlist PARAMS((void));
+static int set_waitlist (WORD_LIST *);
+static void unset_waitlist (void);
+static int check_bgpids (WORD_LIST *, struct procstat *);
 
 /* Wait for the pid in LIST to stop or die.  If no arguments are given, then
    wait for all of the active background processes of the shell and return
@@ -108,8 +109,7 @@ static void unset_waitlist PARAMS((void));
   while (0)
 
 int
-wait_builtin (list)
-     WORD_LIST *list;
+wait_builtin (WORD_LIST *list)
 {
   int status, code, opt, nflag, vflags, bindflags;
   volatile int wflags;
@@ -154,10 +154,10 @@ wait_builtin (list)
       int arrayflags;
 
       SET_VFLAGS (vflags, arrayflags, bindflags);
-      if (legal_identifier (vname) == 0 && valid_array_reference (vname, arrayflags) == 0)
+      if (valid_identifier (vname) == 0 && valid_array_reference (vname, arrayflags) == 0)
 #else
       bindflags = 0;
-      if (legal_identifier (vname) == 0)
+      if (valid_identifier (vname) == 0)
 #endif
 	{
 	  sh_invalidid (vname);
@@ -211,6 +211,21 @@ wait_builtin (list)
 #if defined (JOB_CONTROL)
   if (nflag)
     {
+#if 0	/* TAG:bash-5.3 stevenpelley@gmail.com 01/22/2024 */
+      /* First let's see if there are any requested pids that have already
+	 been removed from the jobs list and saved on bgpids. */
+      if (list)
+	{
+	  status = check_bgpids (list, &pstat);
+	  if (status != -1)
+	    {
+	      if (vname)
+		builtin_bind_var_to_int (vname, pstat.pid, bindflags);
+	      WAIT_RETURN (status);	      
+	    }
+	}
+#endif
+
       if (list)
 	{
 	  opt = set_waitlist (list);
@@ -255,7 +270,7 @@ wait_builtin (list)
       w = list->word->word;
       if (DIGIT (*w))
 	{
-	  if (legal_number (w, &pid_value) && pid_value == (pid_t)pid_value)
+	  if (valid_number (w, &pid_value) && pid_value == (pid_t)pid_value)
 	    {
 	      pid = (pid_t)pid_value;
 	      status = wait_for_single_pid (pid, wflags|JWAIT_PERROR);
@@ -331,11 +346,10 @@ wait_builtin (list)
    J_WAITING, so wait -n knows which jobs to wait for. Return the number of
    jobs we found. */
 static int
-set_waitlist (list)
-     WORD_LIST *list;
+set_waitlist (WORD_LIST *list)
 {
   sigset_t set, oset;
-  int job, r, njob;
+  int job, njob;
   intmax_t pid;
   WORD_LIST *l;
 
@@ -344,7 +358,7 @@ set_waitlist (list)
   for (l = list; l; l = l->next)
     {
       job = NO_JOB;
-      job = (l && legal_number (l->word->word, &pid) && pid == (pid_t) pid)
+      job = (l && l->word && valid_number (l->word->word, &pid) && pid == (pid_t) pid)
 		? get_job_by_pid ((pid_t) pid, 0, 0)
 		: get_job_spec (l);
       if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))
@@ -367,7 +381,7 @@ set_waitlist (list)
 
 /* Clean up after a call to wait -n jobs */
 static void
-unset_waitlist ()
+unset_waitlist (void)
 {
   int i;
   sigset_t set, oset;
@@ -378,4 +392,41 @@ unset_waitlist ()
       jobs[i]->flags &= ~J_WAITING;
   UNBLOCK_CHILD (oset);
 }
+
+#if 0 /* TAG:bash-5.3 */
+static int
+check_bgpids (WORD_LIST *list, struct procstat *pstat)
+{
+  sigset_t set, oset;
+  pid_t pid;
+  intmax_t ipid;
+  WORD_LIST *l;
+  int r, s;
+
+  r = -1;
+
+  BLOCK_CHILD (set, oset);
+  for (l = list; l; l = l->next)
+    {
+      if (l && valid_number (l->word->word, &ipid) && ipid == (pid_t) ipid)
+        pid = ipid;
+      else
+	continue;	/* skip job ids for now */
+
+      if ((s = retrieve_proc_status (pid, 0)) != -1)
+	{
+	  pstat->pid = pid;
+	  pstat->status = r = s;
+	  /* If running in posix mode, `wait -n pid' deletes pid from bgpids,
+	     just like `wait pid'. */
+	  if (posixly_correct)
+	    delete_proc_status (pid, 0);
+	  break;
+	}
+    }
+  UNBLOCK_CHILD (oset);
+
+  return r;
+}
+#endif
 #endif

@@ -2,7 +2,7 @@
  * tmpfile.c - functions to create and safely open temp files for the shell.
  */
 
-/* Copyright (C) 2000-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2020,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -42,6 +42,10 @@
 extern int errno;
 #endif
 
+#if defined (HAVE_GETRANDOM) || defined (HAVE_ARC4RANDOM) || defined (HAVE_GETENTROPY)
+#  define USE_URANDOM32
+#endif
+
 #define BASEOPENFLAGS	(O_CREAT | O_TRUNC | O_EXCL | O_BINARY)
 
 #define DEFAULT_TMPDIR		"."	/* bogus default, should be changed */
@@ -54,8 +58,10 @@ extern int errno;
 
 extern pid_t dollar_dollar_pid;
 
-static char *get_sys_tmpdir PARAMS((void));
-static char *get_tmpdir PARAMS((int));
+static int tmpunlink (const char *);
+
+static char *get_sys_tmpdir (void);
+static char *get_tmpdir (int);
 
 static char *sys_tmpdir = (char *)NULL;
 static int ntmpfiles;
@@ -63,7 +69,7 @@ static int tmpnamelen = -1;
 static unsigned long filenum = 1L;
 
 static char *
-get_sys_tmpdir ()
+get_sys_tmpdir (void)
 {
   if (sys_tmpdir)
     return sys_tmpdir;
@@ -92,8 +98,7 @@ get_sys_tmpdir ()
 }
 
 static char *
-get_tmpdir (flags)
-     int flags;
+get_tmpdir (int flags)
 {
   char *tdir;
 
@@ -115,7 +120,7 @@ get_tmpdir (flags)
 }
 
 static void
-sh_seedrand ()
+sh_seedrand (void)
 {
 #if HAVE_RANDOM
   int d;
@@ -131,12 +136,20 @@ sh_seedrand ()
 #endif
 }
 
-char *
-sh_mktmpname (nameroot, flags)
-     char *nameroot;
-     int flags;
+static int
+tmpunlink (const char *fn)
 {
-  char *filename, *tdir, *lroot;
+  int r;
+
+  r = unlink (fn);
+  return r;
+}
+
+char *
+sh_mktmpname (const char *nameroot, int flags)
+{
+  char *filename, *tdir;
+  const char *lroot;
   struct stat sb;
   int r, tdlen;
   static int seeded = 0;
@@ -156,22 +169,30 @@ sh_mktmpname (nameroot, flags)
   if (flags & MT_TEMPLATE)
     strcpy (filename, nameroot);
   else
-    sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
+    snprintf (filename, PATH_MAX, "%s/%s.XXXXXX", tdir, lroot);
   if (mktemp (filename) == 0)
     {
       free (filename);
       filename = NULL;
     }
 #else  /* !USE_MKTEMP */
+#ifndef USE_URANDOM32
   sh_seedrand ();
+#endif
   while (1)
     {
+      unsigned long x;
+#ifdef USE_URANDOM32
+      x = (unsigned long) ((flags & MT_USERANDOM) ? get_urandom32 () : ntmpfiles++);
+#else
+      x = (unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
+#endif
       filenum = (filenum << 1) ^
 		(unsigned long) time ((time_t *)0) ^
 		(unsigned long) dollar_dollar_pid ^
-		(unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
-      sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
-      if (tmpnamelen > 0 && tmpnamelen < 32)
+		x;
+      snprintf (filename, PATH_MAX, "%s/%s-%lu", tdir, lroot, filenum);
+      if (tmpnamelen > 0 && tmpnamelen < 32)		/* XXX */
 	filename[tdlen + 1 + tmpnamelen] = '\0';
 #  ifdef HAVE_LSTAT
       r = lstat (filename, &sb);
@@ -187,12 +208,10 @@ sh_mktmpname (nameroot, flags)
 }
 
 int
-sh_mktmpfd (nameroot, flags, namep)
-     char *nameroot;
-     int flags;
-     char **namep;
+sh_mktmpfd (const char *nameroot, int flags, char **namep)
 {
-  char *filename, *tdir, *lroot;
+  char *filename, *tdir;
+  const char *lroot;
   int fd, tdlen;
   
   filename = (char *)xmalloc (PATH_MAX + 1);
@@ -210,8 +229,15 @@ sh_mktmpfd (nameroot, flags, namep)
   if (flags & MT_TEMPLATE)
     strcpy (filename, nameroot);
   else
-    sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
+    snprintf (filename, PATH_MAX, "%s/%s.XXXXXX", tdir, lroot);
   fd = mkstemp (filename);
+  if ((flags & MT_UNLINK) && tmpunlink (filename) < 0)
+    {
+      int e = errno;
+      close (fd);
+      fd = -1;
+      errno = e;
+    }
   if (fd < 0 || namep == 0)
     {
       free (filename);
@@ -219,36 +245,53 @@ sh_mktmpfd (nameroot, flags, namep)
     }
   if (namep)
     *namep = filename;
+
   return fd;
 #else /* !USE_MKSTEMP */
+#ifndef USE_URANDOM32
   sh_seedrand ();
+#endif
   do
     {
+      unsigned long x;
+#ifdef USE_URANDOM32
+      x = (unsigned long) ((flags & MT_USERANDOM) ? get_urandom32 () : ntmpfiles++);
+#else
+      x = (unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
+#endif
       filenum = (filenum << 1) ^
 		(unsigned long) time ((time_t *)0) ^
 		(unsigned long) dollar_dollar_pid ^
-		(unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
-      sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
-      if (tmpnamelen > 0 && tmpnamelen < 32)
+		x;
+      snprintf (filename, PATH_MAX, "%s/%s-%lu", tdir, lroot, filenum);
+      if (tmpnamelen > 0 && tmpnamelen < 32)		/* XXX */
 	filename[tdlen + 1 + tmpnamelen] = '\0';
       fd = open (filename, BASEOPENFLAGS | ((flags & MT_READWRITE) ? O_RDWR : O_WRONLY), 0600);
     }
   while (fd < 0 && errno == EEXIST);
 
+  if ((flags & MT_UNLINK) && (tmpunlink (filename) < 0)
+    {
+      int e = errno;
+      close (fd);
+      fd = -1;
+      errno = e;
+    }
+  if (fd < 0 || namep == 0)
+    {
+      free (filename);
+      filename = NULL;
+    }
+
   if (namep)
     *namep = filename;
-  else
-    free (filename);
 
   return fd;
 #endif /* !USE_MKSTEMP */
 }
 
 FILE *
-sh_mktmpfp (nameroot, flags, namep)
-     char *nameroot;
-     int flags;
-     char **namep;
+sh_mktmpfp (const char *nameroot, int flags, char **namep)
 {
   int fd;
   FILE *fp;
@@ -263,14 +306,15 @@ sh_mktmpfp (nameroot, flags, namep)
 }
 
 char *
-sh_mktmpdir (nameroot, flags)
-     char *nameroot;
-     int flags;
+sh_mktmpdir (const char *nameroot, int flags)
 {
-  char *filename, *tdir, *lroot, *dirname;
-  int fd, tdlen;
-  
+  char *filename;
+  int fd;
 #ifdef USE_MKDTEMP
+  char *tdir, *dirname;
+  const char *lroot;
+  int tdlen;
+  
   filename = (char *)xmalloc (PATH_MAX + 1);
   tdir = get_tmpdir (flags);
   tdlen = strlen (tdir);
@@ -285,7 +329,7 @@ sh_mktmpdir (nameroot, flags)
   if (flags & MT_TEMPLATE)
     strcpy (filename, nameroot);
   else
-    sprintf (filename, "%s/%s.XXXXXX", tdir, lroot);
+    snprintf (filename, PATH_MAX, "%s/%s.XXXXXX", tdir, lroot);
   dirname = mkdtemp (filename);
   if (dirname == 0)
     {

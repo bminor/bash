@@ -1,6 +1,6 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -39,9 +39,9 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0802		/* Readline 8.2 */
+#define RL_READLINE_VERSION	0x0803		/* Readline 8.3 */
 #define RL_VERSION_MAJOR	8
-#define RL_VERSION_MINOR	2
+#define RL_VERSION_MINOR	3
 
 /* Readline data structures. */
 
@@ -209,6 +209,8 @@ extern int rl_stop_output (int, int);
 extern int rl_abort (int, int);
 extern int rl_tty_status (int, int);
 
+extern int rl_execute_named_command (int, int);
+
 /* Bindable commands for incremental and non-incremental history searching. */
 extern int rl_history_search_forward (int, int);
 extern int rl_history_search_backward (int, int);
@@ -341,7 +343,9 @@ extern int rl_trim_arg_from_keyseq (const char *, size_t, Keymap);
 extern void rl_list_funmap_names (void);
 extern char **rl_invoking_keyseqs_in_map (rl_command_func_t *, Keymap);
 extern char **rl_invoking_keyseqs (rl_command_func_t *);
- 
+
+extern void rl_print_keybinding (const char *, Keymap, int);
+
 extern void rl_function_dumper (int);
 extern void rl_macro_dumper (int);
 extern void rl_variable_dumper (int);
@@ -404,11 +408,7 @@ extern void rl_activate_mark (void);
 extern void rl_deactivate_mark (void);
 extern int rl_mark_active_p (void);
 
-#if defined (USE_VARARGS) && defined (PREFER_STDARG)
 extern int rl_message (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
-#else
-extern int rl_message ();
-#endif
 
 extern int rl_show_char (int);
 
@@ -441,6 +441,7 @@ extern void rl_get_screen_size (int *, int *);
 extern void rl_reset_screen_size (void);
 
 extern char *rl_get_termcap (const char *);
+extern void rl_reparse_colors (void);
 
 /* Functions for character input. */
 extern int rl_stuff_char (int);
@@ -627,6 +628,8 @@ extern rl_voidfunc_t *rl_redisplay_function;
 extern rl_vintfunc_t *rl_prep_term_function;
 extern rl_voidfunc_t *rl_deprep_term_function;
 
+extern rl_macro_print_func_t *rl_macro_display_hook;
+
 /* Dispatch variables. */
 extern Keymap rl_executing_keymap;
 extern Keymap rl_binding_keymap;
@@ -770,6 +773,19 @@ extern rl_icppfunc_t *rl_filename_stat_hook;
    converted. */
 extern rl_dequote_func_t *rl_filename_rewrite_hook;
 
+/* If non-zero, this is the address of a function to call before
+   comparing the filename portion of a word to be completed with directory
+   entries from the filesystem. This takes the address of the partial word
+   to be completed, after any rl_filename_dequoting_function has been applied.
+   The function should either return its first argument (if no conversion
+   takes place) or newly-allocated memory. This can, for instance, convert
+   the filename portion of the completion word to a character set suitable
+   for comparison against directory entries read from the filesystem (after
+   their potential modification by rl_filename_rewrite_hook). 
+   The returned value is what is added to the list of matches.
+   The second argument is the length of the filename to be converted. */
+extern rl_dequote_func_t *rl_completion_rewrite_hook;
+
 /* Backwards compatibility with previous versions of readline. */
 #define rl_symbolic_link_hook rl_directory_completion_hook
 
@@ -793,6 +809,12 @@ extern int rl_filename_completion_desired;
    ALWAYS non-zero on entry, and can only be changed within a completion
    entry finder function. */
 extern int rl_filename_quoting_desired;
+
+/* Non-zero means we should apply filename-type quoting to all completions
+   even if we are not otherwise treating the matches as filenames. This is
+   ALWAYS zero on entry, and can only be changed within a completion entry
+   finder function. */
+extern int rl_full_quoting_desired;
 
 /* Set to a function to quote a filename in an application-specific fashion.
    Called with the text to quote, the type of match found (single or multiple)
@@ -892,37 +914,40 @@ extern int rl_persistent_signal_handlers;
 #define MULT_MATCH      2
 
 /* Possible state values for rl_readline_state */
-#define RL_STATE_NONE		0x000000		/* no state; before first call */
+#define RL_STATE_NONE		0x0000000	/* no state; before first call */
 
-#define RL_STATE_INITIALIZING	0x0000001	/* initializing */
-#define RL_STATE_INITIALIZED	0x0000002	/* initialization done */
-#define RL_STATE_TERMPREPPED	0x0000004	/* terminal is prepped */
-#define RL_STATE_READCMD	0x0000008	/* reading a command key */
-#define RL_STATE_METANEXT	0x0000010	/* reading input after ESC */
-#define RL_STATE_DISPATCHING	0x0000020	/* dispatching to a command */
-#define RL_STATE_MOREINPUT	0x0000040	/* reading more input in a command function */
-#define RL_STATE_ISEARCH	0x0000080	/* doing incremental search */
-#define RL_STATE_NSEARCH	0x0000100	/* doing non-inc search */
-#define RL_STATE_SEARCH		0x0000200	/* doing a history search */
-#define RL_STATE_NUMERICARG	0x0000400	/* reading numeric argument */
-#define RL_STATE_MACROINPUT	0x0000800	/* getting input from a macro */
-#define RL_STATE_MACRODEF	0x0001000	/* defining keyboard macro */
-#define RL_STATE_OVERWRITE	0x0002000	/* overwrite mode */
-#define RL_STATE_COMPLETING	0x0004000	/* doing completion */
-#define RL_STATE_SIGHANDLER	0x0008000	/* in readline sighandler */
-#define RL_STATE_UNDOING	0x0010000	/* doing an undo */
-#define RL_STATE_INPUTPENDING	0x0020000	/* rl_execute_next called */
-#define RL_STATE_TTYCSAVED	0x0040000	/* tty special chars saved */
-#define RL_STATE_CALLBACK	0x0080000	/* using the callback interface */
-#define RL_STATE_VIMOTION	0x0100000	/* reading vi motion arg */
-#define RL_STATE_MULTIKEY	0x0200000	/* reading multiple-key command */
-#define RL_STATE_VICMDONCE	0x0400000	/* entered vi command mode at least once */
-#define RL_STATE_CHARSEARCH	0x0800000	/* vi mode char search */
-#define RL_STATE_REDISPLAYING	0x1000000	/* updating terminal display */
+#define RL_STATE_INITIALIZING	0x00000001	/* initializing */
+#define RL_STATE_INITIALIZED	0x00000002	/* initialization done */
+#define RL_STATE_TERMPREPPED	0x00000004	/* terminal is prepped */
+#define RL_STATE_READCMD	0x00000008	/* reading a command key */
+#define RL_STATE_METANEXT	0x00000010	/* reading input after ESC */
+#define RL_STATE_DISPATCHING	0x00000020	/* dispatching to a command */
+#define RL_STATE_MOREINPUT	0x00000040	/* reading more input in a command function */
+#define RL_STATE_ISEARCH	0x00000080	/* doing incremental search */
+#define RL_STATE_NSEARCH	0x00000100	/* doing non-inc search */
+#define RL_STATE_SEARCH		0x00000200	/* doing a history search */
+#define RL_STATE_NUMERICARG	0x00000400	/* reading numeric argument */
+#define RL_STATE_MACROINPUT	0x00000800	/* getting input from a macro */
+#define RL_STATE_MACRODEF	0x00001000	/* defining keyboard macro */
+#define RL_STATE_OVERWRITE	0x00002000	/* overwrite mode */
+#define RL_STATE_COMPLETING	0x00004000	/* doing completion */
+#define RL_STATE_SIGHANDLER	0x00008000	/* in readline sighandler */
+#define RL_STATE_UNDOING	0x00010000	/* doing an undo */
+#define RL_STATE_INPUTPENDING	0x00020000	/* rl_execute_next called */
+#define RL_STATE_TTYCSAVED	0x00040000	/* tty special chars saved */
+#define RL_STATE_CALLBACK	0x00080000	/* using the callback interface */
+#define RL_STATE_VIMOTION	0x00100000	/* reading vi motion arg */
+#define RL_STATE_MULTIKEY	0x00200000	/* reading multiple-key command */
+#define RL_STATE_VICMDONCE	0x00400000	/* entered vi command mode at least once */
+#define RL_STATE_CHARSEARCH	0x00800000	/* vi mode char search */
+#define RL_STATE_REDISPLAYING	0x01000000	/* updating terminal display */
 
-#define RL_STATE_DONE		0x2000000	/* done; accepted line */
-#define RL_STATE_TIMEOUT	0x4000000	/* done; timed out */
-#define RL_STATE_EOF		0x8000000	/* done; got eof on read */
+#define RL_STATE_DONE		0x02000000	/* done; accepted line */
+#define RL_STATE_TIMEOUT	0x04000000	/* done; timed out */
+#define RL_STATE_EOF		0x08000000	/* done; got eof on read */
+
+/* Rearrange these for next major version */
+#define RL_STATE_READSTR	0x10000000	/* reading a string for M-x */
 
 #define RL_SETSTATE(x)		(rl_readline_state |= (x))
 #define RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))
@@ -939,7 +964,7 @@ struct readline_state {
   char *prompt;
 
   /* global state */
-  int rlstate;
+  int rlstate;		/* XXX -- needs to be unsigned long */
   int done;
   Keymap kmap;
 

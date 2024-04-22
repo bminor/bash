@@ -53,12 +53,7 @@
 #endif
 
 int
-sh_charvis (s, sindp, slen, ret, rindp)
-     const char *s;
-     size_t *sindp;
-     size_t slen;
-     char *ret;
-     size_t *rindp;
+sh_charvis (const char *s, size_t *sindp, size_t slen, char *ret, size_t *rindp)
 {
   unsigned char c;
   size_t si, ri;
@@ -117,8 +112,7 @@ sh_charvis (s, sindp, slen, ret, rindp)
 /* Return a new string with `unsafe' non-graphical characters in S rendered
    in a visible way. */
 char *
-sh_strvis (string)
-     const char *string;
+sh_strvis (const char *string)
 {
   size_t slen, sind;
   char *ret;

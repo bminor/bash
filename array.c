@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -61,7 +61,7 @@
 		ae->next = new; \
 	} while (0)
 
-static char *array_to_string_internal PARAMS((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
+static char *array_to_string_internal (ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int);
 
 static char *spacesep = " ";
 
@@ -78,7 +78,7 @@ static char *spacesep = " ";
 #define UNSET_LASTREF(a)	a->lastref = 0;
 
 ARRAY *
-array_create()
+array_create(void)
 {
 	ARRAY	*r;
 	ARRAY_ELEMENT	*head;
@@ -94,8 +94,7 @@ array_create()
 }
 
 void
-array_flush (a)
-ARRAY	*a;
+array_flush (ARRAY *a)
 {
 	register ARRAY_ELEMENT *r, *r1;
 
@@ -113,8 +112,7 @@ ARRAY	*a;
 }
 
 void
-array_dispose(a)
-ARRAY	*a;
+array_dispose(ARRAY *a)
 {
 	if (a == 0)
 		return;
@@ -124,8 +122,7 @@ ARRAY	*a;
 }
 
 ARRAY *
-array_copy(a)
-ARRAY	*a;
+array_copy(ARRAY *a)
 {
 	ARRAY	*a1;
 	ARRAY_ELEMENT	*ae, *new;
@@ -149,9 +146,7 @@ ARRAY	*a;
  * S to E, inclusive.
  */
 ARRAY *
-array_slice(array, s, e)
-ARRAY		*array;
-ARRAY_ELEMENT	*s, *e;
+array_slice(ARRAY *array, ARRAY_ELEMENT *s, ARRAY_ELEMENT *e)
 {
 	ARRAY	*a;
 	ARRAY_ELEMENT *p, *n;
@@ -175,10 +170,7 @@ ARRAY_ELEMENT	*s, *e;
  * element as the argument.
  */
 void
-array_walk(a, func, udata)
-ARRAY	*a;
-sh_ae_map_func_t *func;
-void	*udata;
+array_walk(ARRAY *a, sh_ae_map_func_t *func, void *udata)
 {
 	register ARRAY_ELEMENT *ae;
 
@@ -198,9 +190,7 @@ void	*udata;
  * and returns NULL.
  */
 ARRAY_ELEMENT *
-array_shift(a, n, flags)
-ARRAY	*a;
-int	n, flags;
+array_shift(ARRAY *a, int n, int flags)
 {
 	register ARRAY_ELEMENT *ae, *ret;
 	register int i;
@@ -258,10 +248,7 @@ int	n, flags;
  * shift.
  */
 int
-array_rshift (a, n, s)
-ARRAY	*a;
-int	n;
-char	*s;
+array_rshift (ARRAY *a, int n, char *s)
 {
 	register ARRAY_ELEMENT	*ae, *new;
 
@@ -294,23 +281,19 @@ char	*s;
 }
 
 ARRAY_ELEMENT *
-array_unshift_element(a)
-ARRAY	*a;
+array_unshift_element(ARRAY *a)
 {
 	return (array_shift (a, 1, 0));
 }
 
 int
-array_shift_element(a, v)
-ARRAY	*a;
-char	*v;
+array_shift_element(ARRAY *a, char *v)
 {
 	return (array_rshift (a, 1, v));
 }
 
 ARRAY *
-array_quote(array)
-ARRAY	*array;
+array_quote(ARRAY *array)
 {
 	ARRAY_ELEMENT	*a;
 	char	*t;
@@ -326,8 +309,7 @@ ARRAY	*array;
 }
 
 ARRAY *
-array_quote_escapes(array)
-ARRAY	*array;
+array_quote_escapes(ARRAY *array)
 {
 	ARRAY_ELEMENT	*a;
 	char	*t;
@@ -343,8 +325,7 @@ ARRAY	*array;
 }
 
 ARRAY *
-array_dequote(array)
-ARRAY	*array;
+array_dequote(ARRAY *array)
 {
 	ARRAY_ELEMENT	*a;
 	char	*t;
@@ -360,8 +341,7 @@ ARRAY	*array;
 }
 
 ARRAY *
-array_dequote_escapes(array)
-ARRAY	*array;
+array_dequote_escapes(ARRAY *array)
 {
 	ARRAY_ELEMENT	*a;
 	char	*t;
@@ -377,8 +357,7 @@ ARRAY	*array;
 }
 
 ARRAY *
-array_remove_quoted_nulls(array)
-ARRAY	*array;
+array_remove_quoted_nulls(ARRAY *array)
 {
 	ARRAY_ELEMENT	*a;
 
@@ -395,10 +374,7 @@ ARRAY	*array;
  * Since arrays are sparse, unset array elements are not counted.
  */
 char *
-array_subrange (a, start, nelem, starsub, quoted, pflags)
-ARRAY	*a;
-arrayind_t	start, nelem;
-int	starsub, quoted, pflags;
+array_subrange (ARRAY *a, arrayind_t start, arrayind_t nelem, int starsub, int quoted, int pflags)
 {
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*h, *p;
@@ -440,10 +416,7 @@ int	starsub, quoted, pflags;
 }
 
 char *
-array_patsub (a, pat, rep, mflags)
-ARRAY	*a;
-char	*pat, *rep;
-int	mflags;
+array_patsub (ARRAY *a, char *pat, char *rep, int mflags)
 {
 	char	*t;
 	int	pchar, qflags, pflags;
@@ -473,11 +446,7 @@ int	mflags;
 }
 
 char *
-array_modcase (a, pat, modop, mflags)
-ARRAY	*a;
-char	*pat;
-int	modop;
-int	mflags;
+array_modcase (ARRAY *a, char *pat, int modop, int mflags)
 {
 	char	*t;
 	int	pchar, qflags, pflags;
@@ -511,9 +480,7 @@ int	mflags;
  * VALUE.
  */
 ARRAY_ELEMENT *
-array_create_element(indx, value)
-arrayind_t	indx;
-char	*value;
+array_create_element(arrayind_t indx, char *value)
 {
 	ARRAY_ELEMENT *r;
 
@@ -526,8 +493,7 @@ char	*value;
 
 #ifdef INCLUDE_UNUSED
 ARRAY_ELEMENT *
-array_copy_element(ae)
-ARRAY_ELEMENT	*ae;
+array_copy_element(ARRAY_ELEMENT *ae)
 {
 	return(ae ? array_create_element(element_index(ae), element_value(ae))
 		  : (ARRAY_ELEMENT *) NULL);
@@ -535,8 +501,7 @@ ARRAY_ELEMENT	*ae;
 #endif
 
 void
-array_dispose_element(ae)
-ARRAY_ELEMENT	*ae;
+array_dispose_element(ARRAY_ELEMENT *ae)
 {
 	if (ae) {
 		FREE(ae->value);
@@ -548,10 +513,7 @@ ARRAY_ELEMENT	*ae;
  * Add a new element with index I and value V to array A (a[i] = v).
  */
 int
-array_insert(a, i, v)
-ARRAY	*a;
-arrayind_t	i;
-char	*v;
+array_insert(ARRAY *a, arrayind_t i, char *v)
 {
 	register ARRAY_ELEMENT *new, *ae, *start;
 	arrayind_t startind;
@@ -637,9 +599,7 @@ char	*v;
  * caller can dispose of it.
  */
 ARRAY_ELEMENT *
-array_remove(a, i)
-ARRAY	*a;
-arrayind_t	i;
+array_remove(ARRAY *a, arrayind_t i)
 {
 	register ARRAY_ELEMENT *ae, *start;
 	arrayind_t startind;
@@ -694,9 +654,7 @@ arrayind_t	i;
  * Return the value of a[i].
  */
 char *
-array_reference(a, i)
-ARRAY	*a;
-arrayind_t	i;
+array_reference(ARRAY *a, arrayind_t i)
 {
 	register ARRAY_ELEMENT *ae, *start;
 	arrayind_t startind;
@@ -748,8 +706,7 @@ arrayind_t	i;
    by the rest of the code. */
 
 WORD_LIST *
-array_to_word_list(a)
-ARRAY	*a;
+array_to_word_list(ARRAY *a)
 {
 	WORD_LIST	*list;
 	ARRAY_ELEMENT	*ae;
@@ -763,8 +720,7 @@ ARRAY	*a;
 }
 
 ARRAY *
-array_from_word_list (list)
-WORD_LIST	*list;
+array_from_word_list (WORD_LIST *list)
 {
 	ARRAY	*a;
 
@@ -775,8 +731,7 @@ WORD_LIST	*list;
 }
 
 WORD_LIST *
-array_keys_to_word_list(a)
-ARRAY	*a;
+array_keys_to_word_list(ARRAY *a)
 {
 	WORD_LIST	*list;
 	ARRAY_ELEMENT	*ae;
@@ -794,8 +749,7 @@ ARRAY	*a;
 }
 
 WORD_LIST *
-array_to_kvpair_list(a)
-ARRAY	*a;
+array_to_kvpair_list(ARRAY *a)
 {
 	WORD_LIST	*list;
 	ARRAY_ELEMENT	*ae;
@@ -815,9 +769,7 @@ ARRAY	*a;
 }
 
 ARRAY *
-array_assign_list (array, list)
-ARRAY	*array;
-WORD_LIST	*list;
+array_assign_list (ARRAY *array, WORD_LIST *list)
 {
 	register WORD_LIST *l;
 	register arrayind_t i;
@@ -828,9 +780,7 @@ WORD_LIST	*list;
 }
 
 char **
-array_to_argv (a, countp)
-ARRAY	*a;
-int	*countp;
+array_to_argv (ARRAY *a, int *countp)
 {
 	char		**ret, *t;
 	int		i;
@@ -855,10 +805,7 @@ int	*countp;
 }
 
 ARRAY *
-array_from_argv(a, vec, count)
-ARRAY	*a;
-char	**vec;
-int	count;
+array_from_argv(ARRAY *a, char **vec, int count)
 {
   arrayind_t	i;
   ARRAY_ELEMENT	*ae;
@@ -867,7 +814,7 @@ int	count;
   if (a == 0 || array_num_elements (a) == 0)
     {
       for (i = 0; i < count; i++)
-	array_insert (a, i, t);
+	array_insert (a, i, vec[i]);
       return a;
     }
 
@@ -908,10 +855,7 @@ int	count;
  * to END, separated by SEP.
  */
 static char *
-array_to_string_internal (start, end, sep, quoted)
-ARRAY_ELEMENT	*start, *end;
-char	*sep;
-int	quoted;
+array_to_string_internal (ARRAY_ELEMENT *start, ARRAY_ELEMENT *end, char *sep, int quoted)
 {
 	char	*result, *t;
 	ARRAY_ELEMENT *ae;
@@ -949,9 +893,7 @@ int	quoted;
 }
 
 char *
-array_to_kvpair (a, quoted)
-ARRAY	*a;
-int	quoted;
+array_to_kvpair (ARRAY *a, int quoted)
 {
 	char	*result, *valstr, *is;
 	char	indstr[INT_STRLEN_BOUND(intmax_t) + 1];
@@ -1003,9 +945,7 @@ int	quoted;
 }
 
 char *
-array_to_assign (a, quoted)
-ARRAY	*a;
-int	quoted;
+array_to_assign (ARRAY *a, int quoted)
 {
 	char	*result, *valstr, *is;
 	char	indstr[INT_STRLEN_BOUND(intmax_t) + 1];
@@ -1057,10 +997,7 @@ int	quoted;
 }
 
 char *
-array_to_string (a, sep, quoted)
-ARRAY	*a;
-char	*sep;
-int	quoted;
+array_to_string (ARRAY *a, char *sep, int quoted)
 {
 	if (a == 0)
 		return((char *)NULL);
@@ -1074,8 +1011,7 @@ int	quoted;
  * Return an array consisting of elements in S, separated by SEP
  */
 ARRAY *
-array_from_string(s, sep)
-char	*s, *sep;
+array_from_string(char *s, char *sep)
 {
 	ARRAY	*a;
 	WORD_LIST *w;
@@ -1098,8 +1034,7 @@ char	*s, *sep;
 int interrupt_immediately = 0;
 
 int
-signal_is_trapped(s)
-int	s;
+signal_is_trapped(int s)
 {
 	return 0;
 }
@@ -1119,8 +1054,7 @@ programming_error(const char *s, ...)
 }
 
 WORD_DESC *
-make_bare_word (s)
-const char	*s;
+make_bare_word (const char *s)
 {
 	WORD_DESC *w;
 
@@ -1131,9 +1065,7 @@ const char	*s;
 }
 
 WORD_LIST *
-make_word_list(x, l)
-WORD_DESC	*x;
-WORD_LIST	*l;
+make_word_list(WORD_DESC *x, WORD_LIST *l)
 {
 	WORD_LIST *w;
 
@@ -1144,9 +1076,7 @@ WORD_LIST	*l;
 }
 
 WORD_LIST *
-list_string(s, t, i)
-char	*s, *t;
-int	i;
+list_string(char *s, char *t, int i)
 {
 	char	*r, *a;
 	WORD_LIST	*wl;
@@ -1164,8 +1094,7 @@ int	i;
 }
 
 GENERIC_LIST *
-list_reverse (list)
-GENERIC_LIST	*list;
+list_reverse (GENERIC_LIST *list)
 {
 	register GENERIC_LIST *next, *prev;
 
@@ -1179,22 +1108,19 @@ GENERIC_LIST	*list;
 }
 
 char *
-pat_subst(s, t, u, i)
-char	*s, *t, *u;
-int	i;
+pat_subst(char *s, char *t, char *u, int i)
 {
 	return ((char *)NULL);
 }
 
 char *
-quote_string(s)
-char	*s;
+quote_string(char *s)
 {
 	return savestring(s);
 }
 
-print_element(ae)
-ARRAY_ELEMENT	*ae;
+void
+print_element(ARRAY_ELEMENT *ae)
 {
 	char	lbuf[INT_STRLEN_BOUND (intmax_t) + 1];
 
@@ -1203,14 +1129,15 @@ ARRAY_ELEMENT	*ae;
 		element_value(ae));
 }
 
-print_array(a)
-ARRAY	*a;
+void
+print_array(ARRAY *a)
 {
 	printf("\n");
 	array_walk(a, print_element, (void *)NULL);
 }
 
-main()
+int
+main(int c, char **v)
 {
 	ARRAY	*a, *new_a, *copy_of_a;
 	ARRAY_ELEMENT	*ae, *aew;

@@ -69,3 +69,8 @@ echo $wpid $?
 jobs
 wait -p wpid
 declare -p wpid
+
+# let's check errors like with other builtins that take variable names
+wait -p invalid-varname
+readonly WV
+wait -p WV

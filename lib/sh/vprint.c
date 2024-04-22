@@ -25,11 +25,7 @@
 #include <stdio.h>
 
 #if !defined (NULL)
-#  if defined (__STDC__)
-#    define NULL ((void *)0)
-#  else
-#    define NULL 0x0
-#  endif /* __STDC__ */
+#  define NULL 0
 #endif /* !NULL */
 
 /*
@@ -40,10 +36,7 @@
 #include <varargs.h>
 
 int
-vfprintf (iop, fmt, ap)
-     FILE *iop;
-     char *fmt;
-     va_list ap;
+vfprintf (FILE *iop, char *fmt, va_list ap)
 {
   int len;
   char localbuf[BUFSIZ];
@@ -68,9 +61,7 @@ vfprintf (iop, fmt, ap)
  * Ditto for vsprintf
  */
 int
-vsprintf (str, fmt, ap)
-     char *str, *fmt;
-     va_list ap;
+vsprintf (char *str, char *fmt, va_list ap)
 {
   FILE f;
   int len;

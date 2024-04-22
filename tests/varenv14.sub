@@ -44,3 +44,46 @@ f
 
 f() { local -a a+=Y s+=Y; declare -p a s; }
 f
+
+# inherit from different array types/variable types
+unset -v v
+unset -f f
+
+v=7
+
+f()
+{
+	declare -A v
+	v+=(1 one)
+	declare -p v
+}
+f
+
+f()
+{
+	declare -a v
+	v+=(1)
+	declare -p v
+}
+f
+
+unset -v array assoc
+
+declare -a array=(1 2 3)
+declare -A assoc=(one 1 two 2 three 3)
+
+f()
+{
+	declare -A array
+	array+=(list of four words)
+	declare -p array
+}
+f
+
+f()
+{
+	declare -a assoc
+	assoc+=(list of four words)
+	declare -p assoc
+}
+f

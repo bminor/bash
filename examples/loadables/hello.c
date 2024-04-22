@@ -4,7 +4,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -48,8 +48,7 @@
    A builtin command returns EXECUTION_SUCCESS for success and
    EXECUTION_FAILURE to indicate failure. */
 int
-hello_builtin (list)
-     WORD_LIST *list;
+hello_builtin (WORD_LIST *list)
 {
   printf("hello world\n");
   fflush (stdout);
@@ -57,8 +56,7 @@ hello_builtin (list)
 }
 
 int
-hello_builtin_load (s)
-     char *s;
+hello_builtin_load (char *s)
 {
   printf ("hello builtin loaded\n");
   fflush (stdout);
@@ -66,8 +64,7 @@ hello_builtin_load (s)
 }
 
 void
-hello_builtin_unload (s)
-     char *s;
+hello_builtin_unload (char *s)
 {
   printf ("hello builtin unloaded\n");
   fflush (stdout);

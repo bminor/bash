@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,7 +22,7 @@ $PRODUCES read.c
 
 $BUILTIN read
 $FUNCTION read_builtin
-$SHORT_DOC read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
+$SHORT_DOC read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
 Read a line from the standard input and split it into fields.
 
 Reads a single line from the standard input, or from file descriptor FD
@@ -41,6 +41,8 @@ Options:
   -d delim	continue until the first character of DELIM is read, rather
 		than newline
   -e	use Readline to obtain the line
+  -E	use Readline to obtain the line and use the bash default
+		completion instead of Readline's default completion
   -i text	use TEXT as the initial text for Readline
   -n nchars	return after reading NCHARS characters rather than waiting
 		for a newline, but honor a delimiter if fewer than
@@ -86,7 +88,6 @@ $END
 
 #ifdef __CYGWIN__
 #  include <fcntl.h>
-#  include <io.h>
 #endif
 
 #include "../bashintl.h"
@@ -103,9 +104,7 @@ $END
 #include <readline/readline.h>
 #endif
 
-#if defined (BUFFERED_INPUT)
-#  include "input.h"
-#endif
+#include "input.h"
 
 #include "shmbutil.h"
 #include "timer.h"
@@ -121,28 +120,29 @@ struct ttsave
 };
 
 #if defined (READLINE)
-static void reset_attempted_completion_function PARAMS((char *));
-static int set_itext PARAMS((void));
-static char *edit_line PARAMS((char *, char *));
-static void set_eol_delim PARAMS((int));
-static void reset_eol_delim PARAMS((char *));
-static void set_readline_timeout PARAMS((sh_timer *t, time_t, long));
+static void uw_reset_attempted_completion_function (void *);
+static int set_itext (void);
+static char *edit_line (char *, char *, unsigned char, int);
+static void set_eol_delim (int);
+static void reset_eol_delim (void *);
+static void set_readline_timeout (sh_timer *t, time_t, long);
+static void uw_bashline_reset_event_hook (void *);
 #endif
-static SHELL_VAR *bind_read_variable PARAMS((char *, char *, int));
+static SHELL_VAR *bind_read_variable (char *, char *, int);
 #if defined (HANDLE_MULTIBYTE)
-static int read_mbchar PARAMS((int, char *, int, int, int));
+static int read_mbchar (int, char *, int, int, int);
 #endif
-static void ttyrestore PARAMS((struct ttsave *));
+static void ttyrestore (struct ttsave *);
+static void uw_ttyrestore (void *);
 
-static sighandler sigalrm PARAMS((int));
-static void reset_timeout PARAMS((void));
+static sighandler sigalrm (int);
+static void reset_timeout (void);
+static void uw_reset_timeout (void *);
 
 /* Try this to see what the rest of the shell can do with the information. */
 sh_timer *read_timeout;
 
 static int reading, tty_modified;
-static SigHandler *old_alrm;
-static unsigned char delim;
 
 static struct ttsave termsave;
 
@@ -153,8 +153,7 @@ static struct ttsave termsave;
 /* Set a flag that check_read_timeout can check.  This relies on zread or
    read_builtin calling trap.c:check_signals() (which calls check_read_timeout()) */
 static sighandler
-sigalrm (s)
-     int s;
+sigalrm (int s)
 {
   /* Display warning if this is called without read_timeout set? */
   if (read_timeout)
@@ -162,7 +161,7 @@ sigalrm (s)
 }
 
 static void
-reset_timeout ()
+reset_timeout (void)
 {
   /* Cancel alarm before restoring signal handler. */
   if (read_timeout)
@@ -173,24 +172,33 @@ reset_timeout ()
   read_timeout = 0;
 }
 
+static void
+uw_reset_timeout (void *ignore)
+{
+  reset_timeout ();
+}
+
 void
-check_read_timeout ()
+check_read_timeout (void)
 {
   if (read_timeout && shtimer_chktimeout (read_timeout))
     sh_longjmp (read_timeout->jmpenv, 1);
 }
 
 int
-read_builtin_timeout (fd)
-     int fd;
+read_builtin_timeout (int fd)
 {
   if ((read_timeout == 0) ||
       (read_timeout->fd != fd) ||
       (read_timeout->tmout.tv_sec == 0 && read_timeout->tmout.tv_usec == 0))
     return 0;
 
+#if defined (HAVE_SELECT)
   return ((read_timeout->flags & SHTIMER_ALARM) ? shtimer_alrm (read_timeout)
   						: shtimer_select (read_timeout));
+#else
+  return (shtimer_alrm (read_timeout));
+#endif
 }
 
 /* Read the value of the shell variables whose names follow.
@@ -200,20 +208,23 @@ read_builtin_timeout (fd)
    gets the remainder of the words on the line.  If no variables
    are mentioned in LIST, then the default variable is $REPLY. */
 int
-read_builtin (list)
-     WORD_LIST *list;
+read_builtin (WORD_LIST *list)
 {
-  register char *varname;
-  int size, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2, nflag;
+  char *varname;
+  int nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2, nflag;
+  size_t size;
   volatile int i;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
-  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd;
+  int edit, use_bash_completion;
+  int raw, nchars, silent, have_timeout, ignore_delim, fd;
+  int free_ifs;
   int lastsig, t_errno;
   int mb_cur_max;
   unsigned int tmsec, tmusec;
   long ival, uval;
   intmax_t intval;
   char c;
+  unsigned char delim;
   char *input_string, *orig_input_string, *ifs_chars, *prompt, *arrayname;
   char *e, *t, *t1, *ps2, *tofree;
   struct stat tsb;
@@ -239,6 +250,8 @@ read_builtin (list)
   USE_VAR(input_is_pipe);
 /*  USE_VAR(raw); */
   USE_VAR(edit);
+  USE_VAR(use_bash_completion);
+  USE_VAR(delim);
   USE_VAR(tmsec);
   USE_VAR(tmusec);
   USE_VAR(nchars);
@@ -260,6 +273,7 @@ read_builtin (list)
 
   i = 0;		/* Index into the string that we are reading. */
   raw = edit = 0;	/* Not reading raw input by default. */
+  use_bash_completion = 0;
   silent = 0;
   arrayname = prompt = (char *)NULL;
   fd = 0;		/* file descriptor to read from */
@@ -276,7 +290,7 @@ read_builtin (list)
   ignore_delim = nflag = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "ersa:d:i:n:p:t:u:N:")) != -1)
+  while ((opt = internal_getopt (list, "Eersa:d:i:n:p:t:u:N:")) != -1)
     {
       switch (opt)
 	{
@@ -294,6 +308,12 @@ read_builtin (list)
 	  edit = 1;
 #endif
 	  break;
+	case 'E':
+#if defined (READLINE)
+	  edit = use_bash_completion = 1;
+#endif
+	  break;
+
 	case 'i':
 #if defined (READLINE)
 	  itext = list_optarg;
@@ -323,7 +343,7 @@ read_builtin (list)
 	  delim = -1;
 	case 'n':
 	  nflag = 1;
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
 	      sh_invalidnum (list_optarg);
@@ -333,7 +353,7 @@ read_builtin (list)
 	    nchars = intval;
 	  break;
 	case 'u':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
 	      builtin_error (_("%s: invalid file descriptor specification"), list_optarg);
@@ -368,10 +388,10 @@ read_builtin (list)
 #if defined (ARRAY_VARS)
   if (list)
     SET_VFLAGS (list->word->flags, vflags, bindflags);
-  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
+  if (list && valid_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   bindflags = 0;
-  if (list && legal_identifier (list->word->word) == 0)
+  if (list && valid_identifier (list->word->word) == 0)
 #endif
     {
       sh_invalidid (list->word->word);
@@ -383,17 +403,26 @@ read_builtin (list)
     delim = -1;
 
   /* IF IFS is unset, we use the default of " \t\n". */
-  ifs_chars = getifs ();
-  if (ifs_chars == 0)		/* XXX - shouldn't happen */
-    ifs_chars = "";
+  free_ifs = 0;
   /* If we want to read exactly NCHARS chars, don't split on IFS */
   if (ignore_delim)
     ifs_chars = "";
+  else
+    {
+      ifs_chars = getifs ();
+      if (ifs_chars == 0)		/* XXX - shouldn't happen */
+	ifs_chars = "";
+      else
+	free_ifs = 1;
+    }
   for (skip_ctlesc = skip_ctlnul = 0, e = ifs_chars; *e; e++)
     skip_ctlesc |= *e == CTLESC, skip_ctlnul |= *e == CTLNUL;
 
   input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
   input_string[0] = '\0';
+
+  pass_next = 0;	/* Non-zero signifies last char was backslash. */
+  saw_escape = 0;	/* Non-zero is count of escape chars we added */
 
   /* More input and options validation */
   if (nflag == 1 && nchars == 0)
@@ -420,14 +449,14 @@ read_builtin (list)
   sigemptyset (&chldset);
   sigprocmask (SIG_BLOCK, (sigset_t *)0, &chldset);
   sigaddset (&chldset, SIGCHLD);
+  sigemptyset (&prevset);
+  sigprocmask (SIG_SETMASK, (sigset_t *)0, &prevset);
 #endif
 
   begin_unwind_frame ("read_builtin");
 
-#if defined (BUFFERED_INPUT)
   if (interactive == 0 && default_buffered_input >= 0 && fd_is_bash_input (fd))
     sync_buffered_stream (default_buffered_input);
-#endif
 
 #if 1
   input_is_tty = isatty (fd);
@@ -436,7 +465,7 @@ read_builtin (list)
 #endif
   if (input_is_tty == 0)
 #ifndef __CYGWIN__
-    input_is_pipe = (lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
+    input_is_pipe = fd_ispipe (fd);
 #else
     input_is_pipe = 1;
 #endif
@@ -457,9 +486,6 @@ read_builtin (list)
     add_unwind_protect (xfree, rlbuf);
 #endif
 
-  pass_next = 0;	/* Non-zero signifies last char was backslash. */
-  saw_escape = 0;	/* Non-zero signifies that we saw an escape char */
-
   if (tmsec > 0 || tmusec > 0)
     {
       /* Turn off the timeout if stdin is a regular file (e.g. from
@@ -473,7 +499,7 @@ read_builtin (list)
       read_timeout = shtimer_alloc ();
       read_timeout->flags = SHTIMER_LONGJMP;
 
-#if defined (HAVE_SELECT)
+#if defined (HAVE_SELECT) || defined (HAVE_PSELECT)
       read_timeout->flags |= (edit || posixly_correct) ? SHTIMER_ALARM : SHTIMER_SELECT;
 #else
       read_timeout->flags |= SHTIMER_ALARM;
@@ -489,7 +515,9 @@ read_builtin (list)
       if (code)
 	{
 	  reset_timeout ();
+#if defined (SIGCHLD)
 	  sigprocmask (SIG_SETMASK, &prevset, (sigset_t *)0);
+#endif
 
 	  /* Tricky.  The top of the unwind-protect stack is the free of
 	     input_string.  We want to run all the rest and use input_string,
@@ -512,12 +540,12 @@ read_builtin (list)
 	}
       if (interactive_shell == 0)
 	initialize_terminating_signals ();
-      add_unwind_protect (reset_timeout, (char *)NULL);
+      add_unwind_protect (uw_reset_timeout, NULL);
 #if defined (READLINE)
       if (edit)
 	{
-	  add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
-	  add_unwind_protect (bashline_reset_event_hook, (char *)NULL);
+	  add_unwind_protect (uw_reset_attempted_completion_function, NULL);
+	  add_unwind_protect (uw_bashline_reset_event_hook, NULL);
 	  set_readline_timeout (read_timeout, tmsec, tmusec);
 	}
       else
@@ -541,7 +569,7 @@ read_builtin (list)
 	  if (delim != '\n')
 	    {
 	      set_eol_delim (delim);
-	      add_unwind_protect (reset_eol_delim, (char *)NULL);
+	      add_unwind_protect (reset_eol_delim, NULL);
 	    }
 	}
       else
@@ -558,7 +586,7 @@ read_builtin (list)
 	  if (i < 0)
 	    sh_ttyerror (1);
 	  tty_modified = 1;
-	  add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
+	  add_unwind_protect (uw_ttyrestore, &termsave);
 	  if (interactive_shell == 0)
 	    initialize_terminating_signals ();
 	}
@@ -576,7 +604,7 @@ read_builtin (list)
 	sh_ttyerror (1);
 
       tty_modified = 1;
-      add_unwind_protect ((Function *)ttyrestore, (char *)&termsave);
+      add_unwind_protect (uw_ttyrestore, &termsave);
       if (interactive_shell == 0)
 	initialize_terminating_signals ();
     }
@@ -614,10 +642,6 @@ read_builtin (list)
       fflush (stderr);
     }
 
-#if defined (__CYGWIN__) && defined (O_TEXT)
-  setmode (0, O_TEXT);
-#endif
-
   ps2 = 0;
   for (print_ps2 = eof = retval = 0;;)
     {
@@ -639,7 +663,7 @@ read_builtin (list)
 	  if (rlbuf == 0)
 	    {
 	      reading = 1;
-	      rlbuf = edit_line (prompt ? prompt : "", itext);
+	      rlbuf = edit_line (prompt ? prompt : "", itext, delim, use_bash_completion);
 	      reading = 0;
 	      rlind = 0;
 	    }
@@ -690,9 +714,9 @@ read_builtin (list)
 
       if (retval <= 0)
 	{
-	  int t;
+	  int x;
 
-	  t = errno;
+	  x = errno;
 	  if (retval < 0 && errno == EINTR)
 	    {
 	      check_signals ();		/* in case we didn't call zread via zreadc */
@@ -709,7 +733,7 @@ read_builtin (list)
 	    ttyrestore (&termsave);	/* fix terminal before exiting */
 	  CHECK_TERMSIG;
 	  eof = 1;
-	  errno = t;	/* preserve it for the error message below */
+	  errno = x;	/* preserve it for the error message below */
 	  break;
 	}
 
@@ -724,13 +748,13 @@ read_builtin (list)
       /* XXX -- use i + mb_cur_max (at least 4) for multibyte/read_mbchar */
       if (i + (mb_cur_max > 4 ? mb_cur_max : 4) >= size)
 	{
-	  char *t;
-	  t = (char *)xrealloc (input_string, size += 128);
+	  char *x;
+	  x = (char *)xrealloc (input_string, size += 128);
 
 	  /* Only need to change unwind-protect if input_string changes */
-	  if (t != input_string)
+	  if (x != input_string)
 	    {
-	      input_string = t;
+	      input_string = x;
 	      remove_unwind_protect ();
 	      add_unwind_protect (xfree, input_string);
 	    }
@@ -741,11 +765,14 @@ read_builtin (list)
       if (pass_next)
 	{
 	  pass_next = 0;
-	  if (c == '\n')
+	  if (c == '\n' || c == '\0')
 	    {
 	      if (skip_ctlesc == 0 && i > 0)
-		i--;		/* back up over the CTLESC */
-	      if (interactive && input_is_tty && raw == 0)
+		{
+		  i--;			/* back up over the CTLESC */
+		  saw_escape--;		/* one fewer CTLESC in the input */
+		}
+	      if (interactive && input_is_tty && raw == 0 && c == '\n')
 		print_ps2 = 1;
 	    }
 	  else
@@ -815,6 +842,17 @@ add_char:
       if (nchars > 0 && nr >= nchars)
 	break;
     }
+  /* Back up over trailing CTLESC if the input ends with an unescaped
+     backslash */
+  if (pass_next && skip_ctlesc == 0)
+    {
+      i--;
+      saw_escape--;		/* that CTLESC is no longer in the input */
+    }
+  /* I don't think this clause ever tests true. */
+  if (skip_ctlnul && saw_escape && i == 1 && input_string[0] == CTLNUL)
+    saw_escape = 0;		/* Avoid dequoting bare CTLNUL */
+
   input_string[i] = '\0';
   check_read_timeout ();
 
@@ -843,7 +881,7 @@ add_char:
 	  if (nchars > 0)
 	    rl_num_chars_to_read = 0;
 	  if (delim != '\n')
-	    reset_eol_delim ((char *)NULL);
+	    reset_eol_delim (NULL);
 	}
       else
 #endif
@@ -923,7 +961,7 @@ assign_vars:
       else
 	var = bind_variable ("REPLY", input_string, 0);
       if (var == 0 || readonly_p (var) || noassign_p (var))
-	retval = EXECUTION_FAILURE;
+	retval = EX_MISCERROR;
       else
 	VUNSETATTR (var, att_invisible);
 
@@ -945,9 +983,9 @@ assign_vars:
       varname = list->word->word;
 #if defined (ARRAY_VARS)
       SET_VFLAGS (list->word->flags, vflags, bindflags);
-      if (legal_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
+      if (valid_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
 #else
-      if (legal_identifier (varname) == 0)
+      if (valid_identifier (varname) == 0)
 #endif
 	{
 	  sh_invalidid (varname);
@@ -984,7 +1022,7 @@ assign_vars:
       if (var == 0)
 	{
 	  free (orig_input_string);
-	  return (EXECUTION_FAILURE);
+	  return (EX_MISCERROR);
 	}
 
       stupidly_hack_special_variables (varname);
@@ -994,9 +1032,9 @@ assign_vars:
   /* Now assign the rest of the line to the last variable argument. */
 #if defined (ARRAY_VARS)
   SET_VFLAGS (list->word->flags, vflags, bindflags);
-  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
+  if (valid_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
-  if (legal_identifier (list->word->word) == 0)
+  if (valid_identifier (list->word->word) == 0)
 #endif
     {
       sh_invalidid (list->word->word);
@@ -1044,6 +1082,8 @@ assign_vars:
   else
     retval = EXECUTION_FAILURE;
 
+  if (free_ifs)
+    free (ifs_chars);
   FREE (tofree);
   free (orig_input_string);
 
@@ -1051,9 +1091,7 @@ assign_vars:
 }
 
 static SHELL_VAR *
-bind_read_variable (name, value, flags)
-     char *name, *value;
-     int flags;
+bind_read_variable (char *name, char *value, int flags)
 {
   SHELL_VAR *v;
 
@@ -1064,10 +1102,7 @@ bind_read_variable (name, value, flags)
 
 #if defined (HANDLE_MULTIBYTE)
 static int
-read_mbchar (fd, string, ind, ch, unbuffered)
-     int fd;
-     char *string;
-     int ind, ch, unbuffered;
+read_mbchar (int fd, char *string, int ind, int ch, int unbuffered)
 {
   char mbchar[MB_LEN_MAX + 1];
   int i, n, r;
@@ -1116,22 +1151,27 @@ mbchar_return:
 
 
 static void
-ttyrestore (ttp)
-     struct ttsave *ttp;
+ttyrestore (struct ttsave *ttp)
 {
   ttsetattr (ttp->fd, &(ttp->attrs));
   tty_modified = 0;
 }
 
+static void
+uw_ttyrestore (void *ttp)
+{
+  ttyrestore (ttp);
+}
+
 void
-read_tty_cleanup ()
+read_tty_cleanup (void)
 {
   if (tty_modified)
     ttyrestore (&termsave);
 }
 
 int
-read_tty_modified ()
+read_tty_modified (void)
 {
   return (tty_modified);
 }
@@ -1142,15 +1182,20 @@ static rl_hook_func_t *old_startup_hook;
 static char *deftext;
 
 static void
-reset_attempted_completion_function (cp)
-     char *cp;
+uw_reset_attempted_completion_function (void *cp)
 {
   if (rl_attempted_completion_function == 0 && old_attempted_completion_function)
     rl_attempted_completion_function = old_attempted_completion_function;
 }
 
+static void
+uw_bashline_reset_event_hook (void *ignore)
+{
+  bashline_reset_event_hook ();
+}
+
 static int
-set_itext ()
+set_itext (void)
 {
   int r1, r2;
 
@@ -1168,18 +1213,19 @@ set_itext ()
 }
 
 static char *
-edit_line (p, itext)
-     char *p;
-     char *itext;
+edit_line (char *p, char *itext, unsigned char delim, int keep_completion_func)
 {
   char *ret;
-  int len;
+  size_t len;
 
   if (bash_readline_initialized == 0)
     initialize_readline ();
 
   old_attempted_completion_function = rl_attempted_completion_function;
-  rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  /* If we don't indicate that we want to keep the attempted completion
+     function, reset it so we use the default readline word completion. */
+  if (keep_completion_func == 0)
+    rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   bashline_set_event_hook ();
   if (itext)
     {
@@ -1190,7 +1236,8 @@ edit_line (p, itext)
 
   ret = readline (p);
 
-  rl_attempted_completion_function = old_attempted_completion_function;
+  if (keep_completion_func == 0)
+    rl_attempted_completion_function = old_attempted_completion_function;
   old_attempted_completion_function = (rl_completion_func_t *)NULL;
   bashline_reset_event_hook ();
 
@@ -1212,10 +1259,7 @@ edit_line (p, itext)
 }
 
 static void
-set_readline_timeout (t, sec, usec)
-     sh_timer *t;
-     time_t sec;
-     long usec;
+set_readline_timeout (sh_timer *t, time_t sec, long usec)
 {
   t->tmout.tv_sec = sec;
   t->tmout.tv_usec = usec;
@@ -1230,8 +1274,7 @@ static rl_command_func_t *old_newline_func;
 static unsigned char delim_char;
 
 static void
-set_eol_delim (c)
-     int c;
+set_eol_delim (int c)
 {
   Keymap cmap;
 
@@ -1257,8 +1300,7 @@ set_eol_delim (c)
 }
 
 static void
-reset_eol_delim (cp)
-     char *cp;
+reset_eol_delim (void *ignore)
 {
   Keymap cmap;
 

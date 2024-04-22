@@ -36,7 +36,7 @@
 #endif
 #include <sys/types.h>
 
-typedef unsigned chartype;
+typedef unsigned int chartype;
 
 #undef strstr
 

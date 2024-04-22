@@ -7,7 +7,7 @@
  */
 
 /*
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -135,6 +135,7 @@ sleep_builtin (WORD_LIST *list)
 	if (list->word && ISOPTION (list->word->word, '-'))
 		list = list->next;
 
+	/* Reject options and negative arguments */
 	if (*list->word->word == '-' || list->next) {
 		builtin_usage ();
 		return (EX_USAGE);
@@ -146,8 +147,7 @@ sleep_builtin (WORD_LIST *list)
 	 *
 	 * A heuristic: if the conversion failed, but the argument appears to
 	 * contain a GNU-like interval specifier (e.g. "1m30s"), try to parse
-	 * it. If we can't, return the right exit code to tell
-	 * execute_builtin to try and execute a disk command instead.
+	 * it. If we can't, it's an error.
 	 */
 	if (r == 0 && (strchr ("dhms", *ep) || strpbrk (list->word->word, "dhms")))
 		r = parse_gnutimefmt (list->word->word, &sec, &usec);

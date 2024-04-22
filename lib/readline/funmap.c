@@ -40,16 +40,12 @@
 
 #include "xmalloc.h"
 
-#ifdef __STDC__
 typedef int QSFUNC (const void *, const void *);
-#else
-typedef int QSFUNC ();
-#endif
 
 extern int _rl_qsort_string_compare (char **, char **);
 
 FUNMAP **funmap;
-static int funmap_size;
+static size_t funmap_size;
 static int funmap_entry;
 
 /* After initializing the function map, this is the index of the first
@@ -93,6 +89,7 @@ static const FUNMAP default_funmap[] = {
   { "end-of-history", rl_end_of_history },
   { "end-of-line", rl_end_of_line },
   { "exchange-point-and-mark", rl_exchange_point_and_mark },
+  { "execute-named-command", rl_execute_named_command },
   { "fetch-history", rl_fetch_history },
   { "forward-backward-delete-char", rl_rubout_or_delete },
   { "forward-byte", rl_forward_byte },
@@ -251,7 +248,7 @@ const char **
 rl_funmap_names (void)
 {
   const char **result;
-  int result_size, result_index;
+  size_t result_size, result_index;
 
   /* Make sure that the function map has been initialized. */
   rl_initialize_funmap ();

@@ -95,6 +95,11 @@ wheat=([six]=6 [foo bar]="qux qix" )
 
 recho ${#wheat[@]}
 
+# and error
+echo ${#wheat[$unset]}
+# zero length for unset element
+echo ${#wheat[unset]}
+
 recho ${#wheat[foo bar]}
 
 # TEST - appending assignment operator
@@ -266,3 +271,5 @@ ${THIS_SH} ./assoc17.sub
 # tests with `[' and `]' subscripts and printf/read/wait builtins
 ${THIS_SH} ./assoc18.sub
 
+# tests with tilde expansion in keys and values post-bash-5.2
+${THIS_SH} ./assoc19.sub

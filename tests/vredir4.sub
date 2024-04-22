@@ -32,4 +32,22 @@ echo $line >&$stdout
 
 type swizzle
 
+exec {stdin}<&-
+exec {stdout}>&-
+
+stdin=-1 stdout=-1
+
+declare -n stdin=input
+declare -n stdout=output
+
+swizzle
+echo ${input} ${output}
+echo ${stdin} ${stdout}
+
+exec {stdin}<&-
+exec {stdout}>&-
+
+# this should be an error
+echo invalid fd >&${output}
+
 exit 0

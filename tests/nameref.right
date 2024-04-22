@@ -92,6 +92,10 @@ expect <one>
 one
 expect <four>
 four
+expect <X>
+X
+expect <X>
+X
 errors = 0
 1
 2
@@ -123,17 +127,17 @@ bar
 unset
 ./nameref8.sub: line 16: typeset: warning: v: circular name reference
 ./nameref8.sub: line 16: warning: v: circular name reference
-./nameref8.sub: line 18: warning: v: circular name reference
+./nameref8.sub: line 18: warning: v: maximum nameref depth (8) exceeded
 inside
 inside: two
 outside:
 ./nameref8.sub: line 42: typeset: warning: x: circular name reference
 ./nameref8.sub: line 42: warning: x: circular name reference
-./nameref8.sub: line 44: warning: x: circular name reference
+./nameref8.sub: line 44: warning: x: maximum nameref depth (8) exceeded
 foo
 ./nameref8.sub: line 51: typeset: warning: v: circular name reference
 ./nameref8.sub: line 51: warning: v: circular name reference
-./nameref8.sub: line 51: warning: v: circular name reference
+./nameref8.sub: line 51: warning: v: maximum nameref depth (8) exceeded
 local
 ./nameref8.sub: line 60: typeset: v: nameref variable self references not allowed
 ./nameref8.sub: line 67: warning: x: circular name reference
@@ -302,7 +306,7 @@ declare -n ref="var"
 declare -a a=([0]="0")
 ./nameref15.sub: line 14: local: warning: a: circular name reference
 ./nameref15.sub: line 14: warning: a: circular name reference
-./nameref15.sub: line 14: warning: a: circular name reference
+./nameref15.sub: line 14: warning: a: maximum nameref depth (8) exceeded
 declare -a a=([0]="X")
 declare -a b=([0]="X")
 ./nameref15.sub: line 14: local: warning: a: circular name reference
@@ -311,14 +315,14 @@ declare -a b=([0]="X")
 declare -a b=([0]="0")
 ./nameref15.sub: line 32: typeset: warning: ref: circular name reference
 ./nameref15.sub: line 32: warning: ref: circular name reference
-./nameref15.sub: line 33: warning: ref: circular name reference
+./nameref15.sub: line 33: warning: ref: maximum nameref depth (8) exceeded
 ./nameref15.sub: line 34: warning: ref: circular name reference
 inside X
 outside X
 before: 7
 ./nameref15.sub: line 45: typeset: warning: xxx: circular name reference
 ./nameref15.sub: line 45: warning: xxx: circular name reference
-./nameref15.sub: line 46: warning: xxx: circular name reference
+./nameref15.sub: line 46: warning: xxx: maximum nameref depth (8) exceeded
 declare -n xxx="xxx"
 ./nameref15.sub: line 48: warning: xxx: circular name reference
 xxx_func: inside: xxx = foo
@@ -529,17 +533,18 @@ declare -a array=([0]="zero")
 declare -a array=([0]="one" [1]="two" [2]="three")
 declare -ai a=([0]="5")
 declare -ai a=([0]="6")
+declare -ai a=([0]="42")
 declare -ai a=([0]="1")
-./nameref23.sub: line 15: declare: b: not found
+./nameref23.sub: line 16: declare: b: not found
 declare -ai a=([0]="1")
 declare -- b="1"
 declare -ai a=([0]="1")
 declare -- b="11"
 declare -ai a=([0]="1")
 declare -- b="110"
-./nameref23.sub: line 25: declare: `1': invalid variable name for name reference
+./nameref23.sub: line 26: declare: `1': invalid variable name for name reference
 declare -ai a=([0]="1")
-./nameref23.sub: line 27: declare: b: not found
+./nameref23.sub: line 28: declare: b: not found
 declare -ai a=([0]="4")
 declare -in b="a[0]"
 declare -ai a=([0]="6")
@@ -558,3 +563,14 @@ declare -ai a=([0]="0" [1]="16")
 12
 16
 declare -ai a=([0]="0" [1]="16")
+./nameref24.sub: line 24: declare: `': not a valid identifier
+./nameref24.sub: line 25: declare: `a&b': invalid variable name for name reference
+3
+3
+0
+0
+0
+./nameref24.sub: line 38: declare: `aa&bb': invalid variable name for name reference
+3
+3
+5

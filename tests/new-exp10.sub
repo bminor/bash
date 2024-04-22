@@ -43,13 +43,6 @@ printf "<%s> " "${z@Q}"	; echo	# empty string?
 recho ${z@Q}		# this disappears
 
 #
-HOST=host
-SHELL_LEVEL=2
-NPS1='\[\]${HOST}($SHELL_LEVEL)[\v]\$ '
-
-recho "${NPS1@P}"
-
-#
 D=' \t\n'
 printf "<%s>" "${D@E}" ; echo
 printf "<%s>" "${D@Q}" ; echo
@@ -57,6 +50,10 @@ printf "<%s>" "${D@Q}" ; echo
 E=$' \t\n'
 printf "<%s>" "${E@E}" ; echo
 printf "<%s>" "${E@Q}" ; echo
+
+v=$'\1\1'
+printf '%q\n' "${v@E}"
+unset -v v
 
 declare x
 declare -r x="ab 'cd' ef"
@@ -114,5 +111,43 @@ echo ${foo@a}
 
 declare -p foo
 
+unset -v foo
+foo=lower
+echo ${foo@U}
+echo ${foo@u}
+
+# framework for testing prompt expansions using @P transformation
+cd /tmp
+
+HOST=host
+SHELL_LEVEL=2
+HOME=$PWD
+
+NPS1='\[\]${HOST}($SHELL_LEVEL)[\v]\$ '
+recho "${NPS1@P}"
+
+NPS1='\[\]\W\$\040'
+recho "${NPS1@P}"
+
+NPS1='\[\001\][\j]\w\$\040'
+recho "${NPS1@P}"
+
+NPS1='\[\a\][\j:\!]\w\\\$\040'
+set -o emacs
+recho "${NPS1@P}"
+set +o emacs
+
+cd /
+# no longer abbreviate as ~
+NPS1='\W \s\$\040'
+recho "${NPS1@P}"
+
+set -o posix
+NPS1='!\n\W \s\$\040'
+recho "${NPS1@P}"
+
+cd $OLDPWD
+
+# this must be last, fatal error
 V=42
 echo ${V@}	# error

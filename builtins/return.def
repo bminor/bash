@@ -1,7 +1,7 @@
 This file is return.def, from which is created return.c.
 It implements the builtin "return" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,12 +54,17 @@ $END
    specified as an argument.  if no argument is given, then the last
    exit status is used. */
 int
-return_builtin (list)
-     WORD_LIST *list;
+return_builtin (WORD_LIST *list)
 {
   CHECK_HELPOPT (list);
 
   return_catch_value = get_exitstat (list);
+  /* return is a special builtin, so non-interactive shells in posix mode
+     exit on an invalid numeric argument. We have to do it this way because
+     the return_catch targets aren't set up to deal with EXITSHELL, so we
+     just jump_to_top_level directly. */
+  if (interactive_shell == 0 && posixly_correct && executing_command_builtin == 0 && return_catch_value > EX_SHERRBASE)
+    return (return_catch_value);
 
   if (return_catch_flag)
     sh_longjmp (return_catch, 1);

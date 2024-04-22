@@ -6,7 +6,7 @@
 /*								    */
 /* **************************************************************** */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021,2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -58,6 +58,8 @@
 char *_rl_isearch_terminators = (char *)NULL;
 
 _rl_search_cxt *_rl_iscxt = 0;
+
+int _rl_search_case_fold = 0;
 
 static int rl_search_history (int, int);
 
@@ -150,7 +152,7 @@ static void
 rl_display_search (char *search_string, int flags, int where)
 {
   char *message;
-  int msglen, searchlen;
+  size_t msglen, searchlen;
 
   searchlen = (search_string && *search_string) ? strlen (search_string) : 0;
 
@@ -340,7 +342,7 @@ _rl_search_getchar (_rl_search_cxt *cxt)
 int
 _rl_isearch_dispatch (_rl_search_cxt *cxt, int c)
 {
-  int n, wstart, wlen, limit, cval, incr;
+  int n, wstart, wlen, limit, cval;
   char *paste;
   size_t pastelen;
   int j;
@@ -428,7 +430,11 @@ add_character:
 	{
 	  f = cxt->keymap[c].function;
 	  if (f == rl_do_lowercase_version)
-	    f = cxt->keymap[_rl_to_lower (c)].function;
+	    {
+	      f = cxt->keymap[_rl_to_lower (c)].function;
+	      if (f == rl_do_lowercase_version)
+		f = rl_insert;
+	    }
 	}
 
       if (f == rl_reverse_search_history)
@@ -445,6 +451,8 @@ add_character:
 	cxt->lastc = -6;
       else if (f == rl_bracketed_paste_begin)
 	cxt->lastc = -7;
+      else if (c == CTRL('V') || f == rl_quoted_insert)
+	cxt->lastc = -8;
     }
 
   /* If we changed the keymap earlier while translating a key sequence into
@@ -463,6 +471,11 @@ add_character:
 	{
 	  rl_stuff_char (cxt->lastc);
 	  rl_execute_next (cxt->prevc);
+
+	  /* We're going to read the last two characters again. */
+	  _rl_del_executing_keyseq ();
+	  _rl_del_executing_keyseq ();
+
 	  /* XXX - do we insert everything in cxt->pmb? */
 	  return (0);
 	}
@@ -477,6 +490,8 @@ add_character:
 	  /* Make lastc be the next character read */
 	  /* XXX - do we insert everything in cxt->mb? */
 	  rl_execute_next (cxt->lastc);
+	  _rl_del_executing_keyseq ();
+
 	  /* Dispatch on the previous character (insert into search string) */
 	  cxt->lastc = cxt->prevc;
 #if defined (HANDLE_MULTIBYTE)
@@ -524,7 +539,10 @@ add_character:
 	 settable keyboard timeout value, this could alternatively
 	 use _rl_input_queued(100000) */
       if (cxt->lastc == ESC && (_rl_pushed_input_available () || _rl_input_available ()))
-	rl_execute_next (ESC);
+	{
+	  rl_execute_next (ESC);
+	  _rl_del_executing_keyseq ();
+	}
       return (0);
     }
 
@@ -536,6 +554,7 @@ add_character:
 	  /* This sets rl_pending_input to LASTC; it will be picked up the next
 	     time rl_read_key is called. */
 	  rl_execute_next (cxt->lastc);
+	  _rl_del_executing_keyseq ();
 	  return (0);
 	}
     }
@@ -546,6 +565,7 @@ add_character:
 	/* This sets rl_pending_input to LASTC; it will be picked up the next
 	   time rl_read_key is called. */
 	rl_execute_next (cxt->lastc);
+	_rl_del_executing_keyseq ();
 	return (0);
       }
 
@@ -698,6 +718,27 @@ opcode_dispatch:
       xfree (paste);
       break;
 
+    case -8:	/* quoted insert */
+#if defined (HANDLE_SIGNALS)
+      if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
+	_rl_disable_tty_signals ();
+#endif
+      c = _rl_search_getchar (cxt);
+#if defined (HANDLE_SIGNALS)
+      if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
+	_rl_restore_tty_signals ();
+#endif
+
+      if (c < 0)
+	{
+	  cxt->sflags |= SF_FAILED;
+	  cxt->history_pos = cxt->last_found_line;
+	  return -1;
+	}
+      
+      _rl_add_executing_keyseq (c);
+
+      /*FALLTHROUGH*/
     /* Add character to search string and continue search. */
     default:
 #if defined (HANDLE_MULTIBYTE)
@@ -713,13 +754,13 @@ opcode_dispatch:
 #if defined (HANDLE_MULTIBYTE)
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	{
-	  int j;
+	  int w;
 
 	  if (cxt->mb[0] == 0 || cxt->mb[1] == 0)
 	    cxt->search_string[cxt->search_string_index++] = cxt->mb[0];
 	  else
-	    for (j = 0; j < wlen; )
-	      cxt->search_string[cxt->search_string_index++] = cxt->mb[j++];
+	    for (w = 0; w < wlen; )
+	      cxt->search_string[cxt->search_string_index++] = cxt->mb[w++];
 	}
       else
 #endif
@@ -741,7 +782,27 @@ opcode_dispatch:
       /* Search the current line. */
       while ((cxt->sflags & SF_REVERSE) ? (cxt->sline_index >= 0) : (cxt->sline_index < limit))
 	{
-	  if (STREQN (cxt->search_string, cxt->sline + cxt->sline_index, cxt->search_string_index))
+	  int found;
+
+	  if (_rl_search_case_fold)
+	    {
+#if defined (HANDLE_MULTIBYTE)
+	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+		found = _rl_mb_strcaseeqn (cxt->search_string,
+					   cxt->search_string_index,
+					   cxt->sline + cxt->sline_index,
+					   limit,
+					   cxt->search_string_index, 0);
+	      else
+		found = _rl_strnicmp (cxt->search_string,
+				      cxt->sline + cxt->sline_index,
+				      cxt->search_string_index) == 0;
+#endif
+	    }
+	  else
+	    found = STREQN (cxt->search_string, cxt->sline + cxt->sline_index, cxt->search_string_index);
+
+	  if (found)
 	    {
 	      cxt->sflags |= SF_FOUND;
 	      break;
@@ -749,7 +810,7 @@ opcode_dispatch:
 	  else
 	    cxt->sline_index += cxt->direction;
 
-	  if (cxt->sline_index < 0)
+	  if (cxt->sline_index < 0 || cxt->sline_index > cxt->sline_len)
 	    {
 	      cxt->sline_index = 0;
 	      break;
@@ -782,8 +843,8 @@ opcode_dispatch:
 
       if (cxt->sflags & SF_FAILED)
 	{
-	  /* XXX - reset sline_index if < 0 */
-	  if (cxt->sline_index < 0)
+	  /* XXX - reset sline_index if < 0 or longer than the history line */
+	  if (cxt->sline_index < 0 || cxt->sline_index > cxt->sline_len)
 	    cxt->sline_index = 0;
 	  break;
 	}
@@ -885,6 +946,13 @@ _rl_isearch_callback (_rl_search_cxt *cxt)
   int c, r;
 
   c = _rl_search_getchar (cxt);
+
+  if (c < 0)					/* EOF */
+    return 1;
+
+  if (RL_ISSTATE (RL_STATE_ISEARCH) == 0)	/* signal could turn it off */
+    return 1;
+
   /* We might want to handle EOF here */
   r = _rl_isearch_dispatch (cxt, cxt->lastc);
 

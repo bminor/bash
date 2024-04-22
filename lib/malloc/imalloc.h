@@ -1,6 +1,6 @@
 /* imalloc.h -- internal malloc definitions shared by source files. */
 
-/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,11 +39,7 @@
 
 /* Generic pointer type. */
 #ifndef PTR_T
-#  if defined (__STDC__)
-#    define PTR_T void *
-#  else
-#    define PTR_T char *
-#  endif
+#  define PTR_T void *
 #endif
 
 #if !defined (NULL)
@@ -71,14 +67,6 @@
 #    define FASTCOPY(s, d, n)  bcopy (s, d, n)
 #  endif /* HAVE_BCOPY */
 #endif /* !__GNUC__ */
-
-#if !defined (PARAMS)
-#  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus) || defined (PROTOTYPES)
-#    define PARAMS(protos) protos
-#  else 
-#    define PARAMS(protos) ()
-#  endif
-#endif
 
 /* Use Duff's device for good zeroing/copying performance.  DO NOT call the
    Duff's device macros with NBYTES == 0. */
@@ -172,7 +160,7 @@ do {									\
 
 #include <signal.h>
 
-extern void _malloc_block_signals PARAMS((sigset_t *, sigset_t *));
-extern void _malloc_unblock_signals PARAMS((sigset_t *, sigset_t *));
+extern void _malloc_block_signals (sigset_t *, sigset_t *);
+extern void _malloc_unblock_signals (sigset_t *, sigset_t *);
 
 #endif /* _IMALLOC_H */

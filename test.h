@@ -1,6 +1,6 @@
 /* test.h -- external interface to the conditional command code. */
 
-/* Copyright (C) 1997-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,12 +29,11 @@
 #define TEST_LOCALE	0x04
 #define TEST_ARRAYEXP	0x08		/* array subscript expansion */
 
-extern int test_unop PARAMS((char *));
-extern int test_binop PARAMS((char *));
+extern int test_unop (char *);
+extern int test_binop (char *);
 
-extern int unary_test PARAMS((char *, char *, int));
-extern int binary_test PARAMS((char *, char *, char *, int));
+extern int cond_test (char *, char *, char *, int);
 
-extern int test_command PARAMS((int, char **));
+extern int test_command (int, char **);
 
 #endif /* _TEST_H_ */

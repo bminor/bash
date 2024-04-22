@@ -1,6 +1,6 @@
 /* fnxform - use iconv(3) to transform strings to and from "filename" format */
 
-/* Copyright (C) 2009-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,9 +35,9 @@
 #endif
 
 #if defined (HAVE_LOCALE_CHARSET)
-extern const char *locale_charset PARAMS((void));
+extern const char *locale_charset (void);
 #else
-extern char *get_locale_var PARAMS((char *));
+extern char *get_locale_var (char *);
 #endif
 
 #if defined (HAVE_ICONV)
@@ -49,12 +49,12 @@ static iconv_t conv_tofs = (iconv_t)-1;
 static char *outbuf = 0;
 static size_t outlen = 0;
 
-static char *curencoding PARAMS((void));
-static void init_tofs PARAMS((void));
-static void init_fromfs PARAMS((void));
+static char *curencoding (void);
+static void init_tofs (void);
+static void init_fromfs (void);
 
 static char *
-curencoding ()
+curencoding (void)
 {
   char *loc;
 #if defined (HAVE_LOCALE_CHARSET)
@@ -77,7 +77,7 @@ curencoding ()
 }  
 
 static void
-init_tofs ()
+init_tofs (void)
 {
   char *cur;
 
@@ -86,7 +86,7 @@ init_tofs ()
 }
 
 static void
-init_fromfs ()
+init_fromfs (void)
 {
   char *cur;
 
@@ -95,9 +95,7 @@ init_fromfs ()
 }
 
 char *
-fnx_tofs (string, len)
-     char *string;
-     size_t len;
+fnx_tofs (char *string, size_t len)
 {
 #ifdef MACOSX
   ICONV_CONST char *inbuf;
@@ -139,9 +137,7 @@ fnx_tofs (string, len)
 }
 
 char *
-fnx_fromfs (string, len)
-     char *string;
-     size_t len;
+fnx_fromfs (char *string, size_t len)
 {
 #ifdef MACOSX
   ICONV_CONST char *inbuf;
@@ -184,15 +180,13 @@ fnx_fromfs (string, len)
 
 #else
 char *
-fnx_tofs (string)
-     char *string;
+fnx_tofs (char *string, size_t len)
 {
   return string;
 }
 
 char *
-fnx_fromfs (string)
-     char *string;
+fnx_fromfs (char *string, size_t len)
 {
   return string;
 }

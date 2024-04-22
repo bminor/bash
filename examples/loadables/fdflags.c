@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2017-2022 Free Software Foundation, Inc.
+   Copyright (C) 2017-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -98,9 +98,21 @@ static const struct
 #  define O_NOSIGPIPE 0
 #endif
 
+#ifndef O_NDELAY
+/* Solaris has this */
+#  define O_NDELAY 0
+#endif
+
+#ifndef O_LARGEFILE
+/* HP-UX has this */
+#  define O_LARGEFILE 0
+#endif
+
 #ifndef O_CLOEXEC
+#  define IGNOREFLAGS (O_RDONLY|O_WRONLY|O_RDWR)
 #  define ALLFLAGS (O_APPEND|O_ASYNC|O_SYNC|O_NONBLOCK|O_FSYNC|O_DSYNC|\
-	O_RSYNC|O_ALT_IO|O_DIRECT|O_NOATIME|O_NOSIGPIPE)
+	O_RSYNC|O_ALT_IO|O_DIRECT|O_NOATIME|O_NOSIGPIPE|O_NDELAY|O_LARGEFILE|\
+	IGNOREFLAGS)
 
 /* An unused bit in the file status flags word we can use to pass around the
    state of close-on-exec. */
@@ -120,7 +132,7 @@ extern int errno;
 
 /* FIX THIS */
 static int
-getallflags ()
+getallflags (void)
 {
   int i, allflags;
   
@@ -164,6 +176,7 @@ printone(int fd, int p, int verbose)
   if ((f = getflags(fd, p)) == -1)
     return;
 
+  /* maybe make the file descriptor printing optional if only one argument */
   printf ("%d:", fd);
 
   for (i = 0; i < N_FLAGS; i++)
@@ -224,15 +237,13 @@ parseflags(char *s, int *p, int *n)
 }
 
 static void
-setone(int fd, char *v, int verbose)
+setone(int fd, int pos, int neg, int verbose)
 {
-  int f, n, pos, neg, cloexec;
+  int f, n, cloexec;
 
   f = getflags(fd, 1);
   if (f == -1)
     return;
-
-  parseflags(v, &pos, &neg);
 
   cloexec = -1;
 
@@ -257,7 +268,7 @@ setone(int fd, char *v, int verbose)
 }
 
 static int
-getmaxfd ()
+getmaxfd (void)
 {
   int maxfd, ignore;
 
@@ -281,6 +292,7 @@ int
 fdflags_builtin (WORD_LIST *list)
 {
   int opt, maxfd, i, num, verbose, setflag;
+  int pos, neg;
   char *setspec;
   WORD_LIST *l;
   intmax_t inum;
@@ -311,6 +323,9 @@ fdflags_builtin (WORD_LIST *list)
   if (list == 0 && setflag)
     return (EXECUTION_SUCCESS);
 
+  if (setflag)
+    parseflags (setspec, &pos, &neg);
+
   if (list == 0)
     {
       maxfd = getmaxfd ();
@@ -327,7 +342,7 @@ fdflags_builtin (WORD_LIST *list)
   opt = EXECUTION_SUCCESS;
   for (l = list; l; l = l->next)
     {
-      if (legal_number (l->word->word, &inum) == 0 || inum < 0)
+      if (valid_number (l->word->word, &inum) == 0 || inum < 0)
 	{
 	  builtin_error ("%s: invalid file descriptor", l->word->word);
 	  opt = EXECUTION_FAILURE;
@@ -335,12 +350,12 @@ fdflags_builtin (WORD_LIST *list)
 	}
       num = inum;		/* truncate to int */
       if (setflag)
-	setone (num, setspec, verbose);
+	setone (num, pos, neg, verbose);
       else
 	printone (num, 1, verbose);
     }
 
-  return (opt);
+  return (sh_chkwrite (opt));
 }
 
 char *fdflags_doc[] =

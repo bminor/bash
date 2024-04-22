@@ -102,7 +102,7 @@ esac
 BASHTESTERS="bash-testers@cwru.edu"
 
 case "$RELSTATUS" in
-alpha*|beta*|devel*|rc*)	BUGBASH=chet@cwru.edu ;;
+alpha*|beta*|devel*|rc*)	BUGBASH=chet.ramey@case.edu ;;
 *)				BUGBASH=bug-bash@gnu.org ;;
 esac
 

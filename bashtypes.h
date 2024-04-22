@@ -1,6 +1,6 @@
 /* bashtypes.h -- Bash system types. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2009,2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,6 +33,18 @@
 
 #if defined (HAVE_INTTYPES_H)
 #  include <inttypes.h>
+#endif
+
+/* Fix PRIdMAX on systems where it's broken. */
+#ifdef PRI_MACROS_BROKEN
+#  undef PRIdMAX
+#endif
+#ifndef PRIdMAX
+#  if HAVE_LONG_LONG
+#    define PRIdMAX	"lld"
+#  else
+#    define PRIdMAX	"ld"
+#  endif
 #endif
 
 #if HAVE_STDINT_H

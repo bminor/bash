@@ -1,7 +1,7 @@
 This file is command.def, from which is created command.c.
 It implements the builtin "command" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -53,18 +53,18 @@ $END
 #include "../shell.h"
 #include "../execute_cmd.h"
 #include "../flags.h"
+#include "../parser.h"
 #include "bashgetopt.h"
 #include "common.h"
 
 #if defined (_CS_PATH) && defined (HAVE_CONFSTR) && !HAVE_DECL_CONFSTR
-extern size_t confstr PARAMS((int, char *, size_t));
+extern size_t confstr (int, char *, size_t);
 #endif
 
 /* Run the commands mentioned in LIST without paying attention to shell
    functions. */
 int
-command_builtin (list)
-     WORD_LIST *list;
+command_builtin (WORD_LIST *list)
 {
   int result, verbose, use_standard_path, opt;
   COMMAND *command;
@@ -124,20 +124,22 @@ command_builtin (list)
 
 #define COMMAND_BUILTIN_FLAGS (CMD_NO_FUNCTIONS | CMD_INHIBIT_EXPANSION | CMD_COMMAND_BUILTIN | (use_standard_path ? CMD_STDPATH : 0))
 
-  INTERNAL_DEBUG (("command_builtin: running execute_command for `%s'", list->word->word));
+  /* This code isn't executed any more; look at execute_cmd.c:execute_simple_command()
+     where command is treated as a pseudo-reserved prefix so we can optimize
+     away forks where possible. */
 
   /* We don't want this to be reparsed (consider command echo 'foo &'), so
      just make a simple_command structure and call execute_command with it. */
-  command = make_bare_simple_command ();
+  command = make_bare_simple_command (line_number);
   command->value.Simple->words = (WORD_LIST *)copy_word_list (list);
   command->value.Simple->redirects = (REDIRECT *)NULL;
   command->flags |= COMMAND_BUILTIN_FLAGS;
   command->value.Simple->flags |= COMMAND_BUILTIN_FLAGS;
 
-  add_unwind_protect ((char *)dispose_command, command);
+  add_unwind_protect (uw_dispose_command, command);
   result = execute_command (command);
+  dispose_command (command);
 
-  run_unwind_frame ("command_builtin");
-
+  discard_unwind_frame ("command_builtin");
   return (result);
 }

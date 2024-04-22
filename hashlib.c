@@ -1,6 +1,6 @@
 /* hashlib.c -- functions to manage and access hash tables for bash. */
 
-/* Copyright (C) 1987,1989,1991,1995,1998,2001,2003,2005,2006,2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-1991,1995,1998,2001-2009,2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -50,17 +50,16 @@
    don't discard the upper 32 bits of the value, if present. */
 #define HASH_BUCKET(s, t, h) (((h) = hash_string (s)) & ((t)->nbuckets - 1))
 
-static BUCKET_CONTENTS *copy_bucket_array PARAMS((BUCKET_CONTENTS *, sh_string_func_t *));
+static BUCKET_CONTENTS *copy_bucket_array (BUCKET_CONTENTS *, sh_string_func_t *);
 
-static void hash_rehash PARAMS((HASH_TABLE *, int));
-static void hash_grow PARAMS((HASH_TABLE *));
-static void hash_shrink PARAMS((HASH_TABLE *));
+static void hash_rehash (HASH_TABLE *, int);
+static void hash_grow (HASH_TABLE *);
+static void hash_shrink (HASH_TABLE *);
 
 /* Make a new hash table with BUCKETS number of buckets.  Initialize
    each slot in the table to NULL. */
 HASH_TABLE *
-hash_create (buckets)
-     int buckets;
+hash_create (int buckets)
 {
   HASH_TABLE *new_table;
   register int i;
@@ -81,16 +80,15 @@ hash_create (buckets)
 }
 
 int
-hash_size (table)
-     HASH_TABLE *table;
+hash_size (HASH_TABLE *table)
 {
   return (HASH_ENTRIES(table));
 }
 
+/* Copy a hash table bucket array. Call (*cpdata) to copy the data from
+   each element. */
 static BUCKET_CONTENTS *
-copy_bucket_array (ba, cpdata)
-     BUCKET_CONTENTS *ba;
-     sh_string_func_t *cpdata;	/* data copy function */
+copy_bucket_array (BUCKET_CONTENTS *ba, sh_string_func_t *cpdata)
 {
   BUCKET_CONTENTS *new_bucket, *n, *e;
 
@@ -122,9 +120,7 @@ copy_bucket_array (ba, cpdata)
 }
 
 static void
-hash_rehash (table, nsize)
-     HASH_TABLE *table;
-     int nsize;
+hash_rehash (HASH_TABLE *table, int nsize)
 {
   int osize, i, j;
   BUCKET_CONTENTS **old_bucket_array, *item, *next;
@@ -155,8 +151,7 @@ hash_rehash (table, nsize)
 }
 
 static void
-hash_grow (table)
-     HASH_TABLE *table;
+hash_grow (HASH_TABLE *table)
 {
   int nsize;
 
@@ -166,8 +161,7 @@ hash_grow (table)
 }
 
 static void
-hash_shrink (table)
-     HASH_TABLE *table;
+hash_shrink (HASH_TABLE *table)
 {
   int nsize;
 
@@ -175,10 +169,9 @@ hash_shrink (table)
   hash_rehash (table, nsize);
 }
 
+/* Copy an entire hash table. (*cpdata) copies the data in each element. */
 HASH_TABLE *
-hash_copy (table, cpdata)
-     HASH_TABLE *table;
-     sh_string_func_t *cpdata;
+hash_copy (HASH_TABLE *table, sh_string_func_t *cpdata)
 {
   HASH_TABLE *new_table;
   int i;
@@ -212,8 +205,7 @@ FNV_PRIME	1099511628211
 /* The `khash' check below requires that strings that compare equally with
    strcmp hash to the same value. */
 unsigned int
-hash_string (s)
-     const char *s;
+hash_string (const char *s)
 {
   register unsigned int i;
 
@@ -233,9 +225,7 @@ hash_string (s)
    for STRING.  TABLE is a pointer to a HASH_TABLE. */
 
 int
-hash_bucket (string, table)
-     const char *string;
-     HASH_TABLE *table;
+hash_bucket (const char *string, HASH_TABLE *table)
 {
   unsigned int h;
 
@@ -245,10 +235,7 @@ hash_bucket (string, table)
 /* Return a pointer to the hashed item.  If the HASH_CREATE flag is passed,
    create a new hash table entry for STRING, otherwise return NULL. */
 BUCKET_CONTENTS *
-hash_search (string, table, flags)
-     const char *string;
-     HASH_TABLE *table;
-     int flags;
+hash_search (const char *string, HASH_TABLE *table, int flags)
 {
   BUCKET_CONTENTS *list;
   int bucket;
@@ -297,10 +284,7 @@ hash_search (string, table, flags)
    The item removed is returned, so you can free its contents.  If
    the item isn't in this table NULL is returned. */
 BUCKET_CONTENTS *
-hash_remove (string, table, flags)
-     const char *string;
-     HASH_TABLE *table;
-     int flags;
+hash_remove (const char *string, HASH_TABLE *table, int flags)
 {
   int bucket;
   BUCKET_CONTENTS *prev, *temp;
@@ -331,10 +315,7 @@ hash_remove (string, table, flags)
 /* Create an entry for STRING, in TABLE.  If the entry already
    exists, then return it (unless the HASH_NOSRCH flag is set). */
 BUCKET_CONTENTS *
-hash_insert (string, table, flags)
-     char *string;
-     HASH_TABLE *table;
-     int flags;
+hash_insert (char *string, HASH_TABLE *table, int flags)
 {
   BUCKET_CONTENTS *item;
   int bucket;
@@ -372,9 +353,7 @@ hash_insert (string, table, flags)
    is a function to call to dispose of a hash item's data.  Otherwise,
    free() is called. */
 void
-hash_flush (table, free_data)
-     HASH_TABLE *table;
-     sh_free_func_t *free_data;
+hash_flush (HASH_TABLE *table, sh_free_func_t *free_data)
 {
   int i;
   register BUCKET_CONTENTS *bucket, *item;
@@ -406,17 +385,16 @@ hash_flush (table, free_data)
 
 /* Free the hash table pointed to by TABLE. */
 void
-hash_dispose (table)
-     HASH_TABLE *table;
+hash_dispose (HASH_TABLE *table)
 {
   free (table->bucket_array);
   free (table);
 }
 
+/* Call (*FUNC) for each element in TABLE. If FUNC returns < 0, abort the
+   walk. */
 void
-hash_walk (table, func)
-     HASH_TABLE *table;
-     hash_wfunc *func;
+hash_walk (HASH_TABLE *table, hash_wfunc *func)
 {
   register int i;
   BUCKET_CONTENTS *item;
@@ -434,9 +412,7 @@ hash_walk (table, func)
 
 #if defined (DEBUG) || defined (TEST_HASHING)
 void
-hash_pstats (table, name)
-     HASH_TABLE *table;
-     char *name;
+hash_pstats (HASH_TABLE *table, char *name)
 {
   register int slot, bcount;
   register BUCKET_CONTENTS *bc;
@@ -477,8 +453,7 @@ int interrupt_immediately = 0;
 int running_trap = 0;
 
 int
-signal_is_trapped (s)
-     int s;
+signal_is_trapped (int s)
 {
   return (0);
 }
@@ -501,7 +476,7 @@ internal_warning (const char *format, ...)
 }
 
 int
-main ()
+main (int c, char **v)
 {
   char string[256];
   int count = 0;

@@ -1,6 +1,6 @@
 /* posixtime.h -- wrapper for time.h, sys/times.h mess. */
 
-/* Copyright (C) 1999-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,8 +49,17 @@ struct timeval
 #endif
 
 #if !HAVE_GETTIMEOFDAY
-extern int gettimeofday PARAMS((struct timeval *, void *));
+extern int gettimeofday (struct timeval * restrict, void * restrict);
 #endif
+
+/* consistently use gettimeofday for time information */
+static inline time_t
+getnow(void)
+{
+  struct timeval now;
+  gettimeofday (&now, 0);
+  return now.tv_sec;
+}
 
 /* These exist on BSD systems, at least. */
 #if !defined (timerclear)

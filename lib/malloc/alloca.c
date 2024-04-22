@@ -57,11 +57,7 @@ long i00afunc ();
 #define ADDRESS_FUNCTION(arg) &(arg)
 #endif /* CRAY && CRAY_STACKSEG_END */
 
-#if __STDC__
 typedef void *pointer;
-#else
-typedef char *pointer;
-#endif
 
 #define	NULL	0
 
@@ -77,7 +73,7 @@ typedef char *pointer;
 
 #ifndef emacs
 #define malloc xmalloc
-extern pointer xmalloc ();
+extern pointer xmalloc (size_t);
 #endif
 
 /* Define STACK_DIRECTION if you know the direction of stack
@@ -102,7 +98,7 @@ static int stack_dir;		/* 1 or -1 once known.  */
 #define	STACK_DIR	stack_dir
 
 static void
-find_stack_direction ()
+find_stack_direction (void)
 {
   static char *addr = NULL;	/* Address of first `dummy', once known.  */
   auto char dummy;		/* To get stack address.  */
@@ -156,8 +152,7 @@ static header *last_alloca_header = NULL;	/* -> last alloca header.  */
    implementations of C, for example under Gould's UTX/32.  */
 
 pointer
-alloca (size)
-     size_t size;
+alloca (size_t size)
 {
   auto char probe;		/* Probes stack depth: */
   register char *depth = ADDRESS_FUNCTION (probe);

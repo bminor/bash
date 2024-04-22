@@ -1,5 +1,7 @@
 @comment %**start of header (This is for running Texinfo on a region.)
+@ifclear BashFeatures
 @setfilename rluser.info
+@end ifclear
 @comment %**end of header (This is for running Texinfo on a region.)
 
 @ignore
@@ -9,7 +11,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2022 Free Software Foundation, Inc.
+Copyright (C) 1988--2023 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -323,13 +325,14 @@ the line, thereby executing the command from the history list.
 A movement command will terminate the search, make the last line found
 the current line, and begin editing.
 
-Readline remembers the last incremental search string.  If two
-@kbd{C-r}s are typed without any intervening characters defining a new
-search string, any remembered search string is used.
+Readline remembers the last incremental search string.
+If two @kbd{C-r}s are typed without any intervening characters defining
+a new search string, Readline uses any remembered search string.
 
 Non-incremental searches read the entire search string before starting
-to search for matching history lines.  The search string may be
-typed by the user or be part of the contents of the current line.
+to search for matching history lines.
+The search string may be typed by the user or be part of the contents of
+the current line.
 
 @node Readline Init File
 @section Readline Init File
@@ -402,11 +405,12 @@ set editing-mode vi
 @end example
 
 Variable names and values, where appropriate, are recognized without regard
-to case.  Unrecognized variable names are ignored.
+to case.
+Unrecognized variable names are ignored.
 
 Boolean variables (those that can be set to on or off) are set to on if
-the value is null or empty, @var{on} (case-insensitive), or 1.  Any other
-value results in the variable being set to off.
+the value is null or empty, @var{on} (case-insensitive), or 1.
+Any other value results in the variable being set to off.
 
 @ifset BashFeatures
 The @w{@code{bind -V}} command lists the current Readline variable names
@@ -456,8 +460,12 @@ the terminal's bell.
 @item bind-tty-special-chars
 @vindex bind-tty-special-chars
 If set to @samp{on} (the default), Readline attempts to bind the control
-characters   treated specially by the kernel's terminal driver to their
+characters that are
+treated specially by the kernel's terminal driver to their
 Readline equivalents.
+These override the default Readline bindings described here.
+Type @samp{stty -a} at a Bash prompt to see your current terminal settings,
+including the special control characters (usually @code{cchars}).
 
 @item blink-matching-paren
 @vindex blink-matching-paren
@@ -716,11 +724,11 @@ The default is @samp{off}.
 
 @item match-hidden-files
 @vindex match-hidden-files
-This variable, when set to @samp{on}, causes Readline to match files whose
+This variable, when set to @samp{on}, forces Readline to match files whose
 names begin with a @samp{.} (hidden files) when performing filename
 completion.
-If set to @samp{off}, the leading @samp{.} must be
-supplied by the user in the filename to be completed.
+If set to @samp{off}, the user must include the leading @samp{.}
+in the filename to be completed.
 This variable is @samp{on} by default.
 
 @item menu-complete-display-prefix
@@ -756,6 +764,12 @@ If set to @samp{on}, Readline will undo all changes to history lines
 before returning when @code{accept-line} is executed.  By default,
 history lines may be modified and retain individual undo lists across
 calls to @code{readline()}.  The default is @samp{off}.
+
+@item search-ignore-case
+@vindex search-ignore-case
+If set to @samp{on}, Readline performs incremental and non-incremental
+history list searches in a case-insensitive fashion.
+The default value is @samp{off}.
 
 @item show-all-if-ambiguous
 @vindex show-all-if-ambiguous
@@ -1458,6 +1472,16 @@ moving point past that word as well.
 If the insertion point is at the end of the line, this transposes
 the last two words on the line.
 
+@ifset BashFeatures
+@item shell-transpose-words (M-C-t)
+Drag the word before point past the word after point,
+moving point past that word as well.
+If the insertion point is at the end of the line, this transposes
+the last two words on the line.
+Word boundaries are the same as @code{shell-forward-word} and
+@code{shell-backward-word}.
+@end ifset
+
 @item upcase-word (M-u)
 Uppercase the current (or following) word.  With a negative argument,
 uppercase the previous word, but do not move the cursor.
@@ -1527,14 +1551,6 @@ Word boundaries are the same as @code{shell-forward-word}.
 Kill the word behind point.
 Word boundaries are the same as @code{shell-backward-word}.
 @end ifset
-
-@item shell-transpose-words (M-C-t)
-Drag the word before point past the word after point,
-moving point past that word as well.
-If the insertion point is at the end of the line, this transposes
-the last two words on the line.
-Word boundaries are the same as @code{shell-forward-word} and
-@code{shell-backward-word}.
 
 @item unix-word-rubout (C-w)
 Kill the word behind point, using white space as a word boundary.
@@ -1858,9 +1874,13 @@ pathname expansion.
 Display version information about the current instance of Bash.
 
 @item shell-expand-line (M-C-e)
-Expand the line as the shell does.
-This performs alias and history expansion as well as all of the shell
-word expansions (@pxref{Shell Expansions}).
+Expand the line by performing shell word expansions.  
+This performs alias and history expansion,
+$'@var{string}' and $"@var{string}" quoting,
+tilde expansion, parameter and variable expansion, arithmetic expansion,
+command and proces substitution,
+word splitting, and quote removal.  
+An explicit argument suppresses command and process substitution.
 
 @item history-expand-line (M-^)
 Perform history expansion on the current line.
@@ -1897,6 +1917,13 @@ When in @code{emacs} editing mode, this causes a switch to @code{vi}
 editing mode.
 
 @end ifclear
+
+@item execute-named-command (M-x)
+Read a bindable readline command name from the input and execute the
+function to which it's bound, as if the key sequence to which it was
+bound appeared in the input.
+If this function is supplied with a numeric argument, it passes that
+argument to the function it executes.
 
 @end ftable
 
@@ -2098,14 +2125,25 @@ be completed, and two to modify the completion as it is happening.
 @item compgen
 @btindex compgen
 @example
-@code{compgen [@var{option}] [@var{word}]}
+@code{compgen [-V @var{varname}] [@var{option}] [@var{word}]}
 @end example
 
 Generate possible completion matches for @var{word} according to
 the @var{option}s, which may be any option accepted by the
 @code{complete}
-builtin with the exception of @option{-p} and @option{-r}, and write
-the matches to the standard output.
+builtin with the exceptions of
+@option{-p},
+@option{-r},
+@option{-D},
+@option{-E},
+and
+@option{-I},
+and write the matches to the standard output.
+
+If the @option{-V} option is supplied, @code{compgen} stores the generated
+completions into the indexed array variable @var{varname} instead of writing
+them to the standard output.
+
 When using the @option{-F} or @option{-C} options, the various shell variables
 set by the programmable completion facilities, while available, will not
 have useful values.
@@ -2122,14 +2160,15 @@ matches were generated.
 @item complete
 @btindex complete
 @example
-@code{complete [-abcdefgjksuv] [-o @var{comp-option}] [-DEI] [-A @var{action}] [-G @var{globpat}]
-[-W @var{wordlist}] [-F @var{function}] [-C @var{command}] [-X @var{filterpat}]
-[-P @var{prefix}] [-S @var{suffix}] @var{name} [@var{name} @dots{}]}
+@code{complete [-abcdefgjksuv] [-o @var{comp-option}] [-DEI] [-A @var{action}]
+[-G @var{globpat}] [-W @var{wordlist}] [-F @var{function}] [-C @var{command}]
+[-X @var{filterpat}] [-P @var{prefix}] [-S @var{suffix}] @var{name} [@var{name} @dots{}]}
 @code{complete -pr [-DEI] [@var{name} @dots{}]}
 @end example
 
 Specify how arguments to each @var{name} should be completed.
-If the @option{-p} option is supplied, or if no options are supplied, existing
+If the @option{-p} option is supplied, or if no options or @var{name}s
+are supplied, existing
 completion specifications are printed in a way that allows them to be
 reused as input.
 The @option{-r} option removes a completion specification for
@@ -2186,6 +2225,10 @@ filename-specific processing (like adding a slash to directory names,
 quoting special characters, or suppressing trailing spaces).
 This option is intended to be used with shell functions specified
 with @option{-F}.
+
+@item fullquote
+Tell Readline to quote all the completed words even if they are not
+filenames.
 
 @item noquote
 Tell Readline not to quote the completed words if they are filenames
@@ -2330,7 +2373,14 @@ case, any completion not matching @var{filterpat} is removed.
 @end table
 
 The return value is true unless an invalid option is supplied, an option
-other than @option{-p} or @option{-r} is supplied without a @var{name}
+other than
+@option{-p},
+@option{-r},
+@option{-D},
+@option{-E},
+or
+@option{-I}
+is supplied without a @var{name}
 argument, an attempt is made to remove a completion specification for
 a @var{name} for which no specification exists, or
 an error occurs adding a completion specification.
@@ -2458,9 +2508,11 @@ complete -o filenames -o nospace -o bashdefault -F _comp_cd cd
 @noindent
 Since we'd like Bash and Readline to take care of some
 of the other details for us, we use several other options to tell Bash
-and Readline what to do.  The @option{-o filenames} option tells Readline
+and Readline what to do.
+The @option{-o filenames} option tells Readline
 that the possible completions should be treated as filenames, and quoted
-appropriately.  That option will also cause Readline to append a slash to
+appropriately.
+That option will also cause Readline to append a slash to
 filenames it can determine are directories (which is why we might want to
 extend @code{_comp_cd} to append a slash if we're using directories found
 via @var{CDPATH}: Readline can't tell those completions are directories).
@@ -2468,9 +2520,10 @@ The @option{-o nospace} option tells Readline to not append a space
 character to the directory name, in case we want to append to it.
 The @option{-o bashdefault} option brings in the rest of the "Bash default"
 completions -- possible completions that Bash adds to the default Readline
-set.  These include things like command name completion, variable completion
-for words beginning with @samp{$} or @samp{$@{}, completions containing pathname
-expansion patterns (@pxref{Filename Expansion}), and so on.
+set.
+These include things like command name completion, variable completion
+for words beginning with @samp{$} or @samp{$@{}, completions containing
+pathname expansion patterns (@pxref{Filename Expansion}), and so on.
 
 Once installed using @code{complete}, @code{_comp_cd} will be called every
 time we attempt word completion for a @code{cd} command.
@@ -2479,8 +2532,8 @@ Many more examples -- an extensive collection of completions for most of
 the common GNU, Unix, and Linux commands -- are available as part of the
 bash_completion project.  This is installed by default on many GNU/Linux
 distributions.  Originally written by Ian Macdonald, the project now lives
-at @url{https://github.com/scop/bash-completion/}.  There are ports for
-other systems such as Solaris and Mac OS X.
+at @url{https://github.com/scop/bash-completion/}.
+There are ports for other systems such as Solaris and Mac OS X.
 
 An older version of the bash_completion package is distributed with bash
 in the @file{examples/complete} subdirectory.

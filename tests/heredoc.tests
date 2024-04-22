@@ -80,6 +80,12 @@ F
 EOF
 true
 
+# but unquoted here-documents remove backslash-newline
+cat <<EOF
+line 1\
+line 2
+EOF
+
 # check that \newline is removed at start of here-doc
 cat << EO\
 F
@@ -92,6 +98,12 @@ hi
 EO\
 F
 
+# backslash-newline processing is performed before the check for the delimiter
+cat <<EOF
+next\
+EOF
+EOF
+
 # check operation of tab removal in here documents
 cat <<- EOF
 	tab 1
@@ -100,16 +112,25 @@ cat <<- EOF
 	EOF
 
 # check appending of text to file from here document
-rm -f ${TMPDIR}/bash-zzz
-cat > ${TMPDIR}/bash-zzz << EOF
+rm -f ${TMPDIR}/bash-zzz-$$
+cat > ${TMPDIR}/bash-zzz-$$ << EOF
 abc
 EOF
-cat >> ${TMPDIR}/bash-zzz << EOF
+cat >> ${TMPDIR}/bash-zzz-$$ << EOF
 def ghi
 jkl mno
 EOF
-cat ${TMPDIR}/bash-zzz
-rm -f ${TMPDIR}/bash-zzz
+cat ${TMPDIR}/bash-zzz-$$
+rm -f ${TMPDIR}/bash-zzz-$$
+
+# check behavior of double quotes and backslashes in here-documents
+cat <<EOF
+echo "
+EOF
+
+cat <<EOF
+echo \"
+EOF
 
 # make sure command printing puts the here-document as the last redirection
 # on the line, and the function export code preserves syntactic correctness
@@ -142,7 +163,13 @@ ${THIS_SH} ./heredoc6.sub
 
 # interaction between here-documents and command substitutions
 ${THIS_SH} ./heredoc7.sub
+${THIS_SH} ./heredoc8.sub
 
+# various tests for printing here-documents in function bodies
+${THIS_SH} ./heredoc9.sub
+
+# test various combinations of here-documents and aliases
+${THIS_SH} ./heredoc10.sub
 
 echo $(
 	cat <<< "comsub here-string"
@@ -151,6 +178,7 @@ echo $(
 # check that end of file delimits a here-document
 # THIS MUST BE LAST!
 
-cat << EOF
+cat <<''
 hi
 there
+''

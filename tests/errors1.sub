@@ -20,13 +20,14 @@ f()
 
 set -- a b c
 shift -4
+shift -- -4
 
 f
 
-for f in 1 2 3; do
-	break -1
-done
-
+for f in 1 2 3; do break -1; done
+for f in 1 2 3; do continue -1; done
+for f in 1 2 3; do break -- -5; done
+for f in 1 2 3; do continue -- -5; done
 
 f()
 {

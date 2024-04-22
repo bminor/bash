@@ -101,7 +101,8 @@ extern int yydebug;
     GREATER_BAR = 302,             /* GREATER_BAR  */
     BAR_AND = 303,                 /* BAR_AND  */
     DOLPAREN = 304,                /* DOLPAREN  */
-    yacc_EOF = 305                 /* yacc_EOF  */
+    DOLBRACE = 305,                /* DOLBRACE  */
+    yacc_EOF = 306                 /* yacc_EOF  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -157,13 +158,14 @@ extern int yydebug;
 #define GREATER_BAR 302
 #define BAR_AND 303
 #define DOLPAREN 304
-#define yacc_EOF 305
+#define DOLBRACE 305
+#define yacc_EOF 306
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 338 "/usr/local/src/chet/src/bash/src/parse.y"
+#line 365 "/usr/local/src/chet/src/bash/src/parse.y"
 
   WORD_DESC *word;		/* the word that we read. */
   int number;			/* the number that we read. */
@@ -173,7 +175,7 @@ union YYSTYPE
   ELEMENT element;
   PATTERN_LIST *pattern;
 
-#line 177 "y.tab.h"
+#line 179 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -15,7 +15,7 @@
 # test basic behavior of globskipdots
 TDIR=/tmp/dotglob-$$
 
-{ mkdir $TDIR && cd $TDIR; } || exit 1
+{ mkdir $TDIR && cd -L $TDIR; } || exit 1
 
 touch a b aa bb .a .b .aa .bb
 

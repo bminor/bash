@@ -1,6 +1,6 @@
 /* shell.h -- The data structures used by the shell */
 
-/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,7 +29,6 @@
 #include "general.h"
 #include "error.h"
 #include "variables.h"
-#include "arrayfunc.h"
 #include "quit.h"
 #include "maxpath.h"
 #include "unwind_prot.h"
@@ -37,6 +36,7 @@
 #include "make_cmd.h"
 #include "ocache.h"
 #include "subst.h"
+#include "arrayfunc.h"
 #include "sig.h"
 #include "pathnames.h"
 #include "externs.h"
@@ -73,6 +73,7 @@ extern int EOF_Reached;
 #define EX_BADASSIGN	260	/* variable assignment error */
 #define EX_EXPFAIL	261	/* word expansion failed */
 #define EX_DISKFALLBACK	262	/* fall back to disk command from builtin */
+#define EX_UTILERROR	263	/* Posix special builtin utility error */
 
 /* Flag values that control parameter pattern substitution. */
 #define MATCH_ANY	0x000
@@ -96,9 +97,11 @@ extern char *command_execution_string;
 
 extern int debugging_mode;
 extern int executing, login_shell;
+extern int parsing_command;
 extern int interactive, interactive_shell;
 extern int startup_state;
 extern int reading_shell_script;
+extern int ssh_reading_startup_files;
 extern int shell_initialized;
 extern int bash_argv_initialized;
 extern int subshell_environment;
@@ -106,6 +109,8 @@ extern int current_command_number;
 extern int indirection_level;
 extern int shell_compatibility_level;
 extern int running_under_emacs;
+
+extern int pretty_print_mode;
 
 extern int posixly_correct;
 extern int no_line_editing;
@@ -144,8 +149,8 @@ struct fd_bitmap {
 
 /* Information about the current user. */
 struct user_info {
-  uid_t uid, euid;
-  gid_t gid, egid;
+  uid_t uid, euid, saveuid;
+  gid_t gid, egid, savegid;
   char *user_name;
   char *shell;		/* shell from the password file */
   char *home_dir;
@@ -171,6 +176,7 @@ typedef struct _sh_parser_state_t
   /* parsing state */
   int parser_state;
   int *token_state;
+  int parsing_command;
 
   char *token;
   size_t token_buffer_size;
@@ -228,13 +234,15 @@ typedef struct _sh_input_line_state_t
 } sh_input_line_state_t;
 
 /* Let's try declaring these here. */
-extern void shell_ungets PARAMS((char *));
-extern void rewind_input_string PARAMS((void));
+extern void shell_ungets (char *);
+extern void rewind_input_string (void);
 
-extern char *parser_remaining_input PARAMS((void));
+extern char *parser_remaining_input (void);
 
-extern sh_parser_state_t *save_parser_state PARAMS((sh_parser_state_t *));
-extern void restore_parser_state PARAMS((sh_parser_state_t *));
+extern sh_parser_state_t *save_parser_state (sh_parser_state_t *);
+extern void restore_parser_state (sh_parser_state_t *);
+extern void flush_parser_state (sh_parser_state_t *);
+extern void uw_restore_parser_state (void *);
 
-extern sh_input_line_state_t *save_input_line_state PARAMS((sh_input_line_state_t *));
-extern void restore_input_line_state PARAMS((sh_input_line_state_t *));
+extern sh_input_line_state_t *save_input_line_state (sh_input_line_state_t *);
+extern void restore_input_line_state (sh_input_line_state_t *);

@@ -1,7 +1,7 @@
 This file is exit.def, from which is created exit.c.
 It implements the builtins "exit", and "logout" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,14 +48,11 @@ $END
 #include "common.h"
 #include "builtext.h"	/* for jobs_builtin */
 
-extern int check_jobs_at_exit;
-
-static int exit_or_logout PARAMS((WORD_LIST *));
+static int exit_or_logout (WORD_LIST *);
 static int sourced_logout;
 
 int
-exit_builtin (list)
-     WORD_LIST *list;
+exit_builtin (WORD_LIST *list)
 {
   CHECK_HELPOPT (list);
 
@@ -79,8 +76,7 @@ $END
 
 /* How to logout. */
 int
-logout_builtin (list)
-     WORD_LIST *list;
+logout_builtin (WORD_LIST *list)
 {
   CHECK_HELPOPT (list);
 
@@ -94,8 +90,7 @@ logout_builtin (list)
 }
 
 static int
-exit_or_logout (list)
-     WORD_LIST *list;
+exit_or_logout (WORD_LIST *list)
 {
   int exit_value;
 
@@ -145,6 +140,8 @@ exit_or_logout (list)
      (list == 0), use the exit status we saved before running the trap
      commands (trap_saved_exit_value). */
   exit_value = (running_trap == 1 && list == 0) ? trap_saved_exit_value : get_exitstat (list);
+  if (exit_value > EX_SHERRBASE)	/* some kind of error */
+    return (exit_value);    
 
   bash_logout ();
 
@@ -156,7 +153,7 @@ exit_or_logout (list)
 }
 
 void
-bash_logout ()
+bash_logout (void)
 {
   /* Run our `~/.bash_logout' file if it exists, and this is a login shell. */
   if (login_shell && sourced_logout++ == 0 && subshell_environment == 0)

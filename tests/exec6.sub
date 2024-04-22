@@ -65,3 +65,19 @@ echo $?
 echo $?
 
 rm -f /tmp/notwrite
+
+!; echo 1 hi $?
+!& echo 2 hi $?
+
+(echo !)
+#echo !(echo c)
+echo !>/dev/null
+echo !</dev/null
+
+! &
+echo $?
+!
+echo $?
+
+{ time & } 2>/dev/null
+echo $?

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,7 +49,7 @@ struct tms
    Return the elapsed real time from an arbitrary point in the
    past (the bash emulation uses the epoch), or (clock_t) -1 for
    errors.  All times are in CLK_TCKths of a second.  */
-extern clock_t times PARAMS((struct tms *buffer));
+extern clock_t times (struct tms *buffer);
 
 #endif /* !HAVE_SYS_TIMES_H */
 #endif /* _BASH_SYSTIMES_H */

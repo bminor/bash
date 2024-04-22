@@ -6,7 +6,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -51,14 +51,18 @@
 extern int	errno;
 #endif
 
-extern char	**make_builtin_argv ();
+extern char	**make_builtin_argv (WORD_LIST *, int *);
 
-static void	perms();
-static int	printst();
-static int	printsome();
-static void	printmode();
-static int	printfinfo();
-static int	finfo_main();
+static struct stat *getstat(char *);
+static int	printinfo(char *);
+static int	getperm(int);
+
+static void	perms(int);
+static int	printst(struct stat *);
+static int	printsome(char *, int);
+static void	printmode(int);
+static int	printfinfo(char *);
+static int	finfo_main(int, char **);
 
 extern int	sh_optind;
 extern char	*sh_optarg;
@@ -91,21 +95,7 @@ static int	pmask;
 #define OPTIONS		"acdgiflmnopsuACGMP:U"
 
 static int
-octal(s)
-char	*s;
-{
-	int	r;
-
-	r = *s - '0';
-	while (*++s >= '0' && *s <= '7')
-		r = (r * 8) + (*s - '0');
-	return r;
-}
-
-static int
-finfo_main(argc, argv)
-int	argc;
-char	**argv;
+finfo_main(int argc, char **argv)
 {
 	register int	i;
 	int	mode, flags, opt;
@@ -134,7 +124,14 @@ char	**argv;
 		case 'n': flags |= OPT_NLINK; break;
 		case 'o': flags |= OPT_OPERM; break;
 		case 'p': flags |= OPT_PERM; break;
-		case 'P': flags |= OPT_PMASK; pmask = octal(sh_optarg); break;
+		case 'P':
+			flags |= OPT_PMASK;
+			pmask = read_octal(sh_optarg);
+			if (pmask < 0) {
+				builtin_error ("invalid mode: %s", sh_optarg);
+				return(1);
+			}
+			break;
 		case 's': flags |= OPT_SIZE; break;
 		case 'u': flags |= OPT_UID; break;
 		case 'U': flags |= OPT_UID|OPT_ASCII; break;
@@ -157,15 +154,14 @@ char	**argv;
 }
 
 static struct stat *
-getstat(f)
-char	*f;
+getstat(char *f)
 {
 	static struct stat st;
 	int	fd, r;
 	intmax_t lfd;
 
 	if (strncmp(f, "/dev/fd/", 8) == 0) {
-		if ((legal_number(f + 8, &lfd) == 0) || (int)lfd != lfd) {
+		if ((valid_number(f + 8, &lfd) == 0) || (int)lfd != lfd) {
 			builtin_error("%s: invalid fd", f + 8);
 			return ((struct stat *)0);
 		}
@@ -185,8 +181,7 @@ char	*f;
 }
 
 static int
-printfinfo(f)
-char	*f;
+printfinfo(char *f)
 {
 	struct stat *st;
 
@@ -195,15 +190,13 @@ char	*f;
 }
 
 static int
-getperm(m)
-int	m;
+getperm(int m)
 {
 	return (m & (S_IRWXU|S_IRWXG|S_IRWXO|S_ISUID|S_ISGID));
 }
 
 static void
-perms(m)
-int	m;
+perms(int m)
 {
 	char ubits[4], gbits[4], obits[4];	/* u=rwx,g=rwx,o=rwx */
 	int i;
@@ -246,8 +239,7 @@ int	m;
 }
 
 static void
-printmode(mode)
-int	mode;
+printmode(int mode)
 {
 	if (S_ISBLK(mode))
 		printf("S_IFBLK ");
@@ -272,8 +264,7 @@ int	mode;
 }
 
 static int
-printst(st)
-struct stat *st;
+printst(struct stat *st)
 {
 	struct passwd	*pw;
 	struct group	*gr;
@@ -309,15 +300,14 @@ struct stat *st;
 }
 
 static int
-printsome(f, flags)
-char	*f;
-int	flags;
+printsome(char *f, int flags)
 {
 	struct stat *st;
 	struct passwd *pw;
 	struct group *gr;
 	int	p;
 	char	*b;
+	intmax_t xtime;
 
 	st = getstat(f);
 	if (st == NULL)
@@ -325,20 +315,23 @@ int	flags;
 
 	/* Print requested info */
 	if (flags & OPT_ATIME) {
+		xtime = st->st_atime;
 		if (flags & OPT_ASCII)
 			printf("%s", ctime(&st->st_atime));
 		else
-			printf("%ld\n", st->st_atime);
+			printf("%jd\n", xtime);
 	} else if (flags & OPT_MTIME) {
+		xtime = st->st_mtime;
 		if (flags & OPT_ASCII)
 			printf("%s", ctime(&st->st_mtime));
 		else
-			printf("%ld\n", st->st_mtime);
+			printf("%jd\n", xtime);
 	} else if (flags & OPT_CTIME) {
+		xtime = st->st_ctime;
 		if (flags & OPT_ASCII)
 			printf("%s", ctime(&st->st_ctime));
 		else
-			printf("%ld\n", st->st_ctime);
+			printf("%jd\n", xtime);
 	} else if (flags & OPT_DEV)
 		printf("%lu\n", (unsigned long)st->st_dev);
 	else if (flags & OPT_INO)
@@ -391,8 +384,7 @@ int	flags;
 
 #ifndef NOBUILTIN
 int
-finfo_builtin(list)
-     WORD_LIST *list;
+finfo_builtin(WORD_LIST *list)
 {
   int c, r;
   char **v;
@@ -447,34 +439,26 @@ struct builtin finfo_struct = {
 #endif
 
 #ifdef NOBUILTIN
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  if defined (PREFER_VARARGS)
-#    include <varargs.h>
-#  endif
-#endif
+#include <stdarg.h>
 
 char *this_command_name;
 
-main(argc, argv)
-int	argc;
-char	**argv;
+int
+main(int argc, char **argv)
 {
 	this_command_name = argv[0];
 	exit(finfo_main(argc, argv));
 }
 
 void
-builtin_usage()
+builtin_usage(void)
 {
 	fprintf(stderr, "%s: usage: %s [-%s] [file ...]\n", prog, prog, OPTIONS);
 }
 
 #ifndef HAVE_STRERROR
 char *
-strerror(e)
-int	e;
+strerror(int e)
 {
 	static char	ebuf[40];
 	extern int	sys_nerr;
@@ -488,23 +472,20 @@ int	e;
 }
 #endif
 
-char *
-xmalloc(s)
-size_t	s;
+PTR_T
+xmalloc(size_t s)
 {
 	char	*ret;
-	extern char *malloc();
 
 	ret = malloc(s);
 	if (ret)
 		return (ret);
-	fprintf(stderr, "%s: cannot malloc %d bytes\n", prog, s);
+	fprintf(stderr, "%s: cannot malloc %zu bytes\n", prog, s);
 	exit(1);
 }
 
 char *
-base_pathname(p)
-char	*p;
+base_pathname(char *p)
 {
 	char	*t;
 
@@ -514,9 +495,7 @@ char	*p;
 }
 
 int
-legal_number (string, result)
-     char *string;
-     long *result;
+valid_number (char *string, long result)
 {
   int sign;
   long value;
@@ -575,9 +554,7 @@ extern int optind;
 extern char *optarg;
 
 int
-sh_getopt(c, v, o)
-int	c;
-char	**v, *o;
+sh_getopt(int c, char **v, char *o)
 {
 	int	r;
 
@@ -587,43 +564,18 @@ char	**v, *o;
 	return r;
 }
 
-#if defined (USE_VARARGS)
 void
-#if defined (PREFER_STDARG)
 builtin_error (const char *format, ...)
-#else
-builtin_error (format, va_alist)
-     const char *format;
-     va_dcl
-#endif
 {
   va_list args;
 
   if (this_command_name && *this_command_name)
     fprintf (stderr, "%s: ", this_command_name);
 
-#if defined (PREFER_STDARG)
   va_start (args, format);
-#else
-  va_start (args);
-#endif
 
   vfprintf (stderr, format, args);
   va_end (args);
   fprintf (stderr, "\n");
 }
-#else
-void
-builtin_error (format, arg1, arg2, arg3, arg4, arg5)
-     char *format, *arg1, *arg2, *arg3, *arg4, *arg5;
-{
-  if (this_command_name && *this_command_name)
-    fprintf (stderr, "%s: ", this_command_name);
-
-  fprintf (stderr, format, arg1, arg2, arg3, arg4, arg5);
-  fprintf (stderr, "\n");
-  fflush (stderr);
-}
-#endif /* !USE_VARARGS */
-
 #endif

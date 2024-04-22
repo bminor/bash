@@ -5,7 +5,7 @@
  * chet@ins.CWRU.Edu
  */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,27 +63,25 @@ extern int errno;
 #endif
 
 #if !defined (HAVE_INET_ATON)
-extern int inet_aton PARAMS((const char *, struct in_addr *));
+extern int inet_aton (const char *, struct in_addr *);
 #endif
 
 #ifndef HAVE_GETADDRINFO
-static int _getaddr PARAMS((char *, struct in_addr *));
-static int _getserv PARAMS((char *, int, unsigned short *));
-static int _netopen4 PARAMS((char *, char *, int));
+static int _getaddr (const char *, struct in_addr *);
+static int _getserv (const char *, int, unsigned short *);
+static int _netopen4 (const char *, const char *, int);
 #else /* HAVE_GETADDRINFO */
-static int _netopen6 PARAMS((char *, char *, int));
+static int _netopen6 (const char *, const char *, int);
 #endif
 
-static int _netopen PARAMS((char *, char *, int));
+static int _netopen (const char *, const char *, int);
 
 #ifndef HAVE_GETADDRINFO
 /* Stuff the internet address corresponding to HOST into AP, in network
    byte order.  Return 1 on success, 0 on failure. */
 
 static int
-_getaddr (host, ap)
-     char *host;
-     struct in_addr *ap;
+_getaddr (const char *host, struct in_addr *ap)
 {
   struct hostent *h;
   int r;
@@ -114,15 +112,12 @@ _getaddr (host, ap)
 /* Return 1 if SERV is a valid port number and stuff the converted value into
    PP in network byte order. */   
 static int
-_getserv (serv, proto, pp)
-     char *serv;
-     int proto;
-     unsigned short *pp;
+_getserv (const char *serv, int proto, unsigned short *pp)
 {
   intmax_t l;
   unsigned short s;
 
-  if (legal_number (serv, &l))
+  if (valid_number (serv, &l))
     {
       s = (unsigned short)(l & 0xFFFF);
       if (s != l)
@@ -154,9 +149,7 @@ _getserv (serv, proto, pp)
  * traditional BSD mechanisms.  Returns the connected socket or -1 on error.
  */
 static int 
-_netopen4(host, serv, typ)
-     char *host, *serv;
-     int typ;
+_netopen4(const char *host, const char *serv, int typ)
 {
   struct in_addr ina;
   struct sockaddr_in sin;
@@ -209,9 +202,7 @@ _netopen4(host, serv, typ)
  * on error.
  */
 static int
-_netopen6 (host, serv, typ)
-     char *host, *serv;
-     int typ;
+_netopen6 (const char *host, const char *serv, int typ)
 {
   int s, e;
   struct addrinfo hints, *res, *res0;
@@ -274,9 +265,7 @@ _netopen6 (host, serv, typ)
  * Returns the connected socket or -1 on error.
  */
 static int 
-_netopen(host, serv, typ)
-     char *host, *serv;
-     int typ;
+_netopen(const char *host, const char *serv, int typ)
 {
 #ifdef HAVE_GETADDRINFO
   return (_netopen6 (host, serv, typ));
@@ -290,8 +279,7 @@ _netopen(host, serv, typ)
  * host `host' on port `port' and return the connected socket.
  */
 int
-netopen (path)
-     char *path;
+netopen (char *path)
 {
   char *np, *s, *t;
   int fd;
@@ -320,8 +308,7 @@ netopen (path)
  * `serv' and return the connected socket.
  */
 int
-tcpopen (host, serv)
-     char *host, *serv;
+tcpopen (char *host, char *serv)
 {
   return (_netopen (host, serv, 't'));
 }
@@ -331,8 +318,7 @@ tcpopen (host, serv)
  * `serv' and return the connected socket.
  */
 int
-udpopen (host, serv)
-     char *host, *serv;
+udpopen (char *host, char *serv)
 {
   return _netopen (host, serv, 'u');
 }
@@ -341,8 +327,7 @@ udpopen (host, serv)
 #else /* !HAVE_NETWORK */
 
 int
-netopen (path)
-     char *path;
+netopen (char *path)
 {
   internal_error (_("network operations not supported"));
   return -1;

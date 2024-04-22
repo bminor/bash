@@ -9,6 +9,8 @@ a.
 -\ a  b\-
 -\-a  b\-
 -\ a  b\-
+argv[1] = <abc>
+argv[1] = <abc\>
 argv[1] = <^A>
 argv[1] = <^A>
 argv[1] = <^?>
@@ -29,6 +31,8 @@ argv[1] = < foo>
 argv[1] = <foo>
 argv[1] = <foo>
 argv[1] = < foo>
+./read.tests: line 101: b: readonly variable
+a = a b = c = stat = 2
 a = abcdefg
 xyz
 a = xyz
@@ -45,12 +49,14 @@ unset or null 3
 
 abcde
 abcde
+abcde
 ./read3.sub: line 17: read: -1: invalid number
 abc
 defg
 ab
 abc
 #
+0
 while read -u 3 var
 do
 echo "$var"
@@ -83,3 +89,6 @@ one
 two three four
 one
 two three four
+IFS=[,] var=[abc] rest=[def,ghi]
+IFS=[] var=[abc] rest=[def,ghi]
+IFS=[ ] var=[  abc] rest=[def,ghi ]

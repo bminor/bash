@@ -1,7 +1,7 @@
 This file is break.def, from which is created break.c.
 It implements the builtins "break" and "continue" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,7 +46,7 @@ $END
 #include "../execute_cmd.h"
 #include "common.h"
 
-static int check_loop_level PARAMS((void));
+static int check_loop_level (void);
 
 /* The depth of while's and until's. */
 int loop_level = 0;
@@ -60,8 +60,7 @@ int continuing = 0;
 /* Set up to break x levels, where x defaults to 1, but can be specified
    as the first argument. */
 int
-break_builtin (list)
-     WORD_LIST *list;
+break_builtin (WORD_LIST *list)
 {
   intmax_t newbreak;
 
@@ -70,10 +69,14 @@ break_builtin (list)
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
 
-  (void)get_numeric_arg (list, 1, &newbreak);
+  /* This will not return if an error is encountered. */
+  (void)get_numeric_arg (list, interactive_shell ? 2 : 1, &newbreak);
 
   if (newbreak <= 0)
     {
+      /* skip over `--' option to get the right error message */
+      if (list && list->word && ISOPTION (list->word->word, '-'))
+	list = list->next;
       sh_erange (list->word->word, _("loop count"));
       breaking = loop_level;
       return (EXECUTION_FAILURE);
@@ -102,8 +105,7 @@ $END
 /* Set up to continue x levels, where x defaults to 1, but can be specified
    as the first argument. */
 int
-continue_builtin (list)
-     WORD_LIST *list;
+continue_builtin (WORD_LIST *list)
 {
   intmax_t newcont;
 
@@ -112,10 +114,14 @@ continue_builtin (list)
   if (check_loop_level () == 0)
     return (EXECUTION_SUCCESS);
 
-  (void)get_numeric_arg (list, 1, &newcont);
+  /* This will not return if an error is encountered. */
+  (void)get_numeric_arg (list, interactive_shell ? 2 : 1, &newcont);
 
   if (newcont <= 0)
     {
+      /* skip over `--' option to get the right error message */
+      if (list && list->word && ISOPTION (list->word->word, '-'))
+	list = list->next;
       sh_erange (list->word->word, _("loop count"));
       breaking = loop_level;
       return (EXECUTION_FAILURE);
@@ -132,7 +138,7 @@ continue_builtin (list)
 /* Return non-zero if a break or continue command would be okay.
    Print an error message if break or continue is meaningless here. */
 static int
-check_loop_level ()
+check_loop_level (void)
 {
 #if defined (BREAK_COMPLAINS)
   if (loop_level == 0 && posixly_correct == 0)

@@ -1,6 +1,6 @@
 /* list.c - Functions for manipulating linked lists of objects. */
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,9 +35,7 @@ GENERIC_LIST global_error_list;
 #ifdef INCLUDE_UNUSED
 /* Call FUNCTION on every member of LIST, a generic list. */
 void
-list_walk (list, function)
-     GENERIC_LIST *list;
-     sh_glist_func_t *function;
+list_walk (GENERIC_LIST *list, sh_glist_func_t *function)
 {
   for ( ; list; list = list->next)
     if ((*function) (list) < 0)
@@ -46,9 +44,7 @@ list_walk (list, function)
 
 /* Call FUNCTION on every string in WORDS. */
 void
-wlist_walk (words, function)
-     WORD_LIST *words;
-     sh_icpfunc_t *function;
+wlist_walk (WORD_LIST *words, sh_icpfunc_t *function)
 {
   for ( ; words; words = words->next)
     if ((*function) (words->word->word) < 0)
@@ -60,8 +56,7 @@ wlist_walk (words, function)
    of the chain.  You should always assign the output value of this
    function to something, or you will lose the chain. */
 GENERIC_LIST *
-list_reverse (list)
-     GENERIC_LIST *list;
+list_reverse (GENERIC_LIST *list)
 {
   register GENERIC_LIST *next, *prev;
 
@@ -77,8 +72,7 @@ list_reverse (list)
 
 /* Return the number of elements in LIST, a generic list. */
 int
-list_length (list)
-     GENERIC_LIST *list;
+list_length (GENERIC_LIST *list)
 {
   register int i;
 
@@ -88,8 +82,7 @@ list_length (list)
 
 /* Append TAIL to HEAD.  Return the header of the list. */
 GENERIC_LIST *
-list_append (head, tail)
-     GENERIC_LIST *head, *tail;
+list_append (GENERIC_LIST *head, GENERIC_LIST *tail)
 {
   register GENERIC_LIST *t_head;
 
@@ -113,10 +106,7 @@ list_append (head, tail)
    dispose_variable (elt);
 */
 GENERIC_LIST *
-list_remove (list, comparer, arg)
-     GENERIC_LIST **list;
-     Function *comparer;
-     char *arg;
+list_remove (GENERIC_LIST **list, sh_gcp_func_t *comparer, char *arg)
 {
   register GENERIC_LIST *prev, *temp;
 

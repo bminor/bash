@@ -1,23 +1,19 @@
-/* plural-exp.c - Expression parsing for plural form selection. */
-
-/* Copyright (C) 2000, 2001, 2005-2009 Free Software Foundation, Inc.
+/* Expression parsing for plural form selection.
+   Copyright (C) 2000-2016, 2021 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@cygnus.com>, 2000.
 
-   This file is part of GNU Bash.
-
-   Bash is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation; either version 2.1 of the License, or
    (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful,
+   This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
-*/
+   You should have received a copy of the GNU Lesser General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -29,8 +25,7 @@
 
 #include "plural-exp.h"
 
-#if (defined __GNUC__ && !defined __APPLE_CC__) \
-    || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L)
+#if HAVE_STRUCT_INITIALIZER
 
 /* These structs are the constant expression for the germanic plural
    form determination.  It represents the expression  "n != 1".  */
@@ -48,7 +43,7 @@ static const struct expression plone =
     .num = 1
   }
 };
-struct expression GERMANIC_PLURAL =
+const struct expression GERMANIC_PLURAL =
 {
   .nargs = 2,
   .operation = not_equal,
@@ -74,7 +69,7 @@ static struct expression plone;
 struct expression GERMANIC_PLURAL;
 
 static void
-init_germanic_plural ()
+init_germanic_plural (void)
 {
   if (plone.val.num == 0)
     {
@@ -98,10 +93,9 @@ init_germanic_plural ()
 
 void
 internal_function
-EXTRACT_PLURAL_EXPRESSION (nullentry, pluralp, npluralsp)
-     const char *nullentry;
-     struct expression **pluralp;
-     unsigned long int *npluralsp;
+EXTRACT_PLURAL_EXPRESSION (const char *nullentry,
+			   const struct expression **pluralp,
+			   unsigned long int *npluralsp)
 {
   if (nullentry != NULL)
     {
@@ -124,12 +118,7 @@ EXTRACT_PLURAL_EXPRESSION (nullentry, pluralp, npluralsp)
 	    ++nplurals;
 	  if (!(*nplurals >= '0' && *nplurals <= '9'))
 	    goto no_plural;
-#if defined HAVE_STRTOUL || defined _LIBC
 	  n = strtoul (nplurals, &endp, 10);
-#else
-	  for (endp = nplurals, n = 0; *endp >= '0' && *endp <= '9'; endp++)
-	    n = n * 10 + (*endp - '0');
-#endif
 	  if (nplurals == endp)
 	    goto no_plural;
 	  *npluralsp = n;

@@ -1,7 +1,7 @@
 /* zgetline - read a line of input from a specified file descriptor and return
 	      a pointer to a newly-allocated buffer containing the data. */
 
-/* Copyright (C) 2008-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2020,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,13 +34,13 @@
 extern int errno;
 #endif
 
-extern ssize_t zread PARAMS((int, char *, size_t));
-extern ssize_t zreadc PARAMS((int, char *));
-extern ssize_t zreadintr PARAMS((int, char *, size_t));
-extern ssize_t zreadcintr PARAMS((int, char *));
+extern ssize_t zread (int, char *, size_t);
+extern ssize_t zreadc (int, char *);
+extern ssize_t zreadintr (int, char *, size_t);
+extern ssize_t zreadcintr (int, char *);
 
-typedef ssize_t breadfunc_t PARAMS((int, char *, size_t));
-typedef ssize_t creadfunc_t PARAMS((int, char *));
+typedef ssize_t breadfunc_t (int, char *, size_t);
+typedef ssize_t creadfunc_t (int, char *);
 
 /* Initial memory allocation for automatic growing buffer in zreadlinec */
 #define GET_LINE_INITIAL_ALLOCATION 16
@@ -61,15 +61,10 @@ typedef ssize_t creadfunc_t PARAMS((int, char *));
    Returns number of bytes read or -1 on error. */
 
 ssize_t
-zgetline (fd, lineptr, n, delim, unbuffered_read)
-     int fd;
-     char **lineptr;
-     size_t *n;
-     int delim;
-     int unbuffered_read;
+zgetline (int fd, char **lineptr, size_t *n, int delim, int unbuffered_read)
 {
-  int retval;
-  size_t nr;
+  ssize_t retval;
+  ssize_t nr;
   char *line, c;
 
   if (lineptr == 0 || n == 0 || (*lineptr == 0 && *n != 0))

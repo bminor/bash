@@ -1,7 +1,7 @@
 This file is history.def, from which is created history.c.
 It implements the builtin "history" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,7 +46,11 @@ Options:
   -s	append the ARGs to the history list as a single entry
 
 If FILENAME is given, it is used as the history file.  Otherwise,
-if HISTFILE has a value, that is used, else ~/.bash_history.
+if HISTFILE has a value, that is used. If FILENAME is not supplied
+and HISTFILE is unset or null, the -a, -n, -r, and -w options have
+no effect and return success.
+
+The fc builtin also operates on the history list.
 
 If the HISTTIMEFORMAT variable is set and not null, its value is used
 as a format string for strftime(3) to print the time stamp associated
@@ -86,10 +90,10 @@ $END
 extern int errno;
 #endif
 
-static char *histtime PARAMS((HIST_ENTRY *, const char *));
-static int display_history PARAMS((WORD_LIST *));
-static void push_history PARAMS((WORD_LIST *));
-static int expand_and_print_history PARAMS((WORD_LIST *));
+static char *histtime (HIST_ENTRY *, const char *);
+static int display_history (WORD_LIST *);
+static void push_history (WORD_LIST *);
+static int expand_and_print_history (WORD_LIST *);
 
 #define AFLAG	0x01
 #define RFLAG	0x02
@@ -105,8 +109,7 @@ static int expand_and_print_history PARAMS((WORD_LIST *));
 #endif
 
 int
-history_builtin (list)
-     WORD_LIST *list;
+history_builtin (WORD_LIST *list)
 {
   int flags, opt, result, old_history_lines, obase, ind;
   char *filename, *delete_arg, *range;
@@ -186,7 +189,7 @@ history_builtin (list)
     {
       intmax_t delete_start, delete_end;
       *range++ = '\0';
-      if (legal_number (delete_arg, &delete_start) == 0 || legal_number (range, &delete_end) == 0)
+      if (valid_number (delete_arg, &delete_start) == 0 || valid_number (range, &delete_end) == 0)
 	{
 	  range[-1] = '-';
 	  sh_erange (delete_arg, _("history position"));
@@ -223,9 +226,9 @@ history_builtin (list)
     }
   else if (flags & DFLAG)
     {
-      if (legal_number (delete_arg, &delete_offset) == 0)
+      if (valid_number (delete_arg, &delete_offset) == 0)
 	{
-	  sh_erange (delete_arg, _("history position"));
+	  sh_invalidnum (delete_arg);
 	  return (EXECUTION_FAILURE);
 	}
       /* check for negative offsets, count back from end of list */
@@ -267,6 +270,16 @@ history_builtin (list)
 
   filename = list ? list->word->word : get_string_value ("HISTFILE");
   result = EXECUTION_SUCCESS;
+
+  if (filename == 0 || *filename == 0)
+    {
+      if (interactive_shell == 0 || interactive)
+	if (list && filename == list->word->word)
+	  builtin_error (_("empty filename"));
+	else
+	  builtin_error (_("%s: parameter null or not set"), "HISTFILE");
+      return (interactive ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+    }
 
 #if defined (RESTRICTED_SHELL)
   if (restricted && strchr (filename, '/'))
@@ -322,9 +335,7 @@ history_builtin (list)
 #define histdata(i) (hlist[(i)]->data)
 
 static char *
-histtime (hlist, histtimefmt)
-     HIST_ENTRY *hlist;
-     const char *histtimefmt;
+histtime (HIST_ENTRY *hlist, const char *histtimefmt)
 {
   static char timestr[TIMELEN_MAX];
   time_t t;
@@ -343,8 +354,7 @@ histtime (hlist, histtimefmt)
 }
 
 static int
-display_history (list)
-     WORD_LIST *list;
+display_history (WORD_LIST *list)
 {
   register int i;
   intmax_t limit;
@@ -354,7 +364,7 @@ display_history (list)
   if (list)
     {
       if (get_numeric_arg (list, 0, &limit) == 0)
-	return (EXECUTION_FAILURE);
+	return (EX_USAGE);
 
       if (limit < 0)
 	limit = -limit;
@@ -395,8 +405,7 @@ display_history (list)
 /* Remove the last entry in the history list and add each argument in
    LIST to the history. */
 static void
-push_history (list)
-     WORD_LIST *list;
+push_history (WORD_LIST *list)
 {
   char *s;
 
@@ -432,8 +441,7 @@ push_history (list)
 
 #if defined (BANG_HISTORY)
 static int
-expand_and_print_history (list)
-     WORD_LIST *list;
+expand_and_print_history (WORD_LIST *list)
 {
   char *s;
   int r, result;

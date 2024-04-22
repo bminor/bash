@@ -1,7 +1,7 @@
 /* flags.c -- Everything about flags except the `set' command.  That
    is in builtins.c */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,7 +33,7 @@
 #endif
 
 #if defined (JOB_CONTROL)
-extern int set_job_control PARAMS((int));
+extern int set_job_control (int);
 #endif
 
 /* **************************************************************** */
@@ -208,8 +208,7 @@ const struct flags_alist shell_flags[] = {
 char optflags[NUM_SHELL_FLAGS+4] = { '+' };
 
 int *
-find_flag (name)
-     int name;
+find_flag (int name)
 {
   int i;
   for (i = 0; shell_flags[i].name; i++)
@@ -224,9 +223,7 @@ find_flag (name)
    FLAG_ERROR if there is no flag FLAG.  ON_OR_OFF must be either
    FLAG_ON or FLAG_OFF. */
 int
-change_flag (flag, on_or_off)
-  int flag;
-  int on_or_off;
+change_flag (int flag, int on_or_off)
 {
   int *value, old_value;
 
@@ -294,7 +291,7 @@ change_flag (flag, on_or_off)
 /* Return a string which is the names of all the currently
    set shell flags. */
 char *
-which_set_flags ()
+which_set_flags (void)
 {
   char *temp;
   int i, string_index;
@@ -314,7 +311,7 @@ which_set_flags ()
 }
 
 char *
-get_current_flags ()
+get_current_flags (void)
 {
   char *temp;
   int i;
@@ -327,8 +324,7 @@ get_current_flags ()
 }
 
 void
-set_current_flags (bitmap)
-     const char *bitmap;
+set_current_flags (const char *bitmap)
 {
   int i;
 
@@ -339,7 +335,7 @@ set_current_flags (bitmap)
 }
 
 void
-reset_shell_flags ()
+reset_shell_flags (void)
 {
   mark_modified_vars = disallow_filename_globbing = 0;
   place_keywords_in_env = read_but_dont_execute = just_one_command = 0;
@@ -373,7 +369,7 @@ reset_shell_flags ()
 }
 
 void
-initialize_flags ()
+initialize_flags (void)
 {
   register int i;
 

@@ -1,7 +1,7 @@
 This file is echo.def, from which is created echo.c.
 It implements the builtin "echo" in Bash.
 
-Copyright (C) 1987-2018 Free Software Foundation, Inc.
+Copyright (C) 1987-2018,2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -107,10 +107,10 @@ int xpg_echo = 0;
    `-n', then don't print a trailing newline.  We also support the
    echo syntax from Version 9 Unix systems. */
 int
-echo_builtin (list)
-     WORD_LIST *list;
+echo_builtin (WORD_LIST *list)
 {
-  int display_return, do_v9, i, len;
+  int display_return, do_v9, i;
+  size_t len;
   char *temp, *s;
 
   do_v9 = xpg_echo;

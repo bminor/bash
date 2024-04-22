@@ -1,7 +1,7 @@
 /* mksignames.c -- Create and write `signames.h', which contains an array of
    signal names. */
 
-/* Copyright (C) 1992-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,14 +39,13 @@
 #define LASTSIG NSIG+2
 
 /* Imported from signames.c */
-extern void initialize_signames ();
+extern void initialize_signames (void);
 extern char *signal_names[];
 
 char *progname;
 
 void
-write_signames (stream)
-     FILE *stream;
+write_signames (FILE *stream)
 {
   register int i;
 
@@ -57,7 +56,7 @@ write_signames (stream)
 	   "/* A translation list so we can be polite to our users. */\n");
 #if defined (CROSS_COMPILING)
   fprintf (stream, "extern char *signal_names[];\n\n");
-  fprintf (stream, "extern void initialize_signames PARAMS((void));\n\n");
+  fprintf (stream, "extern void initialize_signames (void);\n\n");
 #else
   fprintf (stream, "char *signal_names[NSIG + 4] = {\n");
 
@@ -71,9 +70,7 @@ write_signames (stream)
 }
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   char *stream_name;
   FILE *stream;

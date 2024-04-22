@@ -97,7 +97,7 @@ line 2 for history
 6	 HISTFILE=$TMPDIR/newhistory
 7	 echo displaying \$HISTFILE after history -a
 8	 cat $HISTFILE
-./history.tests: line 90: fc: no command found
+./history.tests: line 91: fc: no command found
    15  echo line 2 for history
    16  unset HISTSIZE
    17  unset HISTFILE
@@ -107,7 +107,7 @@ echo xx xb xc
 xx xb xc
 echo 44 48 4c
 44 48 4c
-./history.tests: line 105: fc: no command found
+./history.tests: line 106: fc: no command found
 aa
 bb
 cc
@@ -140,9 +140,11 @@ three
 one
 two
 three
-5.2
+(exit 42)
+42
+5.3
 echo ${BASH_VERSION%\.*}
-5.2
+5.3
 	 echo ${BASH_VERSION%\.*}
 a
 b
@@ -178,6 +180,8 @@ i
     4  echo g
     5  echo h
 
+./history3.sub: line 48: history: @42: invalid number
+./history3.sub: line 49: history: @42: numeric argument required
 
 0
 1
@@ -264,6 +268,22 @@ out of range 3
 12	 echo out of range 3
 out of range 4
 13	 fc -l 1 99
+a
+b
+c
+# out of range specs aren't errors
+echo a
+a
+d
+e
+1	 echo a
+2	 echo b
+3	 echo c
+4	 # out of range specs aren't errors
+5	 # out of range specs aren't errors
+6	 echo a
+7	 echo d
+8	 echo e
 1
 2
 3
@@ -297,3 +317,58 @@ out of range 4
     7  echo 9
     8  echo 10
     5  echo 10
+$ 1
+$ 2
+$ 3
+$ exit
+6
+$ 1
+$ 2
+$ 3
+$ 4
+$ 5
+$ exit
+6
+$ 1
+$ 2
+$ exit
+4
+$ e 1
+$ e 2
+$ e 3
+$ exit
+3
+e 1
+e 2
+e 3
+$ x 1
+$ x 2
+$ x 3
+$ x 4
+$ x 5
+$ exit
+3
+x 3
+x 4
+x 5
+$ y 1
+$ y 2
+$ exit
+2
+y 1
+y 2
+$ 1
+$ 2
+$ exit
+0
+a
+b
+c
+d
+    1  echo a
+    2  echo c
+    3  echo d
+    4  history -d 2
+    5  history
+./history8.sub: line 15: history: 72: history position out of range
+./history8.sub: line 16: history: -72: history position out of range

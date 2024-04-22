@@ -2,7 +2,7 @@
    primarily for making function definitions, but I'm not sure
    that anyone else will need it.  */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -32,29 +32,28 @@
 
 #include "shell.h"
 
-static PATTERN_LIST *copy_case_clause PARAMS((PATTERN_LIST *));
-static PATTERN_LIST *copy_case_clauses PARAMS((PATTERN_LIST *));
-static FOR_COM *copy_for_command PARAMS((FOR_COM *));
+static PATTERN_LIST *copy_case_clause (PATTERN_LIST *);
+static PATTERN_LIST *copy_case_clauses (PATTERN_LIST *);
+static FOR_COM *copy_for_command (FOR_COM *);
 #if defined (ARITH_FOR_COMMAND)
-static ARITH_FOR_COM *copy_arith_for_command PARAMS((ARITH_FOR_COM *));
+static ARITH_FOR_COM *copy_arith_for_command (ARITH_FOR_COM *);
 #endif
-static GROUP_COM *copy_group_command PARAMS((GROUP_COM *));
-static SUBSHELL_COM *copy_subshell_command PARAMS((SUBSHELL_COM *));
-static COPROC_COM *copy_coproc_command PARAMS((COPROC_COM *));
-static CASE_COM *copy_case_command PARAMS((CASE_COM *));
-static WHILE_COM *copy_while_command PARAMS((WHILE_COM *));
-static IF_COM *copy_if_command PARAMS((IF_COM *));
+static GROUP_COM *copy_group_command (GROUP_COM *);
+static SUBSHELL_COM *copy_subshell_command (SUBSHELL_COM *);
+static COPROC_COM *copy_coproc_command (COPROC_COM *);
+static CASE_COM *copy_case_command (CASE_COM *);
+static WHILE_COM *copy_while_command (WHILE_COM *);
+static IF_COM *copy_if_command (IF_COM *);
 #if defined (DPAREN_ARITHMETIC)
-static ARITH_COM *copy_arith_command PARAMS((ARITH_COM *));
+static ARITH_COM *copy_arith_command (ARITH_COM *);
 #endif
 #if defined (COND_COMMAND)
-static COND_COM *copy_cond_command PARAMS((COND_COM *));
+static COND_COM *copy_cond_command (COND_COM *);
 #endif
-static SIMPLE_COM *copy_simple_command PARAMS((SIMPLE_COM *));
+static SIMPLE_COM *copy_simple_command (SIMPLE_COM *);
 
 WORD_DESC *
-copy_word (w)
-     WORD_DESC *w;
+copy_word (WORD_DESC *w)
 {
   WORD_DESC *new_word;
 
@@ -66,8 +65,7 @@ copy_word (w)
 /* Copy the chain of words in LIST.  Return a pointer to
    the new chain. */
 WORD_LIST *
-copy_word_list (list)
-     WORD_LIST *list;
+copy_word_list (WORD_LIST *list)
 {
   WORD_LIST *new_list, *tl;
 
@@ -86,8 +84,7 @@ copy_word_list (list)
 }
 
 static PATTERN_LIST *
-copy_case_clause (clause)
-     PATTERN_LIST *clause;
+copy_case_clause (PATTERN_LIST *clause)
 {
   PATTERN_LIST *new_clause;
 
@@ -99,8 +96,7 @@ copy_case_clause (clause)
 }
 
 static PATTERN_LIST *
-copy_case_clauses (clauses)
-     PATTERN_LIST *clauses;
+copy_case_clauses (PATTERN_LIST *clauses)
 {
   PATTERN_LIST *new_list, *new_clause;
 
@@ -115,17 +111,12 @@ copy_case_clauses (clauses)
 
 /* Copy a single redirect. */
 REDIRECT *
-copy_redirect (redirect)
-     REDIRECT *redirect;
+copy_redirect (REDIRECT *redirect)
 {
   REDIRECT *new_redirect;
 
   new_redirect = (REDIRECT *)xmalloc (sizeof (REDIRECT));
-#if 0
-  FASTCOPY ((char *)redirect, (char *)new_redirect, (sizeof (REDIRECT)));
-#else
   *new_redirect = *redirect;	/* let the compiler do the fast structure copy */
-#endif
 
   if (redirect->rflags & REDIR_VARASSIGN)
     new_redirect->redirector.filename = copy_word (redirect->redirector.filename);
@@ -162,8 +153,7 @@ copy_redirect (redirect)
 }
 
 REDIRECT *
-copy_redirects (list)
-     REDIRECT *list;
+copy_redirects (REDIRECT *list)
 {
   REDIRECT *new_list, *temp;
 
@@ -177,8 +167,7 @@ copy_redirects (list)
 }
 
 static FOR_COM *
-copy_for_command (com)
-     FOR_COM *com;
+copy_for_command (FOR_COM *com)
 {
   FOR_COM *new_for;
 
@@ -193,8 +182,7 @@ copy_for_command (com)
 
 #if defined (ARITH_FOR_COMMAND)
 static ARITH_FOR_COM *
-copy_arith_for_command (com)
-     ARITH_FOR_COM *com;
+copy_arith_for_command (ARITH_FOR_COM *com)
 {
   ARITH_FOR_COM *new_arith_for;
 
@@ -210,8 +198,7 @@ copy_arith_for_command (com)
 #endif /* ARITH_FOR_COMMAND */
 
 static GROUP_COM *
-copy_group_command (com)
-     GROUP_COM *com;
+copy_group_command (GROUP_COM *com)
 {
   GROUP_COM *new_group;
 
@@ -221,8 +208,7 @@ copy_group_command (com)
 }
 
 static SUBSHELL_COM *
-copy_subshell_command (com)
-     SUBSHELL_COM *com;
+copy_subshell_command (SUBSHELL_COM *com)
 {
   SUBSHELL_COM *new_subshell;
 
@@ -234,8 +220,7 @@ copy_subshell_command (com)
 }
 
 static COPROC_COM *
-copy_coproc_command (com)
-     COPROC_COM *com;
+copy_coproc_command (COPROC_COM *com)
 {
   COPROC_COM *new_coproc;
 
@@ -247,8 +232,7 @@ copy_coproc_command (com)
 }
 
 static CASE_COM *
-copy_case_command (com)
-     CASE_COM *com;
+copy_case_command (CASE_COM *com)
 {
   CASE_COM *new_case;
 
@@ -261,8 +245,7 @@ copy_case_command (com)
 }
 
 static WHILE_COM *
-copy_while_command (com)
-     WHILE_COM *com;
+copy_while_command (WHILE_COM *com)
 {
   WHILE_COM *new_while;
 
@@ -274,8 +257,7 @@ copy_while_command (com)
 }
 
 static IF_COM *
-copy_if_command (com)
-     IF_COM *com;
+copy_if_command (IF_COM *com)
 {
   IF_COM *new_if;
 
@@ -289,8 +271,7 @@ copy_if_command (com)
 
 #if defined (DPAREN_ARITHMETIC)
 static ARITH_COM *
-copy_arith_command (com)
-     ARITH_COM *com;
+copy_arith_command (ARITH_COM *com)
 {
   ARITH_COM *new_arith;
 
@@ -305,8 +286,7 @@ copy_arith_command (com)
 
 #if defined (COND_COMMAND)
 static COND_COM *
-copy_cond_command (com)
-     COND_COM *com;
+copy_cond_command (COND_COM *com)
 {
   COND_COM *new_cond;
 
@@ -323,8 +303,7 @@ copy_cond_command (com)
 #endif
 
 static SIMPLE_COM *
-copy_simple_command (com)
-     SIMPLE_COM *com;
+copy_simple_command (SIMPLE_COM *com)
 {
   SIMPLE_COM *new_simple;
 
@@ -337,8 +316,7 @@ copy_simple_command (com)
 }
 
 FUNCTION_DEF *
-copy_function_def_contents (old, new_def)
-     FUNCTION_DEF *old, *new_def;
+copy_function_def_contents (FUNCTION_DEF *old, FUNCTION_DEF *new_def)
 {
   new_def->name = copy_word (old->name);
   new_def->command = old->command ? copy_command (old->command) : old->command;
@@ -349,8 +327,7 @@ copy_function_def_contents (old, new_def)
 }
 
 FUNCTION_DEF *
-copy_function_def (com)
-     FUNCTION_DEF *com;
+copy_function_def (FUNCTION_DEF *com)
 {
   FUNCTION_DEF *new_def;
 
@@ -363,8 +340,7 @@ copy_function_def (com)
    copy.  Don't you forget to dispose_command () on this pointer
    later! */
 COMMAND *
-copy_command (command)
-     COMMAND *command;
+copy_command (COMMAND *command)
 {
   COMMAND *new_command;
 

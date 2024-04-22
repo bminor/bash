@@ -21,11 +21,12 @@ type
 # this should be a usage error
 type -r ${THIS_SH}
 
-# these should behave identically
+# these should behave identically, but POSIX says command -v is silent if the name is not found
 type notthere
 command -v notthere
 
-alias m=more
+# but this will produce an error message
+command -V notthere
 
 unset -f func 2>/dev/null
 func() { echo this is func; }
@@ -49,24 +50,26 @@ command -V func
 command -v while
 command -V while
 
+alias morealias=more
+
 # the following two lines should produce the same output
 # post-3.0 patch makes command -v silent, as posix specifies
 # first test with alias expansion off (should all fail or produce no output)
-type -t m
-type m
-command -v m
+type -t morealias
+type morealias
+command -v morealias
 alias -p
-alias m
+alias morealias
 
 # then test with alias expansion on 
 shopt -s expand_aliases
-type m
-type -t m
-command -v m
+type morealias
+type -t morealias
+command -v morealias
 alias -p
-alias m
+alias morealias
 
-command -V m
+command -V morealias
 shopt -u expand_aliases
 
 command -v builtin
@@ -76,7 +79,7 @@ command -V /bin/sh
 
 unset -f func
 type func
-unalias m
+unalias morealias
 type m
 
 hash -r
@@ -102,9 +105,7 @@ f() {
 type f | cat -v
 
 ${THIS_SH} type1.sub
-
 ${THIS_SH} type2.sub
-
 ${THIS_SH} type3.sub
-
 ${THIS_SH} type4.sub
+${THIS_SH} type5.sub

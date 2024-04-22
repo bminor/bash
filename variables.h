@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,6 +46,7 @@ typedef struct var_context {
 #define VC_FUNCENV	0x04	/* also function if name != NULL */
 #define VC_BLTNENV	0x08	/* builtin_env */
 #define VC_TEMPENV	0x10	/* temporary_env */
+#define VC_SPECTEMPENV	0x20	/* temporary environment preceding a posix special builtin */
 
 #define VC_TEMPFLAGS	(VC_FUNCENV|VC_BLTNENV|VC_TEMPENV)
 
@@ -61,8 +62,8 @@ typedef struct var_context {
 
 /* What a shell variable looks like. */
 
-typedef struct variable *sh_var_value_func_t PARAMS((struct variable *));
-typedef struct variable *sh_var_assign_func_t PARAMS((struct variable *, char *, arrayind_t, char *));
+typedef struct variable *sh_var_value_func_t (struct variable *);
+typedef struct variable *sh_var_assign_func_t (struct variable *, char *, arrayind_t, char *);
 
 /* For the future */
 union _value {
@@ -95,8 +96,8 @@ typedef struct variable {
 
 typedef struct _vlist {
   SHELL_VAR **list;
-  int list_size;	/* allocated size */
-  int list_len;		/* current number of entries */
+  size_t list_size;	/* allocated size */
+  size_t list_len;	/* current number of entries */
 } VARLIST;
 
 /* The various attributes that a given variable can have. */
@@ -114,9 +115,17 @@ typedef struct _vlist {
 #define att_capcase	0x0000400	/* word capitalized on assignment */
 #define att_nameref	0x0000800	/* word is a name reference */
 
+#define attmask_user	0x0000fff
+
 #define user_attrs	(att_exported|att_readonly|att_integer|att_local|att_trace|att_uppercase|att_lowercase|att_capcase|att_nameref)
 
-#define attmask_user	0x0000fff
+/* These define attributes you can set on readonly variables using declare.
+   You're allowed to set the readonly attribute on a readonly variable.
+   declare checks whether it gets +r explicitly, before testing these.
+   att_nameref is in there because declare performs its own validation due
+   to some ksh93 quirks. */
+#define valid_readonly_attrs	(att_exported|att_local|att_nameref|att_trace|att_readonly)
+#define invalid_readonly_attrs	(~valid_readonly_attrs & attmask_user)
 
 /* Internal attributes used for bookkeeping */
 #define att_invisible	0x0001000	/* cannot see */
@@ -231,7 +240,7 @@ extern SHELL_VAR nameref_invalid_value;
 #define INVALID_NAMEREF_VALUE	(void *)&nameref_invalid_value
 	
 /* Stuff for hacking variables. */
-typedef int sh_var_map_func_t PARAMS((SHELL_VAR *));
+typedef int sh_var_map_func_t (SHELL_VAR *);
 
 /* Where we keep the variables and functions */
 extern VAR_CONTEXT *global_variables;
@@ -255,208 +264,212 @@ extern pid_t dollar_dollar_pid;
 
 extern int localvar_inherit;		/* declared in variables.c */
 
-extern void initialize_shell_variables PARAMS((char **, int));
+extern void initialize_shell_variables (char **, int);
 
-extern int validate_inherited_value PARAMS((SHELL_VAR *, int));
+extern int validate_inherited_value (SHELL_VAR *, int);
 
-extern SHELL_VAR *set_if_not PARAMS((char *, char *));
+extern SHELL_VAR *set_if_not (const char *, const char *);
 
-extern void sh_set_lines_and_columns PARAMS((int, int));
-extern void set_pwd PARAMS((void));
-extern void set_ppid PARAMS((void));
-extern void make_funcname_visible PARAMS((int));
+extern void sh_set_lines_and_columns (int, int);
+extern void set_pwd (void);
+extern void set_ppid (void);
+extern void make_funcname_visible (int);
 
-extern SHELL_VAR *var_lookup PARAMS((const char *, VAR_CONTEXT *));
+extern SHELL_VAR *var_lookup (const char *, VAR_CONTEXT *);
 
-extern SHELL_VAR *find_function PARAMS((const char *));
-extern FUNCTION_DEF *find_function_def PARAMS((const char *));
-extern SHELL_VAR *find_variable PARAMS((const char *));
-extern SHELL_VAR *find_variable_noref PARAMS((const char *));
-extern SHELL_VAR *find_variable_last_nameref PARAMS((const char *, int));
-extern SHELL_VAR *find_global_variable_last_nameref PARAMS((const char *, int));
-extern SHELL_VAR *find_variable_nameref PARAMS((SHELL_VAR *));
-extern SHELL_VAR *find_variable_nameref_for_create PARAMS((const char *, int));
-extern SHELL_VAR *find_variable_nameref_for_assignment PARAMS((const char *, int));
-/*extern SHELL_VAR *find_variable_internal PARAMS((const char *, int));*/
-extern SHELL_VAR *find_variable_tempenv PARAMS((const char *));
-extern SHELL_VAR *find_variable_notempenv PARAMS((const char *));
-extern SHELL_VAR *find_global_variable PARAMS((const char *));
-extern SHELL_VAR *find_global_variable_noref PARAMS((const char *));
-extern SHELL_VAR *find_shell_variable PARAMS((const char *));
-extern SHELL_VAR *find_tempenv_variable PARAMS((const char *));
-extern SHELL_VAR *find_variable_no_invisible PARAMS((const char *));
-extern SHELL_VAR *find_variable_for_assignment PARAMS((const char *));
-extern char *nameref_transform_name PARAMS((char *, int));
-extern SHELL_VAR *copy_variable PARAMS((SHELL_VAR *));
-extern SHELL_VAR *make_local_variable PARAMS((const char *, int));
-extern SHELL_VAR *bind_variable PARAMS((const char *, char *, int));
-extern SHELL_VAR *bind_global_variable PARAMS((const char *, char *, int));
-extern SHELL_VAR *bind_function PARAMS((const char *, COMMAND *));
+extern SHELL_VAR *find_function (const char *);
+extern FUNCTION_DEF *find_function_def (const char *);
+extern SHELL_VAR *find_variable (const char *);
+extern SHELL_VAR *find_variable_noref (const char *);
+extern SHELL_VAR *find_variable_last_nameref (const char *, int);
+extern SHELL_VAR *find_global_variable_last_nameref (const char *, int);
+extern SHELL_VAR *find_variable_nameref (SHELL_VAR *);
+extern SHELL_VAR *find_variable_nameref_for_create (const char *, int);
+extern SHELL_VAR *find_variable_nameref_for_assignment (const char *, int);
+/*extern SHELL_VAR *find_variable_internal (const char *, int);*/
+extern SHELL_VAR *find_variable_tempenv (const char *);
+extern SHELL_VAR *find_variable_notempenv (const char *);
+extern SHELL_VAR *find_global_variable (const char *);
+extern SHELL_VAR *find_global_variable_noref (const char *);
+extern SHELL_VAR *find_shell_variable (const char *);
+extern SHELL_VAR *find_tempenv_variable (const char *);
+extern SHELL_VAR *find_variable_no_invisible (const char *);
+extern SHELL_VAR *find_variable_for_assignment (const char *);
+extern char *nameref_transform_name (const char *, int);
+extern SHELL_VAR *copy_variable (SHELL_VAR *);
+extern SHELL_VAR *make_local_variable (const char *, int);
+extern SHELL_VAR *bind_variable (const char *, const char *, int);
+extern SHELL_VAR *bind_global_variable (const char *, const char *, int);
+extern SHELL_VAR *bind_function (const char *, COMMAND *);
 
-extern void bind_function_def PARAMS((const char *, FUNCTION_DEF *, int));
+extern void bind_function_def (const char *, FUNCTION_DEF *, int);
 
-extern SHELL_VAR **map_over PARAMS((sh_var_map_func_t *, VAR_CONTEXT *));
-SHELL_VAR **map_over_funcs PARAMS((sh_var_map_func_t *));
+extern SHELL_VAR **map_over (sh_var_map_func_t *, VAR_CONTEXT *);
+SHELL_VAR **map_over_funcs (sh_var_map_func_t *);
      
-extern SHELL_VAR **all_shell_variables PARAMS((void));
-extern SHELL_VAR **all_shell_functions PARAMS((void));
-extern SHELL_VAR **all_visible_variables PARAMS((void));
-extern SHELL_VAR **all_visible_functions PARAMS((void));
-extern SHELL_VAR **all_exported_variables PARAMS((void));
-extern SHELL_VAR **local_exported_variables PARAMS((void));
-extern SHELL_VAR **all_local_variables PARAMS((int));
+extern SHELL_VAR **all_shell_variables (void);
+extern SHELL_VAR **all_shell_functions (void);
+extern SHELL_VAR **all_visible_variables (void);
+extern SHELL_VAR **all_visible_functions (void);
+extern SHELL_VAR **all_exported_variables (void);
+extern SHELL_VAR **local_exported_variables (void);
+extern SHELL_VAR **all_local_variables (int);
 #if defined (ARRAY_VARS)
-extern SHELL_VAR **all_array_variables PARAMS((void));
+extern SHELL_VAR **all_array_variables (void);
 #endif
-extern char **all_variables_matching_prefix PARAMS((const char *));
+extern char **all_variables_matching_prefix (const char *);
 
-extern char **make_var_array PARAMS((HASH_TABLE *));
-extern char **add_or_supercede_exported_var PARAMS((char *, int));
+extern char **make_var_array (HASH_TABLE *);
+extern char **add_or_supercede_exported_var (char *, int);
 
-extern char *get_variable_value PARAMS((SHELL_VAR *));
-extern char *get_string_value PARAMS((const char *));
-extern char *sh_get_env_value PARAMS((const char *));
-extern char *make_variable_value PARAMS((SHELL_VAR *, char *, int));
+extern char *get_variable_value (SHELL_VAR *);
+extern char *get_string_value (const char *);
+extern char *sh_get_env_value (const char *);
+extern char *make_variable_value (SHELL_VAR *, const char *, int);
 
-extern SHELL_VAR *bind_variable_value PARAMS((SHELL_VAR *, char *, int));
-extern SHELL_VAR *bind_int_variable PARAMS((char *, char *, int));
-extern SHELL_VAR *bind_var_to_int PARAMS((char *, intmax_t, int));
+extern SHELL_VAR *bind_variable_value (SHELL_VAR *, char *, int);
+extern SHELL_VAR *bind_int_variable (const char *, const char *, int);
+extern SHELL_VAR *bind_var_to_int (const char *, intmax_t, int);
 
-extern int assign_in_env PARAMS((WORD_DESC *, int));
+extern int assign_in_env (const WORD_DESC *, int);
 
-extern int unbind_variable PARAMS((const char *));
-extern int check_unbind_variable PARAMS((const char *));
-extern int unbind_nameref PARAMS((const char *));
-extern int unbind_variable_noref PARAMS((const char *));
-extern int unbind_global_variable PARAMS((const char *));
-extern int unbind_global_variable_noref PARAMS((const char *));
-extern int unbind_func PARAMS((const char *));
-extern int unbind_function_def PARAMS((const char *));
-extern int delete_var PARAMS((const char *, VAR_CONTEXT *));
-extern int makunbound PARAMS((const char *, VAR_CONTEXT *));
-extern int kill_local_variable PARAMS((const char *));
+extern int posix_unbind_tempvar (const char *);
+extern int unbind_variable (const char *);
+extern int check_unbind_variable (const char *);
+extern int unbind_nameref (const char *);
+extern int unbind_variable_noref (const char *);
+extern int unbind_global_variable (const char *);
+extern int unbind_global_variable_noref (const char *);
+extern int unbind_func (const char *);
+extern int unbind_function_def (const char *);
+extern int delete_var (const char *, VAR_CONTEXT *);
+extern int makunbound (const char *, VAR_CONTEXT *);
+extern int kill_local_variable (const char *);
 
-extern void delete_all_variables PARAMS((HASH_TABLE *));
-extern void delete_all_contexts PARAMS((VAR_CONTEXT *));
-extern void reset_local_contexts PARAMS((void));
+extern void delete_all_variables (HASH_TABLE *);
+extern void delete_all_contexts (VAR_CONTEXT *);
+extern void reset_local_contexts (void);
 
-extern VAR_CONTEXT *new_var_context PARAMS((char *, int));
-extern void dispose_var_context PARAMS((VAR_CONTEXT *));
-extern VAR_CONTEXT *push_var_context PARAMS((char *, int, HASH_TABLE *));
-extern void pop_var_context PARAMS((void));
-extern VAR_CONTEXT *push_scope PARAMS((int, HASH_TABLE *));
-extern void pop_scope PARAMS((int));
+extern VAR_CONTEXT *new_var_context (char *, int);
+extern void dispose_var_context (VAR_CONTEXT *);
+extern VAR_CONTEXT *push_var_context (char *, int, HASH_TABLE *);
+extern void pop_var_context (void);
+extern VAR_CONTEXT *push_scope (int, HASH_TABLE *);
+extern void pop_scope (void *);		/* XXX uw_ */
 
-extern void clear_dollar_vars PARAMS((void));
+extern void clear_dollar_vars (void);
 
-extern void push_context PARAMS((char *, int, HASH_TABLE *));
-extern void pop_context PARAMS((void));
-extern void push_dollar_vars PARAMS((void));
-extern void pop_dollar_vars PARAMS((void));
-extern void dispose_saved_dollar_vars PARAMS((void));
+extern void push_context (char *, int, HASH_TABLE *);
+extern void pop_context (void *);	/* XXX uw_ */
+extern void push_dollar_vars (void);
+extern void pop_dollar_vars (void);
+extern void dispose_saved_dollar_vars (void);
 
-extern void init_bash_argv PARAMS((void));
-extern void save_bash_argv PARAMS((void));
-extern void push_args PARAMS((WORD_LIST *));
-extern void pop_args PARAMS((void));
+extern void init_bash_argv (void);
+extern void save_bash_argv (void);
+extern void push_args (WORD_LIST *);
+extern void pop_args (void);
+extern void uw_pop_args (void *);
 
-extern void adjust_shell_level PARAMS((int));
-extern void non_unsettable PARAMS((char *));
-extern void dispose_variable PARAMS((SHELL_VAR *));
-extern void dispose_used_env_vars PARAMS((void));
-extern void dispose_function_env PARAMS((void));
-extern void dispose_builtin_env PARAMS((void));
-extern void merge_temporary_env PARAMS((void));
-extern void flush_temporary_env PARAMS((void));
-extern void merge_builtin_env PARAMS((void));
-extern void kill_all_local_variables PARAMS((void));
+extern void adjust_shell_level (int);
+extern void non_unsettable (char *);
+extern void dispose_variable (SHELL_VAR *);
+extern void dispose_used_env_vars (void);
+extern void dispose_function_env (void);
+extern void dispose_builtin_env (void);
+extern void merge_temporary_env (void);
+extern void merge_function_temporary_env (void);
+extern void flush_temporary_env (void);
+extern void merge_builtin_env (void);
+extern void kill_all_local_variables (void);
 
-extern void set_var_read_only PARAMS((char *));
-extern void set_func_read_only PARAMS((const char *));
-extern void set_var_auto_export PARAMS((char *));
-extern void set_func_auto_export PARAMS((const char *));
+extern void set_var_read_only (char *);
+extern void set_func_read_only (const char *);
+extern void set_var_auto_export (char *);
+extern void set_func_auto_export (const char *);
 
-extern void sort_variables PARAMS((SHELL_VAR **));
+extern void sort_variables (SHELL_VAR **);
 
-extern int chkexport PARAMS((char *));
-extern void maybe_make_export_env PARAMS((void));
-extern void update_export_env_inplace PARAMS((char *, int, char *));
-extern void put_command_name_into_env PARAMS((char *));
-extern void put_gnu_argv_flags_into_env PARAMS((intmax_t, char *));
+extern int chkexport (char *);
+extern void maybe_make_export_env (void);
+extern void update_export_env_inplace (char *, int, char *);
+extern void put_command_name_into_env (char *);
+extern void put_gnu_argv_flags_into_env (intmax_t, char *);
 
-extern void print_var_list PARAMS((SHELL_VAR **));
-extern void print_func_list PARAMS((SHELL_VAR **));
-extern void print_assignment PARAMS((SHELL_VAR *));
-extern void print_var_value PARAMS((SHELL_VAR *, int));
-extern void print_var_function PARAMS((SHELL_VAR *));
+extern void print_var_list (SHELL_VAR **);
+extern void print_func_list (SHELL_VAR **);
+extern void print_assignment (SHELL_VAR *);
+extern void print_var_value (SHELL_VAR *, int);
+extern void print_var_function (SHELL_VAR *);
 
 #if defined (ARRAY_VARS)
-extern SHELL_VAR *make_new_array_variable PARAMS((char *));
-extern SHELL_VAR *make_local_array_variable PARAMS((char *, int));
+extern SHELL_VAR *make_new_array_variable (const char *);
+extern SHELL_VAR *make_local_array_variable (const char *, int);
 
-extern SHELL_VAR *make_new_assoc_variable PARAMS((char *));
-extern SHELL_VAR *make_local_assoc_variable PARAMS((char *, int));
+extern SHELL_VAR *make_new_assoc_variable (const char *);
+extern SHELL_VAR *make_local_assoc_variable (const char *, int);
 
-extern void set_pipestatus_array PARAMS((int *, int));
-extern ARRAY *save_pipestatus_array PARAMS((void));
-extern void restore_pipestatus_array PARAMS((ARRAY *));
+extern void set_pipestatus_array (int *, int);
+extern ARRAY *save_pipestatus_array (void);
+extern void restore_pipestatus_array (ARRAY *);
 #endif
 
-extern void set_pipestatus_from_exit PARAMS((int));
+extern void set_pipestatus_from_exit (int);
 
 /* The variable in NAME has just had its state changed.  Check to see if it
    is one of the special ones where something special happens. */
-extern void stupidly_hack_special_variables PARAMS((char *));
+extern void stupidly_hack_special_variables (const char *);
 
 /* Reinitialize some special variables that have external effects upon unset
    when the shell reinitializes itself. */
-extern void reinit_special_variables PARAMS((void));
+extern void reinit_special_variables (void);
 
-extern int get_random_number PARAMS((void));
+extern int get_random_number (void);
 
 /* The `special variable' functions that get called when a particular
    variable is set. */
-extern void sv_ifs PARAMS((char *));
-extern void sv_path PARAMS((char *));
-extern void sv_mail PARAMS((char *));
-extern void sv_funcnest PARAMS((char *));
-extern void sv_execignore PARAMS((char *));
-extern void sv_globignore PARAMS((char *));
-extern void sv_ignoreeof PARAMS((char *));
-extern void sv_strict_posix PARAMS((char *));
-extern void sv_optind PARAMS((char *));
-extern void sv_opterr PARAMS((char *));
-extern void sv_locale PARAMS((char *));
-extern void sv_xtracefd PARAMS((char *));
-extern void sv_shcompat PARAMS((char *));
+extern void sv_ifs (const char *);
+extern void sv_path (const char *);
+extern void sv_mail (const char *);
+extern void sv_funcnest (const char *);
+extern void sv_execignore (const char *);
+extern void sv_globignore (const char *);
+extern void sv_ignoreeof (const char *);
+extern void sv_strict_posix (const char *);
+extern void sv_optind (const char *);
+extern void sv_opterr (const char *);
+extern void sv_locale (const char *);
+extern void sv_xtracefd (const char *);
+extern void sv_shcompat (const char *);
+extern void sv_globsort (const char *);
 
 #if defined (READLINE)
-extern void sv_comp_wordbreaks PARAMS((char *));
-extern void sv_terminal PARAMS((char *));
-extern void sv_hostfile PARAMS((char *));
-extern void sv_winsize PARAMS((char *));
+extern void sv_comp_wordbreaks (const char *);
+extern void sv_terminal (const char *);
+extern void sv_hostfile (const char *);
+extern void sv_winsize (const char *);
 #endif
 
 #if defined (__CYGWIN__)
-extern void sv_home PARAMS((char *));
+extern void sv_home (const char *);
 #endif
 
 #if defined (HISTORY)
-extern void sv_histsize PARAMS((char *));
-extern void sv_histignore PARAMS((char *));
-extern void sv_history_control PARAMS((char *));
+extern void sv_histsize (const char *);
+extern void sv_histignore (const char *);
+extern void sv_history_control (const char *);
 #  if defined (BANG_HISTORY)
-extern void sv_histchars PARAMS((char *));
+extern void sv_histchars (const char *);
 #  endif
-extern void sv_histtimefmt PARAMS((char *));
+extern void sv_histtimefmt (const char *);
 #endif /* HISTORY */
 
 #if defined (HAVE_TZSET)
-extern void sv_tz PARAMS((char *));
+extern void sv_tz (const char *);
 #endif
 
 #if defined (JOB_CONTROL)
-extern void sv_childmax PARAMS((char *));
+extern void sv_childmax (const char *);
 #endif
 
 #endif /* !_VARIABLES_H_ */

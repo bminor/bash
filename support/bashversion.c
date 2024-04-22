@@ -1,6 +1,6 @@
 /* bashversion.c -- Display bash version information. */
 
-/* Copyright (C) 2001-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -26,6 +26,8 @@
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
+extern int optind;
+extern char *optarg;
 #endif
 
 #include "bashansi.h"
@@ -41,28 +43,23 @@
 #define LFLAG	0x0020
 #define XFLAG	0x0040
 
-extern int optind;
-extern char *optarg;
-
 extern char *dist_version;
 extern int patch_level;
 
-extern char *shell_version_string PARAMS((void));
-extern void show_shell_version PARAMS((int));
+extern char *shell_version_string (void);
+extern void show_shell_version (int);
 
 char *shell_name = "bash";
 char *progname;
 
 static void
-usage()
+usage(void)
 {
   fprintf(stderr, "%s: usage: %s [-hrvpmlsx]\n", progname, progname);
 }
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   int opt, oflags;
   char dv[128], *rv;

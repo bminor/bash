@@ -1,6 +1,6 @@
 /* winsize.c - handle window size changes and information. */
 
-/* Copyright (C) 2005-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,12 +31,6 @@
 #include <sys/ioctl.h>
 
 /* Try to find the definitions of `struct winsize' and TIOGCWINSZ */
-
-#if 0
-#if defined (GWINSZ_IN_SYS_IOCTL) && !defined (TIOCGWINSZ)
-#  include <sys/ioctl.h>
-#endif /* GWINSZ_IN_SYS_IOCTL && !TIOCGWINSZ */
-#endif
 
 #if defined (STRUCT_WINSIZE_IN_TERMIOS) && !defined (STRUCT_WINSIZE_IN_SYS_IOCTL)
 #  include <termios.h>
@@ -73,14 +67,12 @@ extern int shell_tty;
 extern int interactive_shell;
 extern int no_line_editing;
 extern int bash_readline_initialized;
-extern void rl_set_screen_size PARAMS((int, int));
+extern void rl_set_screen_size (int, int);
 #endif
-extern void sh_set_lines_and_columns PARAMS((int, int));
+extern void sh_set_lines_and_columns (int, int);
 
 void
-get_new_window_size (from_sig, rp, cp)
-     int from_sig;
-     int *rp, *cp;
+get_new_window_size (int from_sig, int *rp, int *cp)
 {
 #if defined (TIOCGWINSZ)
   struct winsize win;

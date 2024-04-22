@@ -2,6 +2,7 @@
 shopt: usage: shopt [-pqsu] [-o] [optname ...]
 --
 shopt -u autocd
+shopt -u array_expand_once
 shopt -u assoc_expand_once
 shopt -u cdable_vars
 shopt -s cdspell
@@ -79,6 +80,7 @@ shopt -s promptvars
 shopt -s sourcepath
 --
 shopt -u autocd
+shopt -u array_expand_once
 shopt -u assoc_expand_once
 shopt -u cdable_vars
 shopt -u checkhash
@@ -123,6 +125,7 @@ shopt -u varredir_close
 shopt -u xpg_echo
 --
 autocd         	off
+array_expand_once	off
 assoc_expand_once	off
 cdable_vars    	off
 checkhash      	off
@@ -304,9 +307,5 @@ xtrace         	off
 --
 ./shopt.tests: line 106: shopt: xyz1: invalid shell option name
 ./shopt.tests: line 107: shopt: xyz1: invalid option name
-28c28
-< globskipdots   	off
----
-> globskipdots   	on
 expand_aliases 	on
 expand_aliases 	on

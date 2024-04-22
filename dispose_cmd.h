@@ -1,6 +1,6 @@
 /* dispose_cmd.h -- Functions appearing in dispose_cmd.c. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,18 +23,21 @@
 
 #include "stdc.h"
 
-extern void dispose_command PARAMS((COMMAND *));
-extern void dispose_word_desc PARAMS((WORD_DESC *));
-extern void dispose_word PARAMS((WORD_DESC *));
-extern void dispose_words PARAMS((WORD_LIST *));
-extern void dispose_word_array PARAMS((char **));
-extern void dispose_redirects PARAMS((REDIRECT *));
+extern void dispose_command (COMMAND *);
+extern void dispose_word_desc (WORD_DESC *);
+extern void dispose_word (WORD_DESC *);
+extern void dispose_words (WORD_LIST *);
+extern void dispose_word_array (char **);
+extern void dispose_redirects (REDIRECT *);
 
 #if defined (COND_COMMAND)
-extern void dispose_cond_node PARAMS((COND_COM *));
+extern void dispose_cond_node (COND_COM *);
 #endif
 
-extern void dispose_function_def_contents PARAMS((FUNCTION_DEF *));
-extern void dispose_function_def PARAMS((FUNCTION_DEF *));
+extern void dispose_function_def_contents (FUNCTION_DEF *);
+extern void dispose_function_def (FUNCTION_DEF *);
+
+extern void uw_dispose_command (void *);
+extern void uw_dispose_words (void *);
 
 #endif /* !_DISPOSE_CMD_H_ */

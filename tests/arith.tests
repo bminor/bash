@@ -97,6 +97,8 @@ echo $(( 4<(2+3) ? 1 : 32))
 echo $(( (2+2)<(2+3) ? 1 : 32))
 echo $(( (2+2)>(2+3) ? 1 : 32))
 
+echo $(( (2+2)>(2+3) ? 2**0 : 32))
+
 # bug in bash versions through bash-3.2
 S=105
 W=$((S>99?4:S>9?3:S>0?2:0))
@@ -143,6 +145,10 @@ echo $(( 16#FF/2 ))
 echo $(( 8#44 ))
 
 echo $(( 8 ^ 32 ))
+a=8
+echo $(( a ^ 32 ))
+echo $(( a ^= 32 ))
+unset -v a
 
 # other bases
 echo $(( 16#a ))
@@ -171,6 +177,11 @@ echo $(( 44 / 0 ))
 let 'jv += $iv'
 echo $(( jv += \$iv ))
 let 'rv = 7 + (43 * 6'
+
+b=44
+echo $(( b / 0 ))
+echo $(( b /= 0 ))
+unset -v b
 
 # more errors
 declare -i i
@@ -240,6 +251,9 @@ echo $(( 2**16*2 ))
 echo $(( 2**31-1))
 echo $(( 2**0 ))
 
+# error
+echo $(( 2**-1 ))
+
 # {pre,post}-{inc,dec}rement and associated errors
 
 x=4
@@ -273,6 +287,11 @@ echo $(( -7 ))
 echo $(( ++7 ))
 echo $(( --7 ))
 
+unset -v x
+x=8
+echo $(( --x++ ))	# error
+unset -v x
+
 # combinations of expansions
 echo $(( "`echo 1+1`" ))
 echo $(( `echo 1+1` ))
@@ -298,6 +317,9 @@ ${THIS_SH} ./arith7.sub
 
 # problems with evaluation of conditional expressions
 ${THIS_SH} ./arith8.sub
+
+# expressions with unset variables and nounset enabled
+${THIS_SH} ./arith9.sub
 
 x=4
 y=7

@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,11 +29,7 @@
 #  include <unistd.h>
 #endif
 
-#if defined (PREFER_STDARG)
-#  include <stdarg.h>
-#else
-#  include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #include "bashansi.h"
 #include "bashintl.h"
@@ -50,64 +46,64 @@
 #include "builtins/common.h"
 
 #if !HAVE_DECL_PRINTF
-extern int printf PARAMS((const char *, ...));	/* Yuck.  Double yuck. */
+extern int printf (const char *, ...);	/* Yuck.  Double yuck. */
 #endif
 
 static int indentation;
 static int indentation_amount = 4;
 
-#if defined (PREFER_STDARG)
-typedef void PFUNC PARAMS((const char *, ...));
+typedef void PFUNC (const char *, ...);
 
-static void cprintf PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
-static void xprintf PARAMS((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
-#else
-#define PFUNC VFunction
-static void cprintf ();
-static void xprintf ();
-#endif
+static void cprintf (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+static void xprintf (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
 
-static void reset_locals PARAMS((void));
-static void newline PARAMS((char *));
-static void indent PARAMS((int));
-static void semicolon PARAMS((void));
-static void the_printed_command_resize PARAMS((int));
+static void uw_reset_locals (void *);
 
-static void make_command_string_internal PARAMS((COMMAND *));
-static void _print_word_list PARAMS((WORD_LIST *, char *, PFUNC *));
-static void command_print_word_list PARAMS((WORD_LIST *, char *));
-static void print_case_clauses PARAMS((PATTERN_LIST *));
-static void print_redirection_list PARAMS((REDIRECT *));
-static void print_redirection PARAMS((REDIRECT *));
-static void print_heredoc_header PARAMS((REDIRECT *));
-static void print_heredoc_body PARAMS((REDIRECT *));
-static void print_heredocs PARAMS((REDIRECT *));
-static void print_heredoc_bodies PARAMS((REDIRECT *));
-static void print_deferred_heredocs PARAMS((const char *));
+static void newline (char *);
+static void indent (int);
+static void semicolon (void);
+static void the_printed_command_resize (size_t);
 
-static void print_for_command PARAMS((FOR_COM *));
+static void make_command_string_internal (COMMAND *);
+static void _print_word_list (WORD_LIST *, char *, PFUNC *);
+static void command_print_word_list (WORD_LIST *, char *);
+static void print_case_clauses (PATTERN_LIST *);
+static void print_redirection_list (REDIRECT *);
+static void print_redirection (REDIRECT *);
+static void print_heredoc_header (REDIRECT *);
+static void print_heredoc_body (REDIRECT *);
+static void print_heredocs (REDIRECT *);
+static void print_heredoc_bodies (REDIRECT *);
+static void print_deferred_heredocs (const char *);
+
+static void print_for_command (FOR_COM *);
 #if defined (ARITH_FOR_COMMAND)
-static void print_arith_for_command PARAMS((ARITH_FOR_COM *));
+static void print_arith_for_command (ARITH_FOR_COM *);
 #endif
 #if defined (SELECT_COMMAND)
-static void print_select_command PARAMS((SELECT_COM *));
+static void print_select_command (SELECT_COM *);
 #endif
-static void print_group_command PARAMS((GROUP_COM *));
-static void print_case_command PARAMS((CASE_COM *));
-static void print_while_command PARAMS((WHILE_COM *));
-static void print_until_command PARAMS((WHILE_COM *));
-static void print_until_or_while PARAMS((WHILE_COM *, char *));
-static void print_if_command PARAMS((IF_COM *));
+static void print_group_command (GROUP_COM *);
+static void print_case_command (CASE_COM *);
+static void print_while_command (WHILE_COM *);
+static void print_until_command (WHILE_COM *);
+static void print_until_or_while (WHILE_COM *, char *);
+static void print_if_command (IF_COM *);
 #if defined (COND_COMMAND)
-static void print_cond_node PARAMS((COND_COM *));
+static void print_cond_node (COND_COM *);
 #endif
-static void print_function_def PARAMS((FUNCTION_DEF *));
+static void print_function_def (FUNCTION_DEF *);
+
+#ifdef DEBUG
+void debug_print_word_list (char *, WORD_LIST *, char *);
+void debug_print_cond_command (COND_COM *);
+#endif
 
 #define PRINTED_COMMAND_INITIAL_SIZE 64
 #define PRINTED_COMMAND_GROW_SIZE 128
 
 char *the_printed_command = (char *)NULL;
-int the_printed_command_size = 0;
+size_t the_printed_command_size = 0;
 int command_string_index = 0;
 
 int xtrace_fd = -1;
@@ -138,12 +134,11 @@ static int group_command_nesting;
 
 /* A buffer to indicate the indirection level (PS4) when set -x is enabled. */
 static char *indirection_string = 0;
-static int indirection_stringsiz = 0;
+static size_t indirection_stringsiz = 0;
 
 /* Print COMMAND (a command tree) on standard output. */
 void
-print_command (command)
-     COMMAND *command;
+print_command (COMMAND *command)
 {
   command_string_index = 0;
   printf ("%s", make_command_string (command));
@@ -154,8 +149,7 @@ print_command (command)
    not consed, so you have to do that yourself if you want it to
    remain around. */
 char *
-make_command_string (command)
-     COMMAND *command;
+make_command_string (COMMAND *command)
 {
   command_string_index = was_heredoc = 0;
   deferred_heredocs = 0;
@@ -167,8 +161,7 @@ make_command_string (command)
    back into an external representation without turning newlines into `;'.
    Placeholder for other changes, if any are necessary. */
 char *
-print_comsub (command)
-     COMMAND *command;
+print_comsub (COMMAND *command)
 {
   char *ret;
 
@@ -180,8 +173,7 @@ print_comsub (command)
 
 /* The internal function.  This is the real workhorse. */
 static void
-make_command_string_internal (command)
-     COMMAND *command;
+make_command_string_internal (COMMAND *command)
 {
   char s[3];
 
@@ -335,7 +327,13 @@ make_command_string_internal (command)
 	    }
 
 	  make_command_string_internal (command->value.Connection->second);
-	  PRINT_DEFERRED_HEREDOCS ("");
+	  /* If this is a recursive call to make_command_string_internal to
+	     print a connection with more than two components, defer printing
+	     the here-document bodies until our caller can print the
+	     connector. Remember that the parser builds lists to be left-side
+	     heavy. */
+	  if (printing_connection == 1)
+	    PRINT_DEFERRED_HEREDOCS ("");
 	  printing_connection--;	  	  
 	  break;
 
@@ -353,10 +351,13 @@ make_command_string_internal (command)
 	  make_command_string_internal (command->value.Subshell->command);
 	  PRINT_DEFERRED_HEREDOCS ("");
 	  cprintf (" )");
+	  was_heredoc = 0;	/* last wasn't heredoc/newline */
 	  break;
 
 	case cm_coproc:
-	  cprintf ("coproc %s ", command->value.Coproc->name);
+	  cprintf ("coproc ");
+	  if (command->value.Coproc->command->type != cm_simple)
+	    cprintf ("%s ", command->value.Coproc->name);
 	  skip_this_indent++;
 	  make_command_string_internal (command->value.Coproc->command);
 	  break;
@@ -376,10 +377,7 @@ make_command_string_internal (command)
 }
 
 static void
-_print_word_list (list, separator, pfunc)
-     WORD_LIST *list;
-     char *separator;
-     PFUNC *pfunc;
+_print_word_list (WORD_LIST *list, char *separator, PFUNC *pfunc)
 {
   WORD_LIST *w;
 
@@ -388,17 +386,13 @@ _print_word_list (list, separator, pfunc)
 }
 
 void
-print_word_list (list, separator)
-     WORD_LIST *list;
-     char *separator;
+print_word_list (WORD_LIST *list, char *separator)
 {
   _print_word_list (list, separator, xprintf);
 }
 
 void
-xtrace_set (fd, fp)
-     int fd;
-     FILE *fp;
+xtrace_set (int fd, FILE *fp)
 {
   if (fd >= 0 && sh_validfd (fd) == 0)
     {
@@ -418,13 +412,13 @@ xtrace_set (fd, fp)
 }
 
 void
-xtrace_init ()
+xtrace_init (void)
 {
   xtrace_set (-1, stderr);
 }
 
 void
-xtrace_reset ()
+xtrace_reset (void)
 {
   if (xtrace_fd >= 0 && xtrace_fp)
     {
@@ -439,8 +433,7 @@ xtrace_reset ()
 }
 
 void
-xtrace_fdchk (fd)
-     int fd;
+xtrace_fdchk (int fd)
 {
   if (fd == xtrace_fd)
     xtrace_reset ();
@@ -449,12 +442,14 @@ xtrace_fdchk (fd)
 /* Return a string denoting what our indirection level is. */
 
 char *
-indirection_level_string ()
+indirection_level_string (void)
 {
   register int i, j;
   char *ps4;
   char ps4_firstc[MB_LEN_MAX+1];
-  int ps4_firstc_len, ps4_len, ineed, old;
+  size_t ps4_firstc_len, ps4_len, ineed;
+  int old;
+  DECLARE_MBSTATE;
 
   ps4 = get_string_value ("PS4");
   if (indirection_string == 0)
@@ -465,7 +460,7 @@ indirection_level_string ()
     return (indirection_string);
 
   old = change_flag ('x', FLAG_OFF);
-  ps4 = decode_prompt_string (ps4);
+  ps4 = decode_prompt_string (ps4, 1);
   if (old)
     change_flag ('x', FLAG_ON);
 
@@ -477,7 +472,7 @@ indirection_level_string ()
 
 #if defined (HANDLE_MULTIBYTE)
   ps4_len = strnlen (ps4, MB_CUR_MAX);
-  ps4_firstc_len = MBLEN (ps4, ps4_len);
+  ps4_firstc_len = MBRLEN (ps4, ps4_len, &state);
   if (ps4_firstc_len == 1 || ps4_firstc_len == 0 || ps4_firstc_len < 0)
     {
       ps4_firstc[0] = ps4[0];
@@ -493,7 +488,7 @@ indirection_level_string ()
   /* Dynamically resize indirection_string so we have room for everything
      and we don't have to truncate ps4 */
   ineed = (ps4_firstc_len * indirection_level) + strlen (ps4);
-  if (ineed > indirection_stringsiz - 1)
+  if (ineed + 1 > indirection_stringsiz)
     {
       indirection_stringsiz = ineed + 1;
       indirection_string = xrealloc (indirection_string, indirection_stringsiz);
@@ -516,9 +511,7 @@ indirection_level_string ()
 }
 
 void
-xtrace_print_assignment (name, value, assign_list, xflags)
-     char *name, *value;
-     int assign_list, xflags;
+xtrace_print_assignment (char *name, char *value, int assign_list, int xflags)
 {
   char *nval;
 
@@ -530,10 +523,10 @@ xtrace_print_assignment (name, value, assign_list, xflags)
   /* VALUE should not be NULL when this is called. */
   if (*value == '\0' || assign_list)
     nval = value;
-  else if (sh_contains_shell_metas (value))
-    nval = sh_single_quote (value);
   else if (ansic_shouldquote (value))
     nval = ansic_quote (value, 0, (int *)0);
+  else if (sh_contains_shell_metas (value))
+    nval = sh_single_quote (value);
   else
     nval = value;
 
@@ -553,9 +546,7 @@ xtrace_print_assignment (name, value, assign_list, xflags)
    quoting the words because they haven't been expanded yet.  XTFLAGS&1 means to
    print $PS4; XTFLAGS&2 means to suppress quoting the words in LIST. */
 void
-xtrace_print_word_list (list, xtflags)
-     WORD_LIST *list;
-     int xtflags;
+xtrace_print_word_list (WORD_LIST *list, int xtflags)
 {
   WORD_LIST *w;
   char *t, *x;
@@ -572,15 +563,15 @@ xtrace_print_word_list (list, xtflags)
 	fprintf (xtrace_fp, "''%s", w->next ? " " : "");
       else if (xtflags & 2)
 	fprintf (xtrace_fp, "%s%s", t, w->next ? " " : "");
-      else if (sh_contains_shell_metas (t))
-	{
-	  x = sh_single_quote (t);
-	  fprintf (xtrace_fp, "%s%s", x, w->next ? " " : "");
-	  free (x);
-	}
       else if (ansic_shouldquote (t))
 	{
 	  x = ansic_quote (t, 0, (int *)0);
+	  fprintf (xtrace_fp, "%s%s", x, w->next ? " " : "");
+	  free (x);
+	}
+      else if (sh_contains_shell_metas (t))
+	{
+	  x = sh_single_quote (t);
 	  fprintf (xtrace_fp, "%s%s", x, w->next ? " " : "");
 	  free (x);
 	}
@@ -592,24 +583,30 @@ xtrace_print_word_list (list, xtflags)
 }
 
 static void
-command_print_word_list (list, separator)
-     WORD_LIST *list;
-     char *separator;
+command_print_word_list (WORD_LIST *list, char *separator)
 {
-  _print_word_list (list, separator, cprintf);
+  WORD_LIST *nlist;
+
+  /* A start at removing CTLESC from commands that haven't been expanded. */
+  if (pretty_print_mode)
+    {
+      nlist = list ? dequote_list (list) : list;
+      _print_word_list (nlist, separator, cprintf);
+      /* we're just pretty-printing, so this can be destructive */
+    }
+  else
+    _print_word_list (list, separator, cprintf);
 }
 
 void
-print_for_command_head (for_command)
-     FOR_COM *for_command;
+print_for_command_head (FOR_COM *for_command)
 {
   cprintf ("for %s in ", for_command->name->word);
   command_print_word_list (for_command->map_list, " ");
 }
 
 void
-xtrace_print_for_command_head (for_command)
-     FOR_COM *for_command;
+xtrace_print_for_command_head (FOR_COM *for_command)
 {
   CHECK_XTRACE_FP;
   fprintf (xtrace_fp, "%s", indirection_level_string ());
@@ -618,8 +615,7 @@ xtrace_print_for_command_head (for_command)
 }
 
 static void
-print_for_command (for_command)
-     FOR_COM *for_command;
+print_for_command (FOR_COM *for_command)
 {
   print_for_command_head (for_command);
   cprintf (";");
@@ -636,8 +632,7 @@ print_for_command (for_command)
 
 #if defined (ARITH_FOR_COMMAND)
 static void
-print_arith_for_command (arith_for_command)
-     ARITH_FOR_COM *arith_for_command;
+print_arith_for_command (ARITH_FOR_COM *arith_for_command)
 {
   cprintf ("for ((");
   command_print_word_list (arith_for_command->init, " ");
@@ -658,16 +653,19 @@ print_arith_for_command (arith_for_command)
 
 #if defined (SELECT_COMMAND)
 void
-print_select_command_head (select_command)
-     SELECT_COM *select_command;
+print_select_command_head (SELECT_COM *select_command)
 {
-  cprintf ("select %s in ", select_command->name->word);
+  WORD_DESC *w;
+
+  w = (pretty_print_mode) ? dequote_word (select_command->name) : select_command->name;
+  /* we're just pretty-printing, so this can be destructive */
+
+  cprintf ("select %s in ", w->word);
   command_print_word_list (select_command->map_list, " ");
 }
 
 void
-xtrace_print_select_command_head (select_command)
-     SELECT_COM *select_command;
+xtrace_print_select_command_head (SELECT_COM *select_command)
 {
   CHECK_XTRACE_FP;
   fprintf (xtrace_fp, "%s", indirection_level_string ());
@@ -676,8 +674,7 @@ xtrace_print_select_command_head (select_command)
 }
 
 static void
-print_select_command (select_command)
-     SELECT_COM *select_command;
+print_select_command (SELECT_COM *select_command)
 {
   print_select_command_head (select_command);
 
@@ -693,13 +690,12 @@ print_select_command (select_command)
 #endif /* SELECT_COMMAND */
 
 static void
-print_group_command (group_command)
-     GROUP_COM *group_command;
+print_group_command (GROUP_COM *group_command)
 {
   group_command_nesting++;
   cprintf ("{ ");
 
-  if (inside_function_def == 0)
+  if (inside_function_def == 0 /* && pretty_print_mode == 0 */)
     skip_this_indent++;
   else
     {
@@ -713,7 +709,7 @@ print_group_command (group_command)
   make_command_string_internal (group_command->command);
   PRINT_DEFERRED_HEREDOCS ("");
 
-  if (inside_function_def)
+  if (inside_function_def /* || pretty_print_mode */)
     {
       cprintf ("\n");
       indentation -= indentation_amount;
@@ -726,20 +722,24 @@ print_group_command (group_command)
     }
 
   cprintf ("}");
+  was_heredoc = 0;	/* last wasn't heredoc/newline */
 
   group_command_nesting--;
 }
 
 void
-print_case_command_head (case_command)
-     CASE_COM *case_command;
+print_case_command_head (CASE_COM *case_command)
 {
-  cprintf ("case %s in ", case_command->word->word);
+  WORD_DESC *w;
+
+  w = (pretty_print_mode) ? dequote_word (case_command->word) : case_command->word;
+  /* we're just pretty-printing, so this can be destructive */
+
+  cprintf ("case %s in ", w->word);
 }
 
 void
-xtrace_print_case_command_head (case_command)
-     CASE_COM *case_command;
+xtrace_print_case_command_head (CASE_COM *case_command)
 {
   CHECK_XTRACE_FP;
   fprintf (xtrace_fp, "%s", indirection_level_string ());
@@ -747,8 +747,7 @@ xtrace_print_case_command_head (case_command)
 }
 
 static void
-print_case_command (case_command)
-     CASE_COM *case_command;
+print_case_command (CASE_COM *case_command)
 {
   print_case_command_head (case_command);
 
@@ -758,13 +757,28 @@ print_case_command (case_command)
 }
 
 static void
-print_case_clauses (clauses)
-     PATTERN_LIST *clauses;
+print_case_clauses (PATTERN_LIST *clauses)
 {
+  int first = 1;
+
   indentation += indentation_amount;
   while (clauses)
     {
-      newline ("");
+      /* If we're printing a comsub, the result will be reparsed later, so
+	 we don't want to insert a newline after the `in': that could cause
+	 the parser to parse a reserved word in error, since the newline
+	 inserts a token after the `in'. */
+      if (printing_comsub == 0 || first == 0)
+	newline ("");
+      first = 0;
+      /* "The grammar shows that reserved words can be used as patterns,
+	 even if one is the first word on a line. Obviously, the reserved
+	 word esac cannot be used in this manner." */
+      /* If the first word of the pattern list is literal "esac", the only
+	 way it could have gotten through the parser is to have been
+	 preceded by a left paren. */
+      if (STREQ (clauses->patterns->word->word, "esac"))
+	cprintf("(");
       command_print_word_list (clauses->patterns, " | ");
       cprintf (")\n");
       indentation += indentation_amount;
@@ -783,30 +797,33 @@ print_case_clauses (clauses)
 }
 
 static void
-print_while_command (while_command)
-     WHILE_COM *while_command;
+print_while_command (WHILE_COM *while_command)
 {
   print_until_or_while (while_command, "while");
 }
 
 static void
-print_until_command (while_command)
-     WHILE_COM *while_command;
+print_until_command (WHILE_COM *while_command)
 {
   print_until_or_while (while_command, "until");
 }
 
 static void
-print_until_or_while (while_command, which)
-     WHILE_COM *while_command;
-     char *which;
+print_until_or_while (WHILE_COM *while_command, char *which)
 {
   cprintf ("%s ", which);
   skip_this_indent++;
   make_command_string_internal (while_command->test);
   PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
-  cprintf (" do\n");	/* was newline ("do\n"); */
+  if (was_heredoc)
+    {
+      indent (indentation);
+      cprintf ("do\n");
+      was_heredoc = 0;
+    }
+  else
+    cprintf (" do\n");	/* was newline ("do\n"); */
   indentation += indentation_amount;
   make_command_string_internal (while_command->action);
   PRINT_DEFERRED_HEREDOCS ("");
@@ -816,14 +833,21 @@ print_until_or_while (while_command, which)
 }
 
 static void
-print_if_command (if_command)
-     IF_COM *if_command;
+print_if_command (IF_COM *if_command)
 {
   cprintf ("if ");
   skip_this_indent++;
   make_command_string_internal (if_command->test);
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
-  cprintf (" then\n");
+  if (was_heredoc)
+    {
+      indent (indentation_amount);
+      cprintf ("then\n");
+      was_heredoc = 0;
+    }
+  else
+    cprintf (" then\n");
   indentation += indentation_amount;
   make_command_string_internal (if_command->true_case);
   PRINT_DEFERRED_HEREDOCS ("");
@@ -844,8 +868,7 @@ print_if_command (if_command)
 
 #if defined (DPAREN_ARITHMETIC) || defined (ARITH_FOR_COMMAND)
 void
-print_arith_command (arith_cmd_list)
-     WORD_LIST *arith_cmd_list;
+print_arith_command (WORD_LIST *arith_cmd_list)
 {
   cprintf ("((");
   command_print_word_list (arith_cmd_list, " ");
@@ -855,8 +878,7 @@ print_arith_command (arith_cmd_list)
 
 #if defined (COND_COMMAND)
 static void
-print_cond_node (cond)
-     COND_COM *cond;
+print_cond_node (COND_COM *cond)
 {
   if (cond->flags & CMD_INVERT_RETURN)
     cprintf ("! ");
@@ -900,8 +922,7 @@ print_cond_node (cond)
 }
 
 void
-print_cond_command (cond)
-     COND_COM *cond;
+print_cond_command (COND_COM *cond)
 {
   cprintf ("[[ ");
   print_cond_node (cond);
@@ -910,10 +931,7 @@ print_cond_command (cond)
 
 #ifdef DEBUG
 void
-debug_print_word_list (s, list, sep)
-     char *s;
-     WORD_LIST *list;
-     char *sep;
+debug_print_word_list (char *s, WORD_LIST *list, char *sep)
 {
   WORD_LIST *w;
 
@@ -925,8 +943,7 @@ debug_print_word_list (s, list, sep)
 }
 
 void
-debug_print_cond_command (cond)
-     COND_COM *cond;
+debug_print_cond_command (COND_COM *cond)
 {
   fprintf (stderr, "DEBUG: ");
   command_string_index = 0;
@@ -936,10 +953,7 @@ debug_print_cond_command (cond)
 #endif
 
 void
-xtrace_print_cond_term (type, invert, op, arg1, arg2)
-     int type, invert;
-     WORD_DESC *op;
-     char *arg1, *arg2;
+xtrace_print_cond_term (int type, int invert, WORD_DESC *op, char *arg1, char *arg2)
 {
   CHECK_XTRACE_FP;
   command_string_index = 0;
@@ -969,8 +983,7 @@ xtrace_print_cond_term (type, invert, op, arg1, arg2)
 #if defined (DPAREN_ARITHMETIC) || defined (ARITH_FOR_COMMAND)
 /* A function to print the words of an arithmetic command when set -x is on. */
 void
-xtrace_print_arith_cmd (list)
-     WORD_LIST *list;
+xtrace_print_arith_cmd (WORD_LIST *list)
 {
   WORD_LIST *w;
 
@@ -986,11 +999,12 @@ xtrace_print_arith_cmd (list)
 #endif
 
 void
-print_simple_command (simple_command)
-     SIMPLE_COM *simple_command;
+print_simple_command (SIMPLE_COM *simple_command)
 {
   if (simple_command->words)
     command_print_word_list (simple_command->words, " ");
+  else
+    cprintf ("");
 
   if (simple_command->redirects)
     {
@@ -1001,8 +1015,7 @@ print_simple_command (simple_command)
 }
 
 static void
-print_heredocs (heredocs)
-     REDIRECT *heredocs;
+print_heredocs (REDIRECT *heredocs)
 {
   REDIRECT *hdtail;
 
@@ -1016,8 +1029,7 @@ print_heredocs (heredocs)
 }
 
 static void
-print_heredoc_bodies (heredocs)
-     REDIRECT *heredocs;
+print_heredoc_bodies (REDIRECT *heredocs)
 {
   REDIRECT *hdtail;
 
@@ -1038,8 +1050,7 @@ print_heredoc_bodies (heredocs)
    if it's a `;', but we use it to note not to print an extra space after the
    last heredoc body and newline. */
 static void
-print_deferred_heredocs (cstring)
-     const char *cstring;
+print_deferred_heredocs (const char *cstring)
 {
   /* We now print the heredoc headers in print_redirection_list */
   if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
@@ -1056,11 +1067,9 @@ print_deferred_heredocs (cstring)
 }
       
 static void
-print_redirection_list (redirects)
-     REDIRECT *redirects;
+print_redirection_list (REDIRECT *redirects)
 {
   REDIRECT *heredocs, *hdtail, *newredir;
-  char *rw;
 
   heredocs = (REDIRECT *)NULL;
   hdtail = heredocs;
@@ -1068,7 +1077,7 @@ print_redirection_list (redirects)
   was_heredoc = 0;
   while (redirects)
     {
-      /* Defer printing the here document bodiess until we've printed the rest of the
+      /* Defer printing the here document bodies until we've printed the rest of the
          redirections, but print the headers in the order they're given.  */
       if (redirects->instruction == r_reading_until || redirects->instruction == r_deblank_reading_until)
 	{
@@ -1085,19 +1094,6 @@ print_redirection_list (redirects)
 	  else
 	    hdtail = heredocs = newredir;
 	}
-#if 0
-      /* Remove this heuristic now that the command printing code doesn't
-	 unconditionally put in the redirector file descriptor. */
-      else if (redirects->instruction == r_duplicating_output_word && (redirects->flags & REDIR_VARASSIGN) == 0 && redirects->redirector.dest == 1)
-	{
-	  /* Temporarily translate it as the execution code does. */
-	  rw = redirects->redirectee.filename->word;
-	  if (rw && *rw != '-' && DIGIT (*rw) == 0 && EXPCHAR (*rw) == 0)
-	    redirects->instruction = r_err_and_out;
-	  print_redirection (redirects);
-	  redirects->instruction = r_duplicating_output_word;
-	}
-#endif
       else
 	print_redirection (redirects);
 
@@ -1119,8 +1115,7 @@ print_redirection_list (redirects)
 }
 
 static void
-print_heredoc_header (redirect)
-     REDIRECT *redirect;
+print_heredoc_header (REDIRECT *redirect)
 {
   int kill_leading;
   char *x;
@@ -1145,16 +1140,14 @@ print_heredoc_header (redirect)
 }
 
 static void
-print_heredoc_body (redirect)
-     REDIRECT *redirect;
+print_heredoc_body (REDIRECT *redirect)
 {
   /* Here doc body */
   cprintf ("%s%s", redirect->redirectee.filename->word, redirect->here_doc_eof);
 }
 
 static void
-print_redirection (redirect)
-     REDIRECT *redirect;
+print_redirection (REDIRECT *redirect)
 {
   int redirector, redir_fd;
   WORD_DESC *redirectee, *redir_word;
@@ -1317,7 +1310,7 @@ print_redirection (redirect)
 }
 
 static void
-reset_locals ()
+uw_reset_locals (void *ignore)
 {
   inside_function_def = 0;
   indentation = 0;
@@ -1327,27 +1320,36 @@ reset_locals ()
 }
 
 static void
-print_function_def (func)
-     FUNCTION_DEF *func;
+print_function_def (FUNCTION_DEF *func)
 {
   COMMAND *cmdcopy;
   REDIRECT *func_redirects;
+  WORD_DESC *w;
+
+  w = pretty_print_mode ? dequote_word (func->name) : func->name;
+  /* we're just pretty-printing, so this can be destructive */      
 
   func_redirects = NULL;
-  /* When in posix mode, print functions as posix specifies them. */
+  /* When in posix mode, print functions as posix specifies them, but prefix
+     `function' to words that are not valid POSIX identifiers. */
   if (posixly_correct == 0)
-    cprintf ("function %s () \n", func->name->word);
+    cprintf ("function %s () \n", w->word);
+  else if (valid_function_name (w->word, posixly_correct) == 0)
+    cprintf ("function %s () \n", w->word);
   else
-    cprintf ("%s () \n", func->name->word);
-  add_unwind_protect (reset_locals, 0);
+    cprintf ("%s () \n", w->word);
+
+  begin_unwind_frame ("function-def");
+  add_unwind_protect (uw_reset_locals, 0);
 
   indent (indentation);
-  cprintf ("{ \n");
+  cprintf ("{ \n");	/* } */
 
   inside_function_def++;
   indentation += indentation_amount;
 
-  cmdcopy = copy_command (func->command);
+  cmdcopy = func->command;
+  unwind_protect_pointer (cmdcopy);
   if (cmdcopy->type == cm_group)
     {
       func_redirects = cmdcopy->redirects;
@@ -1358,7 +1360,6 @@ print_function_def (func)
 					: cmdcopy);
   PRINT_DEFERRED_HEREDOCS ("");
 
-  remove_unwind_protect ();
   indentation -= indentation_amount;
   inside_function_def--;
 
@@ -1375,7 +1376,7 @@ print_function_def (func)
       was_heredoc = 0;		/* not printing any here-documents now */
     }
 
-  dispose_command (cmdcopy);
+  discard_unwind_frame ("function-def");
 }
 
 /* Return the string representation of the named function.
@@ -1385,10 +1386,7 @@ print_function_def (func)
    flags&FUNC_EXTERNAL means convert from internal to external form
   */
 char *
-named_function_string (name, command, flags)
-     char *name;
-     COMMAND *command;
-     int flags;
+named_function_string (char *name, COMMAND *command, int flags)
 {
   char *result;
   int old_indent, old_amount;
@@ -1403,7 +1401,7 @@ named_function_string (name, command, flags)
 
   if (name && *name)
     {
-      if (find_reserved_word (name) >= 0)
+      if (valid_function_name (name, posixly_correct) == 0)
 	cprintf ("function ");
       cprintf ("%s ", name);
     }
@@ -1423,9 +1421,11 @@ named_function_string (name, command, flags)
 
   inside_function_def++;
 
-  cprintf ((flags & FUNC_MULTILINE) ? "{ \n" : "{ ");
+  cprintf ((flags & FUNC_MULTILINE) ? "{ \n" : "{ ");	/* }} */
 
-  cmdcopy = copy_command (command);
+  cmdcopy = command;
+  unwind_protect_pointer (cmdcopy);
+
   /* Take any redirections specified in the function definition (which should
      apply to the function as a whole) and save them for printing later. */
   func_redirects = (REDIRECT *)NULL;
@@ -1455,25 +1455,14 @@ named_function_string (name, command, flags)
       was_heredoc = 0;
     }
 
+  remove_unwind_protect ();	/* unwind_protect_pointer */
   result = the_printed_command;
 
   if ((flags & FUNC_MULTILINE) == 0)
     {
-#if 0
-      register int i;
-      for (i = 0; result[i]; i++)
-	if (result[i] == '\n')
-	  {
-	    strcpy (result + i, result + i + 1);
-	    --i;
-	  }
-#else
-      if (result[2] == '\n')	/* XXX -- experimental */
+      if (result[2] == '\n')
 	memmove (result + 2, result + 3, strlen (result) - 2);	
-#endif
     }
-
-  dispose_command (cmdcopy);
 
   if (flags & FUNC_EXTERNAL)
     result = remove_quoted_escapes (result);
@@ -1482,8 +1471,7 @@ named_function_string (name, command, flags)
 }
 
 static void
-newline (string)
-     char *string;
+newline (char *string)
 {
   cprintf ("\n");
   indent (indentation);
@@ -1492,11 +1480,10 @@ newline (string)
 }
 
 static char *indentation_string;
-static int indentation_size;
+static size_t indentation_size;
 
 static void
-indent (amount)
-     int amount;
+indent (int amount)
 {
   register int i;
 
@@ -1509,31 +1496,28 @@ indent (amount)
 }
 
 static void
-semicolon ()
+semicolon (void)
 {
-  if (command_string_index > 0 &&
-       (the_printed_command[command_string_index - 1] == '&' ||
-	the_printed_command[command_string_index - 1] == '\n'))
+  if ((command_string_index > 0 &&
+	the_printed_command[command_string_index - 1] == '\n') ||
+      (command_string_index > 1 && 
+	the_printed_command[command_string_index - 1] == '&' &&
+	the_printed_command[command_string_index - 2] == ' '))
     return;
   cprintf (";");
 }
 
 /* How to make the string. */
 static void
-#if defined (PREFER_STDARG)
 cprintf (const char *control, ...)
-#else
-cprintf (control, va_alist)
-     const char *control;
-     va_dcl
-#endif
 {
-  register const char *s;
+  const char *s;
   char char_arg[2], *argp, intbuf[INT_STRLEN_BOUND (unsigned int) + 1];
-  int digit_arg, arg_len, c;
+  int digit_arg, c;
+  size_t arg_len;
   va_list args;
 
-  SH_VA_START (args, control);
+  va_start (args, control);
 
   arg_len = strlen (control);
   the_printed_command_resize (arg_len + 1);
@@ -1610,8 +1594,7 @@ cprintf (control, va_alist)
 /* Ensure that there is enough space to stuff LENGTH characters into
    THE_PRINTED_COMMAND. */
 static void
-the_printed_command_resize (length)
-     int length;
+the_printed_command_resize (size_t length)
 {
   if (the_printed_command == 0)
     {
@@ -1621,7 +1604,7 @@ the_printed_command_resize (length)
     }
   else if ((command_string_index + length) >= the_printed_command_size)
     {
-      int new;
+      size_t new;
       new = command_string_index + length + 1;
 
       /* Round up to the next multiple of PRINTED_COMMAND_GROW_SIZE. */
@@ -1632,34 +1615,13 @@ the_printed_command_resize (length)
     }
 }
 
-#if defined (HAVE_VPRINTF)
-/* ``If vprintf is available, you may assume that vfprintf and vsprintf are
-     also available.'' */
-
 static void
-#if defined (PREFER_STDARG)
 xprintf (const char *format, ...)
-#else
-xprintf (format, va_alist)
-     const char *format;
-     va_dcl
-#endif
 {
   va_list args;
 
-  SH_VA_START (args, format);
+  va_start (args, format);
 
   vfprintf (stdout, format, args);
   va_end (args);
 }
-
-#else
-
-static void
-xprintf (format, arg1, arg2, arg3, arg4, arg5)
-     const char *format;
-{
-  printf (format, arg1, arg2, arg3, arg4, arg5);
-}
-
-#endif /* !HAVE_VPRINTF */

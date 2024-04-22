@@ -21,7 +21,6 @@ AC_CACHE_VAL(bash_cv_func_strtoimax,
   if test "$ac_cv_have_decl_strtoimax" = "yes" ; then
     HAVE_DECL_STRTOIMAX=1
   fi
-
   if test "$HAVE_STRTOIMAX" = 0 || test "$HAVE_DECL_STRTOIMAX" = 0 ; then
     bash_cv_func_strtoimax=no REPLACE_STRTOIMAX=1
   else
@@ -29,7 +28,10 @@ AC_CACHE_VAL(bash_cv_func_strtoimax,
   fi
 ])
 AC_MSG_RESULT($bash_cv_func_strtoimax)
-if test $bash_cv_func_strtoimax = yes; then
+if test "$ac_cv_have_decl_strtoimax" = "yes" ; then
+AC_DEFINE([HAVE_DECL_STRTOIMAX], [1])
+fi
+if test $bash_cv_func_strtoimax = no; then
 AC_LIBOBJ(strtoimax)
 fi
 ])

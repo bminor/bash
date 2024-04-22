@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,13 +52,13 @@ extern int errno;
 #endif
 
 /* Static functions defined and used in this file. */
-static char *_find_user_command_internal PARAMS((const char *, int));
-static char *find_user_command_internal PARAMS((const char *, int));
-static char *find_user_command_in_path PARAMS((const char *, char *, int, int *));
-static char *find_in_path_element PARAMS((const char *, char *, int, int, struct stat *, int *));
-static char *find_absolute_program PARAMS((const char *, int));
+static char *_find_user_command_internal (const char *, int);
+static char *find_user_command_internal (const char *, int);
+static char *find_user_command_in_path (const char *, char *, int, int *);
+static char *find_in_path_element (const char *, char *, int, size_t, struct stat *, int *);
+static char *find_absolute_program (const char *, int);
 
-static char *get_next_path_element PARAMS((char *, int *));
+static char *get_next_path_element (char *, int *);
 
 /* The file name which we would try to execute, except that it isn't
    possible to execute it.  This is the first file that matches the
@@ -89,15 +89,13 @@ static struct ignorevar execignore =
 };
 
 void
-setup_exec_ignore (varname)
-     char *varname;
+setup_exec_ignore (const char *varname)
 {
   setup_ignore_patterns (&execignore);
 }
 
 static int
-exec_name_should_ignore (name)
-     const char *name;
+exec_name_should_ignore (const char *name)
 {
   struct ign *p;
 
@@ -112,15 +110,26 @@ exec_name_should_ignore (name)
    The EXECABLE bit is non-zero the file is executable.
    Zero is returned if the file is not found. */
 int
-file_status (name)
-     const char *name;
+file_status (const char *name)
 {
   struct stat finfo;
   int r;
 
   /* Determine whether this file exists or not. */
   if (stat (name, &finfo) < 0)
+#if defined (__MVS__) && defined (S_ISEXTL)
+    {
+      /* Workaround for z/OS not supporting stat on external links */
+      int old_errno = errno;
+      if (!(errno == ENOENT && lstat(name, &finfo) == 0 && S_ISEXTL(finfo.st_mode,finfo.st_genvalue)))
+	{
+	  errno = old_errno;	  /* lstat may reset errno */
+	  return (0);
+	}
+    }
+#else
     return (0);
+#endif
 
   /* If the file is a directory, then it is not "executable" in the
      sense of the shell. */
@@ -202,8 +211,7 @@ file_status (name)
    executable file is; do not change this unless YOU know
    what an executable file is. */
 int
-executable_file (file)
-     const char *file;
+executable_file (const char *file)
 {
   int s;
 
@@ -216,15 +224,13 @@ executable_file (file)
 }
 
 int
-is_directory (file)
-     const char *file;
+is_directory (const char *file)
 {
   return (file_status (file) & FS_DIRECTORY);
 }
 
 int
-executable_or_directory (file)
-     const char *file;
+executable_or_directory (const char *file)
 {
   int s;
 
@@ -238,8 +244,7 @@ executable_or_directory (file)
    couldn't be found.  If a file is found that isn't executable,
    and that is the only match, then return that. */
 char *
-find_user_command (name)
-     const char *name;
+find_user_command (const char *name)
 {
   return (find_user_command_internal (name, FS_EXEC_PREFERRED|FS_NODIRS));
 }
@@ -250,28 +255,39 @@ find_user_command (name)
    returns the first readable file found; designed to be used to look
    for shell scripts or files to source. */
 char *
-find_path_file (name)
-     const char *name;
+find_path_file (const char *name)
 {
   return (find_user_command_internal (name, FS_READABLE));
 }
 
+/* Get $PATH and normalize it. USE_TEMPENV, if non-zero, says to look in the
+   temporary environment first. Normalizing means converting PATH= into ".". */
+char *
+path_value (const char *pathvar, int use_tempenv)
+{
+  SHELL_VAR *var;
+  char *path;
+
+  var = use_tempenv ? find_variable_tempenv (pathvar) : find_variable (pathvar);
+  path = var ? value_cell (var) : (char *)NULL;
+
+  if (path == 0 || *path)
+    return (path);
+  else		/* *path == '\0' */
+    return ".";
+}
+
 static char *
-_find_user_command_internal (name, flags)
-     const char *name;
-     int flags;
+_find_user_command_internal (const char *name, int flags)
 {
   char *path_list, *cmd;
   SHELL_VAR *var;
 
   /* Search for the value of PATH in both the temporary environments and
      in the regular list of variables. */
-  if (var = find_variable_tempenv ("PATH"))	/* XXX could be array? */
-    path_list = value_cell (var);
-  else
-    path_list = (char *)NULL;
+  path_list = path_value ("PATH", 1);
 
-  if (path_list == 0 || *path_list == '\0')
+  if (path_list == 0)
     return (savestring (name));
 
   cmd = find_user_command_in_path (name, path_list, flags, (int *)0);
@@ -280,9 +296,7 @@ _find_user_command_internal (name, flags)
 }
 
 static char *
-find_user_command_internal (name, flags)
-     const char *name;
-     int flags;
+find_user_command_internal (const char *name, int flags)
 {
 #ifdef __WIN32__
   char *res, *dotexe;
@@ -305,9 +319,7 @@ find_user_command_internal (name, flags)
    the index is modified by this function.
    Return the next element of PATH_LIST or NULL if there are no more. */
 static char *
-get_next_path_element (path_list, path_index_pointer)
-     char *path_list;
-     int *path_index_pointer;
+get_next_path_element (char *path_list, int *path_index_pointer)
 {
   char *path;
 
@@ -333,9 +345,7 @@ get_next_path_element (path_list, path_index_pointer)
    environment and should use the Posix standard path.
    Returns a newly-allocated string. */
 char *
-search_for_command (pathname, flags)
-     const char *pathname;
-     int flags;
+search_for_command (const char *pathname, int flags)
 {
   char *hashed_file, *command, *path_list;
   int temp_path, st;
@@ -380,7 +390,11 @@ search_for_command (pathname, flags)
       if (flags & CMDSRCH_STDPATH)
 	path_list = conf_standard_path ();
       else if (temp_path || path)
-	path_list = value_cell (path);
+	{
+	  path_list = value_cell (path);
+	  if (path_list && *path_list == '\0')
+	    path_list = ".";
+	}
       else
 	path_list = 0;
 
@@ -393,6 +407,11 @@ search_for_command (pathname, flags)
 	     table unless it's an executable file in the current directory. */
 	  if (STREQ (command, pathname))
 	    {
+	      if (path_list == 0)
+		{
+		  dot_found_in_search = 1;
+		  st = file_status (pathname);
+		}
 	      if (st & FS_EXECABLE)
 	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	    }
@@ -415,17 +434,16 @@ search_for_command (pathname, flags)
 }
 
 char *
-user_command_matches (name, flags, state)
-     const char *name;
-     int flags, state;
+user_command_matches (const char *name, int flags, int state)
 {
   register int i;
-  int  path_index, name_len;
+  int  path_index;
+  size_t name_len;
   char *path_list, *path_element, *match;
   struct stat dotinfo;
   static char **match_list = NULL;
-  static int match_list_size = 0;
-  static int match_index = 0;
+  static size_t match_list_size = 0;
+  static size_t match_index = 0;
 
   if (state == 0)
     {
@@ -456,8 +474,8 @@ user_command_matches (name, flags, state)
 	  dot_found_in_search = 0;
 	  if (stat (".", &dotinfo) < 0)
 	    dotinfo.st_dev = dotinfo.st_ino = 0;	/* so same_file won't match */
-	  path_list = get_string_value ("PATH");
-      	  path_index = 0;
+	  path_list = path_value ("PATH", 0);
+	  path_index = 0;
 	}
 
       while (path_list && path_list[path_index])
@@ -498,9 +516,7 @@ user_command_matches (name, flags, state)
 }
 
 static char *
-find_absolute_program (name, flags)
-     const char *name;
-     int flags;
+find_absolute_program (const char *name, int flags)
 {
   int st;
 
@@ -520,12 +536,7 @@ find_absolute_program (name, flags)
 }
 
 static char *
-find_in_path_element (name, path, flags, name_len, dotinfop, rflagsp)
-     const char *name;
-     char *path;
-     int flags, name_len;
-     struct stat *dotinfop;
-     int *rflagsp;
+find_in_path_element (const char *name, char *path, int flags, size_t name_len, struct stat *dotinfop, int *rflagsp)
 {
   int status;
   char *full_path, *xpath;
@@ -597,7 +608,9 @@ find_in_path_element (name, path, flags, name_len, dotinfop, rflagsp)
 /* This does the dirty work for find_user_command_internal () and
    user_command_matches ().
    NAME is the name of the file to search for.
-   PATH_LIST is a colon separated list of directories to search.
+   PATH_LIST is a colon separated list of directories to search. It is the
+   caller's responsibility to pass a non-empty path if they want an empty
+   path to be treated specially.
    FLAGS contains bit fields which control the files which are eligible.
    Some values are:
       FS_EXEC_ONLY:		The file must be an executable to be found.
@@ -607,13 +620,11 @@ find_in_path_element (name, path, flags, name_len, dotinfop, rflagsp)
       FS_NODIRS:		Don't find any directories.
 */
 static char *
-find_user_command_in_path (name, path_list, flags, rflagsp)
-     const char *name;
-     char *path_list;
-     int flags, *rflagsp;
+find_user_command_in_path (const char *name, char *path_list, int flags, int *rflagsp)
 {
   char *full_path, *path;
-  int path_index, name_len, rflags;
+  int path_index, rflags;
+  size_t name_len;
   struct stat dotinfo;
 
   /* We haven't started looking, so we certainly haven't seen
@@ -687,10 +698,7 @@ find_user_command_in_path (name, path_list, flags, rflagsp)
 /* External interface to find a command given a $PATH.  Separate from
    find_user_command_in_path to allow future customization. */
 char *
-find_in_path (name, path_list, flags)
-     const char *name;
-     char *path_list;
-     int flags;
+find_in_path (const char *name, char *path_list, int flags)
 {
   return (find_user_command_in_path (name, path_list, flags, (int *)0));
 }

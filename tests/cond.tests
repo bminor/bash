@@ -61,6 +61,10 @@ echo returns: $?
 [[ -z $UNSET ]]
 echo returns: $?
 
+# need to handle test syntax errors and longjmp
+[[ -t X ]]
+echo returns: $?
+
 # the ==/= and != operators do pattern matching
 [[ $TDIR == /usr/homes/* ]]
 echo returns: $?
@@ -225,8 +229,20 @@ del=$'\177'
 # allow reserved words after a conditional command just because
 if [[ str ]] then [[ str ]] fi
 
+# make sure pattern matching does the right thing with CTLESC
+var=$'ab\001'
+[[ $var == $var ]] && echo ok c1
+[[ $var == a* ]] && echo ok c2
+[[ $var == $'ab\001' ]] && echo ok c3
+
+var=$'ab\001c'
+[[ $var == $var ]] && echo ok c4
+[[ $var == a* ]] && echo ok c5
+[[ $var == $'ab\001'* ]] && echo ok c6
+
 ${THIS_SH} ./cond-regexp1.sub
-
 ${THIS_SH} ./cond-regexp2.sub
-
 ${THIS_SH} ./cond-regexp3.sub
+
+${THIS_SH} ./cond-error1.sub
+${THIS_SH} ./cond-xtrace1.sub

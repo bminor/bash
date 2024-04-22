@@ -1,22 +1,18 @@
-/* bindtextdom.c - Implementation of the bindtextdomain(3) function */
+/* Implementation of the bindtextdomain(3) function
+   Copyright (C) 1995-2020 Free Software Foundation, Inc.
 
-/* Copyright (C) 1995-1998, 2000, 2001, 2002, 2005-2009 Free Software Foundation, Inc.
-
-   This file is part of GNU Bash.
-
-   Bash is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation; either version 2.1 of the License, or
    (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful,
+   This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
-*/
+   You should have received a copy of the GNU Lesser General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -26,29 +22,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "gettextP.h"
 #ifdef _LIBC
 # include <libintl.h>
 #else
 # include "libgnuintl.h"
 #endif
-#include "gettextP.h"
 
+/* Handle multi-threaded applications.  */
 #ifdef _LIBC
-/* We have to handle multi-threaded applications.  */
 # include <bits/libc-lock.h>
+# define gl_rwlock_define __libc_rwlock_define
+# define gl_rwlock_wrlock __libc_rwlock_wrlock
+# define gl_rwlock_unlock __libc_rwlock_unlock
 #else
-/* Provide dummy implementation if this is outside glibc.  */
-# define __libc_rwlock_define(CLASS, NAME)
-# define __libc_rwlock_wrlock(NAME)
-# define __libc_rwlock_unlock(NAME)
-#endif
-
-/* The internal variables in the standalone libintl.a must have different
-   names than the internal variables in GNU libc, otherwise programs
-   using libintl.a cannot be linked statically.  */
-#if !defined _LIBC
-# define _nl_default_dirname libintl_nl_default_dirname
-# define _nl_domain_bindings libintl_nl_domain_bindings
+# include "lock.h"
 #endif
 
 /* Some compilers, like SunOS4 cc, don't have offsetof in <stddef.h>.  */
@@ -58,19 +46,8 @@
 
 /* @@ end of prolog @@ */
 
-/* Contains the default location of the message catalogs.  */
-extern const char _nl_default_dirname[];
-#ifdef _LIBC
-extern const char _nl_default_dirname_internal[] attribute_hidden;
-#else
-# define INTUSE(name) name
-#endif
-
-/* List with bindings of specific domains.  */
-extern struct binding *_nl_domain_bindings;
-
 /* Lock variable to protect the global data in the gettext implementation.  */
-__libc_rwlock_define (extern, _nl_state_lock attribute_hidden)
+gl_rwlock_define (extern, _nl_state_lock attribute_hidden)
 
 
 /* Names for the libintl functions are a problem.  They must not clash
@@ -88,22 +65,18 @@ __libc_rwlock_define (extern, _nl_state_lock attribute_hidden)
 # define BIND_TEXTDOMAIN_CODESET libintl_bind_textdomain_codeset
 #endif
 
-/* Prototypes for local functions.  */
-static void set_binding_values PARAMS ((const char *domainname,
-					const char **dirnamep,
-					const char **codesetp));
-
-/* Specifies the directory name *DIRNAMEP and the output codeset *CODESETP
-   to be used for the DOMAINNAME message catalog.
-   If *DIRNAMEP or *CODESETP is NULL, the corresponding attribute is not
-   modified, only the current value is returned.
-   If DIRNAMEP or CODESETP is NULL, the corresponding attribute is neither
-   modified nor returned.  */
+/* Specifies the directory name *DIRNAMEP, the directory name *WDIRNAMEP
+   (only on native Windows), and the output codeset *CODESETP to be used
+   for the DOMAINNAME message catalog.
+   If *DIRNAMEP or *WDIRNAMEP or *CODESETP is NULL, the corresponding attribute
+   is not modified, only the current value is returned.
+   If DIRNAMEP or WDIRNAMEP or CODESETP is NULL, the corresponding attribute is
+   neither modified nor returned, except that setting WDIRNAME erases DIRNAME
+   and vice versa.  */
 static void
-set_binding_values (domainname, dirnamep, codesetp)
-     const char *domainname;
-     const char **dirnamep;
-     const char **codesetp;
+set_binding_values (const char *domainname,
+		    const char **dirnamep, const wchar_t **wdirnamep,
+		    const char **codesetp)
 {
   struct binding *binding;
   int modified;
@@ -113,12 +86,16 @@ set_binding_values (domainname, dirnamep, codesetp)
     {
       if (dirnamep)
 	*dirnamep = NULL;
+#if defined _WIN32 && !defined __CYGWIN__
+      if (wdirnamep)
+	*wdirnamep = NULL;
+#endif
       if (codesetp)
 	*codesetp = NULL;
       return;
     }
 
-  __libc_rwlock_wrlock (_nl_state_lock);
+  gl_rwlock_wrlock (_nl_state_lock);
 
   modified = 0;
 
@@ -151,34 +128,65 @@ set_binding_values (domainname, dirnamep, codesetp)
 		 one are equal we simply do nothing.  Otherwise replace the
 		 old binding.  */
 	      char *result = binding->dirname;
-	      if (strcmp (dirname, result) != 0)
+	      if (result == NULL || strcmp (dirname, result) != 0)
 		{
-		  if (strcmp (dirname, INTUSE(_nl_default_dirname)) == 0)
-		    result = (char *) INTUSE(_nl_default_dirname);
+		  if (strcmp (dirname, _nl_default_dirname) == 0)
+		    result = (char *) _nl_default_dirname;
 		  else
-		    {
-#if defined _LIBC || defined HAVE_STRDUP
-		      result = strdup (dirname);
-#else
-		      size_t len = strlen (dirname) + 1;
-		      result = (char *) malloc (len);
-		      if (__builtin_expect (result != NULL, 1))
-			memcpy (result, dirname, len);
-#endif
-		    }
+		    result = strdup (dirname);
 
 		  if (__builtin_expect (result != NULL, 1))
 		    {
-		      if (binding->dirname != INTUSE(_nl_default_dirname))
+		      if (binding->dirname != _nl_default_dirname)
 			free (binding->dirname);
-
 		      binding->dirname = result;
+
+#if defined _WIN32 && !defined __CYGWIN__
+		      free (binding->wdirname);
+		      binding->wdirname = NULL;
+#endif
+
 		      modified = 1;
 		    }
 		}
 	      *dirnamep = result;
 	    }
 	}
+
+#if defined _WIN32 && !defined __CYGWIN__
+      if (wdirnamep)
+	{
+	  const wchar_t *wdirname = *wdirnamep;
+
+	  if (wdirname == NULL)
+	    /* The current binding has be to returned.  */
+	    *wdirnamep = binding->wdirname;
+	  else
+	    {
+	      /* The domain is already bound.  If the new value and the old
+		 one are equal we simply do nothing.  Otherwise replace the
+		 old binding.  */
+	      wchar_t *result = binding->wdirname;
+	      if (result == NULL || wcscmp (wdirname, result) != 0)
+		{
+		  result = _wcsdup (wdirname);
+
+		  if (__builtin_expect (result != NULL, 1))
+		    {
+		      if (binding->dirname != _nl_default_dirname)
+			free (binding->dirname);
+		      binding->dirname = NULL;
+
+		      free (binding->wdirname);
+		      binding->wdirname = result;
+
+		      modified = 1;
+		    }
+		}
+	      *wdirnamep = result;
+	    }
+	}
+#endif
 
       if (codesetp)
 	{
@@ -195,22 +203,12 @@ set_binding_values (domainname, dirnamep, codesetp)
 	      char *result = binding->codeset;
 	      if (result == NULL || strcmp (codeset, result) != 0)
 		{
-#if defined _LIBC || defined HAVE_STRDUP
 		  result = strdup (codeset);
-#else
-		  size_t len = strlen (codeset) + 1;
-		  result = (char *) malloc (len);
-		  if (__builtin_expect (result != NULL, 1))
-		    memcpy (result, codeset, len);
-#endif
-
 		  if (__builtin_expect (result != NULL, 1))
 		    {
-		      if (binding->codeset != NULL)
-			free (binding->codeset);
+		      free (binding->codeset);
 
 		      binding->codeset = result;
-		      binding->codeset_cntr++;
 		      modified = 1;
 		    }
 		}
@@ -219,11 +217,18 @@ set_binding_values (domainname, dirnamep, codesetp)
 	}
     }
   else if ((dirnamep == NULL || *dirnamep == NULL)
+#if defined _WIN32 && !defined __CYGWIN__
+	   && (wdirnamep == NULL || *wdirnamep == NULL)
+#endif
 	   && (codesetp == NULL || *codesetp == NULL))
     {
       /* Simply return the default values.  */
       if (dirnamep)
-	*dirnamep = INTUSE(_nl_default_dirname);
+	*dirnamep = _nl_default_dirname;
+#if defined _WIN32 && !defined __CYGWIN__
+      if (wdirnamep)
+	*wdirnamep = NULL;
+#endif
       if (codesetp)
 	*codesetp = NULL;
     }
@@ -244,26 +249,24 @@ set_binding_values (domainname, dirnamep, codesetp)
 	  const char *dirname = *dirnamep;
 
 	  if (dirname == NULL)
-	    /* The default value.  */
-	    dirname = INTUSE(_nl_default_dirname);
+	    {
+#if defined _WIN32 && !defined __CYGWIN__
+	      if (wdirnamep && *wdirnamep != NULL)
+		dirname = NULL;
+	      else
+#endif
+		/* The default value.  */
+		dirname = _nl_default_dirname;
+	    }
 	  else
 	    {
-	      if (strcmp (dirname, INTUSE(_nl_default_dirname)) == 0)
-		dirname = INTUSE(_nl_default_dirname);
+	      if (strcmp (dirname, _nl_default_dirname) == 0)
+		dirname = _nl_default_dirname;
 	      else
 		{
-		  char *result;
-#if defined _LIBC || defined HAVE_STRDUP
-		  result = strdup (dirname);
+		  char *result = strdup (dirname);
 		  if (__builtin_expect (result == NULL, 0))
 		    goto failed_dirname;
-#else
-		  size_t len = strlen (dirname) + 1;
-		  result = (char *) malloc (len);
-		  if (__builtin_expect (result == NULL, 0))
-		    goto failed_dirname;
-		  memcpy (result, dirname, len);
-#endif
 		  dirname = result;
 		}
 	    }
@@ -271,10 +274,34 @@ set_binding_values (domainname, dirnamep, codesetp)
 	  new_binding->dirname = (char *) dirname;
 	}
       else
-	/* The default value.  */
-	new_binding->dirname = (char *) INTUSE(_nl_default_dirname);
+	{
+#if defined _WIN32 && !defined __CYGWIN__
+	  if (wdirnamep && *wdirnamep != NULL)
+	    new_binding->dirname = NULL;
+	  else
+#endif
+	    /* The default value.  */
+	    new_binding->dirname = (char *) _nl_default_dirname;
+	}
 
-      new_binding->codeset_cntr = 0;
+#if defined _WIN32 && !defined __CYGWIN__
+      if (wdirnamep)
+	{
+	  const wchar_t *wdirname = *wdirnamep;
+
+	  if (wdirname != NULL)
+	    {
+	      wchar_t *result = _wcsdup (wdirname);
+	      if (__builtin_expect (result == NULL, 0))
+		goto failed_wdirname;
+	      wdirname = result;
+	    }
+	  *wdirnamep = wdirname;
+	  new_binding->wdirname = (wchar_t *) wdirname;
+	}
+      else
+	new_binding->wdirname = NULL;
+#endif
 
       if (codesetp)
 	{
@@ -282,21 +309,10 @@ set_binding_values (domainname, dirnamep, codesetp)
 
 	  if (codeset != NULL)
 	    {
-	      char *result;
-
-#if defined _LIBC || defined HAVE_STRDUP
-	      result = strdup (codeset);
+	      char *result = strdup (codeset);
 	      if (__builtin_expect (result == NULL, 0))
 		goto failed_codeset;
-#else
-	      size_t len = strlen (codeset) + 1;
-	      result = (char *) malloc (len);
-	      if (__builtin_expect (result == NULL, 0))
-		goto failed_codeset;
-	      memcpy (result, codeset, len);
-#endif
 	      codeset = result;
-	      new_binding->codeset_cntr++;
 	    }
 	  *codesetp = codeset;
 	  new_binding->codeset = (char *) codeset;
@@ -328,13 +344,21 @@ set_binding_values (domainname, dirnamep, codesetp)
       if (0)
 	{
 	failed_codeset:
-	  if (new_binding->dirname != INTUSE(_nl_default_dirname))
+#if defined _WIN32 && !defined __CYGWIN__
+	  free (new_binding->wdirname);
+	failed_wdirname:
+#endif
+	  if (new_binding->dirname != _nl_default_dirname)
 	    free (new_binding->dirname);
 	failed_dirname:
 	  free (new_binding);
 	failed:
 	  if (dirnamep)
 	    *dirnamep = NULL;
+#if defined _WIN32 && !defined __CYGWIN__
+	  if (wdirnamep)
+	    *wdirnamep = NULL;
+#endif
 	  if (codesetp)
 	    *codesetp = NULL;
 	}
@@ -344,28 +368,67 @@ set_binding_values (domainname, dirnamep, codesetp)
   if (modified)
     ++_nl_msg_cat_cntr;
 
-  __libc_rwlock_unlock (_nl_state_lock);
+  gl_rwlock_unlock (_nl_state_lock);
 }
 
 /* Specify that the DOMAINNAME message catalog will be found
    in DIRNAME rather than in the system locale data base.  */
 char *
-BINDTEXTDOMAIN (domainname, dirname)
-     const char *domainname;
-     const char *dirname;
+BINDTEXTDOMAIN (const char *domainname, const char *dirname)
 {
-  set_binding_values (domainname, &dirname, NULL);
+#ifdef __EMX__
+  const char *saved_dirname = dirname;
+  char dirname_with_drive[_MAX_PATH];
+
+# ifdef __KLIBC__
+  if (dirname && strncmp (dirname, "/@unixroot", 10) == 0
+      && (dirname[10] == '\0' || dirname[10] == '/' || dirname[10] == '\\'))
+    /* kLIBC itself processes /@unixroot prefix */;
+  else
+# endif
+  /* Resolve UNIXROOT into dirname if it is not resolved by os2compat.[ch]. */
+  if (dirname && (dirname[0] == '/' || dirname[0] == '\\' ))
+    {
+      const char *unixroot = getenv ("UNIXROOT");
+      size_t len = strlen (dirname) + 1;
+
+      if (unixroot
+          && unixroot[0] != '\0'
+          && unixroot[1] == ':'
+          && unixroot[2] == '\0'
+          && 2 + len <= _MAX_PATH)
+        {
+          memcpy (dirname_with_drive, unixroot, 2);
+          memcpy (dirname_with_drive + 2, dirname, len);
+
+          dirname = dirname_with_drive;
+        }
+    }
+#endif
+  set_binding_values (domainname, &dirname, NULL, NULL);
+#ifdef __EMX__
+  dirname = saved_dirname;
+#endif
   return (char *) dirname;
 }
+
+#if defined _WIN32 && !defined __CYGWIN__
+/* Specify that the DOMAINNAME message catalog will be found
+   in WDIRNAME rather than in the system locale data base.  */
+wchar_t *
+libintl_wbindtextdomain (const char *domainname, const wchar_t *wdirname)
+{
+  set_binding_values (domainname, NULL, &wdirname, NULL);
+  return (wchar_t *) wdirname;
+}
+#endif
 
 /* Specify the character encoding in which the messages from the
    DOMAINNAME message catalog will be returned.  */
 char *
-BIND_TEXTDOMAIN_CODESET (domainname, codeset)
-     const char *domainname;
-     const char *codeset;
+BIND_TEXTDOMAIN_CODESET (const char *domainname, const char *codeset)
 {
-  set_binding_values (domainname, NULL, &codeset);
+  set_binding_values (domainname, NULL, NULL, &codeset);
   return (char *) codeset;
 }
 

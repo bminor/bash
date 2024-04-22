@@ -67,7 +67,7 @@ extern char *progname;
 #endif
 
 void
-initialize_signames ()
+initialize_signames (void)
 {
   register int i;
 #if defined (SIGRTMAX) || defined (SIGRTMIN)
@@ -296,6 +296,29 @@ initialize_signames ()
 /* FreeBSD */
 #if defined (SIGTHR)	/* thread interrupt */
   signal_names[SIGTHR] = "SIGTHR";
+#endif
+
+/* z/OS */
+#if defined(SIGABND)
+  signal_names[SIGABND] = "SIGABND";
+#endif
+#if defined(SIGIOERR)
+  signal_names[SIGIOERR] = "SIGIOERR";
+#endif
+#if defined(SIGTHSTOP)
+  signal_names[SIGTHSTOP] = "SIGTHSTOP";
+#endif
+#if defined(SIGTHCONT)
+  signal_names[SIGTHCONT] = "SIGTHCONT";
+#endif
+#if defined(SIGTRACE)
+  signal_names[SIGTRACE] = "SIGTRACE";
+#endif
+#if defined(SIGDCE)
+  signal_names[SIGDCE] = "SIGDCE";
+#endif
+#if defined(SIGDUMP)
+  signal_names[SIGDUMP] = "SIGDUMP";
 #endif
 
 /* Common */

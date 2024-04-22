@@ -1,7 +1,7 @@
 /* memalloc.h -- consolidate code for including alloca.h or malloc.h and
    defining alloca. */
 
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1993,2003 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,17 +45,9 @@
 #      include <alloca.h>
 #    endif /* !IBMESA */
 #  else  /* !HAVE_ALLOCA_H || C_ALLOCA */
-#    if defined (__hpux) && defined (__STDC__) && !defined (alloca)
-extern void *alloca ();
-#    else
-#      if !defined (alloca)
-#        if defined (__STDC__)
+#    if !defined (alloca)
 extern void *alloca (size_t);
-#        else
-extern char *alloca ();
-#        endif /* !__STDC__ */
-#      endif /* !alloca */
-#    endif /* !__hpux || !__STDC__ && !alloca */
+#    endif /* !alloca */
 #  endif /* !HAVE_ALLOCA_H || C_ALLOCA */
 #endif /* !__GNUC__ || C_ALLOCA */
 

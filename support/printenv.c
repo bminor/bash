@@ -6,7 +6,7 @@
    chet@po.cwru.edu
 */
 
-/* Copyright (C) 1997-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2002,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,9 +34,7 @@
 extern char **environ;
 
 int
-main (argc, argv) 
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   register char **envp, *eval;
   int len;

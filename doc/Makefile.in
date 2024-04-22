@@ -109,6 +109,10 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/fdl.texi $(srcdir)/version.texi
 	$(RM) $@
 	-${GROFF} -I${srcdir} -man $< > $@
 
+.1.pdf:
+	$(RM) $@
+	-${GROFF} -I${srcdir} -man -T pdf $< > $@
+
 .1.0:
 	$(RM) $@
 	-${NROFF} -I${srcdir} -man $< > $@
@@ -153,9 +157,9 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/fdl.texi $(srcdir)/version.texi
 #	$(RM) $@
 #	-${TEXI2PDF} $<
 
-all: ps info dvi text html $(MAN2HTML)
+all: info dvi text html pdf $(MAN2HTML)
 nodvi: ps info text html
-everything: all pdf
+everything: all ps
 
 PSFILES = bash.ps bashbug.ps article.ps builtins.ps rbash.ps 
 DVIFILES = bashref.dvi bashref.ps
@@ -207,11 +211,11 @@ article.ps: article.ms
 
 bashref.ps: bashref.dvi
 
-article.pdf: article.ps
-#bashref.pdf: bashref.dvi
 # experimental
 bashref.pdf: bashref.texi
-bash.pdf: bash.ps
+bash.pdf: bash.1
+
+article.pdf: article.ps
 rose94.pdf: rose94.ps
 
 OTHER_DOCS = $(srcdir)/FAQ $(srcdir)/INTRO

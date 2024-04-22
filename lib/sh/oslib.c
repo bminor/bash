@@ -1,6 +1,6 @@
 /* oslib.c - functions present only in some unix versions. */
 
-/* Copyright (C) 1995,2010 Free Software Foundation, Inc.
+/* Copyright (C) 1995,2010,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,11 +54,9 @@ extern int errno;
 /* Make the functions strchr and strrchr if they do not exist. */
 #if !defined (HAVE_STRCHR)
 char *
-strchr (string, c)
-     char *string;
-     int c;
+strchr (const char *string, int c)
 {
-  register char *s;
+  char *s;
 
   for (s = string; s && *s; s++)
     if (*s == c)
@@ -68,13 +66,11 @@ strchr (string, c)
 }
 
 char *
-strrchr (string, c)
-     char *string;
-     int c;
+strrchr (const char *string, int c)
 {
-  register char *s, *t;
+  char *s, *t;
 
-  for (s = string, t = (char *)NULL; s && *s; s++)
+  for (s = string, t = NULL; s && *s; s++)
     if (*s == c)
       t = s;
   return (t);
@@ -85,8 +81,7 @@ strrchr (string, c)
 /* Replacement for dup2 (), for those systems which either don't have it,
    or supply one with broken behaviour. */
 int
-dup2 (fd1, fd2)
-     int fd1, fd2;
+dup2 (int fd1, int fd2)
 {
   int saved_errno, r;
 
@@ -143,7 +138,7 @@ dup2 (fd1, fd2)
 
 #if !defined (HAVE_GETDTABLESIZE)
 int
-getdtablesize ()
+getdtablesize (void)
 {
 #  if defined (_POSIX_VERSION) && defined (HAVE_SYSCONF) && defined (_SC_OPEN_MAX)
   return (sysconf(_SC_OPEN_MAX));	/* Posix systems use sysconf */
@@ -166,9 +161,7 @@ getdtablesize ()
 #    undef bcopy
 #  endif
 void
-bcopy (s,d,n)
-     void *d, *s;
-     size_t n;
+bcopy (void *s, void *d, size_t n)
 {
   FASTCOPY (s, d, n);
 }
@@ -179,9 +172,7 @@ bcopy (s,d,n)
 #    undef bzero
 #  endif
 void
-bzero (s, n)
-     void *s; 
-     size_t n;
+bzero (void *s, size_t n)
 {
   register int i;
   register char *r;
@@ -195,9 +186,7 @@ bzero (s, n)
 #  if defined (HAVE_UNAME)
 #    include <sys/utsname.h>
 int
-gethostname (name, namelen)
-     char *name;
-     size_t namelen;
+gethostname (char *name, size_t namelen)
 {
   int i;
   struct utsname ut;
@@ -212,9 +201,7 @@ gethostname (name, namelen)
 }
 #  else /* !HAVE_UNAME */
 int
-gethostname (name, namelen)
-     char *name;
-     size_t namelen;
+gethostname (char *name, size_t namelen)
 {
   strncpy (name, "unknown", namelen);
   name[namelen] = '\0';
@@ -225,9 +212,7 @@ gethostname (name, namelen)
 
 #if !defined (HAVE_KILLPG)
 int
-killpg (pgrp, sig)
-     pid_t pgrp;
-     int sig;
+killpg (pid_t pgrp, int sig)
 {
   return (kill (-pgrp, sig));
 }
@@ -235,9 +220,7 @@ killpg (pgrp, sig)
 
 #if !defined (HAVE_MKFIFO) && defined (PROCESS_SUBSTITUTION)
 int
-mkfifo (path, mode)
-     char *path;
-     mode_t mode;
+mkfifo (char *path, mode_t mode)
 {
 #if defined (S_IFIFO)
   return (mknod (path, (mode | S_IFIFO), 0));
@@ -248,9 +231,10 @@ mkfifo (path, mode)
 #endif /* !HAVE_MKFIFO && PROCESS_SUBSTITUTION */
 
 #define DEFAULT_MAXGROUPS 64
+#define MIN_MAXGROUPS 32	/* work around macOS issue */
 
 int
-getmaxgroups ()
+getmaxgroups (void)
 {
   static int maxgroups = -1;
 
@@ -274,11 +258,14 @@ getmaxgroups ()
   if (maxgroups <= 0)
     maxgroups = DEFAULT_MAXGROUPS;
 
+  if (maxgroups < MIN_MAXGROUPS)
+    maxgroups = MIN_MAXGROUPS;
+
   return maxgroups;
 }
 
 long
-getmaxchild ()
+getmaxchild (void)
 {
   static long maxchild = -1L;
 

@@ -28,3 +28,6 @@ echo after special builtin: $? )
 echo after assignment error: $? )
 ( x=8
 echo after assignment statement error: $? )
+
+( readonly v; : ${v:=val}
+  echo variable assignment error )

@@ -1,6 +1,6 @@
 /* input.c -- functions to perform buffered input with synchronization. */
 
-/* Copyright (C) 1992-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,7 +57,7 @@ extern int errno;
 #  define X_EWOULDBLOCK -99
 #endif
 
-extern void termsig_handler PARAMS((int));
+extern void termsig_handler (int);
 
 /* Functions to handle reading input on systems that don't restart read(2)
    if a signal is received. */
@@ -69,8 +69,7 @@ static int local_index = 0, local_bufused = 0;
    interrupted by a signal.  We do the read ourselves, and restart it
    if it returns EINTR. */
 int
-getc_with_restart (stream)
-     FILE *stream;
+getc_with_restart (FILE *stream)
 {
   unsigned char uc;
 
@@ -117,17 +116,13 @@ getc_with_restart (stream)
 }
 
 int
-ungetc_with_restart (c, stream)
-     int c;
-     FILE *stream;
+ungetc_with_restart (int c, FILE *stream)
 {
   if (local_index == 0 || c == EOF)
     return EOF;
   localbuf[--local_index] = c;
   return c;
 }
-
-#if defined (BUFFERED_INPUT)
 
 /* A facility similar to stdio, but input-only. */
 
@@ -165,8 +160,7 @@ static int nbuffers;
 
 /* Make sure `buffers' has at least N elements. */
 static void
-allocate_buffers (n)
-     int n;
+allocate_buffers (int n)
 {
   register int i, orig_nbuffers;
 
@@ -183,10 +177,7 @@ allocate_buffers (n)
 /* Construct and return a BUFFERED_STREAM corresponding to file descriptor
    FD, using BUFFER. */
 static BUFFERED_STREAM *
-make_buffered_stream (fd, buffer, bufsize)
-     int fd;
-     char *buffer;
-     size_t bufsize;
+make_buffered_stream (int fd, char *buffer, size_t bufsize)
 {
   BUFFERED_STREAM *bp;
 
@@ -196,7 +187,8 @@ make_buffered_stream (fd, buffer, bufsize)
   bp->b_fd = fd;
   bp->b_buffer = buffer;
   bp->b_size = bufsize;
-  bp->b_used = bp->b_inputp = bp->b_flag = 0;
+  bp->b_used = 0;
+  bp->b_inputp = bp->b_flag = 0;
   if (bufsize == 1)
     bp->b_flag |= B_UNBUFF;
   if (O_TEXT && (fcntl (fd, F_GETFL) & O_TEXT) != 0)
@@ -206,8 +198,7 @@ make_buffered_stream (fd, buffer, bufsize)
 
 /* Allocate a new BUFFERED_STREAM, copy BP to it, and return the new copy. */
 static BUFFERED_STREAM *
-copy_buffered_stream (bp)
-     BUFFERED_STREAM *bp;
+copy_buffered_stream (BUFFERED_STREAM *bp)
 {
   BUFFERED_STREAM *nbp;
 
@@ -220,8 +211,7 @@ copy_buffered_stream (bp)
 }
 
 int
-set_bash_input_fd (fd)
-     int fd;
+set_bash_input_fd (int fd)
 {
   if (bash_input.type == st_bstream)
     bash_input.location.buffered_fd = fd;
@@ -231,8 +221,7 @@ set_bash_input_fd (fd)
 }
 
 int
-fd_is_bash_input (fd)
-     int fd;
+fd_is_bash_input (int fd)
 {
   if (bash_input.type == st_bstream && bash_input.location.buffered_fd == fd)
     return 1;
@@ -246,8 +235,7 @@ fd_is_bash_input (fd)
    NEW_FD is -1, a new file descriptor is allocated with fcntl.  The new
    file descriptor is returned on success, -1 on error. */
 int
-save_bash_input (fd, new_fd)
-     int fd, new_fd;
+save_bash_input (int fd, int new_fd)
 {
   int nfd;
 
@@ -312,8 +300,7 @@ save_bash_input (fd, new_fd)
    fd 0, sync_buffered_stream is used instead, to cooperate with input
    redirection (look at redir.c:add_undo_redirect()). */
 int
-check_bash_input (fd)
-     int fd;
+check_bash_input (int fd)
 {
   if (fd_is_bash_input (fd))
     {
@@ -330,8 +317,7 @@ check_bash_input (fd)
    BUFFERS[fd1] is copied to BUFFERS[fd2].  This is called by the
    redirect code for constructs like 4<&0 and 3</etc/rc.local. */
 int
-duplicate_buffered_stream (fd1, fd2)
-     int fd1, fd2;
+duplicate_buffered_stream (int fd1, int fd2)
 {
   int is_bash_input, m;
 
@@ -373,7 +359,7 @@ duplicate_buffered_stream (fd1, fd2)
       buffers[fd2]->b_flag |= B_WASBASHINPUT;
     }
 
-  if (fd_is_bash_input (fd1) || (buffers[fd1] && (buffers[fd1]->b_flag & B_SHAREDBUF)))
+  if (buffers[fd2] && (fd_is_bash_input (fd1) || (buffers[fd1] && (buffers[fd1]->b_flag & B_SHAREDBUF))))
     buffers[fd2]->b_flag |= B_SHAREDBUF;
 
   return (fd2);
@@ -386,8 +372,7 @@ duplicate_buffered_stream (fd1, fd2)
    corresponding to it.  If something is wrong and the file descriptor
    is invalid, return a NULL stream. */
 BUFFERED_STREAM *
-fd_to_buffered_stream (fd)
-     int fd;
+fd_to_buffered_stream (int fd)
 {
   char *buffer;
   size_t size;
@@ -409,8 +394,7 @@ fd_to_buffered_stream (fd)
 
 /* Return a buffered stream corresponding to FILE, a file name. */
 BUFFERED_STREAM *
-open_buffered_stream (file)
-     char *file;
+open_buffered_stream (char *file)
 {
   int fd;
 
@@ -421,8 +405,7 @@ open_buffered_stream (file)
 /* Deallocate a buffered stream and free up its resources.  Make sure we
    zero out the slot in BUFFERS that points to BP. */
 void
-free_buffered_stream (bp)
-     BUFFERED_STREAM *bp;
+free_buffered_stream (BUFFERED_STREAM *bp)
 {
   int n;
 
@@ -439,8 +422,7 @@ free_buffered_stream (bp)
 /* Close the file descriptor associated with BP, a buffered stream, and free
    up the stream.  Return the status of closing BP's file descriptor. */
 int
-close_buffered_stream (bp)
-     BUFFERED_STREAM *bp;
+close_buffered_stream (BUFFERED_STREAM *bp)
 {
   int fd;
 
@@ -456,8 +438,7 @@ close_buffered_stream (bp)
 /* Deallocate the buffered stream associated with file descriptor FD, and
    close FD.  Return the status of the close on FD. */
 int
-close_buffered_fd (fd)
-     int fd;
+close_buffered_fd (int fd)
 {
   if (fd < 0)
     {
@@ -472,9 +453,7 @@ close_buffered_fd (fd)
 /* Make the BUFFERED_STREAM associated with buffers[FD] be BP, and return
    the old BUFFERED_STREAM. */
 BUFFERED_STREAM *
-set_buffered_stream (fd, bp)
-     int fd;
-     BUFFERED_STREAM *bp;
+set_buffered_stream (int fd, BUFFERED_STREAM *bp)
 {
   BUFFERED_STREAM *ret;
 
@@ -483,15 +462,34 @@ set_buffered_stream (fd, bp)
   return ret;
 }
 
+/* Return the BUFFERED_STREAM associated with FD, if any. */
+BUFFERED_STREAM *
+get_buffered_stream (int fd)
+{
+  return (buffers && fd < nbuffers) ? buffers[fd] : (BUFFERED_STREAM *)0;
+}
+
+int
+fd_berror (int fd)
+{
+  BUFFERED_STREAM *bp;
+
+  bp = get_buffered_stream (default_buffered_input);
+  return (bp && berror (bp));
+}
+
 /* Read a buffer full of characters from BP, a buffered stream. */
 static int
-b_fill_buffer (bp)
-     BUFFERED_STREAM *bp;
+b_fill_buffer (BUFFERED_STREAM *bp)
 {
   ssize_t nr;
   off_t o;
 
   CHECK_TERMSIG;
+
+  if (bp->b_flag & B_ERROR)	/* try making read errors `sticky' */
+    return EOF;
+
   /* In an environment where text and binary files are treated differently,
      compensate for lseek() on text files returning an offset different from
      the count of characters read() returns.  Text-mode streams have to be
@@ -534,9 +532,7 @@ b_fill_buffer (bp)
 
 /* Push C back onto buffered stream BP. */
 static int
-bufstream_ungetc(c, bp)
-     int c;
-     BUFFERED_STREAM *bp;
+bufstream_ungetc(int c, BUFFERED_STREAM *bp)
 {
   if (c == EOF || bp == 0 || bp->b_inputp == 0)
     return (EOF);
@@ -548,8 +544,7 @@ bufstream_ungetc(c, bp)
 /* Seek backwards on file BFD to synchronize what we've read so far
    with the underlying file pointer. */
 int
-sync_buffered_stream (bfd)
-     int bfd;
+sync_buffered_stream (int bfd)
 {
   BUFFERED_STREAM *bp;
   off_t chars_left;
@@ -565,7 +560,7 @@ sync_buffered_stream (bfd)
 }
 
 int
-buffered_getchar ()
+buffered_getchar (void)
 {
   CHECK_TERMSIG;
 
@@ -584,17 +579,14 @@ buffered_getchar ()
 }
 
 int
-buffered_ungetchar (c)
-     int c;
+buffered_ungetchar (int c)
 {
   return (bufstream_ungetc (c, buffers[bash_input.location.buffered_fd]));
 }
 
 /* Make input come from file descriptor BFD through a buffered stream. */
 void
-with_input_from_buffered_stream (bfd, name)
-     int bfd;
-     char *name;
+with_input_from_buffered_stream (int bfd, char *name)
 {
   INPUT_STREAM location;
   BUFFERED_STREAM *bp;
@@ -605,73 +597,3 @@ with_input_from_buffered_stream (bfd, name)
   init_yy_io (bp == 0 ? return_EOF : buffered_getchar,
 	      buffered_ungetchar, st_bstream, name, location);
 }
-
-#if defined (TEST)
-void *
-xmalloc(s)
-int s;
-{
-	return (malloc (s));
-}
-
-void *
-xrealloc(s, size)
-char	*s;
-int	size;
-{
-	if (!s)
-		return(malloc (size));
-	else
-		return(realloc (s, size));
-}
-
-void
-init_yy_io ()
-{
-}
-
-process(bp)
-BUFFERED_STREAM *bp;
-{
-	int c;
-
-	while ((c = bufstream_getc(bp)) != EOF)
-		putchar(c);
-}
-
-BASH_INPUT bash_input;
-
-struct stat dsb;		/* can be used from gdb */
-
-/* imitate /bin/cat */
-main(argc, argv)
-int	argc;
-char	**argv;
-{
-	register int i;
-	BUFFERED_STREAM *bp;
-
-	if (argc == 1) {
-		bp = fd_to_buffered_stream (0);
-		process(bp);
-		exit(0);
-	}
-	for (i = 1; i < argc; i++) {
-		if (argv[i][0] == '-' && argv[i][1] == '\0') {
-			bp = fd_to_buffered_stream (0);
-			if (!bp)
-				continue;
-			process(bp);
-			free_buffered_stream (bp);
-		} else {
-			bp = open_buffered_stream (argv[i]);
-			if (!bp)
-				continue;
-			process(bp);
-			close_buffered_stream (bp);
-		}
-	}
-	exit(0);
-}
-#endif /* TEST */
-#endif /* BUFFERED_INPUT */

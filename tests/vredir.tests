@@ -16,7 +16,7 @@ TMPFILE=$TMPDIR/foo
 
 bar()
 {
-exec {v}>$TMPFILE
+exec {v}>>$TMPFILE
 echo $v
 }
 
@@ -32,8 +32,10 @@ rm -f $TMPFILE
 type bar
 exec {v}>&-
 
+# errors
 readonly v=42
 bar
+exec {v}>&1
 
 echo foo 1 2>&1 >&$v | { grep -q '\$v: Bad' || echo 'bad foo 1'; }
 echo foo 2 2>&1 >&$v | { grep -q '\$v: Bad' || echo 'bad foo 2'; }

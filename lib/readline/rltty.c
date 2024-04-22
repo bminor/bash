@@ -1,7 +1,7 @@
 /* rltty.c -- functions to prepare and restore the terminal for readline's
    use. */
 
-/* Copyright (C) 1992-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -49,6 +49,8 @@
 extern int errno;
 #endif /* !errno */
 
+int _rl_use_tty_xon_xoff = 1;
+
 rl_vintfunc_t *rl_prep_term_function = rl_prep_terminal;
 rl_voidfunc_t *rl_deprep_term_function = rl_deprep_terminal;
 
@@ -80,8 +82,7 @@ static int ksrflow;
 /* Dummy call to force a backgrounded readline to stop before it tries
    to get the tty settings. */
 static void
-set_winsize (tty)
-     int tty;
+set_winsize (int tty)
 {
 #if defined (TIOCGWINSZ)
   struct winsize w;
@@ -276,15 +277,16 @@ prepare_terminal_settings (int meta_flag, TIOTYPE oldtio, TIOTYPE *tiop)
     }
 
 #if defined (TIOCGETC)
-#  if defined (USE_XON_XOFF)
-  /* Get rid of terminal output start and stop characters. */
-  tiop->tchars.t_stopc = -1; /* C-s */
-  tiop->tchars.t_startc = -1; /* C-q */
+  if (_rl_use_tty_xon_xoff == 0)
+    {
+      /* Get rid of terminal output start and stop characters. */
+      tiop->tchars.t_stopc = -1; /* C-s */
+      tiop->tchars.t_startc = -1; /* C-q */
 
-  /* If there is an XON character, bind it to restart the output. */
-  if (oldtio.tchars.t_startc != -1)
-    rl_bind_key (oldtio.tchars.t_startc, rl_restart_output);
-#  endif /* USE_XON_XOFF */
+      /* If there is an XON character, bind it to restart the output. */
+      if (oldtio.tchars.t_startc != -1)
+	rl_bind_key (oldtio.tchars.t_startc, rl_restart_output);
+    }
 
   /* If there is an EOF char, bind _rl_eof_char to it. */
   if (oldtio.tchars.t_eofc != -1)
@@ -515,14 +517,13 @@ prepare_terminal_settings (int meta_flag, TIOTYPE oldtio, TIOTYPE *tiop)
   if ((unsigned char) oldtio.c_cc[VEOF] != (unsigned char) _POSIX_VDISABLE)
     _rl_eof_char = oldtio.c_cc[VEOF];
 
-#if defined (USE_XON_XOFF)
+  if (_rl_use_tty_xon_xoff == 0)
 #if defined (IXANY)
-  tiop->c_iflag &= ~(IXON | IXANY);
+    tiop->c_iflag &= ~(IXON | IXANY);
 #else
-  /* `strict' Posix systems do not define IXANY. */
-  tiop->c_iflag &= ~IXON;
+    /* `strict' Posix systems do not define IXANY. */
+    tiop->c_iflag &= ~IXON;
 #endif /* IXANY */
-#endif /* USE_XON_XOFF */
 
   /* Only turn this off if we are using all 8 bits. */
   if (((tiop->c_cflag & CSIZE) == CS8) || meta_flag)
@@ -729,7 +730,7 @@ rl_tty_set_echoing (int u)
   _rl_echoing_p = u;
   return o;
 }
-
+
 /* **************************************************************** */
 /*								    */
 /*			Bogus Flow Control      		    */

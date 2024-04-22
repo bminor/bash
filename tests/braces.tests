@@ -49,6 +49,17 @@ echo ${var}{x,y}
 
 unset var varx vary
 
+# make sure ${ is parsed as a word expansion, since it may contain other
+# expansions
+a=4
+echo "${a#'$('\'}"
+echo "${a-'$('\'}"
+echo "${a+'$('\'}"
+
+echo "${a#aaaa'$(aaaa'aaa)aaa\'}"
+echo "${a#aaaa'$(aaaa)'aaaa\'}"
+unset -v a
+
 # new sequence brace operators
 echo {1..10}
 
@@ -109,6 +120,10 @@ echo {z..a..-2}
 
 # make sure brace expansion handles ints > 2**31 - 1 using intmax_t
 echo {2147483645..2147483649}
+
+# want zero-padding here
+echo {00..10}
+echo {00..10..2}
 
 # unwanted zero-padding -- fixed post-bash-4.0
 echo {10..0..2}

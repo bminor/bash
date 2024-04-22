@@ -134,6 +134,19 @@ echo -n 'outside 3.0: ' ; echo "var=${var-<unset>}"
 unset -v var
 unset -f func1
 
+# operations inside a function on temporary variables do not propagate
+func1()
+{
+	export var
+	echo -n 'inside func1: ' ; echo "var=${var-<unset>}"
+}
+var=outside
+var=func func1
+echo -n 'outside 3.5: ' ; echo "var=${var-<unset>}"
+
+unset -v var
+unset -f func1
+
 func2()
 {
 	local var=local

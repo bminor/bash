@@ -1,6 +1,6 @@
 /* strpbrk.c - locate multiple characters in a string */
 
-/* Copyright (C) 1991, 1994 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1994, 2022 Free Software Foundation, Inc.
 
    NOTE: The canonical source of this file is maintained with the GNU C Library.
    Bugs can be reported to bug-glibc@prep.ai.mit.edu.
@@ -31,9 +31,7 @@
 
 /* Find the first occurrence in S of any character in ACCEPT.  */
 char *
-strpbrk (s, accept)
-     register const char *s;
-     register const char *accept;
+strpbrk (const char *s, const char *accept)
 {
   while (*s != '\0')
     {

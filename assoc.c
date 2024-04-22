@@ -7,7 +7,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 2008,2009,2011-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2011-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,13 +44,12 @@
 #include "assoc.h"
 #include "builtins/common.h"
 
-static WORD_LIST *assoc_to_word_list_internal PARAMS((HASH_TABLE *, int));
+static WORD_LIST *assoc_to_word_list_internal (HASH_TABLE *, int);
 
 /* assoc_create == hash_create */
 
 void
-assoc_dispose (hash)
-     HASH_TABLE *hash;
+assoc_dispose (HASH_TABLE *hash)
 {
   if (hash)
     {
@@ -60,17 +59,13 @@ assoc_dispose (hash)
 }
 
 void
-assoc_flush (hash)
-     HASH_TABLE *hash;
+assoc_flush (HASH_TABLE *hash)
 {
   hash_flush (hash, 0);
 }
 
 int
-assoc_insert (hash, key, value)
-     HASH_TABLE *hash;
-     char *key;
-     char *value;
+assoc_insert (HASH_TABLE *hash, char *key, char *value)
 {
   BUCKET_CONTENTS *b;
 
@@ -89,10 +84,7 @@ assoc_insert (hash, key, value)
 
 /* Like assoc_insert, but returns b->data instead of freeing it */
 PTR_T
-assoc_replace (hash, key, value)
-     HASH_TABLE *hash;
-     char *key;
-     char *value;
+assoc_replace (HASH_TABLE *hash, char *key, char *value)
 {
   BUCKET_CONTENTS *b;
   PTR_T t;
@@ -111,9 +103,7 @@ assoc_replace (hash, key, value)
 }
 
 void
-assoc_remove (hash, string)
-     HASH_TABLE *hash;
-     char *string;
+assoc_remove (HASH_TABLE *hash, const char *string)
 {
   BUCKET_CONTENTS *b;
 
@@ -127,9 +117,7 @@ assoc_remove (hash, string)
 }
 
 char *
-assoc_reference (hash, string)
-     HASH_TABLE *hash;
-     char *string;
+assoc_reference (HASH_TABLE *hash, const char *string)
 {
   BUCKET_CONTENTS *b;
 
@@ -143,8 +131,7 @@ assoc_reference (hash, string)
 /* Quote the data associated with each element of the hash table ASSOC,
    using quote_string */
 HASH_TABLE *
-assoc_quote (h)
-     HASH_TABLE *h;
+assoc_quote (HASH_TABLE *h)
 {
   int i;
   BUCKET_CONTENTS *tlist;
@@ -167,8 +154,7 @@ assoc_quote (h)
 /* Quote escape characters in the data associated with each element
    of the hash table ASSOC, using quote_escapes */
 HASH_TABLE *
-assoc_quote_escapes (h)
-     HASH_TABLE *h;
+assoc_quote_escapes (HASH_TABLE *h)
 {
   int i;
   BUCKET_CONTENTS *tlist;
@@ -189,8 +175,7 @@ assoc_quote_escapes (h)
 }
 
 HASH_TABLE *
-assoc_dequote (h)
-     HASH_TABLE *h;
+assoc_dequote (HASH_TABLE *h)
 {
   int i;
   BUCKET_CONTENTS *tlist;
@@ -211,8 +196,7 @@ assoc_dequote (h)
 }
 
 HASH_TABLE *
-assoc_dequote_escapes (h)
-     HASH_TABLE *h;
+assoc_dequote_escapes (HASH_TABLE *h)
 {
   int i;
   BUCKET_CONTENTS *tlist;
@@ -233,8 +217,7 @@ assoc_dequote_escapes (h)
 }
 
 HASH_TABLE *
-assoc_remove_quoted_nulls (h)
-     HASH_TABLE *h;
+assoc_remove_quoted_nulls (HASH_TABLE *h)
 {
   int i;
   BUCKET_CONTENTS *tlist;
@@ -258,10 +241,7 @@ assoc_remove_quoted_nulls (h)
  * the STARTth element and spanning NELEM members.  Null elements are counted.
  */
 char *
-assoc_subrange (hash, start, nelem, starsub, quoted, pflags)
-     HASH_TABLE *hash;
-     arrayind_t start, nelem;
-     int starsub, quoted, pflags;
+assoc_subrange (HASH_TABLE *hash, arrayind_t start, arrayind_t nelem, int starsub, int quoted, int pflags)
 {
   WORD_LIST *l, *save, *h, *t;
   int i, j;
@@ -296,14 +276,12 @@ assoc_subrange (hash, start, nelem, starsub, quoted, pflags)
 
   dispose_words (save);
   return (ret);
-
 }
 
+/* Substitute REP for each match of PAT in each element of hash table H,
+   qualified by FLAGS to say what kind of quoting to do. */
 char *
-assoc_patsub (h, pat, rep, mflags)
-     HASH_TABLE *h;
-     char *pat, *rep;
-     int mflags;
+assoc_patsub (HASH_TABLE *h, char *pat, char *rep, int mflags)
 {
   char	*t;
   int pchar, qflags, pflags;
@@ -334,11 +312,7 @@ assoc_patsub (h, pat, rep, mflags)
 }
 
 char *
-assoc_modcase (h, pat, modop, mflags)
-     HASH_TABLE *h;
-     char *pat;
-     int modop;
-     int mflags;
+assoc_modcase (HASH_TABLE *h, char *pat, int modop, int mflags)
 {
   char	*t;
   int pchar, qflags, pflags;
@@ -369,9 +343,7 @@ assoc_modcase (h, pat, modop, mflags)
 }
 
 char *
-assoc_to_kvpair (hash, quoted)
-     HASH_TABLE *hash;
-     int quoted;
+assoc_to_kvpair (HASH_TABLE *hash, int quoted)
 {
   char *ret;
   char *istr, *vstr;
@@ -439,9 +411,7 @@ assoc_to_kvpair (hash, quoted)
 }
 
 char *
-assoc_to_assign (hash, quoted)
-     HASH_TABLE *hash;
-     int quoted;
+assoc_to_assign (HASH_TABLE *hash, int quoted)
 {
   char *ret;
   char *istr, *vstr;
@@ -508,9 +478,7 @@ assoc_to_assign (hash, quoted)
 }
 
 static WORD_LIST *
-assoc_to_word_list_internal (h, t)
-     HASH_TABLE *h;
-     int t;
+assoc_to_word_list_internal (HASH_TABLE *h, int t)
 {
   WORD_LIST *list;
   int i;
@@ -531,22 +499,19 @@ assoc_to_word_list_internal (h, t)
 }
 
 WORD_LIST *
-assoc_to_word_list (h)
-     HASH_TABLE *h;
+assoc_to_word_list (HASH_TABLE *h)
 {
   return (assoc_to_word_list_internal (h, 0));
 }
 
 WORD_LIST *
-assoc_keys_to_word_list (h)
-     HASH_TABLE *h;
+assoc_keys_to_word_list (HASH_TABLE *h)
 {
   return (assoc_to_word_list_internal (h, 1));
 }
 
 WORD_LIST *
-assoc_to_kvpair_list (h)
-     HASH_TABLE *h;
+assoc_to_kvpair_list (HASH_TABLE *h)
 {
   WORD_LIST *list;
   int i;
@@ -569,10 +534,7 @@ assoc_to_kvpair_list (h)
 }
 
 char *
-assoc_to_string (h, sep, quoted)
-     HASH_TABLE *h;
-     char *sep;
-     int quoted;
+assoc_to_string (HASH_TABLE *h, char *sep, int quoted)
 {
   BUCKET_CONTENTS *tlist;
   int i;

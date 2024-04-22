@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete", "compgen", and "compopt" in Bash.
 
-Copyright (C) 1999-2021 Free Software Foundation, Inc.
+Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -27,8 +27,8 @@ $SHORT_DOC complete [-abcdefgjksuv] [-pr] [-DEI] [-o option] [-A action] [-G glo
 Specify how arguments are to be completed by Readline.
 
 For each NAME, specify how arguments are to be completed.  If no options
-are supplied, existing completion specifications are printed in a way that
-allows them to be reused as input.
+or NAMEs are supplied, display existing completion specifications in a way
+that allows them to be reused as input.
 
 Options:
   -p	print existing completion specifications in a reusable format
@@ -84,23 +84,23 @@ struct _optflags {
   int Iflag;
 };
 
-static int find_compact PARAMS((char *));
-static int find_compopt PARAMS((char *));
+static int find_compact (char *);
+static int find_compopt (char *);
 
-static int build_actions PARAMS((WORD_LIST *, struct _optflags *, unsigned long *, unsigned long *));
+static int build_actions (WORD_LIST *, struct _optflags *, unsigned long *, unsigned long *, char **);
 
-static int remove_cmd_completions PARAMS((WORD_LIST *));
+static int remove_cmd_completions (WORD_LIST *);
 
-static int print_one_completion PARAMS((char *, COMPSPEC *));
-static int print_compitem PARAMS((BUCKET_CONTENTS *));
-static void print_compopts PARAMS((const char *, COMPSPEC *, int));
-static void print_all_completions PARAMS((void));
-static int print_cmd_completions PARAMS((WORD_LIST *));
+static int print_one_completion (char *, COMPSPEC *);
+static int print_compitem (BUCKET_CONTENTS *);
+static void print_compopts (const char *, COMPSPEC *, int);
+static void print_all_completions (void);
+static int print_cmd_completions (WORD_LIST *);
 
-static void print_compoptions PARAMS((unsigned long, int));
-static void print_compactions PARAMS((unsigned long));
-static void print_arg PARAMS((const char *, const char *, int));
-static void print_cmd_name PARAMS((const char *));
+static void print_compoptions (unsigned long, int);
+static void print_compactions (unsigned long);
+static void print_arg (const char *, const char *, int);
+static void print_cmd_name (const char *);
 
 static char *Garg, *Warg, *Parg, *Sarg, *Xarg, *Farg, *Carg;
 
@@ -145,6 +145,7 @@ static const struct _compopt {
   { "default",	COPT_DEFAULT },
   { "dirnames", COPT_DIRNAMES },
   { "filenames",COPT_FILENAMES},
+  { "fullquote",COPT_FULLQUOTE},
   { "noquote", COPT_NOQUOTE },
   { "nosort", COPT_NOSORT },
   { "nospace",	COPT_NOSPACE },
@@ -153,8 +154,7 @@ static const struct _compopt {
 };
 
 static int
-find_compact (name)
-     char *name;
+find_compact (char *name)
 {
   register int i;
 
@@ -165,8 +165,7 @@ find_compact (name)
 }
 
 static int
-find_compopt (name)
-     char *name;
+find_compopt (char *name)
 {
   register int i;
 
@@ -182,6 +181,8 @@ find_compopt (name)
    bitmap of compspec options (arguments to `-o').  PP, if non-null, gets 1
    if -p is supplied; RP, if non-null, gets 1 if -r is supplied.
    If either is null, the corresponding option generates an error.
+   VNAMEP is a pointer to a string to store the name of the output variable
+   supplied with the -V option.
    This also sets variables corresponding to options that take arguments as
    a side effect; the caller should ensure that those variables are set to
    NULL before calling build_actions.  Return value:
@@ -191,10 +192,7 @@ find_compopt (name)
 */
 
 static int
-build_actions (list, flagp, actp, optp)
-     WORD_LIST *list;
-     struct _optflags *flagp;
-     unsigned long *actp, *optp;
+build_actions (WORD_LIST *list, struct _optflags *flagp, unsigned long *actp, unsigned long *optp, char **vnamep)
 {
   int opt, ind, opt_given;
   unsigned long acts, copts;
@@ -204,7 +202,7 @@ build_actions (list, flagp, actp, optp)
   opt_given = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:DEI")) != -1)
+  while ((opt = internal_getopt (list, "abcdefgjko:prsuvA:G:W:P:S:X:F:C:V:DEI")) != -1)
     {
       opt_given = 1;
       switch (opt)
@@ -346,6 +344,25 @@ build_actions (list, flagp, actp, optp)
 	case 'S':
 	  Sarg = list_optarg;
 	  break;
+	case 'V':
+#if defined (ARRAY_VARS)
+	  if (vnamep)
+	    {
+	      *vnamep = list_optarg;
+	      if (valid_identifier (list_optarg) == 0)
+		{
+		  sh_invalidid (list_optarg);
+		  return (EX_USAGE);
+		}
+	    }
+	  else
+#endif
+	    {
+	      sh_invalidopt ("-V");
+	      builtin_usage ();
+	      return (EX_USAGE);
+	    }
+	  break;
 	case 'W':
 	  Warg = list_optarg;
 	  break;
@@ -367,8 +384,7 @@ build_actions (list, flagp, actp, optp)
 
 /* Add, remove, and display completion specifiers. */
 int
-complete_builtin (list)
-     WORD_LIST *list;
+complete_builtin (WORD_LIST *list)
 {
   int opt_given, rval;
   unsigned long acts, copts;
@@ -391,7 +407,7 @@ complete_builtin (list)
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
      as a side effect if they are supplied as options. */
-  rval = build_actions (list, &oflags, &acts, &copts);
+  rval = build_actions (list, &oflags, &acts, &copts, (char **)NULL);
   if (rval == EX_USAGE)
     return (rval);
   opt_given = rval != EXECUTION_FAILURE;
@@ -473,8 +489,7 @@ complete_builtin (list)
 }
 
 static int
-remove_cmd_completions (list)
-     WORD_LIST *list;
+remove_cmd_completions (WORD_LIST *list)
 {
   WORD_LIST *l;
   int ret;
@@ -491,9 +506,7 @@ remove_cmd_completions (list)
 }
 
 static void
-print_compoptions (copts, full)
-     unsigned long copts;
-     int full;
+print_compoptions (unsigned long copts, int full)
 {
   const struct _compopt *co;
 
@@ -505,8 +518,7 @@ print_compoptions (copts, full)
 }
 
 static void
-print_compactions (acts)
-     unsigned long acts;
+print_compactions (unsigned long acts)
 {
   const struct _compacts *ca;
 
@@ -522,9 +534,7 @@ print_compactions (acts)
 }
 
 static void
-print_arg (arg, flag, quote)
-     const char *arg, *flag;
-     int quote;
+print_arg (const char *arg, const char *flag, int quote)
 {
   char *x;
 
@@ -538,8 +548,7 @@ print_arg (arg, flag, quote)
 }
 
 static void
-print_cmd_name (cmd)
-     const char *cmd;
+print_cmd_name (const char *cmd)
 {
   char *x;
 
@@ -562,9 +571,7 @@ print_cmd_name (cmd)
 }
 
 static int
-print_one_completion (cmd, cs)
-     char *cmd;
-     COMPSPEC *cs;
+print_one_completion (char *cmd, COMPSPEC *cs)
 {
   printf ("complete ");
 
@@ -592,10 +599,7 @@ print_one_completion (cmd, cs)
 }
 
 static void
-print_compopts (cmd, cs, full)
-     const char *cmd;
-     COMPSPEC *cs;
-     int full;
+print_compopts (const char *cmd, COMPSPEC *cs, int full)
 {
   printf ("compopt ");
 
@@ -606,8 +610,7 @@ print_compopts (cmd, cs, full)
 }
 
 static int
-print_compitem (item)
-     BUCKET_CONTENTS *item;
+print_compitem (BUCKET_CONTENTS *item)
 {
   COMPSPEC *cs;
   char *cmd;
@@ -619,14 +622,13 @@ print_compitem (item)
 }
 
 static void
-print_all_completions ()
+print_all_completions (void)
 {
   progcomp_walk (print_compitem);
 }
 
 static int
-print_cmd_completions (list)
-     WORD_LIST *list;
+print_cmd_completions (WORD_LIST *list)
 {
   WORD_LIST *l;
   COMPSPEC *cs;
@@ -650,20 +652,22 @@ print_cmd_completions (list)
 $BUILTIN compgen
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compgen_builtin
-$SHORT_DOC compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
+$SHORT_DOC compgen [-V varname] [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
 Display possible completions depending on the options.
 
 Intended to be used from within a shell function generating possible
-completions.  If the optional WORD argument is supplied, matches against
-WORD are generated.
+completions.  If the optional WORD argument is present, generate matches
+against WORD.
+
+If the -V option is supplied, store the possible completions in the indexed
+array VARNAME instead of printing them to the standard output.
 
 Exit Status:
 Returns success unless an invalid option is supplied or an error occurs.
 $END
 
 int
-compgen_builtin (list)
-     WORD_LIST *list;
+compgen_builtin (WORD_LIST *list)
 {
   int rval;
   unsigned long acts, copts;
@@ -671,7 +675,9 @@ compgen_builtin (list)
   STRINGLIST *sl;
   char *word, **matches;
   char *old_line;
-  int old_ind;
+  int old_ind, old_completion, old_quoting, old_suppress;
+  SHELL_VAR *var;
+  char *varname;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
@@ -679,10 +685,11 @@ compgen_builtin (list)
   acts = copts = (unsigned long)0L;
   Garg = Warg = Parg = Sarg = Xarg = Farg = Carg = (char *)NULL;
   cs = (COMPSPEC *)NULL;
+  varname = 0;
 
   /* Build the actions from the arguments.  Also sets the [A-Z]arg variables
      as a side effect if they are supplied as options. */
-  rval = build_actions (list, (struct _optflags *)NULL, &acts, &copts);
+  rval = build_actions (list, (struct _optflags *)NULL, &acts, &copts, &varname);
   if (rval == EX_USAGE)
     return (rval);
   if (rval == EXECUTION_FAILURE)
@@ -713,6 +720,12 @@ compgen_builtin (list)
 
   rval = EXECUTION_FAILURE;
 
+  old_completion = rl_filename_completion_desired;
+  old_quoting = rl_filename_quoting_desired;
+  old_suppress = rl_completion_suppress_append;
+
+  bashline_set_filename_hooks ();
+
   /* probably don't have to save these, just being safe */
   old_line = pcomp_line;
   old_ind = pcomp_ind;
@@ -741,15 +754,29 @@ compgen_builtin (list)
       strvec_dispose (matches);
     }
 
-  if (sl)
+  rl_filename_completion_desired = old_completion;
+  rl_filename_quoting_desired = old_quoting;
+  rl_completion_suppress_append = old_suppress;
+
+#if defined (ARRAY_VARS)
+  if (varname)
     {
-      if (sl->list && sl->list_len)
+      var = builtin_find_indexed_array (varname, 1);
+      if (var && sl && sl->list && sl->list_len)
 	{
+	  array_from_argv (array_cell (var), sl->list, sl->list_len);
 	  rval = EXECUTION_SUCCESS;
-	  strlist_print (sl, (char *)NULL);
 	}
-      strlist_dispose (sl);
     }
+  else
+#endif
+  if (sl && sl->list && sl->list_len)
+    {
+      rval = EXECUTION_SUCCESS;
+      strlist_print (sl, (char *)NULL);
+    }
+  if (sl)
+    strlist_dispose (sl);
 
   compspec_dispose (cs);
   return (rval);
@@ -787,8 +814,7 @@ have a completion specification defined.
 $END
 
 int
-compopt_builtin (list)
-     WORD_LIST *list;
+compopt_builtin (WORD_LIST *list)
 {
   int opts_on, opts_off, *opts, opt, oind, ret, Dflag, Eflag, Iflag;
   WORD_LIST *l, *wl;

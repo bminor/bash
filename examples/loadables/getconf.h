@@ -125,12 +125,4 @@
 #  define WORD_BIT	(sizeof (int) * CHAR_BIT)
 #endif
 
-#if !defined (PRIdMAX)
-#  if HAVE_LONG_LONG
-#    define PRIdMAX     "lld"
-#  else
-#    define PRIdMAX     "ld"
-#  endif
-#endif
-
 #endif /* _GETCONF_H */

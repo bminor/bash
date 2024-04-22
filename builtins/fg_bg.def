@@ -1,7 +1,7 @@
 This file is fg_bg.def, from which is created fg_bg.c.
 It implements the builtins "bg" and "fg" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,12 +52,11 @@ $END
 #include "bashgetopt.h"
 
 #if defined (JOB_CONTROL)
-static int fg_bg PARAMS((WORD_LIST *, int));
+static int fg_bg (WORD_LIST *, int);
 
 /* How to bring a job into the foreground. */
 int
-fg_builtin (list)
-     WORD_LIST *list;
+fg_builtin (WORD_LIST *list)
 {
   int fg_bit;
   register WORD_LIST *t;
@@ -101,8 +100,7 @@ $END
 #if defined (JOB_CONTROL)
 /* How to put a job into the background. */
 int
-bg_builtin (list)
-     WORD_LIST *list;
+bg_builtin (WORD_LIST *list)
 {
   int r;
 
@@ -135,9 +133,7 @@ bg_builtin (list)
 
 /* How to put a job into the foreground/background. */
 static int
-fg_bg (list, foreground)
-     WORD_LIST *list;
-     int foreground;
+fg_bg (WORD_LIST *list, int foreground)
 {
   sigset_t set, oset;
   int job, status, old_async_pid;

@@ -1,6 +1,6 @@
 /* bashansi.h -- Typically included information required by picky compilers. */
 
-/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,5 +34,29 @@
 #else
 #  include "ansi_stdlib.h"
 #endif /* !HAVE_STDLIB_H */
+
+/* If bool is not a compiler builtin, prefer stdbool.h if we have it */
+#if !defined (HAVE_C_BOOL)
+#  if defined (HAVE_STDBOOL_H)
+#    include <stdbool.h>
+#  else
+#    undef bool
+typedef unsigned char bool;
+#    define true 1
+#    define false 0
+#  endif
+#endif
+
+/* Include <stddef.h>, or define substitutes (config.h handles ptrdiff_t). */
+#ifdef HAVE_STDDEF_H
+#  include <stddef.h>
+#endif
+/* Substitutes for definitions in stddef.h */
+#ifndef NULL
+#  define NULL 0
+#endif
+#ifndef offsetof
+#  define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#endif
 
 #endif /* !_BASHANSI_H_ */

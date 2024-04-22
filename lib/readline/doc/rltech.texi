@@ -7,7 +7,7 @@ This document describes the GNU Readline Library, a utility for aiding
 in the consistency of user interface across discrete programs that need
 to provide a command line interface.
 
-Copyright (C) 1988--2022 Free Software Foundation, Inc.
+Copyright (C) 1988--2023 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -67,6 +67,9 @@ the simplest way possible, perhaps to replace calls in your code to
 
 The function @code{readline()} prints a prompt @var{prompt}
 and then reads and returns a single line of text from the user.
+Since it's possible to enter characters into the line while quoting
+them to disable any Readline editing function they might normally have,
+this line may include embedded newlines and other special characters.
 If @var{prompt} is @code{NULL} or the empty string, no prompt is displayed.
 The line @code{readline} returns is allocated with @code{malloc()};
 the caller should @code{free()} the line when it has finished with it.
@@ -476,6 +479,8 @@ The default hook checks @code{rl_instream}; if an application is using a
 different input source, it should set the hook appropriately.
 Readline queries for available input when implementing intra-key-sequence
 timeouts during input and incremental searches.
+This function must return zero if there is no input available, and non-zero
+if input is available.
 This may use an application-specific timeout before returning a value;
 Readline uses the value passed to @code{rl_set_keyboard_input_timeout()}
 or the value of the user-settable @var{keyseq-timeout} variable.
@@ -511,6 +516,15 @@ to reset the terminal.  This function should undo the effects of
 @code{rl_prep_term_function}.
 By default, this is set to @code{rl_deprep_terminal}
 (@pxref{Terminal Management}).
+@end deftypevar
+
+@deftypevar {void} rl_macro_display_hook 
+If set, this points to a function that @code{rl_macro_dumper} will call to
+display a key sequence bound to a macro.
+It is called with the key sequence, the "untranslated" macro value (i.e.,
+with backslash escapes included, as when passed to @code{rl_macro_bind}),
+the @code{readable} argument passed to @code{rl_macro_dumper}, and any
+prefix to display before the key sequence.
 @end deftypevar
 
 @deftypevar {Keymap} rl_executing_keymap
@@ -915,9 +929,19 @@ Return an array of strings representing the key sequences used to
 invoke @var{function} in the keymap @var{map}.
 @end deftypefun
 
+@deftypefun void rl_print_keybinding (const char *name, Keymap map, int readable)
+Print key sequences bound to Readline function name @var{name} in
+keymap @var{map}.
+If @var{map} is NULL, this uses the current keymap.
+If @var{readable} is non-zero,
+the list is formatted in such a way that it can be made part of an
+@code{inputrc} file and re-read.
+@end deftypefun
+
 @deftypefun void rl_function_dumper (int readable)
 Print the Readline function names and the key sequences currently
-bound to them to @code{rl_outstream}.  If @var{readable} is non-zero,
+bound to them to @code{rl_outstream}.
+If @var{readable} is non-zero,
 the list is formatted in such a way that it can be made part of an
 @code{inputrc} file and re-read.
 @end deftypefun
@@ -1346,13 +1370,15 @@ If @var{c} is a number, return the value it represents.
 Bind the key sequence @var{keyseq} to invoke the macro @var{macro}.
 The binding is performed in @var{map}.  When @var{keyseq} is invoked, the
 @var{macro} will be inserted into the line.  This function is deprecated;
-use @code{rl_generic_bind()} instead.
+use @code{rl_generic_bind} instead.
 @end deftypefun
 
 @deftypefun void rl_macro_dumper (int readable)
 Print the key sequences bound to macros and their values, using
 the current keymap, to @code{rl_outstream}.
-If @var{readable} is non-zero, the list is formatted in such a way
+If the application has assigned a value to @code{rl_macro_display_hook},
+@code{rl_macro_dumper} calls it instead of printing anything.
+If @var{readable} is greater than zero, the list is formatted in such a way
 that it can be made part of an @code{inputrc} file and re-read.
 @end deftypefun
 
@@ -1387,6 +1413,10 @@ uses those capabilities to move around the screen line and perform other
 terminal-specific operations, like erasing a line.  Readline does not
 use all of a terminal's capabilities, and this function will return
 values for only those capabilities Readline uses.
+@end deftypefun
+
+@deftypefun {void} rl_reparse_colors (void)
+Read or re-read color definitions from @env{LS_COLORS}.
 @end deftypefun
 
 @deftypefun {void} rl_clear_history (void)
@@ -2138,7 +2168,9 @@ The function should not modify the directory argument if it returns 0.
 @deftypevar {rl_dequote_func_t *} rl_filename_rewrite_hook
 If non-zero, this is the address of a function called when reading
 directory entries from the filesystem for completion and comparing
-them to the partial word to be completed.  The function should
+them to the filename portion of the partial word to be completed
+(after its potential modification by @code{rl_completion_rewrite_hook}).
+The function should
 perform any necessary application or system-specific conversion on
 the filename, such as converting between character sets or converting
 from a filesystem format to a character input format.
@@ -2149,6 +2181,24 @@ or the converted filename in newly-allocated memory.  The converted
 form is used to compare against the word to be completed, and, if it
 matches, is added to the list of matches.  Readline will free the
 allocated string.
+@end deftypevar
+
+@deftypevar {rl_dequote_func_t *} rl_completion_rewrite_hook
+If non-zero, this is the address of a function to call before
+comparing the filename portion of a word to be completed with directory
+entries from the filesystem.
+The function takes two arguments: @var{fname}, the filename to be converted,
+after any @code{rl_filename_dequoting_function} has been applied,
+and @var{fnlen}, its length in bytes.
+It must either return its first argument (if no conversion takes place)
+or the converted filename in newly-allocated memory.
+The function should perform any necessary application or system-specific
+conversion on the filename, such as converting between character sets or
+converting from a character input format to some other format.
+Readline compares the converted form against directory entries, after
+their potential modification by @code{rl_filename_rewrite_hook}, and adds
+any matches to the list of matches.
+Readline will free the allocated string.
 @end deftypevar
 
 @deftypevar {rl_compdisp_func_t *} rl_completion_display_matches_hook
@@ -2298,6 +2348,17 @@ The quoting is effected via a call to the function pointed to
 by @code{rl_filename_quoting_function}.
 @end deftypevar
 
+@deftypevar int rl_full_quoting_desired
+Non-zero means that Readline should apply filename-style quoting,
+including any application-specified quoting mechanism,
+to all completion matches even if we are not otherwise treating the
+matches as filenames.
+This is @emph{always} zero when completion is attempted, and can only
+be changed within an application-specific completion function.
+The quoting is effected via a call to the function pointed to
+by @code{rl_filename_quoting_function}.
+@end deftypevar
+
 @deftypevar int rl_attempted_completion_over
 If an application-specific completion function assigned to
 @code{rl_attempted_completion_function} sets this variable to a non-zero
@@ -2423,8 +2484,8 @@ COMMAND commands[] = @{
 @};
 
 /* Forward declarations. */
-char *stripwhite ();
-COMMAND *find_command ();
+char *stripwhite (char *);
+COMMAND *find_command (char *);
 
 /* The name of this program, as taken from argv[0]. */
 char *progname;
@@ -2433,8 +2494,7 @@ char *progname;
 int done;
 
 char *
-dupstr (s)
-     char *s;
+dupstr (char *s)
 @{
   char *r;
 
@@ -2443,9 +2503,8 @@ dupstr (s)
   return (r);
 @}
 
-main (argc, argv)
-     int argc;
-     char **argv;
+int
+main (int argc, char **argv)
 @{
   char *line, *s;
 
@@ -2481,8 +2540,7 @@ main (argc, argv)
 
 /* Execute a command line. */
 int
-execute_line (line)
-     char *line;
+execute_line (char *line)
 @{
   register int i;
   COMMAND *command;
@@ -2521,8 +2579,7 @@ execute_line (line)
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
 COMMAND *
-find_command (name)
-     char *name;
+find_command (char *name)
 @{
   register int i;
 
@@ -2536,8 +2593,7 @@ find_command (name)
 /* Strip whitespace from the start and end of STRING.  Return a pointer
    into STRING. */
 char *
-stripwhite (string)
-     char *string;
+stripwhite (char *string)
 @{
   register char *s, *t;
 
@@ -2561,13 +2617,14 @@ stripwhite (string)
 /*                                                                  */
 /* **************************************************************** */
 
-char *command_generator PARAMS((const char *, int));
-char **fileman_completion PARAMS((const char *, int, int));
+char *command_generator (const char *, int);
+char **fileman_completion (const char *, int, int);
 
 /* Tell the GNU Readline library how to complete.  We want to try to complete
    on command names if this is the first word in the line, or on filenames
    if not. */
-initialize_readline ()
+void
+initialize_readline (void)
 @{
   /* Allow conditional parsing of the ~/.inputrc file. */
   rl_readline_name = "FileMan";
@@ -2582,9 +2639,7 @@ initialize_readline ()
    in case we want to do some simple parsing.  Return the array of matches,
    or NULL if there aren't any. */
 char **
-fileman_completion (text, start, end)
-     const char *text;
-     int start, end;
+fileman_completion (const char *text, int start, int end)
 @{
   char **matches;
 
@@ -2603,9 +2658,7 @@ fileman_completion (text, start, end)
    to start from scratch; without any state (i.e. STATE == 0), then we
    start at the top of the list. */
 char *
-command_generator (text, state)
-     const char *text;
-     int state;
+command_generator (const char *text, int state)
 @{
   static int list_index, len;
   char *name;
@@ -2643,40 +2696,40 @@ command_generator (text, state)
 static char syscom[1024];
 
 /* List the file(s) named in arg. */
-com_list (arg)
-     char *arg;
+int
+com_list (char *arg)
 @{
   if (!arg)
     arg = "";
 
-  sprintf (syscom, "ls -FClg %s", arg);
+  snprintf (syscom, sizeof (syscom), "ls -FClg %s", arg);
   return (system (syscom));
 @}
 
-com_view (arg)
-     char *arg;
+int
+com_view (char *arg)
 @{
   if (!valid_argument ("view", arg))
     return 1;
 
 #if defined (__MSDOS__)
   /* more.com doesn't grok slashes in pathnames */
-  sprintf (syscom, "less %s", arg);
+  snprintf (syscom, sizeof (syscom), "less %s", arg);
 #else
-  sprintf (syscom, "more %s", arg);
+  snprintf (syscom, sizeof (syscom), "more %s", arg);
 #endif
   return (system (syscom));
 @}
 
-com_rename (arg)
-     char *arg;
+int
+com_rename (char *arg)
 @{
   too_dangerous ("rename");
   return (1);
 @}
 
-com_stat (arg)
-     char *arg;
+int
+com_stat (char *arg)
 @{
   struct stat finfo;
 
@@ -2703,8 +2756,8 @@ com_stat (arg)
   return (0);
 @}
 
-com_delete (arg)
-     char *arg;
+int
+com_delete (char *arg)
 @{
   too_dangerous ("delete");
   return (1);
@@ -2712,8 +2765,8 @@ com_delete (arg)
 
 /* Print out help for ARG, or for all of the commands if ARG is
    not present. */
-com_help (arg)
-     char *arg;
+int
+com_help (char *arg)
 @{
   register int i;
   int printed = 0;
@@ -2751,8 +2804,8 @@ com_help (arg)
 @}
 
 /* Change to the directory ARG. */
-com_cd (arg)
-     char *arg;
+int
+com_cd (char *arg)
 @{
   if (chdir (arg) == -1)
     @{
@@ -2765,8 +2818,8 @@ com_cd (arg)
 @}
 
 /* Print out the current working directory. */
-com_pwd (ignore)
-     char *ignore;
+int
+com_pwd (char *ignore)
 @{
   char dir[1024], *s;
 
@@ -2782,16 +2835,16 @@ com_pwd (ignore)
 @}
 
 /* The user wishes to quit using this program.  Just set DONE non-zero. */
-com_quit (arg)
-     char *arg;
+int
+com_quit (char *arg)
 @{
   done = 1;
   return (0);
 @}
 
 /* Function which tells you that you can't do this. */
-too_dangerous (caller)
-     char *caller;
+void
+too_dangerous (char *caller)
 @{
   fprintf (stderr,
            "%s: Too dangerous for me to distribute.  Write it yourself.\n",
@@ -2801,8 +2854,7 @@ too_dangerous (caller)
 /* Return non-zero if ARG is a valid argument for CALLER, else print
    an error message and return zero. */
 int
-valid_argument (caller, arg)
-     char *caller, *arg;
+valid_argument (char *caller, char *arg)
 @{
   if (!arg || !*arg)
     @{

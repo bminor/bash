@@ -1,11 +1,11 @@
 dnl
-dnl Configure script for bash-5.2
+dnl Configure script for bash-5.3
 dnl
-dnl report bugs to chet@po.cwru.edu
+dnl report bugs to chet.ramey@case.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2022 Free Software Foundation, Inc.
+# Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.2, version 5.046])dnl
+AC_REVISION([for Bash 5.3, version 5.063])dnl
 
-define(bashvers, 5.2)
-define(relstatus, release)
+define(bashvers, 5.3)
+define(relstatus, alpha)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -76,7 +76,7 @@ m68k-sysv)	opt_bash_malloc=no ;;	# fixes file descriptor leak in closedir
 # These need additional investigation
 sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-aix*)		opt_bash_malloc=no ;;	# AIX machines
-*-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
+*-cygwin*|msys*) opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
 # These lack a working sbrk(2)
 aarch64-freebsd*)	opt_bash_malloc=no ;;
 riscv*-freebsd*)	opt_bash_malloc=no ;;
@@ -92,6 +92,8 @@ riscv*-freebsd*)	opt_bash_malloc=no ;;
 *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
 *-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
 *-genode*)	opt_bash_malloc=no ;;	# Genode has no sbrk
+i370-openedition*)	opt_bash_malloc=no LOCAL_LIBS=-lzoslib LIBS_FOR_BUILD=-lzoslib ;;	# IBM z/OS machines
+i370-*)		opt_bash_malloc=no ;;	# generic (?) IBM 370 machines
 esac
 
 # memory scrambling on free()
@@ -462,6 +464,9 @@ if test "x$cross_compiling" = "xyes"; then
     *-cygwin*)
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
 	;;
+    *-msys*)
+	cross_cache=${srcdir}/cross-build/msys32.cache
+	;;
     *-mingw*)
 	cross_cache=${srcdir}/cross-build/cygwin32.cache
 	;;
@@ -513,7 +518,8 @@ if test "$opt_static_link" = yes; then
 	if test "$GCC" = "yes"; then
 		STATIC_LD="-static" 
 		case "$host_os" in
-		solaris2*|linux*)	;;
+		solaris2*)	;;
+		linux*)		test "$opt_profiling" = "no" && LDFLAGS="$LDFLAGS -static" ;;
 		*)		LDFLAGS="$LDFLAGS -static" ;;	# XXX experimental
 		esac
 	fi
@@ -562,7 +568,8 @@ AC_SUBST(CPPFLAGS_FOR_BUILD)
 AC_SUBST(LDFLAGS_FOR_BUILD)
 AC_SUBST(LIBS_FOR_BUILD)
 
-AC_PROG_GCC_TRADITIONAL
+dnl This macro is obsolete
+dnl AC_PROG_GCC_TRADITIONAL
 
 dnl BEGIN READLINE and HISTORY LIBRARY SECTION
 dnl prepare to allow bash to be linked against an already-installed readline
@@ -602,7 +609,7 @@ if test $opt_readline = yes; then
 		# section for OS versions that don't allow unresolved symbols
 		# to be compiled into dynamic libraries.
 		case "$host_os" in
-		cygwin*)	TILDE_LIB= ;;
+		cygwin*|msys*)	TILDE_LIB= ;;
 		esac
 	else
 		RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
@@ -714,16 +721,18 @@ m4_include([m4/stat-time.m4])
 m4_include([m4/timespec.m4])
 
 m4_include([m4/strtoimax.m4])
+m4_include([m4/unlocked-io.m4])
 
 dnl include files for gettext
 
 m4_include([m4/codeset.m4])
 m4_include([m4/extern-inline.m4])
+
+m4_include([m4/bison.m4])
 m4_include([m4/fcntl-o.m4])
+m4_include([m4/flexmember.m4])
 m4_include([m4/gettext.m4])
 m4_include([m4/glibc2.m4])
-m4_include([m4/glibc21.m4])
-m4_include([m4/host-cpu-c-abi.m4])
 m4_include([m4/iconv.m4])
 m4_include([m4/intdiv0.m4])
 m4_include([m4/intl.m4])
@@ -737,6 +746,7 @@ m4_include([m4/lcmessage.m4])
 m4_include([m4/lib-ld.m4])
 m4_include([m4/lib-link.m4])
 m4_include([m4/lib-prefix.m4])
+m4_include([m4/locale_h.m4])
 m4_include([m4/lock.m4])
 m4_include([m4/nls.m4])
 m4_include([m4/po.m4])
@@ -753,19 +763,26 @@ m4_include([m4/wchar_t.m4])
 m4_include([m4/wint_t.m4])
 m4_include([m4/xsize.m4])
 
+m4_include([m4/glibc21.m4])
+m4_include([m4/host-cpu-c-abi.m4])
+
+m4_include([m4/c-bool.m4])
+
 dnl C compiler characteristics
 AC_C_CONST
 AC_C_INLINE
 AC_C_BIGENDIAN
 AC_C_STRINGIZE
 AC_TYPE_LONG_DOUBLE
-AC_C_PROTOTYPES
 AC_C_CHAR_UNSIGNED
 AC_C_VOLATILE
 AC_C_RESTRICT
 
+gl_C_BOOL
+
 dnl initialize GNU gettext
-BASH_GNU_GETTEXT([no-libtool], [need-ngettext], [lib/intl])
+dnl the use-libtool is a lie, we just use the standard Unix tools
+BASH_GNU_GETTEXT([use-libtool], [need-ngettext], [lib/intl])
 
 dnl header files
 AC_HEADER_DIRENT
@@ -773,9 +790,10 @@ AC_HEADER_MAJOR
 
 BASH_HEADER_INTTYPES
 
-AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
+AC_CHECK_HEADERS(unistd.h stdlib.h varargs.h limits.h string.h \
 		 memory.h locale.h termcap.h termio.h termios.h dlfcn.h \
-		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
+		 stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
+		 stdckdint.h \
 		 regex.h syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h sys/ioctl.h \
 		 sys/mman.h sys/param.h sys/random.h sys/socket.h sys/stat.h \
@@ -842,12 +860,13 @@ AC_CHECK_FUNC(mkfifo, AC_DEFINE(HAVE_MKFIFO), AC_DEFINE(MKFIFO_MISSING))
 dnl checks for system calls
 AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getentropy getgroups \
 		gethostname getpagesize getpeername getrandom getrlimit \
-		getrusage gettimeofday kill killpg lstat pselect readlink \
+		getrusage gettimeofday kill killpg lstat nanosleep \
+		pselect readlink \
 		select setdtablesize setitimer tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions
-AC_CHECK_FUNCS(bcopy bzero confstr faccessat fnmatch \
+AC_CHECK_FUNCS(bcopy bzero clock_gettime confstr faccessat fnmatch \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
 		imaxdiv memmove pathconf putenv raise random regcomp regexec \
 		setenv setlinebuf setlocale setvbuf siginterrupt strchr \
@@ -858,6 +877,9 @@ AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
 AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
 AC_CHECK_FUNCS(mkstemp mkdtemp)
 AC_CHECK_FUNCS(arc4random)
+AC_CHECK_FUNCS(strlcat)
+
+AC_CHECK_FUNCS(memfd_create shm_open shm_mkstemp)
 
 AC_REPLACE_FUNCS(getcwd memset)
 AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
@@ -865,12 +887,15 @@ AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoumax)
 AC_REPLACE_FUNCS(dprintf)
 AC_REPLACE_FUNCS(strchrnul)
 AC_REPLACE_FUNCS(strdup)
+AC_REPLACE_FUNCS(strlcpy)
+AC_REPLACE_FUNCS(reallocarray)
 
 AC_CHECK_HEADERS(libaudit.h)
 AC_CHECK_DECLS([AUDIT_USER_TTY],,, [[#include <linux/audit.h>]])
 
 AC_CHECK_DECLS([confstr])
 AC_CHECK_DECLS([printf])
+AC_CHECK_DECLS([brk])
 AC_CHECK_DECLS([sbrk])
 AC_CHECK_DECLS([setregid])
 AC_CHECK_DECLS([strcpy])
@@ -885,7 +910,7 @@ AC_CHECK_DECLS([strtold], [
 	[AC_COMPILE_IFELSE(
 		[AC_LANG_PROGRAM(
 		[[#include <stdlib.h>]],
-		[[long double r; char *foo, bar; r = strtold(foo, &bar);]]
+		[[long double r; char *foo, *bar; r = strtold(foo, &bar);]]
 	)],
 	[bash_cv_strtold_broken=no],[bash_cv_strtold_broken=yes])
         ]
@@ -912,8 +937,10 @@ dnl
 AC_CHECK_HEADERS([argz.h errno.h fcntl.h malloc.h stdio_ext.h])
 
 dnl AC_FUNC_MALLOC
+AC_DEFINE([HAVE_MALLOC])
 AC_FUNC_MMAP
-AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext mempcpy \
+AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext \
+		locale_charset mempcpy \
 		munmap mremap stpcpy strcspn])
 
 INTL_DEP= INTL_INC= LIBINTL_H=
@@ -921,6 +948,8 @@ if test "x$USE_INCLUDED_LIBINTL" = "xyes"; then
 	INTL_DEP='${INTL_LIBDIR}/libintl.a'
 	INTL_INC='-I${INTL_LIBSRC} -I${INTL_BUILDDIR}'
 	LIBINTL_H='${INTL_BUILDDIR}/libintl.h'
+
+	AC_DEFINE([HAVE_LOCALE_CHARSET], 1)
 fi
 AC_SUBST(INTL_DEP)
 AC_SUBST(INTL_INC)
@@ -965,6 +994,7 @@ AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
+AC_TYPE_INTPTR_T
 AC_TYPE_UINTPTR_T
 
 AC_CHECK_TYPE(ssize_t, int)
@@ -1054,6 +1084,7 @@ BASH_STAT_TIME
 
 dnl checks for system calls
 BASH_FUNC_SBRK
+BASH_FUNC_BRK
 
 dnl presence and behavior of C library functions
 BASH_FUNC_STRSIGNAL
@@ -1064,12 +1095,15 @@ BASH_FUNC_GETENV
 if test "$ac_cv_func_getcwd" = "yes"; then
 BASH_FUNC_GETCWD
 fi
+dnl either way this is correct
+AC_DEFINE([HAVE_GETCWD])
 BASH_FUNC_POSIX_SETJMP
 BASH_FUNC_STRCOLL
 BASH_FUNC_SNPRINTF
 BASH_FUNC_VSNPRINTF
 
 BASH_FUNC_STRTOIMAX
+BASH_FUNC_UNLOCKED_IO
 
 dnl If putenv or unsetenv is not present, set the right define so the
 dnl prototype and declaration in lib/sh/getenv.c will be standard-conformant
@@ -1180,7 +1214,7 @@ freebsd*|midnightbsd*)	LOCAL_CFLAGS='-DHEREDOC_PIPESIZE=4096' ;;
 *qnx[[67]]*)	LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
-cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
+cygwin*|msys*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO -D_POSIX_SOURCE -D_ALL_SOURCE -DRECYCLES_PIDS" ;;
 *openstep*)	LOCAL_CFLAGS="-D__APPLE_CC__" ;;
 esac
@@ -1200,7 +1234,9 @@ freebsd[[3-9]]*)
 		if test -x /usr/bin/objformat && test "`/usr/bin/objformat`" = "elf" ; then
 			LOCAL_LDFLAGS=-rdynamic # allow dynamic loading
 		fi ;;
-freebsdelf*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
+freebsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
+openbsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
+netbsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 dragonfly*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 midnightbsd*)	LOCAL_LDFLAGS=-rdynamic ;;	# allow dynamic loading
 esac
@@ -1322,5 +1358,13 @@ AC_CONFIG_FILES([Makefile builtins/Makefile lib/readline/Makefile \
 
 dnl Makefile uses this timestamp file to record whether config.h is up to date.
 AC_CONFIG_COMMANDS([stamp-h], [echo timestamp > stamp-h])
+
+if test "$ac_cv_header_stdckdint_h" = yes; then
+	rm -f stdckdint.h
+elif cmp ${srcdir}/include/stdckdint.in.h stdckdint.h 2>/dev/null; then
+	:
+else
+	cp ${srcdir}/include/stdckdint.in.h stdckdint.h
+fi
 
 AC_OUTPUT

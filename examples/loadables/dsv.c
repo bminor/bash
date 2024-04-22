@@ -2,7 +2,7 @@
 	 array with the fields */
 
 /*
-   Copyright (C) 2022 Free Software Foundation, Inc.
+   Copyright (C) 2022,2023 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -52,10 +52,7 @@
    null fields. If you want to preserve the quote characters in the generated
    fields, pass F_PRESERVE; by default, this removes them. */
 static int
-dsvsplit (dsv, line, dstring, flags)
-     SHELL_VAR *dsv;
-     char *line, *dstring;
-     int flags;
+dsvsplit (SHELL_VAR *dsv, char *line, char *dstring, int flags)
 {
   arrayind_t ind;
   char *field, *prev, *buf, *xbuf;
@@ -163,8 +160,7 @@ dsvsplit (dsv, line, dstring, flags)
 }
 
 int
-dsv_builtin (list)
-     WORD_LIST *list;
+dsv_builtin (WORD_LIST *list)
 {
   int opt, rval, flags;
   char *array_name, *dsvstring, *delims;
@@ -207,7 +203,7 @@ dsv_builtin (list)
   if (array_name == 0)
     array_name = DSV_ARRAY_DEFAULT;
 
-  if (legal_identifier (array_name) == 0)
+  if (valid_identifier (array_name) == 0)
     {
       sh_invalidid (array_name);
       return (EXECUTION_FAILURE);
@@ -249,16 +245,14 @@ dsv_builtin (list)
 /* Called when builtin is enabled and loaded from the shared object.  If this
    function returns 0, the load fails. */
 int
-dsv_builtin_load (name)
-     char *name;
+dsv_builtin_load (char *name)
 {
   return (1);
 }
 
 /* Called when builtin is disabled. */
 void
-dsv_builtin_unload (name)
-     char *name;
+dsv_builtin_unload (char *name)
 {
 }
 

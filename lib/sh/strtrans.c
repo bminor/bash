@@ -1,6 +1,6 @@
 /* strtrans.c - Translate and untranslate strings with ANSI-C escape sequences. */
 
-/* Copyright (C) 2000-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2015,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,24 +45,23 @@
    that we're translating a string for `echo -e', and therefore should not
    treat a single quote as a character that may be escaped with a backslash.
    If (FLAGS&2) is non-zero, we're expanding for the parser and want to
-   quote CTLESC and CTLNUL with CTLESC.  If (flags&4) is non-zero, we want
+   quote CTLESC and CTLNUL with CTLESC.  If (FLAGS&4) is non-zero, we want
    to remove the backslash before any unrecognized escape sequence. */
 char *
-ansicstr (string, len, flags, sawc, rlen)
-     char *string;
-     int len, flags, *sawc, *rlen;
+ansicstr (const char *string, size_t len, int flags, int *sawc, size_t *rlen)
 {
   int c, temp;
-  char *ret, *r, *s;
+  char *ret, *r;
+  const char *s;
   unsigned long v;
   size_t clen;
-  int b, mb_cur_max;
+  int mb_cur_max;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
 #endif
 
   if (string == 0 || *string == '\0')
-    return ((char *)NULL);
+    return ((char *)0);
 
   mb_cur_max = MB_CUR_MAX;
 #if defined (HANDLE_MULTIBYTE)
@@ -96,13 +95,8 @@ ansicstr (string, len, flags, sawc, rlen)
 	{
 	  switch (c = *s++)
 	    {
-#if defined (__STDC__)
 	    case 'a': c = '\a'; break;
 	    case 'v': c = '\v'; break;
-#else
-	    case 'a': c = (int) 0x07; break;
-	    case 'v': c = (int) 0x0B; break;
-#endif
 	    case 'b': c = '\b'; break;
 	    case 'e': case 'E':		/* ESC -- non-ANSI */
 	      c = ESC; break;
@@ -204,7 +198,9 @@ ansicstr (string, len, flags, sawc, rlen)
 		  s++;
 		  if ((flags & 2) && c == '\\' && c == *s)
 		    s++;	/* Posix requires $'\c\\' do backslash escaping */
-		  c = TOCTRL(c);
+		  else if ((flags & 2) && c == CTLESC && (*s == CTLESC || *s == CTLNUL))
+		    c = *s++;
+ 		  c = TOCTRL(c);
 		  break;
 		}
 		/*FALLTHROUGH*/
@@ -227,12 +223,11 @@ ansicstr (string, len, flags, sawc, rlen)
 /* Take a string STR, possibly containing non-printing characters, and turn it
    into a $'...' ANSI-C style quoted string.  Returns a new string. */
 char *
-ansic_quote (str, flags, rlen)
-     char *str;
-     int flags, *rlen;
+ansic_quote (const char *str, int flags, int *rlen)
 {
-  char *r, *ret, *s;
-  int l, rsize;
+  char *r, *ret;
+  const char  *s;
+  size_t l, rsize;
   unsigned char c;
   size_t clen;
   int b;
@@ -252,20 +247,15 @@ ansic_quote (str, flags, rlen)
 
   for (s = str; c = *s; s++)
     {
-      b = l = 1;		/* 1 == add backslash; 0 == no backslash */
+      b = 1;		/* 1 == add backslash; 0 == no backslash */
+      l = 1;
       clen = 1;
 
       switch (c)
 	{
 	case ESC: c = 'E'; break;
-#ifdef __STDC__
 	case '\a': c = 'a'; break;
 	case '\v': c = 'v'; break;
-#else
-	case 0x07: c = 'a'; break;
-	case 0x0b: c = 'v'; break;
-#endif
-
 	case '\b': c = 'b'; break;
 	case '\f': c = 'f'; break;
 	case '\n': c = 'n'; break;
@@ -318,8 +308,7 @@ ansic_quote (str, flags, rlen)
 
 #if defined (HANDLE_MULTIBYTE)
 int
-ansic_wshouldquote (string)
-     const char *string;
+ansic_wshouldquote (const char *string)
 {
   const wchar_t *wcs;
   wchar_t wcc;
@@ -348,8 +337,7 @@ ansic_wshouldquote (string)
 
 /* return 1 if we need to quote with $'...' because of non-printing chars. */
 int
-ansic_shouldquote (string)
-     const char *string;
+ansic_shouldquote (const char *string)
 {
   const char *s;
   unsigned char c;
@@ -373,12 +361,11 @@ ansic_shouldquote (string)
 /* $'...' ANSI-C expand the portion of STRING between START and END and
    return the result.  The result cannot be longer than the input string. */
 char *
-ansiexpand (string, start, end, lenp)
-     char *string;
-     int start, end, *lenp;
+ansiexpand (const char *string, int start, int end, size_t *lenp)
 {
   char *temp, *t;
-  int len, tlen;
+  int len;
+  size_t tlen;
 
   temp = (char *)xmalloc (end - start + 1);
   for (tlen = 0, len = start; len < end; )

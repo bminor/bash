@@ -1,6 +1,6 @@
 /* wcsdup.c - duplicate wide character string */
 
-/* Copyright (C) 2006 Free Software Foundation, Inc.
+/* Copyright (C) 2006,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -28,8 +28,7 @@
 #include <xmalloc.h>
 
 wchar_t *
-wcsdup (ws)
-     const wchar_t *ws;
+wcsdup (const wchar_t *ws)
 {
   wchar_t *ret;
   size_t len;

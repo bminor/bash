@@ -78,6 +78,7 @@ env -i BASH_FUNC_x%%='() { _; } >_[${ $() }] { id; }' ${THIS_SH} -c : 2>/dev/nul
 env BASH_FUNC_x%%=$'() { _;}>_[$($())]\n{ echo vuln;}' ${THIS_SH} -c : 2>/dev/null
 eval 'x() { _;}>_[$($())] { echo vuln;}' 2>/dev/null
 
+# this fails looking for closing `}' now that `${ ' has syntactic meaning
 eval 'foo() { _; } >_[${ $() }] ;{ echo eval ok; }'
 
 # other tests fixed in bash43-030 concerning function name transformation

@@ -21,13 +21,13 @@
 #ifndef _POSIXSELECT_H_
 #define _POSIXSELECT_H_
 
-#if defined (FD_SET) && !defined (HAVE_SELECT)
+#if defined (FD_SET) && !defined (HAVE_SELECT) && !defined (_WIN32)
 #  define HAVE_SELECT 1
 #endif
 
 #if defined (HAVE_SELECT)
 #  if !defined (HAVE_SYS_SELECT_H) || !defined (M_UNIX)
-#    include <sys/time.h>
+#    include "posixtime.h"
 #  endif
 #endif /* HAVE_SELECT */
 #if defined (HAVE_SYS_SELECT_H)

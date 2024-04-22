@@ -1,7 +1,7 @@
 This file is source.def, from which is created source.c.
 It implements the builtins "." and  "source" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -80,7 +80,7 @@ $END
 extern int errno;
 #endif /* !errno */
 
-static void maybe_pop_dollar_vars PARAMS((void));
+static void uw_maybe_pop_dollar_vars (void *);
 
 /* If non-zero, `.' uses $PATH to look up the script to be sourced. */
 int source_uses_path = 1;
@@ -96,7 +96,7 @@ int source_searches_cwd = 1;
    not executing a shell function, we leave the new values alone and free
    the saved values. */
 static void
-maybe_pop_dollar_vars ()
+uw_maybe_pop_dollar_vars (void *ignore)
 {
   if (variable_context == 0 && (dollar_vars_changed () & ARGS_SETBLTIN))
     dispose_saved_dollar_vars ();
@@ -113,8 +113,7 @@ maybe_pop_dollar_vars ()
    take place in there.  So, I open the file, place it into a large string,
    close the file, and then execute the string. */
 int
-source_builtin (list)
-     WORD_LIST *list;
+source_builtin (WORD_LIST *list)
 {
   int result;
   char *filename, *debug_trap, *x;
@@ -171,7 +170,7 @@ source_builtin (list)
   if (list->next)
     {
       push_dollar_vars ();
-      add_unwind_protect ((Function *)maybe_pop_dollar_vars, (char *)NULL);
+      add_unwind_protect (uw_maybe_pop_dollar_vars, NULL);
       if (debugging_mode || shell_compatibility_level <= 44)
 	init_bash_argv ();	/* Initialize BASH_ARGV and BASH_ARGC */
       remember_args (list->next, 1);
@@ -188,7 +187,7 @@ source_builtin (list)
     {
       debug_trap = savestring (debug_trap);
       add_unwind_protect (xfree, debug_trap);
-      add_unwind_protect (maybe_set_debug_trap, debug_trap);
+      add_unwind_protect (uw_maybe_set_debug_trap, debug_trap);
       restore_default_signal (DEBUG_TRAP);
     }
 

@@ -1,6 +1,6 @@
 /* signals.c -- signal handling support for readline. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -267,6 +267,9 @@ _rl_handle_signal (int sig)
 	sigprocmask (SIG_BLOCK, &set, &oset);
 #endif
 
+#if defined (READLINE_CALLBACKS)
+      if (RL_ISSTATE (RL_STATE_CALLBACK) == 0 || rl_persistent_signal_handlers)
+#endif
       rl_echo_signal_char (sig);
       rl_cleanup_after_signal ();
 
@@ -582,6 +585,19 @@ rl_reset_after_signal (void)
   rl_set_signals ();
 }
 
+/* Similar to rl_callback_sigcleanup, but cleans up operations that allocate
+   state even when not in callback mode. */
+void
+_rl_state_sigcleanup (void)
+{
+  if (RL_ISSTATE (RL_STATE_ISEARCH))		/* incremental search */
+    _rl_isearch_cleanup (_rl_iscxt, 0);
+  else if (RL_ISSTATE (RL_STATE_NSEARCH))	/* non-incremental search */
+    _rl_nsearch_sigcleanup (_rl_nscxt, 0);
+  else if (RL_ISSTATE (RL_STATE_READSTR))	/* reading a string */
+    _rl_readstr_sigcleanup (_rl_rscxt, 0);
+}
+
 /* Free up the readline variable line state for the current line (undo list,
    any partial history entry, any keyboard macros in progress, and any
    numeric arguments in process) after catching a signal, before calling
@@ -590,6 +606,9 @@ void
 rl_free_line_state (void)
 {
   register HIST_ENTRY *entry;
+
+  if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
+    _rl_state_sigcleanup ();
 
   rl_free_undo_list ();
 
@@ -622,7 +641,6 @@ rl_check_signals (void)
 /* **************************************************************** */
 
 #if defined (HAVE_POSIX_SIGNALS)
-static sigset_t sigint_set, sigint_oset;
 static sigset_t sigwinch_set, sigwinch_oset;
 #else /* !HAVE_POSIX_SIGNALS */
 #  if defined (HAVE_BSD_SIGNALS)

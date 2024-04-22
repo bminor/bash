@@ -1,6 +1,6 @@
 /* trap.h -- data structures used in the trap mechanism. */
 
-/* Copyright (C) 1993-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,67 +63,71 @@ extern char *trap_list[];
 extern int trapped_signal_received;
 extern int wait_signal_received;
 extern int running_trap;
+extern int trap_return_context;
 extern int trap_saved_exit_value;
 extern int suppress_debug_trap_verbose;
 
 /* Externally-visible functions declared in trap.c. */
-extern void initialize_traps PARAMS((void));
+extern void initialize_traps (void);
 
-extern void run_pending_traps PARAMS((void));
+extern void run_pending_traps (void);
 
-extern void queue_sigchld_trap PARAMS((int));
-extern void maybe_set_sigchld_trap PARAMS((char *));
-extern void set_impossible_sigchld_trap PARAMS((void));
-extern void set_sigchld_trap PARAMS((char *));
+extern void queue_sigchld_trap (int);
+extern void set_impossible_sigchld_trap (void);
+extern void set_sigchld_trap (const char *);
 
-extern void set_debug_trap PARAMS((char *));
-extern void set_error_trap PARAMS((char *));
-extern void set_return_trap PARAMS((char *));
+extern void set_debug_trap (const char *);
+extern void set_error_trap (const char *);
+extern void set_return_trap (const char *);
 
-extern void maybe_set_debug_trap PARAMS((char *));
-extern void maybe_set_error_trap PARAMS((char *));
-extern void maybe_set_return_trap PARAMS((char *));
+extern void uw_set_error_trap (void *);
+extern void uw_maybe_set_sigchld_trap (void *);
+extern void uw_maybe_set_debug_trap (void *);
+extern void uw_maybe_set_error_trap (void *);
+extern void uw_maybe_set_return_trap (void *);
 
-extern void set_sigint_trap PARAMS((char *));
-extern void set_signal PARAMS((int, char *));
+extern void set_sigint_trap (const char *);
+extern void set_signal (int, const char *);
 
-extern void restore_default_signal PARAMS((int));
-extern void ignore_signal PARAMS((int));
-extern int run_exit_trap PARAMS((void));
-extern void run_trap_cleanup PARAMS((int));
-extern int run_debug_trap PARAMS((void));
-extern void run_error_trap PARAMS((void));
-extern void run_return_trap PARAMS((void));
+extern void restore_default_signal (int);
+extern void ignore_signal (int);
+extern int run_exit_trap (void);
+extern void run_trap_cleanup (int);
+extern int run_debug_trap (void);
+extern void run_error_trap (void);
+extern void run_return_trap (void);
 
-extern void free_trap_strings PARAMS((void));
-extern void reset_signal_handlers PARAMS((void));
-extern void restore_original_signals PARAMS((void));
-extern void restore_traps PARAMS((void));
+extern void free_trap_strings (void);
+extern void reset_signal_handlers (void);
+extern void restore_original_signals (void);
+extern void restore_traps (void);
 
-extern void get_original_signal PARAMS((int));
-extern void get_all_original_signals PARAMS((void));
+extern void get_original_signal (int);
+extern void get_all_original_signals (void);
 
-extern char *signal_name PARAMS((int));
+extern char *signal_name (int);
 
-extern int decode_signal PARAMS((char *, int));
-extern void run_interrupt_trap PARAMS((int));
-extern int maybe_call_trap_handler PARAMS((int));
-extern int signal_is_special PARAMS((int));
-extern int signal_is_trapped PARAMS((int));
-extern int signal_is_pending PARAMS((int));
-extern int signal_is_ignored PARAMS((int));
-extern int signal_is_hard_ignored PARAMS((int));
-extern void set_signal_hard_ignored PARAMS((int));
-extern void set_signal_ignored PARAMS((int));
-extern int signal_in_progress PARAMS((int));
+extern int decode_signal (const char *, int);
+extern void run_interrupt_trap (int);
+extern int maybe_call_trap_handler (int);
+extern int signal_is_special (int);
+extern int signal_is_trapped (int);
+extern int signal_is_pending (int);
+extern int signal_is_ignored (int);
+extern int signal_is_hard_ignored (int);
+extern void set_signal_hard_ignored (int);
+extern void set_signal_ignored (int);
+extern void set_signal_async_ignored (int);
+extern int signal_is_async_ignored (int);
+extern int signal_in_progress (int);
 
-extern void set_trap_state PARAMS((int));
+extern void set_trap_state (int);
 
-extern int next_pending_trap PARAMS((int));
-extern int first_pending_trap PARAMS((void));
-extern void clear_pending_traps PARAMS((void));
-extern int any_signals_trapped PARAMS((void));
-extern void check_signals PARAMS((void));
-extern void check_signals_and_traps PARAMS((void));
+extern int next_pending_trap (int);
+extern int first_pending_trap (void);
+extern void clear_pending_traps (void);
+extern int any_signals_trapped (void);
+extern void check_signals (void);
+extern void check_signals_and_traps (void);
 
 #endif /* _TRAP_H_ */

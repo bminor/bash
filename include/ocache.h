@@ -1,6 +1,6 @@
 /* ocache.h -- a minimal object caching implementation. */
 
-/* Copyright (C) 2002 Free Software Foundation, Inc.
+/* Copyright (C) 2002,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,13 +22,7 @@
 #define	_OCACHE_H_ 1
 
 #ifndef PTR_T
-
-#if defined (__STDC__)
 #  define PTR_T void *
-#else
-#  define PTR_T char *
-#endif
-
 #endif /* PTR_T */
 
 #define OC_MEMSET(memp, xch, nbytes)					\

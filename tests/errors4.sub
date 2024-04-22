@@ -23,6 +23,22 @@ for num in 1 2 3 4 5; do
 done 
 echo after readonly assignment
 
+# can't have the variable in a for command be readonly
+for var in 1 2 3 4 5; do echo $var; done
+
+# but in posix mode these are fatal errors
+(set -o posix
+for f in 1 2 3 4; do readonly f; done ; echo after for readonly assignment)
+
+(set -o posix
+for var in 1 2 3 4; do echo $var; done; echo after posix for readonly variable)
+
+# same with select 
+select var in 1 2 3; do echo $REPLY; done <<<1
+
+(set -o posix
+select var in 1 2 3; do echo $REPLY; done <<<1 ; echo after posix select readonly variable)
+
 # non-numeric arguments to break are fatal errors for all non-interactive shells
 for f in 1 2 3 4 5
 do

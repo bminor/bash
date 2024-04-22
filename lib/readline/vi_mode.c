@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2021,2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -76,6 +76,10 @@
 #define INCREMENT_POS(start)    (start)++
 #endif /* !HANDLE_MULTIBYTE */
 
+/* Flags for the motion context */
+#define MOVE_SUCCESS	0
+#define MOVE_FAILED	0x01
+
 /* This is global so other parts of the code can check whether the last
    command was a text modification command. */
 int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
@@ -101,9 +105,8 @@ static int vi_replace_count;
 /* If non-zero, we have text inserted after a c[motion] command that put
    us implicitly into insert mode.  Some people want this text to be
    attached to the command so that it is `redoable' with `.'. */
-static int vi_continued_command;
 static char *vi_insert_buffer;
-static int vi_insert_buffer_size;
+static size_t vi_insert_buffer_size;
 
 static int _rl_vi_last_repeat = 1;
 static int _rl_vi_last_arg_sign = 1;
@@ -364,12 +367,12 @@ rl_vi_search (int count, int key)
   switch (key)
     {
     case '?':
-      _rl_free_saved_history_line ();
+      _rl_free_saved_search_line ();		/* just in case */
       rl_noninc_forward_search (count, key);
       break;
 
     case '/':
-      _rl_free_saved_history_line ();
+      _rl_free_saved_search_line ();
       rl_noninc_reverse_search (count, key);
       break;
 
@@ -1087,6 +1090,7 @@ _rl_vi_arg_dispatch (int c)
     }
   else
     {
+      rl_restore_prompt ();
       rl_clear_message ();
       rl_stuff_char (key);
       return 0;		/* done */
@@ -1150,10 +1154,27 @@ _rl_mvcxt_dispose (_rl_vimotion_cxt *m)
   xfree (m);
 }
 
+static inline int
+vi_charsearch_command (int c)
+{
+  switch (c)
+    {
+    case 'f':
+    case 'F':
+    case 't':
+    case 'T':
+    case ';':
+    case ',':
+      return 1;
+    default:
+      return 0;
+    }
+}
+
 static int
 rl_domove_motion_callback (_rl_vimotion_cxt *m)
 {
-  int c;
+  int c, r, opoint;
 
   _rl_vi_last_motion = c = m->motion;
 
@@ -1163,8 +1184,15 @@ rl_domove_motion_callback (_rl_vimotion_cxt *m)
   rl_extend_line_buffer (rl_end + 1);
   rl_line_buffer[rl_end++] = ' ';
   rl_line_buffer[rl_end] = '\0';
+  opoint = rl_point;
 
-  _rl_dispatch (c, _rl_keymap);
+  r = _rl_dispatch (c, _rl_keymap);
+
+  /* Note in the context that the motion command failed. Right now we only do
+     this for unsuccessful searches (ones where _rl_dispatch returns non-zero
+     and point doesn't move). */
+  if (r != 0 && rl_point == opoint && vi_charsearch_command (c))
+    m->flags |= MOVE_FAILED;
 
 #if defined (READLINE_CALLBACKS)
   if (RL_ISSTATE (RL_STATE_CALLBACK))
@@ -1199,7 +1227,15 @@ _rl_vi_domove_motion_cleanup (int c, _rl_vimotion_cxt *m)
     {
       /* 'c' and 'C' enter insert mode after the delete even if the motion
 	 didn't delete anything, as long as the motion command is valid. */
-      if (_rl_to_upper (m->key) == 'C' && _rl_vi_motion_command (c))
+      if (_rl_to_upper (m->key) == 'C' && _rl_vi_motion_command (c) && (m->flags & MOVE_FAILED) == 0)
+	return (vidomove_dispatch (m));
+      /* 'd' and 'D' must delete at least one character even if the motion
+	 command doesn't move the cursor. */
+      if (_rl_to_upper (m->key) == 'D' && _rl_vi_motion_command (c) && (m->flags & MOVE_FAILED) == 0)
+	return (vidomove_dispatch (m));
+      /* 'y' and 'Y' must yank at least one character even if the motion
+      	 command doean't move the cursor. */
+      if (_rl_to_upper (m->key) == 'Y' && _rl_vi_motion_command (c) && (m->flags & MOVE_FAILED) == 0)
 	return (vidomove_dispatch (m));
       RL_UNSETSTATE (RL_STATE_VIMOTION);
       return (-1);
@@ -1285,7 +1321,7 @@ rl_domove_read_callback (_rl_vimotion_cxt *m)
   /* Readine vi motion char starting numeric argument */
   else if (_rl_digit_p (c) && RL_ISSTATE (RL_STATE_CALLBACK) && RL_ISSTATE (RL_STATE_VIMOTION) && (RL_ISSTATE (RL_STATE_NUMERICARG) == 0))
     {
-      RL_SETSTATE (RL_STATE_NUMERICARG);
+      _rl_arg_init ();
       return (_rl_vi_arg_dispatch (c));
     }
 #endif
@@ -1295,7 +1331,7 @@ rl_domove_read_callback (_rl_vimotion_cxt *m)
       save = rl_numeric_arg;
       rl_numeric_arg = _rl_digit_value (c);
       rl_explicit_arg = 1;
-      RL_SETSTATE (RL_STATE_NUMERICARG);
+      _rl_arg_init ();
       rl_digit_loop1 ();
       rl_numeric_arg *= save;
       c = rl_vi_domove_getchar (m);
@@ -1304,6 +1340,13 @@ rl_domove_read_callback (_rl_vimotion_cxt *m)
 	  m->motion = 0;
 	  return -1;
 	}
+      else if (member (c, vi_motion) == 0)
+	{
+	  m->motion = 0;
+	  RL_UNSETSTATE (RL_STATE_VIMOTION);
+	  RL_UNSETSTATE (RL_STATE_NUMERICARG);
+	  return (1);
+	}  
       m->motion = c;
       return (rl_domove_motion_callback (m));
     }
@@ -1328,6 +1371,7 @@ _rl_vi_domove_callback (_rl_vimotion_cxt *m)
   int c, r;
 
   m->motion = c = rl_vi_domove_getchar (m);
+
   if (c < 0)
     return 1;		/* EOF */
   r = rl_domove_read_callback (m);
@@ -1340,7 +1384,6 @@ _rl_vi_domove_callback (_rl_vimotion_cxt *m)
 int
 rl_vi_domove (int x, int *ignore)
 {
-  int r;
   _rl_vimotion_cxt *m;
 
   m = _rl_vimvcxt;
@@ -1381,7 +1424,11 @@ rl_vi_delete_to (int count, int key)
       _rl_vimvcxt = _rl_mvcxt_alloc (VIM_DELETE, key);
     }
   else if (_rl_vimvcxt)
-    _rl_mvcxt_init (_rl_vimvcxt, VIM_DELETE, key);
+    {
+      /* are we being called recursively or by `y' or `c'? */
+      savecxt = _rl_vimvcxt;
+      _rl_vimvcxt = _rl_mvcxt_alloc (VIM_DELETE, key);
+    }
   else
     _rl_vimvcxt = _rl_mvcxt_alloc (VIM_DELETE, key);
 
@@ -1480,7 +1527,11 @@ rl_vi_change_to (int count, int key)
       _rl_vimvcxt = _rl_mvcxt_alloc (VIM_CHANGE, key);
     }
   else if (_rl_vimvcxt)
-    _rl_mvcxt_init (_rl_vimvcxt, VIM_CHANGE, key);
+    {
+      /* are we being called recursively or by `y' or `d'? */
+      savecxt = _rl_vimvcxt;
+      _rl_vimvcxt = _rl_mvcxt_alloc (VIM_CHANGE, key);
+    }      
   else
     _rl_vimvcxt = _rl_mvcxt_alloc (VIM_CHANGE, key);
   _rl_vimvcxt->start = rl_point;
@@ -1559,7 +1610,11 @@ rl_vi_yank_to (int count, int key)
       _rl_vimvcxt = _rl_mvcxt_alloc (VIM_YANK, key);
     }
   else if (_rl_vimvcxt)
-    _rl_mvcxt_init (_rl_vimvcxt, VIM_YANK, key);
+    {
+      /* are we being called recursively or by `c' or `d'? */
+      savecxt = _rl_vimvcxt;
+      _rl_vimvcxt = _rl_mvcxt_alloc (VIM_YANK, key);
+    }      
   else
     _rl_vimvcxt = _rl_mvcxt_alloc (VIM_YANK, key);
   _rl_vimvcxt->start = rl_point;

@@ -1,15 +1,15 @@
-# intl-thread-locale.m4 serial 4
-dnl Copyright (C) 2015-2019 Free Software Foundation, Inc.
+# intl-thread-locale.m4 serial 9
+dnl Copyright (C) 2015-2022 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 dnl
 dnl This file can be used in projects which are not available under
-dnl the GNU General Public License or the GNU Library General Public
+dnl the GNU General Public License or the GNU Lesser General Public
 dnl License but which still want to provide support for the GNU gettext
 dnl functionality.
 dnl Please note that the actual code of the GNU gettext library is covered
-dnl by the GNU Library General Public License, and the rest of the GNU
+dnl by the GNU Lesser General Public License, and the rest of the GNU
 dnl gettext package is covered by the GNU General Public License.
 dnl They are *not* in the public domain.
 
@@ -17,7 +17,7 @@ dnl Check how to retrieve the name of a per-thread locale (POSIX locale_t).
 dnl Sets gt_nameless_locales.
 AC_DEFUN([gt_INTL_THREAD_LOCALE_NAME],
 [
-  AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
+  AC_REQUIRE([AC_CANONICAL_HOST])
 
   dnl Persuade Solaris <locale.h> to define 'locale_t'.
   AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
@@ -72,8 +72,12 @@ int main ()
   esac
   case "$gt_cv_locale_fake" in
     *yes)
+      gt_fake_locales=yes
       AC_DEFINE([HAVE_FAKE_LOCALES], [1],
         [Define if the locale_t type contains insufficient information, as on OpenBSD.])
+      ;;
+    *)
+      gt_fake_locales=no
       ;;
   esac
 
@@ -119,33 +123,60 @@ int main ()
       ;;
   esac
 
-  dnl This code is for future use, in case we some day have to port to a
-  dnl platform where the locale_t type does not provide access to the name of
-  dnl each locale category.  This code has the drawback that it requires the
-  dnl gnulib overrides of 'newlocale', 'duplocale', 'freelocale', which is a
-  dnl problem for GNU libunistring.  Therefore try hard to avoid enabling this
-  dnl code!
+  dnl This code is for platforms where the locale_t type does not provide access
+  dnl to the name of each locale category.  This code has the drawback that it
+  dnl requires the gnulib overrides of 'newlocale', 'duplocale', 'freelocale',
+  dnl which is a problem for GNU libunistring.  Therefore try hard to avoid
+  dnl enabling this code!
   gt_nameless_locales=no
-  if false; then
-    gt_nameless_locales=yes
-    AC_DEFINE([HAVE_NAMELESS_LOCALES], [1],
-      [Define if the locale_t type does not contain the name of each locale category.])
+  case "$host_os" in
+    dnl It's needed on AIX 7.2.
+    aix*)
+      gt_nameless_locales=yes
+      AC_DEFINE([HAVE_NAMELESS_LOCALES], [1],
+        [Define if the locale_t type does not contain the name of each locale category.])
+      ;;
+  esac
+
+  dnl We cannot support uselocale() on platforms where the locale_t type is
+  dnl fake.  So, set
+  dnl   gt_good_uselocale = gt_working_uselocale && !gt_fake_locales.
+  if test $gt_working_uselocale = yes && test $gt_fake_locales = no; then
+    gt_good_uselocale=yes
+    AC_DEFINE([HAVE_GOOD_USELOCALE], [1],
+      [Define if the uselocale exists, may be safely called, and returns sufficient information.])
+  else
+    gt_good_uselocale=no
+  fi
+
+  dnl Set gt_localename_enhances_locale_funcs to indicate whether localename.c
+  dnl overrides newlocale(), duplocale(), freelocale() to keep track of locale
+  dnl names.
+  if test $gt_good_uselocale = yes && test $gt_nameless_locales = yes; then
+    gt_localename_enhances_locale_funcs=yes
+    LOCALENAME_ENHANCE_LOCALE_FUNCS=1
+    AC_DEFINE([LOCALENAME_ENHANCE_LOCALE_FUNCS], [1],
+      [Define if localename.c overrides newlocale(), duplocale(), freelocale().])
+  else
+    gt_localename_enhances_locale_funcs=no
   fi
 ])
 
 dnl Tests whether uselocale() exists and is usable.
-dnl Sets gt_cv_func_uselocale_works. Defines HAVE_WORKING_USELOCALE.
+dnl Sets gt_working_uselocale and defines HAVE_WORKING_USELOCALE.
 AC_DEFUN([gt_FUNC_USELOCALE],
 [
   AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
 
-  dnl Persuade Solaris <locale.h> to define 'locale_t'.
+  dnl Persuade glibc and Solaris <locale.h> to define 'locale_t'.
   AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
 
   AC_CHECK_FUNCS_ONCE([uselocale])
 
   dnl On AIX 7.2, the uselocale() function is not documented and leads to
   dnl crashes in subsequent setlocale() invocations.
+  dnl In 2019, some versions of z/OS lack the locale_t type and have a broken
+  dnl uselocale function.
   if test $ac_cv_func_uselocale = yes; then
     AC_CHECK_HEADERS_ONCE([xlocale.h])
     AC_CACHE_CHECK([whether uselocale works],
@@ -156,6 +187,7 @@ AC_DEFUN([gt_FUNC_USELOCALE],
 #if HAVE_XLOCALE_H
 # include <xlocale.h>
 #endif
+locale_t loc1;
 int main ()
 {
   uselocale (NULL);
@@ -164,10 +196,10 @@ int main ()
 }]])],
          [gt_cv_func_uselocale_works=yes],
          [gt_cv_func_uselocale_works=no],
-         [# Guess no on AIX, yes otherwise.
+         [# Guess no on AIX and z/OS, yes otherwise.
           case "$host_os" in
-            aix*) gt_cv_func_uselocale_works="guessing no" ;;
-            *)    gt_cv_func_uselocale_works="guessing yes" ;;
+            aix* | openedition*) gt_cv_func_uselocale_works="guessing no" ;;
+            *)                   gt_cv_func_uselocale_works="guessing yes" ;;
           esac
          ])
       ])
@@ -176,8 +208,12 @@ int main ()
   fi
   case "$gt_cv_func_uselocale_works" in
     *yes)
+      gt_working_uselocale=yes
       AC_DEFINE([HAVE_WORKING_USELOCALE], [1],
-        [Define if the uselocale function exists any may safely be called.])
+        [Define if the uselocale function exists and may safely be called.])
+      ;;
+    *)
+      gt_working_uselocale=no
       ;;
   esac
 ])

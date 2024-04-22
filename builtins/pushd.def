@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -116,6 +116,10 @@ $END
 #include <config.h>
 
 #if defined (PUSHD_AND_POPD)
+#ifdef LOADABLE_BUILTIN
+#  include "builtins.h"
+#endif
+
 #include <stdio.h>
 #if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
@@ -140,10 +144,6 @@ $END
 #include "common.h"
 #include "builtext.h"
 
-#ifdef LOADABLE_BUILTIN
-#  include "builtins.h"
-#endif
-
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
@@ -152,17 +152,17 @@ extern int errno;
 static char **pushd_directory_list = (char **)NULL;
 
 /* Number of existing slots in this list. */
-static int directory_list_size;
+static size_t directory_list_size;
 
 /* Offset to the end of the list. */
 static int directory_list_offset;
 
-static void pushd_error PARAMS((int, char *));
-static void clear_directory_stack PARAMS((void));
-static int cd_to_string PARAMS((char *));
-static int change_to_temp PARAMS((char *));
-static void add_dirstack_element PARAMS((char *));
-static int get_dirstack_index PARAMS((intmax_t, int, int *));
+static void pushd_error (int, char *);
+static void clear_directory_stack (void);
+static int cd_to_string (char *);
+static int change_to_temp (char *);
+static void add_dirstack_element (char *);
+static int get_dirstack_index (intmax_t, int, int *);
 
 #define NOCD		0x01
 #define ROTATE		0x02
@@ -170,8 +170,7 @@ static int get_dirstack_index PARAMS((intmax_t, int, int *));
 #define CLEARSTAK	0x08
 
 int
-pushd_builtin (list)
-     WORD_LIST *list;
+pushd_builtin (WORD_LIST *list)
 {
   WORD_LIST *orig_list;
   char *temp, *current_directory, *top;
@@ -228,7 +227,7 @@ pushd_builtin (list)
 	break;
       else if (((direction = list->word->word[0]) == '+') || direction == '-')
 	{
-	  if (legal_number (list->word->word + 1, &num) == 0)
+	  if (valid_number (list->word->word + 1, &num) == 0)
 	    {
 	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
@@ -316,8 +315,7 @@ pushd_builtin (list)
    If LIST is non-null it should consist of a word +N or -N, which says
    what element to delete from the stack.  The default is the top one. */
 int
-popd_builtin (list)
-     WORD_LIST *list;
+popd_builtin (WORD_LIST *list)
 {
   register int i;
   intmax_t which;
@@ -341,7 +339,7 @@ popd_builtin (list)
 	}
       else if (((direction = list->word->word[0]) == '+') || direction == '-')
 	{
-	  if (legal_number (list->word->word + 1, &which) == 0)
+	  if (valid_number (list->word->word + 1, &which) == 0)
 	    {
 	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
@@ -364,6 +362,30 @@ popd_builtin (list)
       else
 	break;
     }
+
+#if 0
+  /* If we didn't find `which' but there are arguments remaining, assume we
+     got `--' */
+  if (which_word == 0 && list)
+    {
+      if (((direction = list->word->word[0]) == '+') || direction == '-')
+	{
+	  if (valid_number (list->word->word + 1, &which) == 0)
+	    {
+	      sh_invalidnum (list->word->word);
+	      builtin_usage ();
+	      return (EX_USAGE);
+	    }
+	  which_word = list->word->word;
+	}
+      else
+	{
+	  builtin_error (_("%s: invalid argument"), list->word->word);
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
+#endif
 
   if (which > directory_list_offset || (which < -directory_list_offset) || (directory_list_offset == 0 && which == 0))
     {
@@ -406,8 +428,7 @@ popd_builtin (list)
 
 /* Print the current list of directories on the directory stack. */
 int
-dirs_builtin (list)
-     WORD_LIST *list;
+dirs_builtin (WORD_LIST *list)
 {
   int flags, desired_index, index_flag, vflag;
   intmax_t i;
@@ -440,7 +461,7 @@ dirs_builtin (list)
       else if (*list->word->word == '+' || *list->word->word == '-')
 	{
 	  int sign;
-	  if (legal_number (w = list->word->word + 1, &i) == 0)
+	  if (valid_number (w = list->word->word + 1, &i) == 0)
 	    {
 	      sh_invalidnum (list->word->word);
 	      builtin_usage ();
@@ -516,9 +537,7 @@ dirs_builtin (list)
 }
 
 static void
-pushd_error (offset, arg)
-     int offset;
-     char *arg;
+pushd_error (int offset, char *arg)
 {
   if (offset == 0)
     builtin_error (_("directory stack empty"));
@@ -527,7 +546,7 @@ pushd_error (offset, arg)
 }
 
 static void
-clear_directory_stack ()
+clear_directory_stack (void)
 {
   register int i;
 
@@ -540,8 +559,7 @@ clear_directory_stack ()
    so if the result is EXECUTION_FAILURE then an error message has already
    been printed. */
 static int
-cd_to_string (name)
-     char *name;
+cd_to_string (char *name)
 {
   WORD_LIST *tlist;
   WORD_LIST *dir;
@@ -555,8 +573,7 @@ cd_to_string (name)
 }
 
 static int
-change_to_temp (temp)
-     char *temp;
+change_to_temp (char *temp)
 {
   int tt;
 
@@ -569,8 +586,7 @@ change_to_temp (temp)
 }
 
 static void
-add_dirstack_element (dir)
-     char *dir;
+add_dirstack_element (char *dir)
 {
   if (directory_list_offset == directory_list_size)
     pushd_directory_list = strvec_resize (pushd_directory_list, directory_list_size += 10);
@@ -578,9 +594,7 @@ add_dirstack_element (dir)
 }
 
 static int
-get_dirstack_index (ind, sign, indexp)
-     intmax_t ind;
-     int sign, *indexp;
+get_dirstack_index (intmax_t ind, int sign, int *indexp)
 {
   if (indexp)
     *indexp = sign > 0 ? 1 : 2;
@@ -603,8 +617,7 @@ get_dirstack_index (ind, sign, indexp)
 
 /* Used by the tilde expansion code. */
 char *
-get_dirstack_from_string (string)
-     char *string;
+get_dirstack_from_string (char *string)
 {
   int ind, sign, index_flag;
   intmax_t i;
@@ -615,7 +628,7 @@ get_dirstack_from_string (string)
       sign = (*string == '-') ? -1 : 1;
       string++;
     }
-  if (legal_number (string, &i) == 0)
+  if (valid_number (string, &i) == 0)
     return ((char *)NULL);
 
   index_flag = 0;
@@ -630,9 +643,7 @@ get_dirstack_from_string (string)
 
 #ifdef INCLUDE_UNUSED
 char *
-get_dirstack_element (ind, sign)
-     intmax_t ind;
-     int sign;
+get_dirstack_element (intmax_t ind, int sign)
 {
   int i;
 
@@ -643,10 +654,7 @@ get_dirstack_element (ind, sign)
 #endif
 
 void
-set_dirstack_element (ind, sign, value)
-     intmax_t ind;
-     int  sign;
-     char *value;
+set_dirstack_element (intmax_t ind, int  sign, char *value)
 {
   int i;
 
@@ -658,8 +666,7 @@ set_dirstack_element (ind, sign, value)
 }
 
 WORD_LIST *
-get_directory_stack (flags)
-     int flags;
+get_directory_stack (int flags)
 {
   register int i;
   WORD_LIST *ret;

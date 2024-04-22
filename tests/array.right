@@ -1,6 +1,6 @@
 
-./array.tests: line 28: syntax error near unexpected token `&'
-./array.tests: line 28: `test=(first & second)'
+./array.tests: line 34: syntax error near unexpected token `&'
+./array.tests: line 34: `test=(first & second)'
 1
 abcde
 abcde
@@ -26,7 +26,7 @@ hello world
 11
 3
 bdef hello world test expression test 2
-./array.tests: line 92: readonly: `a[5]': not a valid identifier
+./array.tests: line 98: readonly: `a[5]': not a valid identifier
 declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")
 declare -ar c
 declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")
@@ -46,17 +46,17 @@ declare -ar c
 declare -a d=([1]="" [2]="bdef" [5]="hello world" [6]="test" [9]="ninth element")
 declare -a e=([0]="test")
 declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")
-./array.tests: line 116: a: readonly variable
-./array.tests: line 118: b[]: bad array subscript
-./array.tests: line 119: b[*]: bad array subscript
+./array.tests: line 122: a: readonly variable
+./array.tests: line 124: b[]: bad array subscript
+./array.tests: line 125: b[*]: bad array subscript
 this
-./array.tests: line 122: c[-2]: bad array subscript
-./array.tests: line 123: c: bad array subscript
+./array.tests: line 128: c[-2]: bad array subscript
+./array.tests: line 129: c: bad array subscript
 
-./array.tests: line 125: d[7]: cannot assign list to array member
-./array.tests: line 127: []=abcde: bad array subscript
-./array.tests: line 127: [*]=last: cannot assign to non-numeric index
-./array.tests: line 127: [-65]=negative: bad array subscript
+./array.tests: line 131: d[7]: cannot assign list to array member
+./array.tests: line 133: []=abcde: bad array subscript
+./array.tests: line 134: [*]=last: cannot assign to non-numeric index
+./array.tests: line 135: [-65]=negative: bad array subscript
 declare -a BASH_ARGC=()
 declare -a BASH_ARGV=()
 declare -a BASH_LINENO=([0]="0")
@@ -69,8 +69,8 @@ declare -ar c
 declare -a d=([1]="test test")
 declare -a e=()
 declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")
-./array.tests: line 135: unset: ps1: not an array variable
-./array.tests: line 139: declare: c: cannot destroy array variables in this way
+./array.tests: line 143: unset: ps1: not an array variable
+./array.tests: line 147: declare: c: readonly variable
 this of
 this is a test of read using arrays
 this test
@@ -123,13 +123,17 @@ argv[1] = </>
 55
 49
 6 -- 6
+./array.tests: line 238: [-10]: bad array subscript
+0
 42 14 44
 grep [ 123 ] *
 6 7 9
 6 7 9 5
 length = 3
 value = new1 new2 new3
-./array.tests: line 255: narray: unbound variable
+./array.tests: line 267: syntax error near unexpected token `&'
+./array.tests: line 267: `badarray=( metacharacters like & need to be quoted in compound assignments)'
+./array.tests: line 271: narray: unbound variable
 ./array1.sub: line 1: syntax error near unexpected token `('
 ./array1.sub: line 1: `printf "%s\n" -a a=(a 'b  c')'
 ./array2.sub: line 1: declare: `[]=asdf': not a valid identifier
@@ -156,10 +160,10 @@ for case if then else
 12 14 16 18 20
 4414758999202
 aaa bbb
-./array.tests: line 305: syntax error near unexpected token `<>'
-./array.tests: line 305: `metas=( <> < > ! )'
-./array.tests: line 306: syntax error near unexpected token `<>'
-./array.tests: line 306: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
+./array.tests: line 321: syntax error near unexpected token `<>'
+./array.tests: line 321: `metas=( <> < > ! )'
+./array.tests: line 322: syntax error near unexpected token `<>'
+./array.tests: line 322: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
 abc 3
 case 4
 abc case if then else 5
@@ -206,6 +210,13 @@ e
 b  c
 $0
 declare -a A=([0]="X=a" [1]="b")
+2 3 4 5 6
+FIN1:0
+FIN2:0
+FIN3:0
+FIN4:0
+FIN5:0
+FIN6:0
 t
 [3]=abcde r s t u v
 e
@@ -393,6 +404,10 @@ bar: array with element zero unset: ok
 bar: element zero: ok
 qux: unset array: ok
 qux: unset array element 0: ok
+1
+0
+0
+0
 2
 2
 2
@@ -400,7 +415,7 @@ qux: unset array element 0: ok
 0
 0
 1
-./array17.sub: line 43: ~: syntax error: operand expected (error token is "~")
+./array17.sub: line 43: ~: arithmetic syntax error: operand expected (error token is "~")
 0
 0
 3
@@ -415,7 +430,7 @@ one
 one
 two
 two
-./array17.sub: line 89: ~ : syntax error: operand expected (error token is "~ ")
+./array17.sub: line 89: ~ : arithmetic syntax error: operand expected (error token is "~ ")
 1
 argv[1] = <>
 argv[2] = <>
@@ -453,7 +468,7 @@ declare -A a=([1]="b" [0]="a" )
 declare -a var=([0]="[\$(echo" [1]="total" [2]="0)]=1" [3]="[2]=2]")
 declare -a var=([0]="[\$(echo total 0)]=1 [2]=2]")
 declare -a var=([0]="[\$(echo" [1]="total" [2]="0)]=1" [3]="[2]=2]")
-./array19.sub: line 89: total 0: syntax error in expression (error token is "0")
+./array19.sub: line 89: total 0: arithmetic syntax error in expression (error token is "0")
 declare -a var=()
 declare -al foo=([0]="abcde" [1]="two" [2]="three")
 declare -al foo=([0]="abcde")
@@ -522,14 +537,14 @@ p3
 argv[1] = <y>
 <X> <X> <X> <X>
 <X> <X> <X> <X>
-./array23.sub: line 22: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 23: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 24: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 26: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 30: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
-./array23.sub: line 33: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
-./array23.sub: line 34: $index: syntax error: operand expected (error token is "$index")
-./array23.sub: line 35: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 22: $( echo >&2 foo ) : arithmetic syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 23: $( echo >&2 foo ) : arithmetic syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 24: $( echo >&2 foo ) : arithmetic syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 26: $( echo >&2 foo ) : arithmetic syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 30: $( echo >&2 foo ): arithmetic syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 33: $( echo >&2 foo ): arithmetic syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 34: $index: arithmetic syntax error: operand expected (error token is "$index")
+./array23.sub: line 35: $( echo >&2 foo ): arithmetic syntax error: operand expected (error token is "$( echo >&2 foo )")
 0
 0
 0
@@ -583,7 +598,7 @@ jkl
 1. indexed:
 reference:
 1. 0
-./array25.sub: line 24: ' ': syntax error: operand expected (error token is "' '")
+./array25.sub: line 24: ' ': arithmetic syntax error: operand expected (error token is "' '")
 3. 0
 4. 0
 5. 0
@@ -757,6 +772,8 @@ declare -A A=([$'\t']="X" ["*"]="X" [" "]="X" ["@"]="X" )
 declare -A A=(["*"]="X" ["@"]="X" )
 ./array27.sub: line 76: declare: `A[]]=X': not a valid identifier
 declare -A A=(["*"]="X" ["@"]="X" )
+./array27.sub: line 81: y[]: bad array subscript
+./array27.sub: line 81: y[]: bad array subscript
 declare -a bug4=([0]="" [1]="5" [2]="" [3]="1" [4]="")
 declare -a bug=([0]="" [1]="5" [2]="" [3]="1" [4]="")
 declare -a bug2=([0]="")
@@ -785,3 +802,51 @@ FOO
 declare -Au A=([Darwin]="FOO" )
 FOO
 declare -Au A=(["@"]="FOO" )
+declare -a aa=([0]="/homes/cj/Desktop")
+declare -a aa=([0]="/homes/cj/Desktop")
+declare -a aa=([0]="/homes/cj/Desktop:/homes/cj/Library:/homes/cj/Documents")
+declare -a aa=([0]="/homes/cj/Desktop:/homes/cj/Library:/homes/cj/Documents")
+declare -a aa=([0]="/homes/cj/Desktop:/homes/cj/Library:/homes/cj/Documents" [1]="/homes/cj/Applications")
+declare -a aa=([0]="/homes/cj/Desktop:/homes/cj/Library:/homes/cj/Documents" [1]="/homes/cj/Applications")
+./array32.sub: line 20: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+./array32.sub: line 21: declare: a: not found
+./array32.sub: line 24: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+./array32.sub: line 25: declare: a: not found
+./array32.sub: line 29: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -a a=([0]="hi")
+./array32.sub: line 35: declare: a: not found
+./array32.sub: line 38: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+./array32.sub: line 39: declare: a: not found
+./array32.sub: line 42: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -a a
+./array32.sub: line 50: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -a a
+./array32.sub: line 57: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -ai a
+./array32.sub: line 65: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+./array32.sub: line 66: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+./array32.sub: line 68: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+./array32.sub: line 75: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -a a
+./array32.sub: line 77: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -a a
+./array32.sub: line 80: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -a a
+./array32.sub: line 85: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+./array32.sub: line 91: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -a a=()
+./array32.sub: line 95: $(echo INJECTION! >&2 ; echo 0): arithmetic syntax error: operand expected (error token is "$(echo INJECTION! >&2 ; echo 0)")
+declare -a a=()
+declare -A A=([x]="x" )
+declare -A A=([1]="1" )
+./array33.sub: line 27: f: A: cannot convert associative to indexed array
+./array33.sub: line 27: declare: A: cannot convert associative to indexed array
+./array33.sub: line 31: A: cannot convert associative to indexed array
+declare -A A=([1]="1" )
+declare -a A=([0]="x" [1]="x")
+./array33.sub: line 40: f: A: cannot convert indexed to associative array
+./array33.sub: line 40: declare: A: cannot convert indexed to associative array
+declare -a A=([0]="x" [1]="x")
+./array33.sub: line 46: A: cannot convert indexed to associative array
+declare -a A=([0]="x" [1]="x")
+./array33.sub: line 52: read: A: not an indexed array

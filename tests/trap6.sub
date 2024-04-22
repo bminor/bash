@@ -26,3 +26,14 @@ fn
 echo after 2
 
 unset -f fn
+
+# since this sets the exit trap, it has to go last
+
+set +o functrace
+# posix interp 1602
+ReturnFalse()
+{
+	false ; return
+}
+
+trap 'ReturnFalse && echo "woops"' EXIT

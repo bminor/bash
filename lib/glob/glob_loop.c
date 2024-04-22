@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -16,13 +16,12 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-static int INTERNAL_GLOB_PATTERN_P PARAMS((const GCHAR *));
+static int INTERNAL_GLOB_PATTERN_P (const GCHAR *);
 
 /* Return nonzero if PATTERN has any special globbing chars in it.
    Compiled twice, once each for single-byte and multibyte characters. */
 static int
-INTERNAL_GLOB_PATTERN_P (pattern)
-     const GCHAR *pattern;
+INTERNAL_GLOB_PATTERN_P (const GCHAR *pattern)
 {
   register const GCHAR *p;
   register GCHAR c;

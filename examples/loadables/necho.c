@@ -4,7 +4,7 @@
    existing builtin. */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -20,14 +20,14 @@
    You should have received a copy of the GNU General Public License
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <config.h>
 
-#include <stdio.h>
 #include "builtins.h"
 #include "shell.h"
+#include <stdio.h>
 
 int
-necho_builtin (list)
-WORD_LIST *list;
+necho_builtin (WORD_LIST *list)
 {
 	print_word_list (list, " ");
 	printf("\n");

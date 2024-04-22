@@ -1,5 +1,5 @@
 /* seq - print sequence of numbers to standard output.
-   Copyright (C) 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2018-2022 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -35,18 +35,6 @@
 extern int errno;
 #endif
 
-#if defined (PRI_MACROS_BROKEN)
-#  undef PRIdMAX
-#endif
-
-#if !defined (PRIdMAX)
-#  if HAVE_LONG_LONG
-#    define PRIdMAX     "lld"
-#  else
-#    define PRIdMAX     "ld"
-#  endif
-#endif
-
 #if defined (HAVE_LONG_DOUBLE) && HAVE_DECL_STRTOLD && !defined(STRTOLD_BROKEN)
 typedef long double floatmax_t;
 #  define FLOATMAX_CONV "L"
@@ -61,8 +49,8 @@ typedef double floatmax_t;
 #  define FLOATMAX_FMT "%g"
 #  define FLOATMAX_WFMT "%0.f"
 #endif
-static floatmax_t getfloatmax PARAMS((const char *));
-static char *genformat PARAMS((floatmax_t, floatmax_t, floatmax_t));
+static floatmax_t getfloatmax (const char *);
+static char *genformat (floatmax_t, floatmax_t, floatmax_t);
 
 #define MAX(a, b) (((a) < (b))? (b) : (a))
 
@@ -81,8 +69,7 @@ static char decimal_point;
 
 /* Pretty much the same as the version in builtins/printf.def */
 static floatmax_t
-getfloatmax (arg)
-     const char *arg;
+getfloatmax (const char *arg)
 {
   floatmax_t ret;
   char *ep;
@@ -181,8 +168,7 @@ long_double_format (char const *fmt)
 
 /* Return the number of digits following the decimal point in NUMBUF */
 static int
-getprec (numbuf)
-     const char *numbuf;
+getprec (const char *numbuf)
 {
   int p;
   char *dp;
@@ -196,8 +182,7 @@ getprec (numbuf)
 
 /* Return the default format given FIRST, INCR, and LAST.  */
 static char *
-genformat (first, incr, last)
-       floatmax_t first, incr, last;
+genformat (floatmax_t first, floatmax_t incr, floatmax_t last)
 {
   static char buf[6 + 2 * INT_STRLEN_BOUND (int)];
   int wfirst, wlast, width;
@@ -242,9 +227,7 @@ genformat (first, incr, last)
 }
 
 int
-print_fltseq (fmt, first, last, incr)
-     const char *fmt;
-     floatmax_t first, last, incr;
+print_fltseq (const char *fmt, floatmax_t first, floatmax_t last, floatmax_t incr)
 {
   int n;
   floatmax_t next;
@@ -270,8 +253,7 @@ print_fltseq (fmt, first, last, incr)
 
 /* must be <= INT_STRLEN_BOUND(intmax_t) */
 int
-width_needed (num)
-     intmax_t num;
+width_needed (intmax_t num)
 {
   int ret;
 
@@ -285,8 +267,7 @@ width_needed (num)
 }
 
 int
-print_intseq (ifirst, ilast, iincr)
-     intmax_t ifirst, ilast, iincr;
+print_intseq (intmax_t ifirst, intmax_t ilast, intmax_t iincr)
 {
   char intwfmt[6 + INT_STRLEN_BOUND(int) + sizeof (PRIdMAX)];
   const char *s;
@@ -323,8 +304,7 @@ print_intseq (ifirst, ilast, iincr)
 }
 
 int
-seq_builtin (list)
-     WORD_LIST *list;
+seq_builtin (WORD_LIST *list)
 {
   floatmax_t first, last, incr;
   intmax_t ifirst, ilast, iincr;

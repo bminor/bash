@@ -1,7 +1,7 @@
 This file is times.def, from which is created times.c.
 It implements the builtin "times" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2009,2022 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,7 +43,6 @@ $END
 
 #include <stdio.h>
 #include "../bashtypes.h"
-#include "../shell.h"
 
 #include <posixtime.h>
 
@@ -55,12 +54,15 @@ $END
 #  include <sys/resource.h>
 #endif
 
+#define NEED_CLOCK_FUNCS_DECL
+#define NEED_TIMEVAL_FUNCS_DECL
+
+#include "../shell.h"
 #include "common.h"
 
 /* Print the totals for system and user time used. */
 int
-times_builtin (list)
-     WORD_LIST *list;
+times_builtin (WORD_LIST *list)
 {
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_TIMEVAL) && defined (RUSAGE_SELF)
   struct rusage self, kids;

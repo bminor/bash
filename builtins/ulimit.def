@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,9 +63,10 @@ current soft limit, the current hard limit, and no limit, respectively.
 Otherwise, the current value of the specified resource is printed.  If
 no option is given, then -f is assumed.
 
-Values are in 1024-byte increments, except for -t, which is in seconds,
--p, which is in increments of 512 bytes, and -u, which is an unscaled
-number of processes.
+Values are in 1024-byte increments, except for -t, which is in seconds;
+-p, which is in increments of 512 bytes; -R, which is in microseconds;
+-b, which is in bytes; and -e, -i, -k, -n, -q, -r, -u, -x, and -P,
+which accept unscaled values.
 
 Exit Status:
 Returns success unless an invalid option is supplied or an error occurs.
@@ -93,6 +94,7 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 #include "pipesize.h"
+#include <chartypes.h>
 
 #if !defined (errno)
 extern int errno;
@@ -130,7 +132,7 @@ extern int errno;
 
 #if !defined (RLIMTYPE)
 #  define RLIMTYPE long
-#  define string_to_rlimtype(s) strtol(s, (char **)NULL, 10)
+#  define string_to_rlimtype(s, ep) strtol(s, ep, 10)
 #  define print_rlimtype(num, nl) printf ("%ld%s", num, nl ? "\n" : "")
 #endif
 
@@ -204,22 +206,22 @@ extern int errno;
 
 #define BLOCKSIZE(x)	(((x) == POSIXBLK) ? (posixly_correct ? 512 : 1024) : (x))
 
-static int _findlim PARAMS((int));
+static int _findlim (int);
 
-static int ulimit_internal PARAMS((int, char *, int, int));
+static int ulimit_internal (int, char *, int, int);
 
-static int get_limit PARAMS((int, RLIMTYPE *, RLIMTYPE *));
-static int set_limit PARAMS((int, RLIMTYPE, int));
+static int get_limit (int, RLIMTYPE *, RLIMTYPE *);
+static int set_limit (int, RLIMTYPE, int);
 
-static void printone PARAMS((int, RLIMTYPE, int));
-static void print_all_limits PARAMS((int));
+static void printone (int, RLIMTYPE, int);
+static void print_all_limits (int);
 
-static int set_all_limits PARAMS((int, RLIMTYPE));
+static int set_all_limits (int, RLIMTYPE);
 
-static int filesize PARAMS((RLIMTYPE *));
-static int pipesize PARAMS((RLIMTYPE *));
-static int getmaxuprc PARAMS((RLIMTYPE *));
-static int getmaxvm PARAMS((RLIMTYPE *, RLIMTYPE *));
+static int filesize (RLIMTYPE *);
+static int pipesize (RLIMTYPE *);
+static int getmaxuprc (RLIMTYPE *);
+static int getmaxvm (RLIMTYPE *, RLIMTYPE *);
 
 typedef struct {
   int  option;			/* The ulimit option for this limit. */
@@ -299,13 +301,11 @@ typedef struct _cmd {
 
 static ULCMD *cmdlist;
 static int ncmd;
-static int cmdlistsz;
+static size_t cmdlistsz;
 
 #if !defined (HAVE_RESOURCE) && !defined (HAVE_ULIMIT)
 long
-ulimit (cmd, newlim)
-     int cmd;
-     long newlim;
+ulimit (int cmd, long newlim)
 {
   errno = EINVAL;
   return -1;
@@ -313,8 +313,7 @@ ulimit (cmd, newlim)
 #endif /* !HAVE_RESOURCE && !HAVE_ULIMIT */
 
 static int
-_findlim (opt)
-     int opt;
+_findlim (int opt)
 {
   register int i;
 
@@ -329,8 +328,7 @@ static char optstring[4 + 2 * NCMDS];
 /* Report or set limits associated with certain per-process resources.
    See the help documentation in builtins.c for a full description. */
 int
-ulimit_builtin (list)
-     register WORD_LIST *list;
+ulimit_builtin (WORD_LIST *list)
 {
   register char *s;
   int c, limind, mode, opt, all_limits;
@@ -441,14 +439,11 @@ ulimit_builtin (list)
     if (ulimit_internal (cmdlist[c].cmd, cmdlist[c].arg, mode, ncmd > 1) == EXECUTION_FAILURE)
       return (EXECUTION_FAILURE);
 
-  return (EXECUTION_SUCCESS);
+  return (sh_chkwrite (EXECUTION_SUCCESS));
 }
 
 static int
-ulimit_internal (cmd, cmdarg, mode, multiple)
-     int cmd;
-     char *cmdarg;
-     int mode, multiple;
+ulimit_internal (int cmd, char *cmdarg, int mode, int multiple)
 {
   int opt, limind, setting;
   int block_factor;
@@ -479,9 +474,16 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
     real_limit = soft_limit;
   else if (STREQ (cmdarg, "unlimited"))
     real_limit = RLIM_INFINITY;
-  else if (all_digits (cmdarg))
+  else if (DIGIT (*cmdarg) && (cmdarg[1] == 0 || DIGIT (cmdarg[1])))
     {
-      limit = string_to_rlimtype (cmdarg);
+      char *endp;
+      limit = string_to_rlimtype (cmdarg, &endp);
+      if (*endp != '\0')
+	{
+	  sh_invalidnum (cmdarg);
+	  return (EXECUTION_FAILURE);
+	}
+
       block_factor = BLOCKSIZE(limits[limind].block_factor);
       real_limit = limit * block_factor;
 
@@ -508,9 +510,7 @@ ulimit_internal (cmd, cmdarg, mode, multiple)
 }
 
 static int
-get_limit (ind, softlim, hardlim)
-     int ind;
-     RLIMTYPE *softlim, *hardlim;
+get_limit (int ind, RLIMTYPE *softlim, RLIMTYPE *hardlim)
 {
   RLIMTYPE value;
 #if defined (HAVE_RESOURCE)
@@ -569,10 +569,7 @@ get_limit (ind, softlim, hardlim)
 }
 
 static int
-set_limit (ind, newlim, mode)
-     int ind;
-     RLIMTYPE newlim;
-     int mode;
+set_limit (int ind, RLIMTYPE newlim, int mode)
 {
 #if defined (HAVE_RESOURCE)
    struct rlimit limit;
@@ -634,8 +631,7 @@ set_limit (ind, newlim, mode)
 }
 
 static int
-getmaxvm (softlim, hardlim)
-     RLIMTYPE *softlim, *hardlim;
+getmaxvm (RLIMTYPE *softlim, RLIMTYPE *hardlim)
 {
 #if defined (HAVE_RESOURCE)
   struct rlimit datalim, stacklim;
@@ -657,8 +653,7 @@ getmaxvm (softlim, hardlim)
 }
 
 static int
-filesize(valuep)
-     RLIMTYPE *valuep;
+filesize (RLIMTYPE *valuep)
 {
 #if !defined (HAVE_RESOURCE)
   long result;
@@ -674,8 +669,7 @@ filesize(valuep)
 }
 
 static int
-pipesize (valuep)
-     RLIMTYPE *valuep;
+pipesize (RLIMTYPE *valuep)
 {
 #if defined (PIPE_BUF)
   /* This is defined on Posix systems. */
@@ -699,8 +693,7 @@ pipesize (valuep)
 }
 
 static int
-getmaxuprc (valuep)
-     RLIMTYPE *valuep;
+getmaxuprc (RLIMTYPE *valuep)
 {
   long maxchild;
 
@@ -718,8 +711,7 @@ getmaxuprc (valuep)
 }
 
 static void
-print_all_limits (mode)
-     int mode;
+print_all_limits (int mode)
 {
   register int i;
   RLIMTYPE softlim, hardlim;
@@ -738,10 +730,7 @@ print_all_limits (mode)
 }
 
 static void
-printone (limind, curlim, pdesc)
-     int limind;
-     RLIMTYPE curlim;
-     int pdesc;
+printone (int limind, RLIMTYPE curlim, int pdesc)
 {
   char unitstr[64];
   int factor;
@@ -766,6 +755,7 @@ printone (limind, curlim, pdesc)
     print_rlimtype ((curlim / factor), 1);
 }
 
+#ifdef NOTYET
 /* Set all limits to NEWLIM.  NEWLIM currently must be RLIM_INFINITY, which
    causes all limits to be set as high as possible depending on mode (like
    csh `unlimit').  Returns -1 if NEWLIM is invalid, 0 if all limits
@@ -780,9 +770,7 @@ printone (limind, curlim, pdesc)
 */
 
 static int
-set_all_limits (mode, newlim)
-     int mode;
-     RLIMTYPE newlim;
+set_all_limits (int mode, RLIMTYPE newlim)
 {
   register int i;
   int retval = 0;
@@ -805,5 +793,6 @@ set_all_limits (mode, newlim)
       }
   return retval;
 }
+#endif /* NOTYET */
 
 #endif /* !_MINIX */

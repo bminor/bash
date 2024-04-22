@@ -228,6 +228,20 @@ echo "expect <four>"
 echo $qux
 ckval qux ${bar[3]}
 
+bar=()
+declare -n ref='bar[1]'
+
+echo "expect <X>"
+echo ${ref=X}
+ckval ref ${bar[1]}
+
+unset -n ref
+declare -n ref
+
+echo "expect <X>"
+echo ${ref=X}
+ckval ref ${ref}
+
 # Need to add code and tests for `for' loop nameref variables
 
 echo errors = $errors

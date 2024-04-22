@@ -1,7 +1,7 @@
 /* mktemp - create temporary file or directory */
 
 /*
-   Copyright (C) 2019 Free Software Foundation, Inc.
+   Copyright (C) 2019,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -32,8 +32,7 @@
 #define DEFAULT_PREFIX	"shtmp"
 
 int
-mktemp_builtin (list)
-     WORD_LIST *list;
+mktemp_builtin (WORD_LIST *list)
 {
   WORD_LIST *l;
   int rval, opt, fd, mflags, base_mflags;
@@ -76,7 +75,7 @@ mktemp_builtin (list)
 
   if (varname)			/* check for validity, not readonly */
     {
-      if (legal_identifier (varname) == 0)
+      if (valid_identifier (varname) == 0)
 	{
 	  if (qflag == 0)
 	    sh_invalidid (varname);

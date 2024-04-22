@@ -60,6 +60,10 @@ printf "%s"  "$vv"
 printf -v vv "%q\n" 'this&that'
 printf "%s"  "$vv"
 
+# altform with %q will force single-quoting
+printf -v vv '%#q\n' no-quotes-needed 'quotes;needed'
+printf "%s"  "$vv"
+
 # make sure the format string is reused to use up arguments
 printf -v vv "%d " 1 2 3 4 5
 printf "%s"  "$vv"
@@ -158,7 +162,7 @@ printf "%s"  "$vv"
 printf -v vv "%*b\n" 6 4.4BSD
 printf "%s"  "$vv"
 
-# we handle this crap with homemade code in printf -v vv.def
+# we handle this crap with homemade code in printf
 printf -v vv "%10b\n" 4.4BSD
 printf "%s"  "$vv"
 printf -v vv -- "--%-10b--\n" 4.4BSD
@@ -224,7 +228,7 @@ printf "%s"  "$vv"
 printf -v vv "%6.2g\n" 4.2
 printf "%s"  "$vv"
 
-# test some of the more esoteric features of POSIX.1 printf -v vv
+# test some of the more esoteric features of POSIX.1 printf
 printf -v vv "%d\n" "'string'"
 printf "%s"  "$vv"
 printf -v vv "%d\n" '"string"'
@@ -293,7 +297,7 @@ printf "%s"  "$vv"
 printf -v vv "%10"
 printf -v vv "ab%Mcd\n"
 
-# this caused an infinite loop in older versions of printf -v vv
+# this caused an infinite loop in older versions of printf
 printf -v vv "%y" 0
 
 # these should print a warning and `0', according to POSIX.2

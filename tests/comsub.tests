@@ -76,9 +76,34 @@ echo $(echo $( echo nested )
 )
 )
 
+# empty comsubs, fork and nofork
+echo blank --$(
+)--
+echo blank --$()--
+
+echo blank --${ 
+}--
+echo blank --${  }--
+
+
+BUILDDIR=/builds/test
+read << EOC
+Dir: ${BUILDDIR#<(echo a)/}
+EOC
+
+# return in a comsub inside a shell function should abort the comsub
+func()
+{
+	local v
+	v=$( echo comsub ; return ; echo after)
+	echo $FUNCNAME: v = $v
+}
+func
+
 ${THIS_SH} ./comsub1.sub
 ${THIS_SH} ./comsub2.sub
 ${THIS_SH} ./comsub3.sub
 ${THIS_SH} ./comsub4.sub
 ${THIS_SH} ./comsub5.sub
 ${THIS_SH} ./comsub6.sub
+${THIS_SH} ./comsub7.sub

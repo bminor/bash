@@ -100,12 +100,13 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 .c.o:
 	$(SHOBJ_CC) $(SHOBJ_CFLAGS) $(CCFLAGS) $(INC) -c -o $@ $<
 
-
 ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
 	  tty pathchk tee head mkdir rmdir mkfifo mktemp printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid setpgid seq rm \
-	  accept csv dsv cut stat getconf
+	  accept csv dsv cut stat getconf kv strptime
 OTHERPROG = necho hello cat pushd asort
+
+SUBDIRS = perl
 
 all:	$(SHOBJ_STATUS)
 
@@ -225,11 +226,17 @@ csv:	csv.o
 dsv:	dsv.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ dsv.o $(SHOBJ_LIBS)
 
+kv:	kv.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ kv.o $(SHOBJ_LIBS)
+
 cut:	cut.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ cut.o $(SHOBJ_LIBS)
 
 strftime:	strftime.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ strftime.o $(SHOBJ_LIBS)
+
+strptime:	strptime.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ strptime.o $(SHOBJ_LIBS)
 
 mypid:	mypid.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ mypid.o $(SHOBJ_LIBS)
@@ -259,14 +266,20 @@ pushd:	pushd.o
 
 clean:
 	$(RM) $(ALLPROG) $(OTHERPROG) *.o
-	-( cd perl && ${MAKE} ${MFLAGS} $@ )
+	-for subdir in $(SUBDIRS); do \
+		( cd $$subdir && test -f Makefile && ${MAKE} ${MFLAGS} $@ ) ; \
+	done
 
 mostlyclean:	clean
-	-( cd perl && ${MAKE} ${MFLAGS} $@ )
+	-for subdir in $(SUBDIRS); do \
+		( cd $$subdir && test -f Makefile && ${MAKE} ${MFLAGS} $@ ) ; \
+	done
 
 distclean maintainer-clean: clean
 	$(RM) Makefile Makefile.inc Makefile.sample pushd.c
-	-( cd perl && ${MAKE} ${MFLAGS} $@ )
+	-for subdir in $(SUBDIRS); do \
+		( cd $$subdir && test -f Makefile && ${MAKE} ${MFLAGS} $@ ) ; \
+	done
 
 installdirs:
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(loadablesdir)
@@ -298,6 +311,14 @@ uninstall-unsupported:
 install:	install-$(SHOBJ_STATUS)
 uninstall:	uninstall-$(SHOBJ_STATUS)
 
+OBJS = print.o truefalse.o accept.o sleep.o finfo.o getconf.o logname.o \
+       basename.o dirname.o tty.o pathchk.o tee.o head.o rmdir.o necho.o \
+       hello.o cat.o csv.o dsv.o kv.o cut.o printenv.o id.o whoami.o uname.o \
+       sync.o push.o mkdir.o mktemp.o realpath.o strftime.o setpgid.o stat.o \
+       fdflags.o seq.o asort.o strptime.o        
+
+${OBJS}:	${BUILD_DIR}/config.h
+
 print.o: print.c
 truefalse.o: truefalse.c
 accept.o: accept.c
@@ -317,6 +338,7 @@ hello.o: hello.c
 cat.o: cat.c
 csv.o: csv.c
 dsv.o: dsv.c
+kv.o: kv.c
 cut.o: cut.c
 printenv.o: printenv.c
 id.o: id.c
@@ -333,3 +355,4 @@ stat.o: stat.c
 fdflags.o: fdflags.c
 seq.o: seq.c
 asort.o: asort.c
+strptime.o: strptime.c

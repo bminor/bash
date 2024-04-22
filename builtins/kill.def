@@ -1,7 +1,7 @@
 This file is kill.def, from which is created kill.c.
 It implements the builtin "kill" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,7 +70,7 @@ $END
 extern int errno;
 #endif /* !errno */
 
-static void kill_error PARAMS((pid_t, int));
+static void kill_error (pid_t, int);
 
 #if !defined (CONTINUE_AFTER_KILL_ERROR)
 #  define CONTINUE_OR_FAIL return (EXECUTION_FAILURE)
@@ -82,8 +82,7 @@ static void kill_error PARAMS((pid_t, int));
    kill -KILL %1?  No, if you fill up the process table this way you
    can still kill some. */
 int
-kill_builtin (list)
-     WORD_LIST *list;
+kill_builtin (WORD_LIST *list)
 {
   int sig, any_succeeded, listing, saw_signal, dflags;
   char *sigspec, *word;
@@ -190,7 +189,7 @@ use_sigspec:
 	word++;
 
       /* Use the entire argument in case of minus sign presence. */
-      if (*word && legal_number (list->word->word, &pid_value) && (pid_value == (pid_t)pid_value))
+      if (*word && valid_number (list->word->word, &pid_value) && (pid_value == (pid_t)pid_value))
 	{
 	  pid = (pid_t) pid_value;
 
@@ -263,9 +262,7 @@ use_sigspec:
 }
 
 static void
-kill_error (pid, e)
-     pid_t pid;
-     int e;
+kill_error (pid_t pid, int e)
 {
   char *x;
 

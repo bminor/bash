@@ -1,7 +1,7 @@
 /* flags.h -- a list of all the flags that the shell knows about.  You add
    a flag to this program by adding the name here, and in flags.c. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -71,15 +71,15 @@ extern int restricted;
 extern int restricted_shell;
 #endif /* RESTRICTED_SHELL */
 
-extern int *find_flag PARAMS((int));
-extern int change_flag PARAMS((int, int));
-extern char *which_set_flags PARAMS((void));
-extern void reset_shell_flags PARAMS((void));
+extern int *find_flag (int);
+extern int change_flag (int, int);
+extern char *which_set_flags (void);
+extern void reset_shell_flags (void);
 
-extern char *get_current_flags PARAMS((void));
-extern void set_current_flags PARAMS((const char *));
+extern char *get_current_flags (void);
+extern void set_current_flags (const char *);
 
-extern void initialize_flags PARAMS((void));
+extern void initialize_flags (void);
 
 /* A macro for efficiency. */
 #define change_flag_char(flag, on_or_off)  change_flag (flag, on_or_off)

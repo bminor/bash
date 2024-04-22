@@ -23,7 +23,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -94,13 +94,12 @@ extern int errno;
 #  define NAME_MAX_FOR(p)	NAME_MAX
 #endif
 
-extern char *strerror ();
+extern char *strerror (int);
 
-static int validate_path ();
+static int validate_path (char *, int);
 
 int
-pathchk_builtin (list)
-     WORD_LIST *list;
+pathchk_builtin (WORD_LIST *list)
 {
   int retval, pflag, opt;
 
@@ -185,8 +184,7 @@ static char const portable_chars[256] =
 /* If PATH contains only portable characters, return 1, else 0.  */
 
 static int
-portable_chars_only (path)
-     const char *path;
+portable_chars_only (const char *path)
 {
   const char *p;
 
@@ -206,9 +204,7 @@ portable_chars_only (path)
 #else
 # define SAFE_STAT(name, buf) safe_stat (name, buf)
 static inline int
-safe_stat (name, buf)
-     const char *name;
-     struct stat *buf;
+safe_stat (const char *name, struct stat *buf)
 {
   int ret;
 
@@ -224,8 +220,7 @@ safe_stat (name, buf)
    2 if it doesn't exist.  */
 
 static int
-dir_ok (path)
-     const char *path;
+dir_ok (const char *path)
 {
   struct stat stats;
 
@@ -255,8 +250,7 @@ dir_ok (path)
 }
 
 static char *
-xstrdup (s)
-     char *s;
+xstrdup (char *s)
 {
   return (savestring (s));
 }
@@ -276,9 +270,7 @@ xstrdup (s)
    Return 0 if all of these tests are successful, 1 if any fail. */
 
 static int
-validate_path (path, portability)
-     char *path;
-     int portability;
+validate_path (char *path, int portability)
 {
   int path_max;
   int last_elem;		/* Nonzero if checking last element of path. */
