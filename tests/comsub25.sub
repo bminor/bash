@@ -1,0 +1,138 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# tests of internal quoting characters in read_comsub and comsub_quote_string
+
+CTLESC=$'\001'
+CTLNUL=$'\177'
+
+x=${| REPLY=$'AA\001BB' ; }
+recho "$x"
+unset x
+
+x=${| REPLY=$'AA\017BB' ; }
+recho "$x"
+unset x
+
+x=${| REPLY=$'AA\177BB' ; }
+recho "$x"
+unset x
+
+x=${| REPLY=$'\001' ; }
+recho "$x"
+unset x
+x=${| REPLY="" ; }
+recho "$x"
+unset x
+x=${| REPLY= ; }
+recho "$x"
+unset x
+x=${| REPLY=$CTLESC ; }
+recho "$x"
+unset x
+x=${| REPLY="$CTLESC" ; }
+recho "$x"
+unset x
+x="${| REPLY="$CTLESC" ; }"
+recho "$x"
+unset x
+
+x=${| REPLY=$'\177' ; }
+recho "$x"
+unset x
+x=${| REPLY="" ; }
+recho "$x"
+unset x
+x=${| REPLY= ; }
+recho "$x"
+unset x
+x=${| REPLY=$CTLNUL ; }
+recho "$x"
+unset x
+x=${| REPLY="$CTLNUL" ; }
+recho "$x"
+unset x
+x="${| REPLY="$CTLNUL" ; }"
+recho "$x"
+unset x
+
+recho "${ echo $'AA\001BB' ; }"
+recho ${ echo $'AA\001BB' ; }
+
+recho "${ echo $'AA\017BB' ; }"
+recho ${ echo $'AA\017BB' ; }
+
+recho "${ echo $'AA\177BB' ; }"
+recho ${ echo $'AA\177BB' ; }
+
+recho "${ echo $'\001' ; }"
+recho ${ echo $'\001' ; }
+
+recho "${ echo "" ; }"
+recho ${ echo "" ; }
+recho "${ echo  ; }"
+recho ${ echo  ; }
+
+recho "${ echo $CTLESC ; }"
+recho ${ echo $CTLESC ; }
+recho ${ echo "$CTLESC" ; }
+recho "${ echo "$CTLESC" ; }"
+
+recho "${ echo $'\177' ; }"
+recho ${ echo $'\177' ; }
+
+recho "${ echo "" ; }"
+recho ${ echo "" ; }
+recho "${ echo  ; }"
+recho ${ echo  ; }
+recho "${ echo $CTLNUL ; }"
+recho ${ echo $CTLNUL ; }
+recho "${ echo "$CTLNUL" ; }"
+recho ${ echo "$CTLNUL" ; }
+
+IFS=$CTLESC
+x=${| REPLY=$'AA\001BB' ; }
+recho "$x"
+recho $x
+unset x
+
+recho "${ echo $'AA\001BB' ; }"
+recho ${ echo $'AA\001BB' ; }
+
+IFS=$CTLNUL
+x=${| REPLY=$'AA\177BB' ; }
+recho "$x"
+recho $x
+unset x
+
+recho "${ echo $'AA\177BB' ; }"
+recho ${ echo $'AA\177BB' ; }
+
+unset IFS
+x=${| REPLY=AA" "BB ; }
+recho "$x"
+recho $x
+
+IFS=
+recho "$x"
+recho $x
+unset x
+
+unset IFS
+recho "${ echo AA" "BB ; }"
+recho ${ echo AA" "BB ; }
+
+IFS=
+recho "${ echo AA" "BB ; }"
+recho ${ echo AA" "BB ; }

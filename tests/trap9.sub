@@ -1,0 +1,84 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# return with argument in trap string while function is executing
+trap 'echo BASH_TRAPSIG = $(kill -l $BASH_TRAPSIG); return 7' USR1
+func() { kill -USR1 $$; }
+func
+echo func=$?
+
+# test where return with no argument in a trap string gets its exit status
+# when a function is executing (posix interp 1602)
+
+setexit() { return "$1"; }
+
+# function called in trap string to set $?
+# posix interp 1602: the return in the trap string causees the end of
+# execution of the trap action
+trap 'setexit 222; echo $? ; return' USR1
+process() { kill -USR1 $$; }
+process
+echo exit=$?
+unset -f process
+
+# posix interp 1602; the return in the trap string interrupts loop and causes
+# the end of execution of the trap action
+trap 'setexit 123; return' USR1
+loop() { while :; do :; done; }
+get_loop_exit() { loop; echo "exit=$?"; }
+{ sleep 1; kill -USR1 $$; } &
+get_loop_exit
+unset -f loop get_loop_exit
+
+# posix interp 1602; the return in `check' does not cause the end of execution
+# of the trap action
+check() { false; return; }
+handle() { check && echo B || echo A; }
+trap handle USR1
+kill -USR1 $$
+unset -f check handle
+
+# posix interp 1602: show where we get the value of $? for trap actions
+# return in trap string causes end of execution of trap action
+invoke() { kill -USR1 $$; return 222; }
+trap 'setexit 111; return' USR1
+invoke
+case $? in
+(0)   echo 'In trap-argument: last command preceding the trap action' ;;
+(111) echo 'In trap-argument: last command in the trap action' ;;
+(222) echo 'In trap-argument: (failed to exit the function)' ;;
+(*)   echo 'In trap-argument: (unexpected)' ;;
+esac
+
+# return in `handler' does not cause the end of execution of the trap action
+stat=99
+handler() { setexit 111; return; }
+trap 'handler; stat=$?; return' USR1
+invoke
+case $stat in
+(0)   echo 'In a function call: last command preceding the trap action' ;;
+(111) echo 'In a function call: last command in the trap action' ;;
+(*)   echo 'In a function call: (unexpected)' ;;
+esac
+unset -f invoke handler
+unset -f setexit
+
+# posix interp 1602: return in function does not cause end of trap action
+ReturnFalse()
+{
+	false ; return
+}
+
+trap 'ReturnFalse && echo "woops"' EXIT
+(exit 0)	# set exit status

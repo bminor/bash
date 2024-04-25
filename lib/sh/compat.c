@@ -1,6 +1,6 @@
-/* patchlevel.h -- current bash patch level */
+/* compat.c - functions for backwards compatibility with previous versions */
 
-/* Copyright (C) 2001-2024 Free Software Foundation, Inc.
+/* Copyright (C) 2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -17,14 +17,37 @@
    You should have received a copy of the GNU General Public License
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
+   
+#include <config.h>
 
-#if !defined (_PATCHLEVEL_H_)
-#define _PATCHLEVEL_H_
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
-/* It's important that there be no other strings in this file that match the
-   regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
-   looks for to find the patch level (for the sccs version string). */
+#include <bashtypes.h>
+#include <shell.h>
 
-#define PATCHLEVEL 0
+/* For backwards compatibility with existing loadable builtins. */
+int
+legal_number (const char *string, intmax_t *result)
+{
+  return (valid_number (string, result));
+}
 
-#endif /* _PATCHLEVEL_H_ */
+int
+legal_identifier (const char *string)
+{
+  return (valid_identifier (string));
+}
+
+int
+legal_alias_name (const char *string, int flags)
+{
+  return (valid_alias_name (string, flags));
+}
+
+int
+compat_init (void)
+{
+  return 0;
+}

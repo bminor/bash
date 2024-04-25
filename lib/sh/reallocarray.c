@@ -1,6 +1,7 @@
-/* patchlevel.h -- current bash patch level */
+/* reallocarray.c - reallocate memory for an array given type size and
+   number of elements */
 
-/* Copyright (C) 2001-2024 Free Software Foundation, Inc.
+/* Copyright (C) 2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -17,14 +18,27 @@
    You should have received a copy of the GNU General Public License
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
+   
+#include <config.h>
 
-#if !defined (_PATCHLEVEL_H_)
-#define _PATCHLEVEL_H_
+#include "bashansi.h"
+#include <stdckdint.h>
 
-/* It's important that there be no other strings in this file that match the
-   regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
-   looks for to find the patch level (for the sccs version string). */
+#include <errno.h>
+#if !defined (errno)
+extern int errno;
+#endif
 
-#define PATCHLEVEL 0
+void *
+reallocarray (void *ptr, size_t nmemb, size_t size)
+{
+  size_t nbytes;
 
-#endif /* _PATCHLEVEL_H_ */
+  if (ckd_mul (&nbytes, nmemb, size))
+    {
+      errno = ENOMEM;
+      return NULL;
+    }
+	        
+  return realloc (ptr, nbytes);
+}

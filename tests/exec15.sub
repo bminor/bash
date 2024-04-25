@@ -1,0 +1,72 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# problems with fork optimization in subshells in bash-5.2
+
+: ${TMPDIR:=/tmp}
+TDIR=$TMPDIR/delta-$$
+mkdir "$TDIR" || exit 2
+
+CMD='env true && env ls -1 "$TDIR"'
+
+trap 'rm -rf "$TDIR"' EXIT
+
+cd "$TDIR" &&
+{
+	touch archive install test; 
+	echo "$CMD" > s
+	echo '( echo "1 start" ; . "$TDIR/sub2"  ; echo "1 done" ; exit 42 )' >sub1
+	echo 'echo "2 start" && env echo sub3' >sub2
+} &&
+cd "$OLDPWD"
+
+[ -f "$TDIR"/s ] || exit 2
+
+d2()
+{
+	eval "$1" ; return 78
+}
+
+d1()
+{
+	cmd="$1"
+
+	( env true && env ls -1 "$TDIR";
+exit 68 )
+	echo $?
+	( . $TDIR/s ; exit 44 )
+	echo $?
+	( eval "$cmd" ; exit 86 )
+	echo $?
+	return 43
+}
+
+dfunc()
+{
+	local x="$CMD"
+
+	d1 "$x" || return 2
+	echo oops: after
+}
+
+${THIS_SH} -c '(. <(echo ": && env echo Darwin"); echo x)'
+
+( dfunc xxx )
+echo $?
+v=$(d2 "$CMD")
+echo $?
+
+. $TDIR/sub1
+echo $?
+
+exit 0

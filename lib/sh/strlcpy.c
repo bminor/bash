@@ -1,6 +1,6 @@
-/* patchlevel.h -- current bash patch level */
+/* strlcpy - null-terminated string copy with length checking. */
 
-/* Copyright (C) 2001-2024 Free Software Foundation, Inc.
+/* Copyright (C) 2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -17,14 +17,23 @@
    You should have received a copy of the GNU General Public License
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
+   
+#include <config.h>
 
-#if !defined (_PATCHLEVEL_H_)
-#define _PATCHLEVEL_H_
+#include <bashansi.h>
 
-/* It's important that there be no other strings in this file that match the
-   regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
-   looks for to find the patch level (for the sccs version string). */
+size_t
+strlcpy(char *dest, const char *src, size_t size)
+{
+  size_t ret;
 
-#define PATCHLEVEL 0
-
-#endif /* _PATCHLEVEL_H_ */
+  ret = strlen(src);
+  if (size)
+    {
+      size_t len;
+      len = (ret >= size) ? size - 1 : ret;
+      memcpy (dest, src, len);
+      dest[len] = '\0';
+    }
+  return ret;
+}

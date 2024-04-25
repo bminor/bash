@@ -1,0 +1,92 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# Change bash to expand the next word following aliases ending with a space
+# that are more than one level deep. Change how bash handles the expand-next-word
+# flag when recognizing a reserved word.
+#
+# Bash never did this before post-bash-5.2
+
+: ${THIS_SH:=./bash}
+
+shopt -s expand_aliases 2>/dev/null
+
+alias a1='echo '
+alias a2=a1
+
+alias foo=bar
+alias x=xtra
+
+a2 foo
+unalias foo
+
+alias e='echo '
+alias f='foo '
+alias b=bar
+
+e f b x
+
+alias e=echo
+
+a2 foo;e x
+
+unalias e f b
+
+alias e=echo
+alias foo='bar '
+alias c=';'
+
+a2 foo c e x
+
+unalias foo e c
+
+alias file='/dev/null ;'
+alias e=echo
+alias foo='bar '
+alias c='< '
+alias x=xtra
+a2 foo c file e x
+
+unalias a1 a2 e foo c x file
+
+alias foo=bar
+
+alias al=' '
+alias foo=bar
+
+al for foo in v
+do echo foo=$foo bar=$bar
+done
+
+al case foo in foo) echo foo;; bar) echo bar;; esac
+
+# one difference between bash in default and posix modes is that default mode
+# bash allows reserved words to be aliased, which posix says is a no-no
+
+${THIS_SH} -c '
+shopt -s expand_aliases 2>/dev/null
+alias al=" "
+alias foo=bar
+alias for=echo
+al for foo in v
+do echo foo=$foo bar=$bar
+done' bash
+
+${THIS_SH} -o posix -c '
+alias al=" "
+alias foo=bar
+alias for=echo
+al for foo in v
+do echo foo=$foo bar=$bar
+done' bash
