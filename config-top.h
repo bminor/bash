@@ -141,7 +141,7 @@
    executing simultaneously */
 /* TAG: bash-5.3 */
 #ifndef MULTIPLE_COPROCS
-#  define MULTIPLE_COPROCS 0
+#  define MULTIPLE_COPROCS 1
 #endif
 
 /* Define to 0 if you want the checkwinsize option off by default, 1 if you

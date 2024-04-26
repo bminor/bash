@@ -1,6 +1,6 @@
 # This Makefile is for the Bash/documentation directory -*- text -*-.
 #
-# Copyright (C) 2003-2015 Free Software Foundation, Inc.
+# Copyright (C) 2003-2024 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -222,7 +222,7 @@ OTHER_DOCS = $(srcdir)/FAQ $(srcdir)/INTRO
 OTHER_INSTALLED_DOCS = FAQ INTRO
 
 $(MAN2HTML):	${topdir}/support/man2html.c
-	-( cd ${BUILD_DIR}/support ; ${MAKE} ${MFLAGS} man2html)
+	-( cd ${BUILD_DIR}/support ; ${MAKE} ${BASH_MAKEFLAGS} man2html)
 
 clean:
 	$(RM) *.aux *.bak *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps \

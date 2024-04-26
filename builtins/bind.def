@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2023 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -56,6 +56,9 @@ Options:
 				KEYSEQ is entered.
   -X                 List key sequences bound with -x and associated commands
                      in a form that can be reused as input.
+
+If arguments remain after option processing, the -p and -P options treat
+them as readline command names and restrict output to those names.
 
 Exit Status:
 bind returns 0 unless an unrecognized option is given or an error occurs.
@@ -114,6 +117,7 @@ bind_builtin (WORD_LIST *list)
   Keymap kmap, saved_keymap;
   int flags, opt;
   char *initfile, *map_name, *fun_name, *unbind_name, *remove_seq, *cmd_seq, *t;
+  WORD_LIST *savelist;
 
   if (no_line_editing)
     builtin_warning (_("line editing not enabled"));
@@ -220,24 +224,29 @@ bind_builtin (WORD_LIST *list)
 
   if (flags & PFLAG)
     {
-#if 0	/* TAG:bash-5.3 */
-      if (list == 0)
+      if (shell_compatibility_level <= 52 || list == 0)
 	rl_function_dumper (1);
       else
-	while (list)
-	  {
-	    rl_print_keybinding (list->word->word, kmap, 1);
-	    list = list->next;
-	  }
-#else
-      rl_function_dumper (1);
-#endif
+	{
+	  /* Allow both -p and -P to have a crack at the additional
+	     arguments, just like supplying both -p and -P without
+	     arguments displays the full set of bindings twice in
+	     two separate formats. Otherwise, -p takes all the
+	     arguments and -P prints all the bindings. */
+	  savelist = (flags & PPFLAG) ? list : (WORD_LIST *)NULL;
+	  while (list)
+	    {
+	      rl_print_keybinding (list->word->word, kmap, 1);
+	      list = list->next;
+	    }
+	  list = savelist;
+	}
     }
 
+  /* should combine this with the above clause */
   if (flags & PPFLAG)
     {
-#if 0	/* TAG:bash-5.3 */
-      if (list == 0)
+      if (shell_compatibility_level <= 52 || list == 0)
 	rl_function_dumper (0);
       else
 	while (list)
@@ -245,9 +254,6 @@ bind_builtin (WORD_LIST *list)
 	    rl_print_keybinding (list->word->word, kmap, 0);
 	    list = list->next;
 	  }
-#else
-      rl_function_dumper (0);
-#endif
     }
 
 

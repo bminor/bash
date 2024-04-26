@@ -1,6 +1,6 @@
 /* bashversion.c -- Display bash version information. */
 
-/* Copyright (C) 2001-2022,2023 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -18,19 +18,15 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
+#include <buildconf.h>
 
-#include "stdc.h"
+/* assume C90 compilation environment */
 
 #include <stdio.h>
-
-#if defined (HAVE_UNISTD_H)
-#  include <unistd.h>
-extern int optind;
-extern char *optarg;
-#endif
-
-#include "bashansi.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
 
 #include "version.h"
 #include "conftypes.h"

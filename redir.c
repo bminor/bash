@@ -724,7 +724,7 @@ redir_open (char *filename, int flags, int mode, enum r_instruction ri)
 	}
       while (fd < 0 && errno == EINTR);
 
-#if 0 /* TAG: bash-5.3 champetier.etienne@gmail.com 01/28/2024 */
+#if 0	/* reportedly no longer needed */
 #if defined (AFS)
       if ((fd < 0) && (errno == EACCES))
 	{

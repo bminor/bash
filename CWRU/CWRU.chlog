@@ -1,4 +1,4 @@
-\
+
 				 12/6/2020
 				 ---------
 
@@ -9177,3 +9177,57 @@ parser.h
 	  expecting_in_command
 	- PST_FORCMD: new parser state, used to say if we're parsing a `for'
 	  command and waiting for an IN token (not used yet)
+
+				   4/22
+				   ----
+config-top.h
+	- MULTIPLE_COPROCS: now enabled by default
+
+				   4/23
+				   ----
+doc/bash.1,doc/bashref.texi
+	- add text clarifying the difference between PIPESTATUS and $?
+
+expr.c,redir.c,jobs.c,parse.y,arrayfunc.c,test.c,subst.c
+builtins/declare.def,builtins/wait.def,builtins/printf.def
+	- went through and removed or modified TAGs for bash-5.3
+
+lib/readline/bind.c
+	- rl_print_keybinding: handle case where there are no key sequences
+	  bound to the command name; don't just print out every unbound key
+
+builtins/bind.def
+	- bind_builtin: if the shell compatibility level is > 52, interpret
+	  additional non-option arguments supplied with -P and -p as bindable
+	  command names and print out any bindings for those names
+
+				   4/24
+				   ----
+Makefile.in,doc/Makefile.in,builtins/Makefile.in
+lib/sh/Makefile.in,lib/glob/Makefile.in,lib/tilde/Makefile.in
+lib/readline/Makefile.in
+	- MFLAGS -> BASH_MAKEFLAGS, rely on make passing MAKEFLAGS in the
+	  environment
+	  From a report by Cedric Blancher <cedric.blancher@gmail.com>
+
+buildconf.h
+	- new build include file, construct from buildconf.h.in; contains a
+	  subset of config.h for use by the build tools
+
+mksyntax.c
+	- now assumes a C90 compilation environment; includes buildconf.h for
+	  any build-time configuration variables
+
+Makefile.in
+	- buildconf.h: add to CREATED_CONFIGURE
+	- mksyntax: now depends on buildconf.h instead of config.h
+
+				   4/25
+				   ----
+support/bashversion.c,version.c
+	- now assumes a C90 compilation environment; includes buildconf.h for
+	  any build-time configuration variables
+
+support/printenv.c,support/recho.c,support/xcase.c,support/zecho.c
+	- now assumes a C90 compilation environment and POSIX.1-1990 execution
+	  environment

@@ -1875,7 +1875,7 @@ expand to nothing (i.e., they are removed).
 @item ?
 @vindex $?
 ($?) Expands to the exit status of the most recently executed foreground
-pipeline.
+command.
 
 @item -
 @vindex $-
@@ -4504,12 +4504,13 @@ Aliases are described in @ref{Aliases}.
 @item bind
 @btindex bind
 @example
-bind [-m @var{keymap}] [-lpsvPSVX]
+bind [-m @var{keymap}] [-lsvSVX]
 bind [-m @var{keymap}] [-q @var{function}] [-u @var{function}] [-r @var{keyseq}]
 bind [-m @var{keymap}] -f @var{filename}
 bind [-m @var{keymap}] -x @var{keyseq[: ]shell-command}
 bind [-m @var{keymap}] @var{keyseq:function-name}
 bind [-m @var{keymap}] @var{keyseq:readline-command}
+bind [-m @var{keymap}] -p|-P [@var{readline-command}]
 bind @var{readline-command-line}
 @end example
 
@@ -4548,9 +4549,13 @@ Display Readline function names and bindings
 in such a way that they can be used as
 an argument to a subsequent @code{bind} command
 or in a Readline initialization file.
+If arguments remain after option processing, @code{bind} treats
+them as readline command names and restricts output to those names.
 
 @item -P
 List current Readline function names and bindings.
+If arguments remain after option processing, @code{bind} treats
+them as readline command names and restricts output to those names.
 
 @item -v
 Display Readline variable names and values
@@ -6923,8 +6928,9 @@ A string describing the operating system Bash is running on.
 @item PIPESTATUS
 An array variable (@pxref{Arrays})
 containing a list of exit status values from the processes
-in the most-recently-executed foreground pipeline (which may
-contain only a single command).
+in the most-recently-executed foreground pipeline, which may
+consist of only a simple command
+(@pxref{Shell Commands}).
 
 @item POSIXLY_CORRECT
 If this variable is in the environment when Bash starts, the shell
@@ -9085,6 +9091,12 @@ enabled by the time the command is executed.
 @item
 The @code{test} builtin uses its historical algorithm to parse parenthesized
 subexpressions when given five or more arguments.
+@item
+If the @option{-p} or @option{-P} option is supplied to the @code{bind} builtin,
+@code{bind} treats any arguments remaining after option processing
+as bindable command names, and
+displays any key sequences bound to those commands, instead of treating
+the arguments as key sequences to bind.
 @end itemize
 
 @end table

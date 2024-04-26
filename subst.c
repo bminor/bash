@@ -4003,7 +4003,7 @@ expand_arith_string (char *string, int quoted)
       /* This is expanded version of expand_string_internal as it's called by
 	 expand_string_leave_quoted  */
       td.flags = W_NOPROCSUB|W_NOTILDE;	/* don't want process substitution or tilde expansion */
-#if 0	/* TAG: bash-5.2 */
+#if 0	/* TAG: notyet */
       if (quoted & Q_ARRAYSUB)
 	td.flags |= W_NOCOMSUB;
 #endif
@@ -8663,7 +8663,7 @@ string_var_assignment (SHELL_VAR *v, char *s)
     sprintf (ret, "declare -%s %s", flags, v->name);	/* just attributes, unset */
   else if (i > 0)
     sprintf (ret, "declare -%s %s=%s", flags, v->name, val);	/* attributes, set */
-#if 1 /*TAG: tentative */
+#if 1 /*TAG: bash-5.3 tentative */
   else if (i == 0 && val && local_p (v) && variable_context == v->context)
     sprintf (ret, "declare %s=%s", v->name, val);	/* set local variable at current scope */
   else if (i == 0 && val == 0 && local_p (v) && variable_context == v->context)

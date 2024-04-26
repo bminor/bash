@@ -467,7 +467,6 @@ subexpr (const char *expr)
 
   val = EXP_LOWEST ();
 
-  /*TAG:bash-5.3 make it clear that these are arithmetic syntax errors */
   if (curtok != 0)
     evalerror (_("arithmetic syntax error in expression"));
 

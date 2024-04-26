@@ -4,7 +4,7 @@
 #								   #
 ####################################################################
 #
-# Copyright (C) 1996-2009 Free Software Foundation, Inc.     
+# Copyright (C) 1996-2024 Free Software Foundation, Inc.     
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -101,7 +101,7 @@ what-tar:
 	done
 
 documentation: force
-	-(cd doc; $(MAKE) $(MFLAGS))
+	-(cd doc; $(MAKE) $(BASH_MAKEFLAGS))
 force:
 
 # The rule for 'includes' is written funny so that the if statement
@@ -111,17 +111,17 @@ install:
 
 clean:
 	rm -f $(OBJECTS) $(LIBRARY_NAME)
-	-(cd doc && $(MAKE) $(MFLAGS) $@ )
+	-(cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
 realclean distclean maintainer-clean: clean
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	$(RM) -f Makefile
 
 mostlyclean: clean
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
 ${BUILD_DIR}/pathnames.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
-	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} pathnames.h )
+	-( cd ${BUILD_DIR} && ${MAKE} ${BASH_MAKEFLAGS} pathnames.h )
 
 ######################################################################
 #								     #

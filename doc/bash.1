@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Mar 29 11:54:22 EDT 2024
+.\"	Last Change: Tue Apr 23 15:08:01 EDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 March 29" "GNU Bash 5.3"
+.TH BASH 1 "2024 April 23" "GNU Bash 5.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -86,8 +86,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2023 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2023 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2024 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2024 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fP-compatible command language interpreter that
@@ -1491,7 +1491,7 @@ Expands to the number of positional parameters in decimal.
 .TP
 .B ?
 Expands to the exit status of the most recently executed foreground
-pipeline.
+command.
 .TP
 .B \-
 Expands to the current option flags as specified upon invocation,
@@ -2032,8 +2032,11 @@ The default is system-dependent.
 An array variable (see
 .B Arrays
 below) containing a list of exit status values from the processes
-in the most-recently-executed foreground pipeline (which may
-contain only a single command).
+in the most-recently-executed foreground pipeline, which may
+consist of only a simple command
+(see
+.B "SHELL GRAMMAR"
+above).
 .TP
 .B PPID
 The process ID of the shell's parent.  This variable is readonly.
@@ -8145,7 +8148,7 @@ returns 0 unless run when job control is disabled or, when run with
 job control enabled, any specified \fIjobspec\fP was not found
 or was started without job control.
 .TP
-\fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-lpsvPSVX\fP]
+\fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-lsvSVX\fP]
 .PD 0
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-q\fP \fIfunction\fP] [\fB\-u\fP \fIfunction\fP] [\fB\-r\fP \fIkeyseq\fP]
@@ -8155,6 +8158,8 @@ or was started without job control.
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fB\-x\fP \fIkeyseq\fP[:] \fIshell\-command\fP
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fIkeyseq\fP:\fIfunction\-name\fP
+.TP
+\fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fB\-p\fP|\fB\-P\fP [\fIreadline\-command\fP]
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] \fIkeyseq\fP:\fIreadline\-command\fP
 .TP
@@ -8203,9 +8208,13 @@ List the names of all \fBreadline\fP functions.
 .B \-p
 Display \fBreadline\fP function names and bindings in such a way
 that they can be re-read.
+If arguments remain after option processing, \fBbind\fP treats
+them as readline command names and restricts output to those names.
 .TP
 .B \-P
 List current \fBreadline\fP function names and bindings.
+If arguments remain after option processing, \fBbind\fP treats
+them as readline command names and restricts output to those names.
 .TP
 .B \-s
 Display \fBreadline\fP key sequences bound to macros and the strings
@@ -12108,6 +12117,21 @@ This assumes the intent is to enable extglob before the command is executed
 and word expansions are performed.
 It will fail at word expansion time if extglob hasn't been
 enabled by the time the command is executed.
+.RE
+.PD
+.TP
+\fBcompat52\fP
+.PD 0
+.RS
+.IP \(bu
+The \fBtest\fP builtin uses its historical algorithm to parse parenthesized
+subexpressions when given five or more arguments.
+.IP \(bu
+If the \fB\-p\fP or \fB\-P\fP option is supplied to the \fBbind\fP builtin,
+\fBbind\fP treats any arguments remaining after option processing
+as bindable command names, and
+displays any key sequences bound to those commands, instead of treating
+the arguments as key sequences to bind.
 .RE
 .PD
 .\" bash_builtins

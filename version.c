@@ -18,11 +18,9 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <config.h>
+#include <buildconf.h>
 
 #include <stdio.h>
-
-#include "stdc.h"
 
 #include "version.h"
 #include "patchlevel.h"

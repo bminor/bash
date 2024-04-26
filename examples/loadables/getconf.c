@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2024 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software; you can redistribute it and/or modify
@@ -1051,7 +1051,8 @@ getconf_all (WORD_LIST *list)
       if (c->call != PATHCONF && path)
 	continue;	/* Only print pathconf vars if path supplied */
 #endif
-      printf("%-35s", c->name);
+      /* The output format for getconf -a is required by POSIX interp 1808 */
+      printf("%s: ", c->name);
       if (getconf_print (c, path, 1) == EXECUTION_FAILURE)
         r = EXECUTION_FAILURE;
     }

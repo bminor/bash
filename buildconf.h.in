@@ -1,6 +1,7 @@
-/* patchlevel.h -- current bash patch level */
+/* buildconf.h -- config definitions from build environment for tools needed
+		  at build time */
 
-/* Copyright (C) 2001-2024 Free Software Foundation, Inc.
+/* Copyright (C) 2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -18,13 +19,17 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if !defined (_PATCHLEVEL_H_)
-#define _PATCHLEVEL_H_
+#if !defined (BUILDCONF_H_)
+#define BUILDCONF_H_
 
-/* It's important that there be no other strings in this file that match the
-   regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
-   looks for to find the patch level (for the sccs version string). */
+#undef HAVE_LOCALE_H
 
-#define PATCHLEVEL 0
+#undef HAVE_UNISTD_H
 
-#endif /* _PATCHLEVEL_H_ */
+#undef HAVE_ISBLANK
+
+#undef PROCESS_SUBSTITUTION
+
+#undef EXTENDED_GLOB
+
+#endif /* BUILDCONF_H */

@@ -1111,7 +1111,7 @@ rl_redisplay (void)
 #endif
 	{
 #if 0
-	  /* TAG: readline-8.3 20230227 */
+	  /* TAG: readline-8.4 20230227 */
 	  /* https://savannah.gnu.org/support/index.php?110830
 	     asking for non-printing meta characters to be printed using an
 	     escape sequence. */

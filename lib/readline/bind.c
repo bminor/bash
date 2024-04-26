@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -257,7 +257,7 @@ rl_unbind_function_in_map (rl_command_func_t *func, Keymap map)
 	  map[i].function = (rl_command_func_t *)NULL;
 	  rval = 1;
 	}
-      else if (map[i].type == ISKMAP)		/* TAG:readline-8.1 */
+      else if (map[i].type == ISKMAP)
 	{
 	  int r;
 	  r = rl_unbind_function_in_map (func, FUNCTION_TO_KEYMAP (map, i));
@@ -2749,7 +2749,7 @@ rl_print_keybinding (const char *name, Keymap kmap, int print_readably)
   char **invokers;
 
   function = rl_named_function (name);
-  invokers = rl_invoking_keyseqs_in_map (function, kmap ? kmap : _rl_keymap);
+  invokers = function ? rl_invoking_keyseqs_in_map (function, kmap ? kmap : _rl_keymap) : (char **)NULL;
 
   if (print_readably)
     {

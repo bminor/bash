@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 March 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 April 23<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -73,7 +73,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2023 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2024 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -1881,7 +1881,7 @@ Expands to the number of positional parameters in decimal.
 
 <DD>
 Expands to the exit status of the most recently executed foreground
-pipeline.
+command.
 <DT><B>-</B>
 
 <DD>
@@ -2562,8 +2562,12 @@ An array variable (see
 <B>Arrays</B>
 
 below) containing a list of exit status values from the processes
-in the most-recently-executed foreground pipeline (which may
-contain only a single command).
+in the most-recently-executed foreground pipeline, which may
+consist of only a simple command
+(see
+<B>SHELL GRAMMAR</B>
+
+above).
 <DT><B>PPID</B>
 
 <DD>
@@ -10287,12 +10291,13 @@ is not present, the shell's notion of the <I>current job</I> is used.
 returns 0 unless run when job control is disabled or, when run with
 job control enabled, any specified <I>jobspec</I> was not found
 or was started without job control.
-<DT><B>bind</B> [<B>-m</B> <I>keymap</I>] [<B>-lpsvPSVX</B>]<DD>
+<DT><B>bind</B> [<B>-m</B> <I>keymap</I>] [<B>-lsvSVX</B>]<DD>
 
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] [<B>-q</B> <I>function</I>] [<B>-u</B> <I>function</I>] [<B>-r</B> <I>keyseq</I>]<DD>
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <B>-f</B> <I>filename</I><DD>
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <B>-x</B> <I>keyseq</I>[:] <I>shell-command</I><DD>
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <I>keyseq</I>:<I>function-name</I><DD>
+<DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <B>-p</B>|<B>-P</B> [<I>readline-command</I>]<DD>
 <DT><B>bind</B> [<B>-m</B> <I>keymap</I>] <I>keyseq</I>:<I>readline-command</I><DD>
 <DT><B>bind</B> <I>readline-command-line</I><DD>
 
@@ -10355,10 +10360,14 @@ List the names of all <B>readline</B> functions.
 <DD>
 Display <B>readline</B> function names and bindings in such a way
 that they can be re-read.
+If arguments remain after option processing, <B>bind</B> treats
+them as readline command names and restricts output to those names.
 <DT><B>-P</B>
 
 <DD>
 List current <B>readline</B> function names and bindings.
+If arguments remain after option processing, <B>bind</B> treats
+them as readline command names and restricts output to those names.
 <DT><B>-s</B>
 
 <DD>
@@ -15164,6 +15173,22 @@ enabled by the time the command is executed.
 </DL></DL>
 
 
+<DT><B>compat52</B><DD>
+
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>*<DD>
+The <B>test</B> builtin uses its historical algorithm to parse parenthesized
+subexpressions when given five or more arguments.
+<DT>*<DD>
+If the <B>-p</B> or <B>-P</B> option is supplied to the <B>bind</B> builtin,
+<B>bind</B> treats any arguments remaining after option processing
+as bindable command names, and
+displays any key sequences bound to those commands, instead of treating
+the arguments as key sequences to bind.
+</DL></DL>
+
+
 
 
 </DL>
@@ -15471,7 +15496,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 March 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 April 23<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15577,7 +15602,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20240402/doc/bash.1.<BR>
-Time: 04 April 2024 17:50:28 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20240422/doc/bash.1.<BR>
+Time: 23 April 2024 17:29:53 EDT
 </BODY>
 </HTML>

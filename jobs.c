@@ -3297,7 +3297,7 @@ return_job:
 	  if (jobs_list_frozen == 0)		/* must be running a funsub to get here */
 	    {
 	      notify_of_job_status ();		/* XXX */
-#if 1 /* TAG: bash-5.3 kre@munnari.oz.au 01/30/2024 */
+#if 1 /* kre@munnari.oz.au 01/30/2024 */
 	      delete_job (i, posixly_correct ? DEL_NOBGPID : 0);
 #else
 	      delete_job (i, 0);

@@ -890,8 +890,6 @@ restart_new_var_name:
 	     EXECUTION_FAILURE would cause set -e to exit the shell. */
 	  NEXT_VARIABLE ();
 	}
-#if 1
-      /* TAG:bash-5.3 20240216 */
       /* Cannot set or unset invalid attributes on readonly variables */
       else if (readonly_p (var) && ((flags_on & invalid_readonly_attrs) || (flags_off & invalid_readonly_attrs)))
 	{
@@ -901,7 +899,6 @@ restart_new_var_name:
 	  any_failed++;
 	  NEXT_VARIABLE ();
 	}
-#endif
 
 #if defined (ARRAY_VARS)
       /* Array variable error checking. */

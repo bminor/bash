@@ -34,7 +34,7 @@ AC_PREREQ(2.69)
 AC_CONFIG_SRCDIR(shell.h)
 dnl where to find install.sh, config.sub, and config.guess
 AC_CONFIG_AUX_DIR(./support)
-AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_HEADERS(config.h buildconf.h)
 
 dnl checks for version info
 BASHVERS=bashvers

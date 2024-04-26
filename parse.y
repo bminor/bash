@@ -2548,7 +2548,7 @@ shell_getc (int remove_quoted_newline)
 
 	      /* We want to make read errors cancel execution of any partial
 		 line, so we set i = 0 if shell_input_line_terminator == READERR. */
-	      /* XXX TAG: bash-5.3 austingroup interp 1629 */
+	      /* austin group interp 1629 */
 #if defined (FATAL_READERROR)
 	      if (shell_input_line_terminator == READERR)
 		i = 0;	/* no-op for now */
@@ -3996,7 +3996,7 @@ parse_matched_pair (int qc, int open, int close, size_t *lenp, int flags)
 		      free (ttrans);
 		      nestlen = strlen (nestret);
 		    }
-#if 0 /* TAG:bash-5.3 */
+#if 0 /* XXX - this is a different condition than the one immediately previous */
 		  /* This single-quotes PARAM in ${PARAM OP WORD} when PARAM
 		     contains a $'...' even when extended_quote is set. */
 		  else if ((rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_PARAM) && (flags & P_DOLBRACE))

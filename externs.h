@@ -537,7 +537,7 @@ extern size_t utf8_mbstrlen (const char *);
 
 /* declarations for functions defined in lib/sh/wcsnwidth.c */
 #if defined (HANDLE_MULTIBYTE)
-extern int wcsnwidth (const wchar_t *, size_t, int);
+extern int wcsnwidth (const wchar_t *, size_t, size_t);
 #endif
 
 /* declarations for functions defined in lib/sh/winsize.c */

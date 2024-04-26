@@ -23,14 +23,11 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#include "bashansi.h"
 #include <errno.h>
+#include <unistd.h>
 
 #ifndef errno
 extern int errno;

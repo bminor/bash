@@ -18,12 +18,8 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if defined (HAVE_CONFIG_H)
-#  include  <config.h>
-#endif
-
-#include "bashansi.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 int
 main(int argc, char **argv)

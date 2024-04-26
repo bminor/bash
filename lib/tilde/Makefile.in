@@ -4,7 +4,7 @@
 #								   #
 ####################################################################
 
-# Copyright (C) 1996-2021 Free Software Foundation, Inc.     
+# Copyright (C) 1996-2024 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ $(LIBRARY_NAME): $(OBJECTS)
 	-test -n "$(RANLIB)" && $(RANLIB) $@
 
 documentation: force
-	-(cd doc; $(MAKE) $(MFLAGS))
+	-(cd doc; $(MAKE) $(BASH_MAKEFLAGS))
 
 force:
 
@@ -105,14 +105,14 @@ install:
 
 clean:
 	$(RM) -f $(OBJECTS) $(LIBRARY_NAME)
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
 realclean distclean maintainer-clean: clean
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	$(RM) -f Makefile
 
 mostlyclean: clean
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
 ######################################################################
 #								     #

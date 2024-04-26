@@ -1359,8 +1359,7 @@ array_expand_index (SHELL_VAR *var, const char *s, int len, int flags)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-#if 1	/* TAG: bash-5.3 */
-#if 0
+#if 0	/* XXX - not dependent on compatibility mode for now */
   if (shell_compatibility_level <= 52 || (flags & AV_NOEXPAND) == 0)
 #else
   if ((flags & AV_NOEXPAND) == 0)
@@ -1368,9 +1367,6 @@ array_expand_index (SHELL_VAR *var, const char *s, int len, int flags)
     t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   else
     t = exp;
-#else
-  t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
-#endif
   savecmd = this_command_name;
   this_command_name = (char *)NULL;
   eflag = (shell_compatibility_level > 51) ? 0 : EXP_EXPANDED;
