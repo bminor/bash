@@ -9231,3 +9231,49 @@ support/bashversion.c,version.c
 support/printenv.c,support/recho.c,support/xcase.c,support/zecho.c
 	- now assumes a C90 compilation environment and POSIX.1-1990 execution
 	  environment
+
+				   4/26
+				   ----
+redir.h
+	- RX_INTERNAL, RX_USER (unused), RX_SAVCLEXEC, RX_SAVEFD, RX_EXPANDED:
+	  new values starting at 0x80, now intended for rflags member of a
+	  struct redirect; don't want them colliding with O_XX flags for open
+	  and fcntl
+
+redir.c
+	- rflags: save redirect->rflags and pass it to make_redirection if
+	  we're translating a redirection into a new one
+	- new_redirect: pass rflags to all calls to make_redirection now that
+	  it holds more than REDIR_VARASSIGN
+	- RX_INTERNAL, RX_USER (unused), RX_SAVCLEXEC, RX_SAVEFD, RX_EXPANDED:
+	  check and assign these in the rflags member; they're only used here
+	- do_redirection_internal: assign new_redirect->rflags back to
+	  redirect->rflags since it can possibly be modified with RX_EXPANDED
+	- do_redirection_internal: take care not to leave REDIR_VARASSIGN in
+	  new_redirect->rflags, since it will cause redirector to be freed,
+	  leading to accessing freed memory
+	  From a report by Clark Wang <dearvoid@gmail.com> and a hint from
+	  <oguzismailuysal@gmail.com> and Grisha Levit <grishalevit@gmail.com>
+
+				   4/28
+				   ----
+lib/sh/anonfile.c
+	- anonopen: call memfd_create with MFD_NOEXEC_SEAL
+	  From a report by Kerin Millar <kfm@plushkava.net>
+
+				   4/29
+				   ----
+shell.c,shell.h
+	- su_shell: now global
+
+variables.c
+	- get_bash_name: use the user's login shell for $BASH if the shell is
+	  a login shell and the name is "-su".
+	  From https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1069978
+
+subst.c
+	- uw_unbind_localvar: unwind-protect to unbind a local variable at
+	  the current function context
+	- function_substitute: make sure we unbind the local REPLY we created
+	  at the current (fake) context
+	  From a report by Koichi Murase <myoga.murase@gmail.com>

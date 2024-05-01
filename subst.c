@@ -6898,6 +6898,16 @@ uw_unbind_variable (void *name)
 }
 
 static void
+uw_unbind_localvar (void *name)
+{
+  SHELL_VAR *v;
+
+  v = find_variable_noref (name);
+  if (v && local_p (v) && v->context == variable_context)
+    makunbound (name, shell_variables);
+}
+
+static void
 uw_restore_pipeline (void *discard)
 {
   restore_pipeline ((intptr_t) discard);
@@ -7075,7 +7085,7 @@ function_substitute (char *string, int quoted, int flags)
       v = make_local_variable ("REPLY", 0);		/* should be new instance */
       /* We don't check $REPLY for readonly yet, but we could */
       if (v)
-	add_unwind_protect (uw_unbind_variable, "REPLY");
+	add_unwind_protect (uw_unbind_localvar, "REPLY");
     }
 
   old_frozen = freeze_jobs_list ();

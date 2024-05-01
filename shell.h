@@ -96,7 +96,9 @@ extern WORD_LIST *rest_of_args;
 extern char *command_execution_string;
 
 extern int debugging_mode;
-extern int executing, login_shell;
+extern int executing;
+extern int login_shell;
+extern int su_shell;
 extern int parsing_command;
 extern int interactive, interactive_shell;
 extern int startup_state;

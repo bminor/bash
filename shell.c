@@ -134,6 +134,9 @@ char *current_host_name = (char *)NULL;
  */
 int login_shell = 0;
 
+/* Non-zero if this shell is being run by `su'. */
+int su_shell = 0;
+
 /* Non-zero means that at this moment, the shell is interactive.  In
    general, this means that the shell is at this moment reading input
    from the keyboard. */
@@ -204,9 +207,6 @@ static char *bashrc_file;
 
 /* Non-zero means to act more like the Bourne shell on startup. */
 static int act_like_sh;
-
-/* Non-zero if this shell is being run by `su'. */
-static int su_shell;
 
 /* Non-zero if we have already expanded and sourced $ENV. */
 static int sourced_env;

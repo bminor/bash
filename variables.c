@@ -776,7 +776,7 @@ get_bash_name (void)
 {
   char *name;
 
-  if ((login_shell == 1) && RELPATH(shell_name))
+  if ((login_shell == 1) && su_shell)
     {
       if (current_user.shell == 0)
 	get_current_user_info ();
