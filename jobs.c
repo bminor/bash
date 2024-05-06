@@ -231,6 +231,10 @@ int check_window_size = CHECKWINSIZE_DEFAULT;
 
 PROCESS *last_procsub_child = (PROCESS *)NULL;
 
+/* Set to non-zero if you want to force job notifications even in contexts
+   where the shell would defer them. */
+int want_job_notifications = 0;
+
 /* Functions local to this file. */
 
 void debug_print_pgrps (void);
@@ -3423,7 +3427,7 @@ notify_and_cleanup (void)
   if (jobs_list_frozen > 0)
     return;
 
-  if (interactive || interactive_shell == 0 || sourcelevel || (interactive_shell && running_trap))
+  if (want_job_notifications || interactive || interactive_shell == 0 || sourcelevel)
     notify_of_job_status ();
 
   if (jobs_list_frozen < 0)

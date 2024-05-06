@@ -247,6 +247,8 @@ parse_prologue (char *string, int flags, char *tag)
   unwind_protect_int (builtin_ignoring_errexit);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
+  if (flags & SEVAL_NOTIFY)
+    unwind_protect_int (want_job_notifications);
 
 #if defined (HISTORY)
   if (parse_and_execute_level == 0)
@@ -281,6 +283,9 @@ parse_prologue (char *string, int flags, char *tag)
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     interactive = (flags & SEVAL_NONINT) ? 0 : 1;
 
+  if (flags & SEVAL_NOTIFY)
+    want_job_notifications = 1;
+
 #if defined (HISTORY)
   if (flags & SEVAL_NOHIST)
     bash_history_disable ();
@@ -302,6 +307,7 @@ parse_prologue (char *string, int flags, char *tag)
    	(flags & SEVAL_RESETLINE) -> reset line_number to 1
    	(flags & SEVAL_NOHISTEXP) -> history_expansion_inhibited -> 1
    	(flags & SEVAL_NOOPTIMIZE) -> don't try to turn on optimizing flags
+   	(flags & SEVAL_NOTIFY) -> print job status notifications
 */
 
 int

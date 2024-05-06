@@ -483,8 +483,13 @@ run_pending_traps (void)
 		}
 
 	      if (function_code == 0)
-	        /* XXX is x always last_command_exit_value? */
-		x = parse_and_execute (trap_command, "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE|SEVAL_NOOPTIMIZE);
+		{
+		  int pflags;
+		  pflags = interactive_shell ? SEVAL_NOTIFY : 0;
+		  pflags |= SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE|SEVAL_NOOPTIMIZE;
+		  /* XXX is x always last_command_exit_value? */
+		  x = parse_and_execute (trap_command, "trap", pflags);
+		}
 	      else
 		{
 		  parse_and_execute_cleanup (sig + 1);	/* XXX - could use -1 */
@@ -1049,8 +1054,11 @@ run_exit_trap (void)
 
       if (code == 0 && function_code == 0)
 	{
+	  int pflags;
+	  pflags = interactive_shell ? SEVAL_NOTIFY : 0;
+	  pflags |= SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE|SEVAL_NOOPTIMIZE;
 	  reset_parser ();
-	  parse_and_execute (trap_command, "exit trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE|SEVAL_NOOPTIMIZE);
+	  parse_and_execute (trap_command, "exit trap", pflags);
 	}
       else if (code == ERREXIT)
 	retval = last_command_exit_value;
@@ -1172,7 +1180,9 @@ _run_trap_internal (int sig, char *tag)
 	  function_code = setjmp_nosigs (return_catch);
 	}
 
-      flags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE;
+      /* XXX - reconsider this for DEBUG_TRAP, RETURN_TRAP, ERROR_TRAP? */
+      flags = interactive_shell ? SEVAL_NOTIFY : 0;
+      flags |= SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE;
       if (sig != DEBUG_TRAP && sig != RETURN_TRAP && sig != ERROR_TRAP)
 	flags |= SEVAL_RESETLINE;
       if (function_code == 0)

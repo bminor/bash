@@ -1685,7 +1685,7 @@ open_shell_script (char *script_name)
 	}
       else if (sample_len > 0 && (check_binary_file (sample, sample_len)))
 	{
-	  internal_error (_("%s: cannot execute binary file"), filename);
+	  internal_error ("%s: %s", filename, _("cannot execute binary file"));
 #if defined (JOB_CONTROL)
 	  end_job_control ();	/* just in case we were run as bash -i script */
 #endif

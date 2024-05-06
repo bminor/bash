@@ -6081,7 +6081,7 @@ shell_execve (char *command, char **args, char **env)
       last_command_exit_value = (i == ENOENT) ?  EX_NOTFOUND : EX_NOEXEC; /* XXX Posix.2 says that exit status is 126 */
       if (file_isdir (command))
 #if defined (EISDIR)
-	internal_error (_("%s: %s"), command, strerror (EISDIR));
+	internal_error ("%s: %s", command, strerror (EISDIR));
 #else
 	internal_error (_("%s: is a directory"), command);
 #endif
@@ -6119,7 +6119,7 @@ shell_execve (char *command, char **args, char **env)
 		  interp[ilen] = 'M';
 		  interp[ilen + 1] = '\0';
 		}
-	      sys_error (_("%s: %s: bad interpreter"), command, interp);
+	      sys_error ("%s: %s: %s", command, interp, _("bad interpreter"));
 	      FREE (interp);
 	      return (EX_NOEXEC);
 	    }
@@ -6165,7 +6165,7 @@ shell_execve (char *command, char **args, char **env)
 #endif
       if (check_binary_file (sample, sample_len))
 	{
-	  internal_error (_("%s: cannot execute binary file: %s"), command, strerror (i));
+	  internal_error ("%s: %s: %s", command, _("cannot execute binary file"), strerror (i));
 	  errno = i;
 	  return (EX_BINARY_FILE);
 	}

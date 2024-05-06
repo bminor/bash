@@ -2461,10 +2461,10 @@ shell_getc (int remove_quoted_newline)
       if (interactive_shell == 0 || SHOULD_PROMPT())
 	{
 #if defined (JOB_CONTROL)
-      /* This can cause a problem when reading a command as the result
-	 of a trap, when the trap is called from flush_child.  This call
-	 had better not cause jobs to disappear from the job table in
-	 that case, or we will have big trouble. */
+	  /* This can cause a problem when reading a command as the result
+	     of a trap, when the trap is called from flush_child.  This call
+	     had better not cause jobs to disappear from the job table in
+	     that case, or we will have big trouble. */
 	  notify_and_cleanup ();
 #else /* !JOB_CONTROL */
 	  cleanup_dead_jobs ();
@@ -2951,7 +2951,7 @@ execute_variable_command (const char *command, const char *vname)
   save_parser_state (&ps);
   last_lastarg = save_lastarg ();
 
-  parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE);
+  parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE|SEVAL_NOTIFY);
 
   restore_parser_state (&ps);
   bind_lastarg (last_lastarg);

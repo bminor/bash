@@ -9327,3 +9327,46 @@ jobs.c
 jobs.h
 	- LONGEST_SIGNAL_DESC: update to 27 (macos SIGPROF). This changes the
 	  test output
+
+				    5/3
+				    ---
+builtins/common.h
+	- SEVAL_NOTIFY: new flag for parse_and_execute; means we want job
+	  notifications even though we're not interactive at this time and
+	  would not satisfy the conditions
+
+builtins/evalstring.c
+	- parse_prologue: if SEVAL_NOTIFY is supplied, unwind-protect
+	  want_job_notifications and set it to 1
+
+jobs.c,jobs.h.nojobs.c
+	- want_job_notifications: new global variable, initialized to 0
+
+jobs.c
+	- notify_and_cleanup: notify about dead jobs if want_job_notifications
+	  is non-zero
+
+parse.y
+	- execute_variable_command: call parse_and_execute with the SEVAL_NOTIFY
+	  flag
+
+eval.c
+	- reader_loop: call notify_and_cleanup before executing $PROMPT_COMMAND
+	  if the shell is interactive and prompting
+
+trap.c
+	- run_pending_traps,_run_trap_internal,run_exit_trap: add SEVAL_NOTIFY
+	  to the flags for parse_and_execute if the shell is interactive
+
+bashline.c
+	- bash_execute_unix_command: add SEVAL_NOTIFY to the flags for
+	  parse_and_execute if the shell is interactive
+	  Rest of fix for report by Koichi Murase <myoga.murase@gmail.com>
+	  on 11/14/2022
+
+				    5/6
+				    ---
+
+execute_cmd.c,shell.c,builtins/evalfile.c,unwind_prot.c
+	- change some translated error messages to make the text more uniform
+	  and reduce the number of gettext() calls

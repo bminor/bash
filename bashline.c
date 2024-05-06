@@ -4545,7 +4545,7 @@ uw_unbind_readline_variables (void *ignore)
 int
 bash_execute_unix_command (int count, int key)
 {
-  int type;
+  int type, pflags;
   register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
@@ -4627,7 +4627,8 @@ bash_execute_unix_command (int count, int key)
   add_unwind_protect (uw_unbind_readline_variables, 0);
   add_unwind_protect (uw_restore_parser_state, &ps);
   add_unwind_protect (uw_rl_set_signals, 0);
-  r = parse_and_execute (savestring (cmd), "bash_execute_unix_command", SEVAL_NOHIST);
+  pflags = interactive_shell ? (SEVAL_NOTIFY|SEVAL_NOHIST) : SEVAL_NOHIST;
+  r = parse_and_execute (savestring (cmd), "bash_execute_unix_command", pflags);
   rl_set_signals ();
   restore_parser_state (&ps);
 

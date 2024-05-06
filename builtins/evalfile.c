@@ -1,6 +1,6 @@
 /* evalfile.c - read and evaluate commands from a file or file descriptor */
 
-/* Copyright (C) 1996-2017,2022-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -185,7 +185,7 @@ file_error_and_exit:
       check_binary_file (string, (nr > 80) ? 80 : nr))
     {
       free (string);
-      (*errfunc) (_("%s: cannot execute binary file"), filename);
+      (*errfunc) ("%s: %s", filename, _("cannot execute binary file"));
       return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
     }
 
@@ -203,7 +203,7 @@ file_error_and_exit:
 	    if ((flags & FEVAL_BUILTIN) && ++nnull > 256)
 	      {
 		free (string);
-		(*errfunc) (_("%s: cannot execute binary file"), filename);
+		(*errfunc) ("%s: %s", filename, _("cannot execute binary file"));
 		return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
 	      }
           }
