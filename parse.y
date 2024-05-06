@@ -7242,9 +7242,11 @@ flush_parser_state (sh_parser_state_t *ps)
   FREE (ps->token_state);
   ps->token_state = 0;
 
+#if defined (ARRAY_VARS)
   if (ps->pipestatus)
     array_dispose (ps->pipestatus);
   ps->pipestatus = 0;
+#endif
 
   /* We want to free the saved token and leave the current token for error
      reporting and cleanup. */

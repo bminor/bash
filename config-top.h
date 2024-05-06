@@ -47,7 +47,7 @@
 
 /* Define DONT_REPORT_SIGTERM if you don't want to see `Terminated' message
    when a job exits due to SIGTERM, since that's the default signal sent
-   by the kill builtin. */
+   by the kill builtin. Only effective for non-interactive shells. */
 #define DONT_REPORT_SIGTERM
 
 /* Define DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS if you don't want builtins

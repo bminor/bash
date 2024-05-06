@@ -2695,7 +2695,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
 	  prev = NO_PIPE;
 	  add_unwind_protect (uw_restore_stdin, (void *) (intptr_t) lstdin);
 	  lastpipe_flag = 1;
-	  old_frozen = freeze_jobs_list ();
+	  old_frozen = freeze_jobs_list (1);
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
 	  add_unwind_protect (uw_lastpipe_cleanup, (void *) (intptr_t) old_frozen);
 #if defined (JOB_CONTROL)
@@ -2831,6 +2831,10 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 #endif
 
       QUIT;
+#if defined (JOB_CONTROL)
+      if (command->value.Connection->connector == ';' && job_control && interactive)
+        notify_and_cleanup ();
+#endif
       optimize_connection_fork (command);			/* XXX */
       exec_result = execute_command_internal (command->value.Connection->second,
 				      asynchronous, pipe_in, pipe_out,

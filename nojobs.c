@@ -1010,7 +1010,7 @@ describe_pid (pid_t pid)
 }
 
 int
-freeze_jobs_list (void)
+freeze_jobs_list (int n)
 {
   return 0;
 }

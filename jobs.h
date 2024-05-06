@@ -34,9 +34,14 @@
 #define JLIST_PID_ONLY	     2
 #define JLIST_CHANGED_ONLY   3
 #define JLIST_NONINTERACTIVE 4
+#define JLIST_POSIX	     5
+#define JLIST_BGONLY	     6
 
-/* I looked it up.  For pretty_print_job ().  The real answer is 24. */
-#define LONGEST_SIGNAL_DESC 24
+/* I looked it up.  For pretty_print_job ().  The real answer is 27
+   (macOS SIGPROF) but the makefile or configure can override it. */
+#ifndef LONGEST_SIGNAL_DESC
+#  define LONGEST_SIGNAL_DESC 27
+#endif
 
 /* Defines for the wait_for_* functions and for the wait builtin to use */
 #define JWAIT_PERROR		(1 << 0)
@@ -301,7 +306,7 @@ extern int give_terminal_to (pid_t, int);
 
 extern void run_sigchld_trap (int);
 
-extern int freeze_jobs_list (void);
+extern int freeze_jobs_list (int);
 extern int unfreeze_jobs_list (void);
 extern void set_jobs_list_frozen (int);
 extern int jobs_list_frozen_status (void);

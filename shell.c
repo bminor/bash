@@ -448,7 +448,7 @@ main (int argc, char **argv, char **env)
 
   /* Fix for the `infinite process creation' bug when running shell scripts
      from startup files on System V. */
-  login_shell = make_login_shell = 0;
+  login_shell = make_login_shell = su_shell = 0;
 
   /* If this shell has already been run, then reinitialize it to a
      vanilla state. */
@@ -1996,7 +1996,7 @@ shell_reinitialize (void)
   no_rc = no_profile = 1;
 
   /* Things that get 0. */
-  login_shell = make_login_shell = executing = 0;
+  login_shell = make_login_shell = su_shell = executing = 0;
   debugging = debugging_mode = 0;
   do_version = line_number = last_command_exit_value = 0;
   forced_interactive = interactive_shell = interactive = 0;

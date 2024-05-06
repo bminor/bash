@@ -9277,3 +9277,53 @@ subst.c
 	- function_substitute: make sure we unbind the local REPLY we created
 	  at the current (fake) context
 	  From a report by Koichi Murase <myoga.murase@gmail.com>
+
+				   4/30
+				   ----
+
+subst.c
+	- expand_arrayref: fix crash from freeing memory that's only allocated
+	  and initialized if ARRAY_VARS is defined
+	  Report and patch from Henrik Lindström <henrik@lxm.se>
+
+jobs.h,jobs.c
+	- JLIST_POSIX: new format argument for pretty_print_job; implements
+	  POSIX requirement that jobs display the status of all background
+	  jobs and all jobs the user hasn't been notified about (unused yet)
+	- JLIST_BGONLY: new format argument for pretty_print_job; restricts
+	  output to background jobs only (unused yet)
+
+jobs.c,jobs.h,execute_cmd.c,subst.c
+	- freeze_jobs_list: now takes an int argument with the new value of
+	  jobs_list_frozen; prep for having different values with different
+	  meanings; changed callers
+
+jobs.c
+	- wait_for_any_job: return right away if jobs_list_frozen > 0; allow
+	  job status changes (e.g., J_NOTIFIED) if jobs_list_frozen < 0; use
+	  this instead of testing executing_funsub directly
+	- notify_and_cleanup: allow notification and status change if
+	  jobs_list_frozen < 0; don't delete any dead jobs
+	- should_notify: takes a job index and returns 1 if the shell would
+	  notify the user about it, given the current job state
+	- pretty_print_job: if the jobs list is frozen, only print status
+	  about jobs for which the shell would notify users (by calling
+	  should_notify())
+
+subst.c
+	- function_substitute: freeze the jobs list with value -1 so jobs
+	  can change status and possibly inhibit printing by `jobs'
+
+				    5/2
+				    ---
+jobs.c
+	- notify_and_cleanup: allow job notifications if an interactive shell
+	  is running a trap (interactive == 0 && interactive_shell && running_trap)
+	  Fixes report by Koichi Murase <myoga.murase@gmail.com> on 11/14/2022
+	- print_pipeline: don't print an extra space before the pipeline; push
+	  that into pretty_print_job; print the space after the pid if we
+	  print one
+
+jobs.h
+	- LONGEST_SIGNAL_DESC: update to 27 (macos SIGPROF). This changes the
+	  test output

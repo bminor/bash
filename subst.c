@@ -7088,8 +7088,10 @@ function_substitute (char *string, int quoted, int flags)
 	add_unwind_protect (uw_unbind_localvar, "REPLY");
     }
 
-  old_frozen = freeze_jobs_list ();
+#if 1	/* TAG:bash-5.3 myoga.murase@gmail.com 04/30/2024 */
+  old_frozen = freeze_jobs_list (-1);
   add_unwind_protect (uw_lastpipe_cleanup, (void *) (intptr_t) old_frozen);
+#endif
 
 #if defined (JOB_CONTROL)
   unwind_protect_var (pipeline_pgrp);
@@ -7806,7 +7808,9 @@ expand_arrayref:
 
 	  temp = quote_var_value (temp, quoted, pflags);
 
+#if defined (ARRAY_VARS)
 	  FREE (tt);
+#endif
 	}
       else
 	temp = (char *)NULL;

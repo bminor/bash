@@ -337,10 +337,11 @@ static SigHandler *old_cont = (SigHandler *)SIG_DFL;
 /* A place to temporarily save the current pipeline. */
 static struct pipeline_saver *saved_pipeline;
 
-/* Set this to non-zero whenever you don't want the jobs list to change at
+/* Set this to 1 whenever you don't want the jobs list to change at
    all: no jobs deleted and no status change notifications.  This is used,
    for example, when executing SIGCHLD traps, which may run arbitrary
-   commands. */
+   commands. Set to -1 if you allow status change notifications but no
+   jobs deleted. 0 means everything is allowed. */
 static int jobs_list_frozen;
 
 static char retcode_name_buffer[64];
@@ -1905,19 +1906,26 @@ printable_job_status (int j, PROCESS *p, int format)
 /* This is the way to print out information on a job if you
    know the index.  FORMAT is:
 
-    JLIST_NORMAL)   [1]+ Running	   emacs
+    JLIST_STANDARD)   [1]+ Running	   emacs
     JLIST_LONG  )   [1]+ 2378 Running      emacs
     -1	  )   [1]+ 2378	      emacs
 
-    JLIST_NORMAL)   [1]+ Stopped	   ls | more
+    JLIST_STANDARD)   [1]+ Stopped	   ls | more
     JLIST_LONG  )   [1]+ 2369 Stopped      ls
 			 2367	    | more
     JLIST_PID_ONLY)
 	Just list the pid of the process group leader (really
 	the process group).
     JLIST_CHANGED_ONLY)
-	Use format JLIST_NORMAL, but list only jobs about which
-	the user has not been notified. */
+	Use format JLIST_STANDARD, but list only jobs about which
+	the user has not been notified.
+    JLIST_POSIX)
+	Use format JLIST_STANDARD, list all background jobs, running
+	and stopped, plus jobs about which the user has not been
+	notified (that would be notified)
+    JLIST_BGONLY)
+	Use format JLIST_STANDARD, but restrict output to background
+	jobs only. */
 
 /* Print status for pipeline P.  If JOB_INDEX is >= 0, it is the index into
    the JOBS array corresponding to this pipeline.  FORMAT is as described
@@ -1945,9 +1953,14 @@ print_pipeline (PROCESS *p, int job_index, int format, FILE *stream)
 	fprintf (stream, format ? "     " : " |");
 
       if (format != JLIST_STANDARD)
-	fprintf (stream, "%5ld", (long)p->pid);
+	{
+	  fprintf (stream, "%5ld", (long)p->pid);
+	  if (p == first)
+	    fprintf (stream, " ");
+	}
 
-      fprintf (stream, " ");
+      if (p != first)
+	fprintf (stream, " ");
 
       if (format > -1 && job_index >= 0)
 	{
@@ -2021,12 +2034,42 @@ print_pipeline (PROCESS *p, int job_index, int format, FILE *stream)
   fflush (stream);
 }
 
+/* We want to print information about a job if it's running or terminated in
+   the background, if it's stopped, or if it was a foreground job terminated
+   due to a signal that we don't ignore (SIGINT and possibly SIGTERM and
+   SIGPIPE). If we change this, change the conditions in notify_of_job_status()
+   so they stay consistent.
+
+   This is for use by the jobs builtin. */
+
+static int
+should_notify (int job)
+{
+  /* Background jobs, stopped jobs whether they were in the foreground or
+     background. */
+  if ((IS_FOREGROUND (job) == 0) || STOPPED (job))
+    return 1;
+
+  /* Foreground job killed by a signal we report on. */
+  if (DEADJOB (job) && IS_FOREGROUND (job) && job_killed_by_signal (job))
+    return 1;
+
+  return 0;		/* catch-all */  
+}
+
 /* Print information to STREAM about jobs[JOB_INDEX] according to FORMAT.
    Must be called with SIGCHLD blocked or queued with queue_sigchld */
 static void
 pretty_print_job (int job_index, int format, FILE *stream)
 {
   register PROCESS *p;
+
+  /* If the jobs list is frozen, skip jobs we would remove and not report on */
+  if (jobs_list_frozen && should_notify (job_index) == 0)
+    return;
+
+  if (format == JLIST_BGONLY && IS_FOREGROUND (job_index))
+    return;
 
   /* Format only pid information about the process group leader? */
   if (format == JLIST_PID_ONLY)
@@ -2041,6 +2084,12 @@ pretty_print_job (int job_index, int format, FILE *stream)
 	return;
       format = JLIST_STANDARD;
     }
+  else if (format == JLIST_POSIX)
+    {
+      if (IS_FOREGROUND (job_index) && IS_NOTIFIED (job_index))
+	return;
+      format = JLIST_STANDARD;
+    }
 
   if (format != JLIST_NONINTERACTIVE)
     fprintf (stream, "[%d]%c ", job_index + 1,
@@ -2050,8 +2099,10 @@ pretty_print_job (int job_index, int format, FILE *stream)
   if (format == JLIST_NONINTERACTIVE)
     format = JLIST_LONG;
 
-  p = jobs[job_index]->pipe;
+  if (format == JLIST_STANDARD)
+    fprintf (stream, "%c", ' ');		/* used to be in print_pipeline */
 
+  p = jobs[job_index]->pipe;
   print_pipeline (p, job_index, format, stream);
 
   /* We have printed information about this job.  When the job's
@@ -3275,7 +3326,7 @@ wait_for_any_job (int flags, struct procstat *ps)
   sigset_t set, oset;
 
   /* Allow funsubs to run this, but don't remove jobs from the jobs table. */
-  if (jobs_list_frozen && executing_funsub == 0)
+  if (jobs_list_frozen > 0)
     return -1;
 
   /* First see if there are any unnotified dead jobs that we can report on */
@@ -3297,13 +3348,11 @@ return_job:
 	  if (jobs_list_frozen == 0)		/* must be running a funsub to get here */
 	    {
 	      notify_of_job_status ();		/* XXX */
-#if 1 /* kre@munnari.oz.au 01/30/2024 */
+
+	      /* kre@munnari.oz.au 01/30/2024 */
 	      delete_job (i, posixly_correct ? DEL_NOBGPID : 0);
-#else
-	      delete_job (i, 0);
-#endif
 	    }
-	  else
+	  else /* if (jobs_list_frozen < 0) */	/* status changes only */
 	    jobs[i]->flags |= J_NOTIFIED;	/* clean up later */
 #if defined (COPROCESS_SUPPORT)
 	  coproc_reap ();
@@ -3371,11 +3420,14 @@ return_job:
 void
 notify_and_cleanup (void)
 {
-  if (jobs_list_frozen)
+  if (jobs_list_frozen > 0)
     return;
 
-  if (interactive || interactive_shell == 0 || sourcelevel)
+  if (interactive || interactive_shell == 0 || sourcelevel || (interactive_shell && running_trap))
     notify_of_job_status ();
+
+  if (jobs_list_frozen < 0)
+    return;		/* status changes only */
 
   cleanup_dead_jobs ();
 }
@@ -4357,14 +4409,19 @@ notify_of_job_status (void)
 		  if (termsig && WIFSIGNALED (s) && termsig != SIGINT && termsig != SIGPIPE)
 #endif
 		    {
+#if 0
 		      fprintf (stderr, "%s", j_strsignal (termsig));
 
 		      if (WIFCORED (s))
 			fprintf (stderr, _(" (core dumped)"));
 
 		      fprintf (stderr, "\n");
+#else
+		      print_pipeline (jobs[job]->pipe, job, JLIST_STANDARD, stderr);
+#endif
 		    }
-		  /* foreground jobs that exit cleanly */
+		  /* foreground jobs that exit cleanly or due to a signal we
+		     don't report on */
 		  jobs[job]->flags |= J_NOTIFIED;
 		}
 	      else if (job_control)
@@ -4970,12 +5027,12 @@ itrace("mark_dead_jobs_as_notified: child_max = %d ndead = %d ndeadproc = %d", j
 /* Here to allow other parts of the shell (like the trap stuff) to
    freeze and unfreeze the jobs list. */
 int
-freeze_jobs_list (void)
+freeze_jobs_list (int n)
 {
   int o;
 
   o = jobs_list_frozen;
-  jobs_list_frozen = 1;
+  jobs_list_frozen = n;
   return o;
 }
 
