@@ -211,7 +211,7 @@ open_helpfile (const char *name)
   fd = open (name, O_RDONLY);
   if (fd == -1)
     {
-      builtin_error (_("%s: cannot open: %s"), name, strerror (errno));
+      builtin_error ("%s: %s: %s", name, _("cannot open"), strerror (errno));
       return -1;
     }
   return fd;

@@ -2,7 +2,7 @@ This file is mapfile.def, from which is created mapfile.c.
 It implements the builtin "mapfile" in Bash.
 
 Copyright (C) 2005-2006 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008-2023 Free Software Foundation, Inc.
+Copyright (C) 2008-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -254,7 +254,7 @@ mapfile_builtin (WORD_LIST *list)
 
 	  if (sh_validfd (fd) == 0)
 	    {
-	      builtin_error (_("%d: invalid file descriptor: %s"), fd, strerror (errno));
+	      builtin_error ("%d: %s: %s", fd, _("invalid file descriptor"), strerror (errno));
 	      return (EXECUTION_FAILURE);
 	    }
 	  break;	  

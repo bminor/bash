@@ -197,25 +197,25 @@ redirection_error (REDIRECT *temp, int error, char *fn)
   switch (error)
     {
     case AMBIGUOUS_REDIRECT:
-      internal_error (_("%s: ambiguous redirect"), filename);
+      internal_error ("%s: %s", filename, _("ambiguous redirect"));
       break;
 
     case NOCLOBBER_REDIRECT:
-      internal_error (_("%s: cannot overwrite existing file"), filename);
+      internal_error ("%s: %s", filename, _("cannot overwrite existing file"));
       break;
 
 #if defined (RESTRICTED_SHELL)
     case RESTRICTED_REDIRECT:
-      internal_error (_("%s: restricted: cannot redirect output"), filename);
+      internal_error ("%s: %s", filename, _("restricted: cannot redirect output"));
       break;
 #endif /* RESTRICTED_SHELL */
 
     case HEREDOC_REDIRECT:
-      internal_error (_("cannot create temp file for here-document: %s"), strerror (heredoc_errno));
+      internal_error ("%s: %s", _("cannot create temp file for here-document"), strerror (heredoc_errno));
       break;
 
     case BADVAR_REDIRECT:
-      internal_error (_("%s: cannot assign fd to variable"), filename);
+      internal_error ("%s: %s", filename, _("cannot assign fd to variable"));
       break;
 
     default:

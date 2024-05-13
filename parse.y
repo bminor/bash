@@ -2807,7 +2807,7 @@ pop_alias:
   else if (uc == 0 && shell_input_line_terminator == READERR)
     {
 #if defined (FATAL_READERROR)
-      report_error (_("script file read error: %s"), strerror (errno));
+      report_error ("%s: %s", _("script file read error"), strerror (errno));
       exit_shell (128);		/* POSIX mandated error status */
 #else
       /* Treat read errors like EOF here. */

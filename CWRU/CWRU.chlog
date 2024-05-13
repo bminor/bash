@@ -9370,3 +9370,53 @@ bashline.c
 execute_cmd.c,shell.c,builtins/evalfile.c,unwind_prot.c
 	- change some translated error messages to make the text more uniform
 	  and reduce the number of gettext() calls
+
+redir.c,parse.y,bashhist.c.locale.c
+builtins/common.c,builtins/bind.def,builtins/exec.def,builtins/fc.def
+builtins/help.def,builtins/mapfile.def,builtins/printf.def,builtins/read.def
+builtins/ulimit.def
+	- change some error messages to avoid having the format be the return
+	  value from gettext() to avoid clang complaints; simplified
+	  translatable strings and made them more uniform by removing printf
+	  formatting directives
+
+execute_cmd.c
+	- notfound_str: cache the translated version of "command not found"
+	  so we can call gettext early on and work around a macOS misfeature
+	  From a MacPorts ticket https://trac.macports.org/ticket/68638
+	  forwarded by Tom <tom@msbit.com.au>
+	- execute_disk_command: use notfound_str instead of calling gettext
+	  every time a command isn't found
+
+execute_cmd.c,execute_cmd.h
+	- init_notfound_str: call gettext to initialize and translate
+	  notfound_str
+	- execute_disk_command: call init_notfound_str before forking if it
+	  hasn't been initialized
+
+locale.c
+	- set_default_locale_vars: after we set the appropriate values for the
+	  locale shell variables, call init_notfound_str to force a call to
+	  gettext()
+
+jobs.c
+	- wait_for: don't try to set the tty state if we're running a trap,
+	  even if a process terminates due to a signal
+
+				    5/7
+				    ---
+builtins/enable.def
+	- enable_builtin: don't try to turn enable f into enable -f f if the
+	  shell is restricted
+
+				   5/11
+				   ----
+
+doc/bash.1,lib/readline/doc/readline.3,lib/readline/doc/rltech.texi
+	- document some of the bindable commands bound to Home, End, Insert,
+	  Page Up, and Page Down, if those keys exist
+	  From a report by Xose Vazquez Perez <xose.vazquez@gmail.com> in 3/2024
+
+configure
+	- make sure to note in CHANGES that configure now supports
+	  --enable-year-2038 for large time_t

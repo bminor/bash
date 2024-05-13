@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2021,2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2021,2022,2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -154,9 +154,9 @@ exec_builtin (WORD_LIST *list)
       if (file_isdir (args[0]))
 	{
 #if defined (EISDIR)
-	  builtin_error (_("%s: cannot execute: %s"), args[0], strerror (EISDIR));
+	  builtin_error ("%s: %s: %s", args[0], _("cannot execute"), strerror (EISDIR));
 #else
-	  builtin_error (_("%s: cannot execute: %s"), args[0], strerror (errno));
+	  builtin_error ("%s: %s: %s", args[0], _("cannot execute"), strerror (errno));
 #endif
 	  exit_value = EX_NOEXEC;
 	}
@@ -242,7 +242,7 @@ exec_builtin (WORD_LIST *list)
   else if (executable_file (command) == 0)
     {
       errno = opt;
-      builtin_error (_("%s: cannot execute: %s"), command, strerror (errno));
+      builtin_error ("%s: %s: %s", command, _("cannot execute"), strerror (errno));
       exit_value = EX_NOEXEC;	/* As per Posix.2, 3.14.6 */
     }
   else

@@ -3151,7 +3151,8 @@ if (job == NO_JOB)
 
 	  if (WIFSIGNALED (s) || WIFSTOPPED (s))
 	    {
-	      set_tty_state ();
+	      if (running_trap == 0 /* || WIFSTOPPED (s) */)
+		set_tty_state ();
 
 	      /* If the current job was stopped or killed by a signal, and
 		 the user has requested it, get a possibly new window size */

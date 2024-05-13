@@ -261,6 +261,12 @@ int subshell_level = 0;
 /* Currently-executing shell function. */
 SHELL_VAR *this_shell_function;
 
+/* Translated message printed when a command is not found. We declare it here
+   and initialize it in locale.c to work around a macOS bug that forces a
+   crash if bash calls setlocale(3) but does not call gettext(3) before
+   forking, then calls gettext() after forking. */
+char *notfound_str = 0;
+
 /* If non-zero, matches in case and [[ ... ]] are case-insensitive */
 int match_ignore_case = 0;
 
@@ -584,7 +590,7 @@ async_redirect_stdin (void)
       close (fd);
     }
   else if (fd < 0)
-    internal_error (_("cannot redirect standard input from /dev/null: %s"), strerror (errno));
+    internal_error ("%s: %s", _("cannot redirect standard input from /dev/null"), strerror (errno));
 }
 
 #define DESCRIBE_PID(pid) do { if (interactive) describe_pid (pid); } while (0)
@@ -5702,6 +5708,14 @@ setup_async_signals (void)
 
    NOTE: callers expect this to fork or exit(). */
 
+/* See comment above where notfound_str is declared. */
+void
+init_notfound_str (void)
+{
+  if (notfound_str == 0)
+    notfound_str = _("command not found");
+}
+
 /* Name of a shell function to call when a command name is not found. */
 #ifndef NOTFOUND_HOOK
 #  define NOTFOUND_HOOK "command_not_found_handle"
@@ -5759,6 +5773,8 @@ execute_disk_command (WORD_LIST *words, REDIRECT *redirects, char *command_line,
       maybe_make_export_env ();
       put_command_name_into_env (command);
     }
+  else if (command == 0 && notfound_str == 0)	/* make sure */
+    init_notfound_str ();
 
   /* We have to make the child before we check for the non-existence
      of COMMAND, since we want the error messages to be redirected. */
@@ -5845,7 +5861,7 @@ execute_disk_command (WORD_LIST *words, REDIRECT *redirects, char *command_line,
 	    {
 	      /* Make sure filenames are displayed using printable characters */
 	      pathname = printable_filename (pathname, 0);
-	      internal_error (_("%s: command not found"), pathname);
+	      internal_error ("%s: %s", pathname, notfound_str);
 	      exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
 	    }
 

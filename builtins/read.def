@@ -363,7 +363,7 @@ read_builtin (WORD_LIST *list)
 	    fd = intval;
 	  if (sh_validfd (fd) == 0)
 	    {
-	      builtin_error (_("%d: invalid file descriptor: %s"), fd, strerror (errno));
+	      builtin_error ("%d: %s: %s", fd, _("invalid file descriptor"), strerror (errno));
 	      return (EXECUTION_FAILURE);
 	    }
 	  break;
@@ -865,7 +865,7 @@ add_char:
     {
       t_errno = errno;
       if (errno != EINTR)
-	builtin_error (_("read error: %d: %s"), fd, strerror (errno));
+	builtin_error ("%d: %s: %s", fd, _("read error"), strerror (errno));
       run_unwind_frame ("read_builtin");
       return ((t_errno != EINTR) ? EXECUTION_FAILURE : 128+lastsig);
     }

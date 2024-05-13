@@ -461,7 +461,7 @@ maybe_append_history (char *filename)
 	  fd = open (filename, O_WRONLY|O_CREAT, 0600);
 	  if (fd < 0)
 	    {
-	      builtin_error (_("%s: cannot create: %s"), filename, strerror (errno));
+	      builtin_error ("%s: %s: %s", filename, _("cannot create"), strerror (errno));
 	      return (EXECUTION_FAILURE);
 	    }
 	  close (fd);

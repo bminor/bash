@@ -700,7 +700,7 @@ printf_builtin (WORD_LIST *list)
 		        /* check for string length overflow when adjusting precision */
 			if (ckd_add (&precision, slen, 0))
 			  {
-			    builtin_error (_("%%Q: string length: %s"), strerror (ERANGE));
+			    builtin_error ("%%Q: %s %s", _("string length"), strerror (ERANGE));
 			    precision = -1;
 			  }
 		      }		    
@@ -825,7 +825,7 @@ printf_builtin (WORD_LIST *list)
 static inline void
 printf_erange (char *s)
 {
-  builtin_error (_("%s: %s"), s, strerror(ERANGE));
+  builtin_error ("%s: %s", s, strerror(ERANGE));
   conversion_error = 1;
 }
 

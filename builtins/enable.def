@@ -233,7 +233,11 @@ enable_builtin (WORD_LIST *list)
 #if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
 	  /* If we try to enable a non-existent builtin, and we have dynamic
 	     loading, try the equivalent of `enable -f name name'. */
+#if defined (RESTRICTED_SHELL)
+	  if (*command && (flags & NFLAG) == 0 && opt == EX_NOTFOUND && restricted == 0)
+#else
 	  if (*command && (flags & NFLAG) == 0 && opt == EX_NOTFOUND)
+#endif
 	    {
 	      int dflags, r;
 	      

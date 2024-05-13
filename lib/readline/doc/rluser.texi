@@ -1229,9 +1229,11 @@ The text between the point and mark is referred to as the @dfn{region}.
 @ftable @code
 @item beginning-of-line (C-a)
 Move to the start of the current line.
+This may also be bound to the Home key on some keyboards.
 
 @item end-of-line (C-e)
 Move to the end of the line.
+This may also be bound to the End key on some keyboards.
 
 @item forward-char (C-f)
 Move forward a character.
@@ -1342,29 +1344,31 @@ through the history as necessary using a non-incremental search
 for a string supplied by the user.
 The search string may match anywhere in a history line.
 
-@item history-search-forward ()
-Search forward through the history for the string of characters
-between the start of the current line and the point.
-The search string must match at the beginning of a history line.
-This is a non-incremental search.
-By default, this command is unbound.
-
 @item history-search-backward ()
 Search backward through the history for the string of characters
 between the start of the current line and the point.
 The search string must match at the beginning of a history line.
 This is a non-incremental search.
-By default, this command is unbound.
+By default, this command is unbound, but may be bound to the Page Down
+key on some keyboards.
 
-@item history-substring-search-forward ()
+@item history-search-forward ()
 Search forward through the history for the string of characters
+between the start of the current line and the point.
+The search string must match at the beginning of a history line.
+This is a non-incremental search.
+By default, this command is unbound, but may be bound to the Page Up
+key on some keyboards.
+
+@item history-substring-search-backward ()
+Search backward through the history for the string of characters
 between the start of the current line and the point.
 The search string may match anywhere in a history line.
 This is a non-incremental search.
 By default, this command is unbound.
 
-@item history-substring-search-backward ()
-Search backward through the history for the string of characters
+@item history-substring-search-forward ()
+Search forward through the history for the string of characters
 between the start of the current line and the point.
 The search string may match anywhere in a history line.
 This is a non-incremental search.
@@ -1506,7 +1510,8 @@ the text at point rather than pushing the text to the right.
 Characters bound to @code{backward-delete-char} replace the character
 before point with a space.
 
-By default, this command is unbound.
+By default, this command is unbound, but may be bound to the Insert
+key on some keyboards.
 
 @end ftable
 

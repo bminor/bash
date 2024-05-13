@@ -297,16 +297,16 @@ sh_wrerror (void)
 #if defined (DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS) && defined (EPIPE)
   if (errno != EPIPE)
 #endif /* DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS && EPIPE */
-  builtin_error (_("write error: %s"), strerror (errno));
+  builtin_error ("%s: %s", _("write error"), strerror (errno));
 }
 
 void
 sh_ttyerror (int set)
 {
   if (set)
-    builtin_error (_("error setting terminal attributes: %s"), strerror (errno));
+    builtin_error ("%s: %s", _("error setting terminal attributes"), strerror (errno));
   else
-    builtin_error (_("error getting terminal attributes: %s"), strerror (errno));
+    builtin_error ("%s: %s", _("error getting terminal attributes"), strerror (errno));
 }
 
 int
@@ -596,9 +596,11 @@ get_working_directory (const char *for_whom)
 #endif
       if (the_current_working_directory == 0)
 	{
-	  fprintf (stderr, _("%s: error retrieving current directory: %s: %s\n"),
-		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
-		   _(bash_getcwd_errstr), strerror (errno));
+	  fprintf (stderr, "%s: %s: %s: %s\n",
+  	   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
+	   _("error retrieving current directory"),
+	   _(bash_getcwd_errstr),
+	   strerror (errno));
 	  return (char *)NULL;
 	}
     }

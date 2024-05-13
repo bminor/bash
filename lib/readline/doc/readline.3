@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Mar 29 11:54:44 EDT 2024
+.\"	Last Change: Sat May 11 12:44:56 EDT 2024
 .\"
-.TH READLINE 3 "2024 March 29" "GNU Readline 8.3"
+.TH READLINE 3 "2024 May 11" "GNU Readline 8.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -895,9 +895,11 @@ The text between the point and mark is referred to as the \fIregion\fP.
 .TP
 .B beginning\-of\-line (C\-a)
 Move to the start of the current line.
+This may also be bound to the Home key on some keyboards.
 .TP
 .B end\-of\-line (C\-e)
 Move to the end of the line.
+This may also be bound to the End key on some keyboards.
 .TP
 .B forward\-char (C\-f)
 Move forward a character.
@@ -1007,12 +1009,14 @@ between the start of the current line and the current cursor
 position (the \fIpoint\fP).
 The search string must match at the beginning of a history line.
 This is a non-incremental search.
+This may be bound to the Page Up key on some keyboards.
 .TP
 .B history\-search\-forward
 Search forward through the history for the string of characters
 between the start of the current line and the point.
 The search string must match at the beginning of a history line.
 This is a non-incremental search.
+This may be bound to the Page Down key on some keyboards.
 .TP
 .B history\-substring\-search\-backward
 Search backward through the history for the string of characters
@@ -1119,15 +1123,18 @@ Capitalize the current (or following) word.  With a negative argument,
 capitalize the previous word, but do not move point.
 .TP
 .B overwrite\-mode
-Toggle overwrite mode.  With an explicit positive numeric argument,
-switches to overwrite mode.  With an explicit non-positive numeric
-argument, switches to insert mode.  This command affects only
-\fBemacs\fP mode; \fBvi\fP mode does overwrite differently.
+Toggle overwrite mode.
+With an explicit positive numeric argument, switches to overwrite mode.
+With an explicit non-positive numeric argument, switches to insert mode.
+This command affects only \fBemacs\fP mode;
+\fBvi\fP mode does overwrite differently.
 Each call to \fIreadline()\fP starts in insert mode.
 In overwrite mode, characters bound to \fBself\-insert\fP replace
 the text at point rather than pushing the text to the right.
 Characters bound to \fBbackward\-delete\-char\fP replace the character
-before point with a space.  By default, this command is unbound.
+before point with a space.
+By default, this command is unbound,
+but may be bound to the Insert key on some keyboards.
 .PD
 .SS Killing and Yanking
 .PD 0

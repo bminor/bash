@@ -274,7 +274,7 @@ bind_builtin (WORD_LIST *list)
       if (rl_read_init_file (initfile) != 0)
 	{
 	  t = printable_filename (initfile, 0);
-	  builtin_error (_("%s: cannot read: %s"), t, strerror (errno));
+	  builtin_error ("%s: %s: %s", t, _("cannot read"), strerror (errno));
 	  if (t != initfile)
 	    free (t);
 	  BIND_RETURN (EXECUTION_FAILURE);
