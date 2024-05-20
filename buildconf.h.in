@@ -22,11 +22,20 @@
 #if !defined (BUILDCONF_H_)
 #define BUILDCONF_H_
 
-#undef HAVE_LOCALE_H
+/* assume C90/POSIX-1992 compilation environment if cross-compiling */
 
-#undef HAVE_UNISTD_H
+/* pacify glibc */
+#ifndef _POSIX_C_SOURCE
+#  define _POSIX_C_SOURCE 2
+#  define _XOPEN_SOURCE 500
+#endif
 
-#undef HAVE_ISBLANK
+#define HAVE_LOCALE_H 1
+
+#define HAVE_UNISTD_H 1
+
+/* Don't assume this; it's from C99; let syntax.h define a replacement */
+/* #undef HAVE_ISBLANK */
 
 #undef PROCESS_SUBSTITUTION
 

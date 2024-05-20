@@ -189,6 +189,12 @@ glob_char_p (const char *s)
   return 0;
 }
 
+static inline int
+glob_quote_char (const char *s)
+{
+  return (glob_char_p (s) || (*s == '%') || (*s == '#'));
+}
+
 /* PATHNAME can contain characters prefixed by CTLESC; this indicates
    that the character is to be quoted.  We quote it here in the style
    that the glob library recognizes.  If flags includes QGLOB_CVTNULL,
@@ -253,7 +259,7 @@ convert_to_backslash:
 
 	  /* We don't have to backslash-quote non-special BRE characters if
 	     we're quoting a glob pattern. */
-	  if (cc != CTLESC && (qflags & QGLOB_REGEXP) == 0 && glob_char_p (pathname+i+1) == 0)
+	  if (cc != CTLESC && (qflags & QGLOB_REGEXP) == 0 && glob_quote_char (pathname+i+1) == 0)
 	    continue;
 
 	  /* If we're in a multibyte locale, don't bother quoting multibyte
@@ -744,10 +750,13 @@ globsort_namecmp (char **s1, char **s2)
   return ((glob_sorttype < SORT_REVERSE) ? strvec_posixcmp (s1, s2) : strvec_posixcmp (s2, s1));
 }
 
+/* Generic transitive comparison of two numeric values for qsort */
+#define GENCMP(a,b) (a < b ? -1 : (a > b ? 1 : 0))
+
 static int
 globsort_sizecmp (struct globsort_t *g1, struct globsort_t *g2)
 {
-  return ((glob_sorttype < SORT_REVERSE) ? g1->st.size - g2->st.size : g2->st.size - g1->st.size);
+  return ((glob_sorttype < SORT_REVERSE) ? GENCMP(g1->st.size, g2->st.size) : GENCMP(g2->st.size, g1->st.size));
 }
 
 static int
@@ -779,8 +788,10 @@ globsort_timecmp (struct globsort_t *g1, struct globsort_t *g2)
 static int
 globsort_blockscmp (struct globsort_t *g1, struct globsort_t *g2)
 {
-  return ((glob_sorttype < SORT_REVERSE) ? g1->st.blocks - g2->st.blocks : g2->st.blocks - g1->st.blocks);
+  return (glob_sorttype < SORT_REVERSE ? GENCMP(g1->st.blocks, g2->st.blocks) : GENCMP(g2->st.blocks, g1->st.blocks));
 }
+
+#undef GENCMP
 
 static struct globsort_t *
 globsort_buildarray (char **array, size_t len)

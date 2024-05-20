@@ -18,9 +18,13 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <buildconf.h>
+/* assume C90/POSIX-1992 compilation environment if cross-compiling */
 
-/* assume C90 compilation environment */
+#ifndef CROSS_COMPILING
+#  include <config.h>
+#else
+#  include <buildconf.h>
+#endif
 
 #include <stdio.h>
 #include <string.h>

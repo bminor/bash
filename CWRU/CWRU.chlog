@@ -9419,4 +9419,38 @@ doc/bash.1,lib/readline/doc/readline.3,lib/readline/doc/rltech.texi
 
 configure
 	- make sure to note in CHANGES that configure now supports
-	  --enable-year-2038 for large time_t
+	  --enable-year2038 for large time_t
+
+				   5/14
+				   ----
+pathexp.c
+	- glob_quote_char: new function, identify characters that should have
+	  backslashes preserved when quoting a glob pattern. Currently has
+	  all the glob_char_p characters plus `%' and `#' for pattern
+	  substitution and removal.
+	  Fixes issue reported by Andreas Schwab <schwab@suse.de>
+
+				   5/16
+				   ----
+pcomplete.c
+	- programmable_completions: change to allow a newly-loaded compspec
+	  (after a completion function returns 124) to be used in more cases
+	  From a patch from Grisha Levit <grishalevit@gmail.com>
+
+mksyntax.c,version.c,support/bashversion.c
+	- include config.h if CROSS_COMPILING is not defined, assuming that
+	  the build host and target host are the same
+
+buildconf.h.in
+	- if cross-compiling, define _POSIX_C_SOURCE and _XOPEN_SOURCE to
+	  get the C90/1003.1-1992 compilation environment we assume
+	  From a report from Grisha Levit <grishalevit@gmail.com>
+
+				   5/17
+				   ----
+pathexp.c
+	- globsort_sizecmp,globsort_blockscmp: replace subtraction with a
+	  generic transitive comparison function to avoid problems with
+	  integer underflow
+	  From a report from Grisha Levit <grishalevit@gmail.com>
+

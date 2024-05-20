@@ -115,7 +115,7 @@ uw_maybe_pop_dollar_vars (void *ignore)
 int
 source_builtin (WORD_LIST *list)
 {
-  int result;
+  int result, search_cwd;
   char *filename, *debug_trap, *x;
 
   if (no_options (list))
@@ -136,6 +136,8 @@ source_builtin (WORD_LIST *list)
       return (EXECUTION_FAILURE);
     }
 #endif
+
+  search_cwd = source_searches_cwd;
 
   filename = (char *)NULL;
   /* XXX -- should this be absolute_pathname? */
@@ -159,7 +161,7 @@ source_builtin (WORD_LIST *list)
     }
   if (filename == 0)
     {
-      if (source_searches_cwd == 0)
+      if (search_cwd == 0)
 	{
 	  x = printable_filename (list->word->word, 0);
 	  builtin_error (_("%s: file not found"), x);

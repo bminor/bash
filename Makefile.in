@@ -836,6 +836,9 @@ pathnames.h:		Makefile $(srcdir)/pathnames.h.in
 	fi
 	@${RM} pathnames.tmp
 
+buildconf.h:	$(srcdir)/buildconf.h.in
+	CONFIG_FILES= CONFIG_HEADERS=buildconf.h $(SHELL) ./config.status
+
 $(SDIR)/bashbug.sh: $(SDIR)/bashbug.sh.in
 	CONFIG_FILES=$(SDIR)/bashbug.sh CONFIG_HEADERS= $(SHELL) ./config.status
 

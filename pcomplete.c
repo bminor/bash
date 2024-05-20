@@ -1564,7 +1564,7 @@ programmable_completions (const char *cmd, const char *word,
 #endif
 
   lastcs = 0;
-  found = count = 0;
+  count = 0;
 
   pcomp_line = rl_line_buffer;
   pcomp_ind = rl_point;
@@ -1574,7 +1574,7 @@ programmable_completions (const char *cmd, const char *word,
 
   do
     {
-      retry = 0;
+      retry = found = 0;
 
       /* We look at the basename of CMD if the full command does not have
 	 an associated COMPSPEC. */

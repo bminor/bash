@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.063])dnl
+AC_REVISION([for Bash 5.3, version 5.064])dnl
 
 define(bashvers, 5.3)
 define(relstatus, alpha)
@@ -1013,9 +1013,6 @@ AC_CHECK_SIZEOF(char *, 4)
 AC_CHECK_SIZEOF(size_t, 4)
 AC_CHECK_SIZEOF(double, 8)
 AC_CHECK_SIZEOF([long long], 8)
-
-AC_CHECK_TYPE(u_int, [unsigned int])
-AC_CHECK_TYPE(u_long, [unsigned long])
 
 BASH_TYPE_BITS16_T
 BASH_TYPE_U_BITS16_T

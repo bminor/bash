@@ -93,7 +93,7 @@ static char rcsid[] = "$Id: inet_addr.c,v 1.5 1996/08/14 03:48:37 drepper Exp $"
  * Ascii internet address interpretation routine.
  * The value returned is in network order.
  */
-u_long
+in_addr_t
 inet_addr(const char *cp)
 {
 	struct in_addr val;
@@ -117,8 +117,8 @@ inet_aton(const char *cp, struct in_addr *addr)
 	register u_bits32_t val;
 	register int base, n;
 	register unsigned char c;
-	u_int parts[4];
-	register u_int *pp = parts;
+	unsigned int parts[4];
+	register unsigned int *pp = parts;
 
 	c = *cp;
 	for (;;) {
