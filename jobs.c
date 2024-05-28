@@ -216,6 +216,9 @@ volatile pid_t last_asynchronous_pid = NO_PID;
 /* The pipeline currently being built. */
 PROCESS *the_pipeline = (PROCESS *)NULL;
 
+/* We are forking this pipeline (process) to perform a command substitution. */
+PROCESS *comsub_pipeline = (PROCESS *)NULL;
+
 /* If this is non-zero, do job control. */
 int job_control = 1;
 
@@ -643,8 +646,9 @@ stop_pipeline (int async, COMMAND *deferred)
       the_pipeline = (PROCESS *)NULL;
       newjob->pgrp = pipeline_pgrp;
 
-      /* Invariant: if the shell is executing a command substitution,
-	 pipeline_pgrp == shell_pgrp. Other parts of the shell assume this. */
+      /* Invariant: if the shell is executing a command substitution when
+	 job control is enabled, pipeline_pgrp == shell_pgrp.
+	 Other parts of the shell assume this. */
       if (pipeline_pgrp != shell_pgrp)
 	pipeline_pgrp = 0;
 
@@ -1473,6 +1477,28 @@ nohup_job (int job_index)
     temp->flags |= J_NOHUP;
 }
 
+PROCESS *
+alloc_process (char *name, pid_t pid)
+{
+  PROCESS *t;
+
+  t = (PROCESS *)xmalloc (sizeof (PROCESS));
+  t->pid = pid;
+  WSTATUS (t->status) = 0;
+  t->running = PS_RUNNING;	/* default */
+  t->command = name;
+  t->next = (PROCESS *)0;
+
+  return (t);
+}
+
+void
+dispose_process (PROCESS *t)
+{
+  FREE (t->command);
+  free (t);
+}
+  
 /* Get rid of the data structure associated with a process chain. */
 int
 discard_pipeline (PROCESS *chain)
@@ -1485,8 +1511,7 @@ discard_pipeline (PROCESS *chain)
   do
     {
       next = this->next;
-      FREE (this->command);
-      free (this);
+      dispose_process (this);
       n++;
       this = next;
     }
@@ -1516,12 +1541,8 @@ add_process (char *name, pid_t pid)
     }
 #endif
 
-  t = (PROCESS *)xmalloc (sizeof (PROCESS));
+  t = alloc_process (name, pid);
   t->next = the_pipeline;
-  t->pid = pid;
-  WSTATUS (t->status) = 0;
-  t->running = PS_RUNNING;
-  t->command = name;
   the_pipeline = t;
 
   if (t->next == 0)
@@ -1542,13 +1563,11 @@ append_process (char *name, pid_t pid, int status, int jid)
 {
   PROCESS *t, *p;
 
-  t = (PROCESS *)xmalloc (sizeof (PROCESS));
-  t->next = (PROCESS *)NULL;
-  t->pid = pid;
+  t = alloc_process (name, pid);
+
   /* set process exit status using offset discovered by configure */
   t->status = (status & 0xff) << WEXITSTATUS_OFFSET;
   t->running = PS_DONE;
-  t->command = name;
 
   js.c_reaped++;	/* XXX */
 
@@ -2267,6 +2286,7 @@ make_child (char *command, int flags)
 	    pipeline_pgrp = mypid;
 
 	  /* Check for running command in backquotes. */
+	  /* XXX - do this if (flags & FORK_NOJOB)? */
 	  if (pipeline_pgrp == shell_pgrp)
 	    ignore_tty_job_signals ();
 	  else
@@ -2280,7 +2300,7 @@ make_child (char *command, int flags)
 	     this would have for the first child) is an error.  Section
 	     B.4.3.3, p. 237 also covers this, in the context of job control
 	     shells. */
-	  if (setpgid (mypid, pipeline_pgrp) < 0)
+	  if ((flags & FORK_NOJOB) == 0 && setpgid (mypid, pipeline_pgrp) < 0)
 	    sys_error (_("child setpgid (%ld to %ld)"), (long)mypid, (long)pipeline_pgrp);
 
 	  /* By convention (and assumption above), if
@@ -2344,7 +2364,8 @@ make_child (char *command, int flags)
 	     the POSIX 1003.1 standard, where it discusses job control and
 	     shells.  It is done to avoid possible race conditions. (Ref.
 	     1003.1 Rationale, section B.4.3.3, page 236). */
-	  setpgid (pid, pipeline_pgrp);
+	  if ((flags & FORK_NOJOB) == 0)
+	    setpgid (pid, pipeline_pgrp);
 	}
       else
 	{
@@ -3964,7 +3985,12 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
       if (child == 0)
 	{
 	  if (WIFEXITED (status) || WIFSIGNALED (status))
-	    js.c_reaped++;
+	    {
+	      js.c_reaped++;
+	      js.c_totreaped++;
+	      if (pid == wpid)		/* but we're waiting for it?? */
+		internal_debug ("waitchld: pid == wpid but child == 0");		
+	    }
 	  continue;
 	}
 

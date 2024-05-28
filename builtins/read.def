@@ -201,6 +201,19 @@ read_builtin_timeout (int fd)
 #endif
 }
 
+void
+reset_rl_instream (FILE *save_instream)
+{
+  fclose (rl_instream);
+  rl_instream = save_instream;
+}
+
+void
+uw_reset_rl_instream (void *fp)
+{
+  reset_rl_instream (fp);
+}
+
 /* Read the value of the shell variables whose names follow.
    The reading is done from the current input stream, whatever
    that may be.  Successive words of the input line are assigned
@@ -613,12 +626,26 @@ read_builtin (WORD_LIST *list)
   save_instream = 0;
   if (edit && fd != 0)
     {
+      int fd2;
+      FILE *fp2;
+
+      if ((fd2 = dup (fd)) < 0 || (fp2 = fdopen (fd2, "r")) == 0)
+	{
+	  builtin_error ("%d: %s", fd, strerror (errno));
+	  if (fd2 >= 0)
+	    close (fd2);
+	  run_unwind_frame ("read_builtin");
+	  return (EXECUTION_FAILURE);
+	}
+
       if (bash_readline_initialized == 0)
 	initialize_readline ();
 
-      unwind_protect_var (rl_instream);
       save_instream = rl_instream;
-      rl_instream = fdopen (fd, "r");	
+      rl_instream = fp2;
+      add_unwind_protect (uw_reset_rl_instream, save_instream);
+
+      fd = fd2;
     }
 #endif
 
@@ -896,7 +923,7 @@ add_char:
 
 #if defined (READLINE)
   if (save_instream)
-    rl_instream = save_instream;	/* can't portably free it */
+    reset_rl_instream (save_instream);
 #endif
 
   discard_unwind_frame ("read_builtin");

@@ -737,12 +737,9 @@ _rl_bracketed_text (size_t *lenp)
     }
   RL_UNSETSTATE (RL_STATE_MOREINPUT);
 
-  if (c >= 0)
-    {
-      if (len == cap)
-	buf = xrealloc (buf, cap + 1);
-      buf[len] = '\0';
-    }
+  if (len == cap)
+    buf = xrealloc (buf, cap + 1);
+  buf[len] = '\0';
 
   if (lenp)
     *lenp = len;

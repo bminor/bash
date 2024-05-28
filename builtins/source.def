@@ -154,7 +154,10 @@ source_builtin (WORD_LIST *list)
 #else
       if (posixly_correct == 0 && (spath = path_value ("BASH_SOURCE_PATH", 1)))
 #endif
-	filename = find_in_path (list->word->word, spath, FS_READABLE);
+	{
+	  filename = find_in_path (list->word->word, spath, FS_READABLE);
+	  search_cwd = 0;
+	}
       else
 #endif
 	filename = find_path_file (list->word->word);

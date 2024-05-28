@@ -9454,3 +9454,70 @@ pathexp.c
 	  integer underflow
 	  From a report from Grisha Levit <grishalevit@gmail.com>
 
+				   5/20
+				   ----
+lib/readline/kill.c
+	- _rl_bracketed_text: make sure buf is null-terminated even if
+	  rl_read_key() returns an error
+	  From a report from Grisha Levit <grishalevit@gmail.com>
+
+builtins/read.def
+	- read_builtin: if -u and -e are both supplied, dup the file descriptor
+	  supplied as an argument to -u and use it in the new FILE * to pass
+	  to readline as rl_instream. Works around an android problem with
+	  stdio and application-managed file descriptors
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   5/21
+				   ----
+lib/sh/spell.c
+	- mindist: don't check best unless we set it
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+jobs.c
+	- make_child: if FORK_NOJOB is in the flags argument, don't call
+	  setpgid to set the child's process group in either the parent or
+	  child
+	- alloc_process,dispose_process: allocate and deallocate a PROCESS;
+	  changed callers
+
+subst.c
+	- command_substitute: call cleanup_the_pipeline after waiting for
+	  the command substitution process, since we allocated it
+
+				   5/22
+				   ----
+lib/readline/text.c
+	- rl_execute_named_command: fix a leak if the command name is null or
+	  the bound function doesn't return (rl_abort)
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+bashline.c
+	- command_word_completion_function: free directory_part if it's left
+	  over from a previous completion
+	- command_subst_completion_function: free contents of match list left
+	  over from previous completion
+	- bash_spell_correct_shellword: free text if it's "" before returning
+	- build_history_completion_array: only call qsort if there's actually
+	  something in the array to sort
+	  Report and patches from Grisha Levit <grishalevit@gmail.com>
+	- bash_spell_correct_shellword: fix bug where we would correct the
+	  previous word if we start on the first character of a word
+	- bash_spell_correct_shellword: make negative argument counts work
+	  backwards, correcting words before point
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   5/23
+				   ----
+lib/readline/text.c
+	- rl_change_case: if mbrtowc returns -1 or -2, jump to changing case
+	  for a single character, since _rl_find_next_mbchar_internal() will
+	  treat an invalid multibyte character as a sequence of bytes
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   5/25
+				   ----
+execute_cmd.c
+	- shell_execve: fix typo in code that chops \r off the end of the #!
+	  interpreter
+	  Report and fix from Collin Funk <collin.funk1@gmail.com>

@@ -1328,13 +1328,44 @@ bash_transpose_shellwords (int count, int key)
   return 0;
 }
 
-/* Directory name spelling correction on the current word (not shellword).
-   COUNT > 1 is not exactly correct yet. */
+/* Directory name spelling correction on the current or previous shellword. */
 static int
 bash_spell_correct_shellword (int count, int key)
 {
-  int wbeg, wend;
+  int wbeg, wend, n, p;
   char *text, *newdir;
+
+  /* If we have a negative count, move back that many shellwords and then
+     move forward. Do it one at a time so we get an accurate count of the
+     number of words we moved back -- we only want to correct that many. */
+  if (count < 0)
+    {
+      n = 0;
+      while (rl_point > 0 && count++)
+	{
+	  p = rl_point;
+	  bash_backward_shellword (1, key);
+	  /* We probably moved to column 0 with leading spaces on the line */
+	  if (rl_point == 0 && WORDDELIM (rl_line_buffer[rl_point]))
+	    {
+	      rl_point = p;
+	      break;
+	    }
+	  n++;
+	}
+      count = n;
+    }
+  else if (WORDDELIM (rl_line_buffer[rl_point]))	/* count > 0 */
+    {
+      /* between words with a positive count, move forward to word start */
+      while (rl_point < rl_end && WORDDELIM (rl_line_buffer[rl_point]))
+        rl_point++;		/* word delims are single-byte characters */
+    }
+    
+  /* First make sure we're at the end of the word we want to begin with
+     so the initial bash_backward_shellword works right. */
+  if (rl_point < rl_end && WORDDELIM (rl_line_buffer[rl_point]) == 0)
+    bash_forward_shellword (1, key);
 
   while (count)
     {
@@ -1348,7 +1379,10 @@ bash_spell_correct_shellword (int count, int key)
 
       text = rl_copy_text (wbeg, wend);
       if (text == 0 || *text == 0)
-	break;
+	{
+	  FREE (text);
+	  break;
+	}
 
       newdir = dirspell (text);
       if (newdir)
@@ -1371,7 +1405,7 @@ bash_spell_correct_shellword (int count, int key)
       count--;
 
       if (count)
-	bash_forward_shellword (1, key);		/* XXX */
+	bash_forward_shellword (1, key);		/* XXX */	
     }
 
   return 0;
@@ -2002,6 +2036,12 @@ command_word_completion_function (const char *hint_text, int state)
 	  glob_matches = (char **)NULL;
 	}
 
+      if (directory_part)
+	{
+	  free (directory_part);
+	  directory_part = (char *)NULL;
+	}
+
       globpat = completion_glob_pattern (hint_text);
 
       /* If this is an absolute program name, do not check it against
@@ -2451,7 +2491,7 @@ command_subst_completion_function (const char *text, int state)
       filename_text = savestring (text);
       if (matches)
 	{
-	  free (matches);
+	  strvec_dispose (matches);
 	  matches = (char **)NULL;
 	}
 
@@ -3716,7 +3756,7 @@ build_history_completion_array (void)
 	}
 
       /* Sort the complete list of tokens. */
-      if (dabbrev_expand_active == 0)
+      if (harry_len > 1 && dabbrev_expand_active == 0)
         qsort (history_completion_array, harry_len, sizeof (char *), (QSFUNC *)strvec_strcmp);
     }
 }

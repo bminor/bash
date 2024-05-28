@@ -751,7 +751,9 @@ globsort_namecmp (char **s1, char **s2)
 }
 
 /* Generic transitive comparison of two numeric values for qsort */
-#define GENCMP(a,b) (a < b ? -1 : (a > b ? 1 : 0))
+/* #define GENCMP(a,b) ((a) < (b) ? -1 : ((a) > (b) ? 1 : 0)) */
+/* A clever idea from gnulib */
+#define GENCMP(a,b) (((a) > (b)) - ((a) < (b)))
 
 static int
 globsort_sizecmp (struct globsort_t *g1, struct globsort_t *g2)

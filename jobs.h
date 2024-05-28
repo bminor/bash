@@ -210,6 +210,7 @@ struct procchain {
 #define FORK_ASYNC	1		/* background process */
 #define FORK_NOJOB	2		/* don't put process in separate pgrp */
 #define FORK_NOTERM	4		/* don't give terminal to any pgrp */
+#define FORK_COMSUB	8		/* command or process substitution */
 
 /* System calls. */
 #if !defined (HAVE_UNISTD_H)
@@ -239,6 +240,8 @@ extern void save_pipeline (int);
 extern PROCESS *restore_pipeline (int);
 extern void start_pipeline (void);
 extern int stop_pipeline (int, COMMAND *);
+extern PROCESS *alloc_process (char *, pid_t);
+extern void dispose_process (PROCESS *);
 extern int discard_pipeline (PROCESS *);
 extern void append_process (char *, pid_t, int, int);
 

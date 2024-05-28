@@ -7278,7 +7278,10 @@ command_substitute (char *string, int quoted, int flags)
      for example). */
   if ((subshell_environment & (SUBSHELL_FORK|SUBSHELL_PIPE)) == 0)
     pipeline_pgrp = shell_pgrp;
+  /* this can happen if we're performing word expansion in the second or
+     subsequent commands in a pipeline */
   cleanup_the_pipeline ();
+  /* at this point, the_pipeline is NULL */
 #endif /* JOB_CONTROL */
 
   old_async_pid = last_asynchronous_pid;
@@ -7490,6 +7493,11 @@ command_substitute (char *string, int quoted, int flags)
 #endif /* JOB_CONTROL */
 
       CHECK_TERMSIG;
+
+#if defined (JOB_CONTROL)
+      /* this is the pipeline we allocated for this command substitution */
+      cleanup_the_pipeline ();
+#endif
 
       ret = alloc_word_desc ();
       ret->word = istring;

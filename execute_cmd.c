@@ -1392,13 +1392,13 @@ print_formatted_time (FILE *fp, char *format,
 static int
 time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, struct fd_bitmap *fds_to_close)
 {
-  int rv, posix_time, old_flags, nullcmd, code;
+  int rv, posix_time, nullcmd, code;
   time_t rs, us, ss;		/* seconds */
   long rsf, usf, ssf;		/* microseconds */
   int cpu;
   char *time_format;
   volatile procenv_t save_top_level;
-  volatile int old_subshell;
+  volatile int old_subshell, old_flags;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   struct timeval real, user, sys;
@@ -6128,7 +6128,7 @@ shell_execve (char *command, char **args, char **env)
 	      interp = getinterp (sample, sample_len, (int *)NULL);
 	      ilen = strlen (interp);
 	      errno = i;
-	      if (interp > 0 && interp[ilen - 1] == '\r')
+	      if (ilen > 0 && interp[ilen - 1] == '\r')
 		{
 		  interp = xrealloc (interp, ilen + 2);
 		  interp[ilen - 1] = '^';
