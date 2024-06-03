@@ -2295,7 +2295,7 @@ skip_to_delim (const char *string, int start, const char *delims, int flags)
 	    CQ_RETURN(si);
 
 	  if (string[i+1] == LPAREN)
-	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND|completeflag); /* ) */
+	    temp = extract_command_subst (string, &si, SX_NOALLOC|SX_COMMAND|completeflag);
 	  else
 	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC|completeflag);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
@@ -3450,7 +3450,7 @@ do_compound_assignment (const char *name, char *value, int flags)
     {
       v = find_variable (name);		/* follows namerefs */
       newname = (v == 0) ? nameref_transform_name (name, flags) : v->name;
-      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+      if (v && ASSIGN_DISALLOWED (v, flags))
 	{
 	  if (readonly_p (v))
 	    err_readonly (name);
@@ -3476,7 +3476,7 @@ do_compound_assignment (const char *name, char *value, int flags)
 	v = 0;
       if (v == 0)
         v = find_global_variable (name);
-      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+      if (v && ASSIGN_DISALLOWED (v, flags))
 	{
 	  if (readonly_p (v))
 	    err_readonly (name);
@@ -3502,7 +3502,7 @@ do_compound_assignment (const char *name, char *value, int flags)
   else
     {
       v = assign_array_from_string (name, value, flags);
-      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+      if (v && ASSIGN_DISALLOWED (v, flags))
 	{
 	  if (readonly_p (v))
 	    err_readonly (name);
@@ -8172,7 +8172,7 @@ parameter_brace_expand_rhs (char *name, char *value,
 #endif /* ARRAY_VARS */
   v = bind_variable (vname, t1, 0);
 
-  if (v == 0 || readonly_p (v) || noassign_p (v))	/* expansion error  */
+  if (v == 0 || ASSIGN_DISALLOWED (v, 0))		/* expansion error */
     {
       if ((v == 0 || readonly_p (v)) && interactive_shell == 0 && posixly_correct)
 	{

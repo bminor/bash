@@ -9521,3 +9521,72 @@ execute_cmd.c
 	- shell_execve: fix typo in code that chops \r off the end of the #!
 	  interpreter
 	  Report and fix from Collin Funk <collin.funk1@gmail.com>
+
+				   5/28
+				   ----
+execute_cmd.c
+	- time_command: only restore command->flags if we haven't longjmped
+	  Report from Michael Maurer <michael.maurer@univie.ac.at> and
+	  Grisha Levit <grishalevit@gmail.com>
+
+subst.c
+	- skip_to_delim: if we're not skipping over command substitutions
+	  lexically, call extract_command_subst instead of using the old
+	  extract_delimited_string
+	  Fixes bug reported by Oguz <oguzismailuysal@gmail.com>
+
+execute_cmd.c
+	- execute_arith_for_command: handle the extremely unlikely case that
+	  the step or test expressions execute `break' or `continue' in a
+	  nofork command substitution
+	  Report from Oguz <oguzismailuysal@gmail.com>
+
+				   5/29
+				   ----
+lib/readline/complete.c
+	- compute_lcd_of_matches: if we have multiple matches that compare
+	  equally when using case-insensitive completion, but are different
+	  lengths due to the presence of multibyte characters, use the
+	  shorter match as the common prefix to avoid overflow
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   5/30
+				   ----
+lib/readline/text.c
+	- _rl_readstr_init: don't call rl_maybe_replace_line since we're not
+	  actually moving off this history line
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+builtins/read.def
+	- read_builtin: free ifs_chars in more return code paths
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   5/31
+				   ----
+quit.h
+	- ZRESET: new macro, calls zreset() if interrupt_state is non-zero
+
+lib/sh/zread.c
+	- zread: if read returns -1/EINTR, and we're executing a builtin,
+	  call zreset just in case
+
+builtins/read.def
+	- read_builtin: if read returns > 0 (partial read) but interrupt_state
+	  is non-zero, we're going to call throw_to_top_level, so call
+	  ZRESET before that happens
+	  Report from Oguz <oguzismailuysal@gmail.com>
+	- read_builtin: if zread/zreadc/zreadintr/zreadcintr return -1/EINTR,
+	  make sure we call ZRESET in case zread did not
+
+variables.h
+	- ASSIGN_DISALLOWED: macro that encapsulates when an assignment to
+	  SHELL_VAR *v with flags f will be disallowed and fail
+
+arrayfunc.c,execute_cmd.c,expr.c,redir.c,subst.c,variables.c
+builtins/delare.def,builtins/getopts.def,builtins/printf.def,builtins/read.def
+	- use ASSIGN_DISALLOWED where appropriate
+
+arrayfunc.c
+	- assign_array_element_internal: if the assignment failed, as tested by
+	  ASSIGN_DISALLOWED, free the assoc array key we allocated
+	  Report from Grisha Levit <grishalevit@gmail.com>

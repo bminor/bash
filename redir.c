@@ -1417,7 +1417,7 @@ redir_varassign (REDIRECT *redir, int fd)
 
   w = redir->redirector.filename;
   v = bind_var_to_int (w->word, fd, 0);
-  if (v == 0 || readonly_p (v) || noassign_p (v))
+  if (v == 0 || ASSIGN_DISALLOWED (v, 0))
     return BADVAR_REDIRECT;
 
   stupidly_hack_special_variables (w->word);

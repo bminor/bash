@@ -276,7 +276,7 @@ bind_array_variable (const char *name, arrayind_t ind, const char *value, int fl
     }
   if (entry == (SHELL_VAR *) 0)
     entry = make_new_array_variable (name);
-  else if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
+  else if (ASSIGN_DISALLOWED (entry, flags))
     {
       if (readonly_p (entry))
 	err_readonly (name);
@@ -298,7 +298,7 @@ bind_array_element (SHELL_VAR *entry, arrayind_t ind, char *value, int flags)
 SHELL_VAR *
 bind_assoc_variable (SHELL_VAR *entry, const char *name, char *key, const char *value, int flags)
 {
-  if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
+  if (ASSIGN_DISALLOWED (entry, flags))
     {
       if (readonly_p (entry))
 	err_readonly (name);
@@ -406,6 +406,9 @@ assign_array_element_internal (SHELL_VAR *entry, const char *name, char *vname,
       if (estatep)
 	nkey = savestring (akey);	/* assoc_insert/assoc_replace frees akey */
       entry = bind_assoc_variable (entry, vname, akey, value, flags);
+      /* If we didn't perform the assignment, free the key we allocated */
+      if (entry == 0 || (ASSIGN_DISALLOWED (entry, flags)))
+	FREE (akey);
       if (estatep)
 	{
 	  estatep->type = ARRAY_ASSOC;
@@ -476,7 +479,7 @@ find_or_make_array_variable (const char *name, int flags)
 
   if (var == 0)
     var = (flags & 2) ? make_new_assoc_variable (name) : make_new_array_variable (name);
-  else if ((flags & 1) && (readonly_p (var) || noassign_p (var)))
+  else if ((flags & 1) && ASSIGN_DISALLOWED(var, 0))
     {
       if (readonly_p (var))
 	err_readonly (name);

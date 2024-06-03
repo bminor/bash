@@ -879,7 +879,7 @@ restart_new_var_name:
 	  NEXT_VARIABLE ();
 	}
       /* Cannot use declare to assign value to readonly or noassign variable. */
-      else if ((readonly_p (var) || noassign_p (var)) && offset)
+      else if (ASSIGN_DISALLOWED (var, 0) && offset)
 	{
 	  if (readonly_p (var))
 	    {

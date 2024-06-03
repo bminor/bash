@@ -41,12 +41,15 @@ extern int errno;
 #  define ZBUFSIZ 4096
 #endif
 
-extern int executing_builtin;
+extern int executing_builtin, interrupt_state;
 
 extern void check_signals_and_traps (void);
 extern void check_signals (void);
 extern int signal_is_trapped (int);
 extern int read_builtin_timeout (int);
+
+/* Forward declarations */
+void zreset (void);
 
 /* Read LEN bytes from FD into BUF.  Retry the read on EINTR.  Any other
    error causes the loop to break. */
@@ -66,7 +69,11 @@ zread (int fd, char *buf, size_t len)
       /* XXX - bash-5.0 */
       /* We check executing_builtin and run traps here for backwards compatibility */
       if (executing_builtin)
-	check_signals_and_traps ();	/* XXX - should it be check_signals()? */
+	{
+	  if (interrupt_state)
+	    zreset ();
+	  check_signals_and_traps ();	/* XXX - should it be check_signals()? */
+	}
       else
 	check_signals ();
       errno = t;

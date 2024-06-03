@@ -83,4 +83,9 @@ do { \
     } \
 } while (0)
 
+#define ZRESET() \
+  do { \
+    if (interrupt_state) zreset (); \
+  } while (0)
+
 #endif /* _QUIT_H_ */

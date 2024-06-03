@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.064])dnl
+AC_REVISION([for Bash 5.3, version 5.065])dnl
 
 define(bashvers, 5.3)
 define(relstatus, alpha)
@@ -870,7 +870,8 @@ AC_CHECK_FUNCS(bcopy bzero clock_gettime confstr faccessat fnmatch \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
 		imaxdiv memmove pathconf putenv raise random regcomp regexec \
 		setenv setlinebuf setlocale setvbuf siginterrupt strchr \
-		sysconf syslog tcgetattr times ttyname tzset unsetenv)
+		sysconf syslog tcgetattr tcgetwinsize tcsetwinsize \
+		times ttyname tzset unsetenv)
 
 AC_CHECK_FUNCS(vasprintf asprintf)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)

@@ -111,7 +111,7 @@ extern int errno;
 	  SHELL_VAR *v; \
 	  v = builtin_bind_variable  (vname, vbuf, bindflags); \
 	  stupidly_hack_special_variables (vname); \
-	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
+	  if (v == 0 || ASSIGN_DISALLOWED (v, 0)) \
 	    retval = EXECUTION_FAILURE; \
 	  if (vbsize > 4096) \
 	    { \
@@ -334,7 +334,7 @@ printf_builtin (WORD_LIST *list)
       SHELL_VAR *v;
       v = builtin_bind_variable (vname, "", 0);
       stupidly_hack_special_variables (vname);
-      return ((v == 0 || readonly_p (v) || noassign_p (v)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+      return ((v == 0 || ASSIGN_DISALLOWED (v, 0)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
     }
 
   /* If the format string is empty after preprocessing, return immediately. */

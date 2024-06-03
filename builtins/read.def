@@ -635,6 +635,8 @@ read_builtin (WORD_LIST *list)
 	  if (fd2 >= 0)
 	    close (fd2);
 	  run_unwind_frame ("read_builtin");
+	  if (free_ifs)
+	    free (ifs_chars);
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -746,6 +748,7 @@ read_builtin (WORD_LIST *list)
 	  x = errno;
 	  if (retval < 0 && errno == EINTR)
 	    {
+	      ZRESET ();
 	      check_signals ();		/* in case we didn't call zread via zreadc */
 	      lastsig = LASTSIG();
 	      if (lastsig == 0)
@@ -763,6 +766,10 @@ read_builtin (WORD_LIST *list)
 	  errno = x;	/* preserve it for the error message below */
 	  break;
 	}
+
+      /* Even if read returns a partial buffer, if we got an interrupt we're
+	 going to throw it away. */
+      ZRESET();
 
       QUIT;		/* in case we didn't call check_signals() */
 #if defined (READLINE)
@@ -894,6 +901,8 @@ add_char:
       if (errno != EINTR)
 	builtin_error ("%d: %s: %s", fd, _("read error"), strerror (errno));
       run_unwind_frame ("read_builtin");
+      if (free_ifs)
+	free (ifs_chars);
       return ((t_errno != EINTR) ? EXECUTION_FAILURE : 128+lastsig);
     }
 
@@ -943,6 +952,8 @@ assign_vars:
       if (var == 0)
 	{
 	  free (input_string);
+	  if (free_ifs)
+	    free (ifs_chars);
 	  return EXECUTION_FAILURE;	/* readonly or noassign */
 	}
 
@@ -957,6 +968,8 @@ assign_vars:
 	  dispose_words (alist);
 	}
       free (input_string);
+      if (free_ifs)
+	free (ifs_chars);
       return (retval);
     }
 #endif /* ARRAY_VARS */ 
@@ -987,12 +1000,14 @@ assign_vars:
 	}
       else
 	var = bind_variable ("REPLY", input_string, 0);
-      if (var == 0 || readonly_p (var) || noassign_p (var))
+      if (var == 0 || ASSIGN_DISALLOWED (var, 0))
 	retval = EX_MISCERROR;
       else
 	VUNSETATTR (var, att_invisible);
 
       free (input_string);
+      if (free_ifs)
+	free (ifs_chars);
       return (retval);
     }
 
@@ -1017,6 +1032,8 @@ assign_vars:
 	{
 	  sh_invalidid (varname);
 	  free (orig_input_string);
+	  if (free_ifs)
+	    free (ifs_chars);
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -1049,6 +1066,8 @@ assign_vars:
       if (var == 0)
 	{
 	  free (orig_input_string);
+	  if (free_ifs)
+	    free (ifs_chars);
 	  return (EX_MISCERROR);
 	}
 
@@ -1066,6 +1085,8 @@ assign_vars:
     {
       sh_invalidid (list->word->word);
       free (orig_input_string);
+      if (free_ifs)
+	free (ifs_chars);
       return (EXECUTION_FAILURE);
     }
 
@@ -1123,8 +1144,7 @@ bind_read_variable (char *name, char *value, int flags)
   SHELL_VAR *v;
 
   v = builtin_bind_variable (name, value, flags);
-  return (v == 0 ? v
-		 : ((readonly_p (v) || noassign_p (v)) ? (SHELL_VAR *)NULL : v));
+  return ((v == 0 || ASSIGN_DISALLOWED (v, 0)) ? (SHELL_VAR *)NULL : v);
 }
 
 #if defined (HANDLE_MULTIBYTE)

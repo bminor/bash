@@ -3126,7 +3126,7 @@ bind_variable_internal (const char *name, const char *value, HASH_TABLE *table, 
     }
   else if (entry->assign_func)	/* array vars have assign functions now */
     {
-      if ((readonly_p (entry) && (aflags & ASS_FORCE) == 0) || noassign_p (entry))
+      if (ASSIGN_DISALLOWED (entry, aflags))
 	{
 	  if (readonly_p (entry))
 	    err_readonly (name_cell (entry));
@@ -3148,7 +3148,7 @@ bind_variable_internal (const char *name, const char *value, HASH_TABLE *table, 
   else
     {
 assign_value:
-      if ((readonly_p (entry) && (aflags & ASS_FORCE) == 0) || noassign_p (entry))
+      if (ASSIGN_DISALLOWED (entry, aflags))
 	{
 	  if (readonly_p (entry))
 	    err_readonly (name_cell (entry));
@@ -3581,8 +3581,8 @@ assign_in_env (const WORD_DESC *word, int flags)
 	}
       else
         newname = name_cell (var);	/* no-op if not nameref */
-	  
-      if (var && (readonly_p (var) || noassign_p (var)))
+
+      if (var && ASSIGN_DISALLOWED (var, 0))
 	{
 	  if (readonly_p (var))
 	    err_readonly (name);

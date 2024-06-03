@@ -238,6 +238,10 @@ typedef struct _vlist {
 /* Special value for nameref with invalid value for creation or assignment */
 extern SHELL_VAR nameref_invalid_value;
 #define INVALID_NAMEREF_VALUE	(void *)&nameref_invalid_value
+
+/* Assignment statements */
+#define ASSIGN_DISALLOWED(v, f) \
+  ((readonly_p (v) && (f&ASS_FORCE) == 0) || noassign_p (v))
 	
 /* Stuff for hacking variables. */
 typedef int sh_var_map_func_t (SHELL_VAR *);

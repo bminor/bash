@@ -336,7 +336,7 @@ expr_bind_variable (const char *lhs, const char *rhs)
   aflags = 0;
 #endif
   v = bind_int_variable (lhs, rhs, aflags);
-  if (v && (readonly_p (v) || noassign_p (v)))
+  if (v && ASSIGN_DISALLOWED (v, 0))
     sh_longjmp (evalbuf, 1);	/* variable assignment error */
   stupidly_hack_special_variables (lhs);
 }

@@ -1453,7 +1453,8 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
     rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
   COPY_PROCENV (save_top_level, top_level);
 
-  command->flags = old_flags;
+  if (code == NOT_JUMPED)
+    command->flags = old_flags;
 
   /* If we're jumping in a different subshell environment than we started,
      don't bother printing timing stats, just keep longjmping back to the
@@ -2366,7 +2367,7 @@ coproc_setvars (struct coproc *cp)
 	}
     }
 
-  if (v && (readonly_p (v) || noassign_p (v)))
+  if (v && ASSIGN_DISALLOWED (v, 0))
     {
       if (readonly_p (v))
 	err_readonly (cp->c_name);
@@ -3040,7 +3041,7 @@ execute_for_command (FOR_COM *for_command)
       else
 	v = bind_variable (identifier, list->word->word, 0);
 
-      if (v == 0 || readonly_p (v) || noassign_p (v))
+      if (v == 0 || ASSIGN_DISALLOWED (v, 0))
 	{
 	  line_number = save_line_number;
 	  if (v && readonly_p (v) && interactive_shell == 0 && posixly_correct)
@@ -3212,6 +3213,21 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
       line_number = arith_lineno;
       expresult = eval_arith_for_expr (arith_for_command->test, &expok);
       line_number = save_lineno;
+
+      /* If the step or test expressions execute `break' or `continue' in a
+	 nofork command substitution or by some other means, break the loop
+	 here. */
+      if (breaking)
+	{
+	  breaking--;
+	  break;
+	}
+      if (continuing)
+	{
+	  continuing--;
+	  if (continuing)
+	    break;
+	}
 
       if (expok == 0)
 	break;
@@ -3534,7 +3550,7 @@ execute_select_command (SELECT_COM *select_command)
 	}
 
       v = bind_variable (identifier, selection, 0);
-      if (v == 0 || readonly_p (v) || noassign_p (v))
+      if (v == 0 || ASSIGN_DISALLOWED (v, 0))
 	{
 	  if (v && readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
@@ -6263,7 +6279,7 @@ execute_intern_function (WORD_DESC *name, FUNCTION_DEF *funcdef)
     }
 
   var = find_function (name->word);
-  if (var && (readonly_p (var) || noassign_p (var)))
+  if (var && ASSIGN_DISALLOWED (var, 0))
     {
       if (readonly_p (var))
 	internal_error (_("%s: readonly function"), var->name);
