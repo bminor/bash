@@ -3472,6 +3472,7 @@ do_compound_assignment (const char *name, char *value, int flags)
   else if (mkglobal && variable_context)
     {
       v = chklocal ? find_variable (name) : 0;
+      /* XXX - if we want to make chklocal search previous scopes, change here 2024/06/04 */
       if (v && (local_p (v) == 0 || v->context != variable_context))
 	v = 0;
       if (v == 0)
@@ -12144,6 +12145,7 @@ finished_with_string:
 		 return, we expect to be able to split the results, but the
 		 space separation means the right split doesn't happen. */
 	      tword->word = string_list (list);	
+	      dispose_words (list);
 	    }
 	  else
 	    tword->word = istring;
@@ -12959,7 +12961,7 @@ expand_declaration_argument (WORD_LIST *tlist, WORD_LIST *wcmd)
   if (tlist->word->flags & W_ASSNGLOBAL)
     omap['g'] = 1;
   if (tlist->word->flags & W_CHKLOCAL)
-    omap['G'] = 1;
+    omap['G'] = 1;		/* internal, undocumented */
 
   /* If we have special handling note the integer attribute and others
      that transform the value upon assignment.  What we do is take all

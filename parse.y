@@ -1103,6 +1103,7 @@ coproc:		COPROC shell_command
 			{
 			  $$ = make_coproc_command ($2->word, $3);
 			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+			  dispose_word ($2);
 			}
 	|	COPROC WORD shell_command redirection_list
 			{
@@ -1120,6 +1121,7 @@ coproc:		COPROC shell_command
 			    tc->redirects = $4;
 			  $$ = make_coproc_command ($2->word, $3);
 			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
+			  dispose_word ($2);
 			}
 	|	COPROC simple_command
 			{
@@ -3518,15 +3520,20 @@ read_token (int command)
 #if defined (COND_COMMAND)
   if ((parser_state & (PST_CONDCMD|PST_CONDEXPR)) == PST_CONDCMD)
     {
+      COMMAND *cond_command;
       parser_state &= ~PST_CMDBLTIN;
       cond_lineno = line_number;
       parser_state |= PST_CONDEXPR;
-      yylval.command = parse_cond_command ();
+      cond_command = parse_cond_command ();
       if (cond_token != COND_END)
 	{
 	  cond_error ();
+	  if (cond_token == WORD)
+	    dispose_word (yylval.word);
+	  dispose_command (cond_command);
 	  return (-1);
 	}
+      yylval.command = cond_command;
       token_to_read = COND_END;
       parser_state &= ~(PST_CONDEXPR|PST_CONDCMD);
       return (COND_CMD);
@@ -5042,7 +5049,7 @@ cond_term (void)
   else if (tok == BANG || (tok == WORD && (yylval.word->word[0] == '!' && yylval.word->word[1] == '\0')))
     {
       if (tok == WORD)
-	dispose_word (yylval.word);	/* not needed */
+	dispose_word (yylval.word);	/* word not needed */
       term = cond_term ();
       if (term)
 	term->flags ^= CMD_INVERT_RETURN;
@@ -5118,6 +5125,8 @@ cond_term (void)
 	  else
 	    parser_error (line_number, _("conditional binary operator expected"));
 	  dispose_cond_node (tleft);
+	  if (tok == WORD)
+	    dispose_word (yylval.word);
 	  COND_RETURN_ERROR ();
 	}
 

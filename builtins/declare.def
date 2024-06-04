@@ -156,6 +156,7 @@ declare_find_variable (const char *name, int mkglobal, int chklocal)
       var = find_variable (name);
       if (var && local_p (var) && var->context == variable_context)
 	return var;
+      /* XXX - add check for previous scopes here if wanted 6/4/2024 */
       return (find_global_variable (name));
     }
   else

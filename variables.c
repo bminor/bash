@@ -3507,7 +3507,10 @@ bind_function_def (const char *name, FUNCTION_DEF *value, int flags)
   if (entry && (flags & 1))
     {
       dispose_function_def_contents (entry);
+      cmd = value->command;
+      value->command = 0;
       entry = copy_function_def_contents (value, entry);
+      value->command = cmd;
     }
   else if (entry)
     return;

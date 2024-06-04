@@ -9590,3 +9590,39 @@ arrayfunc.c
 	- assign_array_element_internal: if the assignment failed, as tested by
 	  ASSIGN_DISALLOWED, free the assoc array key we allocated
 	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				    6/3
+				    ---
+variables.c
+	- bind_function_def: don't copy the command tree if we're overwriting
+	  a function definition; after function binding, the function_def
+	  struct never uses the saved command anyway
+	  From a report and patch by Koichi Murase <myoga.murase@gmail.com>
+
+parse.y
+	- make sure to free WORD in coproc WORD COMMAND after creating the
+	  coproc struct
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+builtins/exec.def
+	- exec_builtin: we don't need to set args to NULL; if shell_execve
+	  reallocates args to add more items at the front, it has committed
+	  to longjmp back to the top level
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+subst.c
+	- expand_word_internal: dispose of the list used for $@ if we're not
+	  splitting and save the space-separated list back to tword->word
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+parse.y
+	- read_token: if we try to parse a conditional command and get a syntax
+	  error, make sure to dispose of the partial command we created
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+	- read_token: if we try to parse a conditional command and get a syntax
+	  error because we read an unexpected WORD, dispose of the WORD_DESC
+	  before returning -1
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+	- cond_term: if we read a WORD where we expect something else, dispose
+	  of the WORD_DESC before returning COND_ERROR
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
