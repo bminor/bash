@@ -81,11 +81,11 @@ bash: line 1: PWD: readonly variable
 bash: line 1: OLDPWD: readonly variable
 1
 ./errors.tests: line 236: .: filename argument required
-.: usage: . filename [arguments]
+.: usage: . [-p path] filename [arguments]
 ./errors.tests: line 237: source: filename argument required
-source: usage: source filename [arguments]
+source: usage: source [-p path] filename [arguments]
 ./errors.tests: line 240: .: -i: invalid option
-.: usage: . filename [arguments]
+.: usage: . [-p path] filename [arguments]
 ./errors.tests: line 243: set: -q: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
 ./errors.tests: line 246: enable: sh: not a shell builtin
@@ -141,7 +141,7 @@ set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
 ./errors.tests: line 348: xx: readonly variable
 1
 ./errors1.sub: line 14: .: -i: invalid option
-.: usage: . filename [arguments]
+.: usage: . [-p path] filename [arguments]
 ./errors1.sub: line 22: shift: -4: shift count out of range
 ./errors1.sub: line 23: shift: -4: shift count out of range
 ./errors1.sub: line 27: break: -1: loop count out of range
@@ -255,7 +255,7 @@ ok 6
 ./errors8.sub: line 16: /notthere: No such file or directory
 ok 7
 ./errors8.sub: line 17: .: -x: invalid option
-.: usage: . filename [arguments]
+.: usage: . [-p path] filename [arguments]
 ok 8
 DEBUG
 ./errors9.sub: line 6: [[: ++: arithmetic syntax error: operand expected (error token is "+")

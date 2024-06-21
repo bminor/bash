@@ -139,6 +139,19 @@ abc
 def
 ghi
 ok
+./source8.sub: line 36: improbable-filename: No such file or directory
+./source8.sub: line 37: improbable-filename: No such file or directory
+an improbable filename
+an improbable filename
+an improbable filename
+an improbable filename
+file in the current directory
+./source8.sub: line 51: .: cwd-filename: file not found
+file in the current directory
+bash: line 1: .: cwd-filename: file not found
+bash: line 1: .: cwd-filename: file not found
+file in the current directory
+file in the current directory
 AVAR
 foo
 foo
@@ -149,11 +162,11 @@ AVAR
 foo
 declare -x foo=""
 declare -x FOO="\$\$"
-./builtins.tests: line 239: declare: FOO: not found
+./builtins.tests: line 242: declare: FOO: not found
 declare -x FOO="\$\$"
 ok
 ok
-./builtins.tests: line 271: kill: 4096: invalid signal specification
+./builtins.tests: line 274: kill: 4096: invalid signal specification
 1
 a\n\n\nb
 a
@@ -332,7 +345,7 @@ A star (*) next to a name means that the command is disabled.
  ! PIPELINE                              history [-c] [-d offset] [n] or hist>
  job_spec [&]                            if COMMANDS; then COMMANDS; [ elif C>
  (( expression ))                        jobs [-lnprs] [jobspec ...] or jobs >
- . filename [arguments]                  kill [-s sigspec | -n signum | -sigs>
+ . [-p path] filename [arguments]        kill [-s sigspec | -n signum | -sigs>
  :                                       let arg [arg ...]
  [ arg... ]                              local [option] name[=value] ...
  [[ expression ]]                        logout [n]
@@ -349,7 +362,7 @@ A star (*) next to a name means that the command is disabled.
  complete [-abcdefgjksuv] [-pr] [-DEI]>  set [-abefhkmnptuvxBCEHPT] [-o optio>
  compopt [-o|+o option] [-DEI] [name .>  shift [n]
  continue [n]                            shopt [-pqsu] [-o] [optname ...]
- coproc [NAME] command [redirections]    source filename [arguments]
+ coproc [NAME] command [redirections]    source [-p path] filename [argument>
  declare [-aAfFgiIlnrtux] [name[=value>  suspend [-f]
  dirs [-clpv] [+N] [-N]                  test [expr]
  disown [-h] [-ar] [jobspec ... | pid >  time [-p] pipeline
@@ -425,7 +438,7 @@ A star (*) next to a name means that the command is disabled.
  ! PIPELINE                              history [-c] [-d offset] [n] or hist>
  job_spec [&]                            if COMMANDS; then COMMANDS; [ elif C>
  (( expression ))                        jobs [-lnprs] [jobspec ...] or jobs >
- . filename [arguments]                  kill [-s sigspec | -n signum | -sigs>
+ . [-p path] filename [arguments]        kill [-s sigspec | -n signum | -sigs>
  :                                       let arg [arg ...]
  [ arg... ]                              local [option] name[=value] ...
  [[ expression ]]                        logout [n]
@@ -442,7 +455,7 @@ A star (*) next to a name means that the command is disabled.
  complete [-abcdefgjksuv] [-pr] [-DEI]>  set [-abefhkmnptuvxBCEHPT] [-o optio>
  compopt [-o|+o option] [-DEI] [name .>  shift [n]
  continue [n]                            shopt [-pqsu] [-o] [optname ...]
- coproc [NAME] command [redirections]    source filename [arguments]
+ coproc [NAME] command [redirections]    source [-p path] filename [argument>
  declare [-aAfFgiIlnrtux] [name[=value>  suspend [-f]
  dirs [-clpv] [+N] [-N]                  test [expr]
  disown [-h] [-ar] [jobspec ... | pid >  time [-p] pipeline
@@ -489,5 +502,5 @@ popd: usage: popd [-n] [+N | -N]
 ./builtins12.sub: line 36: popd: +8: directory stack index out of range
 /tmp /
 /
-./builtins.tests: line 322: exit: status: numeric argument required
+./builtins.tests: line 325: exit: status: numeric argument required
 after non-numeric arg to exit: 2

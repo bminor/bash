@@ -5041,6 +5041,8 @@ cond_term (void)
 	    }
 	  else
 	    parser_error (lineno, _("expected `)'"));
+	  if (cond_token == WORD)
+	    dispose_word (yylval.word);
 	  COND_RETURN_ERROR ();
 	}
       term = make_cond_node (COND_EXPR, (WORD_DESC *)NULL, term, (COND_COM *)NULL);
@@ -6642,7 +6644,7 @@ error_token_from_token (int tok)
 
   t = (char *)NULL;
   /* This stuff is dicy and needs closer inspection */
-  switch (current_token)
+  switch (tok)
     {
     case WORD:
     case ASSIGNMENT_WORD:

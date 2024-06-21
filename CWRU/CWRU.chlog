@@ -9626,3 +9626,23 @@ parse.y
 	- cond_term: if we read a WORD where we expect something else, dispose
 	  of the WORD_DESC before returning COND_ERROR
 	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   6/10
+				   ----
+parse.y
+	- cond_term: if we read a WORD when expecting a close paren, dispose
+	  of the WORD_DESC before returning COND_ERROR
+	- error_token_from_token: use the TOK argument instead of
+	  current_token if we can't find the token as a reserved word or
+	  symbol
+
+				   6/12
+				   ----
+builtins/source.def
+	- source_builtin: add -p PATH option, searches PATH argument instead
+	  of $PATH; overrides sourcepath; does not search $PWD if path search
+	  fails
+
+doc/bash.1,doc/bashref.texi
+	- source: document -p
+

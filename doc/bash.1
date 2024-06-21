@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat May 11 12:44:30 EDT 2024
+.\"	Last Change: Wed Jun 12 10:31:44 PDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 May 11" "GNU Bash 5.3"
+.TH BASH 1 "2024 June 12" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -8054,44 +8054,40 @@ and performing any specified
 redirections.
 The return status is zero.
 .TP
-\fB\&.\| \fP \fIfilename\fP [\fIarguments\fP]
+\fB\&.\| \fP [\fB\-p\fP \fIpath\fP] \fIfilename\fP [\fIarguments\fP]
 .PD 0
 .TP
-\fBsource\fP \fIfilename\fP [\fIarguments\fP]
+\fBsource\fP [\fB\-p\fP \fIpath\fP] \fIfilename\fP [\fIarguments\fP]
 .PD
-Read and execute commands from
+The \fB\&.\| \fP command (\fBsource\fP) reads and execute commands from
 .I filename
-in the current
-shell environment and return the exit status of the last command
-executed from
+in the current shell environment and returns the exit status of the
+last command executed from
 .IR filename .
-If
-.I filename
-does not contain a slash, filenames in
+If \fIfilename\fP does not contain a slash, \fB\&.\| \fP searchs for it.
+If the \fB\-p\fP option is supplied, \fB\&.\| \fP treats \fIpath\fP
+as a colon-separated list of directories in which to find \fIfilename\fP;
+otherwise, \fB\&.\| \fP uses the entries in
 .SM
 .B PATH
-are used to find the directory containing
-.IR filename ,
-but \fIfilename\fP does not need to be executable.
-The file searched for in
-.SM
-.B PATH
-need not be executable.
+to find the directory containing
+.IR filename .
+\fIfilename\fP does not need to be executable.
 When \fBbash\fP is not in \fIposix mode\fP, it searches
 the current directory if no file is found in
 .SM
-.BR PATH .
+.BR PATH ,
+but does not search the current directory if \fB\-p\fP is supplied.
 If the
 .B sourcepath
 option to the
 .B shopt
-builtin command is turned off, the
+builtin command is turned off, \fB\&.\| \fP does not search
 .SM
-.B PATH
-is not searched.
+.BR PATH .
 If any \fIarguments\fP are supplied, they become the positional
-parameters when \fIfilename\fP is executed.  Otherwise the positional
-parameters are unchanged.
+parameters when \fIfilename\fP is executed.
+Otherwise the positional parameters are unchanged.
 If the \fB\-T\fP option is enabled, \fB.\fP inherits any trap on
 \fBDEBUG\fP; if it is not, any \fBDEBUG\fP trap string is saved and
 restored around the call to \fB.\fP, and \fB.\fP unsets the
@@ -11202,7 +11198,8 @@ If set, the
 \fB.\fP (\fBsource\fP) builtin uses the value of
 .SM
 .B PATH
-to find the directory containing the file supplied as an argument.
+to find the directory containing the file supplied as an argument when
+the \fB\-p\fP option is not supplied.
 This option is enabled by default.
 .TP 8
 .B varredir_close

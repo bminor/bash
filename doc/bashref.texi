@@ -3858,18 +3858,24 @@ The return status is zero.
 @item .    @r{(a period)}
 @btindex .
 @example
-. @var{filename} [@var{arguments}]
+. [-p @var{path}] @var{filename} [@var{arguments}]
 @end example
 
 Read and execute commands from the @var{filename} argument in the
-current shell context.  If @var{filename} does not contain a slash,
-the @env{PATH} variable is used to find @var{filename},
-but @var{filename} does not need to be executable.
+current shell context.
+If @var{filename} does not contain a slash, @code{.} searches for it.
+If @option{-p} is supplied, @code{.} treats @var{path}
+as a colon-separated list of directories in which to find @var{filename};
+otherwise, @code{.} uses the directories in @env{PATH} to find @var{filename}.
+@var{filename} does not need to be executable.
 When Bash is not in @sc{posix} mode, it searches the current directory
-if @var{filename} is not found in @env{$PATH}.
+if @var{filename} is not found in @env{$PATH},
+but does not search the current directory if @option{-p} is supplied.
+If the @code{sourcepath} option (@pxref{The Shopt Builtin}) is turned off
+@code{.} does not search @env{PATH}.
 If any @var{arguments} are supplied, they become the positional
-parameters when @var{filename} is executed.  Otherwise the positional
-parameters are unchanged.
+parameters when @var{filename} is executed.
+Otherwise the positional parameters are unchanged.
 If the @option{-T} option is enabled, @code{.} inherits any trap on
 @code{DEBUG}; if it is not, any @code{DEBUG} trap string is saved and
 restored around the call to @code{.}, and @code{.} unsets the
@@ -5231,7 +5237,7 @@ A synonym for @code{mapfile}.
 @item source
 @btindex source
 @example
-source @var{filename}
+source [-p @var{path}] @var{filename} [@var{arguments}]
 @end example
 
 A synonym for @code{.} (@pxref{Bourne Shell Builtins}).
@@ -6120,7 +6126,8 @@ number of positional parameters.
 
 @item sourcepath
 If set, the @code{.} (@code{source}) builtin uses the value of @env{PATH}
-to find the directory containing the file supplied as an argument.
+to find the directory containing the file supplied as an argument
+when the @option{-p} option is not supplied.
 This option is enabled by default.
 
 @item varredir_close
