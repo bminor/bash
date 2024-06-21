@@ -65,5 +65,13 @@ echo m*
 GLOBSORT=-size
 echo m*
 
+# all zero-length files, so secondary sort on name
+touch aa ab ac
+GLOBSORT=size
+echo a*
+# secondary sorting preserves reverse ordering
+GLOBSORT=-size
+echo a*
+
 cd $OLDPWD
 rm -rf $TDIR

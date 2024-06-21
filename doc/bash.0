@@ -1218,21 +1218,33 @@ PPAARRAAMMEETTEERRSS
               value  of this variable specifies the sort criteria and sort or-
               der for the results of pathname expansion.  If this variable  is
               unset  or  set  to  the null string, pathname expansion uses the
-              historical behavior of sorting by name.  If set, a  valid  value
-              begins  with  an  optional  _+, which is ignored, or _-, which re-
-              verses the sort order from ascending to descending, followed  by
-              a  sort  specifier.   The  valid sort specifiers are _n_a_m_e, _s_i_z_e,
-              _m_t_i_m_e, _a_t_i_m_e, _c_t_i_m_e, and _b_l_o_c_k_s, which sort the files  on  name,
-              file  size,  modification  time, access time, inode change time,
-              and number of blocks, respectively.  For  example,  a  value  of
-              _-_m_t_i_m_e  sorts  the  results  in descending order by modification
-              time (newest first).  A sort specifier of _n_o_s_o_r_t disables  sort-
-              ing  completely;  the results are returned in the order they are
-              read from the file system, and any leading _+ or  _-  is  ignored.
-              If  the  sort  specifier  is  missing, it defaults to _n_a_m_e, so a
-              value of _+ is equivalent to the null string, and a  value  of  _-
-              sorts  by  name in descending order.  Any invalid value restores
-              the historical sorting behavior.
+              historical behavior of sorting by name.
+
+              If set, a valid value begins with an optional _+,  which  is  ig-
+              nored, or _-, which reverses the sort order from ascending to de-
+              scending,  followed  by a sort specifier.  The valid sort speci-
+              fiers are _n_a_m_e, _n_u_m_e_r_i_c, _s_i_z_e, _m_t_i_m_e, _a_t_i_m_e, _c_t_i_m_e, and  _b_l_o_c_k_s,
+              which sort the files on name, names in numeric rather than lexi-
+              cographic  order, file size, modification time, access time, in-
+              ode change time, and number of blocks, respectively.  If any  of
+              the  non-name  keys compare as equal (e.g., if two files are the
+              same size), sorting uses the name as a secondary sort key.   For
+              example, a value of _-_m_t_i_m_e sorts the results in descending order
+              by modification time (newest first).
+
+              The  _n_u_m_e_r_i_c  specifier treats names consisting solely of digits
+              as numbers and sorts them using the numeric value (so  "2"  will
+              sort  before "10", for example).  When using _n_u_m_e_r_i_c, names con-
+              taining non-digits sort after all the all-digit  names  and  are
+              sorted by name using the traditional behavior.
+
+              A  sort specifier of _n_o_s_o_r_t disables sorting completely; the re-
+              sults are returned in the order they are read from the file sys-
+              tem, and any leading _+ or _- is ignored.  If the  sort  specifier
+              is  missing,  it defaults to _n_a_m_e, so a value of _+ is equivalent
+              to the null string, and a value of _- sorts by name in descending
+              order.  Any invalid value restores the historical sorting behav-
+              ior.
        HHIISSTTCCOONNTTRROOLL
               A colon-separated list of values controlling  how  commands  are
               saved  on  the  history  list.   If  the list of values includes

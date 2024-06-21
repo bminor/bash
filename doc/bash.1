@@ -2305,26 +2305,39 @@ of the patterns in
 it is removed from the list of matches.
 .TP
 .B GLOBSORT
+.PD
 Control how the results of pathname expansion are sorted.
 The value of this variable specifies the sort criteria and sort order for
 the results of pathname expansion.
 If this variable is unset or set to the null string, pathname expansion
 uses the historical behavior of sorting by name.
+.IP
 If set, a valid value begins with an optional \fI+\fP, which is ignored,
 or \fI\-\fP, which reverses the sort order from ascending to descending,
 followed by a sort specifier.
 The valid sort specifiers are
 .IR name ,
+.IR numeric ,
 .IR size ,
 .IR mtime ,
 .IR atime ,
 .IR ctime ,
 and
 .IR blocks ,
-which sort the files on name, file size, modification time, access time,
+which sort the files on name, names in numeric rather than lexicographic order,
+file size, modification time, access time,
 inode change time, and number of blocks, respectively.
+If any of the non-name keys compare as equal (e.g., if two files are
+the same size), sorting uses the name as a secondary sort key.
 For example, a value of \fI\-mtime\fP sorts the results in descending
 order by modification time (newest first).
+.IP
+The \fInumeric\fP specifier treats names consisting solely of digits as
+numbers and sorts them using the numeric value (so "2" will sort before
+"10", for example).
+When using \fInumeric\fP, names containing non-digits sort after all
+the all-digit names and are sorted by name using the traditional behavior.
+.IP
 A sort specifier of \fInosort\fP disables sorting completely; the results
 are returned in the order they are read from the file system,
 and any leading \fI+\fP or \fI\-\fP is ignored.
@@ -2332,6 +2345,7 @@ If the sort specifier is missing, it defaults to \fIname\fP,
 so a value of \fI+\fP is equivalent to the null string,
 and a value of \fI-\fP sorts by name in descending order.
 Any invalid value restores the historical sorting behavior.
+.PD 0
 .TP
 .B HISTCONTROL
 A colon-separated list of values controlling how commands are saved on

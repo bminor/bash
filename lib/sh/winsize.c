@@ -71,6 +71,19 @@ extern void rl_set_screen_size (int, int);
 #endif
 extern void sh_set_lines_and_columns (int, int);
 
+#ifndef HAVE_TCGETWINSIZE
+int
+tcgetwinsize (int fd, struct winsize *wp)
+{
+#if defined (TIOCGWINSZ)
+  return (ioctl (fd, TIOCGWINSZ, wp));
+#else
+  errno = EINVAL;
+  return -1;
+#endif
+}
+#endif
+
 void
 get_new_window_size (int from_sig, int *rp, int *cp)
 {
@@ -79,8 +92,7 @@ get_new_window_size (int from_sig, int *rp, int *cp)
   int tty;
 
   tty = input_tty ();
-  if (tty >= 0 && (ioctl (tty, TIOCGWINSZ, &win) == 0) &&
-      win.ws_row > 0 && win.ws_col > 0)
+  if (tty >= 0 && (tcgetwinsize (tty, &win) == 0) && win.ws_row > 0 && win.ws_col > 0)
     {
       sh_set_lines_and_columns (win.ws_row, win.ws_col);
 #if defined (READLINE)

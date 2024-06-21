@@ -6688,17 +6688,27 @@ or @samp{-}, which reverses the sort order from ascending to descending,
 followed by a sort specifier.
 The valid sort specifiers are
 @samp{name},
+@samp{numeric},
 @samp{size},
 @samp{mtime},
 @samp{atime},
 @samp{ctime},
 and
 @samp{blocks},
-which sort the files on name, file size, modification time, access time,
+which sort the files on name, names in numeric rather than lexicographic order,
+file size, modification time, access time,
 inode change time, and number of blocks, respectively.
+If any of the non-name keys compare as equal (e.g., if two files are
+the same size), sorting uses the name as a secondary sort key.
 
 For example, a value of @code{-mtime} sorts the results in descending
 order by modification time (newest first).
+
+The @samp{numeric} specifier treats names consisting solely of digits as
+numbers and sorts them using the numeric value (so "2" will sort before
+"10", for example).
+When using @samp{numeric}, names containing non-digits sort after all
+the all-digit names and are sorted by name using the traditional behavior.
 
 A sort specifier of @samp{nosort} disables sorting completely; the results
 are returned in the order they are read from the file system,

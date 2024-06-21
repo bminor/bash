@@ -3468,15 +3468,11 @@ do_compound_assignment (const char *name, char *value, int flags)
 	return ((SHELL_VAR *)0);
     }
   /* In a function but forcing assignment in global context. CHKLOCAL means to
-     check for an existing local variable first. */
+     check for an existing local variable first */
   else if (mkglobal && variable_context)
     {
-      v = chklocal ? find_variable (name) : 0;
-      /* XXX - if we want to make chklocal search previous scopes, change here 2024/06/04 */
-      if (v && (local_p (v) == 0 || v->context != variable_context))
-	v = 0;
-      if (v == 0)
-        v = find_global_variable (name);
+      /* Changed to find variables at previous local scopes 6/12/2024 */
+      v = chklocal ? find_variable (name) : find_global_variable (name);
       if (v && ASSIGN_DISALLOWED (v, flags))
 	{
 	  if (readonly_p (v))

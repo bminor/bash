@@ -9646,3 +9646,34 @@ builtins/source.def
 doc/bash.1,doc/bashref.texi
 	- source: document -p
 
+pathexp.c
+	- if the size, blocks, or any of the time values compare equal, use
+	  the name for a secondary sort key
+
+lib/sh/winsize.c
+	- tcgetwinsize: provide definition for missing newly-standard function
+	- get_new_window_size: use tcgetwinsize
+
+subst.c
+	- do_compound_assignment: if ASS_CHKLOCAL is in the flags, check for
+	  variables at previous local scopes instead of just the current local
+	  scope and the global scope
+	  Part of fix for inconsistency between arrays and scalar variables
+	  reported by Will Allan <billyzkid@yahoo.com>
+
+builtins/declare.def
+	- declare_find_variable: if `declare -G' is used, check for
+	  variables at previous local scopes instead of just the current local
+	  scope and the global scope
+	  Rest of fix for inconsistency between arrays and scalar variables
+	  reported by Will Allan <billyzkid@yahoo.com>
+
+pathexp.h
+	- SORT_NUMERIC: new "numeric" sort specifier
+
+pathexp.c
+	- globsort_numericcmp: new sort function for the "numeric" sort
+	  specifier: all-digit names are sorted as numbers; names containing
+	  any non-digits sort after all-digit names and are sorted
+	  lexicographically.
+	  Inspired by a discussion with Robert Elz <kre@munnari.oz.au>

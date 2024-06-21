@@ -152,13 +152,8 @@ declare_find_variable (const char *name, int mkglobal, int chklocal)
   if (mkglobal == 0)
     return (find_variable (name));
   else if (chklocal)
-    {
-      var = find_variable (name);
-      if (var && local_p (var) && var->context == variable_context)
-	return var;
-      /* XXX - add check for previous scopes here if wanted 6/4/2024 */
-      return (find_global_variable (name));
-    }
+    /* Changed to find variables at previous local scopes 6/12/2024 */
+    return (find_variable (name));
   else
     return (find_global_variable (name));
 }
@@ -315,7 +310,7 @@ declare_internal (WORD_LIST *list, int local_var)
 	case 'f':
 	  *flags |= att_function;
 	  break;
-	case 'G':
+	case 'G':			/* undocumented, used internally */
 	  if (flags == &flags_on)
 	    chklocal = 1;
 	  /*FALLTHROUGH*/
