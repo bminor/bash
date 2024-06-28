@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.065])dnl
+AC_REVISION([for Bash 5.3, version 5.066])dnl
 
 define(bashvers, 5.3)
 define(relstatus, alpha)
@@ -460,30 +460,30 @@ dnl Set SIGNAMES_H based on whether or not we're cross-compiling.
 
 CROSS_COMPILE=
 if test "x$cross_compiling" = "xyes"; then
-    case "${host}" in
-    *-cygwin*)
-	cross_cache=${srcdir}/cross-build/cygwin32.cache
-	;;
-    *-msys*)
-	cross_cache=${srcdir}/cross-build/msys32.cache
-	;;
-    *-mingw*)
-	cross_cache=${srcdir}/cross-build/cygwin32.cache
-	;;
-    i[[3456]]86-*-beos*)
-	cross_cache=${srcdir}/cross-build/x86-beos.cache
-	;;
-    *-qnx*)
-	cross_cache=${srcdir}/cross-build/qnx.cache
-	;;
-    *)	echo "configure: cross-compiling for $host is not supported" >&2
-	;;
-    esac
-    if test -n "${cross_cache}" && test -r "${cross_cache}"; then
-	echo "loading cross-build cache file ${cross_cache}"
-	. ${cross_cache}
-    fi
-    unset cross_cache
+#    case "${host}" in
+#    *-cygwin*)
+#	cross_cache=${srcdir}/cross-build/cygwin32.cache
+#	;;
+#    *-msys*)
+#	cross_cache=${srcdir}/cross-build/msys32.cache
+#	;;
+#    *-mingw*)
+#	cross_cache=${srcdir}/cross-build/cygwin32.cache
+#	;;
+#    i[[3456]]86-*-beos*)
+#	cross_cache=${srcdir}/cross-build/x86-beos.cache
+#	;;
+#   *-qnx*)
+#	cross_cache=${srcdir}/cross-build/qnx.cache
+#	;;
+#    *)	echo "configure: cross-compiling for $host is not supported" >&2
+#	;;
+#    esac
+#    if test -n "${cross_cache}" && test -r "${cross_cache}"; then
+#	echo "loading cross-build cache file ${cross_cache}"
+#	. ${cross_cache}
+#    fi
+#    unset cross_cache
     SIGNAMES_O='signames.o'
     CROSS_COMPILE='-DCROSS_COMPILING'
     AC_SUBST(CROSS_COMPILE)

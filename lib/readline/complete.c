@@ -1362,7 +1362,6 @@ compute_lcd_of_matches (char **match_list, int matches, const char *text)
   size_t si1, si2;
   size_t len1, len2;
 #if defined (HANDLE_MULTIBYTE)
-  int v;
   size_t v1, v2;
   mbstate_t ps1, ps2;
   WCHAR_T wc1, wc2;

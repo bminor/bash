@@ -78,7 +78,8 @@ _evalfile (const char *filename, int flags)
 {
   volatile int old_interactive;
   procenv_t old_return_catch;
-  int return_val, fd, result, pflags, i, nnull;
+  int return_val, fd, result, pflags, nnull;
+  size_t i;
   ssize_t nr;			/* return value from read(2) */
   char *string;
   struct stat finfo;
@@ -101,19 +102,19 @@ _evalfile (const char *filename, int flags)
   do
     {
       fd = open (filename, O_RDONLY);
-      i = errno;
-      if (fd < 0 && i == EINTR)
+      result = errno;
+      if (fd < 0 && result == EINTR)
         QUIT;
-      errno = i;
+      errno = result;
     }
   while (fd < 0 && errno == EINTR && (flags & FEVAL_RETRY));
 
   if (fd < 0 || (fstat (fd, &finfo) == -1))
     {
-      i = errno;
+      result = errno;
       if (fd >= 0)
 	close (fd);
-      errno = i;
+      errno = result;
 
 file_error_and_exit:
       if (((flags & FEVAL_ENOENTOK) == 0) || errno != ENOENT)

@@ -536,7 +536,10 @@ _rl_audit_tty (char *string)
   size = strlen (string) + 1;
 
   if (NLMSG_SPACE (size) > MAX_AUDIT_MESSAGE_LENGTH)
-    return;
+    {
+      close (fd);
+      return;
+    }
 
   memset (&req, 0, sizeof(req));
   req.nlh.nlmsg_len = NLMSG_SPACE (size);

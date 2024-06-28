@@ -1732,7 +1732,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 {
   char *ofd, *ols, *oe, *nfd, *nls, *ne;
   char *ofdf, *nfdf, *olsf, *nlsf;
-  int temp, lendiff, wsatend, od, nd, twidth, o_cpos;
+  int temp, lendiff, wsatend, od, nd, o_cpos;
   int current_invis_chars;
   int col_lendiff, col_temp;
   int bytes_to_insert;
@@ -1863,7 +1863,7 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 	     _rl_output_some_chars below. */
 	  if (newwidth > 0)
 	    {
-	      int count, i, j;
+	      int i, j;
 	      char *optr;
 
 	      puts_face (new, new_face, newbytes);

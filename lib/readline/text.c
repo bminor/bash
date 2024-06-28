@@ -1453,8 +1453,7 @@ rl_change_case (int count, int op)
 #if defined (HANDLE_MULTIBYTE)
   WCHAR_T wc, nwc;
   char mb[MB_LEN_MAX+1];
-  int mlen;
-  size_t m;
+  size_t m, mlen;
   mbstate_t mps;
 #endif
 
@@ -1532,12 +1531,13 @@ change_singlebyte:
 
 	      memset (&ts, 0, sizeof (mbstate_t));
 	      mlen = WCRTOMB (mb, nwc, &ts);
-	      if (mlen < 0)
+	      
+	      if (MB_INVALIDCH (mlen))
 		{
 		  nwc = wc;
 		  memset (&ts, 0, sizeof (mbstate_t));
 		  mlen = WCRTOMB (mb, nwc, &ts);
-		  if (mlen < 0)		/* should not happen */
+		  if (MB_INVALIDCH (mlen))		/* should not happen */
 		    strncpy (mb, rl_line_buffer + start, mlen = m);
 		}
 	      if (mlen > 0)

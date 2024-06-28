@@ -1286,7 +1286,9 @@ run_debug_trap (void)
       close_pgrp_pipe ();
       restore_pgrp_pipe (save_pipe);
 #  endif
-      if (pipeline_pgrp > 0 && ((subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0))
+      /* If the trap command gave the terminal to another process group,
+	 restore it. XXX - check running_in_background? */
+      if (job_control && pipeline_pgrp > 0 && ((subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0))
 	give_terminal_to (pipeline_pgrp, 1);
 
       notify_and_cleanup ();

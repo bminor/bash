@@ -9677,3 +9677,47 @@ pathexp.c
 	  any non-digits sort after all-digit names and are sorted
 	  lexicographically.
 	  Inspired by a discussion with Robert Elz <kre@munnari.oz.au>
+
+				   6/21
+				   ----
+lib/readline/text.c
+	- rl_change_case: make mlen size_t to assign the return value from
+	  wcrtomb; change the tests of < 0 to use MB_INVALIDCH.
+	  Report from Siteshwar Vashisht <svashisht@redhat.com>
+
+				   6/26
+				   ----
+trap.c
+	- run_debug_trap: give the terminal back to pipeline_pgrp only if
+	  job_control is enabled; that's the only way the trap command would
+	  have given it to a different process group
+	  Fixes bug reported by Mark March <march@systempad.cloud>
+
+				   6/27
+				   ----
+configure.ac
+	- remove support for cached files for cross-compiling; it's too hard
+	  to keep them up-to-date without access to the platforms
+
+				   6/28
+				   ----
+lib/readline/util.c
+	- _rl_audit_tty: make sure to close fd before returning on error
+
+lib/sh/casemod.c
+	- sh_modcase: use size_t variable as return value for wcrtomb; check
+	  for invalid wide char and copy all characters in the multibyte
+	  character as-is if it is
+
+lib/sh/zwrite.c
+	- zwrite: use size_t and ssize_t variables
+
+builtins/evalfile.c
+	- _evalfile: use size_t variable for return value from strlen()
+
+lib/readline/funmap.c
+	- rl_funmap_names: don't bother calling qsort if result doesn't have
+	  any entries
+
+	  All from a report by Siteshwar Vashisht <svashisht@redhat.com>
+

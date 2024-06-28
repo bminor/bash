@@ -19,7 +19,7 @@ My example shows how, using the alternate interface, you can
 interactively change the prompt (which is very nice imo). Also, I
 point out that you must roll your own terminal setting when using the
 alternate interface because readline depreps (using your parlance) the
-terminal while in the user callback. I try to demostrate what I mean
+terminal while in the user callback. I try to demonstrate what I mean
 with an example. I've included the program below.
 
 To compile, I just put the program in the examples directory and made
@@ -72,7 +72,7 @@ Copyright (C) 1999 Jeff Solomon
  * alternate interface. The first is the ability to interactively change the
  * prompt, which can't be done using the regular interface since rl_prompt is
  * read-only.
- * 
+ *
  * The second feature really highlights a subtle point when using the alternate
  * interface. That is, readline will not alter the terminal when inside your
  * callback handler. So let's so, your callback executes a user command that
