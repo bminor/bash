@@ -6,12 +6,13 @@
 /* Used for select(2) */
 #include <sys/types.h>
 #include <sys/select.h>
-#include <errno.h>
 
 #include <signal.h>
 
-#include <locale.h>
+#include <errno.h>
 #include <stdio.h>
+
+#include <locale.h>
 
 /* Standard readline include files. */
 #if defined (READLINE_LIBRARY)
@@ -20,6 +21,10 @@
 #else
 #  include <readline/readline.h>
 #  include <readline/history.h>
+#endif
+
+#if !defined (errno)
+extern int errno;
 #endif
 
 static void cb_linehandler (char *);
@@ -51,18 +56,18 @@ cb_readline (void)
   fd_set fds;
   int r, err;
   char *not_done = "";
-  
+
   /* Install the line handler. */
   rl_callback_handler_install (prompt, cb_linehandler);
 
-if (RL_ISSTATE (RL_STATE_ISEARCH))
-  fprintf(stderr, "cb_readline: after handler install, state (ISEARCH) = %d", rl_readline_state);
-else if (RL_ISSTATE (RL_STATE_NSEARCH))
-  fprintf(stderr, "cb_readline: after handler install, state (NSEARCH) = %d", rl_readline_state);
-/* MULTIKEY VIMOTION NUMERICARG _rl_callback_func */
+  if (RL_ISSTATE (RL_STATE_ISEARCH))
+    fprintf(stderr, "cb_readline: after handler install, state (ISEARCH) = %lu", rl_readline_state);
+  else if (RL_ISSTATE (RL_STATE_NSEARCH))
+    fprintf(stderr, "cb_readline: after handler install, state (NSEARCH) = %lu", rl_readline_state);
+  /* MULTIKEY VIMOTION NUMERICARG _rl_callback_func */
 
   FD_ZERO (&fds);
-  FD_SET (fileno (rl_instream), &fds);    
+  FD_SET (fileno (rl_instream), &fds);
 
   input_string = not_done;
 
@@ -76,10 +81,10 @@ else if (RL_ISSTATE (RL_STATE_NSEARCH))
       while (r == 0)
 	{
 	  struct timeval timeout = {0, 100000};
-	  struct timeval *timeoutp = NULL;      
+	  struct timeval *timeoutp = NULL;
 
 	  timeoutp = &timeout;
-	  FD_SET (fileno (rl_instream), &fds);    
+	  FD_SET (fileno (rl_instream), &fds);
 	  r = select (FD_SETSIZE, &fds, NULL, NULL, timeoutp);
 	  err = errno;
 	}
@@ -115,7 +120,6 @@ sigint_handler (int s)
   rl_cleanup_after_signal ();
   rl_callback_handler_remove ();
   saw_signal = 0;
-fprintf(stderr, "sigint_handler: readline state = %d\r\n", rl_readline_state);
   return s;  
 }
 

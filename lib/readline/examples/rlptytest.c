@@ -19,6 +19,7 @@
 
 #include <signal.h>
 
+/* Need a configure check here to turn this into a real application. */
 #if 1	/* LINUX */
 #include <pty.h>
 #else
@@ -31,9 +32,13 @@
 
 #ifdef READLINE_LIBRARY
 #  include "readline.h"
+#  include "history.h"
 #else
 #  include <readline/readline.h>
+#  include <readline/history.h>
 #endif
+
+int tty_reset(int fd);
 
 /**
  * Master/Slave PTY used to keep readline off of stdin/stdout.
@@ -301,7 +306,8 @@ tty_off_xon_xoff (int fd)
  * 
  * Returns: 0 on success, -1 on error
  */
-int tty_reset(int fd)
+int
+tty_reset(int fd)
 {
    if(ttystate != TCBREAK)
       return (0);

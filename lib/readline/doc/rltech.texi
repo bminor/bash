@@ -1526,16 +1526,8 @@ invert_case_line (count, key)
   if (rl_point >= rl_end)
     return (0);
 
-  if (count < 0)
-    @{
-      direction = -1;
-      count = -count;
-    @}
-  else
-    direction = 1;
-      
   /* Find the end of the range to modify. */
-  end = start + (count * direction);
+  end = start + count;
 
   /* Force it to be within range. */
   if (end > rl_end)
@@ -1546,6 +1538,11 @@ invert_case_line (count, key)
   if (start == end)
     return (0);
 
+  /* For positive arguments, put point after the last changed character. For
+     negative arguments, put point before the last changed character. */
+  rl_point = end;
+
+  /* Swap start and end if we are moving backwards */
   if (start > end)
     @{
       int temp = start;
@@ -1564,8 +1561,7 @@ invert_case_line (count, key)
       else if (_rl_lowercase_p (rl_line_buffer[i]))
         rl_line_buffer[i] = _rl_to_upper (rl_line_buffer[i]);
     @}
-  /* Move point to on top of the last character changed. */
-  rl_point = (direction == 1) ? end - 1 : start;
+
   return (0);
 @}
 @end example
@@ -1583,7 +1579,6 @@ It understands the EOF character or "exit" to exit the program.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <locale.h>
 
 /* Used for select(2) */
 #include <sys/types.h>
@@ -1591,11 +1586,18 @@ It understands the EOF character or "exit" to exit the program.
 
 #include <signal.h>
 
+#include <errno.h>
 #include <stdio.h>
+
+#include <locale.h>
 
 /* Standard readline include files. */
 #include <readline/readline.h>
 #include <readline/history.h>
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 static void cb_linehandler (char *);
 static void sighandler (int);
@@ -1664,7 +1666,7 @@ main (int c, char **v)
   while (running)
     @{
       FD_ZERO (&fds);
-      FD_SET (fileno (rl_instream), &fds);    
+      FD_SET (fileno (rl_instream), &fds);
 
       r = select (FD_SETSIZE, &fds, NULL, NULL, NULL);
       if (r < 0 && errno != EINTR)

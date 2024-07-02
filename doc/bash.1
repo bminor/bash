@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jun 12 10:31:44 PDT 2024
+.\"	Last Change: Mon Jul  1 09:46:16 EDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 June 12" "GNU Bash 5.3"
+.TH BASH 1 "2024 July 1" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -351,9 +351,9 @@ reads and executes commands from \fI\*~/.bashrc\fP, if that file exists.
 This may be inhibited by using the
 .B \-\-norc
 option.
-The \fB\-\-rcfile\fP \fIfile\fP option will force
+The \fB\-\-rcfile\fP \fIfile\fP option will cause
 .B bash
-to read and execute commands from \fIfile\fP instead of \fI\*~/.bashrc\fP.
+to replace \fI\*~/.bashrc\fP with \fIfile\fP.
 .PP
 When
 .B bash
@@ -448,7 +448,8 @@ The
 .B \-\-norc
 option may be used to inhibit this behavior, and the
 .B \-\-rcfile
-option may be used to force another file to be read, but neither
+option will make \fBbash\fP replace \fI\*~/.bashrc\fP with a different file,
+but neither
 \fIrshd\fP nor \fIsshd\fP generally invoke the shell with those options
 or allow them to be specified.
 .PP

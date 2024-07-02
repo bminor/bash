@@ -307,6 +307,19 @@ do { \
     ? line_number_for_err_trap \
     : executing_line_number ()
 
+/* We adjust the line number when executing shell functions in an interactive
+   shell. */
+#define ADJUST_LINE_NUMBER() \
+do { \
+  if (variable_context && interactive_shell && sourcelevel == 0) \
+    { \
+      /* line numbers in a function start at 1 */ \
+      line_number -= function_line_number - 1; \
+      if (line_number <= 0) \
+	line_number = 1; \
+    } \
+} while (0)
+
 /* A sort of function nesting level counter */
 int funcnest = 0;
 int funcnest_max = 0;
@@ -3196,13 +3209,7 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
      line_number before executing each expression -- for $LINENO
      and the DEBUG trap. */
   line_number = arith_lineno = arith_for_command->line;
-  if (variable_context && interactive_shell && sourcelevel == 0)
-    {
-      /* line numbers in a function start at 1 */
-      line_number -= function_line_number - 1;
-      if (line_number <= 0)
-	line_number = 1;
-    }
+  ADJUST_LINE_NUMBER ();
 
   /* Evaluate the initialization expression. */
   expresult = eval_arith_for_expr (arith_for_command->init, &expok);
@@ -3871,13 +3878,7 @@ execute_arith_command (ARITH_COM *arith_command)
   this_command_name = "((";	/* )) */
   SET_LINE_NUMBER (arith_command->line);
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell && sourcelevel == 0)
-    {
-      /* line numbers in a function start at 1 */
-      line_number -= function_line_number - 1;
-      if (line_number <= 0)
-	line_number = 1;
-    }      
+  ADJUST_LINE_NUMBER ();
 
   command_string_index = 0;
   print_arith_command (arith_command->exp);
@@ -4111,13 +4112,8 @@ execute_cond_command (COND_COM *cond_command)
 
   SET_LINE_NUMBER (cond_command->line);
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell && sourcelevel == 0)
-    {
-      /* line numbers in a function start at 1 */
-      line_number -= function_line_number - 1;
-      if (line_number <= 0)
-	line_number = 1;
-    }
+  ADJUST_LINE_NUMBER ();
+
   command_string_index = 0;
   print_cond_command (cond_command);
 
@@ -4458,13 +4454,7 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
   QUIT;
 
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell && sourcelevel == 0)
-    {
-      /* line numbers in a function start at 1 */
-      line_number -= function_line_number - 1;
-      if (line_number <= 0)
-	line_number = 1;
-    }
+  ADJUST_LINE_NUMBER ();
 
   /* Remember what this command line looks like at invocation. */
   command_string_index = 0;
@@ -4915,23 +4905,6 @@ execute_from_filesystem:
   result = execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
 			cmdflags);
-
-#if 0
-/* If we forked but still have to fork again to run the disk command, we
-   did so because we created FIFOs. We can't just execve the command in case
-   it dies of a signal without a chance to clean up the FIFOs, so we fork
-   again, then make sure we wait for the child from execute_disk_command(),
-   unlink the FIFOs we created, and exit ourselves. */
-if (dofork && already_forked && (cmdflags & CMD_NO_FORK) == 0)
-  {
-    result = wait_for (last_made_pid, 0);
-#if defined (PROCESS_SUBSTITUTION)
-    if (fifos_pending ())
-      unlink_fifo_list ();
-#endif
-    sh_exit (result & 0xFF);
-  }
-#endif
 
  return_result:
   bind_lastarg (lastarg);

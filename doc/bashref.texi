@@ -7368,8 +7368,9 @@ the file @file{~/.bash_logout}, if it exists.
 When an interactive shell that is not a login shell is started, Bash
 reads and executes commands from @file{~/.bashrc}, if that file exists.
 This may be inhibited by using the @option{--norc} option.
-The @option{--rcfile @var{file}} option will force Bash to read and
-execute commands from @var{file} instead of @file{~/.bashrc}.
+The @option{--rcfile @var{file}} option will
+cause Bash to
+replace @file{~/.bashrc} with @var{file}.
 
 So, typically, your @file{~/.bash_profile} contains the line
 @example
@@ -7441,8 +7442,10 @@ it reads and executes commands from @file{~/.bashrc}, if that
 file exists and is readable.
 It will not do this if invoked as @code{sh}.
 The @option{--norc} option may be used to inhibit this behavior, and the
-@option{--rcfile} option may be used to force another file to be read, but
-neither @code{rshd} nor @code{sshd} generally invoke the shell with those
+@option{--rcfile} option
+will make Bash replace @file{~/.bashrc} with a different file,
+but neither
+@code{rshd} nor @code{sshd} generally invoke the shell with those
 options or allow them to be specified.
 
 @subsubheading Invoked with unequal effective and real @sc{uid/gid}s
