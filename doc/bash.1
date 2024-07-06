@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Jul  1 09:46:16 EDT 2024
+.\"	Last Change: Tue Jul  2 14:28:46 EDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 July 1" "GNU Bash 5.3"
+.TH BASH 1 "2024 July 2" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -353,7 +353,7 @@ This may be inhibited by using the
 option.
 The \fB\-\-rcfile\fP \fIfile\fP option will cause
 .B bash
-to replace \fI\*~/.bashrc\fP with \fIfile\fP.
+to use \fIfile\fP instead of \fI\*~/.bashrc\fP.
 .PP
 When
 .B bash
@@ -448,8 +448,8 @@ The
 .B \-\-norc
 option may be used to inhibit this behavior, and the
 .B \-\-rcfile
-option will make \fBbash\fP replace \fI\*~/.bashrc\fP with a different file,
-but neither
+option will make \fBbash\fP use a different file instead of
+\fI\*~/.bashrc\fP, but neither
 \fIrshd\fP nor \fIsshd\fP generally invoke the shell with those options
 or allow them to be specified.
 .PP
@@ -12001,11 +12001,6 @@ are not special within double-quoted word expansions
 \fBcompat43\fP
 .PD 0
 .RS
-.IP \(bu
-the shell does not print a warning message if an attempt is made to
-use a quoted compound assignment as an argument to declare
-(e.g., declare \-a foo=\*'(1 2)\*'). Later versions warn that this usage is
-deprecated
 .IP \(bu
 word expansion errors are considered non-fatal errors that cause the
 current command to fail, even in posix mode

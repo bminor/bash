@@ -3,36 +3,11 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 April 23<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 July 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
 <HR>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -465,10 +440,10 @@ This may be inhibited by using the
 <B>--norc</B>
 
 option.
-The <B>--rcfile</B> <I>file</I> option will force
+The <B>--rcfile</B> <I>file</I> option will cause
 <B>bash</B>
 
-to read and execute commands from <I>file</I> instead of <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>.
+to use <I>file</I> instead of <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>.
 <P>
 
 When
@@ -601,7 +576,8 @@ The
 option may be used to inhibit this behavior, and the
 <B>--rcfile</B>
 
-option may be used to force another file to be read, but neither
+option will make <B>bash</B> use a different file instead of
+<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>, but neither
 <I>rshd</I> nor <I>sshd</I> generally invoke the shell with those options
 or allow them to be specified.
 <P>
@@ -978,8 +954,7 @@ The words between the <B>[[</B> and <B>]]</B> do not undergo word splitting
 and pathname expansion.
 The shell performs tilde expansion, parameter and
 variable expansion, arithmetic expansion, command substitution, process
-substitution, and quote removal on those words
-(the expansions that would occur if the words were enclosed in double quotes).
+substitution, and quote removal on those words.
 Conditional operators such as <B>-f</B> must be unquoted to be recognized
 as primaries.
 <DT><DD>
@@ -2936,16 +2911,20 @@ it is removed from the list of matches.
 <DT><B>GLOBSORT</B>
 
 <DD>
+
 Control how the results of pathname expansion are sorted.
 The value of this variable specifies the sort criteria and sort order for
 the results of pathname expansion.
 If this variable is unset or set to the null string, pathname expansion
 uses the historical behavior of sorting by name.
+<DT><DD>
 If set, a valid value begins with an optional <I>+</I>, which is ignored,
 or <I>-</I>, which reverses the sort order from ascending to descending,
 followed by a sort specifier.
 The valid sort specifiers are
 <I>name</I>,
+
+<I>numeric</I>,
 
 <I>size</I>,
 
@@ -2958,16 +2937,28 @@ The valid sort specifiers are
 and
 <I>blocks</I>,
 
-which sort the files on name, file size, modification time, access time,
+which sort the files on name, names in numeric rather than lexicographic order,
+file size, modification time, access time,
 inode change time, and number of blocks, respectively.
+If any of the non-name keys compare as equal (e.g., if two files are
+the same size), sorting uses the name as a secondary sort key.
 For example, a value of <I>-mtime</I> sorts the results in descending
 order by modification time (newest first).
+<DT><DD>
+The <I>numeric</I> specifier treats names consisting solely of digits as
+numbers and sorts them using the numeric value (so &quot;2&quot; will sort before
+&quot;10&quot;, for example).
+When using <I>numeric</I>, names containing non-digits sort after all
+the all-digit names and are sorted by name using the traditional behavior.
+<DT><DD>
 A sort specifier of <I>nosort</I> disables sorting completely; the results
-are returned in the order they are read from the file system,.
+are returned in the order they are read from the file system,
+and any leading <I>+</I> or <I>-</I> is ignored.
 If the sort specifier is missing, it defaults to <I>name</I>,
 so a value of <I>+</I> is equivalent to the null string,
 and a value of <I>-</I> sorts by name in descending order.
 Any invalid value restores the historical sorting behavior.
+
 <DT><B>HISTCONTROL</B>
 
 <DD>
@@ -8552,10 +8543,12 @@ The text between the point and mark is referred to as the <I>region</I>.
 
 <DD>
 Move to the start of the current line.
+This may also be bound to the Home key on some keyboards.
 <DT><B>end-of-line (C-e)</B>
 
 <DD>
 Move to the end of the line.
+This may also be bound to the End key on some keyboards.
 <DT><B>forward-char (C-f)</B>
 
 <DD>
@@ -8690,18 +8683,20 @@ using a non-incremental search for a string supplied by the user.
 <DD>
 Search forward through the history using a non-incremental search for
 a string supplied by the user.
-<DT><B>history-search-forward</B>
-
-<DD>
-Search forward through the history for the string of characters
-between the start of the current line and the point.
-This is a non-incremental search.
 <DT><B>history-search-backward</B>
 
 <DD>
 Search backward through the history for the string of characters
 between the start of the current line and the point.
 This is a non-incremental search.
+This may be bound to the Page Up key on some keyboards.
+<DT><B>history-search-forward</B>
+
+<DD>
+Search forward through the history for the string of characters
+between the start of the current line and the point.
+This is a non-incremental search.
+This may be bound to the Page Down key on some keyboards.
 <DT><B>history-substring-search-backward</B>
 
 <DD>
@@ -8896,15 +8891,18 @@ capitalize the previous word, but do not move point.
 <DT><B>overwrite-mode</B>
 
 <DD>
-Toggle overwrite mode.  With an explicit positive numeric argument,
-switches to overwrite mode.  With an explicit non-positive numeric
-argument, switches to insert mode.  This command affects only
-<B>emacs</B> mode; <B>vi</B> mode does overwrite differently.
+Toggle overwrite mode.
+With an explicit positive numeric argument, switches to overwrite mode.
+With an explicit non-positive numeric argument, switches to insert mode.
+This command affects only <B>emacs</B> mode;
+<B>vi</B> mode does overwrite differently.
 Each call to <I>readline()</I> starts in insert mode.
 In overwrite mode, characters bound to <B>self-insert</B> replace
 the text at point rather than pushing the text to the right.
 Characters bound to <B>backward-delete-char</B> replace the character
-before point with a space.  By default, this command is unbound.
+before point with a space.
+By default, this command is unbound,
+but may be bound to the Insert key on some keyboards.
 
 </DL>
 <A NAME="lbCQ">&nbsp;</A>
@@ -10203,53 +10201,47 @@ No effect; the command does nothing beyond expanding
 and performing any specified
 redirections.
 The return status is zero.
-<DT><B>. </B> <I>filename</I> [<I>arguments</I>]<DD>
+<DT><B>. </B> [<B>-p</B> <I>path</I>] <I>filename</I> [<I>arguments</I>]<DD>
 
-<DT><B>source</B> <I>filename</I> [<I>arguments</I>]<DD>
+<DT><B>source</B> [<B>-p</B> <I>path</I>] <I>filename</I> [<I>arguments</I>]<DD>
 
-Read and execute commands from
+The <B>. </B> command (<B>source</B>) reads and execute commands from
 <I>filename</I>
 
-in the current
-shell environment and return the exit status of the last command
-executed from
+in the current shell environment and returns the exit status of the
+last command executed from
 <I>filename</I>.
 
-If
-<I>filename</I>
-
-does not contain a slash, filenames in
+If <I>filename</I> does not contain a slash, <B>. </B> searchs for it.
+If the <B>-p</B> option is supplied, <B>. </B> treats <I>path</I>
+as a colon-separated list of directories in which to find <I>filename</I>;
+otherwise, <B>. </B> uses the entries in
 <FONT SIZE=-1><B>PATH</B>
 
 </FONT>
-are used to find the directory containing
-<I>filename</I>,
+to find the directory containing
+<I>filename</I>.
 
-but <I>filename</I> does not need to be executable.
-The file searched for in
-<FONT SIZE=-1><B>PATH</B>
-
-</FONT>
-need not be executable.
+<I>filename</I> does not need to be executable.
 When <B>bash</B> is not in <I>posix mode</I>, it searches
 the current directory if no file is found in
-<FONT SIZE=-1><B>PATH</B>.
+<FONT SIZE=-1><B>PATH</B>,
 
 </FONT>
+but does not search the current directory if <B>-p</B> is supplied.
 If the
 <B>sourcepath</B>
 
 option to the
 <B>shopt</B>
 
-builtin command is turned off, the
-<FONT SIZE=-1><B>PATH</B>
+builtin command is turned off, <B>. </B> does not search
+<FONT SIZE=-1><B>PATH</B>.
 
 </FONT>
-is not searched.
 If any <I>arguments</I> are supplied, they become the positional
-parameters when <I>filename</I> is executed.  Otherwise the positional
-parameters are unchanged.
+parameters when <I>filename</I> is executed.
+Otherwise the positional parameters are unchanged.
 If the <B>-T</B> option is enabled, <B>.</B> inherits any trap on
 <B>DEBUG</B>; if it is not, any <B>DEBUG</B> trap string is saved and
 restored around the call to <B>.</B>, and <B>.</B> unsets the
@@ -12498,8 +12490,8 @@ any supplied field width and precision in terms of characters, not bytes.
 
 Arguments to non-string format specifiers are treated as C constants,
 except that a leading plus or minus sign is allowed, and if the leading
-character is a single or double quote, the value is the ASCII value of
-the following character.
+character is a single or double quote, the value is the numeric value of
+the following character, using the current locale.
 <P>
 
 The <I>format</I> is reused as necessary to consume all of the <I>arguments</I>.
@@ -14083,7 +14075,8 @@ If set, the
 <FONT SIZE=-1><B>PATH</B>
 
 </FONT>
-to find the directory containing the file supplied as an argument.
+to find the directory containing the file supplied as an argument when
+the <B>-p</B> option is not supplied.
 This option is enabled by default.
 <DT><B>varredir_close</B>
 
@@ -15051,11 +15044,6 @@ are not special within double-quoted word expansions
 <DL COMPACT><DT><DD>
 <DL COMPACT>
 <DT>*<DD>
-the shell does not print a warning message if an attempt is made to
-use a quoted compound assignment as an argument to declare
-(e.g., declare -a foo='(1 2)'). Later versions warn that this usage is
-deprecated
-<DT>*<DD>
 word expansion errors are considered non-fatal errors that cause the
 current command to fail, even in posix mode
 (the default behavior is to make them fatal errors that cause the shell
@@ -15496,7 +15484,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 April 23<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 July 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15602,7 +15590,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20240422/doc/bash.1.<BR>
-Time: 23 April 2024 17:29:53 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20240701/doc/bash.1.<BR>
+Time: 03 July 2024 10:54:15 EDT
 </BODY>
 </HTML>

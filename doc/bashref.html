@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 23 April 2024).
+the Bash shell (version 5.3, 2 July 2024).
 
-This is Edition 5.3, last updated 23 April 2024,
+This is Edition 5.3, last updated 2 July 2024,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 23 April 2024).
+the Bash shell (version 5.3, 2 July 2024).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 23 April 2024,
+<p>This is Edition 5.3, last updated 2 July 2024,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -1482,8 +1482,7 @@ The words between the <code class="code">[[</code> and <code class="code">]]</co
 and filename expansion.
 The shell performs tilde expansion, parameter and
 variable expansion, arithmetic expansion, command substitution, process
-substitution, and quote removal on those words
-(the expansions that would occur if the words were enclosed in double quotes).
+substitution, and quote removal on those words.
 Conditional operators such as &lsquo;<samp class="samp">-f</samp>&rsquo; must be unquoted to be recognized
 as primaries.
 </p>
@@ -4375,18 +4374,24 @@ The return status is zero.
 </dd>
 <dt><a id="index-_002e"></a><span><code class="code">.    <span class="r">(a period)</span></code><a class="copiable-link" href="#index-_002e"> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example-preformatted">. <var class="var">filename</var> [<var class="var">arguments</var>]
+<pre class="example-preformatted">. [-p <var class="var">path</var>] <var class="var">filename</var> [<var class="var">arguments</var>]
 </pre></div>
 
 <p>Read and execute commands from the <var class="var">filename</var> argument in the
-current shell context.  If <var class="var">filename</var> does not contain a slash,
-the <code class="env">PATH</code> variable is used to find <var class="var">filename</var>,
-but <var class="var">filename</var> does not need to be executable.
+current shell context.
+If <var class="var">filename</var> does not contain a slash, <code class="code">.</code> searches for it.
+If <samp class="option">-p</samp> is supplied, <code class="code">.</code> treats <var class="var">path</var>
+as a colon-separated list of directories in which to find <var class="var">filename</var>;
+otherwise, <code class="code">.</code> uses the directories in <code class="env">PATH</code> to find <var class="var">filename</var>.
+<var class="var">filename</var> does not need to be executable.
 When Bash is not in <small class="sc">POSIX</small> mode, it searches the current directory
-if <var class="var">filename</var> is not found in <code class="env">$PATH</code>.
+if <var class="var">filename</var> is not found in <code class="env">$PATH</code>,
+but does not search the current directory if <samp class="option">-p</samp> is supplied.
+If the <code class="code">sourcepath</code> option (see <a class="pxref" href="#The-Shopt-Builtin">The Shopt Builtin</a>) is turned off
+<code class="code">.</code> does not search <code class="env">PATH</code>.
 If any <var class="var">arguments</var> are supplied, they become the positional
-parameters when <var class="var">filename</var> is executed.  Otherwise the positional
-parameters are unchanged.
+parameters when <var class="var">filename</var> is executed.
+Otherwise the positional parameters are unchanged.
 If the <samp class="option">-T</samp> option is enabled, <code class="code">.</code> inherits any trap on
 <code class="code">DEBUG</code>; if it is not, any <code class="code">DEBUG</code> trap string is saved and
 restored around the call to <code class="code">.</code>, and <code class="code">.</code> unsets the
@@ -5655,8 +5660,8 @@ any supplied field width and precision in terms of characters, not bytes.
 
 <p>Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading
-character is a single or double quote, the value is the ASCII value of
-the following character.
+character is a single or double quote, the value is the numeric value of
+the following character, using the current locale.
 </p>
 <p>The <var class="var">format</var> is reused as necessary to consume all of the <var class="var">arguments</var>.
 If the <var class="var">format</var> requires more <var class="var">arguments</var> than are supplied, the
@@ -5813,7 +5818,7 @@ if the <samp class="option">-u</samp> option is supplied.
 </dd>
 <dt><a id="index-source"></a><span><code class="code">source</code><a class="copiable-link" href="#index-source"> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example-preformatted">source <var class="var">filename</var>
+<pre class="example-preformatted">source [-p <var class="var">path</var>] <var class="var">filename</var> [<var class="var">arguments</var>]
 </pre></div>
 
 <p>A synonym for <code class="code">.</code> (see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>).
@@ -6835,7 +6840,8 @@ number of positional parameters.
 </dd>
 <dt><code class="code">sourcepath</code></dt>
 <dd><p>If set, the <code class="code">.</code> (<code class="code">source</code>) builtin uses the value of <code class="env">PATH</code>
-to find the directory containing the file supplied as an argument.
+to find the directory containing the file supplied as an argument
+when the <samp class="option">-p</samp> option is not supplied.
 This option is enabled by default.
 </p>
 </dd>
@@ -7480,20 +7486,31 @@ or &lsquo;<samp class="samp">-</samp>&rsquo;, which reverses the sort order from
 followed by a sort specifier.
 The valid sort specifiers are
 &lsquo;<samp class="samp">name</samp>&rsquo;,
+&lsquo;<samp class="samp">numeric</samp>&rsquo;,
 &lsquo;<samp class="samp">size</samp>&rsquo;,
 &lsquo;<samp class="samp">mtime</samp>&rsquo;,
 &lsquo;<samp class="samp">atime</samp>&rsquo;,
 &lsquo;<samp class="samp">ctime</samp>&rsquo;,
 and
 &lsquo;<samp class="samp">blocks</samp>&rsquo;,
-which sort the files on name, file size, modification time, access time,
+which sort the files on name, names in numeric rather than lexicographic order,
+file size, modification time, access time,
 inode change time, and number of blocks, respectively.
+If any of the non-name keys compare as equal (e.g., if two files are
+the same size), sorting uses the name as a secondary sort key.
 </p>
 <p>For example, a value of <code class="code">-mtime</code> sorts the results in descending
 order by modification time (newest first).
 </p>
+<p>The &lsquo;<samp class="samp">numeric</samp>&rsquo; specifier treats names consisting solely of digits as
+numbers and sorts them using the numeric value (so &quot;2&quot; will sort before
+&quot;10&quot;, for example).
+When using &lsquo;<samp class="samp">numeric</samp>&rsquo;, names containing non-digits sort after all
+the all-digit names and are sorted by name using the traditional behavior.
+</p>
 <p>A sort specifier of &lsquo;<samp class="samp">nosort</samp>&rsquo; disables sorting completely; the results
-are returned in the order they are read from the file system,.
+are returned in the order they are read from the file system,
+and any leading &lsquo;<samp class="samp">-</samp>&rsquo; is ignored.
 </p>
 <p>If the sort specifier is missing, it defaults to <var class="var">name</var>,
 so a value of &lsquo;<samp class="samp">+</samp>&rsquo; is equivalent to the null string,
@@ -8243,8 +8260,9 @@ the file <samp class="file">~/.bash_logout</samp>, if it exists.
 <p>When an interactive shell that is not a login shell is started, Bash
 reads and executes commands from <samp class="file">~/.bashrc</samp>, if that file exists.
 This may be inhibited by using the <samp class="option">--norc</samp> option.
-The <samp class="option">--rcfile <var class="var">file</var></samp> option will force Bash to read and
-execute commands from <var class="var">file</var> instead of <samp class="file">~/.bashrc</samp>.
+The <samp class="option">--rcfile <var class="var">file</var></samp> option will
+cause Bash to
+use <var class="var">file</var> instead of <samp class="file">~/.bashrc</samp>.
 </p>
 <p>So, typically, your <samp class="file">~/.bash_profile</samp> contains the line
 </p><div class="example">
@@ -8314,8 +8332,10 @@ it reads and executes commands from <samp class="file">~/.bashrc</samp>, if that
 file exists and is readable.
 It will not do this if invoked as <code class="code">sh</code>.
 The <samp class="option">--norc</samp> option may be used to inhibit this behavior, and the
-<samp class="option">--rcfile</samp> option may be used to force another file to be read, but
-neither <code class="code">rshd</code> nor <code class="code">sshd</code> generally invoke the shell with those
+<samp class="option">--rcfile</samp> option
+will make Bash use a different file instead of
+<samp class="file">~/.bashrc</samp>, but neither
+<code class="code">rshd</code> nor <code class="code">sshd</code> generally invoke the shell with those
 options or allow them to be specified.
 </p>
 <h4 class="subsubheading" id="Invoked-with-unequal-effective-and-real-uid_002fgids"><span>Invoked with unequal effective and real <small class="sc">UID/GID</small>s<a class="copiable-link" href="#Invoked-with-unequal-effective-and-real-uid_002fgids"> &para;</a></span></h4>
@@ -9944,11 +9964,7 @@ are not special within double-quoted word expansions
 </dd>
 <dt><code class="code">compat43</code></dt>
 <dd><ul class="itemize mark-bullet">
-<li>the shell does not print a warning message if an attempt is made to
-use a quoted compound assignment as an argument to declare
-(e.g., declare -a foo=&rsquo;(1 2)&rsquo;). Later versions warn that this usage is
-deprecated
-</li><li>word expansion errors are considered non-fatal errors that cause the
+<li>word expansion errors are considered non-fatal errors that cause the
 current command to fail, even in posix mode
 (the default behavior is to make them fatal errors that cause the shell
 to exit)
@@ -11680,10 +11696,12 @@ Next: <a href="#Commands-For-History" accesskey="n" rel="next">Commands For Mani
 <dl class="ftable">
 <dt><a id="index-beginning_002dof_002dline-_0028C_002da_0029"></a><span><code class="code">beginning-of-line (C-a)</code><a class="copiable-link" href="#index-beginning_002dof_002dline-_0028C_002da_0029"> &para;</a></span></dt>
 <dd><p>Move to the start of the current line.
+This may also be bound to the Home key on some keyboards.
 </p>
 </dd>
 <dt><a id="index-end_002dof_002dline-_0028C_002de_0029"></a><span><code class="code">end-of-line (C-e)</code><a class="copiable-link" href="#index-end_002dof_002dline-_0028C_002de_0029"> &para;</a></span></dt>
 <dd><p>Move to the end of the line.
+This may also be bound to the End key on some keyboards.
 </p>
 </dd>
 <dt><a id="index-forward_002dchar-_0028C_002df_0029"></a><span><code class="code">forward-char (C-f)</code><a class="copiable-link" href="#index-forward_002dchar-_0028C_002df_0029"> &para;</a></span></dt>
@@ -11809,32 +11827,34 @@ for a string supplied by the user.
 The search string may match anywhere in a history line.
 </p>
 </dd>
-<dt><a id="index-history_002dsearch_002dforward-_0028_0029"></a><span><code class="code">history-search-forward ()</code><a class="copiable-link" href="#index-history_002dsearch_002dforward-_0028_0029"> &para;</a></span></dt>
-<dd><p>Search forward through the history for the string of characters
-between the start of the current line and the point.
-The search string must match at the beginning of a history line.
-This is a non-incremental search.
-By default, this command is unbound.
-</p>
-</dd>
 <dt><a id="index-history_002dsearch_002dbackward-_0028_0029"></a><span><code class="code">history-search-backward ()</code><a class="copiable-link" href="#index-history_002dsearch_002dbackward-_0028_0029"> &para;</a></span></dt>
 <dd><p>Search backward through the history for the string of characters
 between the start of the current line and the point.
 The search string must match at the beginning of a history line.
 This is a non-incremental search.
-By default, this command is unbound.
+By default, this command is unbound, but may be bound to the Page Down
+key on some keyboards.
 </p>
 </dd>
-<dt><a id="index-history_002dsubstring_002dsearch_002dforward-_0028_0029"></a><span><code class="code">history-substring-search-forward ()</code><a class="copiable-link" href="#index-history_002dsubstring_002dsearch_002dforward-_0028_0029"> &para;</a></span></dt>
+<dt><a id="index-history_002dsearch_002dforward-_0028_0029"></a><span><code class="code">history-search-forward ()</code><a class="copiable-link" href="#index-history_002dsearch_002dforward-_0028_0029"> &para;</a></span></dt>
 <dd><p>Search forward through the history for the string of characters
+between the start of the current line and the point.
+The search string must match at the beginning of a history line.
+This is a non-incremental search.
+By default, this command is unbound, but may be bound to the Page Up
+key on some keyboards.
+</p>
+</dd>
+<dt><a id="index-history_002dsubstring_002dsearch_002dbackward-_0028_0029"></a><span><code class="code">history-substring-search-backward ()</code><a class="copiable-link" href="#index-history_002dsubstring_002dsearch_002dbackward-_0028_0029"> &para;</a></span></dt>
+<dd><p>Search backward through the history for the string of characters
 between the start of the current line and the point.
 The search string may match anywhere in a history line.
 This is a non-incremental search.
 By default, this command is unbound.
 </p>
 </dd>
-<dt><a id="index-history_002dsubstring_002dsearch_002dbackward-_0028_0029"></a><span><code class="code">history-substring-search-backward ()</code><a class="copiable-link" href="#index-history_002dsubstring_002dsearch_002dbackward-_0028_0029"> &para;</a></span></dt>
-<dd><p>Search backward through the history for the string of characters
+<dt><a id="index-history_002dsubstring_002dsearch_002dforward-_0028_0029"></a><span><code class="code">history-substring-search-forward ()</code><a class="copiable-link" href="#index-history_002dsubstring_002dsearch_002dforward-_0028_0029"> &para;</a></span></dt>
+<dd><p>Search forward through the history for the string of characters
 between the start of the current line and the point.
 The search string may match anywhere in a history line.
 This is a non-incremental search.
@@ -11993,7 +12013,8 @@ the text at point rather than pushing the text to the right.
 Characters bound to <code class="code">backward-delete-char</code> replace the character
 before point with a space.
 </p>
-<p>By default, this command is unbound.
+<p>By default, this command is unbound, but may be bound to the Insert
+key on some keyboards.
 </p>
 </dd>
 </dl>

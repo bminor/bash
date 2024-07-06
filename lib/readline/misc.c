@@ -332,7 +332,7 @@ _rl_free_history_entry (HIST_ENTRY *entry)
 
 /* Perhaps put back the current line if it has changed. */
 int
-rl_maybe_replace_line (void)
+_rl_maybe_replace_line (int clear_undo)
 {
   HIST_ENTRY *temp;
 
@@ -350,10 +350,17 @@ rl_maybe_replace_line (void)
       if (_rl_saved_line_for_history && (UNDO_LIST *)_rl_saved_line_for_history->data == rl_undo_list)
 	_rl_saved_line_for_history->data = 0;
       /* Do we want to set rl_undo_list = 0 here since we just saved it into
-	 a history entry? */
-      rl_undo_list = 0;
+	 a history entry? We let the caller decide. */
+      if (clear_undo)
+	rl_undo_list = 0;
     }
   return 0;
+}
+
+int
+rl_maybe_replace_line (void)
+{
+  return (_rl_maybe_replace_line (0));
 }
 
 void

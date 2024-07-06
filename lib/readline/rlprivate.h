@@ -399,6 +399,7 @@ extern void _rl_free_saved_line (HIST_ENTRY *);
 extern void _rl_unsave_line (HIST_ENTRY *);
 #endif
 extern int _rl_free_saved_history_line (void);
+extern int _rl_maybe_replace_line (int);
 
 extern void _rl_set_insert_mode (int, int);
 

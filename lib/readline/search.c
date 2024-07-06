@@ -101,7 +101,7 @@ _rl_unsave_saved_search_line (void)
    from a history entry. We assume the undo list does not come from a
    history entry if we are at the end of the history, entering a new line.
 
-   The call to rl_maybe_replace_line() has already ensured that any undo
+   The call to _rl_maybe_replace_line() has already ensured that any undo
    list pointing to a history entry has already been saved back to the
    history and set rl_undo_list to NULL. */
 
@@ -271,8 +271,9 @@ _rl_nsearch_init (int dir, int pchar)
   cxt->direction = dir;
   cxt->history_pos = cxt->save_line;
 
-  /* If the current line has changed, put it back into the history if necessary. */
-  rl_maybe_replace_line ();
+  /* If the current line has changed, put it back into the history if necessary
+     and clear the undo list. */
+  _rl_maybe_replace_line (1);
 
   _rl_saved_line_for_search = _rl_alloc_saved_line ();
 
@@ -603,11 +604,14 @@ rl_history_search_internal (int count, int dir)
   int ret, oldpos, newcol;
   char *t;
 
-  /* If the current line has changed, put it back into the history if necessary. */
-  rl_maybe_replace_line ();
+  /* If the current line has changed, put it back into the history if necessary
+     and clear the undo list. */
+  _rl_maybe_replace_line (1);
 
   _rl_saved_line_for_search = _rl_alloc_saved_line ();
   temp = (HIST_ENTRY *)NULL;
+
+  oldpos = where_history ();
 
   /* Search COUNT times through the history for a line matching
      history_search_string.  If history_search_string[0] == '^', the
@@ -623,10 +627,8 @@ rl_history_search_internal (int count, int dir)
 
       /* Get the history entry we found. */
       _rl_history_search_pos = ret;
-      oldpos = where_history ();
       history_set_pos (_rl_history_search_pos);
       temp = current_history ();	/* will never be NULL after successful search */
-      history_set_pos (oldpos);
 
       /* Don't find multiple instances of the same line. */
       if (prev_line_found && STREQ (prev_line_found, temp->line))
@@ -635,7 +637,7 @@ rl_history_search_internal (int count, int dir)
       count--;
     }
 
-  /* If we didn't find anything at all, return. */
+  /* If we didn't find anything at all, return without changing history offset */
   if (temp == 0)
     {
       _rl_unsave_saved_search_line ();

@@ -78,8 +78,8 @@
 \entry{login shell}{96}{login shell}
 \entry{interactive shell}{96}{interactive shell}
 \entry{startup files}{96}{startup files}
-\entry{interactive shell}{97}{interactive shell}
-\entry{shell, interactive}{97}{shell, interactive}
+\entry{interactive shell}{98}{interactive shell}
+\entry{shell, interactive}{98}{shell, interactive}
 \entry{expressions, conditional}{99}{expressions, conditional}
 \entry{arithmetic, shell}{101}{arithmetic, shell}
 \entry{shell arithmetic}{101}{shell arithmetic}

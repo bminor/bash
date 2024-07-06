@@ -9734,3 +9734,28 @@ lib/readline/examples/excallback.c,lib/readline/examples/rlptytest.c
 execute_cmd.c:
 	- ADJUST_LINE_NUMBER: encapsulate code that adjusts line_number in
 	  shell functions executed in interactive shells into a macro
+
+				    7/2
+				    ---
+doc/bash.1,doc/bashref.texi
+	- changes to the --rcfile description to avoid the use of `force' and
+	  stay away from the word `replace'
+
+lib/readline/misc.c
+	- _rl_maybe_replace_line: old rl_maybe_replace_line, now takes an
+	  argument saying whether or not to clear rl_undo_list
+	- rl_maybe_replace_line: now calls _rl_maybe_replace_line with a 0
+	  argument for backwards compatibility
+
+lib/readline/rlprivate.h
+	- _rl_maybe_replace_line: extern declaration
+
+lib/readline/search.c
+	- _rl_nsearch_init,rl_history_search_internal: call _rl_maybe_replace_line
+	  with a 1 argument so these searches can manage rl_undo_list and
+	  restore it appropriately
+	- rl_history_search_internal: don't set the history offset back to
+	  oldpos if the history search is successful; we want the history offset
+	  to be set to the position of the last matching line, like isearch
+
+

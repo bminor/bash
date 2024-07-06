@@ -73,7 +73,7 @@
 \entry{initialization file, readline}{125}
 \entry{installation}{165}
 \entry{interaction, readline}{122}
-\entry{interactive shell}{96, 97}
+\entry{interactive shell}{96, 98}
 \entry{internationalization}{7}
 \entry{internationalized scripts}{7}
 \initial {J}
@@ -125,7 +125,7 @@
 \entry{shell function}{19}
 \entry{shell script}{47}
 \entry{shell variable}{21}
-\entry{shell, interactive}{97}
+\entry{shell, interactive}{98}
 \entry{signal}{4}
 \entry{signal handling}{46}
 \entry{special builtin}{4, 80}

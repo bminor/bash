@@ -7370,7 +7370,7 @@ reads and executes commands from @file{~/.bashrc}, if that file exists.
 This may be inhibited by using the @option{--norc} option.
 The @option{--rcfile @var{file}} option will
 cause Bash to
-replace @file{~/.bashrc} with @var{file}.
+use @var{file} instead of @file{~/.bashrc}.
 
 So, typically, your @file{~/.bash_profile} contains the line
 @example
@@ -7443,8 +7443,8 @@ file exists and is readable.
 It will not do this if invoked as @code{sh}.
 The @option{--norc} option may be used to inhibit this behavior, and the
 @option{--rcfile} option
-will make Bash replace @file{~/.bashrc} with a different file,
-but neither
+will make Bash use a different file instead of
+@file{~/.bashrc}, but neither
 @code{rshd} nor @code{sshd} generally invoke the shell with those
 options or allow them to be specified.
 
@@ -9014,11 +9014,6 @@ are not special within double-quoted word expansions
 
 @item compat43
 @itemize @bullet
-@item
-the shell does not print a warning message if an attempt is made to
-use a quoted compound assignment as an argument to declare
-(e.g., declare -a foo='(1 2)'). Later versions warn that this usage is
-deprecated
 @item
 word expansion errors are considered non-fatal errors that cause the
 current command to fail, even in posix mode
