@@ -1181,6 +1181,17 @@ procsub_prune (void)
       p = ps;
     }
 }
+
+void
+procsub_reap (void)
+{
+  int os;
+
+  QUEUE_SIGCHLD(os);
+  procsub_prune ();
+  last_procsub_child = (PROCESS *)NULL;
+  UNQUEUE_SIGCHLD (os);
+}
 #endif
 
 /* Reset the values of js.j_lastj and js.j_firstj after one or both have
@@ -1233,8 +1244,15 @@ cleanup_dead_jobs (void)
   register int i;
   int os;
 
+  /* Even if the jobs list is frozen or there aren't any background jobs,
+     clean up any terminated process substitutions. */
   if (js.j_jobslots == 0 || jobs_list_frozen)
-    return;
+    {
+#if defined (PROCESS_SUBSTITUTION)
+      procsub_reap ();
+#endif
+      return;
+    }
 
   QUEUE_SIGCHLD(os);
 
@@ -1255,6 +1273,7 @@ cleanup_dead_jobs (void)
     }
 
 #if defined (PROCESS_SUBSTITUTION)
+  /* Don't need to call procsub_reap() since SIGCHLD is already blocked. */
   procsub_prune ();
   last_procsub_child = (PROCESS *)NULL;
 #endif
@@ -2681,7 +2700,7 @@ wait_for_single_pid (pid_t pid, int flags)
   /* If running in posix mode, remove the job from the jobs table immediately */
   if (posixly_correct)
     {
-      cleanup_dead_jobs ();
+      cleanup_dead_jobs ();		/* calls procsub_prune */
       bgp_delete (pid);
     }
 
@@ -2751,7 +2770,7 @@ wait_for_background_pids (struct procstat *ps)
 #if defined (PROCESS_SUBSTITUTION)
   if (last_procsub_child && last_procsub_child->pid != NO_PID && last_procsub_child->pid == last_asynchronous_pid)
     procsub_waitpid (last_procsub_child->pid);
-  reap_procsubs ();	/* closes fd */
+  delete_procsubs ();	/* closes fds or unlinks fifos */
 #endif
 
   /* POSIX.2 says the shell can discard the statuses of all completed jobs if
@@ -3974,6 +3993,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 	 is blocked. We only use this as a hint that we can remove FIFOs
 	 or close file descriptors corresponding to terminated process
 	 substitutions. */
+      /* XXX - should combine this list with procsub_add, etc. */
       if ((ind = find_procsub_child (pid)) >= 0)
 	set_procsub_status (ind, pid, WSTATUS (status));
 #endif

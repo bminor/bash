@@ -109,6 +109,7 @@ should_optimize_fork (COMMAND *command, int subshell)
       command->type == cm_simple &&
       signal_is_trapped (EXIT_TRAP) == 0 &&
       signal_is_trapped (ERROR_TRAP) == 0 &&
+      (variable_context == 0 || signal_is_trapped (RETURN_TRAP) == 0) &&
       any_signals_trapped () < 0 &&
       (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
       ((command->flags & CMD_TIME_PIPELINE) == 0) &&
@@ -187,11 +188,11 @@ optimize_shell_function (COMMAND *command)
       fc->flags |= CMD_NO_FORK;
       fc->value.Simple->flags |= CMD_NO_FORK;
     }
-  else if (fc->type == cm_connection && can_optimize_connection (fc) && should_suppress_fork (fc->value.Connection->second))
+  else if (fc->type == cm_connection && can_optimize_connection (fc))
     {
-      fc->value.Connection->second->flags |= CMD_NO_FORK;
-      fc->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
-    }  
+      fc->value.Connection->second->flags |= CMD_TRY_OPTIMIZING;
+      fc->value.Connection->second->value.Simple->flags |= CMD_TRY_OPTIMIZING;
+    }
 }
 
 int
@@ -547,17 +548,20 @@ parse_and_execute (char *string, const char *from_file, int flags)
 	      if ((subshell_environment & SUBSHELL_COMSUB) || executing_funsub)
 		expand_aliases = expaliases_flag;
 
+#if 0
 	      /* See if this is a candidate for $( <file ). */
 	      if (startup_state == 2 &&
 		  (subshell_environment & SUBSHELL_COMSUB) &&
 		  *bash_input.location.string == '\0' &&
 		  can_optimize_cat_file (command))
 		{
+itrace("parse_and_execute: calling cat_file, parse_and_execute_level = %d", parse_and_execute_level);
 		  int r;
 		  r = cat_file (command->value.Simple->redirects);
 		  last_result = (r < 0) ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
 		}
 	      else
+#endif
 		last_result = execute_command_internal
 				(command, 0, NO_PIPE, NO_PIPE, bitmap);
 	      dispose_command (command);
@@ -700,6 +704,10 @@ parse_string (char *string, const char *from_file, int flags, COMMAND **cmdp, ch
 	  else
 	    dispose_command (global_command);
 	  global_command = (COMMAND *)NULL;
+	  /* Presumably this is an error if we haven't consumed the
+	     entire string, but we let the caller deal with it. */
+	  if (flags & SEVAL_ONECMD)
+	    break;
 	}
       else
 	{

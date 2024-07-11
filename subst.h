@@ -308,7 +308,7 @@ extern int find_procsub_child (pid_t);
 extern void set_procsub_status (int, pid_t, int);
 
 extern void wait_procsubs (void);
-extern void reap_procsubs (void);
+extern void delete_procsubs (void);
 #endif
 
 extern WORD_LIST *list_string_with_quotes (char *);

@@ -6089,7 +6089,7 @@ reap_some_procsubs (int max)
 }
 
 void
-reap_procsubs (void)
+delete_procsubs (void)
 {
   reap_some_procsubs (nfifo);
 }
@@ -6322,7 +6322,7 @@ reap_some_procsubs (int max)
 }
 
 void
-reap_procsubs (void)
+delete_procsubs (void)
 {
   reap_some_procsubs (totfds);
 }

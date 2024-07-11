@@ -4781,7 +4781,7 @@ parse_string_to_command (char *string, int flags)
 
 /*itrace("parse_string_to_command: size = %d shell_input_line = `%s' string=`%s'", shell_input_line_size, shell_input_line, string);*/
 
-  sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
+  sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE|SEVAL_ONECMD;
   if (flags & SX_NOLONGJMP)
     sflags |= SEVAL_NOLONGJMP;
 

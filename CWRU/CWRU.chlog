@@ -9758,4 +9758,47 @@ lib/readline/search.c
 	  oldpos if the history search is successful; we want the history offset
 	  to be set to the position of the last matching line, like isearch
 
+				    7/5
+				    ---
+jobs.c
+	- procsub_reap: new function, blocks and unblocks SIGCHLD around
+	  call to procsub_prune
+	- cleanup_dead_jobs: call procsub_reap even if there are no jobs in
+	  the jobs list or the jobs list is frozen
+	  Inspired by report from Zachary Santer <zsanter@gmail.com>
 
+				    7/6
+				    ---
+subst.c,subst.h,execute_cmd.c,jobs.c
+	- reap_procsubs: rename to delete_procsubs
+
+				    7/7
+				    ---
+aclocal.m4
+	- BASH_CHECK_LIB_TERMCAP: check for ncursesw before ncurses, add
+	  -lncursesw if found, to avoid pkgconfig issues for readline (since
+	  this is a shared file)
+	  Report and fix from Rosen Penev <rosenp@gmail.com>
+
+				    7/8
+				    ---
+builtins/evalstring.c
+	- should_optimize_fork: don't optimize the fork if we're executing in
+	  a shell function and a return trap is set
+	- optimize_shell_function: mark a simple command at the end of a shell
+	  function as a candidate for optimization, rather than setting
+	  CMD_NO_FORK before the function executes -- it could set a return
+	  trap
+	  Report from Jens Schmidt <farblos@vodafonemail.de>
+	- parse_and_execute: don't let process substitutions or other calls
+	  to parse_and_execute do <file; that should be reserved for command
+	  substitutions and implemented in command_substitute
+	  Report by Emanuele Torre <torreemanuele6@gmail.com>
+	- parse_string: if flags & SEVAL_ONECMD, stop after parsing a single
+	  command, even if it doesn't consume the entire string
+
+parse.y
+	- parse_string_to_command: call parse_string with SEVAL_ONECMD, since
+	  we only want to parse a single command and make sure it consumes
+	  the entire string, not consume the string and return the last command
+	  parsed

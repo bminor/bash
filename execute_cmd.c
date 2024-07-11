@@ -821,7 +821,7 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 
 #if defined (PROCESS_SUBSTITUTION)
 #  if !defined (HAVE_DEV_FD)
-  reap_procsubs ();
+  delete_procsubs ();		/* closes fds or unlinks fifos */
 #  endif
 
   /* XXX - also if sourcelevel != 0? */

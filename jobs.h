@@ -256,6 +256,7 @@ extern int procsub_waitpid (pid_t);
 extern void procsub_waitall (void);
 extern void procsub_clear (void);
 extern void procsub_prune (void);
+extern void procsub_reap (void);
 
 extern void delete_job (int, int);
 extern void nohup_job (int);
