@@ -548,6 +548,15 @@ reset_alarm ()
   setitimer (ITIMER_REAL, &it, NULL);
 }
 #  else
+#  if defined (__MINGW32_MAJOR_VERSION)
+/* mingw.org's MinGW doesn't have alarm(3).  */
+unsigned int
+alarm (unsigned int seconds)
+{
+  return 0;
+}
+#  endif
+
 static int
 set_alarm (unsigned int *secs, unsigned int *usecs)
 {

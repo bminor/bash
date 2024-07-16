@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -548,6 +548,8 @@ parse_and_execute (char *string, const char *from_file, int flags)
 	      if ((subshell_environment & SUBSHELL_COMSUB) || executing_funsub)
 		expand_aliases = expaliases_flag;
 
+	      /* This functionality is now implemented as part of
+		 subst.c:command_substitute(). */
 #if 0
 	      /* See if this is a candidate for $( <file ). */
 	      if (startup_state == 2 &&
@@ -555,8 +557,8 @@ parse_and_execute (char *string, const char *from_file, int flags)
 		  *bash_input.location.string == '\0' &&
 		  can_optimize_cat_file (command))
 		{
-itrace("parse_and_execute: calling cat_file, parse_and_execute_level = %d", parse_and_execute_level);
 		  int r;
+INTERNAL_DEBUG(("parse_and_execute: calling cat_file, parse_and_execute_level = %d", parse_and_execute_level));
 		  r = cat_file (command->value.Simple->redirects);
 		  last_result = (r < 0) ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
 		}

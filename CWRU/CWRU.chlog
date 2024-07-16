@@ -9802,3 +9802,11 @@ parse.y
 	  we only want to parse a single command and make sure it consumes
 	  the entire string, not consume the string and return the last command
 	  parsed
+
+				    7/9
+				    ---
+bashline.c
+	- _ignore_completion_names: restrict force_fignore to act only on
+	  completions that should be affected by FIGNORE; in other cases
+	  act as if it were set to 1
+	  From a report and patch by Koichi Murase <myoga.murase@gmail.com>

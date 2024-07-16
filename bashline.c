@@ -3071,7 +3071,10 @@ _ignore_completion_names (char **names, sh_ignore_func_t *name_func)
   char **newnames;
   size_t idx, nidx;
   char **oldnames;
-  int oidx;
+  int oidx, allow_empty;
+
+  /* allow_empty is used to make force_fignore apply only to FIGNORE completions. */
+  allow_empty = (name_func == name_is_acceptable) ? force_fignore : 1;
 
   /* If there is only one completion, see if it is acceptable.  If it is
      not, free it up.  In any case, short-circuit and return.  This is a
@@ -3079,7 +3082,7 @@ _ignore_completion_names (char **names, sh_ignore_func_t *name_func)
      if there is only one completion; it is the completion itself. */
   if (names[1] == (char *)0)
     {
-      if (force_fignore)
+      if (allow_empty)
 	if ((*name_func) (names[0]) == 0)
 	  {
 	    free (names[0]);
@@ -3095,7 +3098,7 @@ _ignore_completion_names (char **names, sh_ignore_func_t *name_func)
     ;
   newnames = strvec_create (nidx + 1);
 
-  if (force_fignore == 0)
+  if (allow_empty == 0)
     {
       oldnames = strvec_create (nidx - 1);
       oidx = 0;
@@ -3106,7 +3109,7 @@ _ignore_completion_names (char **names, sh_ignore_func_t *name_func)
     {
       if ((*name_func) (names[idx]))
 	newnames[nidx++] = names[idx];
-      else if (force_fignore == 0)
+      else if (allow_empty == 0)
 	oldnames[oidx++] = names[idx];
       else
 	free (names[idx]);
@@ -3117,7 +3120,7 @@ _ignore_completion_names (char **names, sh_ignore_func_t *name_func)
   /* If none are acceptable then let the completer handle it. */
   if (nidx == 1)
     {
-      if (force_fignore)
+      if (allow_empty)
 	{
 	  free (names[0]);
 	  names[0] = (char *)NULL;
@@ -3129,7 +3132,7 @@ _ignore_completion_names (char **names, sh_ignore_func_t *name_func)
       return;
     }
 
-  if (force_fignore == 0)
+  if (allow_empty == 0)
     {
       while (oidx)
 	free (oldnames[--oidx]);

@@ -1,6 +1,6 @@
 /* xmalloc.c -- safe versions of malloc and realloc */
 
-/* Copyright (C) 1991-2016,2023 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2016,2023-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the GNU Bourne Again SHell.
 

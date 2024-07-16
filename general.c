@@ -834,7 +834,7 @@ absolute_program (const char *string)
   return ((char *)mbschr (string, '/') != (char *)NULL);
 #else
   return ((char *)mbschr (string, '/') != (char *)NULL ||
-	  (char *)mbschr (string, '\\') != (char *)NULL)
+	  (char *)mbschr (string, '\\') != (char *)NULL);
 #endif
 }
 
