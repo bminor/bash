@@ -282,7 +282,7 @@ static void cleanup_dead_jobs (void);
 static int processes_in_job (int);
 static void realloc_jobs_list (void);
 static int compact_jobs_list (int);
-static void add_process (char *, pid_t);
+static PROCESS *add_process (char *, pid_t);
 static void print_pipeline (PROCESS *, int, int, FILE *);
 static void pretty_print_job (int, int, FILE *);
 static void set_current_job (int);
@@ -1051,27 +1051,30 @@ procsub_add (PROCESS *p)
 }
 
 PROCESS *
-procsub_search (pid_t pid)
+procsub_search (pid_t pid, int block)
 {
   PROCESS *p;
   sigset_t set, oset;
 
-  BLOCK_CHILD (set, oset);
+  if (block)
+    BLOCK_CHILD (set, oset);
   for (p = procsubs.head; p; p = p->next)
     if (p->pid == pid)
       break;
-  UNBLOCK_CHILD (oset);
+  if (block)
+    UNBLOCK_CHILD (oset);
 
   return p;
 }
 
 PROCESS *
-procsub_delete (pid_t pid)
+procsub_delete (pid_t pid, int block)
 {
   PROCESS *p, *prev;
   sigset_t set, oset;
 
-  BLOCK_CHILD (set, oset);
+  if (block)
+    BLOCK_CHILD (set, oset);
   for (p = prev = procsubs.head; p; prev = p, p = p->next)
     if (p->pid == pid)
       {
@@ -1081,7 +1084,8 @@ procsub_delete (pid_t pid)
 
   if (p == 0)
     {
-      UNBLOCK_CHILD (oset);
+      if (block)
+	UNBLOCK_CHILD (oset);
       return p;
     }
 
@@ -1098,7 +1102,9 @@ procsub_delete (pid_t pid)
 
   /* this can't be called anywhere in a signal handling path */
   bgp_add (p->pid, process_exit_status (p->status));
-  UNBLOCK_CHILD (oset);
+
+  if (block)
+    UNBLOCK_CHILD (oset);
   return (p);  
 }
 
@@ -1108,7 +1114,7 @@ procsub_waitpid (pid_t pid)
   PROCESS *p;
   int r;
 
-  p = procsub_search (pid);
+  p = procsub_search (pid, 1);
   if (p == 0)
     return -1;
   if (p->running == PS_DONE)
@@ -1138,7 +1144,6 @@ procsub_clear (void)
   sigset_t set, oset;
 
   BLOCK_CHILD (set, oset);
-  
   for (ps = procsubs.head; ps; )
     {
       p = ps;
@@ -1191,6 +1196,40 @@ procsub_reap (void)
   procsub_prune ();
   last_procsub_child = (PROCESS *)NULL;
   UNQUEUE_SIGCHLD (os);
+}
+
+void
+procsub_setflag (pid_t pid, int flag, int block)
+{
+  sigset_t set, oset;
+  PROCESS *p;
+
+  if (block)
+    BLOCK_CHILD (set, oset);
+
+  for (p = procsubs.head; p; p = p->next)
+    if (p->pid == pid || pid == ANY_PID)
+      p->flags |= flag;
+
+  if (block)
+    UNBLOCK_CHILD (oset);
+}
+
+void
+procsub_unsetflag (pid_t pid, int flag, int block)
+{
+  sigset_t set, oset;
+  PROCESS *p;
+
+  if (block)
+    BLOCK_CHILD (set, oset);
+
+  for (p = procsubs.head; p; p = p->next)
+    if (p->pid == pid || pid == ANY_PID)
+      p->flags &= ~flag;
+
+  if (block)
+    UNBLOCK_CHILD (oset);
 }
 #endif
 
@@ -1505,6 +1544,7 @@ alloc_process (char *name, pid_t pid)
   t->pid = pid;
   WSTATUS (t->status) = 0;
   t->running = PS_RUNNING;	/* default */
+  t->flags = 0;
   t->command = name;
   t->next = (PROCESS *)0;
 
@@ -1541,8 +1581,9 @@ discard_pipeline (PROCESS *chain)
 
 /* Add this process to the chain being built in the_pipeline.
    NAME is the command string that will be exec'ed later.
-   PID is the process id of the child. */
-static void
+   PID is the process id of the child. Returns the PROCESS *
+   we just created if the caller wants to use it or set flags. */
+static PROCESS *
 add_process (char *name, pid_t pid)
 {
   PROCESS *t, *p;
@@ -1573,6 +1614,8 @@ add_process (char *name, pid_t pid)
 	p = p->next;
       p->next = t;
     }
+
+  return t;
 }
 
 /* Create a (dummy) PROCESS with NAME, PID, and STATUS, and make it the last
@@ -1784,7 +1827,7 @@ find_pipeline (pid_t pid, int alive_only, int *jobp)
       return (p);
 
 #if defined (PROCESS_SUBSTITUTION)
-  if (procsubs.nproc > 0 && (p = procsub_search (pid)) && ((alive_only == 0 && PRECYCLED(p) == 0) || PALIVE(p)))
+  if (procsubs.nproc > 0 && (p = procsub_search (pid, 0)) && ((alive_only == 0 && PRECYCLED(p) == 0) || PALIVE(p)))
     return (p);
 #endif
 
@@ -1853,6 +1896,9 @@ get_job_by_pid (pid_t pid, int block, PROCESS **procp)
 {
   int job;
   sigset_t set, oset;
+
+  if (pid < 0)
+    return (NO_JOB);
 
   if (block)
     BLOCK_CHILD (set, oset);
@@ -2201,6 +2247,7 @@ make_child (char *command, int flags)
   unsigned int forksleep;
   sigset_t set, oset, oset_copy;
   pid_t pid;
+  PROCESS *child;
   SigHandler *oterm;
 
   sigemptyset (&oset_copy);
@@ -2394,7 +2441,13 @@ make_child (char *command, int flags)
 
       /* Place all processes into the jobs array regardless of the
 	 state of job_control. */
-      add_process (command, pid);
+      child = add_process (command, pid);
+
+      /* Set up the flags based on what the caller provides. */
+      if (flags & FORK_PROCSUB)
+        child->flags |= PROC_PROCSUB;
+      if (flags & FORK_COMSUB)
+	child->flags |= PROC_COMSUB;
 
       if (async_p)
 	last_asynchronous_pid = pid;
@@ -3358,8 +3411,9 @@ wait_for_job (int job, int flags, struct procstat *ps)
   return r;
 }
 
-/* Wait for any background job started by this shell to finish.  Very
-   similar to wait_for_background_pids().  Returns the exit status of
+/* Wait for any background job started by this shell to finish, including
+   process substitutions.
+   Very similar to wait_for_background_pids().  Returns the exit status of
    the next exiting job, -1 if there are no background jobs.  The caller
    is responsible for translating -1 into the right return value. RPID,
    if non-null, gets the pid of the job's process leader. */
@@ -3369,6 +3423,7 @@ wait_for_any_job (int flags, struct procstat *ps)
   pid_t pid;
   int i, r;
   sigset_t set, oset;
+  PROCESS *p, *child;
 
   /* Allow funsubs to run this, but don't remove jobs from the jobs table. */
   if (jobs_list_frozen > 0)
@@ -3406,6 +3461,33 @@ return_job:
 	  return r;
 	}
     }
+
+#if defined (PROCESS_SUBSTITUTION)
+  /* We don't have any dead jobs, but let's see if we have a dead procsub. */
+  for (p = procsubs.head; p; p = p->next)
+    {
+      /* If we're waiting for specific pids, skip over ones we're not interested in. */
+      if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
+	continue;
+      if (p->running == PS_DONE)
+	{
+return_procsub:
+	  r = process_exit_status (p->status);
+	  pid = p->pid;
+	  if (ps)
+	    {
+	      ps->pid = pid;
+	      ps->status = r;
+	    }
+	  procsub_delete (pid, 0);		/* XXX - procsub_reap? */
+	  if (posixly_correct)
+	    bgp_delete (pid);
+	  UNBLOCK_CHILD (oset);
+	  return r;
+	}
+    }
+#endif
+
   UNBLOCK_CHILD (oset);
 
   /* At this point, we have no dead jobs in the jobs table.  Wait until we
@@ -3426,7 +3508,21 @@ return_job:
 	    goto return_job;
 	}
 
-      if (i == js.j_jobslots)
+      p = NULL;
+#if defined (PROCESS_SUBSTITUTION)
+      /* Do we have any procsubs that are still candidates? */
+      for (p = procsubs.head; p; p = p->next)
+	{
+	  if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
+	    continue;
+	  else if (p->running == PS_DONE)
+	    goto return_procsub;
+	  else if (p->running == PS_RUNNING)		/* still got one */
+	    break;
+	}
+#endif
+
+      if (i == js.j_jobslots && p == NULL)
 	{
 	  UNBLOCK_CHILD (oset);
 	  return -1;
@@ -3452,6 +3548,15 @@ return_job:
 	  if (jobs[i] && DEADJOB (i))
 	    goto return_job;
 	}
+#if defined (PROCESS_SUBSTITUTION)
+      for (p = procsubs.head; p; p = p->next)
+	{
+	  if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
+	    continue;
+	  else if (p->running == PS_DONE)
+	    goto return_procsub;
+	}
+#endif
       UNBLOCK_CHILD (oset);
     }
 
@@ -3994,7 +4099,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 	 or close file descriptors corresponding to terminated process
 	 substitutions. */
       /* XXX - should combine this list with procsub_add, etc. */
-      if ((ind = find_procsub_child (pid)) >= 0)
+      if ((ind = find_procsub_child (pid)) >= 0 && (WIFEXITED (status) || WIFSIGNALED (status)))
 	set_procsub_status (ind, pid, WSTATUS (status));
 #endif
 

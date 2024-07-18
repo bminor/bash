@@ -6094,25 +6094,6 @@ delete_procsubs (void)
   reap_some_procsubs (nfifo);
 }
 
-#if 0
-/* UNUSED */
-void
-wait_procsubs (void)
-{
-  int i, r;
-
-  for (i = 0; i < nfifo; i++)
-    {
-      if (fifo_list[i].proc != (pid_t)-1 && fifo_list[i].proc > 0)
-	{
-	  r = wait_for (fifo_list[i].proc, 0);
-	  save_proc_status (fifo_list[i].proc, r);
-	  fifo_list[i].proc = (pid_t)-1;
-	}
-    }
-}
-#endif
-
 int
 fifos_pending (void)
 {
@@ -6327,25 +6308,6 @@ delete_procsubs (void)
   reap_some_procsubs (totfds);
 }
 
-#if 0
-/* UNUSED */
-void
-wait_procsubs (void)
-{
-  int i, r;
-
-  for (i = 0; nfds > 0 && i < totfds; i++)
-    {
-      if (dev_fd_list[i] != (pid_t)-1 && dev_fd_list[i] > 0)
-	{
-	  r = wait_for (dev_fd_list[i], 0);
-	  save_proc_status (dev_fd_list[i], r);
-	  dev_fd_list[i] = (pid_t)-1;
-	}
-    }
-}
-#endif
-
 #if defined (NOTDEF)
 print_dev_fd_list (void)
 {
@@ -6443,7 +6405,7 @@ process_substitute (char *string, int open_for_read_in_child)
   save_pipeline (1);
 #endif /* JOB_CONTROL */
 
-  pid = make_child ((char *)NULL, FORK_ASYNC);
+  pid = make_child ((char *)NULL, FORK_ASYNC|FORK_PROCSUB);
   if (pid == 0)
     {
 #if 0
@@ -7283,7 +7245,7 @@ command_substitute (char *string, int quoted, int flags)
 
   old_async_pid = last_asynchronous_pid;
   fork_flags = (subshell_environment&SUBSHELL_ASYNC) ? FORK_ASYNC : 0;
-  pid = make_child ((char *)NULL, fork_flags|FORK_NOTERM);
+  pid = make_child ((char *)NULL, fork_flags|FORK_NOTERM|FORK_COMSUB);
   last_asynchronous_pid = old_async_pid;
 
   if (pid == 0)

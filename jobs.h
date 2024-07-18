@@ -65,6 +65,12 @@
 #define PS_STOPPED	2
 #define PS_RECYCLED	4
 
+/* Values for the `flags' field of a struct process. */
+#define PROC_WAITING	0x01
+#define PROC_PROCSUB	0x02
+#define PROC_COMSUB	0x04
+#define PROC_LASTPIPE	0x08
+
 /* Each child of the shell is remembered in a STRUCT PROCESS.  A circular
    chain of such structures is a pipeline. */
 typedef struct process {
@@ -72,6 +78,7 @@ typedef struct process {
   pid_t pid;		/* Process ID. */
   WAIT status;		/* The status of this command as returned by wait. */
   int running;		/* Non-zero if this process is running. */
+  int flags;		/* Placeholder for process-specific flag values. */
   char *command;	/* The particular program that is running. */
 } PROCESS;
 
@@ -206,11 +213,12 @@ struct procchain {
 #define ANY_PID (pid_t)-1
 
 /* flags for make_child () */
-#define FORK_SYNC	0		/* normal synchronous process */
-#define FORK_ASYNC	1		/* background process */
-#define FORK_NOJOB	2		/* don't put process in separate pgrp */
-#define FORK_NOTERM	4		/* don't give terminal to any pgrp */
-#define FORK_COMSUB	8		/* command or process substitution */
+#define FORK_SYNC	0x0		/* normal synchronous process */
+#define FORK_ASYNC	0x1		/* background process */
+#define FORK_NOJOB	0x2		/* don't put process in separate pgrp */
+#define FORK_NOTERM	0x4		/* don't give terminal to any pgrp */
+#define FORK_COMSUB	0x8		/* command substitution */
+#define FORK_PROCSUB	0x10		/* process substitution */
 
 /* System calls. */
 #if !defined (HAVE_UNISTD_H)
@@ -250,13 +258,15 @@ extern int retrieve_proc_status (pid_t, int);
 extern void delete_proc_status (pid_t, int);
 
 extern PROCESS *procsub_add (PROCESS *);
-extern PROCESS *procsub_search (pid_t);
-extern PROCESS *procsub_delete (pid_t);
+extern PROCESS *procsub_search (pid_t, int);
+extern PROCESS *procsub_delete (pid_t, int);
 extern int procsub_waitpid (pid_t);
 extern void procsub_waitall (void);
 extern void procsub_clear (void);
 extern void procsub_prune (void);
 extern void procsub_reap (void);
+extern void procsub_setflag (pid_t, int, int);
+extern void procsub_unsetflag (pid_t, int, int);
 
 extern void delete_job (int, int);
 extern void nohup_job (int);

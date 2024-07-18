@@ -92,7 +92,7 @@ int wait_intr_flag;
 
 static int set_waitlist (WORD_LIST *);
 static void unset_waitlist (void);
-static int check_bgpids (WORD_LIST *, struct procstat *);
+static int check_nonjobs (WORD_LIST *, struct procstat *);
 
 /* Wait for the pid in LIST to stop or die.  If no arguments are given, then
    wait for all of the active background processes of the shell and return
@@ -211,12 +211,13 @@ wait_builtin (WORD_LIST *list)
 #if defined (JOB_CONTROL)
   if (nflag)
     {
-#if 0	/* TAG:bash-5.4 stevenpelley@gmail.com 01/22/2024 */
+#if 1	/* TAG:bash-5.3 stevenpelley@gmail.com 01/22/2024 */
       /* First let's see if there are any requested pids that have already
-	 been removed from the jobs list and saved on bgpids. */
+	 been removed from the jobs list and saved on bgpids or are terminated
+	 procsubs. */
       if (list)
 	{
-	  status = check_bgpids (list, &pstat);
+	  status = check_nonjobs (list, &pstat);
 	  if (status != -1)
 	    {
 	      if (vname)
@@ -343,29 +344,47 @@ wait_builtin (WORD_LIST *list)
 
 #if defined (JOB_CONTROL)
 /* Take each valid pid or jobspec in LIST and mark the corresponding job as
-   J_WAITING, so wait -n knows which jobs to wait for. Return the number of
-   jobs we found. */
+   J_WAITING, so wait -n knows which jobs to wait for.
+   If we have process substitutions, allow wait -n to wait for procsubs by
+   pid by marking them with PROC_WAITING.
+   Return the number of jobs or procsubs we found. */
 static int
 set_waitlist (WORD_LIST *list)
 {
   sigset_t set, oset;
   int job, njob;
-  intmax_t pid;
+  intmax_t ipid;
+  pid_t pid;
+  PROCESS *child;
   WORD_LIST *l;
 
   BLOCK_CHILD (set, oset);
   njob = 0;
   for (l = list; l; l = l->next)
     {
-      job = NO_JOB;
-      job = (l && l->word && valid_number (l->word->word, &pid) && pid == (pid_t) pid)
-		? get_job_by_pid ((pid_t) pid, 0, 0)
-		: get_job_spec (l);
+      child = NULL;
+
+      pid = (l && l->word && valid_number (l->word->word, &ipid) && ipid == (pid_t)ipid) ? (pid_t)ipid : NO_PID;
+      job = (pid != NO_PID) ? get_job_by_pid (pid, 0, 0) : get_job_spec (l);
+
       if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))
 	{
-	  sh_badjob (l->word->word);
+#if defined (PROCESS_SUBSTITUTION)
+	  child = (pid >= 0) ? procsub_search (pid, 0) : NULL;
+#endif
+	  if (child)
+	    {
+	      /* If we don't have a valid job, maybe we have a procsub */
+	      njob++;
+	      child->flags |= PROC_WAITING;
+	    }
+	  else if (l->word->word[0] == '%')
+	    sh_badjob (l->word->word);
+	  else
+	    sh_badpid (l->word->word);
 	  continue;
 	}
+
       /* We don't check yet to see if one of the desired jobs has already
 	 terminated, but we could. We wait until wait_for_any_job(). This
 	 has the advantage of validating all the arguments. */
@@ -390,17 +409,22 @@ unset_waitlist (void)
   for (i = 0; i < js.j_jobslots; i++)
     if (jobs[i] && (jobs[i]->flags & J_WAITING))
       jobs[i]->flags &= ~J_WAITING;
+#if defined (PROCESS_SUBSTITUTION)
+  procsub_unsetflag (ANY_PID, PROC_WAITING, 0);
+#endif
   UNBLOCK_CHILD (oset);
 }
 
-#if 0 /* TAG:bash-5.4 */
+/* For each pid in LIST, check the bgpids list and the procsub list, if we
+   have process substitutions. */
 static int
-check_bgpids (WORD_LIST *list, struct procstat *pstat)
+check_nonjobs (WORD_LIST *list, struct procstat *pstat)
 {
   sigset_t set, oset;
   pid_t pid;
   intmax_t ipid;
   WORD_LIST *l;
+  PROCESS *child;
   int r, s;
 
   r = -1;
@@ -408,11 +432,17 @@ check_bgpids (WORD_LIST *list, struct procstat *pstat)
   BLOCK_CHILD (set, oset);
   for (l = list; l; l = l->next)
     {
-      if (l && valid_number (l->word->word, &ipid) && ipid == (pid_t) ipid)
+      if (l && valid_number (l->word->word, &ipid) && ipid == (pid_t) ipid && ipid >= 0)
         pid = ipid;
-      else
+      else if (l && l->word->word[0] == '%')
 	continue;	/* skip job ids for now */
+      else
+	{
+	  r = -1;
+	  continue;
+	}
 
+      /* check bgpids */
       if ((s = retrieve_proc_status (pid, 0)) != -1)
 	{
 	  pstat->pid = pid;
@@ -423,10 +453,22 @@ check_bgpids (WORD_LIST *list, struct procstat *pstat)
 	    delete_proc_status (pid, 0);
 	  break;
 	}
+
+#if defined (PROCESS_SUBSTITUTION)
+      /* If this corresponds to a terminated procsub, return it. */
+      if ((child = procsub_search (pid, 0)) && child->running == PS_DONE)
+	{
+	  pstat->pid = pid;
+	  pstat->status = r = process_exit_status (child->status);
+	  procsub_delete (pid, 0);	/* moves to bgpids list */
+	  if (posixly_correct)
+	    delete_proc_status (pid, 0);
+	  break;
+	}
+#endif
     }
   UNBLOCK_CHILD (oset);
 
   return r;
 }
-#endif
 #endif

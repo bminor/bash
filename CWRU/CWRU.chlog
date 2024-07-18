@@ -9810,3 +9810,51 @@ bashline.c
 	  completions that should be affected by FIGNORE; in other cases
 	  act as if it were set to 1
 	  From a report and patch by Koichi Murase <myoga.murase@gmail.com>
+
+				   7/15
+				   ----
+builtins/ulimit.def
+	- add help text saying that some of the units change in posix mode
+
+
+				   7/17
+				   ----
+subst.c
+	- remove some unused functions
+
+jobs.c,jobs.h
+	- procsub_search,procsub_delete: now take an extra parameter saying
+	  whether or not to block SIGCHLD while they run; avoids overhead
+	  when called when SIGCHLD is already blocked; changed callers and
+	  extern declaration
+	- struct process now has a new FLAGS member; possible values defined
+	  in jobs.h; initialized in alloc_process
+	- procsub_setflag,procsub_setflag: set one of the PROC_XXX flags on
+	  one or all of the processes in the procsub list
+	- new value for the flags argument to make_child: FORK_PROCSUB
+	- add_process: now returns the PROCESS * it creates so the caller can
+	  set flags or otherwise modify it
+	- get_job_by_pid: return NO_JOB for negative pids immediately
+
+subst.c
+	- process_substitute,command_substitute: call make_child with the
+	  appropriate FORK_ flag
+
+jobs.c
+	- make_child: set PROC_ flags in the PROCESS * we create based on the
+	  FORK_ flags the caller passes
+	- wait_for: only call set_procsub_status if the process has terminated
+	- wait_for_any_job: check for any terminated procsubs as well as any
+	  terminated background jobs
+
+builtins/wait.def
+	- check_bgpids: rename to check_nonjobs
+	- wait_builtin: if the -n option is supplied and pid arguments are
+	  supplied, check the bgpids list and procsubs for terminated processes
+	- check_nonjobs: if one of the pids in LIST corresponds to a terminated
+	  procsub, return its status and move the procsub to the bgpids list
+	- set_waitlist: if we have a non-existent or invalid job, and a pid
+	  argument that's >= 0, look for a procsub with that pid and set
+	  PROC_WAITING if we have one
+	- unset_waitlist: unset PROC_WAITING in all procsubs
+
