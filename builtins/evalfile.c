@@ -245,7 +245,7 @@ file_error_and_exit:
   GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
 #  endif
 
-  array_push (bash_source_a, (char *)filename);
+  push_source (bash_source_a, (char *)filename);
   t = itos (executing_line_number ());
   array_push (bash_lineno_a, t);
   free (t);

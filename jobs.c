@@ -233,6 +233,7 @@ int already_making_children = 0;
 int check_window_size = CHECKWINSIZE_DEFAULT;
 
 PROCESS *last_procsub_child = (PROCESS *)NULL;
+pid_t last_procsub_pid = NO_PID;
 
 /* Set to non-zero if you want to force job notifications even in contexts
    where the shell would defer them. */
@@ -1067,6 +1068,8 @@ procsub_search (pid_t pid, int block)
   return p;
 }
 
+/* Take the PROCESS * corresponding to PID out of the procsubs list and
+   return it. */
 PROCESS *
 procsub_delete (pid_t pid, int block)
 {
@@ -1151,7 +1154,9 @@ procsub_clear (void)
       procsub_free (p);
     }
   procsubs.head = procsubs.end = 0;
-  procsubs.nproc = 0;        
+  procsubs.nproc = 0;
+
+  last_procsub_child = NULL;
   UNBLOCK_CHILD (oset);
 }
 
@@ -1179,6 +1184,8 @@ procsub_prune (void)
       if (p->running == PS_DONE)
 	{
 	  bgp_add (p->pid, process_exit_status (p->status));
+	  if (p == last_procsub_child)
+	    last_procsub_child = NULL;
 	  procsub_free (p);
 	}
       else
@@ -1194,7 +1201,6 @@ procsub_reap (void)
 
   QUEUE_SIGCHLD(os);
   procsub_prune ();
-  last_procsub_child = (PROCESS *)NULL;
   UNQUEUE_SIGCHLD (os);
 }
 
@@ -1314,7 +1320,6 @@ cleanup_dead_jobs (void)
 #if defined (PROCESS_SUBSTITUTION)
   /* Don't need to call procsub_reap() since SIGCHLD is already blocked. */
   procsub_prune ();
-  last_procsub_child = (PROCESS *)NULL;
 #endif
 
 #if defined (COPROCESS_SUPPORT)
@@ -3469,9 +3474,17 @@ return_job:
       /* If we're waiting for specific pids, skip over ones we're not interested in. */
       if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
 	continue;
+#if 0
+      /* If we want to restrict wait -n without pid arguments to only wait
+	 for last_procsub_child->pid, uncomment this. */
+      if ((flags & JWAIT_WAITING) == 0 && p != last_procsub_child)
+	continue;
+#endif
       if (p->running == PS_DONE)
 	{
 return_procsub:
+	  if (p == last_procsub_child)
+	    last_procsub_child = (PROCESS *)NULL;
 	  r = process_exit_status (p->status);
 	  pid = p->pid;
 	  if (ps)
@@ -3479,7 +3492,10 @@ return_procsub:
 	      ps->pid = pid;
 	      ps->status = r;
 	    }
-	  procsub_delete (pid, 0);		/* XXX - procsub_reap? */
+	  child = procsub_delete (pid, 0);		/* XXX - procsub_reap? */
+	  if (child == last_procsub_child)
+	    last_procsub_child = NULL;
+	  procsub_free (child);
 	  if (posixly_correct)
 	    bgp_delete (pid);
 	  UNBLOCK_CHILD (oset);
@@ -3515,6 +3531,12 @@ return_procsub:
 	{
 	  if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
 	    continue;
+#if 0
+	  /* If we want to restrict wait -n without pid arguments to only wait
+	     for last_procsub_child->pid, uncomment this. */
+	  if ((flags & JWAIT_WAITING) == 0 && p != last_procsub_child && p->running == PS_DONE)
+	    continue;
+#endif
 	  else if (p->running == PS_DONE)
 	    goto return_procsub;
 	  else if (p->running == PS_RUNNING)		/* still got one */

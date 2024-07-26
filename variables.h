@@ -375,6 +375,10 @@ extern void push_args (WORD_LIST *);
 extern void pop_args (void);
 extern void uw_pop_args (void *);
 
+#if defined (ARRAY_VARS)
+extern void push_source (ARRAY *, char *);
+#endif
+
 extern void adjust_shell_level (int);
 extern void non_unsettable (char *);
 extern void dispose_variable (SHELL_VAR *);

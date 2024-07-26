@@ -1638,7 +1638,7 @@ open_shell_script (char *script_name)
   GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
   GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
 
-  array_push (bash_source_a, filename);
+  push_source (bash_source_a, filename);
   if (bash_lineno_a)
     {
       t = itos (executing_line_number ());

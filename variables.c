@@ -5688,6 +5688,16 @@ uw_pop_args (void *ignore)
   pop_args ();
 }
 
+#if defined (ARRAY_VARS)
+/* Push the current input filename onto BASH_SOURCE. This is where we can
+   apply any policy. */
+void
+push_source (ARRAY *a, char *filename)
+{
+   array_push (a, filename);
+}
+#endif
+
 /*************************************************
  *						 *
  *	Functions to manage special variables	 *

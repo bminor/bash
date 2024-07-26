@@ -237,6 +237,7 @@ extern int already_making_children;
 extern int running_in_background;
 
 extern PROCESS *last_procsub_child;
+extern pid_t last_procsub_pid;
 
 extern JOB **jobs;
 

@@ -9858,3 +9858,17 @@ builtins/wait.def
 	  PROC_WAITING if we have one
 	- unset_waitlist: unset PROC_WAITING in all procsubs
 
+				   7/18
+				   ----
+jobs.c
+	- procsub_prune: set last_procsub_child to NULL if we are cleaning up
+	  that process because it's terminated, since that will invalidate the
+	  pointer
+
+				   7/22
+				   ----
+lib/malloc/malloc.c
+	- RIGHT_BUCKET: don't check binsizes[nu-1] unless nu >= 1; clamp at 0
+	  otherwise
+	- internal_realloc: don't check bucket at nunits-1 unless nunits >= 1
+	  Report and fix from Collin Funk <collin.funk1@gmail.com>
