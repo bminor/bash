@@ -9872,3 +9872,39 @@ lib/malloc/malloc.c
 	  otherwise
 	- internal_realloc: don't check bucket at nunits-1 unless nunits >= 1
 	  Report and fix from Collin Funk <collin.funk1@gmail.com>
+
+				   7/25
+				   ----
+variables.c
+	- push_source: new function, pushes a filename to BASH_SOURCE; changed
+	  callers (shell.c, execute_cmd.c, builtins/evalfile.c)
+	- bash_source_fullpath: new variable, if non-zero, push_source runs
+	  the filename through sh_realpath before pushing it to BASH_SOURCE
+	  Feature requested by several, including konsolebox <konsolebox@gmail.com>
+
+builtins/shopt.def
+	- bash_source_fullpath: new option, controls bash_source_fullpath and
+	  whether or not BASH_SOURCE contains full pathnames
+
+doc/bash.1,doc/bashref.texi
+	- bash_source_fullpath: document new shell option
+
+				   7/26
+				   ----
+jobs.c,jobs.h,subst.c
+	- last_procsub_pid: new variable, set to the pid of last_procsub_child,
+	  so it will survive the PROCESS * being deleted if we need it. Not
+	  used yet
+
+				   7/29
+				   ----
+doc/bash.1,doc/bashref.texi
+	- wait: update description to clarify wait -n and unify language
+	  Inspired by report from Zachary Santer <zsanter@gmail.com>
+	- set: note that the -e behavior for pipelines is affected by the
+	  state of the pipefail option
+	  From a report by Martin D Kealey <martin@kurahaupo.gen.nz>
+
+variables.c,hashcmd.c,builtins/hash.def,builtins/history.def,builtins/source.def
+	- use ABSPATH/RELPATH/absolute_program instead of testing for slash
+	  explicitly

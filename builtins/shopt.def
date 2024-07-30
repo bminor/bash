@@ -97,6 +97,7 @@ extern int localvar_unset;
 extern int varassign_redir_autoclose;
 extern int singlequote_translations;
 extern int patsub_replacement;
+extern int bash_source_fullpath;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -177,10 +178,13 @@ static struct {
   int  *value;
   shopt_set_func_t *set_func;
 } shopt_vars[] = {
-  { "autocd", &autocd, (shopt_set_func_t *)NULL },
 #if defined (ARRAY_VARS)
   { "array_expand_once", &expand_once_flag, set_array_expand },
   { "assoc_expand_once", &expand_once_flag, set_array_expand },
+#endif
+  { "autocd", &autocd, (shopt_set_func_t *)NULL },
+#if defined (ARRAY_VARS)
+  { "bash_source_fullpath", &bash_source_fullpath, (shopt_set_func_t *)NULL },
 #endif
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },

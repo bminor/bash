@@ -6471,6 +6471,7 @@ process_substitute (char *string, int open_for_read_in_child)
       /* We assume that last_procsub_child->next == last_procsub_child because
 	 of how jobs.c:add_process() works. */
       last_procsub_child->next = 0;
+      last_procsub_pid = last_procsub_child->pid;
       procsub_add (last_procsub_child);
 #endif
 

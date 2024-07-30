@@ -170,6 +170,9 @@ int array_needs_making = 1;
    by initialize_variables (). */
 int shell_level = 0;
 
+/* If non-zero, each element of BASH_SOURCE contains a full pathnames */
+int bash_source_fullpath = 0;
+
 /* An array which is passed to commands as their environment.  It is
    manufactured from the union of the initial environment and the
    shell variables that are marked for export. */
@@ -915,7 +918,7 @@ set_pwd (void)
   /* Follow posix rules for importing PWD */
   if (temp_var && imported_p (temp_var) &&
       (temp_string = value_cell (temp_var)) &&
-      temp_string[0] == '/' &&
+      ABSPATH (temp_string) &&
       same_file (temp_string, ".", (struct stat *)NULL, (struct stat *)NULL))
     {
       current_dir = sh_canonpath (temp_string, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
@@ -1718,7 +1721,7 @@ assign_hashcmd (SHELL_VAR *self, char *value, arrayind_t ind, char *key)
 
   if (restricted)
     {
-      if (strchr (value, '/'))
+      if (absolute_program (value))
 	{
 	  sh_restricted (value);
 	  return (SHELL_VAR *)NULL;
@@ -5694,7 +5697,18 @@ uw_pop_args (void *ignore)
 void
 push_source (ARRAY *a, char *filename)
 {
-   array_push (a, filename);
+  char *fn;
+  char pathname[PATH_MAX];
+
+  if (bash_source_fullpath)
+    {
+      if ((fn = sh_realpath (filename, pathname)) == 0)
+        fn = filename;
+    }
+  else
+    fn = filename;
+
+  array_push (a, fn);
 }
 #endif
 

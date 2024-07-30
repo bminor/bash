@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Jul  2 14:28:46 EDT 2024
+.\"	Last Change: Mon Jul 29 11:19:45 EDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 July 2" "GNU Bash 5.3"
+.TH BASH 1 "2024 July 29" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -657,8 +657,8 @@ These are referred to as \fIasynchronous\fP commands.
 Commands separated by a
 .B ;
 are executed sequentially; the shell waits for each
-command to terminate in turn.  The return status is the
-exit status of the last command executed.
+command to terminate in turn.
+The return status is the exit status of the last command executed.
 .PP
 AND and OR lists are sequences of one or more pipelines separated by the
 \fB&&\fP and \fB||\fP control operators, respectively.
@@ -10327,7 +10327,8 @@ reserved words, part of any command executed in a
 or
 .B ||
 list except the command following the final \fB&&\fP or \fB||\fP,
-any command in a pipeline but the last,
+any command in a pipeline but the last
+(subject to the state of the \fBpipefail\fP shell option),
 or if the command's return value is
 being inverted with
 .BR ! .
@@ -10763,6 +10764,10 @@ Deprecated; a synonym for \fBarray_expand_once\fP.
 If set, a command name that is the name of a directory is executed as if
 it were the argument to the \fBcd\fP command.
 This option is only used by interactive shells.
+.TP 8
+.B bash_source_fullpath
+If set, filenames added to the \fBBASH_SOURCE\fP array variable are
+converted to full pathnames (see \fBShell Variables\fP above).
 .TP 8
 .B cdable_vars
 If set, an argument to the
@@ -11831,43 +11836,45 @@ subsequently reset.  The exit status is true unless a
 is readonly or may not be unset.
 .TP
 \fBwait\fP [\fB\-fn\fP] [\fP\-p\fP \fIvarname\fP] [\fIid\fP .\|.\|.]
-Wait for each specified child process and return its termination status.
-Each
-.I id
-may be a process
-ID or a job specification; if a job spec is given, all processes
-in that job's pipeline are waited for.  If
-.I id
-is not given,
+Wait for each specified child process \fIid\fP and return the
+termination status of the last \fIid\fP.
+Each \fIid\fP may be a process ID or a job specification;
+if a job spec is given, \fBwait\fP waits for all processes in the job.
+.IP
+If no options or \fIid\fPs are supplied,
 \fBwait\fP waits for all running background jobs and
-the last-executed process substitution, if its process id is the same as
-\fB$!\fP,
+the last-executed process substitution,
+if its process id is the same as \fB$!\fP,
 and the return status is zero.
-If the \fB\-n\fP option is supplied,
-\fBwait\fP waits for a single job
-from the list of \fIid\fPs or, if no \fIid\fPs are supplied, any job,
+.IP
+If the \fB\-n\fP option is supplied, \fBwait\fP waits for any one of
+the given \fIid\fPs or, if no \fIid\fPs are supplied, any job
+or process substitution,
 to complete and returns its exit status.
-If none of the supplied arguments is a child of the shell, or if no arguments
-are supplied and the shell has no unwaited-for children, the exit status
-is 127.
-If the \fB\-p\fP option is supplied, the process or job identifier of the job
-for which the exit status is returned is assigned to the variable
-\fIvarname\fP named by the option argument.
+If none of the supplied \fIid\fPs is a child of the shell,
+or if no \fIid\fPs are supplied and the shell has no unwaited-for children,
+the exit status is 127.
+.IP
+If the \fB\-p\fP option is supplied, the process or job identifier
+of the job for which the exit status is returned is assigned to the
+variable \fIvarname\fP named by the option argument.
 The variable will be unset initially, before any assignment.
 This is useful only when the \fB\-n\fP option is supplied.
+.IP
 Supplying the \fB\-f\fP option, when job control is enabled,
-forces \fBwait\fP to wait for \fIid\fP to terminate before returning
-its status, instead of returning when it changes status.
-If
-.I id
-specifies a non-existent process or job, the return status is 127.
-If \fBwait\fP is interrupted by a signal, the return status will be greater
+forces \fBwait\fP to wait for each \fIid\fP to terminate before
+returning its status, instead of returning when it changes status.
+.IP
+If none of the \fIid\fPs specify one of the shell's active child
+processes, the return status is 127.
+If \fBwait\fP is interrupted by a signal,
+any \fIvarname\fP will remain unset,
+and the return status will be greater
 than 128, as described under
 .B SIGNALS
 .ie \n(zZ=1 in \fIbash\fP(1).
 .el above.
-Otherwise, the return status is the exit status of the last
-process or job waited for.
+Otherwise, the return status is the exit status of the last \fIid\fP.
 .SH "SHELL COMPATIBILITY MODE"
 Bash-4.0 introduced the concept of a \fIshell compatibility level\fP,
 specified as a set of options to the shopt builtin (\c

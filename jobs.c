@@ -2826,8 +2826,12 @@ wait_for_background_pids (struct procstat *ps)
     }
 
 #if defined (PROCESS_SUBSTITUTION)
+#  if defined (WAIT_WAITS_FOR_ALL_PROCSUBS)
+  procsub_waitall ();
+#  else
   if (last_procsub_child && last_procsub_child->pid != NO_PID && last_procsub_child->pid == last_asynchronous_pid)
     procsub_waitpid (last_procsub_child->pid);
+#  endif
   delete_procsubs ();	/* closes fds or unlinks fifos */
 #endif
 
@@ -3474,7 +3478,7 @@ return_job:
       /* If we're waiting for specific pids, skip over ones we're not interested in. */
       if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
 	continue;
-#if 0
+#if defined (WAIT_N_WAITS_FOR_LAST_PROCSUB)
       /* If we want to restrict wait -n without pid arguments to only wait
 	 for last_procsub_child->pid, uncomment this. */
       if ((flags & JWAIT_WAITING) == 0 && p != last_procsub_child)

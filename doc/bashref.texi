@@ -849,8 +849,8 @@ the standard input for asynchronous commands, in the absence of any
 explicit redirections, is redirected from @code{/dev/null}.
 
 Commands separated by a @samp{;} are executed sequentially; the shell
-waits for each command to terminate in turn.  The return status is the
-exit status of the last command executed.
+waits for each command to terminate in turn.
+The return status is the exit status of the last command executed.
 
 @sc{and} and @sc{or} lists are sequences of one or more pipelines
 separated by the control operators @samp{&&} and @samp{||},
@@ -5481,7 +5481,8 @@ command list immediately following a @code{while} or @code{until} keyword,
 part of the test in an @code{if} statement,
 part of any command executed in a @code{&&} or @code{||} list except
 the command following the final @code{&&} or @code{||},
-any command in a pipeline but the last,
+any command in a pipeline but the last
+(subject to the state of the @code{pipefail} shell option),
 or if the command's return status is being inverted with @code{!}.
 If a compound command other than a subshell
 returns a non-zero status because a command failed
@@ -5812,6 +5813,10 @@ Deprecated; a synonym for @code{array_expand_once}.
 If set, a command name that is the name of a directory is executed as if
 it were the argument to the @code{cd} command.
 This option is only used by interactive shells.
+
+@item bash_source_fullpath
+If set, filenames added to the @code{BASH_SOURCE} array variable are
+converted to full pathnames (@pxref{Bash Variables}).
 
 @item cdable_vars
 If this is set, an argument to the @code{cd} builtin command that
@@ -9337,40 +9342,45 @@ or non-zero if an error occurs or an invalid option is encountered.
 @item wait
 @btindex wait
 @example
-wait [-fn] [-p @var{varname}] [@var{jobspec} or @var{pid} @dots{}]
+wait [-fn] [-p @var{varname}] [@var{id} @dots{}]
 @end example
 
-Wait until the child process specified by each process @sc{id} @var{pid}
-or job specification @var{jobspec} exits and return the exit status of the
-last command waited for.
-If a job spec is given, all processes in the job are waited for.
-If no arguments are given,
+Wait until the child process specified by each @var{id} exits and
+return the exit status of the last @var{id}.
+Each @var{id} may be a @var{pid} or job specification @var{jobspec};
+if a job spec is given, @code{wait} waits for all processes in the job.
+
+If no options or @var{id}s are supplied,
 @code{wait} waits for all running background jobs and
-the last-executed process substitution, if its process id is the same as
-@var{$!},
+the last-executed process substitution,
+if its process id is the same as @var{$!},
 and the return status is zero.
-If the @option{-n} option is supplied, @code{wait} waits for a single job
-from the list of @var{pid}s or @var{jobspec}s or, if no arguments are
-supplied, any job, 
+
+If the @option{-n} option is supplied, @code{wait} waits for any one of
+the @var{id}s or, if no @var{id}s are supplied, any job
+or process substitution,
 to complete and returns its exit status.
-If none of the supplied arguments is a child of the shell, or if no arguments
-are supplied and the shell has no unwaited-for children, the exit status
-is 127.
-If the @option{-p} option is supplied, the process or job identifier of the job
-for which the exit status is returned is assigned to the variable
-@var{varname} named by the option argument.
+If none of the supplied @var{id}s is a child of the shell,
+or if no arguments are supplied and the shell has no unwaited-for children,
+the exit status is 127.
+
+If the @option{-p} option is supplied, the process or job identifier
+of the job for which the exit status is returned is assigned to the
+variable @var{varname} named by the option argument.
 The variable will be unset initially, before any assignment.
 This is useful only when the @option{-n} option is supplied.
+
 Supplying the @option{-f} option, when job control is enabled,
-forces @code{wait} to wait for each @var{pid} or @var{jobspec} to
-terminate before returning its status, instead of returning when it changes
-status.
-If neither @var{jobspec} nor @var{pid} specifies an active child process
-of the shell, the return status is 127.
-If @code{wait} is interrupted by a signal, the return status will be greater
+forces @code{wait} to wait for each @var{id} to terminate before
+returning its status, instead of returning when it changes status.
+
+If none of the @var{id}s specify one of the shell's an active child
+processes, the return status is 127.
+If @code{wait} is interrupted by a signal,
+any @var{varname} will remain unset,
+and the return status will be greater
 than 128, as described above (@pxref{Signals}).
-Otherwise, the return status is the exit  status
-of the last process or job waited for.
+Otherwise, the return status is the exit  status of the last @var{id}.
 
 @item disown
 @btindex disown

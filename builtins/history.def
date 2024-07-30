@@ -282,7 +282,7 @@ history_builtin (WORD_LIST *list)
     }
 
 #if defined (RESTRICTED_SHELL)
-  if (restricted && strchr (filename, '/'))
+  if (restricted && absolute_program (filename))
     {
       sh_restricted (filename);
       return (EXECUTION_FAILURE);

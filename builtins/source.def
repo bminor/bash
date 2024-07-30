@@ -146,7 +146,7 @@ source_builtin (WORD_LIST *list)
     }
 
 #if defined (RESTRICTED_SHELL)
-  if (restricted && (pathstring || strchr (list->word->word, '/')))
+  if (restricted && (pathstring || absolute_program (list->word->word)))
     {
       sh_restricted (list->word->word);
       return (EXECUTION_FAILURE);
@@ -162,7 +162,7 @@ source_builtin (WORD_LIST *list)
 
   filename = (char *)NULL;
   /* XXX -- should this be absolute_pathname? */
-  if (posixly_correct && strchr (list->word->word, '/'))
+  if (posixly_correct && absolute_program (list->word->word))
     filename = savestring (list->word->word);
   else if (absolute_pathname (list->word->word))
     filename = savestring (list->word->word);

@@ -1693,7 +1693,6 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 #if defined (PROCESS_SUBSTITUTION)
 #  if defined (JOB_CONTROL)
   procsub_clear ();
-  last_procsub_child = 0;
 #  endif
   clear_fifo_list ();		/* XXX- we haven't created any FIFOs */
 #endif
@@ -1743,10 +1742,7 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 #if 1
 #if defined (PROCESS_SUBSTITUTION) && defined (JOB_CONTROL)
       if (user_subshell && command->type == cm_subshell)
-	{
-	  procsub_clear ();
-	  last_procsub_child = 0;
-	}
+	procsub_clear ();
 #endif
 #endif
     }
@@ -5277,7 +5273,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
   sfile = shell_fn ? shell_fn->source_file : "";
   array_push ((ARRAY *)funcname_a, this_shell_function->name);
 
-  array_push ((ARRAY *)bash_source_a, sfile);
+  push_source ((ARRAY *)bash_source_a, sfile);
   lineno = GET_LINE_NUMBER ();
   t = itos (lineno);
   array_push ((ARRAY *)bash_lineno_a, t);
