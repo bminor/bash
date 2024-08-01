@@ -762,6 +762,9 @@ open_redir_file (r, fnp)
 
   if (fnp)
     *fnp = fn;
+  else
+    free (fn);
+
   return fd;
 }
 
