@@ -4274,7 +4274,27 @@ notify_of_job_status ()
 	  if (startup_state == 0 && WIFSIGNALED (s) == 0 &&
 		((DEADJOB (job) && IS_FOREGROUND (job) == 0) || STOPPED (job)))
 	    continue;
-	  
+
+	  /* Do the same thing and don't print anything or mark as notified
+	     for the signals we're not going to report on. This is the opposite
+	     of the first two cases under case JDEAD below. */
+	  else if (interactive_shell == 0 && DEADJOB (job) && IS_FOREGROUND (job) == 0 &&
+		WIFSIGNALED (s) && (termsig == SIGINT
+#if defined (DONT_REPORT_SIGTERM)
+		|| termsig == SIGTERM
+#endif
+#if defined (DONT_REPORT_SIGPIPE)
+		|| termsig == SIGPIPE
+#endif
+		|| signal_is_trapped (termsig)))
+	    continue;
+
+	  /* hang onto the status if the shell is running -c command */
+	  else if (startup_state == 2 && subshell_environment == 0 &&
+		WIFSIGNALED (s) == 0 &&
+		((DEADJOB (job) && IS_FOREGROUND (job) == 0) || STOPPED (job)))
+	    continue;
+
 	  /* If job control is disabled, don't print the status messages.
 	     Mark dead jobs as notified so that they get cleaned up.  If
 	     startup_state == 2 and subshell_environment has the
@@ -4297,7 +4317,7 @@ notify_of_job_status ()
 
 	  /* Print info on jobs that are running in the background,
 	     and on foreground jobs that were killed by anything
-	     except SIGINT (and possibly SIGPIPE). */
+	     except SIGINT (and possibly SIGTERM and SIGPIPE). */
 	  switch (JOBSTATE (job))
 	    {
 	    case JDEAD:
@@ -4317,6 +4337,7 @@ notify_of_job_status ()
 		}
 	      else if (IS_FOREGROUND (job))
 		{
+		  /* foreground jobs, interactive and non-interactive shells */
 #if !defined (DONT_REPORT_SIGPIPE)
 		  if (termsig && WIFSIGNALED (s) && termsig != SIGINT)
 #else
@@ -4330,9 +4351,13 @@ notify_of_job_status ()
 
 		      fprintf (stderr, "\n");
 		    }
+		  /* foreground jobs that exit cleanly */
+		  jobs[job]->flags |= J_NOTIFIED;
 		}
-	      else if (job_control)	/* XXX job control test added */
+	      else if (job_control)
 		{
+		  /* background jobs with job control, interactive and
+		     non-interactive shells */
 		  if (dir == 0)
 		    dir = current_working_directory ();
 		  pretty_print_job (job, JLIST_STANDARD, stderr);
@@ -4341,7 +4366,14 @@ notify_of_job_status ()
 			     _("(wd now: %s)\n"), polite_directory_format (dir));
 		}
 
-	      jobs[job]->flags |= J_NOTIFIED;
+	      /* Interactive shells without job control enabled are handled
+		 above. */
+	      /* XXX - this is a catch-all in case we missed a state */
+	      else
+{
+internal_debug("notify_of_job_status: catch-all setting J_NOTIFIED on job %d (%d), startup state = %d", job, jobs[job]->flags, startup_state);
+		jobs[job]->flags |= J_NOTIFIED;
+}
 	      break;
 
 	    case JSTOPPED:
