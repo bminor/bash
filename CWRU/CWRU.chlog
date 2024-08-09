@@ -5783,7 +5783,7 @@ lib/readline/history.c
 
 				   3/24
 				   ----
-lib/readline/history.c
+lib/readline/histfile.c
 	- history_truncate_file: fix off-by-one error that resulted in the
 	  timestamp associated with the first history entry not being written
 	  to the truncated history file
@@ -9908,3 +9908,24 @@ doc/bash.1,doc/bashref.texi
 variables.c,hashcmd.c,builtins/hash.def,builtins/history.def,builtins/source.def
 	- use ABSPATH/RELPATH/absolute_program instead of testing for slash
 	  explicitly
+
+				   7/30
+				   ----
+lib/readline/histfile.c
+	- history_do_write: return 0 immediately if nelements < 0
+	  Report from ZeroIntensity Dev <zintensitydev@gmail.com>
+
+				    8/3
+				    ---
+lib/sh/zread.c,externs.h
+	- zungetc: new function, pushes a character back into a single char of
+	  storage so it can be used with the zread* functions that call read(2)
+	  directly and don't use lbuf. If we try to push back more than one
+	  char, we use lbuf, assuming that the caller will accommodate it
+
+builtins/read.def
+	- read_mbchar: if we read a partial multibyte character (-2) and then
+	  a delimiter that makes it an invalid multibyte character (-1), use
+	  zungetc to push the delimiter back, adjust mbchar, and return what
+	  we read so far to be added as single bytes
+	  From a report by Kerin Millar <kfm@plushkava.net>

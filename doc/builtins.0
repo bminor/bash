@@ -1211,7 +1211,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       a wwhhiillee or uunnttiill keyword, part of the test following the
                       iiff  or eelliiff reserved words, part of any command executed
                       in a &&&& or |||| list except the command following the  fi-
-                      nal &&&& or ||||, any command in a pipeline but the last, or
+                      nal  &&&&  or  ||||,  any command in a pipeline but the last
+                      (subject to the state of the ppiippeeffaaiill shell option),  or
                       if  the command's return value is being inverted with !!.
                       If a compound command other than a  subshell  returns  a
                       non-zero  status  because  a command failed while --ee was
@@ -2001,29 +2002,37 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               only or may not be unset.
 
        wwaaiitt [--ffnn] [--pp _v_a_r_n_a_m_e] [_i_d ...]
-              Wait for each specified child process and return its termination
-              status.  Each _i_d may be a process ID or a job specification;  if
-              a  job  spec  is given, all processes in that job's pipeline are
-              waited for.  If _i_d is not given,  wwaaiitt  waits  for  all  running
+              Wait for each specified child process _i_d and return the termina-
+              tion status of the last _i_d.  Each _i_d may be a process  ID  or  a
+              job  specification;  if  a job spec is given, wwaaiitt waits for all
+              processes in the job.
+
+              If no options or _i_ds are supplied, wwaaiitt waits  for  all  running
               background  jobs  and the last-executed process substitution, if
               its process id is the same as $$!!, and the return status is zero.
-              If the --nn option is supplied, wwaaiitt waits for a single  job  from
-              the list of _i_ds or, if no _i_ds are supplied, any job, to complete
-              and  returns its exit status.  If none of the supplied arguments
-              is a child of the shell, or if no arguments are supplied and the
-              shell has no unwaited-for children, the exit status is 127.   If
-              the  --pp option is supplied, the process or job identifier of the
-              job for which the exit status is returned  is  assigned  to  the
-              variable  _v_a_r_n_a_m_e  named  by  the option argument.  The variable
-              will be unset initially, before any assignment.  This is  useful
-              only  when  the --nn option is supplied.  Supplying the --ff option,
-              when job control is enabled, forces wwaaiitt to wait for _i_d to  ter-
-              minate before returning its status, instead of returning when it
-              changes  status.  If _i_d specifies a non-existent process or job,
-              the return status is 127.  If wwaaiitt is interrupted by  a  signal,
-              the  return  status will be greater than 128, as described under
-              SSIIGGNNAALLSS in _b_a_s_h(1).  Otherwise, the return status  is  the  exit
-              status of the last process or job waited for.
+
+              If the --nn option is supplied, wwaaiitt waits  for  any  one  of  the
+              given _i_ds or, if no _i_ds are supplied, any job or process substi-
+              tution, to complete and returns its exit status.  If none of the
+              supplied  _i_ds is a child of the shell, or if no _i_ds are supplied
+              and the shell has no unwaited-for children, the exit  status  is
+              127.
+
+              If  the  --pp option is supplied, the process or job identifier of
+              the job for which the exit status is returned is assigned to the
+              variable _v_a_r_n_a_m_e named by the  option  argument.   The  variable
+              will  be unset initially, before any assignment.  This is useful
+              only when the --nn option is supplied.
+
+              Supplying the --ff option, when job  control  is  enabled,  forces
+              wwaaiitt  to wait for each _i_d to terminate before returning its sta-
+              tus, instead of returning when it changes status.
+
+              If none of the _i_ds specify  one  of  the  shell's  active  child
+              processes,  the return status is 127.  If wwaaiitt is interrupted by
+              a signal, any _v_a_r_n_a_m_e will remain unset, and the  return  status
+              will be greater than 128, as described under SSIIGGNNAALLSS in _b_a_s_h(1).
+              Otherwise, the return status is the exit status of the last _i_d.
 
 SSHHEELLLL CCOOMMPPAATTIIBBIILLIITTYY MMOODDEE
        Bash-4.0  introduced the concept of a _s_h_e_l_l _c_o_m_p_a_t_i_b_i_l_i_t_y _l_e_v_e_l, speci-

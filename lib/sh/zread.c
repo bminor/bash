@@ -1,6 +1,6 @@
 /* zread - read data from file descriptor into buffer with retries */
 
-/* Copyright (C) 1999-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,6 +41,10 @@ extern int errno;
 #  define ZBUFSIZ 4096
 #endif
 
+#ifndef EOF
+#  define EOF -1
+#endif
+
 extern int executing_builtin, interrupt_state;
 
 extern void check_signals_and_traps (void);
@@ -51,6 +55,11 @@ extern int read_builtin_timeout (int);
 /* Forward declarations */
 void zreset (void);
 
+int zungetc (int);
+
+/* Provide one character of pushback whether we are using read or zread. */
+static int zpushedchar = -1;
+
 /* Read LEN bytes from FD into BUF.  Retry the read on EINTR.  Any other
    error causes the loop to break. */
 ssize_t
@@ -59,6 +68,15 @@ zread (int fd, char *buf, size_t len)
   ssize_t r;
 
   check_signals ();	/* check for signals before a blocking read */
+
+  /* If we pushed a char back, return it immediately */
+  if (zpushedchar != -1)
+    {
+      *buf = (unsigned char)zpushedchar;
+      zpushedchar = -1;
+      return 1;
+    }
+
   /* should generalize into a mechanism where different parts of the shell can
      `register' timeouts and have them checked here. */
   while (((r = read_builtin_timeout (fd)) < 0 || (r = read (fd, buf, len)) < 0) &&
@@ -96,6 +114,14 @@ zreadretry (int fd, char *buf, size_t len)
   ssize_t r;
   int nintr;
 
+  /* If we pushed a char back, return it immediately */
+  if (zpushedchar != -1)
+    {
+      *buf = (unsigned char)zpushedchar;
+      zpushedchar = -1;
+      return 1;
+    }
+
   for (nintr = 0; ; )
     {
       r = read (fd, buf, len);
@@ -116,6 +142,15 @@ ssize_t
 zreadintr (int fd, char *buf, size_t len)
 {
   check_signals ();
+
+  /* If we pushed a char back, return it immediately */
+  if (zpushedchar != -1)
+    {
+      *buf = (unsigned char)zpushedchar;
+      zpushedchar = -1;
+      return 1;
+    }
+
   return (read (fd, buf, len));
 }
 
@@ -130,6 +165,14 @@ ssize_t
 zreadc (int fd, char *cp)
 {
   ssize_t nr;
+
+  /* If we pushed a char back, return it immediately */
+  if (zpushedchar != -1 && cp)
+    {
+      *cp = (unsigned char)zpushedchar;
+      zpushedchar = -1;
+      return 1;
+    }
 
   if (lind == lused || lused == 0)
     {
@@ -154,6 +197,14 @@ zreadcintr (int fd, char *cp)
 {
   ssize_t nr;
 
+  /* If we pushed a char back, return it immediately */
+  if (zpushedchar != -1 && cp)
+    {
+      *cp = (unsigned char)zpushedchar;
+      zpushedchar = -1;
+      return 1;
+    }
+
   if (lind == lused || lused == 0)
     {
       nr = zreadintr (fd, lbuf, sizeof (lbuf));
@@ -177,6 +228,13 @@ zreadn (int fd, char *cp, size_t len)
 {
   ssize_t nr;
 
+  if (zpushedchar != -1 && cp)
+    {
+      *cp = zpushedchar;
+      zpushedchar = -1;
+      return 1;
+    }
+
   if (lind == lused || lused == 0)
     {
       if (len > sizeof (lbuf))
@@ -193,6 +251,21 @@ zreadn (int fd, char *cp, size_t len)
   if (cp)
     *cp = lbuf[lind++];
   return 1;
+}
+
+int
+zungetc (int c)
+{
+  if (zpushedchar == -1)
+    {
+      zpushedchar = c;
+      return c;
+    }
+
+  if (c == EOF || lind == 0)
+    return (EOF);
+  lbuf[--lind] = c;		/* XXX */
+  return c;
 }
 
 void

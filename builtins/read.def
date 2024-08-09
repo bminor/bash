@@ -130,7 +130,7 @@ static void uw_bashline_reset_event_hook (void *);
 #endif
 static SHELL_VAR *bind_read_variable (char *, char *, int);
 #if defined (HANDLE_MULTIBYTE)
-static int read_mbchar (int, char *, int, int, int);
+static int read_mbchar (int, char *, int, int, int, int);
 #endif
 static void ttyrestore (struct ttsave *);
 static void uw_ttyrestore (void *);
@@ -867,7 +867,7 @@ add_char:
 	  else
 #  endif
 	  if (locale_utf8locale == 0 || ((c & 0x80) != 0))
-	    i += read_mbchar (fd, input_string, i, c, unbuffered_read);
+	    i += read_mbchar (fd, input_string, i, c, delim, unbuffered_read);
 	}
 #endif
 
@@ -1149,7 +1149,7 @@ bind_read_variable (char *name, char *value, int flags)
 
 #if defined (HANDLE_MULTIBYTE)
 static int
-read_mbchar (int fd, char *string, int ind, int ch, int unbuffered)
+read_mbchar (int fd, char *string, int ind, int ch, int delim, int unbuffered)
 {
   char mbchar[MB_LEN_MAX + 1];
   int i, n, r;
@@ -1183,8 +1183,21 @@ read_mbchar (int fd, char *string, int ind, int ch, int unbuffered)
 	  mbchar[i++] = c;	
 	  continue;
 	}
-      else if (ret == (size_t)-1 || ret == (size_t)0 || ret > (size_t)0)
-	break;
+      else if (ret == (size_t)-1)
+	{
+	  /* If we read a delimiter character that makes this an invalid
+	     multibyte character, we can't just add it to the input string
+	     and treat it as a byte. We need to push it back so a subsequent
+	     zread will pick it up. */
+	  if (c == delim)
+	    {
+	      zungetc (c);
+	      mbchar[--i] = '\0';		/* unget the delimiter */
+	    }
+	  break;		/* invalid multibyte character */
+	}
+      else if (ret == (size_t)0 || ret > (size_t)0)
+	break;		/* valid multibyte character */
     }
 
 mbchar_return:

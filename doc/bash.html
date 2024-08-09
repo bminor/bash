@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 July 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 August 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -860,8 +860,8 @@ Commands separated by a
 <B>;</B>
 
 are executed sequentially; the shell waits for each
-command to terminate in turn.  The return status is the
-exit status of the last command executed.
+command to terminate in turn.
+The return status is the exit status of the last command executed.
 <P>
 
 AND and OR lists are sequences of one or more pipelines separated by the
@@ -2643,7 +2643,7 @@ the value returned upon subsequent
 references is
 the number of seconds since the assignment plus the value assigned.
 The number of seconds at shell invocation and the current time are always
-determined by querying the system clock.
+determined by querying the system clock at one-second resolution.
 If
 <FONT SIZE=-1><B>SECONDS</B>
 
@@ -12934,7 +12934,8 @@ or
 <B>||</B>
 
 list except the command following the final <B>&amp;&amp;</B> or <B>||</B>,
-any command in a pipeline but the last,
+any command in a pipeline but the last
+(subject to the state of the <B>pipefail</B> shell option),
 or if the command's return value is
 being inverted with
 <B>!</B>.
@@ -14849,47 +14850,46 @@ subsequently reset.  The exit status is true unless a
 
 is readonly or may not be unset.
 <DT><B>wait</B> [<B>-fn</B>] [-p <I>varname</I>] [<I>id</I> ...]<DD>
-Wait for each specified child process and return its termination status.
-Each
-<I>id</I>
-
-may be a process
-ID or a job specification; if a job spec is given, all processes
-in that job's pipeline are waited for.  If
-<I>id</I>
-
-is not given,
+Wait for each specified child process <I>id</I> and return the
+termination status of the last <I>id</I>.
+Each <I>id</I> may be a process ID or a job specification;
+if a job spec is given, <B>wait</B> waits for all processes in the job.
+<DT><DD>
+If no options or <I>id</I>s are supplied,
 <B>wait</B> waits for all running background jobs and
-the last-executed process substitution, if its process id is the same as
-<B>$!</B>,
+the last-executed process substitution,
+if its process id is the same as <B>$!</B>,
 and the return status is zero.
-If the <B>-n</B> option is supplied,
-<B>wait</B> waits for a single job
-from the list of <I>id</I>s or, if no <I>id</I>s are supplied, any job,
+<DT><DD>
+If the <B>-n</B> option is supplied, <B>wait</B> waits for any one of
+the given <I>id</I>s or, if no <I>id</I>s are supplied, any job
+or process substitution,
 to complete and returns its exit status.
-If none of the supplied arguments is a child of the shell, or if no arguments
-are supplied and the shell has no unwaited-for children, the exit status
-is 127.
-If the <B>-p</B> option is supplied, the process or job identifier of the job
-for which the exit status is returned is assigned to the variable
-<I>varname</I> named by the option argument.
+If none of the supplied <I>id</I>s is a child of the shell,
+or if no <I>id</I>s are supplied and the shell has no unwaited-for children,
+the exit status is 127.
+<DT><DD>
+If the <B>-p</B> option is supplied, the process or job identifier
+of the job for which the exit status is returned is assigned to the
+variable <I>varname</I> named by the option argument.
 The variable will be unset initially, before any assignment.
 This is useful only when the <B>-n</B> option is supplied.
+<DT><DD>
 Supplying the <B>-f</B> option, when job control is enabled,
-forces <B>wait</B> to wait for <I>id</I> to terminate before returning
-its status, instead of returning when it changes status.
-If
-<I>id</I>
-
-specifies a non-existent process or job, the return status is 127.
-If <B>wait</B> is interrupted by a signal, the return status will be greater
+forces <B>wait</B> to wait for each <I>id</I> to terminate before
+returning its status, instead of returning when it changes status.
+<DT><DD>
+If none of the <I>id</I>s specify one of the shell's active child
+processes, the return status is 127.
+If <B>wait</B> is interrupted by a signal,
+any <I>varname</I> will remain unset,
+and the return status will be greater
 than 128, as described under
 <B>SIGNALS</B>
 
 
 above.
-Otherwise, the return status is the exit status of the last
-process or job waited for.
+Otherwise, the return status is the exit status of the last <I>id</I>.
 </DL>
 <A NAME="lbDC">&nbsp;</A>
 <H3>SHELL COMPATIBILITY MODE</H3>
@@ -15489,7 +15489,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 July 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 August 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -15595,7 +15595,7 @@ There may be only one active coprocess at a time.
 <DT><A HREF="#lbDI">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20240724/doc/bash.1.<BR>
-Time: 25 July 2024 11:43:06 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20240730/doc/bash.1.<BR>
+Time: 07 August 2024 10:18:33 EDT
 </BODY>
 </HTML>

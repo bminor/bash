@@ -745,6 +745,9 @@ history_do_write (const char *filename, int nelements, int overwrite)
 
   history_lines_written_to_file = 0;
 
+  if (nelements < 0)
+    return (0);
+
   mode = overwrite ? O_RDWR|O_CREAT|O_TRUNC|O_BINARY : O_RDWR|O_APPEND|O_BINARY;
 #else
   mode = overwrite ? O_WRONLY|O_CREAT|O_TRUNC|O_BINARY : O_WRONLY|O_APPEND|O_BINARY;
