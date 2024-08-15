@@ -216,6 +216,7 @@ extern int parse_and_execute (char *, const char *, int);
 extern int evalstring (char *, const char *, int);
 extern void parse_and_execute_cleanup (int);
 extern int parse_string (char *, const char *, int, COMMAND **, char **);
+extern int should_optimize_fork (COMMAND *, int);
 extern int should_suppress_fork (COMMAND *);
 extern int can_optimize_connection (COMMAND *);
 extern int can_optimize_cat_file (COMMAND *);

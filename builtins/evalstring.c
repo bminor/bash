@@ -138,7 +138,7 @@ should_suppress_fork (COMMAND *command)
 int
 can_optimize_connection (COMMAND *command)
 {
-  return (*bash_input.location.string == '\0' &&
+  return ((bash_input.type != st_string || *bash_input.location.string == '\0') &&
 	  parser_expanding_alias () == 0 &&
 	  (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
 	  command->value.Connection->second->type == cm_simple);

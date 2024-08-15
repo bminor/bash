@@ -141,7 +141,7 @@ get_history_event (const char *string, int *caller_index, int delimiting_quote)
   register char c;
   HIST_ENTRY *entry;
   int which, sign, local_index, substring_okay;
-  _hist_search_func_t *search_func;
+  int search_flags;
   char *temp;
 
   /* The event can be specified in a number of ways.
@@ -269,10 +269,10 @@ get_history_event (const char *string, int *caller_index, int delimiting_quote)
         FAIL_SEARCH ();
     }
 
-  search_func = substring_okay ? history_search : history_search_prefix;
+  search_flags = substring_okay ? NON_ANCHORED_SEARCH : ANCHORED_SEARCH;
   while (1)
     {
-      local_index = (*search_func) (temp, -1);
+      local_index = _hs_history_search (temp, -1, -1, search_flags);
 
       if (local_index < 0)
 	FAIL_SEARCH ();

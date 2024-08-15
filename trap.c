@@ -387,6 +387,11 @@ run_pending_traps (void)
 	  if (sig == SIGINT)
 	    {
 	      pending_traps[sig] = 0;	/* XXX */
+	      /* _run_trap_internal saves and restores these, so want
+		 the original values. */
+	      running_trap = old_running;
+	      trap_return_context = old_context;
+	      /* XXX - bash_trapsig()? */
 	      /* We don't modify evalnest here, since run_interrupt_trap() calls
 		 _run_trap_internal, which does. */
 	      run_interrupt_trap (0);

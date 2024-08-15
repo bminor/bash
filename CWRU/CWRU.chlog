@@ -9929,3 +9929,65 @@ builtins/read.def
 	  zungetc to push the delimiter back, adjust mbchar, and return what
 	  we read so far to be added as single bytes
 	  From a report by Kerin Millar <kfm@plushkava.net>
+
+				    8/7
+				    ---
+builtins/evalstring.c
+	- can_optimize_connection: only check bash_input.location.string if
+	  bash_input.type == st_string, in case we want to use this in other
+	  contexts. If we do, the caller *must* make sure it's the last
+	  command in the calling context
+
+execute_cmd.c
+	- execute_subshell_builtin_or_function: if this is an async function
+	  call, try to optimize away the fork before the last simple command
+	  in the function body by calling optimize_shell_function
+	- execute_command_internal: if we have a simple command for which
+	  CMD_TRY_OPTIMIZING is set in a SUBSHELL_ASYNC subshell environment,
+	  try to set CMD_NO_FORK by checking via should_optimize_fork
+
+				    8/9
+				    ---
+parse.y
+	- yy_readline_get: before calling readline, call rl_clear_signals to
+	  reset the signal handling disposition to a known state. Most of the
+	  time it's a no-op
+
+lib/readline/signals.c
+	- _rl_handle_signal: make the call to sigprocmask(SIG_UNBLOCK,...
+	  more symmetric with the corresponding call to SIG_BLOCK
+
+trap.c
+	- run_pending_traps: before calling run_interrupt_trap, restore
+	  running_trap and trap_return_context, since _run_trap_internal
+	  will save and restore them, too
+
+builtins/read.def
+	- read_builtin: if -e is supplied, make sure to install unwind-protects
+	  to reset the attempted completion function and the event hook even
+	  if the timeout is not supplied.
+	  Report from Oguz <oguzismailuysal@gmail.com>
+
+				   8/12
+				   ----
+lib/readline/histsearch.c,lib/readline/histlib.h
+	- history_search_internal: takes a new argument, LINEDIR, saying which
+	  direction to perform the substring/pattern search in the line,
+	  decoupling it from the direction through the history list; changed
+	  all callers (history_search, history_search_prefix, _hs_history_search,
+	  _hs_history_patsearch)
+	- _hs_history_search,_hs_history_patsearch: takes the same new LINEDIR
+	  argument, just passes it to history_search_internal; changed all
+	  callers (noninc_search_from_pos)
+
+lib/readline/search.c
+	- noninc_search_from_pos: changed calls to _hs_history_search and
+	  _hs_history_patsearch
+
+lib/readline/histexpand.c
+	- get_history_event: instead of using function pointers to a history
+	  search function, set the right flags and just call _hs_history_search
+	  with those flags using -1 for list direction and line direction
+
+
+

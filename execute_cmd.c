@@ -913,6 +913,18 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 	begin_unwind_frame ("simple_lineno");
 	add_unwind_protect (uw_restore_lineno, (void *) (intptr_t) save_line_number);
 
+	/* Limit the scope of this attempted optimization for now: async
+	   commands for which TRY_OPTIMIZING is set (see call to optimize_shell_function
+	   for async functions in execute_subshell_builtin_or_function below)
+	   in interactive and script shells. */
+	if ((command->flags & CMD_TRY_OPTIMIZING) &&
+	    (subshell_environment & SUBSHELL_ASYNC) && startup_state < 2 &&
+	    should_optimize_fork (command, 0))
+	  {
+	    command->flags |= CMD_NO_FORK;
+	    command->value.Simple->flags |= CMD_NO_FORK;
+	  }
+
 	SET_LINE_NUMBER (command->value.Simple->line);
 	exec_result =
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
@@ -5523,6 +5535,8 @@ execute_subshell_builtin_or_function (WORD_LIST *words, REDIRECT *redirects,
     }
   else
     {
+      if (async)
+	optimize_shell_function (function_cell (var));
       r = execute_function (var, words, flags, fds_to_close, async, 1);
       fflush (stdout);
       subshell_exit (r);

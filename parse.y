@@ -1621,6 +1621,7 @@ yy_readline_get (void)
       old_sigint = IMPOSSIBLE_TRAP_HANDLER;
       if (signal_is_ignored (SIGINT) == 0)
 	{
+	  rl_clear_signals ();		/* reset to known state, usually a no-op */
 	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
 

@@ -279,7 +279,7 @@ _rl_handle_signal (int sig)
 #if defined (HAVE_POSIX_SIGNALS)
       /* Unblock any signal(s) blocked above */
       if (block_sig)
-	sigprocmask (SIG_UNBLOCK, &oset, (sigset_t *)NULL);
+	sigprocmask (SIG_UNBLOCK, &set, &oset);
 #endif
 
       /* We don't have to bother unblocking the signal because we are not
