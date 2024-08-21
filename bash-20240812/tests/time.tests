@@ -1,0 +1,50 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+: ${THIS_SH:=./bash}
+
+printf "time -c : :\n"
+time ${THIS_SH} -c :
+
+printf "time /dev/null:\n"
+time ${THIS_SH} /dev/null
+
+printf "\nPOSIX: time -p /dev/null:\n"
+time -p ${THIS_SH} /dev/null
+
+printf "\nBSD time /dev/null:\n"
+TIMEFORMAT=$'\t%1R real\t%1U user\t%1S sys'
+time ${THIS_SH} /dev/null
+
+printf "\nSYSV time /dev/null:\n"
+TIMEFORMAT=$'\nreal\t%1R\nuser\t%1U\nsys\t%1S'
+time ${THIS_SH} /dev/null
+
+printf "\nksh time /dev/null:\n"
+TIMEFORMAT=$'\nreal\t%2lR\nuser\t%2lU\nsys\t%2lS'
+time ${THIS_SH} < /dev/null
+
+time (:)
+(time :)
+
+times -x
+
+printf "\ntimes:\n"
+times
+echo
+times --
+
+printf "\ntime standalone:\n"
+{ time ; echo after; } |& wc -l
+
+exit 0

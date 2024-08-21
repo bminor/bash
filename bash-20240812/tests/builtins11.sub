@@ -1,0 +1,45 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ulimit tests
+
+ulimit unlimited	# default to -f
+ulimit -f		# better be unlimited
+ulimit -Sf hard
+
+corelim=${ ulimit -c; }
+
+# pick -c because everyone's going to have it
+ulimit -Sc unlimited
+ulimit -c soft
+ulimit -c		# unlimited
+# maybe someday the leading `+' will be accepted, but not today
+ulimit -c -S -- +1999
+ulimit -c -S -- 1999
+ulimit -c 0
+ulimit -Hc		# hard and soft 0
+ulimit -Sc hard		# should be 0
+ulimit -c
+
+ulimit -a >/dev/null	# just make sure we have no errors
+
+# these are errors
+ulimit -g
+# have to see about this one
+ulimit -u $(( 2**31 - 1 ))
+
+lim=$(ulimit -Sn)
+ulimit -n $lim
+lim2=$(ulimit -n)
+
+[[ $lim -eq $lim2 ]] || echo 'ulimit: setting to soft limit fails' >&2

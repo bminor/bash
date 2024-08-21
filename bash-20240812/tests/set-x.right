@@ -1,0 +1,72 @@
++ (( i=0 ))
++ (( i<=5 ))
++ x=0
++ (( i++  ))
++ (( i<=5 ))
++ x=0
++ (( i++  ))
++ (( i<=5 ))
++ x=0
++ (( i++  ))
++ (( i<=5 ))
++ x=0
++ (( i++  ))
++ (( i<=5 ))
++ x=0
++ (( i++  ))
++ (( i<=5 ))
++ x=0
++ (( i++  ))
++ (( i<=5 ))
++ for i in 0 1 2
++ x=i
++ for i in 0 1 2
++ x=i
++ for i in 0 1 2
++ x=i
++ case x in
++ x=i
++ foo=one
++ foo+=two
++ echo onetwo
+onetwo
++ foo=one
++ echo onetwo
+onetwo
++ set +x
+./set-x1.sub: line 18: BASH_XTRACEFD: 4: invalid value for trace file descriptor
+1
+2
+3
+4
++ exec
++ for f in a b c d e
++ echo a
+a
++ for f in a b c d e
++ echo b
+b
++ for f in a b c d e
++ echo c
+c
++ for f in a b c d e
++ echo d
+d
++ for f in a b c d e
++ echo e
+e
++ set +x
+TRACEFILE:
++ echo 1
++ echo 2
++ echo 3
++ echo 4
++ unset BASH_XTRACEFD
+=====
++ metas=(\| \& \; \( \) \< \> ' ' '	' '
+')
++ n=($@)
++ : '|' '&' ';' '(' ')' '<' '>' ' ' $'\t' $'\n'
++ DEFAULT_IFS=$' \t\n'
++ set +x
+declare -a metas=([0]="|" [1]="&" [2]=";" [3]="(" [4]=")" [5]="<" [6]=">" [7]=" " [8]=$'\t' [9]=$'\n')

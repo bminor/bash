@@ -1,0 +1,24 @@
+: ${THIS_SH:=./bash}
+set -o posix
+
+# tests from Sven Mascheck that check whether a here-doc in a command
+# substitution can be terminated by EOF (the closing paren)
+#
+# currently unused
+
+# Example D.3 # should fail with unterminated here-doc
+${THIS_SH} -o posix -c 'echo $(
+    cat <<\eof
+    D.3: here-doc with )
+eof)'
+
+# Example D.4
+# the first EOF has a trailing blank
+# the third EOF is the correct one
+echo $(cat <<'EOF'
+    D.4 error-prone use of here-doc terminator
+EOF 
+EOF)
+EOF
+)
+echo after here-document

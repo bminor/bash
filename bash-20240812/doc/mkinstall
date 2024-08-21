@@ -1,0 +1,60 @@
+#! /bin/sh
+#
+# mkinstall - make the INSTALL file from the `Installing Bash' node of the
+#	      texinfo manual
+#
+
+# defaults for doing this in the source tree
+SRCDIR=.
+TOPDIR=..
+
+NODE="Installing Bash"
+SUBNODE="Basic Installation"
+TEXI=bashref.texi
+TMPINFO=temp.info
+TMPOUT=INSTALL.tmp
+
+prog=${0##*/}
+USAGE="usage: $prog [-s srcdir] [-t topdir] [output-file]"
+while getopts s:t: opt
+do
+	case "$opt" in
+	s)	SRCDIR=$OPTARG TEXI=${OPTARG}/bashref.texi ;;
+	t)	TOPDIR=$OPTARG ;;
+	*)	echo "$USAGE" >&2 ; exit 2 ;;
+	esac
+done
+shift $(( $OPTIND - 1 ))
+
+OUT=${1:-INSTALL}
+
+trap 'rm -f $TMPOUT $TMPINFO $OUT; trap '' 0; exit 1' 1 2 3 6 15
+trap 'rm -f $TMPOUT $TMPINFO' 0
+
+# create an info file without paragraph indentation
+RLDIR=${TOPDIR}/lib/readline/doc
+makeinfo --no-split --no-number-sections -I${RLDIR} --paragraph-indent 0 -o $TMPINFO $TEXI
+
+# write out the text from the `Installing Bash' node to INSTALL.tmp
+info --file $TMPINFO --node "$NODE" --subnodes --output $TMPOUT
+
+# remove the info traversal information and the initial menu, and squeeze
+# out multiple consecutive blank lines like `cat -s'
+awk 'BEGIN { printline = 0; newlines = 0; }
+
+/^File: '$TMPINFO'/	{ next; }
+
+/^'"$SUBNODE"'/	{ printline = 1; }
+
+/^$/			{ if (printline) newlines = 1; next; }
+
+/$/			{ if (printline) {
+				if (newlines) {
+					printf "\n";
+					newlines = 0;
+				}
+				print $0;
+			  }
+			}' < $TMPOUT > $OUT
+
+exit 0

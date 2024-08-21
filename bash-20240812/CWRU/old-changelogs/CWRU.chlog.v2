@@ -1,0 +1,584 @@
+
+This documents the changes between the first `public' release of CWRU bash
+and this, its second release.  It summarizes, without going into detail,
+the changes that have been made. 
+
+NEW FEATURES
+
+	o `getopts' builtin, as specified by Posix.2
+
+	o new configuration variable HAVE_UNISTD_H, used to include
+	  <unistd.h> and test for Posix features
+
+	o `ulimit' has new -p and -n options to report the pipe buffer size
+	  and number of available file descriptors, respectively
+
+	o allow SIGCHLD to be trapped and useful behavior to result if it is
+
+	o Posix termios and signal code for readline and the shell itself
+
+	o can optionally use the GNU termcap library
+
+	o new output for `times' builtin that looks like ksh:
+
+		shell-user shell-sys
+		child-user child-sys
+
+	o `ulimit' limits now apply to both shell and its children
+
+	o new machines.h entries
+
+	o no longer does the costly `close file descriptors 3-NOFILE'
+	  each time it exec's a program -- now uses the close-on-exec
+	  flag for the files it fiddles with
+
+NOTABLE BUG FIXES
+
+	o jobs.c only sets and gets the tty state in an interactive shell
+
+	o bash does better process group checking on Posix systems, eliminating
+	  some error messages
+
+	o fix for `infinite login' bug on System V machines when executing a
+	  script from a .bash_profile
+
+	o the `trap' command now behaves as 1003.2 specifies, as of draft 9
+
+	o restore original terminal process group upon exit, so as to not
+	  confuse a parent Bourne shell
+
+	o `bash file', where `file' is a binary file, now reports an error
+
+	o shells started with `-s' now execute the .bashrc file
+
+
+CHANGES (by date and files affected)
+                                9/20 - 9/30
+                                -----------
+
+builtins.c, builtins.c.posix
+	- added getopts help text
+	- removed extra "let" from `let' error message
+	- added correct extern definition for list_rest_of_args() to shift
+	  builtin
+
+jobs.c, jobs.c.posix
+	- removed bogus call to set_process_resource_limits() from
+	  make_child() as a consequence of redoing `ulimit'
+	- initialize shell_tty to -1
+	- only get or set the tty state after a command completes if the shell
+	  is interactive
+	- use shell_tty in get_tty_state() and set_tty_state() instead of
+	  reopening /dev/tty every time
+
+jobs.c.posix
+	- do better pgrp checking in initialize_jobs() to avoid error message
+	  about not being able to setpgid(2) on startup
+	- changed tcsetattr() error messages slightly
+
+expr.c
+	- avoid advancing beyond the end of the expression when reporting an
+	  error
+	- NULL expressions now return 0 ($[], for example)
+
+mailcheck.c
+	- #ifdef redundant definition of NOW, which is also defined in
+	  general.h
+
+variables.c
+	- initialize $OPTIND and $OPTERR to 1 for getopts
+	- add correct extern definition for itos()
+
+subst.c
+	- if $IFS is unset, it defaults to " \t\n"
+	- add special variable hack functions for $OPTIND, $OPTERR
+
+builtins.h
+	- add definition for getopts_builtin()
+
+getopts.c
+	- new file, source for `getopts' builtin command
+
+ulimit.c
+	- remove the `struct ResourceLimit' stuff; limits now apply to both
+	  the shell and its children
+	- took out set_process_resource_limits(), let ulimit(2) or
+	  setrlimit(2) do the work
+	- changed error messages to use builtin_error() instead of
+	  report_error()
+	- changed the block factor for RLIMIT_CPU from 1000 (milliseconds)
+	  to 1 (seconds)
+
+
+                                   10/1
+                                   ----
+
+builtins.c, builtins.c.posix
+	- changed `test' help text for -ef option
+	- made `trap -' reset all signals to their original values
+
+machines.h
+	- added a new configuration variable, HAVE_UNISTD_H, which should
+	  be defined if /usr/include/unistd.h exists
+
+cpp-Makefile
+	- make HAVE_UNISTD_H show though from machines.h to the bash code
+	- add an explicit build line for ulimit.o so `psize.sh' is run
+	  each time ulimit.o is remade.  This is kind of flaky.
+config.h
+	- include <unistd.h> if HAVE_UNISTD_H is defined, use it to test
+	  for various Posix features (job control, signals, termios)
+
+jobs.c, jobs.c.posix
+	- restore original signals to child process in make_child()
+	- keep count of number of children that exit or stop in flush_child(),
+	  and call a trap handler for SIGCHLD that many times.  This allows
+	  SIGCHLD to be trapped without disaster occurring.
+
+shell.c
+	- If we're on a Posix system, initialize signals the Posix way
+	- clear signal mask in initialize_signals() if on Posix system
+	- set login_shell and make_login_shell to 0 upon entry to main(),
+	  solving the System V infinite login bug
+
+trap.c
+	- preserve value of $? when running traps
+	- don't allow a signal ignored upon entry to the shell to be trapped
+	  or reset to the default
+	- do not allow trapping SIGCHLD to change the signal handler, but
+	  save the commands to be executed.  Run these commands from the
+	  SIGCHLD signal handler for each child that exits or stops
+	- don't allow SIGCHLD signal handler to be overridden or have SIGCHLD
+	  ignored
+	- new function added to restore all trapped signals to their original
+	  values
+
+ulimit.c
+	- add new -p option to report pipe buffer size.  This is flaky on 
+	  all non-Posix systems (those that do not define PIPE_BUF).
+
+readline/readline.c
+	- add Posix termios and signal code
+
+                                   10/2
+                                   ----
+
+jobs.c, jobs.c.posix
+	- only fetch terminal state in initialize_jobs() if the shell is
+	  interactive
+
+                                   10/3
+                                   ----
+
+machines.h
+	- new entry for Stardent
+	- new variable USE_TERMCAP_EMULATION, for those systems that have the
+	  termcap(3) functions in the curses library, but have not linked 
+	  /usr/lib/libtermcap.a to libcurses.a
+
+cpp-Makefile
+	- use USE_TERMCAP_EMULATION to set TERMCAP and TERMLIB
+
+siglist.c, alias.h, general.c
+	- declare the return values of xmalloc() and malloc() for the benefit
+	  of machines which cannot cope with simply casting the return value
+
+shell.c, execute_cmd.c
+	- change the re-execution of main() when executing a shell script to
+	  use setjmp/longjmp
+
+builtins.c
+	- add code to change the shell level in exec_builtin(), decrementing
+	  it before trying the execve(2) and incrementing it again if that
+	  fails
+
+variables.c
+	- new function adjust_shell_level() to change shell level by a
+	  specified increment
+	- initialize `noclobber' in shell_initialize(), if we have inherited
+	  the `noclobber' variable from a parent shell
+
+ulimit.c
+	- add new option -n, which reports the max number of available file
+	  descriptors as reported by getdtablesize().  On SunOS 4.1, this
+	  can be set, too, with setrlimit(RLIM_NOFILE, ...).
+
+                                   10/4
+                                   ----
+
+readline/readline.c
+	- Ultrix turns off system call restart when executing in `Posix mode'
+	  (when sigaction(3) is used to set signal handling), so make it use
+	  the System V version of shell_getc()
+
+jobs.c.posix
+	- fix a bug in start_job() where `oset' was not initialized in the first
+	  call to sigprocmask(), yet was used in subsequent calls
+	- remove the `shadow' instance of shell_tty_info in the code that sets
+	  the line discipline in initialize_jobs()
+
+shell.c
+	- if job control is being used, restore the tty pgrp to its original
+	  value so as to not screw the parent
+
+builtins.c, builtins.c.posix
+	- make the output of `times' look more like ksh
+
+                                   10/5
+                                   ----
+
+jobs.c.posix
+	- HP/UX no longer needs the signal handler for SIGCHLD reset via a
+	  call to signal() in flush_child() -- this breaks job control
+
+machines.h
+	- add HAVE_VPRINTF to HP/UX entry
+
+siglist.c
+	- include <stdio.h>, sprintf(3) requires it on some systems
+
+                                   10/8
+                                   ----
+
+execute_cmd.c
+	- make $LINENO in a function count the number of simple commands
+	  executed
+
+                                   10/9
+                                   ----
+
+termcap, cpp-Makefile
+	- new GNU termcap library, cribbed from Emacs.  #define
+	  USE_GNU_TERMCAP in machines.h entry to use it.  Small changes
+	  required to cpp-Makefile to make it work.  This works on
+	  4.3 BSD, at least.
+
+machines.h
+	- add new entry for AIX/370
+
+general.c
+	- sysv_getc() is also needed for Ultrix machines running in Posix
+	  mode, so change the #ifdef accordingly (Ultrix passes the
+	  SV_INTERRUPT flag to sigvec(2) in sigaction(3)).
+
+subst.c
+	- use sysv_getc() for Ultrix machines running in Posix mode for
+	  command subsitution pipe reading
+
+                                   10/10
+                                   -----
+
+shell.c, execute_cmd.c
+	- if the `file' portion of `bash file' is a binary file, report an
+	  error and do not attempt to execute it
+
+jobs.c, jobs.c.posix
+	- the code that does the guts of `kill' now sends the SIGCONT to a
+	  stopped job after it sends the specified signal, not before
+
+                                   10/11
+                                   -----
+
+parse.y
+	- set +H also turned off putting commands into the history list
+
+shell.c
+	- make shells started with -s read .bashrc
+
+	
+                                   10/14
+                                   -----
+
+expr.c
+	- changed calls to `report_error' to call `builtin_error'.  I don't
+	  know if this is exactly right, but it seems to me that an error
+	  in an expression shouldn't kill the shell if -e is set.
+
+fc.c
+	- changed `report_error' to `builtin_error'
+
+                                   10/16
+                                   -----
+
+readline/vi_mode.c
+	- repeat count to rl_vi_subst() was incorrectly being ignored
+	- don't call rl_vi_change_case() on an empty line; two calls in
+	  a row can cause a seg fault
+
+
+                                   10/17
+                                   -----
+
+execute_cmd.c
+	- give builtins run in pipes a useful setting of top_level to
+	  longjmp(2) to on errors
+
+
+builtins.c, builtins.c.posix
+	- replace some occurrences of longjmp (top_level, ...) with simple
+	  calls to return (EXECUTION_FAILURE)
+
+                                   10/18
+                                   -----
+
+readline/readline.c
+	- Make O_NDELAY be the same as O_NONBLOCK on Posix systems
+	- Don't use IXANY if it's not defined (some strict Posix systems do
+	  not define it)
+	- Posix systems need NOFLSH for c_lflag to avoid flushing the input
+	  buffer after a SIGINT, SIGQUIT, or SIGSUSP.  This is still wrong,
+	  though.
+
+execute_cmd.c, test.c, general.h
+	- use the Posix S_IS* macros to test file formats instead of explicitly
+	  masking with S_IFMT and testing the result.  Macros are provided
+	  for those systems that do not have them (like 4.3 BSD).
+
+parse.y
+	- fix expansion of \W in the prompt string so that it works when
+	  you're in the root directory
+
+machines.h
+	- add machine description for concurrent in UCB universe
+
+Makefile
+	- make sure $(MFLAGS) is passed to the recursive make of bash-Makefile
+
+                                   10/22
+                                   -----
+
+jobs.c.posix
+	- make sure the NOFLSH bit is turned on in the termios c_lflag word
+	  so that typeahead doesn't get flushed on receipt of signals. THIS
+	  HAS BEEN TAKEN OUT.
+
+                                   10/23
+                                   -----
+
+execute_cmd.c
+	- change extract_colon_unit() to increment the path index past a
+	  colon when it is called, before it tries to get the next component
+	  from the path.  Without doing this, `.' was always found as the
+	  second component in the path, whether it was actually there or not.
+
+trap.c, shell.c
+	- made SIGINT trap handling act the same as that of ksh and the BSD
+	  sh.  As a side effect (really the reason for doing this in the
+	  first place), `read' is now interruptible.
+ 
+Makefile
+	- made the CPPFLAGS definition useful by passing it to cpp when
+	  making bash-Makefile from cpp-Makefile
+	- made the `echo' line when creating bash-Makefile really echo by
+	  quoting the redirection to bash-Makefile
+
+general.c
+	- make fcntl.h be included only if NO_DUP2 is defined
+
+                                   10/24
+                                   -----
+cpp-Makefile
+	- make libreadline.a depend on the objects, not the sources.  Without
+	  this, you could delete on of the .o files to try to force a library
+	  rebuild and have it not happen.
+
+                                   10/25
+                                   -----
+
+shell.c
+	- make a flag of `-' signal the end of option arguments, like the
+	  4.3 BSD sh, and in accordance with the Posix command line syntax
+	  standard
+
+shell.c, builtins.c, builtins.c.posix
+	- shuffle some code around so -o option can be given on the command
+	  line -- there's no reason why it shouldn't be allowed.
+
+variables.c, variables.h, execute_cmd.c, builtins.c, builtins.c.posix, shell.c,
+subst.c, bashline.c, hash.h, variables.h
+	- change the implementation of shell function and variable storage to
+	  a hash table instead of a singly-linked list
+
+make_cmd.c, shell.c
+	- bug reports only get mailed out if MAIL_BUG_REPORTS is defined
+
+                                   10/29
+                                   -----
+
+bashline.c
+	- some random cleanups from bfox
+	- make sure alias expansion is attempted in shell_expand_line () only
+	  if ALIAS is defined
+
+hash.c
+	- add default case to make_hash_table to force the number of buckets
+	  in the table to be the default if 0 is passed as the number of
+	  buckets
+
+variables.c
+	- make initialize_shell_variables () call make_hash_table () with an
+	  argument of 0 again (see previous entry).
+
+
+variables.c, builtins.c, builtins.c.posix
+	- cleanups because map_over(), all_vars(), all_shell_variables(), and
+	  all_shell_functions () can possibly return NULL lists, and such
+	  lists should not be sorted or freed
+
+trap.c
+	- make sure we declare `extern int last_command_exit_value' in
+	  run_interrupt_trap ().
+
+variables.c
+	- Don't override a HOSTTYPE variables that comes in from the
+	  environment
+
+                                   10/30
+                                   -----
+
+variables.c
+	- Fix a bug in variables.c: make_var_array () where it called
+	  array_len on a NULL list
+
+builtins.c, builtins.c.posix
+	- Add a description of `-m' to the help for the `set' builtin
+	  command
+
+                                   11/1
+                                   ----
+
+general.c
+	- added a definition of bzero() for USG machines, because
+	  there is a reference to it in the new variable hashing code
+
+                                   11/2
+                                   ----
+
+shell.c
+	- set forced_interactive to 0 in shell_reinitialize(), otherwise
+	  shell scripts get marked as interactive
+
+                                   11/6
+                                   ----
+
+execute_cmd.c
+	- eliminated the costly loop from 3 to NOFILE closing all file
+	  descriptors each time we exec a command by setting all file
+	  descriptors > 2 opened as the result of a redirection and internal
+	  to the shell to be close-on-exec, as well as all file descriptors
+	  opened to save others in add_undo_redirect().  `internal to the
+	  shell' means that the redirections were attached to shell builtin.
+	  Other `internal' redirections include while, for, and until
+	  loops, and shell functions.  I got scared after reading that
+	  s5r4 provides 2048 fd's per process -- 2045 (mostly useless)
+	  close() calls on *each executed program*?  No way, no how.
+
+	  This caused the other fixes for this file to be discovered.
+
+	  Unfortunately (there always seems to be a catch), 4.3 BSD up to
+	  4.3-tahoe leaves a file descriptor open in setpwent() if you're
+	  using dbm password files.  4.3+NFS does this if you're not using
+	  YP.  Arghhhhhhh...  I haven't decided yet what to do about this;
+	  probably just set fd 3 to close-on-exec when the shell is
+	  initialized.
+
+execute_cmd.c
+	- removed the call to `add_undo_redirect()' when a file is being
+	  closed with the redirection operators [n]<&- and [n]>&-.  The
+	  effect was to make those operators useless.  Sad to say, I was
+	  probably the dummy who put it in there...
+
+execute_cmd.c
+	- when calling fcntl(redirector, F_GETFD, 0) in do_redirection() to
+	  find out if a file descriptor is active, do it only if redirector
+	  is not the same as `fd', which you've just opened.  This has
+	  spectacularly bad consequences if you do something like
+
+	  	exec 3</dev/tty 4>/tmp/foo 5</dev/null
+
+	  I'm probably to blame for this, too...
+
+execute_cmd.c
+	- when saving a file descriptor in add_undo_redirect, make sure we
+	  save the state of the close-on-exec flag, and restore it when
+	  dup2'ing the saved fd back to the orignal.
+
+execute_cmd.c
+	- when performing a redirection that causes us to open a file, make
+	  sure we at least add an undo record to close the file, even if
+	  the file descriptor is not already active
+
+execute_cmd.c
+	- when duplicating a file descriptor as the result of a redirection
+	  instruction, make sure to manually duplicate the state of the
+	  close-on-exec flag
+
+                                   11/13
+                                   -----
+
+execute_cmd.c
+	- finally tracked down and stamped out the persistant bug that caused
+	  the shell to hang when doing a command like "history | more" when
+	  there was more than a pipeful of text to send to `more' and you quit
+	  out of `more'after the first screenful.  An extra read end of the
+	  pipe was being left open in the shell started to run `history', the
+	  consequence being that that shell at the beginning of the pipeline
+	  would never get the SIGPIPE that would cause it to exit.  The fix
+	  is kind of strange: pass around a file descriptor to close whenever
+	  a child process is created in either execute_command_internal or
+	  execute_simple_command.  We just pass the file descriptor that we
+	  want closed to the instance of execute_command_internal that runs
+	  the first half of the pipeline, and it gets closed just like we
+	  want.
+
+	  In the future, this can (and probably should) be made into a bitmap
+	  of file descriptors to close.  It wouldn't have to be big, 16 should
+	  be enough given the ability to do close-on-exec.
+
+builtins.c, builtins.c.posix
+	- changed the one call to execute_command_internal to add the extra
+	  parameter needed by the above fix.
+
+unwind_prot.c
+	- make without_interrupts() block SIGINT on capable systems (Posix
+	  and systems with BSD sigs) instead of ignoring it, which causes
+	  interrupts to be dropped.  Blocking is what you want, anyway.
+
+execute_cmd.c
+	- add an unwind_protect for the redirections for a function or
+	  builtin.  To see why this is needed, define a function shcat:
+
+		shcat()
+		{
+			while read line
+			do
+				echo "$line"
+			done
+		}
+
+	  Now execute "shcat < INSTALL" and try to interrupt it.  Bash will
+	  keep reading the lines from INSTALL and trying to execute them
+	  until EOF, at which point the shell exits.
+
+                                   11/14
+                                   -----
+
+execute_cmd.c
+	- a subshell spawned to execute a function or a builtin with a pipe
+	  or an asynchronous function or builtin should have login_shell and
+	  interactive set to 0.  That way, if someone is stupid enough to
+	  pipe to `exit' from a login shell, the subshell won't try to exec
+	  .bash_logout.
+
+                                   11/16
+                                   -----
+builtins.c, builtins.c.posix
+	- exit status of `type' was wrong for executable files, hashed and
+	  unhashed
+
+bashline.c
+	- Made bash_complete_filename_internal take just about everything
+	  as a possible filename character.  It still can't do completion
+	  of a filename containing blanks if you type one of the blanks,
+	  though -- it needs the blanks-as-word-separators logic to work
+	  at all.

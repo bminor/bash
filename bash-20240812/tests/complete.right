@@ -1,0 +1,387 @@
+complete -f -X '!*.+(ps|PS)' gs
+complete -e printenv
+complete -f -X '!*.texi*' texi2html
+complete -g groupmod
+complete -v -S '=' typeset
+complete -c nohup
+complete -a unalias
+complete -g groupdel
+complete -A hostname telnet
+complete -v -S '=' local
+complete -v -S '=' readonly
+complete -o bashdefault -o filenames -o nospace -F _comp_cd cd
+complete -c type
+complete -f ln
+complete -f -X '!*.+(gz|tgz)' gunzip
+complete -f -X '!*.texi*' makeinfo
+complete -j -P '%' jobs
+complete -o dirnames -o filenames -o nospace -d pushd
+complete -f -X '!*.pdf' acroread
+complete -v unset
+complete -f -X '!*.+(ps|PS)' ghostview
+complete -A hostname rsh
+complete -c exec
+complete -A signal kill
+complete -c eval
+complete -f chown
+complete -f gzip
+complete -W '"${GROUPS[@]}"' newgrp
+complete -A shopt shopt
+complete -A hostname ftp
+complete -A hostname rlogin
+complete -v getopts
+complete -c nice
+complete -c gdb
+complete -j -P '%' fg
+complete -f -X '!*.dvi' dvips
+complete -f -X '!*.texi*' texi2dvi
+complete -f .
+complete -v -S '=' declare
+complete -v -S '=' export
+complete -f -X '!*.dvi' xdvi
+complete -u su
+complete -o dirnames -o filenames -o nospace -d popd
+complete -A signal trap
+complete -j -W '$(ps -x | tail +2 | cut -c1-5)' -P '%' wait
+complete -f -X '!*.Z' zmore
+complete -j -P '%' disown
+complete -f -X '!*.+(ps|PS)' gs
+complete -f -X '!*.+(ps|PS)' gv
+complete -f source
+complete -c make
+complete -A stopped -P '%' bg
+complete -f cat
+complete -d mkdir
+complete -A helptopic help
+complete -v read
+complete -c -k time
+complete -f -X '!*.Z' zcat
+complete -f -X '!*.Z' uncompress
+complete -d rmdir
+complete -f more
+complete -f -X '!*.+(gz|tgz)' gzcat
+./complete.tests: line 123: complete: notthere: no completion specification
+./complete.tests: line 130: complete: -V: invalid option
+complete: usage: complete [-abcdefgjksuv] [-pr] [-DEI] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]
+./complete.tests: line 132: compgen: `invalid-name': not a valid identifier
+.
+unalias -- fee
+unalias -- fi
+unalias -- fum
+!
+%
+(( ... ))
+.
+:
+[
+[[ ... ]]
+alias
+bg
+bind
+break
+builtin
+caller
+case
+cd
+command
+compgen
+complete
+compopt
+continue
+coproc
+declare
+dirs
+disown
+echo
+enable
+eval
+exec
+exit
+export
+false
+fc
+fg
+for
+for ((
+function
+getopts
+hash
+help
+history
+if
+jobs
+kill
+let
+local
+logout
+mapfile
+popd
+printf
+pushd
+pwd
+read
+readarray
+readonly
+return
+select
+set
+shift
+shopt
+source
+suspend
+test
+time
+times
+trap
+true
+type
+typeset
+ulimit
+umask
+unalias
+unset
+until
+variables
+wait
+while
+{ ... }
+allexport
+braceexpand
+emacs
+errexit
+errtrace
+functrace
+hashall
+histexpand
+history
+ignoreeof
+interactive-comments
+keyword
+monitor
+noclobber
+noexec
+noglob
+nolog
+notify
+nounset
+onecmd
+physical
+pipefail
+posix
+privileged
+verbose
+vi
+xtrace
+array_expand_once
+assoc_expand_once
+autocd
+bash_source_fullpath
+cdable_vars
+cdspell
+checkhash
+checkjobs
+checkwinsize
+cmdhist
+compat31
+compat32
+compat40
+compat41
+compat42
+compat43
+compat44
+complete_fullquote
+direxpand
+dirspell
+dotglob
+execfail
+expand_aliases
+extdebug
+extglob
+extquote
+failglob
+force_fignore
+globasciiranges
+globskipdots
+globstar
+gnu_errfmt
+histappend
+histreedit
+histverify
+hostcomplete
+huponexit
+inherit_errexit
+interactive_comments
+lastpipe
+lithist
+localvar_inherit
+localvar_unset
+login_shell
+mailwarn
+no_empty_cmd_completion
+nocaseglob
+nocasematch
+noexpand_translation
+nullglob
+patsub_replacement
+progcomp
+progcomp_alias
+promptvars
+restricted_shell
+shift_verbose
+sourcepath
+varredir_close
+xpg_echo
+.
+:
+[
+alias
+bg
+bind
+break
+builtin
+caller
+cd
+command
+compgen
+complete
+compopt
+continue
+declare
+dirs
+disown
+echo
+enable
+eval
+exec
+exit
+export
+false
+fc
+fg
+getopts
+hash
+help
+history
+jobs
+kill
+let
+local
+logout
+mapfile
+popd
+printf
+pushd
+pwd
+read
+readarray
+readonly
+return
+set
+shift
+shopt
+source
+suspend
+test
+times
+trap
+true
+type
+typeset
+ulimit
+umask
+unalias
+unset
+wait
+.
+:
+[
+alias
+bg
+bind
+break
+builtin
+caller
+cd
+command
+compgen
+complete
+compopt
+continue
+declare
+dirs
+disown
+echo
+enable
+eval
+exec
+exit
+export
+false
+fc
+fg
+getopts
+hash
+help
+history
+jobs
+kill
+let
+local
+logout
+mapfile
+popd
+printf
+pushd
+pwd
+read
+readarray
+readonly
+return
+set
+shift
+shopt
+source
+suspend
+test
+times
+trap
+true
+type
+typeset
+ulimit
+umask
+unalias
+unset
+wait
+if
+then
+else
+elif
+fi
+case
+esac
+for
+select
+while
+until
+do
+done
+in
+function
+time
+{
+}
+!
+[[
+]]
+coproc
+./complete.tests: line 152: complete: -z: invalid option
+complete: usage: complete [-abcdefgjksuv] [-pr] [-DEI] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]
+complete: usage: complete [-abcdefgjksuv] [-pr] [-DEI] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]
+./complete.tests: line 154: compgen: -r: invalid option
+compgen: usage: compgen [-V varname] [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
+./complete.tests: line 155: compgen: noaction: invalid action name
+./complete.tests: line 156: compgen: -D: invalid option
+compgen: usage: compgen [-V varname] [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
+./complete.tests: line 157: compgen: nooption: invalid option name
+./complete.tests: line 159: compopt: nooption: invalid option name

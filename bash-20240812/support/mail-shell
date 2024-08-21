@@ -1,0 +1,127 @@
+#! /bin/bash
+#
+# mail-shell -- mail out the shell
+#
+# usage: mail-shell -t tarball recipient
+#
+# Chet Ramey
+# chet@ins.CWRU.Edu
+#
+
+# Copyright (C) 1995-2009 by Chester Ramey
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+PATH=/usr/ucb:/bin:/usr/bin:/usr/local/bin/gnu:/usr/local/bin:.
+
+trap 'rm -f x?? ${UUFILE}' 0 1 2 3 6 15
+
+prog=`basename $0`
+
+TARFILE=bash.tar
+VERS=2.05b
+
+while getopts t: opt
+do
+	case $opt in
+	t)	TARFILE=$OPTARG ;;
+	*)	echo usage: $prog [ -t tarfile ] recipient 1>&2
+		exit 1
+	esac
+done
+
+shift $(( $OPTIND - 1 ))
+
+case "$TARFILE" in
+bash-*.tar)	VERS=${TARFILE%%.tar} ; VERS=${VERS#bash-} ;;
+esac
+
+GZFILE=${TARFILE}.gz
+UUFILE=${GZFILE}.uu
+
+if [ $# -ne 1 ] ; then
+	echo usage: $0 recipient
+	exit 1
+fi
+
+recip=$1
+i=1
+
+if [ ! -f ${TARFILE} ] && [ ! -f ${GZFILE} ]; then
+	echo "$prog: no file ${TARFILE}, aborting"
+	exit 1
+fi
+
+if [ ! -f ${GZFILE} ] ; then
+	echo "$prog: no gzipped tar file ${GZFILE}"
+	echo "$prog: gzipping ${TARFILE}"
+	gzip ${TARFILE}
+fi
+
+if [ ! -f ${UUFILE} ] ; then
+	echo "$prog: no uuencoded tar file ${UUFILE}"
+	echo "$prog: uuencoding ${GZFILE}"
+	uuencode ${GZFILE} < ${GZFILE} > ${UUFILE}
+fi
+
+files=$(echo x??)
+
+if [ "$files" = 'x??' ] ; then
+	echo "$prog: no split of ${UUFILE} exists"
+	echo "$prog: splitting ${UUFILE}"
+	split ${UUFILE}
+fi
+
+count()
+{
+	echo $#
+}
+
+parts=$(count x??)
+
+if [ -x /usr/ucb/mail ]; then
+	MAIL=/usr/ucb/mail
+elif [ -x /usr/ucb/Mail ]; then
+	MAIL=/usr/ucb/Mail
+elif [ -x /usr/bin/mailx ]; then
+	MAIL=/usr/bin/mailx
+elif [ -x /usr/bin/mail ]; then
+	MAIL=/usr/bin/mail
+else
+	MAIL=/bin/mail
+fi
+
+$MAIL -s "bash-${VERS} shipment coming" $recip <<EOF
+
+Hi.  Here is version ${VERS} of bash.  Expect $parts messages.
+Each is part of a uuencoded tar file of the bash sources.  When
+you get all $parts messages, cat them all together into the file
+${UUFILE}, and run uudecode on this file.  You will have a
+gzipped tar file named ${GZFILE}.  gunzip it, cd into a source
+directory (the tar archive extracts into its own directory), and
+untar.
+
+Chet
+EOF
+
+for file in x??
+do
+	echo mailing part $i to $recip
+	/usr/ucb/mail -s "${UUFILE} part $i of $parts" $recip < $file
+	i=$(( $i + 1 ))
+done
+
+exit 0

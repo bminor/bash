@@ -1,0 +1,53 @@
+This describes how bash users create, destroy, assign, and reference array
+variables.  Array variables are variables whose values are arrays of strings,
+and whose elements may be referenced individually.
+
+CREATING
+	- any variable may be declared as an array using `typeset -a'
+	- an ordinary variable may be converted to an array using
+	  `typeset -a'; the value becomes array[0]
+
+	- there is a question of notation used to simultaneously declare
+	  an array variable and populate it with values sequentially,
+	  like ksh does with `set -A'.  `set -A' is a horrible choice;
+	  it should be discarded immediately.
+
+		- we can use `typeset -a array [values...]'
+
+DESTROYING
+	- `unset name' will destroy the array `name'
+	- how to treat `typeset +a array'?
+		- I think we should keep the variable, convert it from an
+		  array to an `ordinary' variable, and make the value at
+		  the smallest index of the array the value of the new
+		  variable
+
+ASSIGNING
+	- array[index]=value will serve to assign values to individual
+	  elements of the array
+	- the subscript can be an arbitrary arithmetic expression; it
+	  will be run through the expression evaluator
+	- this can create arrays, too
+		- this is analogous to defining a variable by simply
+		  assigning to it
+
+REFERENCING
+	- $array will expand to all elements of the array, just like $*
+	  expands to all the positional parameters
+	- "$array" is like "$@"
+	- ${array[index]} is used to reference array element `index', where
+	  `index' can be an arbitrary arithmetic expression
+		- two special values for `index': * and @ expand to all
+		  elements of the array, just like $* and $@.  Quoting
+		  behavior is the same, too
+	- using a subscript is an error if a variable has not been declared
+	  as an array (is this wise?)
+	- ${#variable}, if `variable' is an array, expands to the number of
+	  elements in the array
+		- ${#variable[n]} expands to the length of variable[n].  n
+		  may be an arbitrary arithmetic expression
+		- ${#variable[*]} and ${#variable[@]} expand to the number of
+		  elements in the array
+
+OPEN QUESTIONS
+	- should we allow them to be exported?  Ksh does not, but rc does

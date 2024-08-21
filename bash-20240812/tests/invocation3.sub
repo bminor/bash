@@ -1,0 +1,25 @@
+: ${THIS_SH:=./bash} ${TMPDIR:=/tmp}
+
+# start at tests for pretty-print mode
+# so far these are cases that aren't handled by the printing code anywhere
+# else in the test suite
+
+SCRIPT=$TMPDIR/pretty-print-$$
+
+cat >$SCRIPT <<\EOF
+for i in 1 2 3
+{
+	select var in a b c; { echo $REPLY; } <<<a
+	echo answer was $REPLY
+}
+
+for (( i=1; i <= 3; i++ ))
+{
+	echo $(( 2**$i ))
+}
+EOF
+
+${THIS_SH} --pretty-print $SCRIPT
+
+rm -f $SCRIPT
+	

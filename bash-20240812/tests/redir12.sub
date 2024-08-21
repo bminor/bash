@@ -1,0 +1,59 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# failing redirections with various compound commands and their effect on
+# set -e and the ERR trap
+
+: ${TMPDIR:=/tmp}
+TDIR=$TMPDIR/redir-fail-$$
+mkdir $TDIR
+cd $TDIR || exit 1
+
+touch unwritable-file unreadable-file
+chmod a-w unwritable-file
+chmod a-r unreadable-file
+
+while [ -z "x" ]; do x=4; done > unwritable-file
+echo $? x = $x
+
+set -o noclobber
+while [ -z "x" ]; do x=4; done > unwritable-file
+echo $? x = $x
+# test priority of noclobber and permission denied
+while [ -z "x" ]; do x=4; done >| unwritable-file
+echo $? x = $x
+set +o noclobber
+
+while [ -z "x" ]; do x=4; done < unreadable-file
+
+# ERR trap is not fatal unless set -e is also enabled
+(trap 'echo got error ERR' ERR
+# have to undo redirections on redirection error
+while [ -z "x" ]; do x=4; done </dev/null > unwritable-file
+echo after ERR trap: $?)
+
+(set -e
+for f in 1 2; do x=4; done > unwritable-file
+echo after set -e: $?)
+
+(set -e
+trap 'echo got error ERR' ERR
+for f in 1 2; do x=4; done < unreadable-file
+echo after set -e with ERR trap: $?)
+
+# the subshell never gets executed
+( echo wow this is bad ) < unreadable-file
+
+cd $OLDPWD
+rm -rf $TDIR

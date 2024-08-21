@@ -1,0 +1,40 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# test varredir_close
+
+# these should work fine
+
+: {fd}<>/dev/null
+
+echo redir 1 >&$fd
+exec {fd}>&-
+
+: {fd}>&1
+echo redir 2 >&$fd
+exec {fd}>&-
+
+shopt -s varredir_close
+
+: {fd}<>/dev/tty
+
+# these should fail with Bad file descriptor errors
+echo redir 3 >&$fd
+exec {fd}>&-
+unset fd
+
+: {fd}>&1
+echo redir 4 >&$fd
+unset fd
+

@@ -1,0 +1,129 @@
+This is a terse description of the new features added to bash-5.3 since
+the release of bash-5.2.  As always, the manual page (doc/bash.1) is
+the place to look for complete descriptions.
+
+1. New Features in Bash
+
+a. When checking whether a script file argument is a binary file, check the
+   first two lines of a script if the first line begins with `#!'.
+
+b. Bash does a better job of preserving user-supplied quotes around a word
+   completion, instead of requoting it.
+
+c. Bash reports the starting line number in an error message about an
+   unterminated compound command like `if' without a `fi'.
+
+d. Implement the POSIX requirement that running the `jobs' builtin removes
+   jobs from the jobs list.
+
+f. Call bash signal handlers while executing programmable completion commands,
+   instead of readline's.
+
+g. Print an error message if a regular expression used with [[ fails to compile.
+
+h. The `umask' builtin now has additional features for full POSIX conformance.
+
+i. `type -a -P' reports both hashed pathnames and the result of a $PATH search.
+
+j. `trap' has a new -P option that prints the trap action associated with each
+   signal argument.
+
+k. The `command' builtin preceding a declaration builtin (e.g., `declare')
+   preserves the special asisgnment statement parsing for the declation
+   builtin. This is a new POSIX requirement.
+
+l. `printf' uses the `alternate form' for %q and %Q to force single quoting.
+
+m. `printf' now interprets %ls (%S) and %lc (%C)nas referring to wide strings
+   and characters, respectively, when in a multibyte locale.
+
+n. The shell can be compiled with a different default value for the
+   patsub_replacement option.
+
+o. Check for window size changes during trap commands, `bind -x' commands,
+   and programmable completion.
+
+p. Treat a NULL value for $PATH as equivalent to ".".
+
+p. New loadable builtins: kv, strptime
+
+q. GLOBSORT: new variable to specify how to sort the results of pathname
+   expansion (name, size, blocks, mtime, atime, ctime, none) in ascending
+   or descending order.
+
+r. `compgen' has a new option: -V varname. If supplied, it stores the generated
+   completions into VARNAME instead of printing them on stdout.
+
+s. New form of command substitution: ${ command; } or ${|command;} to capture
+   the output of COMMAND without forking a child process and using pipes.
+
+t. array_expand_once: new shopt option, replaces assoc_expand_once
+
+u. complete/compopt new option: fullquote; sets rl_full_quoting_desired so all
+   possible completions are quoted as if they were filenames.
+
+v. Command timing now allows precisions up to 6 digits instead of 3 in
+   $TIMEFORMAT.
+
+w. BASH_MONOSECONDS: new dynamic variable that returns the value of the
+   system's monotonic clock, if one is available.
+
+x. BASH_TRAPSIG: new variable, set to the numeric signal number of the trap
+   being executed while it's running.
+
+y. The checkwinsize option can be used in subshell commands started from
+   interactive shells.
+
+z. In posix mode, the test command < and > binary primaries compare strings
+   using the current locale.
+
+aa. bind -x allows new key binding syntax: separate the key sequence and the
+    command string with whitespace, but require the command string to be
+    double-quoted if this is used. This allows different quoting options for
+    the command string.
+
+bb. Print commands bound to key sequences using `bind -x' with the new key
+    binding syntax it allows.
+
+cc. `read' has a new `-E' option to use readline but with the default bash
+    completion (including programmable completion).
+
+dd. New bindable readline command name: `bash-vi-complete'.
+
+ee. New test builtin behavior when parsing a parenthesized subexpression and
+    test was given more than 4 arguments: scan forward for a closing paren and
+    call posixtest() if there are 4 or fewer arguments between the parentheses.
+    Added for compatibility with coreutils test, dependent on the shell
+    compatibility level. Such expressions remain ambiguous.
+
+2. New Features in Readline
+
+a. Output a newline if there is no prompt and readline reads an empty line.
+
+b. The history library falls back to stdio when writing the history list if
+   mmap fails.
+
+c. New bindable variable `search-ignore-case', causes readline to perform
+   case-insensitive incremental and non-incremental history searches.
+
+d. rl_full_quoting_desired: new application-settable variable, causes all
+   completions to be quoted as if they were filenames.
+
+e. rl_macro_display_hook: new application-settable function pointer, used if
+   the application wants to print macro values itself instead of letting
+   readline do it
+
+f. rl_reparse_colors: new application-callable function, reparses $LS_COLORS
+   (presumably after the user changes it)
+
+g. rl_completion_rewrite_hook: new application-settable function pointer,
+   called to modify the word being completed before comparing it against
+   pathnames from the file system.
+
+h. execute-named-command: a new bindable command that reads the name of a
+   readline command from the standard input and executes it. Bound to M-x
+   in emacs mode by default.
+
+i. Incremental and non-incremental searches now allow ^V/^Q (or, in the former
+   case, anything bound to quoted-insert) to quote characters in the search
+   string.

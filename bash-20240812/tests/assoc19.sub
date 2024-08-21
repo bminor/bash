@@ -1,0 +1,50 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Problems with tilde expansion of keys and values in bash-5.2
+
+HOME=/homes/cj
+
+declare -A aa=([key]=~/Desktop) 
+declare -p aa
+unset aa
+
+declare -A aa
+aa=([key]=~/Desktop) 
+declare -p aa
+unset aa
+
+declare -A aa=([key]=~/Desktop [k2]=~/Library )
+declare -p aa
+unset aa
+
+declare -A aa=([~/key]=~/Desktop) 
+declare -p aa
+unset aa
+
+declare -A aa
+aa=([~/key]=~/Desktop) 
+aa[~/Documents]=~/Library
+declare -p aa
+unset aa
+
+declare -A aa
+aa=([~/key]=~/Desktop:~/Documents:~/Applications) 
+aa[~/Documents]=~/Library
+declare -p aa
+unset aa
+
+declare -A aa=([~/key]=~/Desktop:~/Documents:~/Applications [~/Documents]=~/Library)
+declare -p aa
+
+

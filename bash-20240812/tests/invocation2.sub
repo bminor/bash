@@ -1,0 +1,50 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+set +o posix
+shopt -u xpg_echo
+
+echo $SHELLOPTS
+set +B	# on by default
+# shouldn't appear
+echo $SHELLOPTS | grep braceexpand
+export SHELLOPTS
+# but it will appear here because it's enabled by default
+${THIS_SH} -c 'echo $SHELLOPTS'
+
+# turn off an option that's on by default
+${THIS_SH} +B -c 'echo $SHELLOPTS'
+${THIS_SH} +o braceexpand -c 'echo $SHELLOPTS'
+
+# turn on an option that's off by default
+if ${THIS_SH} -f -c 'echo $SHELLOPTS' | grep noglob 2>&1; then
+	:
+else
+	echo 'SHELLOPTS: noglob not inherited correctly'
+fi
+
+# in a different way
+set -o noglob
+if ${THIS_SH} -c 'echo $SHELLOPTS' | grep noglob 2>&1; then
+	:
+else
+	echo 'SHELLOPTS: noglob not inherited correctly'
+fi
+
+# restore default state
+set -o braceexpand
+set +o noglob
+
+# but assigning to SHELLOPTS is an error; have to use set -o/+o
+SHELLOPTS=$SHELLOPTS

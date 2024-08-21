@@ -1,0 +1,40 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+set +o posix
+shopt -u xpg_echo
+
+# check $BASHOPTS inheritance
+# the first should be an error
+${THIS_SH} -O checkhash -O badopt -c 'echo $BASHOPTS' bash 2>&1 | sed 's|^.*/bash|bash|'
+# this should reflect the default set of options
+${THIS_SH} -c 'echo $BASHOPTS'
+# now let's turn one of them on (checkhash is not enabled by default)
+${THIS_SH} -O checkhash -c 'echo $BASHOPTS' bash
+# let's turn one of them off
+${THIS_SH} +O checkwinsize -c 'echo $BASHOPTS' bash
+
+# turn on a non-default option
+shopt -s checkhash
+export BASHOPTS
+# and make sure the child shell sees it enabled
+if ${THIS_SH} -c 'echo $BASHOPTS' | grep checkhash >/dev/null 2>&1; then
+	:
+else
+	echo 'BASHOPTS: checkhash not inherited correctly'
+fi
+shopt -u checkhash
+export -n BASHOPTS
+
+# but assigning to BASHOPTS is an error
+BASHOPTS=$BASHOPTS

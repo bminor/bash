@@ -1,0 +1,68 @@
+#  Chet Ramey <chet.ramey@case.edu>
+#
+#  Copyright 2002 Chester Ramey
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2, or (at your option)
+#   any later version.
+#
+#   TThis program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software Foundation,
+#   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+# from zsh, just for testing
+complete -A stopped -P '%' bg
+complete -j -P '%' fg jobs disown
+# this is wrong at this point
+complete -j -P '%' -W '$(ps -x | tail +2 | cut -c1-5)' wait
+complete -c type
+complete -a unalias
+complete -v getopts read unset 
+complete -v -S '=' declare export local readonly typeset
+complete -f -- . source
+complete -A shopt shopt
+complete -e printenv
+
+complete -A helptopic help
+
+complete -c nohup exec nice eval
+complete -c -k time
+
+complete -A signal trap kill
+
+complete -f chown ln more cat
+complete -d mkdir rmdir
+
+complete -f -X '!*.+(gz|tgz)' gunzip gzcat zcat zmore
+complete -f -X '!*.Z' uncompress zmore zcat
+complete -f gzip
+
+complete -d cd pushd popd
+
+complete -A hostname rsh telnet rlogin ftp
+
+complete -u su
+complete -W '"${GROUPS[@]}"' newgrp
+complete -g groupdel groupmod
+
+complete -f -X '!*.+(ps|PS)' gs gv ghostview
+complete -f -X '!*.dvi' dvips xdvi
+complete -f -X '!*.pdf' acroread
+
+complete -f -X '!*.texi*' makeinfo texi2dvi texi2html
+
+complete -c gdb make
+
+complete -p gs
+complete -p
+
+complete -r xdvi
+complete -r notthere
+complete -r
+complete

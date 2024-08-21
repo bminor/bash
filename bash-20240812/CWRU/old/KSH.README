@@ -1,0 +1,136 @@
+
+This is a description of the changes made to bash for increased ksh
+compatibility.
+
+1.  $SECONDS
+
+	"Each time this parameter is referenced, the number of seconds
+	 since shell invocation is returned.  If this parameter is assigned
+	 a value, then the value returned will be the value that was 
+	 assigned plus the number of seconds since the assignment."
+
+	Files changed:	variables.c
+			variables.h
+			subst.c
+			general.c
+			shell.c
+			general.h
+
+2.  $TMOUT
+
+	"If set to a value greater than 0, the shell will terminate if a
+	 command is not entered within the prescribed number of seconds
+	 after issuing the PS1 prompt."
+
+	Files changed:	shell.c  (the implementation is not perfect)
+
+3.  $RANDOM
+
+	"Each time this parameter is referenced, a random integer is 
+	 generated.  The sequence of random numbers can be initialized
+	 by assigning a numeric value to RANDOM."
+
+	Files changed:	subst.c
+			variables.c
+
+4.  $REPLY
+
+	"This parameter is set by the `read' special command when no 
+	 arguments are supplied."
+
+	Files changed:	builtins.c
+
+5.  integer variables
+
+	`declare -i' (also export) makes a variable an integer (turns on
+	the integer attribute).  When assignment is made to a variable with
+	the -i attribute, arithmetic expression evaluation is done on the
+	value before it is assigned to the variable.
+
+	Files changed:	variables.h
+			variables.c
+			builtins.c
+
+6.  Arithmetic expression evaluation.
+
+	Here is the comment at the beginning of the new file `expr.c':
+
+
+	ksh-style expression evaluation.
+
+	All arithmetic is done as long integers with no checking for overflow
+	(though division by 0 is caught and flagged as an error).
+
+	The following operators are handled, grouped into a set of levels in
+	order of decreasing precedence.
+
+	"-"			[level 0 (unary negation)]
+	"!"			[level 1]
+	"*", "/", "%"		[level 2]
+	"+", "-"		[level 3]
+	"<=", ">=", "<", ">"	[level 4]
+	"==", "!="		[level 5]
+	"="			[level 6 (assignment)]
+
+	(Note that most of these operators have special meaning to bash, and an
+	entire expression should be quoted, e.g. "a=$a+1" or "a=a+1" to ensure
+	that it is passed intact to the evaluator).
+
+	Sub-expressions within parentheses have a precedence level greater than
+	all of the above levels and are evaluated first.  Within a single prece-
+	dence group, evaluation is left-to-right, except for the arithmetic
+	assignment operator (`='), which is evaluated right-to-left (as in C).
+
+	The expression evaluator returns the value of the expression (assignment
+	statements have as a value what is returned by the RHS).  The `let'
+	builtin, on the other hand, returns 0 if the last expression evaluates to
+	a non-zero, and 1 otherwise.
+
+	Implementation is a recursive-descent parser.
+
+	Files added:	expr.c
+
+7. `let' builtin
+
+	Parameters may be assigned numeric values via the `let' builtin.
+	Each of its arguments is an expression to be evaluated.  `let'
+	returns 0 if the value of the last expression is non-zero, and
+	1 otherwise.
+
+	Note that the "((...))" form of this command has not yet been
+	implemented; it requires changes to the parsing functions.
+
+	Files changed:	builtins.c
+
+8.  $_
+
+	$_ is set to the last argument of the previous command line, after
+	expansion.  It is still used as before when checking for mail.
+	Two new keybindings have been added to insert this into the current
+	command line (M-_ and M-.).
+
+	Files changed:	mailcheck.c
+			execute_cmd.c
+			bashline.c
+
+9.  `cd -'
+
+	Equivalent to 'cd $OLDPWD'
+
+	Files changed:	builtins.c
+
+10.  "ulimit -a"
+
+	"List all of the current resource limits (BSD only)."
+
+	Files changed:	builtins.c
+
+11.  ${#@} and ${#*}
+
+	These expand to the number of positional parameters.
+
+	Files changed: subst.c
+
+Chet Ramey
+Information Network Services, Case Western Reserve University
+chet@ins.CWRU.Edu

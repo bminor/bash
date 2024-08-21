@@ -1,0 +1,237 @@
+# Makefile for directory with message catalog handling library of GNU gettext
+# Copyright (C) 1995-1998, 2000-2003, 2008,2009 Free Software Foundation, Inc.
+#
+
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+PACKAGE = @PACKAGE_NAME@
+VERSION = @PACKAGE_VERSION@
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+top_builddir = @BUILD_DIR@
+VPATH = $(srcdir)
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+transform = @program_transform_name@
+
+datarootdir = @datarootdir@
+
+libdir = @libdir@
+includedir = @includedir@
+datadir = @datadir@
+localedir = @localedir@
+
+gettextsrcdir = $(datadir)/gettext/intl
+aliaspath = $(localedir)
+subdir = intl
+
+@SET_MAKE@
+
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+mkinstalldirs = $(SHELL) $(MKINSTALLDIRS)
+
+l = 
+
+AR = @AR@
+CC = @CC@
+LIBTOOL = @LIBTOOL@
+RANLIB = @RANLIB@
+BISON = @INTLBISON@
+BISONFLAGS = --name-prefix=__gettext
+YACC = @INTLBISON@ -y -d
+YFLAGS = --name-prefix=__gettext
+
+ARFLAGS = @ARFLAGS@
+
+LOCAL_DEFS = @LOCAL_DEFS@
+
+DEFS = -DLOCALEDIR=\"$(localedir)\" -DLOCALE_ALIAS_PATH=\"$(aliaspath)\" \
+	-DLIBDIR=\"$(libdir)\" -DIN_LIBINTL -DBUILDING_LIBINTL @DEFS@
+
+# XXX - use this?
+RELOCATABLE_DEFS = -DENABLE_RELOCATABLE=1 -DIN_LIBRARY \
+	-DINSTALLDIR=\"$(libdir)\" -DNO_XMALLOC \
+	-Dset_relocation_prefix=libintl_set_relocation_prefix \
+	-Drelocate=libintl_relocate \
+	-DDEPENDS_ON_LIBICONV=1
+
+CPPFLAGS = @CPPFLAGS@
+CFLAGS = @CFLAGS@ ${DEFS} @DEFS@ ${LOCAL_DEFS}
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+
+COMPILE = $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(XCFLAGS)
+
+HEADERS = gmo.h gettextP.h hash-string.h loadinfo.h plural-exp.h \
+        eval-plural.h localcharset.h lock.h \
+        relocatable.h arg-nonnull.h attribute.h \
+        filename.h flexmember.h localename-table.in.h setlocale_null.h \
+        thread-optim.h tsearch.h verify.h xsize.h \
+        printf-args.h printf-parse.h wprintf-parse.h \
+	export.h os2compat.h plural-exp.h vasnprintf.h vasnwprintf.h \
+	libgnuintl.in.h
+
+SOURCES = bindtextdom.c dcgettext.c dgettext.c gettext.c \
+        finddomain.c hash-string.c loadmsgcat.c localealias.c \
+        textdomain.c l10nflist.c explodename.c dcigettext.c \
+        dcngettext.c dngettext.c ngettext.c plural.y plural-exp.c \
+        localcharset.c threadlib.c lock.c relocatable.c langprefs.c \
+        localename.c localename-table.c log.c printf.c setlocale.c \
+        setlocale-lock.c setlocale_null.c version.c xsize.c osdep.c \
+        intl-compat.c 
+
+EXTRASOURCES = tsearch.c printf-args.c printf-parse.c vasnprintf.c \
+	intl-exports.c os2compat.c
+
+OBJECTS = bindtextdom.o dcgettext.o dgettext.o gettext.o \
+        finddomain.o hash-string.o loadmsgcat.o localealias.o \
+        textdomain.o l10nflist.o explodename.o dcigettext.o \
+        dcngettext.o dngettext.o ngettext.o plural.o plural-exp.o \
+        localcharset.o threadlib.o lock.o relocatable.o langprefs.o \
+        localename.o localename-table.o log.o printf.o setlocale.o \
+        setlocale-lock.o setlocale_null.o version.o xsize.o osdep.o \
+        intl-compat.o 
+
+CREATED_HEADERS = libintl.h libgnuintl.h localename-table.h
+CREATED_SOURCES = plural.c plural.h
+
+OTHERS = Makefile.in locale.alias ref-add.sin ref-del.sin 
+CREATED_OTHERS = Makefile ref-add.sed ref-del.sed
+
+TARGETS = libintl.a libgnuintl.a
+
+all: libintl.a libintl.h
+rest: charset.alias ref-add.sed ref-del.sed
+
+libintl.a libgnuintl.a: $(OBJECTS)
+	rm -f $@
+	$(AR) $(ARFLAGS) $@ $(OBJECTS)
+	$(RANLIB) $@
+
+.SUFFIXES:
+.SUFFIXES: .c .y .o .lo .sin .sed
+
+.c.o:
+	$(COMPILE) $<
+
+.y.c:
+	$(YACC) $(YFLAGS) --output $@ $<
+	rm -f $*.h
+
+ref-add.sed: $(srcdir)/ref-add.sin
+	sed -e '/^#/d' -e 's/@''PACKAGE''@/@PACKAGE@/g' $(srcdir)/ref-add.sin > t-ref-add.sed
+	mv t-ref-add.sed ref-add.sed
+ref-del.sed: $(srcdir)/ref-del.sin
+	sed -e '/^#/d' -e 's/@''PACKAGE''@/@PACKAGE@/g' $(srcdir)/ref-del.sin > t-ref-del.sed
+	mv t-ref-del.sed ref-del.sed
+
+INCLUDES = -I. -I$(srcdir) -I${top_builddir} -I${top_srcdir}
+
+libgnuintl.h: $(srcdir)/libgnuintl.in.h $(srcdir)/export.h
+	sed -e '/IN_LIBGLOCALE/d' \
+	    -e 's,@''HAVE_POSIX_PRINTF''@,@HAVE_POSIX_PRINTF@,g' \
+	    -e 's,@''HAVE_ASPRINTF''@,@HAVE_ASPRINTF@,g' \
+	    -e 's,@''HAVE_SNPRINTF''@,@HAVE_SNPRINTF@,g' \
+	    -e 's,@''HAVE_WPRINTF''@,@HAVE_WPRINTF@,g' \
+	    -e 's,@''HAVE_NEWLOCALE''@,@HAVE_NEWLOCALE@,g' \
+	    -e 's,@''ENHANCE_LOCALE_FUNCS''@,@ENHANCE_LOCALE_FUNCS@,g' \
+	  < $(srcdir)/libgnuintl.in.h \
+	| if test '@WOE32DLL@' = yes; then \
+	    sed -e 's/extern \([^()]*\);/extern __declspec (dllimport) \1;/'; \
+	  else \
+	    cat; \
+	  fi \
+	| sed -e 's/extern \([^"]\)/extern LIBINTL_DLL_EXPORTED \1/' \
+	      -e "/#define _LIBINTL_H/r $(srcdir)/export.h" \
+	| sed -e 's,@''HAVE_VISIBILITY''@,@HAVE_VISIBILITY@,g' \
+	  > libgnuintl.h
+
+libintl.h: $(srcdir)/libgnuintl.in.h
+	sed -e '/IN_LIBGLOCALE/d' \
+	    -e 's,@''HAVE_POSIX_PRINTF''@,@HAVE_POSIX_PRINTF@,g' \
+	    -e 's,@''HAVE_ASPRINTF''@,@HAVE_ASPRINTF@,g' \
+	    -e 's,@''HAVE_SNPRINTF''@,@HAVE_SNPRINTF@,g' \
+	    -e 's,@''HAVE_WPRINTF''@,@HAVE_WPRINTF@,g' \
+	    -e 's,@''HAVE_NEWLOCALE''@,@HAVE_NEWLOCALE@,g' \
+	    -e 's,@''ENHANCE_LOCALE_FUNCS''@,@ENHANCE_LOCALE_FUNCS@,g' \
+	  < $(srcdir)/libgnuintl.in.h > libintl.h
+
+localename-table.h: $(srcdir)/localename-table.in.h $(srcdir)/export.h
+	sed -e 's/extern \([^"]\)/extern LIBINTL_DLL_EXPORTED \1/' \
+	    -e 's/extern,/extern LIBINTL_DLL_EXPORTED,/' \
+	    -e "/#if HAVE_WORKING_USELOCALE/r $(srcdir)/export.h" \
+	  < $(srcdir)/localename-table.in.h \
+	| sed -e 's,@''HAVE_VISIBILITY''@,@HAVE_VISIBILITY@,g' \
+	  > localename-table.h
+
+$(srcdir)/plural.c: $(srcdir)/plural.y
+	$(BISON) -d $(BISONFLAGS) $(srcdir)/plural.y \
+	&& test ':' = '$(BISON)' || { \
+	  sed -e 's|".*/plural.y"|"plural.y"|' \
+	      -e 's|"plural\.tab\.c"|"plural.c"|' \
+	      -e 's|"plural\.tab\.h"|"plural.h"|' \
+	      < plural.tab.c > plural.c-tmp \
+	  && sed -e 's|".*/plural.y"|"plural.y"|' \
+		 -e 's|"plural\.tab\.h"|"plural.h"|' \
+		 < plural.tab.h > plural.h-tmp \
+	  && rm -f plural.tab.c plural.tab.h \
+	  && mv plural.c-tmp $(srcdir)/plural.c \
+	  && mv plural.h-tmp $(srcdir)/plural.h; \
+	}
+
+check: all
+
+# We don't install anything
+install install-exec install-data install-strip:
+installdirs:
+installcheck:
+uninstall:
+
+info dvi ps pdf html:
+
+# update these someday
+
+$(OBJECTS): ${top_builddir}/config.h libgnuintl.h libintl.h
+bindtextdom.o dcgettext.o dcigettext.o dcngettext.o dgettext.o dngettext.o finddomain.o gettext.o intl-compat.o loadmsgcat.o localealias.o ngettext.o textdomain.o: $(srcdir)/gettextP.h $(srcdir)/gmo.h $(srcdir)/loadinfo.h
+dcigettext.o loadmsgcat.o: $(srcdir)/hash-string.h
+explodename.o l10nflist.o: $(srcdir)/loadinfo.h
+dcigettext.o loadmsgcat.o plural.o plural-exp.o: $(srcdir)/plural-exp.h
+dcigettext.o: $(srcdir)/eval-plural.h
+localcharset.o: $(srcdir)/localcharset.h
+localealias.o localcharset.o relocatable.o: $(srcdir)/relocatable.h
+
+localcharset.o: $(srcdir)/localcharset.c
+
+mostlyclean:
+	rm -f ${TARGETS} 
+	rm -f ${OBJECTS}  ${CREATED_HEADERS}
+
+clean: mostlyclean
+
+distclean: clean
+	rm -f ${CREATED_OTHERS}
+
+maintainer-clean: distclean
+	rm -f ${CREATED_SOURCES}
+
+
+# Tell versions [3.59,3.63) of GNU make not to export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

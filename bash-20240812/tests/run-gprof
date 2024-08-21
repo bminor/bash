@@ -1,0 +1,87 @@
+#! /bin/sh
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+: ${TMPDIR:=/tmp}
+export TMPDIR
+
+BASH_TSTOUT=/tmp/xx	# for now
+export BASH_TSTOUT
+
+trap 'rm -f $BASH_TSTOUT' 0
+
+PATH=.:$PATH	# just to get recho/zecho/printenv if not run via `make tests'
+export PATH
+
+# unset BASH_ENV only if it is set
+[ "${BASH_ENV+set}" = "set" ] && unset BASH_ENV
+# ditto for SHELLOPTS
+#[ "${SHELLOPTS+set}" = "set" ] && unset SHELLOPTS
+
+: ${THIS_SH:=../bash}
+export THIS_SH
+
+: ${BUILD_DIR:=..}
+export BUILD_DIR
+
+GPROF="gprof"
+
+rm -f gmon.sum
+
+${THIS_SH} ./version
+
+rm -f "$BASH_TSTOUT"
+
+# prime the pump; ${GPROF} complains if gmon.sum is empty
+[ -f gmon.out ] && ${GPROF} -s ${THIS_SH} gmon.out >/dev/null
+
+export GMON_OUT_PREFIX=bash
+echo Any output from any test, unless otherwise noted, indicates a possible anomaly
+
+for x in run-*
+do
+	case $x in
+	$0|run-all|run-minimal|run-gprof)	;;
+	*.orig|*~) ;;
+	*)	echo $x ; sh $x
+		if [ -f $TMPDIR/gmon.out ]; then
+			if [ -f gmon.out ]; then
+				${GPROF} -s ${THIS_SH} gmon.sum ${GMON_OUT_PREFIX}.[0-9]* $TMPDIR/${GMON_OUT_PREFIX}.[0-9]* >/dev/null
+			else
+				${GPROF} -s ${THIS_SH} gmon.sum $TMPDIR/${GMON_OUT_PREFIX}.[0-9]* >/dev/null				
+			fi
+		else
+			${GPROF} -s ${THIS_SH} gmon.sum ${GMON_OUT_PREFIX}.[0-9]* >/dev/null
+		fi
+		rm -f $TMPDIR/${GMON_OUT_PREFIX}.[0-9]* ${GMON_OUT_PREFIX}.[0-9]*
+		;;
+	esac
+done
+
+if [ -f ./-specialname.gmon ]; then
+	${GPROF} -s ${THIS_SH} gmon.sum ./-specialname.gmon > /dev/null
+	rm -f ./-specialname.gmon
+fi
+if [ -f ./ohio-state.gmon ]; then
+	${GPROF} -s ${THIS_SH} gmon.sum ./ohio-state.gmon > /dev/null
+	rm -f ./ohio-state.gmon
+fi
+
+if [ -f specialname.gmon ]; then
+	${GPROF} -s ${THIS_SH} gmon.sum ./specialname.gmon > /dev/null
+	rm -f specialname.gmon
+fi
+
+exit 0

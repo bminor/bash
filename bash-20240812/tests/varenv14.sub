@@ -1,0 +1,89 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# testing framework for local variable inheritance
+
+shopt -s localvar_inherit
+declare -A var
+
+f() { declare var+=([0]=X); declare -p var; }
+f
+
+f() { declare var=([Y]=Y); declare -p var; }; f
+f() { declare var+=([Y]=Y); declare -p var; }; f
+f() { declare var+=(); declare -p var; }; f
+f() { declare var=(); declare -p var; }; f
+
+unset -f f
+unset -v var
+
+declare -a var=( [0]=12 )
+f() { declare -A var+=([0]=X); declare -p var; }
+f
+
+unset -f f
+unset a s
+
+a=(X) s=X
+
+f() { local -a a s; declare -p a s; }
+f
+
+f() { local a+=(Y) s+=(Y); declare -p a s; }
+f
+
+f() { local -a a+=Y s+=Y; declare -p a s; }
+f
+
+# inherit from different array types/variable types
+unset -v v
+unset -f f
+
+v=7
+
+f()
+{
+	declare -A v
+	v+=(1 one)
+	declare -p v
+}
+f
+
+f()
+{
+	declare -a v
+	v+=(1)
+	declare -p v
+}
+f
+
+unset -v array assoc
+
+declare -a array=(1 2 3)
+declare -A assoc=(one 1 two 2 three 3)
+
+f()
+{
+	declare -A array
+	array+=(list of four words)
+	declare -p array
+}
+f
+
+f()
+{
+	declare -a assoc
+	assoc+=(list of four words)
+	declare -p assoc
+}
+f

@@ -1,0 +1,101 @@
+#! /bin/bash -
+#
+# mkdocdist - make a distribution directory containing formatted
+#	      documentation from a master manifest file
+#
+# usage: mkdocdist [-m manifest] [-s srcdir] [-r rootname] [-v] version
+#
+# SRCDIR defaults to src
+# MANIFEST defaults to $SRCDIR/MANIFEST.doc
+#
+# Chet Ramey
+# chet@po.cwru.edu
+
+# Copyright (C) 1996-2002 Free Software Foundation, Inc.
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+SRCDIR=src
+ROOTNAME=bash-doc
+
+usage()
+{
+	echo usage: mkdocdist [-m manifest] [-s srcdir] [-r rootname] [-v] version 1>&2
+	exit 2
+}
+
+vmsg()
+{
+	if [ -n "$verbose" ]; then
+		echo mkdocdist: "$@"
+	fi
+}
+
+while getopts m:s:r:v name
+do
+	case $name in
+	m)	MANIFEST=$OPTARG ;;
+	s)	SRCDIR=$OPTARG ;;
+	r)	ROOTNAME=$OPTARG ;;
+	v)	verbose=yes ;;
+	?)	usage ;;
+	esac
+done
+
+: ${MANIFEST:=$SRCDIR/MANIFEST.doc}
+
+vmsg using $MANIFEST
+
+shift $(( $OPTIND - 1 ))
+
+if [ $# -lt 1 ]; then
+	usage
+fi
+
+version=$1
+newdir=${ROOTNAME}-$version
+
+vmsg creating documentation distribution for $ROOTNAME version $version in $newdir
+
+if [ ! -d $newdir ]; then
+	mkdir $newdir || { echo $0: cannot make directory $newdir 1>&2 ; exit 1; }
+fi
+
+dirmode=755
+filmode=644
+
+while read fname type mode
+do
+	[ -z "$fname" ] && continue
+
+	case "$fname" in
+	\#*)	continue ;;
+	esac
+
+	case "$type" in
+	d)	mkdir $newdir/$fname ;;
+	f)	cp -p $SRCDIR/$fname $newdir/$fname ;;
+	*)	echo "unknown file type $type" 1>&2 ;;
+	esac
+
+	if [ -n "$mode" ]; then
+		chmod $mode $newdir/$fname
+	fi
+
+done < $MANIFEST
+
+vmsg $newdir created
+
+exit 0

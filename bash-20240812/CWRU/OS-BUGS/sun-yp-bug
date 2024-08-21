@@ -1,0 +1,52 @@
+From chet Mon Jul 27 14:54:45 1992
+Flags: 50
+Received:  by odin.INS.CWRU.Edu (5.65b+ida+/CWRU-1.5-ins)
+	id AA15494; Mon, 27 Jul 92 14:54:45 -0400 (from chet for /usr/homes/chet/bin/mailfilter.sh /usr/homes/chet/mbox)
+Date: Mon, 27 Jul 1992 14:29:55 -0400
+From: Chet Ramey <chet@odin.INS.CWRU.Edu>
+To: stud7b43@x400gate.bnr.ca
+Subject: Re: Bug in Bash 1.12.1
+Cc: bug-bash@ai.mit.edu, chet
+Reply-To: chet@po.CWRU.Edu
+In-Reply-To: Message from stud7b43@x400gate.bnr.ca of Mon, 27 Jul 1992 12:30:00 +0000
+Message-Id: <9207271829.AA14484.SM@odin.INS.CWRU.Edu>
+Read-Receipt-To: chet@po.CWRU.Edu
+
+> I seem to have found a bug in Bash.
+> 
+> How to cause the bug to appear:
+> 1) Start a long username-completion, e.g.
+>       cat ~user<TAB>
+>    Let it run for a while (don't know exactly how long...)
+>    Before it's finished, hit ^C (or whatever the break character
+>    is set to)
+> 2) As the next command, run a filename completion with a username in it, eg.
+>       cat ~username/.log<TAB>
+> 
+> Error message:  "free: Called with already freed block argument
+
+This is a bug in the Sun YP code that everyone seems to have picked up.
+
+Sun keeps static state in the YP library code -- a pointer into the
+data returned from the server.  When YP initializes itself (setpwent),
+it looks at this pointer and calls free on it if it's non-null.  So far,
+so good.
+
+If one of the YP functions is interrupted during getpwent (the exact function
+is interpretwithsave()), and returns NULL, the pointer is freed without being
+reset to NULL, and the function returns.  The next time getpwent is called,
+it sees that this pointer is non-null, calls free, and the Gnu free()
+blows up because it's being asked to free freed memory.
+
+The traditional Unix mallocs allow memory to be freed multiple times; that's
+probably why this has never been fixed.  You can probably stop it by adding
+an #undef USE_GNU_MALLOC to the appropriate machine description in machines.h.
+
+Chet
+
+--
+``The use of history as therapy means the corruption of history as history.''
+	-- Arthur Schlesinger
+
+Chet Ramey, Case Western Reserve University	Internet: chet@po.CWRU.Edu
+

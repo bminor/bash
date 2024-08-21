@@ -1,0 +1,32 @@
+#! /bin/sh
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/ucb:/usr/lib:/usr/etc:/etc
+
+PROG=bash
+O=root
+NEWDIR=$HOME/install
+MODE=0755
+
+if [ -f /bsd ]; then
+	NEWVERS=$NEWDIR/bash.bsd386
+	DEST=/bin
+	O=bin
+	G=bin
+elif [ -d /usr/ibm ]; then
+	NEWVERS=$NEWDIR/bash.ibm032
+	DEST=/bin
+	G=staff
+else
+	NEWVERS=$NEWDIR/bash.sun4
+	DEST=/bin
+	G=staff
+fi
+
+install -c -o ${O} -g ${G} -m ${MODE} -s ${NEWVERS} ${DEST}/${PROG}.new
+
+# swap new and old version; save old version as ${PROG}.old
+cd $DEST
+rm -f ${PROG}.old
+mv ${PROG} ${PROG}.old
+mv ${PROG}.new ${PROG}
+
+exit 0

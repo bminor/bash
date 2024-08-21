@@ -1,0 +1,153 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# initial set of tests for ${Ccommand; } nofork command substitution
+
+# basic functionality
+
+echo ${ printf '%s\n' aa bb cc dd; }
+echo AA${ printf '%s\n' aa bb cc dd; }BB
+
+echo ${ printf '%s\n' aa bb cc dd; return; echo ee ff; }
+echo ${ printf '%s\n' aa bb cc dd
+	}
+echo DDDDD${
+	printf '%s\n' aa bb cc dd
+}EEEEE
+unset x
+echo ${ printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
+echo outside: $x
+unset x
+echo ${ local x; printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
+echo outside: $x
+xx=${ local x; printf '%s\n' aa bb cc dd; x=42 ; return 12; echo ee ff; }
+echo assignment: $?
+unset xx
+
+declare -i x
+y=${ :;}
+declare -i z
+unset -v x y z
+
+# variables can be local, but all function declarations are global
+func() { echo func-outside; }
+xx=${ func() { echo func-inside; }; }
+declare -f func
+xx=${ unset -f func; }
+declare -f func
+
+echo ${ ( echo abcde );}
+
+echo ${| echo 67890;  REPLY=12345; }		# works in mksh
+x=${| REPLY= ;}
+recho "$x"
+unset x
+x=${| :;}
+recho "$x"
+unset x
+
+echo ${ echo aa; },${ echo bb; }
+
+# basic job control
+set -m
+echo this should disappear | echo JOB${ printf '%s\n' aa bb cc dd; }CONTROL | cat
+set +m
+
+# command not found should still echo error messages to stderr
+echo NOT${ p; }FOUND
+
+# alias handling in command substitutions, default and posix mode
+alias p=printf
+alias e='echo aliasval'
+echo "${ typeset x;
+	for f in 1 2; do p '%s\n' $f ; shopt expand_aliases; done
+	unalias p
+	alias e='echo inside redefine'
+ 	x=42 ; return; echo this should not be seen; }"
+echo outside: $x
+alias p e
+shopt expand_aliases
+
+alias p=printf
+set -o posix
+echo "${ typeset x;
+	for f in 1 2; do p '%s\n' $f ; shopt expand_aliases; done
+	unalias p;
+ 	x=42 ; return; echo this should not be seen; }"
+echo outside: $x
+alias p
+shopt expand_aliases
+
+set +o posix
+
+shopt -s expand_aliases
+
+alias p=printf
+echo "${ typeset x;
+	for f in 1 2; do p '%s\n' $f ; /bin/echo xx ; shopt expand_aliases; done
+ 	x=42 ; return; echo ee ff; }"
+echo outside: $x
+shopt expand_aliases
+
+# more tests for value substitutions and local variables
+a=1 b=2
+a=${| local b ; a=12 ; b=22 ; REPLY=42 ; echo inside: $a $b $REPLY; }
+echo outside: $a $b
+unset a b
+
+# this form doesn't remove the trailing newlines
+REPLY=42
+a=${| REPLY=$'newlines\n\n'; }
+echo "$a"
+echo outside: $REPLY
+
+# how do we handle shift with these weird ksh93 function-like semantics?
+# ksh93 doesn't reset the positional parameters here
+set -- 1 2
+echo before: "$@"
+: "${ shift;}"
+echo after: "$@"
+
+set -- 1 2
+echo before: "$@"
+: "${| shift;}"
+echo after: "$@"
+
+set -- 1 2
+echo before: "$@"
+: "${ ( shift) }"	# parse_comsub adds the closing semicolon anyway
+echo after: "$@"
+
+# nested funsubs
+echo ${ echo X${ echo nested; }Y; }
+echo ${ echo a ; echo ${ echo nested; }; echo b; }
+
+# nested funsubs/comsubs
+x=${
+	echo ${ echo one;} $(echo two)
+}
+echo $x
+
+# mixing funsubs and arithmetic expansion
+echo $(( ${ echo 24 + 18; }))
+echo $(( ${ echo 14 + 18; }+ 10))
+echo ${ echo $(( 24+18 )); }
+
+# alias expansion and nested funsubs in other constructs
+${THIS_SH} ./comsub21.sub
+${THIS_SH} ./comsub22.sub
+${THIS_SH} ./comsub23.sub
+${THIS_SH} ./comsub24.sub
+${THIS_SH} ./comsub25.sub
+${THIS_SH} ./comsub26.sub

@@ -1,0 +1,98 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+set aa bb cc -- dd ; f=$'\1' IFS=$f
+
+recho "$f$*$f"
+recho "$f--$f"
+
+[[ $f$*$f == *$f--$f* ]] && echo ok 1
+[[ $f$*$f == "$f--$f" ]] || echo ok 2
+
+[[ ${f}${*}${f} == *$f--$f* ]] && echo ok 3
+
+[[ $f$*$f == $f$*$f ]] && echo ok 4
+[[ ${f}${*}${f} == $f$*$f ]] && echo ok 5
+[[ $f$*$f == *--* ]] && echo ok 6
+
+[[ $* == $* ]] && echo ok 7
+[[ $* == ${*} ]] && echo ok 8
+[[ $f == $f ]] && echo ok 9
+[[ $f == ${f} ]] && echo ok 10
+
+# now with f an array and $f -> ${f[0]}
+
+set aa bb cc -- dd ; f=( $'\1' )
+
+[[ $f$*$f == *$f--$f* ]] && echo ok 11
+[[ ${f}${*}${f} == *$f--$f* ]] && echo ok 12
+[[ $f$*$f == $f$*$f ]] && echo ok 13
+[[ ${f}${*}${f} == $f$*$f ]] && echo ok 14
+[[ $f$*$f == *--* ]] && echo ok 15
+
+[[ $* == $* ]] && echo ok 16
+[[ $* == ${*} ]] && echo ok 17
+[[ $f == $f ]] && echo ok 18
+[[ $f == ${f} ]] && echo ok 19
+
+# now use an array instead of $*
+A=( aa bb cc -- dd ); f=$'\1' IFS=$f
+
+[[ $f${A[*]}$f == $f${A[*]}$f ]] && echo ok 20
+[[ $f${A[*]}$f == *--* ]] && echo ok 21
+[[ ${f}${A[*]}${f} == *$f--$f* ]] && echo ok 22
+
+[[ ${f}${A[*]}${f} == $f${A[*]}$f ]] && echo ok 23
+[[ ${A[*]} == ${A[*]} ]] && echo ok 24
+
+# now test $N/${N}/${A[N]}
+set aa bb $'\1' cc -- dd ; f=$'\1' IFS=$f
+
+[[ $3$*$3 == $3$*$3 ]] && echo ok 25
+[[ $3$*$3 == ${3}${*}${3} ]] && echo ok 26
+[[ $3$*$3 == $3${*}${3} ]] && echo ok 27
+[[ $* == *$3* ]]&& echo ok 28
+[[ $* == *${3}* ]]&& echo ok 29
+
+# now use an array instead of $*
+A=( aa bb $'\1' cc -- dd )
+
+[[ ${A[2]}${A[*]}${A[2]} == ${A[2]}${A[*]}${A[2]} ]] && echo ok 30
+[[ ${A[2]}$*${A[2]} == ${A[2]}${*}${A[2]} ]] && echo ok 31
+[[ ${A[2]}$*${A[2]} == ${A[2]}${*}${A[2]} ]] && echo ok 32
+[[ $* == *${A[2]}* ]]&& echo ok 33
+[[ $* == *${A[2]}* ]]&& echo ok 34
+
+unset -v A
+
+set -- aa bb cc -- dd
+case $* in
+"$*")	echo ok 35;;
+*)	echo bad 35;;
+esac
+
+case $f in
+$f)	echo ok 36;;
+*)	echo bad 36;;
+esac
+
+case $f$*$f in
+$f"$*"$f)	echo ok 37;;
+*)	echo bad 37;;
+esac
+
+case $f$*$f in
+*$f--$f*)	echo ok 38;;
+*)	echo bad 38;;
+esac

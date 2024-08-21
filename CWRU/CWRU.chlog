@@ -9989,5 +9989,57 @@ lib/readline/histexpand.c
 	  search function, set the right flags and just call _hs_history_search
 	  with those flags using -1 for list direction and line direction
 
+				   8/13
+				   ----
+builtins/printf.def
+	- printf_builtin: fix params to call to mklong for long double formats
+	  if STRTOLD_BROKEN is defined
 
+lib/sh/winsize.c
+	- rearrange includes to make sure <termios.h> is included if
+	  HAVE_TCGETWINSIZE is defined
+	  Report from Grisha Levit <grishalevit@gmail.com>
 
+				   8/14
+				   ----
+lib/readline/rlmbutil.h
+	- _rl_is_basic: adapted from gnulib is_basic; tells whether a character
+	  is a single byte because it's guaranteed by ISO C and POSIX
+
+lib/readline/mbutil.c
+	- _rl_mbstrlen: counts the number of possibly multibyte characters in a
+	  string depending on the current locale; uses _rl_utf8_mbstrlen or
+	  _rl_gen_mbstrlen as appropriate (or strlen for a single-byte locale)
+
+lib/readline/readline.c
+	- _rl_internal_char_cleanup: if we are using multibyte characters, call
+	  _rl_mbstrlen to determine whether or not we've read as many characters
+	  than rl_num_chars_to_read says we should
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+builtins/read.def
+	- delim,delim_char: once again an int so we can more easily
+	  distinguish -1 and other unsigned char values >= 0x7f; make
+	  sure delim gets an unsigned char if passed with -d
+	- edit_line: now takes an int parameter for the delim char; only add
+	  the delim to the end of the string if it's non-negative
+	- set_eol_delim,unset_eol_delim: now explicitly check whether or not
+	  the delimiter character is non-negativesince it's no longer unsigned
+	- read_mbchar: make sure to cast the char read to unsigned before
+	  comparing it against the delim
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   8/15
+				   ----
+include/shmbchar.h,lib/sh/shmbchar.c
+	- is_basic: update test for IS_BASIC_ASCII to include $, @, and `,
+	  which ISO C guarantees to be single-byte
+	- is_basic_table: update bitmap to include new characters
+
+				   8/21
+				   ----
+shell.c
+	- main: make sure to set read_but_dont_execute (-n) to 0 in an
+	  interactive shell in case it was set at invocation, but not in
+	  cases where it was forced with -i
+	  Report from Milana <94888u@riseup.net>

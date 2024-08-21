@@ -1,0 +1,54 @@
+
+This is a description of the changes made to bash to provide a `restricted'
+shell, `rbash', organized by changes to various source files.
+
+1.  shell.c
+
+	Moved the declaration of restricted to flags.c; it is now declared
+	extern here.  Changed the detection of a restricted shell; now, any
+	instance of the shell for which *(basename(argv[0])) == 'r' (where
+	basename returns either everything after the last '/' in its 
+	argument or its argument is restricted.  Also, if SHELL is set on
+	entry to the shell, and it's basename is "rbash", the shell is
+	restricted.
+
+	This paragraph applies only to CWRU, or to those who have compiled
+	the shell with "CWRU" defined.  When a shell is determined to be
+	restricted, and it is a login shell, the file "/etc/rprofile" (and
+	only that file) is executed.  There is no execution of ~/.profile
+	or ~/.bash_profile.  The .bashrc file is executed, but after the
+	restrictions have been turned on (users may customize their instances
+	of the shell in this file while not compromising any kind of security
+	arrangements set up by the administrator).
+
+2.  builtins.c
+
+	cd_builtin was modified to return failure if bash is operating in
+	`restricted mode', so changing directories is not allowed.
+
+3.  variables.c
+
+	initialize_shell_variables () was modified to make PATH and SHELL
+	read-only when restricted == 1.  These variables may not be unset
+	in a restricted shell.
+
+4.  flags.c
+
+	The variable `restricted' is now declared here.  A new flag `-r',
+	to turn on restricted mode, has been added.  `change_flag' has 
+	been modified to disallow `set +r' if restricted == 1.
+
+5.  execute_cmd.c
+
+	execute_simple_command () was modified to disallow commands and
+	file names that contain a slash.
+
+	Code was added to do_redirections () and do_redirection() to
+	disallow output file redirection specifications if restricted is
+	1.
+
+Chet Ramey
+Information Network Services, Case Western Reserve University
+chet@ins.CWRU.Edu
+
+(I took almost all of this stuff out again after putting it in.)

@@ -1,0 +1,14 @@
+# test behavior of shopt xpg_echo
+
+USG_ECHO=off
+shopt -q xpg_echo && USG_ECHO=on
+
+shopt -u xpg_echo
+echo 'a\n\n\nb'
+
+shopt -s xpg_echo
+echo 'a\n\n\nb'
+
+echo -p
+set -o posix
+echo 'a\tb\tc'

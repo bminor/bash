@@ -1,0 +1,8 @@
+#!/bin/sh
+
+DATE=`date`
+VERS=`sed -n 's:^.*Bash FAQ, version \([^,]*\),.*$:\1:p' < FAQ`
+BVERS=` sed -n 's:^.*Bash version \(.*\)\.$:\1:p' < FAQ`
+
+sed -e "s!@VERSION@!$VERS!" -e "s!@UPDATED@!$DATE!" -e "s!@BASH_VERSION@!$BVERS!" < $1
+echo ""
