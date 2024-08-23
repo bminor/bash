@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat May 11 12:44:56 EDT 2024
+.\"	Last Change: Fri Aug 23 09:04:51 EDT 2024
 .\"
-.TH READLINE 3 "2024 May 11" "GNU Readline 8.3"
+.TH READLINE 3 "2024 August 23" "GNU Readline 8.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -106,17 +106,31 @@ Control keys are denoted by C\-\fIkey\fP, e.g., C\-n means Control\-N.
 Similarly,
 .I meta
 keys are denoted by M\-\fIkey\fP, so M\-x means Meta\-X.
-(On keyboards without a
-.I meta
+.PP
+On keyboards without a
+.I Meta
 key, M\-\fIx\fP means ESC \fIx\fP, i.e., press the Escape key
 then the
 .I x
-key.  This makes ESC the \fImeta prefix\fP.
+key.
+This makes ESC the \fImeta prefix\fP.
 The combination M\-C\-\fIx\fP means ESC\-Control\-\fIx\fP,
 or press the Escape key
 then hold the Control key while pressing the
 .I x
-key.)
+key.
+.PP
+On some keyboards, the Meta key modifier produces meta characters with
+the eighth bit (0200) set (you can use the \fBenable\-meta\-key\fP variable
+to control whether or not it does this, if the keyboard allows it).
+On many others, the terminal or terminal emulator converts the metafied
+key to a key sequence beginning with ESC as described in the      
+preceding paragraph. 
+.PP
+If the \fIMeta\fP key produces a key sequence with the ESC meta prefix,
+you can make M-\fIkey\fP key bindings you specify (see
+.B "Readline Key Bindings"    
+below) do the same thing by setting the \fBforce\-meta\-prefix\fP variable. 
 .PP
 Readline commands may be given numeric
 .IR arguments ,
@@ -268,7 +282,8 @@ key sequences is
 control prefix
 .TP
 .B \eM\-
-meta prefix
+adding the meta prefix or converting the following character to a meta
+character, as described below under \fBforce-meta-prefix\fP
 .TP
 .B \ee
 an escape character
@@ -486,14 +501,17 @@ on the terminal.
 A negative value causes readline to never ask.
 .TP
 .B convert\-meta (On)
-If set to \fBOn\fP, readline will convert characters with the
-eighth bit set to an ASCII key sequence
-by stripping the eighth bit and prefixing it with an
-escape character (in effect, using escape as the \fImeta prefix\fP).
-The default is \fIOn\fP, but readline will set it to \fIOff\fP if the
-locale contains eight-bit characters.
+If set to \fBOn\fP, readline will convert characters it reads
+with the eighth bit set to an ASCII key sequence
+by stripping the eighth bit and prefixing it with an escape character
+(converting the character to have the \fImeta prefix\fP).
+The default is \fIOn\fP, but readline will set it to \fIOff\fP
+if the locale contains
+characters whose encodings may include bytes with the eighth bit set.
 This variable is dependent on the \fBLC_CTYPE\fP locale category, and
 may change if the locale is changed.
+This variable also affects key bindings; see the description of
+\fBforce\-meta\-prefix\fP below. 
 .TP
 .B disable\-completion (Off)
 If set to \fBOn\fP, readline will inhibit word completion.  Completion
@@ -551,12 +569,33 @@ arrow keys.
 .TP
 .B enable\-meta\-key (On)
 When set to \fBOn\fP, readline will try to enable any meta modifier
-key the terminal claims to support when it is called.  On many terminals,
-the meta key is used to send eight-bit characters.
+key the terminal claims to support when it is called.
+On many terminals, the Meta key is used to send eight-bit characters;
+this variable checks for the terminal capability that indicates the
+terminal can enable and disable a mode that sets the eighth bit of a
+character (0200) if the Meta key is held down when the character is
+typed (a meta character).
 .TP
 .B expand\-tilde (Off)
 If set to \fBOn\fP, tilde expansion is performed when readline
 attempts word completion.
+.TP
+.B force\-meta\-prefix (Off)
+If set to \fBOn\fP, readline modifies its behavior when binding key
+sequences containing \eM- or Meta-
+(see \fBKey Bindings\fP above) by converting a key sequence of the form
+\eM-\fIC\fP or Meta-\fIC\fP to the two-character sequence
+\fBESC\fP\fIC\fP (adding the meta prefix).
+If
+.B force\-meta\-prefix
+is set to \fBOff\fP (the default),
+readline uses the value of the
+.B convert\-meta
+variable to determine whether to perform this conversion:
+if \fBconvert\-meta\fP is \fBOn\fP,
+readline performs the conversion described above;
+if it is \fBOff\fP, Readline converts \fIC\fP to a meta character by
+setting the eighth bit (0200).
 .TP
 .B history\-preserve\-point (Off)
 If set to \fBOn\fP, the history code attempts to place point at the
@@ -582,11 +621,13 @@ This setting is automatically enabled for terminals of height 1.
 .B input\-meta (Off)
 If set to \fBOn\fP, readline will enable eight-bit input (that is,
 it will not clear the eighth bit in the characters it reads),
-regardless of what the terminal claims it can support.  The name
+regardless of what the terminal claims it can support.
+The name
 .B meta\-flag
 is a synonym for this variable.
-The default is \fIOff\fP, but readline will set it to \fIOn\fP if the
-locale contains eight-bit characters.
+The default is \fIOff\fP, but readline will set it to \fIOn\fP
+if the locale contains
+characters whose encodings may include bytes with the eighth bit set.
 This variable is dependent on the \fBLC_CTYPE\fP locale category, and
 may change if the locale is changed.
 .TP
@@ -653,8 +694,9 @@ the list.
 If set to \fBOn\fP, readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.
-The default is \fIOff\fP, but readline will set it to \fIOn\fP if the
-locale contains eight-bit characters.
+The default is \fIOff\fP, but readline will set it to \fIOn\fP
+if the locale contains
+characters whose encodings may include bytes with the eighth bit set.
 This variable is dependent on the \fBLC_CTYPE\fP locale category, and
 may change if the locale is changed.
 .TP
@@ -1275,7 +1317,7 @@ end of the line (like \fBdelete-char\fP).
 If at the end of the line, behaves identically to
 \fBpossible-completions\fP.
 .PD
-.SS Keyboard Macros
+.SS "Keyboard Macros"
 .PD 0
 .TP
 .B start\-kbd\-macro (C\-x (\^)
