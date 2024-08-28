@@ -3614,8 +3614,10 @@ notify_and_cleanup (void)
   if (jobs_list_frozen > 0)
     return;
 
-  if (want_job_notifications || interactive || interactive_shell == 0 || sourcelevel)
+  if (want_job_notifications || interactive || interactive_shell == 0)
     notify_of_job_status ();
+  else if (interactive_shell && sourcelevel && shell_compatibility_level <= 52)
+    notify_of_job_status ();	/* XXX - was not dependent on BASH_COMPAT */
 
   if (jobs_list_frozen < 0)
     return;		/* status changes only */

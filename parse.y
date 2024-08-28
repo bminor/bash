@@ -3137,8 +3137,7 @@ static int open_brace_count;
 	      else if (word_token_alist[i].token == '}' && open_brace_count) \
 		open_brace_count--; \
 \
-	      if (last_read_token == IF || last_read_token == WHILE || last_read_token == UNTIL) \
-		set_word_top (last_read_token); \
+	      set_word_top (word_token_alist[i].token); \
 \
 	      if (posixly_correct) \
 		parser_state &= ~PST_ALEXPNEXT; \
@@ -3596,9 +3595,6 @@ read_token (int command)
       parser_state &= ~PST_ASSIGNOK;
       parser_state &= ~PST_CMDBLTIN;
 
-      if (last_read_token == IF || last_read_token == WHILE || last_read_token == UNTIL)
-	set_word_top (last_read_token);
-
       return (character);
     }
 
@@ -3717,6 +3713,7 @@ read_token (int command)
       /* case pattern lists may be preceded by an optional left paren.  If
 	 we're not trying to parse a case pattern list, the left paren
 	 indicates a subshell. */
+      /* XXX - check for last_read_token != WORD before setting PST_SUBSHELL? */
       if MBTEST(character == '(' && (parser_state & PST_CASEPAT) == 0) /* ) */
 	parser_state |= PST_SUBSHELL;
       /*(*/
@@ -4843,7 +4840,6 @@ parse_dparen (int c)
 #if defined (ARITH_FOR_COMMAND)
   if (last_read_token == FOR)
     {
-      set_word_top (last_read_token);
       arith_for_lineno = line_number;
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)
@@ -4863,8 +4859,6 @@ parse_dparen (int c)
     {
       sline = line_number;
 
-      if (last_read_token == IF || last_read_token == WHILE || last_read_token == UNTIL)
-	set_word_top (last_read_token);
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)	/* arithmetic command */
 	{
@@ -5792,7 +5786,6 @@ got_token:
       expecting_in_token++;
       break;
     }
-  set_word_top (last_read_token);
 
   return (result);
 }

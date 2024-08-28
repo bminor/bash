@@ -10070,3 +10070,43 @@ lib/readline/doc/rluser.texi,lib/readline/doc/readline.3,doc/bash.1
 	- Readline Introduction: expand description of the Meta key and the
 	  various things it can do, reference force-meta-prefix and
 	  enable-meta-key
+
+				   8/26
+				   ----
+doc/bashref.texi
+	- case: add process substitution to the list of expansions for the
+	  word.
+	  Reported by shynur <one.last.kiss@outlook.com>
+
+execute_cmd.c
+	- execute_null_command: if an empty simple command (no words, just
+	  redirections) requires a fork, reset top_level and exit if we
+	  longjmp there. This can happen with an expansion error while we
+	  evaluate the redirection.
+	  Report from youheng.lue@gmail.com
+	- execute_connection: in default mode, bash performs jobs notifications
+	  in an interactive shell between commands separated by ';' or '\n'.
+	  It shouldn't do this in posix mode, since posix now specifies when
+	  notifications can take place
+
+examples/loadables/{realpath,csv,dsv,cut,stat,kv}
+	- changes to make them build when arrays are not available
+	  Report from Dennis Clarke <dclarke@blastwave.org>
+
+jobs.c
+	- notify_and_cleanup: make interactive shells notifying during sourced
+	  scripts dependent on the shell compatibility level and inactive in
+	  versions beyond bash-5.2
+	  Inspired by report from Zachary Santer <zsanter@gmail.com>
+
+doc/bashref.texi
+	- Bash posix mode: note the change with job notifications in command
+	  lists
+	- Shell compatibility mode: note job notification changes for compat
+	  level > 52
+
+parse.y
+	- CHECK_FOR_RESERVED_WORD: call set_word_top here on the reserved word
+	  token about to be returned; don't worry about trying to set it after
+	  the fact
+	  Report from Collin Funk <collin.funk1@gmail.com>

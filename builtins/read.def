@@ -201,6 +201,7 @@ read_builtin_timeout (int fd)
 #endif
 }
 
+#if defined (READLINE)
 void
 reset_rl_instream (FILE *save_instream)
 {
@@ -213,6 +214,7 @@ uw_reset_rl_instream (void *fp)
 {
   reset_rl_instream (fp);
 }
+#endif
 
 /* Read the value of the shell variables whose names follow.
    The reading is done from the current input stream, whatever

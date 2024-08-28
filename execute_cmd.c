@@ -2862,7 +2862,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 
       QUIT;
 #if defined (JOB_CONTROL)
-      if (command->value.Connection->connector == ';' && job_control && interactive)
+      if (command->value.Connection->connector == ';' && job_control && interactive && posixly_correct == 0)
         notify_and_cleanup ();
 #endif
       optimize_connection_fork (command);			/* XXX */
@@ -4187,7 +4187,7 @@ bind_lastarg (char *arg)
 static int
 execute_null_command (REDIRECT *redirects, int pipe_in, int pipe_out, int async)
 {
-  int r;
+  int r, code;
   int forcefork, fork_flags;
   REDIRECT *rd;
 
@@ -4221,6 +4221,10 @@ execute_null_command (REDIRECT *redirects, int pipe_in, int pipe_out, int async)
 	    subshell_environment |= SUBSHELL_ASYNC;
 	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
 	    subshell_environment |= SUBSHELL_PIPE;
+
+	  code = setjmp_nosigs (top_level);
+	  if (code)
+	    exit (EXECUTION_FAILURE);
 
 	  if (do_redirections (redirects, RX_ACTIVE) == 0)
 	    exit (EXECUTION_SUCCESS);

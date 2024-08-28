@@ -165,10 +165,12 @@ realpath_builtin(WORD_LIST *list)
 				builtin_error("%s: %s", p, strerror(errno));
 			continue;
 		}
+#if defined (ARRAY_VARS)
 		if (aflag) {
 			bind_array_element (v, ind, r, 0);
 			ind++;
 		}
+#endif
 		if (qflag == 0) {
 			if (vflag)
 				printf ("%s -> ", p);

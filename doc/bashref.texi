@@ -1041,9 +1041,9 @@ as a @var{clause}.
 
 Each clause must be terminated with @samp{;;}, @samp{;&}, or @samp{;;&}.
 The @var{word} undergoes tilde expansion, parameter expansion, command
-substitution, arithmetic expansion, and quote removal
+substitution, process substitution, arithmetic expansion, and quote removal
 (@pxref{Shell Parameter Expansion})
-before matching is attempted.
+before the shell attempts to match the pattern.
 Each @var{pattern} undergoes tilde expansion, parameter expansion,
 command substitution, arithmetic expansion, process substitution, and
 quote removal.
@@ -1833,7 +1833,7 @@ only be referenced; assignment to them is not allowed.
 ($*) Expands to the positional parameters, starting from one.
 When the expansion is not within double quotes, each positional parameter
 expands to a separate word.
-In contexts where it is performed, those words
+In contexts where these expansions are performed, those words
 are subject to further word splitting and filename expansion.
 When the expansion occurs within double quotes, it expands to a single word
 with the value of each parameter separated by the first character of the
@@ -8545,6 +8545,10 @@ is stopped is `Stopped(@var{signame})', where @var{signame} is, for
 example, @code{SIGTSTP}.
 
 @item
+Bash does not perform job notifications between executing commands in
+lists separated by @samp{;} or newline in interactive shells.
+
+@item
 Alias expansion is always enabled, even in non-interactive shells.
 
 @item
@@ -9118,6 +9122,10 @@ If the @option{-p} or @option{-P} option is supplied to the @code{bind} builtin,
 as bindable command names, and
 displays any key sequences bound to those commands, instead of treating
 the arguments as key sequences to bind.
+@item
+Interactive shells will notify the user of completed jobs while sourcing a
+script.
+Newer versions defer notification until script execution completes.
 @end itemize
 
 @end table

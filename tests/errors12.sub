@@ -1,0 +1,42 @@
+: ${THIS_SH:=./bash}
+
+# various error messages about incomplete compound commands
+
+${THIS_SH} -c 'if
+	true; true
+then
+	echo foo bar' bash
+
+${THIS_SH} -c 'while false; do
+	echo true' bash
+
+${THIS_SH} -c 'until false
+do
+	echo false
+' bash
+
+${THIS_SH} -c 'for f
+in 1 2 3
+do
+	: ; :' bash
+
+${THIS_SH} -c 'case foo in
+bar)	if false
+	then
+		true
+	fi
+	;;
+' bash
+
+# this tripped up ubsan
+x()
+{
+    case y in         
+        z)    
+            if (! false); then
+              foo=bar
+            fi
+            ;;
+    esac
+}
+

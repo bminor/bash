@@ -30,6 +30,8 @@
 
 #include "loadables.h"
 
+#if defined (ARRAY_VARS)
+
 #define DSV_ARRAY_DEFAULT	"DSV"
 
 #define NQUOTE	0
@@ -158,11 +160,13 @@ dsvsplit (SHELL_VAR *dsv, char *line, char *dstring, int flags)
 
   return (rval = ind);				/* number of fields */
 }
+#endif
 
 int
 dsv_builtin (WORD_LIST *list)
 {
   int opt, rval, flags;
+#if defined (ARRAY_VARS)
   char *array_name, *dsvstring, *delims;
   SHELL_VAR *v;
 
@@ -238,6 +242,10 @@ dsv_builtin (WORD_LIST *list)
 
   opt = dsvsplit (v, dsvstring, delims, flags);
   /* Maybe do something with OPT here, it's the number of fields */
+#else
+  builtin_error ("arrays not available");
+  rval = EXECUTION_FAILURE;
+#endif
 
   return (rval);
 }

@@ -178,7 +178,9 @@ cutbytes (SHELL_VAR *v, char *line, struct cutop *ops)
   if (v)
     {
       ind = 0;
+#if defined (ARRAY_VARS)
       bind_array_element (v, ind, buf, 0);
+#endif
       ind++;
     }
   else
@@ -246,7 +248,9 @@ cutchars (SHELL_VAR *v, char *line, struct cutop *ops)
   if (v)
     {
       ind = 0;
+#if defined (ARRAY_VARS)
       bind_array_element (v, ind, buf, 0);
+#endif
       ind++;
     }
   else
@@ -301,7 +305,9 @@ cutfields (SHELL_VAR *v, char *line, struct cutop *ops)
 	return ind;
       if (v)
 	{
+#if defined (ARRAY_VARS)
 	  bind_array_element (v, ind, line, 0);
+#endif
 	  ind++;
 	}
       else
@@ -330,12 +336,14 @@ cutfields (SHELL_VAR *v, char *line, struct cutop *ops)
     {
       if (bmap[b] == 0)
 	continue;
+#if defined (ARRAY_VARS)
       if (v)
 	{
 	  bind_array_element (v, ind, fields[b], 0);
 	  ind++;
 	}
       else
+#endif
 	{
 	  if (i == 0)
 	    putchar (ops->delim);
@@ -441,8 +449,13 @@ cut_internal (int which, WORD_LIST *list)
       switch (opt)
 	{
 	case 'a':
+#if defined (ARRAY_VARS)
 	  array_name = list_optarg;
 	  break;
+#else
+	  builtin_error ("arrays not available");
+	  return (EX_USAGE);
+#endif
 	case 'b':
 	  cutflags |= BFLAG;
 	  list_arg = list_optarg;
@@ -502,6 +515,7 @@ cut_internal (int which, WORD_LIST *list)
       return (EXECUTION_FAILURE);
     }
 
+#if defined (ARRAY_VARS)
   if (array_name)
     {
       v = builtin_find_indexed_array (array_name, 1);
@@ -511,6 +525,7 @@ cut_internal (int which, WORD_LIST *list)
 	  return (EXECUTION_FAILURE);
 	}
     }
+#endif
 
   op.flags = cutflags;
   op.delim = delim;
