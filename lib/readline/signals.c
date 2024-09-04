@@ -671,7 +671,8 @@ _rl_release_sigint (void)
     return;
 
   sigint_blocked = 0;
-  RL_CHECK_SIGNALS ();
+  if (RL_ISSTATE (RL_STATE_SIGHANDLER) == 0)
+    RL_CHECK_SIGNALS ();
 }
 
 /* Cause SIGWINCH to not be delivered until the corresponding call to

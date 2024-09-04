@@ -597,8 +597,8 @@ printf_builtin (WORD_LIST *list)
 		      break;
 		    *t++ = *fmt++;
 		  }
-		*t = '\0';
-		if (*++fmt != 'T')
+		*t = '\0';	/*(*/
+		if (*fmt != ')' || *++fmt != 'T')
 		  {
 		    builtin_warning (_("`%c': invalid time format specification"), *fmt);
 		    fmt = start;

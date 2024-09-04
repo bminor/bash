@@ -10110,3 +10110,56 @@ parse.y
 	  token about to be returned; don't worry about trying to set it after
 	  the fact
 	  Report from Collin Funk <collin.funk1@gmail.com>
+
+				   8/28
+				   ----
+parse.y
+	- CHECK_FOR_RESERVED_WORD: change word_top to keep track of the line
+	  number where a compound command begins; call set_word_top on the
+	  current token about to be returned
+	- read_token_word: call set_word_top if special_case_tokens returns
+	  something; currently used for `{'
+	- set_word_top: add `{' to the list of compound commands we track
+	- grammar: every time we parse a group command or equivalent for the
+	  `for' and `select' compound commands, decrement word_top after we
+	  see the `}'
+	- parse_dparen: set arith_lineno from word_lineno[word_top] since we
+	  now set it for FOR when we read it
+
+				   8/29
+				   ----
+parse.y
+	- read_token: don't turn on PST_SUBSHELL after reading a left paren
+	  if the last token was a WORD, since that's a function definition,
+	  not a subshell
+	- read_token,parse_dparen: don't turn on PST_SUBSHELL if we run into
+	  a left paren while parsing a conditional command (PST_CONDCMD is
+	  set in parser_state)
+	- set_word_top: add `(' to the tokens saved in word_lineno
+	- grammar: decrement word_top in the subshell_command production
+	- read_token,parse_dparen: call set_word_top where we add PST_SUBSHELL
+	  to parser_state
+
+				   8/30
+				   ----
+parse.y
+	- set_word_top: add COND_START to the list of tokens that set
+	  word_lineno[word_top]
+	- grammar: decrement word_top after COND_END
+	- rename: word_lineno -> compoundcmd_lineno, word_top -> compoundcmd_top,
+	  set_word_top -> set_compoundcmd_top
+
+lib/readline/signals.c
+	- _rl_release_sigint: don't check for signals if we're already
+	  handling a received signal
+	  Report from Tycho Kirchner <tychokirchner@mail.de> and
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
+				   8/31
+				   ----
+builtins/printf.def
+	- printf_builtin: when parsing a time specification format, don't
+	  increment the format pointer to check for 'T' unless it points
+	  to a closing right paren, rejecting the format if it's not a `)'
+	  when the loop breaks
+	  Report from Andrey Kovalev <i.not.student@yandex.ru>

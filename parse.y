@@ -185,7 +185,7 @@ static void free_string_list (void);
 
 static char *read_a_line (int);
 
-static int set_word_top (int);
+static int set_compoundcmd_top (int);
 static int reserved_word_acceptable (int);
 static int yylex (void);
 
@@ -341,12 +341,20 @@ static int token_before_that;
 /* The token read prior to token_before_that. */
 static int two_tokens_ago;
 
-/* The line number in a script where the word in a `case WORD', `select WORD'
-   or `for WORD' begins.  This is a nested command maximum, since the array
-   index is decremented after a case, select, or for command is parsed. */
+/* Someday compoundcmd_lineno will be an array of these structs. */
+struct tokeninfo {
+  int tok;
+  int lineno;
+};
+
+/* The line number in a script where a compound command begins. The
+   compound commands for which this is tracked are the ones listed in
+   set_compoundcmd_top().
+   This is a nested command maximum, since the array index is decremented
+   after a compound command is parsed. */
 #define MAX_COMPOUND_NEST	256
-static int word_lineno[MAX_COMPOUND_NEST+1];
-static int word_top = -1;
+static int compoundcmd_lineno[MAX_COMPOUND_NEST+1];
+static int compoundcmd_top = -1;
 
 /* If non-zero, it is the token that we want read_token to return
    regardless of what text is (or isn't) present to be read.  This
@@ -857,12 +865,12 @@ shell_command:	for_command
  	|	WHILE compound_list DO compound_list DONE
 			{
 			  $$ = make_while_command ($2, $4);
-			  if (word_top >= 0) word_top--;
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	UNTIL compound_list DO compound_list DONE
 			{
 			  $$ = make_until_command ($2, $4);
-			  if (word_top >= 0) word_top--;
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	select_command
 			{ $$ = $1; }
@@ -882,43 +890,47 @@ shell_command:	for_command
 
 for_command:	FOR WORD newline_list DO compound_list DONE
 			{
-			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	FOR WORD newline_list '{' compound_list '}'
 			{
-			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* FOR */
 			}
 	|	FOR WORD ';' newline_list DO compound_list DONE
 			{
-			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	FOR WORD ';' newline_list '{' compound_list '}'
 			{
-			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_for_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* FOR */
 			}
 	|	FOR WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
 			{
-			  $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	FOR WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
 			{
-			  $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_for_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* FOR */
 			}
 	|	FOR WORD newline_list IN list_terminator newline_list DO compound_list DONE
 			{
-			  $$ = make_for_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_for_command ($2, (WORD_LIST *)NULL, $8, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	FOR WORD newline_list IN list_terminator newline_list '{' compound_list '}'
 			{
-			  $$ = make_for_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_for_command ($2, (WORD_LIST *)NULL, $8, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* FOR */
 			}
 	;
 
@@ -926,84 +938,90 @@ arith_for_command:	FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
 				  if ($$ == 0) YYERROR;
-				  if (word_top >= 0) word_top--;
+				  if (compoundcmd_top >= 0) compoundcmd_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS list_terminator newline_list '{' compound_list '}'
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
 				  if ($$ == 0) YYERROR;
-				  if (word_top >= 0) word_top--;
+				  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+				  if (compoundcmd_top >= 0) compoundcmd_top--;	/* FOR */
 				}
 	|		FOR ARITH_FOR_EXPRS DO compound_list DONE
 				{
 				  $$ = make_arith_for_command ($2, $4, arith_for_lineno);
 				  if ($$ == 0) YYERROR;
-				  if (word_top >= 0) word_top--;
+				  if (compoundcmd_top >= 0) compoundcmd_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS '{' compound_list '}'
 				{
 				  $$ = make_arith_for_command ($2, $4, arith_for_lineno);
 				  if ($$ == 0) YYERROR;
-				  if (word_top >= 0) word_top--;
+				  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+				  if (compoundcmd_top >= 0) compoundcmd_top--;	/* FOR */
 				}
 	;
 
 select_command:	SELECT WORD newline_list DO compound_list DONE
 			{
-			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	SELECT WORD newline_list '{' compound_list '}'
 			{
-			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $5, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* SELECT */
 			}
 	|	SELECT WORD ';' newline_list DO compound_list DONE
 			{
-			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	SELECT WORD ';' newline_list '{' compound_list '}'
 			{
-			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_select_command ($2, add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), $6, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* SELECT */
 			}
 	|	SELECT WORD newline_list IN word_list list_terminator newline_list DO compound_list DONE
 			{
-			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	SELECT WORD newline_list IN word_list list_terminator newline_list '{' compound_list '}'
 			{
-			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* SELECT */
 			}
 	|	SELECT WORD newline_list IN list_terminator newline_list DO compound_list DONE
 			{
-			  $$ = make_select_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_select_command ($2, (WORD_LIST *)NULL, $8, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	SELECT WORD newline_list IN list_terminator newline_list '{' compound_list '}'
 			{
-			  $$ = make_select_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_select_command ($2, (WORD_LIST *)NULL, $8, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* SELECT */
 			}
 	;
 
 case_command:	CASE WORD newline_list IN newline_list ESAC
 			{
-			  $$ = make_case_command ($2, (PATTERN_LIST *)NULL, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_case_command ($2, (PATTERN_LIST *)NULL, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	CASE WORD newline_list IN case_clause_sequence newline_list ESAC
 			{
-			  $$ = make_case_command ($2, $5, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_case_command ($2, $5, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	CASE WORD newline_list IN case_clause ESAC
 			{
-			  $$ = make_case_command ($2, $5, word_lineno[word_top]);
-			  if (word_top >= 0) word_top--;
+			  $$ = make_case_command ($2, $5, compoundcmd_lineno[compoundcmd_top]);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	;
 
@@ -1054,6 +1072,7 @@ subshell:	'(' compound_list ')'
 			{
 			  $$ = make_subshell_command ($2);
 			  $$->flags |= CMD_WANT_SUBSHELL;
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RPAREN */
 			}
 	;
 
@@ -1133,23 +1152,26 @@ coproc:		COPROC shell_command
 if_command:	IF compound_list THEN compound_list FI
 			{
 			  $$ = make_if_command ($2, $4, (COMMAND *)NULL);
-  			  if (word_top >= 0) word_top--;
+  			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	IF compound_list THEN compound_list ELSE compound_list FI
 			{
 			  $$ = make_if_command ($2, $4, $6);
-			  if (word_top >= 0) word_top--;
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	|	IF compound_list THEN compound_list elif_clause FI
 			{
 			  $$ = make_if_command ($2, $4, $5);
-			  if (word_top >= 0) word_top--;
+			  if (compoundcmd_top >= 0) compoundcmd_top--;
 			}
 	;
 
 
 group_command:	'{' compound_list '}'
-			{ $$ = make_group_command ($2); }
+			{
+			  $$ = make_group_command ($2);
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* RBRACE */
+			}
 	;
 
 arith_command:	ARITH_CMD
@@ -1157,7 +1179,10 @@ arith_command:	ARITH_CMD
 	;
 
 cond_command:	COND_START COND_CMD COND_END
-			{ $$ = $2; }
+			{
+			  $$ = $2;
+			  if (compoundcmd_top >= 0) compoundcmd_top--;	/* COND_END */
+			}
 	; 
 
 elif_clause:	ELIF compound_list THEN compound_list
@@ -3137,7 +3162,7 @@ static int open_brace_count;
 	      else if (word_token_alist[i].token == '}' && open_brace_count) \
 		open_brace_count--; \
 \
-	      set_word_top (word_token_alist[i].token); \
+	      set_compoundcmd_top (word_token_alist[i].token); \
 \
 	      if (posixly_correct) \
 		parser_state &= ~PST_ALEXPNEXT; \
@@ -3711,11 +3736,16 @@ read_token (int command)
 	}
 
       /* case pattern lists may be preceded by an optional left paren.  If
-	 we're not trying to parse a case pattern list, the left paren
-	 indicates a subshell. */
-      /* XXX - check for last_read_token != WORD before setting PST_SUBSHELL? */
-      if MBTEST(character == '(' && (parser_state & PST_CASEPAT) == 0) /* ) */
-	parser_state |= PST_SUBSHELL;
+	 we're not trying to parse a case pattern list or a conditional
+	 command (which may use parens for grouping), and the last token
+	 wasn't a WORD (indicating a function definition), the left paren
+	 introduces a subshell. */
+      if MBTEST(character == '(' && (parser_state & (PST_CASEPAT|PST_CONDCMD)) == 0 && /* ) */
+		last_read_token != WORD)
+	{
+	  set_compoundcmd_top (character);
+	  parser_state |= PST_SUBSHELL;
+	}
       /*(*/
       else if MBTEST((parser_state & PST_CASEPAT) && character == ')')
 	parser_state &= ~PST_CASEPAT;
@@ -4840,7 +4870,7 @@ parse_dparen (int c)
 #if defined (ARITH_FOR_COMMAND)
   if (last_read_token == FOR)
     {
-      arith_for_lineno = line_number;
+      arith_for_lineno = compoundcmd_top[compoundcmd_lineno];
       cmdtyp = parse_arith_cmd (&wval, 0);
       if (cmdtyp == 1)
 	{
@@ -4872,8 +4902,11 @@ parse_dparen (int c)
 	{
 	  push_string (wval, 0, (alias_t *)NULL);
 	  pushed_string_list->flags = PSH_DPAREN;
-	  if ((parser_state & PST_CASEPAT) == 0)
-	    parser_state |= PST_SUBSHELL;
+	  if ((parser_state & (PST_CASEPAT|PST_CONDCMD)) == 0)
+	    {
+	      set_compoundcmd_top (c);
+	      parser_state |= PST_SUBSHELL;
+	    }
 	  return (c);
 	}
       else			/* ERROR */
@@ -5667,7 +5700,10 @@ got_token:
   /* Check for special case tokens. */
   result = (last_shell_getc_is_singlebyte) ? special_case_tokens (token) : -1;
   if (result >= 0)
-    return result;	/* don't need to set word_top in any of these cases */
+    {
+      set_compoundcmd_top (result);	/* need to set compoundcmd_top if it returns `{' */ /*}*/
+      return result;
+    }
 
 #if defined (ALIAS)
   /* Posix.2 does not allow reserved words to be aliased, so check for all
@@ -5791,7 +5827,7 @@ got_token:
 }
 
 static inline int
-set_word_top (int t)
+set_compoundcmd_top (int t)
 {
   switch (t)
     {
@@ -5801,14 +5837,17 @@ set_word_top (int t)
     case IF:
     case WHILE:
     case UNTIL:
-      if (word_top < MAX_COMPOUND_NEST)
-	word_top++;
-      word_lineno[word_top] = line_number;
+    case '{':		/*}*/
+    case '(':		/*)*/
+    case COND_START:
+      if (compoundcmd_top < MAX_COMPOUND_NEST)
+	compoundcmd_top++;
+      compoundcmd_lineno[compoundcmd_top] = line_number;
       break;
     default:
       break;
     }
-  return word_top;
+  return compoundcmd_top;
 }
 
 /* Return 1 if TOKSYM is a token that after being read would allow
@@ -6782,8 +6821,8 @@ report_syntax_error (const char *message)
     {
       if (EOF_Reached && shell_eof_token && current_token != shell_eof_token)
 	parser_error (line_number, _("unexpected EOF while looking for matching `%c'"), shell_eof_token);
-      else if (EOF_Reached && word_top >= 0)
-	parser_error (line_number, _("syntax error: unexpected end of file from command on line %d"), word_lineno[word_top]);
+      else if (EOF_Reached && compoundcmd_top >= 0)
+	parser_error (line_number, _("syntax error: unexpected end of file from command on line %d"), compoundcmd_lineno[compoundcmd_top]);
       else
 	{
 	  msg = EOF_Reached ? _("syntax error: unexpected end of file") : _("syntax error");
