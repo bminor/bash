@@ -277,7 +277,8 @@ static WAIT raw_job_exit_status (int);
 
 static int job_killed_by_signal (int);
 
-static void notify_of_job_status (void);
+static inline void maybe_print_job_notifications (int);
+static void notify_of_job_status (int);
 static void reset_job_indices (void);
 static void cleanup_dead_jobs (void);
 static int processes_in_job (int);
@@ -3373,7 +3374,8 @@ if (job == NO_JOB)
 	 the shell is not interactive, make sure we turn on the notify bit
 	 so we don't get an unwanted message about the job's termination,
 	 and so delete_job really clears the slot in the jobs table. */
-      notify_and_cleanup ();
+      if (posixly_correct == 0 || (interactive_shell == 0 || interactive == 0))
+	notify_and_cleanup (job);
     }
 
 wait_for_return:
@@ -3471,7 +3473,11 @@ return_job:
 	    }
 	  if (jobs_list_frozen == 0)		/* must be running a funsub to get here */
 	    {
-	      notify_of_job_status ();		/* XXX */
+#if 1
+	      notify_of_job_status (i);		/* XXX */
+#else
+	      maybe_print_job_notifications (i);
+#endif
 
 	      /* kre@munnari.oz.au 01/30/2024 */
 	      delete_job (i, posixly_correct ? DEL_NOBGPID : 0);
@@ -3607,17 +3613,15 @@ return_procsub:
 /* Print info about dead jobs, and then delete them from the list
    of known jobs.  This does not actually delete jobs when the
    shell is not interactive, because the dead jobs are not marked
-   as notified. */
+   as notified.
+   If JOB is >= 0, only print info about that job and then clean it up. */
 void
-notify_and_cleanup (void)
+notify_and_cleanup (int job)
 {
   if (jobs_list_frozen > 0)
     return;
 
-  if (want_job_notifications || interactive || interactive_shell == 0)
-    notify_of_job_status ();
-  else if (interactive_shell && sourcelevel && shell_compatibility_level <= 52)
-    notify_of_job_status ();	/* XXX - was not dependent on BASH_COMPAT */
+  maybe_print_job_notifications (job);
 
   if (jobs_list_frozen < 0)
     return;		/* status changes only */
@@ -4239,7 +4243,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
      that this process belongs to is no longer running, then notify the user
      of that fact now. */
   if (children_exited && asynchronous_notification && interactive && executing_builtin == 0)
-    notify_of_job_status ();
+    notify_of_job_status (-1);
 
   return (children_exited);
 }
@@ -4497,11 +4501,13 @@ run_sigchld_trap (int nchild)
 }
 
 /* Function to call when you want to notify people of changes
-   in job status.  This prints out all jobs which are pending
-   notification to stderr, and marks those printed as already
-   notified, thus making them candidates for cleanup. */
+   in job status.  This prints out all requested jobs which are
+   pending notification to stderr, and marks those printed as
+   notified, thus making them candidates for cleanup.
+   if WANTED is >=0, we print information only about that job;
+   otherwise we print all jobs whose status has changed. */
 static void
-notify_of_job_status (void)
+notify_of_job_status (int wanted)
 {
   register int job, termsig;
   char *dir;
@@ -4525,6 +4531,9 @@ notify_of_job_status (void)
   /* XXX could use js.j_firstj here */
   for (job = 0, dir = NULL; job < js.j_jobslots; job++)
     {
+      if (wanted >= 0 && job != wanted)
+	continue;
+
       if (jobs[job] && IS_NOTIFIED (job) == 0)
 	{
 	  s = raw_job_exit_status (job);
@@ -4669,6 +4678,19 @@ internal_debug("notify_of_job_status: catch-all setting J_NOTIFIED on job %d (%d
     sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
   else
     queue_sigchld--;
+}
+
+/* Use this to determine when to conditionally print job notifications. We
+   print notifications if another part of the shell forces it, if we are
+   currently interactive, or if we are not an interactive shell. For
+   compatibility, we can also print notifications if we are sourcing a file
+   in an interactive shell.
+   In a separate inline function so the conditions are in one place. */
+static inline void
+maybe_print_job_notifications (int job)
+{
+  if (want_job_notifications || interactive || interactive_shell == 0)
+    notify_of_job_status (job);
 }
 
 /* Initialize the job control mechanism, and set up the tty stuff. */

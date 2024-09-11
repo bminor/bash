@@ -1296,7 +1296,7 @@ run_debug_trap (void)
       if (job_control && pipeline_pgrp > 0 && ((subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0))
 	give_terminal_to (pipeline_pgrp, 1);
 
-      notify_and_cleanup ();
+      notify_and_cleanup (-1);
 #endif
       
 #if defined (DEBUGGER)

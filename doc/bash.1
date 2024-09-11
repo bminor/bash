@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Aug 23 09:09:35 EDT 2024
+.\"	Last Change: Thu Sep  5 15:41:56 EDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 August 23" "GNU Bash 5.3"
+.TH BASH 1 "2024 September 5" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -1465,8 +1465,7 @@ expand to nothing (i.e., they are removed).
 Expands to the number of positional parameters in decimal.
 .TP
 .B ?
-Expands to the exit status of the most recently executed foreground
-command.
+Expands to the exit status of the most recently executed command.
 .TP
 .B \-
 Expands to the current option flags as specified upon invocation,
@@ -5739,7 +5738,10 @@ Normally,
 .B bash
 waits until it is about to print a prompt before reporting
 changes in a job's status so as to not interrupt
-any other output.  If the
+any other output,
+though it will notify of changes in a job's status after a command in
+a list completes, before executing the next command.
+If the
 .B \-b
 option to the
 .B set

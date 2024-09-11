@@ -10163,3 +10163,34 @@ builtins/printf.def
 	  to a closing right paren, rejecting the format if it's not a `)'
 	  when the loop breaks
 	  Report from Andrey Kovalev <i.not.student@yandex.ru>
+
+				    9/6
+				    ---
+jobs.c,jobs.h
+	- notify_and_cleanup: now takes an argument saying which job to notify
+	  about; if arg is -1 it notifies about all jobs as previously
+	- maybe_print_job_notifications: convenience function to encapsulate
+	  policy about when to call notify_of_job_status in one place; called
+	  by notify_and_cleanup
+	- notify_of_job_status,maybe_print_job_notifications: now take an int
+	  argument with the same semantics as notify_and_cleanup
+	- wait_for_any_job: now call notify_of_job_status only on the job we
+	  just retrieved and will return
+	- wait_for: don't call notify_and_cleanup if posixly_correct unless
+	  the shell is not currently interactive, since posix says we can
+	  notify in a non-interactive shell when a foreground job changes
+	  state
+
+jobs.c,parse.y,eval.c,execute_cmd.c,builtins/jobs.def,trap.c
+	- notify_and_cleanup: changed all callers appropriately
+
+builtins/evalfile.c
+	- _evalfile: renamed to evalfile_internal
+	- evalfile_internal: increment and decrement (or unwind-protect) the
+	  value of want_job_notifications; increment it to a non-zero value
+	  if the shell is interactive and the compatibility level is <= 52
+	  (see change to notify_and_cleanup of 8/26)
+
+jobs.c
+	- maybe_print_job_notifications: remove clause testing sourcelevel;
+	  use want_job_notifications for this

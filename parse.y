@@ -2493,7 +2493,7 @@ shell_getc (int remove_quoted_newline)
 	     of a trap, when the trap is called from flush_child.  This call
 	     had better not cause jobs to disappear from the job table in
 	     that case, or we will have big trouble. */
-	  notify_and_cleanup ();
+	  notify_and_cleanup (-1);
 #else /* !JOB_CONTROL */
 	  cleanup_dead_jobs ();
 #endif /* !JOB_CONTROL */

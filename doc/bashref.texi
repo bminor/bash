@@ -1873,8 +1873,7 @@ expand to nothing (i.e., they are removed).
 
 @item ?
 @vindex $?
-($?) Expands to the exit status of the most recently executed foreground
-command.
+($?) Expands to the exit status of the most recently executed command.
 
 @item -
 @vindex $-
@@ -8545,8 +8544,16 @@ is stopped is `Stopped(@var{signame})', where @var{signame} is, for
 example, @code{SIGTSTP}.
 
 @item
-Bash does not perform job notifications between executing commands in
-lists separated by @samp{;} or newline in interactive shells.
+If the shell is interactive, Bash does not perform job notifications
+between executing commands in lists separated by @samp{;} or newline.
+Non-interactive shells print status messages after a foreground job in
+a list completes.
+
+@item
+If the shell is interactive, Bash waits until the next prompt before
+printing the status of a background job that changes status or a foreground
+job that terminates due to a signal.
+Non-interactive shells print status messages after a foreground job completes.
 
 @item
 Alias expansion is always enabled, even in non-interactive shells.
@@ -9236,7 +9243,9 @@ job 1 in the background, equivalent to @samp{bg %1}
 The shell learns immediately whenever a job changes state. 
 Normally, Bash waits until it is about to print a prompt
 before reporting changes in a job's status so as to not interrupt
-any other output.
+any other output,
+though it will notify of changes in a job's status after a command in
+a list completes, before executing the next command.
 If the @option{-b} option to the @code{set} builtin is enabled,
 Bash reports such changes immediately (@pxref{The Set Builtin}).
 Any trap on @code{SIGCHLD} is executed for each child process

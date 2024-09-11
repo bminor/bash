@@ -647,6 +647,7 @@ history_truncate_file (const char *fname, int lines)
 truncate_write:
   tempname = history_tempfile (filename);
 
+  rv = 0;
   if ((file = open (tempname, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0600)) != -1)
     {
       if (write (file, bp, chars_read - (bp - buffer)) < 0)

@@ -348,7 +348,7 @@ parse_command (void)
   if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
 #if defined (JOB_CONTROL)
-      notify_and_cleanup ();
+      notify_and_cleanup (-1);
 #endif
 #if defined (READLINE)
       if (no_line_editing || (bash_input.type == st_stdin && parser_will_prompt ()))

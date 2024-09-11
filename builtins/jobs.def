@@ -138,7 +138,7 @@ jobs_builtin (WORD_LIST *list)
 	  list_all_jobs (form);
 	  /* POSIX says to remove terminated jobs from the list after the jobs
 	     builtin reports their status. */
-	  notify_and_cleanup ();	/* the notify part will be a no-op */
+	  notify_and_cleanup (-1);	/* the notify part will be a no-op */
 	  break;
 	case JSTATE_RUNNING:
 	  list_running_jobs (form);
@@ -168,7 +168,7 @@ jobs_builtin (WORD_LIST *list)
     }
   /* POSIX says to remove terminated jobs from the list after the jobs
      builtin reports their status. */
-  notify_and_cleanup ();
+  notify_and_cleanup (-1);	/* XXX - why here? list_one_job already deletes dead jobs */
 
   return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }

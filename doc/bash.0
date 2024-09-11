@@ -772,15 +772,16 @@ PPAARRAAMMEETTEERRSS
        only be referenced; assignment to them is not allowed.
        **      Expands  to  the positional parameters, starting from one.  When
               the expansion is not within double quotes, each positional para-
-              meter expands to a separate word.  In contexts where it is  per-
-              formed,  those  words  are subject to further word splitting and
-              pathname expansion.  When the  expansion  occurs  within  double
-              quotes, it expands to a single word with the value of each para-
-              meter  separated by the first character of the IIFFSS special vari-
-              able.  That is, ""$$**"" is equivalent to ""$$11_c$$22_c......"",  where  _c  is
-              the first character of the value of the IIFFSS variable.  If IIFFSS is
-              unset,  the parameters are separated by spaces.  If IIFFSS is null,
-              the parameters are joined without intervening separators.
+              meter expands to a separate word.  In contexts where  these  ex-
+              pansions  are performed, those words are subject to further word
+              splitting and pathname expansion.   When  the  expansion  occurs
+              within double quotes, it expands to a single word with the value
+              of  each  parameter  separated by the first character of the IIFFSS
+              special variable.  That is, ""$$**"" is equivalent  to  ""$$11_c$$22_c......"",
+              where _c is the first character of the value of the IIFFSS variable.
+              If IIFFSS is unset, the parameters are separated by spaces.  If IIFFSS
+              is  null,  the parameters are joined without intervening separa-
+              tors.
        @@      Expands to the positional parameters,  starting  from  one.   In
               contexts  where  word  splitting is performed, this expands each
               positional parameter to a separate word; if  not  within  double
@@ -796,8 +797,8 @@ PPAARRAAMMEETTEERRSS
               word.  When there are no positional parameters, ""$$@@"" and $$@@  ex-
               pand to nothing (i.e., they are removed).
        ##      Expands to the number of positional parameters in decimal.
-       ??      Expands  to  the exit status of the most recently executed fore-
-              ground command.
+       ??      Expands  to  the  exit status of the most recently executed com-
+              mand.
        --      Expands to the current option flags as  specified  upon  invoca-
               tion,  by the sseett builtin command, or those set by the shell it-
               self (such as the --ii option).
@@ -3191,40 +3192,41 @@ JJOOBB CCOONNTTRROOLL
 
        The  shell  learns immediately whenever a job changes state.  Normally,
        bbaasshh waits until it is about to print a prompt before reporting changes
-       in a job's status so as to not interrupt any other output.  If  the  --bb
-       option to the sseett builtin command is enabled, bbaasshh reports such changes
-       immediately.   Any  trap on SSIIGGCCHHLLDD is executed for each child that ex-
-       its.
+       in a job's status so as to not interrupt any other  output,  though  it
+       will notify of changes in a job's status after a command in a list com-
+       pletes, before executing the next command.  If the --bb option to the sseett
+       builtin command is enabled, bbaasshh reports such changes immediately.  Any
+       trap on SSIIGGCCHHLLDD is executed for each child that exits.
 
-       If an attempt to exit bbaasshh is made while jobs are stopped (or,  if  the
-       cchheecckkjjoobbss  shell  option has been enabled using the sshhoopptt builtin, run-
+       If  an  attempt to exit bbaasshh is made while jobs are stopped (or, if the
+       cchheecckkjjoobbss shell option has been enabled using the sshhoopptt  builtin,  run-
        ning), the shell prints a warning message, and, if the cchheecckkjjoobbss option
-       is enabled, lists the jobs and their statuses.  The  jjoobbss  command  may
-       then  be  used to inspect their status.  If a second attempt to exit is
-       made without an intervening command, the shell does not  print  another
+       is  enabled,  lists  the jobs and their statuses.  The jjoobbss command may
+       then be used to inspect their status.  If a second attempt to  exit  is
+       made  without  an intervening command, the shell does not print another
        warning, and any stopped jobs are terminated.
 
-       When  the shell is waiting for a job or process using the wwaaiitt builtin,
-       and job control is enabled, wwaaiitt  will  return  when  the  job  changes
-       state.  The --ff option causes wwaaiitt to wait until the job or process ter-
+       When the shell is waiting for a job or process using the wwaaiitt  builtin,
+       and  job  control  is  enabled,  wwaaiitt  will return when the job changes
+       state. The --ff option causes wwaaiitt to wait until the job or process  ter-
        minates before returning.
 
 PPRROOMMPPTTIINNGG
        When executing interactively, bbaasshh displays the primary prompt PPSS11 when
-       it is ready to read a command, and the secondary  prompt  PPSS22  when  it
-       needs  more  input  to  complete a command.  BBaasshh displays PPSS00 after it
-       reads a command but before executing it.   BBaasshh  displays  PPSS44  as  de-
-       scribed  above  before  tracing  each command when the --xx option is en-
-       abled.  BBaasshh allows these prompt strings to be customized by  inserting
-       a  number  of  backslash-escaped special characters that are decoded as
+       it  is  ready  to  read a command, and the secondary prompt PPSS22 when it
+       needs more input to complete a command.  BBaasshh  displays  PPSS00  after  it
+       reads  a  command  but  before  executing it.  BBaasshh displays PPSS44 as de-
+       scribed above before tracing each command when the  --xx  option  is  en-
+       abled.   BBaasshh allows these prompt strings to be customized by inserting
+       a number of backslash-escaped special characters that  are  decoded  as
        follows:
               \\aa     an ASCII bell character (07)
-              \\dd     the date in "Weekday Month Date" format (e.g.,  "Tue  May
+              \\dd     the  date  in "Weekday Month Date" format (e.g., "Tue May
                      26")
               \\DD{{_f_o_r_m_a_t}}
                      the _f_o_r_m_a_t is passed to _s_t_r_f_t_i_m_e(3) and the result is in-
                      serted into the prompt string; an empty _f_o_r_m_a_t results in
-                     a  locale-specific  time  representation.  The braces are
+                     a locale-specific time representation.   The  braces  are
                      required
               \\ee     an ASCII escape character (033)
               \\hh     the hostname up to the first "."
@@ -3233,7 +3235,7 @@ PPRROOMMPPTTIINNGG
               \\ll     the basename of the shell's terminal device name
               \\nn     newline
               \\rr     carriage return
-              \\ss     the name of the shell, the basename of  $$00  (the  portion
+              \\ss     the  name  of  the shell, the basename of $$00 (the portion
                      following the final slash)
               \\tt     the current time in 24-hour HH:MM:SS format
               \\TT     the current time in 12-hour HH:MM:SS format
@@ -3242,8 +3244,8 @@ PPRROOMMPPTTIINNGG
               \\uu     the username of the current user
               \\vv     the version of bbaasshh (e.g., 2.00)
               \\VV     the release of bbaasshh, version + patch level (e.g., 2.00.0)
-              \\ww     the  value  of  the PPWWDD shell variable ($$PPWWDD), with $$HHOOMMEE
-                     abbreviated  with  a  tilde  (uses  the  value   of   the
+              \\ww     the value of the PPWWDD shell variable  ($$PPWWDD),  with  $$HHOOMMEE
+                     abbreviated   with   a  tilde  (uses  the  value  of  the
                      PPRROOMMPPTT__DDIIRRTTRRIIMM variable)
               \\WW     the basename of $$PPWWDD, with $$HHOOMMEE abbreviated with a tilde
               \\!!     the history number of this command
@@ -3251,70 +3253,82 @@ PPRROOMMPPTTIINNGG
               \\$$     if the effective UID is 0, a ##, otherwise a $$
               \\_n_n_n   the character corresponding to the octal number _n_n_n
               \\\\     a backslash
-              \\[[     begin  a sequence of non-printing characters, which could
-                     be used to embed a terminal  control  sequence  into  the
+              \\[[     begin a sequence of non-printing characters, which  could
+                     be  used  to  embed  a terminal control sequence into the
                      prompt
               \\]]     end a sequence of non-printing characters
 
-       The  command  number  and the history number are usually different: the
-       history number of a command is its position in the history list,  which
-       may  include  commands  restored from the history file (see HHIISSTTOORRYY be-
-       low), while the command number is the position in the sequence of  com-
-       mands  executed  during the current shell session.  After the string is
-       decoded, it is expanded via parameter expansion, command  substitution,
-       arithmetic  expansion,  and  quote removal, subject to the value of the
+       The command number and the history number are  usually  different:  the
+       history  number of a command is its position in the history list, which
+       may include commands restored from the history file  (see  HHIISSTTOORRYY  be-
+       low),  while the command number is the position in the sequence of com-
+       mands executed during the current shell session.  After the  string  is
+       decoded,  it is expanded via parameter expansion, command substitution,
+       arithmetic expansion, and quote removal, subject to the  value  of  the
        pprroommppttvvaarrss shell option (see the description of the sshhoopptt command under
-       SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  This can have unwanted side effects  if
-       escaped  portions  of  the string appear within command substitution or
+       SSHHEELLLL  BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  This can have unwanted side effects if
+       escaped portions of the string appear within  command  substitution  or
        contain characters special to word expansion.
 
 RREEAADDLLIINNEE
-       This is the library that handles reading input when using  an  interac-
+       This  is  the library that handles reading input when using an interac-
        tive shell, unless the ----nnooeeddiittiinngg option is given at shell invocation.
        Line editing is also used when using the --ee option to the rreeaadd builtin.
        By default, the line editing commands are similar to those of Emacs.  A
        vi-style line editing interface is also available.  Line editing can be
-       enabled  at  any  time  using  the --oo eemmaaccss or --oo vvii options to the sseett
-       builtin (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  To turn off  line  editing
-       after  the  shell  is running, use the ++oo eemmaaccss or ++oo vvii options to the
+       enabled at any time using the --oo eemmaaccss or --oo  vvii  options  to  the  sseett
+       builtin  (see  SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  To turn off line editing
+       after the shell is running, use the ++oo eemmaaccss or ++oo vvii  options  to  the
        sseett builtin.
 
    RReeaaddlliinnee NNoottaattiioonn
        In this section, the Emacs-style notation is used to denote keystrokes.
-       Control keys are denoted by C-_k_e_y, e.g., C-n  means  Control-N.   Simi-
-       larly,  _m_e_t_a  keys are denoted by M-_k_e_y, so M-x means Meta-X.  (On key-
-       boards without a _m_e_t_a key, M-_x means ESC _x, i.e., press the Escape  key
-       then the _x key.  This makes ESC the _m_e_t_a _p_r_e_f_i_x.  The combination M-C-_x
-       means  ESC-Control-_x, or press the Escape key then hold the Control key
-       while pressing the _x key.)
+       Control  keys  are  denoted by C-_k_e_y, e.g., C-n means Control-N.  Simi-
+       larly, _m_e_t_a keys are denoted by M-_k_e_y, so M-x means Meta-X.
+
+       On keyboards without a _M_e_t_a key, M-_x means ESC _x, i.e., press  the  Es-
+       cape key then the _x key.  This makes ESC the _m_e_t_a _p_r_e_f_i_x.  The combina-
+       tion  M-C-_x  means ESC-Control-_x, or press the Escape key then hold the
+       Control key while pressing the _x key.)
+
+       On some keyboards, the Meta key modifier produces meta characters  with
+       the  eighth bit (0200) set (you can use the eennaabbllee--mmeettaa--kkeeyy variable to
+       control whether or not it does this, if the keyboard  allows  it).   On
+       many  others,  the  terminal or terminal emulator converts the metafied
+       key to a key sequence beginning with ESC as described in the  preceding
+       paragraph.
+
+       If  the  _M_e_t_a key produces a key sequence with the ESC meta prefix, you
+       can make M-_k_e_y key bindings you specify (see RReeaaddlliinnee KKeeyy BBiinnddiinnggss  be-
+       low) do the same thing by setting the ffoorrccee--mmeettaa--pprreeffiixx variable.
 
        Readline commands may be given numeric _a_r_g_u_m_e_n_t_s, which normally act as
-       a repeat count.  Sometimes, however, it is the  sign  of  the  argument
-       that  is  significant.   Passing  a negative argument to a command that
-       acts in the forward direction (e.g., kkiillll--lliinnee) causes that command  to
-       act  in  a  backward direction.  Commands whose behavior with arguments
+       a  repeat  count.   Sometimes,  however, it is the sign of the argument
+       that is significant.  Passing a negative argument  to  a  command  that
+       acts  in the forward direction (e.g., kkiillll--lliinnee) causes that command to
+       act in a backward direction.  Commands whose  behavior  with  arguments
        deviates from this are noted below.
 
-       When a command is described as _k_i_l_l_i_n_g text, the text deleted is  saved
+       When  a command is described as _k_i_l_l_i_n_g text, the text deleted is saved
        for possible future retrieval (_y_a_n_k_i_n_g).  The killed text is saved in a
        _k_i_l_l _r_i_n_g.  Consecutive kills cause the text to be accumulated into one
        unit, which can be yanked all at once.  Commands which do not kill text
        separate the chunks of text on the kill ring.
 
    RReeaaddlliinnee IInniittiiaalliizzaattiioonn
-       Readline  is  customized  by putting commands in an initialization file
-       (the _i_n_p_u_t_r_c file).  The name of this file is taken from the  value  of
+       Readline is customized by putting commands in  an  initialization  file
+       (the  _i_n_p_u_t_r_c  file).  The name of this file is taken from the value of
        the IINNPPUUTTRRCC variable.  If that variable is unset, the default is _~_/_._i_n_-
-       _p_u_t_r_c.   If  that  file  does not exist or cannot be read, the ultimate
-       default is _/_e_t_c_/_i_n_p_u_t_r_c.  When a program which uses  the  readline  li-
-       brary  starts up, the initialization file is read, and the key bindings
-       and variables are set.  There are only a few basic  constructs  allowed
-       in  the  readline initialization file.  Blank lines are ignored.  Lines
-       beginning with a ## are comments.  Lines beginning  with  a  $$  indicate
-       conditional  constructs.   Other lines denote key bindings and variable
+       _p_u_t_r_c.  If that file  does not exist or cannot be  read,  the  ultimate
+       default  is  _/_e_t_c_/_i_n_p_u_t_r_c.   When a program which uses the readline li-
+       brary starts up, the initialization file is read, and the key  bindings
+       and  variables  are set.  There are only a few basic constructs allowed
+       in the readline initialization file.  Blank lines are  ignored.   Lines
+       beginning  with  a  ##  are comments.  Lines beginning with a $$ indicate
+       conditional constructs.  Other lines denote key bindings  and  variable
        settings.
 
-       The default key-bindings may be changed with an  _i_n_p_u_t_r_c  file.   Other
+       The  default  key-bindings  may be changed with an _i_n_p_u_t_r_c file.  Other
        programs that use this library may add their own commands and bindings.
 
        For example, placing
@@ -3323,18 +3337,18 @@ RREEAADDLLIINNEE
        or
               C-Meta-u: universal-argument
 
-       into  the _i_n_p_u_t_r_c would make M-C-u execute the readline command _u_n_i_v_e_r_-
+       into the _i_n_p_u_t_r_c would make M-C-u execute the readline command  _u_n_i_v_e_r_-
        _s_a_l_-_a_r_g_u_m_e_n_t.
 
-       The following symbolic character names  are  recognized:  _R_U_B_O_U_T,  _D_E_L,
+       The  following  symbolic  character  names are recognized: _R_U_B_O_U_T, _D_E_L,
        _E_S_C, _L_F_D, _N_E_W_L_I_N_E, _R_E_T, _R_E_T_U_R_N, _S_P_C, _S_P_A_C_E, and _T_A_B.
 
-       In  addition  to  command  names, readline allows keys to be bound to a
+       In addition to command names, readline allows keys to  be  bound  to  a
        string that is inserted when the key is pressed (a _m_a_c_r_o).
 
    RReeaaddlliinnee KKeeyy BBiinnddiinnggss
-       The syntax for controlling key bindings in the _i_n_p_u_t_r_c file is  simple.
-       All  that is required is the name of the command or the text of a macro
+       The  syntax for controlling key bindings in the _i_n_p_u_t_r_c file is simple.
+       All that is required is the name of the command or the text of a  macro
        and a key sequence to which it should be bound.  The name may be speci-
        fied in one of two ways: as a symbolic key name, possibly with _M_e_t_a_- or
        _C_o_n_t_r_o_l_- prefixes, or as a key sequence.
@@ -3346,15 +3360,15 @@ RREEAADDLLIINNEE
               Meta-Rubout: backward-kill-word
               Control-o: "> output"
 
-       In the above example, _C_-_u is bound to the function  uunniivveerrssaall--aarrgguummeenntt,
-       _M_-_D_E_L  is bound to the function bbaacckkwwaarrdd--kkiillll--wwoorrdd, and _C_-_o is bound to
-       run the macro expressed on the right hand side (that is, to insert  the
+       In  the above example, _C_-_u is bound to the function uunniivveerrssaall--aarrgguummeenntt,
+       _M_-_D_E_L is bound to the function bbaacckkwwaarrdd--kkiillll--wwoorrdd, and _C_-_o is bound  to
+       run  the macro expressed on the right hand side (that is, to insert the
        text "> output" into the line).
 
-       In  the  second  form,  ""kkeeyysseeqq"":_f_u_n_c_t_i_o_n_-_n_a_m_e or _m_a_c_r_o, kkeeyysseeqq differs
-       from kkeeyynnaammee above in that strings denoting an entire key sequence  may
-       be  specified  by  placing the sequence within double quotes.  Some GNU
-       Emacs style key escapes can be used, as in the following  example,  but
+       In the second form, ""kkeeyysseeqq"":_f_u_n_c_t_i_o_n_-_n_a_m_e  or  _m_a_c_r_o,  kkeeyysseeqq  differs
+       from  kkeeyynnaammee above in that strings denoting an entire key sequence may
+       be specified by placing the sequence within double  quotes.   Some  GNU
+       Emacs  style  key escapes can be used, as in the following example, but
        the symbolic character names are not recognized.
 
               "\C-u": universal-argument
@@ -3362,18 +3376,20 @@ RREEAADDLLIINNEE
               "\e[11~": "Function Key 1"
 
        In this example, _C_-_u is again bound to the function uunniivveerrssaall--aarrgguummeenntt.
-       _C_-_x  _C_-_r is bound to the function rree--rreeaadd--iinniitt--ffiillee, and _E_S_C _[ _1 _1 _~ is
+       _C_-_x _C_-_r is bound to the function rree--rreeaadd--iinniitt--ffiillee, and _E_S_C _[ _1 _1 _~  is
        bound to insert the text "Function Key 1".
 
        The full set of GNU Emacs style escape sequences is
               \\CC--    control prefix
-              \\MM--    meta prefix
+              \\MM--    adding  the meta prefix or converting the following char-
+                     acter to a  meta  character,  as  described  below  under
+                     ffoorrccee--mmeettaa--pprreeffiixx
               \\ee     an escape character
               \\\\     backslash
               \\""     literal "
               \\''     literal '
 
-       In addition to the GNU Emacs style escape sequences, a  second  set  of
+       In  addition  to  the GNU Emacs style escape sequences, a second set of
        backslash escapes is available:
               \\aa     alert (bell)
               \\bb     backspace
@@ -3383,20 +3399,20 @@ RREEAADDLLIINNEE
               \\rr     carriage return
               \\tt     horizontal tab
               \\vv     vertical tab
-              \\_n_n_n   the  eight-bit  character  whose value is the octal value
+              \\_n_n_n   the eight-bit character whose value is  the  octal  value
                      _n_n_n (one to three digits)
-              \\xx_H_H   the eight-bit character whose value  is  the  hexadecimal
+              \\xx_H_H   the  eight-bit  character  whose value is the hexadecimal
                      value _H_H (one or two hex digits)
 
        When entering the text of a macro, single or double quotes must be used
        to indicate a macro definition.  Unquoted text is assumed to be a func-
-       tion  name.   In  the macro body, the backslash escapes described above
-       are expanded.  Backslash will quote any other character  in  the  macro
+       tion name.  In the macro body, the backslash  escapes  described  above
+       are  expanded.   Backslash  will quote any other character in the macro
        text, including " and '.
 
-       BBaasshh  allows the current readline key bindings to be displayed or modi-
-       fied with the bbiinndd builtin command.  The editing mode may  be  switched
-       during  interactive  use by using the --oo option to the sseett builtin com-
+       BBaasshh allows the current readline key bindings to be displayed or  modi-
+       fied  with  the bbiinndd builtin command.  The editing mode may be switched
+       during interactive use by using the --oo option to the sseett  builtin  com-
        mand (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
    RReeaaddlliinnee VVaarriiaabblleess
@@ -3407,109 +3423,111 @@ RREEAADDLLIINNEE
               sseett _v_a_r_i_a_b_l_e_-_n_a_m_e _v_a_l_u_e
        or using the bbiinndd builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
-       Except where noted, readline variables can take the values  OOnn  or  OOffff
-       (without  regard  to  case).   Unrecognized variable names are ignored.
+       Except  where  noted,  readline variables can take the values OOnn or OOffff
+       (without regard to case).  Unrecognized  variable  names  are  ignored.
        When readline reads a variable value, empty or null values, "on" (case-
-       insensitive), and "1" are equivalent  to  OOnn.   All  other  values  are
+       insensitive),  and  "1"  are  equivalent  to  OOnn.  All other values are
        equivalent to OOffff.  The variables and their default values are:
 
        aaccttiivvee--rreeggiioonn--ssttaarrtt--ccoolloorr
-              A  string  variable  that controls the text color and background
-              when displaying the text in the active region (see the  descrip-
-              tion  of eennaabbllee--aaccttiivvee--rreeggiioonn below).  This string must not take
+              A string variable that controls the text  color  and  background
+              when  displaying the text in the active region (see the descrip-
+              tion of eennaabbllee--aaccttiivvee--rreeggiioonn below).  This string must not  take
               up any physical character positions on the display, so it should
-              consist only of terminal escape sequences.  It is output to  the
-              terminal  before displaying the text in the active region.  This
-              variable is reset to the default  value  whenever  the  terminal
-              type  changes.   The  default  value is the string that puts the
-              terminal in standout mode, as obtained from the terminal's  ter-
+              consist  only of terminal escape sequences.  It is output to the
+              terminal before displaying the text in the active region.   This
+              variable  is  reset  to  the default value whenever the terminal
+              type changes.  The default value is the  string  that  puts  the
+              terminal  in standout mode, as obtained from the terminal's ter-
               minfo description.  A sample value might be "\e[01;33m".
        aaccttiivvee--rreeggiioonn--eenndd--ccoolloorr
-              A  string  variable  that  "undoes"  the  effects  of aaccttiivvee--rree--
-              ggiioonn--ssttaarrtt--ccoolloorr and restores "normal" terminal display  appear-
-              ance  after  displaying  text in the active region.  This string
-              must not take up any physical character positions  on  the  dis-
-              play,  so  it  should consist only of terminal escape sequences.
-              It is output to the terminal after displaying the  text  in  the
-              active  region.   This  variable  is  reset to the default value
-              whenever the terminal type changes.  The default  value  is  the
-              string  that  restores  the  terminal from standout mode, as ob-
+              A string  variable  that  "undoes"  the  effects  of  aaccttiivvee--rree--
+              ggiioonn--ssttaarrtt--ccoolloorr  and restores "normal" terminal display appear-
+              ance after displaying text in the active  region.   This  string
+              must  not  take  up any physical character positions on the dis-
+              play, so it should consist only of  terminal  escape  sequences.
+              It  is  output  to the terminal after displaying the text in the
+              active region.  This variable is  reset  to  the  default  value
+              whenever  the  terminal  type changes.  The default value is the
+              string that restores the terminal from  standout  mode,  as  ob-
               tained from the terminal's terminfo description.  A sample value
               might be "\e[0m".
        bbeellll--ssttyyllee ((aauuddiibbllee))
-              Controls what happens when readline wants to ring  the  terminal
+              Controls  what  happens when readline wants to ring the terminal
               bell.  If set to nnoonnee, readline never rings the bell.  If set to
-              vviissiibbllee,  readline  uses a visible bell if one is available.  If
+              vviissiibbllee, readline uses a visible bell if one is  available.   If
               set to aauuddiibbllee, readline attempts to ring the terminal's bell.
        bbiinndd--ttttyy--ssppeecciiaall--cchhaarrss ((OOnn))
-              If set to OOnn (the default), readline attempts to bind  the  con-
+              If  set  to OOnn (the default), readline attempts to bind the con-
               trol  characters that are treated specially by the kernel's ter-
-              minal  driver to their readline equivalents.  These override the
-              default readline bindings described here.  Type "stty -a"  at  a
+              minal driver to their readline equivalents.  These override  the
+              default  readline  bindings described here.  Type "stty -a" at a
               bbaasshh prompt to see your current terminal settings, including the
               special control characters (usually cccchhaarrss).
        bblliinnkk--mmaattcchhiinngg--ppaarreenn ((OOffff))
               If set to OOnn, readline attempts to briefly move the cursor to an
               opening parenthesis when a closing parenthesis is inserted.
        ccoolloorreedd--ccoommpplleettiioonn--pprreeffiixx ((OOffff))
-              If  set  to  OOnn, when listing completions, readline displays the
+              If set to OOnn, when listing completions,  readline  displays  the
               common prefix of the set of possible completions using a differ-
-              ent color.  The color definitions are taken from  the  value  of
+              ent  color.   The  color definitions are taken from the value of
               the LLSS__CCOOLLOORRSS environment variable.  If there is a color defini-
-              tion  in $$LLSS__CCOOLLOORRSS for the custom suffix "readline-colored-com-
-              pletion-prefix", readline uses this color for the common  prefix
+              tion in $$LLSS__CCOOLLOORRSS for the custom suffix  "readline-colored-com-
+              pletion-prefix",  readline uses this color for the common prefix
               instead of its default.
        ccoolloorreedd--ssttaattss ((OOffff))
-              If  set to OOnn, readline displays possible completions using dif-
-              ferent colors to indicate their file type.   The  color  defini-
-              tions  are  taken  from  the  value of the LLSS__CCOOLLOORRSS environment
+              If set to OOnn, readline displays possible completions using  dif-
+              ferent  colors  to  indicate their file type.  The color defini-
+              tions are taken from the  value  of  the  LLSS__CCOOLLOORRSS  environment
               variable.
        ccoommmmeenntt--bbeeggiinn (("##"))
-              The string that is inserted  when  the  readline  iinnsseerrtt--ccoommmmeenntt
+              The  string  that  is  inserted when the readline iinnsseerrtt--ccoommmmeenntt
               command is executed.  This command is bound to MM--## in emacs mode
               and to ## in vi command mode.
        ccoommpplleettiioonn--ddiissppllaayy--wwiiddtthh ((--11))
-              The  number  of  screen columns used to display possible matches
-              when performing completion.  The value is ignored if it is  less
-              than  0 or greater than the terminal screen width.  A value of 0
-              will cause matches to be displayed one per  line.   The  default
+              The number of screen columns used to  display  possible  matches
+              when  performing completion.  The value is ignored if it is less
+              than 0 or greater than the terminal screen width.  A value of  0
+              will  cause  matches  to be displayed one per line.  The default
               value is -1.
        ccoommpplleettiioonn--iiggnnoorree--ccaassee ((OOffff))
               If set to OOnn, readline performs filename matching and completion
               in a case-insensitive fashion.
        ccoommpplleettiioonn--mmaapp--ccaassee ((OOffff))
-              If  set  to  OOnn, and ccoommpplleettiioonn--iiggnnoorree--ccaassee is enabled, readline
-              treats hyphens (_-) and underscores (__) as equivalent  when  per-
+              If set to OOnn, and ccoommpplleettiioonn--iiggnnoorree--ccaassee  is  enabled,  readline
+              treats  hyphens  (_-) and underscores (__) as equivalent when per-
               forming case-insensitive filename matching and completion.
        ccoommpplleettiioonn--pprreeffiixx--ddiissppllaayy--lleennggtthh ((00))
-              The  length in characters of the common prefix of a list of pos-
-              sible completions that is displayed without modification.   When
-              set  to  a  value greater than zero, common prefixes longer than
-              this value are replaced with an ellipsis when displaying  possi-
+              The length in characters of the common prefix of a list of  pos-
+              sible  completions that is displayed without modification.  When
+              set to a value greater than zero, common  prefixes  longer  than
+              this  value are replaced with an ellipsis when displaying possi-
               ble completions.
        ccoommpplleettiioonn--qquueerryy--iitteemmss ((110000))
-              This  determines when the user is queried about viewing the num-
-              ber of possible completions generated  by  the  ppoossssiibbllee--ccoommppllee--
-              ttiioonnss  command.  It may be set to any integer value greater than
-              or equal to zero.  If the  number  of  possible  completions  is
-              greater  than  or  equal to the value of this variable, readline
-              will ask whether or not the user wishes to view them;  otherwise
-              they  are  simply  listed  on  the terminal.  A zero value means
+              This determines when the user is queried about viewing the  num-
+              ber  of  possible  completions generated by the ppoossssiibbllee--ccoommppllee--
+              ttiioonnss command.  It may be set to any integer value greater  than
+              or  equal  to  zero.   If  the number of possible completions is
+              greater than or equal to the value of  this  variable,  readline
+              will  ask whether or not the user wishes to view them; otherwise
+              they are simply listed on the  terminal.   A  zero  value  means
               readline should never ask; negative values are treated as zero.
        ccoonnvveerrtt--mmeettaa ((OOnn))
-              If set to OOnn, readline will convert characters with  the  eighth
-              bit set to an ASCII key sequence by stripping the eighth bit and
-              prefixing  an  escape  character (in effect, using escape as the
-              _m_e_t_a _p_r_e_f_i_x).  The default is _O_n, but readline will  set  it  to
-              _O_f_f  if the locale contains eight-bit characters.  This variable
-              is dependent on the LLCC__CCTTYYPPEE locale category, and may change  if
-              the locale is changed.
+              If set to OOnn, readline will convert characters it reads with the
+              eighth  bit set to an ASCII key sequence by stripping the eighth
+              bit and prefixing it with an escape  character  (converting  the
+              character  to  have  the  _m_e_t_a  _p_r_e_f_i_x).  The default is _O_n, but
+              readline will set it to _O_f_f if the  locale  contains  characters
+              whose encodings may include bytes with the eighth bit set.  This
+              variable  is  dependent on the LLCC__CCTTYYPPEE locale category, and may
+              change if the locale is changed.  This variable also affects key
+              bindings; see the description of ffoorrccee--mmeettaa--pprreeffiixx below.
        ddiissaabbllee--ccoommpplleettiioonn ((OOffff))
               If set to OOnn, readline will inhibit word completion.  Completion
-              characters  will  be  inserted into the line as if they had been
+              characters will be inserted into the line as if  they  had  been
               mapped to sseellff--iinnsseerrtt.
        eecchhoo--ccoonnttrrooll--cchhaarraacctteerrss ((OOnn))
-              When set to OOnn, on operating systems that indicate they  support
+              When  set to OOnn, on operating systems that indicate they support
               it, readline echoes a character corresponding to a signal gener-
               ated from the keyboard.
        eeddiittiinngg--mmooddee ((eemmaaccss))
@@ -3517,29 +3535,29 @@ RREEAADDLLIINNEE
               ilar to _E_m_a_c_s or _v_i.  eeddiittiinngg--mmooddee can be set to either eemmaaccss or
               vvii.
        eemmaaccss--mmooddee--ssttrriinngg ((@@))
-              If  the  _s_h_o_w_-_m_o_d_e_-_i_n_-_p_r_o_m_p_t variable is enabled, this string is
+              If the _s_h_o_w_-_m_o_d_e_-_i_n_-_p_r_o_m_p_t variable is enabled, this  string  is
               displayed immediately before the last line of the primary prompt
               when emacs editing mode is active.  The value is expanded like a
-              key binding, so the standard set of meta- and  control  prefixes
-              and  backslash escape sequences is available.  Use the \1 and \2
-              escapes to begin and end sequences of  non-printing  characters,
-              which  can be used to embed a terminal control sequence into the
+              key  binding,  so the standard set of meta- and control prefixes
+              and backslash escape sequences is available.  Use the \1 and  \2
+              escapes  to  begin and end sequences of non-printing characters,
+              which can be used to embed a terminal control sequence into  the
               mode string.
        eennaabbllee--aaccttiivvee--rreeggiioonn ((OOnn))
-              The _p_o_i_n_t is the current cursor position, and _m_a_r_k refers  to  a
-              saved  cursor  position.  The text between the point and mark is
-              referred to as the _r_e_g_i_o_n.  When this variable  is  set  to  _O_n,
-              readline  allows certain commands to designate the region as _a_c_-
-              _t_i_v_e.  When the region is active, readline highlights  the  text
-              in  the region using the value of the aaccttiivvee--rreeggiioonn--ssttaarrtt--ccoolloorr,
-              which defaults to the string that enables the terminal's  stand-
-              out  mode.   The active region shows the text inserted by brack-
-              eted-paste and any matching text found by incremental  and  non-
+              The  _p_o_i_n_t  is the current cursor position, and _m_a_r_k refers to a
+              saved cursor position.  The text between the point and  mark  is
+              referred  to  as  the  _r_e_g_i_o_n.  When this variable is set to _O_n,
+              readline allows certain commands to designate the region as  _a_c_-
+              _t_i_v_e.   When  the region is active, readline highlights the text
+              in the region using the value of the  aaccttiivvee--rreeggiioonn--ssttaarrtt--ccoolloorr,
+              which  defaults to the string that enables the terminal's stand-
+              out mode.  The active region shows the text inserted  by  brack-
+              eted-paste  and  any matching text found by incremental and non-
               incremental history searches.
        eennaabbllee--bbrraacckkeetteedd--ppaassttee ((OOnn))
-              When  set to OOnn, readline configures the terminal to insert each
-              paste into the editing buffer as a single string of  characters,
-              instead  of  treating each character as if it had been read from
+              When set to OOnn, readline configures the terminal to insert  each
+              paste  into the editing buffer as a single string of characters,
+              instead of treating each character as if it had been  read  from
               the keyboard.  This prevents readline from executing any editing
               commands bound to key sequences appearing in the pasted text.
        eennaabbllee--kkeeyyppaadd ((OOffff))
@@ -3547,39 +3565,54 @@ RREEAADDLLIINNEE
               pad when it is called.  Some systems need this to enable the ar-
               row keys.
        eennaabbllee--mmeettaa--kkeeyy ((OOnn))
-              When set to OOnn, readline will try to enable  any  meta  modifier
-              key  the  terminal claims to support when it is called.  On many
-              terminals, the meta key is used to send eight-bit characters.
+              When  set  to  OOnn, readline will try to enable any meta modifier
+              key the terminal claims to support when it is called.   On  many
+              terminals,  the  Meta  key is used to send eight-bit characters;
+              this variable checks for the terminal capability that  indicates
+              the  terminal can enable and disable a mode that sets the eighth
+              bit of a character (0200) if the Meta key is held down when  the
+              character is typed (a meta character).
+       ffoorrccee--mmeettaa--pprreeffiixx ((OOffff))
+              If  set  to  OOnn, readline modifies its behavior when binding key
+              sequences containing \M- or Meta- (see KKeeyy  BBiinnddiinnggss  above)  by
+              converting a key sequence of the form \M-_C or Meta-_C to the two-
+              character   sequence   EESSCC_C   (adding   the  meta  prefix).   If
+              ffoorrccee--mmeettaa--pprreeffiixx is set to OOffff (the default), readline uses the
+              value of the ccoonnvveerrtt--mmeettaa variable to determine whether to  per-
+              form  this  conversion: if ccoonnvveerrtt--mmeettaa is OOnn, readline performs
+              the conversion described above; if it is OOffff, Readline  converts
+              _C to a meta character by setting the eighth bit (0200).
        eexxppaanndd--ttiillddee ((OOffff))
-              If set to OOnn, tilde expansion is  performed  when  readline  at-
+              If  set  to  OOnn,  tilde expansion is performed when readline at-
               tempts word completion.
        hhiissttoorryy--pprreesseerrvvee--ppooiinntt ((OOffff))
-              If  set  to  OOnn, the history code attempts to place point at the
-              same location on each history line retrieved with  pprreevviioouuss--hhiiss--
+              If set to OOnn, the history code attempts to place  point  at  the
+              same  location on each history line retrieved with pprreevviioouuss--hhiiss--
               ttoorryy or nneexxtt--hhiissttoorryy.
        hhiissttoorryy--ssiizzee ((uunnsseett))
-              Set  the  maximum number of history entries saved in the history
-              list.  If set to zero, any existing history entries are  deleted
+              Set the maximum number of history entries saved in  the  history
+              list.   If set to zero, any existing history entries are deleted
               and no new entries are saved.  If set to a value less than zero,
-              the  number  of history entries is not limited.  By default, the
-              number of history entries is set to the value  of  the  HHIISSTTSSIIZZEE
-              shell  variable.  If an attempt is made to set _h_i_s_t_o_r_y_-_s_i_z_e to a
+              the number of history entries is not limited.  By  default,  the
+              number  of  history  entries is set to the value of the HHIISSTTSSIIZZEE
+              shell variable.  If an attempt is made to set _h_i_s_t_o_r_y_-_s_i_z_e to  a
               non-numeric value, the maximum number of history entries will be
               set to 500.
        hhoorriizzoonnttaall--ssccrroollll--mmooddee ((OOffff))
-              When set to OOnn, makes readline use a single  line  for  display,
+              When  set  to  OOnn, makes readline use a single line for display,
               scrolling the input horizontally on a single screen line when it
-              becomes  longer  than the screen width rather than wrapping to a
-              new line.  This setting is automatically enabled  for  terminals
+              becomes longer than the screen width rather than wrapping  to  a
+              new  line.   This setting is automatically enabled for terminals
               of height 1.
        iinnppuutt--mmeettaa ((OOffff))
-              If  set to OOnn, readline will enable eight-bit input (that is, it
+              If set to OOnn, readline will enable eight-bit input (that is,  it
               will not strip the eighth bit from the characters it reads), re-
-              gardless of what the terminal claims it can support.   The  name
-              mmeettaa--ffllaagg  is  a synonym for this variable.  The default is _O_f_f,
-              but readline will set it to _O_n if the locale contains  eight-bit
-              characters.   This  variable is dependent on the LLCC__CCTTYYPPEE locale
-              category, and may change if the locale is changed.
+              gardless  of  what the terminal claims it can support.  The name
+              mmeettaa--ffllaagg is a synonym for this variable.  The default  is  _O_f_f,
+              but readline will set it to _O_n if the locale contains characters
+              whose encodings may include bytes with the eighth bit set.  This
+              variable  is  dependent on the LLCC__CCTTYYPPEE locale category, and may
+              change if the locale is changed.
        iisseeaarrcchh--tteerrmmiinnaattoorrss (("CC--[[CC--JJ"))
               The string of characters that should  terminate  an  incremental
               search  without  subsequently  executing the character as a com-
@@ -3625,9 +3658,9 @@ RREEAADDLLIINNEE
               If set to OOnn, readline will display characters with  the  eighth
               bit set directly rather than as a meta-prefixed escape sequence.
               The default is _O_f_f, but readline will set it to _O_n if the locale
-              contains  eight-bit  characters.   This variable is dependent on
-              the LLCC__CCTTYYPPEE locale category, and may change if  the  locale  is
-              changed.
+              contains  characters  whose encodings may include bytes with the
+              eighth bit set.  This variable is dependent on the LLCC__CCTTYYPPEE  lo-
+              cale category, and may change if the locale is changed.
        ppaaggee--ccoommpplleettiioonnss ((OOnn))
               If  set to OOnn, readline uses an internal _m_o_r_e-like pager to dis-
               play a screenful of possible completions at a time.
@@ -6945,4 +6978,4 @@ BBUUGGSS
 
        There may be only one active coprocess at a time.
 
-GNU Bash 5.3                    2024 August 16                         _B_A_S_H(1)
+GNU Bash 5.3                   2024 September 5                        _B_A_S_H(1)

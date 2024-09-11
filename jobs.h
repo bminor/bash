@@ -312,7 +312,7 @@ extern int wait_for_any_job (int, struct procstat *);
 
 extern void wait_sigint_cleanup (void);
 
-extern void notify_and_cleanup (void);
+extern void notify_and_cleanup (int);
 extern void reap_dead_jobs (void);
 extern int start_job (int, int);
 extern int kill_pid (pid_t, int, int);

@@ -2863,7 +2863,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
       QUIT;
 #if defined (JOB_CONTROL)
       if (command->value.Connection->connector == ';' && job_control && interactive && posixly_correct == 0)
-        notify_and_cleanup ();
+        notify_and_cleanup (-1);
 #endif
       optimize_connection_fork (command);			/* XXX */
       exec_result = execute_command_internal (command->value.Connection->second,
