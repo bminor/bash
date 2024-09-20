@@ -1864,6 +1864,7 @@ rl_parse_and_bind (char *string)
    false. */
 
 #define V_SPECIAL	0x1
+#define V_DEPRECATED	0x02
 
 static const struct {
   const char * const name;

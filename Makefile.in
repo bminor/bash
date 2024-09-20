@@ -177,6 +177,11 @@ LSAN_CC = clang
 LSAN_XCFLAGS = -fsanitize=leak -fno-common -fno-omit-frame-pointer -fno-optimize-sibling-calls
 LSAN_XLDFLAGS = -fsanitize=leak
 
+MKDEP = $(SUPPORT_SRC)mkdep
+MKDEP_CC = ${CC}
+MKDEP_OPTS = -c ${MKDEP_CC}
+MKDEP_CCFLAGS = ${CCFLAGS}
+
 INCLUDES = -I. @RL_INCLUDE@ -I$(srcdir) -I$(BASHINCDIR) -I$(LIBSRC) $(INTL_INC)
 
 # Maybe add: -Wextra
@@ -1041,7 +1046,7 @@ xdist:	force
 depend:	depends
 
 depends: force
-	$(Program) $(SUPPORT_SRC)mkdep -c ${CC} -- ${CCFLAGS} ${CSOURCES}
+	$(Program) $(MKDEP) ${MKDEP_OPTS} -- ${MKDEP_CCFLAGS} ${CSOURCES}
 
 #### PRIVATE TARGETS ####
 hashtest:	hashlib.c

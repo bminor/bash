@@ -1,109 +1,199 @@
-#!/bin/sh -
+#!/bin/sh
 #
-# Copyright (c) 1991, 1993
-#	The Regents of the University of California.  All rights reserved.
+# mkdep - compute dependencies for the supplied source files
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 4. Neither the name of the University nor the names of its contributors
-#    may be used to endorse or promote products derived from this software
-#    without specific prior written permission.
+#   Copyright © 2024 The Free Software Foundation.
 #
-# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
 #
-# $FreeBSD: stable/11/usr.bin/mkdep/mkdep.sh 216370 2010-12-11 08:32:16Z joel $
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
 #
-#	@(#)mkdep.sh	8.1 (Berkeley) 6/6/93
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Author: Martin D Kealey <martin@kurahaupo.gen.nz>
+#
+# Modified by Chet Ramey <chet.ramey@case.edu> for inclusion in Bash
 #
 
-PATH=/bin:/usr/bin:/usr/ucb:/usr/old/bin
-export PATH
+append_depfile=false
+compiler=cc
+depfile=.depend
+keep_path=false
+keep_output=false
+m_flag=-MM
+skip_o=false
 
-D=.depend			# default dependency file is .depend
-append=0
+debug=false
 
-while :
-	do case "$1" in
-		# -a appends to the depend file
-		-a)
-			append=1
-			shift ;;
+usage()
+{
+  echo "$PROG: usage: $PROG [-a] [-c compiler] [-f depend_file] [-k f|p] [-m M|MM] [-p] [--] [cc_flags] file ..." >&2
+  exit 2
+}
 
-		# -f allows you to select a makefile name
-		-f)
-			D=$2
-			shift; shift ;;
+PROG=${0##*/}
 
-		# the -p flag produces "program: program.c" style dependencies
-		# so .o's don't get produced
-		-p)
-			SED='s;\.o ; ;'
-			shift ;;
-		*)
-			break ;;
-	esac
+while getopts ac:f:k:m:pD opt "$@"
+do
+  case $opt in
+    a)
+      # append to the dependency file (rather than overwriting it)
+      append_depfile=true ;;
+
+    c)
+      # change compiler
+      compiler=$OPTARG ;;
+
+    f)
+      # select a dependency file
+      depfile=$2 ;;
+
+    k)
+      case $OPTARG in
+      f)  # Keep the temporary files on failure
+	  keep_output=true ;;
+      p)
+	  # keep PATH from environment
+	  keep_path=true ;;
+      *) usage ; exit 2 ;;
+      esac ;;
+
+    m)
+      case $OPTARG in
+      M) m_flag=-M ;;
+      MM) m_flag=-MM ;;
+      *) usage ; exit 2 ;;
+      esac;;
+
+    p)
+      # produce “program: program.c”-style dependencies
+      # (to avoid generating .o files)
+      skip_o=true ;;
+
+    D) debug=true ;;
+    
+    ?)
+      usage ;;
+  esac
+
 done
 
+shift $(( $OPTIND - 1 ))
+
 if [ $# = 0 ] ; then
-	echo 'usage: mkdep [-p] [-f depend_file] [cc_flags] file ...'
-	exit 1
+  usage
 fi
 
-TMP=/tmp/mkdep$$
+"$debug" && set -x
 
-trap 'rm -f $TMP ; trap 2 ; kill -2 $$' 1 2 3 13 15
+"$keep_path" || export PATH=/bin:/usr/bin:/usr/local/bin:/opt/bin:$PATH
 
-cc -M $* |
-sed "
-	s; \./; ;g
-	/\.c:$/d
-	$SED" |
-awk '{
-	if ($1 != prev) {
-		if (rec != "")
-			print rec;
-		rec = $0;
-		prev = $1;
-	}
-	else {
-		if (length(rec $2) > 78) {
-			print rec;
-			rec = $0;
-		}
-		else
-			rec = rec " " $2
-	}
+output=$depfile.mkdep$$
+
+cleanup()
+{
+  rm -f "$output".*
 }
-END {
-	print rec
-}' > $TMP
 
-if [ $? != 0 ]; then
-	echo 'mkdep: compile failed.'
-	rm -f $TMP
-	exit 1
+if "$keep_output"
+then soft_cleanup() { :; }
+else soft_cleanup() { cleanup ; }
 fi
 
-if [ $append = 1 ]; then
-	cat $TMP >> $D
-	rm -f $TMP
-else
-	mv $TMP $D
-fi
+caught () {
+  soft_cleanup
+  trap 2	# SIGINT?
+  kill -2 $$
+}
+
+trap caught 1 2 3 13 15
+
+"$compiler" "$m_flag" "$@" > "$output.1" || {
+  ex=$?
+  echo >&2 "mkdep: compilation failed; exit status $ex."
+  soft_cleanup
+  exit "$ex"
+}
+
+# The pathnames here don't work for every system (e.g., macOS), but the -MM
+# option (the default) usually does the right thing
+{
+  if "$append_depfile"
+  then
+    cat "$depfile"
+  fi
+
+  if "$skip_o"
+  then
+    sed '
+	s@ \./@ @g
+	s@ /usr/include[^ ]*@@g
+	s@ /usr/lib/gcc[^ ]*@@g
+
+	s@\.o @ @
+
+        :a
+        / \\$/ {
+          N
+          s/[[:space:]]*\\\n[[:space:]]*/ /
+          ta
+          s/\\$//
+        }
+
+        s/  *$//
+	/^[^ ]*:$/d
+
+        :b
+        /^[^ :][^ :]*:/ {
+          s@^\([^ :][^ :]*: \)\([^ ][^ ]*\) @\1\2\n\1@
+          /: \/usr\/include/bd
+          /: \/usr\/lib/bd
+          P
+          :d
+          D
+          tb
+        }
+      '
+  else
+    sed '
+	s@ \./@ @g;
+	s@ /usr/include[^ ]*@@g;
+	s@ /usr/lib/gcc[^ ]*@@g;
+
+        :a
+        / \\$/ {
+          N
+          s/[[:space:]]*\\\n[[:space:]]*/ /
+          ta
+          s/\\$//
+        }
+
+        s/  *$//
+	/^[^ ]*:$/d
+
+        :b
+        /^[^ :][^ :]*:/ {
+          s@^\([^ :][^ :]*: \)\([^ ][^ ]*\) @\1\2\n\1@
+          /: \/usr\/include/bd
+          /: \/usr\/lib/bd
+          P
+          :d
+          D
+          tb
+        }
+      '
+  fi < "$output.1"
+} |
+sort -o "$output.2"
+
+mv "$output.2" "$depfile"
+
+cleanup
 exit 0

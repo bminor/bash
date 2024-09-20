@@ -168,7 +168,8 @@ jobs_builtin (WORD_LIST *list)
     }
   /* POSIX says to remove terminated jobs from the list after the jobs
      builtin reports their status. */
-  notify_and_cleanup (-1);	/* XXX - why here? list_one_job already deletes dead jobs */
+  if (posixly_correct == 0 || interactive_shell == 0 || interactive == 0)
+    notify_and_cleanup (-1);	/* XXX - why here? list_one_job already deletes dead jobs */
 
   return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }

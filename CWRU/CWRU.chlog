@@ -10194,3 +10194,37 @@ builtins/evalfile.c
 jobs.c
 	- maybe_print_job_notifications: remove clause testing sourcelevel;
 	  use want_job_notifications for this
+
+				   9/11
+				   ----
+
+[prayers for the victims of 9/11]
+
+				   9/12
+				   ----
+support/mkdep
+	- new version from Martin Kealey; modified for inclusion
+
+Makefile.in
+	- MKDEP_ variables to be able to control various aspects of `make
+	  depend'
+
+				   9/13
+				   ----
+configure.ac
+	- relstatus: update to `beta'
+
+
+				   9/16
+				   ----
+builtins/jobs.def
+	- jobs_builtin: when listing individial jobs, don't call notify_and_cleanup
+	  (which notifies about outstanding terminated jobs) if the shell is
+	  interactive and in posix mode
+
+				   9/20
+				   ----
+jobs.c
+	- wait_for_single_pid: if wait finds a status for the pid argument in
+	  the bgp list, remove it from the bgp list if the shell is in posix
+	  mode

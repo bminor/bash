@@ -18,8 +18,12 @@
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
 : ${TMPDIR:=/var/tmp}
+export TDIR=${TMPDIR}/cwd-$$
 export SDIR=${TMPDIR}/source-$$
+mkdir -p $TDIR || { echo "$TDIR: cannot create" >&2; exit 1; }
 mkdir -p $SDIR || { echo "$SDIR: cannot create" >&2; exit 1; }
+
+cd ${TDIR} || { echo "${TDIR}: cannot cd" >&2; 	exit 1; }
 
 FN=${SDIR}/improbable-filename
 
@@ -30,7 +34,7 @@ cat >cwd-filename <<EOF
 echo file in the current directory
 EOF
 
-trap 'rm -rf ${SDIR} ; rm -f cwd-filename' 0
+trap 'rm -rf ${TDIR} ${SDIR}' 0
 
 # not found in $PATH
 . improbable-filename
@@ -60,3 +64,5 @@ ${THIS_SH} -c 'set -o posix ; . -p $SDIR cwd-filename' bash
 # a null PATH argument is the same as "."
 . -p '' cwd-filename
 source -p '' cwd-filename
+
+cd $OLDPWD

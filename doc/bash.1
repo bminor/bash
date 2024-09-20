@@ -5739,7 +5739,8 @@ Normally,
 waits until it is about to print a prompt before reporting
 changes in a job's status so as to not interrupt
 any other output,
-though it will notify of changes in a job's status after a command in
+though it will notify of changes in a job's status after a
+foreground command in
 a list completes, before executing the next command.
 If the
 .B \-b
@@ -10857,7 +10858,8 @@ command and, if necessary, updates the values of
 .B LINES
 and
 .SM
-.BR COLUMNS .
+.BR COLUMNS ,
+using the file descriptor associated with stderr if it is a terminal.
 This option is enabled by default.
 .TP 8
 .B cmdhist

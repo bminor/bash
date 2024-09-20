@@ -5847,7 +5847,8 @@ The shell always postpones exiting if any jobs are stopped.
 @item checkwinsize
 If set, Bash checks the window size after each external (non-builtin)
 command and, if necessary, updates the values of    
-@env{LINES} and @env{COLUMNS}.
+@env{LINES} and @env{COLUMNS},
+using the file descriptor associated with stderr if it is a terminal.
 This option is enabled by default.
 
 @item cmdhist
@@ -8556,6 +8557,11 @@ job that terminates due to a signal.
 Non-interactive shells print status messages after a foreground job completes.
 
 @item
+Bash permanently removes jobs from the jobs table after notifying the
+user of their termination, whether that is via @code{wait}, @code{jobs},
+or interactive shell notification before prompting.
+
+@item
 Alias expansion is always enabled, even in non-interactive shells.
 
 @item
@@ -9244,7 +9250,8 @@ The shell learns immediately whenever a job changes state.
 Normally, Bash waits until it is about to print a prompt
 before reporting changes in a job's status so as to not interrupt
 any other output,
-though it will notify of changes in a job's status after a command in
+though it will notify of changes in a job's status after a
+foreground command in
 a list completes, before executing the next command.
 If the @option{-b} option to the @code{set} builtin is enabled,
 Bash reports such changes immediately (@pxref{The Set Builtin}).

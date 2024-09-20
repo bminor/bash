@@ -2740,7 +2740,11 @@ wait_for_single_pid (pid_t pid, int flags)
     {
       r = bgp_search (pid);
       if (r >= 0)
-	return r;
+	{
+	  if (posixly_correct)
+	    bgp_delete (pid);
+	  return r;
+	}
     }
 
   if (child == 0)
@@ -3374,7 +3378,7 @@ if (job == NO_JOB)
 	 the shell is not interactive, make sure we turn on the notify bit
 	 so we don't get an unwanted message about the job's termination,
 	 and so delete_job really clears the slot in the jobs table. */
-      if (posixly_correct == 0 || (interactive_shell == 0 || interactive == 0))
+      if (posixly_correct == 0 || interactive_shell == 0 || interactive == 0)
 	notify_and_cleanup (job);
     }
 
