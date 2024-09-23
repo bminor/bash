@@ -885,7 +885,7 @@ AC_CHECK_DECLS([strtold], [
 	[AC_COMPILE_IFELSE(
 		[AC_LANG_PROGRAM(
 		[[#include <stdlib.h>]],
-		[[long double r; char *foo, *bar; r = strtold(foo, &bar);]]
+		[[long double r; char *foo, bar; r = strtold(foo, &bar);]]
 	)],
 	[bash_cv_strtold_broken=no],[bash_cv_strtold_broken=yes])
         ]
