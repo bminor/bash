@@ -151,7 +151,9 @@ int rl_timeout_remaining (unsigned int *, unsigned int *);
 
 int _rl_timeout_init (void);
 int _rl_timeout_sigalrm_handler (void);
+#if defined (RL_TIMEOUT_USE_SELECT)
 int _rl_timeout_select (int, fd_set *, fd_set *, fd_set *, const struct timeval *, const sigset_t *);
+#endif
 
 static void _rl_timeout_handle (void);
 #if defined (RL_TIMEOUT_USE_SIGALRM)
@@ -248,7 +250,7 @@ rl_gather_tyi (void)
   register int tem, result;
   int chars_avail, k;
   char input;
-#if defined(HAVE_SELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   fd_set readfds, exceptfds;
   struct timeval timeout;
 #endif
@@ -805,7 +807,7 @@ rl_getc (FILE *stream)
   int result;
   unsigned char c;
   int fd;
-#if defined (HAVE_PSELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   sigset_t empty_set;
   fd_set readfds;
 #endif

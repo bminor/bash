@@ -33,9 +33,7 @@
 #  include <sys/file.h>
 #endif /* HAVE_SYS_FILE_H */
 
-#if defined (HAVE_PSELECT)
-#  include <signal.h>
-#endif
+#include <signal.h>
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -107,10 +105,8 @@ nchars_avail (fd, nchars)
      int nchars;
 {
   int result, chars_avail;
-#if defined(HAVE_SELECT)
-  fd_set readfds, exceptfds;
-#endif
 #if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
+  fd_set readfds, exceptfds;
   sigset_t set, oset;
 #endif
 
@@ -121,13 +117,11 @@ nchars_avail (fd, nchars)
 
   chars_avail = 0;
 
-#if defined (HAVE_SELECT)
+#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   FD_ZERO (&readfds);
   FD_ZERO (&exceptfds);
   FD_SET (fd, &readfds);
   FD_SET (fd, &exceptfds);
-#endif
-#if defined (HAVE_SELECT) || defined (HAVE_PSELECT)
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &set);
 #  ifdef SIGCHLD
   sigaddset (&set, SIGCHLD);
