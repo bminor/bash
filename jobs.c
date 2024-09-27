@@ -1000,7 +1000,7 @@ save_proc_status (pid_t pid, int status)
   sigset_t set, oset;
 
   BLOCK_CHILD (set, oset);
-  bgp_add (pid, status);
+  bgp_add (pid, process_exit_status (status));
   UNBLOCK_CHILD (oset);  
 }
 
@@ -3444,9 +3444,11 @@ wait_for_job (int job, int flags, struct procstat *ps)
 /* Wait for any background job started by this shell to finish, including
    process substitutions.
    Very similar to wait_for_background_pids().  Returns the exit status of
-   the next exiting job, -1 if there are no background jobs.  The caller
-   is responsible for translating -1 into the right return value. RPID,
-   if non-null, gets the pid of the job's process leader. */
+   the next exiting job, -1 if there are no background jobs. If we are in
+   posix mode, we can take a pid from bgpids since we will delete it.
+
+   The caller is responsible for translating -1 into the right return value.
+   PS, if non-null, gets the pid and status of the job's process leader. */
 int
 wait_for_any_job (int flags, struct procstat *ps)
 {
@@ -3575,8 +3577,26 @@ return_procsub:
 
       if (i == js.j_jobslots && p == NULL)
 	{
+	  /* Ok, the job table is empty. If we're in posix mode, we can look
+	     in the bgpids table because we will remove the pid we find and
+	     this won't change existing semantics. Otherwise, we return
+	     failure as before. */
+	  struct pidstat *t;
+
+	  r = -1;
+	  if (posixly_correct && (t = bgp_findone ()))
+	    {
+	      pid = t->pid;
+	      r = t->status;
+	      if (ps)
+		{
+		  ps->pid = pid;
+		  ps->status = r;
+		}
+	      bgp_delete (pid);
+	    }
 	  UNBLOCK_CHILD (oset);
-	  return -1;
+	  return r;
 	}
 
       UNBLOCK_CHILD (oset);
@@ -3886,7 +3906,12 @@ start_job (int job, int foreground)
   /* Save the tty settings before we start the job in the foreground. */
   if (foreground)
     {
-      get_tty_state ();
+#if defined (READLINE)
+      /* Don't fetch the terminal attributes if we're doing this from a key
+         binding or programmable completion. */
+      if (RL_ISSTATE(RL_STATE_COMPLETING|RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) == 0)
+#endif
+	get_tty_state ();
       save_stty = shell_tty_info;
       jobs[job]->flags &= ~J_ASYNC;	/* no longer async */
       /* Give the terminal to this job. */

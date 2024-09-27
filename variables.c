@@ -171,7 +171,7 @@ int array_needs_making = 1;
 int shell_level = 0;
 
 /* If non-zero, each element of BASH_SOURCE contains a full pathnames */
-int bash_source_fullpath = 0;
+int bash_source_fullpath = BASH_SOURCE_FULLPATH_DEFAULT;
 
 /* An array which is passed to commands as their environment.  It is
    manufactured from the union of the initial environment and the

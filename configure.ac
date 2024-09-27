@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.068])dnl
+AC_REVISION([for Bash 5.3, version 5.069])dnl
 
 define(bashvers, 5.3)
 define(relstatus, beta)
@@ -186,6 +186,7 @@ opt_function_import=yes
 opt_dev_fd_stat_broken=no
 opt_alt_array_impl=no
 opt_translatable_strings=yes
+opt_bash_source_fullpath=no
 
 dnl modified by alternate array implementation option
 ARRAY_O=array.o
@@ -211,6 +212,7 @@ if test $opt_minimal_config = yes; then
 	opt_casemod_attrs=no opt_casemod_expansions=no opt_extglob_default=no
 	opt_translatable_strings=no
 	opt_globascii_default=yes
+	opt_bash_source_fullpath=no
 fi
 
 AC_ARG_ENABLE(alias, AS_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)
@@ -218,6 +220,7 @@ AC_ARG_ENABLE(alt-array-implementation, AS_HELP_STRING([--enable-alt-array-imple
 AC_ARG_ENABLE(arith-for-command, AS_HELP_STRING([--enable-arith-for-command], [enable arithmetic for command]), opt_arith_for_command=$enableval)
 AC_ARG_ENABLE(array-variables, AS_HELP_STRING([--enable-array-variables], [include shell array variables]), opt_array_variables=$enableval)
 AC_ARG_ENABLE(bang-history, AS_HELP_STRING([--enable-bang-history], [turn on csh-style history substitution]), opt_bang_history=$enableval)
+AC_ARG_ENABLE(bash-source-fullpath-default, AS_HELP_STRING([--enable-bash-source-fullpath-default], [enable the bash_source_fullpath option by default]), opt_bash_source_fullpath_default=$enableval)
 AC_ARG_ENABLE(brace-expansion, AS_HELP_STRING([--enable-brace-expansion], [include brace expansion]), opt_brace_expansion=$enableval)
 AC_ARG_ENABLE(casemod-attributes, AS_HELP_STRING([--enable-casemod-attributes], [include case-modifying variable attributes]), opt_casemod_attrs=$enableval)
 AC_ARG_ENABLE(casemod-expansions, AS_HELP_STRING([--enable-casemod-expansions], [include case-modifying word expansions]), opt_casemod_expansions=$enableval)
@@ -370,6 +373,11 @@ ARRAY_O=array2.o
 fi
 if test $opt_translatable_strings = yes; then
 AC_DEFINE(TRANSLATABLE_STRINGS)
+fi
+if test $opt_bash_source_fullpath_default = yes; then
+AC_DEFINE(BASH_SOURCE_FULLPATH_DEFAULT, 1)
+else
+AC_DEFINE(BASH_SOURCE_FULLPATH_DEFAULT, 0)
 fi
 
 if test $opt_memscramble = yes; then

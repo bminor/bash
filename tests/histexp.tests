@@ -149,6 +149,10 @@ echo !:2:p ; echo !$
 echo one two three four
 echo !$ ; echo !:2:p
 
+# problem through bash-5.2 with history word tokenization
+echo $((1+2))
+echo !!:1
+
 ${THIS_SH} ./histexp1.sub
 ${THIS_SH} ./histexp2.sub
 ${THIS_SH} ./histexp3.sub

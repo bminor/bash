@@ -10228,3 +10228,57 @@ jobs.c
 	- wait_for_single_pid: if wait finds a status for the pid argument in
 	  the bgp list, remove it from the bgp list if the shell is in posix
 	  mode
+
+				   9/23
+				   ----
+execute_cmd.c
+	- execute_command_internal: if the COMMAND * passed in to execute has
+	  the CMD_INVERT_RETURN flag set, make sure we propagate that to
+	  simple commands, for commands, arith for commands, select commands,
+	  case commands, while/until commands, if commands, group commands,
+	  shell functions, pipelines, subshells, and connections so if set -e
+	  is enabled in the body (or test for if/while/until) its effect is
+	  ignored
+	- execute_in_subshell: if the subshell's return status is being inverted,
+	  make sure to ignore set -e in the commands the subshell executes
+	- execute_pipeline: if the pipeline's return status is being inverted,
+	  make sure to ignore the effects of set -e in all pipeline elements
+	- execute_connection: if the list's return status is being inverted
+	  (tough to do because of precedence), make sure the list commands
+	  ignore the effect of set -e
+
+				   9/24
+				   ----
+jobs.c
+	- start_job: don't fetch the tty settings if we're being called from
+	  a readline key binding (bind -x) or programmable completion
+	  From a report by David Moberg <kaddkaka@gmail.com>
+
+				   9/25
+				   ----
+jobs.c
+	- wait_for_any_job: if the jobs table is empty and there are no
+	  eligible procsubs, and the shell is in posix mode, take a random
+	  pid from the bgpids table, delete it, and return its status
+	  (since we would be deleting that pid from bgpids anyway)
+
+				   9/26
+				   ----
+lib/readline/histexpand.c
+	- history_tokenize_word: fix off-by-one error (incrementing i one too
+	  many positions after the increment in the loop) preventing words
+	  like `$((expr))' from being tokenized correctly
+	  Report from Milana <94888u@riseup.net>
+
+config.h.in,configure.ac
+	- new option: bash-source-fullpath-default: set it to make the
+	  bash_source_fullpath option enabled by default; sets
+	  BASH_SOURCE_FULLPATH_DEFAULT
+	  Based on a patch from konsolebox <konsolebox@gmail.com>
+
+variables.c
+	- bash_source_fullpath: initialize to BASH_SOURCE_FULLPATH_DEFAULT,
+	  set by configure
+
+doc/bashref.texi
+	- --enable-bash-source-default: document

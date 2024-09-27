@@ -905,7 +905,7 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 #endif
 	was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
 
-	if (ignore_return && command->value.Simple)
+	if ((ignore_return || invert) && command->value.Simple)
 	  command->value.Simple->flags |= CMD_IGNORE_RETURN;
 	if (command->flags & CMD_STDIN_REDIR)
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
@@ -1012,14 +1012,14 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
       break;
 
     case cm_for:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.For->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_for_command (command->value.For);
       break;
 
 #if defined (ARITH_FOR_COMMAND)
     case cm_arith_for:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.ArithFor->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_arith_for_command (command->value.ArithFor);
       break;
@@ -1027,32 +1027,32 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 
 #if defined (SELECT_COMMAND)
     case cm_select:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.Select->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_select_command (command->value.Select);
       break;
 #endif
 
     case cm_case:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.Case->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_case_command (command->value.Case);
       break;
 
     case cm_while:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.While->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_while_command (command->value.While);
       break;
 
     case cm_until:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.While->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_until_command (command->value.While);
       break;
 
     case cm_if:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.If->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_if_command (command->value.If);
       break;
@@ -1092,7 +1092,11 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 	}
       else
 	{
-	  if (ignore_return && command->value.Group->command)
+	  /* If we're already ignoring the return value of this group command,
+	     or if the return value is being inverted, make sure to ignore
+	     set -e for the duration of the command, even if the group
+	     command enables it. */
+	  if ((ignore_return || invert) && command->value.Group->command)
 	    command->value.Group->command->flags |= CMD_IGNORE_RETURN;
 	  exec_result =
 	    execute_command_internal (command->value.Group->command,
@@ -1586,7 +1590,7 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 
   /* If a command is asynchronous in a subshell (like ( foo ) & or
      the special case of an asynchronous GROUP command where the
-     subshell bit is turned on down in case cm_group: below),
+     subshell bit is turned on down in case cm_group: above),
      turn off `asynchronous', so that two subshells aren't spawned.
      XXX - asynchronous used to be set to 0 in this block, but that
      means that setup_async_signals was never run.  Now it's set to
@@ -1773,6 +1777,10 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
   
   /* Make sure the subshell inherits any CMD_IGNORE_RETURN flag. */
   if ((command->flags & CMD_IGNORE_RETURN) && tcom != command)
+    tcom->flags |= CMD_IGNORE_RETURN;
+  /* If the subshell's return value is being inverted, ignore set -e even
+     if the subshell enables it. */
+  if (invert)
     tcom->flags |= CMD_IGNORE_RETURN;
 
   /* If this is a simple command, tell execute_disk_command that it
@@ -2603,7 +2611,7 @@ uw_lastpipe_cleanup (void *s)
 static int
 execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, struct fd_bitmap *fds_to_close)
 {
-  int prev, fildes[2], new_bitmap_size, dummyfd, ignore_return, exec_result;
+  int prev, fildes[2], new_bitmap_size, dummyfd, ignore_return, invert, exec_result;
   int lstdin, lastpipe_flag, lastpipe_jid, old_frozen, stdin_valid;
   COMMAND *cmd;
   struct fd_bitmap *fd_bitmap;
@@ -2615,6 +2623,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
 #endif /* JOB_CONTROL */
 
   ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+  invert = (command->flags & CMD_INVERT_RETURN) != 0;
 
   stdin_valid = sh_validfd (0);
 
@@ -2682,7 +2691,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
       add_unwind_protect (uw_restore_signal_mask, &oset);
 #endif /* JOB_CONTROL */
 
-      if (ignore_return && cmd->value.Connection->first)
+      if ((ignore_return || invert) && cmd->value.Connection->first)
 	cmd->value.Connection->first->flags |= CMD_IGNORE_RETURN;
       execute_command_internal (cmd->value.Connection->first, asynchronous,
 				prev, fildes[1], fd_bitmap);
@@ -2702,7 +2711,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
   lastpid = last_made_pid;
 
   /* Now execute the rightmost command in the pipeline.  */
-  if (ignore_return && cmd)
+  if ((ignore_return || invert) && cmd)
     cmd->flags |= CMD_IGNORE_RETURN;
 
   lastpipe_flag = 0;
@@ -2798,6 +2807,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
   volatile int save_line_number;
 
   ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+  invert = (command->flags & CMD_INVERT_RETURN) != 0;
 
   switch (command->value.Connection->connector)
     {
@@ -2842,7 +2852,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
     /* Just call execute command on both sides. */
     case ';':
     case '\n':		/* special case, happens in command substitutions */
-      if (ignore_return)
+      if (ignore_return || invert)
 	{
 	  if (command->value.Connection->first)
 	    command->value.Connection->first->flags |= CMD_IGNORE_RETURN;
@@ -2874,9 +2884,6 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 
     case '|':
       was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
-      invert = (command->flags & CMD_INVERT_RETURN) != 0;
-      ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
-
       SET_LINE_NUMBER (line_number);	/* XXX - save value? */
       exec_result = execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 
