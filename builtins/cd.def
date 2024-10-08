@@ -427,6 +427,7 @@ cd_builtin (WORD_LIST *list)
   builtin_error ("%s: %s", temp, strerror (e));
   if (temp != dirname)
     free (temp);
+  /* posix says to return >1 if eflag && no_symlinks?? */
   return (EXECUTION_FAILURE);
 }
 

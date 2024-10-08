@@ -11,7 +11,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2023 Free Software Foundation, Inc.
+Copyright (C) 1988--2024 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -2003,10 +2003,10 @@ so forth.
 @section Programmable Completion
 @cindex programmable completion
 
-When word completion is attempted for an argument to a command for
+When the user attempts word completion for an argument to a command for
 which a completion specification (a @var{compspec}) has been defined
 using the @code{complete} builtin (@pxref{Programmable Completion Builtins}),
-the programmable completion facilities are invoked. 
+\fBreadline\fP invokes the programmable completion facilities. 
 
 First, the command name is identified.
 If a compspec has been defined for that command, the
@@ -2016,13 +2016,13 @@ beginning of an empty line), any compspec defined with
 the @option{-E} option to @code{complete} is used.
 If the command word is a full pathname, a compspec for the full
 pathname is searched for first.
-If no compspec is found for the full pathname, an attempt is made to
+If no compspec is found for the full pathname, completion attempts to
 find a compspec for the portion following the final slash.
 If those searches do not result in a compspec, any compspec defined with
 the @option{-D} option to @code{complete} is used as the default.
 If there is no default compspec, Bash attempts alias expansion
 on the command word as a final resort, and attempts to find a compspec
-for the command word from any successful expansion 
+for the command word from any successful expansion.
 
 Once a compspec has been found, it is used to generate the list of
 matching words.
@@ -2087,6 +2087,7 @@ in an environment equivalent to command substitution.
 It should print a list of completions, one per line, to
 the standard output.
 Backslash may be used to escape a newline, if necessary.
+These are added to the set of possible completions.
 
 After all of the possible completions are generated, any filter
 specified with the @option{-X} option is applied to the list.
@@ -2104,8 +2105,7 @@ of alphabetic characters.
 
 Finally, any prefix and suffix specified with the @option{-P} and @option{-S}
 options are added to each member of the completion list, and the result is
-returned to the Readline completion code as the list of possible
-completions.
+returned to Readline as the list of possible completions.
 
 If the previously-applied actions do not generate any matches, and the
 @option{-o dirnames} option was supplied to @code{complete} when the
@@ -2117,11 +2117,11 @@ matches are added to the results of the other actions.
 
 By default, if a compspec is found, whatever it generates is returned to
 the completion code as the full set of possible completions.
-The default Bash completions are not attempted, and the Readline default
-of filename completion is disabled.
+The default Bash completions and the Readline default
+of filename completion are disabled.
 If the @option{-o bashdefault} option was supplied to @code{complete} when
-the compspec was defined, the default Bash completions are attempted
-if the compspec generates no matches.
+the compspec was defined, if the compspec generates no matches,
+the default Bash completions are attempted.
 If the @option{-o default} option was supplied to @code{complete} when the
 compspec was defined, Readline's default completion will be performed
 if the compspec (and, if attempted, the default Bash completions)
@@ -2133,17 +2133,19 @@ to completed names which are symbolic links to directories, subject to
 the value of the @var{mark-directories} Readline variable, regardless
 of the setting of the @var{mark-symlinked-directories} Readline variable.
 
-There is some support for dynamically modifying completions.  This is
-most useful when used in combination with a default completion specified
-with @option{-D}.  It's possible for shell functions executed as completion
+There is some support for dynamically modifying completions.
+This is most useful when used in combination with a default completion
+specified with @option{-D}.
+It's possible for shell functions executed as completion
 handlers to indicate that completion should be retried by returning an
-exit status of 124.  If a shell function returns 124, and changes
+exit status of 124.
+If a shell function returns 124, and changes
 the compspec associated with the command on which completion is being
 attempted (supplied as the first argument when the function is executed),
 programmable completion restarts from the beginning, with an
-attempt to find a new compspec for that command.  This allows a set of
-completions to be built dynamically as completion is attempted, rather than
-being loaded all at once.
+attempt to find a new compspec for that command.
+This allows a set of completions to be built dynamically as completion
+is attempted, rather than being loaded all at once.
 
 For instance, assuming that there is a library of compspecs, each kept in a
 file corresponding to the name of the command, the following default
@@ -2196,7 +2198,7 @@ The matches will be generated in the same way as if the programmable
 completion code had generated them directly from a completion specification
 with the same flags.
 If @var{word} is specified, only those completions matching @var{word}
-will be displayed.
+will be displayed or stored.
 
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
@@ -2243,7 +2245,6 @@ The arguments to the @option{-G}, @option{-W}, and @option{-X} options
 should be quoted to protect them from expansion before the
 @code{complete} builtin is invoked.
 
-
 @table @code
 @item -o @var{comp-option}
 The @var{comp-option} controls several aspects of the compspec's behavior
@@ -2287,9 +2288,8 @@ the end of the line.
 
 @item plusdirs
 After any matches defined by the compspec are generated, 
-directory name completion is attempted and any
-matches are added to the results of the other actions.
-
+attempt directory name completion and add any
+matches to the results of the other actions.
 @end table
 
 @item -A @var{action}
@@ -2385,25 +2385,30 @@ When it is executed, $1 is the name of the command whose arguments are
 being completed, $2 is the word being completed, and $3 is the word
 preceding the word being completed, as described above
 (@pxref{Programmable Completion}).
-When it finishes, the possible completions are retrieved from the value
+When @code{function} finishes,
+the possible completions are retrieved from the value
 of the @env{COMPREPLY} array variable.
 
 @item -G @var{globpat}
-The filename expansion pattern @var{globpat} is expanded to generate
+Expand the filename expansion pattern @var{globpat} to generate
 the possible completions.
 
 @item -P @var{prefix}
-@var{prefix} is added at the beginning of each possible completion
+Add @var{prefix} to the beginning of each possible completion
 after all other options have been applied.
 
 @item -S @var{suffix}
-@var{suffix} is appended to each possible completion
+Append @var{suffix} to each possible completion
 after all other options have been applied.
 
 @item -W @var{wordlist}
 The @var{wordlist} is split using the characters in the
-@env{IFS} special variable as delimiters, and each resultant word
+@env{IFS} special variable as delimiters, and each resulting word
 is expanded.
+Shell quoting is honored within @var{wordlist}
+in order to provide a
+mechanism for the words to contain shell metacharacters or characters
+in the value of @env{IFS}.
 The possible completions are the members of the resultant list which
 match the word being completed.
 
@@ -2458,7 +2463,6 @@ over @option{-E}, and both take precedence over @option{-I}
 The return value is true unless an invalid option is supplied, an attempt
 is made to modify the options for a @var{name} for which no completion
 specification exists, or an output error occurs.
-
 @end table
 
 @node A Programmable Completion Example
@@ -2488,7 +2492,8 @@ a newline to accommodate file names containing spaces and tabs --
 @code{compgen} prints the possible completions it generates one per line.
 
 Possible completions go into the @var{COMPREPLY} array variable, one
-completion per array element.  The programmable completion system retrieves
+completion per array element.
+The programmable completion system retrieves
 the completions from there when the function returns.
 
 @example
@@ -2562,7 +2567,7 @@ extend @code{_comp_cd} to append a slash if we're using directories found
 via @var{CDPATH}: Readline can't tell those completions are directories).
 The @option{-o nospace} option tells Readline to not append a space
 character to the directory name, in case we want to append to it.
-The @option{-o bashdefault} option brings in the rest of the "Bash default"
+The @option{-o bashdefault} option brings in the rest of the ``Bash default''
 completions -- possible completions that Bash adds to the default Readline
 set.
 These include things like command name completion, variable completion

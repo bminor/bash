@@ -24,8 +24,8 @@ The simplest way to compile Bash is:
      files, some supplemental documentation, a number of example
      loadable builtin commands, and a set of header files for developing
      loadable builtins.  You may need additional privileges to install
-     ‘bash’ to your desired destination, so ‘sudo make install’ might be
-     required.  More information about controlling the locations where
+     ‘bash’ to your desired destination, which may require ‘sudo make
+     install’.  More information about controlling the locations where
      ‘bash’ and other files are installed is below (*note Installation
      Names::).
 
@@ -228,7 +228,7 @@ Optional Features
 The Bash ‘configure’ has a number of ‘--enable-FEATURE’ options, where
 FEATURE indicates an optional part of Bash.  There are also several
 ‘--with-PACKAGE’ options, where PACKAGE is something like ‘bash-malloc’
-or ‘purify’.  To turn off the default use of a package, use
+or ‘afs’.  To turn off the default use of a package, use
 ‘--without-PACKAGE’.  To configure Bash without a feature that is
 enabled by default, use ‘--disable-FEATURE’.
 
@@ -240,18 +240,18 @@ the Bash ‘configure’ recognizes.
 
 ‘--with-bash-malloc’
      Use the Bash version of ‘malloc’ in the directory ‘lib/malloc’.
-     This is not the same ‘malloc’ that appears in GNU libc, but an
-     older version originally derived from the 4.2 BSD ‘malloc’.  This
-     ‘malloc’ is very fast, but wastes some space on each allocation.
-     This option is enabled by default.  The ‘NOTES’ file contains a
-     list of systems for which this should be turned off, and
-     ‘configure’ disables this option automatically for a number of
-     systems.
+     This is not the same ‘malloc’ that appears in GNU libc, but a
+     custom version originally derived from the 4.2 BSD ‘malloc’.  This
+     ‘malloc’ is very fast, but wastes some space on each allocation,
+     though it uses several techniques to minimize the waste.  This
+     option is enabled by default.  The ‘NOTES’ file contains a list of
+     systems for which this should be turned off, and ‘configure’
+     disables this option automatically for a number of systems.
 
 ‘--with-curses’
-     Use the curses library instead of the termcap library.  This should
-     be supplied if your system has an inadequate or incomplete termcap
-     database.
+     Use the curses library instead of the termcap library.  ‘configure’
+     usually chooses this automatically, since most systems include the
+     termcap functions in the curses library.
 
 ‘--with-gnu-malloc’
      A synonym for ‘--with-bash-malloc’.
@@ -268,7 +268,9 @@ the Bash ‘configure’ recognizes.
      set to any other value, ‘configure’ treats it as a directory
      pathname and looks for the installed version of Readline in
      subdirectories of that directory (include files in PREFIX/‘include’
-     and the library in PREFIX/‘lib’).
+     and the library in PREFIX/‘lib’).  The Bash default is to link with
+     a static library built in the ‘lib/readline’ subdirectory of the
+     build directory.
 
 ‘--with-libintl-prefix[=PREFIX]’
      Define this to make Bash link with a locally-installed version of
@@ -276,10 +278,11 @@ the Bash ‘configure’ recognizes.
 
 ‘--with-libiconv-prefix[=PREFIX]’
      Define this to make Bash look for libiconv in PREFIX instead of the
-     standard system locations.  There is no version included with Bash.
+     standard system locations.  The Bash distribution does not include
+     this library.
 
 ‘--enable-minimal-config’
-     This produces a shell with minimal features, close to the
+     This produces a shell with minimal features, closer to the
      historical Bourne shell.
 
 There are several ‘--enable-’ options that alter how Bash is compiled,
@@ -336,6 +339,12 @@ does not provide the necessary support.
      Include support for ‘csh’-like history substitution (*note History
      Interaction::).
 
+‘--enable-bash-source-fullpath-default’
+     Set the default value of the ‘bash_source_fullpath’ shell option
+     described above under *note The Shopt Builtin:: to be enabled.
+     This controls how filenames are assigned to the ‘BASH_SOURCE’ array
+     variable.
+
 ‘--enable-brace-expansion’
      Include ‘csh’-like brace expansion ( ‘b{a,b}c’ ↦ ‘bac bbc’ ).  See
      *note Brace Expansion::, for a complete description.
@@ -352,8 +361,9 @@ does not provide the necessary support.
 ‘--enable-command-timing’
      Include support for recognizing ‘time’ as a reserved word and for
      displaying timing statistics for the pipeline following ‘time’
-     (*note Pipelines::).  This allows pipelines as well as shell
-     builtins and functions to be timed.
+     (*note Pipelines::).  This allows timing pipelines, shell compound
+     commands, shell builtins, and shell functions, which an external
+     command cannot do easily.
 
 ‘--enable-cond-command’
      Include support for the ‘[[’ conditional command.  (*note
@@ -456,13 +466,13 @@ does not provide the necessary support.
      version of the Readline library (*note Command Line Editing::).
 
 ‘--enable-restricted’
-     Include support for a “restricted shell”.  If this is enabled,
-     Bash, when called as ‘rbash’, enters a restricted mode.  See *note
-     The Restricted Shell::, for a description of restricted mode.
+     Include support for a “restricted shell”.  If this is enabled, Bash
+     enters a restricted mode when called as ‘rbash’.  See *note The
+     Restricted Shell::, for a description of restricted mode.
 
 ‘--enable-select’
-     Include the ‘select’ compound command, which allows the generation
-     of simple menus (*note Conditional Constructs::).
+     Include the ‘select’ compound command, which allows generation of
+     simple menus (*note Conditional Constructs::).
 
 ‘--enable-single-help-strings’
      Store the text displayed by the ‘help’ builtin as a single string

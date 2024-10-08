@@ -26,8 +26,8 @@
  order of decreasing precedence.
 
 	"id++", "id--"		[post-increment and post-decrement]
-	"-", "+"		[(unary operators)]
 	"++id", "--id"		[pre-increment and pre-decrement]
+	"-", "+"		[(unary operators)]
 	"!", "~"
 	"**"			[(exponentiation)]
 	"*", "/", "%"
