@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 September 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 10<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -787,7 +787,7 @@ below under
 <P>
 
 When the shell is in <I>posix mode</I>, <B>time</B>
-may be followed by a newline.
+may appear by itself as the only word in a simple command.
 In this case, the shell displays the
 total user and system time consumed by the shell and its children.
 The
@@ -1578,27 +1578,27 @@ question mark
 <DT><B>\</B><I>nnn</I>
 
 <DD>
-the eight-bit character whose value is the octal value <I>nnn</I>
-(one to three octal digits)
+The eight-bit character whose value is the octal value <I>nnn</I>
+(one to three octal digits).
 <DT><B>\x</B><I>HH</I>
 
 <DD>
-the eight-bit character whose value is the hexadecimal value <I>HH</I>
-(one or two hex digits)
+The eight-bit character whose value is the hexadecimal value <I>HH</I>
+(one or two hex digits).
 <DT><B>\u</B><I>HHHH</I>
 
 <DD>
-the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
-<I>HHHH</I> (one to four hex digits)
+The Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHH</I> (one to four hex digits).
 <DT><B>\U</B><I>HHHHHHHH</I>
 
 <DD>
-the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
-<I>HHHHHHHH</I> (one to eight hex digits)
+The Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHHHHHH</I> (one to eight hex digits).
 <DT><B>\c</B><I>x</I>
 
 <DD>
-a control-<I>x</I> character
+A control-<I>x</I> character.
 
 </DL></DL>
 
@@ -1839,11 +1839,11 @@ The shell treats several parameters specially.
 These parameters may only be referenced; assignment to them is
 not allowed.
 Special parameters are denoted by one of the following characters.
-
 <DL COMPACT>
-<DT><B>*</B>
-
+<DT>
 <DD>
+<B>*</B>
+
 (<B>$*</B>) Expands to the positional parameters, starting from one.
 When the expansion is not within double quotes, each positional parameter
 expands to a separate word.
@@ -4003,8 +4003,9 @@ within the braces, and the postscript is then appended
 to each resulting string, expanding left to right.
 <P>
 
-Brace expansions may be nested.  The results of each expanded
-string are not sorted; left to right order is preserved.
+Brace expansions may be nested.
+The results of each expanded string are not sorted;
+brace expansion preserves left to right order.
 For example, a<B>{</B>d,c,b<B>}</B>e expands into
 
 <P>
@@ -4279,7 +4280,6 @@ When not performing substring expansion, using the forms documented below
 Omitting the colon tests only for a parameter that is unset.
 <P>
 
-
 <DL COMPACT>
 <DT>${<I>parameter</I><B>:-</B><I>word</I>}<DD>
 <B>Use Default Values</B>.  If
@@ -4333,10 +4333,12 @@ is null or unset, nothing is substituted, otherwise the expansion of
 
 is substituted.
 The value of <I>parameter</I> is not used.
-<DT>${<I>parameter</I><B>:</B><I>offset</I>}<DD>
-
-<DT>${<I>parameter</I><B>:</B><I>offset</I><B>:</B><I>length</I>}<DD>
-
+<DT>
+<DD>
+${<I>parameter</I><B>:</B><I>offset</I>}
+<DT>
+<DD>
+${<I>parameter</I><B>:</B><I>offset</I><B>:</B><I>length</I>}
 <B>Substring Expansion</B>.
 Expands to up to <I>length</I> characters of the value of <I>parameter</I>
 starting at the character specified by <I>offset</I>.
@@ -4386,8 +4388,9 @@ Substring indexing is zero-based unless the positional parameters
 are used, in which case the indexing starts at 1 by default.
 If <I>offset</I> is 0, and the positional parameters are used, <B>$0</B> is
 prefixed to the list.
-<DT>${<B>!</B><I>prefix</I><B>*</B>}<DD>
-
+<DT>
+<DD>
+${<B>!</B><I>prefix</I><B>*</B>}
 <DT>${<B>!</B><I>prefix</I><B>@</B>}<DD>
 
 <B>Names matching prefix</B>.
@@ -4399,8 +4402,9 @@ separated by the first character of the
 special variable.
 When <I>@</I> is used and the expansion appears within double quotes, each
 variable name expands to a separate word.
-<DT>${<B>!</B><I>name</I>[<I>@</I>]}<DD>
-
+<DT>
+<DD>
+${<B>!</B><I>name</I>[<I>@</I>]}
 <DT>${<B>!</B><I>name</I>[<I>*</I>]}<DD>
 
 <B>List of array keys</B>.
@@ -4440,8 +4444,9 @@ is an indexed array name subscripted by a negative number, that number is
 interpreted as relative to one greater than the maximum index of
 <I>parameter</I>, so negative indices count back from the end of the
 array, and an index of -1 references the last element.
-<DT>${<I>parameter</I><B>#</B><I>word</I>}<DD>
-
+<DT>
+<DD>
+${<I>parameter</I><B>#</B><I>word</I>}
 <DT>${<I>parameter</I><B>##</B><I>word</I>}<DD>
 
 <B>Remove matching prefix pattern</B>.
@@ -4490,8 +4495,9 @@ or
 
 the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
-<DT>${<I>parameter</I><B>%</B><I>word</I>}<DD>
-
+<DT>
+<DD>
+${<I>parameter</I><B>%</B><I>word</I>}
 <DT>${<I>parameter</I><B>%%</B><I>word</I>}<DD>
 
 <B>Remove matching suffix pattern</B>.
@@ -4536,8 +4542,9 @@ or
 
 the pattern removal operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
-<DT>${<I>parameter</I><B>/</B><I>pattern</I><B>/</B><I>string</I>}<DD>
-
+<DT>
+<DD>
+${<I>parameter</I><B>/</B><I>pattern</I><B>/</B><I>string</I>}
 <DT>${<I>parameter</I><B>//</B><I>pattern</I><B>/</B><I>string</I>}<DD>
 <DT>${<I>parameter</I><B>/#</B><I>pattern</I><B>/</B><I>string</I>}<DD>
 <DT>${<I>parameter</I><B>/%</B><I>pattern</I><B>/</B><I>string</I>}<DD>
@@ -4622,8 +4629,9 @@ or
 
 the substitution operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
-<DT>${<I>parameter</I><B>^</B><I>pattern</I>}<DD>
-
+<DT>
+<DD>
+${<I>parameter</I><B>^</B><I>pattern</I>}
 <DT>${<I>parameter</I><B>^^</B><I>pattern</I>}<DD>
 <DT>${<I>parameter</I><B>,</B><I>pattern</I>}<DD>
 <DT>${<I>parameter</I><B>,,</B><I>pattern</I>}<DD>
@@ -4667,7 +4675,9 @@ or
 
 the case modification operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
-<DT>${<I>parameter</I><B>@</B><I>operator</I>}<DD>
+<DT>
+<DD>
+${<I>parameter</I><B>@</B><I>operator</I>}
 <B>Parameter transformation</B>.
 The expansion is either a transformation of the value of <I>parameter</I>
 or information about <I>parameter</I> itself, depending on the value of
@@ -4676,7 +4686,6 @@ or information about <I>parameter</I> itself, depending on the value of
 <P>
 
 <DL COMPACT><DT><DD>
-
 <DL COMPACT>
 <DT><B>U</B>
 
@@ -6877,33 +6886,33 @@ The shell has an <I>execution environment</I>, which consists of the
 following:
 <DL COMPACT>
 <DT>*<DD>
-open files inherited by the shell at invocation, as modified by
-redirections supplied to the <B>exec</B> builtin
+Open files inherited by the shell at invocation, as modified by
+redirections supplied to the <B>exec</B> builtin.
 <DT>*<DD>
-the current working directory as set by <B>cd</B>, <B>pushd</B>, or
-<B>popd</B>, or inherited by the shell at invocation
+The current working directory as set by <B>cd</B>, <B>pushd</B>, or
+<B>popd</B>, or inherited by the shell at invocation.
 <DT>*<DD>
-the file creation mode mask as set by <B>umask</B> or inherited from
-the shell's parent
+The file creation mode mask as set by <B>umask</B> or inherited from
+the shell's parent.
 <DT>*<DD>
-current traps set by <B>trap</B>
+Current traps set by <B>trap</B>.
 <DT>*<DD>
-shell parameters that are set by variable assignment or with <B>set</B>
-or inherited from the shell's parent in the environment
+Shell parameters that are set by variable assignment or with <B>set</B>
+or inherited from the shell's parent in the environment.
 <DT>*<DD>
-shell functions defined during execution or inherited from the shell's
-parent in the environment
+Shell functions defined during execution or inherited from the shell's
+parent in the environment.
 <DT>*<DD>
-options enabled at invocation (either by default or with command-line
-arguments) or by <B>set</B>
+Options enabled at invocation (either by default or with command-line
+arguments) or by <B>set</B>.
 <DT>*<DD>
-options enabled by <B>shopt</B>
+Options enabled by <B>shopt</B>.
 <DT>*<DD>
-shell aliases defined with <B>alias</B>
+Shell aliases defined with <B>alias</B>.
 <DT>*<DD>
-various process IDs, including those of background jobs, the value
+Various process IDs, including those of background jobs, the value
 of <B>$$</B>, and the value of
-<FONT SIZE=-1><B>PPID</B>
+<FONT SIZE=-1><B>PPID</B>.
 
 </FONT>
 </DL>
@@ -6916,18 +6925,18 @@ the following.
 Unless otherwise noted, the values are inherited from the shell.
 <DL COMPACT>
 <DT>*<DD>
-the shell's open files, plus any modifications and additions specified
-by redirections to the command
+The shell's open files, plus any modifications and additions specified
+by redirections to the command.
 <DT>*<DD>
-the current working directory
+The current working directory.
 <DT>*<DD>
-the file creation mode mask
+The file creation mode mask.
 <DT>*<DD>
-shell variables and functions marked for export, along with variables
-exported for the command, passed in the environment
+Shell variables and functions marked for export, along with variables
+exported for the command, passed in the environment.
 <DT>*<DD>
-traps caught by the shell are reset to the values inherited from the
-shell's parent, and traps ignored by the shell are ignored
+Traps caught by the shell are reset to the values inherited from the
+shell's parent, and traps ignored by the shell are ignored.
 </DL>
 <P>
 
@@ -7689,7 +7698,7 @@ The username of the current user.
 <DT><B>\v</B>
 
 <DD>
-The <B>bash</B> version (e.g., 2.00)
+The <B>bash</B> version (e.g., 2.00).
 <DT><B>\V</B>
 
 <DD>
@@ -7791,8 +7800,8 @@ shell, unless the
 option is supplied at shell invocation.
 Line editing is also used when using the <B>-e</B> option to the
 <B>read</B> builtin.
-By default, the line editing commands are similar to those of Emacs.
-A vi-style line editing interface is also available.
+By default, the line editing commands are similar to those of emacs;
+a vi-style line editing interface is also available.
 Line editing can be enabled at any time using the
 <B>-o emacs</B>
 
@@ -7820,8 +7829,7 @@ builtin.
 <A NAME="lbCH">&nbsp;</A>
 <H4>Readline Notation</H4>
 
-In this section, the Emacs-style notation is used to denote
-keystrokes.
+This section uses an emacs-style notation to denote keystrokes.
 Control keys are denoted by C-<I>key</I>, e.g., C-n means Control-N.
 Similarly,
 <I>meta</I>
@@ -7843,7 +7851,7 @@ or press the Escape key
 then hold the Control key while pressing the
 <I>x</I>
 
-key.)
+key.
 <P>
 
 On some keyboards, the Meta key modifier produces meta characters with
@@ -7854,7 +7862,7 @@ key to a key sequence beginning with ESC as described in the
 preceding paragraph.
 <P>
 
-If the <I>Meta</I> key produces a key sequence with the ESC meta prefix,
+If your <I>Meta</I> key produces a key sequence with the ESC meta prefix,
 you can make M-<I>key</I> key bindings you specify (see
 <B>Readline Key Bindings</B>
 
@@ -7866,18 +7874,19 @@ Readline commands may be given numeric
 
 which normally act as a repeat count.
 Sometimes, however, it is the sign of the argument that is significant.
-Passing a negative argument to a command that acts in the forward
-direction (e.g., <B>kill-line</B>) causes that command to act in a
-backward direction.
+Passing a negative argument
+to a command that acts in the forward direction (e.g., <B>kill-line</B>)
+makes that command act in a backward direction.
 Commands whose behavior with arguments deviates from this are noted
 below.
 <P>
 
 When a command is described as <I>killing</I> text, the text
 deleted is saved for possible future retrieval
-(<I>yanking</I>).  The killed text is saved in a
-<I>kill ring</I>.  Consecutive kills cause the text to be
-accumulated into one unit, which can be yanked all at once.
+(<I>yanking</I>).
+The killed text is saved in a <I>kill ring</I>.
+Consecutive kills accumulate the deleted text 
+into one unit, which can be yanked all at once.
 Commands which do not kill text separate the chunks of text
 on the kill ring.
 <A NAME="lbCI">&nbsp;</A>
@@ -7889,29 +7898,33 @@ The name of this file is taken from the value of the
 <FONT SIZE=-1><B>INPUTRC</B>
 
 </FONT>
-variable.  If that variable is unset, the default is
+shell variable.
+If that variable is unset, the default is
 <A HREF="file:~/.inputrc"><I>~/.inputrc</I></A>.
 
-If that file  does not exist or cannot be read, the ultimate default is
+If that file  does not exist or cannot be read, readline looks for
 <A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>.
 
-When a program which uses the readline library starts up, the
-initialization file is read, and the key bindings and variables
-are set.
-There are only a few basic constructs allowed in the
-readline initialization file.
+When a program which uses the readline library starts up,
+<B>readline</B> reads the initialization file
+and sets the key bindings and variables found there,
+before reading any user input.
+<P>
+
+There are only a few basic constructs allowed in the inputrc file.
 Blank lines are ignored.
 Lines beginning with a <B>#</B> are comments.
 Lines beginning with a <B>$</B> indicate conditional constructs.
 Other lines denote key bindings and variable settings.
 <P>
 
-The default key-bindings may be changed with an
+The default key-bindings in this section
+may be changed using key binding commands in the
 <I>inputrc</I>
 
 file.
-Other programs that use this library may add their own commands
-and bindings.
+Programs that use the readline library, including <B>bash</B>,
+may add their own commands and bindings.
 <P>
 
 For example, placing
@@ -7936,12 +7949,12 @@ would make M-C-u execute the readline command
 
 <P>
 
-The following symbolic character names are recognized:
-<I>RUBOUT</I>,
-
+Key bindings may contain the following symbolic character names:
 <I>DEL</I>,
 
 <I>ESC</I>,
+
+<I>ESCAPE</I>,
 
 <I>LFD</I>,
 
@@ -7951,9 +7964,11 @@ The following symbolic character names are recognized:
 
 <I>RETURN</I>,
 
-<I>SPC</I>,
+<I>RUBOUT</I>,
 
 <I>SPACE</I>,
+
+<I>SPC</I>,
 
 and
 <I>TAB</I>.
@@ -7962,17 +7977,24 @@ and
 
 In addition to command names, readline allows keys to be bound
 to a string that is inserted when the key is pressed (a <I>macro</I>).
+The difference between a macro and a command is that a macro is
+enclosed in single or double quotes.
 <A NAME="lbCJ">&nbsp;</A>
 <H4>Readline Key Bindings</H4>
 
 The syntax for controlling key bindings in the
 <I>inputrc</I>
 
-file is simple.  All that is required is the name of the
-command or the text of a macro and a key sequence to which
-it should be bound.  The name may be specified in one of two ways:
-as a symbolic key name, possibly with <I>Meta-</I> or <I>Control-</I>
-prefixes, or as a key sequence.
+file is simple.
+All that is required is the name of the command or the text of a macro
+and a key sequence to which it should be bound.
+The key sequence may be specified in one of two ways:
+as a symbolic key name,
+possibly with <I>Meta-</I> or <I>Control-</I> prefixes,
+or as a key sequence composed of one or more characters
+enclosed in double quotes.
+The key sequence and name are separated by a colon.
+There can be no whitespace between the name and the colon.
 <P>
 
 When using the form <B>keyname</B>:<I>function-name</I> or <I>macro</I>,
@@ -8027,9 +8049,10 @@ differs from
 
 above in that strings denoting
 an entire key sequence may be specified by placing the sequence
-within double quotes.  Some GNU Emacs style key escapes can be
-used, as in the following example, but the symbolic character names
-are not recognized.
+within double quotes.
+Some GNU Emacs style key escapes can be
+used, as in the following example, but none of
+the symbolic character names are recognized.
 <P>
 
 <DL COMPACT><DT><DD>
@@ -8071,36 +8094,37 @@ is bound to insert the text
 
 <P>
 
-The full set of GNU Emacs style escape sequences is
+The full set of GNU Emacs style escape sequences available when specifying
+key sequences is
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
 <DT><B>\C-</B>
 
 <DD>
-control prefix
+A control prefix.
 <DT><B>\M-</B>
 
 <DD>
-adding the meta prefix or converting the following character to a meta
-character, as described below under <B>force-meta-prefix</B>
+Adding the meta prefix or converting the following character to a meta
+character, as described below under <B>force-meta-prefix</B>.
 <DT><B>\e</B>
 
 <DD>
-an escape character
+An escape character.
 <DT><B>\\</B>
 
 <DD>
-backslash
+Backslash.
 <DT><B>\</B>
 
 <DD>
-literal &quot;
-
+Literal &quot;
+, a double quote.
 <DT><B>\'</B>
 
 <DD>
-literal '
+Literal ', a single quote.
 </DL></DL>
 
 
@@ -8146,13 +8170,13 @@ vertical tab
 <DT><B>\</B><I>nnn</I>
 
 <DD>
-the eight-bit character whose value is the octal value <I>nnn</I>
-(one to three digits)
+The eight-bit character whose value is the octal value <I>nnn</I>
+(one to three digits).
 <DT><B>\x</B><I>HH</I>
 
 <DD>
-the eight-bit character whose value is the hexadecimal value <I>HH</I>
-(one or two hex digits)
+The eight-bit character whose value is the hexadecimal value <I>HH</I>
+(one or two hex digits).
 </DL></DL>
 
 
@@ -8161,7 +8185,8 @@ the eight-bit character whose value is the hexadecimal value <I>HH</I>
 When entering the text of a macro, single or double quotes must
 be used to indicate a macro definition.
 Unquoted text is assumed to be a function name.
-In the macro body, the backslash escapes described above are expanded.
+Tthe backslash escapes described above are expanded
+in the macro body.
 Backslash will quote any other character in the macro text,
 including &quot;
  and '.
@@ -8169,27 +8194,32 @@ including &quot;
 
 <B>Bash</B>
 
-allows the current readline key bindings to be displayed or modified
-with the
+will display or modify the current readline key bindings with the
 <B>bind</B>
 
-builtin command.  The editing mode may be switched during interactive
-use by using the
-<B>-o</B>
+builtin command.
+The
+<B>-o emacs</B>
 
-option to the
+or
+<B>-o vi</B>
+
+options to the
 <B>set</B>
 
-builtin command (see
+builtin
+(see
 <FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
 
 </FONT>
-below).
+below)
+will change the editing mode during interactive use.
 <A NAME="lbCK">&nbsp;</A>
 <H4>Readline Variables</H4>
 
 Readline has variables that can be used to further customize its
-behavior.  A variable may be set in the
+behavior.
+A variable may be set in the
 <I>inputrc</I>
 
 file with a statement of the form
@@ -8221,6 +8251,16 @@ When readline reads a variable value, empty or null values,
 are equivalent to <B>On</B>.
 All other values are equivalent to
 <B>Off</B>.
+<P>
+
+The <B>bind -V</B> command lists the current readline variable names
+and values  (see
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
+
+</FONT>
+below).
+<P>
+
 The variables and their default values are:
 <P>
 
@@ -8261,14 +8301,14 @@ A sample value might be
 
 <DD>
 Controls what happens when readline wants to ring the terminal bell.
-If set to <B>none</B>, readline never rings the bell.  If set to
-<B>visible</B>, readline uses a visible bell if one is available.
+If set to <B>none</B>, readline never rings the bell.
+If set to <B>visible</B>, readline uses a visible bell if one is available.
 If set to <B>audible</B>, readline attempts to ring the terminal's bell.
 <DT><B>bind-tty-special-chars (On)</B>
 
 <DD>
-If set to <B>On</B> (the default), readline attempts to bind
-the control  characters that are treated specially by the kernel's
+If set to <B>On</B>, readline attempts to bind
+the control characters that are treated specially by the kernel's
 terminal driver to their readline equivalents.
 These override the default readline bindings described here.
 Type
@@ -8305,10 +8345,10 @@ environment variable.
 
 <DD>
 
-The string that is inserted when the readline
+The string that the readline
 <B>insert-comment</B>
 
-command is executed.
+command inserts.
 This command is bound to
 <B>M-#</B>
 
@@ -8339,10 +8379,12 @@ performing case-insensitive filename matching and completion.
 <DT><B>completion-prefix-display-length (0)</B>
 
 <DD>
-The length in characters of the common prefix of a list of possible
-completions that is displayed without modification.  When set to a
-value greater than zero, common prefixes longer than this value are
-replaced with an ellipsis when displaying possible completions.
+The maximum
+length in characters of the common prefix of a list of possible
+completions that is displayed without modification.
+When set to a value greater than zero, readline
+replaces common prefixes longer than this value
+with an ellipsis when displaying possible completions.
 <DT><B>completion-query-items (100)</B>
 
 <DD>
@@ -8353,29 +8395,29 @@ It may be set to any integer value greater than or equal to zero.
 If the number of possible completions is greater than
 or equal to the value of this variable,
 readline will ask whether or not the user wishes to view them;
-otherwise they are simply listed on the terminal.
+otherwise readline simply lists them on the terminal.
 A zero value means readline should never ask; negative values are
 treated as zero.
 <DT><B>convert-meta (On)</B>
 
 <DD>
 If set to <B>On</B>, readline will convert characters it reads
-with the eighth bit set to an ASCII key sequence
-by stripping the eighth bit and prefixing it with an escape character
+that have the eighth bit set to an ASCII key sequence by
+clearing the eighth bit and prefixing it with an escape character
 (converting the character to have the <I>meta prefix</I>).
 The default is <I>On</I>, but readline will set it to <I>Off</I>
 if the locale contains
 characters whose encodings may include bytes with the eighth bit set.
 This variable is dependent on the <B>LC_CTYPE</B> locale category, and
-may change if the locale is changed.
+may change if the locale changes.
 This variable also affects key bindings; see the description of
 <B>force-meta-prefix</B> below.
 <DT><B>disable-completion (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline will inhibit word completion.  Completion
-characters will be inserted into the line as if they had been
-mapped to <B>self-insert</B>.
+If set to <B>On</B>, readline will inhibit word completion.
+Completion characters will be inserted into the line as if they
+had been mapped to <B>self-insert</B>.
 <DT><B>echo-control-characters (On)</B>
 
 <DD>
@@ -8385,7 +8427,7 @@ keyboard.
 <DT><B>editing-mode (emacs)</B>
 
 <DD>
-Controls whether readline begins with a set of key bindings similar
+Controls whether readline uses a set of key bindings similar
 to <I>Emacs</I> or <I>vi</I>.
 <B>editing-mode</B>
 
@@ -8399,11 +8441,12 @@ or
 
 <DD>
 If the <I>show-mode-in-prompt</I> variable is enabled,
-this string is displayed immediately before the last line of the primary
-prompt when emacs editing mode is active.  The value is expanded like a
-key binding, so the standard set of meta- and control prefixes and
+this string is displayed immediately before the last line of the
+primary prompt when emacs editing mode is active.
+The value is expanded like a
+key binding, so the standard set of meta- and control- prefixes and
 backslash escape sequences is available.
-Use the \1 and \2 escapes to begin and end sequences of
+The \1 and \2 escapes begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 <DT><B>enable-active-region (On)</B>
@@ -8416,8 +8459,7 @@ When this variable is set to <I>On</I>, readline allows certain commands
 to designate the region as <I>active</I>.
 When the region is active, readline highlights the text in the region using
 the value of the <B>active-region-start-color</B>, which defaults to the
-string that enables
-the terminal's standout mode.
+string that enables the terminal's standout mode.
 The active region shows the text inserted by bracketed-paste and any
 matching text found by incremental and non-incremental history searches.
 <DT><B>enable-bracketed-paste (On)</B>
@@ -8426,49 +8468,50 @@ matching text found by incremental and non-incremental history searches.
 When set to <B>On</B>, readline configures the terminal to insert each
 paste into the editing buffer as a single string of characters, instead
 of treating each character as if it had been read from the keyboard.
-This prevents readline from executing any editing commands bound to key
+This is called <I>bracketed-paste mode</I>;
+it prevents readline from executing any editing commands bound to key
 sequences appearing in the pasted text.
 <DT><B>enable-keypad (Off)</B>
 
 <DD>
 When set to <B>On</B>, readline will try to enable the application
-keypad when it is called.  Some systems need this to enable the
-arrow keys.
+keypad when it is called.
+Some systems need this to enable the arrow keys.
 <DT><B>enable-meta-key (On)</B>
 
 <DD>
 When set to <B>On</B>, readline will try to enable any meta modifier
-key the terminal claims to support when it is called.
+key the terminal claims to support.
 On many terminals, the Meta key is used to send eight-bit characters;
 this variable checks for the terminal capability that indicates the
 terminal can enable and disable a mode that sets the eighth bit of a
 character (0200) if the Meta key is held down when the character is
 typed (a meta character).
+<DT><B>expand-tilde (Off)</B>
+
+<DD>
+If set to <B>On</B>, readline performs tilde expansion when it
+attempts word completion.
 <DT><B>force-meta-prefix (Off)</B>
 
 <DD>
 If set to <B>On</B>, readline modifies its behavior when binding key
 sequences containing \M- or Meta-
 (see <B>Key Bindings</B> above) by converting a key sequence of the form
-\M-<I>C</I> or Meta-<I>C</I> to the two-character sequence            
-<B>ESC</B><I>C</I> (adding the meta prefix).
+\M-<I>C</I> or Meta-<I>C</I> to the two-character sequence
+<B>ESC</B><I>C</I> (adding the <I>meta prefix</I>).
 If
 <B>force-meta-prefix</B>
 
-is set to <B>Off</B> (the default),  
+is set to <B>Off</B> (the default),
 readline uses the value of the
-<B>convert-meta </B>
+<B>convert-meta</B>
 
 variable to determine whether to perform this conversion:
-if <B>convert-meta</B> is <B>On</B>,   
+if <B>convert-meta</B> is <B>On</B>,
 readline performs the conversion described above;
-if it is <B>Off</B>, Readline converts <I>C</I> to a meta character by  
+if it is <B>Off</B>, readline converts <I>C</I> to a meta character by
 setting the eighth bit (0200).
-<DT><B>expand-tilde (Off)</B>
-
-<DD>
-If set to <B>On</B>, tilde expansion is performed when readline
-attempts word completion.
 <DT><B>history-preserve-point (Off)</B>
 
 <DD>
@@ -8483,32 +8526,30 @@ If set to zero, any existing history entries are deleted and no new entries
 are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
-By default, the number of history entries is set to the value of the
-<B>HISTSIZE</B> shell variable.
-If an attempt is made to set <I>history-size</I> to a non-numeric value,
-the maximum number of history entries will be set to 500.
+By default, <B>bash</B> sets the the maximum number of history entries to
+the value of the <B>HISTSIZE</B> shell variable.
+Setting <I>history-size</I> to a non-numeric value will set
+the maximum number of history entries to 500.
 <DT><B>horizontal-scroll-mode (Off)</B>
 
 <DD>
-When set to <B>On</B>, makes readline use a single line for display,
-scrolling the input horizontally on a single screen line when it
-becomes longer than the screen width rather than wrapping to a new line.
+Setting this variable to <B>On</B> makes readline use a single line
+for display, scrolling the input horizontally on a single screen line
+when it becomes longer than the screen width rather than wrapping to
+a new line.
 This setting is automatically enabled for terminals of height 1.
 <DT><B>input-meta (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline will enable eight-bit input (that is,
-it will not strip the eighth bit from the characters it reads),
+If set to <B>On</B>, readline will enable eight-bit input (that is, it
+will not clear the eighth bit in the characters it reads),
 regardless of what the terminal claims it can support.
-The name
-<B>meta-flag</B>
-
-is a synonym for this variable.
 The default is <I>Off</I>, but readline will set it to <I>On</I>
-if the locale contains
-characters whose encodings may include bytes with the eighth bit set.
+if the locale contains characters whose encodings may include bytes
+with the eighth bit set.
 This variable is dependent on the <B>LC_CTYPE</B> locale category, and
-may change if the locale is changed.
+its value may change if the locale changes.
+The name <B>meta-flag</B> is a synonym for <B>input-meta</B>.
 <DT><B>isearch-terminators&nbsp;(</B>
 
 <DD>
@@ -8520,15 +8561,15 @@ If this variable has not been given a value, the characters
 <DT><B>keymap (emacs)</B>
 
 <DD>
-Set the current readline keymap.  The set of valid keymap names is
+Set the current readline keymap.
+The set of valid keymap names is
 <I>emacs, emacs-standard, emacs-meta, emacs-ctlx, vi,
 vi-command</I>, and
 <I>vi-insert</I>.
 
-<I>vi</I> is equivalent to <I>vi-command</I>; <I>emacs</I> is
-equivalent to <I>emacs-standard</I>.  The default value is
-<I>emacs</I>;
-
+<I>vi</I> is equivalent to <I>vi-command</I>;
+<I>emacs</I> is equivalent to <I>emacs-standard</I>.
+The default value is <I>emacs</I>;
 the value of
 <B>editing-mode</B>
 
@@ -8536,33 +8577,31 @@ also affects the default keymap.
 <DT><B>keyseq-timeout (500)</B>
 
 <DD>
-Specifies the duration <I>readline</I> will wait for a character when reading an
-ambiguous key sequence (one that can form a complete key sequence using
-the input read so far, or can take additional input to complete a longer
-key sequence).
-If no input is received within the timeout, <I>readline</I> will use the shorter
-but complete key sequence.
+Specifies the duration <I>readline</I> will wait for a character when
+reading an ambiguous key sequence
+(one that can form a complete key sequence using the input read so far,
+or can take additional input to complete a longer key sequence).
+If readline does not receive any input within the timeout, it will use the
+shorter but complete key sequence.
 The value is specified in milliseconds, so a value of 1000 means that
-<I>readline</I> will wait one second for additional input.
+readline will wait one second for additional input.
 If this variable is set to a value less than or equal to zero, or to a
-non-numeric value, <I>readline</I> will wait until another key is pressed to
+non-numeric value, readline will wait until another key is pressed to
 decide which key sequence to complete.
 <DT><B>mark-directories (On)</B>
 
 <DD>
-If set to <B>On</B>, completed directory names have a slash
-appended.
+If set to <B>On</B>, completed directory names have a slash appended.
 <DT><B>mark-modified-lines (Off)</B>
 
 <DD>
-If set to <B>On</B>, history lines that have been modified are displayed
+If set to <B>On</B>, readline displays history lines that have been modified
 with a preceding asterisk (<B>*</B>).
 <DT><B>mark-symlinked-directories (Off)</B>
 
 <DD>
 If set to <B>On</B>, completed names which are symbolic links to directories
-have a slash appended (subject to the value of
-<B>mark-directories</B>).
+have a slash appended, subject to the value of <B>mark-directories</B>.
 <DT><B>match-hidden-files (On)</B>
 
 <DD>
@@ -8586,10 +8625,10 @@ If set to <B>On</B>, readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.
 The default is <I>Off</I>, but readline will set it to <I>On</I>
-if the locale contains
-characters whose encodings may include bytes with the eighth bit set.
+if the locale contains characters whose encodings may include
+bytes with the eighth bit set.
 This variable is dependent on the <B>LC_CTYPE</B> locale category, and
-may change if the locale is changed.
+its value may change if the locale changes.
 <DT><B>page-completions (On)</B>
 
 <DD>
@@ -8608,7 +8647,8 @@ sorted horizontally in alphabetical order, rather than down the screen.
 
 <DD>
 If set to <B>On</B>, readline will undo all changes to history lines
-before returning when <B>accept-line</B> is executed.  By default,
+before returning when executing <B>accept-line</B>.
+By default,
 history lines may be modified and retain individual undo lists across
 calls to <B>readline</B>.
 <DT><B>search-ignore-case (Off)</B>
@@ -8619,8 +8659,8 @@ history list searches in a case-insensitive fashion.
 <DT><B>show-all-if-ambiguous (Off)</B>
 
 <DD>
-This alters the default behavior of the completion functions.  If
-set to
+This alters the default behavior of the completion functions.
+If set to
 <B>On</B>,
 
 words which have more than one possible completion cause the
@@ -8647,21 +8687,20 @@ The mode strings are user-settable (e.g., <I>emacs-mode-string</I>).
 
 <DD>
 If set to <B>On</B>, this alters the default completion behavior when
-inserting a single match into the line.  It's only active when
-performing completion in the middle of a word.  If enabled, readline
-does not insert characters from the completion that match characters
-after point in the word being completed, so portions of the word
-following the cursor are not duplicated.
+inserting a single match into the line.
+It's only active when performing completion in the middle of a word.
+If enabled, readline does not insert characters from the completion
+that match characters after point in the word being completed,
+so portions of the word following the cursor are not duplicated.
 <DT><B>vi-cmd-mode-string ((cmd))</B>
 
 <DD>
 If the <I>show-mode-in-prompt</I> variable is enabled,
 this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in command mode.
-The value is expanded like a
-key binding, so the standard set of meta- and control prefixes and
-backslash escape sequences is available.
-Use the \1 and \2 escapes to begin and end sequences of
+The value is expanded like a key binding, so the standard set of
+meta- and control- prefixes and backslash escape sequences is available.
+The \1 and \2 escapes begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 <DT><B>vi-ins-mode-string ((ins))</B>
@@ -8670,10 +8709,9 @@ sequence into the mode string.
 If the <I>show-mode-in-prompt</I> variable is enabled,
 this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in insertion mode.
-The value is expanded like a
-key binding, so the standard set of meta- and control prefixes and
-backslash escape sequences is available.
-Use the \1 and \2 escapes to begin and end sequences of
+The value is expanded like a key binding, so the standard set of
+meta- and control- prefixes and backslash escape sequences is available.
+The \1 and \2 escapes begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 <DT><B>visible-stats (Off)</B>
@@ -8690,7 +8728,8 @@ completions.
 Readline implements a facility similar in spirit to the conditional
 compilation features of the C preprocessor which allows key
 bindings and variable settings to be performed as the result
-of tests.  There are four parser directives used.
+of tests.
+There are four parser directives available.
 <DL COMPACT>
 <DT><B>$if</B>
 
@@ -8700,7 +8739,8 @@ The
 
 construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
-readline.  The text of the test, after any comparison operator,
+readline.
+The text of the test, after any comparison operator,
 extends to the end of the line;
 unless otherwise noted, no characters are required to isolate it.
 <DL COMPACT><DT><DD>
@@ -8719,18 +8759,20 @@ readline is starting out in emacs mode.
 <DD>
 The <B>term=</B> form may be used to include terminal-specific
 key bindings, perhaps to bind the key sequences output by the
-terminal's function keys.  The word on the right side of the
+terminal's function keys.
+The word on the right side of the
 <B>=</B>
 
 is tested against both the full name of the terminal and the portion
-of the terminal name before the first <B>-</B>.  This allows
-<I>sun</I>
+of the terminal name before the first <B>-</B>.
+This allows
+<I>xterm</I>
 
 to match both
-<I>sun</I>
+<I>xterm</I>
 
 and
-<I>sun-cmd</I>,
+<I>xterm-256color</I>,
 
 for instance.
 <DT><B>version</B>
@@ -8758,8 +8800,9 @@ and
 
 The version number supplied on the right side of the operator consists
 of a major version number, an optional decimal point, and an optional
-minor version (e.g., <B>7.1</B>). If the minor version is omitted, it
-is assumed to be <B>0</B>.
+minor version (e.g., <B>7.1</B>).
+If the minor version is omitted, it
+defaults to <B>0</B>.
 The operator may be separated from the string <B>version</B>
 and from the version number argument by whitespace.
 <DT><I>application</I>
@@ -8771,7 +8814,8 @@ Each program using the readline
 library sets the <I>application name</I>, and an initialization
 file can test for a particular value.
 This could be used to bind key sequences to functions useful for
-a specific program.  For instance, the following command adds a
+a specific program.
+For instance, the following command adds a
 key sequence that quotes the current or previous word in <B>bash</B>:
 </DL>
 <P>
@@ -8804,26 +8848,27 @@ The permitted comparison operators are <I>=</I>, <I>==</I>, and <I>!=</I>.
 The variable name must be separated from the comparison operator by
 whitespace; the operator may be separated from the value on the right hand
 side by whitespace.
-Both string and boolean variables may be tested. Boolean variables must be
+String and boolean variables may be tested.
+Boolean variables must be
 tested against the values <I>on</I> and <I>off</I>.
 </DL></DL>
 
-<DT><B>$endif</B>
-
-<DD>
-This command, as seen in the previous example, terminates an
-<B>$if</B> command.
 <DT><B>$else</B>
 
 <DD>
 Commands in this branch of the <B>$if</B> directive are executed if
 the test fails.
+<DT><B>$endif</B>
+
+<DD>
+This command, as seen in the previous example, terminates an
+<B>$if</B> command.
 <DT><B>$include</B>
 
 <DD>
 This directive takes a single filename as an argument and reads commands
-and bindings from that file.  For example, the following directive
-would read <A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>:
+and key bindings from that file.
+For example, the following directive would read <A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>:
 </DL>
 <P>
 
@@ -8842,7 +8887,8 @@ Readline provides commands for searching through the command history
 <FONT SIZE=-1><B>HISTORY</B>
 
 </FONT>
-below) for lines containing a specified string.
+below)
+for lines containing a specified string.
 There are two search modes:
 <I>incremental</I>
 
@@ -8857,33 +8903,38 @@ As each character of the search string is typed, readline displays
 the next entry from the history matching the string typed so far.
 An incremental search requires only as many characters as needed to
 find the desired history entry.
+When using emacs editing mode, type <B>C-r</B> to
+search backward in the history for a particular string.
+Typing <B>C-s</B> searches forward through the history.
 The characters present in the value of the <B>isearch-terminators</B>
 variable are used to terminate an incremental search.
-If that variable has not been assigned a value the Escape and
-Control-J characters will terminate an incremental search.
-Control-G will abort an incremental search and restore the original
-line.
+If that variable has not been assigned a value,
+<I>ESC</I> and <I>C-J</I> will terminate an incremental search.
+<I>C-g</I> will abort an incremental search and restore the original line.
 When the search is terminated, the history entry containing the
 search string becomes the current line.
 <P>
 
-To find other matching entries in the history list, type Control-S or
-Control-R as appropriate.
+To find other matching entries in the history list, type <B>C-r</B> or
+<B>C-s</B> as appropriate.
 This will search backward or forward in the history for the next
 entry matching the search string typed so far.
 Any other key sequence bound to a readline command will terminate
 the search and execute that command.
-For instance, a <I>newline</I> will terminate the search and accept
+For instance, a newline will terminate the search and accept
 the line, thereby executing the command from the history list.
+A movement command will terminate the search, make the last line found
+the current line, and begin editing.
 <P>
 
-Readline remembers the last incremental search string.  If two
-Control-Rs are typed without any intervening characters defining a
-new search string, readline uses any remembered search string.
+Readline remembers the last incremental search string.
+If two <B>C-r</B>s are typed without any intervening characters defining
+a new search string, readline uses any remembered search string.
 <P>
 
 Non-incremental searches read the entire search string before starting
-to search for matching history lines.  The search string may be
+to search for matching history entries.
+The search string may be
 typed by the user or be part of the contents of the current line.
 <A NAME="lbCN">&nbsp;</A>
 <H4>Readline Command Names</H4>
@@ -8891,11 +8942,18 @@ typed by the user or be part of the contents of the current line.
 The following is a list of the names of the commands and the default
 key sequences to which they are bound.
 Command names without an accompanying key sequence are unbound by default.
+<P>
+
 In the following descriptions, <I>point</I> refers to the current cursor
 position, and <I>mark</I> refers to a cursor position saved by the
 <B>set-mark</B> command.
 The text between the point and mark is referred to as the <I>region</I>.
-<A NAME="lbCO">&nbsp;</A>
+Readline has the concept of an <I>active region</I>:
+when the region is active, readline redisplay uses the
+value of the <B>active-region-start-color variable
+to denote the region.
+Several commands set the region to active; those are noted below.
+</B><A NAME="lbCO">&nbsp;</A>
 <H4>Commands for Moving</H4>
 
 
@@ -8921,8 +8979,8 @@ Move back a character.
 <DT><B>forward-word (M-f)</B>
 
 <DD>
-Move forward to the end of the next word.  Words are composed of
-alphanumeric characters (letters and digits).
+Move forward to the end of the next word.
+Words are composed of alphanumeric characters (letters and digits).
 <DT><B>backward-word (M-b)</B>
 
 <DD>
@@ -8942,14 +9000,16 @@ Words are delimited by non-quoted shell metacharacters.
 
 <DD>
 Attempt to move point to the same physical screen column on the previous
-physical screen line. This will not have the desired effect if the current
+physical screen line.
+This will not have the desired effect if the current
 readline line does not take up more than one physical line or if point is not
 greater than the length of the prompt plus the screen width.
 <DT><B>next-screen-line</B>
 
 <DD>
 Attempt to move point to the same physical screen column on the next
-physical screen line. This will not have the desired effect if the current
+physical screen line.
+This will not have the desired effect if the current
 readline line does not take up more than one physical line or if the length
 of the current readline line is not greater than the length of the prompt
 plus the screen width.
@@ -8981,13 +9041,18 @@ Refresh the current line.
 <DT><B>accept-line (Newline, Return)</B>
 
 <DD>
-Accept the line regardless of where the cursor is.  If this line is
-non-empty, add it to the history list according to the state of the
+Accept the line regardless of where the cursor is.
+If this line is non-empty, add it to the history list according to the
+state of the
 <FONT SIZE=-1><B>HISTCONTROL</B>
 
 </FONT>
-variable.  If the line is a modified history
-line, then restore the history line to its original state.
+and
+<B>HISTIGNORE</B>
+
+variables.
+If the line is a modified history line,
+restore the history line to its original state.
 <DT><B>previous-history (C-p)</B>
 
 <DD>
@@ -9010,8 +9075,10 @@ entered.
 <DT><B>operate-and-get-next (C-o)</B>
 
 <DD>
-Accept the current line for execution and fetch the next line
-relative to the current line from the history for editing.
+Accept the current line for execution as if a
+newline had been entered,
+and fetch the next line relative to the current line from the history
+for editing.
 A numeric argument, if supplied, specifies the history entry to use instead
 of the current line.
 <DT><B>fetch-history</B>
@@ -9027,6 +9094,7 @@ Search backward starting at the current line and moving
 
 through the history as necessary.
 This is an incremental search.
+This command sets the region to the matched text and activates the region.
 <DT><B>forward-search-history (C-s)</B>
 
 <DD>
@@ -9034,21 +9102,25 @@ Search forward starting at the current line and moving
 
 through the history as necessary.
 This is an incremental search.
+This command sets the region to the matched text and activates the region.
 <DT><B>non-incremental-reverse-search-history (M-p)</B>
 
 <DD>
 Search backward through the history starting at the current line
 using a non-incremental search for a string supplied by the user.
+The search string may match anywhere in a history line.
 <DT><B>non-incremental-forward-search-history (M-n)</B>
 
 <DD>
-Search forward through the history using a non-incremental search for
-a string supplied by the user.
+Search forward through the history using a non-incremental search
+for a string supplied by the user.
+The search string may match anywhere in a history line.
 <DT><B>history-search-backward</B>
 
 <DD>
 Search backward through the history for the string of characters
 between the start of the current line and the point.
+The search string must match at the beginning of a history line.
 This is a non-incremental search.
 This may be bound to the Page Up key on some keyboards.
 <DT><B>history-search-forward</B>
@@ -9056,14 +9128,14 @@ This may be bound to the Page Up key on some keyboards.
 <DD>
 Search forward through the history for the string of characters
 between the start of the current line and the point.
+The search string must match at the beginning of a history line.
 This is a non-incremental search.
 This may be bound to the Page Down key on some keyboards.
 <DT><B>history-substring-search-backward</B>
 
 <DD>
 Search backward through the history for the string of characters
-between the start of the current line and the current cursor
-position (the <I>point</I>).
+between the start of the current line and the point.
 The search string may match anywhere in a history line.
 This is a non-incremental search.
 <DT><B>history-substring-search-forward</B>
@@ -9082,10 +9154,12 @@ With an argument
 <I>n</I>,
 
 insert the <I>n</I>th word from the previous command (the words
-in the previous command begin with word 0).  A negative argument
-inserts the <I>n</I>th word from the end of the previous command.
-Once the argument <I>n</I> is computed, the argument is extracted
-as if the
+in the previous command begin with word 0).
+A negative argument inserts the <I>n</I>th word from the end of
+the previous command.
+Once the argument <I>n</I> is computed,
+this uses the history expansion facilities to extract the
+<I>n</I>th word, as if the
 
 history expansion had been specified.
 <DT><B>yank-last-arg (M-., M-_)</B>
@@ -9098,10 +9172,11 @@ Successive calls to <B>yank-last-arg</B> move back through the history
 list, inserting the last word (or the word specified by the argument to
 the first call) of each line in turn.
 Any numeric argument supplied to these successive calls determines
-the direction to move through the history.  A negative argument switches
-the direction through the history (back or forward).
-The history expansion facilities are used to extract the last word,
-as if the
+the direction to move through the history.
+A negative argument switches the direction through the history
+(back or forward).
+This uses the history expansion facilities to extract the
+last word, as if the
 
 history expansion had been specified.
 <DT><B>shell-expand-line (M-C-e)</B>
@@ -9198,7 +9273,8 @@ commonly is, see above for the effects.
 <DT><B>backward-delete-char (Rubout)</B>
 
 <DD>
-Delete the character behind the cursor.  When given a numeric argument,
+Delete the character behind the cursor.
+When given a numeric argument,
 save the deleted text on the kill ring.
 <DT><B>forward-backward-delete-char</B>
 
@@ -9209,8 +9285,8 @@ deleted.
 <DT><B>quoted-insert (C-q, C-v)</B>
 
 <DD>
-Add the next character typed to the line verbatim.  This is
-how to insert characters like <B>C-q</B>, for example.
+Add the next character typed to the line verbatim.
+This is how to insert characters like <B>C-q</B>, for example.
 <DT><B>tab-insert (C-v TAB)</B>
 
 <DD>
@@ -9219,6 +9295,20 @@ Insert a tab character.
 
 <DD>
 Insert the character typed.
+<DT><B>bracketed-paste-begin</B>
+
+<DD>
+This function is intended to be bound to the
+
+escape
+sequence sent by some terminals, and such a binding is assigned by default.
+It allows readline to insert the pasted text as a single unit without treating
+each character as if it had been read from the keyboard.
+The pasted characters
+are inserted as if each one was bound to <B>self-insert</B> instead of
+executing any editing commands.
+<DT><DD>
+Bracketed paste sets the region to the inserted text and activates the region.
 <DT><B>transpose-chars (C-t)</B>
 
 <DD>
@@ -9234,20 +9324,32 @@ Drag the word before point past the word after point,
 moving point over that word as well.
 If point is at the end of the line, this transposes
 the last two words on the line.
+<DT><B>shell-transpose-words (M-C-t)</B>
+
+<DD>
+Drag the word before point past the word after point,
+moving point past that word as well.
+If the insertion point is at the end of the line, this transposes
+the last two words on the line.
+Word boundaries are the same as <B>shell-forward-word</B> and
+<B>shell-backward-word</B>.
 <DT><B>upcase-word (M-u)</B>
 
 <DD>
-Uppercase the current (or following) word.  With a negative argument,
+Uppercase the current (or following) word.
+With a negative argument,
 uppercase the previous word, but do not move point.
 <DT><B>downcase-word (M-l)</B>
 
 <DD>
-Lowercase the current (or following) word.  With a negative argument,
+Lowercase the current (or following) word.
+With a negative argument,
 lowercase the previous word, but do not move point.
 <DT><B>capitalize-word (M-c)</B>
 
 <DD>
-Capitalize the current (or following) word.  With a negative argument,
+Capitalize the current (or following) word.
+With a negative argument,
 capitalize the previous word, but do not move point.
 <DT><B>overwrite-mode</B>
 
@@ -9258,6 +9360,7 @@ With an explicit non-positive numeric argument, switches to insert mode.
 This command affects only <B>emacs</B> mode;
 <B>vi</B> mode does overwrite differently.
 Each call to <I>readline()</I> starts in insert mode.
+<DT><DD>
 In overwrite mode, characters bound to <B>self-insert</B> replace
 the text at point rather than pushing the text to the right.
 Characters bound to <B>backward-delete-char</B> replace the character
@@ -9274,16 +9377,20 @@ but may be bound to the Insert key on some keyboards.
 <DT><B>kill-line (C-k)</B>
 
 <DD>
-Kill the text from point to the end of the line.
+Kill the text from point to the end of the current line.
+With a negative numeric argument, kill backward from the cursor to the
+beginning of the line.
 <DT><B>backward-kill-line (C-x Rubout)</B>
 
 <DD>
-Kill backward to the beginning of the line.
+Kill backward to the beginning of the current line.
+With a negative numeric argument, kill forward from the cursor to the
+end of the line.
 <DT><B>unix-line-discard (C-u)</B>
 
 <DD>
-Kill backward from point to the beginning of the line.
-The killed text is saved on the kill-ring.
+Kill backward from point to the beginning of the line,
+saving the killed text on the kill-ring.
 
 <DT><B>kill-whole-line</B>
 
@@ -9300,7 +9407,7 @@ Word boundaries are the same as those used by <B>forward-word</B>.
 <DD>
 Kill the word behind point.
 Word boundaries are the same as those used by <B>backward-word</B>.
-<DT><B>shell-kill-word</B>
+<DT><B>shell-kill-word (M-C-d)</B>
 
 <DD>
 Kill from point to the end of the current word, or if between
@@ -9314,14 +9421,14 @@ Word boundaries are the same as those used by <B>shell-backward-word</B>.
 <DT><B>unix-word-rubout (C-w)</B>
 
 <DD>
-Kill the word behind point, using white space as a word boundary.
-The killed text is saved on the kill-ring.
+Kill the word behind point, using white space as a word boundary,
+saving the killed text on the kill-ring.
 <DT><B>unix-filename-rubout</B>
 
 <DD>
 Kill the word behind point, using white space and the slash character
-as the word boundaries.
-The killed text is saved on the kill-ring.
+as the word boundaries,
+saving the killed text on the kill-ring.
 <DT><B>delete-horizontal-space (M-\)</B>
 
 <DD>
@@ -9333,7 +9440,8 @@ Kill the text in the current region.
 <DT><B>copy-region-as-kill</B>
 
 <DD>
-Copy the text in the region to the kill buffer.
+Copy the text in the region to the kill buffer,
+so it can be yanked immediately.
 <DT><B>copy-backward-word</B>
 
 <DD>
@@ -9351,7 +9459,8 @@ Yank the top of the kill ring into the buffer at point.
 <DT><B>yank-pop (M-y)</B>
 
 <DD>
-Rotate the kill ring, and yank the new top.  Only works following
+Rotate the kill ring, and yank the new top.
+Only works following
 <B>yank</B>
 
 or
@@ -9368,7 +9477,8 @@ or
 
 <DD>
 Add this digit to the argument already accumulating, or start a new
-argument.  M-- starts a negative argument.
+argument.
+M-- starts a negative argument.
 <DT><B>universal-argument</B>
 
 <DD>
@@ -9380,8 +9490,8 @@ If the command is followed by digits, executing
 
 again ends the numeric argument, but is otherwise ignored.
 As a special case, if this command is immediately followed by a
-character that is neither a digit nor minus sign, the argument count
-for the next command is multiplied by four.
+character that is neither a digit nor minus sign,
+the argument count for the next command is multiplied by four.
 The argument count is initially one, so executing this function the
 first time makes the argument count four, a second time makes the
 argument count sixteen, and so on.
@@ -9398,34 +9508,45 @@ argument count sixteen, and so on.
 Attempt to perform completion on the text before point.
 <B>Bash</B>
 
-attempts completion treating the text as a variable (if the
-text begins with <B>$</B>), username (if the text begins with
-<B>~</B>), hostname (if the text begins with <B>@</B>), or
-command (including aliases and functions) in turn.  If none
-of these produces a match, filename completion is attempted.
+attempts completion by first checking for any programmable
+completions for the command word (see <B>Programmable Completion</B> below),
+otherwise treating the text as a
+variable (if the text begins with <B>$</B>),
+username (if the text begins with <B>~</B>),
+hostname (if the text begins with <B>@</B>), or
+command (including aliases, functions, and builtins) in turn.
+If none of these produces a match, it falls back to filename completion.
 <DT><B>possible-completions (M-?)</B>
 
 <DD>
 List the possible completions of the text before point.
+When displaying completions, readline sets the number of columns used
+for display to the value of <B>completion-display-width</B>, the value of
+the shell variable
+<FONT SIZE=-1><B>COLUMNS</B>,
+
+</FONT>
+or the screen width, in that order.
 <DT><B>insert-completions (M-*)</B>
 
 <DD>
 Insert all completions of the text before point
 that would have been generated by
-<B>possible-completions</B>.
+<B>possible-completions</B>,
+separated by a space.
 <DT><B>menu-complete</B>
 
 <DD>
 Similar to <B>complete</B>, but replaces the word to be completed
 with a single match from the list of possible completions.
-Repeated execution of <B>menu-complete</B> steps through the list
+Repeatedly executing <B>menu-complete</B> steps through the list
 of possible completions, inserting each match in turn.
-At the end of the list of completions, the bell is rung
+At the end of the list of completions,
+<B>menu-complete</B> rings the bell
 (subject to the setting of <B>bell-style</B>)
-and the original text is restored.
+and restores the original text.
 An argument of <I>n</I> moves <I>n</I> positions forward in the list
-of matches; a negative argument may be used to move backward
-through the list.
+of matches; a negative argument moves backward through the list.
 This command is intended to be bound to <B>TAB</B>, but is unbound
 by default.
 <DT><B>menu-complete-backward</B>
@@ -9433,14 +9554,14 @@ by default.
 <DD>
 Identical to <B>menu-complete</B>, but moves backward through the list
 of possible completions, as if <B>menu-complete</B> had been given a
-negative argument.  This command is unbound by default.
+negative argument.
+This command is unbound by default.
 <DT><B>delete-char-or-list</B>
 
 <DD>
 Deletes the character under the cursor if not at the beginning or
 end of the line (like <B>delete-char</B>).
-If at the end of the line, behaves identically to
-<B>possible-completions</B>.
+At the end of the line, it behaves identically to <B>possible-completions</B>.
 This command is unbound by default.
 <DT><B>complete-filename (M-/)</B>
 
@@ -9485,7 +9606,8 @@ treating it as a hostname.
 
 <DD>
 Attempt completion on the text before point, treating
-it as a command name.  Command completion attempts to
+it as a command name.
+Command completion attempts to
 match the text against aliases, reserved words, shell
 functions, shell builtins, and finally executable filenames,
 in that order.
@@ -9498,7 +9620,7 @@ treating it as a command name.
 
 <DD>
 Attempt completion on the text before point, comparing
-the text against lines from the history list for possible
+the text against history list entries for possible
 completion matches.
 <DT><B>dabbrev-expand</B>
 
@@ -9584,7 +9706,8 @@ Incremental undo, separately remembered for each line.
 <DT><B>revert-line (M-r)</B>
 
 <DD>
-Undo all changes made to this line.  This is like executing the
+Undo all changes made to this line.
+This is like executing the
 <B>undo</B>
 
 command enough times to return the line to its initial state.
@@ -9595,47 +9718,47 @@ Perform tilde expansion on the current word.
 <DT><B>set-mark (C-@, M-&lt;space&gt;)</B>
 
 <DD>
-Set the mark to the point.  If a
-numeric argument is supplied, the mark is set to that position.
+Set the mark to the point.
+If a numeric argument is supplied, set the mark to that position.
 <DT><B>exchange-point-and-mark (C-x C-x)</B>
 
 <DD>
-Swap the point with the mark.  The current cursor position is set to
-the saved position, and the old cursor position is saved as the mark.
+Swap the point with the mark.
+Set the current cursor position to the saved position,
+then set the mark to the old cursor position.
 <DT><B>character-search (C-])</B>
 
 <DD>
-A character is read and point is moved to the next occurrence of that
-character.  A negative argument searches for previous occurrences.
+Read a character and move point to the next occurrence of that character.
+A negative argument searches for previous occurrences.
 <DT><B>character-search-backward (M-C-])</B>
 
 <DD>
-A character is read and point is moved to the previous occurrence of that
-character.  A negative argument searches for subsequent occurrences.
+Read a character and move point to the previous occurrence of that character.
+A negative argument searches for subsequent occurrences.
 <DT><B>skip-csi-sequence</B>
 
 <DD>
 Read enough characters to consume a multi-key sequence such as those
-defined for keys like Home and End.  Such sequences begin with a
-Control Sequence Indicator (CSI), usually ESC-[.  If this sequence is
-bound to
+defined for keys like Home and End.
+CSI sequences begin with a Control Sequence Indicator (CSI), usually ESC-[.
+If this sequence is bound to
 
-keys producing such sequences will have no effect
+keys producing CSI sequences will have no effect
 unless explicitly bound to a readline command, instead of inserting
-stray characters into the editing buffer.  This is unbound by default,
-but usually bound to ESC-[.
+stray characters into the editing buffer.
+This is unbound by default, but usually bound to ESC-[.
 <DT><B>insert-comment (M-#)</B>
 
 <DD>
-Without a numeric argument, the value of the readline
+Without a numeric argument, insert the value of the readline
 <B>comment-begin</B>
 
-variable is inserted at the beginning of the current line.
+variable at the beginning of the current line.
 If a numeric argument is supplied, this command acts as a toggle: if
 the characters at the beginning of the line do not match the value
-of <B>comment-begin</B>, the value is inserted, otherwise
-the characters in <B>comment-begin</B> are deleted from the beginning of
-the line.
+of <B>comment-begin</B>, insert the value; otherwise delete
+the characters in <B>comment-begin</B> from the beginning of the line.
 In either case, the line is accepted as if a newline had been typed.
 The default value of
 <B>comment-begin</B> causes this command to make the current line
@@ -9651,46 +9774,58 @@ Word boundaries are the same as those used by <B>shell-forward-word</B>.
 <DT><B>glob-complete-word (M-g)</B>
 
 <DD>
-The word before point is treated as a pattern for pathname expansion,
-with an asterisk implicitly appended.  This pattern is used to
-generate a list of matching filenames for possible completions.
+Treat the word before point as a pattern for pathname expansion,
+with an asterisk implicitly appended, then use the pattern to
+generate a list of matching file names for possible completions.
 <DT><B>glob-expand-word (C-x *)</B>
 
 <DD>
-The word before point is treated as a pattern for pathname expansion,
-and the list of matching filenames is inserted, replacing the word.
-If a numeric argument is supplied, an asterisk is appended before
+Treat the word before point as a pattern for pathname expansion,
+and insert the list of matching file names, replacing the word.
+If a numeric argument is supplied, append a <B>*</B> before
 pathname expansion.
 <DT><B>glob-list-expansions (C-x g)</B>
 
 <DD>
-The list of expansions that would have been generated by
+Display the list of expansions that would have been generated by
 <B>glob-expand-word</B>
 
-is displayed, and the line is redrawn.
-If a numeric argument is supplied, an asterisk is appended before
+and redisplay the line.
+If a numeric argument is supplied, append a <B>*</B> before
 pathname expansion.
 <DT><B>dump-functions</B>
 
 <DD>
-Print all of the functions and their key bindings to the
-readline output stream.  If a numeric argument is supplied,
+Print all of the functions and their key bindings
+to the readline output stream.
+If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <I>inputrc</I> file.
 <DT><B>dump-variables</B>
 
 <DD>
-Print all of the settable readline variables and their values to the
-readline output stream.  If a numeric argument is supplied,
+Print all of the settable readline variables and their values
+to the readline output stream.
+If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <I>inputrc</I> file.
 <DT><B>dump-macros</B>
 
 <DD>
 Print all of the readline key sequences bound to macros and the
-strings they output.  If a numeric argument is supplied,
+strings they output
+to the readline output stream.
+If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <I>inputrc</I> file.
+<DT><B>execute-named-command (M-x)</B>
+
+<DD>
+Read a bindable readline command name from the input and execute the
+function to which it's bound, as if the key sequence to which it was
+bound appeared in the input.
+If this function is supplied with a numeric argument, it passes that
+argument to the function it executes.
 <DT><B>display-shell-version (C-x C-v)</B>
 
 <DD>
@@ -9708,18 +9843,18 @@ using the <B>complete</B> builtin (see
 <FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
 
 </FONT>
-below), Readline invokes the programmable completion facilities.
+below), <B>readline</B> invokes the programmable completion facilities.
 <P>
 
-First, the command name is identified.
+First, <B>bash</B> identifies the command name.
 If a compspec has been defined for that command, the
 compspec is used to generate the list of possible completions for the word.
 If the command word is the empty string (completion attempted at the
-beginning of an empty line), any compspec defined with
-the <B>-E</B> option to <B>complete</B> is used.
-If the command word is a full pathname, a compspec for the full
-pathname is searched for first.
-If no compspec is found for the full pathname, completion attempts to
+beginning of an empty line), <B>bash</B> uses any compspec defined with
+the <B>-E</B> option to <B>complete</B>.
+If the command word is a full pathname, <B>bash</B>
+searches for a compspec for the full pathname first.
+If there is no compspec for the full pathname, <B>bash</B> attempts to
 find a compspec for the portion following the final slash.
 If those searches do not result in a compspec, any compspec defined with
 the <B>-D</B> option to <B>complete</B> is used as the default.
@@ -9728,13 +9863,13 @@ on the command word as a final resort, and attempts to find a compspec
 for the command word from any successful expansion.
 <P>
 
-Once a compspec has been found, it is used to generate the list of
-matching words.
-If a compspec is not found, the default <B>bash</B> completion as
-described above under <B>Completing</B> is performed.
+If a compspec is not found, <B>bash</B> performs its default completion as
+described above under <B>Completing</B>.
+Otherwise, once a compspec has been found, <B>bash</B> uses it to generate
+the list of matching words.
 <P>
 
-First, the actions specified by the compspec are used.
+First, <B>bash</B> performs the <I>actions</I> specified by the compspec.
 Only matches which are prefixed by the word being completed are
 returned.
 When the
@@ -9743,31 +9878,32 @@ When the
 or
 <B>-d</B>
 
-option is used for filename or directory name completion, the shell
-variable
+option is used for filename or directory name completion,
+<B>bash</B> uses the shell variable
 <FONT SIZE=-1><B>FIGNORE</B>
 
 </FONT>
-is used to filter the matches.
+to filter the matches.
 <P>
 
 Any completions specified by a pathname expansion pattern to the
 <B>-G</B> option are generated next.
 The words generated by the pattern need not match the word
 being completed.
-The
-<FONT SIZE=-1><B>GLOBIGNORE</B>
-
-</FONT>
-shell variable is not used to filter the matches, but the
+<B>Bash</B>
+uses the
 <FONT SIZE=-1><B>FIGNORE</B>
 
 </FONT>
-variable is used.
+variable to filter the matches, but does not use the
+<FONT SIZE=-1><B>GLOBIGNORE</B>
+
+</FONT>
+shell variable.
 <P>
 
-Next, the string specified as the argument to the <B>-W</B> option
-is considered.
+Next, completion considers
+the string specified as the argument to the <B>-W</B> option.
 The string is first split using the characters in the
 <FONT SIZE=-1><B>IFS</B>
 
@@ -9784,11 +9920,12 @@ as described above under
 The results are split using the rules described above under
 <B>Word Splitting</B>.
 The results of the expansion are prefix-matched against the word being
-completed, and the matching words become the possible completions.
+completed, and the matching words become possible completions.
 <P>
 
-After these matches have been generated, any shell function or command
-specified with the <B>-F</B> and <B>-C</B> options is invoked.
+After these matches have been generated,
+<B>bash</B> executes any shell function or command
+specified with the <B>-F</B> and <B>-C</B> options.
 When the command or function is invoked, the
 <FONT SIZE=-1><B>COMP_LINE</B>,
 
@@ -9815,14 +9952,14 @@ and
 </FONT>
 variables are also set.
 When the function or command is invoked,
-the first argument (<B>$1</B>) is the name of the command whose arguments are
-being completed,
+the first argument (<B>$1</B>) is the name of the command whose arguments
+are being completed,
 the second argument (<B>$2</B>) is the word being completed,
 and the third argument (<B>$3</B>) is the word preceding the word being
 completed on the current command line.
-No filtering of the generated completions against the word being completed
-is performed; the function or command has complete freedom in generating
-the matches.
+There is no filtering of the generated completions against the
+word being completed;
+the function or command has complete freedom in generating the matches.
 <P>
 
 Any function specified with <B>-F</B> is invoked first.
@@ -9867,12 +10004,12 @@ returned to <B>readline</B> as the list of possible completions.
 
 If the previously-applied actions do not generate any matches, and the
 <B>-o dirnames</B> option was supplied to <B>complete</B> when the
-compspec was defined, directory name completion is attempted.
+compspec was defined, <B>bash</B> attempts directory name completion. 
 <P>
 
 If the <B>-o plusdirs</B> option was supplied to <B>complete</B> when the
-compspec was defined, directory name completion is attempted and any
-matches are added to the results of the other actions.
+compspec was defined, <B>bash</B> attempts directory name completion and
+adds any matches to the set of possible completions.
 <P>
 
 By default, if a compspec is found, whatever it generates is returned
@@ -9882,9 +10019,10 @@ default of filename completion are disabled.
 If the <B>-o bashdefault</B> option was supplied to <B>complete</B> when
 the compspec was defined,
 if the compspec generates no matches,
-the <B>bash</B> default completions are attempted.
+<B>bash</B> attempts its default completions.
 If the <B>-o default</B> option was supplied to <B>complete</B> when the
-compspec was defined, readline's default completion will be performed
+compspec was defined, programmable completion will perform
+readline's default completion
 if the compspec (and, if attempted, the default <B>bash</B> completions)
 generate no matches.
 <P>
@@ -9899,8 +10037,8 @@ of the setting of the <B>mark-symlinked-directories</B> readline variable.
 There is some support for dynamically modifying completions.
 This is most useful when used in combination with a default completion
 specified with <B>complete -D</B>.
-It's possible for shell functions executed as completion
-handlers to indicate that completion should be retried by returning an
+It's possible for shell functions executed as completion functions
+to indicate that completion should be retried by returning an
 exit status of 124.
 If a shell function returns 124, and changes
 the compspec associated with the command on which completion is being
@@ -9958,15 +10096,14 @@ The value of the
 
 </FONT>
 variable is used as the
-number of commands to save in a history list.
-The text of the last
+number of commands to save in a history list:
+the shell saves the text of the last
 <FONT SIZE=-1><B>HISTSIZE</B>
 
 </FONT>
-commands (default 500) is saved.
-The shell
-stores each command in the history list prior to parameter and
-variable expansion (see
+commands (default 500).
+The shell stores each command in the history list prior to
+parameter and variable expansion (see
 <FONT SIZE=-1><B>EXPANSION</B>
 
 </FONT>
@@ -9991,10 +10128,11 @@ variable (default <A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>).
 That file is referred to as the <I>history file</I>.
 The history file is truncated, if necessary,
 to contain no more than the number of history entries
-specified by the value of
-<FONT SIZE=-1><B>HISTFILESIZE</B>.
+specified by the value of the
+<FONT SIZE=-1><B>HISTFILESIZE</B>
 
 </FONT>
+variable.
 If <B>HISTFILESIZE</B> is unset, or set to null, a non-numeric value,
 or a numeric value less than zero, the history file is not truncated.
 <P>
@@ -10031,20 +10169,30 @@ under
 
 </FONT>
 below), <B>bash</B> appends the entries to the history file,
-otherwise the history file is overwritten.
+otherwise it overwrites the history file.
 If
 <FONT SIZE=-1><B>HISTFILE</B>
 
 </FONT>
 is unset or null,
 or if the history file is unwritable, the history is not saved.
+After saving the history, <B>bash</B> truncates the history file
+to contain no more than
+<FONT SIZE=-1><B>HISTFILESIZE</B>
+
+</FONT>
+lines as described above.
+<P>
+
 If the
 <FONT SIZE=-1><B>HISTTIMEFORMAT</B>
 
 </FONT>
-variable is set, time stamps are written to the history file, marked
-with the history comment character, so
-they may be preserved across shell sessions.
+variable is set, the shell writes
+the timestamp information
+associated with each history entry to the history file,
+marked with the history comment character, so
+timestamps are preserved across shell sessions.
 This uses the history comment character to distinguish timestamps from
 other history lines.
 As above, when using
@@ -10052,18 +10200,6 @@ As above, when using
 
 </FONT>
 the timestamps delimit multi-line history entries.
-After saving the history, <B>bash</B> truncates the history file
-to contain no more than
-<FONT SIZE=-1><B>HISTFILESIZE</B>
-
-</FONT>
-lines.
-If
-<FONT SIZE=-1><B>HISTFILESIZE</B>
-
-</FONT>
-is unset, or set to null, a non-numeric value,
-or a numeric value less than zero, the history file is not truncated.
 <P>
 
 The
@@ -10094,10 +10230,10 @@ and
 
 </FONT>
 variables are used to save only a subset of the commands entered.
-The
+If the
 <B>cmdhist</B>
 
-shell option, if enabled, causes the shell to attempt to save each
+shell option is enabled, the shell attempts to save each
 line of a multi-line command in the same history entry, adding
 semicolons where necessary to preserve syntactic correctness.
 The
@@ -10158,8 +10294,11 @@ The first is to determine which history list entry
 to use during substitution.
 The second is to select portions of that entry to include into
 the current one.
+<P>
+
 The entry selected from the history is the <I>event</I>,
 and the portions of that entry that are acted upon are <I>words</I>.
+Various <I>modifiers</I> are available to manipulate the selected words.
 The entry is split into words in the same fashion as when reading input,
 so that several <I>metacharacter</I>-separated words surrounded by
 quotes are considered one word.
@@ -10191,7 +10330,7 @@ There is a special abbreviation for substitution, active when the
 <B>histchars</B>)
 
 is the first character on the line.
-It selects the previous history entry, using an event designator
+It selects the previous history list entry, using an event designator
 equivalent to <B>!!</B>,
 and substitutes one string for another in that entry.
 It is described below under <B>Event Designators</B>.
@@ -10281,7 +10420,7 @@ position in the history list.
 Start a history substitution, except when followed by a
 <B>blank</B>,
 
-newline, carriage return, =
+newline, carriage return, =,
 or, when the <B>extglob</B> shell option is enabled using
 the <B>shopt</B> builtin, (.
 <DT><B>!</B><I>n</I>
@@ -10299,7 +10438,7 @@ Refer to the current entry minus
 <DT><B>!!</B>
 
 <DD>
-Refer to the previous command.
+Refer to the previous entry.
 This is a synonym for
 
 <DT><B>!</B><I>string</I>
@@ -10417,7 +10556,7 @@ It is not an error to use
 <B>*</B>
 
 if there is just one word in the event;
-it expands to the empty string in this case.
+it expands to the empty string in that case.
 <DT><B>x*</B>
 
 <DD>
@@ -10447,11 +10586,11 @@ These modify, or edit, the word or words selected from the history event.
 <DT><B>h</B>
 
 <DD>
-Remove a trailing filename component, leaving only the head.
+Remove a trailing pathname component, leaving only the head.
 <DT><B>t</B>
 
 <DD>
-Remove all leading filename components, leaving the tail.
+Remove all leading pathname components, leaving the tail.
 <DT><B>r</B>
 
 <DD>
@@ -11118,13 +11257,14 @@ matches were generated.
 <DT><B>complete</B> <B>-pr</B> [<B>-DEI</B>] [<I>name</I> ...]<DD>
 
 Specify how arguments to each <I>name</I> should be completed.
+<DT><DD>
 If the <B>-p</B> option is supplied, or if no options or <I>name</I>s
-are supplied,
-existing completion specifications are printed in a way that allows
-them to be reused as input.
+are supplied, print existing completion specifications
+in a way that allows them to be reused as input.
 The <B>-r</B> option removes a completion specification for
 each <I>name</I>, or, if no <I>name</I>s are supplied, all
 completion specifications.
+<DT><DD>
 The <B>-D</B> option indicates that other supplied options and actions should
 apply to the
 
@@ -11145,8 +11285,8 @@ If any of <B>-D</B>, <B>-E</B>, or <B>-I</B> are supplied, any other
 <I>name</I> arguments are ignored; these completions only apply to the case
 specified by the option.
 <DT><DD>
-The process of applying these completion specifications when word completion
-is attempted is described
+The process of applying these completion specifications when
+attempting word completion  is described
 
 above under <B>Programmable Completion</B>.
 <DT><DD>
@@ -11175,7 +11315,7 @@ generates no matches.
 <DT><B>default</B>
 
 <DD>
-Use readline's default filename completion if the compspec generates
+Use <B>readline</B>'s default filename completion if the compspec generates
 no matches.
 <DT><B>dirnames</B>
 
@@ -11184,33 +11324,34 @@ Perform directory name completion if the compspec generates no matches.
 <DT><B>filenames</B>
 
 <DD>
-Tell readline that the compspec generates filenames, so it can perform any
-filename-specific processing (like adding a slash to directory names,
+Tell <B>readline</B> that the compspec generates filenames, so it can perform
+any filename-specific processing (such as adding a slash to directory names,
 quoting special characters, or suppressing trailing spaces).
-Intended to be used with shell functions.
+This is intended to be used with shell functions.
 <DT><B>fullquote</B>
 
 <DD>
-Tell readline to quote all the completed words even if they are not
+Tell <B>readline</B> to quote all the completed words even if they are not
 filenames.
 <DT><B>noquote</B>
 
 <DD>
-Tell readline not to quote the completed words if they are filenames
+Tell <B>readline</B> not to quote the completed words if they are filenames
 (quoting filenames is the default).
 <DT><B>nosort</B>
 
 <DD>
-Tell readline not to sort the list of possible completions alphabetically.
+Tell <B>readline</B> not to sort the list of possible completions
+alphabetically.
 <DT><B>nospace</B>
 
 <DD>
-Tell readline not to append a space (the default) to words completed at
-the end of the line.
+Tell <B>readline</B> not to append a space (the default) to words completed
+at the end of the line.
 <DT><B>plusdirs</B>
 
 <DD>
-After any matches defined by the compspec are generated,
+After generating any matches defined by the compspec,
 attempt directory name completion and add any
 matches to the results of the other actions.
 </DL></DL>
@@ -11223,7 +11364,8 @@ completions:
 <DT><B>alias</B>
 
 <DD>
-Alias names.  May also be specified as <B>-a</B>.
+Alias names.
+May also be specified as <B>-a</B>.
 <DT><B>arrayvar</B>
 
 <DD>
@@ -11235,15 +11377,18 @@ Array variable names.
 <DT><B>builtin</B>
 
 <DD>
-Names of shell builtin commands.  May also be specified as <B>-b</B>.
+Names of shell builtin commands.
+May also be specified as <B>-b</B>.
 <DT><B>command</B>
 
 <DD>
-Command names.  May also be specified as <B>-c</B>.
+Command names.
+May also be specified as <B>-c</B>.
 <DT><B>directory</B>
 
 <DD>
-Directory names.  May also be specified as <B>-d</B>.
+Directory names.
+May also be specified as <B>-d</B>.
 <DT><B>disabled</B>
 
 <DD>
@@ -11255,11 +11400,13 @@ Names of enabled shell builtins.
 <DT><B>export</B>
 
 <DD>
-Names of exported shell variables.  May also be specified as <B>-e</B>.
+Names of exported shell variables.
+May also be specified as <B>-e</B>.
 <DT><B>file</B>
 
 <DD>
-File names.  May also be specified as <B>-f</B>.
+File names.
+May also be specified as <B>-f</B>.
 <DT><B>function</B>
 
 <DD>
@@ -11267,7 +11414,8 @@ Names of shell functions.
 <DT><B>group</B>
 
 <DD>
-Group names.  May also be specified as <B>-g</B>.
+Group names.
+May also be specified as <B>-g</B>.
 <DT><B>helptopic</B>
 
 <DD>
@@ -11283,11 +11431,13 @@ shell variable.
 <DT><B>job</B>
 
 <DD>
-Job names, if job control is active.  May also be specified as <B>-j</B>.
+Job names, if job control is active.
+May also be specified as <B>-j</B>.
 <DT><B>keyword</B>
 
 <DD>
-Shell reserved words.  May also be specified as <B>-k</B>.
+Shell reserved words.
+May also be specified as <B>-k</B>.
 <DT><B>running</B>
 
 <DD>
@@ -11295,7 +11445,8 @@ Names of running jobs, if job control is active.
 <DT><B>service</B>
 
 <DD>
-Service names.  May also be specified as <B>-s</B>.
+Service names.
+May also be specified as <B>-s</B>.
 <DT><B>setopt</B>
 
 <DD>
@@ -11315,11 +11466,13 @@ Names of stopped jobs, if job control is active.
 <DT><B>user</B>
 
 <DD>
-User names.  May also be specified as <B>-u</B>.
+User names.
+May also be specified as <B>-u</B>.
 <DT><B>variable</B>
 
 <DD>
-Names of all shell variables.  May also be specified as <B>-v</B>.
+Names of all shell variables.
+May also be specified as <B>-v</B>.
 </DL></DL>
 
 <DT><B>-C</B> <I>command</I><DD>
@@ -11332,12 +11485,12 @@ environment.
 When the function is executed,
 the first argument (<B>$1</B>) is the name of the command whose arguments are
 being completed,
-the second argument (<B>$2</B>) is the word being completed,
-and the third argument (<B>$3</B>) is the word preceding the word being
+the second argument (<B>$2</B>) is the word being completed, and
+the third argument (<B>$3</B>) is the word preceding the word being
 completed on the current command line.
 When <I>function</I> finishes,
-the possible completions are retrieved from the value
-of the
+programmable completion retrieves
+the possible completions from the value of the
 <FONT SIZE=-1><B>COMPREPLY</B>
 
 </FONT>
@@ -11352,11 +11505,11 @@ after all other options have been applied.
 Append <I>suffix</I> to each possible completion
 after all other options have been applied.
 <DT><B>-W</B> <I>wordlist</I><DD>
-The <I>wordlist</I> is split using the characters in the
+Split the <I>wordlist</I> using the characters in the
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-special variable as delimiters, and each resulting word is expanded.
+special variable as delimiters, and expand each resulting word.
 Shell quoting is honored within <I>wordlist</I>,
 in order to provide a
 mechanism for the words to contain shell metacharacters or characters
@@ -11365,7 +11518,7 @@ in the value of
 
 </FONT>
 The possible completions are the members of the resultant list which
-match the word being completed.
+match a prefix of the word being completed.
 <DT><B>-X</B> <I>filterpat</I><DD>
 <I>filterpat</I> is a pattern as used for pathname expansion.
 It is applied to the list of possible completions generated by the
@@ -11404,19 +11557,18 @@ If no <I>option</I>s are supplied, display the completion options for each
 <I>name</I> or the current completion.
 The possible values of <I>option</I> are those valid for the <B>complete</B>
 builtin described above.
+<DT><DD>
 The <B>-D</B> option indicates that other supplied options should
 apply to the
 
-command completion; that is, completion attempted
-on a command for which no completion has previously been defined.
-The <B>-E</B> option indicates that other supplied options should
+command completion;
+the <B>-E</B> option indicates that other supplied options should
 apply to
 
-command completion; that is, completion attempted on a blank line.
-The <B>-I</B> option indicates that other supplied options should
-apply to completion on the initial non-assignment word on the line,
-or after a command delimiter such as <B>;</B> or <B>|</B>, which is usually
-command name completion.
+command completion; and
+the <B>-I</B> option indicates that other supplied options should
+apply to completion on the initial word on the line.
+These are determined in the same way as the <B>complete</B> builtin.
 <DT><DD>
 If multiple options are supplied, the <B>-D</B> option takes precedence
 over <B>-E</B>, and both take precedence over <B>-I</B>.
@@ -11811,23 +11963,23 @@ backslash
 <DT><B>\0</B><I>nnn</I>
 
 <DD>
-the eight-bit character whose value is the octal value <I>nnn</I>
-(zero to three octal digits)
+The eight-bit character whose value is the octal value <I>nnn</I>
+(zero to three octal digits).
 <DT><B>\x</B><I>HH</I>
 
 <DD>
-the eight-bit character whose value is the hexadecimal value <I>HH</I>
-(one or two hex digits)
+The eight-bit character whose value is the hexadecimal value <I>HH</I>
+(one or two hex digits).
 <DT><B>\u</B><I>HHHH</I>
 
 <DD>
-the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
-<I>HHHH</I> (one to four hex digits)
+The Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHH</I> (one to four hex digits).
 <DT><B>\U</B><I>HHHHHHHH</I>
 
 <DD>
-the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
-<I>HHHHHHHH</I> (one to eight hex digits)
+The Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHHHHHH</I> (one to eight hex digits).
 
 </DL>
 <P>
@@ -12061,10 +12213,10 @@ with that string) or as a number (an index into the history list,
 where a negative number is used as an offset from the current
 command number).
 <DT><DD>
-When listing, a <I>first</I> or <I>last</I> of
-0 is equivalent to -1 and -0 is equivalent to the current
-command (usually the <B>fc</B> command); otherwise 0 is equivalent to -1
-and -0 is invalid.
+When listing, a <I>first</I> or <I>last</I> of 0 is equivalent to -1
+and -0 is equivalent to the current command
+(usually the <B>fc</B> command);
+otherwise 0 is equivalent to -1 and -0 is invalid.
 If
 <I>last</I>
 
@@ -12491,8 +12643,8 @@ These are history lines entered since the beginning of the current
 <DT><B>-n</B>
 
 <DD>
-Read the history lines not already read from the history
-file into the current history list.
+Read the history lines not already read from the history file
+and add them to the current history list.
 These are lines appended to the history file since the beginning of the
 current <B>bash</B> session.
 <DT><B>-r</B>
@@ -12502,8 +12654,8 @@ Read the history file and append its contents to the current history list.
 <DT><B>-w</B>
 
 <DD>
-Write the current history list to the history file, overwriting the
-history file's contents.
+Write the current history list to the history file, overwriting
+the history file.
 <DT><B>-p</B>
 
 <DD>
@@ -12532,7 +12684,7 @@ If the
 </FONT>
 variable is set, <B>history</B> writes the time stamp information
 associated with each history entry to the history file,
-marked with the history comment character.
+marked with the history comment character as described above.
 When the history file is read, lines beginning with the history
 comment character followed immediately by a digit are interpreted
 as timestamps for the following history entry.
@@ -13912,6 +14064,7 @@ option is used, those available with the
 <B>-o</B>
 
 option to the <B>set</B> builtin command.
+<DT><DD>
 With no options, or with the
 <B>-p</B>
 
@@ -13920,6 +14073,7 @@ an indication of whether or not each is set;
 if any <I>optnames</I> are supplied, the output is restricted to those options.
 The <B>-p</B> option displays output in a form that
 may be reused as input.
+<DT><DD>
 Other options have the following meanings:
 <DL COMPACT><DT><DD>
 
@@ -14111,6 +14265,7 @@ These control aspects of the shell's compatibility mode
 </FONT>
 
 below).
+
 <DT><B>complete_fullquote</B>
 
 <DD>
@@ -14735,8 +14890,8 @@ the <B>&lt;</B> and <B>&gt;</B> operators sort using the
 current locale.
 If the shell is not in <I>posix mode</I>, the <B>test</B> and <B>[</B>
 commands sort lexicographically using ASCII ordering.
-<DL COMPACT>
-<DT><DD>
+<P>
+
 The historical operator-precedence parsing with 4 or more arguments can
 lead to ambiguities when it encounters strings that look like primaries.
 The POSIX
@@ -14746,7 +14901,7 @@ Scripts should no longer use them.
 It's much more reliable to restrict test invocations to a single primary,
 and to replace uses of <B>-a</B> and <B>-o</B> with the shell's
 <B>&amp;&amp;</B> and <B>||</B> list operators.
-</DL></DL>
+</DL>
 
 <DT><B>times</B>
 
@@ -14754,7 +14909,7 @@ and to replace uses of <B>-a</B> and <B>-o</B> with the shell's
 Print the accumulated user and system times for the shell and
 for processes run from the shell.
 The return status is 0.
-<DT><B>trap</B> [<B>-Plp</B>] [[<I>action</I>] <I>sigspec</I> ...]<DD>
+<DT><B>trap</B> [<B>-lpP</B>] [[<I>action</I>] <I>sigspec</I> ...]<DD>
 The
 <I>action</I>
 
@@ -15054,8 +15209,8 @@ any are not found.
 Provides control over the resources available to the shell and to
 processes it starts, on systems that allow such control.
 <DT><DD>
-The <B>-H</B> and <B>-S</B> options specify that the hard or soft limit is
-set for the given resource.
+The <B>-H</B> and <B>-S</B> options specify whether
+the hard or soft limit is set for the given resource.
 A hard limit cannot be increased by a non-root user once it is set;
 a soft limit may be increased up to the value of the hard limit.
 If neither <B>-H</B> nor <B>-S</B> is specified,
@@ -15089,19 +15244,19 @@ Other options are interpreted as follows:
 <DT><B>-a</B>
 
 <DD>
-Report all current limits; no limits are set
+Report all current limits; no limits are set.
 <DT><B>-b</B>
 
 <DD>
-The maximum socket buffer size
+The maximum socket buffer size.
 <DT><B>-c</B>
 
 <DD>
-The maximum size of core files created
+The maximum size of core files created.
 <DT><B>-d</B>
 
 <DD>
-The maximum size of a process's data segment
+The maximum size of a process's data segment.
 <DT><B>-e</B>
 
 <DD>
@@ -15110,73 +15265,73 @@ The maximum scheduling priority (
 <DT><B>-f</B>
 
 <DD>
-The maximum size of files written by the shell and its children
+The maximum size of files written by the shell and its children.
 <DT><B>-i</B>
 
 <DD>
-The maximum number of pending signals
+The maximum number of pending signals.
 <DT><B>-k</B>
 
 <DD>
-The maximum number of kqueues that may be allocated
+The maximum number of kqueues that may be allocated.
 <DT><B>-l</B>
 
 <DD>
-The maximum size that may be locked into memory
+The maximum size that may be locked into memory.
 <DT><B>-m</B>
 
 <DD>
-The maximum resident set size (many systems do not honor this limit)
+The maximum resident set size (many systems do not honor this limit).
 <DT><B>-n</B>
 
 <DD>
 The maximum number of open file descriptors (most systems do not
-allow this value to be set)
+allow this value to be set).
 <DT><B>-p</B>
 
 <DD>
-The pipe size in 512-byte blocks (this may not be set)
+The pipe size in 512-byte blocks (this may not be set).
 <DT><B>-q</B>
 
 <DD>
-The maximum number of bytes in POSIX message queues
+The maximum number of bytes in POSIX message queues.
 <DT><B>-r</B>
 
 <DD>
-The maximum real-time scheduling priority
+The maximum real-time scheduling priority.
 <DT><B>-s</B>
 
 <DD>
-The maximum stack size
+The maximum stack size.
 <DT><B>-t</B>
 
 <DD>
-The maximum amount of cpu time in seconds
+The maximum amount of cpu time in seconds.
 <DT><B>-u</B>
 
 <DD>
-The maximum number of processes available to a single user
+The maximum number of processes available to a single user.
 <DT><B>-v</B>
 
 <DD>
 The maximum amount of virtual memory available to the shell and, on
-some systems, to its children
+some systems, to its children.
 <DT><B>-x</B>
 
 <DD>
-The maximum number of file locks
+The maximum number of file locks.
 <DT><B>-P</B>
 
 <DD>
-The maximum number of pseudoterminals
+The maximum number of pseudoterminals.
 <DT><B>-R</B>
 
 <DD>
-The maximum time a real-time process can run before blocking, in microseconds
+The maximum time a real-time process can run before blocking, in microseconds.
 <DT><B>-T</B>
 
 <DD>
-The maximum number of threads
+The maximum number of threads.
 
 </DL>
 <P>
@@ -16010,7 +16165,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 September 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 10<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16119,7 +16274,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20240927/doc/bash.1.<BR>
-Time: 07 October 2024 17:23:36 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20241007/doc/bash.1.<BR>
+Time: 10 October 2024 17:47:42 EDT
 </BODY>
 </HTML>
