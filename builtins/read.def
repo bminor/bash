@@ -843,7 +843,6 @@ read_builtin (WORD_LIST *list)
 
 add_char:
       input_string[i++] = c;
-      check_read_timeout ();
 
 #if defined (HANDLE_MULTIBYTE)
       /* XXX - what if C == 127? Can DEL introduce a multibyte sequence? */
@@ -878,6 +877,8 @@ add_char:
 
       if (nchars > 0 && nr >= nchars)
 	break;
+
+      check_read_timeout ();
     }
   /* Back up over trailing CTLESC if the input ends with an unescaped
      backslash */
@@ -891,7 +892,10 @@ add_char:
     saw_escape = 0;		/* Avoid dequoting bare CTLNUL */
 
   input_string[i] = '\0';
-  check_read_timeout ();
+  /* Don't check the timeout unless we didn't read anything and zread returned
+     EOF or error. */
+  if (i == 0 && retval <= 0)
+    check_read_timeout ();
 
 #if defined (READLINE)
   if (edit)

@@ -330,6 +330,8 @@ HISTORY_LIBRARY = $(HIST_LIBDIR)/libhistory.a
 HISTORY_LDFLAGS = -L$(HIST_LIBDIR)
 HISTORY_DEP = @HISTORY_DEP@
 
+HIST_INCLUDEDIR = @HIST_INCLUDEDIR@
+
 # The source, object and documentation of the history library.
 HISTORY_SOURCE	= $(HIST_LIBSRC)/history.c $(HIST_LIBSRC)/histexpand.c \
 		  $(HIST_LIBSRC)/histsearch.c $(HIST_LIBSRC)/histfile.c \
@@ -1242,7 +1244,7 @@ shell.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h arr
 shell.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 shell.o: make_cmd.h subst.h sig.h pathnames.h externs.h parser.h
 shell.o: flags.h trap.h mailcheck.h builtins.h $(DEFSRC)/common.h
-shell.o: jobs.h siglist.h input.h execute_cmd.h findcmd.h bashhist.h bashline.h
+shell.o: jobs.h siglist.h input.h execute_cmd.h findcmd.h bashhist.h  bashline.h
 shell.o: ${GLOB_LIBSRC}/strmatch.h ${BASHINCDIR}/posixtime.h ${BASHINCDIR}/posixwait.h
 shell.o: ${BASHINCDIR}/ocache.h ${BASHINCDIR}/chartypes.h assoc.h alias.h
 shell.o: $(BASHINCDIR)/unlocked-io.h
@@ -1457,13 +1459,18 @@ pcomplete.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
 pcomplete.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
 pcomplete.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
 
-shell.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
+bashhist.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
+bashline.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
+bracecomp.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
+error.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
+eval.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
+execute_cmd.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
+flags.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
 variables.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
 subst.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
-bashline.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
-bashhist.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
 y.tab.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
 pcomplete.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
+shell.o: $(HIST_LIBSRC)/history.h $(HIST_LIBSRC)/rlstdc.h
 
 bashline.o: $(TILDE_LIBSRC)/tilde.h
 bracecomp.o: $(TILDE_LIBSRC)/tilde.h
@@ -1815,9 +1822,13 @@ builtins/umask.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 builtins/bind.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
 builtins/bind.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
 
+builtins/common.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+builtins/evalfile.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+builtins/evalstring.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
 builtins/bind.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
 builtins/fc.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
 builtins/history.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+builtins/shopt.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
 
 builtins/common.o: $(TILDE_LIBSRC)/tilde.h
 builtins/cd.o: $(TILDE_LIBSRC)/tilde.h 

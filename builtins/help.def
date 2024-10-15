@@ -265,12 +265,10 @@ show_desc (char *name, int i)
     line = doc ? doc[0] : (char *)NULL;
 
   printf ("%s - ", name);
-  for (j = 0; line && line[j]; j++)
-    {
-      putchar (line[j]);
-      if (line[j] == '\n')
-	break;
-    }
+  /* Don't assume LINE ends with a newline. */
+  for (j = 0; line && line[j] && line[j] != '\n'; j++)
+    putchar (line[j]);
+  putchar ('\n');
   
   fflush (stdout);
 

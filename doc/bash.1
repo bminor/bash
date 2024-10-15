@@ -5,14 +5,14 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Oct 10 16:33:40 EDT 2024
+.\"	Last Change: Mon Oct 14 11:41:21 EDT 2024
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .\" avoid a warning about an undefined register
 .\" .if !rzY .nr zY 0
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 October 10" "GNU Bash 5.3"
+.TH BASH 1 "2024 October 14" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -498,7 +498,7 @@ One of the following:
 .if n \fB|  & ; ( ) < > space tab newline\fP
 .RE
 .TP
-.B control operator
+.B "control operator"
 A \fItoken\fP that performs a control function.
 It is one of the following symbols:
 .RS
@@ -616,7 +616,7 @@ is executed in a \fIsubshell\fP, which is a
 separate process.
 See
 .SM
-\fBCOMMAND EXECUTION ENVIRONMENT\fP
+.B "COMMAND EXECUTION ENVIRONMENT"
 for a description of subshells and a subshell environment.
 If the \fBlastpipe\fP option is enabled using the \fBshopt\fP builtin
 (see the description of \fBshopt\fP below),
@@ -698,7 +698,7 @@ newline in place of a semicolon.
 (\fIlist\fP)
 \fIlist\fP is executed in a subshell (see
 .SM
-\fBCOMMAND EXECUTION ENVIRONMENT\fP
+.B "COMMAND EXECUTION ENVIRONMENT"
 below for a description of a subshell environment).
 Variable assignments and builtin
 commands that affect the shell's environment do not remain in effect
@@ -932,7 +932,7 @@ it against each \fIpattern\fP in turn,
 proceeding from first to last,
 using the matching rules
 described under
-.B Pattern Matching
+.B "Pattern Matching"
 below.
 A pattern list is a set of one or more patterns separated by \|,
 and the ) operator terminates the pattern list.
@@ -1140,7 +1140,7 @@ represent itself.
 When the command history expansion facilities are being used
 (see
 .SM
-.B HISTORY EXPANSION
+.B "HISTORY EXPANSION"
 below), the
 \fIhistory expansion\fP character, usually \fB!\fP, must be quoted
 to prevent history expansion.
@@ -2710,7 +2710,7 @@ The search path for commands.
 It is a colon-separated list of directories in which
 the shell looks for commands (see
 .SM
-.B COMMAND EXECUTION
+.B "COMMAND EXECUTION"
 below).
 A zero-length (null) directory name in the value of
 .SM
@@ -2781,7 +2781,7 @@ The value of this parameter is used as the prompt for the
 .B select
 command (see
 .SM
-.B SHELL GRAMMAR
+.B "SHELL GRAMMAR"
 above).
 .TP
 .B PS4
@@ -2877,38 +2877,41 @@ If set, \fBbash\fP uses its value as the name of a directory in which
 .B auto_resume
 This variable controls how the shell interacts with the user and
 job control.
-If this variable is set, single-word simple
-commands without redirections are treated as candidates for resumption
+If this variable is set, simple commands
+consisting of only a single word,
+without redirections, are treated as candidates for resumption
 of an existing stopped job.
 There is no ambiguity allowed; if there is more than one job
-beginning with the string typed, the most recently accessed job
-is selected.
+beginning with or containing
+the word, this selects the most recently accessed job.
 The
 .I name
 of a stopped job, in this context, is the command line used to
-start it.
+start it, as displayed by \fBjobs\fP.
 If set to the value
 .IR exact ,
-the string supplied must match the name of a stopped job exactly;
+the word must match the name of a stopped job exactly;
 if set to
 .IR substring ,
-the string supplied needs to match a substring of the name of a
-stopped job.  The
+the word needs to match a substring of the name of a stopped job.
+The
 .I substring
 value provides functionality analogous to the
 .B %?
 job identifier (see
 .SM
-.B JOB CONTROL
-below).  If set to any other value, the supplied string must
-be a prefix of a stopped job's name; this provides functionality
-analogous to the \fB%\fP\fIstring\fP job identifier.
+.B "JOB CONTROL"
+below).
+If set to any other value (e.g.,
+.IR prefix ),
+the word must be a prefix of a stopped job's name;
+this provides functionality analogous to the \fB%\fP\fIstring\fP job identifier.
 .TP
 .B histchars
 The two or three characters which control history expansion
 and tokenization (see
 .SM
-.B HISTORY EXPANSION
+.B "HISTORY EXPANSION"
 below).
 The first character is the \fIhistory expansion\fP character,
 the character which signals the start of a history
@@ -3043,7 +3046,7 @@ part of the
 expansion of the original word.
 This is analogous to the expansion
 of the special parameters \fB*\fP and \fB@\fP (see
-.B Special Parameters
+.B "Special Parameters"
 above).
 .PP
 ${#\fIname\fP[\fIsubscript\fP]} expands to the length of
@@ -3326,8 +3329,8 @@ number without a leading
 .Q +
 or
 .Q \- ,
-.Q +
-is assumed.
+tilde expansion assumes
+.Q + .
 .PP
 The results of tilde expansion are treated as if they were quoted, so
 the replacement is not subject to word splitting and pathname expansion.
@@ -3447,10 +3450,11 @@ ${\fIparameter\fP\fB:?\fP\fIword\fP}
 \fBDisplay Error if Null or Unset\fP.
 If
 .I parameter
-is null or unset, the expansion of \fIword\fP (or a message to that effect
+is null or unset, the shell writes
+the expansion of \fIword\fP (or a message to that effect
 if
 .I word
-is not present) is written to the standard error and the shell, if it
+is not present) to the standard error and, if it
 is not interactive, exits with a non-zero status.
 An interactive shell does not exit, but does not execute the command
 associated with the expansion.
@@ -3583,7 +3587,7 @@ is expanded to produce a pattern just as in pathname
 expansion, and matched against the expanded value of
 .I parameter
 using the rules described under
-.B Pattern Matching
+.B "Pattern Matching"
 below.
 If the pattern matches the beginning of
 the value of
@@ -3622,7 +3626,7 @@ The \fIword\fP is expanded to produce a pattern just as in
 pathname expansion, and matched against the expanded value of
 .I parameter
 using the rules described under
-.B Pattern Matching
+.B "Pattern Matching"
 below.
 If the pattern matches a trailing portion of the expanded value of
 .IR parameter ,
@@ -3664,7 +3668,7 @@ The \fIpattern\fP is expanded to produce a pattern just as in
 pathname expansion and matched against the expanded value of
 \fIparameter\fP
 using the rules described under
-.B Pattern Matching
+.B "Pattern Matching"
 below.
 The longest match of \fIpattern\fP
 in the expanded value is replaced with \fIstring\fP.
@@ -4877,9 +4881,13 @@ before executing any of the commands on that line or the compound command.
 Aliases are expanded when a command is read, not when it is executed.
 Therefore, an
 alias definition appearing on the same line as another
-command does not take effect until the shell reads the next line of input.
+command does not take effect until the shell reads the next line of input,
+and an alias definition in a compound command does not take
+effect until the shell parses and executes the entire compound command.
 The commands following the alias definition
-on that line are not affected by the new alias.
+on that line,
+or in the rest of a compound command,
+are not affected by the new alias.
 This behavior is also an issue when functions are executed.
 Aliases are expanded when a function definition is read,
 not when the function is executed, because a function definition
@@ -5495,7 +5503,7 @@ interpreter consist of a single optional argument following the
 interpreter name on the first line of the program, followed
 by the name of the program, followed by the command
 arguments, if any.
-.SH COMMAND EXECUTION ENVIRONMENT
+.SH "COMMAND EXECUTION ENVIRONMENT"
 The shell has an \fIexecution environment\fP, which consists of the
 following:
 .IP \(bu
@@ -5846,17 +5854,22 @@ complete, for compatibility.
 .I Job control
 refers to the ability to selectively stop (\fIsuspend\fP)
 the execution of processes and continue (\fIresume\fP)
-their execution at a later point.  A user typically employs
+their execution at a later point.
+A user typically employs
 this facility via an interactive interface supplied jointly
 by the operating system kernel's terminal driver and
 .BR bash .
 .PP
 The shell associates a
 .I job
-with each pipeline.  It keeps a table of currently executing
-jobs, which may be listed with the
+with each pipeline.
+It keeps a table of currently executing
+jobs, which the
 .B jobs
-command.  When
+command will display.
+Each job has a \fIjob number\fP, which \fBjobs\fP displays between brackets.
+Job numbers start at 1.
+When
 .B bash
 starts a job asynchronously (in the
 .IR background ),
@@ -5874,15 +5887,20 @@ uses the
 .I job
 abstraction as the basis for job control.
 .PP
-To facilitate the implementation of the user interface to job
-control, the operating system maintains the notion of a \fIcurrent terminal
-process group ID\fP.  Members of this process group (processes whose
+To facilitate the implementation of the user interface to job control,
+each process has a \fIprocess group ID\fP, and
+the operating system maintains the notion of a \fIcurrent terminal
+process group ID\fP.
+Processes that have the same process group ID are said to be part of
+the same \fIprocess group\fP.
+Members of the \fIforeground\fP process group (processes whose
 process group ID is equal to the current terminal process group ID)
 receive keyboard-generated signals such as
 .SM
 .BR SIGINT .
-These processes are said to be in the
-.IR foreground .
+Processes in the foreground process group are said to be
+.I foreground
+processes.
 .I Background
 processes are those whose process group ID differs from the terminal's;
 such processes are immune to keyboard-generated signals.
@@ -5894,7 +5912,7 @@ Background processes which attempt to read from (write to when
 .Q tostop
 is in effect) the terminal are sent a
 .SM
-.B SIGTTIN (SIGTTOU)
+.B "SIGTTIN (SIGTTOU)"
 signal by the kernel's terminal driver,
 which, unless caught, suspends the process.
 .PP
@@ -5909,31 +5927,38 @@ Typing the
 character (typically
 .BR \*^Z ,
 Control-Z) while a process is running
-causes that process to be stopped and returns control to
+stops that process and returns control to
 .BR bash .
 Typing the
 .I "delayed suspend"
 character (typically
 .BR \*^Y ,
-Control-Y) causes the process to be stopped when it
-attempts to read input from the terminal, and control to
-be returned to
+Control-Y) causes the process stop when it
+attempts to read input from the terminal, and returns control to
 .BR bash .
-The user may then manipulate the state of this job, using the
+The user then manipulates the state of this job, using the
 .B bg
 command to continue it in the background, the
 .B fg
-command to continue it in the foreground, or
-the
+command to continue it in the foreground, or the
 .B kill
-command to kill it.  A \fB\*^Z\fP takes effect immediately,
-and has the additional side effect of causing pending output
-and typeahead to be discarded.
+command to kill it.
+The suspend character takes effect immediately,
+and has the additional side effect of discarding any pending output
+and typeahead.
+To force a background process to stop, or stop a process
+that's not associated with the current terminal session,
+send it the
+.SM
+.B SIGSTOP
+signal using \fBkill\fP.
 .PP
 There are a number of ways to refer to a job in the shell.
-The character
+The
 .B %
-introduces a job specification (\fIjobspec\fP).  Job number
+character introduces a job specification (jobspec).
+.PP
+Job number
 .I n
 may be referred to as
 .BR %n .
@@ -5941,42 +5966,45 @@ A job may also be referred to using a prefix of the name used to
 start it, or using a substring that appears in its command line.
 For example,
 .B %ce
-refers to a stopped
-job whose command name begins with
+refers to a job whose command name begins with
 .BR ce .
-If a prefix matches more than one job,
-.B bash
-reports an error.  Using
+Using
 .BR %?ce ,
 on the other hand, refers to any job containing the string
 .B ce
-in its command line.  If the substring matches more than one job,
+in its command line.
+If the prefix or substring matches more than one job,
 .B bash
-reports an error.  The symbols
+reports an error.
+.PP
+The symbols
 .B %%
 and
 .B %+
 refer to the shell's notion of the
-.IR "current job" ,
-which is the last job stopped while it was in
-the foreground or started in the background.
-The
-.I "previous job"
-may be referenced using
-.BR %\- .
+.IR "current job" .
+A single % (with no accompanying job specification) also refers to the
+current job.
+.B %\-
+refers to the
+.IR "previous job" .
+When a job starts in the background,
+a job stops while in the foreground,
+or a job is resumed in the background,
+it becomes the current job.
+The job that was the current job becomes the previous job.
+When the current job terminates, the previous job becomes the
+current job.
 If there is only a single job, \fB%+\fP and \fB%\-\fP can both be used
 to refer to that job.
 In output pertaining to jobs (e.g., the output of the
 .B jobs
-command), the current job is always flagged with a
+command), the current job is always marked with a
 .BR + ,
 and the previous job with a
 .BR \- .
-A single % (with no accompanying job specification) also refers to the
-current job.
 .PP
-Simply naming a job can be used to bring it into the
-foreground:
+Simply naming a job can be used to bring it into the foreground:
 .B %1
 is a synonym for
 .Q "fg %1" ,
@@ -5989,12 +6017,13 @@ resumes job 1 in the background, equivalent to
 The shell learns immediately whenever a job changes state.
 Normally,
 .B bash
-waits until it is about to print a prompt before reporting
+waits until it is about to print a prompt before
+notifying the user about
 changes in a job's status so as to not interrupt
 any other output,
 though it will notify of changes in a job's status after a
 foreground command in
-a list completes, before executing the next command.
+a list completes, before executing the next command in the list.
 If the
 .B \-b
 option to the
@@ -6003,27 +6032,36 @@ builtin command
 is enabled,
 .B bash
 reports such changes immediately.
-Any trap on
+\fBBash\fP executes any trap on
 .SM
 .B SIGCHLD
-is executed for each child that exits.
+for each child that terminates.
 .PP
-If an attempt to exit
+When a job terminates and \fBbash\fP notifies the user about it,
+\fBbash\fP removes the job from the table.
+It will not appear in \fBjobs\fP output, but \fBwait\fP will
+report its exit status, as long as it's supplied the process ID
+associated with the job as an argument.
+When the table is empty, job numbers start over at 1.
+.PP
+If a user attempts to exit
 .B bash
-is made while jobs are stopped (or, if the \fBcheckjobs\fP shell option has
+while jobs are stopped (or, if the \fBcheckjobs\fP shell option has
 been enabled using the \fBshopt\fP builtin, running), the shell prints a
 warning message, and, if the \fBcheckjobs\fP option is enabled, lists the
 jobs and their statuses.
 The
 .B jobs
 command may then be used to inspect their status.
-If a second attempt to exit is made without an intervening command,
-the shell does not print another warning, and any stopped
-jobs are terminated.
+If the user immediately attempts to exit again,
+without an intervening command,
+\fBbash\fP does not print another warning, and
+terminates any stopped jobs.
 .PP
 When the shell is waiting for a job or process using the \fBwait\fP
 builtin, and job control is enabled, \fBwait\fP will return when the
-job changes state. The \fB\-f\fP option causes \fBwait\fP to wait
+job changes state.
+The \fB\-f\fP option causes \fBwait\fP to wait
 until the job or process terminates before returning.
 .SH PROMPTING
 When executing interactively,
@@ -6323,7 +6361,7 @@ Key bindings may contain the following symbolic character names:
 .IR NEWLINE ,
 .IR RET ,
 .IR RETURN ,
-.IR RUBOUT ,
+.IR RUBOUT (a destructive backspace),
 .IR SPACE ,
 .IR SPC ,
 and
@@ -7364,6 +7402,7 @@ Delete the character at point.
 If this function is bound to the
 same character as the tty \fBEOF\fP character, as \fBC\-d\fP
 commonly is, see above for the effects.
+This may also be bound to the Delete key on some keyboards.
 .TP
 .B backward\-delete\-char (Rubout)
 Delete the character behind the cursor.
@@ -7659,7 +7698,7 @@ completion matches.
 .B complete\-into\-braces (M\-{)
 Perform filename completion and insert the list of possible completions
 enclosed within braces so the list is available to the shell (see
-.B Brace Expansion
+.B "Brace Expansion"
 above).
 .PD
 .SS "Keyboard Macros"
@@ -8529,21 +8568,21 @@ and performing any specified
 redirections.
 The return status is zero.
 .TP
-\fB\&.\| \fP [\fB\-p\fP \fIpath\fP] \fIfilename\fP [\fIarguments\fP]
+\fB\&.\&\fP [\fB\-p\fP \fIpath\fP] \fIfilename\fP [\fIarguments\fP]
 .PD 0
 .TP
 \fBsource\fP [\fB\-p\fP \fIpath\fP] \fIfilename\fP [\fIarguments\fP]
 .PD
-The \fB\&.\| \fP command (\fBsource\fP) reads and execute commands from
+The \fB\&.\&\fP command (\fBsource\fP) reads and execute commands from
 .I filename
 in the current shell environment and returns the exit status of the
 last command executed from
 .IR filename .
 .IP
-If \fIfilename\fP does not contain a slash, \fB\&.\| \fP searchs for it.
-If the \fB\-p\fP option is supplied, \fB\&.\| \fP treats \fIpath\fP
+If \fIfilename\fP does not contain a slash, \fB\&.\&\fP searches for it.
+If the \fB\-p\fP option is supplied, \fB\&.\&\fP treats \fIpath\fP
 as a colon-separated list of directories in which to find \fIfilename\fP;
-otherwise, \fB\&.\| \fP uses the entries in
+otherwise, \fB\&.\&\fP uses the entries in
 .SM
 .B PATH
 to find the directory containing
@@ -8558,7 +8597,7 @@ If the
 .B sourcepath
 option to the
 .B shopt
-builtin command is turned off, \fB\&.\| \fP does not search
+builtin command is turned off, \fB\&.\&\fP does not search
 .SM
 .BR PATH .
 .IP
@@ -8599,7 +8638,7 @@ had been started with
 .BR & .
 If
 .I jobspec
-is not present, the shell's notion of the \fIcurrent job\fP is used.
+is not present, the shell uses its notion of the \fIcurrent job\fP.
 .B bg
 .I jobspec
 returns 0 unless run when job control is disabled or, when run with
@@ -9483,19 +9522,18 @@ Without options, remove each
 .I id
 from the table of active jobs.
 Each \fIid\fP may be a job specification \fIjobspec\fP
-or a process ID 
-\fIpid\fP; if \fIid\fP is a \fIpid\fP,
+or a process ID \fIpid\fP;
+if \fIid\fP is a \fIpid\fP,
 \fBdisown\fP uses the job containing \fIpid\fP as \fIjobspec\fP.
-If
+.IP
+If the \fB\-h\fP option is supplied,
+\fBdisown\fP does not remove the jobs corresponding to each
 .I id
-is not present, and neither the \fB\-a\fP nor the \fB\-r\fP option
-is supplied, \fBdisown\fP removes the \fIcurrent job\fP.
-If the \fB\-h\fP option is supplied, the job corresponding to each
-.I id
-is not removed from the table, but is marked so that
+from the jobs table,
+but rather marks them so the shell does not send
 .SM
 .B SIGHUP
-is not sent to the job if the shell receives a
+to the job if the shell receives a
 .SM
 .BR SIGHUP .
 .IP
@@ -9507,7 +9545,11 @@ option means to remove or mark all jobs; the
 .B \-r
 option without an
 .I id
-argument restricts operation to running jobs.
+argument removes or marks running jobs.
+If no
+.I id
+is supplied, and neither the \fB\-a\fP nor the \fB\-r\fP option
+is supplied, \fBdisown\fP removes or marks the current job.
 .IP
 The return value is 0 unless an
 .I id
@@ -9853,7 +9895,7 @@ Resume
 in the foreground, and make it the current job.
 If
 .I jobspec
-is not present, use the shell's notion of the \fIcurrent job\fP.
+is not present, \fBfg\fP uses the shell's notion of the \fIcurrent job\fP.
 The return value is that of the command placed into the foreground,
 or failure if run when job control is disabled or, when run with
 job control enabled, if
@@ -10216,7 +10258,7 @@ passing it
 returning its exit status.
 .TP
 \fBkill\fP [\fB\-s\fP \fIsigspec\fP | \fB\-n\fP \fIsignum\fP | \fB\-\fP\fIsigspec\fP] \
-[\fIpid\fP | \fIjobspec\fP] .\|.\|.
+\fIid\fP [ .\|.\|. ]
 .PD 0
 .TP
 \fBkill\fP \fB\-l\fP|\fB\-L\fP [\fIsigspec\fP | \fIexit_status\fP]
@@ -10225,10 +10267,12 @@ Send the signal specified by
 .I sigspec
 or
 .I signum
-to the processes named by
-.I pid
-or
-.IR jobspec .
+to the processes named by each
+.IR id .
+Each
+.I id
+may be a job specification \fIjobspec\fP
+or a process ID \fIpid\fP.
 .I sigspec
 is either a case-insensitive signal name such as
 .SM
@@ -10247,9 +10291,9 @@ sends
 .SM
 .BR SIGTERM .
 .IP
-An argument of
+The
 .B \-l
-lists the signal names.
+option lists the signal names.
 If any arguments are supplied when
 .B \-l
 is given,
@@ -10259,7 +10303,11 @@ and the return status is 0.
 The \fIexit_status\fP argument to
 .B \-l
 is a number specifying either a signal number or the exit status of
-a process terminated by a signal.
+a process terminated by a signal;
+if it is supplied, \fBkill\fP prints the name of the signal that caused
+the process to terminate.
+\fBkill\fP assumes that process exit statuses are greater than 128;
+anything less than that is a signal number.
 The
 .B \-L
 option is equivalent to \fB\-l\fP.
@@ -10891,7 +10939,7 @@ a \fIlist\fP,
 or a \fIcompound command\fP
 (see
 .SM
-.B SHELL GRAMMAR
+.B "SHELL GRAMMAR"
 .ie \n(zZ=1 in \fIbash\fP(1)),
 .el above),
 exits with a non-zero status.
@@ -10957,7 +11005,7 @@ Job control is enabled.
 This option is on by default for interactive shells on systems
 that support it (see
 .SM
-.B JOB CONTROL
+.B "JOB CONTROL"
 .ie \n(zZ=1 in \fIbash\fP(1)).
 .el above).
 All processes run in a separate process group.
@@ -11023,7 +11071,7 @@ The effect is as if the shell command
 .QN "IGNOREEOF=10"
 had been executed
 (see
-.B Shell Variables
+.B "Shell Variables"<
 .ie \n(zZ=1 in \fIbash\fP(1)).
 .el above).
 .TP 8
@@ -11179,7 +11227,7 @@ or associated word list, to the standard error.
 .TP 8
 .B \-B
 The shell performs brace expansion (see
-.B Brace Expansion
+.B "Brace Expansion"
 .ie \n(zZ=1 in \fIbash\fP(1)).
 .el above).
 This is on by default.
@@ -11590,7 +11638,7 @@ This option is enabled by default.
 .B globasciiranges
 If set, range expressions used in pattern matching bracket expressions (see
 .SM
-.B Pattern Matching
+.B "Pattern Matching"
 .ie \n(zZ=1 in \fIbash\fP(1))
 .el above)
 behave as if in the traditional C locale when performing comparisons.
@@ -11730,7 +11778,7 @@ If set,
 .B bash
 matches filenames in a case\-insensitive fashion when performing pathname
 expansion (see
-.B Pathname Expansion
+.B "Pathname Expansion"
 .ie \n(zZ=1 in \fIbash\fP(1)).
 .el above).
 .TP 8
@@ -11753,7 +11801,7 @@ If the string is not translated, this has no effect.
 .B nullglob
 If set, pathname expansion patterns which match no files
 (see
-.B Pathname Expansion
+.B "Pathname Expansion"
 .ie \n(zZ=1 in \fIbash\fP(1))
 .el above)
 expand to nothing and are removed, rather than expanding to themselves.
@@ -12061,7 +12109,7 @@ is executed before every \fIsimple command\fP, \fIfor\fP command,
 arithmetic \fIfor\fP command, and before the first command executes
 in a shell function (see
 .SM
-.B SHELL GRAMMAR
+.B "SHELL GRAMMAR"
 .ie \n(zZ=1 in \fIbash\fP(1)).
 .el above).
 Refer to the description of the \fBextdebug\fP shell option 
@@ -12454,8 +12502,9 @@ is readonly or may not be unset.
 \fBwait\fP [\fB\-fn\fP] [\fP\-p\fP \fIvarname\fP] [\fIid\fP .\|.\|.]
 Wait for each specified child process \fIid\fP and return the
 termination status of the last \fIid\fP.
-Each \fIid\fP may be a process ID or a job specification;
-if a job spec is supplied, \fBwait\fP waits for all processes in the job.
+Each \fIid\fP may be a process ID \fIpid\fP
+or a job specification \fIjobspec\fP;
+if a jobspec is supplied, \fBwait\fP waits for all processes in the job.
 .IP
 If no options or \fIid\fPs are supplied,
 \fBwait\fP waits for all running background jobs and
@@ -12464,20 +12513,21 @@ if its process id is the same as \fB$!\fP,
 and the return status is zero.
 .IP
 If the \fB\-n\fP option is supplied, \fBwait\fP waits for any one of
-the given \fIid\fPs or, if no \fIid\fPs are supplied, any job
-or process substitution,
+the given \fIid\fPs or,
+if no \fIid\fPs are supplied, any job or process substitution,
 to complete and returns its exit status.
 If none of the supplied \fIid\fPs is a child of the shell,
 or if no \fIid\fPs are supplied and the shell has no unwaited-for children,
 the exit status is 127.
 .IP
-If the \fB\-p\fP option is supplied, the process or job identifier
-of the job for which the exit status is returned is assigned to the
+If the \fB\-p\fP option is supplied, \fBwait\fP assigns
+the process or job identifier of the job
+for which the exit status is returned to the
 variable \fIvarname\fP named by the option argument.
 The variable,
 which cannot be readonly,
 will be unset initially, before any assignment.
-This is useful only when the \fB\-n\fP option is supplied.
+This is useful only when used with the \fB\-n\fP option.
 .IP
 Supplying the \fB\-f\fP option, when job control is enabled,
 forces \fBwait\fP to wait for each \fIid\fP to terminate before

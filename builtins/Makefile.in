@@ -77,6 +77,9 @@ BASHINCDIR = ${topdir}/include
 
 RL_INCLUDEDIR = @RL_INCLUDEDIR@
 
+HIST_LIBSRC = ${topdir}/lib/readline
+RL_LIBSRC = ${topdir}/lib/readline
+
 INTL_LIBSRC = ${topdir}/lib/intl
 INTL_BUILDDIR = ${LIBBUILD}/intl
 INTL_LIBDIR = ${INTL_BUILDDIR}
@@ -683,7 +686,34 @@ mapfile.o: $(topdir)/subst.h $(topdir)/externs.h $(BASHINCDIR)/maxpath.h
 mapfile.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/variables.h $(topdir)/conftypes.h
 mapfile.o: $(topdir)/arrayfunc.h ../pathnames.h
 
-#bind.o: $(RL_LIBSRC)chardefs.h $(RL_LIBSRC)readline.h $(RL_LIBSRC)keymaps.h
+bind.o: $(RL_LIBSRC)/rlconf.h
+bind.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+bind.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+bind.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+complete.o: $(RL_LIBSRC)/rlconf.h
+complete.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+complete.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+complete.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+history.o: $(RL_LIBSRC)/rlconf.h
+history.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+history.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+history.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+read.o: $(RL_LIBSRC)/rlconf.h
+read.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+read.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+read.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+set.o: $(RL_LIBSRC)/rlconf.h
+set.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+set.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+set.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+
+common.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+evalfile.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+evalstring.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+bind.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+fc.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+history.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+shopt.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
 
 # libintl dependencies
 bind.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h

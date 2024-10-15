@@ -3455,6 +3455,7 @@ wait_for_any_job (int flags, struct procstat *ps)
   pid_t pid;
   int i, r;
   sigset_t set, oset;
+  struct pidstat *t;
   PROCESS *p, *child;
 
   /* Allow funsubs to run this, but don't remove jobs from the jobs table. */
@@ -3479,11 +3480,7 @@ return_job:
 	    }
 	  if (jobs_list_frozen == 0)		/* must be running a funsub to get here */
 	    {
-#if 1
 	      notify_of_job_status (i);		/* XXX */
-#else
-	      maybe_print_job_notifications (i);
-#endif
 
 	      /* kre@munnari.oz.au 01/30/2024 */
 	      delete_job (i, posixly_correct ? DEL_NOBGPID : 0);
@@ -3535,6 +3532,23 @@ return_procsub:
     }
 #endif
 
+  /* There aren't any dead jobs in the jobs table, but let's see if there's
+     one in bgpids. We can do this in posix mode because we'll remove any
+     one we find from the table, preserving existing semantics. */
+  if (posixly_correct && (t = bgp_findone ()))
+    {
+      pid = t->pid;
+      r = t->status;
+      if (ps)
+	{
+	  ps->pid = pid;
+	  ps->status = r;
+	}
+      bgp_delete (pid);
+      UNBLOCK_CHILD (oset);
+      return r;
+    }
+
   UNBLOCK_CHILD (oset);
 
   /* At this point, we have no dead jobs in the jobs table.  Wait until we
@@ -3577,26 +3591,8 @@ return_procsub:
 
       if (i == js.j_jobslots && p == NULL)
 	{
-	  /* Ok, the job table is empty. If we're in posix mode, we can look
-	     in the bgpids table because we will remove the pid we find and
-	     this won't change existing semantics. Otherwise, we return
-	     failure as before. */
-	  struct pidstat *t;
-
-	  r = -1;
-	  if (posixly_correct && (t = bgp_findone ()))
-	    {
-	      pid = t->pid;
-	      r = t->status;
-	      if (ps)
-		{
-		  ps->pid = pid;
-		  ps->status = r;
-		}
-	      bgp_delete (pid);
-	    }
 	  UNBLOCK_CHILD (oset);
-	  return r;
+	  return -1;
 	}
 
       UNBLOCK_CHILD (oset);
@@ -3943,7 +3939,12 @@ start_job (int job, int foreground)
     }
   else
     {
+#if 0
+      /* XXX TAG:bash-5.4 */
+      set_current_job (job);
+#else
       reset_current ();
+#endif
       UNBLOCK_CHILD (oset);
       return (0);
     }

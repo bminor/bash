@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.069])dnl
+AC_REVISION([for Bash 5.3, version 5.071])dnl
 
 define(bashvers, 5.3)
 define(relstatus, beta)
@@ -186,7 +186,7 @@ opt_function_import=yes
 opt_dev_fd_stat_broken=no
 opt_alt_array_impl=no
 opt_translatable_strings=yes
-opt_bash_source_fullpath=no
+opt_bash_source_fullpath_default=no
 
 dnl modified by alternate array implementation option
 ARRAY_O=array.o
@@ -212,7 +212,7 @@ if test $opt_minimal_config = yes; then
 	opt_casemod_attrs=no opt_casemod_expansions=no opt_extglob_default=no
 	opt_translatable_strings=no
 	opt_globascii_default=yes
-	opt_bash_source_fullpath=no
+	opt_bash_source_fullpath_default=no
 fi
 
 AC_ARG_ENABLE(alias, AS_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)
@@ -622,6 +622,8 @@ if test $opt_readline = yes; then
 	else
 		RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 		READLINE_DEP='$(READLINE_LIBRARY)'
+		# for dependencies
+		RL_INCLUDEDIR='$(RL_LIBDIR)'
 		# section for OS versions that ship an older/broken version of
 		# readline as a standard dynamic library and don't allow a
 		# static version specified as -llibname to override the
@@ -634,6 +636,7 @@ if test $opt_readline = yes; then
 else
 	RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 	READLINE_LIB= READLINE_DEP=
+	RL_INCLUDEDIR=
 fi
 if test $opt_history = yes || test $opt_bang_history = yes; then
 	if test $opt_history = yes; then
@@ -657,6 +660,8 @@ if test $opt_history = yes || test $opt_bang_history = yes; then
 	else
 		HIST_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 		HISTORY_DEP='$(HISTORY_LIBRARY)'
+		# for dependencies
+		HIST_INCLUDEDIR='$(HIST_LIBDIR)'
 		# section for OS versions that ship an older version of
 		# readline as a standard dynamic library and don't allow a
 		# static version specified as -llibname to override the
@@ -669,6 +674,7 @@ if test $opt_history = yes || test $opt_bang_history = yes; then
 else
 	HIST_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 	HISTORY_LIB= HISTORY_DEP=
+	HIST_INCLUDEDIR=
 fi
 AC_SUBST(READLINE_LIB)
 AC_SUBST(READLINE_DEP)
@@ -678,6 +684,7 @@ AC_SUBST(RL_INCLUDE)
 AC_SUBST(HISTORY_LIB)
 AC_SUBST(HISTORY_DEP)
 AC_SUBST(HIST_LIBDIR)
+AC_SUBST(HIST_INCLUDEDIR)
 AC_SUBST(TILDE_LIB)
 
 dnl END READLINE and HISTORY LIBRARY SECTION

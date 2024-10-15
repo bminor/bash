@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 7.1 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 10 October 2024).
+Bash shell (version 5.3, 14 October 2024).
 
-   This is Edition 5.3, last updated 10 October 2024, of ‘The GNU Bash
+   This is Edition 5.3, last updated 14 October 2024, of ‘The GNU Bash
 Reference Manual’, for ‘Bash’, Version 5.3.
 
    Copyright © 1988-2024 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 10 October 2024).  The Bash home page is
+Bash shell (version 5.3, 14 October 2024).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.3, last updated 10 October 2024, of ‘The GNU Bash
+   This is Edition 5.3, last updated 14 October 2024, of ‘The GNU Bash
 Reference Manual’, for ‘Bash’, Version 5.3.
 
    Bash contains features that appear in other popular shells, and some
@@ -1775,7 +1775,7 @@ replaced with the corresponding element from the directory stack, as it
 would be displayed by the ‘dirs’ builtin invoked with the characters
 following tilde in the tilde-prefix as an argument (*note The Directory
 Stack::).  If the tilde-prefix, sans the tilde, consists of a number
-without a leading ‘+’ or ‘-’, ‘+’ is assumed.
+without a leading ‘+’ or ‘-’, tilde expansion assumes ‘+’.
 
    The results of tilde expansion are treated as if they were quoted, so
 the replacement is not subject to word splitting and filename expansion.
@@ -1905,12 +1905,12 @@ omitted, the operator tests only for existence.
           DEFAULT
 
 ‘${PARAMETER:?WORD}’
-     If PARAMETER is null or unset, the expansion of WORD (or a message
-     to that effect if WORD is not present) is written to the standard
-     error and the shell, if it is not interactive, exits with a
-     non-zero status.  An interactive shell does not exit, but does not
-     execute the command associated with the expansion.  Otherwise, the
-     value of PARAMETER is substituted.
+     If PARAMETER is null or unset, the shell writes the expansion of
+     WORD (or a message to that effect if WORD is not present) to the
+     standard error and, if it is not interactive, exits with a non-zero
+     status.  An interactive shell does not exit, but does not execute
+     the command associated with the expansion.  Otherwise, the value of
+     PARAMETER is substituted.
 
           $ var=
           $ : ${var:?var is unset or null}
@@ -7072,15 +7072,17 @@ all lines that make up a compound command, before executing any of the
 commands on that line or the compound command.  Aliases are expanded
 when a command is read, not when it is executed.  Therefore, an alias
 definition appearing on the same line as another command does not take
-effect until the shell reads the next line of input.  The commands
-following the alias definition on that line are not affected by the new
-alias.  This behavior is also an issue when functions are executed.
-Aliases are expanded when a function definition is read, not when the
-function is executed, because a function definition is itself a command.
-As a consequence, aliases defined in a function are not available until
-after that function is executed.  To be safe, always put alias
-definitions on a separate line, and do not use ‘alias’ in compound
-commands.
+effect until the shell reads the next line of input, and an alias
+definition in a compound command does not take effect until the shell
+parses and executes the entire compound command.  The commands following
+the alias definition on that line, or in the rest of a compound command,
+are not affected by the new alias.  This behavior is also an issue when
+functions are executed.  Aliases are expanded when a function definition
+is read, not when the function is executed, because a function
+definition is itself a command.  As a consequence, aliases defined in a
+function are not available until after that function is executed.  To be
+safe, always put alias definitions on a separate line, and do not use
+‘alias’ in compound commands.
 
    For almost every purpose, shell functions are preferred over aliases.
 
@@ -8066,8 +8068,10 @@ interface supplied jointly by the operating system kernel's terminal
 driver and Bash.
 
    The shell associates a JOB with each pipeline.  It keeps a table of
-currently executing jobs, which may be listed with the ‘jobs’ command.
-When Bash starts a job asynchronously, it prints a line that looks like:
+currently executing jobs, which the ‘jobs’ command will display.  Each
+job has a “job number”, which ‘jobs’ displays between brackets.  Job
+numbers start at 1.  When Bash starts a job asynchronously, it prints a
+line that looks like:
      [1] 25647
 indicating that this job is job number 1 and that the process ID of the
 last process in the pipeline associated with this job is 25647.  All of
@@ -8075,72 +8079,85 @@ the processes in a single pipeline are members of the same job.  Bash
 uses the JOB abstraction as the basis for job control.
 
    To facilitate the implementation of the user interface to job
-control, the operating system maintains the notion of a current terminal
-process group ID.  Members of this process group (processes whose
-process group ID is equal to the current terminal process group ID)
-receive keyboard-generated signals such as ‘SIGINT’.  These processes
-are said to be in the foreground.  Background processes are those whose
-process group ID differs from the terminal's; such processes are immune
-to keyboard-generated signals.  Only foreground processes are allowed to
-read from or, if the user so specifies with ‘stty tostop’, write to the
-terminal.  Background processes which attempt to read from (write to
-when ‘tostop’ is in effect) the terminal are sent a ‘SIGTTIN’
-(‘SIGTTOU’) signal by the kernel's terminal driver, which, unless
-caught, suspends the process.
+control, each process has a “process group ID”, and the operating system
+maintains the notion of a current terminal process group ID.  Processes
+that have the same process group ID are said to be part of the same
+“process group”.  Members of the foreground process group (processes
+whose process group ID is equal to the current terminal process group
+ID) receive keyboard-generated signals such as ‘SIGINT’.  Processes in
+the foreground process group are said to be foreground processes.
+Background processes are those whose process group ID differs from the
+terminal's; such processes are immune to keyboard-generated signals.
+Only foreground processes are allowed to read from or, if the user so
+specifies with ‘stty tostop’, write to the terminal.  Background
+processes which attempt to read from (write to when ‘tostop’ is in
+effect) the terminal are sent a ‘SIGTTIN’ (‘SIGTTOU’) signal by the
+kernel's terminal driver, which, unless caught, suspends the process.
 
    If the operating system on which Bash is running supports job
 control, Bash contains facilities to use it.  Typing the “suspend”
-character (typically ‘^Z’, Control-Z) while a process is running causes
-that process to be stopped and returns control to Bash.  Typing the
-“delayed suspend” character (typically ‘^Y’, Control-Y) causes the
-process to be stopped when it attempts to read input from the terminal,
-and control to be returned to Bash.  The user then manipulates the state
-of this job, using the ‘bg’ command to continue it in the background,
-the ‘fg’ command to continue it in the foreground, or the ‘kill’ command
-to kill it.  A ‘^Z’ takes effect immediately, and has the additional
-side effect of causing pending output and typeahead to be discarded.
+character (typically ‘^Z’, Control-Z) while a process is running stops
+that process and returns control to Bash.  Typing the “delayed suspend”
+character (typically ‘^Y’, Control-Y) causes the process to stop when it
+attempts to read input from the terminal, and returns control to Bash.
+The user then manipulates the state of this job, using the ‘bg’ command
+to continue it in the background, the ‘fg’ command to continue it in the
+foreground, or the ‘kill’ command to kill it.  The suspend character
+takes effect immediately, and has the additional side effect of
+discarding any pending output and typeahead.  If you want to force a
+background process to stop, or stop a process that's not associated with
+your terminal session, send it the ‘SIGSTOP’ signal using ‘kill’.
 
-   There are a number of ways to refer to a job in the shell.  The
-character ‘%’ introduces a job specification (“jobspec”).
+   There are a number of ways to refer to a job in the shell.  The ‘%’
+character introduces a “job specification” (jobspec).
 
-   Job number ‘n’ may be referred to as ‘%n’.  The symbols ‘%%’ and ‘%+’
-refer to the shell's notion of the current job, which is the last job
-stopped while it was in the foreground or started in the background.  A
-single ‘%’ (with no accompanying job specification) also refers to the
-current job.  The previous job may be referenced using ‘%-’.  If there
-is only a single job, ‘%+’ and ‘%-’ can both be used to refer to that
-job.  In output pertaining to jobs (e.g., the output of the ‘jobs’
-command), the current job is always flagged with a ‘+’, and the previous
-job with a ‘-’.
+   Job number ‘n’ may be referred to as ‘%n’.  A job may also be
+referred to using a prefix of the name used to start it, or using a
+substring that appears in its command line.  For example, ‘%ce’ refers
+to a job whose command name begins with ‘ce’.  Using ‘%?ce’, on the
+other hand, refers to any job containing the string ‘ce’ in its command
+line.  If the prefix or substring matches more than one job, Bash
+reports an error.
 
-   A job may also be referred to using a prefix of the name used to
-start it, or using a substring that appears in its command line.  For
-example, ‘%ce’ refers to a stopped job whose command name begins with
-‘ce’.  Using ‘%?ce’, on the other hand, refers to any job containing the
-string ‘ce’ in its command line.  If the prefix or substring matches
-more than one job, Bash reports an error.
+   The symbols ‘%%’ and ‘%+’ refer to the shell's notion of the “current
+job”.  A single ‘%’ (with no accompanying job specification) also refers
+to the current job.  ‘%-’ refers to the “previous job”.  When a job
+starts in the background, a job stops while in the foreground, or a job
+is resumed in the background, it becomes the current job.  The job that
+was the current job becomes the previous job.  When the current job
+terminates, the previous job becomes the current job.  If there is only
+a single job, ‘%+’ and ‘%-’ can both be used to refer to that job.  In
+output pertaining to jobs (e.g., the output of the ‘jobs’ command), the
+current job is always marked with a ‘+’, and the previous job with a
+‘-’.
 
    Simply naming a job can be used to bring it into the foreground: ‘%1’
 is a synonym for ‘fg %1’, bringing job 1 from the background into the
 foreground.  Similarly, ‘%1 &’ resumes job 1 in the background,
-equivalent to ‘bg %1’
+equivalent to ‘bg %1’.
 
    The shell learns immediately whenever a job changes state.  Normally,
-Bash waits until it is about to print a prompt before reporting changes
-in a job's status so as to not interrupt any other output, though it
-will notify of changes in a job's status after a foreground command in a
-list completes, before executing the next command.  If the ‘-b’ option
-to the ‘set’ builtin is enabled, Bash reports such changes immediately
-(*note The Set Builtin::).  Any trap on ‘SIGCHLD’ is executed for each
-child process that exits.
+Bash waits until it is about to print a prompt before notifying the user
+about changes in a job's status so as to not interrupt any other output,
+though it will notify of changes in a job's status after a foreground
+command in a list completes, before executing the next command in the
+list.  If the ‘-b’ option to the ‘set’ builtin is enabled, Bash reports
+such changes immediately (*note The Set Builtin::).  Bash executes any
+trap on ‘SIGCHLD’ for each child process that terminates.
 
-   If an attempt to exit Bash is made while jobs are stopped, (or
-running, if the ‘checkjobs’ option is enabled - see *note The Shopt
-Builtin::), the shell prints a warning message, and if the ‘checkjobs’
-option is enabled, lists the jobs and their statuses.  The ‘jobs’
-command may then be used to inspect their status.  If a second attempt
-to exit is made without an intervening command, Bash does not print
-another warning, and any stopped jobs are terminated.
+   When a job terminates and Bash notifies the user about it, Bash
+removes the job from the jobs table.  It will not appear in ‘jobs’
+output, but ‘wait’ will report its exit status, as long as it's supplied
+the process ID associated with the job as an argument.  When the table
+is empty, job numbers start over at 1.
+
+   If a user attempts to exit Bash while jobs are stopped, (or running,
+if the ‘checkjobs’ option is enabled - see *note The Shopt Builtin::),
+the shell prints a warning message, and if the ‘checkjobs’ option is
+enabled, lists the jobs and their statuses.  The ‘jobs’ command may then
+be used to inspect their status.  If the user immediately attempts to
+exit again, without an intervening command, Bash does not print another
+warning, and terminates any stopped jobs.
 
    When the shell is waiting for a job or process using the ‘wait’
 builtin, and job control is enabled, ‘wait’ will return when the job
@@ -8157,21 +8174,22 @@ File: bashref.info,  Node: Job Control Builtins,  Next: Job Control Variables,  
           bg [JOBSPEC ...]
 
      Resume each suspended job JOBSPEC in the background, as if it had
-     been started with ‘&’.  If JOBSPEC is not supplied, the current job
-     is used.  The return status is zero unless it is run when job
-     control is not enabled, or, when run with job control enabled, any
-     JOBSPEC was not found or specifies a job that was started without
-     job control.
+     been started with ‘&’.  If JOBSPEC is not supplied, the shell uses
+     its notion of the current job.  ‘bg’ returns zero unless it is run
+     when job control is not enabled, or, when run with job control
+     enabled, any JOBSPEC was not found or specifies a job that was
+     started without job control.
 
 ‘fg’
           fg [JOBSPEC]
 
      Resume the job JOBSPEC in the foreground and make it the current
-     job.  If JOBSPEC is not supplied, resume the current job.  The
-     return status is that of the command placed into the foreground, or
-     non-zero if run when job control is disabled or, when run with job
-     control enabled, JOBSPEC does not specify a valid job or JOBSPEC
-     specifies a job that was started without job control.
+     job.  If JOBSPEC is not supplied, ‘fg’ resumes the current job.
+     The return status is that of the command placed into the
+     foreground, or non-zero if run when job control is disabled or,
+     when run with job control enabled, JOBSPEC does not specify a valid
+     job or JOBSPEC specifies a job that was started without job
+     control.
 
 ‘jobs’
           jobs [-lnprs] [JOBSPEC]
@@ -8198,7 +8216,8 @@ File: bashref.info,  Node: Job Control Builtins,  Next: Job Control Variables,  
 
      If JOBSPEC is supplied, ‘jobs’ restricts output to information
      about that job.  If JOBSPEC is not supplied, ‘jobs’ lists the
-     status of all jobs.
+     status of all jobs.  The return status is zero unless an invalid
+     option is encountered or an invalid JOBSPEC is supplied.
 
      If the ‘-x’ option is supplied, ‘jobs’ replaces any JOBSPEC found
      in COMMAND or ARGUMENTS with the corresponding process group ID,
@@ -8206,21 +8225,25 @@ File: bashref.info,  Node: Job Control Builtins,  Next: Job Control Variables,  
      status.
 
 ‘kill’
-          kill [-s SIGSPEC] [-n SIGNUM] [-SIGSPEC] JOBSPEC or PID
+          kill [-s SIGSPEC] [-n SIGNUM] [-SIGSPEC] ID [...]
           kill -l|-L [EXIT_STATUS]
 
-     Send a signal specified by SIGSPEC or SIGNUM to the process named
-     by job specification JOBSPEC or process ID PID.  SIGSPEC is either
-     a case-insensitive signal name such as ‘SIGINT’ (with or without
-     the ‘SIG’ prefix) or a signal number; SIGNUM is a signal number.
-     If SIGSPEC and SIGNUM are not present, ‘kill’ sends ‘SIGTERM’.
+     Send a signal specified by SIGSPEC or SIGNUM to the processes named
+     by each ID.  Each ID may be a job specification JOBSPEC or process
+     ID PID.  SIGSPEC is either a case-insensitive signal name such as
+     ‘SIGINT’ (with or without the ‘SIG’ prefix) or a signal number;
+     SIGNUM is a signal number.  If SIGSPEC and SIGNUM are not present,
+     ‘kill’ sends ‘SIGTERM’.
 
      The ‘-l’ option lists the signal names.  If any arguments are
-     supplied when ‘-l’ is supplied, the names of the signals
-     corresponding to the arguments are listed, and the return status is
+     supplied when ‘-l’ is supplied, ‘kill’ lists the names of the
+     signals corresponding to the arguments, and the return status is
      zero.  EXIT_STATUS is a number specifying a signal number or the
-     exit status of a process terminated by a signal.  The ‘-L’ option
-     is equivalent to ‘-l’.
+     exit status of a process terminated by a signal; if it is supplied,
+     ‘kill’ prints the name of the signal that caused the process to
+     terminate.  ‘kill’ assumes that process exit statuses are greater
+     than 128; anything less than that is a signal number.  The ‘-L’
+     option is equivalent to ‘-l’.
 
      The return status is zero if at least one signal was successfully
      sent, or non-zero if an error occurs or an invalid option is
@@ -8230,9 +8253,9 @@ File: bashref.info,  Node: Job Control Builtins,  Next: Job Control Variables,  
           wait [-fn] [-p VARNAME] [ID ...]
 
      Wait until the child process specified by each ID exits and return
-     the exit status of the last ID.  Each ID may be a PID or job
-     specification JOBSPEC; if a job spec is supplied, ‘wait’ waits for
-     all processes in the job.
+     the exit status of the last ID.  Each ID may be a process ID PID or
+     a job specification JOBSPEC; if a jobspec is supplied, ‘wait’ waits
+     for all processes in the job.
 
      If no options or IDs are supplied, ‘wait’ waits for all running
      background jobs and the last-executed process substitution, if its
@@ -8244,11 +8267,11 @@ File: bashref.info,  Node: Job Control Builtins,  Next: Job Control Variables,  
      is a child of the shell, or if no arguments are supplied and the
      shell has no unwaited-for children, the exit status is 127.
 
-     If the ‘-p’ option is supplied, the process or job identifier of
-     the job for which the exit status is returned is assigned to the
+     If the ‘-p’ option is supplied, ‘wait’ assigns the process or job
+     identifier of the job for which the exit status is returned to the
      variable VARNAME named by the option argument.  The variable, which
      cannot be readonly, will be unset initially, before any assignment.
-     This is useful only when the ‘-n’ option is supplied.
+     This is useful only when used with the ‘-n’ option.
 
      Supplying the ‘-f’ option, when job control is enabled, forces
      ‘wait’ to wait for each ID to terminate before returning its
@@ -8264,16 +8287,18 @@ File: bashref.info,  Node: Job Control Builtins,  Next: Job Control Variables,  
           disown [-ar] [-h] [ID ...]
 
      Without options, remove each ID from the table of active jobs.
-     Each ID may be a PID or job specification JOBSPEC; if ID is a PID,
-     ‘disown’ uses the job containing PID.  If the ‘-h’ option is
-     supplied, the job is not removed from the table, but is marked so
-     that ‘SIGHUP’ is not sent to the job if the shell receives a
-     ‘SIGHUP’.  If ID is not present, and neither the ‘-a’ nor the ‘-r’
-     option is supplied, ‘disown’ removes the current job.
+     Each ID may be a job specification JOBSPEC or a process ID PID; if
+     ID is a PID, ‘disown’ uses the job containing PID as JOBSPEC.
+
+     If the ‘-h’ option is supplied, ‘disown’ does not remove the jobs
+     corresponding to each ‘id’ from the jobs table, but rather marks
+     them so the shell does not send ‘SIGHUP’ to the job if the shell
+     receives a ‘SIGHUP’.
 
      If no ID is supplied, the ‘-a’ option means to remove or mark all
-     jobs; the ‘-r’ option without an ID argument restricts operation to
-     running jobs.
+     jobs; the ‘-r’ option without an ID argument removes or marks
+     running jobs.  If no ID is supplied, and neither the ‘-a’ nor the
+     ‘-r’ option is supplied, ‘disown’ removes or marks the current job.
 
      The return value is 0 unless an ID does not specify a valid job.
 
@@ -8297,19 +8322,20 @@ File: bashref.info,  Node: Job Control Variables,  Prev: Job Control Builtins,  
 
 ‘auto_resume’
      This variable controls how the shell interacts with the user and
-     job control.  If this variable exists then single-word simple
-     commands without redirections are treated as candidates for
-     resumption of an existing job.  There is no ambiguity allowed; if
-     there is more than one job beginning with the string typed, then
-     the most recently accessed job is selected.  The name of a stopped
-     job, in this context, is the command line used to start it.  If
-     this variable is set to the value ‘exact’, the string supplied must
-     match the name of a stopped job exactly; if set to ‘substring’, the
-     string supplied needs to match a substring of the name of a stopped
-     job.  The ‘substring’ value provides functionality analogous to the
-     ‘%?’ job ID (*note Job Control Basics::).  If set to any other
-     value, the supplied string must be a prefix of a stopped job's
-     name; this provides functionality analogous to the ‘%’ job ID.
+     job control.  If this variable exists then simple commands
+     consisting of only a single word, without redirections, are treated
+     as candidates for resumption of an existing job.  There is no
+     ambiguity allowed; if there is more than one job beginning with or
+     containing the word, then this selects the most recently accessed
+     job.  The name of a stopped job, in this context, is the command
+     line used to start it, as displayed by ‘jobs’.  If this variable is
+     set to the value ‘exact’, the word must match the name of a stopped
+     job exactly; if set to ‘substring’, the word needs to match a
+     substring of the name of a stopped job.  The ‘substring’ value
+     provides functionality analogous to the ‘%?string’ job ID (*note
+     Job Control Basics::).  If set to any other value (e.g., ‘prefix’),
+     the word must be a prefix of a stopped job's name; this provides
+     functionality analogous to the ‘%string’ job ID.
 
 
 File: bashref.info,  Node: Command Line Editing,  Next: Using History Interactively,  Prev: Job Control,  Up: Top
@@ -9091,7 +9117,7 @@ Key Bindings
 
           This key binding syntax recognizes a number of symbolic
           character names: DEL, ESC, ESCAPE, LFD, NEWLINE, RET, RETURN,
-          RUBOUT, SPACE, SPC, and TAB.
+          RUBOUT (a destructive backspace), SPACE, SPC, and TAB.
 
      "KEYSEQ": FUNCTION-NAME or MACRO
           KEYSEQ differs from KEYNAME above in that strings denoting an
@@ -9583,7 +9609,8 @@ File: bashref.info,  Node: Commands For Text,  Next: Commands For Killing,  Prev
 ‘delete-char (C-d)’
      Delete the character at point.  If this function is bound to the
      same character as the tty EOF character, as ‘C-d’ commonly is, see
-     above for the effects.
+     above for the effects.  This may also be bound to the Delete key on
+     some keyboards.
 
 ‘backward-delete-char (Rubout)’
      Delete the character behind the cursor.  A numeric argument means
@@ -12643,7 +12670,7 @@ D.1 Index of Shell Builtin Commands
 * dirs:                                  Directory Stack Builtins.
                                                               (line   7)
 * disown:                                Job Control Builtins.
-                                                              (line 114)
+                                                              (line 120)
 * echo:                                  Bash Builtins.       (line 284)
 * enable:                                Bash Builtins.       (line 337)
 * eval:                                  Bourne Shell Builtins.
@@ -12668,9 +12695,9 @@ D.1 Index of Shell Builtin Commands
 * history:                               Bash History Builtins.
                                                               (line  59)
 * jobs:                                  Job Control Builtins.
-                                                              (line  27)
+                                                              (line  28)
 * kill:                                  Job Control Builtins.
-                                                              (line  59)
+                                                              (line  61)
 * let:                                   Bash Builtins.       (line 394)
 * local:                                 Bash Builtins.       (line 403)
 * logout:                                Bash Builtins.       (line 428)
@@ -12694,7 +12721,7 @@ D.1 Index of Shell Builtin Commands
 * shopt:                                 The Shopt Builtin.   (line   9)
 * source:                                Bash Builtins.       (line 668)
 * suspend:                               Job Control Builtins.
-                                                              (line 131)
+                                                              (line 139)
 * test:                                  Bourne Shell Builtins.
                                                               (line 333)
 * times:                                 Bourne Shell Builtins.
@@ -12712,7 +12739,7 @@ D.1 Index of Shell Builtin Commands
 * unset:                                 Bourne Shell Builtins.
                                                               (line 528)
 * wait:                                  Job Control Builtins.
-                                                              (line  80)
+                                                              (line  86)
 
 
 File: bashref.info,  Node: Reserved Word Index,  Next: Variable Index,  Prev: Builtin Index,  Up: Indexes
@@ -13022,7 +13049,7 @@ D.4 Function Index
 * alias-expand-line ():                  Miscellaneous Commands.
                                                               (line 133)
 * backward-char (C-b):                   Commands For Moving. (line  17)
-* backward-delete-char (Rubout):         Commands For Text.   (line  17)
+* backward-delete-char (Rubout):         Commands For Text.   (line  18)
 * backward-kill-line (C-x Rubout):       Commands For Killing.
                                                               (line  11)
 * backward-kill-word (M-<DEL>):          Commands For Killing.
@@ -13031,9 +13058,9 @@ D.4 Function Index
 * beginning-of-history (M-<):            Commands For History.
                                                               (line  20)
 * beginning-of-line (C-a):               Commands For Moving. (line   6)
-* bracketed-paste-begin ():              Commands For Text.   (line  34)
+* bracketed-paste-begin ():              Commands For Text.   (line  35)
 * call-last-kbd-macro (C-x e):           Keyboard Macros.     (line  13)
-* capitalize-word (M-c):                 Commands For Text.   (line  72)
+* capitalize-word (M-c):                 Commands For Text.   (line  73)
 * character-search (C-]):                Miscellaneous Commands.
                                                               (line  41)
 * character-search-backward (M-C-]):     Miscellaneous Commands.
@@ -13072,7 +13099,7 @@ D.4 Function Index
                                                               (line 147)
 * do-lowercase-version (M-A, M-B, M-X, ...): Miscellaneous Commands.
                                                               (line  14)
-* downcase-word (M-l):                   Commands For Text.   (line  68)
+* downcase-word (M-l):                   Commands For Text.   (line  69)
 * dump-functions ():                     Miscellaneous Commands.
                                                               (line  71)
 * dump-macros ():                        Miscellaneous Commands.
@@ -13094,7 +13121,7 @@ D.4 Function Index
                                                               (line  90)
 * fetch-history ():                      Commands For History.
                                                               (line 106)
-* forward-backward-delete-char ():       Commands For Text.   (line  22)
+* forward-backward-delete-char ():       Commands For Text.   (line  23)
 * forward-char (C-f):                    Commands For Moving. (line  14)
 * forward-search-history (C-s):          Commands For History.
                                                               (line  33)
@@ -13146,7 +13173,7 @@ D.4 Function Index
                                                               (line  39)
 * operate-and-get-next (C-o):            Commands For History.
                                                               (line  99)
-* overwrite-mode ():                     Commands For Text.   (line  76)
+* overwrite-mode ():                     Commands For Text.   (line  77)
 * possible-command-completions (C-x !):  Commands For Completion.
                                                               (line  87)
 * possible-completions (M-?):            Commands For Completion.
@@ -13165,7 +13192,7 @@ D.4 Function Index
                                                               (line  13)
 * previous-screen-line ():               Commands For Moving. (line  36)
 * print-last-kbd-macro ():               Keyboard Macros.     (line  17)
-* quoted-insert (C-q or C-v):            Commands For Text.   (line  27)
+* quoted-insert (C-q or C-v):            Commands For Text.   (line  28)
 * re-read-init-file (C-x C-r):           Miscellaneous Commands.
                                                               (line   6)
 * redraw-current-line ():                Commands For Moving. (line  59)
@@ -13173,7 +13200,7 @@ D.4 Function Index
                                                               (line  27)
 * revert-line (M-r):                     Miscellaneous Commands.
                                                               (line  26)
-* self-insert (a, b, A, 1, !, ...):      Commands For Text.   (line  31)
+* self-insert (a, b, A, 1, !, ...):      Commands For Text.   (line  32)
 * set-mark (C-@):                        Miscellaneous Commands.
                                                               (line  33)
 * shell-backward-kill-word ():           Commands For Killing.
@@ -13184,7 +13211,7 @@ D.4 Function Index
 * shell-forward-word (M-C-f):            Commands For Moving. (line  28)
 * shell-kill-word (M-C-d):               Commands For Killing.
                                                               (line  32)
-* shell-transpose-words (M-C-t):         Commands For Text.   (line  57)
+* shell-transpose-words (M-C-t):         Commands For Text.   (line  58)
 * skip-csi-sequence ():                  Miscellaneous Commands.
                                                               (line  50)
 * spell-correct-word (C-x s):            Miscellaneous Commands.
@@ -13192,8 +13219,8 @@ D.4 Function Index
 * start-kbd-macro (C-x ():               Keyboard Macros.     (line   6)
 * tilde-expand (M-&):                    Miscellaneous Commands.
                                                               (line  30)
-* transpose-chars (C-t):                 Commands For Text.   (line  46)
-* transpose-words (M-t):                 Commands For Text.   (line  52)
+* transpose-chars (C-t):                 Commands For Text.   (line  47)
+* transpose-words (M-t):                 Commands For Text.   (line  53)
 * undo (C-_ or C-x C-u):                 Miscellaneous Commands.
                                                               (line  23)
 * universal-argument ():                 Numeric Arguments.   (line  10)
@@ -13203,7 +13230,7 @@ D.4 Function Index
                                                               (line  16)
 * unix-word-rubout (C-w):                Commands For Killing.
                                                               (line  41)
-* upcase-word (M-u):                     Commands For Text.   (line  64)
+* upcase-word (M-u):                     Commands For Text.   (line  65)
 * yank (C-y):                            Commands For Killing.
                                                               (line  72)
 * yank-last-arg (M-. or M-_):            Commands For History.
@@ -13356,7 +13383,7 @@ D.5 Concept Index
 * quoting:                               Quoting.             (line   6)
 * quoting, ANSI:                         ANSI-C Quoting.      (line   6)
 * Readline, how to use:                  Job Control Variables.
-                                                              (line  22)
+                                                              (line  23)
 * redirection:                           Redirections.        (line   6)
 * reserved word:                         Definitions.         (line  70)
 * reserved words:                        Reserved Words.      (line   6)
@@ -13425,104 +13452,104 @@ Node: Special Parameters70393
 Node: Shell Expansions73857
 Node: Brace Expansion76049
 Node: Tilde Expansion78780
-Node: Shell Parameter Expansion81725
-Node: Command Substitution101500
-Node: Arithmetic Expansion105036
-Node: Process Substitution106052
-Node: Word Splitting107171
-Node: Filename Expansion109271
-Node: Pattern Matching112542
-Node: Quote Removal117879
-Node: Redirections118186
-Node: Executing Commands128404
-Node: Simple Command Expansion129074
-Node: Command Search and Execution131185
-Node: Command Execution Environment133632
-Node: Environment137083
-Node: Exit Status138989
-Node: Signals141050
-Node: Shell Scripts144951
-Node: Shell Builtin Commands148252
-Node: Bourne Shell Builtins150366
-Node: Bash Builtins176670
-Node: Modifying Shell Behavior213121
-Node: The Set Builtin213466
-Node: The Shopt Builtin225405
-Node: Special Builtins242460
-Node: Shell Variables243452
-Node: Bourne Shell Variables243889
-Node: Bash Variables246400
-Node: Bash Features284660
-Node: Invoking Bash285677
-Node: Bash Startup Files292106
-Node: Interactive Shells297422
-Node: What is an Interactive Shell?297833
-Node: Is this Shell Interactive?298498
-Node: Interactive Shell Behavior299325
-Node: Bash Conditional Expressions303089
-Node: Shell Arithmetic308309
-Node: Aliases311651
-Node: Arrays314616
-Node: The Directory Stack321682
-Node: Directory Stack Builtins322482
-Node: Controlling the Prompt326930
-Node: The Restricted Shell329817
-Node: Bash POSIX Mode332702
-Node: Shell Compatibility Mode350846
-Node: Job Control359860
-Node: Job Control Basics360320
-Node: Job Control Builtins365631
-Node: Job Control Variables371802
-Node: Command Line Editing372973
-Node: Introduction and Notation374679
-Node: Readline Interaction377032
-Node: Readline Bare Essentials378223
-Node: Readline Movement Commands380034
-Node: Readline Killing Commands381033
-Node: Readline Arguments383059
-Node: Searching384119
-Node: Readline Init File386383
-Node: Readline Init File Syntax387690
-Node: Conditional Init Constructs414413
-Node: Sample Init File418801
-Node: Bindable Readline Commands421925
-Node: Commands For Moving423400
-Node: Commands For History425630
-Node: Commands For Text430886
-Node: Commands For Killing434948
-Node: Numeric Arguments437739
-Node: Commands For Completion438894
-Node: Keyboard Macros443397
-Node: Miscellaneous Commands444101
-Node: Readline vi Mode450657
-Node: Programmable Completion451637
-Node: Programmable Completion Builtins459692
-Node: A Programmable Completion Example471360
-Node: Using History Interactively476708
-Node: Bash History Facilities477392
-Node: Bash History Builtins481130
-Node: History Interaction487604
-Node: Event Designators492561
-Node: Word Designators494142
-Node: Modifiers496453
-Node: Installing Bash498397
-Node: Basic Installation499516
-Node: Compilers and Options503395
-Node: Compiling For Multiple Architectures504148
-Node: Installation Names505900
-Node: Specifying the System Type508137
-Node: Sharing Defaults508886
-Node: Operation Controls509603
-Node: Optional Features510625
-Node: Reporting Bugs523008
-Node: Major Differences From The Bourne Shell524369
-Node: GNU Free Documentation License545792
-Node: Indexes570972
-Node: Builtin Index571426
-Node: Reserved Word Index578527
-Node: Variable Index580975
-Node: Function Index598391
-Node: Concept Index612250
+Node: Shell Parameter Expansion81738
+Node: Command Substitution101509
+Node: Arithmetic Expansion105045
+Node: Process Substitution106061
+Node: Word Splitting107180
+Node: Filename Expansion109280
+Node: Pattern Matching112551
+Node: Quote Removal117888
+Node: Redirections118195
+Node: Executing Commands128413
+Node: Simple Command Expansion129083
+Node: Command Search and Execution131194
+Node: Command Execution Environment133641
+Node: Environment137092
+Node: Exit Status138998
+Node: Signals141059
+Node: Shell Scripts144960
+Node: Shell Builtin Commands148261
+Node: Bourne Shell Builtins150375
+Node: Bash Builtins176679
+Node: Modifying Shell Behavior213130
+Node: The Set Builtin213475
+Node: The Shopt Builtin225414
+Node: Special Builtins242469
+Node: Shell Variables243461
+Node: Bourne Shell Variables243898
+Node: Bash Variables246409
+Node: Bash Features284669
+Node: Invoking Bash285686
+Node: Bash Startup Files292115
+Node: Interactive Shells297431
+Node: What is an Interactive Shell?297842
+Node: Is this Shell Interactive?298507
+Node: Interactive Shell Behavior299334
+Node: Bash Conditional Expressions303098
+Node: Shell Arithmetic308318
+Node: Aliases311660
+Node: Arrays314798
+Node: The Directory Stack321864
+Node: Directory Stack Builtins322664
+Node: Controlling the Prompt327112
+Node: The Restricted Shell329999
+Node: Bash POSIX Mode332884
+Node: Shell Compatibility Mode351028
+Node: Job Control360042
+Node: Job Control Basics360502
+Node: Job Control Builtins366781
+Node: Job Control Variables373466
+Node: Command Line Editing374700
+Node: Introduction and Notation376406
+Node: Readline Interaction378759
+Node: Readline Bare Essentials379950
+Node: Readline Movement Commands381761
+Node: Readline Killing Commands382760
+Node: Readline Arguments384786
+Node: Searching385846
+Node: Readline Init File388110
+Node: Readline Init File Syntax389417
+Node: Conditional Init Constructs416166
+Node: Sample Init File420554
+Node: Bindable Readline Commands423678
+Node: Commands For Moving425153
+Node: Commands For History427383
+Node: Commands For Text432639
+Node: Commands For Killing436767
+Node: Numeric Arguments439558
+Node: Commands For Completion440713
+Node: Keyboard Macros445216
+Node: Miscellaneous Commands445920
+Node: Readline vi Mode452476
+Node: Programmable Completion453456
+Node: Programmable Completion Builtins461511
+Node: A Programmable Completion Example473179
+Node: Using History Interactively478527
+Node: Bash History Facilities479211
+Node: Bash History Builtins482949
+Node: History Interaction489423
+Node: Event Designators494380
+Node: Word Designators495961
+Node: Modifiers498272
+Node: Installing Bash500216
+Node: Basic Installation501335
+Node: Compilers and Options505214
+Node: Compiling For Multiple Architectures505967
+Node: Installation Names507719
+Node: Specifying the System Type509956
+Node: Sharing Defaults510705
+Node: Operation Controls511422
+Node: Optional Features512444
+Node: Reporting Bugs524827
+Node: Major Differences From The Bourne Shell526188
+Node: GNU Free Documentation License547611
+Node: Indexes572791
+Node: Builtin Index573245
+Node: Reserved Word Index580346
+Node: Variable Index582794
+Node: Function Index600210
+Node: Concept Index614069
 
 End Tag Table
 

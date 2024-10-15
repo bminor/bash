@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 10<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -802,7 +802,9 @@ where pipes are created,
 is executed in a <I>subshell</I>, which is a
 separate process.
 See
-<FONT SIZE=-1><B>COMMAND EXECUTION ENVIRONMENT</B></FONT>
+<FONT SIZE=-1><B>COMMAND EXECUTION ENVIRONMENT</B>
+
+</FONT>
 for a description of subshells and a subshell environment.
 If the <B>lastpipe</B> option is enabled using the <B>shopt</B> builtin
 (see the description of <B>shopt</B> below),
@@ -915,7 +917,9 @@ newline in place of a semicolon.
 <DL COMPACT>
 <DT>(<I>list</I>)<DD>
 <I>list</I> is executed in a subshell (see
-<FONT SIZE=-1><B>COMMAND EXECUTION ENVIRONMENT</B></FONT>
+<FONT SIZE=-1><B>COMMAND EXECUTION ENVIRONMENT</B>
+
+</FONT>
 below for a description of a subshell environment).
 Variable assignments and builtin
 commands that affect the shell's environment do not remain in effect
@@ -3607,26 +3611,27 @@ If set, <B>bash</B> uses its value as the name of a directory in which
 <DD>
 This variable controls how the shell interacts with the user and
 job control.
-If this variable is set, single-word simple
-commands without redirections are treated as candidates for resumption
+If this variable is set, simple commands
+consisting of only a single word,
+without redirections, are treated as candidates for resumption
 of an existing stopped job.
 There is no ambiguity allowed; if there is more than one job
-beginning with the string typed, the most recently accessed job
-is selected.
+beginning with or containing
+the word, this selects the most recently accessed job.
 The
 <I>name</I>
 
 of a stopped job, in this context, is the command line used to
-start it.
+start it, as displayed by <B>jobs</B>.
 If set to the value
 <I>exact</I>,
 
-the string supplied must match the name of a stopped job exactly;
+the word must match the name of a stopped job exactly;
 if set to
 <I>substring</I>,
 
-the string supplied needs to match a substring of the name of a
-stopped job.  The
+the word needs to match a substring of the name of a stopped job.
+The
 <I>substring</I>
 
 value provides functionality analogous to the
@@ -3636,9 +3641,12 @@ job identifier (see
 <FONT SIZE=-1><B>JOB CONTROL</B>
 
 </FONT>
-below).  If set to any other value, the supplied string must
-be a prefix of a stopped job's name; this provides functionality
-analogous to the <B>%</B><I>string</I> job identifier.
+below).
+If set to any other value (e.g.,
+<I>prefix</I>),
+
+the word must be a prefix of a stopped job's name;
+this provides functionality analogous to the <B>%</B><I>string</I> job identifier.
 <DT><B>histchars</B>
 
 <DD>
@@ -4165,8 +4173,8 @@ number without a leading
 
 or
 
+tilde expansion assumes
 
-is assumed.
 <P>
 
 The results of tilde expansion are treated as if they were quoted, so
@@ -4314,11 +4322,12 @@ not be assigned in this way.
 If
 <I>parameter</I>
 
-is null or unset, the expansion of <I>word</I> (or a message to that effect
+is null or unset, the shell writes
+the expansion of <I>word</I> (or a message to that effect
 if
 <I>word</I>
 
-is not present) is written to the standard error and the shell, if it
+is not present) to the standard error and, if it
 is not interactive, exits with a non-zero status.
 An interactive shell does not exit, but does not execute the command
 associated with the expansion.
@@ -6124,9 +6133,13 @@ before executing any of the commands on that line or the compound command.
 Aliases are expanded when a command is read, not when it is executed.
 Therefore, an
 alias definition appearing on the same line as another
-command does not take effect until the shell reads the next line of input.
+command does not take effect until the shell reads the next line of input,
+and an alias definition in a compound command does not take
+effect until the shell parses and executes the entire compound command.
 The commands following the alias definition
-on that line are not affected by the new alias.
+on that line,
+or in the rest of a compound command,
+are not affected by the new alias.
 This behavior is also an issue when functions are executed.
 Aliases are expanded when a function definition is read,
 not when the function is executed, because a function definition
@@ -7328,7 +7341,8 @@ complete, for compatibility.
 
 refers to the ability to selectively stop (<I>suspend</I>)
 the execution of processes and continue (<I>resume</I>)
-their execution at a later point.  A user typically employs
+their execution at a later point.
+A user typically employs
 this facility via an interactive interface supplied jointly
 by the operating system kernel's terminal driver and
 <B>bash</B>.
@@ -7338,11 +7352,15 @@ by the operating system kernel's terminal driver and
 The shell associates a
 <I>job</I>
 
-with each pipeline.  It keeps a table of currently executing
-jobs, which may be listed with the
+with each pipeline.
+It keeps a table of currently executing
+jobs, which the
 <B>jobs</B>
 
-command.  When
+command will display.
+Each job has a <I>job number</I>, which <B>jobs</B> displays between brackets.
+Job numbers start at 1.
+When
 <B>bash</B>
 
 starts a job asynchronously (in the
@@ -7368,17 +7386,22 @@ uses the
 abstraction as the basis for job control.
 <P>
 
-To facilitate the implementation of the user interface to job
-control, the operating system maintains the notion of a <I>current terminal
-process group ID</I>.  Members of this process group (processes whose
+To facilitate the implementation of the user interface to job control,
+each process has a <I>process group ID</I>, and
+the operating system maintains the notion of a <I>current terminal
+process group ID</I>.
+Processes that have the same process group ID are said to be part of
+the same <I>process group</I>.
+Members of the <I>foreground</I> process group (processes whose
 process group ID is equal to the current terminal process group ID)
 receive keyboard-generated signals such as
 <FONT SIZE=-1><B>SIGINT</B>.
 
 </FONT>
-These processes are said to be in the
-<I>foreground</I>.
+Processes in the foreground process group are said to be
+<I>foreground</I>
 
+processes.
 <I>Background</I>
 
 processes are those whose process group ID differs from the terminal's;
@@ -7412,7 +7435,7 @@ character (typically
 <B>^Z</B>,
 
 Control-Z) while a process is running
-causes that process to be stopped and returns control to
+stops that process and returns control to
 <B>bash</B>.
 
 Typing the
@@ -7421,31 +7444,40 @@ Typing the
 character (typically
 <B>^Y</B>,
 
-Control-Y) causes the process to be stopped when it
-attempts to read input from the terminal, and control to
-be returned to
+Control-Y) causes the process stop when it
+attempts to read input from the terminal, and returns control to
 <B>bash</B>.
 
-The user may then manipulate the state of this job, using the
+The user then manipulates the state of this job, using the
 <B>bg</B>
 
 command to continue it in the background, the
 <B>fg</B>
 
-command to continue it in the foreground, or
-the
+command to continue it in the foreground, or the
 <B>kill</B>
 
-command to kill it.  A <B>^Z</B> takes effect immediately,
-and has the additional side effect of causing pending output
-and typeahead to be discarded.
+command to kill it.
+The suspend character takes effect immediately,
+and has the additional side effect of discarding any pending output
+and typeahead.
+To force a background process to stop, or stop a process
+that's not associated with the current terminal session,
+send it the
+<FONT SIZE=-1><B>SIGSTOP</B>
+
+</FONT>
+signal using <B>kill</B>.
 <P>
 
 There are a number of ways to refer to a job in the shell.
-The character
+The
 <B>%</B>
 
-introduces a job specification (<I>jobspec</I>).  Job number
+character introduces a job specification (jobspec).
+<P>
+
+Job number
 <I>n</I>
 
 may be referred to as
@@ -7456,56 +7488,59 @@ start it, or using a substring that appears in its command line.
 For example,
 <B>%ce</B>
 
-refers to a stopped
-job whose command name begins with
+refers to a job whose command name begins with
 <B>ce</B>.
 
-If a prefix matches more than one job,
-<B>bash</B>
-
-reports an error.  Using
+Using
 <B>%?ce</B>,
 
 on the other hand, refers to any job containing the string
 <B>ce</B>
 
-in its command line.  If the substring matches more than one job,
+in its command line.
+If the prefix or substring matches more than one job,
 <B>bash</B>
 
-reports an error.  The symbols
+reports an error.
+<P>
+
+The symbols
 <B>%%</B>
 
 and
 <B>%+</B>
 
 refer to the shell's notion of the
-<I>current job</I>,
+<I>current job</I>.
 
-which is the last job stopped while it was in
-the foreground or started in the background.
-The
-<I>previous job</I>
+A single % (with no accompanying job specification) also refers to the
+current job.
+<B>%-</B>
 
-may be referenced using
-<B>%-</B>.
+refers to the
+<I>previous job</I>.
 
+When a job starts in the background,
+a job stops while in the foreground,
+or a job is resumed in the background,
+it becomes the current job.
+The job that was the current job becomes the previous job.
+When the current job terminates, the previous job becomes the
+current job.
 If there is only a single job, <B>%+</B> and <B>%-</B> can both be used
 to refer to that job.
 In output pertaining to jobs (e.g., the output of the
 <B>jobs</B>
 
-command), the current job is always flagged with a
+command), the current job is always marked with a
 <B>+</B>,
 
 and the previous job with a
 <B>-</B>.
 
-A single % (with no accompanying job specification) also refers to the
-current job.
 <P>
 
-Simply naming a job can be used to bring it into the
-foreground:
+Simply naming a job can be used to bring it into the foreground:
 <B>%1</B>
 
 is a synonym for
@@ -7521,12 +7556,13 @@ The shell learns immediately whenever a job changes state.
 Normally,
 <B>bash</B>
 
-waits until it is about to print a prompt before reporting
+waits until it is about to print a prompt before
+notifying the user about
 changes in a job's status so as to not interrupt
 any other output,
 though it will notify of changes in a job's status after a
 foreground command in
-a list completes, before executing the next command.
+a list completes, before executing the next command in the list.
 If the
 <B>-b</B>
 
@@ -7538,17 +7574,25 @@ is enabled,
 <B>bash</B>
 
 reports such changes immediately.
-Any trap on
+<B>Bash</B> executes any trap on
 <FONT SIZE=-1><B>SIGCHLD</B>
 
 </FONT>
-is executed for each child that exits.
+for each child that terminates.
 <P>
 
-If an attempt to exit
+When a job terminates and <B>bash</B> notifies the user about it,
+<B>bash</B> removes the job from the table.
+It will not appear in <B>jobs</B> output, but <B>wait</B> will
+report its exit status, as long as it's supplied the process ID
+associated with the job as an argument.
+When the table is empty, job numbers start over at 1.
+<P>
+
+If a user attempts to exit
 <B>bash</B>
 
-is made while jobs are stopped (or, if the <B>checkjobs</B> shell option has
+while jobs are stopped (or, if the <B>checkjobs</B> shell option has
 been enabled using the <B>shopt</B> builtin, running), the shell prints a
 warning message, and, if the <B>checkjobs</B> option is enabled, lists the
 jobs and their statuses.
@@ -7556,14 +7600,16 @@ The
 <B>jobs</B>
 
 command may then be used to inspect their status.
-If a second attempt to exit is made without an intervening command,
-the shell does not print another warning, and any stopped
-jobs are terminated.
+If the user immediately attempts to exit again,
+without an intervening command,
+<B>bash</B> does not print another warning, and
+terminates any stopped jobs.
 <P>
 
 When the shell is waiting for a job or process using the <B>wait</B>
 builtin, and job control is enabled, <B>wait</B> will return when the
-job changes state. The <B>-f</B> option causes <B>wait</B> to wait
+job changes state.
+The <B>-f</B> option causes <B>wait</B> to wait
 until the job or process terminates before returning.
 <A NAME="lbCF">&nbsp;</A>
 <H3>PROMPTING</H3>
@@ -7964,7 +8010,7 @@ Key bindings may contain the following symbolic character names:
 
 <I>RETURN</I>,
 
-<I>RUBOUT</I>,
+<I>RUBOUT</I>(a<I>destructive</I>backspace),
 
 <I>SPACE</I>,
 
@@ -9270,6 +9316,7 @@ Delete the character at point.
 If this function is bound to the
 same character as the tty <B>EOF</B> character, as <B>C-d</B>
 commonly is, see above for the effects.
+This may also be bound to the Delete key on some keyboards.
 <DT><B>backward-delete-char (Rubout)</B>
 
 <DD>
@@ -10733,11 +10780,11 @@ No effect; the command does nothing beyond expanding
 and performing any specified
 redirections.
 The return status is zero.
-<DT><B>. </B> [<B>-p</B> <I>path</I>] <I>filename</I> [<I>arguments</I>]<DD>
+<DT><B>.</B> [<B>-p</B> <I>path</I>] <I>filename</I> [<I>arguments</I>]<DD>
 
 <DT><B>source</B> [<B>-p</B> <I>path</I>] <I>filename</I> [<I>arguments</I>]<DD>
 
-The <B>. </B> command (<B>source</B>) reads and execute commands from
+The <B>.</B> command (<B>source</B>) reads and execute commands from
 <I>filename</I>
 
 in the current shell environment and returns the exit status of the
@@ -10745,10 +10792,10 @@ last command executed from
 <I>filename</I>.
 
 <DT><DD>
-If <I>filename</I> does not contain a slash, <B>. </B> searchs for it.
-If the <B>-p</B> option is supplied, <B>. </B> treats <I>path</I>
+If <I>filename</I> does not contain a slash, <B>.</B> searches for it.
+If the <B>-p</B> option is supplied, <B>.</B> treats <I>path</I>
 as a colon-separated list of directories in which to find <I>filename</I>;
-otherwise, <B>. </B> uses the entries in
+otherwise, <B>.</B> uses the entries in
 <FONT SIZE=-1><B>PATH</B>
 
 </FONT>
@@ -10768,7 +10815,7 @@ If the
 option to the
 <B>shopt</B>
 
-builtin command is turned off, <B>. </B> does not search
+builtin command is turned off, <B>.</B> does not search
 <FONT SIZE=-1><B>PATH</B>.
 
 </FONT>
@@ -10812,7 +10859,7 @@ had been started with
 If
 <I>jobspec</I>
 
-is not present, the shell's notion of the <I>current job</I> is used.
+is not present, the shell uses its notion of the <I>current job</I>.
 <B>bg</B>
 
 <I>jobspec</I>
@@ -11854,22 +11901,20 @@ Without options, remove each
 
 from the table of active jobs.
 Each <I>id</I> may be a job specification <I>jobspec</I>
-or a process ID 
-<I>pid</I>; if <I>id</I> is a <I>pid</I>,
+or a process ID <I>pid</I>;
+if <I>id</I> is a <I>pid</I>,
 <B>disown</B> uses the job containing <I>pid</I> as <I>jobspec</I>.
-If
+<DT><DD>
+If the <B>-h</B> option is supplied,
+<B>disown</B> does not remove the jobs corresponding to each
 <I>id</I>
 
-is not present, and neither the <B>-a</B> nor the <B>-r</B> option
-is supplied, <B>disown</B> removes the <I>current job</I>.
-If the <B>-h</B> option is supplied, the job corresponding to each
-<I>id</I>
-
-is not removed from the table, but is marked so that
+from the jobs table,
+but rather marks them so the shell does not send
 <FONT SIZE=-1><B>SIGHUP</B>
 
 </FONT>
-is not sent to the job if the shell receives a
+to the job if the shell receives a
 <FONT SIZE=-1><B>SIGHUP</B>.
 
 </FONT>
@@ -11886,7 +11931,12 @@ option means to remove or mark all jobs; the
 option without an
 <I>id</I>
 
-argument restricts operation to running jobs.
+argument removes or marks running jobs.
+If no
+<I>id</I>
+
+is supplied, and neither the <B>-a</B> nor the <B>-r</B> option
+is supplied, <B>disown</B> removes or marks the current job.
 <DT><DD>
 The return value is 0 unless an
 <I>id</I>
@@ -12325,7 +12375,7 @@ in the foreground, and make it the current job.
 If
 <I>jobspec</I>
 
-is not present, use the shell's notion of the <I>current job</I>.
+is not present, <B>fg</B> uses the shell's notion of the <I>current job</I>.
 The return value is that of the command placed into the foreground,
 or failure if run when job control is disabled or, when run with
 job control enabled, if
@@ -12759,7 +12809,7 @@ passing it
 <I>args</I>,
 
 returning its exit status.
-<DT><B>kill</B> [<B>-s</B> <I>sigspec</I> | <B>-n</B> <I>signum</I> | <B>-</B><I>sigspec</I>] [<I>pid</I> | <I>jobspec</I>] ...<DD>
+<DT><B>kill</B> [<B>-s</B> <I>sigspec</I> | <B>-n</B> <I>signum</I> | <B>-</B><I>sigspec</I>] <I>id</I> [ ... ]<DD>
 
 <DT><B>kill</B> <B>-l</B>|<B>-L</B> [<I>sigspec</I> | <I>exit_status</I>]<DD>
 
@@ -12769,12 +12819,14 @@ Send the signal specified by
 or
 <I>signum</I>
 
-to the processes named by
-<I>pid</I>
+to the processes named by each
+<I>id</I>.
 
-or
-<I>jobspec</I>.
+Each
+<I>id</I>
 
+may be a job specification <I>jobspec</I>
+or a process ID <I>pid</I>.
 <I>sigspec</I>
 
 is either a case-insensitive signal name such as
@@ -12800,10 +12852,10 @@ sends
 
 </FONT>
 <DT><DD>
-An argument of
+The
 <B>-l</B>
 
-lists the signal names.
+option lists the signal names.
 If any arguments are supplied when
 <B>-l</B>
 
@@ -12816,7 +12868,11 @@ The <I>exit_status</I> argument to
 <B>-l</B>
 
 is a number specifying either a signal number or the exit status of
-a process terminated by a signal.
+a process terminated by a signal;
+if it is supplied, <B>kill</B> prints the name of the signal that caused
+the process to terminate.
+<B>kill</B> assumes that process exit statuses are greater than 128;
+anything less than that is a signal number.
 The
 <B>-L</B>
 
@@ -13719,7 +13775,7 @@ The effect is as if the shell command
 
 had been executed
 (see
-<B>Shell Variables</B>
+<B>Shell Variables&lt;</B>
 
 
 above).
@@ -15522,8 +15578,9 @@ is readonly or may not be unset.
 <DT><B>wait</B> [<B>-fn</B>] [-p <I>varname</I>] [<I>id</I> ...]<DD>
 Wait for each specified child process <I>id</I> and return the
 termination status of the last <I>id</I>.
-Each <I>id</I> may be a process ID or a job specification;
-if a job spec is supplied, <B>wait</B> waits for all processes in the job.
+Each <I>id</I> may be a process ID <I>pid</I>
+or a job specification <I>jobspec</I>;
+if a jobspec is supplied, <B>wait</B> waits for all processes in the job.
 <DT><DD>
 If no options or <I>id</I>s are supplied,
 <B>wait</B> waits for all running background jobs and
@@ -15532,20 +15589,21 @@ if its process id is the same as <B>$!</B>,
 and the return status is zero.
 <DT><DD>
 If the <B>-n</B> option is supplied, <B>wait</B> waits for any one of
-the given <I>id</I>s or, if no <I>id</I>s are supplied, any job
-or process substitution,
+the given <I>id</I>s or,
+if no <I>id</I>s are supplied, any job or process substitution,
 to complete and returns its exit status.
 If none of the supplied <I>id</I>s is a child of the shell,
 or if no <I>id</I>s are supplied and the shell has no unwaited-for children,
 the exit status is 127.
 <DT><DD>
-If the <B>-p</B> option is supplied, the process or job identifier
-of the job for which the exit status is returned is assigned to the
+If the <B>-p</B> option is supplied, <B>wait</B> assigns
+the process or job identifier of the job
+for which the exit status is returned to the
 variable <I>varname</I> named by the option argument.
 The variable,
 which cannot be readonly,
 will be unset initially, before any assignment.
-This is useful only when the <B>-n</B> option is supplied.
+This is useful only when used with the <B>-n</B> option.
 <DT><DD>
 Supplying the <B>-f</B> option, when job control is enabled,
 forces <B>wait</B> to wait for each <I>id</I> to terminate before
@@ -16165,7 +16223,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 10<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16274,7 +16332,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20241007/doc/bash.1.<BR>
-Time: 10 October 2024 17:47:42 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20241012/doc/bash.1.<BR>
+Time: 14 October 2024 17:00:24 EDT
 </BODY>
 </HTML>

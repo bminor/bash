@@ -2126,7 +2126,7 @@ corresponding element from the directory stack, as it would be displayed
 by the @code{dirs} builtin invoked with the characters following tilde
 in the tilde-prefix as an argument (@pxref{The Directory Stack}).
 If the tilde-prefix, sans the tilde, consists of a number without a
-leading @samp{+} or @samp{-}, @samp{+} is assumed.
+leading @samp{+} or @samp{-}, tilde expansion assumes @samp{+}.
 
 The results of tilde expansion are treated as if they were quoted, so
 the replacement is not subject to word splitting and filename expansion.
@@ -2262,7 +2262,7 @@ unset-or-null
 @item $@{@var{parameter}:=@var{word}@}
 If @var{parameter} is unset or null, the expansion of @var{word}
 is assigned to @var{parameter},
-and  the result of the expansion
+and the result of the expansion
 is the final value of @var{parameter}.
 Positional parameters and special parameters may not be assigned
 in this way.
@@ -2280,9 +2280,10 @@ DEFAULT
 
 @item $@{@var{parameter}:?@var{word}@}
 If @var{parameter}
-is null or unset, the expansion of @var{word} (or a message
+is null or unset, the shell writes
+the expansion of @var{word} (or a message
 to that effect if @var{word}
-is not present) is written to the standard error and the shell, if it
+is not present) to the standard error and, if it
 is not interactive, exits with a non-zero status.
 An interactive shell does not exit, but does not execute the command
 associated with the expansion.
@@ -8291,9 +8292,13 @@ before executing any of the commands on that line or the compound command.
 Aliases are expanded when a command is read, not when it is executed.
 Therefore, an
 alias definition appearing on the same line as another
-command does not take effect until the shell reads the next line of input.
+command does not take effect until the shell reads the next line of input,
+and an alias definition in a compound command does not take
+effect until the shell parses and executes the entire compound command.
 The commands following the alias definition
-on that line are not affected by the new alias.
+on that line,
+or in the rest of a compound command,
+are not affected by the new alias.
 This behavior is also an issue when functions are executed.
 Aliases are expanded when a function definition is read,
 not when the function is executed, because a function definition
@@ -9536,14 +9541,18 @@ Bash allows you to access its facilities.
 Job control
 refers to the ability to selectively stop (suspend)
 the execution of processes and continue (resume)
-their execution at a later point.  A user typically employs
+their execution at a later point.
+A user typically employs
 this facility via an interactive interface supplied jointly
 by the operating system kernel's terminal driver and Bash.
 
-The shell associates a @var{job} with each pipeline.  It keeps a
-table of currently executing jobs, which may be listed with the
-@code{jobs} command.  When Bash starts a job
-asynchronously, it prints a line that looks
+The shell associates a @var{job} with each pipeline.
+It keeps a
+table of currently executing jobs, which the
+@code{jobs} command will display.
+Each job has a @dfn{job number}, which @code{jobs} displays between brackets.
+Job numbers start at 1.
+When Bash starts a job asynchronously, it prints a line that looks
 like:
 @example
 [1] 25647
@@ -9551,19 +9560,26 @@ like:
 @noindent
 indicating that this job is job number 1 and that the process @sc{id}
 of the last process in the pipeline associated with this job is
-25647.  All of the processes in a single pipeline are members of
-the same job.  Bash uses the @var{job} abstraction as the
-basis for job control. 
+25647.
+All of the processes in a single pipeline are members of
+the same job.
+Bash uses the @var{job} abstraction as the basis for job control. 
 
-To facilitate the implementation of the user interface to job
-control, the operating system maintains the notion of a current terminal
-process group @sc{id}.  Members of this process group (processes whose
+To facilitate the implementation of the user interface to job control,
+each process has a @dfn{process group @sc{id}}, and
+the operating system maintains the notion of a current terminal
+process group @sc{id}.
+Processes that have the same process group ID are said to be part of
+the same @dfn{process group}.
+Members of the foreground process group (processes whose
 process group @sc{id} is equal to the current terminal process group
 @sc{id}) receive keyboard-generated signals such as @code{SIGINT}. 
-These processes are said to be in the foreground.  Background
-processes are those whose process group @sc{id} differs from the
-terminal's; such processes are immune to keyboard-generated
-signals.  Only foreground processes are allowed to read from or, if
+Processes in the foreground process group are said to be
+foreground processes.
+Background processes
+are those whose process group @sc{id} differs from the terminal's;
+such processes are immune to keyboard-generated signals.
+Only foreground processes are allowed to read from or, if
 the user so specifies with @code{stty tostop}, write to the terminal.
 Background processes which attempt to
 read from (write to when @code{tostop} is in effect) the
@@ -9572,72 +9588,101 @@ signal by the kernel's terminal driver,
 which, unless caught, suspends the process. 
 
 If the operating system on which Bash is running supports
-job control, Bash contains facilities to use it.  Typing the
+job control, Bash contains facilities to use it.
+Typing the
 @dfn{suspend} character (typically @samp{^Z}, Control-Z) while a
-process is running causes that process to be stopped and returns
-control to Bash.  Typing the @dfn{delayed suspend} character
-(typically @samp{^Y}, Control-Y) causes the process to be stopped
-when it attempts to read input from the terminal, and control to
-be returned to Bash.  The user then manipulates the state of
-this job, using the @code{bg} command to continue it in the
-background, the @code{fg} command to continue it in the
-foreground, or the @code{kill} command to kill it.  A @samp{^Z}
+process is running stops that process
+and returns control to Bash.
+Typing the @dfn{delayed suspend} character
+(typically @samp{^Y}, Control-Y) causes the process to stop
+when it attempts to read input from the terminal,
+and returns control to Bash.
+The user then manipulates the state of
+this job, using
+the @code{bg} command to continue it in the background,
+the @code{fg} command to continue it in the foreground, or
+the @code{kill} command to kill it.
+The suspend character
 takes effect immediately, and has the additional side effect of
-causing pending output and typeahead to be discarded. 
+discarding any pending output and typeahead.
+If you want to force a background process to stop, or stop a process
+that's not associated with your terminal session,
+send it the @code{SIGSTOP} signal using @code{kill}.
 
-There are a number of ways to refer to a job in the shell.  The
-character @samp{%} introduces a job specification (@dfn{jobspec}).
+There are a number of ways to refer to a job in the shell.
+The @samp{%} character introduces a @dfn{job specification} (jobspec).
 
 Job number @code{n} may be referred to as @samp{%n}.
+A job may also be referred to
+using a prefix of the name used to start it,
+or using a substring that appears in its command line.
+For example, @samp{%ce} refers
+to a job whose command name begins with @samp{ce}.
+Using @samp{%?ce}, on the
+other hand, refers to any job containing the string @samp{ce} in
+its command line.
+If the prefix or substring matches more than one job,
+Bash reports an error.
+
 The symbols @samp{%%} and  @samp{%+} refer to the shell's notion of the
-current job, which is the last job stopped while it was in the foreground
-or started in the background.
+@dfn{current job}.
 A single @samp{%} (with no accompanying job specification) also refers
 to the current job.
-The previous job may be referenced using @samp{%-}.
+@samp{%-} refers to the @dfn{previous job}.
+When a job starts in the background,
+a job stops while in the foreground,
+or a job is resumed in the background,
+it becomes the current job.
+The job that was the current job becomes the previous job.
+When the current job terminates, the previous job becomes the
+current job.
 If there is only a single job, @samp{%+} and @samp{%-} can both be used
 to refer to that job.
 In output pertaining to jobs (e.g., the output of the @code{jobs}
-command), the current job is always flagged with a @samp{+}, and the
+command), the current job is always marked with a @samp{+}, and the
 previous job with a @samp{-}. 
-
-A job may also be referred to
-using a prefix of the name used to start it, or using a substring
-that appears in its command line.  For example, @samp{%ce} refers
-to a stopped job whose command name begins with @samp{ce}.
-Using @samp{%?ce}, on the
-other hand, refers to any job containing the string @samp{ce} in
-its command line.  If the prefix or substring matches more than one job,
-Bash reports an error.
 
 Simply naming a job can be used to bring it into the foreground:
 @samp{%1} is a synonym for @samp{fg %1}, bringing job 1 from the
-background into the foreground.  Similarly, @samp{%1 &} resumes
-job 1 in the background, equivalent to @samp{bg %1}
+background into the foreground.
+Similarly, @samp{%1 &} resumes
+job 1 in the background, equivalent to @samp{bg %1}.
 
 The shell learns immediately whenever a job changes state. 
-Normally, Bash waits until it is about to print a prompt
-before reporting changes in a job's status so as to not interrupt
+Normally, Bash waits until it is about to print a prompt before
+notifying the user about
+changes in a job's status so as to not interrupt
 any other output,
 though it will notify of changes in a job's status after a
 foreground command in
-a list completes, before executing the next command.
+a list completes, before executing the next command in the list.
 If the @option{-b} option to the @code{set} builtin is enabled,
 Bash reports such changes immediately (@pxref{The Set Builtin}).
-Any trap on @code{SIGCHLD} is executed for each child process
-that exits.
+Bash executes any trap on @code{SIGCHLD}
+for each child process that terminates.
 
-If an attempt to exit Bash is made while jobs are stopped, (or running, if
+When a job terminates and Bash notifies the user about it,
+Bash removes the job from the jobs table.
+It will not appear in @code{jobs} output, but @code{wait} will
+report its exit status, as long as it's supplied the process ID
+associated with the job as an argument.
+When the table is empty, job numbers start over at 1.
+
+If a user attempts to exit
+Bash while jobs are stopped, (or running, if
 the @code{checkjobs} option is enabled -- see @ref{The Shopt Builtin}), the
 shell prints a warning message, and if the @code{checkjobs} option is
 enabled, lists the jobs and their statuses.
 The @code{jobs} command may then be used to inspect their status.
-If a second attempt to exit is made without an intervening command,
-Bash does not print another warning, and any stopped jobs are terminated.
+If the user immediately attempts to exit again,
+without an intervening command,
+Bash does not print another warning, and
+terminates any stopped jobs.
 
 When the shell is waiting for a job or process using the @code{wait}
 builtin, and job control is enabled, @code{wait} will return when the
-job changes state. The @option{-f} option causes @code{wait} to wait
+job changes state.
+The @option{-f} option causes @code{wait} to wait
 until the job or process terminates before returning.
 
 @node Job Control Builtins
@@ -9653,8 +9698,9 @@ bg [@var{jobspec} @dots{}]
 
 Resume each suspended job @var{jobspec} in the background, as if it
 had been started with @samp{&}.
-If @var{jobspec} is not supplied, the current job is used.
-The return status is zero unless it is run when job control is not
+If @var{jobspec} is not supplied, the shell uses its
+notion of the current job.
+@code{bg} returns  zero unless it is run when job control is not
 enabled, or, when run with job control enabled, any
 @var{jobspec} was not found or specifies a job
 that was started without job control.
@@ -9666,7 +9712,7 @@ fg [@var{jobspec}]
 @end example
 
 Resume the job @var{jobspec} in the foreground and make it the current job.
-If @var{jobspec} is not supplied, resume the current job.
+If @var{jobspec} is not supplied, @code{fg} resumes the current job.
 The return status is that of the command placed into the foreground,
 or non-zero if run when job control is disabled or, when run with
 job control enabled, @var{jobspec} does not specify a valid job or
@@ -9703,6 +9749,10 @@ Display only stopped jobs.
 If @var{jobspec} is supplied,
 @code{jobs} restricts output to information about that job. 
 If @var{jobspec} is not supplied, @code{jobs} lists the status of all jobs.
+The return status is zero unless an invalid option is encountered
+or an invalid
+@var{jobspec}
+is supplied.
 
 If the @option{-x} option is supplied, @code{jobs} replaces any
 @var{jobspec} found in @var{command} or @var{arguments} with the
@@ -9712,12 +9762,14 @@ passing it @var{argument}s, returning its exit status.
 @item kill
 @btindex kill
 @example
-kill [-s @var{sigspec}] [-n @var{signum}] [-@var{sigspec}] @var{jobspec} or @var{pid}
+kill [-s @var{sigspec}] [-n @var{signum}] [-@var{sigspec}] @var{id} [@dots{}]
 kill -l|-L [@var{exit_status}]
 @end example
 
-Send a signal specified by @var{sigspec} or @var{signum} to the process
-named by job specification @var{jobspec} or process @sc{id} @var{pid}.
+Send a signal specified by @var{sigspec} or @var{signum} to the processes
+named by each @var{id}.
+Each @var{id} may be a
+job specification @var{jobspec} or process @sc{id} @var{pid}.
 @var{sigspec} is either a case-insensitive signal name such as
 @code{SIGINT} (with or without the @code{SIG} prefix)
 or a signal number; @var{signum} is a signal number.
@@ -9725,11 +9777,15 @@ If @var{sigspec} and @var{signum} are not present, @code{kill}
 sends @code{SIGTERM}.
 
 The @option{-l} option lists the signal names.
-If any arguments are supplied when @option{-l} is supplied, the names of the
-signals corresponding to the arguments are listed, and the return status
-is zero.
+If any arguments are supplied when @option{-l} is supplied,
+@code{kill} lists the names of the signals corresponding to the arguments,
+and the return status is zero.
 @var{exit_status} is a number specifying a signal number or the exit
-status of a process terminated by a signal.
+status of a process terminated by a signal;
+if it is supplied, @code{kill} prints the name of the signal that caused
+the process to terminate.
+@code{kill} assumes that process exit statuses are greater than 128;
+anything less than that is a signal number.
 The @option{-L} option is equivalent to @option{-l}.
 
 The return status is zero if at least one signal was successfully sent,
@@ -9743,8 +9799,9 @@ wait [-fn] [-p @var{varname}] [@var{id} @dots{}]
 
 Wait until the child process specified by each @var{id} exits and
 return the exit status of the last @var{id}.
-Each @var{id} may be a @var{pid} or job specification @var{jobspec};
-if a job spec is supplied, @code{wait} waits for all processes in the job.
+Each @var{id} may be a process @sc{id} @var{pid}
+or a job specification @var{jobspec};
+if a jobspec is supplied, @code{wait} waits for all processes in the job.
 
 If no options or @var{id}s are supplied,
 @code{wait} waits for all running background jobs and
@@ -9753,20 +9810,21 @@ if its process id is the same as @var{$!},
 and the return status is zero.
 
 If the @option{-n} option is supplied, @code{wait} waits for any one of
-the @var{id}s or, if no @var{id}s are supplied, any job
-or process substitution,
+the @var{id}s or,
+if no @var{id}s are supplied, any job or process substitution,
 to complete and returns its exit status.
 If none of the supplied @var{id}s is a child of the shell,
 or if no arguments are supplied and the shell has no unwaited-for children,
 the exit status is 127.
 
-If the @option{-p} option is supplied, the process or job identifier
-of the job for which the exit status is returned is assigned to the
+If the @option{-p} option is supplied, @code{wait} assigns
+the process or job identifier of the job
+for which the exit status is returned to the
 variable @var{varname} named by the option argument.
 The variable,
 which cannot be readonly,
 will be unset initially, before any assignment.
-This is useful only when the @option{-n} option is supplied.
+This is useful only when used with the @option{-n} option.
 
 Supplying the @option{-f} option, when job control is enabled,
 forces @code{wait} to wait for each @var{id} to terminate before
@@ -9788,21 +9846,27 @@ disown [-ar] [-h] [@var{id} @dots{}]
 
 Without options, remove each @var{id} from the table of
 active jobs.
-Each @var{id} may be a @var{pid} or job specification @var{jobspec};
+Each @var{id} may be a job specification @var{jobspec}
+or a process @sc{id} @var{pid};
 if @var{id} is a @var{pid},
-@code{disown} uses the job containing @var{pid}.
-If the @option{-h} option is supplied, the job is not removed from the table,
-but is marked so that @code{SIGHUP} is not sent to the job if the shell
-receives a @code{SIGHUP}.
-If @var{id} is not present, and neither the @option{-a} nor the
-@option{-r} option is supplied, @code{disown} removes the current job.
+@code{disown} uses the job containing @var{pid} as @var{jobspec}.
+
+If the @option{-h} option is supplied,
+@code{disown} does not remove the jobs corresponding to each @code{id}
+from the jobs table,
+but rather marks them so the shell does not send
+@code{SIGHUP}
+to the job if the shell receives a
+@code{SIGHUP}.
 
 If no @var{id} is supplied, the @option{-a} option means to remove or
 mark all jobs; the @option{-r} option without an @var{id}
-argument restricts operation to running jobs.
+argument removes or marks running jobs.
+If no @var{id} is supplied,
+and neither the @option{-a} nor the @option{-r} option is supplied,
+@code{disown} removes or marks the current job.
 
-The return value is 0 unless an @var{id}
-does not specify a valid job.
+The return value is 0 unless an @var{id} does not specify a valid job.
 
 @item suspend
 @btindex suspend
@@ -9824,8 +9888,8 @@ is not supplied.
 @end table
 
 When job control is not active, the @code{kill} and @code{wait}
-builtins do not accept @var{jobspec} arguments.  They must be
-supplied process @sc{id}s.
+builtins do not accept @var{jobspec} arguments.
+They must be supplied process @sc{id}s.
 
 @node Job Control Variables
 @section Job Control Variables
@@ -9835,24 +9899,24 @@ supplied process @sc{id}s.
 @item auto_resume
 This variable controls how the shell interacts with the user and
 job control.
-If this variable exists then single-word simple
-commands without redirections are treated as candidates for resumption
+If this variable exists then simple commands
+consisting of only a single word,
+without redirections, are treated as candidates for resumption
 of an existing job.
 There is no ambiguity allowed; if there is more than one job
-beginning with the string typed, then
-the most recently accessed job is selected.
+beginning with or containing the word, then
+this selects the most recently accessed job.
 The name of a stopped job, in this context, is the command line
-used to start it.
+used to start it, as displayed by @code{jobs}.
 If this variable is set to the value @samp{exact},
-the string supplied must match the name of a stopped job exactly;
+the word must match the name of a stopped job exactly;
 if set to @samp{substring},
-the string supplied needs to match a substring of the name of a
-stopped job.
+the word needs to match a substring of the name of a stopped job.
 The @samp{substring} value provides functionality
-analogous to the @samp{%?} job @sc{id} (@pxref{Job Control Basics}).
-If set to any other value, the supplied string must
-be a prefix of a stopped job's name; this provides functionality
-analogous to the @samp{%} job @sc{id}.
+analogous to the @samp{%?string} job @sc{id} (@pxref{Job Control Basics}).
+If set to any other value (e.g., @samp{prefix}),
+the word must be a prefix of a stopped job's name;
+this provides functionality analogous to the @samp{%string} job @sc{id}.
 
 @end vtable
 

@@ -10307,5 +10307,56 @@ lib/readline/doc/hsuser.texi,lib/readline/doc/history.3
 	- next set of updates for consistency between formats, update language,
 	  fix formatting conventions
 
+				   10/11
+				   -----
+lib/readline/doc/rltech.texi,lib/readline/doc/hstech.texi
+	- next set of updates for consistency between formats, update language,
+	  fix formatting conventions
 
+				   10/12
+				   -----
+Makefile.in,builtins/Makefile.in
+	- update dependencies on readline, history include files
 
+builtins/shopt.def
+	- update bash_source_fullpath reset to use new default
+
+configure.ac
+	- update to use the right option name for bash-source-fullpath-default
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+braces.c
+	- mkseq: fix loop condition to avoid integer overflow
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+builtins/help.def
+	- show_desc: don't assume that long_doc[0] ends with a newline,
+	  just add one manually when we hit a newline or NULL
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+builtins/read.def
+	- read_builtin: don't check the timeout after breaking out of the
+	  character read loop unless we didn't read anything (i == 0) and
+	  the last read return EOF or error
+	- read_builtin: move check_read_timeout call to the end of the read
+	  loop, after we check for the delimiter and whether or not we've
+	  read the right number of characters, so we always return any
+	  valid data
+	  Report from Thomas Oettli <thomas.oettli@sfs.com>
+
+				   10/14
+				   -----
+jobs.c
+	- wait_for_any_job: in posix mode, take any terminated pid from bgpids
+	  before waiting for a running job to terminate
+	  Inspired by report from Zachary Santer <zsanter@gmail.com>
+
+				   10/14
+				   -----
+doc/bash.1,doc/bashref.texi
+	- next set of updates for consistency between formats, update language,
+	  fix formatting conventions (job control section)
+
+doc/bash.1,doc/bashref.texi,lib/readline/doc/readline.3,lib/readline/doc/rluser.texi
+	- minor wording updates and typo fixes from
+	  G. Branden Robinson <g.branden.robinson@gmail.com>

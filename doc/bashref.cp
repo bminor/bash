@@ -105,26 +105,26 @@
 \entry{foreground}{123}{foreground}
 \entry{background}{123}{background}
 \entry{suspending jobs}{123}{suspending jobs}
-\entry{Readline, how to use}{126}{Readline, how to use}
-\entry{interaction, readline}{127}{interaction, readline}
-\entry{notation, readline}{128}{notation, readline}
-\entry{command editing}{128}{command editing}
-\entry{editing command lines}{128}{editing command lines}
-\entry{killing text}{129}{killing text}
-\entry{yanking text}{129}{yanking text}
-\entry{kill ring}{129}{kill ring}
-\entry{initialization file, readline}{130}{initialization file, readline}
-\entry{variables, readline}{131}{variables, readline}
-\entry{programmable completion}{155}{programmable completion}
-\entry{completion builtins}{157}{completion builtins}
-\entry{History, how to use}{163}{History, how to use}
-\entry{command history}{164}{command history}
-\entry{history list}{164}{history list}
-\entry{history builtins}{165}{history builtins}
-\entry{history expansion}{167}{history expansion}
-\entry{event designators}{168}{event designators}
-\entry{history events}{168}{history events}
-\entry{installation}{171}{installation}
-\entry{configuration}{171}{configuration}
-\entry{Bash installation}{171}{Bash installation}
-\entry{Bash configuration}{171}{Bash configuration}
+\entry{Readline, how to use}{127}{Readline, how to use}
+\entry{interaction, readline}{128}{interaction, readline}
+\entry{notation, readline}{129}{notation, readline}
+\entry{command editing}{129}{command editing}
+\entry{editing command lines}{129}{editing command lines}
+\entry{killing text}{130}{killing text}
+\entry{yanking text}{130}{yanking text}
+\entry{kill ring}{130}{kill ring}
+\entry{initialization file, readline}{131}{initialization file, readline}
+\entry{variables, readline}{132}{variables, readline}
+\entry{programmable completion}{156}{programmable completion}
+\entry{completion builtins}{158}{completion builtins}
+\entry{History, how to use}{164}{History, how to use}
+\entry{command history}{165}{command history}
+\entry{history list}{165}{history list}
+\entry{history builtins}{166}{history builtins}
+\entry{history expansion}{168}{history expansion}
+\entry{event designators}{169}{event designators}
+\entry{history events}{169}{history events}
+\entry{installation}{172}{installation}
+\entry{configuration}{172}{configuration}
+\entry{Bash installation}{172}{Bash installation}
+\entry{Bash configuration}{172}{Bash configuration}

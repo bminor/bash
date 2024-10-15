@@ -7,18 +7,18 @@
 \entry{arrays}{108}
 \initial {B}
 \entry{background}{123}
-\entry{Bash configuration}{171}
-\entry{Bash installation}{171}
+\entry{Bash configuration}{172}
+\entry{Bash installation}{172}
 \entry{binary arithmetic operators}{106}
 \entry{bitwise arithmetic operators}{106}
 \entry{Bourne shell}{5}
 \entry{brace expansion}{25}
 \entry{builtin}{3}
 \initial {C}
-\entry{command editing}{128}
+\entry{command editing}{129}
 \entry{command execution}{44}
 \entry{command expansion}{44}
-\entry{command history}{164}
+\entry{command history}{165}
 \entry{command search}{44}
 \entry{command substitution}{35}
 \entry{command timing}{10}
@@ -33,19 +33,19 @@
 \entry{comments, shell}{9}
 \entry{Compatibility Level}{119}
 \entry{Compatibility Mode}{119}
-\entry{completion builtins}{157}
+\entry{completion builtins}{158}
 \entry{conditional arithmetic operator}{106}
-\entry{configuration}{171}
+\entry{configuration}{172}
 \entry{control operator}{3}
 \entry{coprocess}{18}
 \initial {D}
 \entry{directory stack}{110}
 \entry{dollar-single quote quoting}{6}
 \initial {E}
-\entry{editing command lines}{128}
+\entry{editing command lines}{129}
 \entry{environment}{46}
 \entry{evaluation, arithmetic}{105}
-\entry{event designators}{168}
+\entry{event designators}{169}
 \entry{execution environment}{45}
 \entry{exit status}{3, 47}
 \entry{expansion}{24}
@@ -64,16 +64,16 @@
 \entry{foreground}{123}
 \entry{functions, shell}{19}
 \initial {H}
-\entry{history builtins}{165}
-\entry{history events}{168}
-\entry{history expansion}{167}
-\entry{history list}{164}
-\entry{History, how to use}{163}
+\entry{history builtins}{166}
+\entry{history events}{169}
+\entry{history expansion}{168}
+\entry{history list}{165}
+\entry{History, how to use}{164}
 \initial {I}
 \entry{identifier}{3}
-\entry{initialization file, readline}{130}
-\entry{installation}{171}
-\entry{interaction, readline}{127}
+\entry{initialization file, readline}{131}
+\entry{installation}{172}
+\entry{interaction, readline}{128}
 \entry{interactive shell}{100, 102}
 \entry{internationalization}{7}
 \entry{internationalized scripts}{8}
@@ -81,8 +81,8 @@
 \entry{job}{3}
 \entry{job control}{3, 123}
 \initial {K}
-\entry{kill ring}{129}
-\entry{killing text}{129}
+\entry{kill ring}{130}
+\entry{killing text}{130}
 \initial {L}
 \entry{localization}{7}
 \entry{login shell}{100}
@@ -92,7 +92,7 @@
 \initial {N}
 \entry{name}{3}
 \entry{native languages}{7}
-\entry{notation, readline}{128}
+\entry{notation, readline}{129}
 \initial {O}
 \entry{operator, shell}{3}
 \initial {P}
@@ -109,13 +109,13 @@
 \entry{process group}{3}
 \entry{process group ID}{3}
 \entry{process substitution}{36}
-\entry{programmable completion}{155}
+\entry{programmable completion}{156}
 \entry{prompting}{111}
 \initial {Q}
 \entry{quoting}{6}
 \entry{quoting, ANSI}{6}
 \initial {R}
-\entry{Readline, how to use}{126}
+\entry{Readline, how to use}{127}
 \entry{redirection}{40}
 \entry{reserved word}{3}
 \entry{reserved words}{9}
@@ -141,9 +141,9 @@
 \entry{unary arithmetic operators}{106}
 \initial {V}
 \entry{variable, shell}{22}
-\entry{variables, readline}{131}
+\entry{variables, readline}{132}
 \initial {W}
 \entry{word}{4}
 \entry{word splitting}{37}
 \initial {Y}
-\entry{yanking text}{129}
+\entry{yanking text}{130}

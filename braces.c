@@ -444,9 +444,12 @@ mkseq (intmax_t start, intmax_t end, intmax_t incr, int type, size_t width)
 	  return ((char **)NULL);
 	}
 
+      if (i >= nelem - 1)
+	break;
+
       n += incr;
     }
-  while (i < nelem - 1);
+  while (1);
 
   result[i] = (char *)0;
   return (result);

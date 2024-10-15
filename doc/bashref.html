@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 10 October 2024).
+the Bash shell (version 5.3, 14 October 2024).
 
-This is Edition 5.3, last updated 10 October 2024,
+This is Edition 5.3, last updated 14 October 2024,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 10 October 2024).
+the Bash shell (version 5.3, 14 October 2024).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 10 October 2024,
+<p>This is Edition 5.3, last updated 14 October 2024,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -2515,7 +2515,7 @@ corresponding element from the directory stack, as it would be displayed
 by the <code class="code">dirs</code> builtin invoked with the characters following tilde
 in the tilde-prefix as an argument (see <a class="pxref" href="#The-Directory-Stack">The Directory Stack</a>).
 If the tilde-prefix, sans the tilde, consists of a number without a
-leading &lsquo;<samp class="samp">+</samp>&rsquo; or &lsquo;<samp class="samp">-</samp>&rsquo;, &lsquo;<samp class="samp">+</samp>&rsquo; is assumed.
+leading &lsquo;<samp class="samp">+</samp>&rsquo; or &lsquo;<samp class="samp">-</samp>&rsquo;, tilde expansion assumes &lsquo;<samp class="samp">+</samp>&rsquo;.
 </p>
 <p>The results of tilde expansion are treated as if they were quoted, so
 the replacement is not subject to word splitting and filename expansion.
@@ -2665,7 +2665,7 @@ unset-or-null
 <dt><code class="code">${<var class="var">parameter</var>:=<var class="var">word</var>}</code></dt>
 <dd><p>If <var class="var">parameter</var> is unset or null, the expansion of <var class="var">word</var>
 is assigned to <var class="var">parameter</var>,
-and  the result of the expansion
+and the result of the expansion
 is the final value of <var class="var">parameter</var>.
 Positional parameters and special parameters may not be assigned
 in this way.
@@ -2684,9 +2684,10 @@ DEFAULT
 </dd>
 <dt><code class="code">${<var class="var">parameter</var>:?<var class="var">word</var>}</code></dt>
 <dd><p>If <var class="var">parameter</var>
-is null or unset, the expansion of <var class="var">word</var> (or a message
+is null or unset, the shell writes
+the expansion of <var class="var">word</var> (or a message
 to that effect if <var class="var">word</var>
-is not present) is written to the standard error and the shell, if it
+is not present) to the standard error and, if it
 is not interactive, exits with a non-zero status.
 An interactive shell does not exit, but does not execute the command
 associated with the expansion.
@@ -9256,9 +9257,13 @@ before executing any of the commands on that line or the compound command.
 Aliases are expanded when a command is read, not when it is executed.
 Therefore, an
 alias definition appearing on the same line as another
-command does not take effect until the shell reads the next line of input.
+command does not take effect until the shell reads the next line of input,
+and an alias definition in a compound command does not take
+effect until the shell parses and executes the entire compound command.
 The commands following the alias definition
-on that line are not affected by the new alias.
+on that line,
+or in the rest of a compound command,
+are not affected by the new alias.
 This behavior is also an issue when functions are executed.
 Aliases are expanded when a function definition is read,
 not when the function is executed, because a function definition
@@ -10472,33 +10477,44 @@ Next: <a href="#Job-Control-Builtins" accesskey="n" rel="next">Job Control Built
 <p>Job control
 refers to the ability to selectively stop (suspend)
 the execution of processes and continue (resume)
-their execution at a later point.  A user typically employs
+their execution at a later point.
+A user typically employs
 this facility via an interactive interface supplied jointly
 by the operating system kernel&rsquo;s terminal driver and Bash.
 </p>
-<p>The shell associates a <var class="var">job</var> with each pipeline.  It keeps a
-table of currently executing jobs, which may be listed with the
-<code class="code">jobs</code> command.  When Bash starts a job
-asynchronously, it prints a line that looks
+<p>The shell associates a <var class="var">job</var> with each pipeline.
+It keeps a
+table of currently executing jobs, which the
+<code class="code">jobs</code> command will display.
+Each job has a <em class="dfn">job number</em>, which <code class="code">jobs</code> displays between brackets.
+Job numbers start at 1.
+When Bash starts a job asynchronously, it prints a line that looks
 like:
 </p><div class="example">
 <pre class="example-preformatted">[1] 25647
 </pre></div>
 <p>indicating that this job is job number 1 and that the process <small class="sc">ID</small>
 of the last process in the pipeline associated with this job is
-25647.  All of the processes in a single pipeline are members of
-the same job.  Bash uses the <var class="var">job</var> abstraction as the
-basis for job control. 
+25647.
+All of the processes in a single pipeline are members of
+the same job.
+Bash uses the <var class="var">job</var> abstraction as the basis for job control. 
 </p>
-<p>To facilitate the implementation of the user interface to job
-control, the operating system maintains the notion of a current terminal
-process group <small class="sc">ID</small>.  Members of this process group (processes whose
+<p>To facilitate the implementation of the user interface to job control,
+each process has a <em class="dfn">process group <small class="sc">ID</small></em>, and
+the operating system maintains the notion of a current terminal
+process group <small class="sc">ID</small>.
+Processes that have the same process group ID are said to be part of
+the same <em class="dfn">process group</em>.
+Members of the foreground process group (processes whose
 process group <small class="sc">ID</small> is equal to the current terminal process group
 <small class="sc">ID</small>) receive keyboard-generated signals such as <code class="code">SIGINT</code>. 
-These processes are said to be in the foreground.  Background
-processes are those whose process group <small class="sc">ID</small> differs from the
-terminal&rsquo;s; such processes are immune to keyboard-generated
-signals.  Only foreground processes are allowed to read from or, if
+Processes in the foreground process group are said to be
+foreground processes.
+Background processes
+are those whose process group <small class="sc">ID</small> differs from the terminal&rsquo;s;
+such processes are immune to keyboard-generated signals.
+Only foreground processes are allowed to read from or, if
 the user so specifies with <code class="code">stty tostop</code>, write to the terminal.
 Background processes which attempt to
 read from (write to when <code class="code">tostop</code> is in effect) the
@@ -10507,72 +10523,101 @@ signal by the kernel&rsquo;s terminal driver,
 which, unless caught, suspends the process. 
 </p>
 <p>If the operating system on which Bash is running supports
-job control, Bash contains facilities to use it.  Typing the
+job control, Bash contains facilities to use it.
+Typing the
 <em class="dfn">suspend</em> character (typically &lsquo;<samp class="samp">^Z</samp>&rsquo;, Control-Z) while a
-process is running causes that process to be stopped and returns
-control to Bash.  Typing the <em class="dfn">delayed suspend</em> character
-(typically &lsquo;<samp class="samp">^Y</samp>&rsquo;, Control-Y) causes the process to be stopped
-when it attempts to read input from the terminal, and control to
-be returned to Bash.  The user then manipulates the state of
-this job, using the <code class="code">bg</code> command to continue it in the
-background, the <code class="code">fg</code> command to continue it in the
-foreground, or the <code class="code">kill</code> command to kill it.  A &lsquo;<samp class="samp">^Z</samp>&rsquo;
+process is running stops that process
+and returns control to Bash.
+Typing the <em class="dfn">delayed suspend</em> character
+(typically &lsquo;<samp class="samp">^Y</samp>&rsquo;, Control-Y) causes the process to stop
+when it attempts to read input from the terminal,
+and returns control to Bash.
+The user then manipulates the state of
+this job, using
+the <code class="code">bg</code> command to continue it in the background,
+the <code class="code">fg</code> command to continue it in the foreground, or
+the <code class="code">kill</code> command to kill it.
+The suspend character
 takes effect immediately, and has the additional side effect of
-causing pending output and typeahead to be discarded. 
+discarding any pending output and typeahead.
+If you want to force a background process to stop, or stop a process
+that&rsquo;s not associated with your terminal session,
+send it the <code class="code">SIGSTOP</code> signal using <code class="code">kill</code>.
 </p>
-<p>There are a number of ways to refer to a job in the shell.  The
-character &lsquo;<samp class="samp">%</samp>&rsquo; introduces a job specification (<em class="dfn">jobspec</em>).
+<p>There are a number of ways to refer to a job in the shell.
+The &lsquo;<samp class="samp">%</samp>&rsquo; character introduces a <em class="dfn">job specification</em> (jobspec).
 </p>
 <p>Job number <code class="code">n</code> may be referred to as &lsquo;<samp class="samp">%n</samp>&rsquo;.
-The symbols &lsquo;<samp class="samp">%%</samp>&rsquo; and  &lsquo;<samp class="samp">%+</samp>&rsquo; refer to the shell&rsquo;s notion of the
-current job, which is the last job stopped while it was in the foreground
-or started in the background.
+A job may also be referred to
+using a prefix of the name used to start it,
+or using a substring that appears in its command line.
+For example, &lsquo;<samp class="samp">%ce</samp>&rsquo; refers
+to a job whose command name begins with &lsquo;<samp class="samp">ce</samp>&rsquo;.
+Using &lsquo;<samp class="samp">%?ce</samp>&rsquo;, on the
+other hand, refers to any job containing the string &lsquo;<samp class="samp">ce</samp>&rsquo; in
+its command line.
+If the prefix or substring matches more than one job,
+Bash reports an error.
+</p>
+<p>The symbols &lsquo;<samp class="samp">%%</samp>&rsquo; and  &lsquo;<samp class="samp">%+</samp>&rsquo; refer to the shell&rsquo;s notion of the
+<em class="dfn">current job</em>.
 A single &lsquo;<samp class="samp">%</samp>&rsquo; (with no accompanying job specification) also refers
 to the current job.
-The previous job may be referenced using &lsquo;<samp class="samp">%-</samp>&rsquo;.
+&lsquo;<samp class="samp">%-</samp>&rsquo; refers to the <em class="dfn">previous job</em>.
+When a job starts in the background,
+a job stops while in the foreground,
+or a job is resumed in the background,
+it becomes the current job.
+The job that was the current job becomes the previous job.
+When the current job terminates, the previous job becomes the
+current job.
 If there is only a single job, &lsquo;<samp class="samp">%+</samp>&rsquo; and &lsquo;<samp class="samp">%-</samp>&rsquo; can both be used
 to refer to that job.
 In output pertaining to jobs (e.g., the output of the <code class="code">jobs</code>
-command), the current job is always flagged with a &lsquo;<samp class="samp">+</samp>&rsquo;, and the
+command), the current job is always marked with a &lsquo;<samp class="samp">+</samp>&rsquo;, and the
 previous job with a &lsquo;<samp class="samp">-</samp>&rsquo;. 
-</p>
-<p>A job may also be referred to
-using a prefix of the name used to start it, or using a substring
-that appears in its command line.  For example, &lsquo;<samp class="samp">%ce</samp>&rsquo; refers
-to a stopped job whose command name begins with &lsquo;<samp class="samp">ce</samp>&rsquo;.
-Using &lsquo;<samp class="samp">%?ce</samp>&rsquo;, on the
-other hand, refers to any job containing the string &lsquo;<samp class="samp">ce</samp>&rsquo; in
-its command line.  If the prefix or substring matches more than one job,
-Bash reports an error.
 </p>
 <p>Simply naming a job can be used to bring it into the foreground:
 &lsquo;<samp class="samp">%1</samp>&rsquo; is a synonym for &lsquo;<samp class="samp">fg %1</samp>&rsquo;, bringing job 1 from the
-background into the foreground.  Similarly, &lsquo;<samp class="samp">%1 &amp;</samp>&rsquo; resumes
-job 1 in the background, equivalent to &lsquo;<samp class="samp">bg %1</samp>&rsquo;
+background into the foreground.
+Similarly, &lsquo;<samp class="samp">%1 &amp;</samp>&rsquo; resumes
+job 1 in the background, equivalent to &lsquo;<samp class="samp">bg %1</samp>&rsquo;.
 </p>
 <p>The shell learns immediately whenever a job changes state. 
-Normally, Bash waits until it is about to print a prompt
-before reporting changes in a job&rsquo;s status so as to not interrupt
+Normally, Bash waits until it is about to print a prompt before
+notifying the user about
+changes in a job&rsquo;s status so as to not interrupt
 any other output,
 though it will notify of changes in a job&rsquo;s status after a
 foreground command in
-a list completes, before executing the next command.
+a list completes, before executing the next command in the list.
 If the <samp class="option">-b</samp> option to the <code class="code">set</code> builtin is enabled,
 Bash reports such changes immediately (see <a class="pxref" href="#The-Set-Builtin">The Set Builtin</a>).
-Any trap on <code class="code">SIGCHLD</code> is executed for each child process
-that exits.
+Bash executes any trap on <code class="code">SIGCHLD</code>
+for each child process that terminates.
 </p>
-<p>If an attempt to exit Bash is made while jobs are stopped, (or running, if
+<p>When a job terminates and Bash notifies the user about it,
+Bash removes the job from the jobs table.
+It will not appear in <code class="code">jobs</code> output, but <code class="code">wait</code> will
+report its exit status, as long as it&rsquo;s supplied the process ID
+associated with the job as an argument.
+When the table is empty, job numbers start over at 1.
+</p>
+<p>If a user attempts to exit
+Bash while jobs are stopped, (or running, if
 the <code class="code">checkjobs</code> option is enabled &ndash; see <a class="ref" href="#The-Shopt-Builtin">The Shopt Builtin</a>), the
 shell prints a warning message, and if the <code class="code">checkjobs</code> option is
 enabled, lists the jobs and their statuses.
 The <code class="code">jobs</code> command may then be used to inspect their status.
-If a second attempt to exit is made without an intervening command,
-Bash does not print another warning, and any stopped jobs are terminated.
+If the user immediately attempts to exit again,
+without an intervening command,
+Bash does not print another warning, and
+terminates any stopped jobs.
 </p>
 <p>When the shell is waiting for a job or process using the <code class="code">wait</code>
 builtin, and job control is enabled, <code class="code">wait</code> will return when the
-job changes state. The <samp class="option">-f</samp> option causes <code class="code">wait</code> to wait
+job changes state.
+The <samp class="option">-f</samp> option causes <code class="code">wait</code> to wait
 until the job or process terminates before returning.
 </p>
 <hr>
@@ -10592,8 +10637,9 @@ Next: <a href="#Job-Control-Variables" accesskey="n" rel="next">Job Control Vari
 
 <p>Resume each suspended job <var class="var">jobspec</var> in the background, as if it
 had been started with &lsquo;<samp class="samp">&amp;</samp>&rsquo;.
-If <var class="var">jobspec</var> is not supplied, the current job is used.
-The return status is zero unless it is run when job control is not
+If <var class="var">jobspec</var> is not supplied, the shell uses its
+notion of the current job.
+<code class="code">bg</code> returns  zero unless it is run when job control is not
 enabled, or, when run with job control enabled, any
 <var class="var">jobspec</var> was not found or specifies a job
 that was started without job control.
@@ -10605,7 +10651,7 @@ that was started without job control.
 </pre></div>
 
 <p>Resume the job <var class="var">jobspec</var> in the foreground and make it the current job.
-If <var class="var">jobspec</var> is not supplied, resume the current job.
+If <var class="var">jobspec</var> is not supplied, <code class="code">fg</code> resumes the current job.
 The return status is that of the command placed into the foreground,
 or non-zero if run when job control is disabled or, when run with
 job control enabled, <var class="var">jobspec</var> does not specify a valid job or
@@ -10647,6 +10693,10 @@ the user was last notified of their status.
 <p>If <var class="var">jobspec</var> is supplied,
 <code class="code">jobs</code> restricts output to information about that job. 
 If <var class="var">jobspec</var> is not supplied, <code class="code">jobs</code> lists the status of all jobs.
+The return status is zero unless an invalid option is encountered
+or an invalid
+<var class="var">jobspec</var>
+is supplied.
 </p>
 <p>If the <samp class="option">-x</samp> option is supplied, <code class="code">jobs</code> replaces any
 <var class="var">jobspec</var> found in <var class="var">command</var> or <var class="var">arguments</var> with the
@@ -10656,12 +10706,14 @@ passing it <var class="var">argument</var>s, returning its exit status.
 </dd>
 <dt><a id="index-kill"></a><span><code class="code">kill</code><a class="copiable-link" href="#index-kill"> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example-preformatted">kill [-s <var class="var">sigspec</var>] [-n <var class="var">signum</var>] [-<var class="var">sigspec</var>] <var class="var">jobspec</var> or <var class="var">pid</var>
+<pre class="example-preformatted">kill [-s <var class="var">sigspec</var>] [-n <var class="var">signum</var>] [-<var class="var">sigspec</var>] <var class="var">id</var> [...]
 kill -l|-L [<var class="var">exit_status</var>]
 </pre></div>
 
-<p>Send a signal specified by <var class="var">sigspec</var> or <var class="var">signum</var> to the process
-named by job specification <var class="var">jobspec</var> or process <small class="sc">ID</small> <var class="var">pid</var>.
+<p>Send a signal specified by <var class="var">sigspec</var> or <var class="var">signum</var> to the processes
+named by each <var class="var">id</var>.
+Each <var class="var">id</var> may be a
+job specification <var class="var">jobspec</var> or process <small class="sc">ID</small> <var class="var">pid</var>.
 <var class="var">sigspec</var> is either a case-insensitive signal name such as
 <code class="code">SIGINT</code> (with or without the <code class="code">SIG</code> prefix)
 or a signal number; <var class="var">signum</var> is a signal number.
@@ -10669,11 +10721,15 @@ If <var class="var">sigspec</var> and <var class="var">signum</var> are not pres
 sends <code class="code">SIGTERM</code>.
 </p>
 <p>The <samp class="option">-l</samp> option lists the signal names.
-If any arguments are supplied when <samp class="option">-l</samp> is supplied, the names of the
-signals corresponding to the arguments are listed, and the return status
-is zero.
+If any arguments are supplied when <samp class="option">-l</samp> is supplied,
+<code class="code">kill</code> lists the names of the signals corresponding to the arguments,
+and the return status is zero.
 <var class="var">exit_status</var> is a number specifying a signal number or the exit
-status of a process terminated by a signal.
+status of a process terminated by a signal;
+if it is supplied, <code class="code">kill</code> prints the name of the signal that caused
+the process to terminate.
+<code class="code">kill</code> assumes that process exit statuses are greater than 128;
+anything less than that is a signal number.
 The <samp class="option">-L</samp> option is equivalent to <samp class="option">-l</samp>.
 </p>
 <p>The return status is zero if at least one signal was successfully sent,
@@ -10687,8 +10743,9 @@ or non-zero if an error occurs or an invalid option is encountered.
 
 <p>Wait until the child process specified by each <var class="var">id</var> exits and
 return the exit status of the last <var class="var">id</var>.
-Each <var class="var">id</var> may be a <var class="var">pid</var> or job specification <var class="var">jobspec</var>;
-if a job spec is supplied, <code class="code">wait</code> waits for all processes in the job.
+Each <var class="var">id</var> may be a process <small class="sc">ID</small> <var class="var">pid</var>
+or a job specification <var class="var">jobspec</var>;
+if a jobspec is supplied, <code class="code">wait</code> waits for all processes in the job.
 </p>
 <p>If no options or <var class="var">id</var>s are supplied,
 <code class="code">wait</code> waits for all running background jobs and
@@ -10697,20 +10754,21 @@ if its process id is the same as <var class="var">$!</var>,
 and the return status is zero.
 </p>
 <p>If the <samp class="option">-n</samp> option is supplied, <code class="code">wait</code> waits for any one of
-the <var class="var">id</var>s or, if no <var class="var">id</var>s are supplied, any job
-or process substitution,
+the <var class="var">id</var>s or,
+if no <var class="var">id</var>s are supplied, any job or process substitution,
 to complete and returns its exit status.
 If none of the supplied <var class="var">id</var>s is a child of the shell,
 or if no arguments are supplied and the shell has no unwaited-for children,
 the exit status is 127.
 </p>
-<p>If the <samp class="option">-p</samp> option is supplied, the process or job identifier
-of the job for which the exit status is returned is assigned to the
+<p>If the <samp class="option">-p</samp> option is supplied, <code class="code">wait</code> assigns
+the process or job identifier of the job
+for which the exit status is returned to the
 variable <var class="var">varname</var> named by the option argument.
 The variable,
 which cannot be readonly,
 will be unset initially, before any assignment.
-This is useful only when the <samp class="option">-n</samp> option is supplied.
+This is useful only when used with the <samp class="option">-n</samp> option.
 </p>
 <p>Supplying the <samp class="option">-f</samp> option, when job control is enabled,
 forces <code class="code">wait</code> to wait for each <var class="var">id</var> to terminate before
@@ -10732,21 +10790,27 @@ Otherwise, the return status is the exit  status of the last <var class="var">id
 
 <p>Without options, remove each <var class="var">id</var> from the table of
 active jobs.
-Each <var class="var">id</var> may be a <var class="var">pid</var> or job specification <var class="var">jobspec</var>;
+Each <var class="var">id</var> may be a job specification <var class="var">jobspec</var>
+or a process <small class="sc">ID</small> <var class="var">pid</var>;
 if <var class="var">id</var> is a <var class="var">pid</var>,
-<code class="code">disown</code> uses the job containing <var class="var">pid</var>.
-If the <samp class="option">-h</samp> option is supplied, the job is not removed from the table,
-but is marked so that <code class="code">SIGHUP</code> is not sent to the job if the shell
-receives a <code class="code">SIGHUP</code>.
-If <var class="var">id</var> is not present, and neither the <samp class="option">-a</samp> nor the
-<samp class="option">-r</samp> option is supplied, <code class="code">disown</code> removes the current job.
+<code class="code">disown</code> uses the job containing <var class="var">pid</var> as <var class="var">jobspec</var>.
+</p>
+<p>If the <samp class="option">-h</samp> option is supplied,
+<code class="code">disown</code> does not remove the jobs corresponding to each <code class="code">id</code>
+from the jobs table,
+but rather marks them so the shell does not send
+<code class="code">SIGHUP</code>
+to the job if the shell receives a
+<code class="code">SIGHUP</code>.
 </p>
 <p>If no <var class="var">id</var> is supplied, the <samp class="option">-a</samp> option means to remove or
 mark all jobs; the <samp class="option">-r</samp> option without an <var class="var">id</var>
-argument restricts operation to running jobs.
+argument removes or marks running jobs.
+If no <var class="var">id</var> is supplied,
+and neither the <samp class="option">-a</samp> nor the <samp class="option">-r</samp> option is supplied,
+<code class="code">disown</code> removes or marks the current job.
 </p>
-<p>The return value is 0 unless an <var class="var">id</var>
-does not specify a valid job.
+<p>The return value is 0 unless an <var class="var">id</var> does not specify a valid job.
 </p>
 </dd>
 <dt><a id="index-suspend"></a><span><code class="code">suspend</code><a class="copiable-link" href="#index-suspend"> &para;</a></span></dt>
@@ -10769,8 +10833,8 @@ is not supplied.
 </dl>
 
 <p>When job control is not active, the <code class="code">kill</code> and <code class="code">wait</code>
-builtins do not accept <var class="var">jobspec</var> arguments.  They must be
-supplied process <small class="sc">ID</small>s.
+builtins do not accept <var class="var">jobspec</var> arguments.
+They must be supplied process <small class="sc">ID</small>s.
 </p>
 <hr>
 </div>
@@ -10785,24 +10849,24 @@ Previous: <a href="#Job-Control-Builtins" accesskey="p" rel="prev">Job Control B
 <dt><a id="index-auto_005fresume"></a><span><code class="code">auto_resume</code><a class="copiable-link" href="#index-auto_005fresume"> &para;</a></span></dt>
 <dd><p>This variable controls how the shell interacts with the user and
 job control.
-If this variable exists then single-word simple
-commands without redirections are treated as candidates for resumption
+If this variable exists then simple commands
+consisting of only a single word,
+without redirections, are treated as candidates for resumption
 of an existing job.
 There is no ambiguity allowed; if there is more than one job
-beginning with the string typed, then
-the most recently accessed job is selected.
+beginning with or containing the word, then
+this selects the most recently accessed job.
 The name of a stopped job, in this context, is the command line
-used to start it.
+used to start it, as displayed by <code class="code">jobs</code>.
 If this variable is set to the value &lsquo;<samp class="samp">exact</samp>&rsquo;,
-the string supplied must match the name of a stopped job exactly;
+the word must match the name of a stopped job exactly;
 if set to &lsquo;<samp class="samp">substring</samp>&rsquo;,
-the string supplied needs to match a substring of the name of a
-stopped job.
+the word needs to match a substring of the name of a stopped job.
 The &lsquo;<samp class="samp">substring</samp>&rsquo; value provides functionality
-analogous to the &lsquo;<samp class="samp">%?</samp>&rsquo; job <small class="sc">ID</small> (see <a class="pxref" href="#Job-Control-Basics">Job Control Basics</a>).
-If set to any other value, the supplied string must
-be a prefix of a stopped job&rsquo;s name; this provides functionality
-analogous to the &lsquo;<samp class="samp">%</samp>&rsquo; job <small class="sc">ID</small>.
+analogous to the &lsquo;<samp class="samp">%?string</samp>&rsquo; job <small class="sc">ID</small> (see <a class="pxref" href="#Job-Control-Basics">Job Control Basics</a>).
+If set to any other value (e.g., &lsquo;<samp class="samp">prefix</samp>&rsquo;),
+the word must be a prefix of a stopped job&rsquo;s name;
+this provides functionality analogous to the &lsquo;<samp class="samp">%string</samp>&rsquo; job <small class="sc">ID</small>.
 </p>
 </dd>
 </dl>
@@ -11793,7 +11857,7 @@ expressed on the right hand side (that is, to insert the text
 <var class="var">NEWLINE</var>,
 <var class="var">RET</var>,
 <var class="var">RETURN</var>,
-<var class="var">RUBOUT</var>,
+<var class="var">RUBOUT</var> (a destructive backspace),
 <var class="var">SPACE</var>,
 <var class="var">SPC</var>,
 and
@@ -12432,6 +12496,7 @@ interprets it as the end of input and returns <small class="sc">EOF</small>.
 If this function is bound to the
 same character as the tty <small class="sc">EOF</small> character, as <kbd class="kbd">C-d</kbd>
 commonly is, see above for the effects.
+This may also be bound to the Delete key on some keyboards.
 </p>
 </dd>
 <dt><a id="index-backward_002ddelete_002dchar-_0028Rubout_0029"></a><span><code class="code">backward-delete-char (Rubout)</code><a class="copiable-link" href="#index-backward_002ddelete_002dchar-_0028Rubout_0029"> &para;</a></span></dt>
