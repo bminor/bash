@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 14<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 15<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -216,7 +216,8 @@ builtin below).
 
 <DD>
 Equivalent to <B>-D</B>, but the output is in the GNU <I>gettext</I>
-<B>po</B> (portable object) file format.
+
+(portable object) file format.
 <DT><B>--dump-strings</B>
 
 <DD>
@@ -234,6 +235,7 @@ Execute commands from
 <I>file</I>
 
 instead of the standard personal initialization file
+
 <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>
 
 if the shell is interactive (see
@@ -260,11 +262,14 @@ Do not read either the system-wide startup file
 <A HREF="file:/etc/profile"><I>/etc/profile</I></A>
 
 or any of the personal initialization files
+
 <A HREF="file:~/.bash_profile"><I>~/.bash_profile</I></A>,
+
 
 <A HREF="file:~/.bash_login"><I>~/.bash_login</I></A>,
 
 or
+
 <A HREF="file:~/.profile"><I>~/.profile</I></A>.
 
 By default,
@@ -279,6 +284,7 @@ below).
 
 <DD>
 Do not read and execute the personal initialization file
+
 <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>
 
 if the shell is interactive.
@@ -295,7 +301,7 @@ See
 
 </FONT>
 below for a reference to a document that details how posix mode affects
-bash's behavior.
+<B>Bash</B>'s behavior.
 <DT><B>--restricted</B>
 
 <DD>
@@ -412,10 +418,23 @@ When
 
 is invoked as an interactive login shell, or as a non-interactive shell
 with the <B>--login</B> option, it first reads and
-executes commands from the file <A HREF="file:/etc/profile"><I>/etc/profile</I></A>, if that
-file exists.
-After reading that file, it looks for <A HREF="file:~/.bash_profile"><I>~/.bash_profile</I></A>,
-<A HREF="file:~/.bash_login"><I>~/.bash_login</I></A>, and <A HREF="file:~/.profile"><I>~/.profile</I></A>, in that order, and reads
+executes commands from the file
+
+<A HREF="file:/etc/profile"><I>/etc/profile</I></A>,
+
+if that file exists.
+After reading that file, it looks for
+
+<A HREF="file:~/.bash_profile"><I>~/.bash_profile</I></A>,
+
+
+<A HREF="file:~/.bash_login"><I>~/.bash_login</I></A>,
+
+and
+
+<A HREF="file:~/.profile"><I>~/.profile</I></A>,
+
+in that order, and reads
 and executes commands from the first one that exists and is readable.
 The
 <B>--noprofile</B>
@@ -427,14 +446,21 @@ When an interactive login shell exits,
 or a non-interactive login shell executes the <B>exit</B> builtin command,
 <B>bash</B>
 
-reads and executes commands from the file <A HREF="file:~/.bash_logout"><I>~/.bash_logout</I></A>, if it
-exists.
+reads and executes commands from the file
+
+<A HREF="file:~/.bash_logout"><I>~/.bash_logout</I></A>,
+
+if it exists.
 <P>
 
 When an interactive shell that is not a login shell is started,
 <B>bash</B>
 
-reads and executes commands from <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>, if that file exists.
+reads and executes commands from 
+
+<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>,
+
+if that file exists.
 This may be inhibited by using the
 <B>--norc</B>
 
@@ -442,7 +468,10 @@ option.
 The <B>--rcfile</B> <I>file</I> option causes
 <B>bash</B>
 
-to use <I>file</I> instead of <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>.
+to use <I>file</I> instead of
+
+<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>.
+
 <P>
 
 When
@@ -493,16 +522,18 @@ while conforming to the POSIX standard as well.
 When invoked as an interactive login shell, or a non-interactive
 shell with the <B>--login</B> option, it first attempts to
 read and execute commands from
+
 <A HREF="file:/etc/profile"><I>/etc/profile</I></A>
 
 and
+
 <A HREF="file:~/.profile"><I>~/.profile</I></A>,
 
 in that order.
 The
 <B>--noprofile</B>
 
-option may be used to inhibit this behavior.
+option will inhibit this behavior.
 When invoked as an interactive shell with the name
 <B>sh</B>,
 
@@ -531,19 +562,13 @@ When invoked as
 
 <B>bash</B>
 
-enters
-<I>posix</I>
-
-mode after the startup files are read.
+enters posix mode after reading the startup files.
 <P>
 
 When
 <B>bash</B>
 
-is started in
-<I>posix</I>
-
-mode, as with the
+is started in posix mode, as with the
 <B>--posix</B>
 
 command line option, it follows the POSIX standard for startup files.
@@ -566,17 +591,23 @@ If
 <B>bash</B>
 
 determines it is being run non-interactively in this fashion,
-it reads and executes commands from <A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>,
+it reads and executes commands from
+
+<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>,
+
 if that file exists and is readable.
 It will not do this if invoked as <B>sh</B>.
 The
 <B>--norc</B>
 
-option may be used to inhibit this behavior, and the
+option will inhibit this behavior, and the
 <B>--rcfile</B>
 
 option will make <B>bash</B> use a different file instead of
-<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>, but neither
+
+<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>,
+
+but neither
 <I>rshd</I> nor <I>sshd</I> generally invoke the shell with those options
 or allow them to be specified.
 <P>
@@ -769,7 +800,7 @@ reserved word precedes a pipeline, the shell reports the
 elapsed as well as user and system time consumed by its execution
 when the pipeline terminates.
 The <B>-p</B> option changes the output format to that specified by POSIX.
-When the shell is in <I>posix mode</I>, it does not recognize
+When the shell is in posix mode, it does not recognize
 <B>time</B> as a reserved word if the next token begins with a
 
 The value of the
@@ -786,7 +817,7 @@ below under
 
 <P>
 
-When the shell is in <I>posix mode</I>, <B>time</B>
+When the shell is in posix mode, <B>time</B>
 may appear by itself as the only word in a simple command.
 In this case, the shell displays the
 total user and system time consumed by the shell and its children.
@@ -1351,7 +1382,7 @@ If the <B>function</B> reserved word is used, but the
 parentheses are not supplied, the braces are recommended.
 <I>compound-command</I> is executed whenever <I>fname</I> is specified as the
 name of a simple command.
-When in <I>posix mode</I>, <I>fname</I> must be a valid shell <I>name</I>
+When in posix mode, <I>fname</I> must be a valid shell <I>name</I>
 and may not be the name of one of the POSIX <I>special builtins</I>.
 In default mode, a function name can be any unquoted shell word that does
 not contain <B>$</B>.
@@ -1467,7 +1498,7 @@ of all characters within the quotes, with the exception of
 and, when history expansion is enabled,
 <B>!</B>.
 
-When the shell is in <I>posix mode</I>,
+When the shell is in posix mode,
 the <B>!</B> has no special meaning
 within double quotes, even when history expansion is enabled.
 The characters
@@ -1736,7 +1767,7 @@ and
 <B>local</B>
 
 builtin commands (<I>declaration</I> commands).
-When in <I>posix mode</I>, these builtins may appear in a command after
+When in posix mode, these builtins may appear in a command after
 one or more instances of the <B>command</B> builtin and retain these
 assignment statement properties.
 <P>
@@ -2423,7 +2454,7 @@ Each time this parameter is referenced, it expands to the number of seconds
 since the Unix Epoch (see
 <I>time</I>(3))
 
-as a floating point value with micro-second granularity.
+as a floating-point value with micro-second granularity.
 Assignments to
 <FONT SIZE=-1><B>EPOCHREALTIME</B>
 
@@ -2648,7 +2679,7 @@ subsequently reset.
 <DT><B>READLINE_ARGUMENT</B>
 
 <DD>
-Any numeric argument given to a readline command that was defined using
+Any numeric argument given to a <B>readline</B> command that was defined using
 
 (see
 <FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
@@ -2926,7 +2957,7 @@ Expanded and executed similarly to
 
 </FONT>
 (see <B>INVOCATION</B> above)
-when an interactive shell is invoked in <I>posix mode</I>.
+when an interactive shell is invoked in posix mode.
 <DT><B>EXECIGNORE</B>
 
 <DD>
@@ -2994,7 +3025,11 @@ Controls how the results of pathname expansion are sorted.
 The value of this variable specifies the sort criteria and sort order for
 the results of pathname expansion.
 If this variable is unset or set to the null string, pathname expansion
-uses the historical behavior of sorting by name.
+uses the historical behavior of sorting by name,
+in ascending lexicographic order as determined by the
+<B>LC_COLLATE</B>
+
+shell variable.
 <DT><DD>
 If set, a valid value begins with an optional <I>+</I>, which is ignored,
 or <I>-</I>, which reverses the sort order from ascending to descending,
@@ -3026,14 +3061,20 @@ For example, a value of <I>-mtime</I> sorts the results in descending
 order by modification time (newest first).
 <DT><DD>
 The <I>numeric</I> specifier treats names consisting solely of digits as
-numbers and sorts them using the numeric value (so &quot;2&quot; will sort before
-&quot;10&quot;, for example).
+numbers and sorts them using their numeric value (so
+
+will sort before
+
+for example).
 When using <I>numeric</I>, names containing non-digits sort after all
 the all-digit names and are sorted by name using the traditional behavior.
 <DT><DD>
-A sort specifier of <I>nosort</I> disables sorting completely; the results
-are returned in the order they are read from the file system,
-and any leading <I>+</I> or <I>-</I> is ignored.
+A sort specifier of <I>nosort</I> disables sorting completely;
+<B>bash</B>
+
+returns the results
+in the order they are read from the file system,
+ignoring any leading <I>-</I>.
 <DT><DD>
 If the sort specifier is missing, it defaults to <I>name</I>,
 so a value of <I>+</I> is equivalent to the null string,
@@ -3092,7 +3133,10 @@ The name of the file in which command history is saved (see
 
 </FONT>
 below).
-<B>Bash</B> assigns a default value of <A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>.
+<B>Bash</B> assigns a default value of
+
+<A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>.
+
 If <B>HISTFILE</B> is unset or null,
 the shell does not save the command history when it exits.
 <DT><B>HISTFILESIZE</B>
@@ -3426,14 +3470,14 @@ A common value is
 
 <DD>
 If this variable is in the environment when <B>bash</B> starts, the shell
-enters <I>posix mode</I> before reading the startup files, as if the
+enters posix mode before reading the startup files, as if the
 <B>--posix</B>
 
 invocation option had been supplied.  If it is set while the shell is
-running, <B>bash</B> enables <I>posix mode</I>, as if the command
+running, <B>bash</B> enables posix mode, as if the command
 
 had been executed.
-When the shell enters <I>posix mode</I>, it sets this variable if it was
+When the shell enters posix mode, it sets this variable if it was
 not already set.
 <DT><B>PROMPT_COMMAND</B>
 
@@ -3657,20 +3701,18 @@ and tokenization (see
 </FONT>
 below).
 The first character is the <I>history expansion</I> character,
-the character which signals the start of a history
-expansion, normally
+the character which begins a history expansion, normally
 
-The second character is the <I>quick substitution</I>
-character, which is used as shorthand for re-running the previous
-command entered, substituting one string for another in the command,
-when it appears as the first character on the line.
-The default is
+The second character is the <I>quick substitution</I> character, normally
 
+When it appears as the first character on the line,
+history substitution repeats the previous command,
+replacing one string with another.
 The optional third character is the character which indicates that
 the remainder of the line is a comment when found as the first character
 of a word, normally
 
-The history comment character causes history substitution to be skipped
+The history comment character disables history substitution
 for the remaining words on the line.
 It does not necessarily cause the shell parser to treat the rest of the
 line as a comment.
@@ -4215,7 +4257,7 @@ of variable assignments (as described above under
 </FONT>
 when they appear as arguments to simple commands.
 <B>Bash</B> does not do this, except for the <I>declaration</I> commands listed
-above, when in <I>posix mode</I>.
+above, when in posix mode.
 <A NAME="lbBC">&nbsp;</A>
 <H4>Parameter Expansion</H4>
 
@@ -4264,7 +4306,8 @@ and <I>parameter</I> is not a <I>nameref</I>,
 it introduces a level of indirection.
 <B>Bash</B> uses the value formed by expanding the rest of
 <I>parameter</I> as the new <I>parameter</I>;
-this new parameter is then expanded and that value is used in the rest of the expansion, rather
+this new parameter is then expanded and that value is used
+in the rest of the expansion, rather
 than the expansion of the original <I>parameter</I>.
 This is known as <I>indirect expansion</I>.
 The value is subject to tilde expansion,
@@ -5142,7 +5185,11 @@ must be matched explicitly, unless the shell option
 is set.
 In order to match the filenames
 
+<I>.</I>
+
 and
+
+<I>..</I>,
 
 the pattern must begin with
 
@@ -5157,7 +5204,11 @@ If the
 
 shell option is enabled, the filenames
 
+<I>.</I>
+
 and
+
+<I>..</I>
 
 never match, even if the pattern begins with a
 
@@ -5220,7 +5271,11 @@ If the <B>nocaseglob</B> option is set, the matching against the patterns in
 is performed without regard to case.
 The filenames
 
+<I>.</I>
+
 and
+
+<I>..</I>
 
 are always ignored when
 <FONT SIZE=-1><B>GLOBIGNORE</B>
@@ -5445,7 +5500,11 @@ beginning with
 
 but
 
+<I>.</I>
+
 and
+
+<I>..</I>
 
 must be matched by a pattern or sub-pattern that begins with a dot;
 when it is disabled, the set does not
@@ -5458,7 +5517,11 @@ If the
 
 shell option is enabled, the filenames
 
+<I>.</I>
+
 and
+
+<I>..</I>
 
 never appear in the set.
 As above,
@@ -6520,10 +6583,22 @@ If the operating system on which <B>bash</B> is running provides these
 special files, bash will use them; otherwise it will emulate them
 internally with this behavior:
 If any <I>file</I> argument to one of the primaries is of the form
-<I>/dev/fd/n</I>, then file descriptor <I>n</I> is checked.
+
+<I>/dev/fd/n</I>,
+
+then <B>bash</B> checks file descriptor <I>n</I>.
 If the <I>file</I> argument to one of the primaries is one of
-<I>/dev/stdin</I>, <I>/dev/stdout</I>, or <I>/dev/stderr</I>, file
-descriptor 0, 1, or 2, respectively, is checked.
+
+<I>dev/stdin</I>,
+
+
+<I>dev/stdout</I>,
+
+or
+
+<I>dev/stderr</I>,
+
+<B>bash</B> checks file descriptor 0, 1, or 2, respectively.
 <P>
 
 Unless otherwise specified, primaries that operate on files follow symbolic
@@ -6531,10 +6606,10 @@ links and operate on the target of the link, rather than the link itself.
 <P>
 
 When used with <B>[[</B>,
-or when the shell is in <I>posix mode</I>,
+or when the shell is in posix mode,
 the <B>&lt;</B> and <B>&gt;</B> operators sort
 lexicographically using the current locale.
-When the shell is not in <I>posix mode</I>,
+When the shell is not in posix mode,
 the <B>test</B> command sorts using ASCII ordering.
 <P>
 
@@ -6973,11 +7048,10 @@ Changes made to the subshell environment
 cannot affect the shell's execution environment.
 <P>
 
-When the shell is in
-<I>posix mode</I>,
+When the shell is in posix mode,
 subshells spawned to execute command substitutions inherit the value of
 the <B>-e</B> option from their parent shell.
-When not in <I>posix mode</I>,
+When not in posix mode,
 <B>bash</B> clears the <B>-e</B> option in such subshells.
 See the
 description of the <B>inherit_errexit</B> shell option below
@@ -6985,7 +7059,10 @@ for how to control this behavior when not in posix mode.
 <P>
 
 If a command is followed by a <B>&amp;</B> and job control is not active, the
-default standard input for the command is the empty file <I>/dev/null</I>.
+default standard input for the command is the empty file
+
+<I>/dev/null</I>.
+
 Otherwise, the invoked command inherits the file descriptors of the calling
 shell as modified by redirections.
 <A NAME="lbCB">&nbsp;</A>
@@ -7573,7 +7650,7 @@ builtin command
 is enabled,
 <B>bash</B>
 
-reports such changes immediately.
+reports status changes immediately.
 <B>Bash</B> executes any trap on
 <FONT SIZE=-1><B>SIGCHLD</B>
 
@@ -7875,34 +7952,41 @@ builtin.
 <A NAME="lbCH">&nbsp;</A>
 <H4>Readline Notation</H4>
 
-This section uses an emacs-style notation to denote keystrokes.
+This section uses Emacs-style editing concepts and uses its
+notation for keystrokes.
 Control keys are denoted by C-<I>key</I>, e.g., C-n means Control-N.
 Similarly,
 <I>meta</I>
 
 keys are denoted by M-<I>key</I>, so M-x means Meta-X.
+The Meta key is often labeled
+
+or
+
 <P>
 
 On keyboards without a
 <I>Meta</I>
 
-key, M-<I>x</I> means ESC <I>x</I>, i.e., press the Escape key
-then the
+key, M-<I>x</I> means ESC <I>x</I>,
+i.e., press and release the Escape key,
+then press and release the
 <I>x</I>
 
-key.
+key, in sequence.
 This makes ESC the <I>meta prefix</I>.
-The combination M-C-<I>x</I> means ESC-Control-<I>x</I>,
-or press the Escape key
-then hold the Control key while pressing the
+The combination M-C-<I>x</I> means ESC-Control-<I>x</I>:
+press and release the Escape key,
+then press and hold the Control key while pressing the
 <I>x</I>
 
-key.
+key, then release both.
 <P>
 
-On some keyboards, the Meta key modifier produces meta characters with
-the eighth bit (0200) set (you can use the <B>enable-meta-key</B> variable
-to control whether or not it does this, if the keyboard allows it).
+On some keyboards, the Meta key modifier produces characters with
+the eighth bit (0200) set.
+You can use the <B>enable-meta-key</B> variable
+to control whether or not it does this, if the keyboard allows it.
 On many others, the terminal or terminal emulator converts the metafied
 key to a key sequence beginning with ESC as described in the
 preceding paragraph.
@@ -7915,7 +7999,9 @@ you can make M-<I>key</I> key bindings you specify (see
 below) do the same thing by setting the <B>force-meta-prefix</B> variable.
 <P>
 
-Readline commands may be given numeric
+<B>Readline</B>
+
+commands may be given numeric
 <I>arguments</I>,
 
 which normally act as a repeat count.
@@ -7925,6 +8011,17 @@ to a command that acts in the forward direction (e.g., <B>kill-line</B>)
 makes that command act in a backward direction.
 Commands whose behavior with arguments deviates from this are noted
 below.
+<P>
+
+The <I>point</I> is the current cursor position, and <I>mark</I> refers
+to a saved cursor position.
+The text between the point and mark is referred to as the <I>region</I>.
+<B>Readline</B> has the concept of an <I>active region</I>:
+when the region is active, <B>readline</B> redisplay
+highlights the region using the
+value of the <B>active-region-start-color</B> variable.
+The <B>enable-active-region</B> variable turns this on and off.
+Several commands set the region to active; those are noted below.
 <P>
 
 When a command is described as <I>killing</I> text, the text
@@ -7938,7 +8035,9 @@ on the kill ring.
 <A NAME="lbCI">&nbsp;</A>
 <H4>Readline Initialization</H4>
 
-Readline is customized by putting commands in an initialization
+<B>Readline</B>
+
+is customized by putting commands in an initialization
 file (the <I>inputrc</I> file).
 The name of this file is taken from the value of the
 <FONT SIZE=-1><B>INPUTRC</B>
@@ -7946,12 +8045,14 @@ The name of this file is taken from the value of the
 </FONT>
 shell variable.
 If that variable is unset, the default is
+
 <A HREF="file:~/.inputrc"><I>~/.inputrc</I></A>.
 
-If that file  does not exist or cannot be read, readline looks for
+If that file  does not exist or cannot be read, <B>readline</B> looks for
+
 <A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>.
 
-When a program which uses the readline library starts up,
+When a program which uses the <B>readline</B> library starts up,
 <B>readline</B> reads the initialization file
 and sets the key bindings and variables found there,
 before reading any user input.
@@ -7969,7 +8070,7 @@ may be changed using key binding commands in the
 <I>inputrc</I>
 
 file.
-Programs that use the readline library, including <B>bash</B>,
+Programs that use the <B>readline</B> library, including <B>bash</B>,
 may add their own commands and bindings.
 <P>
 
@@ -7990,7 +8091,7 @@ C-Meta-u: universal-argument
 into the
 <I>inputrc</I>
 
-would make M-C-u execute the readline command
+would make M-C-u execute the <B>readline</B> command
 <I>universal-argument</I>.
 
 <P>
@@ -8021,7 +8122,7 @@ and
 
 <P>
 
-In addition to command names, readline allows keys to be bound
+In addition to command names, <B>readline</B> allows keys to be bound
 to a string that is inserted when the key is pressed (a <I>macro</I>).
 The difference between a macro and a command is that a macro is
 enclosed in single or double quotes.
@@ -8240,7 +8341,7 @@ including &quot;
 
 <B>Bash</B>
 
-will display or modify the current readline key bindings with the
+will display or modify the current <B>readline</B> key bindings with the
 <B>bind</B>
 
 builtin command.
@@ -8263,7 +8364,7 @@ will change the editing mode during interactive use.
 <A NAME="lbCK">&nbsp;</A>
 <H4>Readline Variables</H4>
 
-Readline has variables that can be used to further customize its
+<B>Readline</B> has variables that can be used to further customize its
 behavior.
 A variable may be set in the
 <I>inputrc</I>
@@ -8282,7 +8383,7 @@ or using the <B>bind</B> builtin command (see
 below).
 <P>
 
-Except where noted, readline variables can take the values
+Except where noted, <B>readline</B> variables can take the values
 <B>On</B>
 
 or
@@ -8290,7 +8391,7 @@ or
 
 (without regard to case).
 Unrecognized variable names are ignored.
-When readline reads a variable value, empty or null values,
+When <B>readline</B> reads a variable value, empty or null values,
 
 (case-insensitive), and
 
@@ -8299,7 +8400,7 @@ All other values are equivalent to
 <B>Off</B>.
 <P>
 
-The <B>bind -V</B> command lists the current readline variable names
+The <B>bind -V</B> command lists the current <B>readline</B> variable names
 and values  (see
 <FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
 
@@ -8346,17 +8447,17 @@ A sample value might be
 <DT><B>bell-style (audible)</B>
 
 <DD>
-Controls what happens when readline wants to ring the terminal bell.
-If set to <B>none</B>, readline never rings the bell.
-If set to <B>visible</B>, readline uses a visible bell if one is available.
-If set to <B>audible</B>, readline attempts to ring the terminal's bell.
+Controls what happens when <B>readline</B> wants to ring the terminal bell.
+If set to <B>none</B>, <B>readline</B> never rings the bell.
+If set to <B>visible</B>, <B>readline</B> uses a visible bell if one is available.
+If set to <B>audible</B>, <B>readline</B> attempts to ring the terminal's bell.
 <DT><B>bind-tty-special-chars (On)</B>
 
 <DD>
-If set to <B>On</B>, readline attempts to bind
+If set to <B>On</B>, <B>readline</B> attempts to bind
 the control characters that are treated specially by the kernel's
-terminal driver to their readline equivalents.
-These override the default readline bindings described here.
+terminal driver to their <B>readline</B> equivalents.
+These override the default <B>readline</B> bindings described here.
 Type
 
 at a <B>bash</B> prompt to see your current terminal settings,
@@ -8364,23 +8465,23 @@ including the special control characters (usually <B>cchars</B>).
 <DT><B>blink-matching-paren (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline attempts to briefly move the cursor to an
+If set to <B>On</B>, <B>readline</B> attempts to briefly move the cursor to an
 opening parenthesis when a closing parenthesis is inserted.
 <DT><B>colored-completion-prefix (Off)</B>
 
 <DD>
-If set to <B>On</B>, when listing completions, readline displays the
+If set to <B>On</B>, when listing completions, <B>readline</B> displays the
 common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the <B>LS_COLORS</B>
 environment variable.
 If there is a color definition in <B>$LS_COLORS</B> for the custom suffix
 
-readline uses this color for
+<B>readline</B> uses this color for
 the common prefix instead of its default.
 <DT><B>colored-stats (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline displays possible completions using different
+If set to <B>On</B>, <B>readline</B> displays possible completions using different
 colors to indicate their file type.
 The color definitions are taken from the value of the <B>LS_COLORS</B>
 environment variable.
@@ -8391,7 +8492,7 @@ environment variable.
 
 <DD>
 
-The string that the readline
+The string that the <B>readline</B>
 <B>insert-comment</B>
 
 command inserts.
@@ -8414,12 +8515,14 @@ The default value is -1.
 <DT><B>completion-ignore-case (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline performs filename matching and completion
+If set to <B>On</B>, <B>readline</B> performs filename matching and completion
 in a case-insensitive fashion.
 <DT><B>completion-map-case (Off)</B>
 
 <DD>
-If set to <B>On</B>, and <B>completion-ignore-case</B> is enabled, readline
+If set to <B>On</B>, and <B>completion-ignore-case</B> is enabled,
+<B>readline</B>
+
 treats hyphens (<I>-</I>) and underscores (<I>_</I>) as equivalent when
 performing case-insensitive filename matching and completion.
 <DT><B>completion-prefix-display-length (0)</B>
@@ -8428,7 +8531,7 @@ performing case-insensitive filename matching and completion.
 The maximum
 length in characters of the common prefix of a list of possible
 completions that is displayed without modification.
-When set to a value greater than zero, readline
+When set to a value greater than zero, <B>readline</B>
 replaces common prefixes longer than this value
 with an ellipsis when displaying possible completions.
 <DT><B>completion-query-items (100)</B>
@@ -8440,18 +8543,18 @@ generated by the <B>possible-completions</B> command.
 It may be set to any integer value greater than or equal to zero.
 If the number of possible completions is greater than
 or equal to the value of this variable,
-readline will ask whether or not the user wishes to view them;
-otherwise readline simply lists them on the terminal.
-A zero value means readline should never ask; negative values are
+<B>readline</B> will ask whether or not the user wishes to view them;
+otherwise <B>readline</B> simply lists them on the terminal.
+A zero value means <B>readline</B> should never ask; negative values are
 treated as zero.
 <DT><B>convert-meta (On)</B>
 
 <DD>
-If set to <B>On</B>, readline will convert characters it reads
+If set to <B>On</B>, <B>readline</B> will convert characters it reads
 that have the eighth bit set to an ASCII key sequence by
 clearing the eighth bit and prefixing it with an escape character
-(converting the character to have the <I>meta prefix</I>).
-The default is <I>On</I>, but readline will set it to <I>Off</I>
+(converting the character to have the meta prefix).
+The default is <I>On</I>, but <B>readline</B> will set it to <I>Off</I>
 if the locale contains
 characters whose encodings may include bytes with the eighth bit set.
 This variable is dependent on the <B>LC_CTYPE</B> locale category, and
@@ -8461,19 +8564,19 @@ This variable also affects key bindings; see the description of
 <DT><B>disable-completion (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline will inhibit word completion.
+If set to <B>On</B>, <B>readline</B> will inhibit word completion.
 Completion characters will be inserted into the line as if they
 had been mapped to <B>self-insert</B>.
 <DT><B>echo-control-characters (On)</B>
 
 <DD>
 When set to <B>On</B>, on operating systems that indicate they support it,
-readline echoes a character corresponding to a signal generated from the
+<B>readline</B> echoes a character corresponding to a signal generated from the
 keyboard.
 <DT><B>editing-mode (emacs)</B>
 
 <DD>
-Controls whether readline uses a set of key bindings similar
+Controls whether <B>readline</B> uses a set of key bindings similar
 to <I>Emacs</I> or <I>vi</I>.
 <B>editing-mode</B>
 
@@ -8498,12 +8601,10 @@ sequence into the mode string.
 <DT><B>enable-active-region (On)</B>
 
 <DD>
-The <I>point</I> is the current cursor position, and <I>mark</I> refers
-to a saved cursor position.
-The text between the point and mark is referred to as the <I>region</I>.
-When this variable is set to <I>On</I>, readline allows certain commands
+When this variable is set to <I>On</I>, <B>readline</B> allows certain commands
 to designate the region as <I>active</I>.
-When the region is active, readline highlights the text in the region using
+When the region is active, <B>readline</B> highlights
+the text in the region using
 the value of the <B>active-region-start-color</B>, which defaults to the
 string that enables the terminal's standout mode.
 The active region shows the text inserted by bracketed-paste and any
@@ -8511,22 +8612,22 @@ matching text found by incremental and non-incremental history searches.
 <DT><B>enable-bracketed-paste (On)</B>
 
 <DD>
-When set to <B>On</B>, readline configures the terminal to insert each
+When set to <B>On</B>, <B>readline</B> configures the terminal to insert each
 paste into the editing buffer as a single string of characters, instead
 of treating each character as if it had been read from the keyboard.
 This is called <I>bracketed-paste mode</I>;
-it prevents readline from executing any editing commands bound to key
+it prevents <B>readline</B> from executing any editing commands bound to key
 sequences appearing in the pasted text.
 <DT><B>enable-keypad (Off)</B>
 
 <DD>
-When set to <B>On</B>, readline will try to enable the application
+When set to <B>On</B>, <B>readline</B> will try to enable the application
 keypad when it is called.
 Some systems need this to enable the arrow keys.
 <DT><B>enable-meta-key (On)</B>
 
 <DD>
-When set to <B>On</B>, readline will try to enable any meta modifier
+When set to <B>On</B>, <B>readline</B> will try to enable any meta modifier
 key the terminal claims to support.
 On many terminals, the Meta key is used to send eight-bit characters;
 this variable checks for the terminal capability that indicates the
@@ -8536,27 +8637,27 @@ typed (a meta character).
 <DT><B>expand-tilde (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline performs tilde expansion when it
+If set to <B>On</B>, <B>readline</B> performs tilde expansion when it
 attempts word completion.
 <DT><B>force-meta-prefix (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline modifies its behavior when binding key
+If set to <B>On</B>, <B>readline</B> modifies its behavior when binding key
 sequences containing \M- or Meta-
 (see <B>Key Bindings</B> above) by converting a key sequence of the form
 \M-<I>C</I> or Meta-<I>C</I> to the two-character sequence
-<B>ESC</B><I>C</I> (adding the <I>meta prefix</I>).
+<B>ESC</B> <I>C</I> (adding the meta prefix).
 If
 <B>force-meta-prefix</B>
 
 is set to <B>Off</B> (the default),
-readline uses the value of the
+<B>readline</B> uses the value of the
 <B>convert-meta</B>
 
 variable to determine whether to perform this conversion:
 if <B>convert-meta</B> is <B>On</B>,
-readline performs the conversion described above;
-if it is <B>Off</B>, readline converts <I>C</I> to a meta character by
+<B>readline</B> performs the conversion described above;
+if it is <B>Off</B>, <B>readline</B> converts <I>C</I> to a meta character by
 setting the eighth bit (0200).
 <DT><B>history-preserve-point (Off)</B>
 
@@ -8579,7 +8680,7 @@ the maximum number of history entries to 500.
 <DT><B>horizontal-scroll-mode (Off)</B>
 
 <DD>
-Setting this variable to <B>On</B> makes readline use a single line
+Setting this variable to <B>On</B> makes <B>readline</B> use a single line
 for display, scrolling the input horizontally on a single screen line
 when it becomes longer than the screen width rather than wrapping to
 a new line.
@@ -8587,10 +8688,10 @@ This setting is automatically enabled for terminals of height 1.
 <DT><B>input-meta (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline will enable eight-bit input (that is, it
+If set to <B>On</B>, <B>readline</B> will enable eight-bit input (that is, it
 will not clear the eighth bit in the characters it reads),
 regardless of what the terminal claims it can support.
-The default is <I>Off</I>, but readline will set it to <I>On</I>
+The default is <I>Off</I>, but <B>readline</B> will set it to <I>On</I>
 if the locale contains characters whose encodings may include bytes
 with the eighth bit set.
 This variable is dependent on the <B>LC_CTYPE</B> locale category, and
@@ -8607,7 +8708,7 @@ If this variable has not been given a value, the characters
 <DT><B>keymap (emacs)</B>
 
 <DD>
-Set the current readline keymap.
+Set the current <B>readline</B> keymap.
 The set of valid keymap names is
 <I>emacs, emacs-standard, emacs-meta, emacs-ctlx, vi,
 vi-command</I>, and
@@ -8623,16 +8724,16 @@ also affects the default keymap.
 <DT><B>keyseq-timeout (500)</B>
 
 <DD>
-Specifies the duration <I>readline</I> will wait for a character when
+Specifies the duration <B>readline</B> will wait for a character when
 reading an ambiguous key sequence
 (one that can form a complete key sequence using the input read so far,
 or can take additional input to complete a longer key sequence).
-If readline does not receive any input within the timeout, it will use the
-shorter but complete key sequence.
+If <B>readline</B> does not receive any input within the timeout,
+it will use the shorter but complete key sequence.
 The value is specified in milliseconds, so a value of 1000 means that
-readline will wait one second for additional input.
+<B>readline</B> will wait one second for additional input.
 If this variable is set to a value less than or equal to zero, or to a
-non-numeric value, readline will wait until another key is pressed to
+non-numeric value, <B>readline</B> will wait until another key is pressed to
 decide which key sequence to complete.
 <DT><B>mark-directories (On)</B>
 
@@ -8641,7 +8742,8 @@ If set to <B>On</B>, completed directory names have a slash appended.
 <DT><B>mark-modified-lines (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline displays history lines that have been modified
+If set to <B>On</B>, <B>readline</B> displays history lines
+that have been modified
 with a preceding asterisk (<B>*</B>).
 <DT><B>mark-symlinked-directories (Off)</B>
 
@@ -8651,7 +8753,7 @@ have a slash appended, subject to the value of <B>mark-directories</B>.
 <DT><B>match-hidden-files (On)</B>
 
 <DD>
-This variable, when set to <B>On</B>, forces readline to match files whose
+This variable, when set to <B>On</B>, forces <B>readline</B> to match files whose
 names begin with a
 
 (hidden files) when performing filename completion.
@@ -8667,10 +8769,10 @@ the list.
 <DT><B>output-meta (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline will display characters with the
+If set to <B>On</B>, <B>readline</B> will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.
-The default is <I>Off</I>, but readline will set it to <I>On</I>
+The default is <I>Off</I>, but <B>readline</B> will set it to <I>On</I>
 if the locale contains characters whose encodings may include
 bytes with the eighth bit set.
 This variable is dependent on the <B>LC_CTYPE</B> locale category, and
@@ -8678,7 +8780,7 @@ its value may change if the locale changes.
 <DT><B>page-completions (On)</B>
 
 <DD>
-If set to <B>On</B>, readline uses an internal <I>more</I>-like pager
+If set to <B>On</B>, <B>readline</B> uses an internal <I>more</I>-like pager
 to display a screenful of possible completions at a time.
 <DT><B>prefer-visible-bell</B>
 
@@ -8687,12 +8789,12 @@ See <B>bell-style</B>.
 <DT><B>print-completions-horizontally (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline will display completions with matches
+If set to <B>On</B>, <B>readline</B> will display completions with matches
 sorted horizontally in alphabetical order, rather than down the screen.
 <DT><B>revert-all-at-newline (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline will undo all changes to history lines
+If set to <B>On</B>, <B>readline</B> will undo all changes to history lines
 before returning when executing <B>accept-line</B>.
 By default,
 history lines may be modified and retain individual undo lists across
@@ -8700,7 +8802,7 @@ calls to <B>readline</B>.
 <DT><B>search-ignore-case (Off)</B>
 
 <DD>
-If set to <B>On</B>, readline performs incremental and non-incremental
+If set to <B>On</B>, <B>readline</B> performs incremental and non-incremental
 history list searches in a case-insensitive fashion.
 <DT><B>show-all-if-ambiguous (Off)</B>
 
@@ -8735,7 +8837,7 @@ The mode strings are user-settable (e.g., <I>emacs-mode-string</I>).
 If set to <B>On</B>, this alters the default completion behavior when
 inserting a single match into the line.
 It's only active when performing completion in the middle of a word.
-If enabled, readline does not insert characters from the completion
+If enabled, <B>readline</B> does not insert characters from the completion
 that match characters after point in the word being completed,
 so portions of the word following the cursor are not duplicated.
 <DT><B>vi-cmd-mode-string ((cmd))</B>
@@ -8771,7 +8873,9 @@ completions.
 <A NAME="lbCL">&nbsp;</A>
 <H4>Readline Conditional Constructs</H4>
 
-Readline implements a facility similar in spirit to the conditional
+<B>Readline</B>
+
+implements a facility similar in spirit to the conditional
 compilation features of the C preprocessor which allows key
 bindings and variable settings to be performed as the result
 of tests.
@@ -8785,7 +8889,7 @@ The
 
 construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
-readline.
+<B>readline</B>.
 The text of the test, after any comparison operator,
 extends to the end of the line;
 unless otherwise noted, no characters are required to isolate it.
@@ -8795,11 +8899,11 @@ unless otherwise noted, no characters are required to isolate it.
 
 <DD>
 The <B>mode=</B> form of the <B>$if</B> directive is used to test
-whether readline is in emacs or vi mode.
+whether <B>readline</B> is in emacs or vi mode.
 This may be used in conjunction
 with the <B>set keymap</B> command, for instance, to set bindings in
 the <I>emacs-standard</I> and <I>emacs-ctlx</I> keymaps only if
-readline is starting out in emacs mode.
+<B>readline</B> is starting out in emacs mode.
 <DT><B>term</B>
 
 <DD>
@@ -8825,8 +8929,8 @@ for instance.
 
 <DD>
 The <B>version</B> test may be used to perform comparisons against
-specific readline versions.
-The <B>version</B> expands to the current readline version.
+specific <B>readline</B> versions.
+The <B>version</B> expands to the current <B>readline</B> version.
 The set of comparison operators includes
 <B>=</B>,
 
@@ -8856,7 +8960,7 @@ and from the version number argument by whitespace.
 <DD>
 The <I>application</I> construct is used to include
 application-specific settings.
-Each program using the readline
+Each program using the <B>readline</B>
 library sets the <I>application name</I>, and an initialization
 file can test for a particular value.
 This could be used to bind key sequences to functions useful for
@@ -8888,7 +8992,7 @@ key sequence that quotes the current or previous word in <B>bash</B>:
 <DT><I>variable</I>
 
 <DD>
-The <I>variable</I> construct provides simple equality tests for readline
+The <I>variable</I> construct provides simple equality tests for <B>readline</B>
 variables and values.
 The permitted comparison operators are <I>=</I>, <I>==</I>, and <I>!=</I>.
 The variable name must be separated from the comparison operator by
@@ -8914,7 +9018,10 @@ This command, as seen in the previous example, terminates an
 <DD>
 This directive takes a single filename as an argument and reads commands
 and key bindings from that file.
-For example, the following directive would read <A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>:
+For example, the following directive would read
+
+<A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>:
+
 </DL>
 <P>
 
@@ -8928,8 +9035,9 @@ For example, the following directive would read <A HREF="file:/etc/inputrc"><I>/
 <A NAME="lbCM">&nbsp;</A>
 <H4>Searching</H4>
 
-Readline provides commands for searching through the command history
-(see
+<B>Readline</B>
+
+provides commands for searching through the command history (see
 <FONT SIZE=-1><B>HISTORY</B>
 
 </FONT>
@@ -8945,7 +9053,7 @@ and
 
 Incremental searches begin before the user has finished typing the
 search string.
-As each character of the search string is typed, readline displays
+As each character of the search string is typed, <B>readline</B> displays
 the next entry from the history matching the string typed so far.
 An incremental search requires only as many characters as needed to
 find the desired history entry.
@@ -8965,7 +9073,7 @@ To find other matching entries in the history list, type <B>C-r</B> or
 <B>C-s</B> as appropriate.
 This will search backward or forward in the history for the next
 entry matching the search string typed so far.
-Any other key sequence bound to a readline command will terminate
+Any other key sequence bound to a <B>readline</B> command will terminate
 the search and execute that command.
 For instance, a newline will terminate the search and accept
 the line, thereby executing the command from the history list.
@@ -8973,9 +9081,11 @@ A movement command will terminate the search, make the last line found
 the current line, and begin editing.
 <P>
 
-Readline remembers the last incremental search string.
+<B>Readline</B>
+
+remembers the last incremental search string.
 If two <B>C-r</B>s are typed without any intervening characters defining
-a new search string, readline uses any remembered search string.
+a new search string, <B>readline</B> uses any remembered search string.
 <P>
 
 Non-incremental searches read the entire search string before starting
@@ -8994,8 +9104,10 @@ In the following descriptions, <I>point</I> refers to the current cursor
 position, and <I>mark</I> refers to a cursor position saved by the
 <B>set-mark</B> command.
 The text between the point and mark is referred to as the <I>region</I>.
-Readline has the concept of an <I>active region</I>:
-when the region is active, readline redisplay uses the
+<B>Readline</B>
+
+has the concept of an <I>active region</I>:
+when the region is active, <B>readline</B> redisplay uses the
 value of the <B>active-region-start-color variable
 to denote the region.
 Several commands set the region to active; those are noted below.
@@ -9048,16 +9160,17 @@ Words are delimited by non-quoted shell metacharacters.
 Attempt to move point to the same physical screen column on the previous
 physical screen line.
 This will not have the desired effect if the current
-readline line does not take up more than one physical line or if point is not
-greater than the length of the prompt plus the screen width.
+<B>readline</B> line does not take up more than one physical line or if
+point is not greater than the length of the prompt plus the screen width.
 <DT><B>next-screen-line</B>
 
 <DD>
 Attempt to move point to the same physical screen column on the next
 physical screen line.
 This will not have the desired effect if the current
-readline line does not take up more than one physical line or if the length
-of the current readline line is not greater than the length of the prompt
+<B>readline</B> line does not take up more than one physical line or if
+the length of the current <B>readline</B> line is
+not greater than the length of the prompt
 plus the screen width.
 <DT><B>clear-display (M-C-l)</B>
 
@@ -9304,7 +9417,7 @@ The character indicating end-of-file as set, for example, by
 <I>stty</I>(1).
 
 If this character is read when there are no characters
-on the line, and point is at the beginning of the line, readline
+on the line, and point is at the beginning of the line, <B>readline</B>
 interprets it as the end of input and returns
 <FONT SIZE=-1><B>EOF</B>.
 
@@ -9349,8 +9462,8 @@ This function is intended to be bound to the
 
 escape
 sequence sent by some terminals, and such a binding is assigned by default.
-It allows readline to insert the pasted text as a single unit without treating
-each character as if it had been read from the keyboard.
+It allows <B>readline</B> to insert the pasted text as a single unit
+without treating each character as if it had been read from the keyboard.
 The pasted characters
 are inserted as if each one was bound to <B>self-insert</B> instead of
 executing any editing commands.
@@ -9567,7 +9680,7 @@ If none of these produces a match, it falls back to filename completion.
 
 <DD>
 List the possible completions of the text before point.
-When displaying completions, readline sets the number of columns used
+When displaying completions, <B>readline</B> sets the number of columns used
 for display to the value of <B>completion-display-width</B>, the value of
 the shell variable
 <FONT SIZE=-1><B>COLUMNS</B>,
@@ -9792,13 +9905,13 @@ CSI sequences begin with a Control Sequence Indicator (CSI), usually ESC-[.
 If this sequence is bound to
 
 keys producing CSI sequences will have no effect
-unless explicitly bound to a readline command, instead of inserting
+unless explicitly bound to a <B>readline</B> command, instead of inserting
 stray characters into the editing buffer.
 This is unbound by default, but usually bound to ESC-[.
 <DT><B>insert-comment (M-#)</B>
 
 <DD>
-Without a numeric argument, insert the value of the readline
+Without a numeric argument, insert the value of the <B>readline</B>
 <B>comment-begin</B>
 
 variable at the beginning of the current line.
@@ -9844,31 +9957,31 @@ pathname expansion.
 
 <DD>
 Print all of the functions and their key bindings
-to the readline output stream.
+to the <B>readline</B> output stream.
 If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <I>inputrc</I> file.
 <DT><B>dump-variables</B>
 
 <DD>
-Print all of the settable readline variables and their values
-to the readline output stream.
+Print all of the settable <B>readline</B> variables and their values
+to the <B>readline</B> output stream.
 If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <I>inputrc</I> file.
 <DT><B>dump-macros</B>
 
 <DD>
-Print all of the readline key sequences bound to macros and the
+Print all of the <B>readline</B> key sequences bound to macros and the
 strings they output
-to the readline output stream.
+to the <B>readline</B> output stream.
 If a numeric argument is supplied,
 the output is formatted in such a way that it can be made part
 of an <I>inputrc</I> file.
 <DT><B>execute-named-command (M-x)</B>
 
 <DD>
-Read a bindable readline command name from the input and execute the
+Read a bindable <B>readline</B> command name from the input and execute the
 function to which it's bound, as if the key sequence to which it was
 bound appeared in the input.
 If this function is supplied with a numeric argument, it passes that
@@ -10069,16 +10182,16 @@ if the compspec generates no matches,
 <B>bash</B> attempts its default completions.
 If the <B>-o default</B> option was supplied to <B>complete</B> when the
 compspec was defined, programmable completion will perform
-readline's default completion
+<B>readline</B>'s default completion
 if the compspec (and, if attempted, the default <B>bash</B> completions)
 generate no matches.
 <P>
 
 When a compspec indicates that directory name completion is desired,
-the programmable completion functions force readline to append a slash
+the programmable completion functions force <B>readline</B> to append a slash
 to completed names which are symbolic links to directories, subject to
-the value of the <B>mark-directories</B> readline variable, regardless
-of the setting of the <B>mark-symlinked-directories</B> readline variable.
+the value of the <B>mark-directories</B> <B>readline</B> variable, regardless
+of the setting of the <B>mark-symlinked-directories</B> <B>readline</B> variable.
 <P>
 
 There is some support for dynamically modifying completions.
@@ -10171,7 +10284,10 @@ the file named by the
 <FONT SIZE=-1><B>HISTFILE</B>
 
 </FONT>
-variable (default <A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>).
+variable (default
+
+<A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>).
+
 That file is referred to as the <I>history file</I>.
 The history file is truncated, if necessary,
 to contain no more than the number of history entries
@@ -10803,7 +10919,7 @@ to find the directory containing
 <I>filename</I>.
 
 <I>filename</I> does not need to be executable.
-When <B>bash</B> is not in <I>posix mode</I>, it searches
+When <B>bash</B> is not in posix mode, it searches
 the current directory if <I>filename</I> is not found in
 <FONT SIZE=-1><B>PATH</B>,
 
@@ -10839,7 +10955,7 @@ is not found or cannot be read.
 With no arguments or with the
 <B>-p</B>
 
-option,<B>alias</B> prints the list of aliases in the form
+option, <B>alias</B> prints the list of aliases in the form
 <B>alias</B> <I>name</I>=<I>value</I> on standard output.
 When arguments are supplied, define an alias for
 each <I>name</I> whose <I>value</I> is given.
@@ -10940,13 +11056,13 @@ that they can be
 used as an argument to a subsequent
 <B>bind</B> command or in a <B>readline</B> initialization file.
 If arguments remain after option processing, <B>bind</B> treats
-them as readline command names and restricts output to those names.
+them as <B>readline</B> command names and restricts output to those names.
 <DT><B>-P</B>
 
 <DD>
 List current <B>readline</B> function names and bindings.
 If arguments remain after option processing, <B>bind</B> treats
-them as readline command names and restricts output to those names.
+them as <B>readline</B> command names and restricts output to those names.
 <DT><B>-s</B>
 
 <DD>
@@ -11037,7 +11153,7 @@ those new values will be reflected in the editing state.
 <DD>
 List all key sequences bound to shell commands and the associated commands
 in a format that can be reused as
-an argument to a subsequent @code{bind} command.
+an argument to a subsequent <B>bind</B> command.
 
 </DL>
 <P>
@@ -11095,7 +11211,11 @@ The current frame is frame 0.
 The return value is 0 unless the shell is not executing a subroutine
 call or <I>expr</I> does not correspond to a valid position in the
 call stack.
-<DT><B>cd</B> [<B>-L</B>|[<B>-P</B> [<B>-e</B>]]] [-@] [<I>dir</I>]<DD>
+<DT>
+<DD>
+<B>cd</B> [<B>-L</B>] [-@] [<I>dir</I>]
+<DT><B>cd</B> <B>-P</B> [<B>-e</B>] [-@] [<I>dir</I>]<DD>
+
 Change the current directory to <I>dir</I>.
 if <I>dir</I> is not supplied, the value of the
 <FONT SIZE=-1><B>HOME</B>
@@ -11106,7 +11226,9 @@ The variable
 <FONT SIZE=-1><B>CDPATH</B>
 
 </FONT>
-exists, <B>cd</B> uses it as a search path:
+exists,
+and <I>dir</I> does not begin with a slash (/),
+<B>cd</B> uses it as a search path:
 the shell searches each directory name in
 <FONT SIZE=-1><B>CDPATH</B>
 
@@ -11123,22 +11245,17 @@ A null directory name in
 </FONT>
 is the same as the current directory, i.e.,
 
-If
-<I>dir</I>
-
-begins with a slash (/),
-then
-<FONT SIZE=-1><B>CDPATH</B>
-
-</FONT>
-is not used.
 <DT><DD>
 The
 <B>-P</B>
 
 option causes <B>cd</B> to use the physical directory structure
 by resolving symbolic links while traversing <I>dir</I> and
-before processing instances of <I>..</I> in <I>dir</I> (see also the
+before processing instances of
+
+<I>..</I>
+
+in <I>dir</I> (see also the
 <B>-P</B>
 
 option to the
@@ -11149,11 +11266,36 @@ builtin command).
 The
 <B>-L</B>
 
-option forces symbolic links to be followed by resolving the link
-after processing instances of <I>..</I> in <I>dir</I>.
-If <I>..</I> appears in <I>dir</I>, it is processed by removing the
+option forces <B>cd</B> to follow symbolic links by resolving the link
+after processing instances of
+
+<I>..</I>
+
+in <I>dir</I>.
+If
+
+<I>..</I>
+
+appears in <I>dir</I>, <B>cd</B> processes it by removing the
 immediately previous pathname component from <I>dir</I>, back to a slash
-or the beginning of <I>dir</I>.
+or the beginning of <I>dir</I>,
+and verifying that the portion of <I>dir</I> it has processed to
+that point is still a valid directory name after removing the pathname
+component.
+If it is not a valid directory name, <B>cd</B> returns a non-zero status.
+If neither
+<B>-L</B>
+
+nor
+<B>-P</B>
+
+is supplied,
+<B>cd</B>
+
+behaves as if
+<B>-L</B>
+
+had been supplied.
 <DT><DD>
 If the
 <B>-e</B>
@@ -11161,9 +11303,8 @@ If the
 option is supplied with
 <B>-P</B>,
 
-and the current working directory cannot be successfully determined
-after a successful directory change, <B>cd</B> will return a non-zero
-status.
+and <B>cd</B> cannot successfully determine the current working directory 
+after a successful directory change, it will return a non-zero status.
 <DT><DD>
 On systems that support it, the <B>-@</B> option presents the extended
 attributes associated with a file as a directory.
@@ -13350,8 +13491,9 @@ If the standard input is coming from a terminal,
 
 above)
 to obtain the line.
-Readline uses the current (or default, if line editing was not previously
-active) editing settings, but uses readline's default filename completion.
+<B>Readline</B> uses the current
+(or default, if line editing was not previously active)
+editing settings, but uses <B>readline</B>'s default filename completion.
 <DT><B>-E</B>
 
 <DD>
@@ -13366,7 +13508,9 @@ If the standard input is coming from a terminal,
 
 above)
 to obtain the line.
-Readline uses the current (or default, if line editing was not previously
+<B>Readline</B>
+
+uses the current (or default, if line editing was not previously
 active) editing settings, but uses bash's default completion, including
 programmable completion.
 <DT><B>-i </B><I>text</I>
@@ -13560,7 +13704,7 @@ Without options, display the name and value of each shell variable
 in a format that can be reused as input
 for setting or resetting the currently-set variables.
 Read-only variables cannot be reset.
-In <I>posix mode</I>, only shell variables are listed.
+In posix mode, only shell variables are listed.
 The output is sorted according to the current locale.
 When options are specified, they set or unset shell attributes.
 Any arguments remaining after option processing are treated
@@ -13775,7 +13919,7 @@ The effect is as if the shell command
 
 had been executed
 (see
-<B>Shell Variables&lt;</B>
+<B>Shell Variables</B>
 
 
 above).
@@ -14352,7 +14496,7 @@ If set,
 
 replaces directory names with the results of word expansion when performing
 filename completion.
-This changes the contents of the readline editing buffer.
+This changes the contents of the <B>readline</B> editing buffer.
 If not set,
 <B>bash</B>
 
@@ -14376,7 +14520,11 @@ includes filenames beginning with a
 in the results of pathname expansion.
 The filenames
 
+<I>.</I>
+
 and
+
+<I>..</I>
 
 must always be matched explicitly, even if
 <B>dotglob</B>
@@ -14492,7 +14640,8 @@ shell variable
 cause words to be ignored when performing word completion even if
 the ignored words are the only possible completions.
 See
-<FONT SIZE=-1><B>SHELL VARIABLES</B></FONT>
+<B>Shell Variables</B>
+
 
 above
 for a description of
@@ -14526,7 +14675,11 @@ and upper-case and lower-case ASCII characters will collate together.
 <DD>
 If set, pathname expansion will never match the filenames
 
+<I>.</I>
+
 and
+
+<I>..</I>,
 
 even if the pattern begins with a
 
@@ -14600,7 +14753,7 @@ to all jobs when an interactive login shell exits.
 <DD>
 If set, command substitution inherits the value of the <B>errexit</B> option,
 instead of unsetting it in the subshell environment.
-This option is enabled when <I>posix mode</I> is enabled.
+This option is enabled when posix mode is enabled.
 <DT><B>interactive_comments</B>
 
 <DD>
@@ -14940,11 +15093,11 @@ using the rules listed above.
 </DL>
 <P>
 
-When the shell is in <I>posix mode</I>, or if the expression is part
+When the shell is in posix mode, or if the expression is part
 of the <B>[[</B> command,
 the <B>&lt;</B> and <B>&gt;</B> operators sort using the
 current locale.
-If the shell is not in <I>posix mode</I>, the <B>test</B> and <B>[</B>
+If the shell is not in posix mode, the <B>test</B> and <B>[</B>
 commands sort lexicographically using ASCII ordering.
 <P>
 
@@ -16062,7 +16215,7 @@ script.
 <DT><I>The Gnu Readline Library</I>, Brian Fox and Chet Ramey<DD>
 <DT><I>The Gnu History Library</I>, Brian Fox and Chet Ramey<DD>
 <DT><I>Portable Operating System Interface (POSIX) Part 2: Shell and Utilities</I>, IEEE -<DD>
-<A HREF="http://pubs.opengroup.org/onlinepubs/9699919799/">http://pubs.opengroup.org/onlinepubs/9699919799/</A>
+<A HREF="http://pubs.opengroup.org/onlinepubs/9799919799/">http://pubs.opengroup.org/onlinepubs/9799919799/</A>
 <DT><A HREF="http://tiswww.case.edu/~chet/bash/POSIX">http://tiswww.case.edu/~chet/bash/POSIX</A> - a description of posix mode<DD>
 <DT><I>sh</I>(1), <I>ksh</I>(1), <I>csh</I>(1)<DD>
 <DT><I>emacs</I>(1), <I>vi</I>(1)<DD>
@@ -16223,7 +16376,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 14<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 15<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16332,7 +16485,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20241012/doc/bash.1.<BR>
-Time: 14 October 2024 17:00:24 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20241015/doc/bash.1.<BR>
+Time: 18 October 2024 12:02:45 EDT
 </BODY>
 </HTML>

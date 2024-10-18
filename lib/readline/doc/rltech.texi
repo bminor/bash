@@ -72,8 +72,8 @@ Since it's possible to enter characters into the line while quoting
 them to disable any Readline editing function they might normally have,
 this line may include embedded newlines and other special characters.
 If @var{prompt} is @code{NULL} or the empty string,
-@code{readline} does not display a prompt.
-The line @code{readline} returns is allocated with @code{malloc()};
+@code{readline()} does not display a prompt.
+The line @code{readline()} returns is allocated with @code{malloc()};
 the caller should @code{free()} the line when it has finished with it.
 The declaration for @code{readline} in ANSI C is
 
@@ -92,9 +92,9 @@ The line returned has the final newline removed, so only the
 text remains.
 This means that lines consisting of a newline return the empty string.
 
-If @code{readline} encounters an @code{EOF} while reading the line,
+If Readline encounters an @code{EOF} while reading the line,
 and the line is empty at that point,
-then @code{readline} returns @code{(char *)NULL}.
+then @code{readline()} returns @code{(char *)NULL}.
 Otherwise, the line is ended just as if a newline had been typed.
 
 Readline performs some expansion on the @var{prompt} before it is
@@ -467,12 +467,12 @@ twice in succession, for example.
 
 @deftypevar {rl_hook_func_t *} rl_startup_hook
 If non-zero, this is the address of a function to call just
-before @code{readline} prints the first prompt.
+before Readline prints the first prompt.
 @end deftypevar
 
 @deftypevar {rl_hook_func_t *} rl_pre_input_hook
 If non-zero, this is the address of a function to call after
-the first prompt has been printed and just before @code{readline}
+the first prompt has been printed and just before Readline
 starts reading input characters.
 @end deftypevar
 
@@ -629,7 +629,7 @@ Readline is in overwrite mode.
 @item RL_STATE_COMPLETING
 Readline is performing word completion.
 @item RL_STATE_SIGHANDLER
-Readline is currently executing the readline signal handler.
+Readline is currently executing the Readline signal handler.
 @item RL_STATE_UNDOING
 Readline is performing an undo.
 @item RL_STATE_INPUTPENDING

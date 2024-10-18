@@ -2,7 +2,7 @@ This is rluserman.info, produced by makeinfo version 7.1 from
 rluserman.texi.
 
 This manual describes the end user interface of the GNU Readline Library
-(version 8.3, 10 October 2024), a library which aids in the consistency
+(version 8.3, 15 October 2024), a library which aids in the consistency
 of user interface across discrete programs which provide a command line
 interface.
 
@@ -61,27 +61,26 @@ File: rluserman.info,  Node: Introduction and Notation,  Next: Readline Interact
 1.1 Introduction to Line Editing
 ================================
 
-The following paragraphs describe the notation used to represent
-keystrokes.
+The following paragraphs use Emacs style to describe the notation used
+to represent keystrokes.
 
    The text ‘C-k’ is read as 'Control-K' and describes the character
 produced when the <k> key is pressed while the Control key is depressed.
 
    The text ‘M-k’ is read as 'Meta-K' and describes the character
 produced when the Meta key (if you have one) is depressed, and the <k>
-key is pressed (a “meta character”).  The Meta key is labeled <ALT> on
-many keyboards.  On keyboards with two keys labeled <ALT> (usually to
-either side of the space bar), the <ALT> on the left side is generally
-set to work as a Meta key.  The <ALT> key on the right may also be
-configured to work as a Meta key or may be configured as some other
-modifier, such as a Compose key for typing accented characters.
+key is pressed (a “meta character”), then both are released.  The Meta
+key is labeled <ALT> or <Option> on many keyboards.  On keyboards with
+two keys labeled <ALT> (usually to either side of the space bar), the
+<ALT> on the left side is generally set to work as a Meta key.  One of
+the <ALT> keys may also be configured as some other modifier, such as a
+Compose key for typing accented characters.
 
-   On some keyboards, the Meta key modifier produces meta characters
-with the eighth bit (0200) set.  You can use the ‘enable-meta-key’
-variable to control whether or not it does this, if the keyboard allows
-it.  On many others, the terminal or terminal emulator converts the
-metafied key to a key sequence beginning with <ESC> as described in the
-next paragraph.
+   On some keyboards, the Meta key modifier produces characters with the
+eighth bit (0200) set.  You can use the ‘enable-meta-key’ variable to
+control whether or not it does this, if the keyboard allows it.  On many
+others, the terminal or terminal emulator converts the metafied key to a
+key sequence beginning with <ESC> as described in the next paragraph.
 
    If you do not have a Meta or <ALT> key, or another key working as a
 Meta key, you can generally achieve the latter effect by typing <ESC>
@@ -326,7 +325,7 @@ putting commands in an “inputrc” file, conventionally in their home
 directory.  The name of this file is taken from the value of the
 environment variable ‘INPUTRC’.  If that variable is unset, the default
 is ‘~/.inputrc’.  If that file does not exist or cannot be read,
-readline looks for ‘/etc/inputrc’.
+Readline looks for ‘/etc/inputrc’.
 
    When a program which uses the Readline library starts up, Readline
 reads the init file and sets any variables and key bindings it contains.
@@ -426,9 +425,9 @@ Variable Settings
           different color.  The color definitions are taken from the
           value of the ‘LS_COLORS’ environment variable.  If there is a
           color definition in ‘LS_COLORS’ for the custom suffix
-          ‘readline-colored-completion-prefix’, Readline uses this color
-          for the common prefix instead of its default.  The default is
-          ‘off’.
+          ‘.readline-colored-completion-prefix’, Readline uses this
+          color for the common prefix instead of its default.  The
+          default is ‘off’.
 
      ‘colored-stats’
           If set to ‘on’, Readline displays possible completions using
@@ -461,7 +460,7 @@ Variable Settings
      ‘completion-prefix-display-length’
           The maximum length in characters of the common prefix of a
           list of possible completions that is displayed without
-          modification.  When set to a value greater than zero, readline
+          modification.  When set to a value greater than zero, Readline
           replaces common prefixes longer than this value with an
           ellipsis when displaying possible completions.
 
@@ -560,7 +559,7 @@ Variable Settings
           key sequences containing ‘\M-’ or ‘Meta-’ (see ‘Key Bindings’
           in *note Readline Init File Syntax::) by converting a key
           sequence of the form ‘\M-’C or ‘Meta-’C to the two-character
-          sequence ‘ESC’C (adding the meta prefix).  If
+          sequence ‘ESC’ C (adding the meta prefix).  If
           ‘force-meta-prefix’ is set to ‘off’ (the default), Readline
           uses the value of the ‘convert-meta’ variable to determine
           whether to perform this conversion: if ‘convert-meta’ is ‘on’,
@@ -720,7 +719,7 @@ Variable Settings
           If set to ‘on’, this alters the default completion behavior
           when inserting a single match into the line.  It's only active
           when performing completion in the middle of a word.  If
-          enabled, readline does not insert characters from the
+          enabled, Readline does not insert characters from the
           completion that match characters after point in the word being
           completed, so portions of the word following the cursor are
           not duplicated.  For instance, if this is enabled, attempting
@@ -790,7 +789,7 @@ Key Bindings
 
           This key binding syntax recognizes a number of symbolic
           character names: DEL, ESC, ESCAPE, LFD, NEWLINE, RET, RETURN,
-          RUBOUT, SPACE, SPC, and TAB.
+          RUBOUT (a destructive backspace), SPACE, SPC, and TAB.
 
      "KEYSEQ": FUNCTION-NAME or MACRO
           KEYSEQ differs from KEYNAME above in that strings denoting an
@@ -1088,9 +1087,10 @@ unbound by default.
 position, and “mark” refers to a cursor position saved by the ‘set-mark’
 command.  The text between the point and mark is referred to as the
 “region”.  Readline has the concept of an _active region_: when the
-region is active, Readline redisplay uses the value of the
-‘active-region-start-color’ variable to denote the region.  Several
-commands set the region to active; those are noted below.
+region is active, Readline redisplay highlights the region using the
+value of the ‘active-region-start-color’ variable.  The
+‘enable-active-region’ variable turns this on and off.  Several commands
+set the region to active; those are noted below.
 
 
 File: rluserman.info,  Node: Commands For Moving,  Next: Commands For History,  Up: Bindable Readline Commands
@@ -1271,7 +1271,8 @@ File: rluserman.info,  Node: Commands For Text,  Next: Commands For Killing,  Pr
 ‘delete-char (C-d)’
      Delete the character at point.  If this function is bound to the
      same character as the tty EOF character, as ‘C-d’ commonly is, see
-     above for the effects.
+     above for the effects.  This may also be bound to the Delete key on
+     some keyboards.
 
 ‘backward-delete-char (Rubout)’
      Delete the character behind the cursor.  A numeric argument means
@@ -1589,7 +1590,7 @@ File: rluserman.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up
      default.
 
 ‘execute-named-command (M-x)’
-     Read a bindable readline command name from the input and execute
+     Read a bindable Readline command name from the input and execute
      the function to which it's bound, as if the key sequence to which
      it was bound appeared in the input.  If this function is supplied
      with a numeric argument, it passes that argument to the function it
@@ -2113,27 +2114,27 @@ Tag Table:
 Node: Top906
 Node: Command Line Editing1428
 Node: Introduction and Notation2082
-Node: Readline Interaction4437
-Node: Readline Bare Essentials5630
-Node: Readline Movement Commands7443
-Node: Readline Killing Commands8444
-Node: Readline Arguments10472
-Node: Searching11534
-Node: Readline Init File13766
-Node: Readline Init File Syntax14965
-Node: Conditional Init Constructs41331
-Node: Sample Init File45721
-Node: Bindable Readline Commands48847
-Node: Commands For Moving50166
-Node: Commands For History52097
-Node: Commands For Text57303
-Node: Commands For Killing61083
-Node: Numeric Arguments63540
-Node: Commands For Completion64697
-Node: Keyboard Macros66785
-Node: Miscellaneous Commands67491
-Node: Readline vi Mode71816
-Node: GNU Free Documentation License72810
+Node: Readline Interaction4439
+Node: Readline Bare Essentials5632
+Node: Readline Movement Commands7445
+Node: Readline Killing Commands8446
+Node: Readline Arguments10474
+Node: Searching11536
+Node: Readline Init File13768
+Node: Readline Init File Syntax14967
+Node: Conditional Init Constructs41361
+Node: Sample Init File45751
+Node: Bindable Readline Commands48877
+Node: Commands For Moving50262
+Node: Commands For History52193
+Node: Commands For Text57399
+Node: Commands For Killing61245
+Node: Numeric Arguments63702
+Node: Commands For Completion64859
+Node: Keyboard Macros66947
+Node: Miscellaneous Commands67653
+Node: Readline vi Mode71978
+Node: GNU Free Documentation License72972
 
 End Tag Table
 

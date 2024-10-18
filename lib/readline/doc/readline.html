@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on October, 11  2024 by texi2html 1.64 -->
+<!-- Created on October, 18  2024 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -99,8 +99,8 @@ command line editing interface.
 <!--docid::SEC2::-->
 <P>
 
-The following paragraphs describe the notation used to represent
-keystrokes.
+The following paragraphs use Emacs style to
+describe the notation used to represent keystrokes.
 </P><P>
 
 The text <KBD>C-k</KBD> is read as `Control-K' and describes the character
@@ -110,17 +110,17 @@ is depressed.
 
 The text <KBD>M-k</KBD> is read as `Meta-K' and describes the character
 produced when the Meta key (if you have one) is depressed, and the <KBD>k</KBD>
-key is pressed (a <EM>meta character</EM>).
-The Meta key is labeled <KBD>ALT</KBD> on many keyboards.
+key is pressed (a <EM>meta character</EM>), then both are released.
+The Meta key is labeled <KBD>ALT</KBD> or <KBD>Option</KBD> on many keyboards.
 On keyboards with two keys labeled <KBD>ALT</KBD> (usually to either side of
 the space bar), the <KBD>ALT</KBD> on the left side is generally set to
 work as a Meta key.
-The <KBD>ALT</KBD> key on the right may also be configured to work as a
-Meta key or may be configured as some other modifier, such as a
+One of the <KBD>ALT</KBD> keys may also be configured
+as some other modifier, such as a
 Compose key for typing accented characters.
 </P><P>
 
-On some keyboards, the Meta key modifier produces meta characters with
+On some keyboards, the Meta key modifier produces characters with
 the eighth bit (0200) set.
 You can use the <CODE>enable-meta-key</CODE> variable
 to control whether or not it does this, if the keyboard allows it.
@@ -528,7 +528,7 @@ commands in an <EM>inputrc</EM> file, conventionally in their home directory.
 The name of this file is taken from the value of the
 environment variable <CODE>INPUTRC</CODE>.
 If that variable is unset, the default is <TT>`~/.inputrc'</TT>.
-If that file does not exist or cannot be read, readline looks for
+If that file does not exist or cannot be read, Readline looks for
 <TT>`/etc/inputrc'</TT>.
 </P><P>
 
@@ -672,7 +672,7 @@ common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the <CODE>LS_COLORS</CODE>
 environment variable.
 If there is a color definition in <CODE>LS_COLORS</CODE> for the custom suffix
-<SAMP>`readline-colored-completion-prefix'</SAMP>, Readline uses this color for
+<SAMP>`.readline-colored-completion-prefix'</SAMP>, Readline uses this color for
 the common prefix instead of its default.
 The default is <SAMP>`off'</SAMP>.
 <P>
@@ -723,7 +723,7 @@ The default value is <SAMP>`off'</SAMP>.
 The maximum
 length in characters of the common prefix of a list of possible
 completions that is displayed without modification.
-When set to a value greater than zero, readline
+When set to a value greater than zero, Readline
 replaces common prefixes longer than this value
 with an ellipsis when displaying possible completions.
 <P>
@@ -856,7 +856,7 @@ sequences containing <KBD>\M-</KBD> or <CODE>Meta-</CODE>
 (see <CODE>Key Bindings</CODE> in <A HREF="readline.html#SEC10">1.3.1 Readline Init File Syntax</A>)
 by converting a key sequence of the form
 <KBD>\M-</KBD><VAR>C</VAR> or <CODE>Meta-</CODE><VAR>C</VAR> to the two-character sequence
-<KBD>ESC</KBD><VAR>C</VAR> (adding the meta prefix).
+<KBD>ESC</KBD> <VAR>C</VAR> (adding the meta prefix).
 If <CODE>force-meta-prefix</CODE> is set to <SAMP>`off'</SAMP> (the default),
 Readline uses the value of the <CODE>convert-meta</CODE> variable to determine
 whether to perform this conversion:
@@ -1074,7 +1074,7 @@ The default value is <SAMP>`off'</SAMP>.
 If set to <SAMP>`on'</SAMP>, this alters the default completion behavior when
 inserting a single match into the line.
 It's only active when performing completion in the middle of a word.
-If enabled, readline does not insert characters from the completion
+If enabled, Readline does not insert characters from the completion
 that match characters after point in the word being completed,
 so portions of the word following the cursor are not duplicated.
 For instance, if this is enabled, attempting completion when the cursor
@@ -1171,7 +1171,7 @@ This key binding syntax recognizes a number of symbolic character names:
 <VAR>NEWLINE</VAR>,
 <VAR>RET</VAR>,
 <VAR>RETURN</VAR>,
-<VAR>RUBOUT</VAR>,
+<VAR>RUBOUT</VAR> (a destructive backspace),
 <VAR>SPACE</VAR>,
 <VAR>SPC</VAR>,
 and
@@ -1562,9 +1562,10 @@ position, and <EM>mark</EM> refers to a cursor position saved by the
 <CODE>set-mark</CODE> command.
 The text between the point and mark is referred to as the <EM>region</EM>.
 Readline has the concept of an <EM>active region</EM>:
-when the region is active, Readline redisplay uses the
-value of the <CODE>active-region-start-color</CODE> variable
-to denote the region.
+when the region is active,
+Readline redisplay highlights the region using the
+value of the <CODE>active-region-start-color</CODE> variable.
+The <CODE>enable-active-region</CODE> variable turns this on and off.
 Several commands set the region to active; those are noted below.
 </P><P>
 
@@ -1896,6 +1897,7 @@ Delete the character at point.
 If this function is bound to the
 same character as the tty EOF character, as <KBD>C-d</KBD>
 commonly is, see above for the effects.
+This may also be bound to the Delete key on some keyboards.
 <P>
 
 <A NAME="IDX111"></A>
@@ -2486,7 +2488,7 @@ This command is unbound by default.
 <A NAME="IDX221"></A>
 <DT><CODE>execute-named-command (M-x)</CODE>
 <DD><A NAME="IDX222"></A>
-Read a bindable readline command name from the input and execute the
+Read a bindable Readline command name from the input and execute the
 function to which it's bound, as if the key sequence to which it was
 bound appeared in the input.
 If this function is supplied with a numeric argument, it passes that
@@ -2649,8 +2651,8 @@ Since it's possible to enter characters into the line while quoting
 them to disable any Readline editing function they might normally have,
 this line may include embedded newlines and other special characters.
 If <VAR>prompt</VAR> is <CODE>NULL</CODE> or the empty string,
-<CODE>readline</CODE> does not display a prompt.
-The line <CODE>readline</CODE> returns is allocated with <CODE>malloc()</CODE>;
+<CODE>readline()</CODE> does not display a prompt.
+The line <CODE>readline()</CODE> returns is allocated with <CODE>malloc()</CODE>;
 the caller should <CODE>free()</CODE> the line when it has finished with it.
 The declaration for <CODE>readline</CODE> in ANSI C is
 </P><P>
@@ -2666,9 +2668,9 @@ text remains.
 This means that lines consisting of a newline return the empty string.
 </P><P>
 
-If <CODE>readline</CODE> encounters an <CODE>EOF</CODE> while reading the line,
+If Readline encounters an <CODE>EOF</CODE> while reading the line,
 and the line is empty at that point,
-then <CODE>readline</CODE> returns <CODE>(char *)NULL</CODE>.
+then <CODE>readline()</CODE> returns <CODE>(char *)NULL</CODE>.
 Otherwise, the line is ended just as if a newline had been typed.
 </P><P>
 
@@ -3201,7 +3203,7 @@ twice in succession, for example.
 <DL>
 <DT><U>Variable:</U> rl_hook_func_t * <B>rl_startup_hook</B>
 <DD>If non-zero, this is the address of a function to call just
-before <CODE>readline</CODE> prints the first prompt.
+before Readline prints the first prompt.
 </DL>
 </P><P>
 
@@ -3209,7 +3211,7 @@ before <CODE>readline</CODE> prints the first prompt.
 <DL>
 <DT><U>Variable:</U> rl_hook_func_t * <B>rl_pre_input_hook</B>
 <DD>If non-zero, this is the address of a function to call after
-the first prompt has been printed and just before <CODE>readline</CODE>
+the first prompt has been printed and just before Readline
 starts reading input characters.
 </DL>
 </P><P>
@@ -3415,7 +3417,7 @@ macro.
 <DT><CODE>RL_STATE_COMPLETING</CODE>
 <DD>Readline is performing word completion.
 <DT><CODE>RL_STATE_SIGHANDLER</CODE>
-<DD>Readline is currently executing the readline signal handler.
+<DD>Readline is currently executing the Readline signal handler.
 <DT><CODE>RL_STATE_UNDOING</CODE>
 <DD>Readline is performing an undo.
 <DT><CODE>RL_STATE_INPUTPENDING</CODE>
@@ -8127,7 +8129,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="readline.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>October, 11  2024</I>
+This document was generated by <I>Chet Ramey</I> on <I>October, 18  2024</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -8289,7 +8291,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>October, 11  2024</I>
+by <I>Chet Ramey</I> on <I>October, 18  2024</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

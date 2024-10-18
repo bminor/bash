@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 14 October 2024).
+the Bash shell (version 5.3, 15 October 2024).
 
-This is Edition 5.3, last updated 14 October 2024,
+This is Edition 5.3, last updated 15 October 2024,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 14 October 2024).
+the Bash shell (version 5.3, 15 October 2024).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 14 October 2024,
+<p>This is Edition 5.3, last updated 15 October 2024,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -857,7 +857,7 @@ There are more details in the gettext documentation.
 <a class="index-entry-id" id="index-internationalized-scripts"></a>
 <a class="index-entry-id" id="index-string-translations"></a>
 <p>Once you&rsquo;ve marked the strings in your script
-that you want to translate using $&quot;...&quot;,
+that you want to translate using $&quot;&hellip;&quot;,
 you create a gettext &quot;template&quot; file using the command
 </p>
 <div class="example">
@@ -2615,7 +2615,8 @@ it introduces a level of indirection.
 Bash uses the value formed by expanding the rest of
 <var class="var">parameter</var> as the new <var class="var">parameter</var>;
 this new parameter is then
-expanded and that value is used in the rest of the expansion, rather
+expanded and that value is used
+in the rest of the expansion, rather
 than the expansion of the original <var class="var">parameter</var>.
 This is known as <code class="code">indirect expansion</code>.
 The value is subject to tilde expansion,
@@ -3403,11 +3404,11 @@ without regard to the case of alphabetic characters.
 <p>When a pattern is used for filename expansion, the character &lsquo;<samp class="samp">.</samp>&rsquo;
 at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option <code class="code">dotglob</code> is set.
-In order to match the filenames &lsquo;<samp class="samp">.</samp>&rsquo; and &lsquo;<samp class="samp">..</samp>&rsquo;,
+In order to match the filenames <samp class="file">.</samp> and <samp class="file">..</samp>,
 the pattern must begin with &lsquo;<samp class="samp">.</samp>&rsquo; (for example, &lsquo;<samp class="samp">.?</samp>&rsquo;),
 even if <code class="code">dotglob</code> is set.
 If the <code class="code">globskipdots</code> shell option is enabled, the filenames
-&lsquo;<samp class="samp">.</samp>&rsquo; and &lsquo;<samp class="samp">..</samp>&rsquo; never match, even if the pattern begins
+<samp class="file">.</samp> and <samp class="file">..</samp> never match, even if the pattern begins
 with a &lsquo;<samp class="samp">.</samp>&rsquo;.
 When not matching filenames, the &lsquo;<samp class="samp">.</samp>&rsquo; character is not treated specially.
 </p>
@@ -3577,14 +3578,14 @@ patterns, including shell functions and command substitutions.
 the set of filenames that are tested:
 when <code class="code">dotglob</code> is enabled, the set of filenames includes all files
 beginning with &lsquo;<samp class="samp">.</samp>&rsquo;, but the filenames
-&lsquo;<samp class="samp">.</samp>&rsquo; and &lsquo;<samp class="samp">..</samp>&rsquo; must be matched by a
+<samp class="file">.</samp> and <samp class="file">..</samp> must be matched by a
 pattern or sub-pattern that begins with a dot;
 when it is disabled, the set does not
-include any filenames beginning with &ldquo;.&rdquo; unless the pattern
+include any filenames beginning with &lsquo;<samp class="samp">.</samp>&rsquo; unless the pattern
 or sub-pattern begins with a &lsquo;<samp class="samp">.</samp>&rsquo;.
 If the <code class="code">globskipdots</code>
 shell option is enabled, the filenames
-&lsquo;<samp class="samp">.</samp>&rsquo; and &lsquo;<samp class="samp">..</samp>&rsquo;
+<samp class="file">.</samp> and <samp class="file">..</samp>
 never appear in the set.
 As above, &lsquo;<samp class="samp">.</samp>&rsquo; only has a special meaning when matching filenames. 
 </p>
@@ -3656,7 +3657,7 @@ If the first character of the redirection operator
 is &lsquo;<samp class="samp">&gt;</samp>&rsquo;, the redirection refers to the standard output (file
 descriptor 1).
 </p>
-<p>The \fIword\fP following the redirection operator in the following
+<p>The <var class="var">word</var> following the redirection operator in the following
 descriptions, unless otherwise noted, is subjected to
 brace expansion,
 tilde expansion,
@@ -4585,37 +4586,43 @@ The return status is zero unless <var class="var">n</var> is not greater than or
 </dd>
 <dt><a id="index-cd"></a><span><code class="code">cd</code><a class="copiable-link" href="#index-cd"> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example-preformatted">cd [-L|[-P [-e]]] [-@] [<var class="var">directory</var>]
+<pre class="example-preformatted">cd [-L] [-@] [<var class="var">directory</var>]
+cd -P [-e] [-@] [<var class="var">directory</var>]
 </pre></div>
 
 <p>Change the current working directory to <var class="var">directory</var>.
 If <var class="var">directory</var> is not supplied, the value of the <code class="env">HOME</code>
 shell variable is used as <var class="var">directory</var>.
 If the shell variable
-<code class="env">CDPATH</code> exists, <code class="code">cd</code> uses it as a search path:
+<code class="env">CDPATH</code> exists,
+and <var class="var">directory</var> does not begin with a slash,
+<code class="code">cd</code> uses it as a search path:
 <code class="code">cd</code> searches each directory name in <code class="env">CDPATH</code> for
 <var class="var">directory</var>, with alternative directory names in <code class="env">CDPATH</code>
 separated by a colon (&lsquo;<samp class="samp">:</samp>&rsquo;).
 A null directory name in <code class="env">CDPATH</code> means the same thing as the
 current directory.
-If <var class="var">directory</var> begins with a slash, <code class="env">CDPATH</code> is not used.
 </p>
-<p>The <samp class="option">-P</samp> option means to not follow symbolic links: symbolic links
+<p>The <samp class="option">-P</samp> option means not to follow symbolic links: symbolic links
 are resolved while <code class="code">cd</code> is traversing <var class="var">directory</var> and before
-processing an instance of &lsquo;<samp class="samp">..</samp>&rsquo; in <var class="var">directory</var>.
+processing an instance of <samp class="file">..</samp> in <var class="var">directory</var>.
 </p>
 <p>By default, or when the <samp class="option">-L</samp> option is supplied, symbolic links
 in <var class="var">directory</var> are resolved after <code class="code">cd</code> processes an instance
-of &lsquo;<samp class="samp">..</samp>&rsquo; in <var class="var">directory</var>.
+of <samp class="file">..</samp> in <var class="var">directory</var>.
 </p>
-<p>If &lsquo;<samp class="samp">..</samp>&rsquo; appears in <var class="var">directory</var>, it is processed by removing the
+<p>If <samp class="file">..</samp> appears in <var class="var">directory</var>, <code class="code">cd</code> processes it by removing the
 immediately preceding pathname component, back to a slash or the beginning
-of <var class="var">directory</var>.
+of <var class="var">directory</var>,
+and verifying that the portion of <var class="var">directory</var>
+it has processed to
+that point is still a valid directory name after removing the pathname
+component.
+If it is not a valid directory name, <code class="code">cd</code> returns a non-zero status.
 </p>
 <p>If the <samp class="option">-e</samp> option is supplied with <samp class="option">-P</samp>
-and the current working directory cannot be successfully determined
-after a successful directory change, <code class="code">cd</code> will return a non-zero
-status.
+and <code class="code">cd</code> cannot successfully determine the current working directory 
+after a successful directory change, it will return a non-zero status.
 </p>
 <p>On systems that support it, the <samp class="option">-@</samp> option presents the extended
 attributes associated with a file as a directory.              
@@ -6856,7 +6863,7 @@ if the directory name initially supplied does not exist.
 <dt><code class="code">dotglob</code></dt>
 <dd><p>If set, Bash includes filenames beginning with a &lsquo;<samp class="samp">.</samp>&rsquo; in
 the results of filename expansion.
-The filenames &lsquo;<samp class="samp">.</samp>&rsquo; and &lsquo;<samp class="samp">..</samp>&rsquo; must always be matched explicitly,
+The filenames <samp class="file">.</samp> and <samp class="file">..</samp> must always be matched explicitly,
 even if <code class="code">dotglob</code> is set.
 </p>
 </dd>
@@ -6943,7 +6950,7 @@ and upper-case and lower-case ASCII characters will collate together.
 </dd>
 <dt><code class="code">globskipdots</code></dt>
 <dd><p>If set, filename expansion will never match the filenames
-&lsquo;<samp class="samp">.</samp>&rsquo; and &lsquo;<samp class="samp">..</samp>&rsquo;, even if the pattern begins with a &lsquo;<samp class="samp">.</samp>&rsquo;.
+<samp class="file">.</samp> and <samp class="file">..</samp>, even if the pattern begins with a &lsquo;<samp class="samp">.</samp>&rsquo;.
 This option is enabled by default.
 </p>
 </dd>
@@ -7061,7 +7068,7 @@ or when filtering possible completions as part of programmable completion.
 </dd>
 <dt><code class="code">noexpand_translation</code></dt>
 <dd><p>If set, Bash
-encloses the translated results of $&quot;...&quot; quoting in single quotes
+encloses the translated results of $&quot;&hellip;&quot; quoting in single quotes
 instead of double quotes.
 If the string is not translated, this has no effect.
 </p>
@@ -7677,7 +7684,7 @@ when an interactive shell is invoked in
 </dd>
 <dt><a id="index-EPOCHREALTIME"></a><span><code class="code">EPOCHREALTIME</code><a class="copiable-link" href="#index-EPOCHREALTIME"> &para;</a></span></dt>
 <dd><p>Each time this parameter is referenced, it expands to the number of seconds
-since the Unix Epoch as a floating point value with micro-second granularity
+since the Unix Epoch as a floating-point value with micro-second granularity
 (see the documentation for the C library function <code class="code">time</code> for the
 definition of Epoch).
 Assignments to <code class="env">EPOCHREALTIME</code> are ignored.
@@ -7773,8 +7780,11 @@ option.
 The value of this variable specifies the sort criteria and sort order for
 the results of filename expansion.
 If this variable is unset or set to the null string, filename expansion
-uses the historical behavior of sorting by name.
-If set, a valid value begins with an optional &lsquo;<samp class="samp">+</samp>&rsquo;, which is ignored,
+uses the historical behavior of sorting by name,
+in ascending lexicographic order as determined by the
+<code class="code">LC_COLLATE</code> shell variable.
+</p>
+<p>If set, a valid value begins with an optional &lsquo;<samp class="samp">+</samp>&rsquo;, which is ignored,
 or &lsquo;<samp class="samp">-</samp>&rsquo;, which reverses the sort order from ascending to descending,
 followed by a sort specifier.
 The valid sort specifiers are
@@ -7797,14 +7807,15 @@ the same size), sorting uses the name as a secondary sort key.
 order by modification time (newest first).
 </p>
 <p>The &lsquo;<samp class="samp">numeric</samp>&rsquo; specifier treats names consisting solely of digits as
-numbers and sorts them using the numeric value (so &quot;2&quot; will sort before
-&quot;10&quot;, for example).
+numbers and sorts them using their numeric value
+(so &quot;2&quot; will sort before &quot;10&quot;, for example).
 When using &lsquo;<samp class="samp">numeric</samp>&rsquo;, names containing non-digits sort after all
 the all-digit names and are sorted by name using the traditional behavior.
 </p>
-<p>A sort specifier of &lsquo;<samp class="samp">nosort</samp>&rsquo; disables sorting completely; the results
-are returned in the order they are read from the file system,
-and any leading &lsquo;<samp class="samp">-</samp>&rsquo; is ignored.
+<p>A sort specifier of &lsquo;<samp class="samp">nosort</samp>&rsquo; disables sorting completely;
+Bash returns the results
+in the order they are read from the file system,
+ignoring any leading &lsquo;<samp class="samp">-</samp>&rsquo;.
 </p>
 <p>If the sort specifier is missing, it defaults to <var class="var">name</var>,
 so a value of &lsquo;<samp class="samp">+</samp>&rsquo; is equivalent to the null string,
@@ -7826,8 +7837,8 @@ subsequently reset.
 <dd><p>Up to three characters which control history expansion, quick
 substitution, and tokenization (see <a class="pxref" href="#History-Interaction">History Expansion</a>).
 The first character is the
-<em class="dfn">history expansion</em> character, that is, the character which signifies the
-start of a history expansion, normally &lsquo;<samp class="samp">!</samp>&rsquo;.
+<em class="dfn">history expansion</em> character,
+the character which begins a history expansion, normally &lsquo;<samp class="samp">!</samp>&rsquo;.
 The second character is the
 character which signifies &quot;quick substitution&quot; when seen as the first
 character on a line, normally &lsquo;<samp class="samp">^</samp>&rsquo;.
@@ -7835,7 +7846,7 @@ The optional third character is the
 character which indicates that the remainder of the line is a comment when
 found as the first character of a word, usually &lsquo;<samp class="samp">#</samp>&rsquo;.
 The history
-comment character causes history substitution to be skipped for the
+comment character disables history substitution for the
 remaining words on the line.
 It does not necessarily cause the shell
 parser to treat the rest of the line as a comment.
@@ -8614,7 +8625,7 @@ possible, while conforming to the <small class="sc">POSIX</small> standard as we
 shell with the <samp class="option">--login</samp> option, it first attempts to read
 and execute commands from <samp class="file">/etc/profile</samp> and <samp class="file">~/.profile</samp>, in
 that order.
-The <samp class="option">--noprofile</samp> option may be used to inhibit this behavior.
+The <samp class="option">--noprofile</samp> option will inhibit this behavior.
 </p>
 <p>When invoked as an interactive shell with the name <code class="code">sh</code>, Bash
 looks for the variable <code class="env">ENV</code>, expands its value if it is defined,
@@ -8626,8 +8637,8 @@ no effect.
 <p>A non-interactive shell invoked with the name <code class="code">sh</code> does not attempt
 to read any other startup files.
 </p>
-<p>When invoked as <code class="code">sh</code>, Bash enters <small class="sc">POSIX</small> mode after
-the startup files are read.
+<p>When invoked as <code class="code">sh</code>, Bash enters <small class="sc">POSIX</small> mode after reading
+the startup files.
 </p>
 <h4 class="subsubheading" id="Invoked-in-posix-mode"><span>Invoked in <small class="sc">POSIX</small> mode<a class="copiable-link" href="#Invoked-in-posix-mode"> &para;</a></span></h4>
 
@@ -8650,7 +8661,7 @@ determines it is being run non-interactively in this fashion,
 it reads and executes commands from <samp class="file">~/.bashrc</samp>, if that
 file exists and is readable.
 It will not do this if invoked as <code class="code">sh</code>.
-The <samp class="option">--norc</samp> option may be used to inhibit this behavior, and the
+The <samp class="option">--norc</samp> option will inhibit this behavior, and the
 <samp class="option">--rcfile</samp> option
 will make Bash use a different file instead of
 <samp class="file">~/.bashrc</samp>, but neither
@@ -8870,10 +8881,10 @@ If the operating system on which Bash is running provides these
 special files, Bash will use them; otherwise it will emulate them
 internally with this behavior:
 If the <var class="var">file</var> argument to one of the primaries is of the form
-<samp class="file">/dev/fd/<var class="var">N</var></samp>, then file descriptor <var class="var">N</var> is checked.
+<samp class="file">/dev/fd/<var class="var">N</var></samp>, then Bash checks file descriptor <var class="var">N</var>.
 If the <var class="var">file</var> argument to one of the primaries is one of
-<samp class="file">/dev/stdin</samp>, <samp class="file">/dev/stdout</samp>, or <samp class="file">/dev/stderr</samp>, file
-descriptor 0, 1, or 2, respectively, is checked.
+<samp class="file">/dev/stdin</samp>, <samp class="file">/dev/stdout</samp>, or <samp class="file">/dev/stderr</samp>,
+Bash checks file descriptor 0, 1, or 2, respectively.
 </p>
 <p>When used with <code class="code">[[</code>, the &lsquo;<samp class="samp">&lt;</samp>&rsquo; and &lsquo;<samp class="samp">&gt;</samp>&rsquo; operators sort
 lexicographically using the current locale.
@@ -9161,9 +9172,8 @@ The levels are listed in order of decreasing precedence.
 performed before the expression is evaluated. 
 Within an expression, shell variables may also be referenced by name
 without using the parameter expansion syntax.
-This means you can use
-.Q x ,
-where \fIx\fP is a shell variable name, in an arithmetic expression,
+This means you can use <var class="var">x</var>,
+where <var class="var">x</var> is a shell variable name, in an arithmetic expression,
 and the shell will evaluate its value as an expression and use the
 result.
 A shell variable that is null or unset evaluates to 0 when referenced
@@ -10011,6 +10021,9 @@ completes.
 
 </li><li> Bash permanently removes jobs from the jobs table after notifying the
 user of their termination via the <code class="code">wait</code> or <code class="code">jobs</code> builtins.
+It removes the job from the jobs list after notifying the user of its
+termination, but the status is still available via <code class="code">wait</code>, as long
+as <code class="code">wait</code> is supplied a <small class="sc">PID</small> argument.
 
 </li><li> The <code class="code">vi</code> editing mode will invoke the <code class="code">vi</code> editor directly when
 the &lsquo;<samp class="samp">v</samp>&rsquo; command is run, instead of checking <code class="code">$VISUAL</code> and
@@ -10210,7 +10223,7 @@ not interrupt the <code class="code">wait</code> builtin and cause it to return 
 The trap command is run once for each child that exits.
 
 </li><li> Bash removes an exited background process&rsquo;s status from the list of such
-statuses after the <code class="code">wait</code> builtin is used to obtain it.
+statuses after the <code class="code">wait</code> builtin returns it.
 
 </li></ol>
 
@@ -10397,13 +10410,13 @@ Bash-5.1 suppresses that message when the <samp class="option">-l</samp> option 
 &lsquo;<samp class="samp">a[@]</samp>&rsquo;.
 Bash-5.2 will unset an element with key &lsquo;<samp class="samp">@</samp>&rsquo; (associative arrays)
 or remove all the elements without unsetting the array (indexed arrays).
-</li><li>Arithmetic commands ( ((...)) ) and the expressions in an arithmetic for
+</li><li>Arithmetic commands ( ((&hellip;)) ) and the expressions in an arithmetic for
 statement can be expanded more than once.
 </li><li>Expressions used as arguments to arithmetic operators in the <code class="code">[[</code>
 conditional command can be expanded more than once.
 </li><li>The expressions in substring parameter brace expansion can be
 expanded more than once.
-</li><li>The expressions in the $(( ... )) word expansion can be expanded
+</li><li>The expressions in the $(( &hellip; )) word expansion can be expanded
 more than once.
 </li><li>Arithmetic expressions used as indexed array subscripts can be
 expanded more than once.
@@ -10592,7 +10605,7 @@ though it will notify of changes in a job&rsquo;s status after a
 foreground command in
 a list completes, before executing the next command in the list.
 If the <samp class="option">-b</samp> option to the <code class="code">set</code> builtin is enabled,
-Bash reports such changes immediately (see <a class="pxref" href="#The-Set-Builtin">The Set Builtin</a>).
+Bash reports status changes immediately (see <a class="pxref" href="#The-Set-Builtin">The Set Builtin</a>).
 Bash executes any trap on <code class="code">SIGCHLD</code>
 for each child process that terminates.
 </p>
@@ -10920,8 +10933,8 @@ Next: <a href="#Readline-Interaction" accesskey="n" rel="next">Readline Interact
 </div>
 <h3 class="section" id="Introduction-to-Line-Editing"><span>8.1 Introduction to Line Editing<a class="copiable-link" href="#Introduction-to-Line-Editing"> &para;</a></span></h3>
 
-<p>The following paragraphs describe the notation used to represent
-keystrokes.
+<p>The following paragraphs use Emacs style to
+describe the notation used to represent keystrokes.
 </p>
 <p>The text <kbd class="kbd">C-k</kbd> is read as &lsquo;Control-K&rsquo; and describes the character
 produced when the <kbd class="key">k</kbd> key is pressed while the Control key
@@ -10929,16 +10942,16 @@ is depressed.
 </p>
 <p>The text <kbd class="kbd">M-k</kbd> is read as &lsquo;Meta-K&rsquo; and describes the character
 produced when the Meta key (if you have one) is depressed, and the <kbd class="key">k</kbd>
-key is pressed (a <em class="dfn">meta character</em>).
-The Meta key is labeled <kbd class="key">ALT</kbd> on many keyboards.
+key is pressed (a <em class="dfn">meta character</em>), then both are released.
+The Meta key is labeled <kbd class="key">ALT</kbd> or <kbd class="key">Option</kbd> on many keyboards.
 On keyboards with two keys labeled <kbd class="key">ALT</kbd> (usually to either side of
 the space bar), the <kbd class="key">ALT</kbd> on the left side is generally set to
 work as a Meta key.
-The <kbd class="key">ALT</kbd> key on the right may also be configured to work as a
-Meta key or may be configured as some other modifier, such as a
+One of the <kbd class="key">ALT</kbd> keys may also be configured
+as some other modifier, such as a
 Compose key for typing accented characters.
 </p>
-<p>On some keyboards, the Meta key modifier produces meta characters with
+<p>On some keyboards, the Meta key modifier produces characters with
 the eighth bit (0200) set.
 You can use the <code class="code">enable-meta-key</code> variable
 to control whether or not it does this, if the keyboard allows it.
@@ -11270,7 +11283,7 @@ commands in an <em class="dfn">inputrc</em> file, conventionally in their home d
 The name of this file is taken from the value of the
 shell variable <code class="env">INPUTRC</code>.
 If that variable is unset, the default is <samp class="file">~/.inputrc</samp>.
-If that file does not exist or cannot be read, readline looks for
+If that file does not exist or cannot be read, Readline looks for
 <samp class="file">/etc/inputrc</samp>.
 The <code class="code">bind</code><!-- /@w --> builtin command can also be used to set Readline
 keybindings and variables.
@@ -11395,7 +11408,7 @@ common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the <code class="env">LS_COLORS</code>
 environment variable.
 If there is a color definition in <code class="env">LS_COLORS</code> for the custom suffix
-&lsquo;<samp class="samp">readline-colored-completion-prefix</samp>&rsquo;, Readline uses this color for
+&lsquo;<samp class="samp">.readline-colored-completion-prefix</samp>&rsquo;, Readline uses this color for
 the common prefix instead of its default.
 The default is &lsquo;<samp class="samp">off</samp>&rsquo;.
 </p>
@@ -11440,7 +11453,7 @@ The default value is &lsquo;<samp class="samp">off</samp>&rsquo;.
 <dd><p>The maximum
 length in characters of the common prefix of a list of possible
 completions that is displayed without modification.
-When set to a value greater than zero, readline
+When set to a value greater than zero, Readline
 replaces common prefixes longer than this value
 with an ellipsis when displaying possible completions.
 </p>
@@ -11561,7 +11574,7 @@ sequences containing <kbd class="kbd">\M-</kbd> or <code class="code">Meta-</cod
 (see <code class="code">Key Bindings</code> in <a class="ref" href="#Readline-Init-File-Syntax">Readline Init File Syntax</a>)
 by converting a key sequence of the form
 <kbd class="kbd">\M-</kbd><var class="var">C</var> or <code class="code">Meta-</code><var class="var">C</var> to the two-character sequence
-<kbd class="kbd">ESC</kbd><var class="var">C</var> (adding the meta prefix).
+<kbd class="kbd">ESC</kbd> <var class="var">C</var> (adding the meta prefix).
 If <code class="code">force-meta-prefix</code> is set to &lsquo;<samp class="samp">off</samp>&rsquo; (the default),
 Readline uses the value of the <code class="code">convert-meta</code> variable to determine
 whether to perform this conversion:
@@ -11762,7 +11775,7 @@ The default value is &lsquo;<samp class="samp">off</samp>&rsquo;.
 <dd><p>If set to &lsquo;<samp class="samp">on</samp>&rsquo;, this alters the default completion behavior when
 inserting a single match into the line.
 It&rsquo;s only active when performing completion in the middle of a word.
-If enabled, readline does not insert characters from the completion
+If enabled, Readline does not insert characters from the completion
 that match characters after point in the word being completed,
 so portions of the word following the cursor are not duplicated.
 For instance, if this is enabled, attempting completion when the cursor
@@ -12232,9 +12245,10 @@ position, and <em class="dfn">mark</em> refers to a cursor position saved by the
 <code class="code">set-mark</code> command.
 The text between the point and mark is referred to as the <em class="dfn">region</em>.
 Readline has the concept of an <em class="emph">active region</em>:
-when the region is active, Readline redisplay uses the
-value of the <code class="code">active-region-start-color</code> variable
-to denote the region.
+when the region is active,
+Readline redisplay highlights the region using the
+value of the <code class="code">active-region-start-color</code> variable.
+The <code class="code">enable-active-region</code> variable turns this on and off.
 Several commands set the region to active; those are noted below.
 </p>
 <ul class="mini-toc">
@@ -13022,7 +13036,7 @@ This command is unbound by default.
 </p>
 </dd>
 <dt><a id="index-execute_002dnamed_002dcommand-_0028M_002dx_0029"></a><span><code class="code">execute-named-command (M-x)</code><a class="copiable-link" href="#index-execute_002dnamed_002dcommand-_0028M_002dx_0029"> &para;</a></span></dt>
-<dd><p>Read a bindable readline command name from the input and execute the
+<dd><p>Read a bindable Readline command name from the input and execute the
 function to which it&rsquo;s bound, as if the key sequence to which it was
 bound appeared in the input.
 If this function is supplied with a numeric argument, it passes that
@@ -13144,7 +13158,7 @@ Next: <a href="#Programmable-Completion-Builtins" accesskey="n" rel="next">Progr
 <p>When the user attempts word completion for an argument to a command for
 which a completion specification (a <em class="dfn">compspec</em>) has been defined
 using the <code class="code">complete</code> builtin (see <a class="pxref" href="#Programmable-Completion-Builtins">Programmable Completion Builtins</a>),
-\fBreadline\fP invokes the programmable completion facilities. 
+Readline invokes the programmable completion facilities. 
 </p>
 <p>First, Bash identifies the command name.
 If a compspec has been defined for that command, the
@@ -13658,7 +13672,7 @@ the <samp class="option">-E</samp> option indicates that other supplied options 
 apply to &ldquo;empty&rdquo; command completion; and
 the <samp class="option">-I</samp> option indicates that other supplied options should
 apply to completion on the initial word on the line.
-These are determined in the same way as the \fBcomplete\fP builtin.
+These are determined in the same way as the <code class="code">complete</code> builtin.
 </p>
 <p>If multiple options are supplied, the <samp class="option">-D</samp> option takes precedence
 over <samp class="option">-E</samp>, and both take precedence over <samp class="option">-I</samp>
@@ -14629,7 +14643,7 @@ You may need to
 supply the <samp class="option">--srcdir=PATH</samp> argument to tell <code class="code">configure</code>
 where the source files are.
 <code class="code">configure</code> automatically checks for the
-source code in the directory that <code class="code">configure</code> is in and in &lsquo;..&rsquo;.
+source code in the directory that <code class="code">configure</code> is in and in <samp class="file">..</samp>.
 </p>
 <p>If you have to use a <code class="code">make</code> that does not support the <code class="code">VPATH</code>
 variable, you can compile Bash for one architecture at a

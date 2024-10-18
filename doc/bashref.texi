@@ -572,7 +572,7 @@ There are more details in the gettext documentation.
 @cindex internationalized scripts
 @cindex string translations
 Once you've marked the strings in your script
-that you want to translate using $"...",
+that you want to translate using $"@dots{}",
 you create a gettext "template" file using the command
 
 @example
@@ -2212,7 +2212,8 @@ it introduces a level of indirection.
 Bash uses the value formed by expanding the rest of
 @var{parameter} as the new @var{parameter};
 this new parameter is then
-expanded and that value is used in the rest of the expansion, rather
+expanded and that value is used
+in the rest of the expansion, rather
 than the expansion of the original @var{parameter}.
 This is known as @code{indirect expansion}.
 The value is subject to tilde expansion,
@@ -2966,11 +2967,11 @@ without regard to the case of alphabetic characters.
 When a pattern is used for filename expansion, the character @samp{.}
 at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option @code{dotglob} is set.
-In order to match the filenames @samp{.} and @samp{..},
+In order to match the filenames @file{.} and @file{..},
 the pattern must begin with @samp{.} (for example, @samp{.?}),
 even if @code{dotglob} is set.
 If the @code{globskipdots} shell option is enabled, the filenames
-@samp{.} and @samp{..} never match, even if the pattern begins
+@file{.} and @file{..} never match, even if the pattern begins
 with a @samp{.}.
 When not matching filenames, the @samp{.} character is not treated specially.
 
@@ -3125,14 +3126,14 @@ When matching filenames, the @code{dotglob} shell option determines
 the set of filenames that are tested:
 when @code{dotglob} is enabled, the set of filenames includes all files
 beginning with @samp{.}, but the filenames
-@samp{.} and @samp{..} must be matched by a
+@file{.} and @file{..} must be matched by a
 pattern or sub-pattern that begins with a dot;
 when it is disabled, the set does not
-include any filenames beginning with ``.'' unless the pattern
+include any filenames beginning with @samp{.} unless the pattern
 or sub-pattern begins with a @samp{.}.
 If the @code{globskipdots}
 shell option is enabled, the filenames
-@samp{.} and @samp{..}
+@file{.} and @file{..}
 never appear in the set.
 As above, @samp{.} only has a special meaning when matching filenames. 
 
@@ -3190,7 +3191,7 @@ If the first character of the redirection operator
 is @samp{>}, the redirection refers to the standard output (file
 descriptor 1).
 
-The \fIword\fP following the redirection operator in the following
+The @var{word} following the redirection operator in the following
 descriptions, unless otherwise noted, is subjected to
 brace expansion,
 tilde expansion,
@@ -4069,37 +4070,43 @@ The return status is zero unless @var{n} is not greater than or equal to 1.
 @item cd
 @btindex cd
 @example
-cd [-L|[-P [-e]]] [-@@] [@var{directory}]
+cd [-L] [-@@] [@var{directory}]
+cd -P [-e] [-@@] [@var{directory}]
 @end example
 
 Change the current working directory to @var{directory}.
 If @var{directory} is not supplied, the value of the @env{HOME}
 shell variable is used as @var{directory}.
 If the shell variable
-@env{CDPATH} exists, @code{cd} uses it as a search path:
+@env{CDPATH} exists,
+and @var{directory} does not begin with a slash,
+@code{cd} uses it as a search path:
 @code{cd} searches each directory name in @env{CDPATH} for
 @var{directory}, with alternative directory names in @env{CDPATH}
 separated by a colon (@samp{:}).
 A null directory name in @env{CDPATH} means the same thing as the
 current directory.
-If @var{directory} begins with a slash, @env{CDPATH} is not used.
 
-The @option{-P} option means to not follow symbolic links: symbolic links
+The @option{-P} option means not to follow symbolic links: symbolic links
 are resolved while @code{cd} is traversing @var{directory} and before
-processing an instance of @samp{..} in @var{directory}.
+processing an instance of @file{..} in @var{directory}.
 
 By default, or when the @option{-L} option is supplied, symbolic links
 in @var{directory} are resolved after @code{cd} processes an instance
-of @samp{..} in @var{directory}.
+of @file{..} in @var{directory}.
 
-If @samp{..} appears in @var{directory}, it is processed by removing the
+If @file{..} appears in @var{directory}, @code{cd} processes it by removing the
 immediately preceding pathname component, back to a slash or the beginning
-of @var{directory}.
+of @var{directory},
+and verifying that the portion of @var{directory}
+it has processed to
+that point is still a valid directory name after removing the pathname
+component.
+If it is not a valid directory name, @code{cd} returns a non-zero status.
 
 If the @option{-e} option is supplied with @option{-P}
-and the current working directory cannot be successfully determined
-after a successful directory change, @code{cd} will return a non-zero
-status.
+and @code{cd} cannot successfully determine the current working directory 
+after a successful directory change, it will return a non-zero status.
 
 On systems that support it, the @option{-@@} option presents the extended
 attributes associated with a file as a directory.              
@@ -6171,7 +6178,7 @@ if the directory name initially supplied does not exist.
 @item dotglob
 If set, Bash includes filenames beginning with a @samp{.} in
 the results of filename expansion.
-The filenames @samp{.} and @samp{..} must always be matched explicitly,
+The filenames @file{.} and @file{..} must always be matched explicitly,
 even if @code{dotglob} is set.
 
 @item execfail
@@ -6255,7 +6262,7 @@ and upper-case and lower-case ASCII characters will collate together.
 
 @item globskipdots
 If set, filename expansion will never match the filenames
-@samp{.} and @samp{..}, even if the pattern begins with a @samp{.}.
+@file{.} and @file{..}, even if the pattern begins with a @samp{.}.
 This option is enabled by default.
 
 @item globstar
@@ -6354,7 +6361,7 @@ or when filtering possible completions as part of programmable completion.
 
 @item noexpand_translation
 If set, Bash
-encloses the translated results of $"..." quoting in single quotes
+encloses the translated results of $"@dots{}" quoting in single quotes
 instead of double quotes.
 If the string is not translated, this has no effect.
 
@@ -6887,7 +6894,7 @@ when an interactive shell is invoked in
 
 @item EPOCHREALTIME
 Each time this parameter is referenced, it expands to the number of seconds
-since the Unix Epoch as a floating point value with micro-second granularity
+since the Unix Epoch as a floating-point value with micro-second granularity
 (see the documentation for the C library function @code{time} for the
 definition of Epoch).
 Assignments to @env{EPOCHREALTIME} are ignored.
@@ -6974,7 +6981,10 @@ Controls how the results of filename expansion are sorted.
 The value of this variable specifies the sort criteria and sort order for
 the results of filename expansion.
 If this variable is unset or set to the null string, filename expansion
-uses the historical behavior of sorting by name.
+uses the historical behavior of sorting by name,
+in ascending lexicographic order as determined by the
+@code{LC_COLLATE} shell variable.
+
 If set, a valid value begins with an optional @samp{+}, which is ignored,
 or @samp{-}, which reverses the sort order from ascending to descending,
 followed by a sort specifier.
@@ -6998,14 +7008,15 @@ For example, a value of @code{-mtime} sorts the results in descending
 order by modification time (newest first).
 
 The @samp{numeric} specifier treats names consisting solely of digits as
-numbers and sorts them using the numeric value (so "2" will sort before
-"10", for example).
+numbers and sorts them using their numeric value
+(so "2" will sort before "10", for example).
 When using @samp{numeric}, names containing non-digits sort after all
 the all-digit names and are sorted by name using the traditional behavior.
 
-A sort specifier of @samp{nosort} disables sorting completely; the results
-are returned in the order they are read from the file system,
-and any leading @samp{-} is ignored.
+A sort specifier of @samp{nosort} disables sorting completely;
+Bash returns the results
+in the order they are read from the file system,
+ignoring any leading @samp{-}.
 
 If the sort specifier is missing, it defaults to @var{name},
 so a value of @samp{+} is equivalent to the null string,
@@ -7025,8 +7036,8 @@ subsequently reset.
 Up to three characters which control history expansion, quick
 substitution, and tokenization (@pxref{History Interaction}).
 The first character is the
-@dfn{history expansion} character, that is, the character which signifies the
-start of a history expansion, normally @samp{!}.
+@dfn{history expansion} character,
+the character which begins a history expansion, normally @samp{!}.
 The second character is the
 character which signifies "quick substitution" when seen as the first
 character on a line, normally @samp{^}.
@@ -7034,7 +7045,7 @@ The optional third character is the
 character which indicates that the remainder of the line is a comment when
 found as the first character of a word, usually @samp{#}.
 The history
-comment character causes history substitution to be skipped for the
+comment character disables history substitution for the
 remaining words on the line.
 It does not necessarily cause the shell
 parser to treat the rest of the line as a comment.
@@ -7723,7 +7734,7 @@ When invoked as an interactive login shell, or as a non-interactive
 shell with the @option{--login} option, it first attempts to read
 and execute commands from @file{/etc/profile} and @file{~/.profile}, in
 that order.
-The @option{--noprofile} option may be used to inhibit this behavior.
+The @option{--noprofile} option will inhibit this behavior.
 
 When invoked as an interactive shell with the name @code{sh}, Bash
 looks for the variable @env{ENV}, expands its value if it is defined,
@@ -7735,8 +7746,8 @@ no effect.
 A non-interactive shell invoked with the name @code{sh} does not attempt
 to read any other startup files.
 
-When invoked as @code{sh}, Bash enters @sc{posix} mode after
-the startup files are read.
+When invoked as @code{sh}, Bash enters @sc{posix} mode after reading
+the startup files.
 
 @subsubheading Invoked in @sc{posix} mode
 
@@ -7759,7 +7770,7 @@ determines it is being run non-interactively in this fashion,
 it reads and executes commands from @file{~/.bashrc}, if that
 file exists and is readable.
 It will not do this if invoked as @code{sh}.
-The @option{--norc} option may be used to inhibit this behavior, and the
+The @option{--norc} option will inhibit this behavior, and the
 @option{--rcfile} option
 will make Bash use a different file instead of
 @file{~/.bashrc}, but neither
@@ -7970,10 +7981,10 @@ If the operating system on which Bash is running provides these
 special files, Bash will use them; otherwise it will emulate them
 internally with this behavior:
 If the @var{file} argument to one of the primaries is of the form
-@file{/dev/fd/@var{N}}, then file descriptor @var{N} is checked.
+@file{/dev/fd/@var{N}}, then Bash checks file descriptor @var{N}.
 If the @var{file} argument to one of the primaries is one of
-@file{/dev/stdin}, @file{/dev/stdout}, or @file{/dev/stderr}, file
-descriptor 0, 1, or 2, respectively, is checked.
+@file{/dev/stdin}, @file{/dev/stdout}, or @file{/dev/stderr},
+Bash checks file descriptor 0, 1, or 2, respectively.
 
 When used with @code{[[}, the @samp{<} and @samp{>} operators sort
 lexicographically using the current locale.
@@ -8202,9 +8213,8 @@ Shell variables are allowed as operands; parameter expansion is
 performed before the expression is evaluated. 
 Within an expression, shell variables may also be referenced by name
 without using the parameter expansion syntax.
-This means you can use
-.Q x ,
-where \fIx\fP is a shell variable name, in an arithmetic expression,
+This means you can use @var{x},
+where @var{x} is a shell variable name, in an arithmetic expression,
 and the shell will evaluate its value as an expression and use the
 result.
 A shell variable that is null or unset evaluates to 0 when referenced
@@ -9019,6 +9029,9 @@ completes.
 @item
 Bash permanently removes jobs from the jobs table after notifying the
 user of their termination via the @code{wait} or @code{jobs} builtins.
+It removes the job from the jobs list after notifying the user of its
+termination, but the status is still available via @code{wait}, as long
+as @code{wait} is supplied a @sc{pid} argument.
 
 @item
 The @code{vi} editing mode will invoke the @code{vi} editor directly when
@@ -9266,7 +9279,7 @@ The trap command is run once for each child that exits.
 
 @item
 Bash removes an exited background process's status from the list of such
-statuses after the @code{wait} builtin is used to obtain it.
+statuses after the @code{wait} builtin returns it.
 
 @end enumerate
 
@@ -9463,7 +9476,7 @@ The @code{unset} builtin will unset the array @code{a} given an argument like
 Bash-5.2 will unset an element with key @samp{@@} (associative arrays)
 or remove all the elements without unsetting the array (indexed arrays).
 @item
-Arithmetic commands ( ((...)) ) and the expressions in an arithmetic for
+Arithmetic commands ( ((@dots{})) ) and the expressions in an arithmetic for
 statement can be expanded more than once.
 @item
 Expressions used as arguments to arithmetic operators in the @code{[[}
@@ -9472,7 +9485,7 @@ conditional command can be expanded more than once.
 The expressions in substring parameter brace expansion can be
 expanded more than once.
 @item
-The expressions in the $(( ... )) word expansion can be expanded
+The expressions in the $(( @dots{} )) word expansion can be expanded
 more than once.
 @item
 Arithmetic expressions used as indexed array subscripts can be
@@ -9657,7 +9670,7 @@ though it will notify of changes in a job's status after a
 foreground command in
 a list completes, before executing the next command in the list.
 If the @option{-b} option to the @code{set} builtin is enabled,
-Bash reports such changes immediately (@pxref{The Set Builtin}).
+Bash reports status changes immediately (@pxref{The Set Builtin}).
 Bash executes any trap on @code{SIGCHLD}
 for each child process that terminates.
 
@@ -10100,7 +10113,7 @@ You may need to
 supply the @option{--srcdir=PATH} argument to tell @code{configure}
 where the source files are.
 @code{configure} automatically checks for the
-source code in the directory that @code{configure} is in and in `..'.
+source code in the directory that @code{configure} is in and in @file{..}.
 
 If you have to use a @code{make} that does not support the @code{VPATH}
 variable, you can compile Bash for one architecture at a

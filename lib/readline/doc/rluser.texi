@@ -82,8 +82,8 @@ Line editing can be enabled at any time using the @option{-o emacs} or
 @node Introduction and Notation
 @section Introduction to Line Editing
 
-The following paragraphs describe the notation used to represent
-keystrokes.
+The following paragraphs use Emacs style to
+describe the notation used to represent keystrokes.
 
 The text @kbd{C-k} is read as `Control-K' and describes the character
 produced when the @key{k} key is pressed while the Control key
@@ -91,16 +91,16 @@ is depressed.
 
 The text @kbd{M-k} is read as `Meta-K' and describes the character
 produced when the Meta key (if you have one) is depressed, and the @key{k}
-key is pressed (a @dfn{meta character}).
-The Meta key is labeled @key{ALT} on many keyboards.
+key is pressed (a @dfn{meta character}), then both are released.
+The Meta key is labeled @key{ALT} or @key{Option} on many keyboards.
 On keyboards with two keys labeled @key{ALT} (usually to either side of
 the space bar), the @key{ALT} on the left side is generally set to
 work as a Meta key.
-The @key{ALT} key on the right may also be configured to work as a
-Meta key or may be configured as some other modifier, such as a
+One of the @key{ALT} keys may also be configured
+as some other modifier, such as a
 Compose key for typing accented characters.
 
-On some keyboards, the Meta key modifier produces meta characters with
+On some keyboards, the Meta key modifier produces characters with
 the eighth bit (0200) set.
 You can use the @code{enable-meta-key} variable
 to control whether or not it does this, if the keyboard allows it.
@@ -381,7 +381,7 @@ shell variable @env{INPUTRC}.
 environment variable @env{INPUTRC}.
 @end ifclear
 If that variable is unset, the default is @file{~/.inputrc}.
-If that file does not exist or cannot be read, readline looks for
+If that file does not exist or cannot be read, Readline looks for
 @file{/etc/inputrc}.
 @ifset BashFeatures
 The @w{@code{bind}} builtin command can also be used to set Readline
@@ -508,7 +508,7 @@ common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the @env{LS_COLORS}
 environment variable.
 If there is a color definition in @env{LS_COLORS} for the custom suffix
-@samp{readline-colored-completion-prefix}, Readline uses this color for
+@samp{.readline-colored-completion-prefix}, Readline uses this color for
 the common prefix instead of its default.
 The default is @samp{off}.
 
@@ -553,7 +553,7 @@ The default value is @samp{off}.
 The maximum
 length in characters of the common prefix of a list of possible
 completions that is displayed without modification.
-When set to a value greater than zero, readline
+When set to a value greater than zero, Readline
 replaces common prefixes longer than this value
 with an ellipsis when displaying possible completions.
 
@@ -674,7 +674,7 @@ sequences containing @kbd{\M-} or @code{Meta-}
 (see @code{Key Bindings} in @ref{Readline Init File Syntax})
 by converting a key sequence of the form
 @kbd{\M-}@var{C} or @code{Meta-}@var{C} to the two-character sequence
-@kbd{ESC}@var{C} (adding the meta prefix).
+@kbd{ESC} @var{C} (adding the meta prefix).
 If @code{force-meta-prefix} is set to @samp{off} (the default),
 Readline uses the value of the @code{convert-meta} variable to determine
 whether to perform this conversion:
@@ -876,7 +876,7 @@ The default value is @samp{off}.
 If set to @samp{on}, this alters the default completion behavior when
 inserting a single match into the line.
 It's only active when performing completion in the middle of a word.
-If enabled, readline does not insert characters from the completion
+If enabled, Readline does not insert characters from the completion
 that match characters after point in the word being completed,
 so portions of the word following the cursor are not duplicated.
 For instance, if this is enabled, attempting completion when the cursor
@@ -1312,9 +1312,10 @@ position, and @dfn{mark} refers to a cursor position saved by the
 @code{set-mark} command.
 The text between the point and mark is referred to as the @dfn{region}.
 Readline has the concept of an @emph{active region}:
-when the region is active, Readline redisplay uses the
-value of the @code{active-region-start-color} variable
-to denote the region.
+when the region is active,
+Readline redisplay highlights the region using the
+value of the @code{active-region-start-color} variable.
+The @code{enable-active-region} variable turns this on and off.
 Several commands set the region to active; those are noted below.
 
 @node Commands For Moving
@@ -1979,7 +1980,7 @@ of an @var{inputrc} file.
 This command is unbound by default.
 
 @item execute-named-command (M-x)
-Read a bindable readline command name from the input and execute the
+Read a bindable Readline command name from the input and execute the
 function to which it's bound, as if the key sequence to which it was
 bound appeared in the input.
 If this function is supplied with a numeric argument, it passes that
@@ -2095,7 +2096,7 @@ so forth.
 When the user attempts word completion for an argument to a command for
 which a completion specification (a @dfn{compspec}) has been defined
 using the @code{complete} builtin (@pxref{Programmable Completion Builtins}),
-\fBreadline\fP invokes the programmable completion facilities. 
+Readline invokes the programmable completion facilities. 
 
 First, Bash identifies the command name.
 If a compspec has been defined for that command, the
@@ -2563,7 +2564,7 @@ the @option{-E} option indicates that other supplied options should
 apply to ``empty'' command completion; and
 the @option{-I} option indicates that other supplied options should
 apply to completion on the initial word on the line.
-These are determined in the same way as the \fBcomplete\fP builtin.
+These are determined in the same way as the @code{complete} builtin.
 
 If multiple options are supplied, the @option{-D} option takes precedence
 over @option{-E}, and both take precedence over @option{-I}

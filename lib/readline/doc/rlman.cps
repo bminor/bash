@@ -1,20 +1,20 @@
 \initial {A}
-\entry {application-specific completion functions}{49}
+\entry{application-specific completion functions}{55}
 \initial {C}
-\entry {command editing}{1}
+\entry{command editing}{2}
 \initial {E}
-\entry {editing command lines}{1}
+\entry{editing command lines}{2}
 \initial {I}
-\entry {initialization file, readline}{4}
-\entry {interaction, readline}{1}
+\entry{initialization file, readline}{4}
+\entry{interaction, readline}{1}
 \initial {K}
-\entry {kill ring}{2}
-\entry {killing text}{2}
+\entry{kill ring}{3}
+\entry{killing text}{3}
 \initial {N}
-\entry {notation, readline}{1}
+\entry{notation, readline}{2}
 \initial {R}
-\entry {readline, function}{24}
+\entry{readline, function}{27}
 \initial {V}
-\entry {variables, readline}{4}
+\entry{variables, readline}{5}
 \initial {Y}
-\entry {yanking text}{2}
+\entry{yanking text}{3}
