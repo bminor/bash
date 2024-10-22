@@ -12,7 +12,7 @@
 \entry{operator, shell}{3}{operator, shell}
 \entry{process group}{3}{process group}
 \entry{process group ID}{3}{process group ID}
-\entry{reserved word}{3}{reserved word}
+\entry{reserved word}{4}{reserved word}
 \entry{return status}{4}{return status}
 \entry{signal}{4}{signal}
 \entry{special builtin}{4}{special builtin}
@@ -68,13 +68,13 @@
 \entry{matching, pattern}{38}{matching, pattern}
 \entry{redirection}{40}{redirection}
 \entry{command expansion}{44}{command expansion}
-\entry{command execution}{44}{command execution}
-\entry{command search}{44}{command search}
+\entry{command execution}{45}{command execution}
+\entry{command search}{45}{command search}
 \entry{execution environment}{45}{execution environment}
 \entry{environment}{46}{environment}
 \entry{exit status}{47}{exit status}
-\entry{signal handling}{47}{signal handling}
-\entry{shell script}{48}{shell script}
+\entry{signal handling}{48}{signal handling}
+\entry{shell script}{49}{shell script}
 \entry{special builtin}{82}{special builtin}
 \entry{login shell}{100}{login shell}
 \entry{interactive shell}{100}{interactive shell}

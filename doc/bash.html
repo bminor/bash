@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 20<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -643,6 +643,11 @@ document.
 
 <DD>
 A space or tab.
+<DT><B>whitespace</B>
+
+<DD>
+A character belonging to the <B>space</B> character class in the
+current locale, or for which <I>isspace</I>(3) returns true.
 <DT><B>word</B>
 
 <DD>
@@ -5010,96 +5015,72 @@ arithmetic expansion
 that did not occur within double quotes for
 <I>word splitting</I>.
 
+Words that were not expanded are not split.
 <P>
 
 The shell treats each character of
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-as a delimiter, and splits the results of the other
-expansions into words using these characters as field terminators.
+as a delimiter,
+and splits the results of the other expansions into words
+using these characters as field terminators.
+<P>
+
+An <I>IFS whitespace</I> character is whitespace as defined above
+(see <B>Definitions</B>) that appears in the value of
+<FONT SIZE=-1><B>IFS</B>.
+
+</FONT>
+Space, tab, and newline are always considered IFS whitespace, even
+if they don't appear in the locale's <B>space</B> category.
 <P>
 
 If
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-is unset, or its
-value is exactly
+is unset, field splitting acts as if its value were
 <B>&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</B>,
 
-the default, then
-sequences of
-<B>space</B>,
-
-<B>tab</B>,
-
-and
-<B>newline</B>
-
-at the beginning and end of the results of the previous
-expansions are ignored, and
-any sequence of
+and treats these characters as IFS whitespace.
+If the value of
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-characters not at the beginning or end delimits words.
-If
-<FONT SIZE=-1><B>IFS</B>
+is null, no word splitting occurs,
+but implicit null arguments (see below) are still removed.
+<P>
 
-</FONT>
-has a value other than the default, then sequences of
-the whitespace characters
-<B>space</B>,
-
-<B>tab</B>,
-
-and
-<B>newline</B>
-
-present in the value of
-<FONT SIZE=-1><B>IFS</B>
-
-</FONT>
-(an
-<FONT SIZE=-1><B>IFS</B>
-
-</FONT>
-whitespace character)
-are ignored at the beginning and end of the word.
-Any character in
-<FONT SIZE=-1><B>IFS</B>
-
-</FONT>
-that is not
-<FONT SIZE=-1><B>IFS</B>
-
-</FONT>
-whitespace, along with any adjacent
-<FONT SIZE=-1><B>IFS</B>
-
-</FONT>
-whitespace characters, delimits a field.
-A sequence of
-<FONT SIZE=-1><B>IFS</B>
-
-</FONT>
-whitespace characters is also treated as a delimiter.
+Word splitting begins by removing sequences of IFS whitespace characters
+from the beginning and end of the results of the previous expansions,
+then splits the remaining words.
 <P>
 
 If the value of
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-is null, no word splitting occurs.
+consists solely of IFS whitespace,
+any sequence of IFS whitespace characters delimits a field,
+so a field consists of characters that are not unquoted IFS
+whitespace, and null fields result only from quoting.
+<P>
+
 If
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-is unset, word splitting behaves as if it contained the default value
-of
-<B>&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</B>.
+contains a non-whitespace character, then any character in
+the value of
+<FONT SIZE=-1><B>IFS</B>
 
+</FONT>
+that is not IFS whitespace,
+along with any adjacent IFS whitespace characters, delimits a field.
+This means that adjacent non-IFS-whitespace delimiters produce a
+null field.
+A sequence of IFS whitespace characters also delimits a field.
 <P>
 
 Explicit null arguments (<B>&quot;
@@ -5109,19 +5090,19 @@ Explicit null arguments (<B>&quot;
 and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
-If a parameter with no value is expanded within double quotes, a
-null argument results and is retained
-and passed to a command as an empty string.
+Expanding a  parameter with no value within double quotes
+produces a null field,
+which is retained and passed to a command as an empty string.
+<P>
+
 When a quoted null argument appears as part of a word whose expansion is
-non-null, the null argument is removed.
+non-null, word splitting removes the null argument portion,
+leaving the non-null expansion.
 That is, the word
 
 becomes
 
 after word splitting and null argument removal.
-<P>
-
-Note that if no expansion occurs, no splitting is performed.
 <A NAME="lbBH">&nbsp;</A>
 <H4>Pathname Expansion</H4>
 
@@ -16376,7 +16357,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 20<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16485,7 +16466,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20241015/doc/bash.1.<BR>
-Time: 18 October 2024 12:02:45 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20241018/doc/bash.1.<BR>
+Time: 20 October 2024 12:37:36 EDT
 </BODY>
 </HTML>

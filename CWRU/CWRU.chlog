@@ -10380,3 +10380,21 @@ doc/bash.1,lib/readline/doc/readline.3
 				   -----
 sig.c
 	- fix minix typo
+
+lib/readline/history.c
+	- history_do_write: for portability, make sure that the offset argument
+	  to mmap is page-aligned, since some systems (linux, macos) require it.
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/util.c
+	- rl_tilde_expand: rearrange code to do bounds checking before data
+	  validation when finding the end of the tilde-word to avoid
+	  touching uninitialized data
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   10/20
+				   -----
+doc/bash.1,doc/bashref.texi
+	- update word splitting section to add what IFS whitespace means and
+	  how word splitting uses it. Based on a bug-bash discussion
+

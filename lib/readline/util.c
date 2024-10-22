@@ -205,9 +205,9 @@ rl_tilde_expand (int ignore, int key)
   end = start;
   do
     end++;
-  while (whitespace (rl_line_buffer[end]) == 0 && end < rl_end);
+  while (end < rl_end && whitespace (rl_line_buffer[end]) == 0);
 
-  if (whitespace (rl_line_buffer[end]) || end >= rl_end)
+  if (end >= rl_end || whitespace (rl_line_buffer[end]))
     end--;
 
   /* If the first character of the current word is a tilde, perform

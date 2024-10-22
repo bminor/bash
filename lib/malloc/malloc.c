@@ -1140,6 +1140,7 @@ internal_realloc (PTR_T mem, size_t n, const char *file, int line, int flags)
   if (n == 0)
     {
       internal_free (mem, file, line, MALLOC_INTERNAL);
+      /* XXX - return internal_malloc (0, file, line MALLOC_INTERNAL) ? */
       return (NULL);
     }
   if ((p = (union mhead *) mem) == 0)

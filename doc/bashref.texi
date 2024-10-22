@@ -202,6 +202,10 @@ is primarily concerned with the Shell and Utilities portion of the
 @item blank
 A space or tab character.
 
+@item whitespace
+A character belonging to the @code{space} character class in the
+current locale, or for which @code{isspace()} returns true.
+
 @item builtin
 @cindex builtin
 A command that is implemented internally by the shell itself, rather
@@ -2895,44 +2899,53 @@ expansion.
 The shell scans the results of parameter expansion, command substitution,
 and arithmetic expansion that did not occur within double quotes for
 word splitting.
+Words that were not expanded are not split.
 
-The shell treats each character of @env{$IFS} as a delimiter, and splits
-the results of the other expansions into words using these characters
-as field terminators.
+The shell treats each character of @env{$IFS} as a delimiter,
+and splits the results of the other expansions into fields
+using these characters as field terminators.
 
-If @env{IFS} is unset, or its value is exactly @code{<space><tab><newline>},
-the default, then sequences of
-@code{space}, @code{tab}, and @code{newline}
-at the beginning and end of the results of the previous
-expansions are ignored, and any sequence of @env{IFS}
-characters not at the beginning or end delimits words.
-If @env{IFS} has a value other than the default, then sequences of
-the whitespace characters @code{space}, @code{tab}, and @code{newline}
-present the value of @env{IFS} (an @env{IFS} whitespace character)
-are ignored at the beginning and end of the word.
-Any character in @env{IFS} that is not @env{IFS}
-whitespace, along with any adjacent @env{IFS}
-whitespace characters, delimits a field.  A sequence of @env{IFS}
-whitespace characters is also treated as a delimiter.
+An @dfn{IFS whitespace} character is whitespace as defined above
+(@pxref{Definitions}) that appears in the value of @env{IFS}.
+Space, tab, and newline are always considered IFS whitespace, even
+if they don't appear in the locale's @code{space} category.
 
-If the value of @env{IFS} is null, no word splitting occurs.
-If @env{IFS} is unset, word splitting behaves as if it contained
-the default value @code{<space><tab><newline>}.
+If @env{IFS} is unset, word splitting behaves as if its value were
+@code{<space><tab><newline>},
+and treats these characters as IFS whitespace.
+If the value of @env{IFS} is null, no word splitting occurs,
+but implicit null arguments (see below) are still removed.
+
+Word splitting begins by removing sequences of IFS whitespace characters
+from the beginning and end of the results of the previous expansions,
+then splits the remaining words.
+
+If the value of @env{IFS} consists solely of IFS whitespace,
+any sequence of IFS whitespace characters delimits a field,
+so a field consists of characters that are not unquoted IFS
+whitespace, and null fields result only from quoting.
+
+If @env{IFS} contains a non-whitespace character, then any
+character in the value of @env{IFS} that is not IFS whitespace,
+along with any adjacent IFS whitespace characters, delimits a field.
+This means that adjacent non-IFS-whitespace delimiters produce a
+null field.
+A sequence of IFS whitespace characters also delimits a field.
 
 Explicit null arguments (@code{""} or @code{''}) are retained
 and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
-If a parameter with no value is expanded within double quotes, a
-null argument results and is retained
-and passed to a command as an empty string.
-When a quoted null argument appears as part of a word whose expansion is
-non-null, the null argument is removed.
+Expanding a  parameter with no value within double quotes
+produces a null field,
+which is retained and passed to a command as an empty string.
+
+When a quoted null argument appears as part of a word whose expansion
+is non-null, word splitting removes the null argument portion,
+leaving the non-null expansion.
 That is, the word
 @code{-d''} becomes @code{-d} after word splitting and
 null argument removal.
-
-Note that if no expansion occurs, no splitting is performed.
 
 @node Filename Expansion
 @subsection Filename Expansion

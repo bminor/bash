@@ -16,10 +16,10 @@
 \entry{builtin}{3}
 \initial {C}
 \entry{command editing}{129}
-\entry{command execution}{44}
+\entry{command execution}{45}
 \entry{command expansion}{44}
 \entry{command history}{165}
-\entry{command search}{44}
+\entry{command search}{45}
 \entry{command substitution}{35}
 \entry{command timing}{10}
 \entry{commands, compound}{11}
@@ -117,18 +117,18 @@
 \initial {R}
 \entry{Readline, how to use}{127}
 \entry{redirection}{40}
-\entry{reserved word}{3}
+\entry{reserved word}{4}
 \entry{reserved words}{9}
 \entry{restricted shell}{113}
 \entry{return status}{4}
 \initial {S}
 \entry{shell arithmetic}{105}
 \entry{shell function}{19}
-\entry{shell script}{48}
+\entry{shell script}{49}
 \entry{shell variable}{22}
 \entry{shell, interactive}{102}
 \entry{signal}{4}
-\entry{signal handling}{47}
+\entry{signal handling}{48}
 \entry{special builtin}{4, 82}
 \entry{startup files}{100}
 \entry{string translations}{8}

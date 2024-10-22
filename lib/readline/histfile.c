@@ -742,7 +742,8 @@ history_do_write (const char *filename, int nelements, int overwrite)
   int file, mode, rv, exists;
   struct stat finfo;
 #ifdef HISTORY_USE_MMAP
-  size_t cursize;
+  size_t cursize, newsize;
+  off_t offset;
 
   history_lines_written_to_file = 0;
 
@@ -798,7 +799,11 @@ history_do_write (const char *filename, int nelements, int overwrite)
 #ifdef HISTORY_USE_MMAP
     if (ftruncate (file, buffer_size+cursize) == -1)
       goto mmap_error;
-    buffer = (char *)mmap (0, buffer_size, PROT_READ|PROT_WRITE, MAP_WFLAGS, file, cursize);
+    /* for portability, ensure that we round cursize to a multiple of the
+       page size. */
+    offset = cursize & ~(getpagesize () - 1);
+    newsize = buffer_size + cursize - offset;
+    buffer = (char *)mmap (0, newsize, PROT_READ|PROT_WRITE, MAP_WFLAGS, file, offset);
     if ((void *)buffer == MAP_FAILED)
       {
 mmap_error:
@@ -812,6 +817,7 @@ mmap_error:
 	FREE (tempname);
 	return rv;
       }
+    j = cursize - offset;
 #else    
     buffer = (char *)malloc (buffer_size);
     if (buffer == 0)
@@ -826,9 +832,10 @@ mmap_error:
 	FREE (tempname);
 	return rv;
       }
+    j = 0;
 #endif
 
-    for (j = 0, i = history_length - nelements; i < history_length; i++)
+    for (i = history_length - nelements; i < history_length; i++)
       {
 	if (history_write_timestamps && the_history[i]->timestamp && the_history[i]->timestamp[0])
 	  {
@@ -842,7 +849,10 @@ mmap_error:
       }
 
 #ifdef HISTORY_USE_MMAP
-    if (msync (buffer, buffer_size, MS_ASYNC) != 0 || munmap (buffer, buffer_size) != 0)
+    /* make sure we unmap the pages even if the sync fails */
+    if (msync (buffer, newsize, MS_ASYNC) != 0)
+      rv = errno;
+    if (munmap (buffer, newsize) != 0 && rv == 0)
       rv = errno;
 #else
     if (write (file, buffer, buffer_size) < 0)

@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 15 October 2024).
+the Bash shell (version 5.3, 20 October 2024).
 
-This is Edition 5.3, last updated 15 October 2024,
+This is Edition 5.3, last updated 20 October 2024,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 15 October 2024).
+the Bash shell (version 5.3, 20 October 2024).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 15 October 2024,
+<p>This is Edition 5.3, last updated 20 October 2024,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -428,6 +428,11 @@ is primarily concerned with the Shell and Utilities portion of the
 </dd>
 <dt><code class="code">blank</code></dt>
 <dd><p>A space or tab character.
+</p>
+</dd>
+<dt><code class="code">whitespace</code></dt>
+<dd><p>A character belonging to the <code class="code">space</code> character class in the
+current locale, or for which <code class="code">isspace()</code> returns true.
 </p>
 </dd>
 <dt><a id="index-builtin-1"></a><span><code class="code">builtin</code><a class="copiable-link" href="#index-builtin-1"> &para;</a></span></dt>
@@ -3329,44 +3334,53 @@ Next: <a href="#Filename-Expansion" accesskey="n" rel="next">Filename Expansion<
 <p>The shell scans the results of parameter expansion, command substitution,
 and arithmetic expansion that did not occur within double quotes for
 word splitting.
+Words that were not expanded are not split.
 </p>
-<p>The shell treats each character of <code class="env">$IFS</code> as a delimiter, and splits
-the results of the other expansions into words using these characters
-as field terminators.
+<p>The shell treats each character of <code class="env">$IFS</code> as a delimiter,
+and splits the results of the other expansions into fields
+using these characters as field terminators.
 </p>
-<p>If <code class="env">IFS</code> is unset, or its value is exactly <code class="code">&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</code>,
-the default, then sequences of
-<code class="code">space</code>, <code class="code">tab</code>, and <code class="code">newline</code>
-at the beginning and end of the results of the previous
-expansions are ignored, and any sequence of <code class="env">IFS</code>
-characters not at the beginning or end delimits words.
-If <code class="env">IFS</code> has a value other than the default, then sequences of
-the whitespace characters <code class="code">space</code>, <code class="code">tab</code>, and <code class="code">newline</code>
-present the value of <code class="env">IFS</code> (an <code class="env">IFS</code> whitespace character)
-are ignored at the beginning and end of the word.
-Any character in <code class="env">IFS</code> that is not <code class="env">IFS</code>
-whitespace, along with any adjacent <code class="env">IFS</code>
-whitespace characters, delimits a field.  A sequence of <code class="env">IFS</code>
-whitespace characters is also treated as a delimiter.
+<p>An <em class="dfn">IFS whitespace</em> character is whitespace as defined above
+(see <a class="pxref" href="#Definitions">Definitions</a>) that appears in the value of <code class="env">IFS</code>.
+Space, tab, and newline are always considered IFS whitespace, even
+if they don&rsquo;t appear in the locale&rsquo;s <code class="code">space</code> category.
 </p>
-<p>If the value of <code class="env">IFS</code> is null, no word splitting occurs.
-If <code class="env">IFS</code> is unset, word splitting behaves as if it contained
-the default value <code class="code">&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</code>.
+<p>If <code class="env">IFS</code> is unset, word splitting behaves as if its value were
+<code class="code">&lt;space&gt;&lt;tab&gt;&lt;newline&gt;</code>,
+and treats these characters as IFS whitespace.
+If the value of <code class="env">IFS</code> is null, no word splitting occurs,
+but implicit null arguments (see below) are still removed.
+</p>
+<p>Word splitting begins by removing sequences of IFS whitespace characters
+from the beginning and end of the results of the previous expansions,
+then splits the remaining words.
+</p>
+<p>If the value of <code class="env">IFS</code> consists solely of IFS whitespace,
+any sequence of IFS whitespace characters delimits a field,
+so a field consists of characters that are not unquoted IFS
+whitespace, and null fields result only from quoting.
+</p>
+<p>If <code class="env">IFS</code> contains a non-whitespace character, then any
+character in the value of <code class="env">IFS</code> that is not IFS whitespace,
+along with any adjacent IFS whitespace characters, delimits a field.
+This means that adjacent non-IFS-whitespace delimiters produce a
+null field.
+A sequence of IFS whitespace characters also delimits a field.
 </p>
 <p>Explicit null arguments (<code class="code">&quot;&quot;</code> or <code class="code">''</code>) are retained
 and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
-If a parameter with no value is expanded within double quotes, a
-null argument results and is retained
-and passed to a command as an empty string.
-When a quoted null argument appears as part of a word whose expansion is
-non-null, the null argument is removed.
+Expanding a  parameter with no value within double quotes
+produces a null field,
+which is retained and passed to a command as an empty string.
+</p>
+<p>When a quoted null argument appears as part of a word whose expansion
+is non-null, word splitting removes the null argument portion,
+leaving the non-null expansion.
 That is, the word
 <code class="code">-d''</code> becomes <code class="code">-d</code> after word splitting and
 null argument removal.
-</p>
-<p>Note that if no expansion occurs, no splitting is performed.
 </p>
 <hr>
 </div>
