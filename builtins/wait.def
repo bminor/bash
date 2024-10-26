@@ -380,6 +380,8 @@ set_waitlist (WORD_LIST *list)
 	    }
 	  else if (l->word->word[0] == '%')
 	    sh_badjob (l->word->word);
+	  else if (job == BAD_JOBSPEC)
+	    sh_invalidjob (l->word->word);
 	  else
 	    sh_badpid (l->word->word);
 	  continue;

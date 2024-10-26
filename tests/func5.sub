@@ -85,15 +85,15 @@ break()
 echo after
 )
 
-# in posix mode, functions whose names are invalid identifiers are fatal errors
+# in posix mode, functions whose names are invalid identifiers are
+# no longer fatal errors
 ( set -o posix
 !! () { fc -s "$@" ; }
 type \!\!
 )
 
-# but you can create such functions and print them in posix mode
-!! () { fc -s "$@" ; }
-type '!!'
+# you can create such functions and print them in posix mode
 set -o posix
+!! () { fc -s "$@" ; }
 type '!!'
 set +o posix

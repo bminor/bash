@@ -10398,3 +10398,70 @@ doc/bash.1,doc/bashref.texi
 	- update word splitting section to add what IFS whitespace means and
 	  how word splitting uses it. Based on a bug-bash discussion
 
+				   10/21
+				   -----
+lib/readline/colors.c
+doc/bash.1,lib/readline/doc/readline.3,lib/readline/doc/rluser.texi
+	- RL_COLOR_PREFIX_EXTENSION: remove the leading `.' again; this was
+	  the result of a misunderstanding about how `dircolors' works
+	  Report from Daniël Gerbrand Haasbroek <dghaasbroek@gmail.com>
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: when adding the character to the search
+	  string, insert it as a single byte in the C locale (or if we're
+	  not doing multibyte characters)
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   10/23
+				   -----
+doc/bash.1,doc/bashref.texi
+	- SIGNALS: update section to make it clear how job control affects
+	  SIGINT receipt and the behavior of the shell when it's waiting
+	  for a command that receives one.
+	  From a suggestion by Simone Robinson <robinson027@yahoo.com>
+
+builtins/common.c
+	- get_job_spec: warn about deprecated notation if the job spec doesn't
+	  have a leading `%'; code to return BAD_JOBSPEC tagged for bash-5.4
+	- sh_invalidjob: new convenience function to print error for invalid
+	  job specifications
+
+builtins/jobs.def, builtins/ kill.def, builtins/ wait.def, builtins/fg_bg.def
+	- handle BAD_JOBSPEC return from get_job_spec; call sh_invalidjob.
+	  Nothing returns that yet.
+
+builtins/kill.def
+	- kill_builtin: change to use common error message via sh_badpid() if
+	  we get an argument where the first character is not a digit or `%'
+
+builtins/jobs.def
+	- jobs_builtin: check for INVALID_JOB return from get_job_spec to
+	  avoid call to get_job_by_jid
+
+				   10/24
+				   -----
+error.c, error.h
+	- err_invalidid: common error function for invalid identifiers;
+	  changed callers in execute_cmd.c, general.c
+
+general.c
+	- valid_function_word: separated posix check against special builtin
+	  names (flags&4) and posix check for valid identifiers (flags&1);
+	  callers need to differentiate. This means that posix mode does not
+	  require function names to be valid identifiers
+
+execute_cmd.c
+	- execute_intern_function: don't call valid_function_word with
+	  (flags&1) in posix mode unless POSIX_RESTRICT_FUNCNAME is defined;
+	  call with flags&4 to keep the check against special builtin names
+
+print_cmd.c
+	- print_function_def,named_function_string: don't print functions
+	  with names that are invalid identifiers with a leading `function'
+
+config-top.h
+	- POSIX_RESTRICT_FUNCNAME: placeholder, not defined by default
+
+doc/bashref.texi
+	- Posix mode: remove item about function names being valid shell
+	  identifiers

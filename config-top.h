@@ -139,7 +139,6 @@
 
 /* Define as 1 if you want to enable code that implements multiple coprocs
    executing simultaneously */
-/* TAG: bash-5.3 */
 #ifndef MULTIPLE_COPROCS
 #  define MULTIPLE_COPROCS 1
 #endif
@@ -206,3 +205,7 @@
 #ifndef PATSUB_REPLACE_DEFAULT
 #define PATSUB_REPLACE_DEFAULT	1
 #endif
+
+/* Define to 1 if you want posix mode to restrict shell function names to
+   shell NAMEs. */
+/* #define POSIX_RESTRICT_FUNCNAME 0 */

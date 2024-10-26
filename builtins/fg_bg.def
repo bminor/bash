@@ -1,7 +1,7 @@
 This file is fg_bg.def, from which is created fg_bg.c.
 It implements the builtins "bg" and "fg" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -144,7 +144,9 @@ fg_bg (WORD_LIST *list, int foreground)
 
   if (INVALID_JOB (job))
     {
-      if (job != DUP_JOB)
+      if (job == BAD_JOBSPEC)
+	sh_invalidjob (list->word->word);
+      else if (job != DUP_JOB)
 	sh_badjob (list ? list->word->word : _("current"));
 
       goto failure;

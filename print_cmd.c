@@ -1325,16 +1325,27 @@ print_function_def (FUNCTION_DEF *func)
   COMMAND *cmdcopy;
   REDIRECT *func_redirects;
   WORD_DESC *w;
+  int pflags;
+
+  pflags = 0;
+  if (posixly_correct)
+    {
+      pflags |= 4;	/* no reserved words */
+#if POSIX_RESTRICT_FUNCNAME
+      pflags |= 1;	/* function names must be valid identifiers */
+#endif
+    }
 
   w = pretty_print_mode ? dequote_word (func->name) : func->name;
   /* we're just pretty-printing, so this can be destructive */      
 
   func_redirects = NULL;
   /* When in posix mode, print functions as posix specifies them, but prefix
-     `function' to words that are not valid POSIX identifiers. */
+     `function' to names that are not valid posix function names, as
+     determined by valid_function_name(). */
   if (posixly_correct == 0)
     cprintf ("function %s () \n", w->word);
-  else if (valid_function_name (w->word, posixly_correct) == 0)
+  else if (valid_function_name (w->word, pflags) == 0)
     cprintf ("function %s () \n", w->word);
   else
     cprintf ("%s () \n", w->word);
@@ -1392,6 +1403,16 @@ named_function_string (char *name, COMMAND *command, int flags)
   int old_indent, old_amount;
   COMMAND *cmdcopy;
   REDIRECT *func_redirects;
+  int pflags;
+
+  pflags = 0;
+  if (posixly_correct)
+    {
+      pflags |= 4;	/* no reserved words */
+#if POSIX_RESTRICT_FUNCNAME
+      pflags |= 1;	/* function names must be valid identifiers */
+#endif
+    }
 
   old_indent = indentation;
   old_amount = indentation_amount;
@@ -1401,7 +1422,7 @@ named_function_string (char *name, COMMAND *command, int flags)
 
   if (name && *name)
     {
-      if (valid_function_name (name, posixly_correct) == 0)
+      if (valid_function_name (name, pflags) == 0)
 	cprintf ("function ");
       cprintf ("%s ", name);
     }

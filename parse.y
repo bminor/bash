@@ -343,8 +343,8 @@ static int two_tokens_ago;
 
 /* Someday compoundcmd_lineno will be an array of these structs. */
 struct tokeninfo {
-  int tok;
   int lineno;
+  int tok;
 };
 
 /* The line number in a script where a compound command begins. The
@@ -6790,6 +6790,9 @@ report_syntax_error (const char *message)
 	  free (msg);
 	  msg = p;
 	}
+if (shell_eof_token && current_token != shell_eof_token)
+  parser_error (line_number, _("syntax error near unexpected token `%s' while looking for matching `%c'"), msg, shell_eof_token);
+else
       parser_error (line_number, _("syntax error near unexpected token `%s'"), msg);
       free (msg);
 

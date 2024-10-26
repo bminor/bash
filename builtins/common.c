@@ -272,6 +272,13 @@ sh_nojobs (const char *s)
   else
     builtin_error (_("no job control"));
 }
+
+void
+sh_invalidjob (const char *s)
+{
+  builtin_error (_("%s: invalid job specification"), s);
+}
+
 #endif
 
 #if defined (RESTRICTED_SHELL)
@@ -693,6 +700,14 @@ get_job_spec (WORD_LIST *list)
 
   if (*word == '%')
     word++;
+  else
+#if 1
+    /* This could be builtin_error or sh_invalidjob() */
+    builtin_warning (_("%s: job specification requires leading `%%'"), word);
+#else
+    /* TAG:bash-5.4 10/23/2024 */
+    return (BAD_JOBSPEC);
+#endif
 
   if (DIGIT (*word) && all_digits (word))
     {

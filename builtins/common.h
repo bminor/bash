@@ -103,6 +103,7 @@ extern void sh_erange (const char *, const char *);
 extern void sh_badpid (const char *);
 extern void sh_badjob (const char *);
 extern void sh_nojobs (const char *);
+extern void sh_invalidjob (const char *);
 extern void sh_restricted (const char *);
 extern void sh_notbuiltin (const char *);
 extern void sh_wrerror (void);

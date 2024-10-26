@@ -3853,8 +3853,8 @@ If the  @code{huponexit} shell option has been set using @code{shopt}
 an interactive login shell exits.
 
 If Bash is waiting for a command to complete and receives a signal
-for which a trap has been set, the trap will not be executed until
-the command completes.
+for which a trap has been set,
+it will not execute the trap until the command completes.
 If Bash is waiting for an asynchronous command via the @code{wait} builtin,
 and it receives a signal for which a trap has been set,
 the @code{wait} builtin will return immediately with an exit status
@@ -3867,20 +3867,33 @@ commonly intend to send to that command.
 This happens because the shell and the command are in the same process
 group as the terminal, and @samp{^C} sends @code{SIGINT} to all processes
 in that process group.
+Since Bash does not enable job control by default when the
+shell is not interactive,
+this scenario is most common in non-interactive shells.
+
+When job control is enabled, and Bash is waiting for a foreground
+command to complete, the shell does not receive keyboard-generated
+signals, because it is not in the same process group as the terminal.
+This scenario is most common in interactive shells, where Bash
+attempts to enable job control by default.
 See @ref{Job Control}, for a more in-depth discussion of process groups.
 
-When Bash is running without job control enabled and receives @code{SIGINT}
+When job control is not enabled, and Bash receives @code{SIGINT}
 while waiting for a foreground command, it waits until that foreground
 command terminates and then decides what to do about the @code{SIGINT}:
 
 @enumerate
 @item
 If the command terminates due to the @code{SIGINT}, Bash concludes
-that the user meant to end the entire script, and acts on the
-@code{SIGINT} (e.g., by running a @code{SIGINT} trap or exiting itself);
+that the user meant to send the @code{SIGINT} to the shell as well,
+and acts on the
+@code{SIGINT}
+(e.g., by running a @code{SIGINT} trap,
+exiting a non-interactive shell,
+or returning to the top level to read a new command).
 
 @item
-If the pipeline does not terminate due to @code{SIGINT}, the program
+If the command does not terminate due to @code{SIGINT}, the program
 handled the @code{SIGINT} itself and did not treat it as a fatal signal.
 In that case, Bash does not treat @code{SIGINT} as a fatal signal,
 either, instead assuming that the @code{SIGINT} was used as part of the
@@ -3891,6 +3904,17 @@ trap set on @code{SIGINT}, as it does with any other trapped signal it
 receives while it is waiting for the foreground command to
 complete, for compatibility.
 @end enumerate
+
+When job control is enabled, Bash does not receive keyboard-generated
+signals such as @code{SIGINT}
+while it is waiting for a foreground command.
+An interactive shell does not pay attention to the @code{SIGINT},
+even if the foreground command terminates as a result, other than noting
+its exit status.
+If the shell is not interactive, and
+the foreground command terminates due to the @code{SIGINT},
+Bash pretends it received the @code{SIGINT}
+itself (scenario 1 above), for compatibility.
 
 @node Shell Scripts
 @section Shell Scripts
@@ -8954,14 +8978,6 @@ Redirection operators do not perform word splitting on the word in a
 redirection.
 
 @item
-Function names must be valid shell @code{name}s.
-That is, they may not
-contain characters other than letters, digits, and underscores, and
-may not start with a digit.
-Declaring a function with an invalid name in a non-interactive shell
-is a fatal syntax error.
-
-@item
 Function names may not be the same as one of the @sc{posix} special
 builtins.
 
@@ -9068,7 +9084,7 @@ double-quoted string, even if the @code{histexpand} option is enabled.
 
 @item
 When printing shell function definitions (e.g., by @code{type}), Bash does
-not print the @code{function} keyword.
+not print the @code{function} keyword unless necessary.
 
 @item
 Non-interactive shells exit if a syntax error in an arithmetic expansion

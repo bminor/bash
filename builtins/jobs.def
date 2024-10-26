@@ -155,7 +155,7 @@ jobs_builtin (WORD_LIST *list)
       BLOCK_CHILD (set, oset);
       job = get_job_spec (list);
 
-      if ((job == NO_JOB) || jobs == 0 || get_job_by_jid (job) == 0)
+      if ((job == NO_JOB) || jobs == 0 || INVALID_JOB (job) || get_job_by_jid (job) == 0)
 	{
 	  sh_badjob (list->word->word);
 	  any_failed++;
@@ -287,7 +287,10 @@ disown_builtin (WORD_LIST *list)
 
       if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))
 	{
-	  sh_badjob (list ? list->word->word : _("current"));
+	  if (job == BAD_JOBSPEC)
+	    sh_invalidjob (list->word->word);
+	  else
+	    sh_badjob (list ? list->word->word : _("current"));
 	  retval = EXECUTION_FAILURE;
 	}
       else if (nohup_only)

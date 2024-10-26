@@ -1967,7 +1967,7 @@ cpl_reap (void)
       if (p->coproc->c_flags & COPROC_DEAD)
 	{
 	  coproc_list.ncoproc--;	/* keep running count, fix up pointers later */
-#ifdef DEBUG
+#if 0
 	  INTERNAL_DEBUG (("cpl_reap: deleting %d", p->coproc->c_pid));
 #endif
 	  coproc_dispose (p->coproc);
@@ -2496,7 +2496,7 @@ execute_coproc (COMMAND *command, int pipe_in, int pipe_out, struct fd_bitmap *f
   /* Optional check -- could be relaxed */
   if (valid_identifier (name) == 0)
     {
-      internal_error (_("`%s': not a valid identifier"), name);
+      err_invalidid (name);
       free (name);
       return (invert ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
@@ -6256,8 +6256,21 @@ execute_intern_function (WORD_DESC *name, FUNCTION_DEF *funcdef)
 {
   SHELL_VAR *var;
   char *t;
+  int pflags;
 
-  if (valid_function_word (name, posixly_correct) == 0)
+  /* This is where we enforce any restrictions on the function name via the
+     call to valid_function_word(). */
+  pflags = 0;
+#if POSIX_RESTRICT_FUNCNAME
+  if (posixly_correct)
+    pflags |= 1;		/* enforce posix function name restrictions */
+#endif
+  if (posixly_correct)
+    pflags |= 4;		/* no special builtins */
+
+  /* We still allow functions with the same name as reserved words, so they
+     can be called if quoted. */
+  if (valid_function_word (name, pflags) == 0)
     {
       if (posixly_correct)
 	{

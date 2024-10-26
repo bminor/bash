@@ -68,7 +68,7 @@ umask: usage: umask [-p] [-S] [mode]
 ./errors.tests: line 214: VAR: readonly variable
 comsub: -c: line 1: syntax error near unexpected token `)'
 comsub: -c: line 1: `: $( for z in 1 2 3; do )'
-comsub: -c: line 1: syntax error near unexpected token `done'
+comsub: -c: line 1: syntax error near unexpected token `done' while looking for matching `)'
 comsub: -c: line 1: `: $( for z in 1 2 3; done )'
 ./errors.tests: line 221: cd: HOME not set
 ./errors.tests: line 222: cd: /tmp/xyz.bash: No such file or directory
@@ -130,7 +130,7 @@ kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill 
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
 ./errors.tests: line 332: kill: SIGBAD: invalid signal specification
 ./errors.tests: line 334: kill: BAD: invalid signal specification
-./errors.tests: line 336: kill: @12: arguments must be process or job IDs
+./errors.tests: line 336: kill: `@12': not a pid or valid job spec
 ./errors.tests: line 339: unset: BASH_LINENO: cannot unset
 ./errors.tests: line 339: unset: BASH_SOURCE: cannot unset
 ./errors.tests: line 342: set: trackall: invalid option name
@@ -343,4 +343,4 @@ sh: line 1: unset: `a-b': not a valid identifier
 sh: line 1: /nosuchfile: No such file or directory
 sh: line 1: trap: SIGNOSIG: invalid signal specification
 after trap
-./errors.tests: line 396: `!!': not a valid identifier
+end

@@ -207,7 +207,11 @@ use_sigspec:
 #if defined (JOB_CONTROL)
       else if (*list->word->word && *list->word->word != '%')
 	{
+#if 1
+	  sh_badpid (list->word->word);
+#else
 	  builtin_error (_("%s: arguments must be process or job IDs"), list->word->word);
+#endif
 	  CONTINUE_OR_FAIL;
 	}
       else if (*word)
