@@ -110,6 +110,7 @@ extern int subshell_environment;
 extern int current_command_number;
 extern int indirection_level;
 extern int shell_compatibility_level;
+extern const int default_compatibility_level;
 extern int running_under_emacs;
 
 extern int pretty_print_mode;

@@ -538,6 +538,9 @@ get_exitstat (WORD_LIST *list)
 	 return value. */
       if (this_shell_builtin == return_builtin && running_trap > 0 && running_trap != DEBUG_TRAP+1 && trap_return_context == funcnest + sourcenest)
 	return (trap_saved_exit_value);
+      /* The same interp applies to the exit builtin. */
+      if (this_shell_builtin == exit_builtin && running_trap > 0 && running_trap != DEBUG_TRAP+1 && trap_return_context == funcnest + sourcenest)
+	return (trap_saved_exit_value);
       return (last_command_exit_value);
     }
 

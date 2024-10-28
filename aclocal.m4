@@ -1025,7 +1025,7 @@ dnl like _AC_STRUCT_DIRENT(MEMBER) but public
 AC_DEFUN(BASH_STRUCT_DIRENT,
 [
 AC_REQUIRE([AC_HEADER_DIRENT])
-AC_CHECK_MEMBERS(struct dirent.$1, bash_cv_dirent_has_$1=yes, bash_cv_dirent_has_$1=no,
+AC_CHECK_MEMBERS(struct dirent.$1, [], [],
 [[
 #include <stdio.h>
 #include <sys/types.h>
@@ -1049,35 +1049,9 @@ AC_CHECK_MEMBERS(struct dirent.$1, bash_cv_dirent_has_$1=yes, bash_cv_dirent_has
 ]])
 ])
 
-AC_DEFUN(BASH_STRUCT_DIRENT_D_INO,
-[AC_REQUIRE([AC_HEADER_DIRENT])
-AC_MSG_CHECKING(for struct dirent.d_ino)
-AC_CACHE_VAL(bash_cv_dirent_has_d_ino, [BASH_STRUCT_DIRENT([d_ino])])
-AC_MSG_RESULT($bash_cv_dirent_has_d_ino)
-if test $bash_cv_dirent_has_d_ino = yes; then
-AC_DEFINE(HAVE_STRUCT_DIRENT_D_INO)
-fi
-])
-
-AC_DEFUN(BASH_STRUCT_DIRENT_D_FILENO,
-[AC_REQUIRE([AC_HEADER_DIRENT])
-AC_MSG_CHECKING(for struct dirent.d_fileno)
-AC_CACHE_VAL(bash_cv_dirent_has_d_fileno, [BASH_STRUCT_DIRENT([d_fileno])])
-AC_MSG_RESULT($bash_cv_dirent_has_d_fileno)
-if test $bash_cv_dirent_has_d_fileno = yes; then
-AC_DEFINE(HAVE_STRUCT_DIRENT_D_FILENO)
-fi
-])
-
-AC_DEFUN(BASH_STRUCT_DIRENT_D_NAMLEN,
-[AC_REQUIRE([AC_HEADER_DIRENT])
-AC_MSG_CHECKING(for struct dirent.d_namlen)
-AC_CACHE_VAL(bash_cv_dirent_has_d_namlen, [BASH_STRUCT_DIRENT([d_namlen])])
-AC_MSG_RESULT($bash_cv_dirent_has_d_namlen)
-if test $bash_cv_dirent_has_d_namlen = yes; then
-AC_DEFINE(HAVE_STRUCT_DIRENT_D_NAMLEN)
-fi
-])
+AC_DEFUN([BASH_STRUCT_DIRENT_D_INO], [BASH_STRUCT_DIRENT([d_ino])])
+AC_DEFUN([BASH_STRUCT_DIRENT_D_FILENO], [BASH_STRUCT_DIRENT([d_fileno])])
+AC_DEFUN([BASH_STRUCT_DIRENT_D_NAMLEN], [BASH_STRUCT_DIRENT([d_namlen])])
 
 AC_DEFUN(BASH_STRUCT_TIMEVAL,
 [AC_MSG_CHECKING(for struct timeval in sys/time.h and time.h)

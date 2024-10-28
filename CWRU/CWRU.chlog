@@ -10465,3 +10465,93 @@ config-top.h
 doc/bashref.texi
 	- Posix mode: remove item about function names being valid shell
 	  identifiers
+
+				   10/25
+				   -----
+aclocal.m4
+	- simplify the checks for the various members of struct dirent
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+m4/strtoimax.m4
+	- simplify and remove redundant caching and cache check
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+builtins/common.c
+	- get_exitstat: make the behavior of exit with no arguments
+	  running in a trap action the same as return: check for any trap
+	  (running_trap > 0) in the current execution_context. This is
+	  POSIX interp 1602, in POSIX.1-2024
+
+stringlib.c
+	- find_token_in_alist: if FLAGS is non-zero, do *no* allocate new
+	  memory for the token. The existing behavior is to allocate memory
+	  and return a copy of the token, and all callers pass 0
+
+parse.y
+	- compoundcmd_lineno: now an array of `struct tokeninfo', which
+	  has line number and current compound command information
+	- change compoundcmd_lineno[compoundcmd_top] to
+	  compoundcmd_lineno[compoundcmd_top].lineno in all calls
+	- set_compoundcmd_top: in addition to assigning line number info,
+	  assign T to compoundcmd_lineno[compoundcmd_top].token
+	- report_syntax_error: if we get a syntax error while looking for
+	  shell_eof_token (comsubs), include the token we were looking for
+	  in the error message
+	- report_syntax_error: if we are reporting an unexpected EOF error,
+	  and compoundcmd_top >= 0, look up the token for the compound
+	  command we're parsing, including `(', and change the error message
+	  to include it
+
+				   10/26
+				   -----
+Makefile.in
+	- PURIFY,GLOBC,GLOBO,ALLOC_FILES,LIBRARY_SOURCE: remove
+	- ADDON_CFLAGS,ADDON_LDDFLAGS: initialize to empty
+	- GRAM_H: remove from HSOURCES
+	- profiling-tests: use Program instead of PROGRAM
+
+builtins/Makefile.in
+	- DEBUG: initialize from configure
+	- SYSTEM_FLAGS: remove, since it's not passed from topdir Makefile
+	- ADDON_CFLAGS: initialize to empty
+
+lib/glob/Makefile.in
+	- ADDON_CFLAGS: initialize to empty
+
+lib/readline/Makefile.in
+	- ADDON_CFLAGS: initialize to empty
+	- APP_CFLAGS: remove
+
+lib/sh/Makefile.in
+	- DEBUG: initialize from configure
+	- ADDON_CFLAGS: initialize to empty
+	- LIBOBJDIR: initialize to empty; configure uses it in LIBOBJS
+
+lib/tilde/Makefile.in
+	- ADDON_CFLAGS: initialize to empty
+	- CCFLAGS: add ADDON_CFLAGS, replacing ASAN_CFLAGS
+
+support/Makefile.in
+	- SYSTEM_FLAGS: remove, since it's not passed from topdir Makefile
+
+	  Makefiles report and patch from Grisha Levit <grishalevit@gmail.com>
+
+version.c,shell.h
+	- default_compatibility_level: int variable, initialized to
+	  DEFAULT_COMPAT_LEVEL like shell_compatibility_level
+
+variables.c
+	- sv_shcompat: use default_compatibility_level instead of
+	  DEFAULT_COMPAT_LEVEL so variables.o doesn't have to depend on
+	  version.h
+
+builtins/shopt.def
+	- set_compatibility_level: use default_compatibility_level instead
+	  of DEFAULT_COMPAT_LEVEL so shopt.o doesn't have to depend on
+	  version.h
+	- don't include version.h any more
+
+configure.ac,Makefile.in,support/Makefile.in,doc/Makefile.in
+	- remove some unused variables: BASE_CFLAGS_FOR_BUILD, DEBUGGER_DIR,
+	  INTLOBJS, TEXINDEX, TEX, MALLOC, SIGNAMES_SUPPORT
+	  From a report by Martin D Kealey <martin@kurahaupo.gen.nz>

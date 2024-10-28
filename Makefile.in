@@ -1,4 +1,4 @@
-# Makefile for bash-5.3, version 5.6
+# Makefile for bash-5.3, version 5.7
 #
 # Copyright (C) 1996-2024 Free Software Foundation, Inc.
 
@@ -96,9 +96,6 @@ TESTSCRIPT = @TESTSCRIPT@
 
 DEBUGGER_START_FILE = @DEBUGGER_START_FILE@
 
-#If you have purify, and want to use it, run the make as `make PURIFY=purify'
-#PURIFY = @PURIFY@
-
 # Here is a rule for making .o files from .c files that does not
 # force the type of the machine (like -M_MACHINE) into the flags.
 .c.o:
@@ -151,6 +148,12 @@ STATIC_LD = @STATIC_LD@
 LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
 
 SYSTEM_FLAGS = -DPROGRAM='"$(Program)"' -DCONF_HOSTTYPE='"$(Machine)"' -DCONF_OSTYPE='"$(OS)"' -DCONF_MACHTYPE='"$(MACHTYPE)"' -DCONF_VENDOR='"$(VENDOR)"' $(LOCALE_DEFS)
+
+BASH_MAKEFLAGS =
+
+# set by lint/sanitize targets
+ADDON_CFLAGS =
+ADDON_LDFLAGS =
 
 BASE_CCFLAGS = $(SYSTEM_FLAGS) $(LOCAL_DEFS) \
 	  $(DEFS) $(LOCAL_CFLAGS) $(INCLUDES) $(STYLE_CFLAGS)
@@ -405,7 +408,6 @@ LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LTLIBINTL = @LTLIBINTL@
 INTLLIBS = @INTLLIBS@
-INTLOBJS = @INTLOBJS@
 
 # Our malloc.
 MALLOC_TARGET = @MALLOC_TARGET@
@@ -467,9 +469,9 @@ LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(GLOB_LDFLAGS) \
 
 # The main source code for the Bourne Again SHell.
 CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
-	   dispose_cmd.c execute_cmd.c variables.c $(GLOBC) version.c \
+	   dispose_cmd.c execute_cmd.c variables.c version.c \
 	   expr.c copy_cmd.c flags.c subst.c hashcmd.c hashlib.c mailcheck.c \
-	   test.c trap.c alias.c jobs.c nojobs.c $(ALLOC_FILES) braces.c \
+	   test.c trap.c alias.c jobs.c nojobs.c braces.c \
 	   input.c bashhist.c array.c arrayfunc.c assoc.c sig.c pathexp.c \
 	   unwind_prot.c siglist.c bashline.c bracecomp.c error.c \
 	   list.c stringlib.c locale.c findcmd.c redir.c \
@@ -477,7 +479,7 @@ CSOURCES = shell.c eval.c parse.y general.c make_cmd.c print_cmd.c y.tab.c \
 
 HSOURCES = shell.h flags.h trap.h hashcmd.h hashlib.h jobs.h builtins.h \
 	   general.h variables.h config.h $(ALLOC_HEADERS) alias.h \
-	   quit.h unwind_prot.h syntax.h ${GRAM_H} \
+	   quit.h unwind_prot.h syntax.h \
 	   command.h input.h error.h bashansi.h dispose_cmd.h make_cmd.h \
 	   subst.h externs.h siglist.h bashhist.h bashline.h bashtypes.h \
 	   array.h arrayfunc.h sig.h mailcheck.h bashintl.h bashjmp.h \
@@ -512,7 +514,7 @@ SIGNAMES_O = @SIGNAMES_O@
 ARRAY_O = @ARRAY_O@
 
 # Matching object files.
-OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o $(GLOBO) \
+OBJECTS	 = shell.o eval.o y.tab.o general.o make_cmd.o print_cmd.o \
 	   dispose_cmd.o execute_cmd.o variables.o copy_cmd.o error.o \
 	   expr.o flags.o $(JOBS_O) subst.o hashcmd.o hashlib.o mailcheck.o \
 	   trap.o input.o unwind_prot.o pathexp.o sig.o test.o version.o \
@@ -525,7 +527,6 @@ BUILTIN_SRCDIR=$(srcdir)/builtins
 DEFSRC=$(BUILTIN_SRCDIR)
 BUILTIN_ABSSRC=${topdir}/builtins
 DEFDIR = $(dot)/builtins
-DEBUGGER_DIR = $(dot)/debugger
 
 BUILTIN_DEFS = $(DEFSRC)/alias.def $(DEFSRC)/bind.def $(DEFSRC)/break.def \
 	       $(DEFSRC)/builtin.def $(DEFSRC)/cd.def $(DEFSRC)/colon.def \
@@ -578,10 +579,9 @@ DOCDIR = $(dot)/doc
 PO_SRC = $(srcdir)/po/
 PO_DIR = $(dot)/po/
 
-SIGNAMES_SUPPORT = $(SUPPORT_SRC)mksignames.c
-
+# Auxiliary support files
 SUPPORT_SRC = $(srcdir)/support/
-SDIR = $(dot)/support
+SUPPORT_DIR = $(dot)/support
 
 TESTS_SUPPORT = recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) xcase$(EXEEXT)
 CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
@@ -614,12 +614,12 @@ LOADABLES_DIR = ${top_builddir}/examples/loadables
 # Keep GNU Make from exporting the entire environment for small machines.
 .NOEXPORT:
 
-.made: $(Program) bashbug $(SDIR)/man2html$(EXEEXT)
+.made: $(Program) bashbug $(SUPPORT_DIR)/man2html$(EXEEXT)
 	@echo "$(Program) last made for a $(Machine) running $(OS)" >.made
 
 $(Program): $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP) .build
 	$(RM) $@
-	$(PURIFY) $(CC) $(BUILTINS_LDFLAGS) $(LIBRARY_LDFLAGS) $(LDFLAGS) -o $(Program) $(OBJECTS) $(LIBS)
+	$(CC) $(BUILTINS_LDFLAGS) $(LIBRARY_LDFLAGS) $(LDFLAGS) -o $(Program) $(OBJECTS) $(LIBS)
 	ls -l $(Program)
 	-$(SIZE) $(Program)
 
@@ -632,9 +632,9 @@ $(Program): $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP) .build
 	@echo "	  ***********************************************************"
 	@echo
 
-bashbug: $(SDIR)/bashbug.sh $(VERSPROG)
+bashbug: $(SUPPORT_DIR)/bashbug.sh $(VERSPROG)
 	@sed -e "s%!PATCHLEVEL!%$(PatchLevel)%" \
-	     $(SDIR)/bashbug.sh > $@
+	     $(SUPPORT_DIR)/bashbug.sh > $@
 	@chmod a+rx bashbug
 
 strip:	$(Program) .made
@@ -661,7 +661,6 @@ lsan:
 gcov:
 	${MAKE} $(BASH_MAKEFLAGS) CFLAGS=-g ADDON_CFLAGS='${GCOV_XCFLAGS}' ADDON_LDFLAGS='${GCOV_XLDFLAGS}' .made
 
-
 # have to make this separate because making tests depend on $(PROGRAM)
 asan-tests: asan  $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests
@@ -676,7 +675,7 @@ lsan-tests: lsan  $(TESTS_SUPPORT)
 	@( cd $(srcdir)/tests && \
 		BUILD_DIR=$(BUILD_DIR) PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
 
-profiling-tests:	${PROGRAM}
+profiling-tests:	${Program}
 	@test "X$$PROFILE_FLAGS" == "X" && { echo "profiling-tests: must be built with profiling enabled" >&2; exit 1; }
 	@${MAKE} $(BASH_MAKEFLAGS) tests TESTSCRIPT=run-gprof
 
@@ -796,7 +795,7 @@ syntax.c:	mksyntax${EXEEXT} $(srcdir)/syntax.h
 	$(RM) $@
 	./mksyntax$(EXEEXT) -o $@
 
-$(BUILTINS_LIBRARY): $(DEFDIR)/builtext.h $(BUILTIN_DEFS) $(BUILTIN_C_SRC) config.h ${BASHINCDIR}/memalloc.h  version.h
+$(BUILTINS_LIBRARY): $(DEFDIR)/builtext.h $(BUILTIN_DEFS) $(BUILTIN_C_SRC) config.h ${BASHINCDIR}/memalloc.h
 	@(cd $(DEFDIR) && $(MAKE) $(BASH_MAKEFLAGS) DEBUG=${DEBUG} targets ) || exit 1
 
 # these require special rules to circumvent make builtin rules
@@ -812,8 +811,8 @@ ${DEFDIR}/builtext.h: $(BUILTIN_DEFS)
 ${DEFDIR}/pipesize.h:	${BUILTINS_LIBRARY}
 	@(cd $(DEFDIR) && $(MAKE) $(BASH_MAKEFLAGS) pipesize.h ) || exit 1
 
-$(SDIR)/man2html$(EXEEXT):	${SUPPORT_SRC}/man2html.c
-	@(cd $(SDIR) && $(MAKE) $(BASH_MAKEFLAGS) all ) || exit 1
+$(SUPPORT_DIR)/man2html$(EXEEXT):	$(SUPPORT_SRC)man2html.c
+	@(cd $(SUPPORT_DIR) && $(MAKE) $(BASH_MAKEFLAGS) all ) || exit 1
 
 # For the justification of the following Makefile rules, see node
 # `Automatic Remaking' in GNU Autoconf documentation.
@@ -846,8 +845,8 @@ pathnames.h:		Makefile $(srcdir)/pathnames.h.in
 buildconf.h:	$(srcdir)/buildconf.h.in
 	CONFIG_FILES= CONFIG_HEADERS=buildconf.h $(SHELL) ./config.status
 
-$(SDIR)/bashbug.sh: $(SDIR)/bashbug.sh.in
-	CONFIG_FILES=$(SDIR)/bashbug.sh CONFIG_HEADERS= $(SHELL) ./config.status
+$(SUPPORT_DIR)/bashbug.sh: $(SUPPORT_DIR)/bashbug.sh.in
+	CONFIG_FILES=$(SUPPORT_DIR)/bashbug.sh CONFIG_HEADERS= $(SHELL) ./config.status
 
 # comment out for distribution
 $(srcdir)/configure:	$(srcdir)/configure.ac $(srcdir)/aclocal.m4 $(srcdir)/config.h.in
@@ -876,11 +875,11 @@ info dvi ps: force
 force:
 
 # unused
-TAGS:	$(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
-	( cd $(topdir) && $(ETAGS) $(ETAGSFLAGS) $(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE) )
+TAGS:	$(SOURCES) $(BUILTIN_C_SRC)
+	( cd $(topdir) && $(ETAGS) $(ETAGSFLAGS) $(SOURCES) $(BUILTIN_C_SRC) )
 
-tags:	$(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
-	( cd $(topdir) && $(CTAGS) $(CTAGSFLAGS) $(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE) > $@ )
+tags:	$(SOURCES) $(BUILTIN_C_SRC)
+	( cd $(topdir) && $(CTAGS) $(CTAGSFLAGS) $(SOURCES) $(BUILTIN_C_SRC) )
 
 # Targets that actually do things not part of the build
 
@@ -931,7 +930,7 @@ install-headers: install-headers-dirs
 			${INSTALL_DATA} $(srcdir)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
 		fi ; \
 	done
-	-$(INSTALL_DATA) $(SDIR)/bash.pc $(DESTDIR)$(pkgconfigdir)/bash.pc
+	-$(INSTALL_DATA) $(SUPPORT_DIR)/bash.pc $(DESTDIR)$(pkgconfigdir)/bash.pc
 
 uninstall-headers:
 	-( cd $(DESTDIR)$(headersdir) && $(RM) $(INSTALLED_HEADERS) )
@@ -962,7 +961,7 @@ basic-clean:
 clean:	basic-clean
 	( cd $(DOCDIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	( cd builtins && $(MAKE) $(BASH_MAKEFLAGS) $@ )
-	-( cd $(SDIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
+	-( cd $(SUPPORT_DIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	-for libdir in ${LIB_SUBDIRS}; do \
 		(cd $$libdir && test -f Makefile && $(MAKE) $(BASH_MAKEFLAGS) $@) ;\
 	done
@@ -974,7 +973,7 @@ clean:	basic-clean
 mostlyclean: basic-clean
 	( cd $(DOCDIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	( cd builtins && $(MAKE) $(BASH_MAKEFLAGS) $@ )
-	-( cd $(SDIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
+	-( cd $(SUPPORT_DIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	-for libdir in ${LIB_SUBDIRS}; do \
 		(cd $$libdir && test -f Makefile && $(MAKE) $(BASH_MAKEFLAGS) $@) ;\
 	done
@@ -984,7 +983,7 @@ mostlyclean: basic-clean
 distclean:	basic-clean maybe-clean
 	( cd $(DOCDIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	( cd builtins && $(MAKE) $(BASH_MAKEFLAGS) $@ )
-	-( cd $(SDIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
+	-( cd $(SUPPORT_DIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	-for libdir in ${LIB_SUBDIRS}; do \
 		(cd $$libdir && test -f Makefile && $(MAKE) $(BASH_MAKEFLAGS) $@) ;\
 	done
@@ -1000,7 +999,7 @@ maintainer-clean:	basic-clean
 	$(RM) y.tab.c y.tab.h parser-built tags TAGS
 	( cd $(DOCDIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	( cd builtins && $(MAKE) $(BASH_MAKEFLAGS) $@ )
-	( cd $(SDIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
+	( cd $(SUPPORT_DIR) && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	-for libdir in ${LIB_SUBDIRS}; do \
 		(cd $$libdir && test -f Makefile && $(MAKE) $(BASH_MAKEFLAGS) $@) ;\
 	done
@@ -1303,7 +1302,7 @@ variables.o: flags.h execute_cmd.h mailcheck.h input.h $(DEFSRC)/common.h
 variables.o: findcmd.h bashhist.h hashcmd.h pathexp.h
 variables.o: pcomplete.h  ${BASHINCDIR}/chartypes.h
 variables.o: ${BASHINCDIR}/posixtime.h assoc.h ${DEFSRC}/getopt.h
-variables.o: version.h $(DEFDIR)/builtext.h
+variables.o: $(DEFDIR)/builtext.h
 version.o: conftypes.h patchlevel.h version.h
 version.o: buildconf.h
 xmalloc.o: config.h bashtypes.h ${BASHINCDIR}/ansi_stdlib.h error.h

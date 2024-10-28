@@ -55,6 +55,8 @@ MV = mv
 
 SHELL = @MAKE_SHELL@
 
+DEBUG = @DEBUG@
+
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
 STYLE_CFLAGS = @STYLE_CFLAGS@
@@ -62,6 +64,8 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@ @LOCAL_LDFLAGS@
 
 PROFILE_FLAGS = @PROFILE_FLAGS@
+
+ADDON_CFLAGS =
 
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
@@ -101,6 +105,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 HSOURCES = 
 
 # The object files contained in $(LIBRARY_NAME)
+LIBOBJDIR =
 LIBOBJS = @LIBOBJS@
 OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  itos.o zread.o zwrite.o shtty.o shmatch.o eaccess.o \

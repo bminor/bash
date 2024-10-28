@@ -6443,14 +6443,14 @@ sv_shcompat (const char *name)
   v = find_variable (name);
   if (v == 0)
     {
-      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      shell_compatibility_level = default_compatibility_level;
       set_compatibility_opts ();
       return;
     }
   val = value_cell (v);
   if (val == 0 || *val == '\0')
     {
-      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      shell_compatibility_level = default_compatibility_level;
       set_compatibility_opts ();
       return;
     }
@@ -6477,7 +6477,7 @@ compat_error:
       return;
     }
 
-  if (compatval < MIN_COMPAT_LEVEL || compatval > DEFAULT_COMPAT_LEVEL)
+  if (compatval < MIN_COMPAT_LEVEL || compatval > default_compatibility_level)
     goto compat_error;
 
   shell_compatibility_level = compatval;

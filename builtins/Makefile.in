@@ -56,6 +56,8 @@ BUILD_DIR = @BUILD_DIR@
 
 LIBBUILD = ${BUILD_DIR}/lib
 
+DEBUG = @DEBUG@
+
 PROFILE_FLAGS = @PROFILE_FLAGS@
 CFLAGS = @CFLAGS@
 CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@ @CROSS_COMPILE@
@@ -95,9 +97,10 @@ HELPFILES_TARGET = @HELPFILES_TARGET@
 
 INCLUDES = -I. -I.. @RL_INCLUDE@ -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib -I$(srcdir) ${INTL_INC}
 
-BASE_CCFLAGS = ${PROFILE_FLAGS} $(DEFS) $(LOCAL_DEFS) $(SYSTEM_FLAGS) \
+BASE_CCFLAGS = ${PROFILE_FLAGS} $(DEFS) $(LOCAL_DEFS) \
 	 ${INCLUDES} $(STYLE_CFLAGS) $(LOCAL_CFLAGS)
 
+ADDON_CFLAGS=
 CCFLAGS = ${ADDON_CFLAGS} $(BASE_CCFLAGS) $(CPPFLAGS) $(CFLAGS)
 
 CCFLAGS_FOR_BUILD = $(BASE_CCFLAGS) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
@@ -268,8 +271,9 @@ distclean maintainer-clean: clean
 
 $(OFILES):	$(MKBUILTINS) ../config.h
 
-../version.h: ../config.h ../Makefile Makefile
-	-( cd ${BUILD_DIR} && ${MAKE} ${BASH_MAKEFLAGS} version.h )
+# sketchy rule here
+#../version.h: ../config.h ../Makefile Makefile
+#	-( cd ${BUILD_DIR} && ${MAKE} ${BASH_MAKEFLAGS} version.h )
 
 # maintainer special - for now
 po:	builtins.c

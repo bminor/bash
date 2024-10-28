@@ -52,8 +52,6 @@ $END
 
 #include <stdio.h>
 
-#include "version.h"
-
 #include "../bashintl.h"
 
 #include "../shell.h"
@@ -689,10 +687,10 @@ set_compatibility_level (char *option_name, int mode)
     shell_compatibility_level = 43;
   else if (shopt_compat44)
     shell_compatibility_level = 44;
-  else if (oldval > 44 && shell_compatibility_level < DEFAULT_COMPAT_LEVEL)
+  else if (oldval > 44 && shell_compatibility_level < default_compatibility_level)
     ;
   else
-    shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+    shell_compatibility_level = default_compatibility_level;
 
   /* Make sure the current compatibility level is reflected in BASH_COMPAT */
   rhs = itos (shell_compatibility_level);
@@ -710,9 +708,12 @@ set_compatibility_opts (void)
   shopt_compat31 = shopt_compat32 = 0;
   shopt_compat40 = shopt_compat41 = shopt_compat42 = shopt_compat43 = 0;
   shopt_compat44 = 0;
+  if (shell_compatibility_level == default_compatibility_level)
+    return;
+
   switch (shell_compatibility_level)
     {
-      case DEFAULT_COMPAT_LEVEL:
+      case 52:			/* completeness */
       case 51:			/* completeness */
       case 50:
 	break;

@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.071])dnl
+AC_REVISION([for Bash 5.3, version 5.073])dnl
 
 define(bashvers, 5.3)
 define(relstatus, beta)
@@ -547,11 +547,9 @@ if test "X$cross_compiling" = "Xno"; then
 	# CFLAGS set above to default value if not passed in environment
 	if test -n "$want_auto_cflags" ; then
 		CFLAGS_FOR_BUILD="${CFLAGS}"
-		BASE_CFLAGS_FOR_BUILD="${CFLAGS}"
 	else
 		# passed in environment
 		CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
-		BASE_CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
 	fi
 	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-'$(LIBS)'}
 else
@@ -559,7 +557,6 @@ else
 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-""}
 	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-""}
 	CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD="-g"}
-	BASE_CFLAGS_FOR_BUILD=${BASE_CFLAGS_FOR_BUILD="-g"}
 	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-""}
 fi
 
@@ -570,7 +567,6 @@ AC_SUBST(STATIC_LD)
 
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
-AC_SUBST(BASE_CFLAGS_FOR_BUILD)
 AC_SUBST(STYLE_CFLAGS)
 AC_SUBST(CPPFLAGS_FOR_BUILD)
 AC_SUBST(LDFLAGS_FOR_BUILD)
