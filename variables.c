@@ -59,8 +59,6 @@
 #include "alias.h"
 #include "jobs.h"
 
-#include "version.h"
-
 #include "builtins/getopt.h"
 #include "builtins/common.h"
 #include "builtins/builtext.h"
@@ -6472,7 +6470,7 @@ sv_shcompat (const char *name)
     {
 compat_error:
       internal_error (_("%s: %s: compatibility value out of range"), name, val);
-      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      shell_compatibility_level = default_compatibility_level;
       set_compatibility_opts ();
       return;
     }

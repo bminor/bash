@@ -15,6 +15,14 @@
 # added tests for changes in 10/2021 for preserving the traps across a failed
 # exec
 
+: ${THIS_SH:=./bash}
+: ${TMPDIR:=/var/tmp}
+TDIR=$TMPDIR/execdir-$$
+
+mkdir $TDIR || exit 1
+cp $THIS_SH $TDIR || exit 1
+cd $TDIR || exit 1
+
 shopt -s execfail
 
 trap 'echo EXIT' EXIT 
@@ -24,14 +32,63 @@ trap
 
 kill -s USR1 $$		# should run the trap
 
+# ENOENT -- No such file or directory
+# full pathname
+rm -f /tmp/bash-notthere
 exec /tmp/bash-notthere
-
 # make sure we're still around
-echo $0: after failed exec: $?
+echo $0: ENOENT: after failed exec: $?
+# relative pathname
+rm -f bash-notthere
+exec bash-notthere 
+
+# EACCES - permission denied
+rm -f x.sh x.output
+echo 'echo bar' > x.sh
+exec ./x.sh 2>x.output
+string=$(< x.output)
+# check for right error message and that we survived the failed exec
+case $string in
+*denied)	;;
+*)	echo "$0: EACCES: error message mismatch: $string" ;;
+esac
+rm -f x.sh x.output
+
+# E2BIG - Argument list too long
+unset BASH_ENV
+
+rm -f x.sh x.output
+echo "export var='$(echo {1..1000500})' ;
+exec ${THIS_SH}" > ./x.sh
+chmod 755 ./x.sh
+${THIS_SH} ./x.sh 2>x.output
+string=$(< x.output)
+# check for right error message and that we survived the failed exec
+case $string in
+*list\ too\ long)	;;
+*)	echo "$0: E2BIG: error message mismatch: $string" ;;
+esac
+rm -f x.sh x.output
+
+# EISDIR - is a directory
+rm -f x.sh x.output
+mkdir xdir-$$
+exec ./xdir-$$ 2>x.output
+rmdir ./xdir-$$
+string=$(< x.output)
+# check for right error message and that we survived the failed exec
+case $string in
+*[Ii]s\ a\ directory)	;;
+*)	echo "$0: EISDIR: error message mismatch: $string" ;;
+esac
+rm -f x.sh x.output
 
 trap
 kill -s USR1 $$		# should run the trap
 kill -s TERM $$		# should still be ignored
+
+cd $OLDPWD
+rm -rf $TDIR
 
 # this should run the exit trap
 exit 0

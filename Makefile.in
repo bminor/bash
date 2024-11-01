@@ -463,6 +463,9 @@ LIBDEP = $(GLOB_DEP) $(SHLIB_DEP) $(INTL_DEP) $(READLINE_DEP) $(HISTORY_DEP) \
 LIBRARY_LDFLAGS = $(READLINE_LDFLAGS) $(HISTORY_LDFLAGS) $(GLOB_LDFLAGS) \
 		  $(TILDE_LDFLAGS) $(MALLOC_LDFLAGS) $(SHLIB_LDFLAGS)
 
+LIBRARY_SOURCE = $(SHLIB_SOURCE) $(GLOB_SOURCE) \
+	$(READLINE_SOURCE) $(MALLOC_SOURCE)
+
 #
 # The shell itself
 #
@@ -875,11 +878,11 @@ info dvi ps: force
 force:
 
 # unused
-TAGS:	$(SOURCES) $(BUILTIN_C_SRC)
-	( cd $(topdir) && $(ETAGS) $(ETAGSFLAGS) $(SOURCES) $(BUILTIN_C_SRC) )
+TAGS:	$(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
+	( cd $(topdir) && $(ETAGS) $(ETAGSFLAGS) $(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE) )
 
-tags:	$(SOURCES) $(BUILTIN_C_SRC)
-	( cd $(topdir) && $(CTAGS) $(CTAGSFLAGS) $(SOURCES) $(BUILTIN_C_SRC) )
+tags:	$(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
+	( cd $(topdir) && $(CTAGS) $(CTAGSFLAGS) $(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE) )
 
 # Targets that actually do things not part of the build
 

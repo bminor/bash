@@ -233,16 +233,23 @@ exec_builtin (WORD_LIST *list)
   if (cleanenv == 0)
     adjust_shell_level (1);
 
-  if (exit_value == EX_NOTFOUND)	/* no duplicate error message */
+  /* These are the return statuses for which shell_execve will print a message. */
+  if (exit_value == EX_NOTFOUND || exit_value == EX_BINARY_FILE || exit_value == EX_NOEXEC)
     goto failed_exec;
-  else if (executable_file (command) == 0)
+  /* These are the errno values for which shell_execve will print a message. */
+#if defined (EISDIR)
+  else if (opt == EISDIR || opt == E2BIG || opt == ENOMEM)
+#else
+  else if (opt == E2BIG || opt == ENOMEM)
+#endif
+    goto failed_exec;
+  else	/* catchall */
     {
+      builtin_error ("%s: %s: %s", command, _("cannot execute"), strerror (opt));
+      if (executable_file (command) == 0)
+	exit_value = EX_NOEXEC;	/* As per Posix.2, 3.14.6 */
       errno = opt;
-      builtin_error ("%s: %s: %s", command, _("cannot execute"), strerror (errno));
-      exit_value = EX_NOEXEC;	/* As per Posix.2, 3.14.6 */
     }
-  else
-    file_error (command);
 
 failed_exec:
   FREE (command);

@@ -10555,3 +10555,14 @@ configure.ac,Makefile.in,support/Makefile.in,doc/Makefile.in
 	- remove some unused variables: BASE_CFLAGS_FOR_BUILD, DEBUGGER_DIR,
 	  INTLOBJS, TEXINDEX, TEX, MALLOC, SIGNAMES_SUPPORT
 	  From a report by Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				   10/28
+				   -----
+builtins/exec.def
+	- exec_builtin: don't try to print an error message in the cases
+	  where shell_execve prints one, in case we have execfail set
+	  Report from Emanuele Torre <torreemanuele6@gmail.com>
+
+Makefile.in
+	- LIBRARY_SOURCE: add back in to tags targets, add definition
+	  Suggestion from Mike Jonkmans <bashbug@jonkmans.nl>
