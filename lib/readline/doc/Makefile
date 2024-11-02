@@ -74,7 +74,7 @@ PDFOBJ = readline.pdf history.pdf rluserman.pdf readline_3.pdf history_3.pdf
 
 INTERMEDIATE_OBJ = rlman.dvi
 
-CREATED_DOCS = $(DVIOBJ) $(INFOOBJ) $(PSOBJ) $(HTMLOBJ) $(PDFOBJ)
+CREATED_DOCS = $(DVIOBJ) $(INFOOBJ) $(PSOBJ) $(HTMLOBJ) $(PDFOBJ) $(TEXTOBJ)
 
 .SUFFIXES:      .0 .3 .ps .txt .dvi .html .pdf
 
@@ -191,7 +191,6 @@ mostlyclean: clean
 maintainer-clean: clean
 	$(RM) $(CREATED_DOCS)
 	$(RM) $(INTERMEDIATE_OBJ)
-	$(RM) Makefile
 
 install:
 	@echo "This documentation should not be installed."

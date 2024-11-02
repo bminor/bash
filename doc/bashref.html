@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 20 October 2024).
+the Bash shell (version 5.3, 23 October 2024).
 
-This is Edition 5.3, last updated 20 October 2024,
+This is Edition 5.3, last updated 23 October 2024,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 20 October 2024).
+the Bash shell (version 5.3, 23 October 2024).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 20 October 2024,
+<p>This is Edition 5.3, last updated 23 October 2024,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -4359,8 +4359,8 @@ not to receive <code class="code">SIGHUP</code> using <code class="code">disown 
 an interactive login shell exits.
 </p>
 <p>If Bash is waiting for a command to complete and receives a signal
-for which a trap has been set, the trap will not be executed until
-the command completes.
+for which a trap has been set,
+it will not execute the trap until the command completes.
 If Bash is waiting for an asynchronous command via the <code class="code">wait</code> builtin,
 and it receives a signal for which a trap has been set,
 the <code class="code">wait</code> builtin will return immediately with an exit status
@@ -4373,18 +4373,31 @@ commonly intend to send to that command.
 This happens because the shell and the command are in the same process
 group as the terminal, and &lsquo;<samp class="samp">^C</samp>&rsquo; sends <code class="code">SIGINT</code> to all processes
 in that process group.
+Since Bash does not enable job control by default when the
+shell is not interactive,
+this scenario is most common in non-interactive shells.
+</p>
+<p>When job control is enabled, and Bash is waiting for a foreground
+command to complete, the shell does not receive keyboard-generated
+signals, because it is not in the same process group as the terminal.
+This scenario is most common in interactive shells, where Bash
+attempts to enable job control by default.
 See <a class="ref" href="#Job-Control">Job Control</a>, for a more in-depth discussion of process groups.
 </p>
-<p>When Bash is running without job control enabled and receives <code class="code">SIGINT</code>
+<p>When job control is not enabled, and Bash receives <code class="code">SIGINT</code>
 while waiting for a foreground command, it waits until that foreground
 command terminates and then decides what to do about the <code class="code">SIGINT</code>:
 </p>
 <ol class="enumerate">
 <li> If the command terminates due to the <code class="code">SIGINT</code>, Bash concludes
-that the user meant to end the entire script, and acts on the
-<code class="code">SIGINT</code> (e.g., by running a <code class="code">SIGINT</code> trap or exiting itself);
+that the user meant to send the <code class="code">SIGINT</code> to the shell as well,
+and acts on the
+<code class="code">SIGINT</code>
+(e.g., by running a <code class="code">SIGINT</code> trap,
+exiting a non-interactive shell,
+or returning to the top level to read a new command).
 
-</li><li> If the pipeline does not terminate due to <code class="code">SIGINT</code>, the program
+</li><li> If the command does not terminate due to <code class="code">SIGINT</code>, the program
 handled the <code class="code">SIGINT</code> itself and did not treat it as a fatal signal.
 In that case, Bash does not treat <code class="code">SIGINT</code> as a fatal signal,
 either, instead assuming that the <code class="code">SIGINT</code> was used as part of the
@@ -4396,6 +4409,17 @@ receives while it is waiting for the foreground command to
 complete, for compatibility.
 </li></ol>
 
+<p>When job control is enabled, Bash does not receive keyboard-generated
+signals such as <code class="code">SIGINT</code>
+while it is waiting for a foreground command.
+An interactive shell does not pay attention to the <code class="code">SIGINT</code>,
+even if the foreground command terminates as a result, other than noting
+its exit status.
+If the shell is not interactive, and
+the foreground command terminates due to the <code class="code">SIGINT</code>,
+Bash pretends it received the <code class="code">SIGINT</code>
+itself (scenario 1 above), for compatibility.
+</p>
 <hr>
 </div>
 </div>
@@ -9963,13 +9987,6 @@ in a redirection unless the shell is interactive.
 </li><li> Redirection operators do not perform word splitting on the word in a
 redirection.
 
-</li><li> Function names must be valid shell <code class="code">name</code>s.
-That is, they may not
-contain characters other than letters, digits, and underscores, and
-may not start with a digit.
-Declaring a function with an invalid name in a non-interactive shell
-is a fatal syntax error.
-
 </li><li> Function names may not be the same as one of the <small class="sc">POSIX</small> special
 builtins.
 
@@ -10056,7 +10073,7 @@ default value the shell assigns to <code class="env">$HISTFILE</code>).
 double-quoted string, even if the <code class="code">histexpand</code> option is enabled.
 
 </li><li> When printing shell function definitions (e.g., by <code class="code">type</code>), Bash does
-not print the <code class="code">function</code> keyword.
+not print the <code class="code">function</code> keyword unless necessary.
 
 </li><li> Non-interactive shells exit if a syntax error in an arithmetic expansion
 results in an invalid expression.
@@ -11422,7 +11439,7 @@ common prefix of the set of possible completions using a different color.
 The color definitions are taken from the value of the <code class="env">LS_COLORS</code>
 environment variable.
 If there is a color definition in <code class="env">LS_COLORS</code> for the custom suffix
-&lsquo;<samp class="samp">.readline-colored-completion-prefix</samp>&rsquo;, Readline uses this color for
+&lsquo;<samp class="samp">readline-colored-completion-prefix</samp>&rsquo;, Readline uses this color for
 the common prefix instead of its default.
 The default is &lsquo;<samp class="samp">off</samp>&rsquo;.
 </p>

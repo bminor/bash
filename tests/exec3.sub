@@ -56,14 +56,23 @@ rm -f x.sh x.output
 
 # E2BIG - Argument list too long
 unset BASH_ENV
-
 rm -f x.sh x.output
-echo "export var='$(echo {1..1000500})' ;
-exec ${THIS_SH}" > ./x.sh
+cat << \EOF > x.sh
+argmax=$(getconf ARG_MAX 2>/dev/null)
+if (( argmax <= 0 )); then
+        argmax=1048576
+fi
+v=$(echo {1..250000})
+while (( ${#v} < $argmax )); do
+        v+=$(echo {250001..350000})
+done
+export v
+exec ${THIS_SH} </dev/null
+EOF
 chmod 755 ./x.sh
 ${THIS_SH} ./x.sh 2>x.output
 string=$(< x.output)
-# check for right error message and that we survived the failed exec
+# check for right error message
 case $string in
 *list\ too\ long)	;;
 *)	echo "$0: E2BIG: error message mismatch: $string" ;;

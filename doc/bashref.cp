@@ -75,32 +75,32 @@
 \entry{exit status}{47}{exit status}
 \entry{signal handling}{48}{signal handling}
 \entry{shell script}{49}{shell script}
-\entry{special builtin}{82}{special builtin}
-\entry{login shell}{100}{login shell}
-\entry{interactive shell}{100}{interactive shell}
-\entry{startup files}{100}{startup files}
-\entry{interactive shell}{102}{interactive shell}
-\entry{shell, interactive}{102}{shell, interactive}
-\entry{expressions, conditional}{103}{expressions, conditional}
-\entry{arithmetic, shell}{105}{arithmetic, shell}
-\entry{shell arithmetic}{105}{shell arithmetic}
-\entry{expressions, arithmetic}{105}{expressions, arithmetic}
-\entry{evaluation, arithmetic}{105}{evaluation, arithmetic}
-\entry{arithmetic evaluation}{105}{arithmetic evaluation}
-\entry{arithmetic operators}{106}{arithmetic operators}
-\entry{unary arithmetic operators}{106}{unary arithmetic operators}
-\entry{binary arithmetic operators}{106}{binary arithmetic operators}
-\entry{conditional arithmetic operator}{106}{conditional arithmetic operator}
-\entry{bitwise arithmetic operators}{106}{bitwise arithmetic operators}
-\entry{alias expansion}{107}{alias expansion}
-\entry{arrays}{108}{arrays}
-\entry{directory stack}{110}{directory stack}
-\entry{prompting}{111}{prompting}
-\entry{restricted shell}{113}{restricted shell}
-\entry{POSIX description}{114}{POSIX description}
-\entry{POSIX Mode}{114}{POSIX Mode}
-\entry{Compatibility Level}{119}{Compatibility Level}
-\entry{Compatibility Mode}{119}{Compatibility Mode}
+\entry{special builtin}{83}{special builtin}
+\entry{login shell}{101}{login shell}
+\entry{interactive shell}{101}{interactive shell}
+\entry{startup files}{101}{startup files}
+\entry{interactive shell}{103}{interactive shell}
+\entry{shell, interactive}{103}{shell, interactive}
+\entry{expressions, conditional}{104}{expressions, conditional}
+\entry{arithmetic, shell}{106}{arithmetic, shell}
+\entry{shell arithmetic}{106}{shell arithmetic}
+\entry{expressions, arithmetic}{106}{expressions, arithmetic}
+\entry{evaluation, arithmetic}{106}{evaluation, arithmetic}
+\entry{arithmetic evaluation}{106}{arithmetic evaluation}
+\entry{arithmetic operators}{107}{arithmetic operators}
+\entry{unary arithmetic operators}{107}{unary arithmetic operators}
+\entry{binary arithmetic operators}{107}{binary arithmetic operators}
+\entry{conditional arithmetic operator}{107}{conditional arithmetic operator}
+\entry{bitwise arithmetic operators}{107}{bitwise arithmetic operators}
+\entry{alias expansion}{108}{alias expansion}
+\entry{arrays}{109}{arrays}
+\entry{directory stack}{111}{directory stack}
+\entry{prompting}{112}{prompting}
+\entry{restricted shell}{114}{restricted shell}
+\entry{POSIX description}{115}{POSIX description}
+\entry{POSIX Mode}{115}{POSIX Mode}
+\entry{Compatibility Level}{120}{Compatibility Level}
+\entry{Compatibility Mode}{120}{Compatibility Mode}
 \entry{job control}{123}{job control}
 \entry{foreground}{123}{foreground}
 \entry{background}{123}{background}

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 20<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 October 23<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -7307,8 +7307,8 @@ to all jobs when an interactive login shell exits.
 <P>
 
 If <B>bash</B> is waiting for a command to complete and receives a signal
-for which a trap has been set, the trap will not be executed until
-the command completes.
+for which a trap has been set,
+it will not execute the trap until the command completes.
 If <B>bash</B> is waiting for an asynchronous command via the <B>wait</B>
 builtin,
 and it receives a signal for which a trap has been set,
@@ -7330,6 +7330,16 @@ same process group as the terminal, and <B>^C</B> sends
 
 </FONT>
 to all processes in that process group.
+Since <B>bash</B> does not enable job control by default when the
+shell is not interactive,
+this scenario is most common in non-interactive shells.
+<P>
+
+When job control is enabled, and <B>bash</B> is waiting for a foreground
+command to complete, the shell does not receive keyboard-generated
+signals, because it is not in the same process group as the terminal.
+This scenario is most common in interactive shells, where <B>bash</B>
+attempts to enable job control by default.
 See
 <FONT SIZE=-1><B>JOB CONTROL</B>
 
@@ -7337,7 +7347,7 @@ See
 below for more information about process groups.
 <P>
 
-When <B>bash</B> is running without job control enabled and receives
+When job control is not enabled, and <B>bash</B> receives
 <FONT SIZE=-1><B>SIGINT</B>
 
 </FONT>
@@ -7353,7 +7363,11 @@ If the command terminates due to the
 
 </FONT>
 <B>bash</B> concludes
-that the user meant to end the entire script, and acts on the
+that the user meant to send the
+<FONT SIZE=-1><B>SIGINT</B>
+
+</FONT>
+to the shell as well, and acts on the
 <FONT SIZE=-1><B>SIGINT</B>
 
 </FONT>
@@ -7361,7 +7375,9 @@ that the user meant to end the entire script, and acts on the
 <FONT SIZE=-1><B>SIGINT</B>
 
 </FONT>
-trap or exiting itself);
+trap,
+exiting a non-interactive shell,
+or returning to the top level to read a new command).
 <DT>2.<DD>
 If the command does not terminate due to
 <FONT SIZE=-1><B>SIGINT</B>,
@@ -7392,6 +7408,30 @@ as it does with any other trapped signal it
 receives while it is waiting for the foreground command to
 complete, for compatibility.
 </DL>
+<P>
+
+When job control is enabled, <B>bash</B> does not receive keyboard-generated
+signals such as
+<FONT SIZE=-1><B>SIGINT</B>
+
+</FONT>
+while it is waiting for a foreground command.
+An interactive shell does not pay attention to the
+<FONT SIZE=-1><B>SIGINT</B>,
+
+</FONT>
+even if the foreground command terminates as a result, other than noting
+its exit status.
+If the shell is not interactive, and
+the foreground command terminates due to the
+<FONT SIZE=-1><B>SIGINT</B>,
+
+</FONT>
+<B>bash</B> pretends it received the
+<FONT SIZE=-1><B>SIGINT</B>
+
+</FONT>
+itself (scenario 1 above), for compatibility.
 <A NAME="lbCE">&nbsp;</A>
 <H3>JOB CONTROL</H3>
 
@@ -16357,7 +16397,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 20<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 October 23<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16466,7 +16506,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20241018/doc/bash.1.<BR>
-Time: 20 October 2024 12:37:36 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20241031/doc/bash.1.<BR>
+Time: 01 November 2024 18:25:05 EDT
 </BODY>
 </HTML>

@@ -50,6 +50,8 @@ PSDPI       = 300	# I don't have any 600-dpi printers
 DVIPS       = dvips -D ${PSDPI} $(QUIETPS) -o $@     # tricky
 DVIPDF      = dvipdfm -o $@ -p ${PAPERSIZE}
 PSPDF       = gs -sPAPERSIZE=${PAPERSIZE} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -sOutputFile=$@
+# experimental; uses external texi2dvi for now; this needs pdftex to be present
+TEXI2PDF    = texi2dvi --pdf
 
 RLSRC = $(srcdir)/rlman.texi $(srcdir)/rluser.texi \
 	$(srcdir)/rltech.texi $(srcdir)/version.texi \
@@ -58,7 +60,7 @@ HISTSRC = $(srcdir)/history.texi $(srcdir)/hsuser.texi \
 	  $(srcdir)/hstech.texi $(srcdir)/version.texi
 
 # This should be a program that converts troff to an ascii-readable format
-NROFF       = groff -Tascii
+NROFF       = groff -Tascii -P -c
 
 # This should be a program that converts troff to postscript
 GROFF       = groff
@@ -67,44 +69,74 @@ DVIOBJ = readline.dvi history.dvi rluserman.dvi
 INFOOBJ = readline.info history.info rluserman.info
 PSOBJ = readline.ps history.ps rluserman.ps
 HTMLOBJ = readline.html history.html rluserman.html
-PDFOBJ = readline.pdf history.pdf rluserman.pdf
+TEXTOBJ = readline.0 history.0
+PDFOBJ = readline.pdf history.pdf rluserman.pdf readline_3.pdf history_3.pdf
 
 INTERMEDIATE_OBJ = rlman.dvi
 
-CREATED_DOCS = $(DVIOBJ) $(INFOOBJ) $(PSOBJ) $(HTMLOBJ) $(PDFOBJ)
+CREATED_DOCS = $(DVIOBJ) $(INFOOBJ) $(PSOBJ) $(HTMLOBJ) $(PDFOBJ) $(TEXTOBJ)
 
-.SUFFIXES:      .ps .txt .dvi .html .pdf
+.SUFFIXES:      .0 .3 .ps .txt .dvi .html .pdf
 
-.ps.pdf:
+.3.0:
 	$(RM) $@
-	-${PSPDF} $<
+	-${NROFF} -man $< > $@
+
+.3.pdf:
+	$(RM) $@
+	-${GROFF} -man -T pdf $< > $@
+
+.3.ps:
+	$(RM) $@
+	-${GROFF} -man $< > $@
+
+#.ps.pdf:
+#	$(RM) $@
+#	-${PSPDF} $<
 
 .dvi.pdf:
 	$(RM) $@
 	-${DVIPDF} $<
 
-all: info dvi html ps
-nodvi: info html
+all: info html text pdf ps dvi
+nodvi: info html text
 pdf: $(PDFOBJ)
 
 readline.dvi: $(RLSRC)
-	TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS $(TEXI2DVI) $(srcdir)/rlman.texi
-	mv rlman.dvi readline.dvi
+	$(RM) $@
+	TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS $(TEXI2DVI) -o $@ $(srcdir)/rlman.texi
 
 readline.info: $(RLSRC)
+	$(RM) $@
 	$(MAKEINFO) --no-split -I $(TEXINPUTDIR) -o $@ $(srcdir)/rlman.texi
 
+readline.pdf: $(RLSRC)
+	$(RM) $@
+	$(TEXI2PDF) -I $(TEXINPUTDIR) -o $@ $(srcdir)/rlman.texi
+
 rluserman.dvi: $(RLSRC)
+	$(RM) $@
 	TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS $(TEXI2DVI) $(srcdir)/rluserman.texi
 
 rluserman.info: $(RLSRC)
+	$(RM) $@
 	$(MAKEINFO) --no-split -I $(TEXINPUTDIR) -o $@ $(srcdir)/rluserman.texi
 
+rluserman.pdf: $(RLSRC)
+	$(RM) $@
+	$(TEXI2PDF) -I $(TEXINPUTDIR) -o $@ $(srcdir)/rluserman.texi
+
 history.dvi: ${HISTSRC}
+	$(RM) $@
 	TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS $(TEXI2DVI) $(srcdir)/history.texi
 
 history.info: ${HISTSRC}
+	$(RM) $@
 	$(MAKEINFO) --no-split -I $(TEXINPUTDIR) -o $@ $(srcdir)/history.texi
+
+history.pdf: $(HISTSRC)
+	$(RM) $@
+	$(TEXI2PDF) -I $(TEXINPUTDIR) -o $@ $(srcdir)/history.texi
 
 readline.ps:	readline.dvi
 	$(RM) $@
@@ -118,15 +150,9 @@ history.ps:	history.dvi
 	$(RM) $@
 	$(DVIPS) history.dvi
 
-# can also use:
-#	$(MAKEINFO) --html --no-split
-# in place of
-#	$(TEXI2HTML) -menu -monolithic
-
 readline.html:	${RLSRC}
-	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/rlman.texi
-	sed -e 's:rlman.html:readline.html:' rlman.html > readline.html
-	$(RM) rlman.html
+	$(RM) $@
+	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) -o $@ $(srcdir)/rlman.texi
 
 rluserman.html:	${RLSRC}
 	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/rluserman.texi
@@ -134,14 +160,23 @@ rluserman.html:	${RLSRC}
 history.html:	${HISTSRC}
 	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/history.texi
 
+history.0: $(srcdir)/history.3
+readline.0: $(srcdir)/readline.3
+
+history_3.pdf: $(srcdir)/history.3
+	$(RM) $@
+	-${GROFF} -man -T pdf $< > $@
+
+readline_3.pdf: $(srcdir)/readline.3
+	$(RM) $@
+	-${GROFF} -man -T pdf $< > $@
+
 info:	$(INFOOBJ)
 dvi:	$(DVIOBJ)
 ps:	$(PSOBJ)
 html:	$(HTMLOBJ)
-
-readline.pdf:   readline.dvi
-history.pdf:    history.dvi
-rluserman.pdf:  rluserman.dvi
+text:	$(TEXTOBJ)
+pdf:	$(PDFOBJ)
 
 clean:
 	$(RM) *.aux *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps *.pgs \
@@ -150,7 +185,6 @@ clean:
 distclean: clean
 	$(RM) $(CREATED_DOCS)
 	$(RM) $(INTERMEDIATE_OBJ)
-	$(RM) Makefile
 
 mostlyclean: clean
 
