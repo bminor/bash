@@ -10566,3 +10566,34 @@ builtins/exec.def
 Makefile.in
 	- LIBRARY_SOURCE: add back in to tags targets, add definition
 	  Suggestion from Mike Jonkmans <bashbug@jonkmans.nl>
+
+				   10/31
+				   -----
+lib/readline/search.c
+	- make_history_line_current: change to use the same strategy to move
+	  to a history line as incremental search: one or more calls to
+	  rl_get_{next,previous}_history
+	- dispose_saved_search_line: remove
+	- noninc_dosearch: no longer need to call _rl_unsave_saved_search_line
+	  or dispose_saved_search_line; use new calling convention for
+	  make_history_line_current
+	- _rl_nsearch_init: don't need to call _rl_maybe_replace_line, wait
+	  until we move to the history line
+	- _rl_nsearch_dosearch: free the undo list unconditionally, since we
+	  are committed to using the contents of rl_line_buffer as the search
+	  string
+	- _rl_nsearch_dosearch: if we abort because of no search string, call
+	  _rl_unsave_saved_search_line and let the caller clean up
+	- _rl_nsearch_dosearch: if the search fails, reset rl_point to the
+	  saved point, since we will be restoring the old line
+	- rl_history_search_internal: don't bother to save and restore the
+	  search line, since we don't use rl_line_buffer for anything
+	- rl_history_search_internal: use new calling convention for
+	  make_history_line_current
+	- all these changes unify the incremental and non-incremental search
+	  implementations
+
+lib/readline/readline.c
+	- rl_initialize: reset rl_eof_found to 0 at the same time we reset
+	  the EOF state
+	  Report and fix from Andrew Burgess <aburgess@redhat.com> (GDB)

@@ -5964,7 +5964,7 @@ An error message will be written to the standard error, and a non-interactive
 shell will exit.
 
 @item -v
-Print shell input lines as they are read.
+Print shell input lines to standard error as they are read.
 
 @item -x
 Print a trace of simple commands, @code{for} commands, @code{case}
@@ -6815,7 +6815,8 @@ Bash (e.g., 5.2.37(3)-release).
 @item BASH_XTRACEFD
 If set to an integer corresponding to a valid file descriptor, Bash
 will write the trace output generated when @samp{set -x}
-is enabled to that file descriptor.
+is enabled to that file descriptor
+instead of the standard error.
 This allows tracing output to be separated from diagnostic and error
 messages.
 The file descriptor is closed when @code{BASH_XTRACEFD} is unset or assigned

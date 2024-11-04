@@ -1222,6 +1222,7 @@ rl_initialize (void)
 
   /* We aren't done yet.  We haven't even gotten started yet! */
   rl_done = 0;
+  rl_eof_found = 0;
   RL_UNSETSTATE(RL_STATE_DONE|RL_STATE_TIMEOUT|RL_STATE_EOF);
 
   /* Tell the history routines what is going on. */

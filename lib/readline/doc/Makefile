@@ -188,9 +188,7 @@ distclean: clean
 
 mostlyclean: clean
 
-maintainer-clean: clean
-	$(RM) $(CREATED_DOCS)
-	$(RM) $(INTERMEDIATE_OBJ)
+maintainer-clean: distclean
 
 install:
 	@echo "This documentation should not be installed."
