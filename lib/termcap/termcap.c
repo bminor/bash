@@ -536,7 +536,10 @@ tgetent (bp, name)
   fd = open (termcap_name, O_RDONLY, 0);
 #endif
   if (fd < 0)
-    return -1;
+    {
+      free (indirect);
+      return -1;
+    }
 
   buf.size = BUFSIZE;
   /* Add 1 to size to ensure room for terminating null.  */

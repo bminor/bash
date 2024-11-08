@@ -1474,13 +1474,22 @@ rl_redisplay (void)
 	  changed_screen_line = _rl_last_v_pos != cursor_linenum;
 	  if (changed_screen_line)
 	    {
+	      int physpos;
+
+	      /* The physpos calculation is to account for lines with differing
+		 numbers of invisible characters. */
+	      if (mb_cur_max == 1 || rl_byte_oriented)
+		physpos = _rl_last_c_pos - WRAP_OFFSET (_rl_last_v_pos, visible_wrap_offset);
+
+	      /* Move to the line where the cursor will be. */
 	      _rl_move_vert (cursor_linenum);
+
 	      /* If we moved up to the line with the prompt using _rl_term_up,
 		 the physical cursor position on the screen stays the same,
 		 but the buffer position needs to be adjusted to account
 		 for invisible characters. */
-	      if ((mb_cur_max == 1 || rl_byte_oriented) && cursor_linenum == 0 && wrap_offset)
-		_rl_last_c_pos += wrap_offset;
+	      if ((mb_cur_max == 1 || rl_byte_oriented) && cursor_linenum == prompt_last_screen_line)
+		_rl_last_c_pos = physpos + WRAP_OFFSET (cursor_linenum, wrap_offset);;
 	    }
 
 	  /* Now we move the cursor to where it needs to be.  First, make
@@ -1492,20 +1501,29 @@ rl_redisplay (void)
 	     only need to reprint it if the cursor is before the last
 	     invisible character in the prompt string. */
 	  /* XXX - why not use local_prompt_len? */
-	  /* XXX - This is right only if the prompt is a single line. */
 	  nleft = prompt_visible_length + wrap_offset;
-	  if (cursor_linenum == 0 && wrap_offset > 0 && _rl_last_c_pos > 0 &&
-	      _rl_last_c_pos < PROMPT_ENDING_INDEX && local_prompt)
+	  if (cursor_linenum == prompt_last_screen_line && wrap_offset > 0 &&
+	      _rl_last_c_pos > 0 && local_prompt &&
+	      _rl_last_c_pos < PROMPT_ENDING_INDEX)
 	    {
+	      int pmt_offset;
+
 	      _rl_cr ();
 	      if (modmark)
 		_rl_output_some_chars ("*", 1);
 
-	      _rl_output_some_chars (local_prompt, nleft);
+	      /* If the number of characters in local_prompt is greater than
+		 the screen width, the prompt wraps. We only want to print the
+		 portion after the line wrap. */
+	      pmt_offset = local_prompt_newlines[cursor_linenum];
+	      if (cursor_linenum > 0 && pmt_offset > 0 && nleft > pmt_offset)
+		_rl_output_some_chars (local_prompt + pmt_offset, nleft - pmt_offset);
+	      else
+		_rl_output_some_chars (local_prompt, nleft);
 	      if (mb_cur_max > 1 && rl_byte_oriented == 0)
 		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft, 1) - wrap_offset + modmark;
 	      else
-		_rl_last_c_pos = nleft + modmark;
+		_rl_last_c_pos = nleft + modmark;	/* buffer position */
 	    }
 
 	  /* Where on that line?  And where does that line start
@@ -1524,6 +1542,7 @@ rl_redisplay (void)
 	     the prompt, and there's no good way to tell it, we compensate for
 	     those characters here and call _rl_backspace() directly if
 	     necessary */
+	  /* XXX - might need to check cursor_linenum == prompt_last_screen_line like above. */
 	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
 	    {
 	      /* TX == new physical cursor position in multibyte locale. */

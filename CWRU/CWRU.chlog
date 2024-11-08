@@ -10597,3 +10597,37 @@ lib/readline/readline.c
 	- rl_initialize: reset rl_eof_found to 0 at the same time we reset
 	  the EOF state
 	  Report and fix from Andrew Burgess <aburgess@redhat.com> (GDB)
+
+				   11/6
+				   ----
+lib/readline/display.c
+	- rl_redisplay: if we changed screen lines during the redisplay and
+	  we need to return to the line with the cursor, make sure to account
+	  for differing numbers of invisible characters in the two lines
+	- rl_redisplay: if we need to redisplay the prompt because we moved
+	  into a portion of it containing invisible characters while moving
+	  to the line containing the cursor, make sure to account for the
+	  cursor being on a line other than 0 and the prompt wrapping lines.
+	  If it wraps, we only want to redisplay the portion after the line
+	  wrap before the line the cursor is on
+	  Fix for C locale issues reported by Grisha Levit <grishalevit@gmail.com>
+
+				   11/7
+				   ----
+lib/termcap/termcap.c
+	- tgetent: fix small memory leak on file open error
+
+Makefile.in
+	- y.tab.h: move from CREATED_HEADERS to INSTALLED_HEADERS so we don't
+	  clean it
+	- maybe-clean: slightly chnage the syntax of the recipe
+
+doc/Makefile.in
+	- PSFILES: split into CREATED_PS and ps files from the distro
+	  so we just remove CREATED_PS in maintainer-clean target
+	- PDFFILES: split into CREATED_PDF and ps files from the distro
+	  so we just remove CREATED_PDF in maintainer-clean targets
+	- clean,mostlyclean: swap
+	- mostlyclean: don't remove Makefile
+	- maybe-clean: use realpath equivalent like in top-level Makefile.in
+	Report from Mike Jonkmans <bashbug@jonkmans.nl>

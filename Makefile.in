@@ -1,4 +1,4 @@
-# Makefile for bash-5.3, version 5.7
+# Makefile for bash-5.3, version 5.8
 #
 # Copyright (C) 1996-2024 Free Software Foundation, Inc.
 
@@ -498,7 +498,7 @@ INSTALLED_HEADERS = shell.h bashjmp.h command.h syntax.h general.h error.h \
 		    bashtypes.h xmalloc.h config-top.h config-bot.h \
 		    bashintl.h bashansi.h bashjmp.h alias.h hashlib.h \
 		    conftypes.h unwind_prot.h jobs.h siglist.h \
-		    execute_cmd.h
+		    execute_cmd.h y.tab.h
 INSTALLED_BUILTINS_HEADERS = bashgetopt.h common.h getopt.h
 INSTALLED_INCFILES =	 posixstat.h ansi_stdlib.h filecntl.h posixdir.h \
 	memalloc.h stdc.h posixjmp.h posixwait.h posixtime.h systimes.h \
@@ -605,7 +605,7 @@ CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
 		    examples/loadables/Makefile.inc examples/loadables/Makefile.sample \
 		    examples/loadables/perl/Makefile support/Makefile \
 		    lib/intl/Makefile po/Makefile po/Makefile.in
-CREATED_HEADERS = signames.h config.h pathnames.h version.h y.tab.h \
+CREATED_HEADERS = signames.h config.h pathnames.h version.h \
 		  ${DEFDIR}/builtext.h
 
 OTHER_DOCS = $(srcdir)/CHANGES $(srcdir)/COMPAT $(srcdir)/NEWS $(srcdir)/POSIX \
@@ -1013,7 +1013,9 @@ maintainer-clean:	basic-clean
 	$(RM) -rf $(CREATED_MACOS)
 
 maybe-clean:
-	-if test X"`cd $(topdir) && pwd -P`" != X"`cd $(BUILD_DIR) && pwd -P`" ; then \
+	-TD=$$(cd $(topdir) && pwd -P); \
+	BD=$$(cd $(BUILD_DIR) && pwd -P); \
+	if test X"$$TD" != X"$$BD" ; then \
 		$(RM) parser-built y.tab.c y.tab.h ; \
 	fi
 
