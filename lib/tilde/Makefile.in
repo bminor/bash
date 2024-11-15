@@ -106,7 +106,9 @@ install:
 	$(INSTALL_DATA) -c -m 644 $(LIBRARY_NAME) $(libdir)/$(LIBRARY_NAME)
 	-test -n "$(RANLIB)" && $(RANLIB) -t $(libdir)/$(LIBRARY_NAME)
 
-clean:
+.PHONY: clean maintainer-clean distclean mostlyclean 
+
+mostlyclean:
 	$(RM) -f $(OBJECTS) $(LIBRARY_NAME)
 	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
@@ -114,7 +116,7 @@ realclean distclean maintainer-clean: clean
 	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	$(RM) -f Makefile
 
-mostlyclean: clean
+clean: mostlyclean
 	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
 ######################################################################

@@ -222,6 +222,8 @@ OTHER_INSTALLED_DOCS = FAQ INTRO
 $(MAN2HTML):	${topdir}/support/man2html.c
 	-( cd ${BUILD_DIR}/support ; ${MAKE} ${BASH_MAKEFLAGS} man2html)
 
+.PHONY: clean maintainer-clean distclean mostlyclean maybe-clean
+
 mostlyclean:
 	$(RM) *.aux *.bak *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps \
 		*.pgs *.bt *.bts *.rw *.rws *.fns *.kys *.tps *.vrs *.o
@@ -285,6 +287,16 @@ install-html:	html
 	-if test -n "${htmldir}" ; then \
 		$(INSTALL_DATA) $(srcdir)/bash.html $(DESTDIR)$(htmldir) ; \
 		$(INSTALL_DATA) $(srcdir)/bashref.html $(DESTDIR)$(htmldir) ; \
+	fi
+
+install-dvi:
+install-pdf:
+install-ps:
+
+uninstall-html:
+	-if test -n "$(htmldir)" ; then \
+		$(RM) $(DESTDIR)$(htmldir)/bash.html ; \
+		$(RM) $(DESTDIR)$(htmldir)/bashref.html ; \
 	fi
 
 uninstall:

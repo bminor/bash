@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.073])dnl
+AC_REVISION([for Bash 5.3, version 5.074])dnl
 
 define(bashvers, 5.3)
 define(relstatus, beta)
@@ -1370,10 +1370,14 @@ AC_CONFIG_COMMANDS([stamp-h], [echo timestamp > stamp-h])
 
 if test "$ac_cv_header_stdckdint_h" = yes; then
 	rm -f stdckdint.h
+	STDCKDINT_H=
 elif cmp ${srcdir}/include/stdckdint.in.h stdckdint.h 2>/dev/null; then
 	:
+	STDCKDINT_H='${BUILD_DIR}/stdckdint.h'
 else
 	cp ${srcdir}/include/stdckdint.in.h stdckdint.h
+	STDCKDINT_H='${BUILD_DIR}/stdckdint.h'
 fi
+AC_SUBST(STDCKDINT_H)
 
 AC_OUTPUT

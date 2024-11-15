@@ -1,3 +1,172 @@
+This document details the changes between this version, bash-5.3-beta, and
+the previous version, bash-5.3-alpha.
+
+1. Changes to Bash
+
+a. Per POSIX, a null pathname argument to `cd' is now an error.
+
+b. Fixes for command completion when the directory portion of the pathname
+   contains characters that require quoting.
+
+c. Fix to prevent redirections from undergoing word expansion twice.
+
+d. Fix for rare parsing issue with for loops where a newline appears before
+   `in'.
+
+e. The bash build process now assumes a C90 compilation environment and a
+   POSIX.1-1990 execution environment.
+
+f. Fixed a bug where bash's internal redirection flags could collide with
+   the system's open/fcntl flags.
+
+g. Fixed a problem with `jobs' run from a trap or `bind -x' command printing
+   the status of terminated foreground jobs.
+
+h. Bash works around a macOS gettext bug with translating the `command not
+   found' message by caching the translated string.
+
+i. Bash does not try to set the tty state after a process finishes if it is
+   running a trap, running a readline key binding (bind -x), or executing a
+   programmable completion.
+
+j. Restricted shells are not allowed to run `enable -f', even when it's
+   shorthand from `enable f'.
+
+k. Work around an android problem with file descriptors if the read builtin
+   gets both -u and -e.
+
+l. Fixed some small memory leaks in bash completion and command parsing and
+   execution.
+
+m. Fix for crash when timed commands jump back to the top level after SIGINT.
+
+n. Minor fixes for command substitution parsing in the foreground.
+
+o. Fix to reset read builtin buffer after SIGINT.
+
+p. Fix for inconsistency between arrays and scalar variables when declaring
+   local variables and using values from previous variable contexts.
+
+q. Bash doesn't try to give the terminal back to the original process group
+   after running a trap unless job control is enabled.
+
+r. Fix to inhibit fork optimizations in functions that set a RETURN trap.
+
+s. Fixes for parsing commands within process substitutions where they should
+   behave differently than command substitutions.
+
+t. Restrict the effect of force_fignore to the cases where FIGNORE should
+   affect completions.
+
+u. Fix for `read' builtin and invalid multibyte characters that contain the
+   delimiter character, so the delimiter acts as intended.
+
+v. Fix for `read -e' so it restores the correct completion function if it's
+   interrupted.
+
+w. Fix an off-by-one error when parsing an improperly-formed printf time
+   specification.
+
+x. Fix for return status for commands whose return status is being inverted
+   when set -e is ignored.
+
+y. Fix for checking `read' builtin timeouts after we check for having read
+   the delimiter.
+
+z. Fixes for integer overflows and size_t variables.
+
+aa. Fixes for the Makefiles to simplify, remove some unused variables, and
+    clean up what `git' sees after running the various clean targets.
+
+bb. Fix for the `exec' builtin to avoid duplicate error messages.
+
+2. Changes to Readline
+
+a. Make sure the bracketed-paste input buffer is null-terminated when read
+   returns an error.
+
+b. Fixed a small memory leak in execute-named-command if the command doesn't
+   exist or the function doesn't return.
+
+c. Fix for attempting to change case of invalid multibyte characters.
+
+d. Fix for possible completions that compare identically when using case-
+   insensitive completion but have different byte lengths.
+
+e. Fix to make non-incremental searches use undo lists and set the history
+   position the same way as incremental searches.
+
+f. Don't check for signals when handling a received signal.
+
+g. Fix off-by-one error when tokenizing words like $((expr)) while performing
+   history expansion.
+
+h. Fixes for incremental searches and redisplay in the C locale.
+
+3. New Features in Bash
+
+a. MULTIPLE_COPROCS is now enabled by default.
+
+b. The `bind' builtin interprets additional non-option arguments after -p or
+   -P as bindable command names and restricts output to the bindings for
+   those names.
+
+c. Bash now uses the login shell for $BASH if the shell is named `su' or `-su'.
+
+d. Bash now prints job notifications if an interactive shell is running a trap,
+   even though the shell is not interactive at that moment.
+
+e. Programmable completion allows a new compspec loaded after a completion
+   function returns 124 to be used in more cases.
+
+f. ./source has a new -p PATH option, which makes it use the PATH argument
+   instead of $PATH to look for the file.
+
+g. GLOBSORT has a new `numeric' sort specifier, which sorts all-digit strings
+   as numbers.
+
+h. Documentation has been significantly updated.
+
+i. `wait -n' can now return terminated process substitutions, jobs about
+   which the user has already been notified (like `wait' without options),
+   
+j. `wait -n' removes jobs from the jobs table or list of terminated children
+    when in posix mode.
+
+k. Changed the `wait' builtin behavior regarding process substitutions to
+   match the documentation.
+
+l. There is a new `bash_source_fullpath' shopt option, which makes bash put
+   full pathnames into BASH_SOURCE, and a way to set a default value for it
+   at configure time.
+
+m. Posix mode now forces job notifications to occur when the new edition of
+   POSIX specifes (since it now specifies them).
+
+n. Interactive shells don't print job notifications while sourcing scripts.
+
+o. The parser prints more information about the command it's trying to parse
+   when it encounters EOF before completing the command.
+
+p. Posix mode no longer requires function names to be valid shell identifiers.
+
+q. If `exit' is run in a trap and not supplied an exit status argument, it
+   uses the value of $? from before the trap only if it's run at the trap's
+   `top level' and would cause the trap to end (that is, not in a subshell).
+   This is from Posix interp 1602.
+
+4. New Features in Readline
+
+a. Documentation has been significantly updated.
+
+b. New `force-meta-prefix' bindable variable, which forces the use of ESC as
+   the meta prefix when using "\M-" in key bindings instead of overloading
+   convert-meta.
+
+c. The default value for `readline-colored-completion-prefix' no longer has a
+   leading `.'; the original report was based on a misunderstanding.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.3-alpha, and
 the previous version, bash-5.2-release.
 

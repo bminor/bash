@@ -178,7 +178,9 @@ html:	$(HTMLOBJ)
 text:	$(TEXTOBJ)
 pdf:	$(PDFOBJ)
 
-clean:
+.PHONY: clean maintainer-clean distclean mostlyclean 
+
+mostlyclean:
 	$(RM) *.aux *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps *.pgs \
 	      *.fns *.kys *.tps *.vrs *.bt *.bts *.o core *.core
 
@@ -186,7 +188,7 @@ distclean: clean
 	$(RM) $(CREATED_DOCS)
 	$(RM) $(INTERMEDIATE_OBJ)
 
-mostlyclean: clean
+clean: mostlyclean
 
 maintainer-clean: distclean
 	$(RM) Makefile

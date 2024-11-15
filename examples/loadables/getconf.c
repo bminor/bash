@@ -21,8 +21,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <error.h>
-#include <gettext.h>
-#include <locale.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

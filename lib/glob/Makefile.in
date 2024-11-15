@@ -68,7 +68,10 @@ LIBRARY_NAME = libglob.a
 
 # The C code source files for this library.
 CSOURCES = $(srcdir)/glob.c $(srcdir)/strmatch.c $(srcdir)/smatch.c \
+	   $(srcdir)/gmisc.c \
 	   $(srcdir)/xmbsrtowcs.c
+
+LOOP_FILES = $(srcdir)/glob_loop.c $(srcdir)/gm_loop.c $(srcdir)/sm_loop.c
 
 # The header files for this library.
 HSOURCES = $(srcdir)/strmatch.h
@@ -110,7 +113,9 @@ force:
 # include files.
 install:
 
-clean:
+.PHONY: clean maintainer-clean distclean mostlyclean
+
+mostlyclean:
 	rm -f $(OBJECTS) $(LIBRARY_NAME)
 	-(cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
@@ -118,7 +123,7 @@ realclean distclean maintainer-clean: clean
 	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	$(RM) -f Makefile
 
-mostlyclean: clean
+clean: mostlyclean
 	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
 ${BUILD_DIR}/pathnames.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile

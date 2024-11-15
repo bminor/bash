@@ -102,8 +102,12 @@ alloca.o:	$(srcdir)/$(ALLOCA_SOURCE)
 		mv $(ALLOCA_OBJECT) alloca.o >/dev/null 2>&1 ; \
 	fi
 
-mostlyclean clean:
+.PHONY: clean maintainer-clean distclean mostlyclean
+
+mostlyclean:
 	$(RM) *.o libmalloc.a
+
+clean: mostlyclean
 
 distclean realclean maintainer-clean: clean
 	$(RM) Makefile

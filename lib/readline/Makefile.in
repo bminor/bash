@@ -161,11 +161,13 @@ TAGS:	force
 tags:	force
 	$(CTAGS) $(CSOURCES) $(HSOURCES)
 
-clean:	force
+.PHONY: clean maintainer-clean distclean mostlyclean 
+
+mostlyclean:	force
 	$(RM) $(OBJECTS) *.a
 	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
-mostlyclean: clean
+clean: mostlyclean
 	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
 distclean maintainer-clean: clean

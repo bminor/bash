@@ -114,6 +114,8 @@ DIRECTDEFINE = -D $(srcdir)
 HELPDIRDEFINE = @HELPDIRDEFINE@
 HELPSTRINGS = @HELPSTRINGS@
 
+STDCKDINT_H = @STDCKDINT_H@
+
 # xxx this is bad style
 RL_LIBSRC = $(topdir)/lib/readline
 
@@ -257,6 +259,8 @@ documentation: builtins.texi
 
 builtins.texi: $(MKBUILTINS)
 	./$(MKBUILTINS) -documentonly $(DEFSRC)
+
+.PHONY: basic-clean clean maintainer-clean distclean mostlyclean maybe-clean
 
 clean:
 	$(RM) $(OFILES) $(CREATED_FILES) libbuiltins.a
@@ -563,6 +567,7 @@ printf.o: $(topdir)/bashtypes.h ${srcdir}/common.h $(BASHINCDIR)/chartypes.h
 printf.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 printf.o: ../pathnames.h
 printf.o: $(BASHINCDIR)/unlocked-io.h
+printf.o: ${STDCKDINT_H} ${BASHINCDIR}/intprops-internal.h
 pushd.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 pushd.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 pushd.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h

@@ -48,8 +48,8 @@ p. Treat a NULL value for $PATH as equivalent to ".".
 p. New loadable builtins: kv, strptime
 
 q. GLOBSORT: new variable to specify how to sort the results of pathname
-   expansion (name, size, blocks, mtime, atime, ctime, none) in ascending
-   or descending order.
+   expansion (name, size, blocks, mtime, atime, ctime, numeric, none) in
+   ascending or descending order.
 
 r. `compgen' has a new option: -V varname. If supplied, it stores the generated
    completions into VARNAME instead of printing them on stdout.
@@ -96,6 +96,53 @@ ee. New test builtin behavior when parsing a parenthesized subexpression and
     Added for compatibility with coreutils test, dependent on the shell
     compatibility level. Such expressions remain ambiguous.
 
+ff. MULTIPLE_COPROCS is now enabled by default.
+
+gg. The `bind' builtin interprets additional non-option arguments after -p or
+    -P as bindable command names and restricts output to the bindings for
+    those names.
+
+hh. Bash now uses the login shell for $BASH if the shell is named `su' or `-su'.
+
+ii. Bash now prints job notifications if an interactive shell is running a trap,
+    even though the shell is not interactive at that moment.
+
+jj. Programmable completion allows a new compspec loaded after a completion
+    function returns 124 to be used in more cases.
+
+kk. ./source has a new -p PATH option, which makes it use the PATH argument
+    instead of $PATH to look for the file.
+
+ll. Documentation has been significantly updated.
+
+mm. `wait -n' can now return terminated process substitutions, jobs about
+    which the user has already been notified (like `wait' without options),
+   
+nn. `wait -n' removes jobs from the jobs table or list of terminated children
+     when in posix mode.
+
+oo. Changed the `wait' builtin behavior regarding process substitutions to
+    match the documentation.
+
+pp. There is a new `bash_source_fullpath' shopt option, which makes bash put
+    full pathnames into BASH_SOURCE, and a way to set a default value for it
+    at configure time.
+
+qq. Posix mode now forces job notifications to occur when the new edition of
+    POSIX specifes (since it now specifies them).
+
+rr. Interactive shells don't print job notifications while sourcing scripts.
+
+ss. The parser prints more information about the command it's trying to parse
+    when it encounters EOF before completing the command.
+
+tt. Posix mode no longer requires function names to be valid shell identifiers.
+
+uu. If `exit' is run in a trap and not supplied an exit status argument, it
+    uses the value of $? from before the trap only if it's run at the trap's
+    `top level' and would cause the trap to end (that is, not in a subshell).
+    This is from Posix interp 1602.
+
 2. New Features in Readline
 
 a. Output a newline if there is no prompt and readline reads an empty line.
@@ -128,6 +175,14 @@ i. Incremental and non-incremental searches now allow ^V/^Q (or, in the former
    case, anything bound to quoted-insert) to quote characters in the search
    string.
 
+j. Documentation has been significantly updated.
+
+k. New `force-meta-prefix' bindable variable, which forces the use of ESC as
+   the meta prefix when using "\M-" in key bindings instead of overloading
+   convert-meta.
+
+l. The default value for `readline-colored-completion-prefix' no longer has a
+   leading `.'; the original report was based on a misunderstanding.
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-5.2 since

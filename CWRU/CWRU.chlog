@@ -9140,7 +9140,7 @@ bashline.c
 	  to dequote the entire pathname
 	- command_word_completion_function: since the directory name from $PATH
 	  is not quoted, use the dequoted hint to construct the full pathname
-	  to pass to rl_filename_completion_function (possibly after quoting it
+	  to pass to rl_filename_completion_function (possibly after quoting it)
 	  From https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=306043
 
 				   4/10
@@ -10483,7 +10483,7 @@ builtins/common.c
 	  POSIX interp 1602, in POSIX.1-2024
 
 stringlib.c
-	- find_token_in_alist: if FLAGS is non-zero, do *no* allocate new
+	- find_token_in_alist: if FLAGS is non-zero, do *not* allocate new
 	  memory for the token. The existing behavior is to allocate memory
 	  and return a copy of the token, and all callers pass 0
 
@@ -10620,7 +10620,7 @@ lib/termcap/termcap.c
 Makefile.in
 	- y.tab.h: move from CREATED_HEADERS to INSTALLED_HEADERS so we don't
 	  clean it
-	- maybe-clean: slightly chnage the syntax of the recipe
+	- maybe-clean: slightly change the syntax of the recipe
 
 doc/Makefile.in
 	- PSFILES: split into CREATED_PS and ps files from the distro
@@ -10631,3 +10631,22 @@ doc/Makefile.in
 	- mostlyclean: don't remove Makefile
 	- maybe-clean: use realpath equivalent like in top-level Makefile.in
 	Report from Mike Jonkmans <bashbug@jonkmans.nl>
+
+				   11/11
+				   -----
+Makefile.in,doc/Makefile.in,lib/glob/Makefile.in,lib/readline/Makefile.in
+lib/malloc/Makefile.in.,lib/tilde/Makefile.in
+	- mostlyclean: swap with clean where appropriate
+	- add .PHONY target for clean targets where appropriate
+
+Makefile.in,configure.ac
+	- STDCKDINT_H: variable for possibly-created file stdckdint.h, for
+	  dependencies; add dependencies where appropriate
+
+Makefile.in,doc/Makefile.in
+	- add various gnu-standard install targets that do nothing
+
+				   11/14
+				   -----
+CHANGES,NEWS
+	- updated for bash-5.3-beta

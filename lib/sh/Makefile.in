@@ -35,6 +35,7 @@ LIBBUILD = ${BUILD_DIR}/lib
 BASHINCDIR = ${topdir}/include
 
 INTL_LIBSRC = ${topdir}/lib/intl
+INTL_LIBDIR = ${LIBBUILD}/intl
 INTL_BUILDDIR = ${LIBBUILD}/intl
 INTL_INC = @INTL_INC@
 LIBINTL_H = @LIBINTL_H@
@@ -134,13 +135,15 @@ force:
 # include files.
 install:
 
-clean:
+.PHONY: clean maintainer-clean distclean mostlyclean
+
+mostlyclean:
 	$(RM) $(OBJECTS) $(LIBRARY_NAME)
 
 realclean distclean maintainer-clean: clean
 	$(RM) Makefile
 
-mostlyclean: clean
+clean: mostlyclean
 
 # Dependencies
 
