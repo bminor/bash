@@ -27,6 +27,13 @@
 #  include <floss.h>
 #endif
 
+/* These are needed to get the declaration of 'alarm' when including
+   <unistd.h>. I'm not sure it's needed, but the compiler might require it. */
+#if defined (__MINGW32__)
+#  define __USE_MINGW_ALARM
+#  define _POSIX
+#endif
+
 #if defined (HAVE_CONFIG_H)
 #  include <config.h>
 #endif

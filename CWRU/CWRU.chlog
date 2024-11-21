@@ -10650,3 +10650,43 @@ Makefile.in,doc/Makefile.in
 				   -----
 CHANGES,NEWS
 	- updated for bash-5.3-beta
+
+				   11/15
+				   -----
+lib/sh/snprintf.c
+	- wchars: fix small memory leak by freeing lbuf if wcrtomb fails
+	  Report from SerGoGubarev <sergeygubarev263@gmail.com>
+
+lib/readline/complete.c
+	- vector_len: an inline convenience function to return the length
+	  of an array of strings; callers are remove_duplicate_matches,
+	  rl_old_menu_complete, rl_menu_complete
+	- rl_complete_internal: add `$' as a value for what_to_do that
+	  exports a (possibly null) list of possible completions to an
+	  application or another process by writing them, using a specific
+	  protocol, to rl_outstream
+	- rl_export_completions: bindable command to perform word completion
+	  and write the results, with other information, to rl_outstream
+	- _rl_export_completions: workhorse function to export the completions
+	  Based on a patch from Matthew Tromp <matthewktromp@gmail.com>,
+	  original request from Spencer Baugh <sbaugh@catern.com> back in 11/23
+
+lib/readline/readline.h
+	- rl_export_completions: extern declaration
+
+lib/readline/funmap.c
+	- export-completions: new bindable command name
+
+doc/bash.1,lib/readline/doc/readline.3,lib/readline/doc/rluser.texi
+	- export-completions: document, including output format
+
+				   11/19
+				   -----
+Makefile.in
+	- HYBRID_HEADERS: new variable containing header files that may appear
+	  in the build directory or the source directory
+	- maybe-install-headers: rule to install header files that may appear
+	  in the build directory or a subdirectory of it; install-headers
+	  depends on it
+	- uninstall-headers: remove $(HYBRID_HEADERS); fix typo in recipe
+

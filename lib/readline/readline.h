@@ -160,6 +160,7 @@ extern int rl_insert_completions (int, int);
 extern int rl_old_menu_complete (int, int);
 extern int rl_menu_complete (int, int);
 extern int rl_backward_menu_complete (int, int);
+extern int rl_export_completions (int, int);
 
 /* Bindable commands for killing and yanking text, and managing the kill ring. */
 extern int rl_kill_word (int, int);

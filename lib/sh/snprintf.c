@@ -909,8 +909,11 @@ wchars (struct DATA *p, wint_t wc)
   memset (&mbs, '\0', sizeof (mbstate_t));
   len = wcrtomb (lbuf, wc, &mbs);
   if (len == (size_t)-1)
-    /* conversion failed; bail now. */
-    return;
+    {
+      free (lbuf);
+      /* conversion failed; bail now. */
+      return;
+    }
   p->width -= len;
   l = lbuf;
   PUT_STRING (l, len, p);

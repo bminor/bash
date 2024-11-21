@@ -12562,7 +12562,6 @@ glob_expand_word_list (WORD_LIST *tlist, int eflags)
   register int glob_index;
   WORD_LIST *glob_list, *output_list, *disposables, *next;
   WORD_DESC *tword;
-  int x;
 
   output_list = disposables = (WORD_LIST *)NULL;
   glob_array = (char **)NULL;

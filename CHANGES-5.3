@@ -53,7 +53,9 @@ q. Bash doesn't try to give the terminal back to the original process group
 r. Fix to inhibit fork optimizations in functions that set a RETURN trap.
 
 s. Fixes for parsing commands within process substitutions where they should
-   behave differently than command substitutions.
+   behave differently than command substitutions, including prohibiting the
+   special case for redirections that is only available for command
+   substitutions.
 
 t. Restrict the effect of force_fignore to the cases where FIGNORE should
    affect completions.

@@ -500,7 +500,10 @@ INSTALLED_HEADERS = shell.h bashjmp.h command.h syntax.h general.h error.h \
 		    bashtypes.h xmalloc.h config-top.h config-bot.h \
 		    bashintl.h bashansi.h bashjmp.h alias.h hashlib.h \
 		    conftypes.h unwind_prot.h jobs.h siglist.h \
-		    execute_cmd.h y.tab.h
+		    execute_cmd.h
+# these can appear in either the source directory or the build directory and
+# are installed by install-headers
+HYBRID_HEADERS = y.tab.h
 INSTALLED_BUILTINS_HEADERS = bashgetopt.h common.h getopt.h
 INSTALLED_INCLUDE_HEADERS = posixstat.h ansi_stdlib.h filecntl.h posixdir.h \
 	memalloc.h stdc.h posixjmp.h posixwait.h posixtime.h systimes.h \
@@ -929,7 +932,20 @@ install-headers-dirs:
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(headersdir)/include
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(pkgconfigdir)
 
-install-headers: install-headers-dirs
+maybe-install-headers: install-headers-dirs
+	@for hf in $(HYBRID_HEADERS) ; do \
+		if test -f $(BUILD_DIR)/"$$hf" ; then \
+			${INSTALL_DATA} $(BUILD_DIR)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
+		else \
+			${INSTALL_DATA} $(srcdir)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
+		fi ; \
+	done
+	@SDH=${CREATED_SUBDIR_HEADERS} ; \
+	for hf in $${SDH} ; do \
+		$(INSTALL_DATA) "$$hf" $(DESTDIR)$(headersdir)/ ; \
+	done
+
+install-headers: maybe-install-headers
 	@for hf in $(INSTALLED_HEADERS) ; do \
 		${INSTALL_DATA} $(srcdir)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
 	done
@@ -946,20 +962,16 @@ install-headers: install-headers-dirs
 			${INSTALL_DATA} $(srcdir)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
 		fi ; \
 	done
-	@SDH=${CREATED_SUBDIR_HEADERS} ; \
-	for hf in $${SDH} ; do \
-		$(INSTALL_DATA) "$$hf" $(DESTDIR)$(headersdir)/ ; \
-	done
 	-$(INSTALL_DATA) $(SUPPORT_DIR)/bash.pc $(DESTDIR)$(pkgconfigdir)/bash.pc
 
 uninstall-headers:
 	-( cd $(DESTDIR)$(headersdir) && $(RM) $(INSTALLED_HEADERS) )
 	-( cd $(DESTDIR)$(headersdir)/include && $(RM) $(INSTALLED_INCLUDE_HEADERS) )
 	-( cd $(DESTDIR)$(headersdir)/builtins && $(RM) $(INSTALLED_BUILTINS_HEADERS) )
-	-( cd $(DESTDIR)$(headersdir) && $(RM) $(CREATED_HEADERS) )
-	-@SDH=${CREATED_SUBDIR_HEADERS} ; \
+	-( cd $(DESTDIR)$(headersdir) && $(RM) $(CREATED_HEADERS) $(HYBRID_HEADERS) )
+	-SDH=${CREATED_SUBDIR_HEADERS} ; \
 	for hf in $${SDH} ; do \
-		( cd $(DESTDIR)$(headersdir) && $(RM) `basename "$$hf"` )
+		( cd $(DESTDIR)$(headersdir) && $(RM) $$(basename "$$hf") ) \
 	done
 	-( $(RM) $(DESTDIR)$(pkgconfigdir)/bash.pc )
 

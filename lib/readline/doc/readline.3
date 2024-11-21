@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Oct 10 16:33:40 EDT 2024
+.\"	Last Change: Fri Nov 15 17:57:09 EST 2024
 .\"
-.TH READLINE 3 "2024 October 10" "GNU Readline 8.3"
+.TH READLINE 3 "2024 November 15" "GNU Readline 8.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -1408,6 +1408,39 @@ by default.
 Identical to \fBmenu\-complete\fP, but moves backward through the list
 of possible completions, as if \fBmenu\-complete\fP had been given a
 negative argument.
+This command is unbound by default.
+.TP
+.B export\-completions
+Perform completion on the word before point as described above
+and write the list of possible completions to \fBreadline\fP's output
+stream using the following format, writing information on separate lines:
+.sp
+.IP
+.RS
+.nf
+The number of matches; 
+The word being completed;
+S:E, where S and E are the start and end offsets of the word
+in the readline line buffer; then
+Each match, one per line
+.fi
+.RE
+.sp
+.IP
+If there are no matches, the first line will be 0, and this command will
+not print any output after the S:E.
+If there is only a single match, this prints a single line containing it.
+If there is more than one match, this prints the common prefix of the
+matches, which may be empty, on the first line after the S:E,
+then the matches on subsequent lines.
+In this case, N will include the first line with the common prefix.
+.PD
+.IP
+.PD 0
+The user or application
+should be able to accommodate the possibility of a blank line.
+The intent is that the user or application reads N lines after the line
+containing S:E to obtain the match list.
 This command is unbound by default.
 .TP
 .B delete\-char\-or\-list

@@ -1,6 +1,6 @@
 This is readline.info, produced by makeinfo version 7.1 from rlman.texi.
 
-This manual describes the GNU Readline Library (version 8.3, 15 October
+This manual describes the GNU Readline Library (version 8.3, 15 November
 2024), a library which aids in the consistency of user interface across
 discrete programs which provide a command line interface.
 
@@ -1476,6 +1476,30 @@ File: readline.info,  Node: Commands For Completion,  Next: Keyboard Macros,  Pr
      Identical to ‘menu-complete’, but moves backward through the list
      of possible completions, as if ‘menu-complete’ had been given a
      negative argument.  This command is unbound by default.
+
+‘export-completions ()’
+     Perform completion on the word before point as described above and
+     write the list of possible completions to Readline's output stream
+     using the following format, writing information on separate lines:
+
+          The number of matches;
+          The word being completed;
+          S:E, where S and E are the start and end offsets of the word
+          in the readline line buffer; then
+          Each match, one per line
+
+     If there are no matches, the first line will be 0, and this command
+     will not print any output after the S:E. If there is only a single
+     match, this prints a single line containing it.  If there is more
+     than one match, this prints the common prefix of the matches, which
+     may be empty, on the first line after the S:E, then the matches on
+     subsequent lines.  In this case, N will include the first line with
+     the common prefix.
+
+     The user or application should be able to accommodate the
+     possibility of a blank line.  The intent is that the user or
+     application reads N lines after the line containing S:E to obtain
+     the match list.  This command is unbound by default.
 
 ‘delete-char-or-list ()’
      Deletes the character under the cursor if not at the beginning or
@@ -4937,7 +4961,7 @@ Function and Variable Index
                                                               (line  49)
 * delete-char (C-d):                     Commands For Text.   (line  12)
 * delete-char-or-list ():                Commands For Completion.
-                                                              (line  38)
+                                                              (line  62)
 * delete-horizontal-space ():            Commands For Killing.
                                                               (line  41)
 * digit-argument (M-0, M-1, ... M--):    Numeric Arguments.   (line   6)
@@ -4979,6 +5003,8 @@ Function and Variable Index
                                                               (line  87)
 * expand-tilde:                          Readline Init File Syntax.
                                                               (line 212)
+* export-completions ():                 Commands For Completion.
+                                                              (line  38)
 * fetch-history ():                      Commands For History.
                                                               (line 105)
 * force-meta-prefix:                     Readline Init File Syntax.
@@ -5411,59 +5437,59 @@ Function and Variable Index
 
 
 Tag Table:
-Node: Top863
-Node: Command Line Editing1588
-Node: Introduction and Notation2240
-Node: Readline Interaction4596
-Node: Readline Bare Essentials5788
-Node: Readline Movement Commands7600
-Node: Readline Killing Commands8600
-Node: Readline Arguments10627
-Node: Searching11688
-Node: Readline Init File13919
-Node: Readline Init File Syntax15117
-Node: Conditional Init Constructs41509
-Node: Sample Init File45898
-Node: Bindable Readline Commands49023
-Node: Commands For Moving50407
-Node: Commands For History52337
-Node: Commands For Text57542
-Node: Commands For Killing61387
-Node: Numeric Arguments63843
-Node: Commands For Completion64999
-Node: Keyboard Macros67086
-Node: Miscellaneous Commands67791
-Node: Readline vi Mode72115
-Node: Programming with GNU Readline74012
-Node: Basic Behavior74998
-Node: Custom Functions79061
-Node: Readline Typedefs80583
-Node: Function Writing82469
-Node: Readline Variables83775
-Node: Readline Convenience Functions98729
-Node: Function Naming99805
-Node: Keymaps101136
-Node: Binding Keys104298
-Node: Associating Function Names and Bindings109123
-Node: Allowing Undoing112953
-Node: Redisplay115703
-Node: Modifying Text120005
-Node: Character Input121544
-Node: Terminal Management124701
-Node: Utility Functions126588
-Node: Miscellaneous Functions129698
-Node: Alternate Interface133588
-Node: A Readline Example136483
-Node: Alternate Interface Example138401
-Node: Readline Signal Handling142020
-Node: Custom Completers151570
-Node: How Completing Works152290
-Node: Completion Functions155666
-Node: Completion Variables159333
-Node: A Short Completion Example177651
-Node: GNU Free Documentation License190320
-Node: Concept Index215497
-Node: Function and Variable Index217018
+Node: Top864
+Node: Command Line Editing1589
+Node: Introduction and Notation2241
+Node: Readline Interaction4597
+Node: Readline Bare Essentials5789
+Node: Readline Movement Commands7601
+Node: Readline Killing Commands8601
+Node: Readline Arguments10628
+Node: Searching11689
+Node: Readline Init File13920
+Node: Readline Init File Syntax15118
+Node: Conditional Init Constructs41510
+Node: Sample Init File45899
+Node: Bindable Readline Commands49024
+Node: Commands For Moving50408
+Node: Commands For History52338
+Node: Commands For Text57543
+Node: Commands For Killing61388
+Node: Numeric Arguments63844
+Node: Commands For Completion65000
+Node: Keyboard Macros68270
+Node: Miscellaneous Commands68975
+Node: Readline vi Mode73299
+Node: Programming with GNU Readline75196
+Node: Basic Behavior76182
+Node: Custom Functions80245
+Node: Readline Typedefs81767
+Node: Function Writing83653
+Node: Readline Variables84959
+Node: Readline Convenience Functions99913
+Node: Function Naming100989
+Node: Keymaps102320
+Node: Binding Keys105482
+Node: Associating Function Names and Bindings110307
+Node: Allowing Undoing114137
+Node: Redisplay116887
+Node: Modifying Text121189
+Node: Character Input122728
+Node: Terminal Management125885
+Node: Utility Functions127772
+Node: Miscellaneous Functions130882
+Node: Alternate Interface134772
+Node: A Readline Example137667
+Node: Alternate Interface Example139585
+Node: Readline Signal Handling143204
+Node: Custom Completers152754
+Node: How Completing Works153474
+Node: Completion Functions156850
+Node: Completion Variables160517
+Node: A Short Completion Example178835
+Node: GNU Free Documentation License191504
+Node: Concept Index216681
+Node: Function and Variable Index218202
 
 End Tag Table
 

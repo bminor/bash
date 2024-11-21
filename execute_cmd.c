@@ -4277,13 +4277,13 @@ fix_assignment_words (WORD_LIST *words)
 {
   WORD_LIST *w, *wcmd;
   struct builtin *b;
-  int assoc, global, array, integer;
+  int assoc, global, array;
 
   if (words == 0)
     return;
 
   b = 0;
-  assoc = global = array = integer = 0;
+  assoc = global = array = 0;
 
   /* Skip over assignment statements preceding a command name */
   wcmd = words;

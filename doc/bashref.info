@@ -9867,6 +9867,30 @@ File: bashref.info,  Node: Commands For Completion,  Next: Keyboard Macros,  Pre
      of possible completions, as if ‘menu-complete’ had been given a
      negative argument.  This command is unbound by default.
 
+‘export-completions ()’
+     Perform completion on the word before point as described above and
+     write the list of possible completions to Readline's output stream
+     using the following format, writing information on separate lines:
+
+          The number of matches;
+          The word being completed;
+          S:E, where S and E are the start and end offsets of the word
+          in the readline line buffer; then
+          Each match, one per line
+
+     If there are no matches, the first line will be 0, and this command
+     will not print any output after the S:E. If there is only a single
+     match, this prints a single line containing it.  If there is more
+     than one match, this prints the common prefix of the matches, which
+     may be empty, on the first line after the S:E, then the matches on
+     subsequent lines.  In this case, N will include the first line with
+     the common prefix.
+
+     The user or application should be able to accommodate the
+     possibility of a blank line.  The intent is that the user or
+     application reads N lines after the line containing S:E to obtain
+     the match list.  This command is unbound by default.
+
 ‘delete-char-or-list ()’
      Deletes the character under the cursor if not at the beginning or
      end of the line (like ‘delete-char’).  At the end of the line, it
@@ -13105,17 +13129,17 @@ D.4 Function Index
 * complete (<TAB>):                      Commands For Completion.
                                                               (line   6)
 * complete-command (M-!):                Commands For Completion.
-                                                              (line  81)
+                                                              (line 105)
 * complete-filename (M-/):               Commands For Completion.
-                                                              (line  50)
+                                                              (line  74)
 * complete-hostname (M-@):               Commands For Completion.
-                                                              (line  73)
+                                                              (line  97)
 * complete-into-braces (M-{):            Commands For Completion.
-                                                              (line 100)
+                                                              (line 124)
 * complete-username (M-~):               Commands For Completion.
-                                                              (line  57)
+                                                              (line  81)
 * complete-variable (M-$):               Commands For Completion.
-                                                              (line  65)
+                                                              (line  89)
 * copy-backward-word ():                 Commands For Killing.
                                                               (line  62)
 * copy-forward-word ():                  Commands For Killing.
@@ -13123,10 +13147,10 @@ D.4 Function Index
 * copy-region-as-kill ():                Commands For Killing.
                                                               (line  58)
 * dabbrev-expand ():                     Commands For Completion.
-                                                              (line  95)
+                                                              (line 119)
 * delete-char (C-d):                     Commands For Text.   (line  12)
 * delete-char-or-list ():                Commands For Completion.
-                                                              (line  44)
+                                                              (line  68)
 * delete-horizontal-space ():            Commands For Killing.
                                                               (line  50)
 * digit-argument (M-0, M-1, ... M--):    Numeric Arguments.   (line   6)
@@ -13142,7 +13166,7 @@ D.4 Function Index
 * dump-variables ():                     Miscellaneous Commands.
                                                               (line  77)
 * dynamic-complete-history (M-<TAB>):    Commands For Completion.
-                                                              (line  91)
+                                                              (line 115)
 * edit-and-execute-command (C-x C-e):    Miscellaneous Commands.
                                                               (line 142)
 * end-kbd-macro (C-x )):                 Keyboard Macros.     (line   9)
@@ -13154,6 +13178,8 @@ D.4 Function Index
                                                               (line  37)
 * execute-named-command (M-x):           Miscellaneous Commands.
                                                               (line  90)
+* export-completions ():                 Commands For Completion.
+                                                              (line  44)
 * fetch-history ():                      Commands For History.
                                                               (line 106)
 * forward-backward-delete-char ():       Commands For Text.   (line  23)
@@ -13210,17 +13236,17 @@ D.4 Function Index
                                                               (line  99)
 * overwrite-mode ():                     Commands For Text.   (line  77)
 * possible-command-completions (C-x !):  Commands For Completion.
-                                                              (line  87)
+                                                              (line 111)
 * possible-completions (M-?):            Commands For Completion.
                                                               (line  17)
 * possible-filename-completions (C-x /): Commands For Completion.
-                                                              (line  53)
-* possible-hostname-completions (C-x @): Commands For Completion.
                                                               (line  77)
+* possible-hostname-completions (C-x @): Commands For Completion.
+                                                              (line 101)
 * possible-username-completions (C-x ~): Commands For Completion.
-                                                              (line  61)
+                                                              (line  85)
 * possible-variable-completions (C-x $): Commands For Completion.
-                                                              (line  69)
+                                                              (line  93)
 * prefix-meta (<ESC>):                   Miscellaneous Commands.
                                                               (line  19)
 * previous-history (C-p):                Commands For History.
@@ -13554,37 +13580,37 @@ Node: Commands For Text434477
 Node: Commands For Killing438605
 Node: Numeric Arguments441396
 Node: Commands For Completion442551
-Node: Keyboard Macros447054
-Node: Miscellaneous Commands447758
-Node: Readline vi Mode454314
-Node: Programmable Completion455294
-Node: Programmable Completion Builtins463343
-Node: A Programmable Completion Example475011
-Node: Using History Interactively480359
-Node: Bash History Facilities481043
-Node: Bash History Builtins484781
-Node: History Interaction491255
-Node: Event Designators496212
-Node: Word Designators497793
-Node: Modifiers500104
-Node: Installing Bash502048
-Node: Basic Installation503167
-Node: Compilers and Options507046
-Node: Compiling For Multiple Architectures507799
-Node: Installation Names509555
-Node: Specifying the System Type511792
-Node: Sharing Defaults512541
-Node: Operation Controls513258
-Node: Optional Features514280
-Node: Reporting Bugs526663
-Node: Major Differences From The Bourne Shell528024
-Node: GNU Free Documentation License549447
-Node: Indexes574627
-Node: Builtin Index575081
-Node: Reserved Word Index582182
-Node: Variable Index584630
-Node: Function Index602046
-Node: Concept Index615905
+Node: Keyboard Macros448237
+Node: Miscellaneous Commands448941
+Node: Readline vi Mode455497
+Node: Programmable Completion456477
+Node: Programmable Completion Builtins464526
+Node: A Programmable Completion Example476194
+Node: Using History Interactively481542
+Node: Bash History Facilities482226
+Node: Bash History Builtins485964
+Node: History Interaction492438
+Node: Event Designators497395
+Node: Word Designators498976
+Node: Modifiers501287
+Node: Installing Bash503231
+Node: Basic Installation504350
+Node: Compilers and Options508229
+Node: Compiling For Multiple Architectures508982
+Node: Installation Names510738
+Node: Specifying the System Type512975
+Node: Sharing Defaults513724
+Node: Operation Controls514441
+Node: Optional Features515463
+Node: Reporting Bugs527846
+Node: Major Differences From The Bourne Shell529207
+Node: GNU Free Documentation License550630
+Node: Indexes575810
+Node: Builtin Index576264
+Node: Reserved Word Index583365
+Node: Variable Index585813
+Node: Function Index603229
+Node: Concept Index617227
 
 End Tag Table
 

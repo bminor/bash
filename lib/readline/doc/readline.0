@@ -918,6 +918,30 @@ EEDDIITTIINNGG CCOOMMMMAANNDDSS
               Identical  to mmeennuu--ccoommpplleettee, but moves backward through the list
               of possible completions, as if mmeennuu--ccoommpplleettee had  been  given  a
               negative argument.  This command is unbound by default.
+       eexxppoorrtt--ccoommpplleettiioonnss
+              Perform  completion  on the word before point as described above
+              and write the list of possible completions to rreeaaddlliinnee's  output
+              stream  using the following format, writing information on sepa-
+              rate lines:
+
+              The number of matches;
+              The word being completed;
+              S:E, where S and E are the start and end offsets of the word
+              in the readline line buffer; then
+              Each match, one per line
+
+              If there are no matches, the first line will be 0, and this com-
+              mand will not print any output after the S:E.  If there is  only
+              a  single  match,  this  prints a single line containing it.  If
+              there is more than one match, this prints the common  prefix  of
+              the  matches,  which  may  be empty, on the first line after the
+              S:E, then the matches on subsequent lines.  In this case, N will
+              include the first line with the common prefix.
+
+              The user or application should be able to accommodate the possi-
+              bility of a blank line.  The intent is that the user or applica-
+              tion reads N lines after the line containing S:E.  This  command
+              is unbound by default.
        ddeelleettee--cchhaarr--oorr--lliisstt
               Deletes  the  character under the cursor if not at the beginning
               or end of the line (like ddeelleettee--cchhaarr).  At the end of the  line,
