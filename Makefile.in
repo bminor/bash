@@ -74,6 +74,7 @@ YACC = @YACC@
 SHELL = @MAKE_SHELL@
 CP = cp
 RM = rm -f
+RMDIR = rmdir
 AR = @AR@
 ARFLAGS = @ARFLAGS@
 RANLIB = @RANLIB@
@@ -964,6 +965,10 @@ install-headers: maybe-install-headers
 	done
 	-$(INSTALL_DATA) $(SUPPORT_DIR)/bash.pc $(DESTDIR)$(pkgconfigdir)/bash.pc
 
+uninstall-headers-dirs:
+	-$(RMDIR) $(DESTDIR)$(headersdir)/builtins $(DESTDIR)$(headersdir)/include
+	-$(RMDIR) $(DESTDIR)$(headersdir)
+
 uninstall-headers:
 	-( cd $(DESTDIR)$(headersdir) && $(RM) $(INSTALLED_HEADERS) )
 	-( cd $(DESTDIR)$(headersdir)/include && $(RM) $(INSTALLED_INCLUDE_HEADERS) )
@@ -974,6 +979,9 @@ uninstall-headers:
 		( cd $(DESTDIR)$(headersdir) && $(RM) $$(basename "$$hf") ) \
 	done
 	-( $(RM) $(DESTDIR)$(pkgconfigdir)/bash.pc )
+	# uninstall-headers-dirs
+	-$(RMDIR) $(DESTDIR)$(headersdir)/builtins $(DESTDIR)$(headersdir)/include
+	-$(RMDIR) $(DESTDIR)$(headersdir)
 
 uninstall:	.made
 	$(RM) $(DESTDIR)$(bindir)/$(Program) $(DESTDIR)$(bindir)/bashbug
@@ -984,6 +992,7 @@ uninstall:	.made
 		infodir=$(infodir) htmldir=$(htmldir) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(PO_DIR) ; $(MAKE) $(BASH_MAKEFLAGS) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(LOADABLES_DIR) && $(MAKE) $(BASH_MAKEFLAGS) DESTDIR=$(DESTDIR) $@ )
+	-$(RMDIR) $(DESTDIR)$(loadablesdir) $(DESTDIR)$(docdir)
 
 .PHONY: basic-clean clean maintainer-clean distclean mostlyclean maybe-clean
 

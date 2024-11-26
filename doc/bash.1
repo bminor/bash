@@ -4264,7 +4264,9 @@ Matches any single character.
 .TP
 .BR [ .\|.\|. ]
 .PD
-Matches any one of the enclosed characters.
+Matches any one of the characters enclosed between the brackets.
+This is known as a \fIbracket expression\fP
+and matches a single character.
 A pair of characters separated by a hyphen denotes a
 \fIrange expression\fP;
 any character that falls between those two characters, inclusive,
@@ -4276,14 +4278,12 @@ is a
 or a
 .B \*^
 then any character not within the range matches.
-A
-.B \-
-may be matched by including it as the first or last character
-in the set.
-A
-.B ]
-may be matched by including it as the first character
-in the set.
+To match a
+.BR \- ,
+include it as the first or last character in the set.
+To match a
+.BR ] ,
+include it as the first character in the set.
 .IP
 The sorting order of characters in range expressions,
 and the characters included in the range,
@@ -4308,10 +4308,7 @@ or enable the
 .B globasciiranges
 shell option.
 .IP
-Within
-.B [
-and
-.BR ] ,
+Within a bracket expression,
 \fIcharacter classes\fP can be specified using the syntax
 \fB[:\fP\fIclass\fP\fB:]\fP, where \fIclass\fP is one of the
 following classes defined in the POSIX standard:
@@ -4327,19 +4324,13 @@ print   punct   space   upper   word   xdigit
 A character class matches any character belonging to that class.
 The \fBword\fP character class matches letters, digits, and the character _.
 .IP
-Within
-.B [
-and
-.BR ] ,
+Within a bracket expression,
 an \fIequivalence class\fP can be specified using the syntax
 \fB[=\fP\fIc\fP\fB=]\fP, which matches all characters with the
 same collation weight (as defined by the current locale) as
 the character \fIc\fP.
 .IP
-Within
-.B [
-and
-.BR ] ,
+Within a bracket expression,
 the syntax \fB[.\fP\fIsymbol\fP\fB.]\fP matches the collating symbol
 \fIsymbol\fP.
 .RE
@@ -13137,12 +13128,12 @@ Aliases are confusing in some uses.
 .PP
 Shell builtin commands and functions are not stoppable/restartable.
 .PP
-Compound commands and command sequences of the form
+Compound commands and command lists of the form
 .Q "a ; b ; c"
-are not handled gracefully when process suspension is attempted.
+are not handled gracefully when combined with process suspension.
 When a process is stopped, the shell immediately executes the next
-command in the sequence.
-It suffices to place the sequence of commands between parentheses to
+command in the list or breaks out of any existing loops.
+It suffices to enclose the command in parentheses to
 force it into a subshell, which may be stopped as a unit,
 or to start the command in the background and immediately
 bring it into the foreground.

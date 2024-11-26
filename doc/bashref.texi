@@ -3053,12 +3053,14 @@ directories and subdirectories.
 @item ?
 Matches any single character.
 @item [@dots{}]
-Matches any one of the enclosed characters.
+Matches any one of the characters enclosed between the brackets.
+This is known as a @dfn{bracket expression}
+and matches a single character.
 A pair of characters separated by a hyphen denotes a @dfn{range expression};
 any character that falls between those two characters, inclusive,
 using the current locale's collating sequence and character set, matches.
 If the first character following the
-@samp{[} is a @samp{!}  or a @samp{^}
+@samp{[} is a @samp{!} or a @samp{^}
 then any character not within the range matches.
 To match a @samp{@minus{}}, include it as the first
 or last character in the set.
@@ -3081,7 +3083,7 @@ force the use of the C locale by setting the @env{LC_COLLATE} or
 @env{LC_ALL} environment variable to the value @samp{C}, or enable the
 @code{globasciiranges} shell option.
 
-Within @samp{[} and @samp{]}, @dfn{character classes} can be specified
+Within a bracket expression, @dfn{character classes} can be specified
 using the syntax
 @code{[:}@var{class}@code{:]}, where @var{class} is one of the
 following classes defined in the @sc{posix} standard:
@@ -3094,12 +3096,21 @@ A character class matches any character belonging to that class.
 The @code{word} character class matches letters, digits, and the character
 @samp{_}.
 
-Within @samp{[} and @samp{]}, an @dfn{equivalence class} can be
+For instance, the following pattern will match any character belonging
+to the @code{space} character class in the current locale, then any
+upper case letter or @samp{!}, a dot, and finally any lower case letter
+or a hyphen.
+
+@example
+[[:space:]][[:upper:]!].[-[:lower:]]
+@end example
+
+Within a bracket expression, an @dfn{equivalence class} can be
 specified using the syntax @code{[=}@var{c}@code{=]}, which
 matches all characters with the same collation weight (as defined
 by the current locale) as the character @var{c}.
 
-Within @samp{[} and @samp{]}, the syntax @code{[.}@var{symbol}@code{.]}
+Within a bracket expression, the syntax @code{[.}@var{symbol}@code{.]}
 matches the collating symbol @var{symbol}.
 @end table
 

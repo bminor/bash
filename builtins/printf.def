@@ -1355,6 +1355,24 @@ getstr (void)
   return ret;
 }
 
+/* POSIX.2 says ``...a diagnostic message shall be written to standard
+   error, and the utility shall not exit with a zero exit status, but
+   shall continue processing any remaining operands and shall write the
+   value accumulated at the time the error was detected to standard
+   output.'' */
+
+static inline void
+chk_converror (char *s, char *ep)
+{
+  if (*ep || ep == s)
+    {
+      sh_invalidnum (s);
+      conversion_error = 1;
+    }
+  else if (errno == ERANGE)
+    printf_erange (s);
+}
+
 /* Don't call getintmax here because it may consume an argument on error, and
    we call this to get field width/precision arguments. */
 static int
@@ -1372,15 +1390,10 @@ getint (int overflow_retval)
 
   errno = 0;
   ret = strtoimax (garglist->word->word, &ep, 0);
-  overflow = (errno == ERANGE) || (ret < INT_MIN || ret > INT_MAX);
+  if (overflow = (errno == ERANGE) || (ret < INT_MIN || ret > INT_MAX))
+    errno = ERANGE;	/* force errno */
 
-  if (*ep)
-    {
-      sh_invalidnum (garglist->word->word);
-      conversion_error = 1;
-    }
-  else if (overflow)
-    printf_erange (garglist->word->word);
+  chk_converror (garglist->word->word, ep);
 
   garglist = garglist->next;
   return (overflow ? overflow_retval : (int)ret);
@@ -1401,21 +1414,7 @@ getintmax (void)
   errno = 0;
   ret = strtoimax (garglist->word->word, &ep, 0);
 
-  if (*ep)
-    {
-      sh_invalidnum (garglist->word->word);
-      /* POSIX.2 says ``...a diagnostic message shall be written to standard
-	 error, and the utility shall not exit with a zero exit status, but
-	 shall continue processing any remaining operands and shall write the
-         value accumulated at the time the error was detected to standard
-	 output.''  Yecch. */
-#if 0
-      ret = 0;		/* return partially-converted value from strtoimax */
-#endif
-      conversion_error = 1;
-    }
-  else if (errno == ERANGE)
-    printf_erange (garglist->word->word);
+  chk_converror (garglist->word->word, ep);
 
   garglist = garglist->next;
   return (ret);
@@ -1435,18 +1434,8 @@ getuintmax (void)
 
   errno = 0;
   ret = strtoumax (garglist->word->word, &ep, 0);
-  
-  if (*ep)
-    {
-      sh_invalidnum (garglist->word->word);
-#if 0
-      /* Same POSIX.2 conversion error requirements as getintmax(). */
-      ret = 0;
-#endif
-      conversion_error = 1;
-    }
-  else if (errno == ERANGE)
-    printf_erange (garglist->word->word);
+
+  chk_converror (garglist->word->word, ep);  
 
   garglist = garglist->next;
   return (ret);
@@ -1467,13 +1456,7 @@ getdouble (void)
   errno = 0;
   ret = strtod (garglist->word->word, &ep);
 
-  if (*ep)
-    {
-      sh_invalidnum (garglist->word->word);
-      conversion_error = 1;
-    }
-  else if (errno == ERANGE)
-    printf_erange (garglist->word->word);
+  chk_converror (garglist->word->word, ep);
 
   garglist = garglist->next;
   return (ret);
@@ -1494,17 +1477,7 @@ getfloatmax (void)
   errno = 0;
   ret = strtofltmax (garglist->word->word, &ep);
 
-  if (*ep)
-    {
-      sh_invalidnum (garglist->word->word);
-#if 0
-      /* Same thing about POSIX.2 conversion error requirements. */
-      ret = 0;
-#endif
-      conversion_error = 1;
-    }
-  else if (errno == ERANGE)
-    printf_erange (garglist->word->word);
+  chk_converror (garglist->word->word, ep);
 
   garglist = garglist->next;
   return (ret);

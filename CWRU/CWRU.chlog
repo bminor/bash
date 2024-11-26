@@ -10690,3 +10690,30 @@ Makefile.in
 	  depends on it
 	- uninstall-headers: remove $(HYBRID_HEADERS); fix typo in recipe
 
+				   11/21
+				   -----
+builtins/printf.def
+	- chk_converror: inline function to use for single place to check
+	  for numeric overflow, change callers to use it
+
+				   11/25
+				   -----
+doc/bash.1,doc/bashref.texi
+	- minor updates to the section on bracket expressions in pattern
+	  matching
+
+builtins/command.def
+	- update -v help string to indicate that the output is a single word
+	  Report from Andrew Davis <addavis@gmail.com>
+
+				   11/26
+				   -----
+builtins/printf.def
+	- chk_converr: add check for no characters being converted at all,
+	  print same warning message as if *ep != 0. This covers the case of
+	  an empty string argument.
+	  Report by Paul Eggert <eggert@cs.ucla.edu>
+
+Makefile.in,doc/Makefile.in
+	- uninstall: make sure the bash-specific directories created by
+	  `make install' are emptied and removed
