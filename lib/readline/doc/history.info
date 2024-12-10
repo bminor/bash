@@ -1,7 +1,7 @@
 This is history.info, produced by makeinfo version 7.1 from
 history.texi.
 
-This document describes the GNU History library (version 8.3, 15
+This document describes the GNU History library (version 8.3, 29
 November 2024), a programming tool that provides a consistent user
 interface for recalling lines of previously typed input.
 
@@ -194,8 +194,8 @@ spaces.
      The first argument: word 1.
 
 ‘$’
-     The last word.  This is usually the last argument, but will expand
-     to the zeroth word if there is only one word in the line.
+     The last word.  This is usually the last argument, but expands to
+     the zeroth word if there is only one word in the line.
 
 ‘%’
      The first word matched by the most recent ‘?STRING?’ search, if the
@@ -253,11 +253,11 @@ or edit, the word or words selected from the history event.
      Any character may be used as the delimiter in place of ‘/’.  The
      delimiter may be quoted in OLD and NEW with a single backslash.  If
      ‘&’ appears in NEW, it is replaced with OLD.  A single backslash
-     will quote the ‘&’ in OLD and NEW.  If OLD is null, it is set to
-     the last OLD substituted, or, if no previous history substitutions
-     took place, the last STRING in a !?STRING‘[?]’ search.  If NEW is
-     null, each matching OLD is deleted.  The final delimiter is
-     optional if it is the last character on the input line.
+     quotes the ‘&’ in OLD and NEW.  If OLD is null, it is set to the
+     last OLD substituted, or, if no previous history substitutions took
+     place, the last STRING in a !?STRING‘[?]’ search.  If NEW is null,
+     each matching OLD is deleted.  The final delimiter is optional if
+     it is the last character on the input line.
 
 ‘&’
      Repeat the previous substitution.
@@ -687,8 +687,8 @@ GNU History Library.
 
      The current timestamp format uses the value of HISTORY_COMMENT_CHAR
      to delimit timestamp entries in the history file.  If that variable
-     does not have a value (the default), this will not write
-     timestamps.
+     does not have a value (the default), the history library will not
+     write timestamps.
 
  -- Variable: char history_expansion_char
      The character that introduces a history event.  The default is ‘!’.
@@ -729,16 +729,15 @@ GNU History Library.
  -- Variable: int history_quoting_state
      An application may set this variable to indicate that the current
      line being expanded is subject to existing quoting.  If set to ‘'’,
-     the history expansion function will assume that the line is
-     single-quoted and inhibit expansion until it reads an unquoted
-     closing single quote; if set to ‘"’, history expansion will assume
-     the line is double quoted until it reads an unquoted closing double
-     quote.  If set to 0, the default, the history expansion function
-     will assume the line is not quoted and treat quote characters
-     within the line as described above.  This is only effective if
-     HISTORY_QUOTES_INHIBIT_EXPANSION is set.  This is intended for use
-     by applications like Bash which allow quoted strings to span
-     multiple lines.
+     history expansion assumes that the line is single-quoted and
+     inhibit expansion until it reads an unquoted closing single quote;
+     if set to ‘"’, history expansion assumes the line is double quoted
+     until it reads an unquoted closing double quote.  If set to 0, the
+     default, history expansion assumes the line is not quoted and
+     treats quote characters within the line as described above.  This
+     is only effective if HISTORY_QUOTES_INHIBIT_EXPANSION is set.  This
+     is intended for use by applications like Bash which allow quoted
+     strings to span multiple lines.
 
  -- Variable: rl_linebuf_func_t * history_inhibit_expansion_function
      This should be set to the address of a function that takes two
@@ -1375,7 +1374,7 @@ Appendix C Function and Variable Index
                                                                (line 14)
 * history_get_time:                      Information About the History List.
                                                                (line 28)
-* history_inhibit_expansion_function:    History Variables.    (line 79)
+* history_inhibit_expansion_function:    History Variables.    (line 78)
 * history_is_stifled:                    History List Management.
                                                                (line 52)
 * history_length:                        History Variables.    (line 12)
@@ -1435,23 +1434,23 @@ Node: Using History Interactively1493
 Node: History Interaction2001
 Node: Event Designators4715
 Node: Word Designators6217
-Node: Modifiers8528
-Node: Programming with GNU History10179
-Node: Introduction to History10923
-Node: History Storage12655
-Node: History Functions13835
-Node: Initializing History and State Management14824
-Node: History List Management15627
-Node: Information About the History List18058
-Node: Moving Around the History List19671
-Node: Searching the History List20751
-Node: Managing the History File22697
-Node: History Expansion25167
-Node: History Variables27140
-Node: History Programming Example31282
-Node: GNU Free Documentation License33936
-Node: Concept Index59111
-Node: Function and Variable Index59816
+Node: Modifiers8524
+Node: Programming with GNU History10171
+Node: Introduction to History10915
+Node: History Storage12647
+Node: History Functions13827
+Node: Initializing History and State Management14816
+Node: History List Management15619
+Node: Information About the History List18050
+Node: Moving Around the History List19663
+Node: Searching the History List20743
+Node: Managing the History File22689
+Node: History Expansion25159
+Node: History Variables27132
+Node: History Programming Example31247
+Node: GNU Free Documentation License33901
+Node: Concept Index59076
+Node: Function and Variable Index59781
 
 End Tag Table
 

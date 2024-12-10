@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on November, 1  2024 by texi2html 1.64 -->
+<!-- Created on December, 2  2024 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -469,19 +469,19 @@ Typing <KBD>C-s</KBD> searches forward through the history.
 The characters present in the value of the <CODE>isearch-terminators</CODE> variable
 are used to terminate an incremental search.
 If that variable has not been assigned a value, the <KBD>ESC</KBD> and
-<KBD>C-J</KBD> characters will terminate an incremental search.
-<KBD>C-g</KBD> will abort an incremental search and restore the original line.
+<KBD>C-j</KBD> characters terminate an incremental search.
+<KBD>C-g</KBD> aborts an incremental search and restores the original line.
 When the search is terminated, the history entry containing the
 search string becomes the current line.
 </P><P>
 
 To find other matching entries in the history list, type <KBD>C-r</KBD> or
 <KBD>C-s</KBD> as appropriate.
-This will search backward or forward in the history for the next
+This searches backward or forward in the history for the next
 entry matching the search string typed so far.
-Any other key sequence bound to a Readline command will terminate
-the search and execute that command.
-For instance, a <KBD>RET</KBD> will terminate the search and accept
+Any other key sequence bound to a Readline command terminates
+the search and executes that command.
+For instance, a <KBD>RET</KBD> terminates the search and accepts
 the line, thereby executing the command from the history list.
 A movement command will terminate the search, make the last line found
 the current line, and begin editing.
@@ -528,7 +528,7 @@ If that file does not exist or cannot be read, Readline looks for
 <TT>`/etc/inputrc'</TT>.
 </P><P>
 
-When a program which uses the Readline library starts up, Readline reads
+When a program that uses the Readline library starts up, Readline reads
 the init file and sets any variables and key bindings it contains.
 </P><P>
 
@@ -695,7 +695,7 @@ The number of screen columns used to display possible matches
 when performing completion.
 The value is ignored if it is less than 0 or greater than the terminal
 screen width.
-A value of 0 will cause matches to be displayed one per line.
+A value of 0 causes matches to be displayed one per line.
 The default value is -1.
 <P>
 
@@ -729,8 +729,8 @@ with an ellipsis when displaying possible completions.
 The number of possible completions that determines when the user is asked
 whether the list of possibilities should be displayed.
 If the number of possible completions is greater than
-or equal to this value, Readline will ask whether or not
-the user wishes to view them;
+or equal to this value,
+Readline asks whether or not the user wishes to view them;
 otherwise, Readline simply lists the completions.
 This variable must be set to an integer value greater than or equal to zero.
 A zero value means Readline should never ask; negative
@@ -740,11 +740,11 @@ The default limit is <CODE>100</CODE>.
 
 <DT><CODE>convert-meta</CODE>
 <DD><A NAME="IDX18"></A>
-If set to <SAMP>`on'</SAMP>, Readline will convert characters it reads
+If set to <SAMP>`on'</SAMP>, Readline converts characters it reads
 that have the eighth bit set to an ASCII key sequence by
 clearing the eighth bit and prefixing an <KBD>ESC</KBD> character,
 converting them to a meta-prefixed key sequence.
-The default value is <SAMP>`on'</SAMP>, but Readline will set it to <SAMP>`off'</SAMP>
+The default value is <SAMP>`on'</SAMP>, but Readline sets it to <SAMP>`off'</SAMP>
 if the locale contains
 characters whose encodings may include bytes with the eighth bit set.
 This variable is dependent on the <CODE>LC_CTYPE</CODE> locale category, and
@@ -755,8 +755,8 @@ see the description of <CODE>force-meta-prefix</CODE> below.
 
 <DT><CODE>disable-completion</CODE>
 <DD><A NAME="IDX19"></A>
-If set to <SAMP>`On'</SAMP>, Readline will inhibit word completion.
-Completion characters will be inserted into the line as if they
+If set to <SAMP>`On'</SAMP>, Readline inhibits word completion.
+Completion characters are inserted into the line as if they
 had been mapped to <CODE>self-insert</CODE>.
 The default is <SAMP>`off'</SAMP>.
 <P>
@@ -820,7 +820,7 @@ The default is <SAMP>`On'</SAMP>.
 
 <DT><CODE>enable-keypad</CODE>
 <DD><A NAME="IDX25"></A>
-When set to <SAMP>`on'</SAMP>, Readline will try to enable the application
+When set to <SAMP>`on'</SAMP>, Readline tries to enable the application
 keypad when it is called.
 Some systems need this to enable the arrow keys.
 The default is <SAMP>`off'</SAMP>.
@@ -828,7 +828,7 @@ The default is <SAMP>`off'</SAMP>.
 
 <DT><CODE>enable-meta-key</CODE>
 <DD><A NAME="IDX26"></A>
-When set to <SAMP>`on'</SAMP>, Readline will try to enable any meta
+When set to <SAMP>`on'</SAMP>, Readline tries to enable any meta
 modifier key the terminal claims to support when it is called.
 On many terminals, the Meta key is used to send eight-bit characters;
 this variable checks for the terminal capability that indicates the
@@ -897,10 +897,10 @@ By default, this variable is set to <SAMP>`off'</SAMP>.
 <DT><CODE>input-meta</CODE>
 <DD><A NAME="IDX32"></A>
 <A NAME="IDX33"></A>
-If set to <SAMP>`on'</SAMP>, Readline will enable eight-bit input (that is, it
-will not clear the eighth bit in the characters it reads),
+If set to <SAMP>`on'</SAMP>, Readline enables eight-bit input (that is, it
+does not clear the eighth bit in the characters it reads),
 regardless of what the terminal claims it can support.
-The default value is <SAMP>`off'</SAMP>, but Readline will set it to <SAMP>`on'</SAMP>
+The default value is <SAMP>`off'</SAMP>, but Readline sets it to <SAMP>`on'</SAMP>
 if the locale contains characters whose encodings may include bytes
 with the eighth bit set.
 This variable is dependent on the <CODE>LC_CTYPE</CODE> locale category, and
@@ -913,7 +913,7 @@ The name <CODE>meta-flag</CODE> is a synonym for <CODE>input-meta</CODE>.
 The string of characters that should terminate an incremental search without
 subsequently executing the character as a command (see section <A HREF="rluserman.html#SEC8">1.2.5 Searching for Commands in the History</A>).
 If this variable has not been given a value, the characters <KBD>ESC</KBD> and
-<KBD>C-J</KBD> will terminate an incremental search.
+<KBD>C-j</KBD> terminate an incremental search.
 <P>
 
 <DT><CODE>keymap</CODE>
@@ -941,14 +941,14 @@ default keymap.
 reading an ambiguous key sequence
 (one that can form a complete key sequence using the input read so far,
 or can take additional input to complete a longer key sequence).
-If Readline doesn't receive any input within the timeout, it will use the
+If Readline doesn't receive any input within the timeout, it uses the
 shorter but complete key sequence.
 Readline uses this value to determine whether or not input is
 available on the current input source (<CODE>rl_instream</CODE> by default).
 The value is specified in milliseconds, so a value of 1000 means that
 Readline will wait one second for additional input.
 If this variable is set to a value less than or equal to zero, or to a
-non-numeric value, Readline will wait until another key is pressed to
+non-numeric value, Readline waits until another key is pressed to
 decide which key sequence to complete.
 The default value is <CODE>500</CODE>.
 <P>
@@ -960,7 +960,7 @@ The default is <SAMP>`on'</SAMP>.
 
 <DT><CODE>mark-modified-lines</CODE>
 <DD><A NAME="IDX36"></A>
-When this variable is set to <SAMP>`on'</SAMP>, Readline will to display an
+When this variable is set to <SAMP>`on'</SAMP>, Readline displays an
 asterisk (<SAMP>`*'</SAMP>) at the start of history lines which have been modified.
 This variable is <SAMP>`off'</SAMP> by default.
 <P>
@@ -992,10 +992,10 @@ The default is <SAMP>`off'</SAMP>.
 
 <DT><CODE>output-meta</CODE>
 <DD><A NAME="IDX40"></A>
-If set to <SAMP>`on'</SAMP>, Readline will display characters with the
+If set to <SAMP>`on'</SAMP>, Readline displays characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.
-The default is <SAMP>`off'</SAMP>, but Readline will set it to <SAMP>`on'</SAMP>
+The default is <SAMP>`off'</SAMP>, but Readline sets it to <SAMP>`on'</SAMP>
 if the locale contains characters whose encodings may include
 bytes with the eighth bit set.
 This variable is dependent on the <CODE>LC_CTYPE</CODE> locale category, and
@@ -1004,7 +1004,8 @@ its value may change if the locale changes.
 
 <DT><CODE>page-completions</CODE>
 <DD><A NAME="IDX41"></A>
-If set to <SAMP>`on'</SAMP>, Readline uses an internal <CODE>more</CODE>-like pager
+If set to <SAMP>`on'</SAMP>, Readline uses an internal pager resembling
+<I>more</I>(1)
 to display a screenful of possible completions at a time.
 This variable is <SAMP>`on'</SAMP> by default.
 <P>
@@ -1014,7 +1015,7 @@ This variable is <SAMP>`on'</SAMP> by default.
 <P>
 
 <DT><CODE>print-completions-horizontally</CODE>
-<DD>If set to <SAMP>`on'</SAMP>, Readline will display completions with matches
+<DD>If set to <SAMP>`on'</SAMP>, Readline displays completions with matches
 sorted horizontally in alphabetical order, rather than down the screen.
 The default is <SAMP>`off'</SAMP>.
 <P>
@@ -1167,7 +1168,8 @@ This key binding syntax recognizes a number of symbolic character names:
 <VAR>NEWLINE</VAR>,
 <VAR>RET</VAR>,
 <VAR>RETURN</VAR>,
-<VAR>RUBOUT</VAR> (a destructive backspace),
+<VAR>RUBOUT</VAR>
+(a destructive backspace),
 <VAR>SPACE</VAR>,
 <VAR>SPC</VAR>,
 and
@@ -1600,12 +1602,14 @@ This may also be bound to the End key on some keyboards.
 <DT><CODE>forward-char (C-f)</CODE>
 <DD><A NAME="IDX56"></A>
 Move forward a character.
+This may also be bound to the right arrow key on some keyboards.
 <P>
 
 <A NAME="IDX57"></A>
 <DT><CODE>backward-char (C-b)</CODE>
 <DD><A NAME="IDX58"></A>
 Move back a character.
+This may also be bound to the left arrow key on some keyboards.
 <P>
 
 <A NAME="IDX59"></A>
@@ -1701,12 +1705,14 @@ to its original state.
 <DT><CODE>previous-history (C-p)</CODE>
 <DD><A NAME="IDX76"></A>
 Move `back' through the history list, fetching the previous command.
+This may also be bound to the up arrow key on some keyboards.
 <P>
 
 <A NAME="IDX77"></A>
 <DT><CODE>next-history (C-n)</CODE>
 <DD><A NAME="IDX78"></A>
 Move `forward' through the history list, fetching the next command.
+This may also be bound to the down arrow key on some keyboards.
 <P>
 
 <A NAME="IDX79"></A>
@@ -2266,8 +2272,50 @@ This command is unbound by default.
 <P>
 
 <A NAME="IDX179"></A>
-<DT><CODE>delete-char-or-list ()</CODE>
+<DT><CODE>export-completions ()</CODE>
 <DD><A NAME="IDX180"></A>
+Perform completion on the word before point as described above
+and write the list of possible completions to Readline's output stream
+using the following format, writing information on separate lines:
+<P>
+
+<UL>
+<A NAME="IDX181"></A>
+<LI>
+the number of matches <VAR>N</VAR>;
+<A NAME="IDX182"></A>
+<LI>
+the word being completed;
+<A NAME="IDX183"></A>
+<LI>
+<VAR>S</VAR>:<VAR>E</VAR>,
+where S and E are the start and end offsets of the word
+in the Readline line buffer; then
+<A NAME="IDX184"></A>
+<LI>
+each match, one per line
+</UL>
+<P>
+
+If there are no matches, the first line will be "0",
+and this command does not print any output after the <VAR>S</VAR>:<VAR>E</VAR>.
+If there is only a single match, this prints a single line containing it.
+If there is more than one match, this prints the common prefix of the
+matches, which may be empty, on the first line after the <VAR>S</VAR>:<VAR>E</VAR>,
+then the matches on subsequent lines.
+In this case, <VAR>N</VAR> will include the first line with the common prefix.
+</P><P>
+
+The user or application
+should be able to accommodate the possibility of a blank line.
+The intent is that the user or application reads <VAR>N</VAR> lines after
+the line containing <VAR>S</VAR>:<VAR>E</VAR> to obtain the match list.
+This command is unbound by default.
+</P><P>
+
+<A NAME="IDX185"></A>
+<DT><CODE>delete-char-or-list ()</CODE>
+<DD><A NAME="IDX186"></A>
 Deletes the character under the cursor if not at the beginning or
 end of the line (like <CODE>delete-char</CODE>).
 At the end of the line, it behaves identically to <CODE>possible-completions</CODE>.
@@ -2295,29 +2343,29 @@ This command is unbound by default.
 <!--docid::SEC20::-->
 <DL COMPACT>
 
-<A NAME="IDX181"></A>
+<A NAME="IDX187"></A>
 <DT><CODE>start-kbd-macro (C-x ()</CODE>
-<DD><A NAME="IDX182"></A>
+<DD><A NAME="IDX188"></A>
 Begin saving the characters typed into the current keyboard macro.
 <P>
 
-<A NAME="IDX183"></A>
+<A NAME="IDX189"></A>
 <DT><CODE>end-kbd-macro (C-x ))</CODE>
-<DD><A NAME="IDX184"></A>
+<DD><A NAME="IDX190"></A>
 Stop saving the characters typed into the current keyboard macro
 and save the definition.
 <P>
 
-<A NAME="IDX185"></A>
+<A NAME="IDX191"></A>
 <DT><CODE>call-last-kbd-macro (C-x e)</CODE>
-<DD><A NAME="IDX186"></A>
+<DD><A NAME="IDX192"></A>
 Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
 <P>
 
-<A NAME="IDX187"></A>
+<A NAME="IDX193"></A>
 <DT><CODE>print-last-kbd-macro ()</CODE>
-<DD><A NAME="IDX188"></A>
+<DD><A NAME="IDX194"></A>
 Print the last keyboard macro defined in a format suitable for the
 <VAR>inputrc</VAR> file.
 <P>
@@ -2343,101 +2391,103 @@ Print the last keyboard macro defined in a format suitable for the
 <!--docid::SEC21::-->
 <DL COMPACT>
 
-<A NAME="IDX189"></A>
+<A NAME="IDX195"></A>
 <DT><CODE>re-read-init-file (C-x C-r)</CODE>
-<DD><A NAME="IDX190"></A>
+<DD><A NAME="IDX196"></A>
 Read in the contents of the <VAR>inputrc</VAR> file, and incorporate
 any bindings or variable assignments found there.
 <P>
 
-<A NAME="IDX191"></A>
+<A NAME="IDX197"></A>
 <DT><CODE>abort (C-g)</CODE>
-<DD><A NAME="IDX192"></A>
+<DD><A NAME="IDX198"></A>
 Abort the current editing command and
 ring the terminal's bell (subject to the setting of
 <CODE>bell-style</CODE>).
 <P>
 
-<A NAME="IDX193"></A>
+<A NAME="IDX199"></A>
 <DT><CODE>do-lowercase-version (M-A, M-B, M-<VAR>x</VAR>, <small>...</small>)</CODE>
-<DD><A NAME="IDX194"></A>
+<DD><A NAME="IDX200"></A>
 If the metafied character <VAR>x</VAR> is upper case, run the command
 that is bound to the corresponding metafied lower case character.
 The behavior is undefined if <VAR>x</VAR> is already lower case.
 <P>
 
-<A NAME="IDX195"></A>
+<A NAME="IDX201"></A>
 <DT><CODE>prefix-meta (<KBD>ESC</KBD>)</CODE>
-<DD><A NAME="IDX196"></A>
+<DD><A NAME="IDX202"></A>
 Metafy the next character typed.
 Typing <SAMP>`<KBD>ESC</KBD> f'</SAMP> is equivalent to typing <KBD>M-f</KBD>.
 <P>
 
-<A NAME="IDX197"></A>
+<A NAME="IDX203"></A>
 <DT><CODE>undo (C-_ or C-x C-u)</CODE>
-<DD><A NAME="IDX198"></A>
+<DD><A NAME="IDX204"></A>
 Incremental undo, separately remembered for each line.
 <P>
 
-<A NAME="IDX199"></A>
+<A NAME="IDX205"></A>
 <DT><CODE>revert-line (M-r)</CODE>
-<DD><A NAME="IDX200"></A>
+<DD><A NAME="IDX206"></A>
 Undo all changes made to this line.
 This is like executing the <CODE>undo</CODE>
 command enough times to get back to the initial state.
 <P>
 
-<A NAME="IDX201"></A>
+<A NAME="IDX207"></A>
 <DT><CODE>tilde-expand (M-~)</CODE>
-<DD><A NAME="IDX202"></A>
+<DD><A NAME="IDX208"></A>
 Perform tilde expansion on the current word.
 <P>
 
-<A NAME="IDX203"></A>
+<A NAME="IDX209"></A>
 <DT><CODE>set-mark (C-@)</CODE>
-<DD><A NAME="IDX204"></A>
+<DD><A NAME="IDX210"></A>
 Set the mark to the point.
 If a numeric argument is supplied, set the mark to that position.
 <P>
 
-<A NAME="IDX205"></A>
+<A NAME="IDX211"></A>
 <DT><CODE>exchange-point-and-mark (C-x C-x)</CODE>
-<DD><A NAME="IDX206"></A>
+<DD><A NAME="IDX212"></A>
 Swap the point with the mark.
 Set the current cursor position to the saved position,
 then set the mark to the old cursor position.
 <P>
 
-<A NAME="IDX207"></A>
+<A NAME="IDX213"></A>
 <DT><CODE>character-search (C-])</CODE>
-<DD><A NAME="IDX208"></A>
+<DD><A NAME="IDX214"></A>
 Read a character and move point to the next occurrence of that character.
 A negative argument searches for previous occurrences.
 <P>
 
-<A NAME="IDX209"></A>
+<A NAME="IDX215"></A>
 <DT><CODE>character-search-backward (M-C-])</CODE>
-<DD><A NAME="IDX210"></A>
+<DD><A NAME="IDX216"></A>
 Read a character and move point to the previous occurrence of that character.
 A negative argument searches for subsequent occurrences.
 <P>
 
-<A NAME="IDX211"></A>
+<A NAME="IDX217"></A>
 <DT><CODE>skip-csi-sequence ()</CODE>
-<DD><A NAME="IDX212"></A>
+<DD><A NAME="IDX218"></A>
 Read enough characters to consume a multi-key sequence such as those
 defined for keys like Home and End.
-CSI sequences begin with a Control Sequence Indicator (CSI), usually ESC-[.
+CSI sequences begin with a Control Sequence Indicator (CSI), usually
+<KBD>ESC [</KBD>.
 If this sequence is bound to "\e[",
-keys producing CSI sequences will have no effect
-unless explicitly bound to a Readline command, instead of inserting
-stray characters into the editing buffer.
-This is unbound by default, but usually bound to ESC-[.
+keys producing CSI sequences have no effect
+unless explicitly bound to a Readline command,
+instead of inserting stray characters into the editing buffer.
+This is unbound by default, but usually bound to
+<KBD>ESC [</KBD>.
 <P>
 
-<A NAME="IDX213"></A>
+<A NAME="IDX219"></A>
 <DT><CODE>insert-comment (M-#)</CODE>
-<DD><A NAME="IDX214"></A>
+<DD><A NAME="IDX220"></A>
 Without a numeric argument, insert the value of the <CODE>comment-begin</CODE>
 variable at the beginning of the current line.
 If a numeric argument is supplied, this command acts as a toggle:  if
@@ -2447,9 +2497,9 @@ the characters in <CODE>comment-begin</CODE> from the beginning of the line.
 In either case, the line is accepted as if a newline had been typed.
 <P>
 
-<A NAME="IDX215"></A>
+<A NAME="IDX221"></A>
 <DT><CODE>dump-functions ()</CODE>
-<DD><A NAME="IDX216"></A>
+<DD><A NAME="IDX222"></A>
 Print all of the functions and their key bindings
 to the Readline output stream.
 If a numeric argument is supplied,
@@ -2458,9 +2508,9 @@ of an <VAR>inputrc</VAR> file.
 This command is unbound by default.
 <P>
 
-<A NAME="IDX217"></A>
+<A NAME="IDX223"></A>
 <DT><CODE>dump-variables ()</CODE>
-<DD><A NAME="IDX218"></A>
+<DD><A NAME="IDX224"></A>
 Print all of the settable variables and their values
 to the Readline output stream.
 If a numeric argument is supplied,
@@ -2469,9 +2519,9 @@ of an <VAR>inputrc</VAR> file.
 This command is unbound by default.
 <P>
 
-<A NAME="IDX219"></A>
+<A NAME="IDX225"></A>
 <DT><CODE>dump-macros ()</CODE>
-<DD><A NAME="IDX220"></A>
+<DD><A NAME="IDX226"></A>
 Print all of the Readline key sequences bound to macros and the
 strings they output
 to the Readline output stream.
@@ -2481,9 +2531,9 @@ of an <VAR>inputrc</VAR> file.
 This command is unbound by default.
 <P>
 
-<A NAME="IDX221"></A>
+<A NAME="IDX227"></A>
 <DT><CODE>execute-named-command (M-x)</CODE>
-<DD><A NAME="IDX222"></A>
+<DD><A NAME="IDX228"></A>
 Read a bindable Readline command name from the input and execute the
 function to which it's bound, as if the key sequence to which it was
 bound appeared in the input.
@@ -2491,16 +2541,16 @@ If this function is supplied with a numeric argument, it passes that
 argument to the function it executes.
 <P>
 
-<A NAME="IDX223"></A>
+<A NAME="IDX229"></A>
 <DT><CODE>emacs-editing-mode (C-e)</CODE>
-<DD><A NAME="IDX224"></A>
+<DD><A NAME="IDX230"></A>
 When in <CODE>vi</CODE> command mode, this causes a switch to <CODE>emacs</CODE>
 editing mode.
 <P>
 
-<A NAME="IDX225"></A>
+<A NAME="IDX231"></A>
 <DT><CODE>vi-editing-mode (M-C-j)</CODE>
-<DD><A NAME="IDX226"></A>
+<DD><A NAME="IDX232"></A>
 When in <CODE>emacs</CODE> editing mode, this causes a switch to <CODE>vi</CODE>
 editing mode.
 <P>
@@ -3228,7 +3278,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="rluserman.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>November, 1  2024</I>
+This document was generated by <I>Chet Ramey</I> on <I>December, 2  2024</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -3390,7 +3440,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>November, 1  2024</I>
+by <I>Chet Ramey</I> on <I>December, 2  2024</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

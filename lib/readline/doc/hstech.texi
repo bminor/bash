@@ -470,8 +470,8 @@ The default value is 0, meaning that timestamps are not saved.
 
 The current timestamp format uses the value of @var{history_comment_char}
 to delimit timestamp entries in the history file.
-If that variable does not have a value (the default), this will not
-write timestamps.
+If that variable does not have a value (the default),
+the history library will not write timestamps.
 @end deftypevar
 
 @deftypevar char history_expansion_char
@@ -523,14 +523,15 @@ The default value is 0.
 @deftypevar int history_quoting_state
 An application may set this variable to indicate that the current line
 being expanded is subject to existing quoting.
-If set to @samp{'}, the
-history expansion function will assume that the line is single-quoted and
+If set to @samp{'},
+history expansion assumes that the line is single-quoted and
 inhibit expansion until it reads an unquoted closing single quote;
-if set to @samp{"}, history expansion will assume the line is
-double quoted until it reads an unquoted closing double quote.
+if set to @samp{"},
+history expansion assumes the line is double quoted
+until it reads an unquoted closing double quote.
 If set to 0, the default,
-the history expansion function will assume the line is not quoted and
-treat quote characters within the line as described above.
+history expansion assumes the line is not quoted and
+treats quote characters within the line as described above.
 This is only effective if @var{history_quotes_inhibit_expansion} is set.
 This is intended for use by applications like Bash which allow
 quoted strings to span multiple lines.

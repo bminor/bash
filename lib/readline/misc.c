@@ -625,7 +625,12 @@ rl_get_next_history (int count, int key)
   if (count == 0)
     return 0;
 
+  /* If the current line has changed, save the changes. */
+#if 0	/* XXX old code can leak or corrupt rl_undo_list */
   rl_maybe_replace_line ();
+#else
+  _rl_maybe_replace_line (1);
+#endif
 
   r = _rl_next_history_internal (count);
 
@@ -689,10 +694,19 @@ rl_get_previous_history (int count, int key)
 
   /* If we don't have a line saved, then save this one. */
   had_saved_line = _rl_saved_line_for_history != 0;
+
+  /* XXX - if we are not editing a history line and we already had a saved
+     line, we're going to lose this undo list. Not sure what the right thing
+     is here - replace the saved line? */
+
   rl_maybe_save_line ();
 
   /* If the current line has changed, save the changes. */
+#if 0	/* XXX old code can leak or corrupt rl_undo_list */
   rl_maybe_replace_line ();
+#else
+  _rl_maybe_replace_line (1);
+#endif
 
   r = _rl_previous_history_internal (count);
 

@@ -10717,3 +10717,27 @@ builtins/printf.def
 Makefile.in,doc/Makefile.in
 	- uninstall: make sure the bash-specific directories created by
 	  `make install' are emptied and removed
+
+				   11/27
+				   -----
+doc/bash.1,doc/bashref.texi
+lib/readline/doc/readline.3,lib/readline/doc/history.3
+lib/readline/doc/rluser.texi,lib/readline/doc/rltech.texi
+	- another set of updates for formatting consistency, language
+	  consistency between man pages and info files
+
+				   12/1
+				   ----
+lib/readline/misc.c
+	- rl_get_previous_history: call _rl_maybe_replace_line with arg of 1
+	  so it clears rl_undo_list, since this may not immediately replace
+	  rl_undo_list with something from history
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   12/5
+				   ----
+doc/bash.1,doc/bashref.texi
+lib/readline/doc/rluser.texi
+	- updates for active voice, future tense, formatting and fonts, edits
+	  to Programmable Completion
+	  Suggestions from G. Branden Robinson <g.branden.robinson@gmail.com>

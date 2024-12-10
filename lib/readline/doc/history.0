@@ -101,8 +101,8 @@ HHIISSTTOORRYY EEXXPPAANNSSIIOONN
               this is the command word.
        _n      The _nth word.
        ^^      The first argument: word 1.
-       $$      The  last word.  This is usually the last argument, but will ex-
-              pand to the zeroth word if there is only one word in the line.
+       $$      The  last  word.  This is usually the last argument, but expands
+              to the zeroth word if there is only one word in the line.
        %%      The first word matched by the most recent "?_s_t_r_i_n_g?"  search, if
               the search string begins with a character  that  is  part  of  a
               word.   By  default,  searches begin at the end of each line and
@@ -138,12 +138,12 @@ HHIISSTTOORRYY EEXXPPAANNSSIIOONN
               Substitute  _n_e_w  for  the  first  occurrence of _o_l_d in the event
               line.  Any character may be used as the delimiter in place of /.
               The final delimiter is optional if it is the last  character  of
-              the  event line.  A single backslash will quote the delimiter in
-              _o_l_d and _n_e_w.  If & appears in _n_e_w, it is replaced with  _o_l_d.   A
-              single backslash will quote the &.  If _o_l_d is null, it is set to
-              the  last  _o_l_d substituted, or, if no previous history substitu-
-              tions took place, the last _s_t_r_i_n_g in a !!??_s_t_r_i_n_g[[??]]  search.   If
-              _n_e_w is null, each matching _o_l_d is deleted.
+              the  event line.  A single backslash quotes the delimiter in _o_l_d
+              and _n_e_w.  If & appears in _n_e_w, it is replaced with _o_l_d.  A  sin-
+              gle  backslash  quotes  the &.  If _o_l_d is null, it is set to the
+              last _o_l_d substituted, or, if no previous  history  substitutions
+              took place, the last _s_t_r_i_n_g in a !!??_s_t_r_i_n_g[[??]]  search.  If _n_e_w is
+              null, each matching _o_l_d is deleted.
        &&      Repeat the previous substitution.
        gg      Cause changes to be applied over the entire event line.  This is
               used  in  conjunction  with "::ss" (e.g., "::ggss//_o_l_d//_n_e_w//") or "::&&".
@@ -413,12 +413,11 @@ HHiissttoorryy FFuunnccttiioonnss
        _*_c_i_n_d_e_x is modified to point to after the event specifier.  At function
        entry,  _c_i_n_d_e_x  points to the index into _s_t_r_i_n_g where the history event
        specification begins.  _q_c_h_a_r is a character that is allowed to end  the
-       event  specification  in addition to the ``normal'' terminating charac-
-       ters.
+       event specification in addition to the "normal" terminating characters.
 
        _c_h_a_r _*_* hhiissttoorryy__ttookkeenniizzee (_c_o_n_s_t _c_h_a_r _*_s_t_r_i_n_g)
-       Return an array of tokens parsed out  of  _s_t_r_i_n_g,  much  as  the  shell
-       might.   The tokens are split on the characters in the hhiissttoorryy__wwoorrdd__ddee--
+       Return  an  array  of  tokens  parsed  out of _s_t_r_i_n_g, much as the shell
+       might.  The tokens are split on the characters in the  hhiissttoorryy__wwoorrdd__ddee--
        lliimmiitteerrss variable, and shell quoting conventions are obeyed.
 
        _c_h_a_r _* hhiissttoorryy__aarrgg__eexxttrraacctt (_i_n_t _f_i_r_s_t_, _i_n_t _l_a_s_t_, _c_o_n_s_t _c_h_a_r _*_s_t_r_i_n_g)
@@ -442,10 +441,10 @@ HHiissttoorryy FFuunnccttiioonnss
        _i_n_t hhiissttoorryy__wwrriittee__ttiimmeessttaammppss
        If non-zero, timestamps are written to the history file, so they can be
        preserved between sessions.  The default value is 0, meaning that time-
-       stamps are not saved.  The current timestamp format uses the  value  of
-       _h_i_s_t_o_r_y___c_o_m_m_e_n_t___c_h_a_r  to delimit timestamp entries in the history file.
-       If that variable does not have a value (the default),  timestamps  will
-       not be written.
+       stamps  are  not saved.  The current timestamp format uses the value of
+       _h_i_s_t_o_r_y___c_o_m_m_e_n_t___c_h_a_r to delimit timestamp entries in the history  file.
+       If  that  variable does not have a value (the default), the history li-
+       brary will not write timestamps.
 
        _c_h_a_r hhiissttoorryy__eexxppaannssiioonn__cchhaarr
        The character that introduces a history event.  The default is !!.  Set-
@@ -456,50 +455,50 @@ HHiissttoorryy FFuunnccttiioonnss
        line.  The default is ^^.
 
        _c_h_a_r hhiissttoorryy__ccoommmmeenntt__cchhaarr
-       During  tokenization,  if this character is seen as the first character
-       of a word, then it and all subsequent characters up to  a  newline  are
-       ignored,  suppressing  history expansion for the remainder of the line.
+       During tokenization, if this character is seen as the  first  character
+       of  a  word,  then it and all subsequent characters up to a newline are
+       ignored, suppressing history expansion for the remainder of  the  line.
        This is disabled by default.
 
        _c_h_a_r _* hhiissttoorryy__wwoorrdd__ddeelliimmiitteerrss
-       The characters that separate tokens for  hhiissttoorryy__ttookkeenniizzee(()).   The  de-
+       The  characters  that  separate tokens for hhiissttoorryy__ttookkeenniizzee(()).  The de-
        fault value is "" \\tt\\nn(())<<>>;;&&||"".
 
        _c_h_a_r _* hhiissttoorryy__nnoo__eexxppaanndd__cchhaarrss
        The list of characters which inhibit history expansion if found immedi-
-       ately  following  hhiissttoorryy__eexxppaannssiioonn__cchhaarr.   The  default is space, tab,
+       ately following hhiissttoorryy__eexxppaannssiioonn__cchhaarr.  The  default  is  space,  tab,
        newline, \\rr, and ==.
 
        _c_h_a_r _* hhiissttoorryy__sseeaarrcchh__ddeelliimmiitteerr__cchhaarrss
-       The list of additional characters which can delimit  a  history  search
-       string,  in  addition to space, tab, _: and _? in the case of a substring
+       The  list  of  additional characters which can delimit a history search
+       string, in addition to space, tab, _: and _? in the case of  a  substring
        search.  The default is empty.
 
        _i_n_t hhiissttoorryy__qquuootteess__iinnhhiibbiitt__eexxppaannssiioonn
-       If non-zero, the history expansion code implements shell-like  quoting:
+       If  non-zero, the history expansion code implements shell-like quoting:
        single-quoted words are not scanned for the history expansion character
        or the history comment character, and double-quoted words may have his-
-       tory  expansion  performed,  since single quotes are not special within
+       tory expansion performed, since single quotes are  not  special  within
        double quotes.  The default value is 0.
 
        _i_n_t hhiissttoorryy__qquuoottiinngg__ssttaattee
-       An application may set this variable to indicate that the current  line
-       being expanded is subject to existing quoting. If set to _', the history
-       expansion  function  will assume that the line is single-quoted and in-
-       hibit expansion until it reads an unquoted closing single quote; if set
-       to _", history expansion will assume the line is double quoted until  it
-       reads  an  unquoted  closing double quote. If set to zero, the default,
-       the history expansion function will assume the line is not  quoted  and
-       treat  quote  characters  within  the line as described above.  This is
-       only effective if hhiissttoorryy__qquuootteess__iinnhhiibbiitt__eexxppaannssiioonn is set.
+       An  application may set this variable to indicate that the current line
+       being expanded is subject to existing quoting.  If set  to  _',  history
+       expansion  assumes that the line is single-quoted and inhibit expansion
+       until it reads an unquoted closing single quote; if set to  _",  history
+       expansion  assumes the line is double quoted until it reads an unquoted
+       closing double quote.  If set to zero, the default,  history  expansion
+       assumes  the  line is not quoted and treats quote characters within the
+       line as described above.  This is only effective if  hhiissttoorryy__qquuootteess__iinn--
+       hhiibbiitt__eexxppaannssiioonn is set.
 
        _r_l___l_i_n_e_b_u_f___f_u_n_c___t _* hhiissttoorryy__iinnhhiibbiitt__eexxppaannssiioonn__ffuunnccttiioonn
-       This should be set to the address of a function that  takes  two  argu-
-       ments:  a  cchhaarr  **  (_s_t_r_i_n_g) and an iinntt index into that string (_i).  It
-       should return a non-zero value if the  history  expansion  starting  at
-       _s_t_r_i_n_g_[_i_]  should  not  be  performed;  zero if the expansion should be
-       done.  It is intended for use by applications like bbaasshh  that  use  the
-       history  expansion character for additional purposes.  By default, this
+       This  should  be  set to the address of a function that takes two argu-
+       ments: a cchhaarr ** (_s_t_r_i_n_g) and an iinntt index into  that  string  (_i).   It
+       should  return  a  non-zero  value if the history expansion starting at
+       _s_t_r_i_n_g_[_i_] should not be performed; zero  if  the  expansion  should  be
+       done.   It  is  intended for use by applications like bbaasshh that use the
+       history expansion character for additional purposes.  By default,  this
        variable is set to NNUULLLL.
 
 FFIILLEESS
@@ -520,17 +519,17 @@ AAUUTTHHOORRSS
        chet.ramey@case.edu
 
 BBUUGG RREEPPOORRTTSS
-       If you find a bug in the hhiissttoorryy library, you should  report  it.   But
-       first,  you  should  make sure that it really is a bug, and that it ap-
+       If  you  find  a bug in the hhiissttoorryy library, you should report it.  But
+       first, you should make sure that it really is a bug, and  that  it  ap-
        pears in the latest version of the hhiissttoorryy library that you have.
 
-       Once you have determined that a bug actually exists, mail a bug  report
-       to  _b_u_g_-_r_e_a_d_l_i_n_e@_g_n_u_._o_r_g.   If  you have a fix, you are welcome to mail
-       that as well!  Suggestions  and  `philosophical'  bug  reports  may  be
-       mailed  to  _b_u_g_-_r_e_a_d_l_i_n_e@_g_n_u_._o_r_g  or  posted  to  the  Usenet newsgroup
+       Once  you have determined that a bug actually exists, mail a bug report
+       to _b_u_g_-_r_e_a_d_l_i_n_e@_g_n_u_._o_r_g.  If you have a fix, you are  welcome  to  mail
+       that  as  well!   Suggestions  and  "philosophical"  bug reports may be
+       mailed to  _b_u_g_-_r_e_a_d_l_i_n_e@_g_n_u_._o_r_g  or  posted  to  the  Usenet  newsgroup
        ggnnuu..bbaasshh..bbuugg.
 
        Comments and bug reports concerning this manual page should be directed
        to _c_h_e_t_._r_a_m_e_y_@_c_a_s_e_._e_d_u.
 
-GNU History 8.3                 2024 October 10                     _H_I_S_T_O_R_Y(3)
+GNU History 8.3                2024 November 29                     _H_I_S_T_O_R_Y(3)

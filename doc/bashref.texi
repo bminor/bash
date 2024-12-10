@@ -66,15 +66,17 @@ of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
 Bash contains features that appear in other popular shells, and some
-features that only appear in Bash.  Some of the shells that Bash has
+features that only appear in Bash.
+Some of the shells that Bash has
 borrowed concepts from are the Bourne Shell (@file{sh}), the Korn Shell
 (@file{ksh}), and the C-shell (@file{csh} and its successor,
-@file{tcsh}).  The following menu breaks the features up into
+@file{tcsh}).
+The following menu breaks the features up into
 categories, noting which features were inspired by other shells and
 which are specific to Bash.
 
-This manual is meant as a brief introduction to features found in
-Bash.  The Bash manual page should be used as the definitive
+This manual is meant as a brief introduction to features found in Bash.
+The Bash manual page should be used as the definitive
 reference on shell behavior.
 
 @menu
@@ -476,7 +478,8 @@ special meaning are left unmodified.
 
 A double quote may be quoted within double quotes by preceding it with
 a backslash.
-If enabled, history expansion will be performed unless an @samp{!}
+If enabled, history expansion will be performed unless an
+@samp{!}
 appearing in double quotes is escaped using a backslash.
 The backslash preceding the @samp{!} is not removed.
 
@@ -553,7 +556,7 @@ been present.
 
 Prefixing a double-quoted string with a dollar sign (@samp{$}), such
 as @verb{|$"hello, world"|},
-will cause the string to be translated according to the current locale.
+causes the string to be translated according to the current locale.
 The @code{gettext} infrastructure performs the lookup and 
 translation, using the @code{LC_MESSAGES}, @code{TEXTDOMAINDIR},
 and @code{TEXTDOMAIN} shell variables, as explained below.
@@ -1223,7 +1226,7 @@ instead of as a regular expression (see above).
 If the pattern is stored in a shell variable, quoting the variable
 expansion forces the entire pattern to be matched literally.
 
-The pattern will match if it matches any part of the string.
+The match succeeds if the pattern matches any part of the string.
 If you want to force the pattern to match the entire string,
 anchor the pattern using the @samp{^} and @samp{$} regular expression
 operators.
@@ -1679,7 +1682,7 @@ returns.
 
 For example, if a variable @env{var} is declared as local in function
 @code{func1}, and @code{func1} calls another function @code{func2},
-references to @env{var} made from within @code{func2} will resolve to the
+references to @env{var} made from within @code{func2} resolve to the
 local variable @env{var} from @code{func1}, shadowing any global variable
 named @env{var}.
 
@@ -1706,24 +1709,24 @@ var=global
 func1
 @end example
 
-The @code{unset} builtin also acts using the same dynamic scope: if a  
-variable is local to the current scope, @code{unset} will unset it;         
-otherwise the unset will refer to the variable found in any calling scope 
+The @code{unset} builtin also acts using the same dynamic scope: if a
+variable is local to the current scope, @code{unset} unsets it;       
+otherwise the unset will refer to the variable found in any calling scope
 as described above.
-If a variable at the current local scope is unset, it will remain so
+If a variable at the current local scope is unset, it remains so
 (appearing as unset)
 until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
-scope will become visible.
-If the unset acts on a variable at a previous scope, any instance of a   
+scope becomes visible.
+If the unset acts on a variable at a previous scope, any instance of a
 variable with that name that had been shadowed will become visible
-(see below how @code{localvar_unset} shell option changes this behavior).
+(see below how the @code{localvar_unset} shell option changes this behavior).
 
 The @option{-f} option to the @code{declare} (@code{typeset})
 builtin command (@pxref{Bash Builtins})
-will list function names and definitions.
+lists function names and definitions.
 The @option{-F} option to @code{declare} or @code{typeset}
-will list the function names only
+lists the function names only
 (and optionally the source file and line number, if the @code{extdebug}
 shell option is enabled).
 Functions may be exported so that child shell processes
@@ -1734,7 +1737,7 @@ automatically have them defined with the
 The @option{-f} option to
 the @code{unset} builtin
 (@pxref{Bourne Shell Builtins})
-will delete a function definition.
+deletes a function definition.
 
 Functions may be recursive.
 The @code{FUNCNEST} variable may be used to limit the depth of the
@@ -1793,12 +1796,13 @@ command export var=value
 @end example
 
 In the context where an assignment statement is assigning a value  
-to a shell variable or array index (@pxref{Arrays}), the @samp{+=}
-operator will append to or add to the variable's previous value.
-This includes arguments to declaration commands such as @code{declare}
-that accept assignment statements.
-When @samp{+=} is applied to a variable for which the @code{integer} attribute
-has been set,
+to a shell variable or array index (@pxref{Arrays}),
+the @samp{+=} operator appends to or adds to
+the variable's previous value.
+This includes arguments to declaration commands such as
+@code{declare} that accept assignment statements.
+When @samp{+=} is applied to a variable
+for which the @code{integer} attribute has been set,
 the variable's current value and @var{value} are each evaluated as
 arithmetic expressions,
 and the sum of the results is assigned as the variable's value.
@@ -1838,7 +1842,7 @@ to the variable whose name was passed as @code{$1}.
 
 If the control variable in a @code{for} loop has the nameref attribute,
 the list of words can be a list of shell variables, and a name reference
-will be established for each word in the list, in turn, when the loop is
+is established for each word in the list, in turn, when the loop is
 executed.
 Array variables cannot be given the nameref attribute.
 However, nameref variables can reference array variables and subscripted
@@ -1846,7 +1850,7 @@ array variables.
 Namerefs can be unset using the @option{-n} option to the @code{unset} builtin
 (@pxref{Bourne Shell Builtins}).
 Otherwise, if @code{unset} is executed with the name of a nameref variable
-as an argument, the variable referenced by the nameref variable will be unset.
+as an argument, the variable referenced by the nameref variable is unset.
 
 @node Positional Parameters
 @subsection Positional Parameters
@@ -2058,8 +2062,8 @@ where @var{x} and @var{y} are either integers or letters,
 and @var{incr}, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 @var{x} and @var{y}, inclusive.
-When either @var{x} or @var{y} begins with a zero, the shell
-attempts to force all generated terms to contain the same number of digits,
+If either @var{x} or @var{y} begins with a zero,
+each generated term will contain the same number of digits,
 zero-padding where necessary.
 When letters are supplied, the expression expands to each character
 lexicographically between @var{x} and @var{y}, inclusive,
@@ -2568,7 +2572,7 @@ This is intended to duplicate a common @code{sed} idiom.
 Quoting any part of @var{string} inhibits replacement in the
 expansion of the quoted portion, including replacement strings stored
 in shell variables.
-Backslash will escape @samp{&} in @var{string}; the backslash is removed
+Backslash escapes @samp{&} in @var{string}; the backslash is removed
 in order to permit a literal @samp{&} in the replacement string.
 Users should take care if @var{string} is double-quoted to avoid
 unwanted interactions between the backslash and double-quoting, since
@@ -2696,7 +2700,7 @@ The expansion is a string that is the result of expanding the value of
 @item A
 The expansion is a string in the form of
 an assignment statement or @code{declare} command that, if
-evaluated, will recreate @var{parameter} with its attributes and value.
+evaluated, recreates @var{parameter} with its attributes and value.
 @item K
 Produces a possibly-quoted version of the value of @var{parameter},
 except that it prints the values of
@@ -2778,7 +2782,7 @@ word would usually require.
 Any side effects of @var{command} take effect immediately
 in the current execution environment and persist in the current 
 environment after the command completes (e.g., the @code{exit} builtin
-will exit the shell).
+exits the shell).
 
 This type of command substitution superficially resembles executing an
 unnamed shell function: local variables are created as when a shell
@@ -2877,10 +2881,10 @@ passed as an argument to the current command as the result of the
 expansion.
 
 If the @code{>(@var{list})} form is used, writing to
-the file will provide input for @var{list}.
+the file provides input for @var{list}.
 If the
 @code{<(@var{list})} form is used, reading the file 
-will obtain the output of @var{list}.
+obtains the output of @var{list}.
 Note that no space may appear between the @code{<} or @code{>}
 and the left parenthesis, otherwise the construct would be interpreted
 as a redirection.
@@ -2936,7 +2940,7 @@ Explicit null arguments (@code{""} or @code{''}) are retained
 and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
-Expanding a  parameter with no value within double quotes
+Expanding a parameter with no value within double quotes
 produces a null field,
 which is retained and passed to a command as an empty string.
 
@@ -3013,7 +3017,8 @@ is set and not null.
 However, setting @env{GLOBIGNORE} to a non-null value has the effect of
 enabling the @code{dotglob}
 shell option, so all other filenames beginning with a
-@samp{.} will match.
+@samp{.}
+match.
 To get the old behavior of ignoring filenames beginning with a
 @samp{.}, make @samp{.*} one of the patterns in @env{GLOBIGNORE}.
 The @code{dotglob} option is disabled when @env{GLOBIGNORE}
@@ -3046,9 +3051,9 @@ The special pattern characters have the following meanings:
 Matches any string, including the null string.
 When the @code{globstar} shell option is enabled, and @samp{*} is used in
 a filename expansion context, two adjacent @samp{*}s used as a single
-pattern will match all files and zero or more directories and
+pattern match all files and zero or more directories and
 subdirectories.
-If followed by a @samp{/}, two adjacent @samp{*}s will match only
+If followed by a @samp{/}, two adjacent @samp{*}s match only
 directories and subdirectories.
 @item ?
 Matches any single character.
@@ -3178,8 +3183,8 @@ result from one of the above expansions are removed.
 @section Redirections
 @cindex redirection
 
-Before a command is executed, its input and output
-may be @dfn{redirected}
+Before a command is executed, its input and output may be
+@dfn{redirected}
 using a special notation interpreted by the shell.
 @dfn{Redirection} allows commands' file handles to be
 duplicated, opened, closed, made to refer to different files,
@@ -3195,25 +3200,30 @@ left to right.
 Each redirection that may be preceded by a file descriptor number
 may instead be preceded by a word of the form @{@var{varname}@}.
 In this case, for each redirection operator except
->&- and <&-, the shell will allocate a file descriptor greater
-than 10 and assign it to @{@var{varname}@}.
-If @{@var{varname}@} precedes >&- or <&-,
-the value of @var{varname} defines the file
-descriptor to close.
+@code{>&-}
+and
+@code{<&-},
+the shell allocates a file descriptor greater
+than or equal to 10 and assigns it to @{@var{varname}@}.
+If @{@var{varname}@} precedes
+@code{>&-}
+or
+@code{<&-},
+the value of @var{varname} defines the file descriptor to close.
 If @{@var{varname}@} is supplied, the redirection persists beyond
-the scope of the command, which allows the shell programmer to manage
-the file descriptor's lifetime manually without using
+the scope of the command, which allows the shell programmer to
+manage the file descriptor's lifetime manually without using
 the @code{exec} builtin.
 The @code{varredir_close} shell option manages this behavior
 (@pxref{The Shopt Builtin}).
 
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is
-@samp{<}, the redirection refers to the standard input (file
-descriptor 0).
-If the first character of the redirection operator
-is @samp{>}, the redirection refers to the standard output (file
-descriptor 1).
+@samp{<},
+the redirection refers to the standard input (file descriptor 0).
+If the first character of the redirection operator is
+@samp{>},
+the redirection refers to the standard output (file descriptor 1).
 
 The @var{word} following the redirection operator in the following
 descriptions, unless otherwise noted, is subjected to
@@ -3247,7 +3257,7 @@ before the standard output was redirected to @var{dirlist}.
 Bash handles several filenames specially when they are used in
 redirections, as described in the following table.
 If the operating system on which Bash is running provides these
-special files, Bash will use them; otherwise it will emulate them
+special files, Bash uses them; otherwise it emulates them
 internally with the behavior described below.
 
 @table @code
@@ -3305,10 +3315,15 @@ The general format for redirecting output is:
 [@var{n}]>[|]@var{word}
 @end example
 
-If the redirection operator is @samp{>}, and the @code{noclobber}
-option to the @code{set} builtin has been enabled, the redirection
-will fail if the file whose name results from the expansion of
-@var{word} exists and is a regular file.
+If the redirection operator is
+@samp{>},
+and the
+@code{noclobber}
+option to the
+@code{set}
+builtin has been enabled, the redirection fails if the file
+whose name results from the expansion of @var{word} exists and is
+a regular file.
 If the redirection operator is @samp{>|}, or the redirection operator is
 @samp{>} and the @code{noclobber} option is not enabled,
 Bash attemps the redirection
@@ -4154,7 +4169,7 @@ If it is not a valid directory name, @code{cd} returns a non-zero status.
 
 If the @option{-e} option is supplied with @option{-P}
 and @code{cd} cannot successfully determine the current working directory 
-after a successful directory change, it will return a non-zero status.
+after a successful directory change, it returns a non-zero status.
 
 On systems that support it, the @option{-@@} option presents the extended
 attributes associated with a file as a directory.              
@@ -4321,8 +4336,8 @@ error reporting.
 In normal operation, @code{getopts} prints diagnostic messages
 when it encounters invalid options or missing option arguments.
 If the variable @env{OPTERR}
-is set to 0, no error messages will be displayed, even if the first
-character of @code{optstring} is not a colon.
+is set to 0, @code{getopts} does not display any error messages,
+even if the first character of @code{optstring} is not a colon.
 
 If @code{getopts} detects an invalid option, it
 places @samp{?} into @var{name} and, if not silent,
@@ -6686,9 +6701,11 @@ Assignments to @env{BASH_ARGV} have no effect, and it may not be unset.
 When referenced, this variable expands to the name of the shell or shell
 script (identical to @code{$0}; @xref{Special Parameters},
 for the description of special parameter 0).
-Assigning a value to @code{BASH_ARGV0}
-assigns the same value to @code{$0}.
-If @env{BASH_ARGV0}
+Assigning a value to
+@code{BASH_ARGV0}
+sets @code{$0} to the same value.
+If
+@env{BASH_ARGV0}
 is unset, it loses its special properties, even if it is
 subsequently reset.
 
@@ -6824,17 +6841,23 @@ Expands to a string describing the version of this  instance  of
 Bash (e.g., 5.2.37(3)-release).
 
 @item BASH_XTRACEFD
-If set to an integer corresponding to a valid file descriptor, Bash
-will write the trace output generated when @samp{set -x}
-is enabled to that file descriptor
+If set to an integer corresponding to a valid file descriptor,
+Bash writes the trace output generated when
+@samp{set -x}
+is enabled to that file descriptor,
 instead of the standard error.
 This allows tracing output to be separated from diagnostic and error
 messages.
-The file descriptor is closed when @code{BASH_XTRACEFD} is unset or assigned
-a new value.
-Unsetting @code{BASH_XTRACEFD} or assigning it the empty string causes the
+The file descriptor is closed when
+@code{BASH_XTRACEFD}
+is unset or assigned a new value.
+Unsetting
+@code{BASH_XTRACEFD}
+or assigning it the empty string causes the
 trace output to be sent to the standard error.
-Note that setting @code{BASH_XTRACEFD} to 2 (the standard error file
+Note that setting
+@code{BASH_XTRACEFD}
+to 2 (the standard error file
 descriptor) and then unsetting it will result in the standard error
 being closed.
 
@@ -6925,7 +6948,7 @@ Directories appear in the stack in the order they are displayed by the
 Assigning to members of this array variable may be used to modify
 directories already in the stack, but the @code{pushd} and @code{popd}
 builtins must be used to add and remove directories.
-Assignment to this variable will not change the current directory.
+Assigning to this variable does not change the current directory.
 If @env{DIRSTACK}
 is unset, it loses its special properties, even if
 it is subsequently reset.
@@ -7006,15 +7029,19 @@ it is subsequently reset.
 This variable can be used with @code{BASH_LINENO} and @code{BASH_SOURCE}.
 Each element of @code{FUNCNAME} has corresponding elements in
 @code{BASH_LINENO} and @code{BASH_SOURCE} to describe the call stack.
-For instance, @code{$@{FUNCNAME[$i]@}} was called from the file
-@code{$@{BASH_SOURCE[$i+1]@}} at line number @code{$@{BASH_LINENO[$i]@}}.
+For instance,
+@code{$@{FUNCNAME[$i]@}}
+was called from the file
+@code{$@{BASH_SOURCE[$i+1]@}}
+at line number
+@code{$@{BASH_LINENO[$i]@}}.
 The @code{caller} builtin displays the current call stack using this
 information.
 
 @item FUNCNEST
 A numeric value greater than 0 defines a maximum function nesting level.
 Function invocations that exceed this nesting level
-will cause the current command to abort.
+cause the current command to abort.
 
 @item GLOBIGNORE
 A colon-separated list of patterns defining the set of file names to
@@ -7058,7 +7085,7 @@ order by modification time (newest first).
 
 The @samp{numeric} specifier treats names consisting solely of digits as
 numbers and sorts them using their numeric value
-(so "2" will sort before "10", for example).
+(so ``2'' sorts before ``10'', for example).
 When using @samp{numeric}, names containing non-digits sort after all
 the all-digit names and are sorted by name using the traditional behavior.
 
@@ -7082,27 +7109,30 @@ is unset, it loses its special properties, even if it is
 subsequently reset.
 
 @item histchars
-Up to three characters which control history expansion, quick
-substitution, and tokenization (@pxref{History Interaction}).
-The first character is the
-@dfn{history expansion} character,
-the character which begins a history expansion, normally @samp{!}.
-The second character is the
-character which signifies "quick substitution" when seen as the first
-character on a line, normally @samp{^}.
-The optional third character is the
-character which indicates that the remainder of the line is a comment when
-found as the first character of a word, usually @samp{#}.
-The history
-comment character disables history substitution for the
-remaining words on the line.
-It does not necessarily cause the shell
-parser to treat the rest of the line as a comment.
+The two or three characters which control history expansion,
+quick substitution, and tokenization
+(@pxref{History Interaction}).
+The first character is the @dfn{history expansion} character,
+the character which begins a history expansion, normally
+@samp{!}.
+The second character is the ``quick substitution'' character, normally
+@samp{^}.
+When it appears as the first character on the line,
+history substitution repeats the previous command,
+replacing one string with another.
+The optional third character is the character which indicates that
+the remainder of the line is a comment when found as the first character
+of a word, usually @samp{#}.
+The history comment character disables history substitution
+for the remaining words on the line.
+It does not necessarily cause the shell parser to treat the rest of the
+line as a comment.
 
 @item HISTCMD
 The history number, or index in the history list, of the current
 command.
-Assignments to @env{HISTCMD} are ignored.
+Assignments to @env{HISTCMD}
+have no effect.
 If @env{HISTCMD}
 is unset, it loses its special properties,
 even if it is subsequently reset.
@@ -7120,14 +7150,15 @@ A value of @samp{erasedups} causes all previous lines matching the
 current line to be removed from the history list before that line
 is saved.
 Any value not in the above list is ignored.
-If @env{HISTCONTROL} is unset, or does not include a valid value, 
-all lines read by the shell parser are saved on the history list, 
+If @env{HISTCONTROL} is unset, or does not include a valid value,
+Bash saves all lines read by the shell parser on the history list, 
 subject to the value of @env{HISTIGNORE}.
-The second and subsequent lines of a multi-line compound command are
-not tested, and are added to the history regardless of the value of
-@env{HISTCONTROL} if the first line of the command was saved.
+If the first line of a multi-line compound command was saved,
+the second and subsequent lines are not tested,
+and are added to the history regardless of the value of
+@env{HISTCONTROL}.
 If the first line was not saved, the second and subsequent lines of
-the command are not saved, either.
+the command are not saved either.
 
 @item HISTFILE
 The name of the file to which the command history is saved.
@@ -7151,22 +7182,28 @@ after reading any startup files.
 A colon-separated list of patterns used to decide which command
 lines should be saved on the history list.
 If a command line matches one of the patterns in the value of
-@code{HISTIGNORE}, it is not saved on the history list.
-Each pattern is
-anchored at the beginning of the line and must match the complete
-line (Bash will not implicitly append a @samp{*}).
-Each pattern is tested
-against the line after the checks specified by @env{HISTCONTROL}
+@code{HISTIGNORE},
+it is not saved on the history list.
+Each pattern is anchored at the
+beginning of the line and must match the complete line
+(Bash does not implicitly append a
+@samp{*}).
+Each pattern is tested against the line
+after the checks specified by
+@env{HISTCONTROL}
 are applied.
-In addition to the normal shell pattern matching characters, @samp{&}
+In addition to the normal shell pattern matching characters,
+@samp{&}
 matches the previous history line.
-@samp{&} may be escaped using a backslash; the backslash is removed
-before attempting a match. 
-The second and subsequent lines of a multi-line compound command are
-not tested, and are added to the history regardless of the value of
-@env{HISTIGNORE}, if the first line was saved.
+A backslash escapes the
+@samp{&};
+the backslash is removed before attempting a match.
+If the first line of a multi-line compound command was saved,
+the second and subsequent lines are not tested,
+and are added to the history regardless of the value of
+@env{HISTIGNORE}.
 If the first line was not saved, the second and subsequent lines of
-the command are not saved, either.
+the command are not saved either.
 The pattern matching honors the setting of the @code{extglob} shell
 option.
 
@@ -7200,10 +7237,13 @@ is running;
 the next time hostname completion is attempted after the
 value is changed, Bash adds the contents of the new file to the
 existing list.
-If @env{HOSTFILE} is set, but has no value, or does not name a readable file,
+If @env{HOSTFILE}
+is set, but has no value, or does not name a readable file,
 Bash attempts to read 
-@file{/etc/hosts} to obtain the list of possible hostname completions.
-When @env{HOSTFILE} is unset, the hostname list is cleared.
+@file{/etc/hosts}
+to obtain the list of possible hostname completions.
+When @env{HOSTFILE} is unset,
+Bash clears the hostname list.
 
 @item HOSTNAME
 The name of the current host.
@@ -7368,10 +7408,12 @@ The current working directory as set by the @code{cd} builtin.
 
 @item RANDOM
 Each time this parameter is referenced, it expands to a random integer
-between 0 and 32767. Assigning a value to this
-variable initializes (seeds) the random number generator.
-Seeding the random number generator with the same constant value will
-produce the same sequence of values.
+between 0 and 32767.
+Assigning a value to
+@env{RANDOM}
+initializes (seeds) the sequence of random numbers.
+Seeding the random number generator with the same constant value
+produces the same sequence of values.
 If @env{RANDOM}
 is unset, it loses its special properties, even if it is
 subsequently reset.
@@ -7475,7 +7517,7 @@ The CPU percentage, computed as (%U + %S) / %R.
 The optional @var{p} is a digit specifying the precision, the number of
 fractional digits after a decimal point.
 A value of 0 causes no decimal point or fraction to be output.
-@code{time} will print at most six digits after the decimal point;
+@code{time} prints at most six digits after the decimal point;
 values of @var{p} greater than 6 are changed to 6.
 If @var{p} is not specified,
 @code{time} prints three digits after the decimal point.
@@ -7731,8 +7773,9 @@ executes commands from the file @file{/etc/profile}, if that file exists.
 After reading that file, it looks for @file{~/.bash_profile},
 @file{~/.bash_login}, and @file{~/.profile}, in that order, and reads
 and executes commands from the first one that exists and is readable.
-The @option{--noprofile} option may be used when the shell is started to
-inhibit this behavior.
+The
+@option{--noprofile}
+option inhibits this behavior.
 
 When an interactive login shell exits,
 or a non-interactive login shell executes the @code{exit} builtin command,
@@ -7743,7 +7786,7 @@ the file @file{~/.bash_logout}, if it exists.
 
 When Bash runs as an interactive shell that is not a login shell, it
 reads and executes commands from @file{~/.bashrc}, if that file exists.
-This may be inhibited by using the @option{--norc} option.
+The @option{--norc} option inhibits this behavior.
 The @option{--rcfile @var{file}} option
 causes Bash to
 use @var{file} instead of @file{~/.bashrc}.
@@ -7783,7 +7826,7 @@ When invoked as an interactive login shell, or as a non-interactive
 shell with the @option{--login} option, it first attempts to read
 and execute commands from @file{/etc/profile} and @file{~/.profile}, in
 that order.
-The @option{--noprofile} option will inhibit this behavior.
+The @option{--noprofile} option inhibits this behavior.
 
 When invoked as an interactive shell with the name @code{sh}, Bash
 looks for the variable @env{ENV}, expands its value if it is defined,
@@ -7818,11 +7861,14 @@ If Bash
 determines it is being run non-interactively in this fashion,
 it reads and executes commands from @file{~/.bashrc}, if that
 file exists and is readable.
-It will not do this if invoked as @code{sh}.
-The @option{--norc} option will inhibit this behavior, and the
-@option{--rcfile} option
-will make Bash use a different file instead of
-@file{~/.bashrc}, but neither
+Bash does not read this file if invoked as @code{sh}.
+The
+@option{--norc}
+option inhibits this behavior, and the
+@option{--rcfile}
+option makes Bash use a different file instead of
+@file{~/.bashrc},
+but neither
 @code{rshd} nor @code{sshd} generally invoke the shell with those
 options or allow them to be specified.
 
@@ -8027,7 +8073,7 @@ comparisons.
 Bash handles several filenames specially when they are used in
 expressions.
 If the operating system on which Bash is running provides these
-special files, Bash will use them; otherwise it will emulate them
+special files, Bash uses them; otherwise it emulates them
 internally with this behavior:
 If the @var{file} argument to one of the primaries is of the form
 @file{/dev/fd/@var{N}}, then Bash checks file descriptor @var{N}.
@@ -8368,20 +8414,22 @@ function is executed.  To be safe, always put
 alias definitions on a separate line, and do not use @code{alias}
 in compound commands.
 
-For almost every purpose, shell functions are preferred over aliases.
+For almost every purpose, shell functions are preferable to aliases.
 
 @node Arrays
 @section Arrays
 @cindex arrays
 
-Bash provides one-dimensional indexed and associative array variables.
-Any variable may be used as an indexed array;
-the @code{declare} builtin will explicitly declare an array.
+Bash
+provides one-dimensional indexed and associative array variables.
+Any variable may be used as an indexed array; the
+@code{declare}
+builtin explicitly declares an array.
 There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
-Indexed arrays are referenced using integers (including arithmetic
-expressions (@pxref{Shell Arithmetic})) and are zero-based;
+Indexed arrays are referenced using arithmetic expressions
+that must expand to an integer (@pxref{Shell Arithmetic})) and are zero-based;
 associative arrays use arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 
@@ -8400,6 +8448,7 @@ To explicitly declare an array, use
 declare -a @var{name}
 @end example
 @noindent
+(@pxref{Bash Builtins}).
 The syntax
 @example
 declare -a @var{name}[@var{subscript}]
@@ -8463,7 +8512,7 @@ interpreted as relative to one greater than the maximum index of
 @var{name}, so negative indices count back from the end of the
 array, and an index of -1 references the last element.
 
-The @samp{+=} operator will append to an array variable when assigning
+The @samp{+=} operator appends to an array variable when assigning
 using the compound assignment syntax; see @ref{Shell Parameters} above.
 
 An array element is referenced using
@@ -8505,8 +8554,8 @@ and an index of -1 refers to the last element.
 
 Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0.
-Any reference to a variable using a valid subscript is valid, and
-Bash will create an array if necessary.
+Any reference to a variable using a valid subscript is valid;
+Bash creates an array if necessary.
 
 An array variable is considered set if a subscript has been assigned a
 value.
@@ -8768,7 +8817,8 @@ The character whose ASCII code is the octal value @var{nnn}.
 @item \\
 A backslash.
 @item \[
-Begin a sequence of non-printing characters.  This could be used to
+Begin a sequence of non-printing characters.
+Thiss could be used to
 embed a terminal control sequence into the prompt.
 @item \]
 End a sequence of non-printing characters.
@@ -11158,7 +11208,8 @@ More features unique to Bash may be found in @ref{Bash Features}.
 @appendixsec Implementation Differences From The SVR4.2 Shell
 
 Since Bash is a completely new implementation, it does not suffer from
-many of the limitations of the SVR4.2 shell.  For instance:
+many of the limitations of the SVR4.2 shell.
+For instance:
 
 @itemize @bullet
 
@@ -11168,13 +11219,15 @@ a shell control structure such as  an @code{if} or @code{while}
 statement.
 
 @item
-Bash does not allow unbalanced quotes.  The SVR4.2 shell will silently
+Bash does not allow unbalanced quotes.
+The SVR4.2 shell will silently
 insert a needed closing quote at @code{EOF} under certain circumstances.
 This can be the cause of some hard-to-find errors.
 
 @item
 The SVR4.2 shell uses a baroque memory management scheme based on
-trapping @code{SIGSEGV}.  If the shell is started from a process with
+trapping @code{SIGSEGV}.
+If the shell is started from a process with
 @code{SIGSEGV} blocked (e.g., by using the @code{system()} C library
 function call), it misbehaves badly.
 
@@ -11199,8 +11252,8 @@ The SVR4.2 shell treats @samp{^} as the undocumented equivalent of
 
 @item
 Bash allows multiple option arguments when it is invoked (@code{-x -v});
-the SVR4.2 shell allows only one option argument (@code{-xv}).  In
-fact, some versions of the shell dump core if the second argument begins
+the SVR4.2 shell allows only one option argument (@code{-xv}).
+In fact, some versions of the shell dump core if the second argument begins
 with a @samp{-}.
 
 @item

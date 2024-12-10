@@ -15,9 +15,9 @@ CCOOPPYYRRIIGGHHTT
        Readline is Copyright (C) 1989-2024 Free Software Foundation,  Inc.
 
 DDEESSCCRRIIPPTTIIOONN
-       rreeaaddlliinnee will read a line from the terminal and return it, using pprroommpptt
-       as  a prompt.  If pprroommpptt is NNUULLLL or the empty string, rreeaaddlliinnee does not
-       issue a prompt.  The line returned is  allocated  with  _m_a_l_l_o_c(3);  the
+       rreeaaddlliinnee  reads a line from the terminal and return it, using pprroommpptt as
+       a prompt.  If pprroommpptt is NNUULLLL or the empty string, rreeaaddlliinnee does not is-
+       sue a prompt.  The line  returned  is  allocated  with  _m_a_l_l_o_c(3);  the
        caller  must  free  it  when finished.  The line returned has the final
        newline removed, so only the text of the line remains.  Since it's pos-
        sible to enter characters into the line while quoting them  to  disable
@@ -46,7 +46,7 @@ NNOOTTAATTIIOONN
 
        On  keyboards  without a _M_e_t_a key, M-_x means ESC _x, i.e., press and re-
        lease the Escape key, then press and release the _x  key,  in  sequence.
-       This  makes  ESC the _m_e_t_a _p_r_e_f_i_x.  The combination M-C-_x means ESC-Con-
+       This  makes  ESC the _m_e_t_a _p_r_e_f_i_x.  The combination M-C-_x means ESC Con-
        trol-_x: press and release the Escape key, then press and hold the  Con-
        trol key while pressing the _x key, then release both.
 
@@ -83,10 +83,9 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
        (the _i_n_p_u_t_r_c file).  The name of this file is taken from the  value  of
        the  IINNPPUUTTRRCC  environment variable.  If that variable is unset, the de-
        fault is _~_/_._i_n_p_u_t_r_c.  If that file  does not exist or cannot  be  read,
-       rreeaaddlliinnee  looks  for _/_e_t_c_/_i_n_p_u_t_r_c.  When a program which uses the rreeaadd--
-       lliinnee library starts up, rreeaaddlliinnee reads the initialization file and sets
-       the key bindings and variables found there, before reading any user in-
-       put.
+       rreeaaddlliinnee looks for _/_e_t_c_/_i_n_p_u_t_r_c.  When a program that uses the rreeaaddlliinnee
+       library  starts up, rreeaaddlliinnee reads the initialization file and sets the
+       key bindings and variables found there, before reading any user input.
 
        There are only a few basic constructs  allowed  in  the  inputrc  file.
        Blank lines are ignored.  Lines beginning with a ## are comments.  Lines
@@ -107,8 +106,8 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
        _s_a_l_-_a_r_g_u_m_e_n_t.
 
        Key bindings may contain the following symbolic character  names:  _D_E_L,
-       _E_S_C,  _E_S_C_A_P_E, _L_F_D, _N_E_W_L_I_N_E, _R_E_T, _R_E_T_U_R_N, _R_U_B_O_U_T(a_d_e_s_t_r_u_c_t_i_v_ebackspace),
-       _S_P_A_C_E, _S_P_C, and _T_A_B.
+       _E_S_C,  _E_S_C_A_P_E,  _L_F_D,  _N_E_W_L_I_N_E,  _R_E_T, _R_E_T_U_R_N, _R_U_B_O_U_T (a destructive back-
+       space), _S_P_A_C_E, _S_P_C, and _T_A_B.
 
        In addition to command names, rreeaaddlliinnee allows keys to  be  bound  to  a
        string that is inserted when the key is pressed (a _m_a_c_r_o).  The differ-
@@ -179,16 +178,16 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
 
        When entering the text of a macro, single or double quotes must be used
        to indicate a macro definition.  Unquoted text is assumed to be a func-
-       tion  name.  Tthe backslash escapes described above are expanded in the
-       macro body.  Backslash will quote any  other  character  in  the  macro
-       text, including " and '.
+       tion  name.   The backslash escapes described above are expanded in the
+       macro body.  Backslash quotes any other character in  the  macro  text,
+       including " and '.
 
        BBaasshh  will display or modify the current rreeaaddlliinnee key bindings with the
        bbiinndd builtin command.  The --oo eemmaaccss or --oo vvii options to the sseett builtin
-       will change the editing mode during interactive  use.   Other  programs
-       using  this library provide similar mechanisms.  A user may always edit
-       the _i_n_p_u_t_r_c file and have rreeaaddlliinnee re-read it if  a  program  does  not
-       provide any other means to incorporate new bindings.
+       change the editing mode during interactive use.  Other  programs  using
+       this  library  provide  similar mechanisms.  A user may always edit the
+       _i_n_p_u_t_r_c file and have rreeaaddlliinnee re-read it if a program does not provide
+       any other means to incorporate new bindings.
 
    VVaarriiaabblleess
        RReeaaddlliinnee has variables that can be used to further customize its behav-
@@ -197,111 +196,111 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
 
               sseett _v_a_r_i_a_b_l_e_-_n_a_m_e _v_a_l_u_e
 
-       Except  where  noted,  rreeaaddlliinnee variables can take the values OOnn or OOffff
-       (without regard to case).  Unrecognized  variable  names  are  ignored.
+       Except where noted, rreeaaddlliinnee variables can take the values  OOnn  or  OOffff
+       (without  regard  to  case).   Unrecognized variable names are ignored.
        When rreeaaddlliinnee reads a variable value, empty or null values, "on" (case-
-       insensitive),  and  "1"  are  equivalent  to  OOnn.  All other values are
+       insensitive), and "1" are equivalent  to  OOnn.   All  other  values  are
        equivalent to OOffff.
 
        The variables and their default values are:
 
        aaccttiivvee--rreeggiioonn--ssttaarrtt--ccoolloorr
-              A string variable that controls the text  color  and  background
-              when  displaying the text in the active region (see the descrip-
-              tion of eennaabbllee--aaccttiivvee--rreeggiioonn below).  This string must not  take
+              A  string  variable  that controls the text color and background
+              when displaying the text in the active region (see the  descrip-
+              tion  of eennaabbllee--aaccttiivvee--rreeggiioonn below).  This string must not take
               up any physical character positions on the display, so it should
-              consist  only of terminal escape sequences.  It is output to the
-              terminal before displaying the text in the active region.   This
-              variable  is  reset  to  the default value whenever the terminal
-              type changes.  The default value is the  string  that  puts  the
-              terminal  in standout mode, as obtained from the terminal's ter-
+              consist only of terminal escape sequences.  It is output to  the
+              terminal  before displaying the text in the active region.  This
+              variable is reset to the default  value  whenever  the  terminal
+              type  changes.   The  default  value is the string that puts the
+              terminal in standout mode, as obtained from the terminal's  ter-
               minfo description.  A sample value might be "\e[01;33m".
        aaccttiivvee--rreeggiioonn--eenndd--ccoolloorr
-              A string  variable  that  "undoes"  the  effects  of  aaccttiivvee--rree--
-              ggiioonn--ssttaarrtt--ccoolloorr  and restores "normal" terminal display appear-
-              ance after displaying text in the active  region.   This  string
-              must  not  take  up any physical character positions on the dis-
-              play, so it should consist only of  terminal  escape  sequences.
-              It  is  output  to the terminal after displaying the text in the
-              active region.  This variable is  reset  to  the  default  value
-              whenever  the  terminal  type changes.  The default value is the
-              string that restores the terminal from  standout  mode,  as  ob-
+              A  string  variable  that  "undoes"  the  effects  of aaccttiivvee--rree--
+              ggiioonn--ssttaarrtt--ccoolloorr and restores "normal" terminal display  appear-
+              ance  after  displaying  text in the active region.  This string
+              must not take up any physical character positions  on  the  dis-
+              play,  so  it  should consist only of terminal escape sequences.
+              It is output to the terminal after displaying the  text  in  the
+              active  region.   This  variable  is  reset to the default value
+              whenever the terminal type changes.  The default  value  is  the
+              string  that  restores  the  terminal from standout mode, as ob-
               tained from the terminal's terminfo description.  A sample value
               might be "\e[0m".
        bbeellll--ssttyyllee ((aauuddiibbllee))
-              Controls  what  happens when rreeaaddlliinnee wants to ring the terminal
+              Controls what happens when rreeaaddlliinnee wants to ring  the  terminal
               bell.  If set to nnoonnee, rreeaaddlliinnee never rings the bell.  If set to
-              vviissiibbllee, rreeaaddlliinnee uses a visible bell if one is  available.   If
+              vviissiibbllee,  rreeaaddlliinnee  uses a visible bell if one is available.  If
               set to aauuddiibbllee, rreeaaddlliinnee attempts to ring the terminal's bell.
        bbiinndd--ttttyy--ssppeecciiaall--cchhaarrss ((OOnn))
-              If  set  to OOnn, rreeaaddlliinnee attempts to bind the control characters
-              that are treated specially by the kernel's  terminal  driver  to
+              If set to OOnn, rreeaaddlliinnee attempts to bind the  control  characters
+              that  are  treated  specially by the kernel's terminal driver to
               their rreeaaddlliinnee equivalents.  These override the default rreeaaddlliinnee
               bindings described here.  Type "stty -a" at a bbaasshh prompt to see
-              your  current  terminal  settings, including the special control
+              your current terminal settings, including  the  special  control
               characters (usually cccchhaarrss).
        bblliinnkk--mmaattcchhiinngg--ppaarreenn ((OOffff))
               If set to OOnn, rreeaaddlliinnee attempts to briefly move the cursor to an
               opening parenthesis when a closing parenthesis is inserted.
        ccoolloorreedd--ccoommpplleettiioonn--pprreeffiixx ((OOffff))
-              If set to OOnn, when listing completions,  rreeaaddlliinnee  displays  the
+              If  set  to  OOnn, when listing completions, rreeaaddlliinnee displays the
               common prefix of the set of possible completions using a differ-
-              ent  color.   The  color definitions are taken from the value of
+              ent color.  The color definitions are taken from  the  value  of
               the LLSS__CCOOLLOORRSS environment variable.  If there is a color defini-
-              tion in $$LLSS__CCOOLLOORRSS for the custom suffix  "readline-colored-com-
-              pletion-prefix",  rreeaaddlliinnee uses this color for the common prefix
+              tion  in $$LLSS__CCOOLLOORRSS for the custom suffix "readline-colored-com-
+              pletion-prefix", rreeaaddlliinnee uses this color for the common  prefix
               instead of its default.
        ccoolloorreedd--ssttaattss ((OOffff))
-              If set to OOnn, rreeaaddlliinnee displays possible completions using  dif-
-              ferent  colors  to  indicate their file type.  The color defini-
-              tions are taken from the  value  of  the  LLSS__CCOOLLOORRSS  environment
+              If  set to OOnn, rreeaaddlliinnee displays possible completions using dif-
+              ferent colors to indicate their file type.   The  color  defini-
+              tions  are  taken  from  the  value of the LLSS__CCOOLLOORRSS environment
               variable.
        ccoommmmeenntt--bbeeggiinn (("##"))
-              The  string  that  the  rreeaaddlliinnee iinnsseerrtt--ccoommmmeenntt command inserts.
-              This command is bound to MM--## in emacs mode and to ## in  vi  com-
+              The string that the  rreeaaddlliinnee  iinnsseerrtt--ccoommmmeenntt  command  inserts.
+              This  command  is bound to MM--## in emacs mode and to ## in vi com-
               mand mode.
        ccoommpplleettiioonn--ddiissppllaayy--wwiiddtthh ((--11))
-              The  number  of  screen columns used to display possible matches
-              when performing completion.  The value is ignored if it is  less
-              than  0 or greater than the terminal screen width.  A value of 0
-              will cause matches to be displayed one per  line.   The  default
-              value is -1.
+              The number of screen columns used to  display  possible  matches
+              when  performing completion.  The value is ignored if it is less
+              than 0 or greater than the terminal screen width.  A value of  0
+              causes  matches to be displayed one per line.  The default value
+              is -1.
        ccoommpplleettiioonn--iiggnnoorree--ccaassee ((OOffff))
               If set to OOnn, rreeaaddlliinnee performs filename matching and completion
               in a case-insensitive fashion.
        ccoommpplleettiioonn--mmaapp--ccaassee ((OOffff))
-              If  set  to  OOnn, and ccoommpplleettiioonn--iiggnnoorree--ccaassee is enabled, rreeaaddlliinnee
-              treats hyphens (_-) and underscores (__) as equivalent  when  per-
+              If set to OOnn, and ccoommpplleettiioonn--iiggnnoorree--ccaassee  is  enabled,  rreeaaddlliinnee
+              treats  hyphens  (_-) and underscores (__) as equivalent when per-
               forming case-insensitive filename matching and completion.
        ccoommpplleettiioonn--pprreeffiixx--ddiissppllaayy--lleennggtthh ((00))
-              The  maximum length in characters of the common prefix of a list
-              of possible completions that is displayed without  modification.
-              When  set to a value greater than zero, rreeaaddlliinnee replaces common
+              The maximum length in characters of the common prefix of a  list
+              of  possible completions that is displayed without modification.
+              When set to a value greater than zero, rreeaaddlliinnee replaces  common
               prefixes longer than this value with an ellipsis when displaying
               possible completions.
        ccoommpplleettiioonn--qquueerryy--iitteemmss ((110000))
-              This determines when the user is queried about viewing the  num-
-              ber  of  possible  completions generated by the ppoossssiibbllee--ccoommppllee--
-              ttiioonnss command.  It may be set to any integer value greater  than
-              or  equal  to  zero.   If  the number of possible completions is
-              greater than or equal to the value of  this  variable,  rreeaaddlliinnee
-              will  ask whether or not the user wishes to view them; otherwise
-              rreeaaddlliinnee simply lists them on the terminal.  A zero value  means
+              This  determines when the user is queried about viewing the num-
+              ber of possible completions generated  by  the  ppoossssiibbllee--ccoommppllee--
+              ttiioonnss  command.  It may be set to any integer value greater than
+              or equal to zero.  If the  number  of  possible  completions  is
+              greater  than  or  equal to the value of this variable, rreeaaddlliinnee
+              asks whether or not the user  wishes  to  view  them;  otherwise
+              rreeaaddlliinnee  simply lists them on the terminal.  A zero value means
               rreeaaddlliinnee should never ask; negative values are treated as zero.
        ccoonnvveerrtt--mmeettaa ((OOnn))
-              If  set  to  OOnn,  rreeaaddlliinnee will convert characters it reads that
-              have the eighth bit set to an ASCII key sequence by clearing the
+              If set to OOnn, rreeaaddlliinnee converts characters it  reads  that  have
+              the  eighth  bit  set  to  an ASCII key sequence by clearing the
               eighth bit and prefixing it with an escape character (converting
               the character to have the meta prefix).  The default is _O_n,  but
-              rreeaaddlliinnee  will  set  it to _O_f_f if the locale contains characters
-              whose encodings may include bytes with the eighth bit set.  This
-              variable is dependent on the LLCC__CCTTYYPPEE locale category,  and  may
+              rreeaaddlliinnee  sets it to _O_f_f if the locale contains characters whose
+              encodings may include bytes with the eighth bit set.  This vari-
+              able is dependent on  the  LLCC__CCTTYYPPEE  locale  category,  and  may
               change  if  the  locale changes.  This variable also affects key
               bindings; see the description of ffoorrccee--mmeettaa--pprreeffiixx below.
        ddiissaabbllee--ccoommpplleettiioonn ((OOffff))
-              If set to OOnn, rreeaaddlliinnee will inhibit word completion.  Completion
-              characters will be inserted into the line as if  they  had  been
-              mapped to sseellff--iinnsseerrtt.
+              If set to OOnn, rreeaaddlliinnee  inhibits  word  completion.   Completion
+              characters are inserted into the line as if they had been mapped
+              to sseellff--iinnsseerrtt.
        eecchhoo--ccoonnttrrooll--cchhaarraacctteerrss ((OOnn))
               When  set to OOnn, on operating systems that indicate they support
               it, rreeaaddlliinnee echoes a character corresponding to a signal gener-
@@ -322,10 +321,11 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
               When this variable is set to _O_n, rreeaaddlliinnee  allows  certain  com-
               mands to designate the region as _a_c_t_i_v_e.  When the region is ac-
               tive, rreeaaddlliinnee highlights the text in the region using the value
-              of  the  aaccttiivvee--rreeggiioonn--ssttaarrtt--ccoolloorr, which defaults to the string
-              that enables the terminal's standout mode.   The  active  region
-              shows the text inserted by bracketed-paste and any matching text
-              found by incremental and non-incremental history searches.
+              of the aaccttiivvee--rreeggiioonn--ssttaarrtt--ccoolloorr variable, which defaults to the
+              string  that  enables  the terminal's standout mode.  The active
+              region shows the text inserted by bracketed-paste and any match-
+              ing  text  found  by  incremental  and  non-incremental  history
+              searches.
        eennaabbllee--bbrraacckkeetteedd--ppaassttee ((OOnn))
               When  set to OOnn, rreeaaddlliinnee configures the terminal to insert each
               paste into the editing buffer as a single string of  characters,
@@ -334,15 +334,15 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
               rreeaaddlliinnee  from  executing  any editing commands bound to key se-
               quences appearing in the pasted text.
        eennaabbllee--kkeeyyppaadd ((OOffff))
-              When set to OOnn, rreeaaddlliinnee will try to enable the application key-
-              pad when it is called.  Some systems need this to enable the ar-
-              row keys.
+              When set to OOnn, rreeaaddlliinnee tries to enable the application  keypad
+              when  it  is called.  Some systems need this to enable the arrow
+              keys.
        eennaabbllee--mmeettaa--kkeeyy ((OOnn))
-              When set to OOnn, rreeaaddlliinnee will try to enable  any  meta  modifier
-              key the terminal claims to support.  On many terminals, the Meta
-              key  is  used to send eight-bit characters; this variable checks
-              for the terminal capability that indicates the terminal can  en-
-              able  and disable a mode that sets the eighth bit of a character
+              When set to OOnn, rreeaaddlliinnee tries to enable any meta  modifier  key
+              the terminal claims to support.  On many terminals, the Meta key
+              is  used  to send eight-bit characters; this variable checks for
+              the terminal capability that indicates the terminal  can  enable
+              and  disable  a  mode  that  sets  the eighth bit of a character
               (0200) if the Meta key is held down when the character is  typed
               (a meta character).
        eexxppaanndd--ttiillddee ((OOffff))
@@ -377,172 +377,171 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
               wrapping to a new line.  This setting is  automatically  enabled
               for terminals of height 1.
        iinnppuutt--mmeettaa ((OOffff))
-              If  set to OOnn, rreeaaddlliinnee will enable eight-bit input (that is, it
-              will not clear the eighth bit in the characters it  reads),  re-
-              gardless  of  what  the terminal claims it can support.  The de-
-              fault is _O_f_f, but rreeaaddlliinnee will set it to _O_n if the locale  con-
-              tains  characters  whose  encodings  may  include bytes with the
-              eighth bit set.  This variable is dependent on the LLCC__CCTTYYPPEE  lo-
-              cale  category,  and its value may change if the locale changes.
-              The name mmeettaa--ffllaagg is a synonym for iinnppuutt--mmeettaa.
-       iisseeaarrcchh--tteerrmmiinnaattoorrss (("CC--[[CC--JJ"))
-              The string of characters that should  terminate  an  incremental
-              search  without  subsequently  executing the character as a com-
-              mand.  If this variable has not been given a value, the  charac-
-              ters _E_S_C and _C_-_J will terminate an incremental search.
+              If set to OOnn, rreeaaddlliinnee enables eight-bit input (that is, it does
+              not clear the eighth bit in the characters it reads), regardless
+              of what the terminal claims it can support.  The default is _O_f_f,
+              but  rreeaaddlliinnee  sets  it  to _O_n if the locale contains characters
+              whose encodings may include bytes with the eighth bit set.  This
+              variable is dependent on the LLCC__CCTTYYPPEE locale category,  and  its
+              value may change if the locale changes.  The name mmeettaa--ffllaagg is a
+              synonym for iinnppuutt--mmeettaa.
+       iisseeaarrcchh--tteerrmmiinnaattoorrss (("CC--[[CC--jj"))
+              The  string  of  characters that should terminate an incremental
+              search without subsequently executing the character  as  a  com-
+              mand.   If this variable has not been given a value, the charac-
+              ters _E_S_C and CC--jj terminate an incremental search.
        kkeeyymmaapp ((eemmaaccss))
-              Set  the current rreeaaddlliinnee keymap.  The set of valid keymap names
-              is _e_m_a_c_s_, _e_m_a_c_s_-_s_t_a_n_d_a_r_d_, _e_m_a_c_s_-_m_e_t_a_,  _e_m_a_c_s_-_c_t_l_x_,  _v_i_,  _v_i_-_c_o_m_-
-              _m_a_n_d,  and  _v_i_-_i_n_s_e_r_t.  _v_i is equivalent to _v_i_-_c_o_m_m_a_n_d; _e_m_a_c_s is
-              equivalent to _e_m_a_c_s_-_s_t_a_n_d_a_r_d.  The default value is  _e_m_a_c_s;  the
+              Set the current rreeaaddlliinnee keymap.  The set of valid keymap  names
+              is  _e_m_a_c_s_,  _e_m_a_c_s_-_s_t_a_n_d_a_r_d_,  _e_m_a_c_s_-_m_e_t_a_, _e_m_a_c_s_-_c_t_l_x_, _v_i_, _v_i_-_c_o_m_-
+              _m_a_n_d, and _v_i_-_i_n_s_e_r_t.  _v_i is equivalent to _v_i_-_c_o_m_m_a_n_d;  _e_m_a_c_s  is
+              equivalent  to  _e_m_a_c_s_-_s_t_a_n_d_a_r_d.  The default value is _e_m_a_c_s; the
               value of eeddiittiinngg--mmooddee also affects the default keymap.
        kkeeyysseeqq--ttiimmeeoouutt ((550000))
-              Specifies  the  duration rreeaaddlliinnee will wait for a character when
-              reading an ambiguous key sequence (one that can form a  complete
+              Specifies the duration rreeaaddlliinnee will wait for a  character  when
+              reading  an ambiguous key sequence (one that can form a complete
               key sequence using the input read so far, or can take additional
-              input  to complete a longer key sequence).  If rreeaaddlliinnee does not
-              receive any input within the timeout, it will  use  the  shorter
-              but  complete key sequence.  The value is specified in millisec-
-              onds, so a value of 1000 means that rreeaaddlliinnee will wait one  sec-
-              ond  for  additional  input.  If this variable is set to a value
-              less than or equal to zero, or to a non-numeric value,  rreeaaddlliinnee
-              will  wait  until another key is pressed to decide which key se-
-              quence to complete.
+              input to complete a longer key sequence).  If rreeaaddlliinnee does  not
+              receive  any  input  within the timeout, it uses the shorter but
+              complete key sequence.  The value is specified in  milliseconds,
+              so  a value of 1000 means that rreeaaddlliinnee will wait one second for
+              additional input.  If this variable is set to a value less  than
+              or  equal to zero, or to a non-numeric value, rreeaaddlliinnee waits un-
+              til another key is pressed to decide which key sequence to  com-
+              plete.
        mmaarrkk--ddiirreeccttoorriieess ((OOnn))
               If set to OOnn, completed directory names have a slash appended.
        mmaarrkk--mmooddiiffiieedd--lliinneess ((OOffff))
-              If set to OOnn, rreeaaddlliinnee displays history  lines  that  have  been
+              If  set  to  OOnn,  rreeaaddlliinnee displays history lines that have been
               modified with a preceding asterisk (**).
        mmaarrkk--ssyymmlliinnkkeedd--ddiirreeccttoorriieess ((OOffff))
               If set to OOnn, completed names which are symbolic links to direc-
-              tories  have  a slash appended, subject to the value of mmaarrkk--ddii--
+              tories have a slash appended, subject to the value  of  mmaarrkk--ddii--
               rreeccttoorriieess.
        mmaattcchh--hhiiddddeenn--ffiilleess ((OOnn))
-              This variable, when set to OOnn, forces rreeaaddlliinnee  to  match  files
-              whose  names  begin  with  a "."  (hidden files) when performing
-              filename completion.  If set to OOffff, the user must  include  the
+              This  variable,  when  set to OOnn, forces rreeaaddlliinnee to match files
+              whose names begin with a "."   (hidden  files)  when  performing
+              filename  completion.   If set to OOffff, the user must include the
               leading "."  in the filename to be completed.
        mmeennuu--ccoommpplleettee--ddiissppllaayy--pprreeffiixx ((OOffff))
-              If  set to OOnn, menu completion displays the common prefix of the
+              If set to OOnn, menu completion displays the common prefix of  the
               list of possible completions (which may be empty) before cycling
               through the list.
        oouuttppuutt--mmeettaa ((OOffff))
-              If set to OOnn, rreeaaddlliinnee will display characters with  the  eighth
-              bit set directly rather than as a meta-prefixed escape sequence.
-              The default is _O_f_f, but rreeaaddlliinnee will set it to _O_n if the locale
-              contains  characters  whose encodings may include bytes with the
-              eighth bit set.  This variable is dependent on the LLCC__CCTTYYPPEE  lo-
+              If  set  to OOnn, rreeaaddlliinnee displays characters with the eighth bit
+              set directly rather than as  a  meta-prefixed  escape  sequence.
+              The  default  is  _O_f_f,  but rreeaaddlliinnee sets it to _O_n if the locale
+              contains characters whose encodings may include bytes  with  the
+              eighth  bit set.  This variable is dependent on the LLCC__CCTTYYPPEE lo-
               cale category, and its value may change if the locale changes.
        ppaaggee--ccoommpplleettiioonnss ((OOnn))
-              If  set to OOnn, rreeaaddlliinnee uses an internal _m_o_r_e-like pager to dis-
-              play a screenful of possible completions at a time.
+              If set to OOnn, rreeaaddlliinnee uses an internal pager resembling _m_o_r_e(1)
+              to display a screenful of possible completions at a time.
        pprreeffeerr--vviissiibbllee--bbeellll
               See bbeellll--ssttyyllee.
        pprriinntt--ccoommpplleettiioonnss--hhoorriizzoonnttaallllyy ((OOffff))
-              If set to OOnn, rreeaaddlliinnee will  display  completions  with  matches
-              sorted  horizontally in alphabetical order, rather than down the
-              screen.
+              If set to OOnn, rreeaaddlliinnee displays completions with matches  sorted
+              horizontally in alphabetical order, rather than down the screen.
        rreevveerrtt--aallll--aatt--nneewwlliinnee ((OOffff))
-              If set to OOnn, rreeaaddlliinnee will undo all changes  to  history  lines
-              before  returning  when executing aacccceepptt--lliinnee.  By default, his-
-              tory lines may be modified  and  retain  individual  undo  lists
+              If  set  to  OOnn, rreeaaddlliinnee will undo all changes to history lines
+              before returning when executing aacccceepptt--lliinnee.  By  default,  his-
+              tory  lines  may  be  modified  and retain individual undo lists
               across calls to rreeaaddlliinnee(()).
        sseeaarrcchh--iiggnnoorree--ccaassee ((OOffff))
-              If  set to OOnn, rreeaaddlliinnee performs incremental and non-incremental
+              If set to OOnn, rreeaaddlliinnee performs incremental and  non-incremental
               history list searches in a case-insensitive fashion.
        sshhooww--aallll--iiff--aammbbiigguuoouuss ((OOffff))
-              This alters the default behavior of  the  completion  functions.
+              This  alters  the  default behavior of the completion functions.
               If set to OOnn, words which have more than one possible completion
-              cause  the  matches  to be listed immediately instead of ringing
+              cause the matches to be listed immediately  instead  of  ringing
               the bell.
        sshhooww--aallll--iiff--uunnmmooddiiffiieedd ((OOffff))
-              This alters the default behavior of the completion functions  in
+              This  alters the default behavior of the completion functions in
               a fashion similar to sshhooww--aallll--iiff--aammbbiigguuoouuss.  If set to OOnn, words
-              which  have more than one possible completion without any possi-
-              ble partial completion (the possible completions don't  share  a
-              common  prefix)  cause  the matches to be listed immediately in-
+              which have more than one possible completion without any  possi-
+              ble  partial  completion (the possible completions don't share a
+              common prefix) cause the matches to be  listed  immediately  in-
               stead of ringing the bell.
        sshhooww--mmooddee--iinn--pprroommpptt ((OOffff))
-              If set to OOnn, add a string to the beginning of the prompt  indi-
-              cating  the  editing  mode:  emacs, vi command, or vi insertion.
+              If  set to OOnn, add a string to the beginning of the prompt indi-
+              cating the editing mode: emacs, vi  command,  or  vi  insertion.
               The mode strings are user-settable (e.g., _e_m_a_c_s_-_m_o_d_e_-_s_t_r_i_n_g).
        sskkiipp--ccoommpplleetteedd--tteexxtt ((OOffff))
-              If set to OOnn, this alters the default completion  behavior  when
-              inserting  a  single match into the line.  It's only active when
-              performing completion in the middle  of  a  word.   If  enabled,
-              rreeaaddlliinnee  does  not  insert  characters from the completion that
-              match characters after point in the  word  being  completed,  so
+              If  set  to OOnn, this alters the default completion behavior when
+              inserting a single match into the line.  It's only  active  when
+              performing  completion  in  the  middle  of a word.  If enabled,
+              rreeaaddlliinnee does not insert characters  from  the  completion  that
+              match  characters  after  point  in the word being completed, so
               portions of the word following the cursor are not duplicated.
        vvii--ccmmdd--mmooddee--ssttrriinngg ((((ccmmdd))))
-              If  the  _s_h_o_w_-_m_o_d_e_-_i_n_-_p_r_o_m_p_t variable is enabled, this string is
+              If the _s_h_o_w_-_m_o_d_e_-_i_n_-_p_r_o_m_p_t variable is enabled, this  string  is
               displayed immediately before the last line of the primary prompt
-              when vi editing mode is active and in command mode.   The  value
+              when  vi  editing mode is active and in command mode.  The value
               is expanded like a key binding, so the standard set of meta- and
-              control-  prefixes  and backslash escape sequences is available.
-              The \1 and \2 escapes begin and end  sequences  of  non-printing
-              characters,  which  can  be used to embed a terminal control se-
+              control- prefixes and backslash escape sequences  is  available.
+              The  \1  and  \2 escapes begin and end sequences of non-printing
+              characters, which can be used to embed a  terminal  control  se-
               quence into the mode string.
        vvii--iinnss--mmooddee--ssttrriinngg ((((iinnss))))
-              If the _s_h_o_w_-_m_o_d_e_-_i_n_-_p_r_o_m_p_t variable is enabled, this  string  is
+              If  the  _s_h_o_w_-_m_o_d_e_-_i_n_-_p_r_o_m_p_t variable is enabled, this string is
               displayed immediately before the last line of the primary prompt
               when vi editing mode is active and in insertion mode.  The value
               is expanded like a key binding, so the standard set of meta- and
-              control-  prefixes  and backslash escape sequences is available.
-              The \1 and \2 escapes begin and end  sequences  of  non-printing
-              characters,  which  can  be used to embed a terminal control se-
+              control- prefixes and backslash escape sequences  is  available.
+              The  \1  and  \2 escapes begin and end sequences of non-printing
+              characters, which can be used to embed a  terminal  control  se-
               quence into the mode string.
        vviissiibbllee--ssttaattss ((OOffff))
-              If set to OOnn, a character denoting a file's type as reported  by
-              _s_t_a_t(2)  is  appended to the filename when listing possible com-
+              If  set to OOnn, a character denoting a file's type as reported by
+              _s_t_a_t(2) is appended to the filename when listing  possible  com-
               pletions.
 
    CCoonnddiittiioonnaall CCoonnssttrruuccttss
-       RReeaaddlliinnee implements a facility similar in  spirit  to  the  conditional
-       compilation  features  of  the C preprocessor which allows key bindings
-       and variable settings to be performed as the result  of  tests.   There
+       RReeaaddlliinnee  implements  a  facility  similar in spirit to the conditional
+       compilation features of the C preprocessor which  allows  key  bindings
+       and  variable  settings  to be performed as the result of tests.  There
        are four parser directives available.
 
-       $$iiff    The  $$iiff construct allows bindings to be made based on the edit-
-              ing mode, the terminal being  used,  or  the  application  using
-              rreeaaddlliinnee.   The text of the test, after any comparison operator,
+       $$iiff    The $$iiff construct allows bindings to be made based on the  edit-
+              ing  mode,  the  terminal  being  used, or the application using
+              rreeaaddlliinnee.  The text of the test, after any comparison  operator,
               extends to the end of the line; unless otherwise noted, no char-
               acters are required to isolate it.
 
-              mmooddee   The mmooddee== form of the  $$iiff  directive  is  used  to  test
-                     whether  rreeaaddlliinnee  is  in  emacs or vi mode.  This may be
-                     used in conjunction with the sseett kkeeyymmaapp command, for  in-
-                     stance,   to  set  bindings  in  the  _e_m_a_c_s_-_s_t_a_n_d_a_r_d  and
-                     _e_m_a_c_s_-_c_t_l_x keymaps only if rreeaaddlliinnee is  starting  out  in
+              mmooddee   The  mmooddee==  form  of  the  $$iiff  directive is used to test
+                     whether rreeaaddlliinnee is in emacs or vi  mode.   This  may  be
+                     used  in conjunction with the sseett kkeeyymmaapp command, for in-
+                     stance,  to  set  bindings  in  the  _e_m_a_c_s_-_s_t_a_n_d_a_r_d   and
+                     _e_m_a_c_s_-_c_t_l_x  keymaps  only  if rreeaaddlliinnee is starting out in
                      emacs mode.
 
-              tteerrmm   The  tteerrmm==  form may be used to include terminal-specific
+              tteerrmm   The tteerrmm== form may be used to  include  terminal-specific
                      key bindings, perhaps to bind the key sequences output by
                      the terminal's function keys.  The word on the right side
                      of the == is tested against both the full name of the ter-
-                     minal and the portion of the  terminal  name  before  the
-                     first  --.   This  allows  _x_t_e_r_m  to  match both _x_t_e_r_m and
+                     minal  and  the  portion  of the terminal name before the
+                     first --.  This allows  _x_t_e_r_m  to  match  both  _x_t_e_r_m  and
                      _x_t_e_r_m_-_2_5_6_c_o_l_o_r, for instance.
 
               vveerrssiioonn
-                     The vveerrssiioonn test  may  be  used  to  perform  comparisons
-                     against  specific rreeaaddlliinnee versions.  The vveerrssiioonn expands
-                     to the current rreeaaddlliinnee version.  The set  of  comparison
-                     operators  includes  ==,  (and  ====), !!==, <<==, >>==, <<, and >>.
-                     The version number supplied on the right side of the  op-
-                     erator  consists  of  a major version number, an optional
+                     The  vveerrssiioonn  test  may  be  used  to perform comparisons
+                     against specific rreeaaddlliinnee versions.  The vveerrssiioonn  expands
+                     to  the  current rreeaaddlliinnee version.  The set of comparison
+                     operators includes ==, (and ====), !!==, <<==,  >>==,  <<,  and  >>.
+                     The  version number supplied on the right side of the op-
+                     erator consists of a major version  number,  an  optional
                      decimal point, and an optional minor version (e.g., 77..11).
-                     If the minor version is omitted, it defaults to  00.   The
-                     operator  may  be  separated  from the string vveerrssiioonn and
+                     If  the  minor version is omitted, it defaults to 00.  The
+                     operator may be separated from  the  string  vveerrssiioonn  and
                      from the version number argument by whitespace.
 
               _a_p_p_l_i_c_a_t_i_o_n
                      The _a_p_p_l_i_c_a_t_i_o_n construct is used to include application-
-                     specific settings.  Each program using the  rreeaaddlliinnee  li-
-                     brary  sets  the  _a_p_p_l_i_c_a_t_i_o_n _n_a_m_e, and an initialization
+                     specific  settings.   Each program using the rreeaaddlliinnee li-
+                     brary sets the _a_p_p_l_i_c_a_t_i_o_n _n_a_m_e,  and  an  initialization
                      file can test for a particular value.  This could be used
-                     to bind key sequences to functions useful for a  specific
-                     program.   For instance, the following command adds a key
-                     sequence that quotes the  current  or  previous  word  in
+                     to  bind key sequences to functions useful for a specific
+                     program.  For instance, the following command adds a  key
+                     sequence  that  quotes  the  current  or previous word in
                      bbaasshh:
 
                      $$iiff Bash
@@ -552,12 +551,12 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
 
               _v_a_r_i_a_b_l_e
                      The _v_a_r_i_a_b_l_e construct provides simple equality tests for
-                     rreeaaddlliinnee  variables and values.  The permitted comparison
-                     operators are _=, _=_=, and _!_=.  The variable name  must  be
+                     rreeaaddlliinnee variables and values.  The permitted  comparison
+                     operators  are  _=, _=_=, and _!_=.  The variable name must be
                      separated from the comparison operator by whitespace; the
-                     operator  may  be  separated  from the value on the right
-                     hand side by whitespace.  String  and  boolean  variables
-                     may  be tested.  Boolean variables must be tested against
+                     operator may be separated from the  value  on  the  right
+                     hand  side  by  whitespace.  String and boolean variables
+                     may be tested.  Boolean variables must be tested  against
                      the values _o_n and _o_f_f.
 
        $$eellssee  Commands in this branch of the $$iiff directive are executed if the
@@ -567,39 +566,39 @@ IINNIITTIIAALLIIZZAATTIIOONN FFIILLEE
               command.
 
        $$iinncclluuddee
-              This directive takes a single filename as an argument and  reads
+              This  directive takes a single filename as an argument and reads
               commands and key bindings from that file.  For example, the fol-
               lowing directive would read _/_e_t_c_/_i_n_p_u_t_r_c:
 
               $$iinncclluuddee  _/_e_t_c_/_i_n_p_u_t_r_c
 
 SSEEAARRCCHHIINNGG
-       RReeaaddlliinnee  provides  commands  for searching through the command history
-       for lines containing a specified string.  There are two  search  modes:
+       RReeaaddlliinnee provides commands for searching through  the  command  history
+       for  lines  containing a specified string.  There are two search modes:
        _i_n_c_r_e_m_e_n_t_a_l and _n_o_n_-_i_n_c_r_e_m_e_n_t_a_l.
 
-       Incremental  searches  begin  before  the  user has finished typing the
-       search string.  As each character of the search string is typed,  rreeaadd--
+       Incremental searches begin before the  user  has  finished  typing  the
+       search  string.  As each character of the search string is typed, rreeaadd--
        lliinnee displays the next entry from the history matching the string typed
-       so  far.   An  incremental  search  requires only as many characters as
-       needed to find the desired history entry.   When  using  emacs  editing
-       mode,  type  CC--rr  to  search  backward  in the history for a particular
-       string.  Typing CC--ss searches forward through the history.  The  charac-
-       ters  present in the value of the iisseeaarrcchh--tteerrmmiinnaattoorrss variable are used
-       to terminate an incremental search.  If that variable has not been  as-
-       signed  a value, _E_S_C and _C_-_J will terminate an incremental search.  _C_-_g
-       will abort an incremental search and restore the original  line.   When
-       the  search  is  terminated,  the  history  entry containing the search
-       string becomes the current line.
+       so far.  An incremental search requires  only  as  many  characters  as
+       needed  to  find  the  desired history entry.  When using emacs editing
+       mode, type CC--rr to search backward  in  the  history  for  a  particular
+       string.   Typing CC--ss searches forward through the history.  The charac-
+       ters present in the value of the iisseeaarrcchh--tteerrmmiinnaattoorrss variable are  used
+       to  terminate an incremental search.  If that variable has not been as-
+       signed a value, _E_S_C and  CC--jj  terminate  an  incremental  search.   CC--gg
+       aborts  an incremental search and restores the original line.  When the
+       search is terminated, the history entry containing  the  search  string
+       becomes the current line.
 
-       To find other matching entries in the history list, type CC--rr or CC--ss  as
-       appropriate.   This  will search backward or forward in the history for
-       the next entry matching the search string typed so far.  Any other  key
-       sequence bound to a rreeaaddlliinnee command will terminate the search and exe-
-       cute  that  command.  For instance, a newline will terminate the search
-       and accept the line, thereby executing the  command  from  the  history
-       list.  A movement command will terminate the search, make the last line
-       found the current line, and begin editing.
+       To  find other matching entries in the history list, type CC--rr or CC--ss as
+       appropriate.  This searches backward or forward in the history for  the
+       next  entry matching the search string typed so far.  Any other key se-
+       quence bound to a rreeaaddlliinnee command terminates the search  and  executes
+       that  command.   For  instance, a newline terminates the search and ac-
+       cepts the line, thereby executing the command from the history list.  A
+       movement command will terminate the search, make the  last  line  found
+       the current line, and begin editing.
 
        RReeaaddlliinnee remembers the last incremental search string.  If two CC--rrs are
        typed  without any intervening characters defining a new search string,
@@ -631,34 +630,35 @@ EEDDIITTIINNGG CCOOMMMMAANNDDSS
               Move  to the end of the line.  This may also be bound to the End
               key on some keyboards.
        ffoorrwwaarrdd--cchhaarr ((CC--ff))
-              Move forward a character.
+              Move forward a character.  This may also be bound to  the  right
+              arrow key on some keyboards.
        bbaacckkwwaarrdd--cchhaarr ((CC--bb))
               Move back a character.
        ffoorrwwaarrdd--wwoorrdd ((MM--ff))
               Move forward to the end of the next word.  Words are composed of
               alphanumeric characters (letters and digits).
        bbaacckkwwaarrdd--wwoorrdd ((MM--bb))
-              Move back to the start of the current or previous  word.   Words
+              Move  back  to the start of the current or previous word.  Words
               are composed of alphanumeric characters (letters and digits).
        pprreevviioouuss--ssccrreeeenn--lliinnee
-              Attempt  to move point to the same physical screen column on the
-              previous physical screen line.  This will not have  the  desired
-              effect  if  the current rreeaaddlliinnee line does not take up more than
-              one physical line or if point is not greater than the length  of
+              Attempt to move point to the same physical screen column on  the
+              previous  physical  screen line.  This will not have the desired
+              effect if the current rreeaaddlliinnee line does not take up  more  than
+              one  physical line or if point is not greater than the length of
               the prompt plus the screen width.
        nneexxtt--ssccrreeeenn--lliinnee
-              Attempt  to move point to the same physical screen column on the
-              next physical screen line.  This will not have the  desired  ef-
+              Attempt to move point to the same physical screen column on  the
+              next  physical  screen line.  This will not have the desired ef-
               fect if the current rreeaaddlliinnee line does not take up more than one
-              physical  line  or if the length of the current rreeaaddlliinnee line is
+              physical line or if the length of the current rreeaaddlliinnee  line  is
               not greater than the length of the prompt plus the screen width.
        cclleeaarr--ddiissppllaayy ((MM--CC--ll))
-              Clear the screen and, if  possible,  the  terminal's  scrollback
-              buffer,  then  redraw the current line, leaving the current line
+              Clear  the  screen  and,  if possible, the terminal's scrollback
+              buffer, then redraw the current line, leaving the  current  line
               at the top of the screen.
        cclleeaarr--ssccrreeeenn ((CC--ll))
               Clear the screen, then redraw the current line, leaving the cur-
-              rent line at the top of the screen.  With an  argument,  refresh
+              rent  line  at the top of the screen.  With an argument, refresh
               the current line without clearing the screen.
        rreeddrraaww--ccuurrrreenntt--lliinnee
               Refresh the current line.
@@ -667,45 +667,47 @@ EEDDIITTIINNGG CCOOMMMMAANNDDSS
        aacccceepptt--lliinnee ((NNeewwlliinnee,, RReettuurrnn))
               Accept the line regardless of where the cursor is.  If this line
               is non-empty, it may be added to the history list for future re-
-              call  with  aadddd__hhiissttoorryy(()).   If  the  line is a modified history
+              call with aadddd__hhiissttoorryy(()).  If the  line  is  a  modified  history
               line, restore the history line to its original state.
        pprreevviioouuss--hhiissttoorryy ((CC--pp))
               Fetch the previous command from the history list, moving back in
-              the list.
+              the  list.   This  may also be bound to the up arrow key on some
+              keyboards.
        nneexxtt--hhiissttoorryy ((CC--nn))
               Fetch the next command from the history list, moving forward  in
-              the list.
+              the  list.  This may also be bound to the down arrow key on some
+              keyboards.
        bbeeggiinnnniinngg--ooff--hhiissttoorryy ((MM--<<))
               Move to the first line in the history.
        eenndd--ooff--hhiissttoorryy ((MM-->>))
-              Move  to  the end of the input history, i.e., the line currently
+              Move to the end of the input history, i.e., the  line  currently
               being entered.
        ooppeerraattee--aanndd--ggeett--nneexxtt ((CC--oo))
               Accept the current line for return to the calling application as
-              if a newline had been entered, and fetch the next line  relative
+              if  a newline had been entered, and fetch the next line relative
               to the current line from the history for editing.  A numeric ar-
-              gument,  if supplied, specifies the history entry to use instead
+              gument, if supplied, specifies the history entry to use  instead
               of the current line.
        ffeettcchh--hhiissttoorryy
-              With a numeric argument, fetch that entry from the history  list
+              With  a numeric argument, fetch that entry from the history list
               and make it the current line.  Without an argument, move back to
               the first entry in the history list.
        rreevveerrssee--sseeaarrcchh--hhiissttoorryy ((CC--rr))
-              Search  backward  starting  at  the current line and moving "up"
-              through the  history  as  necessary.   This  is  an  incremental
-              search.   This  command  sets the region to the matched text and
-              activates the region.
-       ffoorrwwaarrdd--sseeaarrcchh--hhiissttoorryy ((CC--ss))
-              Search forward starting at the current line  and  moving  "down"
+              Search backward starting at the current  line  and  moving  "up"
               through  the  history  as  necessary.   This  is  an incremental
               search.  This command sets the region to the  matched  text  and
               activates the region.
+       ffoorrwwaarrdd--sseeaarrcchh--hhiissttoorryy ((CC--ss))
+              Search  forward  starting  at the current line and moving "down"
+              through the  history  as  necessary.   This  is  an  incremental
+              search.   This  command  sets the region to the matched text and
+              activates the region.
        nnoonn--iinnccrreemmeennttaall--rreevveerrssee--sseeaarrcchh--hhiissttoorryy ((MM--pp))
               Search backward through the history starting at the current line
-              using  a  non-incremental  search  for  a string supplied by the
+              using a non-incremental search for  a  string  supplied  by  the
               user.  The search string may match anywhere in a history line.
        nnoonn--iinnccrreemmeennttaall--ffoorrwwaarrdd--sseeaarrcchh--hhiissttoorryy ((MM--nn))
-              Search forward  through  the  history  using  a  non-incremental
+              Search  forward  through  the  history  using  a non-incremental
               search for a string supplied by the user.  The search string may
               match anywhere in a history line.
        hhiissttoorryy--sseeaarrcchh--bbaacckkwwaarrdd
@@ -715,46 +717,46 @@ EEDDIITTIINNGG CCOOMMMMAANNDDSS
               non-incremental search.  This may be bound to the Page Up key on
               some keyboards.
        hhiissttoorryy--sseeaarrcchh--ffoorrwwaarrdd
-              Search  forward through the history for the string of characters
+              Search forward through the history for the string of  characters
               between the start of the current line and the point.  The search
               string must match at the beginning of a history line.  This is a
-              non-incremental search.  This may be bound to the Page Down  key
+              non-incremental  search.  This may be bound to the Page Down key
               on some keyboards.
        hhiissttoorryy--ssuubbssttrriinngg--sseeaarrcchh--bbaacckkwwaarrdd
               Search backward through the history for the string of characters
               between the start of the current line and the point.  The search
-              string  may match anywhere in a history line.  This is a non-in-
+              string may match anywhere in a history line.  This is a  non-in-
               cremental search.
        hhiissttoorryy--ssuubbssttrriinngg--sseeaarrcchh--ffoorrwwaarrdd
-              Search forward through the history for the string of  characters
+              Search  forward through the history for the string of characters
               between the start of the current line and the point.  The search
-              string  may match anywhere in a history line.  This is a non-in-
+              string may match anywhere in a history line.  This is a  non-in-
               cremental search.
        yyaannkk--nntthh--aarrgg ((MM--CC--yy))
-              Insert the first argument to the previous command  (usually  the
+              Insert  the  first argument to the previous command (usually the
               second word on the previous line) at point.  With an argument _n,
-              insert  the _nth word from the previous command (the words in the
-              previous command begin with word 0).  A  negative  argument  in-
-              serts  the  _nth word from the end of the previous command.  Once
-              the argument _n is computed, this uses the history expansion  fa-
-              cilities  to extract the _nth word, as if the "!_n" history expan-
+              insert the _nth word from the previous command (the words in  the
+              previous  command  begin  with word 0).  A negative argument in-
+              serts the _nth word from the end of the previous  command.   Once
+              the  argument _n is computed, this uses the history expansion fa-
+              cilities to extract the _nth word, as if the "!_n" history  expan-
               sion had been specified.
        yyaannkk--llaasstt--aarrgg ((MM--..,, MM--__))
-              Insert the last argument to the previous command (the last  word
+              Insert  the last argument to the previous command (the last word
               of the previous history entry).  With a numeric argument, behave
-              exactly  like  yyaannkk--nntthh--aarrgg.   Successive calls to yyaannkk--llaasstt--aarrgg
-              move back through the history list, inserting the last word  (or
-              the  word  specified  by the argument to the first call) of each
+              exactly like yyaannkk--nntthh--aarrgg.  Successive  calls  to  yyaannkk--llaasstt--aarrgg
+              move  back through the history list, inserting the last word (or
+              the word specified by the argument to the first  call)  of  each
               line in turn.  Any numeric argument supplied to these successive
-              calls determines the direction to move through the  history.   A
-              negative  argument  switches  the  direction through the history
-              (back or forward).  This uses the history  expansion  facilities
-              to  extract  the last word, as if the "!$" history expansion had
+              calls  determines  the direction to move through the history.  A
+              negative argument switches the  direction  through  the  history
+              (back  or  forward).  This uses the history expansion facilities
+              to extract the last word, as if the "!$" history  expansion  had
               been specified.
 
    CCoommmmaannddss ffoorr CChhaannggiinngg TTeexxtt
        _e_n_d_-_o_f_-_f_i_l_e ((uussuuaallllyy CC--dd))
-              The character indicating end-of-file as  set,  for  example,  by
+              The  character  indicating  end-of-file  as set, for example, by
               _s_t_t_y(1).  If this character is read when there are no characters
               on the line, and point is at the beginning of the line, rreeaaddlliinnee
               interprets it as the end of input and returns EEOOFF.
@@ -764,213 +766,214 @@ EEDDIITTIINNGG CCOOMMMMAANNDDSS
               above for the effects.  This may also be bound to the Delete key
               on some keyboards.
        bbaacckkwwaarrdd--ddeelleettee--cchhaarr ((RRuubboouutt))
-              Delete  the  character  behind the cursor.  When given a numeric
+              Delete the character behind the cursor.  When  given  a  numeric
               argument, save the deleted text on the kill ring.
        ffoorrwwaarrdd--bbaacckkwwaarrdd--ddeelleettee--cchhaarr
-              Delete the character under the cursor, unless the cursor  is  at
+              Delete  the  character under the cursor, unless the cursor is at
               the end of the line, in which case the character behind the cur-
               sor is deleted.
        qquuootteedd--iinnsseerrtt ((CC--qq,, CC--vv))
-              Add  the next character typed to the line verbatim.  This is how
+              Add the next character typed to the line verbatim.  This is  how
               to insert characters like CC--qq, for example.
        ttaabb--iinnsseerrtt ((MM--TTAABB))
               Insert a tab character.
        sseellff--iinnsseerrtt ((aa,, bb,, AA,, 11,, !!,, ...))
               Insert the character typed.
        bbrraacckkeetteedd--ppaassttee--bbeeggiinn
-              This function is intended to be bound to the  "bracketed  paste"
-              escape  sequence  sent  by some terminals, and such a binding is
-              assigned by default.  It allows rreeaaddlliinnee to  insert  the  pasted
-              text  as  a single unit without treating each character as if it
-              had been read from the keyboard.  The pasted characters are  in-
-              serted  as  if each one was bound to sseellff--iinnsseerrtt instead of exe-
+              This  function  is intended to be bound to the "bracketed paste"
+              escape sequence sent by some terminals, and such  a  binding  is
+              assigned  by  default.   It allows rreeaaddlliinnee to insert the pasted
+              text as a single unit without treating each character as  if  it
+              had  been read from the keyboard.  The pasted characters are in-
+              serted as if each one was bound to sseellff--iinnsseerrtt instead  of  exe-
               cuting any editing commands.
-              Bracketed paste sets the region to the inserted text  and  acti-
+              Bracketed  paste  sets the region to the inserted text and acti-
               vates the region.
        ttrraannssppoossee--cchhaarrss ((CC--tt))
-              Drag  the  character  before point forward over the character at
-              point, moving point forward as well.  If point is at the end  of
-              the  line, then this transposes the two characters before point.
+              Drag the character before point forward over  the  character  at
+              point,  moving point forward as well.  If point is at the end of
+              the line, then this transposes the two characters before  point.
               Negative arguments have no effect.
        ttrraannssppoossee--wwoorrddss ((MM--tt))
-              Drag the word before point past the  word  after  point,  moving
-              point  over  that  word  as well.  If point is at the end of the
+              Drag  the  word  before  point past the word after point, moving
+              point over that word as well.  If point is at  the  end  of  the
               line, this transposes the last two words on the line.
        uuppccaassee--wwoorrdd ((MM--uu))
-              Uppercase the current (or following) word.  With a negative  ar-
+              Uppercase  the current (or following) word.  With a negative ar-
               gument, uppercase the previous word, but do not move point.
        ddoowwnnccaassee--wwoorrdd ((MM--ll))
-              Lowercase  the current (or following) word.  With a negative ar-
+              Lowercase the current (or following) word.  With a negative  ar-
               gument, lowercase the previous word, but do not move point.
        ccaappiittaalliizzee--wwoorrdd ((MM--cc))
               Capitalize the current (or following) word.  With a negative ar-
               gument, capitalize the previous word, but do not move point.
        oovveerrwwrriittee--mmooddee
-              Toggle overwrite mode.  With an explicit positive numeric  argu-
+              Toggle  overwrite mode.  With an explicit positive numeric argu-
               ment, switches to overwrite mode.  With an explicit non-positive
               numeric argument, switches to insert mode.  This command affects
-              only  eemmaaccss mode; vvii mode does overwrite differently.  Each call
+              only eemmaaccss mode; vvii mode does overwrite differently.  Each  call
               to _r_e_a_d_l_i_n_e_(_) starts in insert mode.
-              In overwrite mode, characters bound to sseellff--iinnsseerrtt  replace  the
-              text  at point rather than pushing the text to the right.  Char-
-              acters bound to bbaacckkwwaarrdd--ddeelleettee--cchhaarr replace the  character  be-
-              fore  point  with a space.  By default, this command is unbound,
+              In  overwrite  mode, characters bound to sseellff--iinnsseerrtt replace the
+              text at point rather than pushing the text to the right.   Char-
+              acters  bound  to bbaacckkwwaarrdd--ddeelleettee--cchhaarr replace the character be-
+              fore point with a space.  By default, this command  is  unbound,
               but may be bound to the Insert key on some keyboards.
 
    KKiilllliinngg aanndd YYaannkkiinngg
        kkiillll--lliinnee ((CC--kk))
               Kill the text from point to the end of the current line.  With a
-              negative numeric argument, kill backward from the cursor to  the
+              negative  numeric argument, kill backward from the cursor to the
               beginning of the line.
        bbaacckkwwaarrdd--kkiillll--lliinnee ((CC--xx RRuubboouutt))
               Kill backward to the beginning of the current line.  With a neg-
-              ative  numeric argument, kill forward from the cursor to the end
+              ative numeric argument, kill forward from the cursor to the  end
               of the line.
        uunniixx--lliinnee--ddiissccaarrdd ((CC--uu))
-              Kill backward from point to the beginning of  the  line,  saving
+              Kill  backward  from  point to the beginning of the line, saving
               the killed text on the kill-ring.
        kkiillll--wwhhoollee--lliinnee
-              Kill  all  characters on the current line, no matter where point
+              Kill all characters on the current line, no matter  where  point
               is.
        kkiillll--wwoorrdd ((MM--dd))
-              Kill from point to the end of the current word,  or  if  between
-              words,  to  the  end  of the next word.  Word boundaries are the
+              Kill  from  point  to the end of the current word, or if between
+              words, to the end of the next word.   Word  boundaries  are  the
               same as those used by ffoorrwwaarrdd--wwoorrdd.
        bbaacckkwwaarrdd--kkiillll--wwoorrdd ((MM--RRuubboouutt))
-              Kill the word behind point.  Word boundaries  are  the  same  as
+              Kill  the  word  behind  point.  Word boundaries are the same as
               those used by bbaacckkwwaarrdd--wwoorrdd.
        uunniixx--wwoorrdd--rruubboouutt ((CC--ww))
-              Kill  the  word behind point, using white space as a word bound-
+              Kill the word behind point, using white space as a  word  bound-
               ary, saving the killed text on the kill-ring.
        uunniixx--ffiilleennaammee--rruubboouutt
-              Kill the word behind point, using  white  space  and  the  slash
-              character  as the word boundaries, saving the killed text on the
+              Kill  the  word  behind  point,  using white space and the slash
+              character as the word boundaries, saving the killed text on  the
               kill-ring.
        ddeelleettee--hhoorriizzoonnttaall--ssppaaccee ((MM--\\))
               Delete all spaces and tabs around point.
        kkiillll--rreeggiioonn
               Kill the text in the current region.
        ccooppyy--rreeggiioonn--aass--kkiillll
-              Copy the text in the region to the kill buffer,  so  it  can  be
+              Copy  the  text  in  the region to the kill buffer, so it can be
               yanked immediately.
        ccooppyy--bbaacckkwwaarrdd--wwoorrdd
-              Copy  the word before point to the kill buffer.  The word bound-
+              Copy the word before point to the kill buffer.  The word  bound-
               aries are the same as bbaacckkwwaarrdd--wwoorrdd.
        ccooppyy--ffoorrwwaarrdd--wwoorrdd
-              Copy the word following point to  the  kill  buffer.   The  word
+              Copy  the  word  following  point  to the kill buffer.  The word
               boundaries are the same as ffoorrwwaarrdd--wwoorrdd.
        yyaannkk ((CC--yy))
               Yank the top of the kill ring into the buffer at point.
        yyaannkk--ppoopp ((MM--yy))
-              Rotate  the kill ring, and yank the new top.  Only works follow-
+              Rotate the kill ring, and yank the new top.  Only works  follow-
               ing yyaannkk or yyaannkk--ppoopp.
 
    NNuummeerriicc AArrgguummeennttss
        ddiiggiitt--aarrgguummeenntt ((MM--00,, MM--11,, ...,, MM----))
-              Add this digit to the argument already accumulating, or start  a
+              Add  this digit to the argument already accumulating, or start a
               new argument.  M-- starts a negative argument.
        uunniivveerrssaall--aarrgguummeenntt
-              This  is another way to specify an argument.  If this command is
-              followed by one or more digits, optionally with a leading  minus
-              sign,  those digits define the argument.  If the command is fol-
+              This is another way to specify an argument.  If this command  is
+              followed  by one or more digits, optionally with a leading minus
+              sign, those digits define the argument.  If the command is  fol-
               lowed by digits, executing uunniivveerrssaall--aarrgguummeenntt again ends the nu-
               meric argument, but is otherwise ignored.  As a special case, if
               this command is immediately followed by a character that is nei-
-              ther a digit nor minus sign, the argument  count  for  the  next
-              command  is multiplied by four.  The argument count is initially
-              one, so executing this function the first time makes  the  argu-
+              ther  a  digit  nor  minus sign, the argument count for the next
+              command is multiplied by four.  The argument count is  initially
+              one,  so  executing this function the first time makes the argu-
               ment count four, a second time makes the argument count sixteen,
               and so on.
 
    CCoommpplleettiinngg
        ccoommpplleettee ((TTAABB))
               Attempt to perform completion on the text before point.  The ac-
-              tual  completion  performed  is application-specific.  BBaasshh, for
+              tual completion performed is  application-specific.   BBaasshh,  for
               instance,  attempts  programmable  completion  first,  otherwise
-              treating  the  text  as  a variable (if the text begins with $$),
-              username (if the text begins with ~~), hostname (if the text  be-
-              gins  with  @@),  or  command  (including aliases, functions, and
-              builtins) in turn.  If none of these produces a match, it  falls
-              back  to  filename  completion.   GGddbb, on the other hand, allows
+              treating the text as a variable (if the  text  begins  with  $$),
+              username  (if the text begins with ~~), hostname (if the text be-
+              gins with @@), or  command  (including  aliases,  functions,  and
+              builtins)  in turn.  If none of these produces a match, it falls
+              back to filename completion.  GGddbb, on  the  other  hand,  allows
               completion of program functions and variables, and only attempts
-              filename completion under certain  circumstances.   The  default
+              filename  completion  under  certain circumstances.  The default
               rreeaaddlliinnee completion is filename completion.
        ppoossssiibbllee--ccoommpplleettiioonnss ((MM--??))
-              List  the  possible  completions of the text before point.  When
+              List the possible completions of the text  before  point.   When
               displaying completions, rreeaaddlliinnee sets the number of columns used
-              for display to the value of ccoommpplleettiioonn--ddiissppllaayy--wwiiddtthh, the  value
-              of  the  environment  variable  CCOOLLUUMMNNSS, or the screen width, in
+              for  display to the value of ccoommpplleettiioonn--ddiissppllaayy--wwiiddtthh, the value
+              of the environment variable CCOOLLUUMMNNSS, or  the  screen  width,  in
               that order.
        iinnsseerrtt--ccoommpplleettiioonnss ((MM--**))
-              Insert all completions of the text before point that would  have
+              Insert  all completions of the text before point that would have
               been generated by ppoossssiibbllee--ccoommpplleettiioonnss, separated by a space.
        mmeennuu--ccoommpplleettee
-              Similar  to ccoommpplleettee, but replaces the word to be completed with
-              a single match from the list of possible  completions.   Repeat-
-              edly  executing mmeennuu--ccoommpplleettee steps through the list of possible
-              completions, inserting each match in turn.  At the  end  of  the
-              list  of  completions,  mmeennuu--ccoommpplleettee rings the bell (subject to
-              the setting of bbeellll--ssttyyllee) and restores the original  text.   An
-              argument  of _n moves _n positions forward in the list of matches;
-              a negative argument moves backward through the list.  This  com-
+              Similar to ccoommpplleettee, but replaces the word to be completed  with
+              a  single  match from the list of possible completions.  Repeat-
+              edly executing mmeennuu--ccoommpplleettee steps through the list of  possible
+              completions,  inserting  each  match in turn.  At the end of the
+              list of completions, mmeennuu--ccoommpplleettee rings the  bell  (subject  to
+              the  setting  of bbeellll--ssttyyllee) and restores the original text.  An
+              argument of _n moves _n positions forward in the list of  matches;
+              a  negative argument moves backward through the list.  This com-
               mand is intended to be bound to TTAABB, but is unbound by default.
        mmeennuu--ccoommpplleettee--bbaacckkwwaarrdd
-              Identical  to mmeennuu--ccoommpplleettee, but moves backward through the list
-              of possible completions, as if mmeennuu--ccoommpplleettee had  been  given  a
+              Identical to mmeennuu--ccoommpplleettee, but moves backward through the  list
+              of  possible  completions,  as if mmeennuu--ccoommpplleettee had been given a
               negative argument.  This command is unbound by default.
        eexxppoorrtt--ccoommpplleettiioonnss
-              Perform  completion  on the word before point as described above
-              and write the list of possible completions to rreeaaddlliinnee's  output
-              stream  using the following format, writing information on sepa-
+              Perform completion on the word before point as  described  above
+              and  write the list of possible completions to rreeaaddlliinnee's output
+              stream using the following format, writing information on  sepa-
               rate lines:
 
-              The number of matches;
-              The word being completed;
-              S:E, where S and E are the start and end offsets of the word
-              in the readline line buffer; then
-              Each match, one per line
+              +o      the number of matches _N;
+              +o      the word being completed;
+              +o      _S:_E,  where  S and E are the start and end offsets of the
+                     word in the rreeaaddlliinnee line buffer; then
+              +o      each match, one per line
 
-              If there are no matches, the first line will be 0, and this com-
-              mand will not print any output after the S:E.  If there is  only
-              a  single  match,  this  prints a single line containing it.  If
-              there is more than one match, this prints the common  prefix  of
-              the  matches,  which  may  be empty, on the first line after the
-              S:E, then the matches on subsequent lines.  In this case, N will
+              If there are no matches, the first line will be  "0",  and  this
+              command  does  not  print any output after the _S:_E.  If there is
+              only a single match, this prints a single  line  containing  it.
+              If  there  is more than one match, this prints the common prefix
+              of the matches, which may be empty, on the first line after  the
+              _S:_E, then the matches on subsequent lines.  In this case, _N will
               include the first line with the common prefix.
 
               The user or application should be able to accommodate the possi-
               bility of a blank line.  The intent is that the user or applica-
-              tion reads N lines after the line containing S:E.  This  command
-              is unbound by default.
+              tion  reads  _N lines after the line containing _S:_E to obtain the
+              match list.  This command is unbound by default.
+
        ddeelleettee--cchhaarr--oorr--lliisstt
-              Deletes  the  character under the cursor if not at the beginning
-              or end of the line (like ddeelleettee--cchhaarr).  At the end of the  line,
+              Deletes the character under the cursor if not at  the  beginning
+              or  end of the line (like ddeelleettee--cchhaarr).  At the end of the line,
               it behaves identically to ppoossssiibbllee--ccoommpplleettiioonnss.  This command is
               unbound by default.
 
    KKeeyybbooaarrdd MMaaccrrooss
        ssttaarrtt--kkbbdd--mmaaccrroo ((CC--xx (())
-              Begin  saving  the  characters  typed  into the current keyboard
+              Begin saving the characters  typed  into  the  current  keyboard
               macro.
        eenndd--kkbbdd--mmaaccrroo ((CC--xx ))))
               Stop saving the characters typed into the current keyboard macro
               and store the definition.
        ccaallll--llaasstt--kkbbdd--mmaaccrroo ((CC--xx ee))
-              Re-execute the last keyboard macro defined, by making the  char-
+              Re-execute  the last keyboard macro defined, by making the char-
               acters in the macro appear as if typed at the keyboard.
        pprriinntt--llaasstt--kkbbdd--mmaaccrroo (())
-              Print  the  last keyboard macro defined in a format suitable for
+              Print the last keyboard macro defined in a format  suitable  for
               the _i_n_p_u_t_r_c file.
 
    MMiisscceellllaanneeoouuss
        rree--rreeaadd--iinniitt--ffiillee ((CC--xx CC--rr))
-              Read in the contents of the _i_n_p_u_t_r_c file,  and  incorporate  any
+              Read  in  the  contents of the _i_n_p_u_t_r_c file, and incorporate any
               bindings or variable assignments found there.
        aabboorrtt ((CC--gg))
-              Abort  the  current editing command and ring the terminal's bell
+              Abort the current editing command and ring the  terminal's  bell
               (subject to the setting of bbeellll--ssttyyllee).
        ddoo--lloowweerrccaassee--vveerrssiioonn ((MM--AA,, MM--BB,, MM--_x,, ...))
-              If the metafied character _x is uppercase, run the  command  that
+              If  the  metafied character _x is uppercase, run the command that
               is bound to the corresponding metafied lowercase character.  The
               behavior is undefined if _x is already lowercase.
        pprreeffiixx--mmeettaa ((EESSCC))
@@ -978,34 +981,34 @@ EEDDIITTIINNGG CCOOMMMMAANNDDSS
        uunnddoo ((CC--__,, CC--xx CC--uu))
               Incremental undo, separately remembered for each line.
        rreevveerrtt--lliinnee ((MM--rr))
-              Undo  all changes made to this line.  This is like executing the
-              uunnddoo command enough times to return  the  line  to  its  initial
+              Undo all changes made to this line.  This is like executing  the
+              uunnddoo  command  enough  times  to  return the line to its initial
               state.
        ttiillddee--eexxppaanndd ((MM--~~))
               Perform tilde expansion on the current word.
        sseett--mmaarrkk ((CC--@@,, MM--<<ssppaaccee>>))
-              Set  the  mark to the point.  If a numeric argument is supplied,
+              Set the mark to the point.  If a numeric argument  is  supplied,
               set the mark to that position.
        eexxcchhaannggee--ppooiinntt--aanndd--mmaarrkk ((CC--xx CC--xx))
-              Swap the point with the mark.  Set the current  cursor  position
+              Swap  the  point with the mark.  Set the current cursor position
               to the saved position, then set the mark to the old cursor posi-
               tion.
        cchhaarraacctteerr--sseeaarrcchh ((CC--]]))
-              Read  a  character and move point to the next occurrence of that
-              character.  A negative argument  searches  for  previous  occur-
+              Read a character and move point to the next occurrence  of  that
+              character.   A  negative  argument  searches for previous occur-
               rences.
        cchhaarraacctteerr--sseeaarrcchh--bbaacckkwwaarrdd ((MM--CC--]]))
-              Read  a  character  and move point to the previous occurrence of
+              Read a character and move point to the  previous  occurrence  of
               that character.  A negative argument searches for subsequent oc-
               currences.
        sskkiipp--ccssii--sseeqquueennccee
-              Read enough characters to consume a multi-key sequence  such  as
-              those  defined  for keys like Home and End.  CSI sequences begin
-              with a Control Sequence Indicator (CSI), usually ESC-[.  If this
-              sequence is bound to "\e[", keys producing  CSI  sequences  will
-              have  no  effect  unless explicitly bound to a rreeaaddlliinnee command,
-              instead of inserting stray characters into the  editing  buffer.
-              This is unbound by default, but usually bound to ESC-[.
+              Read  enough  characters to consume a multi-key sequence such as
+              those defined for keys like Home and End.  CSI  sequences  begin
+              with a Control Sequence Indicator (CSI), usually _E_S_C _[.  If this
+              sequence is bound to "\e[", keys producing CSI sequences have no
+              effect unless explicitly bound to a rreeaaddlliinnee command, instead of
+              inserting stray characters into the editing buffer.  This is un-
+              bound by default, but usually bound to _E_S_C _[.
        iinnsseerrtt--ccoommmmeenntt ((MM--##))
               Without  a  numeric  argument,  insert the value of the rreeaaddlliinnee
               ccoommmmeenntt--bbeeggiinn variable at the beginning of the current line.  If
@@ -1279,7 +1282,7 @@ BBUUGG RREEPPOORRTTSS
 
        Once  you have determined that a bug actually exists, mail a bug report
        to _b_u_g_-_r_e_a_d_l_i_n_e@_g_n_u_._o_r_g.  If you have a fix, you are  welcome  to  mail
-       that  as  well!   Suggestions  and  `philosophical'  bug reports may be
+       that  as  well!   Suggestions  and  "philosophical"  bug reports may be
        mailed to  _b_u_g_-_r_e_a_d_l_i_n_e@_g_n_u_._o_r_g  or  posted  to  the  Usenet  newsgroup
        ggnnuu..bbaasshh..bbuugg.
 
@@ -1289,4 +1292,4 @@ BBUUGG RREEPPOORRTTSS
 BBUUGGSS
        It's too big and too slow.
 
-GNU Readline 8.3                2024 October 10                    _R_E_A_D_L_I_N_E(3)
+GNU Readline 8.3               2024 November 29                    _R_E_A_D_L_I_N_E(3)

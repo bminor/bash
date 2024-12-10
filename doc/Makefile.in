@@ -213,6 +213,10 @@ bashref.ps: bashref.dvi
 bashref.pdf: bashref.texi
 bash.pdf: bash.1
 
+builtins.pdf: builtins.1 bash.1
+	$(RM) $@
+	-${GROFF} -I${srcdir} -man -T pdf builtins.1 > $@
+
 article.pdf: article.ps
 rose94.pdf: rose94.ps
 

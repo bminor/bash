@@ -1,6 +1,6 @@
 This is readline.info, produced by makeinfo version 7.1 from rlman.texi.
 
-This manual describes the GNU Readline Library (version 8.3, 15 November
+This manual describes the GNU Readline Library (version 8.3, 29 November
 2024), a library which aids in the consistency of user interface across
 discrete programs which provide a command line interface.
 
@@ -292,19 +292,19 @@ mode, type ‘C-r’ to search backward in the history for a particular
 string.  Typing ‘C-s’ searches forward through the history.  The
 characters present in the value of the ‘isearch-terminators’ variable
 are used to terminate an incremental search.  If that variable has not
-been assigned a value, the <ESC> and ‘C-J’ characters will terminate an
-incremental search.  ‘C-g’ will abort an incremental search and restore
-the original line.  When the search is terminated, the history entry
+been assigned a value, the <ESC> and ‘C-j’ characters terminate an
+incremental search.  ‘C-g’ aborts an incremental search and restores the
+original line.  When the search is terminated, the history entry
 containing the search string becomes the current line.
 
    To find other matching entries in the history list, type ‘C-r’ or
-‘C-s’ as appropriate.  This will search backward or forward in the
-history for the next entry matching the search string typed so far.  Any
-other key sequence bound to a Readline command will terminate the search
-and execute that command.  For instance, a <RET> will terminate the
-search and accept the line, thereby executing the command from the
-history list.  A movement command will terminate the search, make the
-last line found the current line, and begin editing.
+‘C-s’ as appropriate.  This searches backward or forward in the history
+for the next entry matching the search string typed so far.  Any other
+key sequence bound to a Readline command terminates the search and
+executes that command.  For instance, a <RET> terminates the search and
+accepts the line, thereby executing the command from the history list.
+A movement command will terminate the search, make the last line found
+the current line, and begin editing.
 
    Readline remembers the last incremental search string.  If two ‘C-r’s
 are typed without any intervening characters defining a new search
@@ -329,7 +329,7 @@ environment variable ‘INPUTRC’.  If that variable is unset, the default
 is ‘~/.inputrc’.  If that file does not exist or cannot be read,
 Readline looks for ‘/etc/inputrc’.
 
-   When a program which uses the Readline library starts up, Readline
+   When a program that uses the Readline library starts up, Readline
 reads the init file and sets any variables and key bindings it contains.
 
    In addition, the ‘C-x C-r’ command re-reads this init file, thus
@@ -445,8 +445,8 @@ Variable Settings
           The number of screen columns used to display possible matches
           when performing completion.  The value is ignored if it is
           less than 0 or greater than the terminal screen width.  A
-          value of 0 will cause matches to be displayed one per line.
-          The default value is -1.
+          value of 0 causes matches to be displayed one per line.  The
+          default value is -1.
 
      ‘completion-ignore-case’
           If set to ‘on’, Readline performs filename matching and
@@ -470,19 +470,19 @@ Variable Settings
           The number of possible completions that determines when the
           user is asked whether the list of possibilities should be
           displayed.  If the number of possible completions is greater
-          than or equal to this value, Readline will ask whether or not
-          the user wishes to view them; otherwise, Readline simply lists
-          the completions.  This variable must be set to an integer
-          value greater than or equal to zero.  A zero value means
-          Readline should never ask; negative values are treated as
-          zero.  The default limit is ‘100’.
+          than or equal to this value, Readline asks whether or not the
+          user wishes to view them; otherwise, Readline simply lists the
+          completions.  This variable must be set to an integer value
+          greater than or equal to zero.  A zero value means Readline
+          should never ask; negative values are treated as zero.  The
+          default limit is ‘100’.
 
      ‘convert-meta’
-          If set to ‘on’, Readline will convert characters it reads that
+          If set to ‘on’, Readline converts characters it reads that
           have the eighth bit set to an ASCII key sequence by clearing
           the eighth bit and prefixing an <ESC> character, converting
           them to a meta-prefixed key sequence.  The default value is
-          ‘on’, but Readline will set it to ‘off’ if the locale contains
+          ‘on’, but Readline sets it to ‘off’ if the locale contains
           characters whose encodings may include bytes with the eighth
           bit set.  This variable is dependent on the ‘LC_CTYPE’ locale
           category, and may change if the locale changes.  This variable
@@ -490,9 +490,9 @@ Variable Settings
           ‘force-meta-prefix’ below.
 
      ‘disable-completion’
-          If set to ‘On’, Readline will inhibit word completion.
-          Completion characters will be inserted into the line as if
-          they had been mapped to ‘self-insert’.  The default is ‘off’.
+          If set to ‘On’, Readline inhibits word completion.  Completion
+          characters are inserted into the line as if they had been
+          mapped to ‘self-insert’.  The default is ‘off’.
 
      ‘echo-control-characters’
           When set to ‘on’, on operating systems that indicate they
@@ -538,18 +538,18 @@ Variable Settings
           appearing in the pasted text.  The default is ‘On’.
 
      ‘enable-keypad’
-          When set to ‘on’, Readline will try to enable the application
+          When set to ‘on’, Readline tries to enable the application
           keypad when it is called.  Some systems need this to enable
           the arrow keys.  The default is ‘off’.
 
      ‘enable-meta-key’
-          When set to ‘on’, Readline will try to enable any meta
-          modifier key the terminal claims to support when it is called.
-          On many terminals, the Meta key is used to send eight-bit
-          characters; this variable checks for the terminal capability
-          that indicates the terminal can enable and disable a mode that
-          sets the eighth bit of a character (0200) if the Meta key is
-          held down when the character is typed (a meta character).  The
+          When set to ‘on’, Readline tries to enable any meta modifier
+          key the terminal claims to support when it is called.  On many
+          terminals, the Meta key is used to send eight-bit characters;
+          this variable checks for the terminal capability that
+          indicates the terminal can enable and disable a mode that sets
+          the eighth bit of a character (0200) if the Meta key is held
+          down when the character is typed (a meta character).  The
           default is ‘on’.
 
      ‘expand-tilde’
@@ -593,22 +593,22 @@ Variable Settings
           default, this variable is set to ‘off’.
 
      ‘input-meta’
-          If set to ‘on’, Readline will enable eight-bit input (that is,
-          it will not clear the eighth bit in the characters it reads),
+          If set to ‘on’, Readline enables eight-bit input (that is, it
+          does not clear the eighth bit in the characters it reads),
           regardless of what the terminal claims it can support.  The
-          default value is ‘off’, but Readline will set it to ‘on’ if
-          the locale contains characters whose encodings may include
-          bytes with the eighth bit set.  This variable is dependent on
-          the ‘LC_CTYPE’ locale category, and its value may change if
-          the locale changes.  The name ‘meta-flag’ is a synonym for
+          default value is ‘off’, but Readline sets it to ‘on’ if the
+          locale contains characters whose encodings may include bytes
+          with the eighth bit set.  This variable is dependent on the
+          ‘LC_CTYPE’ locale category, and its value may change if the
+          locale changes.  The name ‘meta-flag’ is a synonym for
           ‘input-meta’.
 
      ‘isearch-terminators’
           The string of characters that should terminate an incremental
           search without subsequently executing the character as a
           command (*note Searching::).  If this variable has not been
-          given a value, the characters <ESC> and ‘C-J’ will terminate
-          an incremental search.
+          given a value, the characters <ESC> and ‘C-j’ terminate an
+          incremental search.
 
      ‘keymap’
           Sets Readline's idea of the current keymap for key binding
@@ -625,23 +625,23 @@ Variable Settings
           reading an ambiguous key sequence (one that can form a
           complete key sequence using the input read so far, or can take
           additional input to complete a longer key sequence).  If
-          Readline doesn't receive any input within the timeout, it will
-          use the shorter but complete key sequence.  Readline uses this
+          Readline doesn't receive any input within the timeout, it uses
+          the shorter but complete key sequence.  Readline uses this
           value to determine whether or not input is available on the
           current input source (‘rl_instream’ by default).  The value is
           specified in milliseconds, so a value of 1000 means that
           Readline will wait one second for additional input.  If this
           variable is set to a value less than or equal to zero, or to a
-          non-numeric value, Readline will wait until another key is
-          pressed to decide which key sequence to complete.  The default
-          value is ‘500’.
+          non-numeric value, Readline waits until another key is pressed
+          to decide which key sequence to complete.  The default value
+          is ‘500’.
 
      ‘mark-directories’
           If set to ‘on’, completed directory names have a slash
           appended.  The default is ‘on’.
 
      ‘mark-modified-lines’
-          When this variable is set to ‘on’, Readline will to display an
+          When this variable is set to ‘on’, Readline displays an
           asterisk (‘*’) at the start of history lines which have been
           modified.  This variable is ‘off’ by default.
 
@@ -663,24 +663,24 @@ Variable Settings
           cycling through the list.  The default is ‘off’.
 
      ‘output-meta’
-          If set to ‘on’, Readline will display characters with the
-          eighth bit set directly rather than as a meta-prefixed escape
-          sequence.  The default is ‘off’, but Readline will set it to
-          ‘on’ if the locale contains characters whose encodings may
-          include bytes with the eighth bit set.  This variable is
-          dependent on the ‘LC_CTYPE’ locale category, and its value may
-          change if the locale changes.
+          If set to ‘on’, Readline displays characters with the eighth
+          bit set directly rather than as a meta-prefixed escape
+          sequence.  The default is ‘off’, but Readline sets it to ‘on’
+          if the locale contains characters whose encodings may include
+          bytes with the eighth bit set.  This variable is dependent on
+          the ‘LC_CTYPE’ locale category, and its value may change if
+          the locale changes.
 
      ‘page-completions’
-          If set to ‘on’, Readline uses an internal ‘more’-like pager to
-          display a screenful of possible completions at a time.  This
-          variable is ‘on’ by default.
+          If set to ‘on’, Readline uses an internal pager resembling
+          more(1) to display a screenful of possible completions at a
+          time.  This variable is ‘on’ by default.
 
      ‘prefer-visible-bell’
           See ‘bell-style’.
 
      ‘print-completions-horizontally’
-          If set to ‘on’, Readline will display completions with matches
+          If set to ‘on’, Readline displays completions with matches
           sorted horizontally in alphabetical order, rather than down
           the screen.  The default is ‘off’.
 
@@ -1109,10 +1109,12 @@ File: readline.info,  Node: Commands For Moving,  Next: Commands For History,  U
      on some keyboards.
 
 ‘forward-char (C-f)’
-     Move forward a character.
+     Move forward a character.  This may also be bound to the right
+     arrow key on some keyboards.
 
 ‘backward-char (C-b)’
-     Move back a character.
+     Move back a character.  This may also be bound to the left arrow
+     key on some keyboards.
 
 ‘forward-word (M-f)’
      Move forward to the end of the next word.  Words are composed of
@@ -1162,10 +1164,12 @@ File: readline.info,  Node: Commands For History,  Next: Commands For Text,  Pre
 
 ‘previous-history (C-p)’
      Move 'back' through the history list, fetching the previous
-     command.
+     command.  This may also be bound to the up arrow key on some
+     keyboards.
 
 ‘next-history (C-n)’
      Move 'forward' through the history list, fetching the next command.
+     This may also be bound to the down arrow key on some keyboards.
 
 ‘beginning-of-history (M-<)’
      Move to the first line in the history.
@@ -1482,19 +1486,19 @@ File: readline.info,  Node: Commands For Completion,  Next: Keyboard Macros,  Pr
      write the list of possible completions to Readline's output stream
      using the following format, writing information on separate lines:
 
-          The number of matches;
-          The word being completed;
-          S:E, where S and E are the start and end offsets of the word
-          in the readline line buffer; then
-          Each match, one per line
+        • the number of matches N;
+        • the word being completed;
+        • S:E, where S and E are the start and end offsets of the word
+          in the Readline line buffer; then
+        • each match, one per line
 
-     If there are no matches, the first line will be 0, and this command
-     will not print any output after the S:E. If there is only a single
-     match, this prints a single line containing it.  If there is more
-     than one match, this prints the common prefix of the matches, which
-     may be empty, on the first line after the S:E, then the matches on
-     subsequent lines.  In this case, N will include the first line with
-     the common prefix.
+     If there are no matches, the first line will be "0", and this
+     command does not print any output after the S:E.  If there is only
+     a single match, this prints a single line containing it.  If there
+     is more than one match, this prints the common prefix of the
+     matches, which may be empty, on the first line after the S:E, then
+     the matches on subsequent lines.  In this case, N will include the
+     first line with the common prefix.
 
      The user or application should be able to accommodate the
      possibility of a blank line.  The intent is that the user or
@@ -1581,11 +1585,11 @@ File: readline.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up:
 ‘skip-csi-sequence ()’
      Read enough characters to consume a multi-key sequence such as
      those defined for keys like Home and End.  CSI sequences begin with
-     a Control Sequence Indicator (CSI), usually ESC-[.  If this
-     sequence is bound to "\e[", keys producing CSI sequences will have
-     no effect unless explicitly bound to a Readline command, instead of
+     a Control Sequence Indicator (CSI), usually ‘ESC [’.  If this
+     sequence is bound to "\e[", keys producing CSI sequences have no
+     effect unless explicitly bound to a Readline command, instead of
      inserting stray characters into the editing buffer.  This is
-     unbound by default, but usually bound to ESC-[.
+     unbound by default, but usually bound to ‘ESC [’.
 
 ‘insert-comment (M-#)’
      Without a numeric argument, insert the value of the ‘comment-begin’
@@ -4908,15 +4912,15 @@ Function and Variable Index
                                                               (line  48)
 * active-region-start-color:             Readline Init File Syntax.
                                                               (line  35)
-* backward-char (C-b):                   Commands For Moving. (line  17)
+* backward-char (C-b):                   Commands For Moving. (line  18)
 * backward-delete-char (Rubout):         Commands For Text.   (line  18)
 * backward-kill-line (C-x Rubout):       Commands For Killing.
                                                               (line  11)
 * backward-kill-word (M-<DEL>):          Commands For Killing.
                                                               (line  28)
-* backward-word (M-b):                   Commands For Moving. (line  24)
+* backward-word (M-b):                   Commands For Moving. (line  26)
 * beginning-of-history (M-<):            Commands For History.
-                                                              (line  19)
+                                                              (line  21)
 * beginning-of-line (C-a):               Commands For Moving. (line   6)
 * bell-style:                            Readline Init File Syntax.
                                                               (line  61)
@@ -4931,8 +4935,8 @@ Function and Variable Index
                                                               (line  41)
 * character-search-backward (M-C-]):     Miscellaneous Commands.
                                                               (line  45)
-* clear-display (M-C-l):                 Commands For Moving. (line  42)
-* clear-screen (C-l):                    Commands For Moving. (line  47)
+* clear-display (M-C-l):                 Commands For Moving. (line  44)
+* clear-screen (C-l):                    Commands For Moving. (line  49)
 * colored-completion-prefix:             Readline Init File Syntax.
                                                               (line  81)
 * colored-stats:                         Readline Init File Syntax.
@@ -4995,7 +4999,7 @@ Function and Variable Index
 * end-kbd-macro (C-x )):                 Keyboard Macros.     (line   9)
 * end-of-file (usually C-d):             Commands For Text.   (line   6)
 * end-of-history (M->):                  Commands For History.
-                                                              (line  22)
+                                                              (line  24)
 * end-of-line (C-e):                     Commands For Moving. (line  10)
 * exchange-point-and-mark (C-x C-x):     Miscellaneous Commands.
                                                               (line  37)
@@ -5006,26 +5010,26 @@ Function and Variable Index
 * export-completions ():                 Commands For Completion.
                                                               (line  38)
 * fetch-history ():                      Commands For History.
-                                                              (line 105)
+                                                              (line 107)
 * force-meta-prefix:                     Readline Init File Syntax.
                                                               (line 216)
 * forward-backward-delete-char ():       Commands For Text.   (line  23)
 * forward-char (C-f):                    Commands For Moving. (line  14)
 * forward-search-history (C-s):          Commands For History.
-                                                              (line  32)
-* forward-word (M-f):                    Commands For Moving. (line  20)
+                                                              (line  34)
+* forward-word (M-f):                    Commands For Moving. (line  22)
 * history-preserve-point:                Readline Init File Syntax.
                                                               (line 229)
 * history-search-backward ():            Commands For History.
-                                                              (line  50)
+                                                              (line  52)
 * history-search-forward ():             Commands For History.
-                                                              (line  57)
+                                                              (line  59)
 * history-size:                          Readline Init File Syntax.
                                                               (line 235)
 * history-substring-search-backward ():  Commands For History.
-                                                              (line  64)
+                                                              (line  66)
 * history-substring-search-forward ():   Commands For History.
-                                                              (line  70)
+                                                              (line  72)
 * horizontal-scroll-mode:                Readline Init File Syntax.
                                                               (line 244)
 * input-meta:                            Readline Init File Syntax.
@@ -5061,14 +5065,14 @@ Function and Variable Index
 * meta-flag:                             Readline Init File Syntax.
                                                               (line 252)
 * next-history (C-n):                    Commands For History.
-                                                              (line  16)
-* next-screen-line ():                   Commands For Moving. (line  35)
+                                                              (line  17)
+* next-screen-line ():                   Commands For Moving. (line  37)
 * non-incremental-forward-search-history (M-n): Commands For History.
-                                                              (line  44)
+                                                              (line  46)
 * non-incremental-reverse-search-history (M-p): Commands For History.
-                                                              (line  38)
+                                                              (line  40)
 * operate-and-get-next (C-o):            Commands For History.
-                                                              (line  98)
+                                                              (line 100)
 * output-meta:                           Readline Init File Syntax.
                                                               (line 322)
 * overwrite-mode ():                     Commands For Text.   (line  73)
@@ -5080,15 +5084,15 @@ Function and Variable Index
                                                               (line  19)
 * previous-history (C-p):                Commands For History.
                                                               (line  12)
-* previous-screen-line ():               Commands For Moving. (line  28)
+* previous-screen-line ():               Commands For Moving. (line  30)
 * print-last-kbd-macro ():               Keyboard Macros.     (line  17)
 * quoted-insert (C-q or C-v):            Commands For Text.   (line  28)
 * re-read-init-file (C-x C-r):           Miscellaneous Commands.
                                                               (line   6)
 * readline:                              Basic Behavior.      (line  11)
-* redraw-current-line ():                Commands For Moving. (line  51)
+* redraw-current-line ():                Commands For Moving. (line  53)
 * reverse-search-history (C-r):          Commands For History.
-                                                              (line  26)
+                                                              (line  28)
 * revert-all-at-newline:                 Readline Init File Syntax.
                                                               (line 344)
 * revert-line (M-r):                     Miscellaneous Commands.
@@ -5428,9 +5432,9 @@ Function and Variable Index
 * yank (C-y):                            Commands For Killing.
                                                               (line  63)
 * yank-last-arg (M-. or M-_):            Commands For History.
-                                                              (line  86)
+                                                              (line  88)
 * yank-nth-arg (M-C-y):                  Commands For History.
-                                                              (line  76)
+                                                              (line  78)
 * yank-pop (M-y):                        Commands For Killing.
                                                               (line  66)
 
@@ -5446,50 +5450,50 @@ Node: Readline Movement Commands7601
 Node: Readline Killing Commands8601
 Node: Readline Arguments10628
 Node: Searching11689
-Node: Readline Init File13920
-Node: Readline Init File Syntax15118
-Node: Conditional Init Constructs41510
-Node: Sample Init File45899
-Node: Bindable Readline Commands49024
-Node: Commands For Moving50408
-Node: Commands For History52338
-Node: Commands For Text57543
-Node: Commands For Killing61388
-Node: Numeric Arguments63844
-Node: Commands For Completion65000
-Node: Keyboard Macros68270
-Node: Miscellaneous Commands68975
-Node: Readline vi Mode73299
-Node: Programming with GNU Readline75196
-Node: Basic Behavior76182
-Node: Custom Functions80245
-Node: Readline Typedefs81767
-Node: Function Writing83653
-Node: Readline Variables84959
-Node: Readline Convenience Functions99913
-Node: Function Naming100989
-Node: Keymaps102320
-Node: Binding Keys105482
-Node: Associating Function Names and Bindings110307
-Node: Allowing Undoing114137
-Node: Redisplay116887
-Node: Modifying Text121189
-Node: Character Input122728
-Node: Terminal Management125885
-Node: Utility Functions127772
-Node: Miscellaneous Functions130882
-Node: Alternate Interface134772
-Node: A Readline Example137667
-Node: Alternate Interface Example139585
-Node: Readline Signal Handling143204
-Node: Custom Completers152754
-Node: How Completing Works153474
-Node: Completion Functions156850
-Node: Completion Variables160517
-Node: A Short Completion Example178835
-Node: GNU Free Documentation License191504
-Node: Concept Index216681
-Node: Function and Variable Index218202
+Node: Readline Init File13902
+Node: Readline Init File Syntax15099
+Node: Conditional Init Constructs41427
+Node: Sample Init File45816
+Node: Bindable Readline Commands48941
+Node: Commands For Moving50325
+Node: Commands For History52396
+Node: Commands For Text57738
+Node: Commands For Killing61583
+Node: Numeric Arguments64039
+Node: Commands For Completion65195
+Node: Keyboard Macros68478
+Node: Miscellaneous Commands69183
+Node: Readline vi Mode73514
+Node: Programming with GNU Readline75411
+Node: Basic Behavior76397
+Node: Custom Functions80460
+Node: Readline Typedefs81982
+Node: Function Writing83868
+Node: Readline Variables85174
+Node: Readline Convenience Functions100128
+Node: Function Naming101204
+Node: Keymaps102535
+Node: Binding Keys105697
+Node: Associating Function Names and Bindings110522
+Node: Allowing Undoing114352
+Node: Redisplay117102
+Node: Modifying Text121404
+Node: Character Input122943
+Node: Terminal Management126100
+Node: Utility Functions127987
+Node: Miscellaneous Functions131097
+Node: Alternate Interface134987
+Node: A Readline Example137882
+Node: Alternate Interface Example139800
+Node: Readline Signal Handling143419
+Node: Custom Completers152969
+Node: How Completing Works153689
+Node: Completion Functions157065
+Node: Completion Variables160732
+Node: A Short Completion Example179050
+Node: GNU Free Documentation License191719
+Node: Concept Index216896
+Node: Function and Variable Index218417
 
 End Tag Table
 

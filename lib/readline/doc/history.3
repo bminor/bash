@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Oct 10 16:50:53 EDT 2024
+.\"	Last Change: Fri Nov 29 18:17:58 EST 2024
 .\"
-.TH HISTORY 3 "2024 October 10" "GNU History 8.3"
+.TH HISTORY 3 "2024 November 29" "GNU History 8.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -18,7 +18,7 @@
 .\}
 .el \{\
 .ds ' '
-.\" not usable in macro arguments on AT&T troff (DWB, Solaris 10)
+.\" \*" is not usable in macro arguments on AT&T troff (DWB, Solaris 10)
 .ds " ""\" two adjacent quotes and no space before this comment
 .ds ^ ^
 .ds ~ ~
@@ -26,6 +26,7 @@
 .
 .\" Fix broken EX/EE macros on DWB troff.
 .\" Detect it: only DWB sets up a `)Y` register.
+.if \n(.g .nr )Y 0 \" silence "groff -wreg" warning
 .if \n()Y \{\
 .\" Revert the undesired changes to indentation.
 .am EX
@@ -38,10 +39,15 @@
 .
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
+.\" \% at the beginning of the string protects the filename from hyphenation.
 .\"
 .de FN
 \%\fI\|\\$1\|\fP
 ..
+.\"
+.\" Quotation macro: generate consistent quoted strings that don't rely
+.\" on the presence of the `CW' constant-width font.
+.\"
 .de Q
 .ie \n(.g \(lq\\$1\(rq\\$2
 .el \{\
@@ -230,7 +236,7 @@ The first argument: word 1.
 .TP
 .B $
 The last word.
-This is usually the last argument, but will expand to the
+This is usually the last argument, but expands to the
 zeroth word if there is only one word in the line.
 .TP
 .B %
@@ -312,7 +318,7 @@ in the event line.
 Any character may be used as the delimiter in place of /.
 The final delimiter is optional if it is the last character of the
 event line.
-A single backslash will quote the delimiter in
+A single backslash quotes the delimiter in
 .I old
 and
 .IR new .
@@ -320,7 +326,7 @@ If & appears in
 .IR new ,
 it is replaced with
 .IR old .
-A single backslash will quote the &.
+A single backslash quotes the &.
 If
 .I old
 is null, it is set to the last
@@ -399,11 +405,13 @@ declared as follows:
 .Vb "typedef void *" histdata_t;
 .PP
 .nf
+.EX
 typedef struct _hist_entry {
   char *line;
   char *timestamp;
   histdata_t data;
 } HIST_ENTRY;
+.EE
 .fi
 .PP
 The history list itself might therefore be declared as
@@ -641,7 +649,9 @@ Returns the text of the history event beginning at \fIstring\fP +
 specifier.  At function entry, \fIcindex\fP points to the index into
 \fIstring\fP where the history event specification begins.  \fIqchar\fP
 is a character that is allowed to end the event specification in addition
-to the ``normal'' terminating characters.
+to the
+.Q normal
+terminating characters.
 .PP
 .F1 "char **" history_tokenize "const char *string"
 Return an array of tokens parsed out of \fIstring\fP, much as the
@@ -673,16 +683,20 @@ If non-zero, timestamps are written to the history file, so they can be
 preserved between sessions.  The default value is 0, meaning that
 timestamps are not saved.
 The current timestamp format uses the value of \fIhistory_comment_char\fP
-to delimit timestamp entries in the history file.  If that variable does
-not have a value (the default), timestamps will not be written.
+to delimit timestamp entries in the history file.
+If that variable does
+not have a value (the default),
+the history library will not write timestamps.
 .PP
 .Vb char history_expansion_char
-The character that introduces a history event.  The default is \fB!\fP.
+The character that introduces a history event.
+The default is \fB!\fP.
 Setting this to 0 inhibits history expansion.
 .PP
 .Vb char history_subst_char
 The character that invokes word substitution if found at the start of
-a line.  The default is \fB\*^\fP.
+a line.
+The default is \fB\*^\fP.
 .PP
 .Vb char history_comment_char
 During tokenization, if this character is seen as the first character
@@ -714,13 +728,15 @@ The default value is 0.
 .PP
 .Vb int history_quoting_state
 An application may set this variable to indicate that the current line
-being expanded is subject to existing quoting. If set to \fI\*'\fP, the
-history expansion function will assume that the line is single-quoted and
-inhibit expansion until it reads an unquoted closing single quote; if set
-to \fI\*"\fP, history expansion will assume the line is double quoted until
-it reads an unquoted closing double quote. If set to zero, the default,
-the history expansion function will assume the line is not quoted and
-treat quote characters within the line as described above.
+being expanded is subject to existing quoting.
+If set to \fI\*'\fP,
+history expansion assumes that the line is single-quoted and
+inhibit expansion until it reads an unquoted closing single quote;
+if set to \fI\*"\fP, history expansion assumes the line is double quoted
+until it reads an unquoted closing double quote.
+If set to zero, the default,
+history expansion assumes the line is not quoted and
+treats quote characters within the line as described above.
 This is only effective if \fBhistory_quotes_inhibit_expansion\fP is set.
 .PP
 .Vb "rl_linebuf_func_t *" history_inhibit_expansion_function
@@ -770,7 +786,9 @@ library that you have.
 Once you have determined that a bug actually exists, mail a
 bug report to \fIbug\-readline\fP@\fIgnu.org\fP.
 If you have a fix, you are welcome to mail that
-as well!  Suggestions and `philosophical' bug reports may be mailed
+as well!  Suggestions and
+.Q philosophical
+bug reports may be mailed
 to \fIbug\-readline\fP@\fIgnu.org\fP or posted to the Usenet
 newsgroup
 .BR gnu.bash.bug .
