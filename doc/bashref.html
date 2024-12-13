@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 29 November 2024).
+the Bash shell (version 5.3, 12 December 2024).
 
-This is Edition 5.3, last updated 29 November 2024,
+This is Edition 5.3, last updated 12 December 2024,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 29 November 2024).
+the Bash shell (version 5.3, 12 December 2024).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 29 November 2024,
+<p>This is Edition 5.3, last updated 12 December 2024,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -8180,10 +8180,23 @@ is initialized to 1 each time the shell is invoked.
 </dd>
 <dt><a id="index-PIPESTATUS"></a><span><code class="code">PIPESTATUS</code><a class="copiable-link" href="#index-PIPESTATUS"> &para;</a></span></dt>
 <dd><p>An array variable (see <a class="pxref" href="#Arrays">Arrays</a>)
-containing a list of exit status values from the processes
+containing a list of exit status values from the commands
 in the most-recently-executed foreground pipeline, which may
 consist of only a simple command
 (see <a class="pxref" href="#Shell-Commands">Shell Commands</a>).
+Bash sets
+<code class="code">PIPESTATUS</code>
+after executing multi-element pipelines,
+timed and negated pipelines,
+simple commands,
+subshells created with the &lsquo;<samp class="samp">(</samp>&rsquo; operator,
+the
+<code class="code">[[</code>
+and
+<code class="code">((</code>
+compound commands, and
+after error conditions that result in the
+shell aborting command execution.
 </p>
 </dd>
 <dt><a id="index-POSIXLY_005fCORRECT"></a><span><code class="code">POSIXLY_CORRECT</code><a class="copiable-link" href="#index-POSIXLY_005fCORRECT"> &para;</a></span></dt>
@@ -11549,6 +11562,9 @@ completions that is displayed without modification.
 When set to a value greater than zero, Readline
 replaces common prefixes longer than this value
 with an ellipsis when displaying possible completions.
+If a completion begins with a period,
+and Readline is completing filenames,
+it uses three underscores instead of an ellipsis.
 </p>
 </dd>
 <dt><a id="index-completion_002dquery_002ditems"></a><span><code class="code">completion-query-items</code><a class="copiable-link" href="#index-completion_002dquery_002ditems"> &para;</a></span></dt>

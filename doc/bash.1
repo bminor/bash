@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Nov 29 18:17:43 EST 2024
+.\"	Last Change: Thu Dec 12 13:37:07 EST 2024
 .\"
 .\" bash_builtins, strip all but Builtins section
 .\"
@@ -17,7 +17,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 November 29" "GNU Bash 5.3"
+.TH BASH 1 "2024 December 12" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -2116,13 +2116,27 @@ The default is system-dependent.
 .B PIPESTATUS
 An array variable (see
 .B Arrays
-below) containing a list of exit status values from the processes
+below) containing a list of exit status values from the commands
 in the most-recently-executed foreground pipeline, which may
 consist of only a simple command
 (see
 .SM
 .B "SHELL GRAMMAR"
 above).
+\fBBash\fP sets
+.SM
+.B PIPESTATUS
+after executing multi-element pipelines,
+timed and negated pipelines,
+simple commands,
+subshells created with the ( operator,
+the
+.B [[
+and
+.B ((
+compound commands, and
+after error conditions that result in the
+shell aborting command execution.
 .TP
 .B PPID
 The process ID of the shell's parent.
@@ -6803,6 +6817,9 @@ completions that is displayed without modification.
 When set to a value greater than zero, \fBreadline\fP
 replaces common prefixes longer than this value
 with an ellipsis when displaying possible completions.
+If a completion begins with a period,
+and \fBeadline\fP is completing filenames,
+it uses three underscores instead of an ellipsis.
 .TP
 .B completion\-query\-items (100)
 This determines when the user is queried about viewing

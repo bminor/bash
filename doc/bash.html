@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 November 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 December 12<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2679,7 +2679,7 @@ The default is system-dependent.
 An array variable (see
 <B>Arrays</B>
 
-below) containing a list of exit status values from the processes
+below) containing a list of exit status values from the commands
 in the most-recently-executed foreground pipeline, which may
 consist of only a simple command
 (see
@@ -2687,6 +2687,23 @@ consist of only a simple command
 
 </FONT>
 above).
+<B>Bash</B> sets
+<FONT SIZE=-1><B>PIPESTATUS</B>
+
+</FONT>
+after executing multi-element pipelines,
+timed and negated pipelines,
+simple commands,
+subshells created with the ( operator,
+the
+<B>[[</B>
+
+and
+<B>((</B>
+
+compound commands, and
+after error conditions that result in the
+shell aborting command execution.
 <DT><B>PPID</B>
 
 <DD>
@@ -8625,6 +8642,9 @@ completions that is displayed without modification.
 When set to a value greater than zero, <B>readline</B>
 replaces common prefixes longer than this value
 with an ellipsis when displaying possible completions.
+If a completion begins with a period,
+and <B>eadline</B> is completing filenames,
+it uses three underscores instead of an ellipsis.
 <DT><B>completion-query-items (100)</B>
 
 <DD>
@@ -16566,7 +16586,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 November 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 December 12<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16675,7 +16695,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20241126/doc/bash.1.<BR>
-Time: 07 December 2024 09:58:26 PST
+This document was created by man2html from /usr/local/src/bash/bash-20241207/doc/bash.1.<BR>
+Time: 12 December 2024 13:38:21 EST
 </BODY>
 </HTML>

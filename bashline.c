@@ -1933,10 +1933,20 @@ bash_default_completion (const char *text, int start, int end, int qc, int compf
 	  strvec_dispose (matches);
 	  matches = (char **)0;
 	}
-      else if (matches && matches[1] && rl_completion_type == '!')
+      else if (matches && matches[1] && (rl_completion_type == '!' || rl_completion_type == '@'))
 	{
 	  rl_completion_suppress_append = 1;
 	  rl_filename_completion_desired = 0;
+	}
+      else if (matches && matches[1] && rl_completion_type == '?')
+	{
+	  size_t ind;
+	  ind = (end > start) ? end - start - 1 : 0;
+	  if (text[ind] == '/')
+	    {
+	      rl_completion_suppress_append = 1;
+	      rl_filename_completion_desired = 0;
+	    }
 	}
     }
 

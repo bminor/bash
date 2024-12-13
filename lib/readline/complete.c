@@ -881,7 +881,8 @@ fnprint (const char *to_print, int prefix_bytes, const char *real_pathname)
      possible completions.  Only cut off prefix_bytes if we're going to be
      printing the ellipsis, which takes precedence over coloring the
      completion prefix (see print_filename() below). */
-  if (_rl_completion_prefix_display_length > 0 && prefix_bytes >= print_len)
+  if (_rl_completion_prefix_display_length > 0 && prefix_bytes >= print_len &&
+      prefix_bytes > _rl_completion_prefix_display_length)
     prefix_bytes = 0;
 
 #if defined (COLOR_SUPPORT)
@@ -900,13 +901,16 @@ fnprint (const char *to_print, int prefix_bytes, const char *real_pathname)
       printed_len = ELLIPSIS_LEN;
     }
 #if defined (COLOR_SUPPORT)
-  else if (prefix_bytes && _rl_colored_completion_prefix > 0)
+  else if (prefix_bytes && _rl_completion_prefix_display_length <= 0 &&
+	   _rl_colored_completion_prefix > 0)
     {
       common_prefix_len = prefix_bytes;
       prefix_bytes = 0;
       /* XXX - print color indicator start here */
       colored_prefix_start ();
     }
+  else
+    common_prefix_len = prefix_bytes = 0;	/* no ellipsis or color */
 #endif
 
   s = to_print + prefix_bytes;
@@ -1602,7 +1606,7 @@ rl_display_match_list (char **matches, int len, int max)
       /* check again in case of /usr/src/ */
       temp = rl_filename_completion_desired ? strrchr (t, '/') : 0;
       common_length = temp ? fnwidth (temp) : fnwidth (t);
-      sind = temp ? strlen (temp) : strlen (t);
+      sind = temp ? RL_STRLEN (temp) : RL_STRLEN (t);
       if (common_length > max || sind > max)
 	common_length = sind = 0;
 

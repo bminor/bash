@@ -10741,3 +10741,34 @@ lib/readline/doc/rluser.texi
 	- updates for active voice, future tense, formatting and fonts, edits
 	  to Programmable Completion
 	  Suggestions from G. Branden Robinson <g.branden.robinson@gmail.com>
+
+				   12/10
+				   -----
+lib/readline/complete.c
+	- fnprint: make sure _rl_completion_prefix_display_length and
+	  _rl_colored_completion_prefix are mutually exclusive, since the
+	  callers assume they are.
+
+bashline.c
+	- bash_default_completion: if we're trying to complete a glob pattern,
+	  and rl_completion_type is '?', tell readline not to append a slash
+	  if the pattern ends in one.
+
+doc/bash.1,lib/readline/doc/readline.3,lib/readline/doc/rluser.texi
+	- completion-prefix-display-length: note that readline uses `___'
+	  instead of an ellipsis if the filename begins with a period
+	  All reported by Frederick Abell <fkabell3@hotmail.com>
+
+doc/bash.1,doc/bashref.texi
+	- PIPESTATUS: enumerate the commands that set PIPESTATUS
+	  From a report by Ulrich Müller <ulm@gentoo.org>
+
+lib/readline/isearch.c
+	- _rl_isearch_init: change to call _rl_maybe_replace_line with arg
+	  of 1 so rl_undo_list gets cleared (see change from 12/1)
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   12/13
+				   -----
+CHANGES,NEWS
+	- updated for bash-5.3-beta

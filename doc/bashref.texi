@@ -7349,10 +7349,23 @@ A string describing the operating system Bash is running on.
 
 @item PIPESTATUS
 An array variable (@pxref{Arrays})
-containing a list of exit status values from the processes
+containing a list of exit status values from the commands
 in the most-recently-executed foreground pipeline, which may
 consist of only a simple command
 (@pxref{Shell Commands}).
+Bash sets
+@code{PIPESTATUS}
+after executing multi-element pipelines,
+timed and negated pipelines,
+simple commands,
+subshells created with the @samp{(} operator,
+the
+@code{[[}
+and
+@code{((}
+compound commands, and
+after error conditions that result in the
+shell aborting command execution.
 
 @item POSIXLY_CORRECT
 If this variable is in the environment when Bash starts, the shell

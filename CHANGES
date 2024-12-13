@@ -82,6 +82,9 @@ aa. Fixes for the Makefiles to simplify, remove some unused variables, and
 
 bb. Fix for the `exec' builtin to avoid duplicate error messages.
 
+cc. `printf' now warns if there are no valid characters at all in an integer
+    argument.
+
 2. Changes to Readline
 
 a. Make sure the bracketed-paste input buffer is null-terminated when read
@@ -104,6 +107,12 @@ g. Fix off-by-one error when tokenizing words like $((expr)) while performing
    history expansion.
 
 h. Fixes for incremental searches and redisplay in the C locale.
+
+i. Fixes for some use-after-free of the undo list errors when stacking multiple
+   commands that use rl_maybe_replace_line to save changes to a history entry.
+
+j. Fixes to ensure that completion-prefix-display-length and
+   colored-completion-prefix are mutually exclusive.
 
 3. New Features in Bash
 
@@ -167,6 +176,9 @@ b. New `force-meta-prefix' bindable variable, which forces the use of ESC as
 
 c. The default value for `readline-colored-completion-prefix' no longer has a
    leading `.'; the original report was based on a misunderstanding.
+
+d. There is a new bindable command, `export-completions', which writes the
+   possible completions for a word to the standard output in a defined format.
 
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.3-alpha, and

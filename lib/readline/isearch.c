@@ -218,7 +218,7 @@ _rl_isearch_init (int direction)
 
   /* Create an array of pointers to the lines that we want to search. */
   hlist = history_list ();
-  rl_maybe_replace_line ();
+  _rl_maybe_replace_line (1);
   i = 0;
   if (hlist)
     for (i = 0; hlist[i]; i++);
