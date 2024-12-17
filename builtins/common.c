@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -272,6 +272,13 @@ sh_nojobs (const char *s)
   else
     builtin_error (_("no job control"));
 }
+
+void
+sh_invalidjob (const char *s)
+{
+  builtin_error (_("%s: invalid job specification"), s);
+}
+
 #endif
 
 #if defined (RESTRICTED_SHELL)
@@ -297,16 +304,16 @@ sh_wrerror (void)
 #if defined (DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS) && defined (EPIPE)
   if (errno != EPIPE)
 #endif /* DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS && EPIPE */
-  builtin_error (_("write error: %s"), strerror (errno));
+  builtin_error ("%s: %s", _("write error"), strerror (errno));
 }
 
 void
 sh_ttyerror (int set)
 {
   if (set)
-    builtin_error (_("error setting terminal attributes: %s"), strerror (errno));
+    builtin_error ("%s: %s", _("error setting terminal attributes"), strerror (errno));
   else
-    builtin_error (_("error getting terminal attributes: %s"), strerror (errno));
+    builtin_error ("%s: %s", _("error getting terminal attributes"), strerror (errno));
 }
 
 int
@@ -531,6 +538,9 @@ get_exitstat (WORD_LIST *list)
 	 return value. */
       if (this_shell_builtin == return_builtin && running_trap > 0 && running_trap != DEBUG_TRAP+1 && trap_return_context == funcnest + sourcenest)
 	return (trap_saved_exit_value);
+      /* The same interp applies to the exit builtin. */
+      if (this_shell_builtin == exit_builtin && running_trap > 0 && running_trap != DEBUG_TRAP+1 && trap_return_context == funcnest + sourcenest)
+	return (trap_saved_exit_value);
       return (last_command_exit_value);
     }
 
@@ -596,9 +606,11 @@ get_working_directory (const char *for_whom)
 #endif
       if (the_current_working_directory == 0)
 	{
-	  fprintf (stderr, _("%s: error retrieving current directory: %s: %s\n"),
-		   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
-		   _(bash_getcwd_errstr), strerror (errno));
+	  fprintf (stderr, "%s: %s: %s: %s\n",
+  	   (for_whom && *for_whom) ? for_whom : get_name_for_error (),
+	   _("error retrieving current directory"),
+	   _(bash_getcwd_errstr),
+	   strerror (errno));
 	  return (char *)NULL;
 	}
     }
@@ -691,6 +703,14 @@ get_job_spec (WORD_LIST *list)
 
   if (*word == '%')
     word++;
+  else
+#if 1
+    /* This could be builtin_error or sh_invalidjob() */
+    builtin_warning (_("%s: job specification requires leading `%%'"), word);
+#else
+    /* TAG:bash-5.4 10/23/2024 */
+    return (BAD_JOBSPEC);
+#endif
 
   if (DIGIT (*word) && all_digits (word))
     {

@@ -1,6 +1,6 @@
 /* stringvec.c - functions for managing arrays of strings. */
 
-/* Copyright (C) 2000-2002,2022-2023 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2002,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

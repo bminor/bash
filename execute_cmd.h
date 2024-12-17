@@ -134,4 +134,6 @@ extern void bind_lastarg (char *);
 extern void uw_dispose_fd_bitmap (void *);
 extern void uw_close (void *);
 
+extern void init_notfound_str (void);
+
 #endif /* _EXECUTE_CMD_H_ */

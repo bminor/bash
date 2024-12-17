@@ -1,6 +1,6 @@
 /* spell.c -- spelling correction for pathnames. */
 
-/* Copyright (C) 2000-2023 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -135,7 +135,7 @@ mindist(const char *dir, char *guess, char *best)
   (void)closedir(fd);
 
   /* Don't return `.' */
-  if (best[0] == '.' && best[1] == '\0')
+  if (dist != 3 && best[0] == '.' && best[1] == '\0')
     dist = 3;
   return dist;
 }

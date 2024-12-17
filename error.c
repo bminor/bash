@@ -454,3 +454,9 @@ err_readonly (const char *s)
 {
   report_error (_("%s: readonly variable"), s);
 }
+
+void
+err_invalidid (const char *s)
+{
+  internal_error (_("`%s': not a valid identifier"), s);
+}

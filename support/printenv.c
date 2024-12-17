@@ -6,7 +6,7 @@
    chet@po.cwru.edu
 */
 
-/* Copyright (C) 1997-2002,2023 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2002,2023-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,12 +24,9 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if defined (HAVE_CONFIG_H)
-#  include  <config.h>
-#endif
-
-#include "bashansi.h"
 #include <stdio.h>		/* puts */
+#include <stdlib.h>		/* exit */
+#include <string.h>		/* strncmp */
 
 extern char **environ;
 

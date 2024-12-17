@@ -13,7 +13,8 @@
 #
 
 # tests of integer overflow for field width and precision arguments
-INT_MAX=$(getconf INT_MAX)
+INT_MAX=$(getconf INT_MAX 2>/dev/null)
+[ -z "$INT_MAX" ] && INT_MAX=2147483647		# assume 32 bits
 TOOBIG=$(( $INT_MAX * 10 ))
 
 printf '[%*s]\n' "${TOOBIG}"

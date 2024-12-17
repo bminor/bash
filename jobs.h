@@ -34,9 +34,14 @@
 #define JLIST_PID_ONLY	     2
 #define JLIST_CHANGED_ONLY   3
 #define JLIST_NONINTERACTIVE 4
+#define JLIST_POSIX	     5
+#define JLIST_BGONLY	     6
 
-/* I looked it up.  For pretty_print_job ().  The real answer is 24. */
-#define LONGEST_SIGNAL_DESC 24
+/* I looked it up.  For pretty_print_job ().  The real answer is 27
+   (macOS SIGPROF) but the makefile or configure can override it. */
+#ifndef LONGEST_SIGNAL_DESC
+#  define LONGEST_SIGNAL_DESC 27
+#endif
 
 /* Defines for the wait_for_* functions and for the wait builtin to use */
 #define JWAIT_PERROR		(1 << 0)
@@ -60,6 +65,12 @@
 #define PS_STOPPED	2
 #define PS_RECYCLED	4
 
+/* Values for the `flags' field of a struct process. */
+#define PROC_WAITING	0x01
+#define PROC_PROCSUB	0x02
+#define PROC_COMSUB	0x04
+#define PROC_LASTPIPE	0x08
+
 /* Each child of the shell is remembered in a STRUCT PROCESS.  A circular
    chain of such structures is a pipeline. */
 typedef struct process {
@@ -67,6 +78,7 @@ typedef struct process {
   pid_t pid;		/* Process ID. */
   WAIT status;		/* The status of this command as returned by wait. */
   int running;		/* Non-zero if this process is running. */
+  int flags;		/* Placeholder for process-specific flag values. */
   char *command;	/* The particular program that is running. */
 } PROCESS;
 
@@ -201,10 +213,12 @@ struct procchain {
 #define ANY_PID (pid_t)-1
 
 /* flags for make_child () */
-#define FORK_SYNC	0		/* normal synchronous process */
-#define FORK_ASYNC	1		/* background process */
-#define FORK_NOJOB	2		/* don't put process in separate pgrp */
-#define FORK_NOTERM	4		/* don't give terminal to any pgrp */
+#define FORK_SYNC	0x0		/* normal synchronous process */
+#define FORK_ASYNC	0x1		/* background process */
+#define FORK_NOJOB	0x2		/* don't put process in separate pgrp */
+#define FORK_NOTERM	0x4		/* don't give terminal to any pgrp */
+#define FORK_COMSUB	0x8		/* command substitution */
+#define FORK_PROCSUB	0x10		/* process substitution */
 
 /* System calls. */
 #if !defined (HAVE_UNISTD_H)
@@ -217,11 +231,13 @@ extern struct jobstats js;
 extern pid_t original_pgrp, shell_pgrp, pipeline_pgrp;
 extern volatile pid_t last_made_pid, last_asynchronous_pid;
 extern int asynchronous_notification;
+extern int want_job_notifications;
 
 extern int already_making_children;
 extern int running_in_background;
 
 extern PROCESS *last_procsub_child;
+extern pid_t last_procsub_pid;
 
 extern JOB **jobs;
 
@@ -233,6 +249,8 @@ extern void save_pipeline (int);
 extern PROCESS *restore_pipeline (int);
 extern void start_pipeline (void);
 extern int stop_pipeline (int, COMMAND *);
+extern PROCESS *alloc_process (char *, pid_t);
+extern void dispose_process (PROCESS *);
 extern int discard_pipeline (PROCESS *);
 extern void append_process (char *, pid_t, int, int);
 
@@ -241,12 +259,15 @@ extern int retrieve_proc_status (pid_t, int);
 extern void delete_proc_status (pid_t, int);
 
 extern PROCESS *procsub_add (PROCESS *);
-extern PROCESS *procsub_search (pid_t);
-extern PROCESS *procsub_delete (pid_t);
+extern PROCESS *procsub_search (pid_t, int);
+extern PROCESS *procsub_delete (pid_t, int);
 extern int procsub_waitpid (pid_t);
 extern void procsub_waitall (void);
 extern void procsub_clear (void);
 extern void procsub_prune (void);
+extern void procsub_reap (void);
+extern void procsub_setflag (pid_t, int, int);
+extern void procsub_unsetflag (pid_t, int, int);
 
 extern void delete_job (int, int);
 extern void nohup_job (int);
@@ -291,7 +312,7 @@ extern int wait_for_any_job (int, struct procstat *);
 
 extern void wait_sigint_cleanup (void);
 
-extern void notify_and_cleanup (void);
+extern void notify_and_cleanup (int);
 extern void reap_dead_jobs (void);
 extern int start_job (int, int);
 extern int kill_pid (pid_t, int, int);
@@ -301,7 +322,7 @@ extern int give_terminal_to (pid_t, int);
 
 extern void run_sigchld_trap (int);
 
-extern int freeze_jobs_list (void);
+extern int freeze_jobs_list (int);
 extern int unfreeze_jobs_list (void);
 extern void set_jobs_list_frozen (int);
 extern int jobs_list_frozen_status (void);

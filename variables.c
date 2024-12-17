@@ -59,8 +59,6 @@
 #include "alias.h"
 #include "jobs.h"
 
-#include "version.h"
-
 #include "builtins/getopt.h"
 #include "builtins/common.h"
 #include "builtins/builtext.h"
@@ -169,6 +167,9 @@ int array_needs_making = 1;
 /* The number of times BASH has been executed.  This is set
    by initialize_variables (). */
 int shell_level = 0;
+
+/* If non-zero, each element of BASH_SOURCE contains a full pathnames */
+int bash_source_fullpath = BASH_SOURCE_FULLPATH_DEFAULT;
 
 /* An array which is passed to commands as their environment.  It is
    manufactured from the union of the initial environment and the
@@ -776,7 +777,7 @@ get_bash_name (void)
 {
   char *name;
 
-  if ((login_shell == 1) && RELPATH(shell_name))
+  if ((login_shell == 1) && su_shell)
     {
       if (current_user.shell == 0)
 	get_current_user_info ();
@@ -915,7 +916,7 @@ set_pwd (void)
   /* Follow posix rules for importing PWD */
   if (temp_var && imported_p (temp_var) &&
       (temp_string = value_cell (temp_var)) &&
-      temp_string[0] == '/' &&
+      ABSPATH (temp_string) &&
       same_file (temp_string, ".", (struct stat *)NULL, (struct stat *)NULL))
     {
       current_dir = sh_canonpath (temp_string, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
@@ -1718,7 +1719,7 @@ assign_hashcmd (SHELL_VAR *self, char *value, arrayind_t ind, char *key)
 
   if (restricted)
     {
-      if (strchr (value, '/'))
+      if (absolute_program (value))
 	{
 	  sh_restricted (value);
 	  return (SHELL_VAR *)NULL;
@@ -3126,7 +3127,7 @@ bind_variable_internal (const char *name, const char *value, HASH_TABLE *table, 
     }
   else if (entry->assign_func)	/* array vars have assign functions now */
     {
-      if ((readonly_p (entry) && (aflags & ASS_FORCE) == 0) || noassign_p (entry))
+      if (ASSIGN_DISALLOWED (entry, aflags))
 	{
 	  if (readonly_p (entry))
 	    err_readonly (name_cell (entry));
@@ -3148,7 +3149,7 @@ bind_variable_internal (const char *name, const char *value, HASH_TABLE *table, 
   else
     {
 assign_value:
-      if ((readonly_p (entry) && (aflags & ASS_FORCE) == 0) || noassign_p (entry))
+      if (ASSIGN_DISALLOWED (entry, aflags))
 	{
 	  if (readonly_p (entry))
 	    err_readonly (name_cell (entry));
@@ -3507,7 +3508,10 @@ bind_function_def (const char *name, FUNCTION_DEF *value, int flags)
   if (entry && (flags & 1))
     {
       dispose_function_def_contents (entry);
+      cmd = value->command;
+      value->command = 0;
       entry = copy_function_def_contents (value, entry);
+      value->command = cmd;
     }
   else if (entry)
     return;
@@ -3581,8 +3585,8 @@ assign_in_env (const WORD_DESC *word, int flags)
 	}
       else
         newname = name_cell (var);	/* no-op if not nameref */
-	  
-      if (var && (readonly_p (var) || noassign_p (var)))
+
+      if (var && ASSIGN_DISALLOWED (var, 0))
 	{
 	  if (readonly_p (var))
 	    err_readonly (name);
@@ -3982,16 +3986,10 @@ makunbound (const char *name, VAR_CONTEXT *vc)
     {
       dispose_variable_value (old_var);
 
-#if 0
       /* Reset the attributes.  Preserve the export attribute if the variable
 	 came from a temporary environment.  Make sure it stays local, and
 	 make it invisible. */ 
       old_var->attributes = (exported_p (old_var) && tempvar_p (old_var)) ? att_exported : 0;
-#else	/* TAG:bash-5.3 look at this again */
-      /* Reset the attributes, but preserve the export attribute.
-	 Make sure it stays local, and make it invisible. */ 
-      old_var->attributes = exported_p (old_var) ? att_exported : 0;
-#endif
       VSETATTR (old_var, att_local);
       VSETATTR (old_var, att_invisible);
       var_setvalue (old_var, (char *)NULL);
@@ -5691,6 +5689,27 @@ uw_pop_args (void *ignore)
   pop_args ();
 }
 
+#if defined (ARRAY_VARS)
+/* Push the current input filename onto BASH_SOURCE. This is where we can
+   apply any policy. */
+void
+push_source (ARRAY *a, char *filename)
+{
+  char *fn;
+  char pathname[PATH_MAX];
+
+  if (bash_source_fullpath)
+    {
+      if ((fn = sh_realpath (filename, pathname)) == 0)
+        fn = filename;
+    }
+  else
+    fn = filename;
+
+  array_push (a, fn);
+}
+#endif
+
 /*************************************************
  *						 *
  *	Functions to manage special variables	 *
@@ -6422,14 +6441,14 @@ sv_shcompat (const char *name)
   v = find_variable (name);
   if (v == 0)
     {
-      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      shell_compatibility_level = default_compatibility_level;
       set_compatibility_opts ();
       return;
     }
   val = value_cell (v);
   if (val == 0 || *val == '\0')
     {
-      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      shell_compatibility_level = default_compatibility_level;
       set_compatibility_opts ();
       return;
     }
@@ -6451,12 +6470,12 @@ sv_shcompat (const char *name)
     {
 compat_error:
       internal_error (_("%s: %s: compatibility value out of range"), name, val);
-      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      shell_compatibility_level = default_compatibility_level;
       set_compatibility_opts ();
       return;
     }
 
-  if (compatval < MIN_COMPAT_LEVEL || compatval > DEFAULT_COMPAT_LEVEL)
+  if (compatval < MIN_COMPAT_LEVEL || compatval > default_compatibility_level)
     goto compat_error;
 
   shell_compatibility_level = compatval;

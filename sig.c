@@ -24,7 +24,7 @@
 
 #if defined (HAVE_UNISTD_H)
 #  ifdef _MINIX
-initialize_shell_signals (#    include <sys/types.h>
+#    include <sys/types.h>
 #  endif
 #  include <unistd.h>
 #endif

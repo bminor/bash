@@ -48,6 +48,10 @@
 #  include "bashhist.h"
 #endif
 
+#if defined (JOB_CONTROL)
+#  include "jobs.h"
+#endif
+
 static void send_pwd_to_eterm (void);
 static sighandler alrm_catcher (int);
 
@@ -343,6 +347,9 @@ parse_command (void)
      actually printed. */
   if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
+#if defined (JOB_CONTROL)
+      notify_and_cleanup (-1);
+#endif
 #if defined (READLINE)
       if (no_line_editing || (bash_input.type == st_stdin && parser_will_prompt ()))
 #endif

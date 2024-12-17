@@ -1,7 +1,7 @@
 /* getenv.c - get environment variable value from the shell's variable
 	      list. */
 
-/* Copyright (C) 1997-2002,2023 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2002,2023-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

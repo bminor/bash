@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2020,2022,2023 Free Software Foundation, Inc.
+   Copyright (C) 2020,2022-2024 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 /* Contributed by Geir Hauge <geir.hauge@gmail.com> */
+
+#include <config.h>
 
 #include <stdlib.h>
 #include <string.h>

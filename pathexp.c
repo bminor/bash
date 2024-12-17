@@ -1,6 +1,6 @@
 /* pathexp.c -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1995-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -189,6 +189,12 @@ glob_char_p (const char *s)
   return 0;
 }
 
+static inline int
+glob_quote_char (const char *s)
+{
+  return (glob_char_p (s) || (*s == '%') || (*s == '#'));
+}
+
 /* PATHNAME can contain characters prefixed by CTLESC; this indicates
    that the character is to be quoted.  We quote it here in the style
    that the glob library recognizes.  If flags includes QGLOB_CVTNULL,
@@ -253,7 +259,7 @@ convert_to_backslash:
 
 	  /* We don't have to backslash-quote non-special BRE characters if
 	     we're quoting a glob pattern. */
-	  if (cc != CTLESC && (qflags & QGLOB_REGEXP) == 0 && glob_char_p (pathname+i+1) == 0)
+	  if (cc != CTLESC && (qflags & QGLOB_REGEXP) == 0 && glob_quote_char (pathname+i+1) == 0)
 	    continue;
 
 	  /* If we're in a multibyte locale, don't bother quoting multibyte
@@ -673,6 +679,7 @@ static STRING_INT_ALIST sorttypes[] = {
   { "atime",	SORT_ATIME },
   { "ctime",	SORT_CTIME },
   { "blocks",	SORT_BLOCKS },
+  { "numeric",	SORT_NUMERIC },
   { "nosort",	SORT_NOSORT },
   { (char *)NULL,	-1 }
 };
@@ -744,16 +751,24 @@ globsort_namecmp (char **s1, char **s2)
   return ((glob_sorttype < SORT_REVERSE) ? strvec_posixcmp (s1, s2) : strvec_posixcmp (s2, s1));
 }
 
+/* Generic transitive comparison of two numeric values for qsort */
+/* #define GENCMP(a,b) ((a) < (b) ? -1 : ((a) > (b) ? 1 : 0)) */
+/* A clever idea from gnulib */
+#define GENCMP(a,b) (((a) > (b)) - ((a) < (b)))
+
 static int
 globsort_sizecmp (struct globsort_t *g1, struct globsort_t *g2)
 {
-  return ((glob_sorttype < SORT_REVERSE) ? g1->st.size - g2->st.size : g2->st.size - g1->st.size);
+  int x;
+
+  x = (glob_sorttype < SORT_REVERSE) ? GENCMP(g1->st.size, g2->st.size) : GENCMP(g2->st.size, g1->st.size);
+  return (x == 0) ? (globsort_namecmp (&g1->name, &g2->name)) : x;
 }
 
 static int
 globsort_timecmp (struct globsort_t *g1, struct globsort_t *g2)
 {
-  int t;
+  int t, x;
   struct timespec t1, t2;
 
   t = (glob_sorttype < SORT_REVERSE) ? glob_sorttype : glob_sorttype - SORT_REVERSE;
@@ -773,14 +788,53 @@ globsort_timecmp (struct globsort_t *g1, struct globsort_t *g2)
       t2 = g2->st.ctime;
     }
 
-  return ((glob_sorttype < SORT_REVERSE) ? timespec_cmp (t1, t2) : timespec_cmp (t2, t1));
+  x = (glob_sorttype < SORT_REVERSE) ? timespec_cmp (t1, t2) : timespec_cmp (t2, t1);
+  return (x == 0) ? (globsort_namecmp (&g1->name, &g2->name)) : x;
 }
 
 static int
 globsort_blockscmp (struct globsort_t *g1, struct globsort_t *g2)
 {
-  return ((glob_sorttype < SORT_REVERSE) ? g1->st.blocks - g2->st.blocks : g2->st.blocks - g1->st.blocks);
+  int x;
+
+  x = (glob_sorttype < SORT_REVERSE) ? GENCMP(g1->st.blocks, g2->st.blocks) : GENCMP(g2->st.blocks, g1->st.blocks);
+  return (x == 0) ? (globsort_namecmp (&g1->name, &g2->name)) : x;
 }
+
+static inline int
+gs_checknum (char *string, intmax_t *val)
+{
+  int v;
+  intmax_t i;
+
+  v = all_digits (string);
+  if (v)
+    *val = strtoimax (string, (char **)NULL, 10);
+  return v;
+}
+
+static int
+globsort_numericcmp (struct globsort_t *g1, struct globsort_t *g2)
+{
+  intmax_t i1, i2;
+  int v1, v2, x;
+
+  /* like valid_number but doesn't allow leading/trailing whitespace or sign */
+  v1 = gs_checknum (g1->name, &i1);
+  v2 = gs_checknum (g2->name, &i2);
+
+  if (v1 && v2)		/* both valid numbers */
+    /* Don't need to fall back to name comparison here */
+    return (glob_sorttype < SORT_REVERSE) ? GENCMP(i1, i2) : GENCMP(i2, i1);
+  else if (v1 == 0 && v2 == 0)	/* neither valid numbers */
+    return (globsort_namecmp (&g1->name, &g2->name));
+  else if (v1 != 0 && v2 == 0)
+    return (glob_sorttype < SORT_REVERSE) ? -1 : 1;
+  else
+    return (glob_sorttype < SORT_REVERSE) ? 1 : -1;
+}
+
+#undef GENCMP
 
 static struct globsort_t *
 globsort_buildarray (char **array, size_t len)
@@ -835,6 +889,9 @@ globsort_sortarray (struct globsort_t *garray, size_t len)
       break;
     case SORT_BLOCKS:
       sortfunc = (QSFUNC *)globsort_blockscmp;
+      break;
+    case SORT_NUMERIC:
+      sortfunc = (QSFUNC *)globsort_numericcmp;
       break;
     default:
       internal_error (_("invalid glob sort type"));

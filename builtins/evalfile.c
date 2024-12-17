@@ -1,6 +1,6 @@
 /* evalfile.c - read and evaluate commands from a file or file descriptor */
 
-/* Copyright (C) 1996-2017,2022-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,7 +58,7 @@
 extern int errno;
 #endif
 
-/* Flags for _evalfile() */
+/* Flags for evalfile_internal() */
 #define FEVAL_ENOENTOK		0x001
 #define FEVAL_BUILTIN		0x002
 #define FEVAL_UNWINDPROT	0x004
@@ -74,11 +74,12 @@ extern int errno;
 int sourcelevel = 0;
 
 static int
-_evalfile (const char *filename, int flags)
+evalfile_internal (const char *filename, int flags)
 {
   volatile int old_interactive;
   procenv_t old_return_catch;
-  int return_val, fd, result, pflags, i, nnull;
+  int return_val, fd, result, pflags, nnull;
+  size_t i;
   ssize_t nr;			/* return value from read(2) */
   char *string;
   struct stat finfo;
@@ -101,19 +102,19 @@ _evalfile (const char *filename, int flags)
   do
     {
       fd = open (filename, O_RDONLY);
-      i = errno;
-      if (fd < 0 && i == EINTR)
+      result = errno;
+      if (fd < 0 && result == EINTR)
         QUIT;
-      errno = i;
+      errno = result;
     }
   while (fd < 0 && errno == EINTR && (flags & FEVAL_RETRY));
 
   if (fd < 0 || (fstat (fd, &finfo) == -1))
     {
-      i = errno;
+      result = errno;
       if (fd >= 0)
 	close (fd);
-      errno = i;
+      errno = result;
 
 file_error_and_exit:
       if (((flags & FEVAL_ENOENTOK) == 0) || errno != ENOENT)
@@ -185,7 +186,7 @@ file_error_and_exit:
       check_binary_file (string, (nr > 80) ? 80 : nr))
     {
       free (string);
-      (*errfunc) (_("%s: cannot execute binary file"), filename);
+      (*errfunc) ("%s: %s", filename, _("cannot execute binary file"));
       return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
     }
 
@@ -203,7 +204,7 @@ file_error_and_exit:
 	    if ((flags & FEVAL_BUILTIN) && ++nnull > 256)
 	      {
 		free (string);
-		(*errfunc) (_("%s: cannot execute binary file"), filename);
+		(*errfunc) ("%s: %s", filename, _("cannot execute binary file"));
 		return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
 	      }
           }
@@ -211,13 +212,14 @@ file_error_and_exit:
 
   if (flags & FEVAL_UNWINDPROT)
     {
-      begin_unwind_frame ("_evalfile");
+      begin_unwind_frame ("evalfile_internal");
 
       unwind_protect_int (return_catch_flag);
       unwind_protect_jmp_buf (return_catch);
       if (flags & FEVAL_NONINT)
 	unwind_protect_int (interactive);
       unwind_protect_int (sourcelevel);
+      unwind_protect_int (want_job_notifications);
       unwind_protect_int (retain_fifos);
     }
   else
@@ -232,6 +234,8 @@ file_error_and_exit:
 
   return_catch_flag++;
   sourcelevel++;
+  if (interactive_shell && shell_compatibility_level <= 52)
+    want_job_notifications++;
 
   retain_fifos++;			/* XXX */
 
@@ -244,7 +248,7 @@ file_error_and_exit:
   GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
 #  endif
 
-  array_push (bash_source_a, (char *)filename);
+  push_source (bash_source_a, (char *)filename);
   t = itos (executing_line_number ());
   array_push (bash_lineno_a, t);
   free (t);
@@ -296,7 +300,7 @@ file_error_and_exit:
     result = parse_and_execute (string, filename, pflags);
 
   if (flags & FEVAL_UNWINDPROT)
-    run_unwind_frame ("_evalfile");
+    run_unwind_frame ("evalfile_internal");
   else
     {
       if (flags & FEVAL_NONINT)
@@ -315,6 +319,8 @@ file_error_and_exit:
 #endif
       return_catch_flag--;
       sourcelevel--;
+      if (interactive_shell && shell_compatibility_level <= 52)
+	want_job_notifications--;
       retain_fifos--;
       COPY_PROCENV (old_return_catch, return_catch);
     }
@@ -337,7 +343,7 @@ maybe_execute_file (const char *fname, int force_noninteractive)
   flags = FEVAL_ENOENTOK|FEVAL_RETRY;
   if (force_noninteractive)
     flags |= FEVAL_NONINT;
-  result = _evalfile (filename, flags);
+  result = evalfile_internal (filename, flags);
   free (filename);
   return result;
 }
@@ -352,7 +358,7 @@ force_execute_file (const char *fname, int force_noninteractive)
   flags = FEVAL_RETRY;
   if (force_noninteractive)
     flags |= FEVAL_NONINT;
-  result = _evalfile (filename, flags);
+  result = evalfile_internal (filename, flags);
   free (filename);
   return result;
 }
@@ -367,7 +373,7 @@ fc_execute_file (const char *filename)
      remember_on_history is set.  We use FEVAL_BUILTIN to return
      the result of parse_and_execute. */
   flags = FEVAL_ENOENTOK|FEVAL_HISTORY|FEVAL_REGFILE|FEVAL_BUILTIN;
-  return (_evalfile (filename, flags));
+  return (evalfile_internal (filename, flags));
 }
 #endif /* HISTORY */
 
@@ -382,7 +388,7 @@ source_file (const char *filename, int sflags)
   /* POSIX shells exit if non-interactive and file error. */
   if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
     flags |= FEVAL_LONGJMP;
-  rval = _evalfile (filename, flags);
+  rval = evalfile_internal (filename, flags);
 
   run_return_trap ();
   return rval;

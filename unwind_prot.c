@@ -243,7 +243,7 @@ unwind_frame_discard_internal (char *tag)
     }
 
   if (found == 0)
-    internal_warning (_("unwind_frame_discard: %s: frame not found"), tag);
+    internal_warning ("unwind_frame_discard: %s: %s", tag, _("frame not found"));
 }
 
 /* Restore the value of a variable, based on the contents of SV.
@@ -289,7 +289,7 @@ unwind_frame_run_internal (char *tag)
       uwpfree (elt);
     }
   if (tag && found == 0)
-    internal_warning (_("unwind_frame_run: %s: frame not found"), tag);
+    internal_warning ("unwind_frame_run: %s: %s", tag, _("frame not found"));
 }
 
 static void

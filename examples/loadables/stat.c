@@ -46,6 +46,8 @@
 extern int	errno;
 #endif
 
+#if defined (ARRAY_VARS)
+
 #define ST_NAME		0
 #define ST_DEV		1
 #define ST_INO		2
@@ -334,10 +336,12 @@ loadstat (char *vname, SHELL_VAR *var, char *fname, int flags, char *fmt, struct
     }
   return 0;
 }
+#endif
 
 int
 stat_builtin (WORD_LIST *list)
 {
+#if defined (ARRAY_VARS)
   int opt, flags;
   char *aname, *fname, *timefmt;
   struct stat st;
@@ -410,6 +414,10 @@ stat_builtin (WORD_LIST *list)
     }
 
   return (EXECUTION_SUCCESS);
+#else
+  builtin_error ("arrays not available");
+  return (EXECUTION_FAILURE);
+#endif
 }
 
 /* An array of strings forming the `long' documentation for a builtin xxx,

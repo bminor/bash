@@ -357,12 +357,12 @@ check_identifier (WORD_DESC *word, int check_word)
 {
   if (word->flags & (W_HASDOLLAR|W_QUOTED))	/* XXX - HASDOLLAR? */
     {
-      internal_error (_("`%s': not a valid identifier"), word->word);
+      err_invalidid (word->word);
       return (0);
     }
   else if (check_word && (all_digits (word->word) || valid_identifier (word->word) == 0))
     {
-      internal_error (_("`%s': not a valid identifier"), word->word);
+      err_invalidid (word->word);
       return (0);
     }
   else
@@ -431,10 +431,15 @@ valid_function_name (const char *name, int flags)
 /* Return 1 if this is an identifier that can be used as a function name
    when declaring a function. We don't allow `$' for historical reasons.
    We allow quotes (for now), slashes, and pretty much everything else.
-   If FLAGS is non-zero (it's usually posixly_correct), we check the name
-   for additional posix restrictions using valid_function_name(). We pass
-   flags|2 to valid_function_name to suppress the check for an assignment
-   word, since we want to allow those here. */
+   If (FLAGS&4) is non-zero, we check that the name is not one of the POSIX
+   special builtins (this is the shell enforcing a POSIX application
+   requirement). We allow reserved words, even though it's unlikely anyone
+   would use them.
+   If (FLAGS&1) is non-zero (it's usually set by the caller from
+   posixly_correct), we check the name for additional posix restrictions
+   using valid_function_name().
+   We pass flags|2 to valid_function_name to suppress the check for an
+   assignment word, since we want to allow those here. */
 int
 valid_function_word (WORD_DESC *word, int flags)
 {
@@ -443,18 +448,20 @@ valid_function_word (WORD_DESC *word, int flags)
   name = word->word;
   if ((word->flags & W_HASDOLLAR))		/* allow quotes for now */
     {
-      internal_error (_("`%s': not a valid identifier"), name);
+      err_invalidid (name);
       return (0);
     }
-  /* POSIX interpretation 383 */
-  if (flags && find_special_builtin (name))
+  /* POSIX interpretation 383 -- this is an application requirement, but the
+     shell should enforce it rather than allow a script to define a function
+     that will never be called. */
+  if ((flags & 4) && find_special_builtin (name))
     {
       internal_error (_("`%s': is a special builtin"), name);
       return (0);
     }
-  if (flags && valid_function_name (name, flags|2) == 0)
+  if ((flags & 1) && valid_function_name (name, flags|2) == 0)
     {
-      internal_error (_("`%s': not a valid identifier"), name);
+      err_invalidid (name);
       return (0);
     }
   return 1;
@@ -834,7 +841,7 @@ absolute_program (const char *string)
   return ((char *)mbschr (string, '/') != (char *)NULL);
 #else
   return ((char *)mbschr (string, '/') != (char *)NULL ||
-	  (char *)mbschr (string, '\\') != (char *)NULL)
+	  (char *)mbschr (string, '\\') != (char *)NULL);
 #endif
 }
 

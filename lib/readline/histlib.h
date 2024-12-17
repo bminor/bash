@@ -83,8 +83,8 @@
 /* internal extern function declarations used by other parts of the library */
 
 /* histsearch.c */
-extern int _hs_history_patsearch (const char *, int, int);
-extern int _hs_history_search (const char *, int, int);
+extern int _hs_history_patsearch (const char *, int, int, int);
+extern int _hs_history_search (const char *, int, int, int);
 
 /* history.c */
 extern void _hs_replace_history_data (int, histdata_t *, histdata_t *);

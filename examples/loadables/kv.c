@@ -37,6 +37,8 @@
 extern int errno;
 #endif
 
+#if defined (ARRAY_VARS)
+
 #define KV_ARRAY_DEFAULT	"KV"
 
 /* Split LINE into a key and value, with the delimiter between the key and
@@ -113,10 +115,12 @@ kvfile (SHELL_VAR *v, int fd, char *delims, char *rs)
   QUIT;
   return nr;  
 }
+#endif
 
 int
 kv_builtin (WORD_LIST *list)
 {
+#if defined (ARRAY_VARS)
   int opt, rval, free_delims;
   char *array_name, *delims, *rs;
   SHELL_VAR *v;
@@ -192,6 +196,10 @@ kv_builtin (WORD_LIST *list)
   if (free_delims)
     free (delims);	/* getifs returns allocated memory */  
   return (rval > 0 ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+#else
+  builtin_error ("arrays not available");
+  return (EXECUTION_FAILURE);
+#endif
 }
 
 /* Called when builtin is enabled and loaded from the shared object.  If this

@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -26,8 +26,8 @@
  order of decreasing precedence.
 
 	"id++", "id--"		[post-increment and post-decrement]
-	"-", "+"		[(unary operators)]
 	"++id", "--id"		[pre-increment and pre-decrement]
+	"-", "+"		[(unary operators)]
 	"!", "~"
 	"**"			[(exponentiation)]
 	"*", "/", "%"
@@ -336,7 +336,7 @@ expr_bind_variable (const char *lhs, const char *rhs)
   aflags = 0;
 #endif
   v = bind_int_variable (lhs, rhs, aflags);
-  if (v && (readonly_p (v) || noassign_p (v)))
+  if (v && ASSIGN_DISALLOWED (v, 0))
     sh_longjmp (evalbuf, 1);	/* variable assignment error */
   stupidly_hack_special_variables (lhs);
 }
@@ -467,7 +467,6 @@ subexpr (const char *expr)
 
   val = EXP_LOWEST ();
 
-  /*TAG:bash-5.3 make it clear that these are arithmetic syntax errors */
   if (curtok != 0)
     evalerror (_("arithmetic syntax error in expression"));
 

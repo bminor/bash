@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -98,6 +98,15 @@ static int currently_reading_init_file;
 /* used only in this file */
 static int _rl_prefer_visible_bell = 1;
 
+/* Currently confined to this file for key bindings. If enabled (> 0), we
+   force meta key bindings to use the meta prefix (ESC). If unset (-1) or
+   disabled (0), we use the current value of _rl_convert_meta_chars_to_ascii
+   as in previous readline versions. */
+static int _rl_force_meta_prefix = 0;
+
+/* Do we want to force binding "\M-C" to the meta prefix (ESC-C)? */
+#define FORCE_META_PREFIX()	(_rl_force_meta_prefix > 0 ? 1 : _rl_convert_meta_chars_to_ascii)
+
 #define OP_EQ	1
 #define OP_NE	2
 #define OP_GT	3
@@ -137,7 +146,7 @@ rl_bind_key (int key, rl_command_func_t *function)
     return (key);
 
   /* Want to make this a multi-character key sequence with an ESC prefix */
-  if (META_CHAR (key) && _rl_convert_meta_chars_to_ascii)
+  if (META_CHAR (key) && FORCE_META_PREFIX())
     {
       if (_rl_keymap[ESC].type == ISKMAP)
 	{
@@ -257,7 +266,7 @@ rl_unbind_function_in_map (rl_command_func_t *func, Keymap map)
 	  map[i].function = (rl_command_func_t *)NULL;
 	  rval = 1;
 	}
-      else if (map[i].type == ISKMAP)		/* TAG:readline-8.1 */
+      else if (map[i].type == ISKMAP)
 	{
 	  int r;
 	  r = rl_unbind_function_in_map (func, FUNCTION_TO_KEYMAP (map, i));
@@ -418,19 +427,8 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 	  return -1;
         }
 
-      /* We now rely on rl_translate_keyseq to do this conversion, so this
-	 check is superfluous. */
-#if 0
-      if (META_CHAR (ic) && _rl_convert_meta_chars_to_ascii)
-	{
-	  ic = UNMETA (ic);
-	  if (map[ESC].type == ISKMAP)
-	    {
-	      prevmap = map;
-	      map = FUNCTION_TO_KEYMAP (map, ESC);
-	    }
-	}
-#endif
+      /* We rely on rl_translate_keyseq to do convert meta-chars to key
+	 sequences with the meta prefix (ESC). */
 
       if ((i + 1) < keys_len)
 	{
@@ -617,14 +615,13 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 	  c = (c == '?') ? RUBOUT : CTRL (_rl_to_upper (c));
 	  has_control = 0;
 	}
-      if (has_meta)
-	{
-	  c = META (c);
-	  has_meta = 0;
-	}
 
-      /* If convert-meta is turned on, convert a meta char to a key sequence */
-      if (META_CHAR (c) && _rl_convert_meta_chars_to_ascii)
+      if (has_meta)
+	c = META (c);
+
+      /* If force-meta-prefix is turned on, convert a meta char to a key
+	 sequence, but only if it uses the \M- syntax. */
+      if (META_CHAR (c) && has_meta && FORCE_META_PREFIX())
 	{
 	  int x = UNMETA (c);
 	  if (x)
@@ -637,6 +634,8 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 	}
       else
 	array[l++] = (c);
+
+      has_meta = 0;
 
       /* Null characters may be processed for incomplete prefixes at the end of
 	 sequence */
@@ -698,7 +697,7 @@ rl_untranslate_keyseq (int seq)
       c = UNMETA (c);
     }
 
-  if (c == ESC)
+  if (c == ESC)		/* look at _rl_force_meta_prefix here? */
     {
       kseq[i++] = '\\';
       c = 'e';
@@ -805,7 +804,7 @@ _rl_function_of_keyseq_internal (const char *keyseq, size_t len, Keymap map, int
     {
       unsigned char ic = keyseq[i];
 
-      if (META_CHAR (ic) && _rl_convert_meta_chars_to_ascii)
+      if (META_CHAR (ic) && FORCE_META_PREFIX())	/* XXX - might not want this */
 	{
 	  if (map[ESC].type == ISKMAP)
 	    {
@@ -1865,6 +1864,7 @@ rl_parse_and_bind (char *string)
    false. */
 
 #define V_SPECIAL	0x1
+#define V_DEPRECATED	0x02
 
 static const struct {
   const char * const name;
@@ -1888,6 +1888,7 @@ static const struct {
   { "enable-keypad",		&_rl_enable_keypad,		0 },
   { "enable-meta-key",		&_rl_enable_meta,		0 },
   { "expand-tilde",		&rl_complete_with_tilde_expansion, 0 },
+  { "force-meta-prefix",	&_rl_force_meta_prefix,		0 },
   { "history-preserve-point",	&_rl_history_preserve_point,	0 },
   { "horizontal-scroll-mode",	&_rl_horizontal_scroll_mode,	0 },
   { "input-meta",		&_rl_meta_flag,			0 },
@@ -2749,7 +2750,7 @@ rl_print_keybinding (const char *name, Keymap kmap, int print_readably)
   char **invokers;
 
   function = rl_named_function (name);
-  invokers = rl_invoking_keyseqs_in_map (function, kmap ? kmap : _rl_keymap);
+  invokers = function ? rl_invoking_keyseqs_in_map (function, kmap ? kmap : _rl_keymap) : (char **)NULL;
 
   if (print_readably)
     {

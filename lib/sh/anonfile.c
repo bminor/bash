@@ -1,6 +1,6 @@
 /* anonfile.c - open and close temporary files (anonymous and memory-backed if possible). */
 
-/* Copyright (C) 2023 Free Software Foundation, Inc.
+/* Copyright (C) 2023-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,6 +36,10 @@
 #include <bashansi.h>
 
 static int anonunlink (const char *);
+
+#if defined (HAVE_MEMFD_CREATE) && !defined (MFD_NOEXEC_SEAL)
+#  define MFD_NOEXEC_SEAL 0
+#endif
 
 #if defined (HAVE_SHM_OPEN)
 #ifndef O_NOFOLLOW
@@ -104,7 +108,7 @@ anonopen (const char *name, int flags, char **fn)
 
 #if defined (HAVE_MEMFD_CREATE)
   /* "Names do not affect the behavior of the file descriptor." */
-  fd = memfd_create ("anonopen", 0);
+  fd = memfd_create ("anonopen", MFD_NOEXEC_SEAL);
   if (fd >= 0)
     {
       if (fn)

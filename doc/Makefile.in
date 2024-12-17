@@ -1,6 +1,6 @@
 # This Makefile is for the Bash/documentation directory -*- text -*-.
 #
-# Copyright (C) 2003-2015 Free Software Foundation, Inc.
+# Copyright (C) 2003-2024 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -64,10 +64,6 @@ SUPPORT_SRCDIR = $(topdir)/support
 
 # bad style
 RL_LIBDIR = $(topdir)/lib/readline
-
-# unused
-TEXINDEX    = texindex
-TEX	    = tex
 
 MAKEINFO    = makeinfo
 TEXI2DVI    = ${SUPPORT_SRCDIR}/texi2dvi
@@ -161,12 +157,14 @@ all: info dvi text html pdf $(MAN2HTML)
 nodvi: ps info text html
 everything: all ps
 
-PSFILES = bash.ps bashbug.ps article.ps builtins.ps rbash.ps 
-DVIFILES = bashref.dvi bashref.ps
+CREATED_PS = bash.ps bashref.ps
+PSFILES = ${CREATED_PS} article.ps
+DVIFILES = bashref.dvi 
 INFOFILES = bashref.info bash.info
 MAN0FILES = bash.0 bashbug.0 builtins.0 rbash.0
 HTMLFILES = bashref.html bash.html
-PDFFILES = bash.pdf bashref.pdf article.pdf rose94.pdf
+CREATED_PDF = bash.pdf bashref.pdf builtins.pdf rbash.pdf
+PDFFILES = ${CREATED_PDF} article.pdf rose94.pdf
 
 ps: ${PSFILES}
 dvi: ${DVIFILES}
@@ -215,6 +213,10 @@ bashref.ps: bashref.dvi
 bashref.pdf: bashref.texi
 bash.pdf: bash.1
 
+builtins.pdf: builtins.1 bash.1
+	$(RM) $@
+	-${GROFF} -I${srcdir} -man -T pdf builtins.1 > $@
+
 article.pdf: article.ps
 rose94.pdf: rose94.ps
 
@@ -222,27 +224,32 @@ OTHER_DOCS = $(srcdir)/FAQ $(srcdir)/INTRO
 OTHER_INSTALLED_DOCS = FAQ INTRO
 
 $(MAN2HTML):	${topdir}/support/man2html.c
-	-( cd ${BUILD_DIR}/support ; ${MAKE} ${MFLAGS} man2html)
+	-( cd ${BUILD_DIR}/support ; ${MAKE} ${BASH_MAKEFLAGS} man2html)
 
-clean:
+.PHONY: clean maintainer-clean distclean mostlyclean maybe-clean
+
+mostlyclean:
 	$(RM) *.aux *.bak *.cp *.fn *.ky *.log *.pg *.toc *.tp *.vr *.cps \
 		*.pgs *.bt *.bts *.rw *.rws *.fns *.kys *.tps *.vrs *.o
 	${RM} core *.core
 
-mostlyclean: clean
-	$(RM) Makefile
+clean: mostlyclean
 
 distclean: clean maybe-clean
 	$(RM) Makefile
 
 maintainer-clean:	clean
-	${RM} ${PSFILES} ${DVIFILES} ${INFOFILES} ${MAN0FILES} ${HTMLFILES}
+	${RM} ${DVIFILES} ${INFOFILES} ${MAN0FILES} ${HTMLFILES}
+	${RM} ${CREATED_PS} ${CREATED_PDF}
 	${RM} ${CREATED_FAQ}
 	$(RM) Makefile
 
+# I'd like to use realpath here, but it's not universal
 maybe-clean:
-	-if test "X$(topdir)" != "X$(BUILD_DIR)"; then \
-		$(RM) ${PSFILES} ${DVIFILES} ${INFOFILES} ${MAN0FILES} ${HTMLFILES}; \
+	-TD=$$(cd $(topdir) && pwd -P) ; \
+	BD=$$(cd $(BUILD_DIR) && pwd -P) ; \
+	if test "X$$TD" != "X$$BD"; then \
+		$(RM) ${CREATED_PS} ${DVIFILES} ${INFOFILES} ${MAN0FILES} ${HTMLFILES} ${CREATED_PDF}; \
 	fi
 
 installdirs:
@@ -286,12 +293,22 @@ install-html:	html
 		$(INSTALL_DATA) $(srcdir)/bashref.html $(DESTDIR)$(htmldir) ; \
 	fi
 
+install-dvi:
+install-pdf:
+install-ps:
+
+uninstall-html:
+	-if test -n "$(htmldir)" ; then \
+		$(RM) $(DESTDIR)$(htmldir)/bash.html ; \
+		$(RM) $(DESTDIR)$(htmldir)/bashref.html ; \
+	fi
+
 uninstall:
 	-$(RM) $(DESTDIR)$(man1dir)/bash${man1ext} $(DESTDIR)$(man1dir)/bashbug${man1ext}
 	-$(RM) $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
 	$(RM) $(DESTDIR)$(infodir)/bash.info
 # run install-info if it is present to update the info directory
-	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
+	-if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
 		install-info --delete --dir-file=$(DESTDIR)$(infodir)/dir $(DESTDIR)$(infodir)/bash.info; \
 	else true; fi
 	-( cd $(DESTDIR)$(docdir) && $(RM) $(OTHER_INSTALLED_DOCS) )

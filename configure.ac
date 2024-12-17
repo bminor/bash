@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.063])dnl
+AC_REVISION([for Bash 5.3, version 5.074])dnl
 
 define(bashvers, 5.3)
-define(relstatus, alpha)
+define(relstatus, beta)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -34,7 +34,7 @@ AC_PREREQ(2.69)
 AC_CONFIG_SRCDIR(shell.h)
 dnl where to find install.sh, config.sub, and config.guess
 AC_CONFIG_AUX_DIR(./support)
-AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_HEADERS(config.h buildconf.h)
 
 dnl checks for version info
 BASHVERS=bashvers
@@ -186,6 +186,7 @@ opt_function_import=yes
 opt_dev_fd_stat_broken=no
 opt_alt_array_impl=no
 opt_translatable_strings=yes
+opt_bash_source_fullpath_default=no
 
 dnl modified by alternate array implementation option
 ARRAY_O=array.o
@@ -211,6 +212,7 @@ if test $opt_minimal_config = yes; then
 	opt_casemod_attrs=no opt_casemod_expansions=no opt_extglob_default=no
 	opt_translatable_strings=no
 	opt_globascii_default=yes
+	opt_bash_source_fullpath_default=no
 fi
 
 AC_ARG_ENABLE(alias, AS_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)
@@ -218,6 +220,7 @@ AC_ARG_ENABLE(alt-array-implementation, AS_HELP_STRING([--enable-alt-array-imple
 AC_ARG_ENABLE(arith-for-command, AS_HELP_STRING([--enable-arith-for-command], [enable arithmetic for command]), opt_arith_for_command=$enableval)
 AC_ARG_ENABLE(array-variables, AS_HELP_STRING([--enable-array-variables], [include shell array variables]), opt_array_variables=$enableval)
 AC_ARG_ENABLE(bang-history, AS_HELP_STRING([--enable-bang-history], [turn on csh-style history substitution]), opt_bang_history=$enableval)
+AC_ARG_ENABLE(bash-source-fullpath-default, AS_HELP_STRING([--enable-bash-source-fullpath-default], [enable the bash_source_fullpath option by default]), opt_bash_source_fullpath_default=$enableval)
 AC_ARG_ENABLE(brace-expansion, AS_HELP_STRING([--enable-brace-expansion], [include brace expansion]), opt_brace_expansion=$enableval)
 AC_ARG_ENABLE(casemod-attributes, AS_HELP_STRING([--enable-casemod-attributes], [include case-modifying variable attributes]), opt_casemod_attrs=$enableval)
 AC_ARG_ENABLE(casemod-expansions, AS_HELP_STRING([--enable-casemod-expansions], [include case-modifying word expansions]), opt_casemod_expansions=$enableval)
@@ -371,6 +374,11 @@ fi
 if test $opt_translatable_strings = yes; then
 AC_DEFINE(TRANSLATABLE_STRINGS)
 fi
+if test $opt_bash_source_fullpath_default = yes; then
+AC_DEFINE(BASH_SOURCE_FULLPATH_DEFAULT, 1)
+else
+AC_DEFINE(BASH_SOURCE_FULLPATH_DEFAULT, 0)
+fi
 
 if test $opt_memscramble = yes; then
 AC_DEFINE(MEMSCRAMBLE)
@@ -460,30 +468,30 @@ dnl Set SIGNAMES_H based on whether or not we're cross-compiling.
 
 CROSS_COMPILE=
 if test "x$cross_compiling" = "xyes"; then
-    case "${host}" in
-    *-cygwin*)
-	cross_cache=${srcdir}/cross-build/cygwin32.cache
-	;;
-    *-msys*)
-	cross_cache=${srcdir}/cross-build/msys32.cache
-	;;
-    *-mingw*)
-	cross_cache=${srcdir}/cross-build/cygwin32.cache
-	;;
-    i[[3456]]86-*-beos*)
-	cross_cache=${srcdir}/cross-build/x86-beos.cache
-	;;
-    *-qnx*)
-	cross_cache=${srcdir}/cross-build/qnx.cache
-	;;
-    *)	echo "configure: cross-compiling for $host is not supported" >&2
-	;;
-    esac
-    if test -n "${cross_cache}" && test -r "${cross_cache}"; then
-	echo "loading cross-build cache file ${cross_cache}"
-	. ${cross_cache}
-    fi
-    unset cross_cache
+#    case "${host}" in
+#    *-cygwin*)
+#	cross_cache=${srcdir}/cross-build/cygwin32.cache
+#	;;
+#    *-msys*)
+#	cross_cache=${srcdir}/cross-build/msys32.cache
+#	;;
+#    *-mingw*)
+#	cross_cache=${srcdir}/cross-build/cygwin32.cache
+#	;;
+#    i[[3456]]86-*-beos*)
+#	cross_cache=${srcdir}/cross-build/x86-beos.cache
+#	;;
+#   *-qnx*)
+#	cross_cache=${srcdir}/cross-build/qnx.cache
+#	;;
+#    *)	echo "configure: cross-compiling for $host is not supported" >&2
+#	;;
+#    esac
+#    if test -n "${cross_cache}" && test -r "${cross_cache}"; then
+#	echo "loading cross-build cache file ${cross_cache}"
+#	. ${cross_cache}
+#    fi
+#    unset cross_cache
     SIGNAMES_O='signames.o'
     CROSS_COMPILE='-DCROSS_COMPILING'
     AC_SUBST(CROSS_COMPILE)
@@ -539,11 +547,9 @@ if test "X$cross_compiling" = "Xno"; then
 	# CFLAGS set above to default value if not passed in environment
 	if test -n "$want_auto_cflags" ; then
 		CFLAGS_FOR_BUILD="${CFLAGS}"
-		BASE_CFLAGS_FOR_BUILD="${CFLAGS}"
 	else
 		# passed in environment
 		CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
-		BASE_CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
 	fi
 	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-'$(LIBS)'}
 else
@@ -551,7 +557,6 @@ else
 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-""}
 	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-""}
 	CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD="-g"}
-	BASE_CFLAGS_FOR_BUILD=${BASE_CFLAGS_FOR_BUILD="-g"}
 	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-""}
 fi
 
@@ -562,7 +567,6 @@ AC_SUBST(STATIC_LD)
 
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
-AC_SUBST(BASE_CFLAGS_FOR_BUILD)
 AC_SUBST(STYLE_CFLAGS)
 AC_SUBST(CPPFLAGS_FOR_BUILD)
 AC_SUBST(LDFLAGS_FOR_BUILD)
@@ -614,6 +618,8 @@ if test $opt_readline = yes; then
 	else
 		RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 		READLINE_DEP='$(READLINE_LIBRARY)'
+		# for dependencies
+		RL_INCLUDEDIR='$(RL_LIBDIR)'
 		# section for OS versions that ship an older/broken version of
 		# readline as a standard dynamic library and don't allow a
 		# static version specified as -llibname to override the
@@ -626,6 +632,7 @@ if test $opt_readline = yes; then
 else
 	RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 	READLINE_LIB= READLINE_DEP=
+	RL_INCLUDEDIR=
 fi
 if test $opt_history = yes || test $opt_bang_history = yes; then
 	if test $opt_history = yes; then
@@ -649,6 +656,8 @@ if test $opt_history = yes || test $opt_bang_history = yes; then
 	else
 		HIST_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 		HISTORY_DEP='$(HISTORY_LIBRARY)'
+		# for dependencies
+		HIST_INCLUDEDIR='$(HIST_LIBDIR)'
 		# section for OS versions that ship an older version of
 		# readline as a standard dynamic library and don't allow a
 		# static version specified as -llibname to override the
@@ -661,6 +670,7 @@ if test $opt_history = yes || test $opt_bang_history = yes; then
 else
 	HIST_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
 	HISTORY_LIB= HISTORY_DEP=
+	HIST_INCLUDEDIR=
 fi
 AC_SUBST(READLINE_LIB)
 AC_SUBST(READLINE_DEP)
@@ -670,6 +680,7 @@ AC_SUBST(RL_INCLUDE)
 AC_SUBST(HISTORY_LIB)
 AC_SUBST(HISTORY_DEP)
 AC_SUBST(HIST_LIBDIR)
+AC_SUBST(HIST_INCLUDEDIR)
 AC_SUBST(TILDE_LIB)
 
 dnl END READLINE and HISTORY LIBRARY SECTION
@@ -870,7 +881,8 @@ AC_CHECK_FUNCS(bcopy bzero clock_gettime confstr faccessat fnmatch \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
 		imaxdiv memmove pathconf putenv raise random regcomp regexec \
 		setenv setlinebuf setlocale setvbuf siginterrupt strchr \
-		sysconf syslog tcgetattr times ttyname tzset unsetenv)
+		sysconf syslog tcgetattr tcgetwinsize tcsetwinsize \
+		times ttyname tzset unsetenv)
 
 AC_CHECK_FUNCS(vasprintf asprintf)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
@@ -1013,9 +1025,6 @@ AC_CHECK_SIZEOF(char *, 4)
 AC_CHECK_SIZEOF(size_t, 4)
 AC_CHECK_SIZEOF(double, 8)
 AC_CHECK_SIZEOF([long long], 8)
-
-AC_CHECK_TYPE(u_int, [unsigned int])
-AC_CHECK_TYPE(u_long, [unsigned long])
 
 BASH_TYPE_BITS16_T
 BASH_TYPE_U_BITS16_T
@@ -1361,10 +1370,14 @@ AC_CONFIG_COMMANDS([stamp-h], [echo timestamp > stamp-h])
 
 if test "$ac_cv_header_stdckdint_h" = yes; then
 	rm -f stdckdint.h
+	STDCKDINT_H=
 elif cmp ${srcdir}/include/stdckdint.in.h stdckdint.h 2>/dev/null; then
 	:
+	STDCKDINT_H='${BUILD_DIR}/stdckdint.h'
 else
 	cp ${srcdir}/include/stdckdint.in.h stdckdint.h
+	STDCKDINT_H='${BUILD_DIR}/stdckdint.h'
 fi
+AC_SUBST(STDCKDINT_H)
 
 AC_OUTPUT

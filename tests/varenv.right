@@ -328,6 +328,36 @@ after unset f1: x = local
 f1: x = local
 after unset f1: x = unset
 1009: after posix f1: x = global
+global initial
+declare -- string
+declare -i int
+declare -a array
+inside init_vars acting on previous scope
+./varenv25.sub: line 26: local: string: not found
+./varenv25.sub: line 26: local: int: not found
+./varenv25.sub: line 26: local: array: not found
+inside foo, after init_vars
+declare -r string="foo"
+declare -ir int="100"
+declare -ar array=([0]="1" [1]="2")
+global after foo
+declare -- string
+declare -i int
+declare -a array
+init_vars2
+./varenv25.sub: line 51: local: int: not found
+foo2, after init_vars2
+declare -ir int="142"
+global after calling foo2
+declare -i int
+inside init_vars acting on previous scope
+./varenv25.sub: line 26: local: string: not found
+./varenv25.sub: line 26: local: int: not found
+./varenv25.sub: line 26: local: array: not found
+global values after foo placeholder
+declare -r string="foo"
+declare -ir int="100"
+declare -ar array=([0]="1" [1]="2")
 a=z
 a=b
 a=z

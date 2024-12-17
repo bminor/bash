@@ -52,8 +52,6 @@ $END
 
 #include <stdio.h>
 
-#include "version.h"
-
 #include "../bashintl.h"
 
 #include "../shell.h"
@@ -97,6 +95,7 @@ extern int localvar_unset;
 extern int varassign_redir_autoclose;
 extern int singlequote_translations;
 extern int patsub_replacement;
+extern int bash_source_fullpath;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -177,10 +176,13 @@ static struct {
   int  *value;
   shopt_set_func_t *set_func;
 } shopt_vars[] = {
-  { "autocd", &autocd, (shopt_set_func_t *)NULL },
 #if defined (ARRAY_VARS)
   { "array_expand_once", &expand_once_flag, set_array_expand },
   { "assoc_expand_once", &expand_once_flag, set_array_expand },
+#endif
+  { "autocd", &autocd, (shopt_set_func_t *)NULL },
+#if defined (ARRAY_VARS)
+  { "bash_source_fullpath", &bash_source_fullpath, (shopt_set_func_t *)NULL },
 #endif
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
@@ -375,6 +377,7 @@ reset_shopt_options (void)
   varassign_redir_autoclose = 0;
   singlequote_translations = 0;
   patsub_replacement = PATSUB_REPLACE_DEFAULT;
+  bash_source_fullpath = BASH_SOURCE_FULLPATH_DEFAULT;
 
 #if defined (JOB_CONTROL)
   check_jobs_at_exit = 0;
@@ -684,10 +687,10 @@ set_compatibility_level (char *option_name, int mode)
     shell_compatibility_level = 43;
   else if (shopt_compat44)
     shell_compatibility_level = 44;
-  else if (oldval > 44 && shell_compatibility_level < DEFAULT_COMPAT_LEVEL)
+  else if (oldval > 44 && shell_compatibility_level < default_compatibility_level)
     ;
   else
-    shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+    shell_compatibility_level = default_compatibility_level;
 
   /* Make sure the current compatibility level is reflected in BASH_COMPAT */
   rhs = itos (shell_compatibility_level);
@@ -705,9 +708,12 @@ set_compatibility_opts (void)
   shopt_compat31 = shopt_compat32 = 0;
   shopt_compat40 = shopt_compat41 = shopt_compat42 = shopt_compat43 = 0;
   shopt_compat44 = 0;
+  if (shell_compatibility_level == default_compatibility_level)
+    return;
+
   switch (shell_compatibility_level)
     {
-      case DEFAULT_COMPAT_LEVEL:
+      case 52:			/* completeness */
       case 51:			/* completeness */
       case 50:
 	break;

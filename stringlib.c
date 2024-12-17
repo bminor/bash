@@ -70,7 +70,9 @@ find_string_in_alist (char *string, STRING_INT_ALIST *alist, int flags)
 
 /* Find TOKEN in ALIST, a list of string/int value pairs.  Return the
    corresponding string.  Allocates memory for the returned
-   string.  FLAGS is currently ignored, but reserved. */
+   string.  FLAGS == 0 means to allocate new memory, the existing
+   behavior. If FLAGS&1, we just return the token and expect the caller
+   to allocate new memory and save it, if necessary. */
 char *
 find_token_in_alist (int token, STRING_INT_ALIST *alist, int flags)
 {
@@ -79,7 +81,7 @@ find_token_in_alist (int token, STRING_INT_ALIST *alist, int flags)
   for (i = 0; alist[i].word; i++)
     {
       if (alist[i].token == token)
-        return (savestring (alist[i].word));
+        return (flags ? alist[i].word : savestring (alist[i].word));
     }
   return (NULL);
 }

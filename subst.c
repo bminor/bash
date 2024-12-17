@@ -378,8 +378,8 @@ static WORD_LIST *expand_declaration_argument (WORD_LIST *, WORD_LIST *);
 static WORD_LIST *shell_expand_word_list (WORD_LIST *, int);
 static WORD_LIST *expand_word_list_internal (WORD_LIST *, int);
 
-static void posix_variable_assignment_error (int);
-static void bash_variable_assignment_error (int);
+static inline void posix_variable_assignment_error (int);
+static inline void bash_variable_assignment_error (int);
 
 static int do_assignment_statements (WORD_LIST *, char *, int);
 
@@ -2295,7 +2295,7 @@ skip_to_delim (const char *string, int start, const char *delims, int flags)
 	    CQ_RETURN(si);
 
 	  if (string[i+1] == LPAREN)
-	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND|completeflag); /* ) */
+	    temp = extract_command_subst (string, &si, SX_NOALLOC|SX_COMMAND|completeflag);
 	  else
 	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC|completeflag);
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
@@ -3450,7 +3450,7 @@ do_compound_assignment (const char *name, char *value, int flags)
     {
       v = find_variable (name);		/* follows namerefs */
       newname = (v == 0) ? nameref_transform_name (name, flags) : v->name;
-      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+      if (v && ASSIGN_DISALLOWED (v, flags))
 	{
 	  if (readonly_p (v))
 	    err_readonly (name);
@@ -3468,15 +3468,12 @@ do_compound_assignment (const char *name, char *value, int flags)
 	return ((SHELL_VAR *)0);
     }
   /* In a function but forcing assignment in global context. CHKLOCAL means to
-     check for an existing local variable first. */
+     check for an existing local variable first */
   else if (mkglobal && variable_context)
     {
-      v = chklocal ? find_variable (name) : 0;
-      if (v && (local_p (v) == 0 || v->context != variable_context))
-	v = 0;
-      if (v == 0)
-        v = find_global_variable (name);
-      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+      /* Changed to find variables at previous local scopes 6/12/2024 */
+      v = chklocal ? find_variable (name) : find_global_variable (name);
+      if (v && ASSIGN_DISALLOWED (v, flags))
 	{
 	  if (readonly_p (v))
 	    err_readonly (name);
@@ -3502,7 +3499,7 @@ do_compound_assignment (const char *name, char *value, int flags)
   else
     {
       v = assign_array_from_string (name, value, flags);
-      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+      if (v && ASSIGN_DISALLOWED (v, flags))
 	{
 	  if (readonly_p (v))
 	    err_readonly (name);
@@ -4003,7 +4000,7 @@ expand_arith_string (char *string, int quoted)
       /* This is expanded version of expand_string_internal as it's called by
 	 expand_string_leave_quoted  */
       td.flags = W_NOPROCSUB|W_NOTILDE;	/* don't want process substitution or tilde expansion */
-#if 0	/* TAG: bash-5.2 */
+#if 0	/* TAG: notyet */
       if (quoted & Q_ARRAYSUB)
 	td.flags |= W_NOCOMSUB;
 #endif
@@ -6092,29 +6089,10 @@ reap_some_procsubs (int max)
 }
 
 void
-reap_procsubs (void)
+delete_procsubs (void)
 {
   reap_some_procsubs (nfifo);
 }
-
-#if 0
-/* UNUSED */
-void
-wait_procsubs (void)
-{
-  int i, r;
-
-  for (i = 0; i < nfifo; i++)
-    {
-      if (fifo_list[i].proc != (pid_t)-1 && fifo_list[i].proc > 0)
-	{
-	  r = wait_for (fifo_list[i].proc, 0);
-	  save_proc_status (fifo_list[i].proc, r);
-	  fifo_list[i].proc = (pid_t)-1;
-	}
-    }
-}
-#endif
 
 int
 fifos_pending (void)
@@ -6325,29 +6303,10 @@ reap_some_procsubs (int max)
 }
 
 void
-reap_procsubs (void)
+delete_procsubs (void)
 {
   reap_some_procsubs (totfds);
 }
-
-#if 0
-/* UNUSED */
-void
-wait_procsubs (void)
-{
-  int i, r;
-
-  for (i = 0; nfds > 0 && i < totfds; i++)
-    {
-      if (dev_fd_list[i] != (pid_t)-1 && dev_fd_list[i] > 0)
-	{
-	  r = wait_for (dev_fd_list[i], 0);
-	  save_proc_status (dev_fd_list[i], r);
-	  dev_fd_list[i] = (pid_t)-1;
-	}
-    }
-}
-#endif
 
 #if defined (NOTDEF)
 print_dev_fd_list (void)
@@ -6446,7 +6405,7 @@ process_substitute (char *string, int open_for_read_in_child)
   save_pipeline (1);
 #endif /* JOB_CONTROL */
 
-  pid = make_child ((char *)NULL, FORK_ASYNC);
+  pid = make_child ((char *)NULL, FORK_ASYNC|FORK_PROCSUB);
   if (pid == 0)
     {
 #if 0
@@ -6512,6 +6471,7 @@ process_substitute (char *string, int open_for_read_in_child)
       /* We assume that last_procsub_child->next == last_procsub_child because
 	 of how jobs.c:add_process() works. */
       last_procsub_child->next = 0;
+      last_procsub_pid = last_procsub_child->pid;
       procsub_add (last_procsub_child);
 #endif
 
@@ -6898,6 +6858,16 @@ uw_unbind_variable (void *name)
 }
 
 static void
+uw_unbind_localvar (void *name)
+{
+  SHELL_VAR *v;
+
+  v = find_variable_noref (name);
+  if (v && local_p (v) && v->context == variable_context)
+    makunbound (name, shell_variables);
+}
+
+static void
 uw_restore_pipeline (void *discard)
 {
   restore_pipeline ((intptr_t) discard);
@@ -7075,11 +7045,13 @@ function_substitute (char *string, int quoted, int flags)
       v = make_local_variable ("REPLY", 0);		/* should be new instance */
       /* We don't check $REPLY for readonly yet, but we could */
       if (v)
-	add_unwind_protect (uw_unbind_variable, "REPLY");
+	add_unwind_protect (uw_unbind_localvar, "REPLY");
     }
 
-  old_frozen = freeze_jobs_list ();
+#if 1	/* TAG:bash-5.3 myoga.murase@gmail.com 04/30/2024 */
+  old_frozen = freeze_jobs_list (-1);
   add_unwind_protect (uw_lastpipe_cleanup, (void *) (intptr_t) old_frozen);
+#endif
 
 #if defined (JOB_CONTROL)
   unwind_protect_var (pipeline_pgrp);
@@ -7266,12 +7238,15 @@ command_substitute (char *string, int quoted, int flags)
      for example). */
   if ((subshell_environment & (SUBSHELL_FORK|SUBSHELL_PIPE)) == 0)
     pipeline_pgrp = shell_pgrp;
+  /* this can happen if we're performing word expansion in the second or
+     subsequent commands in a pipeline */
   cleanup_the_pipeline ();
+  /* at this point, the_pipeline is NULL */
 #endif /* JOB_CONTROL */
 
   old_async_pid = last_asynchronous_pid;
   fork_flags = (subshell_environment&SUBSHELL_ASYNC) ? FORK_ASYNC : 0;
-  pid = make_child ((char *)NULL, fork_flags|FORK_NOTERM);
+  pid = make_child ((char *)NULL, fork_flags|FORK_NOTERM|FORK_COMSUB);
   last_asynchronous_pid = old_async_pid;
 
   if (pid == 0)
@@ -7478,6 +7453,11 @@ command_substitute (char *string, int quoted, int flags)
 #endif /* JOB_CONTROL */
 
       CHECK_TERMSIG;
+
+#if defined (JOB_CONTROL)
+      /* this is the pipeline we allocated for this command substitution */
+      cleanup_the_pipeline ();
+#endif
 
       ret = alloc_word_desc ();
       ret->word = istring;
@@ -7796,7 +7776,9 @@ expand_arrayref:
 
 	  temp = quote_var_value (temp, quoted, pflags);
 
+#if defined (ARRAY_VARS)
 	  FREE (tt);
+#endif
 	}
       else
 	temp = (char *)NULL;
@@ -8150,7 +8132,7 @@ parameter_brace_expand_rhs (char *name, char *value,
 #endif /* ARRAY_VARS */
   v = bind_variable (vname, t1, 0);
 
-  if (v == 0 || readonly_p (v) || noassign_p (v))	/* expansion error  */
+  if (v == 0 || ASSIGN_DISALLOWED (v, 0))		/* expansion error */
     {
       if ((v == 0 || readonly_p (v)) && interactive_shell == 0 && posixly_correct)
 	{
@@ -8663,7 +8645,7 @@ string_var_assignment (SHELL_VAR *v, char *s)
     sprintf (ret, "declare -%s %s", flags, v->name);	/* just attributes, unset */
   else if (i > 0)
     sprintf (ret, "declare -%s %s=%s", flags, v->name, val);	/* attributes, set */
-#if 1 /*TAG: tentative */
+#if 1 /*TAG: bash-5.3 tentative */
   else if (i == 0 && val && local_p (v) && variable_context == v->context)
     sprintf (ret, "declare %s=%s", v->name, val);	/* set local variable at current scope */
   else if (i == 0 && val == 0 && local_p (v) && variable_context == v->context)
@@ -11147,6 +11129,34 @@ expand_array_subscript (const char *string, size_t *sindex, int quoted, int flag
 }
 #endif
 
+/* Handle a variable assignment error in default mode. */
+static inline void
+bash_variable_assignment_error (int force_exit)
+{
+  if (interactive_shell == 0 && force_exit)
+    exp_jump_to_top_level (FORCE_EOF);
+  else if (interactive_shell == 0)
+    exp_jump_to_top_level (DISCARD);	/* XXX - maybe change later */
+  else
+    exp_jump_to_top_level (DISCARD);
+}
+
+/* Handle a variable assignment error in posix mode. */
+static inline void
+posix_variable_assignment_error (int force_exit)
+{
+#if defined (STRICT_POSIX)
+  if (posixly_correct && interactive_shell == 0)
+#else
+  if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
+#endif
+    exp_jump_to_top_level (FORCE_EOF);
+  else if (force_exit)
+    exp_jump_to_top_level (FORCE_EOF);
+  else
+    exp_jump_to_top_level (DISCARD);
+}
+
 void
 invalidate_cached_quoted_dollar_at (void)
 {
@@ -12094,6 +12104,7 @@ finished_with_string:
 		 return, we expect to be able to split the results, but the
 		 space separation means the right split doesn't happen. */
 	      tword->word = string_list (list);	
+	      dispose_words (list);
 	    }
 	  else
 	    tword->word = istring;
@@ -12551,7 +12562,6 @@ glob_expand_word_list (WORD_LIST *tlist, int eflags)
   register int glob_index;
   WORD_LIST *glob_list, *output_list, *disposables, *next;
   WORD_DESC *tword;
-  int x;
 
   output_list = disposables = (WORD_LIST *)NULL;
   glob_array = (char **)NULL;
@@ -12909,7 +12919,7 @@ expand_declaration_argument (WORD_LIST *tlist, WORD_LIST *wcmd)
   if (tlist->word->flags & W_ASSNGLOBAL)
     omap['g'] = 1;
   if (tlist->word->flags & W_CHKLOCAL)
-    omap['G'] = 1;
+    omap['G'] = 1;		/* internal, undocumented */
 
   /* If we have special handling note the integer attribute and others
      that transform the value upon assignment.  What we do is take all
@@ -13081,34 +13091,6 @@ shell_expand_word_list (WORD_LIST *tlist, int eflags)
     new_list = REVERSE_LIST (new_list, WORD_LIST *);
 
   return (new_list);
-}
-
-/* Handle a variable assignment error in default mode. */
-static inline void
-bash_variable_assignment_error (int force_exit)
-{
-  if (interactive_shell == 0 && force_exit)
-    exp_jump_to_top_level (FORCE_EOF);
-  else if (interactive_shell == 0)
-    exp_jump_to_top_level (DISCARD);	/* XXX - maybe change later */
-  else
-    exp_jump_to_top_level (DISCARD);
-}
-
-/* Handle a variable assignment error in posix mode. */
-static inline void
-posix_variable_assignment_error (int force_exit)
-{
-#if defined (STRICT_POSIX)
-  if (posixly_correct && interactive_shell == 0)
-#else
-  if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
-#endif
-    exp_jump_to_top_level (FORCE_EOF);
-  else if (force_exit)
-    exp_jump_to_top_level (FORCE_EOF);
-  else
-    exp_jump_to_top_level (DISCARD);
 }
 
 /* Perform assignment statements optionally preceding a command name COMMAND.

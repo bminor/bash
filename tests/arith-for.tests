@@ -140,3 +140,7 @@ for ((j=;;)); do :; done
 echo X
 break
 echo Y
+
+# arithmetic for commands need to skip over command substitutions
+for (( $(case x in x) esac);; )); do break; done
+for (( ${ case x in x) esac; };; )); do break; done

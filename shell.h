@@ -96,7 +96,9 @@ extern WORD_LIST *rest_of_args;
 extern char *command_execution_string;
 
 extern int debugging_mode;
-extern int executing, login_shell;
+extern int executing;
+extern int login_shell;
+extern int su_shell;
 extern int parsing_command;
 extern int interactive, interactive_shell;
 extern int startup_state;
@@ -108,6 +110,7 @@ extern int subshell_environment;
 extern int current_command_number;
 extern int indirection_level;
 extern int shell_compatibility_level;
+extern const int default_compatibility_level;
 extern int running_under_emacs;
 
 extern int pretty_print_mode;
@@ -215,6 +218,7 @@ typedef struct _sh_parser_state_t
 
   int esacs_needed;
   int expecting_in;
+  int incmd;
 
   /* structures affecting the parser */
   void *pushed_strings;

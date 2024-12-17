@@ -1,6 +1,6 @@
 /* histfile.c - functions to manipulate the history file. */
 
-/* Copyright (C) 1989-2019,2023 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2019,2023-2024 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -647,6 +647,7 @@ history_truncate_file (const char *fname, int lines)
 truncate_write:
   tempname = history_tempfile (filename);
 
+  rv = 0;
   if ((file = open (tempname, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0600)) != -1)
     {
       if (write (file, bp, chars_read - (bp - buffer)) < 0)
@@ -741,9 +742,13 @@ history_do_write (const char *filename, int nelements, int overwrite)
   int file, mode, rv, exists;
   struct stat finfo;
 #ifdef HISTORY_USE_MMAP
-  size_t cursize;
+  size_t cursize, newsize;
+  off_t offset;
 
   history_lines_written_to_file = 0;
+
+  if (nelements < 0)
+    return (0);
 
   mode = overwrite ? O_RDWR|O_CREAT|O_TRUNC|O_BINARY : O_RDWR|O_APPEND|O_BINARY;
 #else
@@ -794,7 +799,11 @@ history_do_write (const char *filename, int nelements, int overwrite)
 #ifdef HISTORY_USE_MMAP
     if (ftruncate (file, buffer_size+cursize) == -1)
       goto mmap_error;
-    buffer = (char *)mmap (0, buffer_size, PROT_READ|PROT_WRITE, MAP_WFLAGS, file, cursize);
+    /* for portability, ensure that we round cursize to a multiple of the
+       page size. */
+    offset = cursize & ~(getpagesize () - 1);
+    newsize = buffer_size + cursize - offset;
+    buffer = (char *)mmap (0, newsize, PROT_READ|PROT_WRITE, MAP_WFLAGS, file, offset);
     if ((void *)buffer == MAP_FAILED)
       {
 mmap_error:
@@ -808,6 +817,7 @@ mmap_error:
 	FREE (tempname);
 	return rv;
       }
+    j = cursize - offset;
 #else    
     buffer = (char *)malloc (buffer_size);
     if (buffer == 0)
@@ -822,9 +832,10 @@ mmap_error:
 	FREE (tempname);
 	return rv;
       }
+    j = 0;
 #endif
 
-    for (j = 0, i = history_length - nelements; i < history_length; i++)
+    for (i = history_length - nelements; i < history_length; i++)
       {
 	if (history_write_timestamps && the_history[i]->timestamp && the_history[i]->timestamp[0])
 	  {
@@ -838,7 +849,10 @@ mmap_error:
       }
 
 #ifdef HISTORY_USE_MMAP
-    if (msync (buffer, buffer_size, MS_ASYNC) != 0 || munmap (buffer, buffer_size) != 0)
+    /* make sure we unmap the pages even if the sync fails */
+    if (msync (buffer, newsize, MS_ASYNC) != 0)
+      rv = errno;
+    if (munmap (buffer, newsize) != 0 && rv == 0)
       rv = errno;
 #else
     if (write (file, buffer, buffer_size) < 0)

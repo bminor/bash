@@ -1,6 +1,6 @@
 /* strlcpy - null-terminated string copy with length checking. */
 
-/* Copyright (C) 2023 Free Software Foundation, Inc.
+/* Copyright (C) 2023-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

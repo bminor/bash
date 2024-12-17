@@ -818,7 +818,7 @@ out_html(char *c)
 	} else if (output_possible) {
 		while (*c) {
 			outbuffer[obp++] = *c;
-			if (*c == '\n' || obp > HUGE_STR_MAX) {
+			if (*c == '\n' || obp >= HUGE_STR_MAX) {
 				outbuffer[obp] = '\0';
 				add_links(outbuffer);
 				obp = 0;

@@ -238,6 +238,10 @@ typedef struct _vlist {
 /* Special value for nameref with invalid value for creation or assignment */
 extern SHELL_VAR nameref_invalid_value;
 #define INVALID_NAMEREF_VALUE	(void *)&nameref_invalid_value
+
+/* Assignment statements */
+#define ASSIGN_DISALLOWED(v, f) \
+  ((readonly_p (v) && (f&ASS_FORCE) == 0) || noassign_p (v))
 	
 /* Stuff for hacking variables. */
 typedef int sh_var_map_func_t (SHELL_VAR *);
@@ -370,6 +374,10 @@ extern void save_bash_argv (void);
 extern void push_args (WORD_LIST *);
 extern void pop_args (void);
 extern void uw_pop_args (void *);
+
+#if defined (ARRAY_VARS)
+extern void push_source (ARRAY *, char *);
+#endif
 
 extern void adjust_shell_level (int);
 extern void non_unsettable (char *);

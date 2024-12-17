@@ -38,7 +38,9 @@ extern int errno;
 int
 zwrite (int fd, char *buf, size_t nb)
 {
-  int n, i, nt;
+  int nt;
+  size_t n;
+  ssize_t i;
 
   for (n = nb, nt = 0;;)
     {

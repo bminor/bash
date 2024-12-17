@@ -4,7 +4,7 @@
 #								            #
 #############################################################################
 
-# Copyright (C) 1994-2012 Free Software Foundation, Inc.
+# Copyright (C) 1994-2024 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -53,6 +53,8 @@ ETAGS = etags -tw
 CTAGS = ctags -tw
 
 DEBUG = @DEBUG@
+
+ADDON_CFLAGS = 
 
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
@@ -137,7 +139,7 @@ libhistory.a: $(HISTOBJ) xmalloc.o xfree.o
 
 documentation: force
 	test -d doc || mkdir doc
-	-( cd doc && $(MAKE) $(MFLAGS) )
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) )
 
 # Since tilde.c is shared between readline and bash, make sure we compile
 # it with the right flags when it's built as part of readline
@@ -159,15 +161,17 @@ TAGS:	force
 tags:	force
 	$(CTAGS) $(CSOURCES) $(HSOURCES)
 
-clean:	force
-	$(RM) $(OBJECTS) *.a
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+.PHONY: clean maintainer-clean distclean mostlyclean 
 
-mostlyclean: clean
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+mostlyclean:	force
+	$(RM) $(OBJECTS) *.a
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
+
+clean: mostlyclean
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 
 distclean maintainer-clean: clean
-	-( cd doc && $(MAKE) $(MFLAGS) $@ )
+	-( cd doc && $(MAKE) $(BASH_MAKEFLAGS) $@ )
 	$(RM) Makefile
 	$(RM) TAGS tags
 

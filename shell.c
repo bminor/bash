@@ -134,6 +134,9 @@ char *current_host_name = (char *)NULL;
  */
 int login_shell = 0;
 
+/* Non-zero if this shell is being run by `su'. */
+int su_shell = 0;
+
 /* Non-zero means that at this moment, the shell is interactive.  In
    general, this means that the shell is at this moment reading input
    from the keyboard. */
@@ -204,9 +207,6 @@ static char *bashrc_file;
 
 /* Non-zero means to act more like the Bourne shell on startup. */
 static int act_like_sh;
-
-/* Non-zero if this shell is being run by `su'. */
-static int su_shell;
 
 /* Non-zero if we have already expanded and sourced $ENV. */
 static int sourced_env;
@@ -448,7 +448,7 @@ main (int argc, char **argv, char **env)
 
   /* Fix for the `infinite process creation' bug when running shell scripts
      from startup files on System V. */
-  login_shell = make_login_shell = 0;
+  login_shell = make_login_shell = su_shell = 0;
 
   /* If this shell has already been run, then reinitialize it to a
      vanilla state. */
@@ -671,6 +671,8 @@ main (int argc, char **argv, char **env)
     {
       change_flag ('i', FLAG_ON);
       interactive = 1;
+      if (forced_interactive == 0)
+	read_but_dont_execute = 0;
     }
 
 #if defined (RESTRICTED_SHELL)
@@ -1638,7 +1640,7 @@ open_shell_script (char *script_name)
   GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
   GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
 
-  array_push (bash_source_a, filename);
+  push_source (bash_source_a, filename);
   if (bash_lineno_a)
     {
       t = itos (executing_line_number ());
@@ -1685,7 +1687,7 @@ open_shell_script (char *script_name)
 	}
       else if (sample_len > 0 && (check_binary_file (sample, sample_len)))
 	{
-	  internal_error (_("%s: cannot execute binary file"), filename);
+	  internal_error ("%s: %s", filename, _("cannot execute binary file"));
 #if defined (JOB_CONTROL)
 	  end_job_control ();	/* just in case we were run as bash -i script */
 #endif
@@ -1996,7 +1998,7 @@ shell_reinitialize (void)
   no_rc = no_profile = 1;
 
   /* Things that get 0. */
-  login_shell = make_login_shell = executing = 0;
+  login_shell = make_login_shell = su_shell = executing = 0;
   debugging = debugging_mode = 0;
   do_version = line_number = last_command_exit_value = 0;
   forced_interactive = interactive_shell = interactive = 0;

@@ -73,6 +73,8 @@ extern void err_badarraysub (const char *);
 extern void err_unboundvar (const char *);
 extern void err_readonly (const char *);
 
+extern void err_invalidid (const char *);
+
 #ifdef DEBUG
 #  define INTERNAL_DEBUG(x)	internal_debug x
 #else

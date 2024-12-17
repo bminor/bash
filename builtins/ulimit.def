@@ -68,6 +68,9 @@ Values are in 1024-byte increments, except for -t, which is in seconds;
 -b, which is in bytes; and -e, -i, -k, -n, -q, -r, -u, -x, and -P,
 which accept unscaled values.
 
+When in posix mode, values supplied with -c and -f are in 512-byte
+increments.
+
 Exit Status:
 Returns success unless an invalid option is supplied or an error occurs.
 $END
@@ -456,8 +459,9 @@ ulimit_internal (int cmd, char *cmdarg, int mode, int multiple)
   opt = get_limit (limind, &soft_limit, &hard_limit);
   if (opt < 0)
     {
-      builtin_error (_("%s: cannot get limit: %s"), limits[limind].description,
-						 strerror (errno));
+      builtin_error ("%s: %s: %s", limits[limind].description,
+				   _("cannot get limit"),
+				   strerror (errno));
       return (EXECUTION_FAILURE);
     }
 
@@ -501,8 +505,9 @@ ulimit_internal (int cmd, char *cmdarg, int mode, int multiple)
 
   if (set_limit (limind, real_limit, mode) < 0)
     {
-      builtin_error (_("%s: cannot modify limit: %s"), limits[limind].description,
-						    strerror (errno));
+      builtin_error ("%s: %s: %s", limits[limind].description,
+				   _("cannot modify limit"),
+				   strerror (errno));
       return (EXECUTION_FAILURE);
     }
 
@@ -724,8 +729,9 @@ print_all_limits (int mode)
       if (get_limit (i, &softlim, &hardlim) == 0)
 	printone (i, (mode & LIMIT_SOFT) ? softlim : hardlim, 1);
       else if (errno != EINVAL)
-	builtin_error ("%s: cannot get limit: %s", limits[i].description,
-						   strerror (errno));
+	builtin_error ("%s: %s: %s", limits[i].description,
+				     _("cannot get limit"),
+				     strerror (errno));
     }
 }
 
@@ -787,8 +793,9 @@ set_all_limits (int mode, RLIMTYPE newlim)
   for (retval = i = 0; limits[i].option > 0; i++)
     if (set_limit (i, newlim, mode) < 0)
       {
-	builtin_error (_("%s: cannot modify limit: %s"), limits[i].description,
-						      strerror (errno));
+	builtin_error ("%s: %s: %s", limits[i].description,
+				     _("cannot modify limit"),
+				     strerror (errno));
 	retval = 1;
       }
   return retval;

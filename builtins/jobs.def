@@ -138,7 +138,7 @@ jobs_builtin (WORD_LIST *list)
 	  list_all_jobs (form);
 	  /* POSIX says to remove terminated jobs from the list after the jobs
 	     builtin reports their status. */
-	  notify_and_cleanup ();	/* the notify part will be a no-op */
+	  notify_and_cleanup (-1);	/* the notify part will be a no-op */
 	  break;
 	case JSTATE_RUNNING:
 	  list_running_jobs (form);
@@ -155,7 +155,7 @@ jobs_builtin (WORD_LIST *list)
       BLOCK_CHILD (set, oset);
       job = get_job_spec (list);
 
-      if ((job == NO_JOB) || jobs == 0 || get_job_by_jid (job) == 0)
+      if ((job == NO_JOB) || jobs == 0 || INVALID_JOB (job) || get_job_by_jid (job) == 0)
 	{
 	  sh_badjob (list->word->word);
 	  any_failed++;
@@ -168,7 +168,8 @@ jobs_builtin (WORD_LIST *list)
     }
   /* POSIX says to remove terminated jobs from the list after the jobs
      builtin reports their status. */
-  notify_and_cleanup ();
+  if (posixly_correct == 0 || interactive_shell == 0 || interactive == 0)
+    notify_and_cleanup (-1);	/* XXX - why here? list_one_job already deletes dead jobs */
 
   return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
@@ -286,7 +287,10 @@ disown_builtin (WORD_LIST *list)
 
       if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))
 	{
-	  sh_badjob (list ? list->word->word : _("current"));
+	  if (job == BAD_JOBSPEC)
+	    sh_invalidjob (list->word->word);
+	  else
+	    sh_badjob (list ? list->word->word : _("current"));
 	  retval = EXECUTION_FAILURE;
 	}
       else if (nohup_only)

@@ -428,6 +428,14 @@ version and versions 2.0 and above.
     there are four or fewer, it uses the posix test algorithm on the
     subexpression.
 
+68. The bind builtin's -p and -P options treat any arguments remaining after
+    option processing as bindable command names for which to print any key
+    bindings.
+
+69. Interactive shells will notify the user of completed jobs while sourcing
+    a script. Newer versions defer notification until script execution
+    completes.
+
 Shell Compatibility Level
 =========================
 
@@ -512,10 +520,6 @@ compat42
 	  single quotes are not special within double-quoted word expansions
 
 compat43
-	- the shell does not print a warning message if an attempt is made to
-	  use a quoted compound assignment as an argument to declare
-	  (declare -a foo='(1 2)'). Later versions warn that this usage is
-	  deprecated.
 	- word expansion errors are considered non-fatal errors that cause the
 	  current command to fail, even in posix mode (the default behavior is
 	  to make them fatal errors that cause the shell to exit)
@@ -587,7 +591,11 @@ compat51 (set using BASH_COMPAT)
 compat52 (set using BASH_COMPAT)
 	- the test builtin uses its historical algorithm for parsing
 	  expressions composed of five or more primaries.
-
+	- the -p and -P options to the bind builtin treat remaining arguments
+	  as bindable command names for which to print any key bindings
+	- interactive shells will notify the user of completed jobs while
+	  sourcing a script. Newer versions defer notification until script
+	  execution completes.
 -------------------------------------------------------------------------------
 
 Copying and distribution of this file, with or without modification,

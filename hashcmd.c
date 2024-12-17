@@ -112,7 +112,7 @@ phash_insert (char *filename, char *full_path, int check_dot, int found)
   pathdata(item)->flags = 0;
   if (check_dot)
     pathdata(item)->flags |= HASH_CHKDOT;
-  if (*full_path != '/')
+  if (RELPATH (full_path))
     pathdata(item)->flags |= HASH_RELPATH;
   item->times_found = found;
 }

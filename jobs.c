@@ -216,6 +216,9 @@ volatile pid_t last_asynchronous_pid = NO_PID;
 /* The pipeline currently being built. */
 PROCESS *the_pipeline = (PROCESS *)NULL;
 
+/* We are forking this pipeline (process) to perform a command substitution. */
+PROCESS *comsub_pipeline = (PROCESS *)NULL;
+
 /* If this is non-zero, do job control. */
 int job_control = 1;
 
@@ -230,6 +233,11 @@ int already_making_children = 0;
 int check_window_size = CHECKWINSIZE_DEFAULT;
 
 PROCESS *last_procsub_child = (PROCESS *)NULL;
+pid_t last_procsub_pid = NO_PID;
+
+/* Set to non-zero if you want to force job notifications even in contexts
+   where the shell would defer them. */
+int want_job_notifications = 0;
 
 /* Functions local to this file. */
 
@@ -269,13 +277,14 @@ static WAIT raw_job_exit_status (int);
 
 static int job_killed_by_signal (int);
 
-static void notify_of_job_status (void);
+static inline void maybe_print_job_notifications (int);
+static void notify_of_job_status (int);
 static void reset_job_indices (void);
 static void cleanup_dead_jobs (void);
 static int processes_in_job (int);
 static void realloc_jobs_list (void);
 static int compact_jobs_list (int);
-static void add_process (char *, pid_t);
+static PROCESS *add_process (char *, pid_t);
 static void print_pipeline (PROCESS *, int, int, FILE *);
 static void pretty_print_job (int, int, FILE *);
 static void set_current_job (int);
@@ -337,10 +346,11 @@ static SigHandler *old_cont = (SigHandler *)SIG_DFL;
 /* A place to temporarily save the current pipeline. */
 static struct pipeline_saver *saved_pipeline;
 
-/* Set this to non-zero whenever you don't want the jobs list to change at
+/* Set this to 1 whenever you don't want the jobs list to change at
    all: no jobs deleted and no status change notifications.  This is used,
    for example, when executing SIGCHLD traps, which may run arbitrary
-   commands. */
+   commands. Set to -1 if you allow status change notifications but no
+   jobs deleted. 0 means everything is allowed. */
 static int jobs_list_frozen;
 
 static char retcode_name_buffer[64];
@@ -562,7 +572,7 @@ stop_pipeline (int async, COMMAND *deferred)
   cleanup_dead_jobs ();
 
   if (js.j_jobslots == 0)
-    {
+   {
       js.j_jobslots = JOB_SLOTS;
       jobs = (JOB **)xmalloc (js.j_jobslots * sizeof (JOB *));
 
@@ -638,8 +648,9 @@ stop_pipeline (int async, COMMAND *deferred)
       the_pipeline = (PROCESS *)NULL;
       newjob->pgrp = pipeline_pgrp;
 
-      /* Invariant: if the shell is executing a command substitution,
-	 pipeline_pgrp == shell_pgrp. Other parts of the shell assume this. */
+      /* Invariant: if the shell is executing a command substitution when
+	 job control is enabled, pipeline_pgrp == shell_pgrp.
+	 Other parts of the shell assume this. */
       if (pipeline_pgrp != shell_pgrp)
 	pipeline_pgrp = 0;
 
@@ -964,6 +975,21 @@ bgp_prune (void)
 }
 #endif
 
+/* Find any pid in the bgpids table and return it. It's pretty much random
+   because of how the hashing works, so we just return the first one. */
+static struct pidstat *
+bgp_findone (void)
+{
+  ps_index_t psi;
+
+  if (bgpids.storage == 0 || bgpids.nalloc == 0 || bgpids.npid == 0)
+    return NULL;
+  for (psi = 0; psi < bgpids.nalloc; psi++)
+    if (bgpids.storage[psi].pid != NO_PID)
+      return (&bgpids.storage[psi]);
+  return NULL;
+}
+
 /* External interface to bgp_add/bgp_search/bgp_delete; takes care of blocking
    and unblocking SIGCHLD if needed. If retrieve_proc_status or delete_proc_status
    is called with BLOCK non-zero, the caller must block and unblock SIGCHLD. */
@@ -974,7 +1000,7 @@ save_proc_status (pid_t pid, int status)
   sigset_t set, oset;
 
   BLOCK_CHILD (set, oset);
-  bgp_add (pid, status);
+  bgp_add (pid, process_exit_status (status));
   UNBLOCK_CHILD (oset);  
 }
 
@@ -1042,27 +1068,32 @@ procsub_add (PROCESS *p)
 }
 
 PROCESS *
-procsub_search (pid_t pid)
+procsub_search (pid_t pid, int block)
 {
   PROCESS *p;
   sigset_t set, oset;
 
-  BLOCK_CHILD (set, oset);
+  if (block)
+    BLOCK_CHILD (set, oset);
   for (p = procsubs.head; p; p = p->next)
     if (p->pid == pid)
       break;
-  UNBLOCK_CHILD (oset);
+  if (block)
+    UNBLOCK_CHILD (oset);
 
   return p;
 }
 
+/* Take the PROCESS * corresponding to PID out of the procsubs list and
+   return it. */
 PROCESS *
-procsub_delete (pid_t pid)
+procsub_delete (pid_t pid, int block)
 {
   PROCESS *p, *prev;
   sigset_t set, oset;
 
-  BLOCK_CHILD (set, oset);
+  if (block)
+    BLOCK_CHILD (set, oset);
   for (p = prev = procsubs.head; p; prev = p, p = p->next)
     if (p->pid == pid)
       {
@@ -1072,7 +1103,8 @@ procsub_delete (pid_t pid)
 
   if (p == 0)
     {
-      UNBLOCK_CHILD (oset);
+      if (block)
+	UNBLOCK_CHILD (oset);
       return p;
     }
 
@@ -1089,7 +1121,9 @@ procsub_delete (pid_t pid)
 
   /* this can't be called anywhere in a signal handling path */
   bgp_add (p->pid, process_exit_status (p->status));
-  UNBLOCK_CHILD (oset);
+
+  if (block)
+    UNBLOCK_CHILD (oset);
   return (p);  
 }
 
@@ -1099,7 +1133,7 @@ procsub_waitpid (pid_t pid)
   PROCESS *p;
   int r;
 
-  p = procsub_search (pid);
+  p = procsub_search (pid, 1);
   if (p == 0)
     return -1;
   if (p->running == PS_DONE)
@@ -1129,7 +1163,6 @@ procsub_clear (void)
   sigset_t set, oset;
 
   BLOCK_CHILD (set, oset);
-  
   for (ps = procsubs.head; ps; )
     {
       p = ps;
@@ -1137,7 +1170,9 @@ procsub_clear (void)
       procsub_free (p);
     }
   procsubs.head = procsubs.end = 0;
-  procsubs.nproc = 0;        
+  procsubs.nproc = 0;
+
+  last_procsub_child = NULL;
   UNBLOCK_CHILD (oset);
 }
 
@@ -1165,12 +1200,58 @@ procsub_prune (void)
       if (p->running == PS_DONE)
 	{
 	  bgp_add (p->pid, process_exit_status (p->status));
+	  if (p == last_procsub_child)
+	    last_procsub_child = NULL;
 	  procsub_free (p);
 	}
       else
 	procsub_add (p);
       p = ps;
     }
+}
+
+void
+procsub_reap (void)
+{
+  int os;
+
+  QUEUE_SIGCHLD(os);
+  procsub_prune ();
+  UNQUEUE_SIGCHLD (os);
+}
+
+void
+procsub_setflag (pid_t pid, int flag, int block)
+{
+  sigset_t set, oset;
+  PROCESS *p;
+
+  if (block)
+    BLOCK_CHILD (set, oset);
+
+  for (p = procsubs.head; p; p = p->next)
+    if (p->pid == pid || pid == ANY_PID)
+      p->flags |= flag;
+
+  if (block)
+    UNBLOCK_CHILD (oset);
+}
+
+void
+procsub_unsetflag (pid_t pid, int flag, int block)
+{
+  sigset_t set, oset;
+  PROCESS *p;
+
+  if (block)
+    BLOCK_CHILD (set, oset);
+
+  for (p = procsubs.head; p; p = p->next)
+    if (p->pid == pid || pid == ANY_PID)
+      p->flags &= ~flag;
+
+  if (block)
+    UNBLOCK_CHILD (oset);
 }
 #endif
 
@@ -1224,8 +1305,15 @@ cleanup_dead_jobs (void)
   register int i;
   int os;
 
+  /* Even if the jobs list is frozen or there aren't any background jobs,
+     clean up any terminated process substitutions. */
   if (js.j_jobslots == 0 || jobs_list_frozen)
-    return;
+    {
+#if defined (PROCESS_SUBSTITUTION)
+      procsub_reap ();
+#endif
+      return;
+    }
 
   QUEUE_SIGCHLD(os);
 
@@ -1246,8 +1334,8 @@ cleanup_dead_jobs (void)
     }
 
 #if defined (PROCESS_SUBSTITUTION)
+  /* Don't need to call procsub_reap() since SIGCHLD is already blocked. */
   procsub_prune ();
-  last_procsub_child = (PROCESS *)NULL;
 #endif
 
 #if defined (COPROCESS_SUPPORT)
@@ -1468,6 +1556,29 @@ nohup_job (int job_index)
     temp->flags |= J_NOHUP;
 }
 
+PROCESS *
+alloc_process (char *name, pid_t pid)
+{
+  PROCESS *t;
+
+  t = (PROCESS *)xmalloc (sizeof (PROCESS));
+  t->pid = pid;
+  WSTATUS (t->status) = 0;
+  t->running = PS_RUNNING;	/* default */
+  t->flags = 0;
+  t->command = name;
+  t->next = (PROCESS *)0;
+
+  return (t);
+}
+
+void
+dispose_process (PROCESS *t)
+{
+  FREE (t->command);
+  free (t);
+}
+  
 /* Get rid of the data structure associated with a process chain. */
 int
 discard_pipeline (PROCESS *chain)
@@ -1480,8 +1591,7 @@ discard_pipeline (PROCESS *chain)
   do
     {
       next = this->next;
-      FREE (this->command);
-      free (this);
+      dispose_process (this);
       n++;
       this = next;
     }
@@ -1492,8 +1602,9 @@ discard_pipeline (PROCESS *chain)
 
 /* Add this process to the chain being built in the_pipeline.
    NAME is the command string that will be exec'ed later.
-   PID is the process id of the child. */
-static void
+   PID is the process id of the child. Returns the PROCESS *
+   we just created if the caller wants to use it or set flags. */
+static PROCESS *
 add_process (char *name, pid_t pid)
 {
   PROCESS *t, *p;
@@ -1511,12 +1622,8 @@ add_process (char *name, pid_t pid)
     }
 #endif
 
-  t = (PROCESS *)xmalloc (sizeof (PROCESS));
+  t = alloc_process (name, pid);
   t->next = the_pipeline;
-  t->pid = pid;
-  WSTATUS (t->status) = 0;
-  t->running = PS_RUNNING;
-  t->command = name;
   the_pipeline = t;
 
   if (t->next == 0)
@@ -1528,6 +1635,8 @@ add_process (char *name, pid_t pid)
 	p = p->next;
       p->next = t;
     }
+
+  return t;
 }
 
 /* Create a (dummy) PROCESS with NAME, PID, and STATUS, and make it the last
@@ -1537,13 +1646,11 @@ append_process (char *name, pid_t pid, int status, int jid)
 {
   PROCESS *t, *p;
 
-  t = (PROCESS *)xmalloc (sizeof (PROCESS));
-  t->next = (PROCESS *)NULL;
-  t->pid = pid;
+  t = alloc_process (name, pid);
+
   /* set process exit status using offset discovered by configure */
   t->status = (status & 0xff) << WEXITSTATUS_OFFSET;
   t->running = PS_DONE;
-  t->command = name;
 
   js.c_reaped++;	/* XXX */
 
@@ -1741,7 +1848,7 @@ find_pipeline (pid_t pid, int alive_only, int *jobp)
       return (p);
 
 #if defined (PROCESS_SUBSTITUTION)
-  if (procsubs.nproc > 0 && (p = procsub_search (pid)) && ((alive_only == 0 && PRECYCLED(p) == 0) || PALIVE(p)))
+  if (procsubs.nproc > 0 && (p = procsub_search (pid, 0)) && ((alive_only == 0 && PRECYCLED(p) == 0) || PALIVE(p)))
     return (p);
 #endif
 
@@ -1810,6 +1917,9 @@ get_job_by_pid (pid_t pid, int block, PROCESS **procp)
 {
   int job;
   sigset_t set, oset;
+
+  if (pid < 0)
+    return (NO_JOB);
 
   if (block)
     BLOCK_CHILD (set, oset);
@@ -1905,19 +2015,26 @@ printable_job_status (int j, PROCESS *p, int format)
 /* This is the way to print out information on a job if you
    know the index.  FORMAT is:
 
-    JLIST_NORMAL)   [1]+ Running	   emacs
+    JLIST_STANDARD)   [1]+ Running	   emacs
     JLIST_LONG  )   [1]+ 2378 Running      emacs
     -1	  )   [1]+ 2378	      emacs
 
-    JLIST_NORMAL)   [1]+ Stopped	   ls | more
+    JLIST_STANDARD)   [1]+ Stopped	   ls | more
     JLIST_LONG  )   [1]+ 2369 Stopped      ls
 			 2367	    | more
     JLIST_PID_ONLY)
 	Just list the pid of the process group leader (really
 	the process group).
     JLIST_CHANGED_ONLY)
-	Use format JLIST_NORMAL, but list only jobs about which
-	the user has not been notified. */
+	Use format JLIST_STANDARD, but list only jobs about which
+	the user has not been notified.
+    JLIST_POSIX)
+	Use format JLIST_STANDARD, list all background jobs, running
+	and stopped, plus jobs about which the user has not been
+	notified (that would be notified)
+    JLIST_BGONLY)
+	Use format JLIST_STANDARD, but restrict output to background
+	jobs only. */
 
 /* Print status for pipeline P.  If JOB_INDEX is >= 0, it is the index into
    the JOBS array corresponding to this pipeline.  FORMAT is as described
@@ -1945,9 +2062,14 @@ print_pipeline (PROCESS *p, int job_index, int format, FILE *stream)
 	fprintf (stream, format ? "     " : " |");
 
       if (format != JLIST_STANDARD)
-	fprintf (stream, "%5ld", (long)p->pid);
+	{
+	  fprintf (stream, "%5ld", (long)p->pid);
+	  if (p == first)
+	    fprintf (stream, " ");
+	}
 
-      fprintf (stream, " ");
+      if (p != first)
+	fprintf (stream, " ");
 
       if (format > -1 && job_index >= 0)
 	{
@@ -2021,12 +2143,42 @@ print_pipeline (PROCESS *p, int job_index, int format, FILE *stream)
   fflush (stream);
 }
 
+/* We want to print information about a job if it's running or terminated in
+   the background, if it's stopped, or if it was a foreground job terminated
+   due to a signal that we don't ignore (SIGINT and possibly SIGTERM and
+   SIGPIPE). If we change this, change the conditions in notify_of_job_status()
+   so they stay consistent.
+
+   This is for use by the jobs builtin. */
+
+static int
+should_notify (int job)
+{
+  /* Background jobs, stopped jobs whether they were in the foreground or
+     background. */
+  if ((IS_FOREGROUND (job) == 0) || STOPPED (job))
+    return 1;
+
+  /* Foreground job killed by a signal we report on. */
+  if (DEADJOB (job) && IS_FOREGROUND (job) && job_killed_by_signal (job))
+    return 1;
+
+  return 0;		/* catch-all */  
+}
+
 /* Print information to STREAM about jobs[JOB_INDEX] according to FORMAT.
    Must be called with SIGCHLD blocked or queued with queue_sigchld */
 static void
 pretty_print_job (int job_index, int format, FILE *stream)
 {
   register PROCESS *p;
+
+  /* If the jobs list is frozen, skip jobs we would remove and not report on */
+  if (jobs_list_frozen && should_notify (job_index) == 0)
+    return;
+
+  if (format == JLIST_BGONLY && IS_FOREGROUND (job_index))
+    return;
 
   /* Format only pid information about the process group leader? */
   if (format == JLIST_PID_ONLY)
@@ -2041,6 +2193,12 @@ pretty_print_job (int job_index, int format, FILE *stream)
 	return;
       format = JLIST_STANDARD;
     }
+  else if (format == JLIST_POSIX)
+    {
+      if (IS_FOREGROUND (job_index) && IS_NOTIFIED (job_index))
+	return;
+      format = JLIST_STANDARD;
+    }
 
   if (format != JLIST_NONINTERACTIVE)
     fprintf (stream, "[%d]%c ", job_index + 1,
@@ -2050,8 +2208,10 @@ pretty_print_job (int job_index, int format, FILE *stream)
   if (format == JLIST_NONINTERACTIVE)
     format = JLIST_LONG;
 
-  p = jobs[job_index]->pipe;
+  if (format == JLIST_STANDARD)
+    fprintf (stream, "%c", ' ');		/* used to be in print_pipeline */
 
+  p = jobs[job_index]->pipe;
   print_pipeline (p, job_index, format, stream);
 
   /* We have printed information about this job.  When the job's
@@ -2108,6 +2268,7 @@ make_child (char *command, int flags)
   unsigned int forksleep;
   sigset_t set, oset, oset_copy;
   pid_t pid;
+  PROCESS *child;
   SigHandler *oterm;
 
   sigemptyset (&oset_copy);
@@ -2212,6 +2373,7 @@ make_child (char *command, int flags)
 	    pipeline_pgrp = mypid;
 
 	  /* Check for running command in backquotes. */
+	  /* XXX - do this if (flags & FORK_NOJOB)? */
 	  if (pipeline_pgrp == shell_pgrp)
 	    ignore_tty_job_signals ();
 	  else
@@ -2225,7 +2387,7 @@ make_child (char *command, int flags)
 	     this would have for the first child) is an error.  Section
 	     B.4.3.3, p. 237 also covers this, in the context of job control
 	     shells. */
-	  if (setpgid (mypid, pipeline_pgrp) < 0)
+	  if ((flags & FORK_NOJOB) == 0 && setpgid (mypid, pipeline_pgrp) < 0)
 	    sys_error (_("child setpgid (%ld to %ld)"), (long)mypid, (long)pipeline_pgrp);
 
 	  /* By convention (and assumption above), if
@@ -2289,7 +2451,8 @@ make_child (char *command, int flags)
 	     the POSIX 1003.1 standard, where it discusses job control and
 	     shells.  It is done to avoid possible race conditions. (Ref.
 	     1003.1 Rationale, section B.4.3.3, page 236). */
-	  setpgid (pid, pipeline_pgrp);
+	  if ((flags & FORK_NOJOB) == 0)
+	    setpgid (pid, pipeline_pgrp);
 	}
       else
 	{
@@ -2299,7 +2462,13 @@ make_child (char *command, int flags)
 
       /* Place all processes into the jobs array regardless of the
 	 state of job_control. */
-      add_process (command, pid);
+      child = add_process (command, pid);
+
+      /* Set up the flags based on what the caller provides. */
+      if (flags & FORK_PROCSUB)
+        child->flags |= PROC_PROCSUB;
+      if (flags & FORK_COMSUB)
+	child->flags |= PROC_COMSUB;
 
       if (async_p)
 	last_asynchronous_pid = pid;
@@ -2571,7 +2740,11 @@ wait_for_single_pid (pid_t pid, int flags)
     {
       r = bgp_search (pid);
       if (r >= 0)
-	return r;
+	{
+	  if (posixly_correct)
+	    bgp_delete (pid);
+	  return r;
+	}
     }
 
   if (child == 0)
@@ -2605,7 +2778,7 @@ wait_for_single_pid (pid_t pid, int flags)
   /* If running in posix mode, remove the job from the jobs table immediately */
   if (posixly_correct)
     {
-      cleanup_dead_jobs ();
+      cleanup_dead_jobs ();		/* calls procsub_prune */
       bgp_delete (pid);
     }
 
@@ -2673,9 +2846,13 @@ wait_for_background_pids (struct procstat *ps)
     }
 
 #if defined (PROCESS_SUBSTITUTION)
+#  if defined (WAIT_WAITS_FOR_ALL_PROCSUBS)
+  procsub_waitall ();
+#  else
   if (last_procsub_child && last_procsub_child->pid != NO_PID && last_procsub_child->pid == last_asynchronous_pid)
     procsub_waitpid (last_procsub_child->pid);
-  reap_procsubs ();	/* closes fd */
+#  endif
+  delete_procsubs ();	/* closes fds or unlinks fifos */
 #endif
 
   /* POSIX.2 says the shell can discard the statuses of all completed jobs if
@@ -3096,7 +3273,8 @@ if (job == NO_JOB)
 
 	  if (WIFSIGNALED (s) || WIFSTOPPED (s))
 	    {
-	      set_tty_state ();
+	      if (running_trap == 0 /* || WIFSTOPPED (s) */)
+		set_tty_state ();
 
 	      /* If the current job was stopped or killed by a signal, and
 		 the user has requested it, get a possibly new window size */
@@ -3200,7 +3378,8 @@ if (job == NO_JOB)
 	 the shell is not interactive, make sure we turn on the notify bit
 	 so we don't get an unwanted message about the job's termination,
 	 and so delete_job really clears the slot in the jobs table. */
-      notify_and_cleanup ();
+      if (posixly_correct == 0 || interactive_shell == 0 || interactive == 0)
+	notify_and_cleanup (job);
     }
 
 wait_for_return:
@@ -3262,20 +3441,25 @@ wait_for_job (int job, int flags, struct procstat *ps)
   return r;
 }
 
-/* Wait for any background job started by this shell to finish.  Very
-   similar to wait_for_background_pids().  Returns the exit status of
-   the next exiting job, -1 if there are no background jobs.  The caller
-   is responsible for translating -1 into the right return value. RPID,
-   if non-null, gets the pid of the job's process leader. */
+/* Wait for any background job started by this shell to finish, including
+   process substitutions.
+   Very similar to wait_for_background_pids().  Returns the exit status of
+   the next exiting job, -1 if there are no background jobs. If we are in
+   posix mode, we can take a pid from bgpids since we will delete it.
+
+   The caller is responsible for translating -1 into the right return value.
+   PS, if non-null, gets the pid and status of the job's process leader. */
 int
 wait_for_any_job (int flags, struct procstat *ps)
 {
   pid_t pid;
   int i, r;
   sigset_t set, oset;
+  struct pidstat *t;
+  PROCESS *p, *child;
 
   /* Allow funsubs to run this, but don't remove jobs from the jobs table. */
-  if (jobs_list_frozen && executing_funsub == 0)
+  if (jobs_list_frozen > 0)
     return -1;
 
   /* First see if there are any unnotified dead jobs that we can report on */
@@ -3296,14 +3480,12 @@ return_job:
 	    }
 	  if (jobs_list_frozen == 0)		/* must be running a funsub to get here */
 	    {
-	      notify_of_job_status ();		/* XXX */
-#if 1 /* TAG: bash-5.3 kre@munnari.oz.au 01/30/2024 */
+	      notify_of_job_status (i);		/* XXX */
+
+	      /* kre@munnari.oz.au 01/30/2024 */
 	      delete_job (i, posixly_correct ? DEL_NOBGPID : 0);
-#else
-	      delete_job (i, 0);
-#endif
 	    }
-	  else
+	  else /* if (jobs_list_frozen < 0) */	/* status changes only */
 	    jobs[i]->flags |= J_NOTIFIED;	/* clean up later */
 #if defined (COPROCESS_SUPPORT)
 	  coproc_reap ();
@@ -3312,6 +3494,61 @@ return_job:
 	  return r;
 	}
     }
+
+#if defined (PROCESS_SUBSTITUTION)
+  /* We don't have any dead jobs, but let's see if we have a dead procsub. */
+  for (p = procsubs.head; p; p = p->next)
+    {
+      /* If we're waiting for specific pids, skip over ones we're not interested in. */
+      if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
+	continue;
+#if defined (WAIT_N_WAITS_FOR_LAST_PROCSUB)
+      /* If we want to restrict wait -n without pid arguments to only wait
+	 for last_procsub_child->pid, uncomment this. */
+      if ((flags & JWAIT_WAITING) == 0 && p != last_procsub_child)
+	continue;
+#endif
+      if (p->running == PS_DONE)
+	{
+return_procsub:
+	  if (p == last_procsub_child)
+	    last_procsub_child = (PROCESS *)NULL;
+	  r = process_exit_status (p->status);
+	  pid = p->pid;
+	  if (ps)
+	    {
+	      ps->pid = pid;
+	      ps->status = r;
+	    }
+	  child = procsub_delete (pid, 0);		/* XXX - procsub_reap? */
+	  if (child == last_procsub_child)
+	    last_procsub_child = NULL;
+	  procsub_free (child);
+	  if (posixly_correct)
+	    bgp_delete (pid);
+	  UNBLOCK_CHILD (oset);
+	  return r;
+	}
+    }
+#endif
+
+  /* There aren't any dead jobs in the jobs table, but let's see if there's
+     one in bgpids. We can do this in posix mode because we'll remove any
+     one we find from the table, preserving existing semantics. */
+  if (posixly_correct && (t = bgp_findone ()))
+    {
+      pid = t->pid;
+      r = t->status;
+      if (ps)
+	{
+	  ps->pid = pid;
+	  ps->status = r;
+	}
+      bgp_delete (pid);
+      UNBLOCK_CHILD (oset);
+      return r;
+    }
+
   UNBLOCK_CHILD (oset);
 
   /* At this point, we have no dead jobs in the jobs table.  Wait until we
@@ -3332,7 +3569,27 @@ return_job:
 	    goto return_job;
 	}
 
-      if (i == js.j_jobslots)
+      p = NULL;
+#if defined (PROCESS_SUBSTITUTION)
+      /* Do we have any procsubs that are still candidates? */
+      for (p = procsubs.head; p; p = p->next)
+	{
+	  if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
+	    continue;
+#if 0
+	  /* If we want to restrict wait -n without pid arguments to only wait
+	     for last_procsub_child->pid, uncomment this. */
+	  if ((flags & JWAIT_WAITING) == 0 && p != last_procsub_child && p->running == PS_DONE)
+	    continue;
+#endif
+	  else if (p->running == PS_DONE)
+	    goto return_procsub;
+	  else if (p->running == PS_RUNNING)		/* still got one */
+	    break;
+	}
+#endif
+
+      if (i == js.j_jobslots && p == NULL)
 	{
 	  UNBLOCK_CHILD (oset);
 	  return -1;
@@ -3358,6 +3615,15 @@ return_job:
 	  if (jobs[i] && DEADJOB (i))
 	    goto return_job;
 	}
+#if defined (PROCESS_SUBSTITUTION)
+      for (p = procsubs.head; p; p = p->next)
+	{
+	  if ((flags & JWAIT_WAITING) && (p->flags & PROC_WAITING) == 0)
+	    continue;
+	  else if (p->running == PS_DONE)
+	    goto return_procsub;
+	}
+#endif
       UNBLOCK_CHILD (oset);
     }
 
@@ -3367,15 +3633,18 @@ return_job:
 /* Print info about dead jobs, and then delete them from the list
    of known jobs.  This does not actually delete jobs when the
    shell is not interactive, because the dead jobs are not marked
-   as notified. */
+   as notified.
+   If JOB is >= 0, only print info about that job and then clean it up. */
 void
-notify_and_cleanup (void)
+notify_and_cleanup (int job)
 {
-  if (jobs_list_frozen)
+  if (jobs_list_frozen > 0)
     return;
 
-  if (interactive || interactive_shell == 0 || sourcelevel)
-    notify_of_job_status ();
+  maybe_print_job_notifications (job);
+
+  if (jobs_list_frozen < 0)
+    return;		/* status changes only */
 
   cleanup_dead_jobs ();
 }
@@ -3633,7 +3902,12 @@ start_job (int job, int foreground)
   /* Save the tty settings before we start the job in the foreground. */
   if (foreground)
     {
-      get_tty_state ();
+#if defined (READLINE)
+      /* Don't fetch the terminal attributes if we're doing this from a key
+         binding or programmable completion. */
+      if (RL_ISSTATE(RL_STATE_COMPLETING|RL_STATE_DISPATCHING|RL_STATE_TERMPREPPED) == 0)
+#endif
+	get_tty_state ();
       save_stty = shell_tty_info;
       jobs[job]->flags &= ~J_ASYNC;	/* no longer async */
       /* Give the terminal to this job. */
@@ -3665,7 +3939,12 @@ start_job (int job, int foreground)
     }
   else
     {
+#if 0
+      /* XXX TAG:bash-5.4 */
+      set_current_job (job);
+#else
       reset_current ();
+#endif
       UNBLOCK_CHILD (oset);
       return (0);
     }
@@ -3896,7 +4175,8 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 	 is blocked. We only use this as a hint that we can remove FIFOs
 	 or close file descriptors corresponding to terminated process
 	 substitutions. */
-      if ((ind = find_procsub_child (pid)) >= 0)
+      /* XXX - should combine this list with procsub_add, etc. */
+      if ((ind = find_procsub_child (pid)) >= 0 && (WIFEXITED (status) || WIFSIGNALED (status)))
 	set_procsub_status (ind, pid, WSTATUS (status));
 #endif
 
@@ -3907,7 +4187,12 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
       if (child == 0)
 	{
 	  if (WIFEXITED (status) || WIFSIGNALED (status))
-	    js.c_reaped++;
+	    {
+	      js.c_reaped++;
+	      js.c_totreaped++;
+	      if (pid == wpid)		/* but we're waiting for it?? */
+		internal_debug ("waitchld: pid == wpid but child == 0");		
+	    }
 	  continue;
 	}
 
@@ -3988,7 +4273,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
      that this process belongs to is no longer running, then notify the user
      of that fact now. */
   if (children_exited && asynchronous_notification && interactive && executing_builtin == 0)
-    notify_of_job_status ();
+    notify_of_job_status (-1);
 
   return (children_exited);
 }
@@ -4246,11 +4531,13 @@ run_sigchld_trap (int nchild)
 }
 
 /* Function to call when you want to notify people of changes
-   in job status.  This prints out all jobs which are pending
-   notification to stderr, and marks those printed as already
-   notified, thus making them candidates for cleanup. */
+   in job status.  This prints out all requested jobs which are
+   pending notification to stderr, and marks those printed as
+   notified, thus making them candidates for cleanup.
+   if WANTED is >=0, we print information only about that job;
+   otherwise we print all jobs whose status has changed. */
 static void
-notify_of_job_status (void)
+notify_of_job_status (int wanted)
 {
   register int job, termsig;
   char *dir;
@@ -4274,6 +4561,9 @@ notify_of_job_status (void)
   /* XXX could use js.j_firstj here */
   for (job = 0, dir = NULL; job < js.j_jobslots; job++)
     {
+      if (wanted >= 0 && job != wanted)
+	continue;
+
       if (jobs[job] && IS_NOTIFIED (job) == 0)
 	{
 	  s = raw_job_exit_status (job);
@@ -4357,14 +4647,19 @@ notify_of_job_status (void)
 		  if (termsig && WIFSIGNALED (s) && termsig != SIGINT && termsig != SIGPIPE)
 #endif
 		    {
+#if 0
 		      fprintf (stderr, "%s", j_strsignal (termsig));
 
 		      if (WIFCORED (s))
 			fprintf (stderr, _(" (core dumped)"));
 
 		      fprintf (stderr, "\n");
+#else
+		      print_pipeline (jobs[job]->pipe, job, JLIST_STANDARD, stderr);
+#endif
 		    }
-		  /* foreground jobs that exit cleanly */
+		  /* foreground jobs that exit cleanly or due to a signal we
+		     don't report on */
 		  jobs[job]->flags |= J_NOTIFIED;
 		}
 	      else if (job_control)
@@ -4413,6 +4708,19 @@ internal_debug("notify_of_job_status: catch-all setting J_NOTIFIED on job %d (%d
     sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
   else
     queue_sigchld--;
+}
+
+/* Use this to determine when to conditionally print job notifications. We
+   print notifications if another part of the shell forces it, if we are
+   currently interactive, or if we are not an interactive shell. For
+   compatibility, we can also print notifications if we are sourcing a file
+   in an interactive shell.
+   In a separate inline function so the conditions are in one place. */
+static inline void
+maybe_print_job_notifications (int job)
+{
+  if (want_job_notifications || interactive || interactive_shell == 0)
+    notify_of_job_status (job);
 }
 
 /* Initialize the job control mechanism, and set up the tty stuff. */
@@ -4970,12 +5278,12 @@ itrace("mark_dead_jobs_as_notified: child_max = %d ndead = %d ndeadproc = %d", j
 /* Here to allow other parts of the shell (like the trap stuff) to
    freeze and unfreeze the jobs list. */
 int
-freeze_jobs_list (void)
+freeze_jobs_list (int n)
 {
   int o;
 
   o = jobs_list_frozen;
-  jobs_list_frozen = 1;
+  jobs_list_frozen = n;
   return o;
 }
 

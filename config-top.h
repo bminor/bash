@@ -47,7 +47,7 @@
 
 /* Define DONT_REPORT_SIGTERM if you don't want to see `Terminated' message
    when a job exits due to SIGTERM, since that's the default signal sent
-   by the kill builtin. */
+   by the kill builtin. Only effective for non-interactive shells. */
 #define DONT_REPORT_SIGTERM
 
 /* Define DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS if you don't want builtins
@@ -139,9 +139,8 @@
 
 /* Define as 1 if you want to enable code that implements multiple coprocs
    executing simultaneously */
-/* TAG: bash-5.3 */
 #ifndef MULTIPLE_COPROCS
-#  define MULTIPLE_COPROCS 0
+#  define MULTIPLE_COPROCS 1
 #endif
 
 /* Define to 0 if you want the checkwinsize option off by default, 1 if you
@@ -206,3 +205,7 @@
 #ifndef PATSUB_REPLACE_DEFAULT
 #define PATSUB_REPLACE_DEFAULT	1
 #endif
+
+/* Define to 1 if you want posix mode to restrict shell function names to
+   shell NAMEs. */
+/* #define POSIX_RESTRICT_FUNCNAME 0 */

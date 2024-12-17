@@ -1,6 +1,6 @@
 /* locale.c - Miscellaneous internationalization functions. */
 
-/* Copyright (C) 1996-2009,2012,2016-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2012,2016-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,6 +46,8 @@ extern int errno;
 #if defined (HAVE_LOCALE_CHARSET)
 extern const char *locale_charset (void);
 #endif
+
+extern void init_notfound_str (void);	/* from execute_cmd.c */
 
 extern int dump_translatable_strings, dump_po_strings;
 
@@ -173,6 +175,8 @@ set_default_locale_vars (void)
       if (default_domain && *default_domain)
 	bindtextdomain (default_domain, default_dir);
     }
+
+  init_notfound_str ();		/* force a gettext call early on */
 }
 
 /* Set one of the locale categories (specified by VAR) to VALUE.  Returns 1
@@ -219,9 +223,9 @@ set_locale_var (const char *var, const char *value)
       if (x == 0)
 	{
 	  if (errno == 0)
-	    internal_warning(_("setlocale: LC_ALL: cannot change locale (%s)"), lc_all);
+	    internal_warning ("setlocale: LC_ALL: %s (%s)", _("cannot change locale"), lc_all);
 	  else
-	    internal_warning(_("setlocale: LC_ALL: cannot change locale (%s): %s"), lc_all, strerror (errno));
+	    internal_warning ("setlocale: LC_ALL: %s (%s): %s", _("cannot change locale"), lc_all, strerror (errno));
 	}
       locale_mb_cur_max = MB_CUR_MAX;
       /* if LC_ALL == "", reset_locale_vars has already called this */
@@ -294,9 +298,9 @@ set_locale_var (const char *var, const char *value)
   if (x == 0)
     {
       if (errno == 0)
-	internal_warning(_("setlocale: %s: cannot change locale (%s)"), var, get_locale_var (var));
+	internal_warning("setlocale: %s: %s (%s)", var, _("cannot change locale"), get_locale_var (var));
       else
-	internal_warning(_("setlocale: %s: cannot change locale (%s): %s"), var, get_locale_var (var), strerror (errno));
+	internal_warning("setlocale: %s: %s (%s): %s", var, _("cannot change locale"), get_locale_var (var), strerror (errno));
     }
 
   return (x != 0);

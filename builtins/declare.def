@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2023 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -112,6 +112,9 @@ Define local variables.
 Create a local variable called NAME, and give it VALUE.  OPTION can
 be any option accepted by `declare'.
 
+If any NAME is "-", local saves the set of shell options and restores
+them when the function returns.
+
 Local variables can only be used within a function; they are visible
 only to the function where they are defined and its children.
 
@@ -152,12 +155,8 @@ declare_find_variable (const char *name, int mkglobal, int chklocal)
   if (mkglobal == 0)
     return (find_variable (name));
   else if (chklocal)
-    {
-      var = find_variable (name);
-      if (var && local_p (var) && var->context == variable_context)
-	return var;
-      return (find_global_variable (name));
-    }
+    /* Changed to find variables at previous local scopes 6/12/2024 */
+    return (find_variable (name));
   else
     return (find_global_variable (name));
 }
@@ -314,7 +313,7 @@ declare_internal (WORD_LIST *list, int local_var)
 	case 'f':
 	  *flags |= att_function;
 	  break;
-	case 'G':
+	case 'G':			/* undocumented, used internally */
 	  if (flags == &flags_on)
 	    chklocal = 1;
 	  /*FALLTHROUGH*/
@@ -879,7 +878,7 @@ restart_new_var_name:
 	  NEXT_VARIABLE ();
 	}
       /* Cannot use declare to assign value to readonly or noassign variable. */
-      else if ((readonly_p (var) || noassign_p (var)) && offset)
+      else if (ASSIGN_DISALLOWED (var, 0) && offset)
 	{
 	  if (readonly_p (var))
 	    {
@@ -890,8 +889,6 @@ restart_new_var_name:
 	     EXECUTION_FAILURE would cause set -e to exit the shell. */
 	  NEXT_VARIABLE ();
 	}
-#if 1
-      /* TAG:bash-5.3 20240216 */
       /* Cannot set or unset invalid attributes on readonly variables */
       else if (readonly_p (var) && ((flags_on & invalid_readonly_attrs) || (flags_off & invalid_readonly_attrs)))
 	{
@@ -901,7 +898,6 @@ restart_new_var_name:
 	  any_failed++;
 	  NEXT_VARIABLE ();
 	}
-#endif
 
 #if defined (ARRAY_VARS)
       /* Array variable error checking. */

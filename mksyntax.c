@@ -20,28 +20,25 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
+/* assume C90/POSIX-1992 compilation environment if cross-compiling */
 
-#include <stdio.h>
-#include "bashansi.h"
-#include "chartypes.h"
-#include <errno.h>
-
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
+#ifndef CROSS_COMPILING
+#  include <config.h>
 #else
-extern int optind;
-extern char *optarg;
+#  include <buildconf.h>
 #endif
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+
+#include "chartypes.h"
 #include "syntax.h"
 
 #ifndef errno
 extern int errno;
-#endif
-
-#ifndef HAVE_STRERROR
-extern char *strerror();
 #endif
 
 struct wordflag {
@@ -356,40 +353,3 @@ main(int argc, char **argv)
     fclose (fp);
   exit (0);
 }
-
-
-#if !defined (HAVE_STRERROR)
-
-#include <bashtypes.h>
-#if defined (HAVE_SYS_PARAM_H)
-#  include <sys/param.h>
-#endif
-
-#if defined (HAVE_UNISTD_H)
-#  include <unistd.h>
-#endif
-
-/* Return a string corresponding to the error number E.  From
-   the ANSI C spec. */
-#if defined (strerror)
-#  undef strerror
-#endif
-
-char *
-strerror (int e)
-{
-  static char emsg[40];
-#if defined (HAVE_SYS_ERRLIST)
-  extern int sys_nerr;
-  extern char *sys_errlist[];
-
-  if (e > 0 && e < sys_nerr)
-    return (sys_errlist[e]);
-  else
-#endif /* HAVE_SYS_ERRLIST */
-    {
-      sprintf (emsg, "Unknown system error %d", e);
-      return (&emsg[0]);
-    }
-}
-#endif /* HAVE_STRERROR */

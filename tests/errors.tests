@@ -371,6 +371,9 @@ ${THIS_SH} ./errors10.sub
 # invalid identifiers to readonly/export
 ${THIS_SH} ./errors11.sub
 
+# EOF when parsing compound commands
+${THIS_SH} ./errors12.sub
+
 ${THIS_SH} -c 'return ; echo after return' bash
 ${THIS_SH} -o posix -c 'return ; echo after return' bash
 
@@ -385,10 +388,8 @@ ${THIS_SH} -o posix -c '. /nosuchfile ; echo after source' sh
 # but trap specifying a bad signal nunber is non-fatal
 ${THIS_SH} -o posix -c 'trap "echo bad" SIGNOSIG; echo after trap' sh
 
-# this must be last!
-# in posix mode, a function name must be a valid identifier
-# this can't go in posix2.tests, since it causes the shell to exit
-# immediately
+# in posix mode, this is no longer a fatal error
+# a function name does not have to be a valid identifier
 set -o posix
 function !! () { fc -s "$@" ; }
 set +o posix

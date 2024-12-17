@@ -67,7 +67,7 @@
 
 #define CASE_USEWORDS	0x1000		/* modify behavior to act on words in passed string */
 
-extern char *substring (char *, int, int);
+extern char *substring (char *, size_t, size_t);
 
 #ifndef UCHAR_MAX
 #  define UCHAR_MAX	TYPE_MAXIMUM(unsigned char)
@@ -106,8 +106,7 @@ sh_modcase (const char *string, char *pat, int flags)
 #if defined (HANDLE_MULTIBYTE)
   wchar_t nwc;
   char mb[MB_LEN_MAX+1];
-  int mlen;
-  size_t m;
+  size_t m, mlen;
   mbstate_t state;
 #endif
 
@@ -249,8 +248,9 @@ singlebyte:
 	  else
 	    {
 	      mlen = wcrtomb (mb, nwc, &state);
-	      if (mlen > 0)
-		mb[mlen] = '\0';
+	      if (MB_INVALIDCH (mlen))
+		strncpy (mb, string + start, mlen = m);			
+	      mb[mlen] = '\0';
 	      /* Don't assume the same width */
 	      strncpy (ret + retind, mb, mlen);
 	      retind += mlen;

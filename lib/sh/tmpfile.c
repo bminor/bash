@@ -270,7 +270,7 @@ sh_mktmpfd (const char *nameroot, int flags, char **namep)
     }
   while (fd < 0 && errno == EEXIST);
 
-  if ((flags & MT_UNLINK) && (tmpunlink (filename) < 0)
+  if ((flags & MT_UNLINK) && (tmpunlink (filename) < 0))
     {
       int e = errno;
       close (fd);

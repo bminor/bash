@@ -274,7 +274,7 @@ typedef union _malloc_guard {
 
 /* Use this when we want to be sure that NB is in bucket NU. */
 #define RIGHT_BUCKET(nb, nu) \
-	(((nb) > binsizes[(nu)-1]) && ((nb) <= binsizes[(nu)]))
+  (((nb) > (((nu) >= 1) ? binsizes[(nu)-1] : 0UL)) && ((nb) <= binsizes[(nu)]))
 
 /* nextf[i] is free list of blocks of size 2**(i + 5)  */
 
@@ -1140,6 +1140,7 @@ internal_realloc (PTR_T mem, size_t n, const char *file, int line, int flags)
   if (n == 0)
     {
       internal_free (mem, file, line, MALLOC_INTERNAL);
+      /* XXX - return internal_malloc (0, file, line MALLOC_INTERNAL) ? */
       return (NULL);
     }
   if ((p = (union mhead *) mem) == 0)
@@ -1202,7 +1203,7 @@ internal_realloc (PTR_T mem, size_t n, const char *file, int line, int flags)
   nbytes = ALLOCATED_BYTES(n);
 
   /* If ok, use the same block, just marking its size as changed.  */
-  if (RIGHT_BUCKET(nbytes, nunits) || RIGHT_BUCKET(nbytes, nunits-1))
+  if (RIGHT_BUCKET(nbytes, nunits) || (nunits >= 1 && RIGHT_BUCKET(nbytes, nunits-1)))
     {
       /* Compensate for increment above. */
       m -= 4;

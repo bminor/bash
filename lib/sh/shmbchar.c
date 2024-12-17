@@ -31,16 +31,18 @@ extern int errno;
 
 #if IS_BASIC_ASCII
 
-/* Bit table of characters in the ISO C "basic character set".  */
+/* Bit table of characters in the POSIX "portable character set", which
+   POSIX guarantees to be single-byte and in practice are safe to treat
+   like the ISO C "basic character set".  */
 const unsigned int is_basic_table [UCHAR_MAX / 32 + 1] =
 {
-  0x00001a00,           /* '\t' '\v' '\f' */
-  0xffffffef,           /* ' '...'#' '%'...'?' */
-  0xfffffffe,           /* 'A'...'Z' '[' '\\' ']' '^' '_' */
-  0x7ffffffe            /* 'a'...'z' '{' '|' '}' '~' */
+  0x00003f81,           /* '\0' '\007' '\010' '\t' '\n' '\v' '\f' '\r' */
+  0xffffffff,           /* ' '......'?' */
+  0xffffffff,           /* '@' 'A'...'Z' '[' '\\' ']' '^' '_' */
+  0x7fffffff            /* '`' 'a'...'z' '{' '|' '}' '~' */
   /* The remaining bits are 0.  */
 };
-
+	
 #endif /* IS_BASIC_ASCII */
 
 extern int locale_utf8locale;

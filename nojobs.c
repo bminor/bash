@@ -93,6 +93,9 @@ int check_window_size = CHECKWINSIZE_DEFAULT;
 /* We don't have job control. */
 int job_control = 0;
 
+/* and don't want job notifications */
+int want_job_notifications = 0;
+
 int running_in_background = 0;	/* can't tell without job control */
 
 /* STATUS and FLAGS are only valid if pid != NO_PID
@@ -1010,7 +1013,7 @@ describe_pid (pid_t pid)
 }
 
 int
-freeze_jobs_list (void)
+freeze_jobs_list (int n)
 {
   return 0;
 }

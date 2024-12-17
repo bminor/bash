@@ -112,7 +112,8 @@ extern void ignore_glob_matches (char **);
 #define SORT_ATIME	4
 #define SORT_CTIME	5
 #define SORT_BLOCKS	6
-#define SORT_NOSORT	7
+#define SORT_NUMERIC	7
+#define SORT_NOSORT	8
 
 #define SORT_REVERSE	128
 

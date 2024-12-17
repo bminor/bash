@@ -1,0 +1,127 @@
+# test ignoring effects of set -e on commands whose return status is being
+# inverted
+
+echo test invert
+
+! ( set -e; false; echo reached subshell; )
+set +e
+
+! { set -e; false; echo reached group; }
+set +e
+
+! { set -e ; false ; echo reached async group; } &
+wait
+set +e
+
+set -e
+exec 3>&2
+exec 2>/dev/null
+! time { set -e ; false ; echo reached timed group; }
+exec 2>&3
+set +e
+
+set -e
+! false
+echo reached simple
+set +e
+
+! if set -e; false ; echo reached if test; true; then
+	set -e
+	false
+	echo reached if body
+fi
+set +e
+
+! while set -e ; false; echo reached while test; true; do
+	set -e
+	false
+	echo reached while body
+	break
+done
+set +e
+! until set -e ; false; echo reached until test; false; do
+	set -e
+	false
+	echo reached until body
+	break
+done
+set +e
+
+func()
+{
+	set -e; false; echo reached func;
+}
+! func
+set +e
+
+! for f in 1 2 3; do
+	set -e
+	false
+	echo reached for
+	break
+done
+set +e
+
+! for (( f=0; f < 3; f++ )); do
+	set -e
+	false
+	echo reached arith for
+	break
+done
+set +e
+
+! select f in a b c
+do
+	set -e
+	false
+	echo reached select
+	break
+done <<<"a"
+set +e
+
+! case 1 in
+1)	set -e
+	false
+	echo reached case ;;
+*)	echo bad case match;;
+esac
+set +e
+
+set -e
+! (( 0 ))
+echo reached arith
+set +e
+
+set -e
+! [[ -n '' ]]
+echo reached cond
+set +e
+
+! coproc C { set -e; false; echo reached coproc body; sleep 0.5; exit 0; }
+read -u ${C[0]}
+echo $REPLY
+set +e
+
+! echo pipeline | { set -e ; false; echo reached pipeline element invert; } | cat -
+echo pipeline | { set -e ; false; echo reached pipeline element non-invert; } | cat -
+set +e
+
+! { true && { set -e ; false; echo reached AND-AND body; }; }
+set +e
+! { false || { set -e ; false; echo reached OR-OR body; }; }
+set +e
+
+true && ! { set -e ; false ; echo reached AND-AND group; }
+set +e
+false || ! { set -e ; false ; echo reached OR-OR group; }
+set +e
+
+# precedence here
+
+! false && { set -e ; false ; echo reached inverted AND-AND group; }
+set +e
+! true ||  { set -e ; false ; echo reached inverted OR-OR group; }
+set +e
+
+# NOTREACHED
+echo done

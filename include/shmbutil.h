@@ -86,7 +86,7 @@ extern int locale_utf8locale;	/* XXX */
 #define UTF8_SINGLEBYTE(c)	(1)
 #define UTF8_MBFIRSTCHAR(c)	(0)
 
-#defined VALID_SINGLEBYTE_CHAR(c)  (1)
+#define VALID_SINGLEBYTE_CHAR(c)  (1)
 
 #endif /* !HANDLE_MULTIBYTE */
 

@@ -364,6 +364,11 @@ TOOSMALL=-9223372036854775815
 printf '%d\n' "$TOOBIG"
 printf '%d\n' "$TOOSMALL"
 
+# arguments that are not completely converted generate warning messages
+printf '%d\n' +
+printf '%d\n' z
+printf '%d\n' ''
+
 # tests variable assignment with -v
 ${THIS_SH} ./printf1.sub
 ${THIS_SH} ./printf2.sub

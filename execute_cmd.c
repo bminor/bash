@@ -261,6 +261,12 @@ int subshell_level = 0;
 /* Currently-executing shell function. */
 SHELL_VAR *this_shell_function;
 
+/* Translated message printed when a command is not found. We declare it here
+   and initialize it in locale.c to work around a macOS bug that forces a
+   crash if bash calls setlocale(3) but does not call gettext(3) before
+   forking, then calls gettext() after forking. */
+char *notfound_str = 0;
+
 /* If non-zero, matches in case and [[ ... ]] are case-insensitive */
 int match_ignore_case = 0;
 
@@ -300,6 +306,19 @@ do { \
   (signal_in_progress (ERROR_TRAP) && running_trap == ERROR_TRAP+1) \
     ? line_number_for_err_trap \
     : executing_line_number ()
+
+/* We adjust the line number when executing shell functions in an interactive
+   shell. */
+#define ADJUST_LINE_NUMBER() \
+do { \
+  if (variable_context && interactive_shell && sourcelevel == 0) \
+    { \
+      /* line numbers in a function start at 1 */ \
+      line_number -= function_line_number - 1; \
+      if (line_number <= 0) \
+	line_number = 1; \
+    } \
+} while (0)
 
 /* A sort of function nesting level counter */
 int funcnest = 0;
@@ -584,7 +603,7 @@ async_redirect_stdin (void)
       close (fd);
     }
   else if (fd < 0)
-    internal_error (_("cannot redirect standard input from /dev/null: %s"), strerror (errno));
+    internal_error ("%s: %s", _("cannot redirect standard input from /dev/null"), strerror (errno));
 }
 
 #define DESCRIBE_PID(pid) do { if (interactive) describe_pid (pid); } while (0)
@@ -802,7 +821,7 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 
 #if defined (PROCESS_SUBSTITUTION)
 #  if !defined (HAVE_DEV_FD)
-  reap_procsubs ();
+  delete_procsubs ();		/* closes fds or unlinks fifos */
 #  endif
 
   /* XXX - also if sourcelevel != 0? */
@@ -886,13 +905,25 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 #endif
 	was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
 
-	if (ignore_return && command->value.Simple)
+	if ((ignore_return || invert) && command->value.Simple)
 	  command->value.Simple->flags |= CMD_IGNORE_RETURN;
 	if (command->flags & CMD_STDIN_REDIR)
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
 
 	begin_unwind_frame ("simple_lineno");
 	add_unwind_protect (uw_restore_lineno, (void *) (intptr_t) save_line_number);
+
+	/* Limit the scope of this attempted optimization for now: async
+	   commands for which TRY_OPTIMIZING is set (see call to optimize_shell_function
+	   for async functions in execute_subshell_builtin_or_function below)
+	   in interactive and script shells. */
+	if ((command->flags & CMD_TRY_OPTIMIZING) &&
+	    (subshell_environment & SUBSHELL_ASYNC) && startup_state < 2 &&
+	    should_optimize_fork (command, 0))
+	  {
+	    command->flags |= CMD_NO_FORK;
+	    command->value.Simple->flags |= CMD_NO_FORK;
+	  }
 
 	SET_LINE_NUMBER (command->value.Simple->line);
 	exec_result =
@@ -981,14 +1012,14 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
       break;
 
     case cm_for:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.For->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_for_command (command->value.For);
       break;
 
 #if defined (ARITH_FOR_COMMAND)
     case cm_arith_for:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.ArithFor->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_arith_for_command (command->value.ArithFor);
       break;
@@ -996,32 +1027,32 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 
 #if defined (SELECT_COMMAND)
     case cm_select:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.Select->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_select_command (command->value.Select);
       break;
 #endif
 
     case cm_case:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.Case->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_case_command (command->value.Case);
       break;
 
     case cm_while:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.While->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_while_command (command->value.While);
       break;
 
     case cm_until:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.While->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_until_command (command->value.While);
       break;
 
     case cm_if:
-      if (ignore_return)
+      if (ignore_return || invert)
 	command->value.If->flags |= CMD_IGNORE_RETURN;
       exec_result = execute_if_command (command->value.If);
       break;
@@ -1061,7 +1092,11 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 	}
       else
 	{
-	  if (ignore_return && command->value.Group->command)
+	  /* If we're already ignoring the return value of this group command,
+	     or if the return value is being inverted, make sure to ignore
+	     set -e for the duration of the command, even if the group
+	     command enables it. */
+	  if ((ignore_return || invert) && command->value.Group->command)
 	    command->value.Group->command->flags |= CMD_IGNORE_RETURN;
 	  exec_result =
 	    execute_command_internal (command->value.Group->command,
@@ -1386,13 +1421,13 @@ print_formatted_time (FILE *fp, char *format,
 static int
 time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, struct fd_bitmap *fds_to_close)
 {
-  int rv, posix_time, old_flags, nullcmd, code;
+  int rv, posix_time, nullcmd, code;
   time_t rs, us, ss;		/* seconds */
   long rsf, usf, ssf;		/* microseconds */
   int cpu;
   char *time_format;
   volatile procenv_t save_top_level;
-  volatile int old_subshell;
+  volatile int old_subshell, old_flags;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   struct timeval real, user, sys;
@@ -1447,7 +1482,8 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
     rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
   COPY_PROCENV (save_top_level, top_level);
 
-  command->flags = old_flags;
+  if (code == NOT_JUMPED)
+    command->flags = old_flags;
 
   /* If we're jumping in a different subshell environment than we started,
      don't bother printing timing stats, just keep longjmping back to the
@@ -1554,7 +1590,7 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 
   /* If a command is asynchronous in a subshell (like ( foo ) & or
      the special case of an asynchronous GROUP command where the
-     subshell bit is turned on down in case cm_group: below),
+     subshell bit is turned on down in case cm_group: above),
      turn off `asynchronous', so that two subshells aren't spawned.
      XXX - asynchronous used to be set to 0 in this block, but that
      means that setup_async_signals was never run.  Now it's set to
@@ -1673,7 +1709,6 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 #if defined (PROCESS_SUBSTITUTION)
 #  if defined (JOB_CONTROL)
   procsub_clear ();
-  last_procsub_child = 0;
 #  endif
   clear_fifo_list ();		/* XXX- we haven't created any FIFOs */
 #endif
@@ -1723,10 +1758,7 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 #if 1
 #if defined (PROCESS_SUBSTITUTION) && defined (JOB_CONTROL)
       if (user_subshell && command->type == cm_subshell)
-	{
-	  procsub_clear ();
-	  last_procsub_child = 0;
-	}
+	procsub_clear ();
 #endif
 #endif
     }
@@ -1745,6 +1777,10 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
   
   /* Make sure the subshell inherits any CMD_IGNORE_RETURN flag. */
   if ((command->flags & CMD_IGNORE_RETURN) && tcom != command)
+    tcom->flags |= CMD_IGNORE_RETURN;
+  /* If the subshell's return value is being inverted, ignore set -e even
+     if the subshell enables it. */
+  if (invert)
     tcom->flags |= CMD_IGNORE_RETURN;
 
   /* If this is a simple command, tell execute_disk_command that it
@@ -1931,7 +1967,9 @@ cpl_reap (void)
       if (p->coproc->c_flags & COPROC_DEAD)
 	{
 	  coproc_list.ncoproc--;	/* keep running count, fix up pointers later */
+#if 0
 	  INTERNAL_DEBUG (("cpl_reap: deleting %d", p->coproc->c_pid));
+#endif
 	  coproc_dispose (p->coproc);
 	  cpe_dispose (p);
 	}
@@ -2185,7 +2223,11 @@ coproc_reap (void)
 
   cp = &sh_coproc;		/* XXX - will require changes for multiple coprocs */
   if (cp && (cp->c_flags & COPROC_DEAD))
+{
+INTERNAL_DEBUG (("coproc_reap: deleting %d", cp->c_pid));
+
     coproc_dispose (cp);
+}
 #endif
 }
 
@@ -2356,7 +2398,7 @@ coproc_setvars (struct coproc *cp)
 	}
     }
 
-  if (v && (readonly_p (v) || noassign_p (v)))
+  if (v && ASSIGN_DISALLOWED (v, 0))
     {
       if (readonly_p (v))
 	err_readonly (cp->c_name);
@@ -2454,7 +2496,7 @@ execute_coproc (COMMAND *command, int pipe_in, int pipe_out, struct fd_bitmap *f
   /* Optional check -- could be relaxed */
   if (valid_identifier (name) == 0)
     {
-      internal_error (_("`%s': not a valid identifier"), name);
+      err_invalidid (name);
       free (name);
       return (invert ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
@@ -2569,7 +2611,7 @@ uw_lastpipe_cleanup (void *s)
 static int
 execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, struct fd_bitmap *fds_to_close)
 {
-  int prev, fildes[2], new_bitmap_size, dummyfd, ignore_return, exec_result;
+  int prev, fildes[2], new_bitmap_size, dummyfd, ignore_return, invert, exec_result;
   int lstdin, lastpipe_flag, lastpipe_jid, old_frozen, stdin_valid;
   COMMAND *cmd;
   struct fd_bitmap *fd_bitmap;
@@ -2581,6 +2623,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
 #endif /* JOB_CONTROL */
 
   ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+  invert = (command->flags & CMD_INVERT_RETURN) != 0;
 
   stdin_valid = sh_validfd (0);
 
@@ -2648,7 +2691,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
       add_unwind_protect (uw_restore_signal_mask, &oset);
 #endif /* JOB_CONTROL */
 
-      if (ignore_return && cmd->value.Connection->first)
+      if ((ignore_return || invert) && cmd->value.Connection->first)
 	cmd->value.Connection->first->flags |= CMD_IGNORE_RETURN;
       execute_command_internal (cmd->value.Connection->first, asynchronous,
 				prev, fildes[1], fd_bitmap);
@@ -2668,7 +2711,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
   lastpid = last_made_pid;
 
   /* Now execute the rightmost command in the pipeline.  */
-  if (ignore_return && cmd)
+  if ((ignore_return || invert) && cmd)
     cmd->flags |= CMD_IGNORE_RETURN;
 
   lastpipe_flag = 0;
@@ -2691,7 +2734,7 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
 	  prev = NO_PIPE;
 	  add_unwind_protect (uw_restore_stdin, (void *) (intptr_t) lstdin);
 	  lastpipe_flag = 1;
-	  old_frozen = freeze_jobs_list ();
+	  old_frozen = freeze_jobs_list (1);
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
 	  add_unwind_protect (uw_lastpipe_cleanup, (void *) (intptr_t) old_frozen);
 #if defined (JOB_CONTROL)
@@ -2764,6 +2807,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
   volatile int save_line_number;
 
   ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+  invert = (command->flags & CMD_INVERT_RETURN) != 0;
 
   switch (command->value.Connection->connector)
     {
@@ -2808,7 +2852,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
     /* Just call execute command on both sides. */
     case ';':
     case '\n':		/* special case, happens in command substitutions */
-      if (ignore_return)
+      if (ignore_return || invert)
 	{
 	  if (command->value.Connection->first)
 	    command->value.Connection->first->flags |= CMD_IGNORE_RETURN;
@@ -2827,6 +2871,10 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 #endif
 
       QUIT;
+#if defined (JOB_CONTROL)
+      if (command->value.Connection->connector == ';' && job_control && interactive && posixly_correct == 0)
+        notify_and_cleanup (-1);
+#endif
       optimize_connection_fork (command);			/* XXX */
       exec_result = execute_command_internal (command->value.Connection->second,
 				      asynchronous, pipe_in, pipe_out,
@@ -2836,9 +2884,6 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 
     case '|':
       was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
-      invert = (command->flags & CMD_INVERT_RETURN) != 0;
-      ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
-
       SET_LINE_NUMBER (line_number);	/* XXX - save value? */
       exec_result = execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 
@@ -3026,7 +3071,7 @@ execute_for_command (FOR_COM *for_command)
       else
 	v = bind_variable (identifier, list->word->word, 0);
 
-      if (v == 0 || readonly_p (v) || noassign_p (v))
+      if (v == 0 || ASSIGN_DISALLOWED (v, 0))
 	{
 	  line_number = save_line_number;
 	  if (v && readonly_p (v) && interactive_shell == 0 && posixly_correct)
@@ -3181,13 +3226,7 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
      line_number before executing each expression -- for $LINENO
      and the DEBUG trap. */
   line_number = arith_lineno = arith_for_command->line;
-  if (variable_context && interactive_shell && sourcelevel == 0)
-    {
-      /* line numbers in a function start at 1 */
-      line_number -= function_line_number - 1;
-      if (line_number <= 0)
-	line_number = 1;
-    }
+  ADJUST_LINE_NUMBER ();
 
   /* Evaluate the initialization expression. */
   expresult = eval_arith_for_expr (arith_for_command->init, &expok);
@@ -3198,6 +3237,21 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
       line_number = arith_lineno;
       expresult = eval_arith_for_expr (arith_for_command->test, &expok);
       line_number = save_lineno;
+
+      /* If the step or test expressions execute `break' or `continue' in a
+	 nofork command substitution or by some other means, break the loop
+	 here. */
+      if (breaking)
+	{
+	  breaking--;
+	  break;
+	}
+      if (continuing)
+	{
+	  continuing--;
+	  if (continuing)
+	    break;
+	}
 
       if (expok == 0)
 	break;
@@ -3520,7 +3574,7 @@ execute_select_command (SELECT_COM *select_command)
 	}
 
       v = bind_variable (identifier, selection, 0);
-      if (v == 0 || readonly_p (v) || noassign_p (v))
+      if (v == 0 || ASSIGN_DISALLOWED (v, 0))
 	{
 	  if (v && readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
@@ -3841,13 +3895,7 @@ execute_arith_command (ARITH_COM *arith_command)
   this_command_name = "((";	/* )) */
   SET_LINE_NUMBER (arith_command->line);
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell && sourcelevel == 0)
-    {
-      /* line numbers in a function start at 1 */
-      line_number -= function_line_number - 1;
-      if (line_number <= 0)
-	line_number = 1;
-    }      
+  ADJUST_LINE_NUMBER ();
 
   command_string_index = 0;
   print_arith_command (arith_command->exp);
@@ -4081,13 +4129,8 @@ execute_cond_command (COND_COM *cond_command)
 
   SET_LINE_NUMBER (cond_command->line);
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell && sourcelevel == 0)
-    {
-      /* line numbers in a function start at 1 */
-      line_number -= function_line_number - 1;
-      if (line_number <= 0)
-	line_number = 1;
-    }
+  ADJUST_LINE_NUMBER ();
+
   command_string_index = 0;
   print_cond_command (cond_command);
 
@@ -4151,7 +4194,7 @@ bind_lastarg (char *arg)
 static int
 execute_null_command (REDIRECT *redirects, int pipe_in, int pipe_out, int async)
 {
-  int r;
+  int r, code;
   int forcefork, fork_flags;
   REDIRECT *rd;
 
@@ -4185,6 +4228,10 @@ execute_null_command (REDIRECT *redirects, int pipe_in, int pipe_out, int async)
 	    subshell_environment |= SUBSHELL_ASYNC;
 	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
 	    subshell_environment |= SUBSHELL_PIPE;
+
+	  code = setjmp_nosigs (top_level);
+	  if (code)
+	    exit (EXECUTION_FAILURE);
 
 	  if (do_redirections (redirects, RX_ACTIVE) == 0)
 	    exit (EXECUTION_SUCCESS);
@@ -4230,13 +4277,13 @@ fix_assignment_words (WORD_LIST *words)
 {
   WORD_LIST *w, *wcmd;
   struct builtin *b;
-  int assoc, global, array, integer;
+  int assoc, global, array;
 
   if (words == 0)
     return;
 
   b = 0;
-  assoc = global = array = integer = 0;
+  assoc = global = array = 0;
 
   /* Skip over assignment statements preceding a command name */
   wcmd = words;
@@ -4428,13 +4475,7 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
   QUIT;
 
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell && sourcelevel == 0)
-    {
-      /* line numbers in a function start at 1 */
-      line_number -= function_line_number - 1;
-      if (line_number <= 0)
-	line_number = 1;
-    }
+  ADJUST_LINE_NUMBER ();
 
   /* Remember what this command line looks like at invocation. */
   command_string_index = 0;
@@ -4886,23 +4927,6 @@ execute_from_filesystem:
 			pipe_in, pipe_out, async, fds_to_close,
 			cmdflags);
 
-#if 0
-/* If we forked but still have to fork again to run the disk command, we
-   did so because we created FIFOs. We can't just execve the command in case
-   it dies of a signal without a chance to clean up the FIFOs, so we fork
-   again, then make sure we wait for the child from execute_disk_command(),
-   unlink the FIFOs we created, and exit ourselves. */
-if (dofork && already_forked && (cmdflags & CMD_NO_FORK) == 0)
-  {
-    result = wait_for (last_made_pid, 0);
-#if defined (PROCESS_SUBSTITUTION)
-    if (fifos_pending ())
-      unlink_fifo_list ();
-#endif
-    sh_exit (result & 0xFF);
-  }
-#endif
-
  return_result:
   bind_lastarg (lastarg);
   FREE (command_line);
@@ -5274,7 +5298,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
   sfile = shell_fn ? shell_fn->source_file : "";
   array_push ((ARRAY *)funcname_a, this_shell_function->name);
 
-  array_push ((ARRAY *)bash_source_a, sfile);
+  push_source ((ARRAY *)bash_source_a, sfile);
   lineno = GET_LINE_NUMBER ();
   t = itos (lineno);
   array_push ((ARRAY *)bash_lineno_a, t);
@@ -5524,6 +5548,8 @@ execute_subshell_builtin_or_function (WORD_LIST *words, REDIRECT *redirects,
     }
   else
     {
+      if (async)
+	optimize_shell_function (function_cell (var));
       r = execute_function (var, words, flags, fds_to_close, async, 1);
       fflush (stdout);
       subshell_exit (r);
@@ -5694,6 +5720,14 @@ setup_async_signals (void)
 
    NOTE: callers expect this to fork or exit(). */
 
+/* See comment above where notfound_str is declared. */
+void
+init_notfound_str (void)
+{
+  if (notfound_str == 0)
+    notfound_str = _("command not found");
+}
+
 /* Name of a shell function to call when a command name is not found. */
 #ifndef NOTFOUND_HOOK
 #  define NOTFOUND_HOOK "command_not_found_handle"
@@ -5751,6 +5785,8 @@ execute_disk_command (WORD_LIST *words, REDIRECT *redirects, char *command_line,
       maybe_make_export_env ();
       put_command_name_into_env (command);
     }
+  else if (command == 0 && notfound_str == 0)	/* make sure */
+    init_notfound_str ();
 
   /* We have to make the child before we check for the non-existence
      of COMMAND, since we want the error messages to be redirected. */
@@ -5837,7 +5873,7 @@ execute_disk_command (WORD_LIST *words, REDIRECT *redirects, char *command_line,
 	    {
 	      /* Make sure filenames are displayed using printable characters */
 	      pathname = printable_filename (pathname, 0);
-	      internal_error (_("%s: command not found"), pathname);
+	      internal_error ("%s: %s", pathname, notfound_str);
 	      exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
 	    }
 
@@ -6073,7 +6109,7 @@ shell_execve (char *command, char **args, char **env)
       last_command_exit_value = (i == ENOENT) ?  EX_NOTFOUND : EX_NOEXEC; /* XXX Posix.2 says that exit status is 126 */
       if (file_isdir (command))
 #if defined (EISDIR)
-	internal_error (_("%s: %s"), command, strerror (EISDIR));
+	internal_error ("%s: %s", command, strerror (EISDIR));
 #else
 	internal_error (_("%s: is a directory"), command);
 #endif
@@ -6104,14 +6140,14 @@ shell_execve (char *command, char **args, char **env)
 	      interp = getinterp (sample, sample_len, (int *)NULL);
 	      ilen = strlen (interp);
 	      errno = i;
-	      if (interp > 0 && interp[ilen - 1] == '\r')
+	      if (ilen > 0 && interp[ilen - 1] == '\r')
 		{
 		  interp = xrealloc (interp, ilen + 2);
 		  interp[ilen - 1] = '^';
 		  interp[ilen] = 'M';
 		  interp[ilen + 1] = '\0';
 		}
-	      sys_error (_("%s: %s: bad interpreter"), command, interp);
+	      sys_error ("%s: %s: %s", command, interp, _("bad interpreter"));
 	      FREE (interp);
 	      return (EX_NOEXEC);
 	    }
@@ -6157,7 +6193,7 @@ shell_execve (char *command, char **args, char **env)
 #endif
       if (check_binary_file (sample, sample_len))
 	{
-	  internal_error (_("%s: cannot execute binary file: %s"), command, strerror (i));
+	  internal_error ("%s: %s: %s", command, _("cannot execute binary file"), strerror (i));
 	  errno = i;
 	  return (EX_BINARY_FILE);
 	}
@@ -6220,8 +6256,21 @@ execute_intern_function (WORD_DESC *name, FUNCTION_DEF *funcdef)
 {
   SHELL_VAR *var;
   char *t;
+  int pflags;
 
-  if (valid_function_word (name, posixly_correct) == 0)
+  /* This is where we enforce any restrictions on the function name via the
+     call to valid_function_word(). */
+  pflags = 0;
+#if POSIX_RESTRICT_FUNCNAME
+  if (posixly_correct)
+    pflags |= 1;		/* enforce posix function name restrictions */
+#endif
+  if (posixly_correct)
+    pflags |= 4;		/* no special builtins */
+
+  /* We still allow functions with the same name as reserved words, so they
+     can be called if quoted. */
+  if (valid_function_word (name, pflags) == 0)
     {
       if (posixly_correct)
 	{
@@ -6239,7 +6288,7 @@ execute_intern_function (WORD_DESC *name, FUNCTION_DEF *funcdef)
     }
 
   var = find_function (name->word);
-  if (var && (readonly_p (var) || noassign_p (var)))
+  if (var && ASSIGN_DISALLOWED (var, 0))
     {
       if (readonly_p (var))
 	internal_error (_("%s: readonly function"), var->name);

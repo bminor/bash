@@ -52,6 +52,7 @@ do { \
 #define SEVAL_ONECMD	0x100		/* only allow a single command */
 #define SEVAL_NOHISTEXP	0x200		/* inhibit history expansion */
 #define SEVAL_NOOPTIMIZE 0x400		/* don't try to set optimization flags */
+#define SEVAL_NOTIFY	0x800		/* want job notifications */
 
 /* Flags for describe_command, shared between type.def and command.def */
 #define CDESC_ALL		0x001	/* type -a */
@@ -102,6 +103,7 @@ extern void sh_erange (const char *, const char *);
 extern void sh_badpid (const char *);
 extern void sh_badjob (const char *);
 extern void sh_nojobs (const char *);
+extern void sh_invalidjob (const char *);
 extern void sh_restricted (const char *);
 extern void sh_notbuiltin (const char *);
 extern void sh_wrerror (void);
@@ -215,6 +217,7 @@ extern int parse_and_execute (char *, const char *, int);
 extern int evalstring (char *, const char *, int);
 extern void parse_and_execute_cleanup (int);
 extern int parse_string (char *, const char *, int, COMMAND **, char **);
+extern int should_optimize_fork (COMMAND *, int);
 extern int should_suppress_fork (COMMAND *);
 extern int can_optimize_connection (COMMAND *);
 extern int can_optimize_cat_file (COMMAND *);

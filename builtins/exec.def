@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2021,2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2021,2022,2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -154,9 +154,9 @@ exec_builtin (WORD_LIST *list)
       if (file_isdir (args[0]))
 	{
 #if defined (EISDIR)
-	  builtin_error (_("%s: cannot execute: %s"), args[0], strerror (EISDIR));
+	  builtin_error ("%s: %s: %s", args[0], _("cannot execute"), strerror (EISDIR));
 #else
-	  builtin_error (_("%s: cannot execute: %s"), args[0], strerror (errno));
+	  builtin_error ("%s: %s: %s", args[0], _("cannot execute"), strerror (errno));
 #endif
 	  exit_value = EX_NOEXEC;
 	}
@@ -230,23 +230,26 @@ exec_builtin (WORD_LIST *list)
   exit_value = shell_execve (command, args, env);
   opt = errno;
 
-  /* We have to set this to NULL because shell_execve has called realloc()
-     to stuff more items at the front of the array, which may have caused
-     the memory to be freed by realloc().  We don't want to free it twice. */
-  args = (char **)NULL;
   if (cleanenv == 0)
     adjust_shell_level (1);
 
-  if (exit_value == EX_NOTFOUND)	/* no duplicate error message */
+  /* These are the return statuses for which shell_execve will print a message. */
+  if (exit_value == EX_NOTFOUND || exit_value == EX_BINARY_FILE || exit_value == EX_NOEXEC)
     goto failed_exec;
-  else if (executable_file (command) == 0)
+  /* These are the errno values for which shell_execve will print a message. */
+#if defined (EISDIR)
+  else if (opt == EISDIR || opt == E2BIG || opt == ENOMEM)
+#else
+  else if (opt == E2BIG || opt == ENOMEM)
+#endif
+    goto failed_exec;
+  else	/* catchall */
     {
+      builtin_error ("%s: %s: %s", command, _("cannot execute"), strerror (opt));
+      if (executable_file (command) == 0)
+	exit_value = EX_NOEXEC;	/* As per Posix.2, 3.14.6 */
       errno = opt;
-      builtin_error (_("%s: cannot execute: %s"), command, strerror (errno));
-      exit_value = EX_NOEXEC;	/* As per Posix.2, 3.14.6 */
     }
-  else
-    file_error (command);
 
 failed_exec:
   FREE (command);

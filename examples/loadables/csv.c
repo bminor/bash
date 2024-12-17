@@ -30,6 +30,8 @@
 
 #include "loadables.h"
 
+#if defined (ARRAY_VARS)
+
 #define CSV_ARRAY_DEFAULT	"CSV"
 
 #define NQUOTE	0
@@ -99,11 +101,13 @@ csvsplit (SHELL_VAR *csv, char *line, char *dstring)
 
   return (rval = ind);				/* number of fields */
 }
+#endif
 
 int
 csv_builtin (WORD_LIST *list)
 {
   int opt, rval;
+#if defined (ARRAY_VARS)
   char *array_name, *csvstring;
   SHELL_VAR *v;
 
@@ -164,6 +168,10 @@ csv_builtin (WORD_LIST *list)
 
   opt = csvsplit (v, csvstring, ",");
   /* Maybe do something with OPT here, it's the number of fields */
+#else
+  builtin_error ("arrays not available");
+  rval = EXECUTION_FAILURE;
+#endif
 
   return (rval);
 }

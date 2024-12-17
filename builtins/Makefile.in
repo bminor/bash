@@ -56,6 +56,8 @@ BUILD_DIR = @BUILD_DIR@
 
 LIBBUILD = ${BUILD_DIR}/lib
 
+DEBUG = @DEBUG@
+
 PROFILE_FLAGS = @PROFILE_FLAGS@
 CFLAGS = @CFLAGS@
 CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@ @CROSS_COMPILE@
@@ -77,6 +79,9 @@ BASHINCDIR = ${topdir}/include
 
 RL_INCLUDEDIR = @RL_INCLUDEDIR@
 
+HIST_LIBSRC = ${topdir}/lib/readline
+RL_LIBSRC = ${topdir}/lib/readline
+
 INTL_LIBSRC = ${topdir}/lib/intl
 INTL_BUILDDIR = ${LIBBUILD}/intl
 INTL_LIBDIR = ${INTL_BUILDDIR}
@@ -92,9 +97,10 @@ HELPFILES_TARGET = @HELPFILES_TARGET@
 
 INCLUDES = -I. -I.. @RL_INCLUDE@ -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib -I$(srcdir) ${INTL_INC}
 
-BASE_CCFLAGS = ${PROFILE_FLAGS} $(DEFS) $(LOCAL_DEFS) $(SYSTEM_FLAGS) \
+BASE_CCFLAGS = ${PROFILE_FLAGS} $(DEFS) $(LOCAL_DEFS) \
 	 ${INCLUDES} $(STYLE_CFLAGS) $(LOCAL_CFLAGS)
 
+ADDON_CFLAGS=
 CCFLAGS = ${ADDON_CFLAGS} $(BASE_CCFLAGS) $(CPPFLAGS) $(CFLAGS)
 
 CCFLAGS_FOR_BUILD = $(BASE_CCFLAGS) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
@@ -107,6 +113,8 @@ MKBUILTINS = mkbuiltins$(EXEEXT)
 DIRECTDEFINE = -D $(srcdir)
 HELPDIRDEFINE = @HELPDIRDEFINE@
 HELPSTRINGS = @HELPSTRINGS@
+
+STDCKDINT_H = @STDCKDINT_H@
 
 # xxx this is bad style
 RL_LIBSRC = $(topdir)/lib/readline
@@ -252,6 +260,8 @@ documentation: builtins.texi
 builtins.texi: $(MKBUILTINS)
 	./$(MKBUILTINS) -documentonly $(DEFSRC)
 
+.PHONY: basic-clean clean maintainer-clean distclean mostlyclean maybe-clean
+
 clean:
 	$(RM) $(OFILES) $(CREATED_FILES) libbuiltins.a
 	$(RM) $(MKBUILTINS) gen-helpfiles $(CREATED_OBJECTS)
@@ -265,8 +275,9 @@ distclean maintainer-clean: clean
 
 $(OFILES):	$(MKBUILTINS) ../config.h
 
-../version.h: ../config.h ../Makefile Makefile
-	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} version.h )
+# sketchy rule here
+#../version.h: ../config.h ../Makefile Makefile
+#	-( cd ${BUILD_DIR} && ${MAKE} ${BASH_MAKEFLAGS} version.h )
 
 # maintainer special - for now
 po:	builtins.c
@@ -275,7 +286,7 @@ po:	builtins.c
 ${LIBINTL_H}:
 	@echo making $@ in ${INTL_BUILDDIR}
 	@(cd ${INTL_BUILDDIR} && \
-		$(MAKE) $(MFLAGS) libintl.h) || exit 1
+		$(MAKE) $(BASH_MAKEFLAGS) libintl.h) || exit 1
 
 # dependencies
 
@@ -556,6 +567,7 @@ printf.o: $(topdir)/bashtypes.h ${srcdir}/common.h $(BASHINCDIR)/chartypes.h
 printf.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 printf.o: ../pathnames.h
 printf.o: $(BASHINCDIR)/unlocked-io.h
+printf.o: ${STDCKDINT_H} ${BASHINCDIR}/intprops-internal.h
 pushd.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 pushd.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 pushd.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
@@ -683,7 +695,34 @@ mapfile.o: $(topdir)/subst.h $(topdir)/externs.h $(BASHINCDIR)/maxpath.h
 mapfile.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/variables.h $(topdir)/conftypes.h
 mapfile.o: $(topdir)/arrayfunc.h ../pathnames.h
 
-#bind.o: $(RL_LIBSRC)chardefs.h $(RL_LIBSRC)readline.h $(RL_LIBSRC)keymaps.h
+bind.o: $(RL_LIBSRC)/rlconf.h
+bind.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+bind.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+bind.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+complete.o: $(RL_LIBSRC)/rlconf.h
+complete.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+complete.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+complete.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+history.o: $(RL_LIBSRC)/rlconf.h
+history.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+history.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+history.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+read.o: $(RL_LIBSRC)/rlconf.h
+read.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+read.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+read.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+set.o: $(RL_LIBSRC)/rlconf.h
+set.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+set.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+set.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+
+common.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+evalfile.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+evalstring.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+bind.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+fc.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+history.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+shopt.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
 
 # libintl dependencies
 bind.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h

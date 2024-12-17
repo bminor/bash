@@ -156,7 +156,7 @@ hash_builtin (WORD_LIST *list)
 #if defined (RESTRICTED_SHELL)
   if (restricted && pathname)
     {
-      if (strchr (pathname, '/'))
+      if (absolute_program (pathname))
 	{
           sh_restricted (pathname);
           return (EXECUTION_FAILURE);

@@ -68,7 +68,7 @@ umask: usage: umask [-p] [-S] [mode]
 ./errors.tests: line 214: VAR: readonly variable
 comsub: -c: line 1: syntax error near unexpected token `)'
 comsub: -c: line 1: `: $( for z in 1 2 3; do )'
-comsub: -c: line 1: syntax error near unexpected token `done'
+comsub: -c: line 1: syntax error near unexpected token `done' while looking for matching `)'
 comsub: -c: line 1: `: $( for z in 1 2 3; done )'
 ./errors.tests: line 221: cd: HOME not set
 ./errors.tests: line 222: cd: /tmp/xyz.bash: No such file or directory
@@ -81,11 +81,11 @@ bash: line 1: PWD: readonly variable
 bash: line 1: OLDPWD: readonly variable
 1
 ./errors.tests: line 236: .: filename argument required
-.: usage: . filename [arguments]
+.: usage: . [-p path] filename [arguments]
 ./errors.tests: line 237: source: filename argument required
-source: usage: source filename [arguments]
+source: usage: source [-p path] filename [arguments]
 ./errors.tests: line 240: .: -i: invalid option
-.: usage: . filename [arguments]
+.: usage: . [-p path] filename [arguments]
 ./errors.tests: line 243: set: -q: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
 ./errors.tests: line 246: enable: sh: not a shell builtin
@@ -130,7 +130,7 @@ kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill 
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
 ./errors.tests: line 332: kill: SIGBAD: invalid signal specification
 ./errors.tests: line 334: kill: BAD: invalid signal specification
-./errors.tests: line 336: kill: @12: arguments must be process or job IDs
+./errors.tests: line 336: kill: `@12': not a pid or valid job spec
 ./errors.tests: line 339: unset: BASH_LINENO: cannot unset
 ./errors.tests: line 339: unset: BASH_SOURCE: cannot unset
 ./errors.tests: line 342: set: trackall: invalid option name
@@ -141,7 +141,7 @@ set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
 ./errors.tests: line 348: xx: readonly variable
 1
 ./errors1.sub: line 14: .: -i: invalid option
-.: usage: . filename [arguments]
+.: usage: . [-p path] filename [arguments]
 ./errors1.sub: line 22: shift: -4: shift count out of range
 ./errors1.sub: line 23: shift: -4: shift count out of range
 ./errors1.sub: line 27: break: -1: loop count out of range
@@ -240,7 +240,7 @@ after non-special builtin: 1
 ./errors7.sub: line 27: x: readonly variable
 ./errors7.sub: line 29: x: readonly variable
 ./errors7.sub: line 32: v: readonly variable
-./errors8.sub: eval: line 7: syntax error: unexpected end of file
+./errors8.sub: eval: line 7: syntax error: unexpected end of file from `(' command on line 6
 ok 1
 ./errors8.sub: line 8: v: readonly variable
 ok 2
@@ -255,7 +255,7 @@ ok 6
 ./errors8.sub: line 16: /notthere: No such file or directory
 ok 7
 ./errors8.sub: line 17: .: -x: invalid option
-.: usage: . filename [arguments]
+.: usage: . [-p path] filename [arguments]
 ok 8
 DEBUG
 ./errors9.sub: line 6: [[: ++: arithmetic syntax error: operand expected (error token is "+")
@@ -330,6 +330,11 @@ bash: line 1: readonly: `AA[4]': not a valid identifier
 array: 1
 sh: line 1: export: `AA[4]': not a valid identifier
 sh: line 1: readonly: `AA[4]': not a valid identifier
+bash: -c: line 5: syntax error: unexpected end of file from `if' command on line 1
+bash: -c: line 3: syntax error: unexpected end of file from `while' command on line 1
+bash: -c: line 4: syntax error: unexpected end of file from `until' command on line 1
+bash: -c: line 5: syntax error: unexpected end of file from `for' command on line 1
+bash: -c: line 7: syntax error: unexpected end of file from `case' command on line 1
 bash: line 1: return: can only `return' from a function or sourced script
 after return
 bash: line 1: return: can only `return' from a function or sourced script
@@ -338,4 +343,4 @@ sh: line 1: unset: `a-b': not a valid identifier
 sh: line 1: /nosuchfile: No such file or directory
 sh: line 1: trap: SIGNOSIG: invalid signal specification
 after trap
-./errors.tests: line 393: `!!': not a valid identifier
+end

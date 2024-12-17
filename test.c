@@ -657,7 +657,7 @@ unary_test (char *op, char *arg, int flags)
 	  array_eltstate_t es;
 
 	  /* Let's assume that this has already been expanded once. */
-	  /* XXX - TAG:bash-5.2 fix with corresponding fix to execute_cmd.c:
+	  /* bash-5.2 fix with corresponding fix to execute_cmd.c:
 	     execute_cond_node() that passes TEST_ARRAYEXP in FLAGS */
 
 	  if (shell_compatibility_level > 51)

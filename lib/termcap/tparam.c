@@ -30,6 +30,10 @@ extern char *malloc ();
 extern char *realloc ();
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #if defined (HAVE_STRING_H)
 #include <string.h>
 #endif

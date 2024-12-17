@@ -22,6 +22,8 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <config.h>
+
 #include <fcntl.h>
 #include <errno.h>
 

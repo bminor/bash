@@ -332,6 +332,7 @@ extern int _rl_timeout_handle_sigalrm (void);
 /* use as a sentinel for fd_set, struct timeval,  and sigset_t definitions */
 
 #if defined (__MINGW32__)
+/* still doesn't work; no alarm() so we provide a non-working stub. */
 #  define RL_TIMEOUT_USE_SIGALRM
 #elif defined (HAVE_SELECT) || defined (HAVE_PSELECT)
 #  define RL_TIMEOUT_USE_SELECT
@@ -399,6 +400,7 @@ extern void _rl_free_saved_line (HIST_ENTRY *);
 extern void _rl_unsave_line (HIST_ENTRY *);
 #endif
 extern int _rl_free_saved_history_line (void);
+extern int _rl_maybe_replace_line (int);
 
 extern void _rl_set_insert_mode (int, int);
 

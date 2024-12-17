@@ -459,7 +459,7 @@ fc_builtin (WORD_LIST *list)
       stream = sh_mktmpfp ("bash-fc", MT_USERANDOM|MT_USETMPDIR, &fn);
       if (stream == 0)
 	{
-	  builtin_error (_("%s: cannot open temp file: %s"), fn ? fn : "", strerror (errno));
+	  builtin_error ("%s: %s: %s", fn ? fn : "", _("cannot open temp file"), strerror (errno));
 	  FREE (fn);
 	  return (EXECUTION_FAILURE);
 	}

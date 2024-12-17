@@ -1,7 +1,7 @@
 This file is source.def, from which is created source.c.
 It implements the builtins "." and  "source" in Bash.
 
-Copyright (C) 1987-2023 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,13 +22,14 @@ $PRODUCES source.c
 
 $BUILTIN source
 $FUNCTION source_builtin
-$SHORT_DOC source filename [arguments]
+$SHORT_DOC source [-p path] filename [arguments]
 Execute commands from a file in the current shell.
 
-Read and execute commands from FILENAME in the current shell.  The
-entries in $PATH are used to find the directory containing FILENAME.
-If any ARGUMENTS are supplied, they become the positional parameters
-when FILENAME is executed.
+Read and execute commands from FILENAME in the current shell. If the
+-p option is supplied, the PATH argument is treated as a colon-
+separated list of directories to search for FILENAME. If -p is not
+supplied, $PATH is searched to find FILENAME. If any ARGUMENTS are
+supplied, they become the positional parameters when FILENAME is executed.
 
 Exit Status:
 Returns the status of the last command executed in FILENAME; fails if
@@ -38,13 +39,14 @@ $END
 $BUILTIN .
 $DOCNAME dot
 $FUNCTION source_builtin
-$SHORT_DOC . filename [arguments]
+$SHORT_DOC . [-p path] filename [arguments]
 Execute commands from a file in the current shell.
 
-Read and execute commands from FILENAME in the current shell.  The
-entries in $PATH are used to find the directory containing FILENAME.
-If any ARGUMENTS are supplied, they become the positional parameters
-when FILENAME is executed.
+Read and execute commands from FILENAME in the current shell. If the
+-p option is supplied, the PATH argument is treated as a colon-
+separated list of directories to search for FILENAME. If -p is not
+supplied, $PATH is searched to find FILENAME. If any ARGUMENTS are
+supplied, they become the positional parameters when FILENAME is executed.
 
 Exit Status:
 Returns the status of the last command executed in FILENAME; fails if
@@ -82,7 +84,8 @@ extern int errno;
 
 static void uw_maybe_pop_dollar_vars (void *);
 
-/* If non-zero, `.' uses $PATH to look up the script to be sourced. */
+/* If non-zero, `.' uses $PATH to look up the script to be sourced when -p is
+   not supplied. */
 int source_uses_path = 1;
 
 /* If non-zero, `.' looks in the current directory if the filename argument
@@ -115,11 +118,24 @@ uw_maybe_pop_dollar_vars (void *ignore)
 int
 source_builtin (WORD_LIST *list)
 {
-  int result;
-  char *filename, *debug_trap, *x;
+  int result, search_cwd, opt;
+  char *filename, *debug_trap, *x, *pathstring;
 
-  if (no_options (list))
-    return (EX_USAGE);
+  pathstring = 0;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "p:")) != -1)
+    {
+    switch (opt)
+      {
+      case 'p':
+	pathstring = list_optarg;
+	break;
+      CASE_HELPOPT;
+      default:
+	builtin_usage ();
+	return (EX_USAGE);
+      }
+    }
   list = loptend;
 
   if (list == 0)
@@ -130,24 +146,34 @@ source_builtin (WORD_LIST *list)
     }
 
 #if defined (RESTRICTED_SHELL)
-  if (restricted && strchr (list->word->word, '/'))
+  if (restricted && (pathstring || absolute_program (list->word->word)))
     {
       sh_restricted (list->word->word);
       return (EXECUTION_FAILURE);
     }
 #endif
 
+  /* normalize pathstring */
+  if (pathstring && *pathstring == 0)
+    pathstring = ".";
+
+  /* XXX - If we supply -p PATH, don't default to searching $PWD */
+  search_cwd = pathstring == 0 && source_searches_cwd;
+
   filename = (char *)NULL;
   /* XXX -- should this be absolute_pathname? */
-  if (posixly_correct && strchr (list->word->word, '/'))
+  if (posixly_correct && absolute_program (list->word->word))
     filename = savestring (list->word->word);
   else if (absolute_pathname (list->word->word))
     filename = savestring (list->word->word);
+  else if (pathstring)
+    filename = find_in_path (list->word->word, pathstring, FS_READABLE);
   else if (source_uses_path)
     filename = find_path_file (list->word->word);
+
   if (filename == 0)
     {
-      if (source_searches_cwd == 0)
+      if (search_cwd == 0)
 	{
 	  x = printable_filename (list->word->word, 0);
 	  builtin_error (_("%s: file not found"), x);
