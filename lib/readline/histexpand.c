@@ -141,7 +141,7 @@ get_history_event (const char *string, int *caller_index, int delimiting_quote)
   register char c;
   HIST_ENTRY *entry;
   int which, sign, local_index, substring_okay;
-  int search_flags;
+  int search_flags, old_offset;
   char *temp;
 
   /* The event can be specified in a number of ways.
@@ -251,9 +251,10 @@ get_history_event (const char *string, int *caller_index, int delimiting_quote)
 
   *caller_index = i;
 
+  old_offset = history_offset;		/* XXX */
 #define FAIL_SEARCH() \
   do { \
-    history_offset = history_length; xfree (temp) ; return (char *)NULL; \
+    history_offset = old_offset; xfree (temp) ; return (char *)NULL; \
   } while (0)
 
   /* If there is no search string, try to use the previous search string,
@@ -282,7 +283,7 @@ get_history_event (const char *string, int *caller_index, int delimiting_quote)
 	  entry = current_history ();
 	  if (entry == 0)
 	    FAIL_SEARCH ();
-	  history_offset = history_length;
+	  history_offset = old_offset;	/* XXX - was history_length */
 	
 	  /* If this was a substring search, then remember the
 	     string that we matched for word substitution. */

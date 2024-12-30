@@ -10772,3 +10772,21 @@ lib/readline/isearch.c
 				   -----
 CHANGES,NEWS
 	- updated for bash-5.3-beta
+
+				   12/15
+				   -----
+lib/readline/histexpand.c
+	- get_history_event: make sure we don't change history_offset whether
+	  the search succeeds or fails, don't set it to history_length.
+	  Callers don't expect to have the history offset changed out from
+	  under them.
+	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
+
+				   12/16
+				   -----
+lib/readline/util.c
+	- _rl_abort_internal: make sure to clear _rl_command_to_execute
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+tests/printf7.sub,tests/cond-regexp2.sub
+	- accommodate different error messages across different systems

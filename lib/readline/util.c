@@ -112,6 +112,7 @@ _rl_abort_internal (void)
   RL_UNSETSTATE (RL_STATE_MULTIKEY);	/* XXX */
 
   rl_last_func = (rl_command_func_t *)NULL;
+  _rl_command_to_execute = 0;
 
   _rl_longjmp (_rl_top_level, 1);
   return (0);

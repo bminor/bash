@@ -613,7 +613,11 @@ trap_handler (int sig)
       /* Set the event hook so readline will call it after the signal handlers
 	 finish executing, so if this interrupted character input we can get
 	 quick response. */
+#if 1
       if (RL_ISSTATE (RL_STATE_SIGHANDLER))
+#else
+      if (RL_ISSTATE (RL_STATE_SIGHANDLER) || RL_ISSTATE (RL_STATE_TERMPREPPED))
+#endif
         bashline_set_event_hook ();
 #endif
 
