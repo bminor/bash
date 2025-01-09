@@ -152,7 +152,7 @@ l. There is a new `bash_source_fullpath' shopt option, which makes bash put
    at configure time.
 
 m. Posix mode now forces job notifications to occur when the new edition of
-   POSIX specifes (since it now specifies them).
+   POSIX specifies (since it now specifies them).
 
 n. Interactive shells don't print job notifications while sourcing scripts.
 
@@ -325,7 +325,7 @@ vv. Fixed a bug that caused unset not to remove a function named a[b] if
 ww. Posix mode doesn't perform function lookup for function names containing
     a slash.
 
-xx. <( and >( can now be used in funtion names.
+xx. <( and >( can now be used in function names.
 
 yy. Fixed a bug that caused tilde expansion not to be performed on some
     array subscripts.
@@ -451,7 +451,7 @@ oooo. If the cd builtin uses $OLDPWD, allow it to use $CDPATH if the user has
       set it to something that's not a full pathname.
 
 pppp. The test builtin only supports the optional argument to -t if parsing
-      an expression with more than four aguments and not in posix mode.
+      an expression with more than four arguments and not in posix mode.
 
 qqqq. Changes to filename quoting and rewriting to deal with NFC and NFD
       Unicode forms (primarily for macOS).
@@ -618,7 +618,7 @@ a. Fixed a bug in clearing the visible line structure before redisplay.
 b. Fix a bug where setlocale(3) returning NULL caused a crash.
 
 c. Fixed signal checking in callback mode to handle signals that arrive before
-   readline restore's the application's signal handlers.
+   readline restores the application's signal handlers.
 
 d. Fixed a bug with word completion where the directory name needs to be
    dequoted and tilde-expanded.
@@ -675,7 +675,7 @@ u. Call the filename rewrite hook on the word being completed before comparing
    strings.
 
 v. Fix infinite recursion that can happen if someone binds a key that doesn't
-   have a different upper and lower case represenation to do-lowercase-version.
+   have a different upper and lower case representation to do-lowercase-version.
 
 w. Check for non-ANSI (dumb) terminals a little more thoroughly.
 
@@ -718,12 +718,12 @@ j. `trap' has a new -P option that prints the trap action associated with each
    signal argument.
 
 k. The `command' builtin preceding a declaration builtin (e.g., `declare')
-   preserves the special asisgnment statement parsing for the declation
+   preserves the special assignment statement parsing for the declation
    builtin. This is a new POSIX requirement.
 
 l. `printf' uses the `alternate form' for %q and %Q to force single quoting.
 
-m. `printf' now interprets %ls (%S) and %lc (%C)nas referring to wide strings
+m. `printf' now interprets %ls (%S) and %lc (%C) as referring to wide strings
    and characters, respectively, when in a multibyte locale.
 
 n. The shell can be compiled with a different default value for the
@@ -817,6 +817,8 @@ i. Incremental and non-incremental searches now allow ^V/^Q (or, in the former
    case, anything bound to quoted-insert) to quote characters in the search
    string.
 
+j. There is a new rl_print_keybinding function that prints the key bindings
+   for a single bindable function specified by name.
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.2-release, and
 the previous version, bash-5.2-rc4.

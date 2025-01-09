@@ -39,6 +39,12 @@ if [ "${BASH_VERSION+set}" = "set" ]; then
 else
 	[ "${SHELLOPTS+set}" = "set" ] && unset SHELLOPTS 2>/dev/null
 fi
+# ditto for BASHOPTS, which is also readonly in bash
+if [ "${BASH_VERSION+set}" = "set" ]; then
+	export -n BASHOPTS	# just make sure its not exported
+else
+	[ "${BASHOPTS+set}" = "set" ] && unset BASHOPTS 2>/dev/null
+fi
 
 : ${THIS_SH:=../bash}
 export THIS_SH

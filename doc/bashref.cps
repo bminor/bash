@@ -43,7 +43,7 @@
 \entry{dollar-single quote quoting}{6}
 \initial {E}
 \entry{editing command lines}{129}
-\entry{environment}{46}
+\entry{environment}{47}
 \entry{evaluation, arithmetic}{106}
 \entry{event designators}{170}
 \entry{execution environment}{45}
@@ -51,16 +51,16 @@
 \entry{expansion}{24}
 \entry{expansion, arithmetic}{36}
 \entry{expansion, brace}{25}
-\entry{expansion, filename}{37}
+\entry{expansion, filename}{38}
 \entry{expansion, parameter}{27}
-\entry{expansion, pathname}{37}
+\entry{expansion, pathname}{38}
 \entry{expansion, tilde}{26}
 \entry{expressions, arithmetic}{106}
 \entry{expressions, conditional}{104}
 \initial {F}
 \entry{field}{3}
 \entry{filename}{3}
-\entry{filename expansion}{37}
+\entry{filename expansion}{38}
 \entry{foreground}{123}
 \entry{functions, shell}{19}
 \initial {H}
@@ -100,7 +100,7 @@
 \entry{parameters}{22}
 \entry{parameters, positional}{23}
 \entry{parameters, special}{23}
-\entry{pathname expansion}{37}
+\entry{pathname expansion}{38}
 \entry{pattern matching}{38}
 \entry{pipeline}{10}
 \entry{POSIX}{3}
@@ -108,7 +108,7 @@
 \entry{POSIX Mode}{115}
 \entry{process group}{3}
 \entry{process group ID}{3}
-\entry{process substitution}{36}
+\entry{process substitution}{37}
 \entry{programmable completion}{156}
 \entry{prompting}{112}
 \initial {Q}
@@ -129,7 +129,7 @@
 \entry{shell, interactive}{103}
 \entry{signal}{4}
 \entry{signal handling}{48}
-\entry{special builtin}{4, 83}
+\entry{special builtin}{4, 84}
 \entry{startup files}{101}
 \entry{string translations}{8}
 \entry{suspending jobs}{123}

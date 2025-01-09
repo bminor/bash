@@ -14,6 +14,24 @@
 LC_ALL=C
 LC_NUMERIC=C
 
+: ${TMPDIR:=/tmp}
+TMPF=$TMPDIR/printf-oflow-$RANDOM
+
+printf_overflow ()
+{
+        local r;
+
+        line=$1 ; shift
+        rm -f "$TMPF"
+        printf "$@"  2>$TMPF
+        r=$?
+        if [ ! -s "$TMPF" ]; then
+                echo "printf.tests: $line: expected overflow error output to stderr" >&2
+        fi
+        rm -f "$TMPF"
+        return $r
+}
+
 # these should output error messages -- the format is required
 printf
 printf --
@@ -361,8 +379,8 @@ printf '%Q\n'
 TOOBIG=9223372036854775825
 TOOSMALL=-9223372036854775815
 
-printf '%d\n' "$TOOBIG"
-printf '%d\n' "$TOOSMALL"
+printf_overflow $LINENO '%d\n' "$TOOBIG"
+printf_overflow $LINENO '%d\n' "$TOOSMALL"
 
 # arguments that are not completely converted generate warning messages
 printf '%d\n' +

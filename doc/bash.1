@@ -5,9 +5,13 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Dec 12 13:37:07 EST 2024
+.\"	Last Change: Wed Jan  8 09:27:11 EST 2025
 .\"
-.\" bash_builtins, strip all but Builtins section
+.\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
+.\" For rbash, strip all but "RESTRICTED SHELL" section
+.\"
+.\" Both conditionalize text based on the base page being formatted
+.\" using the zZ and zY registers, respectively
 .\"
 .\" Ensure the registers are initialized to avoid groff warnings.
 .nr zZ +0
@@ -17,7 +21,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2024 December 12" "GNU Bash 5.3"
+.TH BASH 1 "2025 January 8" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -66,24 +70,40 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2024 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2024 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2025 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2025 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
-is an \fBsh\fP-compatible command language interpreter that
+is a command language interpreter that
 executes commands read from the standard input, from a string,
 or from a file.
+It is a reimplementation and extension of the Bourne shell,
+the historical Unix command language interpreter.
 .B Bash
 also incorporates useful features from the \fIKorn\fP and \fIC\fP
 shells (\fBksh\fP and \fBcsh\fP).
 .PP
-POSIX is the name for a family of computing standards based on Unix.
+.SM POSIX
+is the name for a family of computing standards based on Unix.
 .B Bash
 is intended to be a conformant implementation of the
-Shell and Utilities portion of the IEEE POSIX specification
-(IEEE Standard 1003.1).
+Shell and Utilities portion of the IEEE
+.SM POSIX
+specification (IEEE Standard 1003.1).
 .B Bash
-can be configured to be POSIX-conformant by default.
+.SM POSIX
+mode (hereafter referred to as \fIposix mode\fP)
+changes the shell's behavior where its default operation differs
+from the standard to strictly conform to the standard.
+See
+.SM
+.B "SEE ALSO"
+below for a reference to a document that details how posix mode affects
+\fBbash\fP's behavior.
+.B Bash
+can be configured to be
+.SM POSIX\c
+-conformant by default.
 .SH OPTIONS
 All of the single-character shell options documented in the
 description of the \fBset\fP builtin command, including \fB\-o\fP,
@@ -244,13 +264,11 @@ This option is on by default if the shell is invoked as
 .BR sh .
 .TP
 .B \-\-posix
-Change the behavior of \fBbash\fP where the default operation differs
-from the POSIX standard to match the standard (\fIposix mode\fP).
-See
-.SM
-.B "SEE ALSO"
-below for a reference to a document that details how posix mode affects
-\fBBash\fP's behavior.
+Enable posix mode;
+change the behavior of \fBbash\fP
+where the default operation differs from the
+.SM POSIX
+standard to match the standard.
 .TP
 .B \-\-restricted
 The shell becomes restricted (see
@@ -270,9 +288,9 @@ If arguments remain after option processing, and neither the
 .B \-c
 nor the
 .B \-s
-option has been supplied, the first argument is assumed to
-be the name of a file containing shell commands (a \fIshell script\fP).
-If
+option has been supplied, the first argument is treated as
+the name of a file containing shell commands (a \fIshell script\fP).
+When
 .B bash
 is invoked in this fashion,
 .B $0
@@ -283,8 +301,9 @@ reads and executes commands from this file, then exits.
 \fBBash\fP's exit status is the exit status of the last command
 executed in the script.
 If no commands are executed, the exit status is 0.
-Bash first attempts to open the file in the current directory, and,
-if no file is found, then searches the directories in
+.B Bash
+first attempts to open the file in the current directory,
+and, if no file is found, searches the directories in
 .SM
 .B PATH
 for the script.
@@ -295,12 +314,12 @@ or one started with the
 .B \-\-login
 option.
 .PP
-An \fIinteractive\fP shell is one started without non-option arguments
+An \fIinteractive shell\fP is one started without non-option arguments
 (unless \fB\-s\fP is specified)
 and without the
 .B \-c
 option,
-whose standard input and standard error are
+and whose standard input and standard error are
 both connected to terminals (as determined by
 .IR isatty (3)),
 or one started with the
@@ -397,10 +416,12 @@ is invoked with the name
 it tries to mimic the startup behavior of historical versions of
 .B sh
 as closely as possible,
-while conforming to the POSIX standard as well.
+while conforming to the
+.SM POSIX
+standard as well.
 When invoked as an interactive login shell, or a non-interactive
-shell with the \fB\-\-login\fP option, it first attempts to
-read and execute commands from
+shell with the \fB\-\-login\fP option, it first attempts to read
+and execute commands from
 .FN /etc/profile
 and
 .FN \*~/.profile ,
@@ -425,6 +446,7 @@ option has no effect.
 A non-interactive shell invoked with the name
 .B sh
 does not attempt to read any other startup files.
+.PP
 When invoked as
 .BR sh ,
 .B bash
@@ -434,7 +456,9 @@ When
 .B bash
 is started in posix mode, as with the
 .B \-\-posix
-command line option, it follows the POSIX standard for startup files.
+command line option, it follows the
+.SM POSIX
+standard for startup files.
 In this mode, interactive shells expand the
 .SM
 .B ENV
@@ -605,7 +629,9 @@ If the
 reserved word precedes a pipeline, the shell reports the
 elapsed as well as user and system time consumed by its execution
 when the pipeline terminates.
-The \fB\-p\fP option changes the output format to that specified by POSIX.
+The \fB\-p\fP option changes the output format to that specified by
+.SM POSIX\c
+\&.
 When the shell is in posix mode, it does not recognize
 \fBtime\fP as a reserved word if the next token begins with a
 .Q \- .
@@ -784,8 +810,12 @@ instead of having any special pattern matching meaning.
 An additional binary operator, \fB=\*~\fP, is available, with the same
 precedence as \fB==\fP and \fB!=\fP.
 When it is used, the string to the right of the operator is considered
-a POSIX extended regular expression and matched accordingly
-(using the POSIX \fIregcomp\fP and \fIregexec\fP interfaces
+a
+.SM POSIX
+extended regular expression and matched accordingly
+(using the
+.SM POSIX
+\fIregcomp\fP and \fIregexec\fP interfaces
 usually described in
 .IR regex (3)).
 The return value is 0 if the string matches
@@ -973,7 +1003,7 @@ Using \fB;&\fP in place of \fB;;\fP causes execution to continue with
 the \fIlist\fP associated with the next pattern list.
 Using \fB;;&\fP in place of \fB;;\fP causes the shell to test the next
 pattern list in the statement, if any, and execute any associated \fIlist\fP
-if the match succeeds.
+if the match succeeds,
 continuing the case statement execution as if the pattern list had not matched.
 The exit status is zero if no pattern matches.
 .IP
@@ -1103,7 +1133,9 @@ parentheses are not supplied, the braces are recommended.
 \fIcompound\-command\fP is executed whenever \fIfname\fP is specified as the
 name of a simple command.
 When in posix mode, \fIfname\fP must be a valid shell \fIname\fP
-and may not be the name of one of the POSIX \fIspecial builtins\fP.
+and may not be the name of one of the
+.SM POSIX
+\fIspecial builtins\fP.
 In default mode, a function name can be any unquoted shell word that does
 not contain \fB$\fP.
 .PP
@@ -1221,8 +1253,8 @@ The special parameters
 .B *
 and
 .B @
-have special meaning when in double
-quotes (see
+have special meaning when in double quotes
+(see
 .SM
 .B PARAMETERS
 below).
@@ -1390,25 +1422,34 @@ one or more instances of the \fBcommand\fP builtin and retain these
 assignment statement properties.
 .PP
 In the context where an assignment statement is assigning a value
-to a shell variable or array index,
-the += operator appends to or adds to
+to a shell variable or array index, the
+.Q +=
+operator appends to or adds to
 the variable's previous value.
 This includes arguments to \fIdeclaration\fP commands such as
-\fBdeclare\fP that accept assignment statements.
-When += is applied to a variable
-for which the \fBinteger\fP attribute has been set,
+.B \%declare
+that accept assignment statements.
+When
+.Q +=
+is applied to a variable for which the
+.B \%integer
+attribute has been set,
 the variable's current value and \fIvalue\fP are each evaluated as
 arithmetic expressions,
 and the sum of the results is assigned as the variable's value.
 The current value is usually an integer constant, but may be an expression.
-When += is applied to an array variable using compound assignment
+When
+.Q +=
+is applied to an array variable using compound assignment
 (see
 .B Arrays
-below), the
-variable's value is not unset (as it is when using =), and new
-values are appended to the array beginning at one greater than the array's
-maximum index (for indexed arrays) or added as additional key\-value pairs
-in an associative array.
+below),
+the variable's value is not unset
+(as it is when using
+.@ = ),
+and new values are appended to the array
+beginning at one greater than the array's maximum index (for indexed arrays)
+or added as additional key\-value pairs in an associative array.
 When applied to a string-valued variable, \fIvalue\fP is expanded and
 appended to the variable's value.
 .PP
@@ -1775,7 +1816,7 @@ have no effect, and it may not be unset.
 .B BASH_LOADABLES_PATH
 A colon-separated list of directories in which the
 .B enable
-command.
+command
 looks for
 dynamically loadable builtins.
 .TP
@@ -2170,7 +2211,9 @@ is unset, it loses its special properties, even if it is
 subsequently reset.
 .TP
 .B READLINE_ARGUMENT
-Any numeric argument given to a \fBreadline\fP command that was defined using
+Any numeric argument given to a
+.B \%readline
+command that was defined using
 .Q "bind \-x"
 (see
 .SM
@@ -2252,6 +2295,8 @@ If this variable is in the environment when
 .B bash
 starts up, the shell enables each option in the list before
 reading any startup files.
+If this variable is exported, child shells will enable each option
+in the list.
 This variable is read-only.
 .TP
 .B SHLVL
@@ -2367,9 +2412,10 @@ A sample value is
 .TP
 .B CHILD_MAX
 Set the number of exited child status values for the shell to remember.
-\fBBash\fP will not allow this value to be decreased below a POSIX-mandated
-minimum, and there is a maximum value (currently 8192) that this may
-not exceed.
+\fBBash\fP will not allow this value to be decreased below a
+.SM POSIX\c
+-mandated minimum,
+and there is a maximum value (currently 8192) that this may not exceed.
 The minimum value is system-dependent.
 .TP
 .B COLUMNS
@@ -2569,7 +2615,9 @@ When this variable is assigned a value, the history file is truncated,
 if necessary, to contain no more than that number of lines
 by removing the oldest entries.
 The history file is also truncated to this size after
-writing it when a shell exits or by the \fBhistory\fP builtin.
+writing it when a shell exits or by the
+.B \%history
+builtin.
 If the value is 0, the history file is truncated to zero size.
 Non-numeric values and numeric values less than zero inhibit truncation.
 The shell sets the default value to the value of
@@ -2606,8 +2654,26 @@ and are added to the history regardless of the value of
 .BR HISTIGNORE .
 If the first line was not saved, the second and subsequent lines of
 the command are not saved either.
-The pattern matching honors the setting of the \fBextglob\fP shell
-option.
+The pattern matching honors the setting of the
+.B \%extglob
+shell option.
+.IP
+.SM
+.B HISTIGNORE
+subsumes some of the function of
+.SM
+.BR HISTCONTROL .
+A pattern of
+.Q &
+is identical to
+.Q \%ignoredups ,
+and a pattern of
+.Q "[ ]*"
+is identical to
+.Q \%ignorespace .
+Combining these two patterns, separating them with a colon,
+provides the functionality of
+.Q \%ignoreboth .
 .TP
 .B HISTSIZE
 The number of commands to remember in the command history (see
@@ -2656,7 +2722,7 @@ to obtain the list of possible hostname completions.
 When
 .SM
 .B HOSTFILE
-is unset, \fBbash\fP clears the the hostname list.
+is unset, \fBbash\fP clears the hostname list.
 .TP
 .B IFS
 The
@@ -2824,15 +2890,22 @@ The default path is system-dependent,
 and is set by the administrator who installs
 .BR bash .
 A common value is
-.na
-.Q /usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin .
-.ad
+.RS
+.RS 5n
+.EX
+/usr/local/bin:/usr/local/sbin:\c
+.if \n(LL<78n .br
+/usr/bin:/usr/sbin:/bin:/sbin
+.EE
+.RE
+.RE
 .TP
 .B POSIXLY_CORRECT
 If this variable is in the environment when \fBbash\fP starts, the shell
 enters posix mode before reading the startup files, as if the
 .B \-\-posix
-invocation option had been supplied.  If it is set while the shell is
+invocation option had been supplied.
+If it is set while the shell is
 running, \fBbash\fP enables posix mode, as if the command
 .Q "set \-o posix"
 had been executed.
@@ -3024,10 +3097,13 @@ The second character is the \fIquick substitution\fP character, normally
 When it appears as the first character on the line,
 history substitution repeats the previous command,
 replacing one string with another.
-The optional third character is the character which indicates that
-the remainder of the line is a comment when found as the first character
-of a word, normally
-.Q \fB#\fP .
+The optional third character is the
+\fIhistory comment\fP
+character,  normally
+.Q \fB#\fP ,
+which indicates
+that the remainder of the line is a comment
+when it appears as the first character of a word.
 The history comment character disables history substitution
 for the remaining words on the line.
 It does not necessarily cause the shell parser to treat the rest of the
@@ -3043,34 +3119,49 @@ There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
 Indexed arrays are referenced using arithmetic expressions
-that must expand to an integer and are zero-based;
+that must expand to an integer
+(see
+.SM
+.B
+ARITHMETIC EVALUATION
+below)
+and are zero-based;
 associative arrays are referenced using arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 .PP
 An indexed array is created automatically if any variable is assigned to
 using the syntax
-\fIname\fP[\fIsubscript\fP]=\fIvalue\fP.
+.RS
+\fIname\fP[\fIsubscript\fP]=\fIvalue\fP
+\&.
+.RE
 The
 .I subscript
 is treated as an arithmetic expression that must evaluate to a number
 greater than or equal to zero.
 To explicitly declare an indexed array, use
-.B declare \-a \fIname\fP
+.RS
+.BI "declare \-a\ " name
+.RE
 (see
 .SM
 .B "SHELL BUILTIN COMMANDS"
 below).
-.B declare \-a \fIname\fP[\fIsubscript\fP]
+.RS
+\fBdeclare \-a\fP \fIname\fP[\fIsubscript\fP]
+.RE
 is also accepted; the \fIsubscript\fP is ignored.
 .PP
 Associative arrays are created using
-.BR "declare \-A \fIname\fP" .
+.RS
+.BI "declare \-A\ " name
+.RE
+\&.
 .PP
-Attributes may be
-specified for an array variable using the
-.B declare
+Attributes may be specified for an array variable using the
+.B \%declare
 and
-.B readonly
+.B \%readonly
 builtins.
 Each attribute applies to all members of an array.
 .PP
@@ -3119,7 +3210,9 @@ interpreted as relative to one greater than the maximum index of
 \fIname\fP, so negative indices count back from the end of the
 array, and an index of \-1 references the last element.
 .PP
-The += operator appends to an array variable when assigning
+The
+.Q +=
+operator appends to an array variable when assigning
 using the compound assignment syntax; see
 .SM
 .B PARAMETERS
@@ -3291,12 +3384,12 @@ need not exist.
 Patterns to be brace expanded are formed from an optional
 .IR preamble ,
 followed by either a series of comma-separated strings or
-a sequence expression between a pair of braces, followed by
-an optional
+a sequence expression between a pair of braces,
+followed by an optional
 .IR postscript .
-The preamble is prefixed to each string contained
-within the braces, and the postscript is then appended
-to each resulting string, expanding left to right.
+The preamble is prefixed to each string contained within the braces,
+and the postscript is then appended to each resulting string,
+expanding left to right.
 .PP
 Brace expansions may be nested.
 The results of each expanded string are not sorted;
@@ -3310,11 +3403,8 @@ where \fIx\fP and \fIy\fP are either integers or single letters,
 and \fIincr\fP, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 \fIx\fP and \fIy\fP, inclusive.
-If either \fIx\fP or \fIy\fP begins with \fI0\fP,
+If either \fIx\fP or \fIy\fP begins with a zero,
 each generated term will contain the same number of digits,
-zero-padding where necessary.
-When either \fIx\fP or \fPy\fP begins with a zero, the shell
-attempts to force all generated terms to contain the same number of digits,
 zero-padding where necessary.
 When letters are supplied, the expression expands to each character
 lexicographically between \fIx\fP and \fIy\fP, inclusive,
@@ -3338,22 +3428,32 @@ and closing braces, and at least one unquoted comma or a valid
 sequence expression.
 Any incorrectly formed brace expansion is left unchanged.
 .PP
-A \fB{\fP or \fB,\fP may be quoted with a backslash to prevent its
+A
+.Q {
+or
+Q ,
+may be quoted with a backslash to prevent its
 being considered part of a brace expression.
-To avoid conflicts with parameter expansion, the string \fB${\fP
-is not considered eligible for brace expansion, and inhibits brace
-expansion until the closing \fB}\fP.
+To avoid conflicts with parameter expansion, the string
+.Q ${
+is not considered eligible for brace expansion,
+and inhibits brace expansion until the closing
+.Q } .
 .PP
 This construct is typically used as shorthand when the common
 prefix of the strings to be generated is longer than in the
 above example:
-.RS
 .PP
+.RS
+.EX
 mkdir /usr/local/src/bash/{old,new,dist,bugs}
+.EE
 .RE
 or
 .RS
+.EX
 chown root /usr/{ucb/{ex,edit},lib/{ex?.?*,how_ex}}
+.EE
 .RE
 .PP
 Brace expansion introduces a slight incompatibility with
@@ -3363,14 +3463,15 @@ historical versions of
 does not treat opening or closing braces specially when they
 appear as part of a word, and preserves them in the output.
 .B Bash
-removes braces from words as a consequence of brace
-expansion.
+removes braces from words as a consequence of brace expansion.
 For example, a word entered to
 .B sh
-as \fIfile{1,2}\fP
+as
+.Q file{1,2}
 appears identically in the output.
-\fBBash\fP outputs that word as
-.I file1 file2
+.B Bash
+outputs that word as
+.Q "file1 file2"
 after brace expansion.
 Start
 .B bash
@@ -3464,8 +3565,9 @@ of variable assignments (as described above under
 .SM
 .BR PARAMETERS )
 when they appear as arguments to simple commands.
-\fBBash\fP does not do this, except for the \fIdeclaration\fP commands listed
-above, when in posix mode.
+\fBBash\fP does not do this,
+except for the \fIdeclaration\fP commands listed above,
+when in posix mode.
 .SS Parameter Expansion
 The
 .Q \fB$\fP
@@ -4080,7 +4182,8 @@ This filename is
 passed as an argument to the current command as the result of the
 expansion.
 .PP
-If the \fB>(\fP\fIlist\^\fP\fB)\fP form is used, writing to
+If the
+\fB>(\fP\fIlist\^\fP\fB)\fP form is used, writing to
 the file provides input for \fIlist\fP.
 If the
 \fB<(\fP\fIlist\^\fP\fB)\fP form is used, reading the file
@@ -4090,7 +4193,7 @@ and the left parenthesis, otherwise the construct would be interpreted
 as a redirection.
 .PP
 Process substitution is supported on systems that support named
-pipes (\fIFIFOs\fP) or the \fB/dev/fd\fP method of naming open files.
+pipes (\fIFIFOs\fP) or the \fI/dev/fd\fP method of naming open files.
 .PP
 When available, process substitution is performed
 simultaneously with parameter and variable expansion,
@@ -4301,7 +4404,8 @@ make
 .Q .*
 one of the patterns in
 .SM
-.BR GLOBIGNORE .
+.B GLOBIGNORE\c
+\&.
 The
 .B dotglob
 option is disabled when
@@ -4313,11 +4417,12 @@ The
 pattern matching honors the setting of the \fBextglob\fP shell
 option.
 .PP
-The
+The value of the
 .SM
 .B GLOBSORT
 shell variable controls how the results of pathname expansion are sorted,
-as described above.
+as described above under
+.BR "Shell Variables" .
 .PP
 \fBPattern Matching\fP
 .PP
@@ -4395,7 +4500,9 @@ shell option.
 Within a bracket expression,
 \fIcharacter classes\fP can be specified using the syntax
 \fB[:\fP\fIclass\fP\fB:]\fP, where \fIclass\fP is one of the
-following classes defined in the POSIX standard:
+following classes defined in the
+.SM POSIX
+standard:
 .IP
 .RS
 .B
@@ -4648,7 +4755,7 @@ and the
 .B noclobber
 option to the
 .B set
-builtin has been enabled, the redirection fails if the file
+builtin command has been enabled, the redirection fails if the file
 whose name results from the expansion of \fIword\fP exists and is
 a regular file.
 If the redirection operator is
@@ -4659,11 +4766,11 @@ and the
 .B noclobber
 option to the
 .B set
-builtin command is not enabled,
+builtin is not enabled,
 \fBbash\fP attempts the redirection
 even if the file named by \fIword\fP exists.
 .SS Appending Redirected Output
-Redirecting  output in this fashion opens
+Redirecting output in this fashion opens
 the file whose name results from the expansion of
 .I word
 for appending on file descriptor
@@ -5418,7 +5525,9 @@ is non-zero.
 .TP
 \fIstring1\fP \fB=\fP \fIstring2\fP
 True if the strings are equal.
-\fB=\fP should be used with the \fBtest\fP command for POSIX conformance.
+\fB=\fP should be used with the \fBtest\fP command for
+.SM POSIX
+conformance.
 When used with the \fB[[\fP command, this performs pattern matching as
 described above (\fBCompound Commands\fP).
 .TP
@@ -6948,7 +7057,7 @@ If set to zero, any existing history entries are deleted and no new entries
 are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
-By default, \fBbash\fP sets the the maximum number of history entries to
+By default, \fBbash\fP sets the maximum number of history entries to
 the value of the \fBHISTSIZE\fP shell variable.
 Setting \fIhistory\-size\fP to a non-numeric value will set
 the maximum number of history entries to 500.
@@ -7329,11 +7438,11 @@ Words are composed of alphanumeric characters (letters and digits).
 Move back to the start of the current or previous word.
 Words are composed of alphanumeric characters (letters and digits).
 .TP
-.B shell\-forward\-word
+.B shell\-forward\-word (M\-C\-f)
 Move forward to the end of the next word.
 Words are delimited by non-quoted shell metacharacters.
 .TP
-.B shell\-backward\-word
+.B shell\-backward\-word (M\-C\-b)
 Move back to the start of the current or previous word.
 Words are delimited by non-quoted shell metacharacters.
 .TP
@@ -7607,7 +7716,7 @@ Negative arguments have no effect.
 .TP
 .B transpose\-words (M\-t)
 Drag the word before point past the word after point,
-moving point over that word as well.
+moving point past that word as well.
 If point is at the end of the line, this transposes
 the last two words on the line.
 .TP
@@ -7810,7 +7919,7 @@ the number of matches \fIN\fP;
 the word being completed;
 .IP \(bu
 \fIS\fP:\fIE\fP,
-where S and E are the start and end offsets of the word
+where \fIS\fP and \fIE\fP are the start and end offsets of the word
 in the \fBreadline\fP line buffer; then
 .IP \(bu
 each match, one per line
@@ -8327,7 +8436,7 @@ and
 .PP
 On startup, \fBbash\fP initializes the history list
 by reading history entries from the
-the file named by the
+file named by the
 .SM
 .B HISTFILE
 variable (default
@@ -9163,7 +9272,7 @@ before attempting the directory change.
 .IP
 If \fBcd\fP uses a non-empty directory name from
 .SM
-.BR CDPATH,
+.BR CDPATH ,
 or if \fB\-\fP is the first argument, and the directory change is
 successful, \fBcd\fP writes the absolute pathname of the new
 working directory to the standard output.
@@ -9712,7 +9821,7 @@ subsequent assignments.
 .PP
 The return value is 0 unless an invalid option is encountered,
 an attempt is made to define a function using
-.Q "\-f foo=bar" .
+.Q "\-f foo=bar" ,
 an attempt is made to assign a value to a readonly variable,
 an attempt is made to assign a value to an array variable without
 using the compound assignment syntax (see
@@ -9895,7 +10004,7 @@ If \fB\-n\fP is supplied, each \fIname\fP is disabled; otherwise,
 \fIname\fPs are enabled.
 For example, to use the
 .B test
-binary found usin g
+binary found using
 .SM
 .B PATH
 instead of the shell builtin version, run
@@ -9909,7 +10018,8 @@ shell builtins.
 If \fB\-n\fP is supplied, print only disabled builtins.
 If \fB\-a\fP is supplied, the list printed includes all builtins, with an
 indication of whether or not each is enabled.
-The \fB\-s\fP option means to restrict the output to the POSIX
+The \fB\-s\fP option means to restrict the output to the
+.SM POSIX
 \fIspecial\fP builtins.
 .IP
 The
@@ -9929,7 +10039,8 @@ to force a search of the current directory.
 The
 .B \-d
 option will delete a builtin previously loaded with \fB\-f\fP.
-If \fI\-s\fP is used with \fI\-f\fP, the new builtin becomes a POSIX
+If \fI\-s\fP is used with \fI\-f\fP, the new builtin becomes a
+.SM POSIX
 special builtin.
 .IP
 If no options are supplied and a \fIname\fP is not a shell builtin,
@@ -10321,12 +10432,15 @@ If
 is specified,
 .B help
 gives detailed help on all commands matching
-.IR pattern ;
+.I pattern
+as described below;
 otherwise it displays a list of
 all the builtins and shell compound commands.
+.IP
+Options, if supplied, have the follow meanings:
 .RS
-.PD 0
 .TP
+.PD 0
 .B \-d
 Display a short description of each \fIpattern\fP
 .TP
@@ -10337,6 +10451,21 @@ Display the description of each \fIpattern\fP in a manpage-like format
 Display only a short usage synopsis for each \fIpattern\fP
 .PD
 .RE
+.IP
+If \fIpattern\fP contains pattern matching characters
+(see
+.SM
+.B "Pattern Matching"
+above)
+it's treated as a shell pattern and
+\fBhelp\fP prints the description of each
+help topic matching \fIpattern\fP.
+.IP
+If not, and \fIpattern\fP exactly matches the name of a help topic,
+\fBhelp\fP prints the description
+associated with that topic.
+Otherwise, \fBhelp\fP performs prefix matching and
+prints the descriptions of all matching help topics.
 .IP
 The return status is 0 unless no command matches
 .IR pattern .
@@ -11380,10 +11509,13 @@ commands in the pipeline exit successfully.
 This option is disabled by default.
 .TP 8
 .B posix
-Change the behavior of
+Enable posix mode;
+change the behavior of
 .B bash
 where the default operation differs
-from the POSIX standard to match the standard (\fIposix mode\fP).
+from the
+.SM POSIX
+standard to match the standard.
 See
 .SM
 .B "SEE ALSO"
@@ -12271,7 +12403,8 @@ commands sort lexicographically using ASCII ordering.
 .PP
 The historical operator-precedence parsing with 4 or more arguments can
 lead to ambiguities when it encounters strings that look like primaries.
-The POSIX
+The
+.SM POSIX
 standard has deprecated the \fB\-a\fP and \fB\-o\fP
 primaries and enclosing expressions within parentheses.
 Scripts should no longer use them.
@@ -12588,7 +12721,9 @@ allow this value to be set).
 The pipe size in 512-byte blocks (this may not be set).
 .TP
 .B \-q
-The maximum number of bytes in POSIX message queues.
+The maximum number of bytes in
+.SM POSIX
+message queues.
 .TP
 .B \-r
 The maximum real-time scheduling priority.
@@ -12906,14 +13041,18 @@ bash-4.1 and later use the current locale's collation sequence and
 .PD 0
 .RS
 .IP \(bu
-In \fIposix\fP mode, \fBtime\fP may be followed by options and still be
-recognized as a reserved word (this is POSIX interpretation 267).
+In posix mode, \fBtime\fP may be followed by options and still be
+recognized as a reserved word (this is
+.SM POSIX
+interpretation 267).
 .IP \(bu
 In \fIposix\fP mode, the parser requires that an even number of single
 quotes occur in the \fIword\fP portion of a double-quoted
 parameter expansion and treats them specially, so that characters within
 the single quotes are considered quoted
-(this is POSIX interpretation 221).
+(this is
+.SM POSIX
+interpretation 221).
 .RE
 .PD
 .TP
@@ -12927,7 +13066,9 @@ undergo quote removal, as it does in versions after bash-4.2.
 In posix mode, single quotes are considered special when expanding
 the \fIword\fP portion of a double-quoted parameter expansion
 and can be used to quote a closing brace or other special character
-(this is part of POSIX interpretation 221);
+(this is part of
+.SM POSIX
+interpretation 221);
 in later versions, single quotes
 are not special within double-quoted word expansions.
 .RE
@@ -13246,7 +13387,7 @@ The hardware and operating system
 .TP
 The compiler used to compile
 .TP
-A description of the bug behaviour
+A description of the bug behavior
 .TP
 A short script or \c
 .Q recipe " \c"
@@ -13268,8 +13409,7 @@ There are some subtle differences between
 and traditional versions of
 .BR sh ,
 mostly because of the
-.SM
-.B POSIX
+.SM POSIX
 specification.
 .PP
 Aliases are confusing in some uses.

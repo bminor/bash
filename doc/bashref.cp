@@ -58,12 +58,12 @@
 \entry{command substitution}{35}{command substitution}
 \entry{expansion, arithmetic}{36}{expansion, arithmetic}
 \entry{arithmetic expansion}{36}{arithmetic expansion}
-\entry{process substitution}{36}{process substitution}
+\entry{process substitution}{37}{process substitution}
 \entry{word splitting}{37}{word splitting}
-\entry{expansion, filename}{37}{expansion, filename}
-\entry{expansion, pathname}{37}{expansion, pathname}
-\entry{filename expansion}{37}{filename expansion}
-\entry{pathname expansion}{37}{pathname expansion}
+\entry{expansion, filename}{38}{expansion, filename}
+\entry{expansion, pathname}{38}{expansion, pathname}
+\entry{filename expansion}{38}{filename expansion}
+\entry{pathname expansion}{38}{pathname expansion}
 \entry{pattern matching}{38}{pattern matching}
 \entry{matching, pattern}{38}{matching, pattern}
 \entry{redirection}{40}{redirection}
@@ -71,11 +71,11 @@
 \entry{command execution}{45}{command execution}
 \entry{command search}{45}{command search}
 \entry{execution environment}{45}{execution environment}
-\entry{environment}{46}{environment}
+\entry{environment}{47}{environment}
 \entry{exit status}{47}{exit status}
 \entry{signal handling}{48}{signal handling}
 \entry{shell script}{49}{shell script}
-\entry{special builtin}{83}{special builtin}
+\entry{special builtin}{84}{special builtin}
 \entry{login shell}{101}{login shell}
 \entry{interactive shell}{101}{interactive shell}
 \entry{startup files}{101}{startup files}

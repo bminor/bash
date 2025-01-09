@@ -4,13 +4,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 12 December 2024).
+the Bash shell (version 5.3, 8 January 2025).
 
-This is Edition 5.3, last updated 12 December 2024,
+This is Edition 5.3, last updated 8 January 2025,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
-Copyright © 1988-2024 Free Software Foundation, Inc.
+Copyright © 1988-2025 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 12 December 2024).
+the Bash shell (version 5.3, 8 January 2025).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 12 December 2024,
+<p>This is Edition 5.3, last updated 8 January 2025,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -2072,7 +2072,7 @@ until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
 scope becomes visible.
 If the unset acts on a variable at a previous scope, any instance of a
-variable with that name that had been shadowed will become visible
+variable with that name that had been shadowed becomes visible
 (see below how the <code class="code">localvar_unset</code> shell option changes this behavior).
 </p>
 <p>The <samp class="option">-f</samp> option to the <code class="code">declare</code> (<code class="code">typeset</code>)
@@ -2150,23 +2150,26 @@ For example,
 </pre></div>
 
 <p>In the context where an assignment statement is assigning a value  
-to a shell variable or array index (see <a class="pxref" href="#Arrays">Arrays</a>),
-the &lsquo;<samp class="samp">+=</samp>&rsquo; operator appends to or adds to
+to a shell variable or array index (see <a class="pxref" href="#Arrays">Arrays</a>), the
+&lsquo;<samp class="samp">+=</samp>&rsquo; operator appends to or adds to
 the variable&rsquo;s previous value.
 This includes arguments to declaration commands such as
-<code class="code">declare</code> that accept assignment statements.
-When &lsquo;<samp class="samp">+=</samp>&rsquo; is applied to a variable
-for which the <code class="code">integer</code> attribute has been set,
+<code class="code">declare</code>
+that accept assignment statements.
+When &lsquo;<samp class="samp">+=</samp>&rsquo;
+is applied to a variable for which the
+<code class="code">integer</code> attribute has been set,
 the variable&rsquo;s current value and <var class="var">value</var> are each evaluated as
 arithmetic expressions,
 and the sum of the results is assigned as the variable&rsquo;s value.
 The current value is usually an integer constant, but may be an expression.
-When &lsquo;<samp class="samp">+=</samp>&rsquo; is applied to an array variable using compound assignment
-(see <a class="pxref" href="#Arrays">Arrays</a>), the
-variable&rsquo;s value is not unset (as it is when using &lsquo;<samp class="samp">=</samp>&rsquo;), and new
-values are appended to the array beginning at one greater than the array&rsquo;s
-maximum index (for indexed arrays), or added as additional key-value pairs
-in an associative array.
+When &lsquo;<samp class="samp">+=</samp>&rsquo;
+is applied to an array variable using compound assignment (see <a class="pxref" href="#Arrays">Arrays</a>),
+the variable&rsquo;s value is not unset
+(as it is when using &lsquo;<samp class="samp">=</samp>&rsquo;),
+and new values are appended to the array
+beginning at one greater than the array&rsquo;s maximum index (for indexed arrays),
+or added as additional key-value pairs in an associative array.
 When applied to a string-valued variable, <var class="var">value</var> is expanded and
 appended to the variable&rsquo;s value.
 </p>
@@ -2204,6 +2207,10 @@ Namerefs can be unset using the <samp class="option">-n</samp> option to the <co
 (see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>).
 Otherwise, if <code class="code">unset</code> is executed with the name of a nameref variable
 as an argument, the variable referenced by the nameref variable is unset.
+</p>
+<p>When the shell starts, it reads its environment and creates a shell
+variable from each environment variable that has a valid name,
+as described below (see <a class="pxref" href="#Environment">Environment</a>).
 </p>
 <ul class="mini-toc">
 <li><a href="#Positional-Parameters" accesskey="1">Positional Parameters</a></li>
@@ -2425,12 +2432,13 @@ This mechanism is similar to
 <em class="dfn">filename expansion</em> (see <a class="pxref" href="#Filename-Expansion">Filename Expansion</a>),
 but the filenames generated need not exist.
 Patterns to be brace expanded are formed from an optional <var class="var">preamble</var>,
-followed by either a series of comma-separated strings or a sequence expression
-between a pair of braces,
-followed by an optional <var class="var">postscript</var>.
-The preamble is prefixed to each string contained within the braces, and
-the postscript is then appended to each resulting string, expanding left
-to right.
+followed by either a series of comma-separated strings or
+a sequence expression between a pair of braces,
+followed by an optional
+<var class="var">postscript</var>.
+The preamble is prefixed to each string contained within the braces,
+and the postscript is then appended to each resulting string,
+expanding left to right.
 </p>
 <p>Brace expansions may be nested.
 The results of each expanded string are not sorted;
@@ -2441,7 +2449,8 @@ For example,
 ade ace abe
 </pre></div>
 
-<p>A sequence expression takes the form <code class="code">{<var class="var">x</var>..<var class="var">y</var>[..<var class="var">incr</var>]}</code>,
+<p>A sequence expression takes the form
+<code class="code">{<var class="var">x</var>..<var class="var">y</var>[..<var class="var">incr</var>]}</code>,
 where <var class="var">x</var> and <var class="var">y</var> are either integers or letters,
 and <var class="var">incr</var>, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
@@ -2470,11 +2479,13 @@ and closing braces, and at least one unquoted comma or a valid
 sequence expression.
 Any incorrectly formed brace expansion is left unchanged.
 </p>
-<p>A { or &lsquo;<samp class="samp">,</samp>&rsquo; may be quoted with a backslash to prevent its
+<p>A &lsquo;<samp class="samp">{</samp>&rsquo; or &lsquo;<samp class="samp">,</samp>&rsquo;
+may be quoted with a backslash to prevent its
 being considered part of a brace expression.
 To avoid conflicts with parameter expansion, the string &lsquo;<samp class="samp">${</samp>&rsquo;
 is not considered eligible for brace expansion,
-and inhibits brace expansion until the closing &lsquo;<samp class="samp">}</samp>&rsquo;.
+and inhibits brace expansion until the closing
+&lsquo;<samp class="samp">}</samp>&rsquo;.
 </p>
 <p>This construct is typically used as shorthand when the common
 prefix of the strings to be generated is longer than in the
@@ -2487,6 +2498,38 @@ above example:
 <pre class="example-preformatted">chown root /usr/{ucb/{ex,edit},lib/{ex?.?*,how_ex}}
 </pre></div>
 
+<p>Brace expansion introduces a slight incompatibility with
+historical versions of
+<code class="command">sh</code>.
+<code class="command">sh</code>
+does not treat opening or closing braces specially when they
+appear as part of a word, and preserves them in the output.
+Bash
+removes braces from words as a consequence of brace
+expansion.
+For example, a word entered to
+<code class="command">sh</code>
+as
+&lsquo;<samp class="samp">file{1,2}</samp>&rsquo;
+appears identically in the output.
+Bash
+outputs that word as
+&lsquo;<samp class="samp">file1 file2</samp>&rsquo;
+after brace expansion.
+Start
+Bash
+with the
+<samp class="option">+B</samp>
+option or disable brace expansion with the
+<samp class="option">+B</samp>
+option to the
+<code class="code">set</code>
+command
+(see <a class="pxref" href="#Shell-Builtin-Commands">Shell Builtin Commands</a>)
+for strict
+<code class="command">sh</code>
+compatibility.
+</p>
 <hr>
 </div>
 <div class="subsection-level-extent" id="Tilde-Expansion">
@@ -3259,7 +3302,7 @@ Next: <a href="#Process-Substitution" accesskey="n" rel="next">Process Substitut
 <a class="index-entry-id" id="index-expansion_002c-arithmetic"></a>
 <a class="index-entry-id" id="index-arithmetic-expansion"></a>
 
-<p>Arithmetic expansion evalutes an arithmetic expression
+<p>Arithmetic expansion evaluates an arithmetic expression
 and substitutes the result.
 The format for arithmetic expansion is:
 </p>
@@ -3309,8 +3352,9 @@ This filename is
 passed as an argument to the current command as the result of the
 expansion.
 </p>
-<p>If the <code class="code">&gt;(<var class="var">list</var>)</code> form is used, writing to
-the file provides input for <var class="var">list</var>.
+<p>If the
+<code class="code">&gt;(<var class="var">list</var>)</code> form is used, writing to the file
+provides input for <var class="var">list</var>.
 If the
 <code class="code">&lt;(<var class="var">list</var>)</code> form is used, reading the file 
 obtains the output of <var class="var">list</var>.
@@ -3452,23 +3496,25 @@ The filenames
 <samp class="file">.</samp> and <samp class="file">..</samp>
 are always ignored when <code class="env">GLOBIGNORE</code>
 is set and not null.
-However, setting <code class="env">GLOBIGNORE</code> to a non-null value has the effect of
-enabling the <code class="code">dotglob</code>
+However, setting <code class="env">GLOBIGNORE</code>
+to a non-null value has the effect of enabling the
+<code class="code">dotglob</code>
 shell option, so all other filenames beginning with a
 &lsquo;<samp class="samp">.</samp>&rsquo;
 match.
 To get the old behavior of ignoring filenames beginning with a
-&lsquo;<samp class="samp">.</samp>&rsquo;, make &lsquo;<samp class="samp">.*</samp>&rsquo; one of the patterns in <code class="env">GLOBIGNORE</code>.
+&lsquo;<samp class="samp">.</samp>&rsquo;,
+make &lsquo;<samp class="samp">.*</samp>&rsquo; one of the patterns in <code class="env">GLOBIGNORE</code>.
 The <code class="code">dotglob</code> option is disabled when <code class="env">GLOBIGNORE</code>
 is unset.
 The <code class="code">GLOBIGNORE</code>
 pattern matching honors the setting of the <code class="code">extglob</code> shell
 option.
 </p>
-<p>After the pattern is expanded and matched against filenames, the value of the
-<code class="env">GLOBSORT</code> shell
-variable controls how the results are sorted, as described
-below (see <a class="pxref" href="#Bash-Variables">Bash Variables</a>).
+<p>The value of the
+<code class="env">GLOBSORT</code>
+shell variable controls how the results of pathname expansion are sorted,
+as described below (see <a class="pxref" href="#Bash-Variables">Bash Variables</a>).
 </p>
 <ul class="mini-toc">
 <li><a href="#Pattern-Matching" accesskey="1">Pattern Matching</a></li>
@@ -3539,7 +3585,9 @@ force the use of the C locale by setting the <code class="env">LC_COLLATE</code>
 <p>Within a bracket expression, <em class="dfn">character classes</em> can be specified
 using the syntax
 <code class="code">[:</code><var class="var">class</var><code class="code">:]</code>, where <var class="var">class</var> is one of the
-following classes defined in the <small class="sc">POSIX</small> standard:
+following classes defined in the
+<small class="sc">POSIX</small>
+standard:
 </p><div class="example">
 <pre class="example-preformatted">alnum   alpha   ascii   blank   cntrl   digit   graph   lower
 print   punct   space   upper   word    xdigit
@@ -3807,19 +3855,22 @@ and the
 <code class="code">noclobber</code>
 option to the
 <code class="code">set</code>
-builtin has been enabled, the redirection fails if the file
+builtin command has been enabled, the redirection fails if the file
 whose name results from the expansion of <var class="var">word</var> exists and is
 a regular file.
-If the redirection operator is &lsquo;<samp class="samp">&gt;|</samp>&rsquo;, or the redirection operator is
-&lsquo;<samp class="samp">&gt;</samp>&rsquo; and the <code class="code">noclobber</code> option is not enabled,
-Bash attemps the redirection
+If the redirection operator is &lsquo;<samp class="samp">&gt;|</samp>&rsquo;,
+or the redirection operator is &lsquo;<samp class="samp">&gt;</samp>&rsquo; and
+the <code class="code">noclobber</code> option to the <code class="code">set</code>
+builtin is not enabled,
+Bash attempts the redirection
 even if the file named by <var class="var">word</var> exists.
 </p>
 </div>
 <div class="subsection-level-extent" id="Appending-Redirected-Output">
 <h4 class="subsection"><span>3.6.3 Appending Redirected Output<a class="copiable-link" href="#Appending-Redirected-Output"> &para;</a></span></h4>
 <p>Redirecting output in this fashion opens
-the file whose name results from the expansion of <var class="var">word</var>
+the file whose name results from the expansion of
+<var class="var">word</var>
 for appending on file descriptor <var class="var">n</var>,
 or the standard output (file descriptor 1) if <var class="var">n</var>
 is not specified.
@@ -5122,7 +5173,9 @@ commands sort lexicographically using ASCII ordering.
 </p>
 <p>The historical operator-precedence parsing with 4 or more arguments can
 lead to ambiguities when it encounters strings that look like primaries.
-The <small class="sc">POSIX</small> standard has deprecated the <samp class="option">-a</samp> and <samp class="option">-o</samp>
+The
+<small class="sc">POSIX</small>
+standard has deprecated the <samp class="option">-a</samp> and <samp class="option">-o</samp>
 primaries and enclosing expressions within parentheses.
 Scripts should no longer use them.
 It&rsquo;s much more reliable to restrict test invocations to a single primary,
@@ -5158,7 +5211,7 @@ The return status is zero.
 shell receives any of the signals <var class="var">sigspec</var>.
 If <var class="var">action</var> is absent (and
 there is a single <var class="var">sigspec</var>) or
-equal to &lsquo;<samp class="samp">-</samp>&rsquo;, each specified <var class="var">sigspec</var>&rsquo;ss disposition is reset
+equal to &lsquo;<samp class="samp">-</samp>&rsquo;, each specified <var class="var">sigspec</var>&rsquo;s disposition is reset
 to the value it had when the shell was started.
 If <var class="var">action</var> is the null string, then the signal specified by
 each <var class="var">sigspec</var> is ignored by the shell and commands it invokes.
@@ -5439,7 +5492,7 @@ If the separator is a colon, any enclosing double quotes are optional, and
 Readline does not expand the command string before saving it.
 Since the entire key binding expression must be a single argument, it
 should be enclosed in single quotes.
-When <var class="var">shell-command</var> is executed, the shell sets thex
+When <var class="var">shell-command</var> is executed, the shell sets the
 <code class="code">READLINE_LINE</code> variable to the contents of the Readline line
 buffer
 and the
@@ -5751,7 +5804,9 @@ The <samp class="option">-n</samp> option means to print only disabled builtins.
 The <samp class="option">-a</samp> option means to list
 each builtin with an indication of whether or not it is enabled. 
 The <samp class="option">-s</samp> option means to
-restrict <code class="code">enable</code> to the <small class="sc">POSIX</small> special builtins.
+restrict <code class="code">enable</code> to the
+<small class="sc">POSIX</small>
+special builtins.
 </p>
 <p>The <samp class="option">-f</samp> option means to load the new builtin command <var class="var">name</var>
 from shared object <var class="var">filename</var>, on systems that support dynamic loading.
@@ -5761,8 +5816,9 @@ colon-separated list of directories in which to search for <var class="var">file
 The default for <code class="env">BASH_LOADABLES_PATH</code> is system-dependent,
 and may include &quot;.&quot; to force a search of the current directory.
 The <samp class="option">-d</samp> option will delete a builtin loaded with <samp class="option">-f</samp>.
-If <samp class="option">-s</samp> is used with <samp class="option">-f</samp>, the new builtin becomes
-a special builtin (see <a class="pxref" href="#Special-Builtins">Special Builtins</a>).
+If <samp class="option">-s</samp> is used with <samp class="option">-f</samp>, the new builtin becomes a
+<small class="sc">POSIX</small>
+special builtin (see <a class="pxref" href="#Special-Builtins">Special Builtins</a>).
 </p>
 <p>If no options are supplied and a <var class="var">name</var> is not a shell builtin,
 <code class="code">enable</code> will attempt to load <var class="var">name</var> from a shared object named
@@ -5780,8 +5836,10 @@ or there is an error loading a new builtin from a shared object.
 
 <p>Display helpful information about builtin commands.
 If <var class="var">pattern</var> is specified, <code class="code">help</code> gives detailed help
-on all commands matching <var class="var">pattern</var>, otherwise it displays
-a list of all builtins and shell compound commands.
+on all commands matching <var class="var">pattern</var>
+as described below;
+otherwise it displays a list of
+all builtins and shell compound commands.
 </p>
 <p>Options, if supplied, have the following meanings:
 </p>
@@ -5797,6 +5855,18 @@ a list of all builtins and shell compound commands.
 </p></dd>
 </dl>
 
+<p>If <var class="var">pattern</var> contains pattern matching characters
+(see <a class="pxref" href="#Pattern-Matching">Pattern Matching</a>)
+it&rsquo;s treated as a shell pattern and
+<code class="code">help</code> prints the description of each
+help topic matching <var class="var">pattern</var>.
+</p>
+<p>If not, and <var class="var">pattern</var> exactly matches the name of a help topic,
+<code class="code">help</code> prints the description
+associated with that topic.
+Otherwise, <code class="code">help</code> performs prefix matching and
+prints the descriptions of all matching help topics. 
+</p>
 <p>The return status is zero unless no command matches <var class="var">pattern</var>.
 </p>
 </dd>
@@ -6272,7 +6342,9 @@ allow this value to be set).
 </p>
 </dd>
 <dt><code class="code">-q</code></dt>
-<dd><p>The maximum number of bytes in <small class="sc">POSIX</small> message queues.
+<dd><p>The maximum number of bytes in
+<small class="sc">POSIX</small>
+message queues.
 </p>
 </dd>
 <dt><code class="code">-r</code></dt>
@@ -6338,7 +6410,7 @@ If no option is supplied, then <samp class="option">-f</samp> is assumed.
 <samp class="option">-b</samp>,
 <samp class="option">-k</samp>,
 <samp class="option">-n</samp> and <samp class="option">-u</samp>, which are unscaled values;
-and, when in <small class="sc">POSIX</small> Mode (see <a class="pxref" href="#Bash-POSIX-Mode">Bash and POSIX</a>),
+and, when in <small class="sc">POSIX</small> mode (see <a class="pxref" href="#Bash-POSIX-Mode">Bash and POSIX</a>),
 <samp class="option">-c</samp> and <samp class="option">-f</samp>, which are in 512-byte increments.
 </p>
 <p>The return status is zero unless an invalid option or argument is supplied,
@@ -6585,7 +6657,8 @@ This option is disabled by default.
 </p>
 </dd>
 <dt><code class="code">posix</code></dt>
-<dd><p>Change the behavior of Bash where the default operation differs
+<dd><p>Enable <small class="sc">POSIX</small> mode;
+change the behavior of Bash where the default operation differs
 from the <small class="sc">POSIX</small> standard to match the standard
 (see <a class="pxref" href="#Bash-POSIX-Mode">Bash and POSIX</a>).
 This is intended to make Bash behave as a strict superset of that
@@ -7640,9 +7713,9 @@ being closed.
 </dd>
 <dt><a id="index-CHILD_005fMAX"></a><span><code class="code">CHILD_MAX</code><a class="copiable-link" href="#index-CHILD_005fMAX"> &para;</a></span></dt>
 <dd><p>Set the number of exited child status values for the shell to remember.
-Bash will not allow this value to be decreased below a <small class="sc">POSIX</small>-mandated
-minimum, and there is a maximum value (currently 8192) that this may
-not exceed.
+Bash will not allow this value to be decreased below a
+<small class="sc">POSIX</small>-mandated minimum,
+and there is a maximum value (currently 8192) that this may not exceed.
 The minimum value is system-dependent.
 </p>
 </dd>
@@ -7752,7 +7825,7 @@ running in an Emacs shell buffer and disables line editing.
 <dd><p>Expanded and executed similarly to <code class="code">BASH_ENV</code>
 (see <a class="pxref" href="#Bash-Startup-Files">Bash Startup Files</a>)
 when an interactive shell is invoked in
-<small class="sc">POSIX</small> Mode (see <a class="pxref" href="#Bash-POSIX-Mode">Bash and POSIX</a>).
+<small class="sc">POSIX</small> mode (see <a class="pxref" href="#Bash-POSIX-Mode">Bash and POSIX</a>).
 </p>
 </dd>
 <dt><a id="index-EPOCHREALTIME"></a><span><code class="code">EPOCHREALTIME</code><a class="copiable-link" href="#index-EPOCHREALTIME"> &para;</a></span></dt>
@@ -7917,14 +7990,19 @@ quick substitution, and tokenization
 The first character is the <em class="dfn">history expansion</em> character,
 the character which begins a history expansion, normally
 &lsquo;<samp class="samp">!</samp>&rsquo;.
-The second character is the &ldquo;quick substitution&rdquo; character, normally
+The second character is the
+<em class="dfn">quick substitution</em>
+character, normally
 &lsquo;<samp class="samp">^</samp>&rsquo;.
 When it appears as the first character on the line,
 history substitution repeats the previous command,
 replacing one string with another.
-The optional third character is the character which indicates that
-the remainder of the line is a comment when found as the first character
-of a word, usually &lsquo;<samp class="samp">#</samp>&rsquo;.
+The optional third character is the
+<em class="dfn">history comment</em>
+character, normally &lsquo;<samp class="samp">#</samp>&rsquo;,
+which indicates
+that the remainder of the line is a comment
+when it appears as the first character of a word.
 The history comment character disables history substitution
 for the remaining words on the line.
 It does not necessarily cause the shell parser to treat the rest of the
@@ -8272,27 +8350,30 @@ subsequently reset.
 </p>
 </dd>
 <dt><a id="index-READLINE_005fARGUMENT"></a><span><code class="code">READLINE_ARGUMENT</code><a class="copiable-link" href="#index-READLINE_005fARGUMENT"> &para;</a></span></dt>
-<dd><p>Any numeric argument given to a Readline command that was defined using
+<dd><p>Any numeric argument given to a Readline
+command that was defined using
 &lsquo;<samp class="samp">bind -x</samp>&rsquo; (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>
 when it was invoked.
 </p>
 </dd>
 <dt><a id="index-READLINE_005fLINE"></a><span><code class="code">READLINE_LINE</code><a class="copiable-link" href="#index-READLINE_005fLINE"> &para;</a></span></dt>
-<dd><p>The contents of the Readline line buffer, for use
-with &lsquo;<samp class="samp">bind -x</samp>&rsquo; (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
+<dd><p>The contents of the Readline
+line buffer, for use with
+&lsquo;<samp class="samp">bind -x</samp>&rsquo; (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
 </p>
 </dd>
 <dt><a id="index-READLINE_005fMARK"></a><span><code class="code">READLINE_MARK</code><a class="copiable-link" href="#index-READLINE_005fMARK"> &para;</a></span></dt>
-<dd><p>The position of the <em class="dfn">mark</em> (saved insertion point) in the
-Readline line buffer, for use
+<dd><p>The position of the <em class="dfn">mark</em> (saved insertion point) in the Readline
+line buffer, for use
 with &lsquo;<samp class="samp">bind -x</samp>&rsquo; (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
 The characters between the insertion point and the mark are often
 called the <em class="dfn">region</em>.
 </p>
 </dd>
 <dt><a id="index-READLINE_005fPOINT"></a><span><code class="code">READLINE_POINT</code><a class="copiable-link" href="#index-READLINE_005fPOINT"> &para;</a></span></dt>
-<dd><p>The position of the insertion point in the Readline line buffer, for use
-with &lsquo;<samp class="samp">bind -x</samp>&rsquo; (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
+<dd><p>The position of the insertion point in the Readline
+line buffer, for use with
+&lsquo;<samp class="samp">bind -x</samp>&rsquo; (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>).
 </p>
 </dd>
 <dt><a id="index-REPLY"></a><span><code class="code">REPLY</code><a class="copiable-link" href="#index-REPLY"> &para;</a></span></dt>
@@ -8328,6 +8409,8 @@ as &lsquo;<samp class="samp">on</samp>&rsquo; by &lsquo;<samp class="samp">set -
 If this variable is in the environment when Bash
 starts up, the shell enables each option in the list before
 reading any startup files.
+If this variable is exported, child shells will enable each option
+in the list.
 This variable is readonly.
 </p>
 </dd>
@@ -8530,8 +8613,11 @@ This is on by default if the shell is invoked as <code class="code">sh</code>.
 </p>
 </dd>
 <dt><code class="code">--posix</code></dt>
-<dd><p>Change the behavior of Bash where the default operation differs
-from the <small class="sc">POSIX</small> standard to match the standard.
+<dd><p>Enable <small class="sc">POSIX</small> mode;
+change the behavior of Bash
+where the default operation differs from the
+<small class="sc">POSIX</small>
+standard to match the standard.
 This is intended to make Bash behave as a strict superset of that
 standard.
 See <a class="xref" href="#Bash-POSIX-Mode">Bash and POSIX</a>, for a description of the Bash <small class="sc">POSIX</small> mode.
@@ -8632,21 +8718,23 @@ and arguments passed to that script.
 </dl>
 
 <a class="index-entry-id" id="index-login-shell"></a>
-<p>A <em class="emph">login</em> shell is one whose first character of argument zero is
+<p>A <em class="dfn">login shell</em> is one whose first character of argument zero is
 &lsquo;<samp class="samp">-</samp>&rsquo;, or one invoked with the <samp class="option">--login</samp> option.
 </p>
 <a class="index-entry-id" id="index-interactive-shell"></a>
-<p>An <em class="emph">interactive</em> shell is one started without non-option arguments,
-unless <samp class="option">-s</samp> is specified, without specifying the <samp class="option">-c</samp> option,
-and whose input and output (using the standard error) are both
-connected to terminals (as determined by <code class="code">isatty(3)</code>), or one
-started with the <samp class="option">-i</samp> option.
+<p>An <em class="dfn">interactive shell</em> is one started without non-option arguments,
+unless <samp class="option">-s</samp> is specified,
+without specifying the <samp class="option">-c</samp> option,
+and whose standard input and standard error are both
+connected to terminals (as determined by
+<i class="i">isatty(3)</i>),
+or one started with the <samp class="option">-i</samp> option.
 See <a class="xref" href="#Interactive-Shells">Interactive Shells</a>, for more information.
 </p>
 <p>If arguments remain after option processing, and neither the
 <samp class="option">-c</samp> nor the <samp class="option">-s</samp>
-option has been supplied, the first argument is assumed to
-be the name of a file containing shell commands (see <a class="pxref" href="#Shell-Scripts">Shell Scripts</a>).
+option has been supplied, the first argument is treated as
+the name of a file containing shell commands (see <a class="pxref" href="#Shell-Scripts">Shell Scripts</a>).
 When Bash is invoked in this fashion, <code class="code">$0</code>
 is set to the name of the file, and the positional parameters
 are set to the remaining arguments.
@@ -8654,6 +8742,11 @@ Bash reads and executes commands from this file, then exits.
 Bash&rsquo;s exit status is the exit status of the last command executed
 in the script.
 If no commands are executed, the exit status is 0.
+Bash
+first attempts to open the file in the current directory,
+and, if no file is found, searches the directories in
+<code class="env">PATH</code>
+for the script.
 </p>
 <hr>
 </div>
@@ -8718,39 +8811,48 @@ Bash behaves as if the following command were executed:
 filename.
 </p>
 <p>As noted above, if a non-interactive shell is invoked with the
-<samp class="option">--login</samp> option, Bash attempts to read and execute commands from the
+<samp class="option">--login</samp> option,
+Bash attempts to read and execute commands from the
 login shell startup files. 
 </p>
 <h4 class="subsubheading" id="Invoked-with-name-sh"><span>Invoked with name <code class="code">sh</code><a class="copiable-link" href="#Invoked-with-name-sh"> &para;</a></span></h4>
 
-<p>If Bash is invoked with the name <code class="code">sh</code>, it tries to mimic the
-startup behavior of historical versions of <code class="code">sh</code> as closely as
-possible, while conforming to the <small class="sc">POSIX</small> standard as well.
+<p>If Bash is invoked with the name <code class="command">sh</code>,
+it tries to mimic the startup behavior of historical versions of
+<code class="command">sh</code> as closely as possible,
+while conforming to the
+<small class="sc">POSIX</small>
+standard as well.
 </p>
 <p>When invoked as an interactive login shell, or as a non-interactive
 shell with the <samp class="option">--login</samp> option, it first attempts to read
-and execute commands from <samp class="file">/etc/profile</samp> and <samp class="file">~/.profile</samp>, in
-that order.
+and execute commands from
+<samp class="file">/etc/profile</samp> and <samp class="file">~/.profile</samp>,
+in that order.
 The <samp class="option">--noprofile</samp> option inhibits this behavior.
 </p>
-<p>When invoked as an interactive shell with the name <code class="code">sh</code>, Bash
-looks for the variable <code class="env">ENV</code>, expands its value if it is defined,
-and uses the expanded value as the name of a file to read and execute.
-Since a shell invoked as <code class="code">sh</code> does not attempt to read and execute
-commands from any other startup files, the <samp class="option">--rcfile</samp> option has
-no effect.
+<p>When invoked as an interactive shell with the name <code class="command">sh</code>, Bash
+looks for the variable <code class="env">ENV</code>,
+expands its value if it is defined, and uses the
+expanded value as the name of a file to read and execute.
+Since a shell invoked as <code class="command">sh</code>
+does not attempt to read and execute commands from any other startup
+files, the
+<samp class="option">--rcfile</samp>
+option has no effect.
 </p>
-<p>A non-interactive shell invoked with the name <code class="code">sh</code> does not attempt
-to read any other startup files.
+<p>A non-interactive shell invoked with the name <code class="command">sh</code>
+does not attempt to read any other startup files.
 </p>
-<p>When invoked as <code class="code">sh</code>, Bash enters <small class="sc">POSIX</small> mode after reading
+<p>When invoked as <code class="command">sh</code>, Bash enters <small class="sc">POSIX</small> mode after reading
 the startup files.
 </p>
 <h4 class="subsubheading" id="Invoked-in-posix-mode"><span>Invoked in <small class="sc">POSIX</small> mode<a class="copiable-link" href="#Invoked-in-posix-mode"> &para;</a></span></h4>
 
 <p>When Bash is started in <small class="sc">POSIX</small> mode, as with the
-<samp class="option">--posix</samp> command line option, it follows the <small class="sc">POSIX</small> standard
-for startup files.
+<samp class="option">--posix</samp> command line option, it follows the
+<small class="sc">POSIX</small>
+standard for startup files.
 In this mode, interactive shells expand the <code class="env">ENV</code> variable
 and read and execute commands from the file whose name is the
 expanded value.
@@ -8758,14 +8860,17 @@ No other startup files are read.
 </p>
 <h4 class="subsubheading" id="Invoked-by-remote-shell-daemon"><span>Invoked by remote shell daemon<a class="copiable-link" href="#Invoked-by-remote-shell-daemon"> &para;</a></span></h4>
 
-<p>Bash attempts to determine when it is being run with its standard input
+<p>Bash
+attempts to determine when it is being run with its standard input
 connected to a network connection, as when executed by
 the historical and rarely-seen remote shell daemon, usually <code class="code">rshd</code>,
 or the secure shell daemon <code class="code">sshd</code>.
-If Bash
+If
+Bash
 determines it is being run non-interactively in this fashion,
-it reads and executes commands from <samp class="file">~/.bashrc</samp>, if that
-file exists and is readable.
+it reads and executes commands from
+<samp class="file">~/.bashrc</samp>,
+if that file exists and is readable.
 Bash does not read this file if invoked as <code class="code">sh</code>.
 The
 <samp class="option">--norc</samp>
@@ -9138,7 +9243,9 @@ this returns true if an element with that key is set.
 When used with the <code class="code">[[</code> command, this performs pattern matching as
 described above (see <a class="pxref" href="#Conditional-Constructs">Conditional Constructs</a>).
 </p>
-<p>&lsquo;<samp class="samp">=</samp>&rsquo; should be used with the <code class="code">test</code> command for <small class="sc">POSIX</small> conformance.
+<p>&lsquo;<samp class="samp">=</samp>&rsquo; should be used with the <code class="code">test</code> command for
+<small class="sc">POSIX</small>
+conformance.
 </p>
 </dd>
 <dt><code class="code"><var class="var">string1</var> != <var class="var">string2</var></code></dt>
@@ -9414,7 +9521,8 @@ There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
 Indexed arrays are referenced using arithmetic expressions
-that must expand to an integer (see <a class="pxref" href="#Shell-Arithmetic">Shell Arithmetic</a>)) and are zero-based;
+that must expand to an integer (see <a class="pxref" href="#Shell-Arithmetic">Shell Arithmetic</a>))
+and are zero-based;
 associative arrays use arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 </p>
@@ -9427,7 +9535,7 @@ using the syntax
 <p>The <var class="var">subscript</var>
 is treated as an arithmetic expression that must evaluate to a number
 greater than or equal to zero.
-To explicitly declare an array, use
+To explicitly declare an indexed array, use
 </p><div class="example">
 <pre class="example-preformatted">declare -a <var class="var">name</var>
 </pre></div>
@@ -9443,9 +9551,8 @@ The syntax
 <pre class="example-preformatted">declare -A <var class="var">name</var>
 </pre></div>
 
-<p>Attributes may be
-specified for an array variable using the <code class="code">declare</code> and
-<code class="code">readonly</code> builtins.
+<p>Attributes may be specified for an array variable using the
+<code class="code">declare</code> and <code class="code">readonly</code> builtins.
 Each attribute applies to all members of an array.
 </p>
 <p>Arrays are assigned using compound assignments of the form
@@ -9492,8 +9599,10 @@ interpreted as relative to one greater than the maximum index of
 <var class="var">name</var>, so negative indices count back from the end of the
 array, and an index of -1 references the last element.
 </p>
-<p>The &lsquo;<samp class="samp">+=</samp>&rsquo; operator appends to an array variable when assigning
-using the compound assignment syntax; see <a class="ref" href="#Shell-Parameters">Shell Parameters</a> above.
+<p>The &lsquo;<samp class="samp">+=</samp>&rsquo;
+operator appends to an array variable when assigning
+using the compound assignment syntax; see
+<a class="ref" href="#Shell-Parameters">Shell Parameters</a> above.
 </p>
 <p>An array element is referenced using
 <code class="code">${<var class="var">name</var>[<var class="var">subscript</var>]}</code>.
@@ -9957,7 +10066,8 @@ Next: <a href="#Shell-Compatibility-Mode" accesskey="n" rel="next">Shell Compati
 <h4 class="subsection"><span>6.11.1 What is POSIX?<a class="copiable-link" href="#What-is-POSIX_003f"> &para;</a></span></h4>
 <a class="index-entry-id" id="index-POSIX-description"></a>
 
-<p><small class="sc">POSIX</small> is the name for a family of standards based on Unix.
+<p><small class="sc">POSIX</small>
+is the name for a family of standards based on Unix.
 A number of Unix services, tools, and functions are part of the standard,
 ranging from the basic system calls and C library functions to common
 applications and tools to system administration and management.
@@ -9989,11 +10099,11 @@ pipelines, argument handling, variable expansion, and quoting.
 shell to provide the desired functionality, are specified as
 being part of the shell; examples of these are <code class="code">eval</code> and
 <code class="code">export</code>.
-Other utilities appear in the sections of POSIX not
+Other utilities appear in the sections of <small class="sc">POSIX</small> not
 devoted to the shell which are commonly (and in some cases must
 be) implemented as builtin commands, such as
 <code class="code">read</code> and <code class="code">test</code>.
-POSIX also specifies aspects of the shell&rsquo;s interactive
+<small class="sc">POSIX</small> also specifies aspects of the shell&rsquo;s interactive
 behavior, including job control and command
 line editing.
 Only vi-style line editing commands have been standardized;
@@ -10008,7 +10118,7 @@ emacs editing commands were left out due to objections.
 specification, there are areas where the Bash default behavior
 differs from the specification.
 The Bash <em class="dfn">posix mode</em> changes the Bash
-behavior in these areas so that it conforms more closely
+behavior in these areas so that it conforms more strictly
 to the standard.
 </p>
 <p>Starting Bash with the <samp class="option">--posix</samp> command-line option or executing
@@ -10019,7 +10129,7 @@ match that specified by <small class="sc">POSIX</small> in areas where the Bash 
 <p>When invoked as <code class="code">sh</code>, Bash enters <small class="sc">POSIX</small> mode after reading the
 startup files.
 </p>
-<p>The following list is what&rsquo;s changed when &lsquo;<small class="sc">POSIX</small> mode&rsquo; is in effect:
+<p>The following list is what&rsquo;s changed when <small class="sc">POSIX</small> mode is in effect:
 </p>
 <ol class="enumerate">
 <li> Bash ensures that the <code class="env">POSIXLY_CORRECT</code> variable is set.
@@ -10444,13 +10554,17 @@ strcoll(3).
 </dd>
 <dt><code class="code">compat41</code></dt>
 <dd><ul class="itemize mark-bullet">
-<li>In posix mode, <code class="code">time</code> may be followed by options and still be
-recognized as a reserved word (this is <small class="sc">POSIX</small> interpretation 267).
-</li><li>In posix mode, the parser requires that an even number of single
+<li>In <small class="sc">POSIX</small> mode, <code class="code">time</code> may be followed by options and still be
+recognized as a reserved word (this is
+<small class="sc">POSIX</small>
+interpretation 267).
+</li><li>In <small class="sc">POSIX</small> mode, the parser requires that an even number of single
 quotes occur in the <var class="var">word</var> portion of a double-quoted ${&hellip;}
 parameter expansion and treats them specially, so that characters within
 the single quotes are considered quoted
-(this is <small class="sc">POSIX</small> interpretation 221).
+(this is
+<small class="sc">POSIX</small>
+interpretation 221).
 </li></ul>
 
 </dd>
@@ -10458,10 +10572,12 @@ the single quotes are considered quoted
 <dd><ul class="itemize mark-bullet">
 <li>The replacement string in double-quoted pattern substitution does not
 undergo quote removal, as it does in versions after bash-4.2.
-</li><li>In posix mode, single quotes are considered special when expanding
+</li><li>In <small class="sc">POSIX</small> mode, single quotes are considered special when expanding
 the <var class="var">word</var> portion of a double-quoted ${&hellip;} parameter expansion
 and can be used to quote a closing brace or other special character
-(this is part of <small class="sc">POSIX</small> interpretation 221);
+(this is part of
+<small class="sc">POSIX</small>
+interpretation 221);
 in later versions, single quotes
 are not special within double-quoted word expansions.
 </li></ul>
@@ -10470,7 +10586,7 @@ are not special within double-quoted word expansions.
 <dt><code class="code">compat43</code></dt>
 <dd><ul class="itemize mark-bullet">
 <li>Word expansion errors are considered non-fatal errors that cause the
-current command to fail, even in posix mode
+current command to fail, even in <small class="sc">POSIX</small> mode
 (the default behavior is to make them fatal errors that cause the shell
 to exit).
 </li><li>When executing a shell function, the loop state (while/until/etc.)
@@ -10490,7 +10606,8 @@ or <code class="code">continue</code> will cause the subshell to exit.
 Bash-5.0 and later reset the loop state to prevent the exit.
 </li><li>Variable assignments preceding builtins like <code class="code">export</code> and <code class="code">readonly</code>
 that set attributes continue to affect variables with the same
-name in the calling environment even if the shell is not in posix
+name in the calling environment even if the shell is not in
+<small class="sc">POSIX</small>
 mode.
 </li></ul>
 
@@ -11472,9 +11589,10 @@ A sample value might be &lsquo;<samp class="samp">\e[01;33m</samp>&rsquo;.
 </p>
 </dd>
 <dt><a id="index-active_002dregion_002dend_002dcolor"></a><span><code class="code">active-region-end-color</code><a class="copiable-link" href="#index-active_002dregion_002dend_002dcolor"> &para;</a></span></dt>
-<dd><p>A string variable that &quot;undoes&quot; the effects of <code class="code">active-region-start-color</code>
-and restores &quot;normal&quot; terminal display appearance after displaying text
-in the active region.
+<dd><p>A string variable that &ldquo;undoes&rdquo;
+the effects of <code class="code">active-region-start-color</code>
+and restores &ldquo;normal&rdquo;
+terminal display appearance after displaying text in the active region.
 This string must not take up any physical character positions on the display,
 so it should consist only of terminal escape sequences.
 It is output to the terminal after displaying the text in the active region.
@@ -11708,7 +11826,7 @@ If set to zero, any existing history entries are deleted and no new entries
 are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
-By default, Bash sets the the maximum number of history entries to
+By default, Bash sets the maximum number of history entries to
 the value of the <code class="code">HISTSIZE</code> shell variable.
 If you try to set <var class="var">history-size</var> to a non-numeric value,
 the maximum number of history entries will be set to 500.
@@ -12078,7 +12196,7 @@ set of backslash escapes is available:
 <p>When entering the text of a macro, single or double quotes must
 be used to indicate a macro definition.
 Unquoted text is assumed to be a function name.
-Tthe backslash escapes described above are expanded
+The backslash escapes described above are expanded
 in the macro body.
 Backslash will quote any other character in the macro text,
 including &lsquo;<samp class="samp">&quot;</samp>&rsquo; and &lsquo;<samp class="samp">'</samp>&rsquo;.
@@ -12232,7 +12350,7 @@ Previous: <a href="#Conditional-Init-Constructs" accesskey="p" rel="prev">Condit
 binding, variable assignment, and conditional syntax.
 </p>
 <div class="example">
-<pre class="example-preformatted"># This file controls the behaviour of line input editing for
+<pre class="example-preformatted"># This file controls the behavior of line input editing for
 # programs that use the GNU Readline library.  Existing
 # programs include FTP, Bash, and GDB.
 #
@@ -12355,10 +12473,13 @@ Command names without an accompanying key sequence are unbound by default.
 position, and <em class="dfn">mark</em> refers to a cursor position saved by the
 <code class="code">set-mark</code> command.
 The text between the point and mark is referred to as the <em class="dfn">region</em>.
-Readline has the concept of an <em class="emph">active region</em>:
+Readline
+has the concept of an <em class="emph">active region</em>:
 when the region is active,
 Readline redisplay highlights the region using the
-value of the <code class="code">active-region-start-color</code> variable.
+value of the
+<code class="code">active-region-start-color</code>
+variable.
 The <code class="code">enable-active-region</code> variable turns this on and off.
 Several commands set the region to active; those are noted below.
 </p>
@@ -12930,7 +13051,7 @@ using the following format, writing information on separate lines:
 <li>the number of matches <var class="var">N</var>;
 </li><li>the word being completed;
 </li><li><var class="var">S</var>:<var class="var">E</var>,
-where S and E are the start and end offsets of the word
+where <var class="var">S</var> and <var class="var">E</var> are the start and end offsets of the word
 in the Readline line buffer; then
 </li><li>each match, one per line
 </li></ul>
@@ -13220,7 +13341,7 @@ pathname expansion.
 This performs alias and history expansion,
 $&rsquo;<var class="var">string</var>&rsquo; and $&quot;<var class="var">string</var>&quot; quoting,
 tilde expansion, parameter and variable expansion, arithmetic expansion,
-command and proces substitution,
+command and process substitution,
 word splitting, and quote removal.  
 An explicit argument suppresses command and process substitution.
 </p>
@@ -15391,7 +15512,7 @@ to <a class="email" href="mailto:bug-bash@gnu.org">bug-bash@gnu.org</a> or <a cl
 <li>The version number of Bash.
 </li><li>The hardware and operating system.
 </li><li>The compiler used to compile Bash.
-</li><li>A description of the bug behaviour.
+</li><li>A description of the bug behavior.
 </li><li>A short script or &lsquo;recipe&rsquo; which exercises the bug and may be used
 to reproduce it.
 </li></ul>

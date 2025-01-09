@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2024 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2025 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -1719,7 +1719,7 @@ until it is reset in that scope or until the function returns.
 Once the function returns, any instance of the variable at a previous
 scope becomes visible.
 If the unset acts on a variable at a previous scope, any instance of a
-variable with that name that had been shadowed will become visible
+variable with that name that had been shadowed becomes visible
 (see below how the @code{localvar_unset} shell option changes this behavior).
 
 The @option{-f} option to the @code{declare} (@code{typeset})
@@ -1796,23 +1796,26 @@ command export var=value
 @end example
 
 In the context where an assignment statement is assigning a value  
-to a shell variable or array index (@pxref{Arrays}),
-the @samp{+=} operator appends to or adds to
+to a shell variable or array index (@pxref{Arrays}), the
+@samp{+=} operator appends to or adds to
 the variable's previous value.
 This includes arguments to declaration commands such as
-@code{declare} that accept assignment statements.
-When @samp{+=} is applied to a variable
-for which the @code{integer} attribute has been set,
+@code{declare}
+that accept assignment statements.
+When @samp{+=}
+is applied to a variable for which the
+@code{integer} attribute has been set,
 the variable's current value and @var{value} are each evaluated as
 arithmetic expressions,
 and the sum of the results is assigned as the variable's value.
 The current value is usually an integer constant, but may be an expression.
-When @samp{+=} is applied to an array variable using compound assignment
-(@pxref{Arrays}), the
-variable's value is not unset (as it is when using @samp{=}), and new
-values are appended to the array beginning at one greater than the array's
-maximum index (for indexed arrays), or added as additional key-value pairs
-in an associative array.
+When @samp{+=}
+is applied to an array variable using compound assignment (@pxref{Arrays}),
+the variable's value is not unset
+(as it is when using @samp{=}),
+and new values are appended to the array
+beginning at one greater than the array's maximum index (for indexed arrays),
+or added as additional key-value pairs in an associative array.
 When applied to a string-valued variable, @var{value} is expanded and
 appended to the variable's value.
 
@@ -2045,12 +2048,13 @@ This mechanism is similar to
 @dfn{filename expansion} (@pxref{Filename Expansion}),
 but the filenames generated need not exist.
 Patterns to be brace expanded are formed from an optional @var{preamble},
-followed by either a series of comma-separated strings or a sequence expression
-between a pair of braces,
-followed by an optional @var{postscript}.
-The preamble is prefixed to each string contained within the braces, and
-the postscript is then appended to each resulting string, expanding left
-to right.
+followed by either a series of comma-separated strings or
+a sequence expression between a pair of braces,
+followed by an optional
+@var{postscript}.
+The preamble is prefixed to each string contained within the braces,
+and the postscript is then appended to each resulting string,
+expanding left to right.
 
 Brace expansions may be nested.
 The results of each expanded string are not sorted;
@@ -2061,7 +2065,8 @@ bash$ echo a@{d,c,b@}e
 ade ace abe
 @end example
 
-A sequence expression takes the form @code{@{@var{x}..@var{y}[..@var{incr}]@}},
+A sequence expression takes the form
+@code{@{@var{x}..@var{y}[..@var{incr}]@}},
 where @var{x} and @var{y} are either integers or letters,
 and @var{incr}, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
@@ -2090,11 +2095,13 @@ and closing braces, and at least one unquoted comma or a valid
 sequence expression.
 Any incorrectly formed brace expansion is left unchanged.
 
-A @{ or @samp{,} may be quoted with a backslash to prevent its
+A @samp{@{} or @samp{,}
+may be quoted with a backslash to prevent its
 being considered part of a brace expression.
 To avoid conflicts with parameter expansion, the string @samp{$@{}
 is not considered eligible for brace expansion,
-and inhibits brace expansion until the closing @samp{@}}.
+and inhibits brace expansion until the closing
+@samp{@}}.
 
 This construct is typically used as shorthand when the common
 prefix of the strings to be generated is longer than in the
@@ -2106,6 +2113,38 @@ or
 @example
 chown root /usr/@{ucb/@{ex,edit@},lib/@{ex?.?*,how_ex@}@}
 @end example
+
+Brace expansion introduces a slight incompatibility with
+historical versions of
+@command{sh}.
+@command{sh}
+does not treat opening or closing braces specially when they
+appear as part of a word, and preserves them in the output.
+Bash
+removes braces from words as a consequence of brace
+expansion.
+For example, a word entered to
+@command{sh}
+as
+@samp{file@{1,2@}}
+appears identically in the output.
+Bash
+outputs that word as
+@samp{file1 file2}
+after brace expansion.
+Start
+Bash
+with the
+@option{+B}
+option or disable brace expansion with the
+@option{+B}
+option to the
+@code{set}
+command
+(@pxref{Shell Builtin Commands})
+for strict
+@command{sh}
+compatibility.
 
 @node Tilde Expansion
 @subsection Tilde Expansion
@@ -2838,7 +2877,7 @@ word splitting and filename expansion on the results.
 @cindex expansion, arithmetic
 @cindex arithmetic expansion
 
-Arithmetic expansion evalutes an arithmetic expression
+Arithmetic expansion evaluates an arithmetic expression
 and substitutes the result.
 The format for arithmetic expansion is:
 
@@ -2884,8 +2923,9 @@ This filename is
 passed as an argument to the current command as the result of the
 expansion.
 
-If the @code{>(@var{list})} form is used, writing to
-the file provides input for @var{list}.
+If the
+@code{>(@var{list})} form is used, writing to the file
+provides input for @var{list}.
 If the
 @code{<(@var{list})} form is used, reading the file 
 obtains the output of @var{list}.
@@ -3018,23 +3058,25 @@ The filenames
 @file{.} and @file{..}
 are always ignored when @env{GLOBIGNORE}
 is set and not null.
-However, setting @env{GLOBIGNORE} to a non-null value has the effect of
-enabling the @code{dotglob}
+However, setting @env{GLOBIGNORE}
+to a non-null value has the effect of enabling the
+@code{dotglob}
 shell option, so all other filenames beginning with a
 @samp{.}
 match.
 To get the old behavior of ignoring filenames beginning with a
-@samp{.}, make @samp{.*} one of the patterns in @env{GLOBIGNORE}.
+@samp{.},
+make @samp{.*} one of the patterns in @env{GLOBIGNORE}.
 The @code{dotglob} option is disabled when @env{GLOBIGNORE}
 is unset.
 The @code{GLOBIGNORE}
 pattern matching honors the setting of the @code{extglob} shell
 option.
 
-After the pattern is expanded and matched against filenames, the value of the
-@env{GLOBSORT} shell
-variable controls how the results are sorted, as described
-below (@pxref{Bash Variables}).
+The value of the
+@env{GLOBSORT}
+shell variable controls how the results of pathname expansion are sorted,
+as described below (@pxref{Bash Variables}).
 
 @node Pattern Matching
 @subsubsection Pattern Matching
@@ -3095,7 +3137,9 @@ force the use of the C locale by setting the @env{LC_COLLATE} or
 Within a bracket expression, @dfn{character classes} can be specified
 using the syntax
 @code{[:}@var{class}@code{:]}, where @var{class} is one of the
-following classes defined in the @sc{posix} standard:
+following classes defined in the
+@sc{posix}
+standard:
 @example
 alnum   alpha   ascii   blank   cntrl   digit   graph   lower
 print   punct   space   upper   word    xdigit
@@ -3325,17 +3369,20 @@ and the
 @code{noclobber}
 option to the
 @code{set}
-builtin has been enabled, the redirection fails if the file
+builtin command has been enabled, the redirection fails if the file
 whose name results from the expansion of @var{word} exists and is
 a regular file.
-If the redirection operator is @samp{>|}, or the redirection operator is
-@samp{>} and the @code{noclobber} option is not enabled,
-Bash attemps the redirection
+If the redirection operator is @samp{>|},
+or the redirection operator is @samp{>} and
+the @code{noclobber} option to the @code{set}
+builtin is not enabled,
+Bash attempts the redirection
 even if the file named by @var{word} exists.
 
 @subsection Appending Redirected Output
 Redirecting output in this fashion opens
-the file whose name results from the expansion of @var{word}
+the file whose name results from the expansion of
+@var{word}
 for appending on file descriptor @var{n},
 or the standard output (file descriptor 1) if @var{n}
 is not specified.
@@ -4606,7 +4653,9 @@ commands sort lexicographically using ASCII ordering.
 
 The historical operator-precedence parsing with 4 or more arguments can
 lead to ambiguities when it encounters strings that look like primaries.
-The @sc{posix} standard has deprecated the @option{-a} and @option{-o}
+The
+@sc{posix}
+standard has deprecated the @option{-a} and @option{-o}
 primaries and enclosing expressions within parentheses.
 Scripts should no longer use them.
 It's much more reliable to restrict test invocations to a single primary,
@@ -4643,7 +4692,7 @@ The @var{action} is a command that is read and executed when the
 shell receives any of the signals @var{sigspec}.
 If @var{action} is absent (and
 there is a single @var{sigspec}) or
-equal to @samp{-}, each specified @var{sigspec}'ss disposition is reset
+equal to @samp{-}, each specified @var{sigspec}'s disposition is reset
 to the value it had when the shell was started.
 If @var{action} is the null string, then the signal specified by
 each @var{sigspec} is ignored by the shell and commands it invokes.
@@ -4907,7 +4956,7 @@ If the separator is a colon, any enclosing double quotes are optional, and
 Readline does not expand the command string before saving it.
 Since the entire key binding expression must be a single argument, it
 should be enclosed in single quotes.
-When @var{shell-command} is executed, the shell sets thex
+When @var{shell-command} is executed, the shell sets the
 @code{READLINE_LINE} variable to the contents of the Readline line
 buffer
 and the
@@ -5194,7 +5243,9 @@ The @option{-n} option means to print only disabled builtins.
 The @option{-a} option means to list
 each builtin with an indication of whether or not it is enabled. 
 The @option{-s} option means to
-restrict @code{enable} to the @sc{posix} special builtins.
+restrict @code{enable} to the
+@sc{posix}
+special builtins.
 
 The @option{-f} option means to load the new builtin command @var{name}
 from shared object @var{filename}, on systems that support dynamic loading.
@@ -5204,8 +5255,9 @@ colon-separated list of directories in which to search for @var{filename}.
 The default for @env{BASH_LOADABLES_PATH} is system-dependent,
 and may include "." to force a search of the current directory.
 The @option{-d} option will delete a builtin loaded with @option{-f}.
-If @option{-s} is used with @option{-f}, the new builtin becomes
-a special builtin (@pxref{Special Builtins}).
+If @option{-s} is used with @option{-f}, the new builtin becomes a
+@sc{posix}
+special builtin (@pxref{Special Builtins}).
 
 If no options are supplied and a @var{name} is not a shell builtin,
 @code{enable} will attempt to load @var{name} from a shared object named
@@ -5223,8 +5275,10 @@ help [-dms] [@var{pattern}]
 
 Display helpful information about builtin commands.
 If @var{pattern} is specified, @code{help} gives detailed help
-on all commands matching @var{pattern}, otherwise it displays
-a list of all builtins and shell compound commands.
+on all commands matching @var{pattern}
+as described below;
+otherwise it displays a list of
+all builtins and shell compound commands.
 
 Options, if supplied, have the following meanings:
 
@@ -5236,6 +5290,18 @@ Display the description of each @var{pattern} in a manpage-like format
 @item -s
 Display only a short usage synopsis for each @var{pattern}
 @end table
+
+If @var{pattern} contains pattern matching characters
+(@pxref{Pattern Matching})
+it's treated as a shell pattern and
+@code{help} prints the description of each
+help topic matching @var{pattern}.
+
+If not, and @var{pattern} exactly matches the name of a help topic,
+@code{help} prints the description
+associated with that topic.
+Otherwise, @code{help} performs prefix matching and
+prints the descriptions of all matching help topics. 
 
 The return status is zero unless no command matches @var{pattern}.
 
@@ -5680,7 +5746,9 @@ allow this value to be set).
 The pipe buffer size.
 
 @item -q
-The maximum number of bytes in @sc{posix} message queues.
+The maximum number of bytes in
+@sc{posix}
+message queues.
 
 @item -r
 The maximum real-time scheduling priority.
@@ -5736,7 +5804,7 @@ Values are in 1024-byte increments, except for
 @option{-b},
 @option{-k},
 @option{-n} and @option{-u}, which are unscaled values;
-and, when in @sc{posix} Mode (@pxref{Bash POSIX Mode}),
+and, when in @sc{posix} mode (@pxref{Bash POSIX Mode}),
 @option{-c} and @option{-f}, which are in 512-byte increments.
 
 The return status is zero unless an invalid option or argument is supplied,
@@ -5944,7 +6012,8 @@ commands in the pipeline exit successfully.
 This option is disabled by default.
 
 @item posix
-Change the behavior of Bash where the default operation differs
+Enable @sc{posix} mode;
+change the behavior of Bash where the default operation differs
 from the @sc{posix} standard to match the standard
 (@pxref{Bash POSIX Mode}).
 This is intended to make Bash behave as a strict superset of that
@@ -6867,9 +6936,9 @@ being closed.
 
 @item CHILD_MAX
 Set the number of exited child status values for the shell to remember.
-Bash will not allow this value to be decreased below a @sc{posix}-mandated
-minimum, and there is a maximum value (currently 8192) that this may
-not exceed.
+Bash will not allow this value to be decreased below a
+@sc{posix}-mandated minimum,
+and there is a maximum value (currently 8192) that this may not exceed.
 The minimum value is system-dependent.
 
 @item COLUMNS
@@ -6966,7 +7035,7 @@ running in an Emacs shell buffer and disables line editing.
 Expanded and executed similarly to @code{BASH_ENV}
 (@pxref{Bash Startup Files})
 when an interactive shell is invoked in
-@sc{posix} Mode (@pxref{Bash POSIX Mode}).
+@sc{posix} mode (@pxref{Bash POSIX Mode}).
 
 @item EPOCHREALTIME
 Each time this parameter is referenced, it expands to the number of seconds
@@ -7119,14 +7188,19 @@ quick substitution, and tokenization
 The first character is the @dfn{history expansion} character,
 the character which begins a history expansion, normally
 @samp{!}.
-The second character is the ``quick substitution'' character, normally
+The second character is the
+@dfn{quick substitution}
+character, normally
 @samp{^}.
 When it appears as the first character on the line,
 history substitution repeats the previous command,
 replacing one string with another.
-The optional third character is the character which indicates that
-the remainder of the line is a comment when found as the first character
-of a word, usually @samp{#}.
+The optional third character is the
+@dfn{history comment}
+character, normally @samp{#},
+which indicates
+that the remainder of the line is a comment
+when it appears as the first character of a word.
 The history comment character disables history substitution
 for the remaining words on the line.
 It does not necessarily cause the shell parser to treat the rest of the
@@ -7436,24 +7510,27 @@ is unset, it loses its special properties, even if it is
 subsequently reset.
 
 @item READLINE_ARGUMENT
-Any numeric argument given to a Readline command that was defined using
+Any numeric argument given to a Readline
+command that was defined using
 @samp{bind -x} (@pxref{Bash Builtins}
 when it was invoked.
 
 @item READLINE_LINE
-The contents of the Readline line buffer, for use
-with @samp{bind -x} (@pxref{Bash Builtins}).
+The contents of the Readline
+line buffer, for use with
+@samp{bind -x} (@pxref{Bash Builtins}).
 
 @item READLINE_MARK
-The position of the @dfn{mark} (saved insertion point) in the
-Readline line buffer, for use
+The position of the @dfn{mark} (saved insertion point) in the Readline
+line buffer, for use
 with @samp{bind -x} (@pxref{Bash Builtins}).
 The characters between the insertion point and the mark are often
 called the @dfn{region}.
 
 @item READLINE_POINT
-The position of the insertion point in the Readline line buffer, for use
-with @samp{bind -x} (@pxref{Bash Builtins}).
+The position of the insertion point in the Readline
+line buffer, for use with
+@samp{bind -x} (@pxref{Bash Builtins}).
 
 @item REPLY
 The default variable for the @code{read} builtin;
@@ -7485,6 +7562,8 @@ as @samp{on} by @samp{set -o}.
 If this variable is in the environment when Bash
 starts up, the shell enables each option in the list before
 reading any startup files.
+If this variable is exported, child shells will enable each option
+in the list.
 This variable is readonly.
 
 @item SHLVL
@@ -7659,8 +7738,11 @@ interactive shell.
 This is on by default if the shell is invoked as @code{sh}.
 
 @item --posix
-Change the behavior of Bash where the default operation differs
-from the @sc{posix} standard to match the standard.
+Enable @sc{posix} mode;
+change the behavior of Bash
+where the default operation differs from the
+@sc{posix}
+standard to match the standard.
 This is intended to make Bash behave as a strict superset of that
 standard.
 @xref{Bash POSIX Mode}, for a description of the Bash @sc{posix} mode.
@@ -7748,21 +7830,23 @@ Equivalent to @code{--}.
 @end table
 
 @cindex login shell
-A @emph{login} shell is one whose first character of argument zero is
+A @dfn{login shell} is one whose first character of argument zero is
 @samp{-}, or one invoked with the @option{--login} option.
 
 @cindex interactive shell
-An @emph{interactive} shell is one started without non-option arguments,
-unless @option{-s} is specified, without specifying the @option{-c} option,
-and whose input and output (using the standard error) are both
-connected to terminals (as determined by @code{isatty(3)}), or one
-started with the @option{-i} option.
+An @dfn{interactive shell} is one started without non-option arguments,
+unless @option{-s} is specified,
+without specifying the @option{-c} option,
+and whose standard input and standard error are both
+connected to terminals (as determined by
+@i{isatty(3)}),
+or one started with the @option{-i} option.
 @xref{Interactive Shells}, for more information.
 
 If arguments remain after option processing, and neither the
 @option{-c} nor the @option{-s}
-option has been supplied, the first argument is assumed to
-be the name of a file containing shell commands (@pxref{Shell Scripts}).
+option has been supplied, the first argument is treated as
+the name of a file containing shell commands (@pxref{Shell Scripts}).
 When Bash is invoked in this fashion, @code{$0}
 is set to the name of the file, and the positional parameters
 are set to the remaining arguments.
@@ -7770,6 +7854,11 @@ Bash reads and executes commands from this file, then exits.
 Bash's exit status is the exit status of the last command executed
 in the script.
 If no commands are executed, the exit status is 0.
+Bash
+first attempts to open the file in the current directory,
+and, if no file is found, searches the directories in
+@env{PATH}
+for the script.
 
 @node Bash Startup Files
 @section Bash Startup Files
@@ -7830,39 +7919,48 @@ but does not the value of the @env{PATH} variable to search for the
 filename.
 
 As noted above, if a non-interactive shell is invoked with the
-@option{--login} option, Bash attempts to read and execute commands from the
+@option{--login} option,
+Bash attempts to read and execute commands from the
 login shell startup files. 
 
 @subsubheading Invoked with name @code{sh}
 
-If Bash is invoked with the name @code{sh}, it tries to mimic the
-startup behavior of historical versions of @code{sh} as closely as
-possible, while conforming to the @sc{posix} standard as well.
+If Bash is invoked with the name @command{sh},
+it tries to mimic the startup behavior of historical versions of
+@command{sh} as closely as possible,
+while conforming to the
+@sc{posix}
+standard as well.
 
 When invoked as an interactive login shell, or as a non-interactive
 shell with the @option{--login} option, it first attempts to read
-and execute commands from @file{/etc/profile} and @file{~/.profile}, in
-that order.
+and execute commands from
+@file{/etc/profile} and @file{~/.profile},
+in that order.
 The @option{--noprofile} option inhibits this behavior.
 
-When invoked as an interactive shell with the name @code{sh}, Bash
-looks for the variable @env{ENV}, expands its value if it is defined,
-and uses the expanded value as the name of a file to read and execute.
-Since a shell invoked as @code{sh} does not attempt to read and execute
-commands from any other startup files, the @option{--rcfile} option has
-no effect.
+When invoked as an interactive shell with the name @command{sh}, Bash
+looks for the variable @env{ENV},
+expands its value if it is defined, and uses the
+expanded value as the name of a file to read and execute.
+Since a shell invoked as @command{sh}
+does not attempt to read and execute commands from any other startup
+files, the
+@option{--rcfile}
+option has no effect.
 
-A non-interactive shell invoked with the name @code{sh} does not attempt
-to read any other startup files.
+A non-interactive shell invoked with the name @command{sh}
+does not attempt to read any other startup files.
 
-When invoked as @code{sh}, Bash enters @sc{posix} mode after reading
+When invoked as @command{sh}, Bash enters @sc{posix} mode after reading
 the startup files.
 
 @subsubheading Invoked in @sc{posix} mode
 
 When Bash is started in @sc{posix} mode, as with the
-@option{--posix} command line option, it follows the @sc{posix} standard
-for startup files.
+@option{--posix} command line option, it follows the
+@sc{posix}
+standard for startup files.
 In this mode, interactive shells expand the @env{ENV} variable
 and read and execute commands from the file whose name is the
 expanded value.
@@ -7870,14 +7968,17 @@ No other startup files are read.
 
 @subsubheading Invoked by remote shell daemon
 
-Bash attempts to determine when it is being run with its standard input
+Bash
+attempts to determine when it is being run with its standard input
 connected to a network connection, as when executed by
 the historical and rarely-seen remote shell daemon, usually @code{rshd},
 or the secure shell daemon @code{sshd}.
-If Bash
+If
+Bash
 determines it is being run non-interactively in this fashion,
-it reads and executes commands from @file{~/.bashrc}, if that
-file exists and is readable.
+it reads and executes commands from
+@file{~/.bashrc},
+if that file exists and is readable.
 Bash does not read this file if invoked as @code{sh}.
 The
 @option{--norc}
@@ -8212,7 +8313,9 @@ True if the strings are equal.
 When used with the @code{[[} command, this performs pattern matching as
 described above (@pxref{Conditional Constructs}).
 
-@samp{=} should be used with the @code{test} command for @sc{posix} conformance.
+@samp{=} should be used with the @code{test} command for
+@sc{posix}
+conformance.
 
 @item @var{string1} != @var{string2}
 True if the strings are not equal.
@@ -8446,7 +8549,8 @@ There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
 Indexed arrays are referenced using arithmetic expressions
-that must expand to an integer (@pxref{Shell Arithmetic})) and are zero-based;
+that must expand to an integer (@pxref{Shell Arithmetic}))
+and are zero-based;
 associative arrays use arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 
@@ -8460,7 +8564,7 @@ using the syntax
 The @var{subscript}
 is treated as an arithmetic expression that must evaluate to a number
 greater than or equal to zero.
-To explicitly declare an array, use
+To explicitly declare an indexed array, use
 @example
 declare -a @var{name}
 @end example
@@ -8479,9 +8583,8 @@ Associative arrays are created using
 declare -A @var{name}
 @end example
 
-Attributes may be
-specified for an array variable using the @code{declare} and
-@code{readonly} builtins.
+Attributes may be specified for an array variable using the
+@code{declare} and @code{readonly} builtins.
 Each attribute applies to all members of an array.
 
 Arrays are assigned using compound assignments of the form
@@ -8529,8 +8632,10 @@ interpreted as relative to one greater than the maximum index of
 @var{name}, so negative indices count back from the end of the
 array, and an index of -1 references the last element.
 
-The @samp{+=} operator appends to an array variable when assigning
-using the compound assignment syntax; see @ref{Shell Parameters} above.
+The @samp{+=}
+operator appends to an array variable when assigning
+using the compound assignment syntax; see
+@ref{Shell Parameters} above.
 
 An array element is referenced using
 @code{$@{@var{name}[@var{subscript}]@}}.
@@ -8936,7 +9041,8 @@ such as @code{jails}, @code{zones}, or @code{containers}.
 @subsection What is POSIX?
 @cindex POSIX description
 
-@sc{posix} is the name for a family of standards based on Unix.
+@sc{posix}
+is the name for a family of standards based on Unix.
 A number of Unix services, tools, and functions are part of the standard,
 ranging from the basic system calls and C library functions to common
 applications and tools to system administration and management.
@@ -8968,11 +9074,11 @@ The @i{special} builtins, which must be implemented as part of the
 shell to provide the desired functionality, are specified as
 being part of the shell; examples of these are @code{eval} and
 @code{export}.
-Other utilities appear in the sections of POSIX not
+Other utilities appear in the sections of @sc{posix} not
 devoted to the shell which are commonly (and in some cases must
 be) implemented as builtin commands, such as
 @code{read} and @code{test}.
-POSIX also specifies aspects of the shell's interactive
+@sc{posix} also specifies aspects of the shell's interactive
 behavior, including job control and command
 line editing.
 Only vi-style line editing commands have been standardized;
@@ -8985,7 +9091,7 @@ Although Bash is an implementation of the @sc{posix} shell
 specification, there are areas where the Bash default behavior
 differs from the specification.
 The Bash @dfn{posix mode} changes the Bash
-behavior in these areas so that it conforms more closely
+behavior in these areas so that it conforms more strictly
 to the standard.
 
 Starting Bash with the @option{--posix} command-line option or executing
@@ -8996,7 +9102,7 @@ match that specified by @sc{posix} in areas where the Bash default differs.
 When invoked as @code{sh}, Bash enters @sc{posix} mode after reading the
 startup files.
 
-The following list is what's changed when `@sc{posix} mode' is in effect:
+The following list is what's changed when @sc{posix} mode is in effect:
 
 @enumerate
 @item
@@ -9505,14 +9611,18 @@ strcoll(3).
 @item compat41
 @itemize @bullet
 @item
-In posix mode, @code{time} may be followed by options and still be
-recognized as a reserved word (this is @sc{posix} interpretation 267).
+In @sc{posix} mode, @code{time} may be followed by options and still be
+recognized as a reserved word (this is
+@sc{posix}
+interpretation 267).
 @item
-In posix mode, the parser requires that an even number of single
+In @sc{posix} mode, the parser requires that an even number of single
 quotes occur in the @var{word} portion of a double-quoted $@{@dots{}@}
 parameter expansion and treats them specially, so that characters within
 the single quotes are considered quoted
-(this is @sc{posix} interpretation 221).
+(this is
+@sc{posix}
+interpretation 221).
 @end itemize
 
 @item compat42
@@ -9521,10 +9631,12 @@ the single quotes are considered quoted
 The replacement string in double-quoted pattern substitution does not
 undergo quote removal, as it does in versions after bash-4.2.
 @item
-In posix mode, single quotes are considered special when expanding
+In @sc{posix} mode, single quotes are considered special when expanding
 the @var{word} portion of a double-quoted $@{@dots{}@} parameter expansion
 and can be used to quote a closing brace or other special character
-(this is part of @sc{posix} interpretation 221);
+(this is part of
+@sc{posix}
+interpretation 221);
 in later versions, single quotes
 are not special within double-quoted word expansions.
 @end itemize
@@ -9533,7 +9645,7 @@ are not special within double-quoted word expansions.
 @itemize @bullet
 @item
 Word expansion errors are considered non-fatal errors that cause the
-current command to fail, even in posix mode
+current command to fail, even in @sc{posix} mode
 (the default behavior is to make them fatal errors that cause the shell
 to exit).
 @item
@@ -9556,7 +9668,8 @@ Bash-5.0 and later reset the loop state to prevent the exit.
 @item
 Variable assignments preceding builtins like @code{export} and @code{readonly}
 that set attributes continue to affect variables with the same
-name in the calling environment even if the shell is not in posix
+name in the calling environment even if the shell is not in
+@sc{posix}
 mode.
 @end itemize
 
@@ -10700,7 +10813,7 @@ The hardware and operating system.
 @item
 The compiler used to compile Bash.
 @item
-A description of the bug behaviour.
+A description of the bug behavior.
 @item
 A short script or `recipe' which exercises the bug and may be used
 to reproduce it.
