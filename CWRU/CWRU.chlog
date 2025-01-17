@@ -10796,3 +10796,41 @@ tests/printf7.sub,tests/cond-regexp2.sub
 tests/run-all, tests/run-minimal
 	- BASHOPTS: unset or unexport as appropriate, same as SHELLOPTS
 	  From a report by Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				    1/9
+				    ---
+subst.c
+	- string_extract_verbatim: take into account the fact that CTLESC can
+	  quote multibyte characters; use ADVANCE_CHAR instead of increment
+	  Fixes bug reported by jktseug@gmail.com
+
+				   1/10
+				   ----
+expr.c
+	- expr_bind_variable,expr_streval: suppress additional expansion if
+	  called by the `let' builtin, whether or not array_expand_once is set
+	- expr_skipsubscript: suppress expansion while parsing subscripts
+	  whether array_expand_once is set or not
+	  Still have to change tests if this goes final
+	  These are all conditional on shell_compatibility_level > 51
+	  From a bug-bash post by Greg Wooledge <greg@wooledge.org>
+
+				   1/14
+				   ----
+lib/readline/complete.c
+	- _rl_export_completions: use print_filename instead of fprintf to
+	  display the possible completions so slashes and file types can
+	  be included
+	  From a patch from Matthew Tromp <matthewktromp@gmail.com>
+
+				   1/15
+				   ----
+examples/loadables/fltexpr.c
+	- fltexpr: new loadable builtin to do floating-point arithmetic
+	  expression evaluation and optionally print the result
+
+				   1/16
+				   ----
+builtins/printf.def
+	- getarg(), advancearg(): cosmetic changes to make it easier to
+	  implement %N$ format specifiers in the future

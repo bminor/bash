@@ -1673,6 +1673,8 @@ If this variable is in the environment when
 .B bash
 starts up, the shell enables each option in the list before
 reading any startup files.
+If this variable is exported, child shells will enable each option
+in the list.
 This variable is read-only.
 .TP
 .B BASHPID
@@ -13259,7 +13261,10 @@ builtin command.
 .IP \(bu
 Importing function definitions from the shell environment at startup.
 .IP \(bu
-Parsing the value of
+Parsing the values of
+.SM
+.B BASHOPTS
+and
 .SM
 .B SHELLOPTS
 from the shell environment at startup.

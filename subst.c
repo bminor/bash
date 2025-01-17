@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1184,7 +1184,9 @@ string_extract_verbatim (const char *string, size_t slen, size_t *sindex, char *
 #endif
       if ((flags & SX_NOCTLESC) == 0 && c == CTLESC)
 	{
-	  i += 2;
+	  i++;
+	  CHECK_STRING_OVERRUN (i, i, slen, c);
+	  ADVANCE_CHAR (string, slen, i);	/* CTLESC can quote mbchars */
 	  CHECK_STRING_OVERRUN (i, i, slen, c);
 	  continue;
 	}

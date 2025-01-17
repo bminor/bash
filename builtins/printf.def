@@ -242,6 +242,12 @@ static char *vbuf, *vname;
 static size_t vbsize;
 static size_t vblen;
 
+/* printf format numbered argument support */
+static char **narg_argv;
+static int narg_argc;
+static int narg_maxind;
+static int narg_curind;
+
 static intmax_t tw;
 
 static char *conv_buf;
@@ -1329,16 +1335,32 @@ mklong (char *str, char *modifiers, size_t mlen)
   return (conv_buf);
 }
 
+static inline char *
+getarg (void)
+{
+  return (garglist ? garglist->word->word : 0);
+}
+
+static inline void
+advancearg (void)
+{
+  garglist = garglist->next;
+}
+
 static int
 getchr (void)
 {
   int ret;
+  char *arg;
 
-  if (garglist == 0)
+  arg = getarg ();
+
+  if (arg == 0)
     return ('\0');
 
-  ret = (int)garglist->word->word[0];
-  garglist = garglist->next;
+  ret = (int)arg[0];
+
+  advancearg ();
   return ret;
 }
 
@@ -1347,11 +1369,11 @@ getstr (void)
 {
   char *ret;
 
-  if (garglist == 0)
+  ret = getarg ();
+  if (ret == 0)
     return ("");
 
-  ret = garglist->word->word;
-  garglist = garglist->next;
+  advancearg ();
   return ret;
 }
 
@@ -1379,23 +1401,25 @@ static int
 getint (int overflow_retval)
 {
   intmax_t ret;
-  char *ep;
+  char *ep, *arg;
   int overflow;
 
-  if (garglist == 0)
+  arg = getarg ();
+
+  if (arg == 0)
     return (0);
 
-  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+  if (arg[0] == '\'' || arg[0] == '"')
     return asciicode ();
 
   errno = 0;
-  ret = strtoimax (garglist->word->word, &ep, 0);
+  ret = strtoimax (arg, &ep, 0);
   if (overflow = (errno == ERANGE) || (ret < INT_MIN || ret > INT_MAX))
     errno = ERANGE;	/* force errno */
 
-  chk_converror (garglist->word->word, ep);
+  chk_converror (arg, ep);
 
-  garglist = garglist->next;
+  advancearg ();
   return (overflow ? overflow_retval : (int)ret);
 }
 
@@ -1403,20 +1427,22 @@ static intmax_t
 getintmax (void)
 {
   intmax_t ret;
-  char *ep;
+  char *ep, *arg;
 
-  if (garglist == 0)
+  arg = getarg ();
+
+  if (arg == 0)
     return (0);
 
-  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+  if (arg[0] == '\'' || arg[0] == '"')
     return asciicode ();
 
   errno = 0;
-  ret = strtoimax (garglist->word->word, &ep, 0);
+  ret = strtoimax (arg, &ep, 0);
 
-  chk_converror (garglist->word->word, ep);
+  chk_converror (arg, ep);
 
-  garglist = garglist->next;
+  advancearg ();
   return (ret);
 }
 
@@ -1424,20 +1450,22 @@ static uintmax_t
 getuintmax (void)
 {
   uintmax_t ret;
-  char *ep;
+  char *ep, *arg;
 
-  if (garglist == 0)
+  arg = getarg ();
+
+  if (arg == 0)
     return (0);
 
-  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+  if (arg[0] == '\'' || arg[0] == '"')
     return asciicode ();
 
   errno = 0;
-  ret = strtoumax (garglist->word->word, &ep, 0);
+  ret = strtoumax (arg, &ep, 0);
 
-  chk_converror (garglist->word->word, ep);  
+  chk_converror (arg, ep);  
 
-  garglist = garglist->next;
+  advancearg ();
   return (ret);
 }
 
@@ -1445,20 +1473,22 @@ static double
 getdouble (void)
 {
   double ret;
-  char *ep;
+  char *ep, *arg;
 
-  if (garglist == 0)
+  arg = getarg ();
+
+  if (arg == 0)
     return (0);
 
-  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+  if (arg[0] == '\'' || arg[0] == '"')
     return asciicode ();
 
   errno = 0;
-  ret = strtod (garglist->word->word, &ep);
+  ret = strtod (arg, &ep);
 
-  chk_converror (garglist->word->word, ep);
+  chk_converror (arg, ep);
 
-  garglist = garglist->next;
+  advancearg ();
   return (ret);
 }
 
@@ -1466,20 +1496,22 @@ static floatmax_t
 getfloatmax (void)
 {
   floatmax_t ret;
-  char *ep;
+  char *ep, *arg;
 
-  if (garglist == 0)
+  arg = getarg ();
+
+  if (arg == 0)
     return (0);
 
-  if (garglist->word->word[0] == '\'' || garglist->word->word[0] == '"')
+  if (arg[0] == '\'' || arg[0] == '"')
     return asciicode ();
 
   errno = 0;
-  ret = strtofltmax (garglist->word->word, &ep);
+  ret = strtofltmax (arg, &ep);
 
-  chk_converror (garglist->word->word, ep);
+  chk_converror (arg, ep);
 
-  garglist = garglist->next;
+  advancearg ();
   return (ret);
 }
 
@@ -1488,23 +1520,25 @@ static intmax_t
 asciicode (void)
 {
   register intmax_t ch;
+  char *arg;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
   size_t slen, mblength;
 #endif
   DECLARE_MBSTATE;
 
+  arg = getarg ();
 #if defined (HANDLE_MULTIBYTE)
-  slen = strlen (garglist->word->word+1);
+  slen = strlen (arg+1);
   wc = 0;
-  mblength = mbrtowc (&wc, garglist->word->word+1, slen, &state);
+  mblength = mbrtowc (&wc, arg+1, slen, &state);
   if (MB_INVALIDCH (mblength) == 0)
     ch = wc;		/* XXX */
   else
 #endif
-    ch = (unsigned char)garglist->word->word[1];
+    ch = (unsigned char)arg[1];
 
-  garglist = garglist->next;
+  advancearg ();
   return (ch);
 }
 
@@ -1515,16 +1549,18 @@ getwidestr (size_t *lenp)
   wchar_t *ws;
   const char *mbs;
   size_t slen, mblength;
+  char *arg;
   DECLARE_MBSTATE;
 
-  if (garglist == 0)
+  arg = getarg ();
+  if (arg == 0)
     {
       if (lenp)
 	*lenp = 0;
       return NULL;
     }
 
-  mbs = garglist->word->word;
+  mbs = arg;
   slen = strlen (mbs);
   ws = (wchar_t *)xmalloc ((slen + 1) * sizeof (wchar_t));
   mblength = mbsrtowcs (ws, &mbs, slen + 1, &state);
@@ -1535,13 +1571,13 @@ getwidestr (size_t *lenp)
     {
       int i;
       for (i = 0; i < slen; i++)
-	ws[i] = (wchar_t)garglist->word->word[i];
+	ws[i] = (wchar_t)arg[i];
       ws[slen] = L'\0';
       if (lenp)
 	*lenp = slen;
     }
 
-  garglist = garglist->next;
+  advancearg ();
   return (ws);
 }
 
@@ -1550,17 +1586,19 @@ getwidechar (void)
 {
   wchar_t wc;
   size_t slen, mblength;
+  char *arg;
   DECLARE_MBSTATE;
 
-  if (garglist == 0)
+  arg = getarg ();
+  if (arg == 0)
     return L'\0';
 
   wc = 0;
-  mblength = mbrtowc (&wc, garglist->word->word, locale_mb_cur_max, &state);
+  mblength = mbrtowc (&wc, arg, locale_mb_cur_max, &state);
   if (MB_INVALIDCH (mblength))
-    wc = (wchar_t)garglist->word->word[0];
+    wc = (wchar_t)arg[0];
 
-  garglist = garglist->next;
+  advancearg ();
   return (wc);
 }
 
