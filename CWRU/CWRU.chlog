@@ -10834,3 +10834,39 @@ examples/loadables/fltexpr.c
 builtins/printf.def
 	- getarg(), advancearg(): cosmetic changes to make it easier to
 	  implement %N$ format specifiers in the future
+
+				   1/18
+				   ----
+subst.c
+	- array_length_reference: requesting the length of an element of an
+	  unset variable using array syntax is a fatal error when `set -u'
+	  is enabled and the subscript is not `@' or `*'.
+	  Inspired by a report from Ian Kelling <iank@fsf.org>
+
+				   1/20
+				   ----
+parse.y
+	- decode_prompt_string: since Debian has made the spectaculary bad call
+	  to allow arbitrary characters in usernames, protect the results of
+	  the \u expansion in the same way as \[Ww] and \[Hh] (externally-
+	  controlled data)
+	  From https://savannah.gnu.org/patch/?10496
+
+				   1/21
+				   ----
+eval.c
+	- reader_loop: if we longjmp with ERREXIT, don't reset any local
+	  function contexts in posix mode, since POSIX says to exit as if
+	  executing the `exit builtin with no arguments'. Revision of change
+	  from 7/2022.
+	  From a report by Ivan Shapovalov <intelfx@intelfx.name> in 11/2024
+
+lib/readline/display.c
+	- rl_redisplay: after calling update_line, when putting the cursor
+	  where it needs to be and reprinting part of the line with the
+	  prompt that contains invisible characters, make sure we start to
+	  output characters at the portion in the prompt buffer that begins
+	  on the current line and only offset by the number of invisible
+	  characters on the current line, and set _rl_last_c_pos accordingly
+	  in both multibyte and singlebyte locales.
+	  Fixes bug reported by Andreas Schwab <schwab@linux-m68k.org>

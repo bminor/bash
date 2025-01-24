@@ -6510,7 +6510,13 @@ decode_prompt_string (char *string, int is_prompt)
 	    case 'u':
 	      if (current_user.user_name == 0)
 		get_current_user_info ();
-	      temp = savestring (current_user.user_name);
+	      if (promptvars || posixly_correct)
+		/* Make sure that expand_prompt_string is called with a
+		   second argument of Q_DOUBLE_QUOTES if we use this
+		   function here. */
+		temp = sh_backslash_quote_for_double_quotes (current_user.user_name, 0);
+	      else
+		temp = savestring (current_user.user_name);
 	      goto add_string;
 
 	    case 'h':

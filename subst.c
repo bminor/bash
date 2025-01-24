@@ -7494,9 +7494,16 @@ array_length_reference (const char *s)
      failure. */
   if ((var == 0 || invisible_p (var) || (assoc_p (var) == 0 && array_p (var) == 0)) && unbound_vars_is_error)
     {
+      set_exit_status (EXECUTION_FAILURE);
+#if 1
+      /* If the array isn't subscripted with `@' or `*', it's an error. */
+      if (ALL_ELEMENT_SUB (t[0]) == 0 || t[1] != RBRACK)
+        return (INTMAX_MIN);		/* caller prints error */
+#endif
+      /* If the variable is subscripted with `@' or `*', ksh93 allows it to
+	 return 0. We treat it as a non-fatal error. */
       c = *--t;
       *t = '\0';
-      set_exit_status (EXECUTION_FAILURE);
       err_unboundvar (s);
       *t = c;
       return (-1);
@@ -7521,6 +7528,8 @@ array_length_reference (const char *s)
 	return (var_isset (var) ? 1 : 0);
     }
 
+  /* If an array variable is set, length expansions for unset elements
+     return 0. This is compatible with ksh93. */
   if (assoc_p (var))
     {
       t[len - 1] = '\0';

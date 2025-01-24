@@ -3873,10 +3873,9 @@ ${\fIparameter\fP\fB/#\fP\fIpattern\fP\fB/\fP\fIstring\fP}
 ${\fIparameter\fP\fB/%\fP\fIpattern\fP\fB/\fP\fIstring\fP}
 .PD
 \fBPattern substitution\fP.
-The \fIpattern\fP is expanded to produce a pattern just as in
-pathname expansion and matched against the expanded value of
-\fIparameter\fP
-using the rules described under
+The \fIpattern\fP is expanded to produce a pattern
+and matched against the expanded value of \fIparameter\fP
+as described under
 .B "Pattern Matching"
 below.
 The longest match of \fIpattern\fP
@@ -3956,18 +3955,29 @@ ${\fIparameter\fP\fB,,\fP\fIpattern\fP}
 .PD
 \fBCase modification\fP.
 This expansion modifies the case of alphabetic characters in \fIparameter\fP.
-The \fIpattern\fP is expanded to produce a pattern just as in
-pathname expansion.
-Each character in the expanded value of \fIparameter\fP is tested against
-\fIpattern\fP, and, if it matches the pattern, its case is converted.
+First, the \fIpattern\fP is expanded to produce a pattern
+as described below under
+.SM
+.BR "Pattern Matching" .
+.B Bash
+then examines characters in the expanded value of \fIparameter\fP
+against \fIpattern\fP as described below.
+If a character matches the pattern, its case is converted.
 The pattern should not attempt to match more than one character.
 .IP
-The \fB\*^\fP operator converts lowercase letters matching \fIpattern\fP
-to uppercase; the \fB,\fP operator converts matching uppercase letters
-to lowercase.
-The \fB\*^\*^\fP and \fB,,\fP expansions convert each matched character in the
-expanded value; the \fB\*^\fP and \fB,\fP expansions match and convert only
-the first character in the expanded value.
+Using
+.Q \*^
+converts lowercase letters matching \fIpattern\fP to uppercase;
+.Q ,
+converts matching uppercase letters to lowercase.
+The
+\fB\*^\fP and \fB,\fP variants
+examine the first character in the expanded value
+and convert its case if it matches \fIpattern\fP;
+the
+\fB\*^\*^\fP and \fB,,\fP variants
+examine all characters in the expanded value
+and convert each one that matches \fIpattern\fP.
 If \fIpattern\fP is omitted, it is treated like a \fB?\fP, which matches
 every character.
 .IP
@@ -4426,7 +4436,7 @@ shell variable controls how the results of pathname expansion are sorted,
 as described above under
 .BR "Shell Variables" .
 .PP
-\fBPattern Matching\fP
+.B "Pattern Matching"
 .PP
 Any character that appears in a pattern, other than the special pattern
 characters described below, matches itself.
@@ -11873,8 +11883,6 @@ under
 .B compat43
 .TP 8
 .B compat44
-.TP 8
-.B compat50
 .PD
 These control aspects of the shell's compatibility mode
 (see

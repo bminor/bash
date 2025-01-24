@@ -2583,11 +2583,9 @@ array in turn, and the expansion is the resultant list.
 @itemx $@{@var{parameter}//@var{pattern}/@var{string}@} 
 @itemx $@{@var{parameter}/#@var{pattern}/@var{string}@} 
 @itemx $@{@var{parameter}/%@var{pattern}/@var{string}@} 
-The @var{pattern} is expanded to produce a pattern just as in
-filename expansion and matched
-against the expanded value of @var{parameter}
-according to the rules
-described below (@pxref{Pattern Matching}).
+The @var{pattern} is expanded to produce a pattern
+and matched against the expanded value of @var{parameter}
+as described below (@pxref{Pattern Matching}).
 The longest match of @var{pattern}
 in the expanded value is replaced with @var{string}.
 @var{string} undergoes tilde expansion, parameter and variable expansion,
@@ -2693,18 +2691,28 @@ array in turn, and the expansion is the resultant list.
 @itemx $@{@var{parameter},@var{pattern}@}
 @itemx $@{@var{parameter},,@var{pattern}@}
 This expansion modifies the case of alphabetic characters in @var{parameter}.
-The @var{pattern} is expanded to produce a pattern just as in
-filename expansion.
-Each character in the expanded value of @var{parameter} is tested against
-@var{pattern}, and, if it matches the pattern, its case is converted.
+First, the @var{pattern} is expanded to produce a pattern
+as described below in @ref{Pattern Matching}.
+
+@code{Bash}
+then examines characters in the expanded value of @var{parameter}
+against @var{pattern} as described below.
+If a character matches the pattern, its case is converted.
 The pattern should not attempt to match more than one character.
 
-The @samp{^} operator converts lowercase letters matching @var{pattern}
-to uppercase; the @samp{,} operator converts matching uppercase letters
-to lowercase.
-The @samp{^^} and @samp{,,} expansions convert each matched character in the
-expanded value; the @samp{^} and @samp{,} expansions match and convert only
-the first character in the expanded value.
+Using
+@samp{^}
+converts lowercase letters matching @var{pattern} to uppercase;
+@samp{,}
+converts matching uppercase letters to lowercase.
+The
+@samp{^} and @samp{,} variants
+examine the first character in the expanded value
+and convert its case if it matches @var{pattern};
+the
+@samp{^^} and @samp{,,} variants
+examine all characters in the expanded value
+and convert each one that matches @var{pattern}.
 If @var{pattern} is omitted, it is treated like a @samp{?}, which matches
 every character.
 
