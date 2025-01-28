@@ -2990,11 +2990,9 @@ array in turn, and the expansion is the resultant list.
 <dt><code class="code">${<var class="var">parameter</var>//<var class="var">pattern</var>/<var class="var">string</var>}</code></dt>
 <dt><code class="code">${<var class="var">parameter</var>/#<var class="var">pattern</var>/<var class="var">string</var>}</code></dt>
 <dt><code class="code">${<var class="var">parameter</var>/%<var class="var">pattern</var>/<var class="var">string</var>}</code></dt>
-<dd><p>The <var class="var">pattern</var> is expanded to produce a pattern just as in
-filename expansion and matched
-against the expanded value of <var class="var">parameter</var>
-according to the rules
-described below (see <a class="pxref" href="#Pattern-Matching">Pattern Matching</a>).
+<dd><p>The <var class="var">pattern</var> is expanded to produce a pattern
+and matched against the expanded value of <var class="var">parameter</var>
+as described below (see <a class="pxref" href="#Pattern-Matching">Pattern Matching</a>).
 The longest match of <var class="var">pattern</var>
 in the expanded value is replaced with <var class="var">string</var>.
 <var class="var">string</var> undergoes tilde expansion, parameter and variable expansion,
@@ -3098,18 +3096,28 @@ array in turn, and the expansion is the resultant list.
 <dt><code class="code">${<var class="var">parameter</var>,<var class="var">pattern</var>}</code></dt>
 <dt><code class="code">${<var class="var">parameter</var>,,<var class="var">pattern</var>}</code></dt>
 <dd><p>This expansion modifies the case of alphabetic characters in <var class="var">parameter</var>.
-The <var class="var">pattern</var> is expanded to produce a pattern just as in
-filename expansion.
-Each character in the expanded value of <var class="var">parameter</var> is tested against
-<var class="var">pattern</var>, and, if it matches the pattern, its case is converted.
+First, the <var class="var">pattern</var> is expanded to produce a pattern
+as described below in <a class="ref" href="#Pattern-Matching">Pattern Matching</a>.
+</p>
+<p><code class="code">Bash</code>
+then examines characters in the expanded value of <var class="var">parameter</var>
+against <var class="var">pattern</var> as described below.
+If a character matches the pattern, its case is converted.
 The pattern should not attempt to match more than one character.
 </p>
-<p>The &lsquo;<samp class="samp">^</samp>&rsquo; operator converts lowercase letters matching <var class="var">pattern</var>
-to uppercase; the &lsquo;<samp class="samp">,</samp>&rsquo; operator converts matching uppercase letters
-to lowercase.
-The &lsquo;<samp class="samp">^^</samp>&rsquo; and &lsquo;<samp class="samp">,,</samp>&rsquo; expansions convert each matched character in the
-expanded value; the &lsquo;<samp class="samp">^</samp>&rsquo; and &lsquo;<samp class="samp">,</samp>&rsquo; expansions match and convert only
-the first character in the expanded value.
+<p>Using
+&lsquo;<samp class="samp">^</samp>&rsquo;
+converts lowercase letters matching <var class="var">pattern</var> to uppercase;
+&lsquo;<samp class="samp">,</samp>&rsquo;
+converts matching uppercase letters to lowercase.
+The
+&lsquo;<samp class="samp">^</samp>&rsquo; and &lsquo;<samp class="samp">,</samp>&rsquo; variants
+examine the first character in the expanded value
+and convert its case if it matches <var class="var">pattern</var>;
+the
+&lsquo;<samp class="samp">^^</samp>&rsquo; and &lsquo;<samp class="samp">,,</samp>&rsquo; variants
+examine all characters in the expanded value
+and convert each one that matches <var class="var">pattern</var>.
 If <var class="var">pattern</var> is omitted, it is treated like a &lsquo;<samp class="samp">?</samp>&rsquo;, which matches
 every character.
 </p>
@@ -7466,6 +7474,8 @@ as &lsquo;<samp class="samp">on</samp>&rsquo; by &lsquo;<samp class="samp">shopt
 If this variable is in the environment when Bash
 starts up, the shell enables each option in the list before
 reading any startup files.
+If this variable is exported, child shells will enable each option
+in the list.
 This variable is readonly.
 </p>
 </dd>
@@ -14603,6 +14613,8 @@ It may be omitted if the word designator begins with a &lsquo;<samp class="samp"
 &lsquo;<samp class="samp">*</samp>&rsquo;, &lsquo;<samp class="samp">-</samp>&rsquo;, or &lsquo;<samp class="samp">%</samp>&rsquo;.
 Words are numbered from the beginning of the line,
 with the first word being denoted by 0 (zero).
+That first word is usually the command word, and the arguments begin
+with the second word.
 Words are inserted into the current line separated by single spaces.
 </p>
 <p>For example,
@@ -14614,7 +14626,7 @@ When you type this, the preceding command is repeated in toto.
 </p>
 </dd>
 <dt><code class="code">!!:$</code></dt>
-<dd><p>designates the last argument of the preceding command.
+<dd><p>designates the last word of the preceding command.
 This may be shortened to <code class="code">!$</code>.
 </p>
 </dd>

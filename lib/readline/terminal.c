@@ -258,6 +258,30 @@ _win_get_screensize (int *swp, int *shp)
 }
 #endif
 
+int
+_rl_tcgetwinsize (int tty, struct winsize *wp)
+{
+#if defined (HAVE_TCGETWINSIZE)
+  return (tcgetwinsize (tty, wp));
+#elif defined (TIOCGWINSZ)
+  return (ioctl (tty, TIOCGWINSZ, wp));
+#else
+  return -1;
+#endif
+}
+
+void
+_rl_tcsetwinsize (int tty, struct winsize *wp)
+{
+#if defined (HAVE_TCGETWINSIZE)
+  tcsetwinsize (tty, wp);
+#elif defined (TIOCGWINSZ)
+  ioctl (tty, TIOCSWINSZ, wp);
+#else
+  ;
+#endif
+}
+
 /* Get readline's idea of the screen size.  TTY is a file descriptor open
    to the terminal.  If IGNORE_ENV is true, we do not pay attention to the
    values of $LINES and $COLUMNS.  The tests for TERM_STRING_BUFFER being
@@ -266,19 +290,19 @@ void
 _rl_get_screen_size (int tty, int ignore_env)
 {
   char *ss;
-#if defined (TIOCGWINSZ)
+#if defined (TIOCGWINSZ) || defined (HAVE_TCGETWINSIZE)
   struct winsize window_size;
-#endif /* TIOCGWINSZ */
+#endif /* TIOCGWINSZ || HAVE_TCGETWINSIZE */
   int wr, wc;
 
   wr = wc = -1;
-#if defined (TIOCGWINSZ)
-  if (ioctl (tty, TIOCGWINSZ, &window_size) == 0)
+#if defined (TIOCGWINSZ) || defined (HAVE_TCGETWINSIZE)
+  if (_rl_tcgetwinsize (tty, &window_size) == 0)
     {
       wc = (int) window_size.ws_col;
       wr = (int) window_size.ws_row;
     }
-#endif /* TIOCGWINSZ */
+#endif /* TIOCGWINSZ || HAVE_TCGETWINSIZE */
 
 #if defined (__EMX__)
   _emx_get_screensize (&wc, &wr);

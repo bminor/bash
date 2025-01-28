@@ -128,12 +128,13 @@ exec_builtin (WORD_LIST *list)
     }
   list = loptend;
 
-  /* First, let the redirections remain. */
-  dispose_redirects (redirection_undo_list);
-  redirection_undo_list = (REDIRECT *)NULL;
-
+  /* First, let the redirections remain if exec is called without operands */
   if (list == 0)
-    return (EXECUTION_SUCCESS);
+    {
+      dispose_redirects (redirection_undo_list);
+      redirection_undo_list = (REDIRECT *)NULL;
+      return (EXECUTION_SUCCESS);
+    }
 
 #if defined (RESTRICTED_SHELL)
   if (restricted)

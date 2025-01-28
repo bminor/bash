@@ -5570,7 +5570,7 @@ execute_builtin_or_function (WORD_LIST *words,
 			     REDIRECT *redirects, struct fd_bitmap *fds_to_close,
 			     int flags)
 {
-  int result;
+  int result, has_exec_redirects;
   REDIRECT *saved_undo_list;
 #if defined (PROCESS_SUBSTITUTION)
   int ofifo, nfifo, osize;
@@ -5597,25 +5597,31 @@ execute_builtin_or_function (WORD_LIST *words,
       return (EX_REDIRFAIL);	/* was EXECUTION_FAILURE */
     }
 
+  /* Is this the exec builtin with redirections? We want to undo them and
+     throw away the exec_redirection_undo_list if exec has a program name
+     argument, fails to execute it, and does not exit the shell */
+  has_exec_redirects = (builtin == exec_builtin) && redirection_undo_list;
+
   saved_undo_list = redirection_undo_list;
 
   /* Calling the "exec" builtin changes redirections forever. */
   if (builtin == exec_builtin)
     {
-      dispose_redirects (saved_undo_list);
+      /* let exec_builtin handle disposing redirection_undo_list */
       saved_undo_list = exec_redirection_undo_list;
       exec_redirection_undo_list = (REDIRECT *)NULL;
     }
   else
-    dispose_exec_redirects ();
+    {
+      dispose_exec_redirects ();
+      redirection_undo_list = (REDIRECT *)NULL;
+    }
 
   if (saved_undo_list)
     {
       begin_unwind_frame ("saved-redirects");
       add_unwind_protect (uw_cleanup_redirects, (char *)saved_undo_list);
     }
-
-  redirection_undo_list = (REDIRECT *)NULL;
 
   if (builtin)
     result = execute_builtin (builtin, words, flags, 0);
@@ -5628,26 +5634,38 @@ execute_builtin_or_function (WORD_LIST *words,
   if (ferror (stdout))
     clearerr (stdout);  
 
-  /* If we are executing the `command' builtin, but this_shell_builtin is
-     set to `exec_builtin', we know that we have something like
-     `command exec [redirection]', since otherwise `exec' would have
-     overwritten the shell and we wouldn't get here.  In this case, we
-     want to behave as if the `command' builtin had not been specified
-     and preserve the redirections. */
-  if (builtin == command_builtin && this_shell_builtin == exec_builtin)
+  if (has_exec_redirects && redirection_undo_list)
     {
-      int discard;
-
-      discard = 0;
+      /* We have returned from the exec builtin. If redirection_undo_list is
+	 still non-null, we had an operand and failed to exit the shell for
+	 some reason. We want to dispose of saved_undo_list, discard the frame,
+	 and let the redirections be undone as usual. If redirection_undo_list
+	 is NULL, then exec_builtin had no program name operand and disposed
+	 of it. In that case, we should perform the redirections in
+	 exec_redirection_undo_list (saved_undo_list) like usual. */
+      if (saved_undo_list)
+        {
+	  dispose_redirects (saved_undo_list);	/* exec_redirection_undo_list */
+	  discard_unwind_frame ("saved-redirects");
+        }
+      saved_undo_list = exec_redirection_undo_list = (REDIRECT *)NULL;      
+    }
+  /* This code is no longer executed and remains only for explanatory reasons. */
+  else if (builtin == command_builtin && this_shell_builtin == exec_builtin)
+    {
+      /* If we are executing the `command' builtin, but this_shell_builtin is
+	 set to `exec_builtin', we know that we have something like
+	 `command exec [redirection]', since otherwise `exec' would have
+	 overwritten the shell and we wouldn't get here. In this case, we
+	 want to behave as if the `command' builtin had not been specified
+	 and preserve the redirections. */
       if (saved_undo_list)
 	{
-	  dispose_redirects (saved_undo_list);
-	  discard = 1;
+	  dispose_redirects (saved_undo_list);	/* redirection_undo_list */
+	  discard_unwind_frame ("saved-redirects");
 	}
       redirection_undo_list = exec_redirection_undo_list;
       saved_undo_list = exec_redirection_undo_list = (REDIRECT *)NULL;      
-      if (discard)
-	discard_unwind_frame ("saved-redirects");
     }
 
   if (saved_undo_list)

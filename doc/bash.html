@@ -2122,6 +2122,8 @@ If this variable is in the environment when
 
 starts up, the shell enables each option in the list before
 reading any startup files.
+If this variable is exported, child shells will enable each option
+in the list.
 This variable is read-only.
 <DT><B>BASHPID</B>
 
@@ -4822,10 +4824,9 @@ ${<I>parameter</I><B>/</B><I>pattern</I><B>/</B><I>string</I>}
 <DT>${<I>parameter</I><B>/%</B><I>pattern</I><B>/</B><I>string</I>}<DD>
 
 <B>Pattern substitution</B>.
-The <I>pattern</I> is expanded to produce a pattern just as in
-pathname expansion and matched against the expanded value of
-<I>parameter</I>
-using the rules described under
+The <I>pattern</I> is expanded to produce a pattern
+and matched against the expanded value of <I>parameter</I>
+as described under
 <B>Pattern Matching</B>
 
 below.
@@ -4910,18 +4911,31 @@ ${<I>parameter</I><B>^</B><I>pattern</I>}
 
 <B>Case modification</B>.
 This expansion modifies the case of alphabetic characters in <I>parameter</I>.
-The <I>pattern</I> is expanded to produce a pattern just as in
-pathname expansion.
-Each character in the expanded value of <I>parameter</I> is tested against
-<I>pattern</I>, and, if it matches the pattern, its case is converted.
+First, the <I>pattern</I> is expanded to produce a pattern
+as described below under
+<FONT SIZE=-1><B>Pattern Matching</B>.
+
+</FONT>
+<B>Bash</B>
+
+then examines characters in the expanded value of <I>parameter</I>
+against <I>pattern</I> as described below.
+If a character matches the pattern, its case is converted.
 The pattern should not attempt to match more than one character.
 <DT><DD>
-The <B>^</B> operator converts lowercase letters matching <I>pattern</I>
-to uppercase; the <B>,</B> operator converts matching uppercase letters
-to lowercase.
-The <B>^^</B> and <B>,,</B> expansions convert each matched character in the
-expanded value; the <B>^</B> and <B>,</B> expansions match and convert only
-the first character in the expanded value.
+Using
+
+converts lowercase letters matching <I>pattern</I> to uppercase;
+
+converts matching uppercase letters to lowercase.
+The
+<B>^</B> and <B>,</B> variants
+examine the first character in the expanded value
+and convert its case if it matches <I>pattern</I>;
+the
+<B>^^</B> and <B>,,</B> variants
+examine all characters in the expanded value
+and convert each one that matches <I>pattern</I>.
 If <I>pattern</I> is omitted, it is treated like a <B>?</B>, which matches
 every character.
 <DT><DD>
@@ -5524,6 +5538,7 @@ as described above under
 <P>
 
 <B>Pattern Matching</B>
+
 <P>
 
 Any character that appears in a pattern, other than the special pattern
@@ -14820,9 +14835,6 @@ under
 <DT><B>compat44</B>
 
 <DD>
-<DT><B>compat50</B>
-
-<DD>
 
 These control aspects of the shell's compatibility mode
 (see
@@ -16523,7 +16535,11 @@ builtin command.
 <DT>*<DD>
 Importing function definitions from the shell environment at startup.
 <DT>*<DD>
-Parsing the value of
+Parsing the values of
+<FONT SIZE=-1><B>BASHOPTS</B>
+
+</FONT>
+and
 <FONT SIZE=-1><B>SHELLOPTS</B>
 
 </FONT>
@@ -16858,7 +16874,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20241227/doc/bash.1.<BR>
-Time: 08 January 2025 09:33:16 EST
+This document was created by man2html from /usr/local/src/bash/bash-20250122/doc/bash.1.<BR>
+Time: 28 January 2025 09:45:18 EST
 </BODY>
 </HTML>

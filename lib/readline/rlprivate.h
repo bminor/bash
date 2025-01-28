@@ -640,6 +640,7 @@ extern int _rl_history_search_pos;
 
 /* signals.c */
 extern int volatile _rl_caught_signal;
+extern int volatile _rl_handling_signal;
 
 extern _rl_sigcleanup_func_t *_rl_sigcleanup;
 extern void *_rl_sigcleanarg;

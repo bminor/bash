@@ -10870,3 +10870,54 @@ lib/readline/display.c
 	  characters on the current line, and set _rl_last_c_pos accordingly
 	  in both multibyte and singlebyte locales.
 	  Fixes bug reported by Andreas Schwab <schwab@linux-m68k.org>
+
+				   1/22
+				   ----
+execute_cmd.c
+	- execute_builtin_or_function: if we're executing the exec builtin,
+	  and there are redirections, let exec_builtin handle disposing of
+	  redirection_undo_list if there is no program name to execute, so
+	  it's still there if exec returns and doesn't exit the shell.
+	  Then we can manage disposing of exec_redirection_undo_list and
+	  letting the redirections be undone as normal.
+	  This is POSIX interp 1896, with modifications from
+	  https://www.austingroupbugs.net/view.php?id=1896#c7037
+
+builtins/exec.def
+	- exec_builtin: dispose of redirection_undo_list and set it to NULL
+	  if there is no program name operand; let execute_builtin_or_function
+	  clean it up
+
+				   1/23
+				   ----
+lib/readline/terminal.c
+	- _rl_tcgetwinsize,_rl_tcsetwinsize: function wrappers for tcgetwinsize/
+	  tcsetwinsize with fallbacks to ioctl if those functions aren't
+	  available
+	- _rl_get_screensize: use _rl_tcgetwinsize
+
+lib/readline/rlwinsize.h
+	- _rl_tcgetwinsize,_rl_tcsetwinsize: extern function declarations
+
+lib/readine/rltty.c
+	- set_winsize: use _rl_tcgetwinsize/_rl_tcsetwinsize
+	- set_winsize: if _rl_tcgetwinsize succeeds, use the values to set
+	  readline's idea of the screen size via _rl_set_screen_size
+	  Inspired by a discussion with Olav Mørkrid <omega@funker.no>
+
+				   1/24
+				   ----
+lib/readline/signals.c
+	- _rl_handling_signal: new private variable, set to the signal we're
+	  currently handling in _rl_signal_handler (SIGWINCH) or
+	  _rl_handle_signal (all others). Only valid if RL_STATE_SIGHANDLER
+	  is set
+
+lib/readline/rlprivate.h
+	- _rl_handling_signal: new extern declaration
+
+lib/readline/rltty.c
+	- set_winsize: only set readline's idea of the screen size if we're
+	  executing in a signal handler context and handling SIGTSTP and the
+	  application has indicated that it doesn't want the environment
+	  variables LINES and COLUMNS to have priority (rl_prefer_env_winsize)

@@ -1,0 +1,69 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# test behavior of redirections when the shell doesn't exit and exec gets a
+# program name to execute as an operand
+
+# set up a fixed path so we know notthere will not be found
+PATH=/usr/bin:/bin
+export PATH
+
+FN=/tmp/output-$$
+shopt -s execfail
+
+# make sure execfail works right, otherwise none of the rest matters
+exec notthere
+echo after failed exec: $?
+
+# basic redirection undoing if exec fails
+rm -f $FN
+exec notthere >$FN
+echo after failed exec with output redirection
+rm -f $FN
+
+# undo successful redirections if exec fails but does not exit the shell
+exec notthere 4>&2
+echo foo >&4
+
+# we should undo successful redirects if one of the redirections fails
+exec >$FN 2>.
+echo after failed redir stdout
+echo after failed redir stderr >&2
+
+exec notthere <<<'foo bar baz'
+echo after failed exec with input redirection
+
+# the command builtin should not make a difference here
+
+# make sure execfail works right, otherwise none of the rest matters
+command exec notthere
+echo after failed exec: $?
+
+# basic redirection undoing if exec fails
+rm -f $FN
+command exec notthere >$FN
+echo after failed exec with output redirection
+rm -f $FN
+
+# undo successful redirections if exec fails but does not exit the shell
+command exec notthere 4>&2
+echo foo >&4
+
+# we should undo successful redirects if one of the redirections fails
+command exec >$FN 2>.
+echo after failed redir stdout
+echo after failed redir stderr >&2
+
+command exec notthere <<<'foo bar baz'
+echo after failed exec with input redirection
