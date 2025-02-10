@@ -2749,6 +2749,7 @@ wait_for_single_pid (pid_t pid, int flags)
 
   if (child == 0)
     {
+no_child:
       if (flags & JWAIT_PERROR)
 	internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
       return (257);
@@ -2758,6 +2759,8 @@ wait_for_single_pid (pid_t pid, int flags)
   do
     {
       r = wait_for (pid, 0);
+      if (r == -1 && errno == ECHILD)
+	goto no_child;
       if ((flags & JWAIT_FORCE) == 0)
 	break;
 

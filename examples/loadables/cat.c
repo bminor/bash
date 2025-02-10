@@ -72,17 +72,18 @@ fcopy(int fd, char *fn)
 int
 cat_main (int argc, char **argv)
 {
-	int	i, fd, r;
+	int	i, fd, r, closefd;
 	char	*s;
 
 	if (argc == 1)
 		return (fcopy(0, "standard input"));
 
-	for (i = r = 1; i < argc; i++) {
+	for (i = 1, r = 0; i < argc; i++) {
 		QUIT;
-		if (argv[i][0] == '-' && argv[i][1] == '\0')
+		if (argv[i][0] == '-' && argv[i][1] == '\0') {
 			fd = 0;
-		else {
+			closefd = 0;
+		} else {
 			fd = open(argv[i], O_RDONLY, 0666);
 			if (fd < 0) {
 				s = strerror(errno);
@@ -91,11 +92,13 @@ cat_main (int argc, char **argv)
 				write(2, ": ", 2);
 				write(2, s, strlen(s));
 				write(2, "\n", 1);
+				r++;
 				continue;
 			}
+			closefd = 1;
 		}
-		r = fcopy(fd, argv[i]);
-		if (fd != 0)
+		r += fcopy(fd, argv[i]);
+		if (closefd)
 			close(fd);
 	}
 	QUIT;
@@ -113,7 +116,7 @@ cat_builtin(WORD_LIST *list)
 	r = cat_main(c, v);
 	free(v);
 
-	return r;
+	return r;	/* relies on EXECUTION_SUCCESS being 0 */
 }
 
 char *cat_doc[] = {

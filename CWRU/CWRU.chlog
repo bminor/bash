@@ -10921,3 +10921,11 @@ lib/readline/rltty.c
 	  executing in a signal handler context and handling SIGTSTP and the
 	  application has indicated that it doesn't want the environment
 	  variables LINES and COLUMNS to have priority (rl_prefer_env_winsize)
+
+				   1/30
+				   ----
+jobs.c
+	- wait_for_single_pid: if wait_for returns -1/ECHILD, make sure to
+	  return 257 just as if the child was not found, optionally printing
+	  an error message if JWAIT_PERROR is supplied
+	  From a discussion with Ian <saturns_rings@protonmail.com>
