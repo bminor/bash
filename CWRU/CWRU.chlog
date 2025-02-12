@@ -10929,3 +10929,59 @@ jobs.c
 	  return 257 just as if the child was not found, optionally printing
 	  an error message if JWAIT_PERROR is supplied
 	  From a discussion with Ian <saturns_rings@protonmail.com>
+
+				    2/8
+				    ---
+redir.c
+	- do_redirection_internal: keep track of whether the redirector fd
+	  was active with a new variable. Not used yet, should be optimized
+	  out.
+	- add_undo_fd_redirect: new undo function using r_move_input so we
+	  don't need a dup redir and a separate close redir to undo. Not
+	  used yet
+	- do_redirection_internal: only call check_bash_input if we're
+	  creating an undo list and not running one
+
+command.h
+	- OUTPUT_REDIRECT: add r_output_force
+
+input.c
+	- check_bash_input: if we dup the bash input fd to another in
+	  save_bash_input, return that fd. Continue to return -1 on error
+	  and 0 if we don't do anything but sync
+
+execute_cmd.c
+	- execute_null_command: force a subshell if any of the redirections
+	  involve the bash input buffered fd.
+	  From a report by Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				   2/10
+				   ----
+
+examples/loadables/chmod.c
+	- chmod: new loadable builtin, inspired by zhixu.liu@gmail.com in
+	  https://savannah.gnu.org/patch/?10499
+
+				   2/11
+				   ----
+builtins/kill.def
+	- kill_builtin: in posix mode, return a failure status if any of the
+	  pid/job arguments are not found or sending the signal fails. This
+	  is consistent with
+	  https://pubs.opengroup.org/onlinepubs/9799919799/utilities/kill.html#tag_20_64_14
+
+				   2/12
+				   ----
+braces.c
+	- brace_gobbler: take a new argument in which to return the type of
+	  brace expansion (comma or sequence) we think we've found; change
+	  all callers
+	- brace_expand: even if we find a BRACE_ARG_SEPARATOR, don't try to
+	  perform expansion if brace_gobbler doesn't think we have a
+	  BRACE_COMMA expansion
+	- valid_seqterm: new function, performs minimal validation on a
+	  sequence expansion, used to skip over invalid sequence expressions
+	  in brace_expand
+	- brace_expand: call valid_seqterm if brace_gobbler finds a BRACE_SEQ
+	  expansion
+	  Inspired by report from Robert Elz <kre@munnari.oz.au>

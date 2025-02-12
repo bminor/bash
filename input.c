@@ -302,10 +302,15 @@ save_bash_input (int fd, int new_fd)
 int
 check_bash_input (int fd)
 {
+  int nfd;
+
   if (fd_is_bash_input (fd))
     {
       if (fd > 0)
-	return ((save_bash_input (fd, -1) == -1) ? -1 : 0);
+	{
+	  nfd = save_bash_input (fd, -1);	/* allocates new fd */
+	  return (nfd);
+	}
       else if (fd == 0)
         return ((sync_buffered_stream (fd) == -1) ? -1 : 0);
     }

@@ -95,6 +95,7 @@ extern REDIRECT *exec_redirection_undo_list;
 static void add_exec_redirect (REDIRECT *);
 static int add_undo_redirect (int, enum r_instruction, int);
 static int add_undo_close_redirect (int);
+static int add_undo_fd_redirect (int, int);
 static int expandable_redirection_filename (REDIRECT *);
 static int stdin_redirection (enum r_instruction, int);
 static int undoablefd (int);
@@ -761,7 +762,7 @@ static int
 do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 {
   WORD_DESC *redirectee;
-  int redir_fd, fd, redirector, r, oflags, rflags;
+  int redir_fd, fd, redirector, r, oflags, rflags, fdactive;
   intmax_t lfd;
   char *redirectee_word;
   enum r_instruction ri;
@@ -882,6 +883,8 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
       dispose_redirects (new_redirect);
     }
 
+  fdactive = 0;
+
   switch (ri)
     {
     case r_output_direction:
@@ -947,14 +950,17 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	      if (fd != redirector && (redirect->rflags & REDIR_VARASSIGN) && varassign_redir_autoclose)
 		r = add_undo_close_redirect (redirector);	      
 	      else if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		r = add_undo_redirect (redirector, ri, -1);
+		{
+		  fdactive = 1;
+		  r = add_undo_redirect (redirector, ri, -1);
+		}
 	      else
 		r = add_undo_close_redirect (redirector);
 	      REDIRECTION_ERROR (r, errno, fd);
 	    }
 
 	  /* inhibit call to sync_buffered_stream() for async processes */
-	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
+	  if ((redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0) && (flags & RX_UNDOABLE))
 	    check_bash_input (redirector);
 
 	  /* Make sure there is no pending output before we change the state
@@ -1062,13 +1068,17 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 		  if (fd != redirector && (redirect->rflags & REDIR_VARASSIGN) && varassign_redir_autoclose)
 		    r = add_undo_close_redirect (redirector);	      
 		  else if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		    r = add_undo_redirect (redirector, ri, -1);
+		    {
+		      fdactive = 1;
+		      r = add_undo_redirect (redirector, ri, -1);
+		    }
 		  else
 		    r = add_undo_close_redirect (redirector);
 		  REDIRECTION_ERROR (r, errno, fd);
 	        }
 
-	      check_bash_input (redirector);
+	      if (flags & RX_UNDOABLE)
+		check_bash_input (redirector);
 
 	      if (redirect->rflags & REDIR_VARASSIGN)
 		{
@@ -1120,7 +1130,10 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	      if ((redirect->rflags & REDIR_VARASSIGN) && varassign_redir_autoclose)
 		r = add_undo_close_redirect (redirector);	      
 	      else if (fcntl (redirector, F_GETFD, 0) != -1)
-		r = add_undo_redirect (redirector, ri, redir_fd);
+		{
+		  fdactive = 1;
+		  r = add_undo_redirect (redirector, ri, redir_fd);
+		}
 	      else
 		r = add_undo_close_redirect (redirector);
 	      REDIRECTION_ERROR (r, errno, -1);
@@ -1137,7 +1150,7 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	    }
 
 	  /* inhibit call to sync_buffered_stream() for async processes */
-	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
+	  if ((redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0) && (flags & RX_UNDOABLE))
 	    check_bash_input (redirector);
 
 	  if (redirect->rflags & REDIR_VARASSIGN)
@@ -1221,7 +1234,7 @@ do_redirection_internal (REDIRECT *redirect, int flags, char **fnp)
 	  xtrace_fdchk (redirector);
 
 	  /* inhibit call to sync_buffered_stream() for async processes */
-	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
+	  if ((redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0) && (flags & RX_UNDOABLE))
 	    check_bash_input (redirector);
 	  r = close_buffered_fd (redirector);
 
@@ -1350,6 +1363,22 @@ add_undo_close_redirect (int fd)
   closer->rflags |= RX_INTERNAL;
   closer->next = redirection_undo_list;
   redirection_undo_list = closer;
+
+  return 0;
+}
+
+static int
+add_undo_fd_redirect (int sfd, int rfd)
+{
+  REDIRECTEE rd, sd;
+  REDIRECT *nr;
+
+  sd.dest = sfd;
+  rd.dest = rfd;
+  nr = make_redirection (sd, r_move_input, rd, 0);
+  nr->rflags |= RX_INTERNAL;
+  nr->next = redirection_undo_list;
+  redirection_undo_list = nr;
 
   return 0;
 }

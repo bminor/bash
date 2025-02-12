@@ -1769,7 +1769,7 @@ The null string is a valid value.
 Once a variable is set, it may be unset only by using
 the @code{unset} builtin command.
 
-A variable may be assigned to by a statement of the form
+A variable is assigned to using a statement of the form
 @example
 @var{name}=[@var{value}]
 @end example
@@ -2325,6 +2325,14 @@ $ : $@{var=DEFAULT@}
 $ echo $var
 DEFAULT
 $ var=
+$ : $@{var=DEFAULT@}
+$ echo $var
+
+$ var=
+$ : $@{var:=DEFAULT@}
+$ echo $var
+DEFAULT
+$ unset var
 $ : $@{var:=DEFAULT@}
 $ echo $var
 DEFAULT
@@ -2345,6 +2353,16 @@ Otherwise, the value of @var{parameter} is substituted.
 $ var=
 $ : $@{var:?var is unset or null@}
 bash: var: var is unset or null
+$ echo $@{var?var is unset@}
+
+$ unset var
+$ : $@{var?var is unset@}
+bash: var: var is unset
+$ : $@{var:?var is unset or null@}
+bash: var: var is unset or null
+$ var=123
+$ echo $@{var:?var is unset or null@}
+123
 @end example
 
 @item $@{@var{parameter}:+@var{word}@}
@@ -2357,7 +2375,16 @@ The value of @var{parameter} is not used.
 $ var=123
 $ echo $@{var:+var is set and not null@}
 var is set and not null
+$ echo $@{var+var is set@}
+var is set
 $ var=
+$ echo $@{var:+var is set and not null@}
+
+$ echo $@{var+var is set@}
+var is set
+$ unset var
+$ echo $@{var+var is set@}
+
 $ echo $@{var:+var is set and not null@}
 
 $ 
@@ -4751,7 +4778,8 @@ command), a list, or a compound command returns a
 non-zero exit status,
 subject to the following conditions.
 The @code{ERR} trap is not executed if the failed command is part of the
-command list immediately following an @code{until} or @code{while} keyword,
+command list immediately following an
+@code{until} or @code{while} reserved word,
 part of the test following the @code{if} or @code{elif} reserved words,
 part of a command executed in a @code{&&} or @code{||} list
 except the command following the final @code{&&} or @code{||},
@@ -5889,7 +5917,8 @@ a list (@pxref{Lists}),
 or a compound command (@pxref{Compound Commands})
 returns a non-zero status.
 The shell does not exit if the command that fails is part of the
-command list immediately following a @code{while} or @code{until} keyword,
+command list immediately following a
+@code{while} or @code{until} reserved word,
 part of the test in an @code{if} statement,
 part of any command executed in a @code{&&} or @code{||} list except
 the command following the final @code{&&} or @code{||},
@@ -9279,7 +9308,7 @@ double-quoted string, even if the @code{histexpand} option is enabled.
 
 @item
 When printing shell function definitions (e.g., by @code{type}), Bash does
-not print the @code{function} keyword unless necessary.
+not print the @code{function} reserved word unless necessary.
 
 @item
 Non-interactive shells exit if a syntax error in an arithmetic expansion
@@ -9419,6 +9448,13 @@ separated by spaces, without the @samp{SIG} prefix.
 @item
 The @code{kill} builtin does not accept signal names with a @samp{SIG}
 prefix.
+
+@item
+The @code{kill} builtin returns a failure status if any of the pid or job
+arguments are invalid or if sending the specified signal to any of them
+fails.
+In default mode, @code{kill} returns success if the signal was
+successfully sent to any of the specified processes.
 
 @item
 The @code{printf} builtin uses @code{double} (via @code{strtod}) to convert
@@ -10918,7 +10954,7 @@ Bash implements command aliases and the @code{alias} and @code{unalias}
 builtins (@pxref{Aliases}).
 
 @item
-Bash implements the @code{!} keyword to negate the return value of
+Bash implements the @code{!} reserved word to negate the return value of
 a pipeline (@pxref{Pipelines}).
 This is very useful when an @code{if} statement needs to act only if a
 test fails.
