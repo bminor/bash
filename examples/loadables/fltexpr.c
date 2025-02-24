@@ -1,5 +1,7 @@
 /* fltexpr.c -- floating-point arithmetic expression evaluation. */
 
+/* A thinly-edited version of expr.c/builtins/let.def */
+
 /* Copyright (C) 2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.

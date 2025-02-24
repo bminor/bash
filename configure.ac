@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.074])dnl
+AC_REVISION([for Bash 5.3, version 5.075])dnl
 
 define(bashvers, 5.3)
 define(relstatus, beta)
@@ -778,6 +778,7 @@ m4_include([m4/glibc21.m4])
 m4_include([m4/host-cpu-c-abi.m4])
 
 m4_include([m4/c-bool.m4])
+m4_include([m4/d-type.m4])
 
 dnl C compiler characteristics
 AC_C_CONST
@@ -1079,6 +1080,7 @@ BASH_STRUCT_TERMIO_LDISC
 BASH_STRUCT_DIRENT_D_INO
 BASH_STRUCT_DIRENT_D_FILENO
 BASH_STRUCT_DIRENT_D_NAMLEN
+gl_CHECK_TYPE_STRUCT_DIRENT_D_TYPE
 BASH_STRUCT_WINSIZE
 BASH_STRUCT_TIMEVAL
 AC_CHECK_MEMBERS([struct stat.st_blocks])

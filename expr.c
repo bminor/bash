@@ -338,8 +338,10 @@ expr_bind_variable (const char *lhs, const char *rhs)
 
 #if defined (ARRAY_VARS)
   aflags = (array_expand_once && already_expanded) ? ASS_NOEXPAND : 0;	/* XXX */
+#if 0 /* TAG:bash-5.4 https://lists.gnu.org/archive/html/bug-bash/2024-12/msg00193.html */
   if (this_shell_builtin == let_builtin && shell_compatibility_level > 51)
     aflags |= ASS_NOEXPAND;		/* we didn't quote subscripts */
+#endif
   aflags |= ASS_ALLOWALLSUB;		/* allow assoc[@]=value */
 #else
   aflags = 0;
@@ -1167,8 +1169,10 @@ expr_streval (char *tok, int e, struct lvalue *lvalue)
 
 #if defined (ARRAY_VARS)
   tflag = (array_expand_once && already_expanded) ? AV_NOEXPAND : 0;	/* for a start */
+#if 0 /* TAG:bash-5.4 https://lists.gnu.org/archive/html/bug-bash/2024-12/msg00193.html */
   if (this_shell_builtin == let_builtin && shell_compatibility_level > 51)
     tflag |= AV_NOEXPAND;	/* we didn't quote subscripts */
+#endif
 #endif
 
   /* [[[[[ */

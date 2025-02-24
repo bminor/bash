@@ -44,16 +44,14 @@ extern ssize_t zread (int, char *, size_t);
 
 /* Dump contents of file descriptor FD to *OSTR.  FN is the filename for
    error messages (not used right now). */
-int
+ssize_t
 zmapfd (int fd, char **ostr, const char *fn)
 {
   ssize_t nr;
-  int rval;
   char lbuf[ZBUFSIZ];
   char *result;
   size_t rsize, rind;
 
-  rval = 0;
   result = (char *)xmalloc (rsize = ZBUFSIZ);
   rind = 0;
 
@@ -61,10 +59,7 @@ zmapfd (int fd, char **ostr, const char *fn)
     {
       nr = zread (fd, lbuf, sizeof (lbuf));
       if (nr == 0)
-	{
-	  rval = rind;
-	  break;
-	}
+	break;
       else if (nr < 0)
 	{
 	  free (result);
@@ -86,5 +81,5 @@ zmapfd (int fd, char **ostr, const char *fn)
   else
     free (result);
 
-  return rval;
+  return (ssize_t)rind;
 }

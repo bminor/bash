@@ -1161,8 +1161,9 @@ The arithmetic @var{expression} is evaluated according to the rules
 described below (@pxref{Shell Arithmetic}).
 The @var{expression} undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in @var{expression} are not treated specially
-and are removed.
+but unescaped double quote characters
+in @var{expression} are not treated
+specially and are removed.
 If the value of the expression is non-zero, the return status is 0;
 otherwise the return status is 1. 
 
@@ -2076,7 +2077,7 @@ each generated term will contain the same number of digits,
 zero-padding where necessary.
 When letters are supplied, the expression expands to each character
 lexicographically between @var{x} and @var{y}, inclusive,
-using the default C locale.
+using the C locale.
 Note that both @var{x} and @var{y} must be of the same type
 (integer or letter).
 When the increment is supplied, it is used as the difference between
@@ -2398,9 +2399,15 @@ starting at the character specified by @var{offset}.
 If @var{parameter} is @samp{@@} or @samp{*}, an indexed array subscripted by
 @samp{@@} or @samp{*}, or an associative array name, the results differ as
 described below.
-If @var{length} is omitted, it expands to the substring of the value of
+If :@var{length} is omitted (the first form above), this
+expands to the substring of the value of
 @var{parameter} starting at the character specified by @var{offset}
 and extending to the end of the value.
+If @var{offset} is omitted,
+it is treated as 0.
+If @var{length} is omitted,
+but the colon after @var{offset} is present,
+it is treated as 0.
 @var{length} and @var{offset} are arithmetic expressions
 (@pxref{Shell Arithmetic}).
 
@@ -2922,8 +2929,9 @@ $(( @var{expression} ))
 
 The @var{expression} undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in @var{expression} are not treated specially
-and are removed.
+but unescaped double quote characters
+in @var{expression} are not treated
+specially and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.

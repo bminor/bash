@@ -10985,3 +10985,36 @@ braces.c
 	- brace_expand: call valid_seqterm if brace_gobbler finds a BRACE_SEQ
 	  expansion
 	  Inspired by report from Robert Elz <kre@munnari.oz.au>
+
+				   2/13
+				   ----
+doc/bash.1,doc/bashref.texi
+	- clarified the handling of double quotes in EXPRESSION in
+	  (( EXPRESSION )) and $(( EXPRESSION )) to say that only unescaped
+	  double quotes are removed
+
+expr.c
+	- expr_bind_variable,expr_streval: revert change from 1/10 that
+	  suppresses additional expansion when called by the `let' builtin,
+	  tag for possible inclusion in a future release when I can look
+	  at parallel changes to ((...)) and $((...)) (and probably
+	  declare 'a[" "]=12' or similar)
+
+				   2/14
+				   ----
+
+lib/sh/zmapfd.c,externs.h
+	- zmapfd: now returns ssize_t in case of large files when size_t is
+	  larger than int
+
+builtins/evalfile.c,builtins/help.def
+	- zmapfd: changed callers
+
+print_cmd.c
+	- print_redirection: the default file descriptor for <> is 0
+	  Report and fix from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   2/18
+				   ----
+configure.ac
+	- check for d_type member of struct dirent for future use

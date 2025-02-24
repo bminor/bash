@@ -771,7 +771,8 @@ otherwise the return status is 1.
 The \fIexpression\fP
 undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in \fIexpression\fP are not treated
+but unescaped double quote characters
+in \fIexpression\fP are not treated
 specially and are removed.
 .TP
 \fB[[\fP \fIexpression\fP \fB]]\fP
@@ -3410,7 +3411,7 @@ each generated term will contain the same number of digits,
 zero-padding where necessary.
 When letters are supplied, the expression expands to each character
 lexicographically between \fIx\fP and \fIy\fP, inclusive,
-using the default C locale.
+using the C locale.
 Note that both \fIx\fP and \fIy\fP must be of the same type
 (integer or letter).
 When the increment is supplied, it is used as the difference between
@@ -3689,9 +3690,15 @@ starting at the character specified by \fIoffset\fP.
 If \fIparameter\fP is \fB@\fP or \fB*\fP, an indexed array subscripted by
 \fB@\fP or \fB*\fP, or an associative array name, the results differ as
 described below.
-If \fIlength\fP is omitted, expands to the substring of the value of
+If \fB:\fP\fIlength\fP is omitted (the first form above), this
+expands to the substring of the value of
 \fIparameter\fP starting at the character specified by \fIoffset\fP
 and extending to the end of the value.
+If \fIoffset\fP is omitted,
+it is treated as 0.
+If \fIlength\fP is omitted,
+but the colon after \fIoffset\fP is present,
+it is treated as 0.
 \fIlength\fP and \fIoffset\fP are arithmetic expressions (see
 .SM
 .B
@@ -4164,8 +4171,9 @@ The
 .I expression
 undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in \fIexpression\fP are not treated specially
-and are removed.
+but unescaped double quote characters
+in \fIexpression\fP are not treated
+specially and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.

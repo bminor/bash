@@ -298,6 +298,11 @@ history_builtin (WORD_LIST *list)
       result = read_history (filename);
       history_lines_in_file = history_lines_read_from_file;
       /* history_lines_in_file = where_history () + history_base - 1; */
+#if 0
+      /* Report read errors from the history library. */
+      if (result > 0)
+	builtin_error ("%s: %s: %s", filename, _("read error"), strerror (errno));
+#endif
     }
   else if (flags & NFLAG)	/* Read `new' history from file. */
     {
@@ -311,6 +316,12 @@ history_builtin (WORD_LIST *list)
 
       history_lines_in_file = history_lines_read_from_file;
       /* history_lines_in_file = where_history () + history_base - 1; */
+
+#if 0
+      /* Report read errors from the history library. */
+      if (result > 0)
+	builtin_error ("%s: %s: %s", filename, _("read error"), strerror (errno));
+#endif
 
       /* If we're rewriting the history file at shell exit rather than just
 	 appending the lines from this session to it, the question is whether

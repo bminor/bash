@@ -245,7 +245,8 @@ show_longdoc (int i)
 static void
 show_desc (char *name, int i)
 {
-  register int j, r;
+  int j;
+  ssize_t r;
   char * const *doc, *line;
   int fd, usefile;
 
@@ -258,8 +259,13 @@ show_desc (char *name, int i)
       if (fd < 0)
 	return;
       r = zmapfd (fd, &line, doc[0]);
+      if (r < 0)
+	{
+	  builtin_error ("%s: %s: %s", doc[0], _("read error"), strerror (errno));
+	  free (line);
+	  line = (char *)NULL;
+	}
       close (fd);
-      /* XXX - handle errors if zmapfd returns < 0 */
     }
   else
     line = doc ? doc[0] : (char *)NULL;
@@ -281,6 +287,7 @@ static void
 show_manpage (char *name, int i)
 {
   register int j;
+  ssize_t r;
   char * const *doc;
   char *line;
   int fd, usefile;
@@ -293,7 +300,13 @@ show_manpage (char *name, int i)
       fd = open_helpfile (doc[0]);
       if (fd < 0)
 	return;
-      zmapfd (fd, &line, doc[0]);
+      r = zmapfd (fd, &line, doc[0]);
+      if (r < 0)
+	{
+	  builtin_error ("%s: %s: %s", doc[0], _("read error"), strerror (errno));
+	  free (line);
+	  line = (char *)NULL;
+	}
       close (fd);
     }
   else

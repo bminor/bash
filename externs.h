@@ -550,7 +550,7 @@ extern int zcatfd (int, int, const char *);
 extern ssize_t zgetline (int, char **, size_t *, int, int);
 
 /* declarations for functions defined in lib/sh/zmapfd.c */
-extern int zmapfd (int, char **, const char *);
+extern ssize_t zmapfd (int, char **, const char *);
 
 /* declarations for functions defined in lib/sh/zread.c */
 extern ssize_t zread (int, char *, size_t);

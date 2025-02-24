@@ -1199,7 +1199,7 @@ print_redirection (REDIRECT *redirect)
     case r_input_output:
       if (redirect->rflags & REDIR_VARASSIGN)
 	cprintf ("{%s}", redir_word->word);
-      else if (redirector != 1)
+      else if (redirector != 0)
 	cprintf ("%d", redirector);
       cprintf ("<> %s", redirectee->word);
       break;
