@@ -465,7 +465,11 @@ here_document_to_fd (WORD_DESC *redirectee, enum r_instruction ri)
 
 #if defined (F_GETPIPE_SZ)
       if (fcntl (herepipe[1], F_GETPIPE_SZ, 0) < document_len)
-	goto use_tempfile;
+	{
+	  close (herepipe[0]);
+	  close (herepipe[1]);
+	  goto use_tempfile;
+	}
 #endif
 
       r = heredoc_write (herepipe[1], document, document_len);
@@ -484,6 +488,7 @@ here_document_to_fd (WORD_DESC *redirectee, enum r_instruction ri)
 
 use_tempfile:
 
+  /* TAG: use anonfiles here in a future version. */
   fd = sh_mktmpfd ("sh-thd", MT_USERANDOM|MT_USETMPDIR, &filename);
 
   /* If we failed for some reason other than the file existing, abort */

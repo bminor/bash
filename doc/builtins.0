@@ -1354,20 +1354,20 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       (see SSHHEELLLL GGRRAAMMMMAARR in _b_a_s_h(1)), exits  with  a  non-zero
                       status.   The  shell  does  not exit if the command that
                       fails is part of the command list immediately  following
-                      a wwhhiillee or uunnttiill keyword, part of the test following the
-                      iiff  or eelliiff reserved words, part of any command executed
-                      in a &&&& or |||| list except the command following the  fi-
-                      nal  &&&&  or  ||||,  any command in a pipeline but the last
-                      (subject to the state of the ppiippeeffaaiill shell option),  or
-                      if  the command's return value is being inverted with !!.
-                      If a compound command other than a  subshell  returns  a
-                      non-zero  status  because  a command failed while --ee was
-                      being ignored, the shell does not exit.  A trap on  EERRRR,
-                      if set, is executed before the shell exits.  This option
-                      applies to the shell environment and each subshell envi-
-                      ronment separately (see CCOOMMMMAANNDD EEXXEECCUUTTIIOONN EENNVVIIRROONNMMEENNTT in
-                      _b_a_s_h(1)), and may cause subshells to exit before execut-
-                      ing all the commands in the subshell.
+                      a wwhhiillee or uunnttiill reserved word, part of the test follow-
+                      ing  the  iiff or eelliiff reserved words, part of any command
+                      executed in a &&&& or |||| list except the command following
+                      the final &&&& or ||||, any command in a  pipeline  but  the
+                      last  (subject  to  the  state of the ppiippeeffaaiill shell op-
+                      tion), or if the command's return  value  is  being  in-
+                      verted  with !!.  If a compound command other than a sub-
+                      shell returns a non-zero status because a command failed
+                      while --ee was being ignored, the shell does not exit.   A
+                      trap on EERRRR, if set, is executed before the shell exits.
+                      This  option  applies  to the shell environment and each
+                      subshell environment separately (see  CCOOMMMMAANNDD  EEXXEECCUUTTIIOONN
+                      EENNVVIIRROONNMMEENNTT in _b_a_s_h(1)), and may cause subshells to exit
+                      before executing all the commands in the subshell.
 
                       If  a  compound  command or shell function executes in a
                       context where --ee is being ignored, none of the  commands
@@ -1975,18 +1975,19 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               compound command returns a non-zero exit status, subject to  the
               following  conditions.   The  EERRRR  trap  is  not executed if the
               failed command is part of the command list immediately following
-              a wwhhiillee or uunnttiill keyword, part of the test in an  _i_f  statement,
-              part of a command executed in a &&&& or |||| list except the command
-              following  the final &&&& or ||||, any command in a pipeline but the
-              last (subject to the state of the ppiippeeffaaiill shell option), or  if
-              the command's return value is being inverted using !!.  These are
-              the same conditions obeyed by the eerrrreexxiitt (--ee) option.
+              a wwhhiillee or uunnttiill reserved word, part of the test in an _i_f state-
+              ment, part of a command executed in a &&&& or |||| list  except  the
+              command  following the final &&&& or ||||, any command in a pipeline
+              but the last (subject to the state of  the  ppiippeeffaaiill  shell  op-
+              tion),  or if the command's return value is being inverted using
+              !!.  These are the same conditions obeyed by the eerrrreexxiitt (--ee) op-
+              tion.
 
               When the shell is not interactive, signals ignored upon entry to
               the shell cannot be trapped or reset.  Interactive shells permit
               trapping signals ignored on entry.  Trapped signals that are not
-              being  ignored  are reset to their original values in a subshell
-              or subshell environment when one is created.  The return  status
+              being ignored are reset to their original values in  a  subshell
+              or  subshell environment when one is created.  The return status
               is false if any _s_i_g_s_p_e_c is invalid; otherwise ttrraapp returns true.
 
        ttrruuee   Does nothing, returns a 0 status.
@@ -1995,61 +1996,61 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               Indicate how each _n_a_m_e would be interpreted if used as a command
               name.
 
-              If  the  --tt option is used, ttyyppee prints a string which is one of
-              _a_l_i_a_s, _k_e_y_w_o_r_d, _f_u_n_c_t_i_o_n, _b_u_i_l_t_i_n, or _f_i_l_e if _n_a_m_e is an  alias,
-              shell  reserved word, function, builtin, or executable file, re-
-              spectively.  If the _n_a_m_e is not found, ttyyppee prints  nothing  and
+              If the --tt option is used, ttyyppee prints a string which is  one  of
+              _a_l_i_a_s,  _k_e_y_w_o_r_d, _f_u_n_c_t_i_o_n, _b_u_i_l_t_i_n, or _f_i_l_e if _n_a_m_e is an alias,
+              shell reserved word, function, builtin, or executable file,  re-
+              spectively.   If  the _n_a_m_e is not found, ttyyppee prints nothing and
               returns a non-zero exit status.
 
-              If  the  --pp  option is used, ttyyppee either returns the pathname of
-              the executable file that would be found by searching  $$PPAATTHH  for
-              _n_a_m_e  or nothing if would not return _f_i_l_e.  The --PP option forces
-              a PPAATTHH search for each _n_a_m_e, even if would not return _f_i_l_e.   If
+              If the --pp option is used, ttyyppee either returns  the  pathname  of
+              the  executable  file that would be found by searching $$PPAATTHH for
+              _n_a_m_e or nothing if would not return _f_i_l_e.  The --PP option  forces
+              a  PPAATTHH search for each _n_a_m_e, even if would not return _f_i_l_e.  If
               _n_a_m_e is present in the table of hashed commands, --pp and --PP print
               the hashed value, which is not necessarily the file that appears
               first in PPAATTHH.
 
-              If  the  --aa  option  is used, ttyyppee prints all of the places that
-              contain a command named _n_a_m_e.  This includes  aliases,  reserved
-              words,  functions, and builtins, but the path search options (--pp
-              and --PP) can be supplied to restrict  the  output  to  executable
-              files.   ttyyppee does not consult the table of hashed commands when
+              If the --aa option is used, ttyyppee prints all  of  the  places  that
+              contain  a  command named _n_a_m_e.  This includes aliases, reserved
+              words, functions, and builtins, but the path search options  (--pp
+              and  --PP)  can  be  supplied to restrict the output to executable
+              files.  ttyyppee does not consult the table of hashed commands  when
               using --aa with --pp, and only performs a PPAATTHH search for _n_a_m_e.
 
               The --ff option suppresses shell function lookup, as with the ccoomm--
-              mmaanndd builtin.  ttyyppee returns true if all  of  the  arguments  are
+              mmaanndd  builtin.   ttyyppee  returns  true if all of the arguments are
               found, false if any are not found.
 
        uulliimmiitt [--HHSS] --aa
        uulliimmiitt [--HHSS] [--bbccddeeffiikkllmmnnppqqrrssttuuvvxxPPRRTT [_l_i_m_i_t]]
-              Provides  control  over the resources available to the shell and
+              Provides control over the resources available to the  shell  and
               to processes it starts, on systems that allow such control.
 
-              The --HH and --SS options specify whether the hard or soft limit  is
+              The  --HH and --SS options specify whether the hard or soft limit is
               set for the given resource.  A hard limit cannot be increased by
               a non-root user once it is set; a soft limit may be increased up
-              to  the value of the hard limit.  If neither --HH nor --SS is speci-
+              to the value of the hard limit.  If neither --HH nor --SS is  speci-
               fied, uulliimmiitt sets both the soft and hard limits.
 
               The value of _l_i_m_i_t can be a number in the unit specified for the
-              resource or one of the special values hhaarrdd, ssoofftt, or  uunnlliimmiitteedd,
-              which  stand for the current hard limit, the current soft limit,
-              and no limit, respectively.  If _l_i_m_i_t is omitted, uulliimmiitt  prints
-              the  current value of the soft limit of the resource, unless the
-              --HH option is given.  When more than one resource  is  specified,
-              the  limit name and unit, if appropriate, are printed before the
+              resource  or one of the special values hhaarrdd, ssoofftt, or uunnlliimmiitteedd,
+              which stand for the current hard limit, the current soft  limit,
+              and  no limit, respectively.  If _l_i_m_i_t is omitted, uulliimmiitt prints
+              the current value of the soft limit of the resource, unless  the
+              --HH  option  is given.  When more than one resource is specified,
+              the limit name and unit, if appropriate, are printed before  the
               value.  Other options are interpreted as follows:
               --aa     Report all current limits; no limits are set.
               --bb     The maximum socket buffer size.
               --cc     The maximum size of core files created.
               --dd     The maximum size of a process's data segment.
               --ee     The maximum scheduling priority (
-              --ff     The maximum size of files written by the  shell  and  its
+              --ff     The  maximum  size  of files written by the shell and its
                      children.
               --ii     The maximum number of pending signals.
               --kk     The maximum number of kqueues that may be allocated.
               --ll     The maximum size that may be locked into memory.
-              --mm     The  maximum resident set size (many systems do not honor
+              --mm     The maximum resident set size (many systems do not  honor
                      this limit).
               --nn     The maximum number of open file descriptors (most systems
                      do not allow this value to be set).
@@ -2058,146 +2059,146 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --rr     The maximum real-time scheduling priority.
               --ss     The maximum stack size.
               --tt     The maximum amount of cpu time in seconds.
-              --uu     The maximum number of processes  available  to  a  single
+              --uu     The  maximum  number  of  processes available to a single
                      user.
-              --vv     The  maximum  amount  of  virtual memory available to the
+              --vv     The maximum amount of virtual  memory  available  to  the
                      shell and, on some systems, to its children.
               --xx     The maximum number of file locks.
               --PP     The maximum number of pseudoterminals.
-              --RR     The maximum time  a  real-time  process  can  run  before
+              --RR     The  maximum  time  a  real-time  process  can run before
                      blocking, in microseconds.
               --TT     The maximum number of threads.
 
-              If  _l_i_m_i_t  is  supplied, and the --aa option is not used, _l_i_m_i_t is
-              the new value of the specified resource.  If no option  is  sup-
+              If _l_i_m_i_t is supplied, and the --aa option is not  used,  _l_i_m_i_t  is
+              the  new  value of the specified resource.  If no option is sup-
               plied, then --ff is assumed.
 
-              Values  are  in 1024-byte increments, except for --tt, which is in
-              seconds; --RR, which is in microseconds; --pp, which is in units  of
-              512-byte  blocks; --PP, --TT, --bb, --kk, --nn, and --uu, which are unscaled
-              values; and, when in  posix  mode,  --cc  and  --ff,  which  are  in
-              512-byte  increments.   The return status is 0 unless an invalid
+              Values are in 1024-byte increments, except for --tt, which  is  in
+              seconds;  --RR, which is in microseconds; --pp, which is in units of
+              512-byte blocks; --PP, --TT, --bb, --kk, --nn, and --uu, which are  unscaled
+              values;  and,  when  in  posix  mode,  --cc  and  --ff, which are in
+              512-byte increments.  The return status is 0 unless  an  invalid
               option or argument is supplied, or an error occurs while setting
               a new limit.
 
        uummaasskk [--pp] [--SS] [_m_o_d_e]
-              Set the user file-creation mask to _m_o_d_e.  If _m_o_d_e begins with  a
+              Set  the user file-creation mask to _m_o_d_e.  If _m_o_d_e begins with a
               digit, it is interpreted as an octal number; otherwise it is in-
-              terpreted  as  a  symbolic mode mask similar to that accepted by
+              terpreted as a symbolic mode mask similar to  that  accepted  by
               _c_h_m_o_d(1).  If _m_o_d_e is omitted, uummaasskk prints the current value of
               the mask.  The --SS option without a _m_o_d_e argument prints the mask
               in a symbolic format; the default output is an octal number.  If
               the --pp option is supplied, and _m_o_d_e is omitted, the output is in
-              a form that may be reused as input.  The return status  is  zero
-              if  the mode was successfully changed or if no _m_o_d_e argument was
+              a  form  that may be reused as input.  The return status is zero
+              if the mode was successfully changed or if no _m_o_d_e argument  was
               supplied, and non-zero otherwise.
 
        uunnaalliiaass [-aa] [_n_a_m_e ...]
-              Remove each _n_a_m_e from the list of defined  aliases.   If  --aa  is
-              supplied,  remove  all  alias  definitions.  The return value is
+              Remove  each  _n_a_m_e  from  the list of defined aliases.  If --aa is
+              supplied, remove all alias definitions.   The  return  value  is
               true unless a supplied _n_a_m_e is not a defined alias.
 
        uunnsseett [-ffvv] [-nn] [_n_a_m_e ...]
-              For each _n_a_m_e, remove the corresponding  variable  or  function.
+              For  each  _n_a_m_e,  remove the corresponding variable or function.
               If the --vv option is given, each _n_a_m_e refers to a shell variable,
-              and  that  variable  is  removed.  If --ff is specified, each _n_a_m_e
-              refers to a shell function, and the function definition  is  re-
-              moved.   If  the  --nn  option is supplied, and _n_a_m_e is a variable
-              with the _n_a_m_e_r_e_f attribute, _n_a_m_e will be unset rather  than  the
-              variable  it  references.   --nn has no effect if the --ff option is
-              supplied.  Read-only variables and functions may not  be  unset.
-              When  variables  or functions are removed, they are also removed
-              from the environment passed to subsequent commands.  If  no  op-
-              tions  are supplied, each _n_a_m_e refers to a variable; if there is
-              no variable by that name, a function with that name, if any,  is
-              unset.   Some  shell  variables  may  not  be  unset.  If any of
+              and that variable is removed.  If --ff  is  specified,  each  _n_a_m_e
+              refers  to  a shell function, and the function definition is re-
+              moved.  If the --nn option is supplied, and  _n_a_m_e  is  a  variable
+              with  the  _n_a_m_e_r_e_f attribute, _n_a_m_e will be unset rather than the
+              variable it references.  --nn has no effect if the  --ff  option  is
+              supplied.   Read-only  variables and functions may not be unset.
+              When variables or functions are removed, they are  also  removed
+              from  the  environment passed to subsequent commands.  If no op-
+              tions are supplied, each _n_a_m_e refers to a variable; if there  is
+              no  variable by that name, a function with that name, if any, is
+              unset.  Some shell variables  may  not  be  unset.   If  any  of
               BBAASSHH__AALLIIAASSEESS,  BBAASSHH__AARRGGVV00,  BBAASSHH__CCMMDDSS,  BBAASSHH__CCOOMMMMAANNDD,  BBAASSHH__SSUUBB--
-              SSHHEELLLL,   BBAASSHHPPIIDD,   CCOOMMPP__WWOORRDDBBRREEAAKKSS,   DDIIRRSSTTAACCKK,  EEPPOOCCHHRREEAALLTTIIMMEE,
-              EEPPOOCCHHSSEECCOONNDDSS, FFUUNNCCNNAAMMEE, GGRROOUUPPSS, HHIISSTTCCMMDD,  LLIINNEENNOO,  RRAANNDDOOMM,  SSEECC--
-              OONNDDSS,  or SSRRAANNDDOOMM are unset, they lose their special properties,
-              even if they are subsequently reset.  The exit  status  is  true
+              SSHHEELLLL,  BBAASSHHPPIIDD,   CCOOMMPP__WWOORRDDBBRREEAAKKSS,   DDIIRRSSTTAACCKK,   EEPPOOCCHHRREEAALLTTIIMMEE,
+              EEPPOOCCHHSSEECCOONNDDSS,  FFUUNNCCNNAAMMEE,  GGRROOUUPPSS,  HHIISSTTCCMMDD, LLIINNEENNOO, RRAANNDDOOMM, SSEECC--
+              OONNDDSS, or SSRRAANNDDOOMM are unset, they lose their special  properties,
+              even  if  they  are subsequently reset.  The exit status is true
               unless a _n_a_m_e is readonly or may not be unset.
 
        wwaaiitt [--ffnn] [--pp _v_a_r_n_a_m_e] [_i_d ...]
               Wait for each specified child process _i_d and return the termina-
-              tion  status of the last _i_d.  Each _i_d may be a process ID _p_i_d or
-              a job specification _j_o_b_s_p_e_c; if  a  jobspec  is  supplied,  wwaaiitt
+              tion status of the last _i_d.  Each _i_d may be a process ID _p_i_d  or
+              a  job  specification  _j_o_b_s_p_e_c;  if  a jobspec is supplied, wwaaiitt
               waits for all processes in the job.
 
-              If  no  options  or _i_ds are supplied, wwaaiitt waits for all running
-              background jobs and the last-executed process  substitution,  if
+              If no options or _i_ds are supplied, wwaaiitt waits  for  all  running
+              background  jobs  and the last-executed process substitution, if
               its process id is the same as $$!!, and the return status is zero.
 
-              If  the  --nn  option  is  supplied, wwaaiitt waits for any one of the
+              If the --nn option is supplied, wwaaiitt waits  for  any  one  of  the
               given _i_ds or, if no _i_ds are supplied, any job or process substi-
               tution, to complete and returns its exit status.  If none of the
-              supplied _i_ds is a child of the shell, or if no _i_ds are  supplied
-              and  the  shell has no unwaited-for children, the exit status is
+              supplied  _i_ds is a child of the shell, or if no _i_ds are supplied
+              and the shell has no unwaited-for children, the exit  status  is
               127.
 
-              If the --pp option is supplied, wwaaiitt assigns the  process  or  job
-              identifier  of  the job for which the exit status is returned to
-              the variable _v_a_r_n_a_m_e named by the option  argument.   The  vari-
-              able,  which cannot be readonly, will be unset initially, before
-              any assignment.  This is useful only when used with the  --nn  op-
+              If  the  --pp  option is supplied, wwaaiitt assigns the process or job
+              identifier of the job for which the exit status is  returned  to
+              the  variable  _v_a_r_n_a_m_e  named by the option argument.  The vari-
+              able, which cannot be readonly, will be unset initially,  before
+              any  assignment.   This is useful only when used with the --nn op-
               tion.
 
-              Supplying  the  --ff  option,  when job control is enabled, forces
-              wwaaiitt to wait for each _i_d to terminate before returning its  sta-
+              Supplying the --ff option, when job  control  is  enabled,  forces
+              wwaaiitt  to wait for each _i_d to terminate before returning its sta-
               tus, instead of returning when it changes status.
 
-              If  none  of  the  _i_ds  specify  one of the shell's active child
-              processes, the return status is 127.  If wwaaiitt is interrupted  by
-              a  signal,  any _v_a_r_n_a_m_e will remain unset, and the return status
+              If none of the _i_ds specify  one  of  the  shell's  active  child
+              processes,  the return status is 127.  If wwaaiitt is interrupted by
+              a signal, any _v_a_r_n_a_m_e will remain unset, and the  return  status
               will be greater than 128, as described under SSIIGGNNAALLSS in _b_a_s_h(1).
               Otherwise, the return status is the exit status of the last _i_d.
 
 SSHHEELLLL CCOOMMPPAATTIIBBIILLIITTYY MMOODDEE
-       Bash-4.0 introduced the concept of a _s_h_e_l_l _c_o_m_p_a_t_i_b_i_l_i_t_y _l_e_v_e_l,  speci-
+       Bash-4.0  introduced the concept of a _s_h_e_l_l _c_o_m_p_a_t_i_b_i_l_i_t_y _l_e_v_e_l, speci-
        fied as a set of options to the shopt builtin (ccoommppaatt3311, ccoommppaatt3322, ccoomm--
-       ppaatt4400,  ccoommppaatt4411,  and so on).  There is only one current compatibility
+       ppaatt4400, ccoommppaatt4411, and so on).  There is only one  current  compatibility
        level -- each option is mutually exclusive.  The compatibility level is
-       intended to allow users to select behavior from previous versions  that
-       is  incompatible  with newer versions while they migrate scripts to use
-       current features and behavior.  It's intended to be a  temporary  solu-
+       intended  to allow users to select behavior from previous versions that
+       is incompatible with newer versions while they migrate scripts  to  use
+       current  features  and behavior.  It's intended to be a temporary solu-
        tion.
 
-       This  section does not mention behavior that is standard for a particu-
-       lar version (e.g., setting ccoommppaatt3322 means that quoting the  right  hand
-       side  of  the regexp matching operator quotes special regexp characters
-       in the word, which is default behavior in bash-3.2 and subsequent  ver-
+       This section does not mention behavior that is standard for a  particu-
+       lar  version  (e.g., setting ccoommppaatt3322 means that quoting the right hand
+       side of the regexp matching operator quotes special  regexp  characters
+       in  the word, which is default behavior in bash-3.2 and subsequent ver-
        sions).
 
-       If  a  user enables, say, ccoommppaatt3322, it may affect the behavior of other
-       compatibility levels up to  and  including  the  current  compatibility
-       level.   The  idea  is  that each compatibility level controls behavior
-       that changed in that version of bbaasshh, but that behavior may  have  been
-       present  in  earlier versions.  For instance, the change to use locale-
-       based comparisons with the [[[[ command came  in  bash-4.1,  and  earlier
+       If a user enables, say, ccoommppaatt3322, it may affect the behavior  of  other
+       compatibility  levels  up  to  and  including the current compatibility
+       level.  The idea is that each  compatibility  level  controls  behavior
+       that  changed  in that version of bbaasshh, but that behavior may have been
+       present in earlier versions.  For instance, the change to  use  locale-
+       based  comparisons  with  the  [[[[ command came in bash-4.1, and earlier
        versions used ASCII-based comparisons, so enabling ccoommppaatt3322 will enable
-       ASCII-based  comparisons  as  well.  That granularity may not be suffi-
-       cient for all uses, and as a result users should  employ  compatibility
-       levels  carefully.   Read the documentation for a particular feature to
+       ASCII-based comparisons as well.  That granularity may  not  be  suffi-
+       cient  for  all uses, and as a result users should employ compatibility
+       levels carefully.  Read the documentation for a particular  feature  to
        find out the current behavior.
 
-       Bash-4.3 introduced a new shell variable: BBAASSHH__CCOOMMPPAATT.  The  value  as-
+       Bash-4.3  introduced  a new shell variable: BBAASSHH__CCOOMMPPAATT.  The value as-
        signed to this variable (a decimal version number like 4.2, or an inte-
-       ger  corresponding to the ccoommppaatt_N_N option, like 42) determines the com-
+       ger corresponding to the ccoommppaatt_N_N option, like 42) determines the  com-
        patibility level.
 
        Starting with bash-4.4, bbaasshh began deprecating older compatibility lev-
        els.  Eventually, the options will be removed in favor of BBAASSHH__CCOOMMPPAATT.
 
-       Bash-5.0 was the final version for which there was an individual  shopt
-       option  for the previous version.  BBAASSHH__CCOOMMPPAATT is the only mechanism to
+       Bash-5.0  was the final version for which there was an individual shopt
+       option for the previous version.  BBAASSHH__CCOOMMPPAATT is the only mechanism  to
        control the compatibility level in versions newer than bash-5.0.
 
-       The following table describes the behavior changes controlled  by  each
+       The  following  table describes the behavior changes controlled by each
        compatibility level setting.  The ccoommppaatt_N_N tag is used as shorthand for
        setting the compatibility level to _N_N using one of the following mecha-
-       nisms.   For versions prior to bash-5.0, the compatibility level may be
-       set using the corresponding ccoommppaatt_N_N shopt option.   For  bash-4.3  and
-       later  versions,  the  BBAASSHH__CCOOMMPPAATT variable is preferred, and it is re-
+       nisms.  For versions prior to bash-5.0, the compatibility level may  be
+       set  using  the  corresponding ccoommppaatt_N_N shopt option.  For bash-4.3 and
+       later versions, the BBAASSHH__CCOOMMPPAATT variable is preferred, and  it  is  re-
        quired for bash-5.1 and later versions.
 
        ccoommppaatt3311
@@ -2205,118 +2206,118 @@ SSHHEELLLL CCOOMMPPAATTIIBBIILLIITTYY MMOODDEE
                      ator (=) has no special effect.
 
        ccoommppaatt3322
-              +o      The << and >> operators to the [[[[ command do  not  consider
+              +o      The  <<  and >> operators to the [[[[ command do not consider
                      the current locale when comparing strings; they use ASCII
                      ordering.
 
        ccoommppaatt4400
-              +o      The  <<  and >> operators to the [[[[ command do not consider
+              +o      The << and >> operators to the [[[[ command do  not  consider
                      the current locale when comparing strings; they use ASCII
                      ordering.  BBaasshh versions prior to bash-4.1 use ASCII col-
-                     lation and _s_t_r_c_m_p(3); bash-4.1 and later use the  current
+                     lation  and _s_t_r_c_m_p(3); bash-4.1 and later use the current
                      locale's collation sequence and _s_t_r_c_o_l_l(3).
 
        ccoommppaatt4411
-              +o      In  posix mode, ttiimmee may be followed by options and still
+              +o      In posix mode, ttiimmee may be followed by options and  still
                      be recognized as a reserved word (this is POSIX interpre-
                      tation 267).
               +o      In _p_o_s_i_x mode, the parser requires that an even number of
-                     single quotes occur in the  _w_o_r_d  portion  of  a  double-
-                     quoted  parameter expansion and treats them specially, so
-                     that characters within the single quotes  are  considered
+                     single  quotes  occur  in  the  _w_o_r_d portion of a double-
+                     quoted parameter expansion and treats them specially,  so
+                     that  characters  within the single quotes are considered
                      quoted (this is POSIX interpretation 221).
 
        ccoommppaatt4422
               +o      The replacement string in double-quoted pattern substitu-
-                     tion  does  not undergo quote removal, as it does in ver-
+                     tion does not undergo quote removal, as it does  in  ver-
                      sions after bash-4.2.
-              +o      In posix mode, single quotes are considered special  when
-                     expanding  the  _w_o_r_d portion of a double-quoted parameter
-                     expansion and can be used to quote  a  closing  brace  or
-                     other  special character (this is part of POSIX interpre-
-                     tation 221); in later versions,  single  quotes  are  not
+              +o      In  posix mode, single quotes are considered special when
+                     expanding the _w_o_r_d portion of a  double-quoted  parameter
+                     expansion  and  can  be  used to quote a closing brace or
+                     other special character (this is part of POSIX  interpre-
+                     tation  221);  in  later  versions, single quotes are not
                      special within double-quoted word expansions.
 
        ccoommppaatt4433
-              +o      Word  expansion  errors  are  considered non-fatal errors
-                     that cause the current command to  fail,  even  in  posix
-                     mode  (the  default behavior is to make them fatal errors
+              +o      Word expansion errors  are  considered  non-fatal  errors
+                     that  cause  the  current  command to fail, even in posix
+                     mode (the default behavior is to make them  fatal  errors
                      that cause the shell to exit).
-              +o      When  executing  a  shell  function,   the   loop   state
+              +o      When   executing   a   shell  function,  the  loop  state
                      (while/until/etc.)  is not reset, so bbrreeaakk or ccoonnttiinnuuee in
                      that function will break or continue loops in the calling
                      context.  Bash-4.4 and later reset the loop state to pre-
                      vent this.
 
        ccoommppaatt4444
-              +o      The  shell  sets  up  the  values  used  by BBAASSHH__AARRGGVV and
-                     BBAASSHH__AARRGGCC so they can expand to  the  shell's  positional
-                     parameters  even  if  extended  debugging mode is not en-
+              +o      The shell sets  up  the  values  used  by  BBAASSHH__AARRGGVV  and
+                     BBAASSHH__AARRGGCC  so  they  can expand to the shell's positional
+                     parameters even if extended debugging  mode  is  not  en-
                      abled.
-              +o      A subshell inherits loops from  its  parent  context,  so
-                     bbrreeaakk  or  ccoonnttiinnuuee  will  cause  the  subshell  to exit.
-                     Bash-5.0 and later reset the loop state  to  prevent  the
+              +o      A  subshell  inherits  loops  from its parent context, so
+                     bbrreeaakk or  ccoonnttiinnuuee  will  cause  the  subshell  to  exit.
+                     Bash-5.0  and  later  reset the loop state to prevent the
                      exit
-              +o      Variable  assignments  preceding builtins like eexxppoorrtt and
+              +o      Variable assignments preceding builtins like  eexxppoorrtt  and
                      rreeaaddoonnllyy that set attributes continue to affect variables
                      with the same name in the calling environment even if the
                      shell is not in posix mode.
 
        ccoommppaatt5500
-              +o      Bash-5.1 changed the way $$RRAANNDDOOMM is generated  to  intro-
-                     duce  slightly more randomness.  If the shell compatibil-
+              +o      Bash-5.1  changed  the way $$RRAANNDDOOMM is generated to intro-
+                     duce slightly more randomness.  If the shell  compatibil-
                      ity level is set to 50 or lower, it reverts to the method
-                     from bash-5.0 and previous versions, so seeding the  ran-
-                     dom  number generator by assigning a value to RRAANNDDOOMM will
+                     from  bash-5.0 and previous versions, so seeding the ran-
+                     dom number generator by assigning a value to RRAANNDDOOMM  will
                      produce the same sequence as in bash-5.0.
-              +o      If the command hash table is empty, bash  versions  prior
-                     to  bash-5.1 printed an informational message to that ef-
-                     fect, even when producing output that can  be  reused  as
-                     input.   Bash-5.1 suppresses that message when the --ll op-
+              +o      If  the  command hash table is empty, bash versions prior
+                     to bash-5.1 printed an informational message to that  ef-
+                     fect,  even  when  producing output that can be reused as
+                     input.  Bash-5.1 suppresses that message when the --ll  op-
                      tion is supplied.
 
        ccoommppaatt5511
-              +o      The uunnsseett builtin treats attempts  to  unset  array  sub-
-                     scripts  @@ and ** differently depending on whether the ar-
-                     ray is indexed or associative, and  differently  than  in
+              +o      The  uunnsseett  builtin  treats  attempts to unset array sub-
+                     scripts @@ and ** differently depending on whether the  ar-
+                     ray  is  indexed  or associative, and differently than in
                      previous versions.
               +o      Arithmetic commands ( ((((...)))) ) and the expressions in an
                      arithmetic for statement can be expanded more than once.
-              +o      Expressions  used as arguments to arithmetic operators in
-                     the [[[[ conditional command  can  be  expanded  more  than
+              +o      Expressions used as arguments to arithmetic operators  in
+                     the  [[[[  conditional  command  can  be expanded more than
                      once.
-              +o      The  expressions  in  substring parameter brace expansion
+              +o      The expressions in substring  parameter  brace  expansion
                      can be expanded more than once.
               +o      The expressions in the $$((((...)))) word expansion can be ex-
                      panded more than once.
-              +o      Arithmetic expressions used as indexed  array  subscripts
+              +o      Arithmetic  expressions  used as indexed array subscripts
                      can be expanded more than once.
-              +o      tteesstt  --vv,  when  given an argument of AA[[@@]], where AA is an
+              +o      tteesstt --vv, when given an argument of AA[[@@]], where  AA  is  an
                      existing associative array, will return true if the array
-                     has any set elements.  Bash-5.2 will look for and  report
+                     has  any set elements.  Bash-5.2 will look for and report
                      on a key named @@.
               +o      The  ${_p_a_r_a_m_e_t_e_r[[::]]==_v_a_l_u_e}  word  expansion  will  return
-                     _v_a_l_u_e, before any variable-specific transformations  have
+                     _v_a_l_u_e,  before any variable-specific transformations have
                      been performed (e.g., converting to lowercase).  Bash-5.2
                      will return the final value assigned to the variable.
-              +o      Parsing  command substitutions will behave as if extended
+              +o      Parsing command substitutions will behave as if  extended
                      globbing (see the description of the sshhoopptt builtin above)
-                     is enabled, so that parsing a command  substitution  con-
+                     is  enabled,  so that parsing a command substitution con-
                      taining an extglob pattern (say, as part of a shell func-
-                     tion)  will  not fail.  This assumes the intent is to en-
-                     able extglob before the command is executed and word  ex-
-                     pansions  are  performed.  It will fail at word expansion
-                     time if extglob hasn't been enabled by the time the  com-
+                     tion) will not fail.  This assumes the intent is  to  en-
+                     able  extglob before the command is executed and word ex-
+                     pansions are performed.  It will fail at  word  expansion
+                     time  if extglob hasn't been enabled by the time the com-
                      mand is executed.
 
        ccoommppaatt5522
-              +o      The  tteesstt  builtin uses its historical algorithm to parse
-                     parenthesized subexpressions when given five or more  ar-
+              +o      The tteesstt builtin uses its historical algorithm  to  parse
+                     parenthesized  subexpressions when given five or more ar-
                      guments.
-              +o      If  the  --pp or --PP option is supplied to the bbiinndd builtin,
+              +o      If the --pp or --PP option is supplied to the  bbiinndd  builtin,
                      bbiinndd treats any arguments remaining after option process-
-                     ing as bindable command names, and displays any  key  se-
-                     quences  bound to those commands, instead of treating the
+                     ing  as  bindable command names, and displays any key se-
+                     quences bound to those commands, instead of treating  the
                      arguments as key sequences to bind.
 
 SSEEEE AALLSSOO

@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 8 January 2025).
+the Bash shell (version 5.3, 24 February 2025).
 
-This is Edition 5.3, last updated 8 January 2025,
+This is Edition 5.3, last updated 24 February 2025,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 8 January 2025).
+the Bash shell (version 5.3, 24 February 2025).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 8 January 2025,
+<p>This is Edition 5.3, last updated 24 February 2025,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -1490,8 +1490,11 @@ done
 described below (see <a class="pxref" href="#Shell-Arithmetic">Shell Arithmetic</a>).
 The <var class="var">expression</var> undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in <var class="var">expression</var> are not treated specially
-and are removed.
+but unescaped double quote characters
+in <var class="var">expression</var> are not treated
+specially and are removed.
+Since this can potentially result in empty strings,
+this command treats those as expressions that evaluate to 0.
 If the value of the expression is non-zero, the return status is 0;
 otherwise the return status is 1. 
 </p>
@@ -2124,7 +2127,7 @@ The null string is a valid value.
 Once a variable is set, it may be unset only by using
 the <code class="code">unset</code> builtin command.
 </p>
-<p>A variable may be assigned to by a statement of the form
+<p>A variable is assigned to using a statement of the form
 </p><div class="example">
 <pre class="example-preformatted"><var class="var">name</var>=[<var class="var">value</var>]
 </pre></div>
@@ -2460,7 +2463,7 @@ each generated term will contain the same number of digits,
 zero-padding where necessary.
 When letters are supplied, the expression expands to each character
 lexicographically between <var class="var">x</var> and <var class="var">y</var>, inclusive,
-using the default C locale.
+using the C locale.
 Note that both <var class="var">x</var> and <var class="var">y</var> must be of the same type
 (integer or letter).
 When the increment is supplied, it is used as the difference between
@@ -2729,6 +2732,14 @@ $ : ${var=DEFAULT}
 $ echo $var
 DEFAULT
 $ var=
+$ : ${var=DEFAULT}
+$ echo $var
+
+$ var=
+$ : ${var:=DEFAULT}
+$ echo $var
+DEFAULT
+$ unset var
 $ : ${var:=DEFAULT}
 $ echo $var
 DEFAULT
@@ -2750,6 +2761,16 @@ Otherwise, the value of <var class="var">parameter</var> is substituted.
 <pre class="example-preformatted">$ var=
 $ : ${var:?var is unset or null}
 bash: var: var is unset or null
+$ echo ${var?var is unset}
+
+$ unset var
+$ : ${var?var is unset}
+bash: var: var is unset
+$ : ${var:?var is unset or null}
+bash: var: var is unset or null
+$ var=123
+$ echo ${var:?var is unset or null}
+123
 </pre></div>
 
 </dd>
@@ -2763,7 +2784,16 @@ The value of <var class="var">parameter</var> is not used.
 <pre class="example-preformatted">$ var=123
 $ echo ${var:+var is set and not null}
 var is set and not null
+$ echo ${var+var is set}
+var is set
 $ var=
+$ echo ${var:+var is set and not null}
+
+$ echo ${var+var is set}
+var is set
+$ unset var
+$ echo ${var+var is set}
+
 $ echo ${var:+var is set and not null}
 
 $ 
@@ -2778,9 +2808,15 @@ starting at the character specified by <var class="var">offset</var>.
 If <var class="var">parameter</var> is &lsquo;<samp class="samp">@</samp>&rsquo; or &lsquo;<samp class="samp">*</samp>&rsquo;, an indexed array subscripted by
 &lsquo;<samp class="samp">@</samp>&rsquo; or &lsquo;<samp class="samp">*</samp>&rsquo;, or an associative array name, the results differ as
 described below.
-If <var class="var">length</var> is omitted, it expands to the substring of the value of
+If :<var class="var">length</var> is omitted (the first form above), this
+expands to the substring of the value of
 <var class="var">parameter</var> starting at the character specified by <var class="var">offset</var>
 and extending to the end of the value.
+If <var class="var">offset</var> is omitted,
+it is treated as 0.
+If <var class="var">length</var> is omitted,
+but the colon after <var class="var">offset</var> is present,
+it is treated as 0.
 <var class="var">length</var> and <var class="var">offset</var> are arithmetic expressions
 (see <a class="pxref" href="#Shell-Arithmetic">Shell Arithmetic</a>).
 </p>
@@ -3320,11 +3356,16 @@ The format for arithmetic expansion is:
 
 <p>The <var class="var">expression</var> undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in <var class="var">expression</var> are not treated specially
-and are removed.
+but unescaped double quote characters
+in <var class="var">expression</var> are not treated
+specially and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.
+Since the way Bash handles double quotes
+can potentially result in empty strings,
+arithmetic expansion treats
+those as expressions that evaluate to 0.
 Arithmetic expansions may be nested. 
 </p>
 <p>The evaluation is performed according to the rules listed below
@@ -5270,7 +5311,8 @@ command), a list, or a compound command returns a
 non-zero exit status,
 subject to the following conditions.
 The <code class="code">ERR</code> trap is not executed if the failed command is part of the
-command list immediately following an <code class="code">until</code> or <code class="code">while</code> keyword,
+command list immediately following an
+<code class="code">until</code> or <code class="code">while</code> reserved word,
 part of the test following the <code class="code">if</code> or <code class="code">elif</code> reserved words,
 part of a command executed in a <code class="code">&amp;&amp;</code> or <code class="code">||</code> list
 except the command following the final <code class="code">&amp;&amp;</code> or <code class="code">||</code>,
@@ -6507,7 +6549,8 @@ a list (see <a class="pxref" href="#Lists">Lists of Commands</a>),
 or a compound command (see <a class="pxref" href="#Compound-Commands">Compound Commands</a>)
 returns a non-zero status.
 The shell does not exit if the command that fails is part of the
-command list immediately following a <code class="code">while</code> or <code class="code">until</code> keyword,
+command list immediately following a
+<code class="code">while</code> or <code class="code">until</code> reserved word,
 part of the test in an <code class="code">if</code> statement,
 part of any command executed in a <code class="code">&amp;&amp;</code> or <code class="code">||</code> list except
 the command following the final <code class="code">&amp;&amp;</code> or <code class="code">||</code>,
@@ -9280,6 +9323,11 @@ respectively.  <var class="var">Arg1</var> and <var class="var">arg2</var>
 may be positive or negative integers.
 When used with the <code class="code">[[</code> command, <var class="var">arg1</var> and <var class="var">arg2</var>
 are evaluated as arithmetic expressions (see <a class="pxref" href="#Shell-Arithmetic">Shell Arithmetic</a>).
+Since the expansions the <code class="code">[[</code> command performs on
+<var class="var">arg1</var> and <var class="var">arg2</var>
+can potentially result in empty strings,
+arithmetic expression evaluation treats
+those as expressions that evaluate to 0.
 </p></dd>
 </dl>
 
@@ -9536,8 +9584,24 @@ and are zero-based;
 associative arrays use arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 </p>
-<p>An indexed array is created automatically if any variable is assigned to
-using the syntax
+<p>The shell performs
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on indexed array subscripts.
+Since this
+can potentially result in empty strings,
+subscript indexing treats
+those as expressions that evaluate to 0.
+</p>
+<p>The shell performs
+tilde expansion,
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on associative array subscripts.
+Empty strings cannot be used as associative array keys.
+</p>
+<p>Bash automatically creates an indexed array
+if any variable is assigned to using the syntax
 </p><div class="example">
 <pre class="example-preformatted"><var class="var">name</var>[<var class="var">subscript</var>]=<var class="var">value</var>
 </pre></div>
@@ -10268,7 +10332,7 @@ default value the shell assigns to <code class="env">$HISTFILE</code>).
 double-quoted string, even if the <code class="code">histexpand</code> option is enabled.
 
 </li><li> When printing shell function definitions (e.g., by <code class="code">type</code>), Bash does
-not print the <code class="code">function</code> keyword unless necessary.
+not print the <code class="code">function</code> reserved word unless necessary.
 
 </li><li> Non-interactive shells exit if a syntax error in an arithmetic expansion
 results in an invalid expression.
@@ -10381,6 +10445,12 @@ separated by spaces, without the &lsquo;<samp class="samp">SIG</samp>&rsquo; pre
 
 </li><li> The <code class="code">kill</code> builtin does not accept signal names with a &lsquo;<samp class="samp">SIG</samp>&rsquo;
 prefix.
+
+</li><li> The <code class="code">kill</code> builtin returns a failure status if any of the pid or job
+arguments are invalid or if sending the specified signal to any of them
+fails.
+In default mode, <code class="code">kill</code> returns success if the signal was
+successfully sent to any of the specified processes.
 
 </li><li> The <code class="code">printf</code> builtin uses <code class="code">double</code> (via <code class="code">strtod</code>) to convert
 arguments corresponding to floating point conversion specifiers, instead of
@@ -10750,7 +10820,10 @@ Bash uses the <var class="var">job</var> abstraction as the basis for job contro
 each process has a <em class="dfn">process group <small class="sc">ID</small></em>, and
 the operating system maintains the notion of a current terminal
 process group <small class="sc">ID</small>.
-Processes that have the same process group ID are said to be part of
+This terminal process group <small class="sc">ID</small> is associated with the
+<em class="dfn">controlling terminal</em>.
+</p>
+<p>Processes that have the same process group ID are said to be part of
 the same <em class="dfn">process group</em>.
 Members of the foreground process group (processes whose
 process group <small class="sc">ID</small> is equal to the current terminal process group
@@ -10758,14 +10831,18 @@ process group <small class="sc">ID</small> is equal to the current terminal proc
 Processes in the foreground process group are said to be
 foreground processes.
 Background processes
-are those whose process group <small class="sc">ID</small> differs from the terminal&rsquo;s;
+are those whose process group <small class="sc">ID</small> differs from the
+controlling terminal&rsquo;s;
 such processes are immune to keyboard-generated signals.
-Only foreground processes are allowed to read from or, if
-the user so specifies with <code class="code">stty tostop</code>, write to the terminal.
-Background processes which attempt to
-read from (write to when <code class="code">tostop</code> is in effect) the
-terminal are sent a <code class="code">SIGTTIN</code> (<code class="code">SIGTTOU</code>)
-signal by the kernel&rsquo;s terminal driver,
+Only foreground processes are allowed to read from or,
+if the user so specifies with
+<code class="code">stty tostop</code>,
+write to the controlling terminal.
+The system sends a
+<code class="code">SIGTTIN</code> (<code class="code">SIGTTOU</code>)
+signal to background processes which attempt to
+read from (write to when <code class="code">tostop</code> is in effect)
+the terminal,
 which, unless caught, suspends the process. 
 </p>
 <p>If the operating system on which Bash is running supports
@@ -12578,6 +12655,8 @@ leaving the current line at the top of the screen.
 <dd><p>Clear the screen,
 then redraw the current line,
 leaving the current line at the top of the screen.
+If given a numeric argument, this refreshes the current line
+without clearing the screen.
 </p>
 </dd>
 <dt><a id="index-redraw_002dcurrent_002dline-_0028_0029"></a><span><code class="code">redraw-current-line ()</code><a class="copiable-link" href="#index-redraw_002dcurrent_002dline-_0028_0029"> &para;</a></span></dt>
@@ -15607,7 +15686,7 @@ expansion (see <a class="pxref" href="#Tilde-Expansion">Tilde Expansion</a>).
 </li><li>Bash implements command aliases and the <code class="code">alias</code> and <code class="code">unalias</code>
 builtins (see <a class="pxref" href="#Aliases">Aliases</a>).
 
-</li><li>Bash implements the <code class="code">!</code> keyword to negate the return value of
+</li><li>Bash implements the <code class="code">!</code> reserved word to negate the return value of
 a pipeline (see <a class="pxref" href="#Pipelines">Pipelines</a>).
 This is very useful when an <code class="code">if</code> statement needs to act only if a
 test fails.

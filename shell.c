@@ -1312,14 +1312,14 @@ uidget (void)
   (void) getresuid (&current_user.uid, &current_user.euid, &current_user.saveuid);
 #else
   current_user.uid = getuid ();
-  current_user.euid = geteuid ();
+  current_user.euid = current_user.saveuid = geteuid ();
 #endif
 
 #if HAVE_SETRESGID
   (void) getresgid (&current_user.gid, &current_user.egid, &current_user.savegid);
 #else
   current_user.gid = getgid ();
-  current_user.egid = getegid ();
+  current_user.egid = current_user.savegid = getegid ();
 #endif
 
   if (current_user.uid != u)

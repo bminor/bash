@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jan  8 09:27:11 EST 2025
+.\"	Last Change: Mon Feb 24 16:09:49 EST 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -21,7 +21,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 January 8" "GNU Bash 5.3"
+.TH BASH 1 "2025 February 24" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -774,6 +774,8 @@ as if it were within double quotes,
 but unescaped double quote characters
 in \fIexpression\fP are not treated
 specially and are removed.
+Since this can potentially result in empty strings, this command treats
+those as expressions that evaluate to 0.
 .TP
 \fB[[\fP \fIexpression\fP \fB]]\fP
 .PD
@@ -3132,8 +3134,24 @@ and are zero-based;
 associative arrays are referenced using arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 .PP
-An indexed array is created automatically if any variable is assigned to
-using the syntax
+The shell performs
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on indexed array subscripts.
+Since this
+can potentially result in empty strings,
+subscript indexing treats
+those as expressions that evaluate to 0.
+.PP
+The shell performs
+tilde expansion,
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on associative array subscripts.
+Empty strings cannot be used as associative array keys.
+.PP
+\fBBash\fP automatically creates an indexed array
+if any variable is assigned to using the syntax
 .RS
 \fIname\fP[\fIsubscript\fP]=\fIvalue\fP
 \&.
@@ -4177,6 +4195,10 @@ specially and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.
+Since the way Bash handles double quotes
+can potentially result in empty strings,
+arithmetic expansion treats
+those as expressions that evaluate to 0.
 Arithmetic expansions may be nested.
 .PP
 The evaluation is performed according to the rules listed below under
@@ -5601,6 +5623,13 @@ are evaluated as arithmetic expressions (see
 .SM
 .B "ARITHMETIC EVALUATION"
 above).
+Since the expansions the \fB[[\fP command performs on
+.I arg1
+and
+.I arg2
+can potentially result in empty strings,
+arithmetic expression evaluation treats
+those as expressions that evaluate to 0.
 .PD
 .SH "SIMPLE COMMAND EXPANSION"
 When the shell executes a simple command, it performs the following
@@ -6145,6 +6174,9 @@ To facilitate the implementation of the user interface to job control,
 each process has a \fIprocess group ID\fP, and
 the operating system maintains the notion of a \fIcurrent terminal
 process group ID\fP.
+This terminal process group ID is associated with the
+\fIcontrolling terminal\fP.
+.PP
 Processes that have the same process group ID are said to be part of
 the same \fIprocess group\fP.
 Members of the \fIforeground\fP process group (processes whose
@@ -6156,18 +6188,21 @@ Processes in the foreground process group are said to be
 .I foreground
 processes.
 .I Background
-processes are those whose process group ID differs from the terminal's;
+processes are those whose process group ID differs from the
+controlling terminal's;
 such processes are immune to keyboard-generated signals.
-Only foreground processes are allowed to read from or, if the
-user so specifies with
+Only foreground processes are allowed to read from or,
+if the user so specifies with
 .Q "stty tostop" ,
-write to the terminal.
-Background processes which attempt to read from (write to when
-.Q tostop
-is in effect) the terminal are sent a
+write to the controlling terminal.
+The system sends a
 .SM
 .B "SIGTTIN (SIGTTOU)"
-signal by the kernel's terminal driver,
+signal to background processes which attempt to
+read from (write to when
+.Q tostop
+is in effect)
+the terminal,
 which, unless caught, suspends the process.
 .PP
 If the operating system on which

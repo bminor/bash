@@ -1,9 +1,9 @@
 This is bash.info, produced by makeinfo version 7.1 from bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 8 January 2025).
+Bash shell (version 5.3, 24 February 2025).
 
-   This is Edition 5.3, last updated 8 January 2025, of ‘The GNU Bash
+   This is Edition 5.3, last updated 24 February 2025, of ‘The GNU Bash
 Reference Manual’, for ‘Bash’, Version 5.3.
 
    Copyright © 1988-2025 Free Software Foundation, Inc.
@@ -26,10 +26,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 8 January 2025).  The Bash home page is
+Bash shell (version 5.3, 24 February 2025).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.3, last updated 8 January 2025, of ‘The GNU Bash
+   This is Edition 5.3, last updated 24 February 2025, of ‘The GNU Bash
 Reference Manual’, for ‘Bash’, Version 5.3.
 
    Bash contains features that appear in other popular shells, and some
@@ -992,8 +992,10 @@ File: bash.info,  Node: Conditional Constructs,  Next: Command Grouping,  Prev: 
      The arithmetic EXPRESSION is evaluated according to the rules
      described below (*note Shell Arithmetic::).  The EXPRESSION
      undergoes the same expansions as if it were within double quotes,
-     but double quote characters in EXPRESSION are not treated specially
-     and are removed.  If the value of the expression is non-zero, the
+     but unescaped double quote characters in EXPRESSION are not treated
+     specially and are removed.  Since this can potentially result in
+     empty strings, this command treats those as expressions that
+     evaluate to 0.  If the value of the expression is non-zero, the
      return status is 0; otherwise the return status is 1.
 
 ‘[[...]]’
@@ -1489,7 +1491,7 @@ attributes.
 is a valid value.  Once a variable is set, it may be unset only by using
 the ‘unset’ builtin command.
 
-   A variable may be assigned to by a statement of the form
+   A variable is assigned to using a statement of the form
      NAME=[VALUE]
 If VALUE is not given, the variable is assigned the null string.  All
 VALUEs undergo tilde expansion, parameter and variable expansion,
@@ -1728,11 +1730,10 @@ integer.  When integers are supplied, the expression expands to each
 number between X and Y, inclusive.  If either X or Y begins with a zero,
 each generated term will contain the same number of digits, zero-padding
 where necessary.  When letters are supplied, the expression expands to
-each character lexicographically between X and Y, inclusive, using the
-default C locale.  Note that both X and Y must be of the same type
-(integer or letter).  When the increment is supplied, it is used as the
-difference between each term.  The default increment is 1 or -1 as
-appropriate.
+each character lexicographically between X and Y, inclusive, using the C
+locale.  Note that both X and Y must be of the same type (integer or
+letter).  When the increment is supplied, it is used as the difference
+between each term.  The default increment is 1 or -1 as appropriate.
 
    Brace expansion is performed before any other expansions, and any
 characters special to other expansions are preserved in the result.  It
@@ -1916,6 +1917,14 @@ omitted, the operator tests only for existence.
           $ echo $var
           DEFAULT
           $ var=
+          $ : ${var=DEFAULT}
+          $ echo $var
+
+          $ var=
+          $ : ${var:=DEFAULT}
+          $ echo $var
+          DEFAULT
+          $ unset var
           $ : ${var:=DEFAULT}
           $ echo $var
           DEFAULT
@@ -1931,6 +1940,16 @@ omitted, the operator tests only for existence.
           $ var=
           $ : ${var:?var is unset or null}
           bash: var: var is unset or null
+          $ echo ${var?var is unset}
+
+          $ unset var
+          $ : ${var?var is unset}
+          bash: var: var is unset
+          $ : ${var:?var is unset or null}
+          bash: var: var is unset or null
+          $ var=123
+          $ echo ${var:?var is unset or null}
+          123
 
 ‘${PARAMETER:+WORD}’
      If PARAMETER is null or unset, nothing is substituted, otherwise
@@ -1940,7 +1959,16 @@ omitted, the operator tests only for existence.
           $ var=123
           $ echo ${var:+var is set and not null}
           var is set and not null
+          $ echo ${var+var is set}
+          var is set
           $ var=
+          $ echo ${var:+var is set and not null}
+
+          $ echo ${var+var is set}
+          var is set
+          $ unset var
+          $ echo ${var+var is set}
+
           $ echo ${var:+var is set and not null}
 
           $
@@ -1951,11 +1979,13 @@ omitted, the operator tests only for existence.
      LENGTH characters of the value of PARAMETER starting at the
      character specified by OFFSET.  If PARAMETER is ‘@’ or ‘*’, an
      indexed array subscripted by ‘@’ or ‘*’, or an associative array
-     name, the results differ as described below.  If LENGTH is omitted,
-     it expands to the substring of the value of PARAMETER starting at
-     the character specified by OFFSET and extending to the end of the
-     value.  LENGTH and OFFSET are arithmetic expressions (*note Shell
-     Arithmetic::).
+     name, the results differ as described below.  If :LENGTH is omitted
+     (the first form above), this expands to the substring of the value
+     of PARAMETER starting at the character specified by OFFSET and
+     extending to the end of the value.  If OFFSET is omitted, it is
+     treated as 0.  If LENGTH is omitted, but the colon after OFFSET is
+     present, it is treated as 0.  LENGTH and OFFSET are arithmetic
+     expressions (*note Shell Arithmetic::).
 
      If OFFSET evaluates to a number less than zero, the value is used
      as an offset in characters from the end of the value of PARAMETER.
@@ -2398,11 +2428,13 @@ the result.  The format for arithmetic expansion is:
      $(( EXPRESSION ))
 
    The EXPRESSION undergoes the same expansions as if it were within
-double quotes, but double quote characters in EXPRESSION are not treated
-specially and are removed.  All tokens in the expression undergo
-parameter and variable expansion, command substitution, and quote
-removal.  The result is treated as the arithmetic expression to be
-evaluated.  Arithmetic expansions may be nested.
+double quotes, but unescaped double quote characters in EXPRESSION are
+not treated specially and are removed.  All tokens in the expression
+undergo parameter and variable expansion, command substitution, and
+quote removal.  The result is treated as the arithmetic expression to be
+evaluated.  Since the way Bash handles double quotes can potentially
+result in empty strings, arithmetic expansion treats those as
+expressions that evaluate to 0.  Arithmetic expansions may be nested.
 
    The evaluation is performed according to the rules listed below
 (*note Shell Arithmetic::).  If the expression is invalid, Bash prints a
@@ -3897,11 +3929,11 @@ standard.
      compound command returns a non-zero exit status, subject to the
      following conditions.  The ‘ERR’ trap is not executed if the failed
      command is part of the command list immediately following an
-     ‘until’ or ‘while’ keyword, part of the test following the ‘if’ or
-     ‘elif’ reserved words, part of a command executed in a ‘&&’ or ‘||’
-     list except the command following the final ‘&&’ or ‘||’, any
-     command in a pipeline but the last, (subject to the state of the
-     ‘pipefail’ shell option), or if the command's return status is
+     ‘until’ or ‘while’ reserved word, part of the test following the
+     ‘if’ or ‘elif’ reserved words, part of a command executed in a ‘&&’
+     or ‘||’ list except the command following the final ‘&&’ or ‘||’,
+     any command in a pipeline but the last, (subject to the state of
+     the ‘pipefail’ shell option), or if the command's return status is
      being inverted using ‘!’.  These are the same conditions obeyed by
      the ‘errexit’ (‘-e’) option.
 
@@ -4856,9 +4888,9 @@ parameters, or to display the names and values of shell variables.
           a list (*note Lists::), or a compound command (*note Compound
           Commands::) returns a non-zero status.  The shell does not
           exit if the command that fails is part of the command list
-          immediately following a ‘while’ or ‘until’ keyword, part of
-          the test in an ‘if’ statement, part of any command executed in
-          a ‘&&’ or ‘||’ list except the command following the final
+          immediately following a ‘while’ or ‘until’ reserved word, part
+          of the test in an ‘if’ statement, part of any command executed
+          in a ‘&&’ or ‘||’ list except the command following the final
           ‘&&’ or ‘||’, any command in a pipeline but the last (subject
           to the state of the ‘pipefail’ shell option), or if the
           command's return status is being inverted with ‘!’.  If a
@@ -7001,7 +7033,10 @@ link itself.
      greater than or equal to ARG2, respectively.  ARG1 and ARG2 may be
      positive or negative integers.  When used with the ‘[[’ command,
      ARG1 and ARG2 are evaluated as arithmetic expressions (*note Shell
-     Arithmetic::).
+     Arithmetic::).  Since the expansions the ‘[[’ command performs on
+     ARG1 and ARG2 can potentially result in empty strings, arithmetic
+     expression evaluation treats those as expressions that evaluate to
+     0.
 
 
 File: bash.info,  Node: Shell Arithmetic,  Next: Aliases,  Prev: Bash Conditional Expressions,  Up: Bash Features
@@ -7182,8 +7217,18 @@ expressions that must expand to an integer (*note Shell Arithmetic::))
 and are zero-based; associative arrays use arbitrary strings.  Unless
 otherwise noted, indexed array indices must be non-negative integers.
 
-   An indexed array is created automatically if any variable is assigned
-to using the syntax
+   The shell performs parameter and variable expansion, arithmetic
+expansion, command substitution, and quote removal on indexed array
+subscripts.  Since this can potentially result in empty strings,
+subscript indexing treats those as expressions that evaluate to 0.
+
+   The shell performs tilde expansion, parameter and variable expansion,
+arithmetic expansion, command substitution, and quote removal on
+associative array subscripts.  Empty strings cannot be used as
+associative array keys.
+
+   Bash automatically creates an indexed array if any variable is
+assigned to using the syntax
      NAME[SUBSCRIPT]=VALUE
 
 The SUBSCRIPT is treated as an arithmetic expression that must evaluate
@@ -7758,7 +7803,7 @@ startup files.
      double-quoted string, even if the ‘histexpand’ option is enabled.
 
   31. When printing shell function definitions (e.g., by ‘type’), Bash
-     does not print the ‘function’ keyword unless necessary.
+     does not print the ‘function’ reserved word unless necessary.
 
   32. Non-interactive shells exit if a syntax error in an arithmetic
      expansion results in an invalid expression.
@@ -7867,72 +7912,77 @@ startup files.
   58. The ‘kill’ builtin does not accept signal names with a ‘SIG’
      prefix.
 
-  59. The ‘printf’ builtin uses ‘double’ (via ‘strtod’) to convert
+  59. The ‘kill’ builtin returns a failure status if any of the pid or
+     job arguments are invalid or if sending the specified signal to any
+     of them fails.  In default mode, ‘kill’ returns success if the
+     signal was successfully sent to any of the specified processes.
+
+  60. The ‘printf’ builtin uses ‘double’ (via ‘strtod’) to convert
      arguments corresponding to floating point conversion specifiers,
      instead of ‘long double’ if it's available.  The ‘L’ length
      modifier forces ‘printf’ to use ‘long double’ if it's available.
 
-  60. The ‘pwd’ builtin verifies that the value it prints is the same as
+  61. The ‘pwd’ builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the ‘-P’ option.
 
-  61. The ‘read’ builtin may be interrupted by a signal for which a trap
+  62. The ‘read’ builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      ‘read’, the trap handler executes and ‘read’ returns an exit status
      greater than 128.
 
-  62. When the ‘set’ builtin is invoked without options, it does not
+  63. When the ‘set’ builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  63. When the ‘set’ builtin is invoked without options, it displays
+  64. When the ‘set’ builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  64. The ‘test’ builtin compares strings using the current locale when
+  65. The ‘test’ builtin compares strings using the current locale when
      evaluating the ‘<’ and ‘>’ binary operators.
 
-  65. The ‘test’ builtin's ‘-t’ unary primary requires an argument.
+  66. The ‘test’ builtin's ‘-t’ unary primary requires an argument.
      Historical versions of ‘test’ made the argument optional in certain
      cases, and Bash attempts to accommodate those for backwards
      compatibility.
 
-  66. The ‘trap’ builtin displays signal names without the leading
+  67. The ‘trap’ builtin displays signal names without the leading
      ‘SIG’.
 
-  67. The ‘trap’ builtin doesn't check the first argument for a possible
+  68. The ‘trap’ builtin doesn't check the first argument for a possible
      signal specification and revert the signal handling to the original
      disposition if it is, unless that argument consists solely of
      digits and is a valid signal number.  If users want to reset the
      handler for a given signal to the original disposition, they should
      use ‘-’ as the first argument.
 
-  68. ‘trap -p’ without arguments displays signals whose dispositions
+  69. ‘trap -p’ without arguments displays signals whose dispositions
      are set to SIG_DFL and those that were ignored when the shell
      started, not just trapped signals.
 
-  69. The ‘type’ and ‘command’ builtins will not report a non-executable
+  70. The ‘type’ and ‘command’ builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in ‘$PATH’.
 
-  70. The ‘ulimit’ builtin uses a block size of 512 bytes for the ‘-c’
+  71. The ‘ulimit’ builtin uses a block size of 512 bytes for the ‘-c’
      and ‘-f’ options.
 
-  71. The ‘unset’ builtin with the ‘-v’ option specified returns a fatal
+  72. The ‘unset’ builtin with the ‘-v’ option specified returns a fatal
      error if it attempts to unset a ‘readonly’ or ‘non-unsettable’
      variable, which causes a non-interactive shell to exit.
 
-  72. When asked to unset a variable that appears in an assignment
+  73. When asked to unset a variable that appears in an assignment
      statement preceding the command, the ‘unset’ builtin attempts to
      unset a variable of the same name in the current or previous scope
      as well.  This implements the required "if an assigned variable is
      further modified by the utility, the modifications made by the
      utility shall persist" behavior.
 
-  73. The arrival of ‘SIGCHLD’ when a trap is set on ‘SIGCHLD’ does not
+  74. The arrival of ‘SIGCHLD’ when a trap is set on ‘SIGCHLD’ does not
      interrupt the ‘wait’ builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  74. Bash removes an exited background process's status from the list
+  75. Bash removes an exited background process's status from the list
      of such statuses after the ‘wait’ builtin returns it.
 
    There is other POSIX behavior that Bash does not implement by default
@@ -8158,19 +8208,22 @@ uses the JOB abstraction as the basis for job control.
 
    To facilitate the implementation of the user interface to job
 control, each process has a “process group ID”, and the operating system
-maintains the notion of a current terminal process group ID.  Processes
-that have the same process group ID are said to be part of the same
-“process group”.  Members of the foreground process group (processes
-whose process group ID is equal to the current terminal process group
-ID) receive keyboard-generated signals such as ‘SIGINT’.  Processes in
-the foreground process group are said to be foreground processes.
-Background processes are those whose process group ID differs from the
-terminal's; such processes are immune to keyboard-generated signals.
-Only foreground processes are allowed to read from or, if the user so
-specifies with ‘stty tostop’, write to the terminal.  Background
-processes which attempt to read from (write to when ‘tostop’ is in
-effect) the terminal are sent a ‘SIGTTIN’ (‘SIGTTOU’) signal by the
-kernel's terminal driver, which, unless caught, suspends the process.
+maintains the notion of a current terminal process group ID.  This
+terminal process group ID is associated with the “controlling terminal”.
+
+   Processes that have the same process group ID are said to be part of
+the same “process group”.  Members of the foreground process group
+(processes whose process group ID is equal to the current terminal
+process group ID) receive keyboard-generated signals such as ‘SIGINT’.
+Processes in the foreground process group are said to be foreground
+processes.  Background processes are those whose process group ID
+differs from the controlling terminal's; such processes are immune to
+keyboard-generated signals.  Only foreground processes are allowed to
+read from or, if the user so specifies with ‘stty tostop’, write to the
+controlling terminal.  The system sends a ‘SIGTTIN’ (‘SIGTTOU’) signal
+to background processes which attempt to read from (write to when
+‘tostop’ is in effect) the terminal, which, unless caught, suspends the
+process.
 
    If the operating system on which Bash is running supports job
 control, Bash contains facilities to use it.  Typing the “suspend”
@@ -9560,7 +9613,8 @@ File: bash.info,  Node: Commands For Moving,  Next: Commands For History,  Up: B
 
 ‘clear-screen (C-l)’
      Clear the screen, then redraw the current line, leaving the current
-     line at the top of the screen.
+     line at the top of the screen.  If given a numeric argument, this
+     refreshes the current line without clearing the screen.
 
 ‘redraw-current-line ()’
      Refresh the current line.  By default, this is unbound.
@@ -11890,8 +11944,8 @@ historical Bourne shell) as the baseline reference.
    • Bash implements command aliases and the ‘alias’ and ‘unalias’
      builtins (*note Aliases::).
 
-   • Bash implements the ‘!’ keyword to negate the return value of a
-     pipeline (*note Pipelines::).  This is very useful when an ‘if’
+   • Bash implements the ‘!’ reserved word to negate the return value of
+     a pipeline (*note Pipelines::).  This is very useful when an ‘if’
      statement needs to act only if a test fails.  The Bash ‘-o
      pipefail’ option to ‘set’ will cause a pipeline to return a failure
      status if any command fails (*note The Set Builtin::).
@@ -12876,9 +12930,9 @@ D.2 Index of Shell Reserved Words
 
 * !:                                     Pipelines.           (line   9)
 * [[:                                    Conditional Constructs.
-                                                              (line 126)
+                                                              (line 128)
 * ]]:                                    Conditional Constructs.
-                                                              (line 126)
+                                                              (line 128)
 * {:                                     Command Grouping.    (line  21)
 * }:                                     Command Grouping.    (line  21)
 * case:                                  Conditional Constructs.
@@ -13321,7 +13375,7 @@ D.4 Function Index
 * quoted-insert (C-q or C-v):            Commands For Text.   (line  28)
 * re-read-init-file (C-x C-r):           Miscellaneous Commands.
                                                               (line   6)
-* redraw-current-line ():                Commands For Moving. (line  61)
+* redraw-current-line ():                Commands For Moving. (line  62)
 * reverse-search-history (C-r):          Commands For History.
                                                               (line  29)
 * revert-line (M-r):                     Miscellaneous Commands.
@@ -13544,138 +13598,138 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top897
-Node: Introduction2834
-Node: What is Bash?3047
-Node: What is a shell?4180
-Node: Definitions6790
-Node: Basic Shell Features10117
-Node: Shell Syntax11341
-Node: Shell Operation12368
-Node: Quoting13659
-Node: Escape Character14997
-Node: Single Quotes15532
-Node: Double Quotes15881
-Node: ANSI-C Quoting17226
-Node: Locale Translation18620
-Node: Creating Internationalized Scripts20023
-Node: Comments24221
-Node: Shell Commands24988
-Node: Reserved Words25927
-Node: Simple Commands26792
-Node: Pipelines27454
-Node: Lists30710
-Node: Compound Commands32582
-Node: Looping Constructs33591
-Node: Conditional Constructs36110
-Node: Command Grouping51046
-Node: Coprocesses52538
-Node: GNU Parallel55224
-Node: Shell Functions56142
-Node: Shell Parameters64590
-Node: Positional Parameters69492
-Node: Special Parameters70582
-Node: Shell Expansions74043
-Node: Brace Expansion76232
-Node: Tilde Expansion79578
-Node: Shell Parameter Expansion82533
-Node: Command Substitution102341
-Node: Arithmetic Expansion105870
-Node: Process Substitution106884
-Node: Word Splitting107992
-Node: Filename Expansion110436
-Node: Pattern Matching113660
-Node: Quote Removal119383
-Node: Redirections119687
-Node: Executing Commands129950
-Node: Simple Command Expansion130617
-Node: Command Search and Execution132725
-Node: Command Execution Environment135169
-Node: Environment138617
-Node: Exit Status140520
-Node: Signals142578
-Node: Shell Scripts147507
-Node: Shell Builtin Commands150805
-Node: Bourne Shell Builtins152916
-Node: Bash Builtins179480
-Node: Modifying Shell Behavior216404
-Node: The Set Builtin216746
-Node: The Shopt Builtin228734
-Node: Special Builtins245786
-Node: Shell Variables246775
-Node: Bourne Shell Variables247209
-Node: Bash Variables249717
-Node: Bash Features288622
-Node: Invoking Bash289636
-Node: Bash Startup Files296220
-Node: Interactive Shells301462
-Node: What is an Interactive Shell?301870
-Node: Is this Shell Interactive?302532
-Node: Interactive Shell Behavior303356
-Node: Bash Conditional Expressions307117
-Node: Shell Arithmetic312328
-Node: Aliases315657
-Node: Arrays318791
-Node: The Directory Stack325883
-Node: Directory Stack Builtins326680
-Node: Controlling the Prompt331125
-Node: The Restricted Shell334010
-Node: Bash POSIX Mode336892
-Node: Shell Compatibility Mode354953
-Node: Job Control363960
-Node: Job Control Basics364417
-Node: Job Control Builtins370695
-Node: Job Control Variables377377
-Node: Command Line Editing378608
-Node: Introduction and Notation380311
-Node: Readline Interaction382663
-Node: Readline Bare Essentials383851
-Node: Readline Movement Commands385659
-Node: Readline Killing Commands386655
-Node: Readline Arguments388678
-Node: Searching389735
-Node: Readline Init File391978
-Node: Readline Init File Syntax393281
-Node: Conditional Init Constructs420106
-Node: Sample Init File424491
-Node: Bindable Readline Commands427611
-Node: Commands For Moving429149
-Node: Commands For History431517
-Node: Commands For Text436907
-Node: Commands For Killing441032
-Node: Numeric Arguments443820
-Node: Commands For Completion444972
-Node: Keyboard Macros450668
-Node: Miscellaneous Commands451369
-Node: Readline vi Mode457936
-Node: Programmable Completion458913
-Node: Programmable Completion Builtins467650
-Node: A Programmable Completion Example479387
-Node: Using History Interactively484732
-Node: Bash History Facilities485413
-Node: Bash History Builtins489148
-Node: History Interaction495619
-Node: Event Designators500569
-Node: Word Designators502147
-Node: Modifiers504539
-Node: Installing Bash506476
-Node: Basic Installation507592
-Node: Compilers and Options511468
-Node: Compiling For Multiple Architectures512218
-Node: Installation Names513971
-Node: Specifying the System Type516205
-Node: Sharing Defaults516951
-Node: Operation Controls517665
-Node: Optional Features518684
-Node: Reporting Bugs531064
-Node: Major Differences From The Bourne Shell532421
-Node: GNU Free Documentation License553841
-Node: Indexes579018
-Node: Builtin Index579469
-Node: Reserved Word Index586567
-Node: Variable Index589012
-Node: Function Index606425
-Node: Concept Index620420
+Node: Top901
+Node: Introduction2842
+Node: What is Bash?3055
+Node: What is a shell?4188
+Node: Definitions6798
+Node: Basic Shell Features10125
+Node: Shell Syntax11349
+Node: Shell Operation12376
+Node: Quoting13667
+Node: Escape Character15005
+Node: Single Quotes15540
+Node: Double Quotes15889
+Node: ANSI-C Quoting17234
+Node: Locale Translation18628
+Node: Creating Internationalized Scripts20031
+Node: Comments24229
+Node: Shell Commands24996
+Node: Reserved Words25935
+Node: Simple Commands26800
+Node: Pipelines27462
+Node: Lists30718
+Node: Compound Commands32590
+Node: Looping Constructs33599
+Node: Conditional Constructs36118
+Node: Command Grouping51188
+Node: Coprocesses52680
+Node: GNU Parallel55366
+Node: Shell Functions56284
+Node: Shell Parameters64732
+Node: Positional Parameters69633
+Node: Special Parameters70723
+Node: Shell Expansions74184
+Node: Brace Expansion76373
+Node: Tilde Expansion79711
+Node: Shell Parameter Expansion82666
+Node: Command Substitution103309
+Node: Arithmetic Expansion106838
+Node: Process Substitution108014
+Node: Word Splitting109122
+Node: Filename Expansion111566
+Node: Pattern Matching114790
+Node: Quote Removal120513
+Node: Redirections120817
+Node: Executing Commands131080
+Node: Simple Command Expansion131747
+Node: Command Search and Execution133855
+Node: Command Execution Environment136299
+Node: Environment139747
+Node: Exit Status141650
+Node: Signals143708
+Node: Shell Scripts148637
+Node: Shell Builtin Commands151935
+Node: Bourne Shell Builtins154046
+Node: Bash Builtins180616
+Node: Modifying Shell Behavior217540
+Node: The Set Builtin217882
+Node: The Shopt Builtin229876
+Node: Special Builtins246928
+Node: Shell Variables247917
+Node: Bourne Shell Variables248351
+Node: Bash Variables250859
+Node: Bash Features289764
+Node: Invoking Bash290778
+Node: Bash Startup Files297362
+Node: Interactive Shells302604
+Node: What is an Interactive Shell?303012
+Node: Is this Shell Interactive?303674
+Node: Interactive Shell Behavior304498
+Node: Bash Conditional Expressions308259
+Node: Shell Arithmetic313676
+Node: Aliases317005
+Node: Arrays320139
+Node: The Directory Stack327727
+Node: Directory Stack Builtins328524
+Node: Controlling the Prompt332969
+Node: The Restricted Shell335854
+Node: Bash POSIX Mode338736
+Node: Shell Compatibility Mode357093
+Node: Job Control366100
+Node: Job Control Basics366557
+Node: Job Control Builtins372925
+Node: Job Control Variables379607
+Node: Command Line Editing380838
+Node: Introduction and Notation382541
+Node: Readline Interaction384893
+Node: Readline Bare Essentials386081
+Node: Readline Movement Commands387889
+Node: Readline Killing Commands388885
+Node: Readline Arguments390908
+Node: Searching391965
+Node: Readline Init File394208
+Node: Readline Init File Syntax395511
+Node: Conditional Init Constructs422336
+Node: Sample Init File426721
+Node: Bindable Readline Commands429841
+Node: Commands For Moving431379
+Node: Commands For History433843
+Node: Commands For Text439233
+Node: Commands For Killing443358
+Node: Numeric Arguments446146
+Node: Commands For Completion447298
+Node: Keyboard Macros452994
+Node: Miscellaneous Commands453695
+Node: Readline vi Mode460262
+Node: Programmable Completion461239
+Node: Programmable Completion Builtins469976
+Node: A Programmable Completion Example481713
+Node: Using History Interactively487058
+Node: Bash History Facilities487739
+Node: Bash History Builtins491474
+Node: History Interaction497945
+Node: Event Designators502895
+Node: Word Designators504473
+Node: Modifiers506865
+Node: Installing Bash508802
+Node: Basic Installation509918
+Node: Compilers and Options513794
+Node: Compiling For Multiple Architectures514544
+Node: Installation Names516297
+Node: Specifying the System Type518531
+Node: Sharing Defaults519277
+Node: Operation Controls519991
+Node: Optional Features521010
+Node: Reporting Bugs533390
+Node: Major Differences From The Bourne Shell534747
+Node: GNU Free Documentation License556173
+Node: Indexes581350
+Node: Builtin Index581801
+Node: Reserved Word Index588899
+Node: Variable Index591344
+Node: Function Index608757
+Node: Concept Index622752
 
 End Tag Table
 

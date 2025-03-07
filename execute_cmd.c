@@ -776,6 +776,14 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 
 	      if (user_subshell && ignore_return == 0 && invert == 0 && exit_immediately_on_error && exec_result != EXECUTION_SUCCESS)
 		{
+		  /* Update BASH_COMMAND before running any traps,
+		     including the exit trap, since we are going to exit
+		     the shell. */
+		  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+		    {
+		      FREE (the_printed_command_except_trap);
+		      the_printed_command_except_trap = savestring (the_printed_command);
+		    }
 		  run_pending_traps ();
 		  jump_to_top_level (ERREXIT);
 		}

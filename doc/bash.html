@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2025 January 8<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2025 February 24<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1010,8 +1010,11 @@ otherwise the return status is 1.
 The <I>expression</I>
 undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in <I>expression</I> are not treated
+but unescaped double quote characters
+in <I>expression</I> are not treated
 specially and are removed.
+Since this can potentially result in empty strings, this command treats
+those as expressions that evaluate to 0.
 <DT><B>[[</B> <I>expression</I> <B>]]</B><DD>
 
 Evaluate the conditional expression <I>expression</I>
@@ -1753,7 +1756,7 @@ below).
 A
 <I>variable</I>
 
-may be assigned to by a statement of the form
+is assigned to using a statement of the form
 <DL COMPACT><DT><DD>
 <P>
 
@@ -3933,8 +3936,26 @@ associative arrays are referenced using arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 <P>
 
-An indexed array is created automatically if any variable is assigned to
-using the syntax
+The shell performs
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on indexed array subscripts.
+Since this
+can potentially result in empty strings,
+subscript indexing treats
+those as expressions that evaluate to 0.
+<P>
+
+The shell performs
+tilde expansion,
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on associative array subscripts.
+Empty strings cannot be used as associative array keys.
+<P>
+
+<B>Bash</B> automatically creates an indexed array
+if any variable is assigned to using the syntax
 <DL COMPACT><DT><DD>
 <I>name</I>[<I>subscript</I>]=<I>value</I>
 .
@@ -4283,7 +4304,7 @@ each generated term will contain the same number of digits,
 zero-padding where necessary.
 When letters are supplied, the expression expands to each character
 lexicographically between <I>x</I> and <I>y</I>, inclusive,
-using the default C locale.
+using the C locale.
 Note that both <I>x</I> and <I>y</I> must be of the same type
 (integer or letter).
 When the increment is supplied, it is used as the difference between
@@ -4619,9 +4640,15 @@ starting at the character specified by <I>offset</I>.
 If <I>parameter</I> is <B>@</B> or <B>*</B>, an indexed array subscripted by
 <B>@</B> or <B>*</B>, or an associative array name, the results differ as
 described below.
-If <I>length</I> is omitted, expands to the substring of the value of
+If <B>:</B><I>length</I> is omitted (the first form above), this
+expands to the substring of the value of
 <I>parameter</I> starting at the character specified by <I>offset</I>
 and extending to the end of the value.
+If <I>offset</I> is omitted,
+it is treated as 0.
+If <I>length</I> is omitted,
+but the colon after <I>offset</I> is present,
+it is treated as 0.
 <I>length</I> and <I>offset</I> are arithmetic expressions (see
 <FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
 
@@ -5178,11 +5205,16 @@ The
 
 undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in <I>expression</I> are not treated specially
-and are removed.
+but unescaped double quote characters
+in <I>expression</I> are not treated
+specially and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.
+Since the way Bash handles double quotes
+can potentially result in empty strings,
+arithmetic expansion treats
+those as expressions that evaluate to 0.
 Arithmetic expansions may be nested.
 <P>
 
@@ -7032,6 +7064,15 @@ are evaluated as arithmetic expressions (see
 
 </FONT>
 above).
+Since the expansions the <B>[[</B> command performs on
+<I>arg1</I>
+
+and
+<I>arg2</I>
+
+can potentially result in empty strings,
+arithmetic expression evaluation treats
+those as expressions that evaluate to 0.
 
 </DL>
 <A NAME="lbBY">&nbsp;</A>
@@ -7721,6 +7762,10 @@ To facilitate the implementation of the user interface to job control,
 each process has a <I>process group ID</I>, and
 the operating system maintains the notion of a <I>current terminal
 process group ID</I>.
+This terminal process group ID is associated with the
+<I>controlling terminal</I>.
+<P>
+
 Processes that have the same process group ID are said to be part of
 the same <I>process group</I>.
 Members of the <I>foreground</I> process group (processes whose
@@ -7735,19 +7780,22 @@ Processes in the foreground process group are said to be
 processes.
 <I>Background</I>
 
-processes are those whose process group ID differs from the terminal's;
+processes are those whose process group ID differs from the
+controlling terminal's;
 such processes are immune to keyboard-generated signals.
-Only foreground processes are allowed to read from or, if the
-user so specifies with
+Only foreground processes are allowed to read from or,
+if the user so specifies with
 
-write to the terminal.
-Background processes which attempt to read from (write to when
-
-is in effect) the terminal are sent a
+write to the controlling terminal.
+The system sends a
 <FONT SIZE=-1><B>SIGTTIN (SIGTTOU)</B>
 
 </FONT>
-signal by the kernel's terminal driver,
+signal to background processes which attempt to
+read from (write to when
+
+is in effect)
+the terminal,
 which, unless caught, suspends the process.
 <P>
 
@@ -9451,7 +9499,7 @@ leaving the current line at the top of the screen.
 Clear the screen,
 then redraw the current line,
 leaving the current line at the top of the screen.
-With an argument, refresh the current line without clearing the
+With a numeric argument, refresh the current line without clearing the
 screen.
 <DT><B>redraw-current-line</B>
 
@@ -14133,7 +14181,7 @@ command that fails is part of the command list immediately following a
 or
 <B>until</B>
 
-keyword,
+reserved word,
 part of the test following the
 <B>if</B>
 
@@ -15648,7 +15696,7 @@ command is part of the command list immediately following a
 or
 <B>until</B>
 
-keyword,
+reserved word,
 part of the test in an
 <I>if</I>
 
@@ -16765,7 +16813,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2025 January 8<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2025 February 24<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16874,7 +16922,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20250122/doc/bash.1.<BR>
-Time: 28 January 2025 09:45:18 EST
+This document was created by man2html from /usr/local/src/bash/bash-20250224/doc/bash.1.<BR>
+Time: 28 February 2025 11:12:41 EST
 </BODY>
 </HTML>

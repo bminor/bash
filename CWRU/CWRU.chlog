@@ -11018,3 +11018,31 @@ print_cmd.c
 				   ----
 configure.ac
 	- check for d_type member of struct dirent for future use
+
+				   2/24
+				   ----
+doc/bash.1,doc/bashref.texi
+	- document the word expansions performed on indexed array subscripts
+	  and assoc array keys
+	- document the possibility and effect of empty strings on arithmetic
+	  evaluation for substring expansion, arithmetic expansion, operands
+	  to the the [[ command's arithmetic operators, the expression in
+	  the (( compound command, and indexed array subscripts
+
+				   2/24
+				   ----
+execute_cmd.c
+	- execute_command_internal: if executing a (...) subshell, make sure
+	  to update BASH_COMMAND before exiting on an error return from the
+	  subshell with -e set
+	  Report from Max Bowsher <maxbowsher@gmail.com>
+
+				    3/3
+				    ---
+redir.c
+	- here_document_to_fd: if we are trying to use a pipe for a here
+	  document, but the F_GETPIPE_SZ fcntl returns a value shorter than
+	  the here document length, make sure to close the pipe file descriptors
+
+builtins/ulimit.def
+	- pipesize: use pathconf and _PC_PIPE_BUF if available

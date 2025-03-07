@@ -1164,6 +1164,8 @@ as if it were within double quotes,
 but unescaped double quote characters
 in @var{expression} are not treated
 specially and are removed.
+Since this can potentially result in empty strings,
+this command treats those as expressions that evaluate to 0.
 If the value of the expression is non-zero, the return status is 0;
 otherwise the return status is 1. 
 
@@ -2935,6 +2937,10 @@ specially and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.
+Since the way Bash handles double quotes
+can potentially result in empty strings,
+arithmetic expansion treats
+those as expressions that evaluate to 0.
 Arithmetic expansions may be nested. 
 
 The evaluation is performed according to the rules listed below
@@ -8383,6 +8389,11 @@ respectively.  @var{Arg1} and @var{arg2}
 may be positive or negative integers.
 When used with the @code{[[} command, @var{arg1} and @var{arg2}
 are evaluated as arithmetic expressions (@pxref{Shell Arithmetic}).
+Since the expansions the @code{[[} command performs on
+@var{arg1} and @var{arg2}
+can potentially result in empty strings,
+arithmetic expression evaluation treats
+those as expressions that evaluate to 0.
 @end table
 
 @node Shell Arithmetic
@@ -8601,8 +8612,24 @@ and are zero-based;
 associative arrays use arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 
-An indexed array is created automatically if any variable is assigned to
-using the syntax
+The shell performs
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on indexed array subscripts.
+Since this
+can potentially result in empty strings,
+subscript indexing treats
+those as expressions that evaluate to 0.
+
+The shell performs
+tilde expansion,
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on associative array subscripts.
+Empty strings cannot be used as associative array keys.
+
+Bash automatically creates an indexed array
+if any variable is assigned to using the syntax
 @example
 @var{name}[@var{subscript}]=@var{value}
 @end example
@@ -9857,6 +9884,9 @@ To facilitate the implementation of the user interface to job control,
 each process has a @dfn{process group @sc{id}}, and
 the operating system maintains the notion of a current terminal
 process group @sc{id}.
+This terminal process group @sc{id} is associated with the
+@dfn{controlling terminal}.
+
 Processes that have the same process group ID are said to be part of
 the same @dfn{process group}.
 Members of the foreground process group (processes whose
@@ -9865,14 +9895,18 @@ process group @sc{id} is equal to the current terminal process group
 Processes in the foreground process group are said to be
 foreground processes.
 Background processes
-are those whose process group @sc{id} differs from the terminal's;
+are those whose process group @sc{id} differs from the
+controlling terminal's;
 such processes are immune to keyboard-generated signals.
-Only foreground processes are allowed to read from or, if
-the user so specifies with @code{stty tostop}, write to the terminal.
-Background processes which attempt to
-read from (write to when @code{tostop} is in effect) the
-terminal are sent a @code{SIGTTIN} (@code{SIGTTOU})
-signal by the kernel's terminal driver,
+Only foreground processes are allowed to read from or,
+if the user so specifies with
+@code{stty tostop},
+write to the controlling terminal.
+The system sends a
+@code{SIGTTIN} (@code{SIGTTOU})
+signal to background processes which attempt to
+read from (write to when @code{tostop} is in effect)
+the terminal,
 which, unless caught, suspends the process. 
 
 If the operating system on which Bash is running supports
