@@ -5,7 +5,7 @@ dnl report bugs to chet.ramey@case.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2024 Free Software Foundation, Inc.
+# Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.075])dnl
+AC_REVISION([for Bash 5.3, version 5.076])dnl
 
 define(bashvers, 5.3)
-define(relstatus, beta)
+define(relstatus, rc1)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 

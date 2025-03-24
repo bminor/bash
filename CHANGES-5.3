@@ -1,3 +1,68 @@
+This document details the changes between this version, bash-5.3-rc1, and
+the previous version, bash-5.3-beta.
+
+1. Changes to Bash
+
+a. Fixed a bug where backslash did not quote multibyte characters in some
+   cases.
+
+b. Requesting the length of an element of an unset array is a fatal error
+   when `set -u' is enabled and the subscript is not `@' or `*'.
+
+c. Prompt expansion now quotes the results of \U.
+
+d. Changes to `set -e' exit behavior in posix mode, since POSIX now says to
+   exit as if executing the `exit builtin with no arguments'.
+
+e. Fixes to the `exec' builtin to undo redirections if it is given a command
+   name to execute and the exection fails, but the shell does not exit. This
+   is POSIX interp 1896.
+
+f. Fixed a bug that resulted in `wait' setting $? to 255 in some cases when
+   waiting for a specific PID.
+
+g. Fixed a bug involving redirections to the file descriptor bash is using to
+   read a script.
+
+h. In POSIX mode, `kill' returns a failure status if any of the PID/job
+   arguments are not found or if sending the signal fails.
+
+i. Fixed a bug that caused an invalid brace sequence expression to mess up
+   expansion of an enclosing brace expansion.
+
+j. Fixed a bug in command printing that output the wrong default file
+   descriptor for the <> redirection.
+
+k. User-specified subshells (`(...)') now update BASH_COMMAND in the subshell.
+
+l. Fixed a bug with the `help -m' and loadable builtins.
+
+m. Fixed a potential file descriptor leak when trying to use a pipe for a
+   here document.
+
+2. Changes to Readline
+
+a. Fixed a bug that allowed a history search to change the current history
+   list position.
+
+b. Fixed a bug that allowed ^G to retain a saved command to execute.
+
+c. Updates to new export-completions command to allow filename suffixes.
+
+d. Fixed a redisplay bug with prompts containing multiple sequences of
+   invisible characters that are longer than the screen width.
+
+3. New Features in Bash
+
+a. There is a new `fltexpr' builtin to perform floating-point arithmetic
+   similarly to `let'.
+
+4. New Features in Readline
+
+a. Readline can reset its idea of the screen dimensions when executing after
+   a SIGCONT.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.3-beta, and
 the previous version, bash-5.3-alpha.
 

@@ -38,15 +38,7 @@ extern char *realloc ();
 #include <string.h>
 #endif
 
-#if !defined (HAVE_BCOPY) && (defined (HAVE_STRING_H) || defined (STDC_HEADERS))
-#  define bcopy(s, d, n)	memcpy ((d), (s), (n))
-#endif
-
 #else /* not HAVE_CONFIG_H */
-
-#if defined(HAVE_STRING_H) || defined(STDC_HEADERS)
-#define bcopy(s, d, n) memcpy ((d), (s), (n))
-#endif
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -72,23 +64,20 @@ memory_out ()
   exit (1);
 }
 
-static char *
-xmalloc (size)
-     unsigned size;
+static void *
+xmalloc (size_t size)
 {
-  register char *tem = malloc (size);
+  register void *tem = malloc (size);
 
   if (!tem)
     memory_out ();
   return tem;
 }
 
-static char *
-xrealloc (ptr, size)
-     char *ptr;
-     unsigned size;
+static void *
+xrealloc (void *ptr, size_t size)
 {
-  register char *tem = realloc (ptr, size);
+  register void *tem = realloc (ptr, size);
 
   if (!tem)
     memory_out ();
@@ -108,15 +97,11 @@ xrealloc (ptr, size)
 
    The fourth and following args to tparam serve as the parameter values.  */
 
-static char *tparam1 ();
+static char *tparam1 (char *, char *, int, char *, char *, int *);
 
 /* VARARGS 2 */
 char *
-tparam (string, outstring, len, arg0, arg1, arg2, arg3)
-     char *string;
-     char *outstring;
-     int len;
-     int arg0, arg1, arg2, arg3;
+tparam (char *string, char *outstring, int len, int arg0, int arg1, int arg2, int arg3)
 {
   int arg[4];
 
@@ -134,9 +119,7 @@ static char tgoto_buf[50];
 
 __private_extern__
 char *
-tgoto (cm, hpos, vpos)
-     char *cm;
-     int hpos, vpos;
+tgoto (char *cm, int hpos, int vpos)
 {
   int args[2];
   if (!cm)
@@ -147,12 +130,7 @@ tgoto (cm, hpos, vpos)
 }
 
 static char *
-tparam1 (string, outstring, len, up, left, argp)
-     char *string;
-     char *outstring;
-     int len;
-     char *up, *left;
-     register int *argp;
+tparam1 (char *string, char *outstring, int len, char *up, char *left, int *argp)
 {
   register int c;
   register char *p = string;
@@ -173,21 +151,21 @@ tparam1 (string, outstring, len, up, left, argp)
       if (op + 5 >= outend)
 	{
 	  register char *new;
+	  int offset = op - outstring;
+
 	  if (outlen == 0)
 	    {
 	      outlen = len + 40;
 	      new = (char *) xmalloc (outlen);
-	      outend += 40;
-	      bcopy (outstring, new, op - outstring);
+	      memcpy (new, outstring, offset);
 	    }
 	  else
 	    {
-	      outend += outlen;
 	      outlen *= 2;
 	      new = (char *) xrealloc (outstring, outlen);
 	    }
-	  op += new - outstring;
-	  outend += new - outstring;
+	  op = new + offset;
+	  outend = new + outlen;
 	  outstring = new;
 	}
       c = *p++;

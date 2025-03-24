@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2024 Free Software Foundation, Inc.
+   Copyright (C) 2024-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify

@@ -903,7 +903,7 @@ operators do not evaluate \fIexpression2\fP if the value of
 the entire conditional expression.
 .RE
 .TP
-\fBfor\fP \fIname\fP [ [ \fBin\fP [ \fIword .\|.\|.\&\fP ] ] ; ] \fBdo\fP \fIlist\fP ; \fBdone\fP
+\fBfor\fP \fIname\fP [ [ \fBin\fP \fIword .\|.\|.\&\fP ] ; ] \fBdo\fP \fIlist\fP ; \fBdone\fP
 First, expand The list of words following \fBin\fP, generating a list
 of items.
 Then, the variable \fIname\fP is set to each element of this list
@@ -917,7 +917,7 @@ The return status is the exit status of the last command that executes.
 If the expansion of the items following \fBin\fP results in an empty
 list, no commands are executed, and the return status is 0.
 .TP
-\fBfor\fP (( \fIexpr1\fP ; \fIexpr2\fP ; \fIexpr3\fP )) ; \fBdo\fP \fIlist\fP ; \fBdone\fP
+\fBfor\fP (( \fIexpr1\fP ; \fIexpr2\fP ; \fIexpr3\fP )) [;] \fBdo\fP \fIlist\fP ; \fBdone\fP
 First, evaluate the arithmetic expression \fIexpr1\fP according
 to the rules described below under
 .SM
@@ -3419,7 +3419,7 @@ For example, a\fB{\fPd,c,b\fB}\fPe expands into
 .Q "ade ace abe" .
 .PP
 A sequence expression takes the form
-\fB{\fP\fIx\fP\fB..\fP\fIy\fP\fB[..\fP\fIincr\fP\fB]}\fP,
+\fIx\fP\fB..\fP\fIy\fP\fB[..\fP\fIincr\fP\fB]\fP,
 where \fIx\fP and \fIy\fP are either integers or single letters,
 and \fIincr\fP, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
@@ -4897,7 +4897,7 @@ The format of here-documents is:
 .PP
 The shell does not perform
 parameter and variable expansion, command substitution,
-arithmetic expansion, or pathname expansion is performed on
+arithmetic expansion, or pathname expansion on
 .IR word .
 .PP
 If any part of

@@ -970,7 +970,7 @@ in @var{consequent-commands}, or zero if none was executed.
 The syntax of the @code{for} command is:
 
 @example
-for @var{name} [ [in [@var{words} @dots{}] ] ; ] do @var{commands}; done
+for @var{name} [ [in @var{words} @dots{}] ; ] do @var{commands}; done
 @end example
 
 Expand @var{words} (@pxref{Shell Expansions}), and then
@@ -985,10 +985,11 @@ The return status is the exit status of the last command that executes.
 If there are no items in the expansion of @var{words}, no commands are
 executed, and the return status is zero.
 
-An alternate form of the @code{for} command is also supported:
+There is an alternate form of the @code{for} command which is similar to the
+C language:
 
 @example
-for (( @var{expr1} ; @var{expr2} ; @var{expr3} )) ; do @var{commands} ; done
+for (( @var{expr1} ; @var{expr2} ; @var{expr3} )) [;] do @var{commands} ; done
 @end example
 
 First, evaluate the arithmetic expression @var{expr1} according
@@ -2069,7 +2070,7 @@ ade ace abe
 @end example
 
 A sequence expression takes the form
-@code{@{@var{x}..@var{y}[..@var{incr}]@}},
+@code{@var{x}..@var{y}[..@var{incr}]},
 where @var{x} and @var{y} are either integers or letters,
 and @var{incr}, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between

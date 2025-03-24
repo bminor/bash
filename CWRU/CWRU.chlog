@@ -11046,3 +11046,37 @@ redir.c
 
 builtins/ulimit.def
 	- pipesize: use pathconf and _PC_PIPE_BUF if available
+
+				    3/8
+				    ---
+braces.c
+	- brace_expand: make sure to call valid_seqterm with the right length
+	  so that text[tlen] == '}'
+
+				   3/10
+				   ----
+builtins/help.def
+	- show_manpage: if the first line of long_doc doesn't contain a
+	  newline, e.g., if it's a loadable builtin, add one so there's the
+	  usual space between NAME and SYNOPSIS
+
+m4/codeset.m4
+	- define HAVE_NL_LANGINFO
+
+lib/sh/strftime.c
+	- updates for locale-awareness
+
+				   3/14
+				   ----
+lib/termcap/termcap.c,lib/termcap/tparam.c
+	- updates for ISO C
+
+				   3/17
+				   ----
+configure.ac
+	- update release to rc1, update CHANGES and NEWS
+
+				   3/19
+				   ----
+lib/readline/rlmbutil.h
+	- _rl_wcwidth: make sure wchar_t constants have an `L' prefix

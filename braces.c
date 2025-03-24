@@ -1,6 +1,6 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2020,2022-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020,2022-2025 Free Software Foundation, Inc.
 `
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -137,7 +137,7 @@ brace_expand (char *text)
 	     terms here. If the sequence expression is invalid, we just skip
 	     over the open brace and go on, leaving other brace expressions in
 	     the candidate sequence expression to be expanded. */
-	  if (etype == BRACE_SEQ && valid_seqterm (text + start, j - 1) == 0)
+	  if (etype == BRACE_SEQ && valid_seqterm (text + start, j - start) == 0)
 	    c = 0;
 #endif
 
@@ -483,7 +483,7 @@ valid_seqterm (char *text, size_t tlen)
   int lhs_t, rhs_t;
   int c;
 
-  c = text[tlen];
+  c = text[tlen];	/* XXX - text[tlen] == RBRACE */
   text[tlen] = '\0';	/* don't be tricked by something later in the string */
   t = strstr (text, BRACE_SEQ_SPECIFIER);
   text[tlen] = c;
