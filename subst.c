@@ -7003,9 +7003,9 @@ function_substitute (char *string, int quoted, int flags)
   
   subst_assign_varlist = 0;
 
-  push_context (lambdafunc.name, 1, temporary_env);		/* make local variables work */
   temporary_env = 0;
-  this_shell_function = &lambdafunc;  
+  push_context (lambdafunc.name, 1, temporary_env);		/* make local variables work */
+  this_shell_function = &lambdafunc;
 
   unwind_protect_int (verbose_flag);
   change_flag ('v', FLAG_OFF);

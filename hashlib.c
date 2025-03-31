@@ -50,7 +50,7 @@
    don't discard the upper 32 bits of the value, if present. */
 #define HASH_BUCKET(s, t, h) (((h) = hash_string (s)) & ((t)->nbuckets - 1))
 
-static BUCKET_CONTENTS *copy_bucket_array (BUCKET_CONTENTS *, sh_string_func_t *);
+static BUCKET_CONTENTS *copy_bucket_array (BUCKET_CONTENTS *, sh_copy_func_t *);
 
 static void hash_rehash (HASH_TABLE *, int);
 static void hash_grow (HASH_TABLE *);
@@ -88,7 +88,7 @@ hash_size (HASH_TABLE *table)
 /* Copy a hash table bucket array. Call (*cpdata) to copy the data from
    each element. */
 static BUCKET_CONTENTS *
-copy_bucket_array (BUCKET_CONTENTS *ba, sh_string_func_t *cpdata)
+copy_bucket_array (BUCKET_CONTENTS *ba, sh_copy_func_t *cpdata)
 {
   BUCKET_CONTENTS *new_bucket, *n, *e;
 
@@ -171,7 +171,7 @@ hash_shrink (HASH_TABLE *table)
 
 /* Copy an entire hash table. (*cpdata) copies the data in each element. */
 HASH_TABLE *
-hash_copy (HASH_TABLE *table, sh_string_func_t *cpdata)
+hash_copy (HASH_TABLE *table, sh_copy_func_t *cpdata)
 {
   HASH_TABLE *new_table;
   int i;

@@ -388,8 +388,11 @@ extern void dispose_builtin_env (void);
 extern void merge_temporary_env (void);
 extern void merge_function_temporary_env (void);
 extern void flush_temporary_env (void);
+extern HASH_TABLE *copy_temporary_env (void);
 extern void merge_builtin_env (void);
 extern void kill_all_local_variables (void);
+
+extern HASH_TABLE *copy_vartab (HASH_TABLE *);
 
 extern void set_var_read_only (char *);
 extern void set_func_read_only (const char *);

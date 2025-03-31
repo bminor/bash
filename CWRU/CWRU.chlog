@@ -11080,3 +11080,19 @@ configure.ac
 				   ----
 lib/readline/rlmbutil.h
 	- _rl_wcwidth: make sure wchar_t constants have an `L' prefix
+
+				   3/24
+				   ----
+subst.c
+	- function_substitute: set temporary_env to NULL (we've already
+	  set up an unwind-protect for it) before pushing the context, so
+	  pop_context doesn't free it out from underneath the caller.
+	  Report from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   3/27
+				   ----
+shell.c
+	- set_bash_input: if the call to with_input_from_buffered_stream does
+	  not result in a valid buffer corresponding to the file descriptor,
+	  print an error message and set last_command_exit_value
+	  From a report in https://savannah.gnu.org/patch/?10512

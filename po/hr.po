@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bash-5.2-rc1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-11 14:50-0500\n"
-"PO-Revision-Date: 2025-02-19 16:48-0800\n"
+"PO-Revision-Date: 2025-03-26 20:56-0700\n"
 "Last-Translator: Božidar Putanec <bozidarp@yahoo.com>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
 "Language: hr\n"
@@ -224,7 +224,7 @@ msgstr "nevaljan oktalni broj"
 
 #: builtins/common.c:242
 msgid "invalid hex number"
-msgstr "nevaljan heksadecimalni broj"
+msgstr "nevaljan heksadekadski broj"
 
 #: builtins/common.c:244 expr.c:1574
 msgid "invalid number"
@@ -360,7 +360,7 @@ msgstr "može se koristiti samo u funkciji"
 
 #: builtins/declare.def:437
 msgid "cannot use `-f' to make functions"
-msgstr "„-f” se ne može koristiti za definiranje funkcija"
+msgstr "„-f” nije moguće koristiti za definiranje funkcija"
 
 #: builtins/declare.def:464 execute_cmd.c:6132
 #, c-format
@@ -682,7 +682,7 @@ msgstr "problem s raščlanjivanjem formata: %s"
 
 #: builtins/printf.def:919
 msgid "missing hex digit for \\x"
-msgstr "nema heksadecimalne znamenke za \\x"
+msgstr "nema heksadekadske znamenke za \\x"
 
 #: builtins/printf.def:934
 #, c-format
@@ -1631,12 +1631,12 @@ msgstr "xtrace_set(): %d: nevaljan deskriptor datoteke"
 
 #: print_cmd.c:380
 msgid "xtrace_set: NULL file pointer"
-msgstr "xtrace_set(): pointer datoteke je NULL"
+msgstr "xtrace_set(): pokazivač datoteke je NULL"
 
 #: print_cmd.c:384
 #, c-format
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
-msgstr "deskriptor datoteke xtrace (%d) !=  broju datoteke u pointeru datoteke xtrace (%d)"
+msgstr "deskriptor datoteke xtrace (%d) !=  broju datoteke u pokazivaču datoteke xtrace (%d)"
 
 #: print_cmd.c:1545
 #, c-format
@@ -2129,7 +2129,7 @@ msgstr "make_local_variable(): u trenutnom opsegu nema konteksta funkcije"
 #: variables.c:2661
 #, c-format
 msgid "%s: variable may not be assigned value"
-msgstr "%s: varijabli se ne može dodijeliti vrijednost"
+msgstr "%s: varijabli nije moguće dodijeliti vrijednost"
 
 #: variables.c:2818 variables.c:2874
 #, c-format
@@ -2170,7 +2170,7 @@ msgstr "pop_var_context(): nije „global_variables” kontekst"
 
 #: variables.c:5410
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
-msgstr "pop_scope(): vrh od „shell_variables” nije privremeni raspon valjanosti"
+msgstr "pop_scope(): vrh od „shell_variables” nije privremeni doseg okružja"
 
 #: variables.c:6400
 #, c-format
@@ -2827,7 +2827,7 @@ msgstr ""
 "    DIREKTORIJA.\n"
 "\n"
 "    Završi s uspjehom ako je direktorij promijenjen i ako je\n"
-"    varijabla okoline PWD uspješno postavljena kad je dana opcija „-P”;\n"
+"    varijabla okruženja PWD uspješno postavljena kad je dana opcija „-P”;\n"
 "    u suprotnom završi s kȏdom 1."
 
 #: builtins.c:425
@@ -3085,11 +3085,11 @@ msgstr ""
 "      \\v   vertikalni tabulator\n"
 "      \\\\     backslash (\\)\n"
 "      \\0NNN   znak s ASCII kȏdom NNN (oktalni, 1 do 3 oktalne znamenke)\n"
-"      \\xHH    osmobitni znak čija je vrijednost HH (heksadecimalna)\n"
-"      \\uHHHH  unicode znak čija je vrijednost HHHH  (heksadecimalna)\n"
-"                 HHHH može biti od 1 do 4 heksadecimalne znamenke\n"
-"      \\UHHHHHHHH  unicode znak čija je vrijednost HHHH  (heksadecimalna)\n"
-"                     HHHHHHHH može biti od 1 do 8 heksadecimalnih znamenki\n"
+"      \\xHH    osmobitni znak čija je vrijednost HH (heksadekadska)\n"
+"      \\uHHHH  unicode znak čija je vrijednost HHHH  (heksadekadska)\n"
+"                 HHHH može biti od 1 do 4 heksadekadske znamenke\n"
+"      \\UHHHHHHHH  unicode znak čija je vrijednost HHHH  (heksadekadska)\n"
+"                     HHHHHHHH može biti od 1 do 8 heksadekadskih znamenki\n"
 "\n"
 "    Završi s uspjehom osim ako se ne dogodi greška pri pisanju."
 
@@ -3951,7 +3951,7 @@ msgstr ""
 "      -P  ne razriješi simbolične linkove pri izvršavanju naredbi poput „cd”\n"
 "            koje promijene trenutni direktorij\n"
 "      -p  uključi privilegirani način: datoteke BASH_ENV i ENV se zanemare,\n"
-"            funkcije ljuske se ne uvoze iz okoline, a zanemari se i\n"
+"            funkcije ljuske se ne uvoze iz okruženja, a zanemari se i\n"
 "            sve SHELLOPTS; taj način se automatski aktivira kad god se stvarni\n"
 "            i efektivni UID i GID ne podudaraju. Isključivanje ove opcije\n"
 "            učini da je efektivni UID i GID isti kao i stvarni UID i GID.\n"
@@ -4758,7 +4758,7 @@ msgstr ""
 "    trošenja vremena: ukupno potrošeno vrijeme, CPU vrijeme potrošeno\n"
 "    korisnikom i CPU vrijeme potrošeno sustavom za izvršavanje naredbi.\n"
 "\n"
-"    Izlazni format se može prilagoditi s varijablom okoline TIMEFORMAT.\n"
+"    Izlazni format se može prilagoditi s varijablom okruženja TIMEFORMAT.\n"
 "    Opcija „-p” zanemari TIMEFORMAT i ispiše izlaz u prenosivom POSIX\n"
 "    formatu.\n"
 "\n"

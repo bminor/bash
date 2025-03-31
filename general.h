@@ -213,6 +213,7 @@ typedef int sh_glist_func_t (GENERIC_LIST *);
 typedef int sh_gcp_func_t (GENERIC_LIST *, char *);
 
 typedef char *sh_string_func_t (char *);	/* like savestring, et al. */
+typedef void *sh_copy_func_t (void *);		/* generic copy function */
 
 typedef int sh_msg_func_t (const char *, ...);	/* printf(3)-like */
 typedef void sh_vmsg_func_t (const char *, ...);	/* printf(3)-like */

@@ -1738,7 +1738,18 @@ set_bash_input (void)
   if (interactive && no_line_editing == 0)
     with_input_from_stdin ();
   else if (interactive == 0)
-    with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
+    {
+      errno = 0;
+      with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
+      if (get_buffered_stream (default_buffered_input) == NULL)
+	{
+	  last_command_exit_value = EX_NOINPUT;
+	  if (errno != 0)
+	    sys_error ("%s", _("error creating buffered stream"));
+	  else
+	    report_error ("%s", _("error creating buffered stream"));
+	}
+    }
   else
     with_input_from_stream (default_input, dollar_vars[0]);
 }
