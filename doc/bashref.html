@@ -1293,7 +1293,7 @@ in <var class="var">consequent-commands</var>, or zero if none was executed.
 <dd><p>The syntax of the <code class="code">for</code> command is:
 </p>
 <div class="example">
-<pre class="example-preformatted">for <var class="var">name</var> [ [in [<var class="var">words</var> ...] ] ; ] do <var class="var">commands</var>; done
+<pre class="example-preformatted">for <var class="var">name</var> [ [in <var class="var">words</var> ...] ; ] do <var class="var">commands</var>; done
 </pre></div>
 
 <p>Expand <var class="var">words</var> (see <a class="pxref" href="#Shell-Expansions">Shell Expansions</a>), and then
@@ -1308,10 +1308,11 @@ set, as if &lsquo;<samp class="samp">in &quot;$@&quot;</samp>&rsquo; had been sp
 If there are no items in the expansion of <var class="var">words</var>, no commands are
 executed, and the return status is zero.
 </p>
-<p>An alternate form of the <code class="code">for</code> command is also supported:
+<p>There is an alternate form of the <code class="code">for</code> command which is similar to the
+C language:
 </p>
 <div class="example">
-<pre class="example-preformatted">for (( <var class="var">expr1</var> ; <var class="var">expr2</var> ; <var class="var">expr3</var> )) ; do <var class="var">commands</var> ; done
+<pre class="example-preformatted">for (( <var class="var">expr1</var> ; <var class="var">expr2</var> ; <var class="var">expr3</var> )) [;] do <var class="var">commands</var> ; done
 </pre></div>
 
 <p>First, evaluate the arithmetic expression <var class="var">expr1</var> according
@@ -2453,7 +2454,7 @@ ade ace abe
 </pre></div>
 
 <p>A sequence expression takes the form
-<code class="code">{<var class="var">x</var>..<var class="var">y</var>[..<var class="var">incr</var>]}</code>,
+<code class="code"><var class="var">x</var>..<var class="var">y</var>[..<var class="var">incr</var>]</code>,
 where <var class="var">x</var> and <var class="var">y</var> are either integers or letters,
 and <var class="var">incr</var>, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between

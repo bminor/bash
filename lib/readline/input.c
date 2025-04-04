@@ -1,6 +1,6 @@
 /* input.c -- character input functions for readline. */
 
-/* Copyright (C) 1994-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2025 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -554,15 +554,15 @@ reset_alarm ()
   timerclear (&it.it_value);
   setitimer (ITIMER_REAL, &it, NULL);
 }
-#  else
-#  if defined (__MINGW32_MAJOR_VERSION)
+#  else /* !HAVE_SETITIMER */
+#    if defined (__MINGW32_MAJOR_VERSION)
 /* mingw.org's MinGW doesn't have alarm(3).  */
 unsigned int
 alarm (unsigned int seconds)
 {
   return 0;
 }
-#  endif
+#    endif /* __MINGW32_MAJOR_VERSION */
 
 static int
 set_alarm (unsigned int *secs, unsigned int *usecs)
@@ -578,8 +578,8 @@ reset_alarm ()
 {
   alarm (0);
 }
-#  endif
-#endif
+#  endif /* !HAVE_SETITIMER */
+#endif /* RL_TIMEOUT_USE_SIGALRM */
 
 /* Set a timeout which will be used for the next call of `readline
    ()'.  When (0, 0) are specified the timeout is cleared.  */

@@ -1158,7 +1158,7 @@ operators do not evaluate <I>expression2</I> if the value of
 the entire conditional expression.
 </DL>
 
-<DT><B>for</B> <I>name</I> [ [ <B>in</B> [ <I>word ...</I> ] ] ; ] <B>do</B> <I>list</I> ; <B>done</B><DD>
+<DT><B>for</B> <I>name</I> [ [ <B>in</B> <I>word ...</I> ] ; ] <B>do</B> <I>list</I> ; <B>done</B><DD>
 First, expand The list of words following <B>in</B>, generating a list
 of items.
 Then, the variable <I>name</I> is set to each element of this list
@@ -1172,7 +1172,7 @@ below).
 The return status is the exit status of the last command that executes.
 If the expansion of the items following <B>in</B> results in an empty
 list, no commands are executed, and the return status is 0.
-<DT><B>for</B> (( <I>expr1</I> ; <I>expr2</I> ; <I>expr3</I> )) ; <B>do</B> <I>list</I> ; <B>done</B><DD>
+<DT><B>for</B> (( <I>expr1</I> ; <I>expr2</I> ; <I>expr3</I> )) [;] <B>do</B> <I>list</I> ; <B>done</B><DD>
 First, evaluate the arithmetic expression <I>expr1</I> according
 to the rules described below under
 <FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>.
@@ -4294,7 +4294,7 @@ For example, a<B>{</B>d,c,b<B>}</B>e expands into
 <P>
 
 A sequence expression takes the form
-<B>{</B><I>x</I><B>..</B><I>y</I><B>[..</B><I>incr</I><B>]}</B>,
+<I>x</I><B>..</B><I>y</I><B>[..</B><I>incr</I><B>]</B>,
 where <I>x</I> and <I>y</I> are either integers or single letters,
 and <I>incr</I>, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
@@ -6134,7 +6134,7 @@ The format of here-documents is:
 
 The shell does not perform
 parameter and variable expansion, command substitution,
-arithmetic expansion, or pathname expansion is performed on
+arithmetic expansion, or pathname expansion on
 <I>word</I>.
 
 <P>
@@ -16922,7 +16922,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20250224/doc/bash.1.<BR>
-Time: 28 February 2025 11:12:41 EST
+This document was created by man2html from /usr/local/src/bash/bash-20250331/doc/bash.1.<BR>
+Time: 31 March 2025 10:28:25 EDT
 </BODY>
 </HTML>

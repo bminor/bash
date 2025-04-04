@@ -337,7 +337,9 @@ main(int c, char **v)
   if (val == -1)
     return -1;
 
+#ifdef SIGWINCH
   signal (SIGWINCH, sigwinch);
+#endif
   signal (SIGINT, sigint);
 
   val = init_readline (slavefd, slavefd);
