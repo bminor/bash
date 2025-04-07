@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2024 Free Software Foundation, Inc.
+Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -157,7 +157,9 @@ extern int errno;
 #  define RLIMIT_FILESIZE	256
 #endif
 
-#define RLIMIT_PIPESIZE	257
+#ifndef RLIMIT_PIPESIZE
+#  define RLIMIT_PIPESIZE	257
+#endif
 
 #ifdef RLIMIT_NOFILE
 #  define RLIMIT_OPENFILES	RLIMIT_NOFILE
@@ -673,9 +675,22 @@ filesize (RLIMTYPE *valuep)
 #endif
 }
 
+/* The longtime problem here is that PIPE_BUF has atomicity restrictions, and
+   is not the true pipe capacity. Only a few systems can retrieve this at
+   runtime. */
 static int
 pipesize (RLIMTYPE *valuep)
 {
+#if defined (HAVE_PATHCONF) && defined (_PC_PIPE_BUF)
+  long r;
+
+  r = pathconf (".", _PC_PIPE_BUF);
+  if (r >= 0)
+    {
+      *valuep = (RLIMTYPE) r;
+      return 0;
+    }
+#endif
 #if defined (PIPE_BUF)
   /* This is defined on Posix systems. */
   *valuep = (RLIMTYPE) PIPE_BUF;

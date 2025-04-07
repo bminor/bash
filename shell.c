@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -990,10 +990,7 @@ exit_shell (int s)
   /* Clean up the terminal if we are in a state where it's been modified. */
 #if defined (READLINE)
   if (bash_readline_initialized && RL_ISSTATE (RL_STATE_TERMPREPPED) && rl_deprep_term_function)
-{
-itrace("exit_shell: calling rl_deprep_term_function");
     (*rl_deprep_term_function) ();
-}
 #endif
   if (read_tty_modified ())
     read_tty_cleanup ();
@@ -1315,14 +1312,14 @@ uidget (void)
   (void) getresuid (&current_user.uid, &current_user.euid, &current_user.saveuid);
 #else
   current_user.uid = getuid ();
-  current_user.euid = geteuid ();
+  current_user.euid = current_user.saveuid = geteuid ();
 #endif
 
 #if HAVE_SETRESGID
   (void) getresgid (&current_user.gid, &current_user.egid, &current_user.savegid);
 #else
   current_user.gid = getgid ();
-  current_user.egid = getegid ();
+  current_user.egid = current_user.savegid = getegid ();
 #endif
 
   if (current_user.uid != u)
@@ -1741,7 +1738,18 @@ set_bash_input (void)
   if (interactive && no_line_editing == 0)
     with_input_from_stdin ();
   else if (interactive == 0)
-    with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
+    {
+      errno = 0;
+      with_input_from_buffered_stream (default_buffered_input, dollar_vars[0]);
+      if (get_buffered_stream (default_buffered_input) == NULL)
+	{
+	  last_command_exit_value = EX_NOINPUT;
+	  if (errno != 0)
+	    sys_error ("%s", _("error creating buffered stream"));
+	  else
+	    report_error ("%s", _("error creating buffered stream"));
+	}
+    }
   else
     with_input_from_stream (default_input, dollar_vars[0]);
 }

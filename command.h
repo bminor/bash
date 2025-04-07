@@ -49,7 +49,7 @@ enum r_instruction {
   (ri == r_output_direction || ri == r_err_and_out)
 
 #define OUTPUT_REDIRECT(ri) \
-  (ri == r_output_direction || ri == r_input_output || ri == r_err_and_out || ri == r_append_err_and_out)
+  (ri == r_output_direction || ri == r_input_output || ri == r_err_and_out || ri == r_append_err_and_out || ri == r_output_force)
 
 #define INPUT_REDIRECT(ri) \
   (ri == r_input_direction || ri == r_inputa_direction || ri == r_input_output)

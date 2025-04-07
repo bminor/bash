@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2021,2022,2024 Free Software Foundation, Inc.
+Copyright (C) 1987-2021,2022,2024,2025 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -128,12 +128,13 @@ exec_builtin (WORD_LIST *list)
     }
   list = loptend;
 
-  /* First, let the redirections remain. */
-  dispose_redirects (redirection_undo_list);
-  redirection_undo_list = (REDIRECT *)NULL;
-
+  /* First, let the redirections remain if exec is called without operands */
   if (list == 0)
-    return (EXECUTION_SUCCESS);
+    {
+      dispose_redirects (redirection_undo_list);
+      redirection_undo_list = (REDIRECT *)NULL;
+      return (EXECUTION_SUCCESS);
+    }
 
 #if defined (RESTRICTED_SHELL)
   if (restricted)

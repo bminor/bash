@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1184,7 +1184,9 @@ string_extract_verbatim (const char *string, size_t slen, size_t *sindex, char *
 #endif
       if ((flags & SX_NOCTLESC) == 0 && c == CTLESC)
 	{
-	  i += 2;
+	  i++;
+	  CHECK_STRING_OVERRUN (i, i, slen, c);
+	  ADVANCE_CHAR (string, slen, i);	/* CTLESC can quote mbchars */
 	  CHECK_STRING_OVERRUN (i, i, slen, c);
 	  continue;
 	}
@@ -7001,9 +7003,9 @@ function_substitute (char *string, int quoted, int flags)
   
   subst_assign_varlist = 0;
 
-  push_context (lambdafunc.name, 1, temporary_env);		/* make local variables work */
   temporary_env = 0;
-  this_shell_function = &lambdafunc;  
+  push_context (lambdafunc.name, 1, temporary_env);		/* make local variables work */
+  this_shell_function = &lambdafunc;
 
   unwind_protect_int (verbose_flag);
   change_flag ('v', FLAG_OFF);
@@ -7492,9 +7494,16 @@ array_length_reference (const char *s)
      failure. */
   if ((var == 0 || invisible_p (var) || (assoc_p (var) == 0 && array_p (var) == 0)) && unbound_vars_is_error)
     {
+      set_exit_status (EXECUTION_FAILURE);
+#if 1
+      /* If the array isn't subscripted with `@' or `*', it's an error. */
+      if (ALL_ELEMENT_SUB (t[0]) == 0 || t[1] != RBRACK)
+        return (INTMAX_MIN);		/* caller prints error */
+#endif
+      /* If the variable is subscripted with `@' or `*', ksh93 allows it to
+	 return 0. We treat it as a non-fatal error. */
       c = *--t;
       *t = '\0';
-      set_exit_status (EXECUTION_FAILURE);
       err_unboundvar (s);
       *t = c;
       return (-1);
@@ -7519,6 +7528,8 @@ array_length_reference (const char *s)
 	return (var_isset (var) ? 1 : 0);
     }
 
+  /* If an array variable is set, length expansions for unset elements
+     return 0. This is compatible with ksh93. */
   if (assoc_p (var))
     {
       t[len - 1] = '\0';

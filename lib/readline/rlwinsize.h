@@ -55,4 +55,7 @@
 #  define tcflow(fd, action)	ioctl(fd, TCXONC, action)
 #endif
 
+extern int _rl_tcgetwinsize (int, struct winsize *);
+extern void _rl_tcsetwinsize (int, struct winsize *);
+
 #endif /* _RL_WINSIZE_H */

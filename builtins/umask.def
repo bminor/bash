@@ -283,7 +283,11 @@ start_op:
 	      perm |= S_IWUGO;
 	      break;
 	    case 'X':
-	      /* for chmod, this includes S_ISDIR but that doesn't make sense here */
+	      /* for chmod, this includes S_ISDIR but that doesn't make sense for umask */
+#if defined (S_IFDIR)
+	      if (this_shell_builtin != umask_builtin && (initial_bits & S_IFDIR) == 0)
+		break;
+#endif
 	      if ((initial_bits & S_IXUGO) == 0)
 		break;		/* no-op if original mask doesn't include execute bits */
 	      /* FALLTHROUGH */

@@ -10772,3 +10772,334 @@ lib/readline/isearch.c
 				   -----
 CHANGES,NEWS
 	- updated for bash-5.3-beta
+
+				   12/15
+				   -----
+lib/readline/histexpand.c
+	- get_history_event: make sure we don't change history_offset whether
+	  the search succeeds or fails, don't set it to history_length.
+	  Callers don't expect to have the history offset changed out from
+	  under them.
+	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
+
+				   12/16
+				   -----
+lib/readline/util.c
+	- _rl_abort_internal: make sure to clear _rl_command_to_execute
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+tests/printf7.sub,tests/cond-regexp2.sub
+	- accommodate different error messages across different systems
+
+				 1/2/2025
+				 --------
+tests/run-all, tests/run-minimal
+	- BASHOPTS: unset or unexport as appropriate, same as SHELLOPTS
+	  From a report by Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				    1/9
+				    ---
+subst.c
+	- string_extract_verbatim: take into account the fact that CTLESC can
+	  quote multibyte characters; use ADVANCE_CHAR instead of increment
+	  Fixes bug reported by jktseug@gmail.com
+
+				   1/10
+				   ----
+expr.c
+	- expr_bind_variable,expr_streval: suppress additional expansion if
+	  called by the `let' builtin, whether or not array_expand_once is set
+	- expr_skipsubscript: suppress expansion while parsing subscripts
+	  whether array_expand_once is set or not
+	  Still have to change tests if this goes final
+	  These are all conditional on shell_compatibility_level > 51
+	  From a bug-bash post by Greg Wooledge <greg@wooledge.org>
+
+				   1/14
+				   ----
+lib/readline/complete.c
+	- _rl_export_completions: use print_filename instead of fprintf to
+	  display the possible completions so slashes and file types can
+	  be included
+	  From a patch from Matthew Tromp <matthewktromp@gmail.com>
+
+				   1/15
+				   ----
+examples/loadables/fltexpr.c
+	- fltexpr: new loadable builtin to do floating-point arithmetic
+	  expression evaluation and optionally print the result
+
+				   1/16
+				   ----
+builtins/printf.def
+	- getarg(), advancearg(): cosmetic changes to make it easier to
+	  implement %N$ format specifiers in the future
+
+				   1/18
+				   ----
+subst.c
+	- array_length_reference: requesting the length of an element of an
+	  unset variable using array syntax is a fatal error when `set -u'
+	  is enabled and the subscript is not `@' or `*'.
+	  Inspired by a report from Ian Kelling <iank@fsf.org>
+
+				   1/20
+				   ----
+parse.y
+	- decode_prompt_string: since Debian has made the spectaculary bad call
+	  to allow arbitrary characters in usernames, protect the results of
+	  the \u expansion in the same way as \[Ww] and \[Hh] (externally-
+	  controlled data)
+	  From https://savannah.gnu.org/patch/?10496
+
+				   1/21
+				   ----
+eval.c
+	- reader_loop: if we longjmp with ERREXIT, don't reset any local
+	  function contexts in posix mode, since POSIX says to exit as if
+	  executing the `exit builtin with no arguments'. Revision of change
+	  from 7/2022.
+	  From a report by Ivan Shapovalov <intelfx@intelfx.name> in 11/2024
+
+lib/readline/display.c
+	- rl_redisplay: after calling update_line, when putting the cursor
+	  where it needs to be and reprinting part of the line with the
+	  prompt that contains invisible characters, make sure we start to
+	  output characters at the portion in the prompt buffer that begins
+	  on the current line and only offset by the number of invisible
+	  characters on the current line, and set _rl_last_c_pos accordingly
+	  in both multibyte and singlebyte locales.
+	  Fixes bug reported by Andreas Schwab <schwab@linux-m68k.org>
+
+				   1/22
+				   ----
+execute_cmd.c
+	- execute_builtin_or_function: if we're executing the exec builtin,
+	  and there are redirections, let exec_builtin handle disposing of
+	  redirection_undo_list if there is no program name to execute, so
+	  it's still there if exec returns and doesn't exit the shell.
+	  Then we can manage disposing of exec_redirection_undo_list and
+	  letting the redirections be undone as normal.
+	  This is POSIX interp 1896, with modifications from
+	  https://www.austingroupbugs.net/view.php?id=1896#c7037
+
+builtins/exec.def
+	- exec_builtin: dispose of redirection_undo_list and set it to NULL
+	  if there is no program name operand; let execute_builtin_or_function
+	  clean it up
+
+				   1/23
+				   ----
+lib/readline/terminal.c
+	- _rl_tcgetwinsize,_rl_tcsetwinsize: function wrappers for tcgetwinsize/
+	  tcsetwinsize with fallbacks to ioctl if those functions aren't
+	  available
+	- _rl_get_screensize: use _rl_tcgetwinsize
+
+lib/readline/rlwinsize.h
+	- _rl_tcgetwinsize,_rl_tcsetwinsize: extern function declarations
+
+lib/readine/rltty.c
+	- set_winsize: use _rl_tcgetwinsize/_rl_tcsetwinsize
+	- set_winsize: if _rl_tcgetwinsize succeeds, use the values to set
+	  readline's idea of the screen size via _rl_set_screen_size
+	  Inspired by a discussion with Olav Mørkrid <omega@funker.no>
+
+				   1/24
+				   ----
+lib/readline/signals.c
+	- _rl_handling_signal: new private variable, set to the signal we're
+	  currently handling in _rl_signal_handler (SIGWINCH) or
+	  _rl_handle_signal (all others). Only valid if RL_STATE_SIGHANDLER
+	  is set
+
+lib/readline/rlprivate.h
+	- _rl_handling_signal: new extern declaration
+
+lib/readline/rltty.c
+	- set_winsize: only set readline's idea of the screen size if we're
+	  executing in a signal handler context and handling SIGTSTP and the
+	  application has indicated that it doesn't want the environment
+	  variables LINES and COLUMNS to have priority (rl_prefer_env_winsize)
+
+				   1/30
+				   ----
+jobs.c
+	- wait_for_single_pid: if wait_for returns -1/ECHILD, make sure to
+	  return 257 just as if the child was not found, optionally printing
+	  an error message if JWAIT_PERROR is supplied
+	  From a discussion with Ian <saturns_rings@protonmail.com>
+
+				    2/8
+				    ---
+redir.c
+	- do_redirection_internal: keep track of whether the redirector fd
+	  was active with a new variable. Not used yet, should be optimized
+	  out.
+	- add_undo_fd_redirect: new undo function using r_move_input so we
+	  don't need a dup redir and a separate close redir to undo. Not
+	  used yet
+	- do_redirection_internal: only call check_bash_input if we're
+	  creating an undo list and not running one
+
+command.h
+	- OUTPUT_REDIRECT: add r_output_force
+
+input.c
+	- check_bash_input: if we dup the bash input fd to another in
+	  save_bash_input, return that fd. Continue to return -1 on error
+	  and 0 if we don't do anything but sync
+
+execute_cmd.c
+	- execute_null_command: force a subshell if any of the redirections
+	  involve the bash input buffered fd.
+	  From a report by Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				   2/10
+				   ----
+
+examples/loadables/chmod.c
+	- chmod: new loadable builtin, inspired by zhixu.liu@gmail.com in
+	  https://savannah.gnu.org/patch/?10499
+
+				   2/11
+				   ----
+builtins/kill.def
+	- kill_builtin: in posix mode, return a failure status if any of the
+	  pid/job arguments are not found or sending the signal fails. This
+	  is consistent with
+	  https://pubs.opengroup.org/onlinepubs/9799919799/utilities/kill.html#tag_20_64_14
+
+				   2/12
+				   ----
+braces.c
+	- brace_gobbler: take a new argument in which to return the type of
+	  brace expansion (comma or sequence) we think we've found; change
+	  all callers
+	- brace_expand: even if we find a BRACE_ARG_SEPARATOR, don't try to
+	  perform expansion if brace_gobbler doesn't think we have a
+	  BRACE_COMMA expansion
+	- valid_seqterm: new function, performs minimal validation on a
+	  sequence expansion, used to skip over invalid sequence expressions
+	  in brace_expand
+	- brace_expand: call valid_seqterm if brace_gobbler finds a BRACE_SEQ
+	  expansion
+	  Inspired by report from Robert Elz <kre@munnari.oz.au>
+
+				   2/13
+				   ----
+doc/bash.1,doc/bashref.texi
+	- clarified the handling of double quotes in EXPRESSION in
+	  (( EXPRESSION )) and $(( EXPRESSION )) to say that only unescaped
+	  double quotes are removed
+
+expr.c
+	- expr_bind_variable,expr_streval: revert change from 1/10 that
+	  suppresses additional expansion when called by the `let' builtin,
+	  tag for possible inclusion in a future release when I can look
+	  at parallel changes to ((...)) and $((...)) (and probably
+	  declare 'a[" "]=12' or similar)
+
+				   2/14
+				   ----
+
+lib/sh/zmapfd.c,externs.h
+	- zmapfd: now returns ssize_t in case of large files when size_t is
+	  larger than int
+
+builtins/evalfile.c,builtins/help.def
+	- zmapfd: changed callers
+
+print_cmd.c
+	- print_redirection: the default file descriptor for <> is 0
+	  Report and fix from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   2/18
+				   ----
+configure.ac
+	- check for d_type member of struct dirent for future use
+
+				   2/24
+				   ----
+doc/bash.1,doc/bashref.texi
+	- document the word expansions performed on indexed array subscripts
+	  and assoc array keys
+	- document the possibility and effect of empty strings on arithmetic
+	  evaluation for substring expansion, arithmetic expansion, operands
+	  to the the [[ command's arithmetic operators, the expression in
+	  the (( compound command, and indexed array subscripts
+
+				   2/24
+				   ----
+execute_cmd.c
+	- execute_command_internal: if executing a (...) subshell, make sure
+	  to update BASH_COMMAND before exiting on an error return from the
+	  subshell with -e set
+	  Report from Max Bowsher <maxbowsher@gmail.com>
+
+				    3/3
+				    ---
+redir.c
+	- here_document_to_fd: if we are trying to use a pipe for a here
+	  document, but the F_GETPIPE_SZ fcntl returns a value shorter than
+	  the here document length, make sure to close the pipe file descriptors
+
+builtins/ulimit.def
+	- pipesize: use pathconf and _PC_PIPE_BUF if available
+
+				    3/8
+				    ---
+braces.c
+	- brace_expand: make sure to call valid_seqterm with the right length
+	  so that text[tlen] == '}'
+
+				   3/10
+				   ----
+builtins/help.def
+	- show_manpage: if the first line of long_doc doesn't contain a
+	  newline, e.g., if it's a loadable builtin, add one so there's the
+	  usual space between NAME and SYNOPSIS
+
+m4/codeset.m4
+	- define HAVE_NL_LANGINFO
+
+lib/sh/strftime.c
+	- updates for locale-awareness
+
+				   3/14
+				   ----
+lib/termcap/termcap.c,lib/termcap/tparam.c
+	- updates for ISO C
+
+				   3/17
+				   ----
+configure.ac
+	- update release to rc1, update CHANGES and NEWS
+
+				   3/19
+				   ----
+lib/readline/rlmbutil.h
+	- _rl_wcwidth: make sure wchar_t constants have an `L' prefix
+
+				   3/24
+				   ----
+subst.c
+	- function_substitute: set temporary_env to NULL (we've already
+	  set up an unwind-protect for it) before pushing the context, so
+	  pop_context doesn't free it out from underneath the caller.
+	  Report from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   3/27
+				   ----
+shell.c
+	- set_bash_input: if the call to with_input_from_buffered_stream does
+	  not result in a valid buffer corresponding to the file descriptor,
+	  print an error message and set last_command_exit_value
+	  From a report in https://savannah.gnu.org/patch/?10512
+
+				    4/3
+				    ---
+lib/sh/gettimeofday.c
+	- updated from version in gnulib
+
+[bash-5.3-rc1 frozen]

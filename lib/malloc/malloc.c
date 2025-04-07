@@ -1,6 +1,6 @@
 /* malloc.c - dynamic memory allocation for bash. */
 
-/*  Copyright (C) 1985-2022 Free Software Foundation, Inc.
+/*  Copyright (C) 1985-2025 Free Software Foundation, Inc.
 
     This file is part of GNU Bash, the Bourne-Again SHell.
     

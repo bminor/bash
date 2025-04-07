@@ -45,7 +45,7 @@ editing commands were left out due to objections.
 Although Bash is an implementation of the POSIX shell specification,
 there are areas where the Bash default behavior differs from the
 specification.  The Bash “posix mode” changes the Bash behavior in these
-areas so that it conforms more closely to the standard.
+areas so that it conforms more strictly to the standard.
 
 Starting Bash with the ‘--posix’ command-line option or executing ‘set
 -o posix’ while Bash is running will cause Bash to conform more closely
@@ -55,7 +55,7 @@ by POSIX in areas where the Bash default differs.
 When invoked as ‘sh’, Bash enters POSIX mode after reading the startup
 files.
 
-The following list is what's changed when 'POSIX mode' is in effect:
+The following list is what's changed when POSIX mode is in effect:
 
   1. Bash ensures that the ‘POSIXLY_CORRECT’ variable is set.
 
@@ -180,7 +180,7 @@ The following list is what's changed when 'POSIX mode' is in effect:
      double-quoted string, even if the ‘histexpand’ option is enabled.
 
   31. When printing shell function definitions (e.g., by ‘type’), Bash
-     does not print the ‘function’ keyword unless necessary.
+     does not print the ‘function’ reserved word unless necessary.
 
   32. Non-interactive shells exit if a syntax error in an arithmetic
      expansion results in an invalid expression.
@@ -289,72 +289,77 @@ The following list is what's changed when 'POSIX mode' is in effect:
   58. The ‘kill’ builtin does not accept signal names with a ‘SIG’
      prefix.
 
-  59. The ‘printf’ builtin uses ‘double’ (via ‘strtod’) to convert
+  59. The ‘kill’ builtin returns a failure status if any of the pid or
+     job arguments are invalid or if sending the specified signal to any
+     of them fails.  In default mode, ‘kill’ returns success if the
+     signal was successfully sent to any of the specified processes.
+
+  60. The ‘printf’ builtin uses ‘double’ (via ‘strtod’) to convert
      arguments corresponding to floating point conversion specifiers,
      instead of ‘long double’ if it's available.  The ‘L’ length
      modifier forces ‘printf’ to use ‘long double’ if it's available.
 
-  60. The ‘pwd’ builtin verifies that the value it prints is the same as
+  61. The ‘pwd’ builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the ‘-P’ option.
 
-  61. The ‘read’ builtin may be interrupted by a signal for which a trap
+  62. The ‘read’ builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      ‘read’, the trap handler executes and ‘read’ returns an exit status
      greater than 128.
 
-  62. When the ‘set’ builtin is invoked without options, it does not
+  63. When the ‘set’ builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  63. When the ‘set’ builtin is invoked without options, it displays
+  64. When the ‘set’ builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  64. The ‘test’ builtin compares strings using the current locale when
+  65. The ‘test’ builtin compares strings using the current locale when
      evaluating the ‘<’ and ‘>’ binary operators.
 
-  65. The ‘test’ builtin's ‘-t’ unary primary requires an argument.
+  66. The ‘test’ builtin's ‘-t’ unary primary requires an argument.
      Historical versions of ‘test’ made the argument optional in certain
      cases, and Bash attempts to accommodate those for backwards
      compatibility.
 
-  66. The ‘trap’ builtin displays signal names without the leading
+  67. The ‘trap’ builtin displays signal names without the leading
      ‘SIG’.
 
-  67. The ‘trap’ builtin doesn't check the first argument for a possible
+  68. The ‘trap’ builtin doesn't check the first argument for a possible
      signal specification and revert the signal handling to the original
      disposition if it is, unless that argument consists solely of
      digits and is a valid signal number.  If users want to reset the
      handler for a given signal to the original disposition, they should
      use ‘-’ as the first argument.
 
-  68. ‘trap -p’ without arguments displays signals whose dispositions
+  69. ‘trap -p’ without arguments displays signals whose dispositions
      are set to SIG_DFL and those that were ignored when the shell
      started, not just trapped signals.
 
-  69. The ‘type’ and ‘command’ builtins will not report a non-executable
+  70. The ‘type’ and ‘command’ builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in ‘$PATH’.
 
-  70. The ‘ulimit’ builtin uses a block size of 512 bytes for the ‘-c’
+  71. The ‘ulimit’ builtin uses a block size of 512 bytes for the ‘-c’
      and ‘-f’ options.
 
-  71. The ‘unset’ builtin with the ‘-v’ option specified returns a fatal
+  72. The ‘unset’ builtin with the ‘-v’ option specified returns a fatal
      error if it attempts to unset a ‘readonly’ or ‘non-unsettable’
      variable, which causes a non-interactive shell to exit.
 
-  72. When asked to unset a variable that appears in an assignment
+  73. When asked to unset a variable that appears in an assignment
      statement preceding the command, the ‘unset’ builtin attempts to
      unset a variable of the same name in the current or previous scope
      as well.  This implements the required "if an assigned variable is
      further modified by the utility, the modifications made by the
      utility shall persist" behavior.
 
-  73. The arrival of ‘SIGCHLD’ when a trap is set on ‘SIGCHLD’ does not
+  74. The arrival of ‘SIGCHLD’ when a trap is set on ‘SIGCHLD’ does not
      interrupt the ‘wait’ builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  74. Bash removes an exited background process's status from the list
+  75. Bash removes an exited background process's status from the list
      of such statuses after the ‘wait’ builtin returns it.
 
 There is other POSIX behavior that Bash does not implement by default

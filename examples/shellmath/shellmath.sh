@@ -88,7 +88,7 @@ function _shellmath_handleError()
     
     # Display error msg, making parameter substitutions as needed
     msgParameters="$*"
-    printf  "$msgTemplate" "${msgParameters[@]}"
+    printf '%s ' "$msgTemplate" "${msgParameters[@]}"; printf '\n'
 
     if ((returnDontExit)); then
         return "$returnCode"
@@ -442,7 +442,7 @@ function _shellmath_add()
         ((isNegative2)) && ((integerPart2*=-1))
         local sum=$((integerPart1 + integerPart2))
         if (( (!isSubcall) && (isScientific1 || isScientific2) )); then
-            _shellmath_numToScientific $sum "" 
+            _shellmath_numToScientific $sum ""
             _shellmath_getReturnValue sum
         fi
         _shellmath_setReturnValue $sum
@@ -485,17 +485,11 @@ function _shellmath_add()
     # Summing the fractional parts is tricky: We need to override the shell's
     # default interpretation of leading zeros, but the operator for doing this
     # (the "10#" operator) cannot work directly with negative numbers. So we
-    # break it all down.
-    if ((isNegative1)); then
-        ((fractionalSum += (-1) * 10#${fractionalPart1:1}))
-    else
-        ((fractionalSum += 10#$fractionalPart1))
-    fi
-    if ((isNegative2)); then
-        ((fractionalSum += (-1) * 10#${fractionalPart2:1}))
-    else
-        ((fractionalSum += 10#$fractionalPart2))
-    fi
+    # use parameter expansions to separate the \+/-\ signs from the numbers.
+
+    ((fractionalSum =
+        ${fractionalPart1//[^-]}10#${fractionalPart1//[^0-9]} +
+        ${fractionalPart2//[^-]}10#${fractionalPart2//[^0-9]}))
 
     unsignedFracSumLength=${#fractionalSum}
     if [[ "$fractionalSum" =~ ^[-] ]]; then
@@ -515,7 +509,9 @@ function _shellmath_add()
     fi
 
     # Carry a digit from fraction to integer if required
-    if ((10#$fractionalSum!=0 && unsignedFracSumLength > unsignedFracLength)); then
+    if (( ${fractionalSum//[^-]}10#${fractionalSum//[^0-9]} !=0 )) &&
+        ((unsignedFracSumLength > unsignedFracLength))
+    then
         local carryAmount
         ((carryAmount = isNegative1?-1:1))
         ((integerSum += carryAmount))
@@ -527,34 +523,43 @@ function _shellmath_add()
     # pair (-2,3) is not -2.3 but rather (-2)+(0.3), i.e. -1.7 so we want to
     # transform (-2,3) to (-1,7). This transformation is meaningful when
     # the two parts have opposite signs, so that's what we look for.
-    if ((integerSum < 0 && 10#$fractionalSum > 0)); then
+    if ((integerSum < 0)) &&
+        (( ${fractionalSum//[^-]}10#${fractionalSum//[^0-9]} > 0))
+    then
         ((integerSum += 1))
-        ((fractionalSum = 10#$fractionalSum - 10**unsignedFracSumLength))
-    elif ((integerSum > 0 && 10#$fractionalSum < 0)); then
+        ((fractionalSum = ${fractionalSum//[^-]}10#${fractionalSum//[^0-9]} -
+            10**unsignedFracSumLength))
+    elif ((integerSum > 0)) &&
+        (( ${fractionalSum//[^-]}10#${fractionalSum//[^0-9]} < 0))
+    then
         ((integerSum -= 1))
-        ((fractionalSum = 10**unsignedFracSumLength + 10#$fractionalSum))
+        ((fractionalSum = 10**unsignedFracSumLength +
+            ${fractionalSum//[^-]}10#${fractionalSum//[^0-9]} ))
     fi
     # This last case needs to function either as an "else" for the above,
     # or as a coda to the "if" clause when integerSum is -1 initially.
-    if ((integerSum == 0 && 10#$fractionalSum < 0)); then
+    if ((integerSum == 0)) &&
+        (( ${fractionalSum//[^-]}10#${fractionalSum//[^0-9]} < 0))
+    then
         integerSum="-"$integerSum
         ((fractionalSum *= -1))
     fi
 
     # Touch up the numbers for display
     local sum
-    ((10#$fractionalSum < 0)) && fractionalSum=${fractionalSum:1}
+    (( ${fractionalSum//[^-]}10#${fractionalSum//[^0-9]}< 0)) &&
+        fractionalSum=${fractionalSum//[-]}
     if (( (!isSubcall) && (isScientific1 || isScientific2) )); then
         _shellmath_numToScientific "$integerSum" "$fractionalSum"
         _shellmath_getReturnValue sum
-    elif ((10#$fractionalSum)); then
+    elif (( ${fractionalSum//[^-]}10#${fractionalSum//[^0-9]} )); then
         printf -v sum "%s.%s" "$integerSum" "$fractionalSum"
     else
         sum=$integerSum
     fi
 
     # Note the result, print if running "normally", and return
-    _shellmath_setReturnValue $sum
+    _shellmath_setReturnValue "$sum"
     if (( isVerbose && ! isSubcall )); then
         echo "$sum"
     fi
@@ -660,9 +665,9 @@ function _shellmath_reduceOuterPairs()
         fi
 
         # Discard the least-significant digits or move them past the decimal point
-        value1=${value1%${tail1}}
+        value1=${value1%"${tail1}"}
         [[ -n "$subvalue1" ]] && subvalue1=${tail1}${subvalue1%0}  # remove placeholder zero
-        value2=${value2%${tail2}}
+        value2=${value2%"${tail2}"}
         [[ -n "$subvalue2" ]] && subvalue2=${tail2}${subvalue2%0}
     else
         # Signal the caller that no rescaling was actually done
@@ -733,7 +738,7 @@ function _shellmath_round()
 
     number=${number:0:digitCount}
     if ((nextDigit >= 5)); then
-        printf -v number "%0*d" "$digitCount" $((10#$number + 1))
+        printf -v number "%0*d" "$digitCount" $((${number//[^-]}10#${number//[^0-9]} + 1))
     fi
 
     _shellmath_setReturnValue "$number"
@@ -818,11 +823,15 @@ function _shellmath_multiply()
 
     # Overflow / underflow detection and accommodation
     local rescalingFactor=0
-    if ((${#integerPart1} + ${#integerPart2} + ${#fractionalPart1} + ${#fractionalPart2} >= ${__shellmath_precision})); then
+    if ((${#integerPart1} + ${#integerPart2} + ${#fractionalPart1} + ${#fractionalPart2} >= __shellmath_precision)); then
         _shellmath_reduceOuterPairs "$integerPart1" "$integerPart2" "$fractionalPart1" "$fractionalPart2"
         _shellmath_getReturnValues integerPart1 integerPart2 fractionalPart1 fractionalPart2 rescalingFactor
-        if ((10#$fractionalPart1)); then type1=${__shellmath_numericTypes[DECIMAL]}; fi
-        if ((10#$fractionalPart2)); then type2=${__shellmath_numericTypes[DECIMAL]}; fi
+        if ((${fractionalPart1//[^-]}10#${fractionalPart1//[^0-9]})); then
+            type1=${__shellmath_numericTypes[DECIMAL]}
+        fi
+        if ((${fractionalPart2//[^-]}10#${fractionalPart2//[^0-9]})); then
+            type2=${__shellmath_numericTypes[DECIMAL]}
+        fi
 
         _shellmath_reduceCrossPairs "$integerPart1" "$integerPart2" "$fractionalPart1" "$fractionalPart2"
         _shellmath_getReturnValues fractionalPart1 fractionalPart2
@@ -841,7 +850,7 @@ function _shellmath_multiply()
             _shellmath_getReturnValue product
         fi
         if (( (!isSubcall) && (isScientific1 || isScientific2) )); then
-            _shellmath_numToScientific $product "" 
+            _shellmath_numToScientific $product ""
             _shellmath_getReturnValue product
         fi
         _shellmath_setReturnValue $product
@@ -862,14 +871,16 @@ function _shellmath_multiply()
     fractionalWidth1=${#fractionalPart1}
     fractionalWidth2=${#fractionalPart2}
     ((floatWidth = fractionalWidth1 + fractionalWidth2))
-    ((floatProduct = 10#$fractionalPart1 * 10#$fractionalPart2))
+    ((floatProduct =
+        ${fractionalPart1//[^-]}10#${fractionalPart1//[^0-9]} *
+        ${fractionalPart2//[^-]}10#${fractionalPart2//[^0-9]}))
     if ((${#floatProduct} < floatWidth)); then
         printf -v floatProduct "%0*d" "$floatWidth" "$floatProduct"
     fi
 
     # Compute the inner products: First integer-multiply, then rescale
-    ((innerProduct1 = integerPart1 * 10#$fractionalPart2))
-    ((innerProduct2 = integerPart2 * 10#$fractionalPart1))
+    ((innerProduct1 = integerPart1 * ${fractionalPart2//[^-]}10#${fractionalPart2//[^0-9]}))
+    ((innerProduct2 = integerPart2 * ${fractionalPart1//[^-]}10#${fractionalPart1//[^0-9]}))
 
     # Rescale the inner products back to decimals so we can shellmath_add() them
     if ((fractionalWidth2 <= ${#innerProduct1})); then
@@ -979,7 +990,9 @@ function _shellmath_divide()
     fi
 
     # Throw error on divide by zero
-    if ((integerPart2 == 0 && 10#$fractionalPart2 == 0)); then
+    if ((integerPart2 == 0)) &&
+        (( ${fractionalPart2//[^-]}10#${fractionalPart2//[^0-9]} == 0 ))
+    then
         _shellmath_warn  "${__shellmath_returnCodes[DIVIDE_BY_ZERO]}"  "$n2"
         return $?
     fi
@@ -1002,11 +1015,13 @@ function _shellmath_divide()
     # Rescale and rewrite the fraction to be computed, and compute it
     numerator=${integerPart1}${fractionalPart1}${zeroTail}
     denominator=${integerPart2}${fractionalPart2}
-    ((quotient = 10#$numerator / 10#$denominator))
+    ((quotient = ${numerator//[^-]}10#${numerator//[^0-9]} /
+        ${denominator//[^-]}10#${denominator//[^0-9]}))
 
     # For greater precision, re-divide by the remainder to get the next digits of the quotient
     local remainder quotient_2
-    ((remainder = 10#$numerator % 10#$denominator))   # cannot exceed numerator or thus, maxValue
+    ((remainder = ${numerator//[^-]}10#${numerator//[^0-9]} %
+        ${denominator//[^-]}10#${denominator//[^0-9]})) # cant exceed numerator or thus, maxValue
     ((zeroCount = __shellmath_precision - ${#remainder}))
     if ((zeroCount > 0)); then
         printf -v zeroTail "%0*d" "$zeroCount" 0
@@ -1015,7 +1030,8 @@ function _shellmath_divide()
     fi
     # Derive the new numerator from the remainder. Do not change the denominator.
     numerator=${remainder}${zeroTail}
-    ((quotient_2 = 10#$numerator / 10#$denominator))
+    ((quotient_2 = ${numerator//[^-]}10#${numerator//[^0-9]} /
+        ${denominator//[^-]}10#${denominator//[^0-9]}))
     quotient=${quotient}${quotient_2}
     ((rescaleFactor += ${#quotient_2}))
 
@@ -1027,12 +1043,12 @@ function _shellmath_divide()
             printf -v zeroPrefix "%0*d" "$((rescaleFactor - ${#quotient}))" 0
         fi
         fractionalPart=${zeroPrefix}${quotient}
-        _shellmath_round "$fractionalPart" $__shellmath_precision
+        _shellmath_round "$fractionalPart" "$__shellmath_precision"
         _shellmath_getReturnValue fractionalPart
         quotient="0."${fractionalPart}
     else
         fractionalPart=${quotient:(-$rescaleFactor)}
-        _shellmath_round "$fractionalPart" $__shellmath_precision
+        _shellmath_round "$fractionalPart" "$__shellmath_precision"
         _shellmath_getReturnValue fractionalPart
         quotient=${quotient:0:(-$rescaleFactor)}"."${fractionalPart}
     fi
@@ -1047,7 +1063,7 @@ function _shellmath_divide()
         if [[ "$quotient" =~ [\.].*0$ ]]; then
             # If the decimal point IMMEDIATELY precedes the 0s, remove that too
             [[ $quotient =~ [\.]?0+$ ]]
-            quotient=${quotient%${BASH_REMATCH[0]}}
+            quotient=${quotient%"${BASH_REMATCH[0]}"}
         fi
     fi
 
@@ -1065,4 +1081,3 @@ function _shellmath_divide()
 
     return "$__shellmath_SUCCESS"
 }
-

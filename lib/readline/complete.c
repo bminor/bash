@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -3066,7 +3066,10 @@ _rl_export_completions (char **matches, char *text, int start, int end)
   fprintf (rl_outstream, "%s\n", text);
   fprintf (rl_outstream, "%d:%d\n", start, end);	/* : because it's not a radix character */
   for (i = 0; i < len; i++)
-    fprintf (rl_outstream, "%s\n", matches[i]);
+    {
+      print_filename (matches[i], matches[i], 0);
+      fprintf (rl_outstream, "\n");
+    }
   fflush (rl_outstream);
 }
 

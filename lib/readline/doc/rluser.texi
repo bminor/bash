@@ -11,7 +11,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2024 Free Software Foundation, Inc.
+Copyright (C) 1988--2025 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -466,9 +466,10 @@ A sample value might be @samp{\e[01;33m}.
 
 @item active-region-end-color
 @vindex active-region-end-color
-A string variable that "undoes" the effects of @code{active-region-start-color}
-and restores "normal" terminal display appearance after displaying text
-in the active region.
+A string variable that ``undoes''
+the effects of @code{active-region-start-color}
+and restores ``normal''
+terminal display appearance after displaying text in the active region.
 This string must not take up any physical character positions on the display,
 so it should consist only of terminal escape sequences.
 It is output to the terminal after displaying the text in the active region.
@@ -703,7 +704,7 @@ are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
 @ifset BashFeatures
-By default, Bash sets the the maximum number of history entries to
+By default, Bash sets the maximum number of history entries to
 the value of the @code{HISTSIZE} shell variable.
 @end ifset
 @ifclear BashFeatures
@@ -1055,7 +1056,7 @@ The eight-bit character whose value is the hexadecimal value @var{HH}
 When entering the text of a macro, single or double quotes must
 be used to indicate a macro definition.
 Unquoted text is assumed to be a function name.
-Tthe backslash escapes described above are expanded
+The backslash escapes described above are expanded
 in the macro body.
 Backslash will quote any other character in the macro text,
 including @samp{"} and @samp{'}.
@@ -1188,7 +1189,7 @@ binding, variable assignment, and conditional syntax.
 
 @example
 @page
-# This file controls the behaviour of line input editing for
+# This file controls the behavior of line input editing for
 # programs that use the GNU Readline library.  Existing
 # programs include FTP, Bash, and GDB.
 #
@@ -1316,10 +1317,13 @@ In the following descriptions, @dfn{point} refers to the current cursor
 position, and @dfn{mark} refers to a cursor position saved by the
 @code{set-mark} command.
 The text between the point and mark is referred to as the @dfn{region}.
-Readline has the concept of an @emph{active region}:
+Readline
+has the concept of an @emph{active region}:
 when the region is active,
 Readline redisplay highlights the region using the
-value of the @code{active-region-start-color} variable.
+value of the
+@code{active-region-start-color}
+variable.
 The @code{enable-active-region} variable turns this on and off.
 Several commands set the region to active; those are noted below.
 
@@ -1384,6 +1388,8 @@ leaving the current line at the top of the screen.
 Clear the screen,
 then redraw the current line,
 leaving the current line at the top of the screen.
+If given a numeric argument, this refreshes the current line
+without clearing the screen.
 
 @item redraw-current-line ()
 Refresh the current line.  By default, this is unbound.
@@ -1806,7 +1812,7 @@ the number of matches @var{N};
 the word being completed;
 @item
 @var{S}:@var{E},
-where S and E are the start and end offsets of the word
+where @var{S} and @var{E} are the start and end offsets of the word
 in the Readline line buffer; then
 @item
 each match, one per line
@@ -2057,7 +2063,7 @@ Expand the line by performing shell word expansions.
 This performs alias and history expansion,
 $'@var{string}' and $"@var{string}" quoting,
 tilde expansion, parameter and variable expansion, arithmetic expansion,
-command and proces substitution,
+command and process substitution,
 word splitting, and quote removal.  
 An explicit argument suppresses command and process substitution.
 

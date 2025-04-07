@@ -1,6 +1,6 @@
 /* histfile.c - functions to manipulate the history file. */
 
-/* Copyright (C) 1989-2019,2023-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2019,2023-2025 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -298,21 +298,24 @@ read_history_range (const char *filename, int from, int to)
 #endif
       goto error_and_exit;
     }
-
-  file_size = (size_t)finfo.st_size;
-
-  /* check for overflow on very large files */
-  if (file_size != finfo.st_size || file_size + 1 < file_size)
+  else
     {
-      errno = overflow_errno;
-      goto error_and_exit;
-    }
+      /* regular file */
+      file_size = (size_t)finfo.st_size;
 
-  if (file_size == 0)
-    {
-      xfree (input);
-      close (file);
-      return 0;	/* don't waste time if we don't have to */
+      /* check for overflow on very large files */
+      if (file_size != finfo.st_size || file_size + 1 < file_size)
+	{
+	  errno = overflow_errno;
+	  goto error_and_exit;
+	}
+
+      if (file_size == 0)
+	{
+	  xfree (input);
+	  close (file);
+	  return 0;	/* don't waste time if we don't have to */
+	}
     }
 
 #ifdef HISTORY_USE_MMAP

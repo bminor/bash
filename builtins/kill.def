@@ -84,7 +84,7 @@ static void kill_error (pid_t, int);
 int
 kill_builtin (WORD_LIST *list)
 {
-  int sig, any_succeeded, listing, saw_signal, dflags;
+  int sig, any_succeeded, any_failed, listing, saw_signal, dflags;
   char *sigspec, *word;
   pid_t pid;
   intmax_t pid_value;
@@ -96,7 +96,7 @@ kill_builtin (WORD_LIST *list)
     }
   CHECK_HELPOPT (list);
 
-  any_succeeded = listing = saw_signal = 0;
+  any_succeeded = any_failed = listing = saw_signal = 0;
   sig = SIGTERM;
   sigspec = "TERM";
 
@@ -199,6 +199,7 @@ use_sigspec:
 		sh_invalidsig (sigspec);
 	      else
 		kill_error (pid, errno);
+	      any_failed++;
 	      CONTINUE_OR_FAIL;
 	    }
 	  else
@@ -247,6 +248,7 @@ use_sigspec:
 		sh_invalidsig (sigspec);
 	      else
 		kill_error (pid, errno);
+	      any_failed++;
 	      CONTINUE_OR_FAIL;
 	    }
 	  else
@@ -262,7 +264,10 @@ use_sigspec:
       list = list->next;
     }
 
-  return (any_succeeded ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+  if (posixly_correct)
+    return ((any_failed == 0) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+  else
+    return (any_succeeded ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
 
 static void

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2024 December 12<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2025 February 24<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -48,30 +48,48 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2024 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2025 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
 <B>Bash</B>
 
-is an <B>sh</B>-compatible command language interpreter that
+is a command language interpreter that
 executes commands read from the standard input, from a string,
 or from a file.
+It is a reimplementation and extension of the Bourne shell,
+the historical Unix command language interpreter.
 <B>Bash</B>
 
 also incorporates useful features from the <I>Korn</I> and <I>C</I>
 shells (<B>ksh</B> and <B>csh</B>).
 <P>
 
-POSIX is the name for a family of computing standards based on Unix.
+<FONT SIZE=-1>POSIX</FONT>
+is the name for a family of computing standards based on Unix.
 <B>Bash</B>
 
 is intended to be a conformant implementation of the
-Shell and Utilities portion of the IEEE POSIX specification
-(IEEE Standard 1003.1).
+Shell and Utilities portion of the IEEE
+<FONT SIZE=-1>POSIX</FONT>
+specification (IEEE Standard 1003.1).
 <B>Bash</B>
 
-can be configured to be POSIX-conformant by default.
+<FONT SIZE=-1>POSIX</FONT>
+mode (hereafter referred to as <I>posix mode</I>)
+changes the shell's behavior where its default operation differs
+from the standard to strictly conform to the standard.
+See
+<FONT SIZE=-1><B>SEE ALSO</B>
+
+</FONT>
+below for a reference to a document that details how posix mode affects
+<B>bash</B>'s behavior.
+<B>Bash</B>
+
+can be configured to be
+<FONT SIZE=-1>POSIX</FONT>
+-conformant by default.
 <A NAME="lbAF">&nbsp;</A>
 <H3>OPTIONS</H3>
 
@@ -294,14 +312,11 @@ This option is on by default if the shell is invoked as
 <DT><B>--posix</B>
 
 <DD>
-Change the behavior of <B>bash</B> where the default operation differs
-from the POSIX standard to match the standard (<I>posix mode</I>).
-See
-<FONT SIZE=-1><B>SEE ALSO</B>
-
-</FONT>
-below for a reference to a document that details how posix mode affects
-<B>Bash</B>'s behavior.
+Enable posix mode;
+change the behavior of <B>bash</B>
+where the default operation differs from the
+<FONT SIZE=-1>POSIX</FONT>
+standard to match the standard.
 <DT><B>--restricted</B>
 
 <DD>
@@ -331,9 +346,9 @@ If arguments remain after option processing, and neither the
 nor the
 <B>-s</B>
 
-option has been supplied, the first argument is assumed to
-be the name of a file containing shell commands (a <I>shell script</I>).
-If
+option has been supplied, the first argument is treated as
+the name of a file containing shell commands (a <I>shell script</I>).
+When
 <B>bash</B>
 
 is invoked in this fashion,
@@ -347,8 +362,10 @@ reads and executes commands from this file, then exits.
 <B>Bash</B>'s exit status is the exit status of the last command
 executed in the script.
 If no commands are executed, the exit status is 0.
-Bash first attempts to open the file in the current directory, and,
-if no file is found, then searches the directories in
+<B>Bash</B>
+
+first attempts to open the file in the current directory,
+and, if no file is found, searches the directories in
 <FONT SIZE=-1><B>PATH</B>
 
 </FONT>
@@ -365,13 +382,13 @@ or one started with the
 option.
 <P>
 
-An <I>interactive</I> shell is one started without non-option arguments
+An <I>interactive shell</I> is one started without non-option arguments
 (unless <B>-s</B> is specified)
 and without the
 <B>-c</B>
 
 option,
-whose standard input and standard error are
+and whose standard input and standard error are
 both connected to terminals (as determined by
 <I>isatty</I>(3)),
 
@@ -518,10 +535,12 @@ it tries to mimic the startup behavior of historical versions of
 <B>sh</B>
 
 as closely as possible,
-while conforming to the POSIX standard as well.
+while conforming to the
+<FONT SIZE=-1>POSIX</FONT>
+standard as well.
 When invoked as an interactive login shell, or a non-interactive
-shell with the <B>--login</B> option, it first attempts to
-read and execute commands from
+shell with the <B>--login</B> option, it first attempts to read
+and execute commands from
 
 <A HREF="file:/etc/profile"><I>/etc/profile</I></A>
 
@@ -557,6 +576,8 @@ A non-interactive shell invoked with the name
 <B>sh</B>
 
 does not attempt to read any other startup files.
+<P>
+
 When invoked as
 <B>sh</B>,
 
@@ -571,7 +592,9 @@ When
 is started in posix mode, as with the
 <B>--posix</B>
 
-command line option, it follows the POSIX standard for startup files.
+command line option, it follows the
+<FONT SIZE=-1>POSIX</FONT>
+standard for startup files.
 In this mode, interactive shells expand the
 <FONT SIZE=-1><B>ENV</B>
 
@@ -806,7 +829,9 @@ If the
 reserved word precedes a pipeline, the shell reports the
 elapsed as well as user and system time consumed by its execution
 when the pipeline terminates.
-The <B>-p</B> option changes the output format to that specified by POSIX.
+The <B>-p</B> option changes the output format to that specified by
+<FONT SIZE=-1>POSIX</FONT>
+.
 When the shell is in posix mode, it does not recognize
 <B>time</B> as a reserved word if the next token begins with a
 
@@ -985,8 +1010,11 @@ otherwise the return status is 1.
 The <I>expression</I>
 undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in <I>expression</I> are not treated
+but unescaped double quote characters
+in <I>expression</I> are not treated
 specially and are removed.
+Since this can potentially result in empty strings, this command treats
+those as expressions that evaluate to 0.
 <DT><B>[[</B> <I>expression</I> <B>]]</B><DD>
 
 Evaluate the conditional expression <I>expression</I>
@@ -1025,8 +1053,12 @@ instead of having any special pattern matching meaning.
 An additional binary operator, <B>=~</B>, is available, with the same
 precedence as <B>==</B> and <B>!=</B>.
 When it is used, the string to the right of the operator is considered
-a POSIX extended regular expression and matched accordingly
-(using the POSIX <I>regcomp</I> and <I>regexec</I> interfaces
+a
+<FONT SIZE=-1>POSIX</FONT>
+extended regular expression and matched accordingly
+(using the
+<FONT SIZE=-1>POSIX</FONT>
+<I>regcomp</I> and <I>regexec</I> interfaces
 usually described in
 <I>regex</I>(3)).
 
@@ -1126,7 +1158,7 @@ operators do not evaluate <I>expression2</I> if the value of
 the entire conditional expression.
 </DL>
 
-<DT><B>for</B> <I>name</I> [ [ <B>in</B> [ <I>word ...</I> ] ] ; ] <B>do</B> <I>list</I> ; <B>done</B><DD>
+<DT><B>for</B> <I>name</I> [ [ <B>in</B> <I>word ...</I> ] ; ] <B>do</B> <I>list</I> ; <B>done</B><DD>
 First, expand The list of words following <B>in</B>, generating a list
 of items.
 Then, the variable <I>name</I> is set to each element of this list
@@ -1140,7 +1172,7 @@ below).
 The return status is the exit status of the last command that executes.
 If the expansion of the items following <B>in</B> results in an empty
 list, no commands are executed, and the return status is 0.
-<DT><B>for</B> (( <I>expr1</I> ; <I>expr2</I> ; <I>expr3</I> )) ; <B>do</B> <I>list</I> ; <B>done</B><DD>
+<DT><B>for</B> (( <I>expr1</I> ; <I>expr2</I> ; <I>expr3</I> )) [;] <B>do</B> <I>list</I> ; <B>done</B><DD>
 First, evaluate the arithmetic expression <I>expr1</I> according
 to the rules described below under
 <FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>.
@@ -1240,7 +1272,7 @@ Using <B>;&amp;</B> in place of <B>;;</B> causes execution to continue with
 the <I>list</I> associated with the next pattern list.
 Using <B>;;&amp;</B> in place of <B>;;</B> causes the shell to test the next
 pattern list in the statement, if any, and execute any associated <I>list</I>
-if the match succeeds.
+if the match succeeds,
 continuing the case statement execution as if the pattern list had not matched.
 The exit status is zero if no pattern matches.
 <DT><DD>
@@ -1390,7 +1422,9 @@ parentheses are not supplied, the braces are recommended.
 <I>compound-command</I> is executed whenever <I>fname</I> is specified as the
 name of a simple command.
 When in posix mode, <I>fname</I> must be a valid shell <I>name</I>
-and may not be the name of one of the POSIX <I>special builtins</I>.
+and may not be the name of one of the
+<FONT SIZE=-1>POSIX</FONT>
+<I>special builtins</I>.
 In default mode, a function name can be any unquoted shell word that does
 not contain <B>$</B>.
 </DL>
@@ -1550,8 +1584,8 @@ The special parameters
 and
 <B>@</B>
 
-have special meaning when in double
-quotes (see
+have special meaning when in double quotes
+(see
 <FONT SIZE=-1><B>PARAMETERS</B>
 
 </FONT>
@@ -1722,7 +1756,7 @@ below).
 A
 <I>variable</I>
 
-may be assigned to by a statement of the form
+is assigned to using a statement of the form
 <DL COMPACT><DT><DD>
 <P>
 
@@ -1780,26 +1814,37 @@ assignment statement properties.
 <P>
 
 In the context where an assignment statement is assigning a value
-to a shell variable or array index,
-the += operator appends to or adds to
+to a shell variable or array index, the
+
+operator appends to or adds to
 the variable's previous value.
 This includes arguments to <I>declaration</I> commands such as
-<B>declare</B> that accept assignment statements.
-When += is applied to a variable
-for which the <B>integer</B> attribute has been set,
+<B>declare</B>
+
+that accept assignment statements.
+When
+
+is applied to a variable for which the
+<B>integer</B>
+
+attribute has been set,
 the variable's current value and <I>value</I> are each evaluated as
 arithmetic expressions,
 and the sum of the results is assigned as the variable's value.
 The current value is usually an integer constant, but may be an expression.
-When += is applied to an array variable using compound assignment
+When
+
+is applied to an array variable using compound assignment
 (see
 <B>Arrays</B>
 
-below), the
-variable's value is not unset (as it is when using =), and new
-values are appended to the array beginning at one greater than the array's
-maximum index (for indexed arrays) or added as additional key-value pairs
-in an associative array.
+below),
+the variable's value is not unset
+(as it is when using
+
+and new values are appended to the array
+beginning at one greater than the array's maximum index (for indexed arrays)
+or added as additional key-value pairs in an associative array.
 When applied to a string-valued variable, <I>value</I> is expanded and
 appended to the variable's value.
 <P>
@@ -1843,6 +1888,15 @@ array variables.
 Namerefs can be unset using the <B>-n</B> option to the <B>unset</B> builtin.
 Otherwise, if <B>unset</B> is executed with the name of a nameref variable
 as an argument, the variable referenced by the nameref variable is unset.
+<P>
+
+When the shell starts, it reads its environment and creates a shell
+variable from each environment variable that has a valid name,
+as described below
+(see
+<FONT SIZE=-1><B>ENVIRONMENT</B>).
+
+</FONT>
 <A NAME="lbAV">&nbsp;</A>
 <H4>Positional Parameters</H4>
 
@@ -2071,6 +2125,8 @@ If this variable is in the environment when
 
 starts up, the shell enables each option in the list before
 reading any startup files.
+If this variable is exported, child shells will enable each option
+in the list.
 This variable is read-only.
 <DT><B>BASHPID</B>
 
@@ -2246,7 +2302,7 @@ have no effect, and it may not be unset.
 A colon-separated list of directories in which the
 <B>enable</B>
 
-command.
+command
 looks for
 dynamically loadable builtins.
 <DT><B>BASH_MONOSECONDS</B>
@@ -2737,7 +2793,10 @@ subsequently reset.
 <DT><B>READLINE_ARGUMENT</B>
 
 <DD>
-Any numeric argument given to a <B>readline</B> command that was defined using
+Any numeric argument given to a
+<B>readline</B>
+
+command that was defined using
 
 (see
 <FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
@@ -2841,6 +2900,8 @@ If this variable is in the environment when
 
 starts up, the shell enables each option in the list before
 reading any startup files.
+If this variable is exported, child shells will enable each option
+in the list.
 This variable is read-only.
 <DT><B>SHLVL</B>
 
@@ -2985,9 +3046,10 @@ A sample value is
 
 <DD>
 Set the number of exited child status values for the shell to remember.
-<B>Bash</B> will not allow this value to be decreased below a POSIX-mandated
-minimum, and there is a maximum value (currently 8192) that this may
-not exceed.
+<B>Bash</B> will not allow this value to be decreased below a
+<FONT SIZE=-1>POSIX</FONT>
+-mandated minimum,
+and there is a maximum value (currently 8192) that this may not exceed.
 The minimum value is system-dependent.
 <DT><B>COLUMNS</B>
 
@@ -3232,7 +3294,10 @@ When this variable is assigned a value, the history file is truncated,
 if necessary, to contain no more than that number of lines
 by removing the oldest entries.
 The history file is also truncated to this size after
-writing it when a shell exits or by the <B>history</B> builtin.
+writing it when a shell exits or by the
+<B>history</B>
+
+builtin.
 If the value is 0, the history file is truncated to zero size.
 Non-numeric values and numeric values less than zero inhibit truncation.
 The shell sets the default value to the value of
@@ -3274,8 +3339,29 @@ and are added to the history regardless of the value of
 </FONT>
 If the first line was not saved, the second and subsequent lines of
 the command are not saved either.
-The pattern matching honors the setting of the <B>extglob</B> shell
-option.
+The pattern matching honors the setting of the
+<B>extglob</B>
+
+shell option.
+<DT><DD>
+<FONT SIZE=-1><B>HISTIGNORE</B>
+
+</FONT>
+subsumes some of the function of
+<FONT SIZE=-1><B>HISTCONTROL</B>.
+
+</FONT>
+A pattern of
+
+is identical to
+
+and a pattern of
+
+is identical to
+
+Combining these two patterns, separating them with a colon,
+provides the functionality of
+
 <DT><B>HISTSIZE</B>
 
 <DD>
@@ -3337,7 +3423,7 @@ When
 <FONT SIZE=-1><B>HOSTFILE</B>
 
 </FONT>
-is unset, <B>bash</B> clears the the hostname list.
+is unset, <B>bash</B> clears the hostname list.
 <DT><B>IFS</B>
 
 <DD>
@@ -3555,8 +3641,18 @@ and is set by the administrator who installs
 <B>bash</B>.
 
 A common value is
+<DL COMPACT><DT><DD>
+<DL COMPACT><DT><DD>
+
+/usr/local/bin:/usr/local/sbin:
+<BR>
 
 
+/usr/bin:/usr/sbin:/bin:/sbin
+
+</DL>
+
+</DL>
 
 <DT><B>POSIXLY_CORRECT</B>
 
@@ -3565,7 +3661,8 @@ If this variable is in the environment when <B>bash</B> starts, the shell
 enters posix mode before reading the startup files, as if the
 <B>--posix</B>
 
-invocation option had been supplied.  If it is set while the shell is
+invocation option had been supplied.
+If it is set while the shell is
 running, <B>bash</B> enables posix mode, as if the command
 
 had been executed.
@@ -3801,10 +3898,13 @@ The second character is the <I>quick substitution</I> character, normally
 When it appears as the first character on the line,
 history substitution repeats the previous command,
 replacing one string with another.
-The optional third character is the character which indicates that
-the remainder of the line is a comment when found as the first character
-of a word, normally
+The optional third character is the
+<I>history comment</I>
+character,  normally
 
+which indicates
+that the remainder of the line is a comment
+when it appears as the first character of a word.
 The history comment character disables history substitution
 for the remaining words on the line.
 It does not necessarily cause the shell parser to treat the rest of the
@@ -3825,39 +3925,75 @@ There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
 Indexed arrays are referenced using arithmetic expressions
-that must expand to an integer and are zero-based;
+that must expand to an integer
+(see
+<FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
+
+</FONT>
+below)
+and are zero-based;
 associative arrays are referenced using arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 <P>
 
-An indexed array is created automatically if any variable is assigned to
-using the syntax
-<I>name</I>[<I>subscript</I>]=<I>value</I>.
+The shell performs
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on indexed array subscripts.
+Since this
+can potentially result in empty strings,
+subscript indexing treats
+those as expressions that evaluate to 0.
+<P>
+
+The shell performs
+tilde expansion,
+parameter and variable expansion, arithmetic expansion,
+command substitution, and quote removal
+on associative array subscripts.
+Empty strings cannot be used as associative array keys.
+<P>
+
+<B>Bash</B> automatically creates an indexed array
+if any variable is assigned to using the syntax
+<DL COMPACT><DT><DD>
+<I>name</I>[<I>subscript</I>]=<I>value</I>
+.
+</DL>
+
 The
 <I>subscript</I>
 
 is treated as an arithmetic expression that must evaluate to a number
 greater than or equal to zero.
 To explicitly declare an indexed array, use
-<B>declare -a </B><I>name</I>
+<DL COMPACT><DT><DD>
+<B>declare -a&nbsp;</B><I>name</I>
+
+</DL>
 
 (see
 <FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
 
 </FONT>
 below).
-<B>declare -a </B><I>name</I>[<I>subscript</I>]
+<DL COMPACT><DT><DD>
+<B>declare -a</B> <I>name</I>[<I>subscript</I>]
+</DL>
 
 is also accepted; the <I>subscript</I> is ignored.
 <P>
 
 Associative arrays are created using
-<B>declare -A </B><I>name</I>.
+<DL COMPACT><DT><DD>
+<B>declare -A&nbsp;</B><I>name</I>
 
+</DL>
+
+.
 <P>
 
-Attributes may be
-specified for an array variable using the
+Attributes may be specified for an array variable using the
 <B>declare</B>
 
 and
@@ -3920,7 +4056,9 @@ interpreted as relative to one greater than the maximum index of
 array, and an index of -1 references the last element.
 <P>
 
-The += operator appends to an array variable when assigning
+The
+
+operator appends to an array variable when assigning
 using the compound assignment syntax; see
 <FONT SIZE=-1><B>PARAMETERS</B>
 
@@ -4139,13 +4277,13 @@ Patterns to be brace expanded are formed from an optional
 <I>preamble</I>,
 
 followed by either a series of comma-separated strings or
-a sequence expression between a pair of braces, followed by
-an optional
+a sequence expression between a pair of braces,
+followed by an optional
 <I>postscript</I>.
 
-The preamble is prefixed to each string contained
-within the braces, and the postscript is then appended
-to each resulting string, expanding left to right.
+The preamble is prefixed to each string contained within the braces,
+and the postscript is then appended to each resulting string,
+expanding left to right.
 <P>
 
 Brace expansions may be nested.
@@ -4156,20 +4294,17 @@ For example, a<B>{</B>d,c,b<B>}</B>e expands into
 <P>
 
 A sequence expression takes the form
-<B>{</B><I>x</I><B>..</B><I>y</I><B>[..</B><I>incr</I><B>]}</B>,
+<I>x</I><B>..</B><I>y</I><B>[..</B><I>incr</I><B>]</B>,
 where <I>x</I> and <I>y</I> are either integers or single letters,
 and <I>incr</I>, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 <I>x</I> and <I>y</I>, inclusive.
-If either <I>x</I> or <I>y</I> begins with <I>0</I>,
+If either <I>x</I> or <I>y</I> begins with a zero,
 each generated term will contain the same number of digits,
-zero-padding where necessary.
-When either <I>x</I> or y begins with a zero, the shell
-attempts to force all generated terms to contain the same number of digits,
 zero-padding where necessary.
 When letters are supplied, the expression expands to each character
 lexicographically between <I>x</I> and <I>y</I>, inclusive,
-using the default C locale.
+using the C locale.
 Note that both <I>x</I> and <I>y</I> must be of the same type
 (integer or letter).
 When the increment is supplied, it is used as the difference between
@@ -4193,25 +4328,35 @@ sequence expression.
 Any incorrectly formed brace expansion is left unchanged.
 <P>
 
-A <B>{</B> or <B>,</B> may be quoted with a backslash to prevent its
+A
+
+or
+Q ,
+may be quoted with a backslash to prevent its
 being considered part of a brace expression.
-To avoid conflicts with parameter expansion, the string <B>${</B>
-is not considered eligible for brace expansion, and inhibits brace
-expansion until the closing <B>}</B>.
+To avoid conflicts with parameter expansion, the string
+
+is not considered eligible for brace expansion,
+and inhibits brace expansion until the closing
+
 <P>
 
 This construct is typically used as shorthand when the common
 prefix of the strings to be generated is longer than in the
 above example:
-<DL COMPACT><DT><DD>
 <P>
 
+<DL COMPACT><DT><DD>
+
 mkdir /usr/local/src/bash/{old,new,dist,bugs}
+
 </DL>
 
 or
 <DL COMPACT><DT><DD>
+
 chown root /usr/{ucb/{ex,edit},lib/{ex?.?*,how_ex}}
+
 </DL>
 
 <P>
@@ -4226,15 +4371,16 @@ does not treat opening or closing braces specially when they
 appear as part of a word, and preserves them in the output.
 <B>Bash</B>
 
-removes braces from words as a consequence of brace
-expansion.
+removes braces from words as a consequence of brace expansion.
 For example, a word entered to
 <B>sh</B>
 
-as <I>file{1,2}</I>
+as
+
 appears identically in the output.
-<B>Bash</B> outputs that word as
-<I>file1 file2</I>
+<B>Bash</B>
+
+outputs that word as
 
 after brace expansion.
 Start
@@ -4352,8 +4498,9 @@ of variable assignments (as described above under
 
 </FONT>
 when they appear as arguments to simple commands.
-<B>Bash</B> does not do this, except for the <I>declaration</I> commands listed
-above, when in posix mode.
+<B>Bash</B> does not do this,
+except for the <I>declaration</I> commands listed above,
+when in posix mode.
 <A NAME="lbBC">&nbsp;</A>
 <H4>Parameter Expansion</H4>
 
@@ -4493,9 +4640,15 @@ starting at the character specified by <I>offset</I>.
 If <I>parameter</I> is <B>@</B> or <B>*</B>, an indexed array subscripted by
 <B>@</B> or <B>*</B>, or an associative array name, the results differ as
 described below.
-If <I>length</I> is omitted, expands to the substring of the value of
+If <B>:</B><I>length</I> is omitted (the first form above), this
+expands to the substring of the value of
 <I>parameter</I> starting at the character specified by <I>offset</I>
 and extending to the end of the value.
+If <I>offset</I> is omitted,
+it is treated as 0.
+If <I>length</I> is omitted,
+but the colon after <I>offset</I> is present,
+it is treated as 0.
 <I>length</I> and <I>offset</I> are arithmetic expressions (see
 <FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
 
@@ -4698,10 +4851,9 @@ ${<I>parameter</I><B>/</B><I>pattern</I><B>/</B><I>string</I>}
 <DT>${<I>parameter</I><B>/%</B><I>pattern</I><B>/</B><I>string</I>}<DD>
 
 <B>Pattern substitution</B>.
-The <I>pattern</I> is expanded to produce a pattern just as in
-pathname expansion and matched against the expanded value of
-<I>parameter</I>
-using the rules described under
+The <I>pattern</I> is expanded to produce a pattern
+and matched against the expanded value of <I>parameter</I>
+as described under
 <B>Pattern Matching</B>
 
 below.
@@ -4786,18 +4938,31 @@ ${<I>parameter</I><B>^</B><I>pattern</I>}
 
 <B>Case modification</B>.
 This expansion modifies the case of alphabetic characters in <I>parameter</I>.
-The <I>pattern</I> is expanded to produce a pattern just as in
-pathname expansion.
-Each character in the expanded value of <I>parameter</I> is tested against
-<I>pattern</I>, and, if it matches the pattern, its case is converted.
+First, the <I>pattern</I> is expanded to produce a pattern
+as described below under
+<FONT SIZE=-1><B>Pattern Matching</B>.
+
+</FONT>
+<B>Bash</B>
+
+then examines characters in the expanded value of <I>parameter</I>
+against <I>pattern</I> as described below.
+If a character matches the pattern, its case is converted.
 The pattern should not attempt to match more than one character.
 <DT><DD>
-The <B>^</B> operator converts lowercase letters matching <I>pattern</I>
-to uppercase; the <B>,</B> operator converts matching uppercase letters
-to lowercase.
-The <B>^^</B> and <B>,,</B> expansions convert each matched character in the
-expanded value; the <B>^</B> and <B>,</B> expansions match and convert only
-the first character in the expanded value.
+Using
+
+converts lowercase letters matching <I>pattern</I> to uppercase;
+
+converts matching uppercase letters to lowercase.
+The
+<B>^</B> and <B>,</B> variants
+examine the first character in the expanded value
+and convert its case if it matches <I>pattern</I>;
+the
+<B>^^</B> and <B>,,</B> variants
+examine all characters in the expanded value
+and convert each one that matches <I>pattern</I>.
 If <I>pattern</I> is omitted, it is treated like a <B>?</B>, which matches
 every character.
 <DT><DD>
@@ -5040,11 +5205,16 @@ The
 
 undergoes the same expansions
 as if it were within double quotes,
-but double quote characters in <I>expression</I> are not treated specially
-and are removed.
+but unescaped double quote characters
+in <I>expression</I> are not treated
+specially and are removed.
 All tokens in the expression undergo parameter and variable expansion,
 command substitution, and quote removal.
 The result is treated as the arithmetic expression to be evaluated.
+Since the way Bash handles double quotes
+can potentially result in empty strings,
+arithmetic expansion treats
+those as expressions that evaluate to 0.
 Arithmetic expansions may be nested.
 <P>
 
@@ -5077,7 +5247,8 @@ passed as an argument to the current command as the result of the
 expansion.
 <P>
 
-If the <B>&gt;(</B><I>list</I><B>)</B> form is used, writing to
+If the
+<B>&gt;(</B><I>list</I><B>)</B> form is used, writing to
 the file provides input for <I>list</I>.
 If the
 <B>&lt;(</B><I>list</I><B>)</B> form is used, reading the file
@@ -5088,7 +5259,7 @@ as a redirection.
 <P>
 
 Process substitution is supported on systems that support named
-pipes (<I>FIFOs</I>) or the <B>/dev/fd</B> method of naming open files.
+pipes (<I>FIFOs</I>) or the <I>/dev/fd</I> method of naming open files.
 <P>
 
 When available, process substitution is performed
@@ -5369,9 +5540,10 @@ To get the old behavior of ignoring filenames beginning with a
 make
 
 one of the patterns in
-<FONT SIZE=-1><B>GLOBIGNORE</B>.
+<FONT SIZE=-1><B>GLOBIGNORE</B>
 
 </FONT>
+.
 The
 <B>dotglob</B>
 
@@ -5387,15 +5559,18 @@ pattern matching honors the setting of the <B>extglob</B> shell
 option.
 <P>
 
-The
+The value of the
 <FONT SIZE=-1><B>GLOBSORT</B>
 
 </FONT>
 shell variable controls how the results of pathname expansion are sorted,
-as described above.
+as described above under
+<B>Shell Variables</B>.
+
 <P>
 
 <B>Pattern Matching</B>
+
 <P>
 
 Any character that appears in a pattern, other than the special pattern
@@ -5491,7 +5666,9 @@ shell option.
 Within a bracket expression,
 <I>character classes</I> can be specified using the syntax
 <B>[:</B><I>class</I><B>:]</B>, where <I>class</I> is one of the
-following classes defined in the POSIX standard:
+following classes defined in the
+<FONT SIZE=-1>POSIX</FONT>
+standard:
 <DT><DD>
 <DL COMPACT><DT><DD>
 <B>
@@ -5816,7 +5993,7 @@ and the
 option to the
 <B>set</B>
 
-builtin has been enabled, the redirection fails if the file
+builtin command has been enabled, the redirection fails if the file
 whose name results from the expansion of <I>word</I> exists and is
 a regular file.
 If the redirection operator is
@@ -5831,13 +6008,13 @@ and the
 option to the
 <B>set</B>
 
-builtin command is not enabled,
+builtin is not enabled,
 <B>bash</B> attempts the redirection
 even if the file named by <I>word</I> exists.
 <A NAME="lbBM">&nbsp;</A>
 <H4>Appending Redirected Output</H4>
 
-Redirecting  output in this fashion opens
+Redirecting output in this fashion opens
 the file whose name results from the expansion of
 <I>word</I>
 
@@ -5957,7 +6134,7 @@ The format of here-documents is:
 
 The shell does not perform
 parameter and variable expansion, command substitution,
-arithmetic expansion, or pathname expansion is performed on
+arithmetic expansion, or pathname expansion on
 <I>word</I>.
 
 <P>
@@ -6823,7 +7000,9 @@ is non-zero.
 
 <DT><I>string1</I> <B>=</B> <I>string2</I><DD>
 True if the strings are equal.
-<B>=</B> should be used with the <B>test</B> command for POSIX conformance.
+<B>=</B> should be used with the <B>test</B> command for
+<FONT SIZE=-1>POSIX</FONT>
+conformance.
 When used with the <B>[[</B> command, this performs pattern matching as
 described above (<B>Compound Commands</B>).
 <DT><I>string1</I> <B>!=</B> <I>string2</I><DD>
@@ -6885,6 +7064,15 @@ are evaluated as arithmetic expressions (see
 
 </FONT>
 above).
+Since the expansions the <B>[[</B> command performs on
+<I>arg1</I>
+
+and
+<I>arg2</I>
+
+can potentially result in empty strings,
+arithmetic expression evaluation treats
+those as expressions that evaluate to 0.
 
 </DL>
 <A NAME="lbBY">&nbsp;</A>
@@ -7574,6 +7762,10 @@ To facilitate the implementation of the user interface to job control,
 each process has a <I>process group ID</I>, and
 the operating system maintains the notion of a <I>current terminal
 process group ID</I>.
+This terminal process group ID is associated with the
+<I>controlling terminal</I>.
+<P>
+
 Processes that have the same process group ID are said to be part of
 the same <I>process group</I>.
 Members of the <I>foreground</I> process group (processes whose
@@ -7588,19 +7780,22 @@ Processes in the foreground process group are said to be
 processes.
 <I>Background</I>
 
-processes are those whose process group ID differs from the terminal's;
+processes are those whose process group ID differs from the
+controlling terminal's;
 such processes are immune to keyboard-generated signals.
-Only foreground processes are allowed to read from or, if the
-user so specifies with
+Only foreground processes are allowed to read from or,
+if the user so specifies with
 
-write to the terminal.
-Background processes which attempt to read from (write to when
-
-is in effect) the terminal are sent a
+write to the controlling terminal.
+The system sends a
 <FONT SIZE=-1><B>SIGTTIN (SIGTTOU)</B>
 
 </FONT>
-signal by the kernel's terminal driver,
+signal to background processes which attempt to
+read from (write to when
+
+is in effect)
+the terminal,
 which, unless caught, suspends the process.
 <P>
 
@@ -8786,7 +8981,7 @@ If set to zero, any existing history entries are deleted and no new entries
 are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
-By default, <B>bash</B> sets the the maximum number of history entries to
+By default, <B>bash</B> sets the maximum number of history entries to
 the value of the <B>HISTSIZE</B> shell variable.
 Setting <I>history-size</I> to a non-numeric value will set
 the maximum number of history entries to 500.
@@ -9264,12 +9459,12 @@ Words are composed of alphanumeric characters (letters and digits).
 <DD>
 Move back to the start of the current or previous word.
 Words are composed of alphanumeric characters (letters and digits).
-<DT><B>shell-forward-word</B>
+<DT><B>shell-forward-word (M-C-f)</B>
 
 <DD>
 Move forward to the end of the next word.
 Words are delimited by non-quoted shell metacharacters.
-<DT><B>shell-backward-word</B>
+<DT><B>shell-backward-word (M-C-b)</B>
 
 <DD>
 Move back to the start of the current or previous word.
@@ -9304,7 +9499,7 @@ leaving the current line at the top of the screen.
 Clear the screen,
 then redraw the current line,
 leaving the current line at the top of the screen.
-With an argument, refresh the current line without clearing the
+With a numeric argument, refresh the current line without clearing the
 screen.
 <DT><B>redraw-current-line</B>
 
@@ -9603,7 +9798,7 @@ Negative arguments have no effect.
 
 <DD>
 Drag the word before point past the word after point,
-moving point over that word as well.
+moving point past that word as well.
 If point is at the end of the line, this transposes
 the last two words on the line.
 <DT><B>shell-transpose-words (M-C-t)</B>
@@ -9854,7 +10049,7 @@ the number of matches <I>N</I>;
 the word being completed;
 <DT>*<DD>
 <I>S</I>:<I>E</I>,
-where S and E are the start and end offsets of the word
+where <I>S</I> and <I>E</I> are the start and end offsets of the word
 in the <B>readline</B> line buffer; then
 <DT>*<DD>
 each match, one per line
@@ -10483,7 +10678,7 @@ and
 
 On startup, <B>bash</B> initializes the history list
 by reading history entries from the
-the file named by the
+file named by the
 <FONT SIZE=-1><B>HISTFILE</B>
 
 </FONT>
@@ -11526,7 +11721,7 @@ is converted to
 before attempting the directory change.
 <DT><DD>
 If <B>cd</B> uses a non-empty directory name from
-<FONT SIZE=-1><B>CDPATH,</B>
+<FONT SIZE=-1><B>CDPATH</B>,
 
 </FONT>
 or if <B>-</B> is the first argument, and the directory change is
@@ -12396,7 +12591,7 @@ If <B>-n</B> is supplied, each <I>name</I> is disabled; otherwise,
 For example, to use the
 <B>test</B>
 
-binary found usin g
+binary found using
 <FONT SIZE=-1><B>PATH</B>
 
 </FONT>
@@ -12420,7 +12615,8 @@ shell builtins.
 If <B>-n</B> is supplied, print only disabled builtins.
 If <B>-a</B> is supplied, the list printed includes all builtins, with an
 indication of whether or not each is enabled.
-The <B>-s</B> option means to restrict the output to the POSIX
+The <B>-s</B> option means to restrict the output to the
+<FONT SIZE=-1>POSIX</FONT>
 <I>special</I> builtins.
 <DT><DD>
 The
@@ -12444,7 +12640,8 @@ The
 <B>-d</B>
 
 option will delete a builtin previously loaded with <B>-f</B>.
-If <I>-s</I> is used with <I>-f</I>, the new builtin becomes a POSIX
+If <I>-s</I> is used with <I>-f</I>, the new builtin becomes a
+<FONT SIZE=-1>POSIX</FONT>
 special builtin.
 <DT><DD>
 If no options are supplied and a <I>name</I> is not a shell builtin,
@@ -12935,16 +13132,19 @@ is specified,
 <B>help</B>
 
 gives detailed help on all commands matching
-<I>pattern</I>;
+<I>pattern</I>
 
+as described below;
 otherwise it displays a list of
 all the builtins and shell compound commands.
+<DT><DD>
+Options, if supplied, have the follow meanings:
 <DL COMPACT><DT><DD>
-
 <DL COMPACT>
-<DT><B>-d</B>
-
+<DT>
 <DD>
+<B>-d</B>
+
 Display a short description of each <I>pattern</I>
 <DT><B>-m</B>
 
@@ -12957,6 +13157,22 @@ Display only a short usage synopsis for each <I>pattern</I>
 
 </DL></DL>
 
+<DT><DD>
+If <I>pattern</I> contains pattern matching characters
+(see
+<FONT SIZE=-1><B>Pattern Matching</B>
+
+</FONT>
+above)
+it's treated as a shell pattern and
+<B>help</B> prints the description of each
+help topic matching <I>pattern</I>.
+<DT><DD>
+If not, and <I>pattern</I> exactly matches the name of a help topic,
+<B>help</B> prints the description
+associated with that topic.
+Otherwise, <B>help</B> performs prefix matching and
+prints the descriptions of all matching help topics.
 <DT><DD>
 The return status is 0 unless no command matches
 <I>pattern</I>.
@@ -13965,7 +14181,7 @@ command that fails is part of the command list immediately following a
 or
 <B>until</B>
 
-keyword,
+reserved word,
 part of the test following the
 <B>if</B>
 
@@ -14201,11 +14417,14 @@ This option is disabled by default.
 <DT><B>posix</B>
 
 <DD>
-Change the behavior of
+Enable posix mode;
+change the behavior of
 <B>bash</B>
 
 where the default operation differs
-from the POSIX standard to match the standard (<I>posix mode</I>).
+from the
+<FONT SIZE=-1>POSIX</FONT>
+standard to match the standard.
 See
 <FONT SIZE=-1><B>SEE ALSO</B>
 
@@ -14662,9 +14881,6 @@ under
 
 <DD>
 <DT><B>compat44</B>
-
-<DD>
-<DT><B>compat50</B>
 
 <DD>
 
@@ -15313,7 +15529,8 @@ commands sort lexicographically using ASCII ordering.
 
 The historical operator-precedence parsing with 4 or more arguments can
 lead to ambiguities when it encounters strings that look like primaries.
-The POSIX
+The
+<FONT SIZE=-1>POSIX</FONT>
 standard has deprecated the <B>-a</B> and <B>-o</B>
 primaries and enclosing expressions within parentheses.
 Scripts should no longer use them.
@@ -15479,7 +15696,7 @@ command is part of the command list immediately following a
 or
 <B>until</B>
 
-keyword,
+reserved word,
 part of the test in an
 <I>if</I>
 
@@ -15713,7 +15930,9 @@ The pipe size in 512-byte blocks (this may not be set).
 <DT><B>-q</B>
 
 <DD>
-The maximum number of bytes in POSIX message queues.
+The maximum number of bytes in
+<FONT SIZE=-1>POSIX</FONT>
+message queues.
 <DT><B>-r</B>
 
 <DD>
@@ -16111,14 +16330,18 @@ bash-4.1 and later use the current locale's collation sequence and
 <DL COMPACT><DT><DD>
 <DL COMPACT>
 <DT>*<DD>
-In <I>posix</I> mode, <B>time</B> may be followed by options and still be
-recognized as a reserved word (this is POSIX interpretation 267).
+In posix mode, <B>time</B> may be followed by options and still be
+recognized as a reserved word (this is
+<FONT SIZE=-1>POSIX</FONT>
+interpretation 267).
 <DT>*<DD>
 In <I>posix</I> mode, the parser requires that an even number of single
 quotes occur in the <I>word</I> portion of a double-quoted
 parameter expansion and treats them specially, so that characters within
 the single quotes are considered quoted
-(this is POSIX interpretation 221).
+(this is
+<FONT SIZE=-1>POSIX</FONT>
+interpretation 221).
 </DL></DL>
 
 
@@ -16133,7 +16356,9 @@ undergo quote removal, as it does in versions after bash-4.2.
 In posix mode, single quotes are considered special when expanding
 the <I>word</I> portion of a double-quoted parameter expansion
 and can be used to quote a closing brace or other special character
-(this is part of POSIX interpretation 221);
+(this is part of
+<FONT SIZE=-1>POSIX</FONT>
+interpretation 221);
 in later versions, single quotes
 are not special within double-quoted word expansions.
 </DL></DL>
@@ -16358,7 +16583,11 @@ builtin command.
 <DT>*<DD>
 Importing function definitions from the shell environment at startup.
 <DT>*<DD>
-Parsing the value of
+Parsing the values of
+<FONT SIZE=-1><B>BASHOPTS</B>
+
+</FONT>
+and
 <FONT SIZE=-1><B>SHELLOPTS</B>
 
 </FONT>
@@ -16525,7 +16754,7 @@ ALL bug reports should include:
 <DT>The version number of <B>bash</B><DD>
 <DT>The hardware and operating system<DD>
 <DT>The compiler used to compile<DD>
-<DT>A description of the bug behaviour<DD>
+<DT>A description of the bug behavior<DD>
 <DT>A short script or <DD>
 
 which exercises the bug
@@ -16556,9 +16785,7 @@ and traditional versions of
 <B>sh</B>,
 
 mostly because of the
-<FONT SIZE=-1><B>POSIX</B>
-
-</FONT>
+<FONT SIZE=-1>POSIX</FONT>
 specification.
 <P>
 
@@ -16586,7 +16813,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2024 December 12<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2025 February 24<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16695,7 +16922,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20241207/doc/bash.1.<BR>
-Time: 12 December 2024 13:38:21 EST
+This document was created by man2html from bash.1.<BR>
+Time: 31 March 2025 10:28:01 EDT
 </BODY>
 </HTML>

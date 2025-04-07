@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2023 Free Software Foundation, Inc.
+   Copyright (C) 2023-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -87,16 +87,19 @@ static char * const date_time_formats[] =
   "%F %r",			/* YYYY-mm-dd HH:MM:SS p.m. */
   "%F %R",			/* YYYY-mm-dd HH:MM */
   "%F %I:%M %p",		/* YYYY-mm-dd HH:MM a.m. */
-  "%F",				/* YYYY-mm-dd ISO8601 time */
-  "%T",				/* HH:MM:SS */
-  "%H.%M.%S",			/* HH.MM.SS */
   /* From coreutils-9.2 date */
   "%Y-%m-%dT%H:%M:%S%z",	/* ISO8601 time */
   "%Y-%m-%dT%H%z",		/* ISO8601 time */
   "%Y-%m-%dT%H:%M%z",		/* ISO8601 time */
+  "%Y-%m-%dT%H:%M:%S%Z",	/* ISO8601 time but with timezone name */
+  "%Y-%m-%dT%H%Z",		/* ISO8601 time but with timezone name */
+  "%Y-%m-%dT%H:%M%Z",		/* ISO8601 time but with timezone name */
   /* RFC 3339 time */
   "%Y-%m-%d %H:%M:%S%z",	/* RFC 3339 time */
-  "%Y-%m-%dT%H:%M:%S%z",	/* RFC 3339 time */
+  "%Y-%m-%d %H:%M:%S%Z",	/* RFC 3339 time but with timezone name */
+#if 0
+  "%Y-%m-%dT%H:%M:%S%z",	/* RFC 3339 time, same as first ISO8601 time */
+#endif
   /* more oddball formats */
   "%m.%d.%Y %T",		/* mm.dd.YYYY HH:MM:SS */
   "%m.%d.%Y %R",		/* mm.dd.YYYY HH:MM */
@@ -151,13 +154,28 @@ static char * const date_time_formats[] =
   "%d.%m.%Y %R",		/* dd.mm.YYYY HH:MM */
   "%d.%m.%Y %r",		/* dd.mm.YYYY HH:MM:SS a.m. */    
   "%d.%m.%Y %I:%M %p",		/* dd.mm.YYYY HH:MM p.m. */
+  /* Some fallbacks */
+  "%F",				/* YYYY-mm-dd ISO8601 time */
+  "%T",				/* HH:MM:SS */
+  "%H.%M.%S",			/* HH.MM.SS */
   0
 };
 
 static void
 inittime (time_t *clock, struct tm *timeptr)
 {
-  timeptr = localtime (clock);		/* for now */
+  struct tm *loctime;
+
+  /* Initialize to local time */
+  loctime = localtime (clock);
+
+  if (loctime == 0)
+    {
+      timeptr->tm_hour = timeptr->tm_min = timeptr->tm_sec = 0;
+      return;
+    }
+
+  memcpy (timeptr, loctime, sizeof (struct tm));
 
   /* but default to midnight */
   timeptr->tm_hour = timeptr->tm_min = timeptr->tm_sec = 0;
@@ -171,17 +189,31 @@ strptime_builtin (WORD_LIST *list)
   char *s;
   struct tm t, *tm;
   time_t now, secs;
-  char *datestr;
-  int i;
+  char *datestr, *format;
+  int i, opt;
 
-  if (no_options (list))	/* for now */
-    return (EX_USAGE);
+  format = NULL;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "f:")) != -1)
+    {
+      switch (opt)
+        {
+          case 'f':
+	    format = list_optarg;
+	    break;
+	  CASE_HELPOPT;
+	  default:
+	    builtin_usage ();
+	    return (EX_USAGE);
+        }
+    }
 
   list = loptend;
+
   if (list == 0)
     {
       builtin_usage ();
-     return (EX_USAGE);
+      return (EX_USAGE);
     }
 
   datestr = string_list (list);
@@ -195,25 +227,43 @@ strptime_builtin (WORD_LIST *list)
       if (STREQ (datestr, date_time_modifiers[i].shorthand))
 	{
 	  secs = now + date_time_modifiers[i].incr;
-	  break;
+	  printf ("%ld\n", secs);    
+	  return (EXECUTION_SUCCESS);
 	}
     }
 
-  if (secs == -1)
+  /* init struct tm */
+  inittime (&now, &t);
+  if (format)
     {
-      /* init struct tm */
-      inittime (&now, tm);
-      t = *tm;
+      s = strptime (datestr, format, &t);
+      if (s == 0 || s == datestr)
+	{
+	  builtin_error ("%s: unrecognized format", datestr);
+	  return (EXECUTION_FAILURE);
+	}
+    }
+  else
+    {
       for (i = 0; date_time_formats[i]; i++)
-        {
+	{
 	  s = strptime (datestr, date_time_formats[i], &t);
-	  if (s == 0)
+	  if (s == 0 || s == datestr)
 	    continue;
-	  /* skip extra characters at the end for now */
-	  secs = mktime (&t);
 	  break;
         }
+      if (date_time_formats[i] == 0)
+	{
+	  builtin_error ("%s: unrecognized format", datestr);
+	  return (EXECUTION_FAILURE);
+
+	}
     }
+
+  /* Found something. */
+  secs = mktime (&t);
+  if (s && *s)
+    builtin_warning("%s: not completely converted (%s)", datestr, s);
 
   printf ("%ld\n", secs);    
   return (EXECUTION_SUCCESS);
@@ -222,9 +272,12 @@ strptime_builtin (WORD_LIST *list)
 char *strptime_doc[] = {
 	"Convert a date-time string to seconds since the epoch.",
 	"",
-	"Take DATE-TIME, a date-time string, parse it against a set of common",
-	"date-time formats. If the string matches one of the formats, convert",
-	"it into seconds since the epoch and display the result.",
+	"Take DATE-TIME, a date-time string, and parse it using FORMAT, a",
+	"date and time format accepted by strptime(3). If FORMAT is not supplied,",
+	"attempt to parse DATE-TIME against a set of common date-time formats,",
+	"not all of which may be acceptable to strptime(3).",
+	"If the string matches one of the formats, convert it into seconds",
+	"since the epoch and display the result.",
 	(char *)NULL
 };
 
@@ -236,6 +289,6 @@ struct builtin strptime_struct = {
 	strptime_builtin,		/* function implementing the builtin */
 	BUILTIN_ENABLED,	/* initial flags for builtin */
 	strptime_doc,		/* array of long documentation strings. */
-	"strptime date-time",	/* usage synopsis; becomes short_doc */
+	"strptime [-f format] date-time",	/* usage synopsis; becomes short_doc */
 	0			/* reserved for internal use */
 };

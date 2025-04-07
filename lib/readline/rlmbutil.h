@@ -148,26 +148,26 @@ _rl_wcwidth (WCHAR_T wc)
 {
   switch (wc)
     {
-    case ' ': case '!': case '"': case '#': case '%':
-    case '&': case '\'': case '(': case ')': case '*':
-    case '+': case ',': case '-': case '.': case '/':
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-    case ':': case ';': case '<': case '=': case '>':
-    case '?':
-    case 'A': case 'B': case 'C': case 'D': case 'E':
-    case 'F': case 'G': case 'H': case 'I': case 'J':
-    case 'K': case 'L': case 'M': case 'N': case 'O':
-    case 'P': case 'Q': case 'R': case 'S': case 'T':
-    case 'U': case 'V': case 'W': case 'X': case 'Y':
-    case 'Z':
-    case '[': case '\\': case ']': case '^': case '_':
-    case 'a': case 'b': case 'c': case 'd': case 'e':
-    case 'f': case 'g': case 'h': case 'i': case 'j':
-    case 'k': case 'l': case 'm': case 'n': case 'o':
-    case 'p': case 'q': case 'r': case 's': case 't':
-    case 'u': case 'v': case 'w': case 'x': case 'y':
-    case 'z': case '{': case '|': case '}': case '~':
+    case L' ': case L'!': case L'"': case L'#': case L'%':
+    case L'&': case L'\'': case L'(': case L')': case L'*':
+    case L'+': case L',': case L'-': case L'.': case L'/':
+    case L'0': case L'1': case L'2': case L'3': case L'4':
+    case L'5': case L'6': case L'7': case L'8': case L'9':
+    case L':': case L';': case L'<': case L'=': case L'>':
+    case L'?':
+    case L'A': case L'B': case L'C': case L'D': case L'E':
+    case L'F': case L'G': case L'H': case L'I': case L'J':
+    case L'K': case L'L': case L'M': case L'N': case L'O':
+    case L'P': case L'Q': case L'R': case L'S': case L'T':
+    case L'U': case L'V': case L'W': case L'X': case L'Y':
+    case L'Z':
+    case L'[': case L'\\': case L']': case L'^': case L'_':
+    case L'a': case L'b': case L'c': case L'd': case L'e':
+    case L'f': case L'g': case L'h': case L'i': case L'j':
+    case L'k': case L'l': case L'm': case L'n': case L'o':
+    case L'p': case L'q': case L'r': case L's': case L't':
+    case L'u': case L'v': case L'w': case L'x': case L'y':
+    case L'z': case L'{': case L'|': case L'}': case L'~':
       return 1;
     default:
       return wcwidth (wc);

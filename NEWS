@@ -29,12 +29,12 @@ j. `trap' has a new -P option that prints the trap action associated with each
    signal argument.
 
 k. The `command' builtin preceding a declaration builtin (e.g., `declare')
-   preserves the special asisgnment statement parsing for the declation
+   preserves the special asisgnment statement parsing for the declaration
    builtin. This is a new POSIX requirement.
 
 l. `printf' uses the `alternate form' for %q and %Q to force single quoting.
 
-m. `printf' now interprets %ls (%S) and %lc (%C)nas referring to wide strings
+m. `printf' now interprets %ls (%S) and %lc (%C) as referring to wide strings
    and characters, respectively, when in a multibyte locale.
 
 n. The shell can be compiled with a different default value for the
@@ -129,7 +129,7 @@ pp. There is a new `bash_source_fullpath' shopt option, which makes bash put
     at configure time.
 
 qq. Posix mode now forces job notifications to occur when the new edition of
-    POSIX specifes (since it now specifies them).
+    POSIX specifies (since it now specifies them).
 
 rr. Interactive shells don't print job notifications while sourcing scripts.
 
@@ -142,6 +142,9 @@ uu. If `exit' is run in a trap and not supplied an exit status argument, it
     uses the value of $? from before the trap only if it's run at the trap's
     `top level' and would cause the trap to end (that is, not in a subshell).
     This is from Posix interp 1602.
+
+vv. There is a new `fltexpr' builtin to perform floating-point arithmetic
+    similarly to `let'.
 
 2. New Features in Readline
 
@@ -175,17 +178,23 @@ i. Incremental and non-incremental searches now allow ^V/^Q (or, in the former
    case, anything bound to quoted-insert) to quote characters in the search
    string.
 
-j. Documentation has been significantly updated.
+j. There is a new rl_print_keybinding function that prints the key bindings
+   for a single bindable function specified by name.
 
-k. New `force-meta-prefix' bindable variable, which forces the use of ESC as
+k. Documentation has been significantly updated.
+
+l. New `force-meta-prefix' bindable variable, which forces the use of ESC as
    the meta prefix when using "\M-" in key bindings instead of overloading
    convert-meta.
 
-l. The default value for `readline-colored-completion-prefix' no longer has a
+m. The default value for `readline-colored-completion-prefix' no longer has a
    leading `.'; the original report was based on a misunderstanding.
 
-m. There is a new bindable command, `export-completions', which writes the
+n. There is a new bindable command, `export-completions', which writes the
    possible completions for a word to the standard output in a defined format.
+
+o. Readline can reset its idea of the screen dimensions when executing after
+   a SIGCONT.
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-5.2 since

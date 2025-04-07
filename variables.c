@@ -3656,7 +3656,7 @@ assign_in_env (const WORD_DESC *word, int flags)
 /*								    */
 /* **************************************************************** */
 
-#ifdef INCLUDE_UNUSED
+#if defined (INCLUDE_UNUSED)
 /* Copy VAR to a new data structure and return that structure. */
 SHELL_VAR *
 copy_variable (SHELL_VAR *var)
@@ -4684,6 +4684,31 @@ flush_temporary_env (void)
       temporary_env = (HASH_TABLE *)NULL;
     }
 }
+
+#if defined (INCLUDE_UNUSED)
+void *
+copyvar (void *v)
+{
+  SHELL_VAR *new;
+  new = copy_variable ((SHELL_VAR *)v);
+  return new;
+}
+
+HASH_TABLE *
+copy_vartab (HASH_TABLE *table)
+{
+  HASH_TABLE *newtab;
+
+  newtab = table ? hash_copy (table, copyvar) : NULL;
+  return newtab;
+}
+
+HASH_TABLE *
+copy_temporary_env (void)
+{
+  return copy_vartab (temporary_env);
+}
+#endif
 
 /* **************************************************************** */
 /*								    */

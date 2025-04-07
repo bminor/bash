@@ -1,3 +1,74 @@
+This document details the changes between this version, bash-5.3-rc1, and
+the previous version, bash-5.3-beta.
+
+1. Changes to Bash
+
+a. Fixed a bug where backslash did not quote multibyte characters in some
+   cases.
+
+b. Requesting the length of an element of an unset array is a fatal error
+   when `set -u' is enabled and the subscript is not `@' or `*'.
+
+c. Prompt expansion now quotes the results of \U.
+
+d. Changes to `set -e' exit behavior in posix mode, since POSIX now says to
+   exit as if executing the `exit builtin with no arguments'.
+
+e. Fixes to the `exec' builtin to undo redirections if it is given a command
+   name to execute and the exection fails, but the shell does not exit. This
+   is POSIX interp 1896.
+
+f. Fixed a bug that resulted in `wait' setting $? to 255 in some cases when
+   waiting for a specific PID.
+
+g. Fixed a bug involving redirections to the file descriptor bash is using to
+   read a script.
+
+h. In POSIX mode, `kill' returns a failure status if any of the PID/job
+   arguments are not found or if sending the signal fails.
+
+i. Fixed a bug that caused an invalid brace sequence expression to mess up
+   expansion of an enclosing brace expansion.
+
+j. Fixed a bug in command printing that output the wrong default file
+   descriptor for the <> redirection.
+
+k. User-specified subshells (`(...)') now update BASH_COMMAND in the subshell.
+
+l. Fixed a display bug with the `help -m' and loadable builtins.
+
+m. Fixed a potential file descriptor leak when trying to use a pipe for a
+   here document.
+
+n. Fix a bug with multiple assignment statements preceding a simple command
+   containing nofork comsubs.
+
+o. Fix a potential bug that could result in a NULL buffered stream even with
+   a valid input file descriptor.
+
+2. Changes to Readline
+
+a. Fixed a bug that allowed a history search to change the current history
+   list position.
+
+b. Fixed a bug that allowed ^G to retain a saved command to execute.
+
+c. Updates to new export-completions command to allow filename suffixes.
+
+d. Fixed a redisplay bug with prompts containing multiple sequences of
+   invisible characters that are longer than the screen width.
+
+3. New Features in Bash
+
+a. There is a new `fltexpr' loadable builtin to perform floating-point
+   arithmetic similarly to `let'.
+
+4. New Features in Readline
+
+a. Readline can reset its idea of the screen dimensions when executing after
+   a SIGCONT.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.3-beta, and
 the previous version, bash-5.3-alpha.
 
@@ -152,7 +223,7 @@ l. There is a new `bash_source_fullpath' shopt option, which makes bash put
    at configure time.
 
 m. Posix mode now forces job notifications to occur when the new edition of
-   POSIX specifes (since it now specifies them).
+   POSIX specifies (since it now specifies them).
 
 n. Interactive shells don't print job notifications while sourcing scripts.
 
@@ -325,7 +396,7 @@ vv. Fixed a bug that caused unset not to remove a function named a[b] if
 ww. Posix mode doesn't perform function lookup for function names containing
     a slash.
 
-xx. <( and >( can now be used in funtion names.
+xx. <( and >( can now be used in function names.
 
 yy. Fixed a bug that caused tilde expansion not to be performed on some
     array subscripts.
@@ -451,7 +522,7 @@ oooo. If the cd builtin uses $OLDPWD, allow it to use $CDPATH if the user has
       set it to something that's not a full pathname.
 
 pppp. The test builtin only supports the optional argument to -t if parsing
-      an expression with more than four aguments and not in posix mode.
+      an expression with more than four arguments and not in posix mode.
 
 qqqq. Changes to filename quoting and rewriting to deal with NFC and NFD
       Unicode forms (primarily for macOS).
@@ -618,7 +689,7 @@ a. Fixed a bug in clearing the visible line structure before redisplay.
 b. Fix a bug where setlocale(3) returning NULL caused a crash.
 
 c. Fixed signal checking in callback mode to handle signals that arrive before
-   readline restore's the application's signal handlers.
+   readline restores the application's signal handlers.
 
 d. Fixed a bug with word completion where the directory name needs to be
    dequoted and tilde-expanded.
@@ -675,7 +746,7 @@ u. Call the filename rewrite hook on the word being completed before comparing
    strings.
 
 v. Fix infinite recursion that can happen if someone binds a key that doesn't
-   have a different upper and lower case represenation to do-lowercase-version.
+   have a different upper and lower case representation to do-lowercase-version.
 
 w. Check for non-ANSI (dumb) terminals a little more thoroughly.
 
@@ -718,12 +789,12 @@ j. `trap' has a new -P option that prints the trap action associated with each
    signal argument.
 
 k. The `command' builtin preceding a declaration builtin (e.g., `declare')
-   preserves the special asisgnment statement parsing for the declation
+   preserves the special assignment statement parsing for the declation
    builtin. This is a new POSIX requirement.
 
 l. `printf' uses the `alternate form' for %q and %Q to force single quoting.
 
-m. `printf' now interprets %ls (%S) and %lc (%C)nas referring to wide strings
+m. `printf' now interprets %ls (%S) and %lc (%C) as referring to wide strings
    and characters, respectively, when in a multibyte locale.
 
 n. The shell can be compiled with a different default value for the
@@ -817,6 +888,8 @@ i. Incremental and non-incremental searches now allow ^V/^Q (or, in the former
    case, anything bound to quoted-insert) to quote characters in the search
    string.
 
+j. There is a new rl_print_keybinding function that prints the key bindings
+   for a single bindable function specified by name.
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.2-release, and
 the previous version, bash-5.2-rc4.
@@ -1883,7 +1956,7 @@ n. The `test -N' operator uses nanosecond timestamp granularity if it's
    available.
 
 o. Bash posix mode now treats assignment statements preceding shell function
-   definitions the same as in its default mode, since POSIX has changed and
+   calls the same as in its default mode, since POSIX has changed and
    no longer requires those assignments to persist after the function returns
    (POSIX interp 654).
 

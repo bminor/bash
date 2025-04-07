@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2024 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -916,7 +916,7 @@ assign_array_var_from_string (SHELL_VAR *var, char *value, int flags)
     return var;
 
   nlist = expand_compound_array_assignment (var, value, flags);
-  /* This is were we set ASS_NOEXPAND and ASS_ONEWORD if we need to, since
+  /* This is where we set ASS_NOEXPAND and ASS_ONEWORD if we need to, since
      expand_compound_array_assignment performs word expansions. Honors
      array_expand_once; allows @ and * as associative array keys. */
   aflags = flags | (array_expand_once ? ASS_NOEXPAND : 0) | ASS_ALLOWALLSUB;
