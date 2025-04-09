@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.4-beta1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-12 11:51-0500\n"
+"POT-Creation-Date: 2025-04-08 11:34-0400\n"
 "PO-Revision-Date: 2015-10-18 07:47+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
@@ -52,42 +52,42 @@ msgstr "%s: %s: phải sử dụng chỉ số phụ khi gán mảng kết hợp"
 msgid "cannot create"
 msgstr "%s: không thể tạo: %s"
 
-#: bashline.c:4628
+#: bashline.c:4638
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command: không tìm thấy ánh xạ phím (keymap) cho câu lệnh"
 
-#: bashline.c:4799
+#: bashline.c:4809
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: ký tự khác khoảng trắng đầu tiên không phải là “\"”"
 
-#: bashline.c:4828
+#: bashline.c:4838
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "thiếu dấu đóng “%c” trong %s"
 
-#: bashline.c:4859
+#: bashline.c:4869
 #, fuzzy, c-format
 msgid "%s: missing separator"
 msgstr "%s: thiếu dấu hai chấm phân cách"
 
-#: bashline.c:4906
+#: bashline.c:4916
 #, fuzzy, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "“%s”: không thể tháo"
 
-#: braces.c:320
+#: braces.c:340
 #, c-format
 msgid "brace expansion: cannot allocate memory for %s"
 msgstr "khai triển ngoặc ôm: không thể phân bổ bộ nhớ cho %s"
 
-#: braces.c:383
+#: braces.c:403
 #, fuzzy, c-format
 msgid "brace expansion: failed to allocate memory for %s elements"
 msgstr "khai triển ngoặc ôm: gặp lỗi khi phân bổ bộ nhớ cho “%d” phần tử"
 
-#: braces.c:442
+#: braces.c:462
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "khai triển ngoặc ôm: gặp lỗi khi phân bổ bộ nhớ cho “%s”"
@@ -237,7 +237,7 @@ msgstr "số bát phân không hợp lệ"
 msgid "invalid hex number"
 msgstr "số thập lục không hợp lệ"
 
-#: builtins/common.c:223 expr.c:1559 expr.c:1573
+#: builtins/common.c:223 expr.c:1577 expr.c:1591
 msgid "invalid number"
 msgstr "số không hợp lệ"
 
@@ -388,7 +388,7 @@ msgstr "chỉ có thể dùng trong một hàm"
 msgid "cannot use `-f' to make functions"
 msgstr "không thể dùng “-f” để tạo hàm"
 
-#: builtins/declare.def:499 execute_cmd.c:6294
+#: builtins/declare.def:499 execute_cmd.c:6320
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: hàm chỉ đọc"
@@ -467,7 +467,7 @@ msgstr "%s không được tải động"
 msgid "%s: cannot delete: %s"
 msgstr "%s: không thể xóa: %s"
 
-#: builtins/evalfile.c:137 builtins/hash.def:190 execute_cmd.c:6114
+#: builtins/evalfile.c:137 builtins/hash.def:190 execute_cmd.c:6140
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: là thư mục"
@@ -482,8 +482,8 @@ msgstr "%s: không phải là tập tin thường"
 msgid "%s: file is too large"
 msgstr "%s: tập tin quá lớn"
 
-#: builtins/evalfile.c:189 builtins/evalfile.c:207 execute_cmd.c:6196
-#: shell.c:1690
+#: builtins/evalfile.c:189 builtins/evalfile.c:207 execute_cmd.c:6222
+#: shell.c:1687
 #, fuzzy
 msgid "cannot execute binary file"
 msgstr "%s: không thể thực hiện tập tin nhị phân"
@@ -493,7 +493,7 @@ msgstr "%s: không thể thực hiện tập tin nhị phân"
 msgid "%s: ignoring function definition attempt"
 msgstr "gặp lỗi khi nhập vào định nghĩa hàm cho “%s”"
 
-#: builtins/exec.def:157 builtins/exec.def:159 builtins/exec.def:248
+#: builtins/exec.def:158 builtins/exec.def:160 builtins/exec.def:249
 #, fuzzy
 msgid "cannot execute"
 msgstr "%s: không thể thực thi: %s"
@@ -588,7 +588,13 @@ msgstr ""
 msgid "cannot open"
 msgstr "không thể ngưng"
 
-#: builtins/help.def:500
+#: builtins/help.def:264 builtins/help.def:306 builtins/history.def:306
+#: builtins/history.def:325 builtins/read.def:909
+#, fuzzy
+msgid "read error"
+msgstr "lỗi đọc: %d: %s"
+
+#: builtins/help.def:517
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -608,31 +614,31 @@ msgstr ""
 "Dấu sao (*) bên cạnh tên nghĩa là lệnh bị tắt.\n"
 "\n"
 
-#: builtins/history.def:162
+#: builtins/history.def:164
 msgid "cannot use more than one of -anrw"
 msgstr "chỉ có thể dùng một của những tùy chọn -anrw"
 
-#: builtins/history.def:195 builtins/history.def:207 builtins/history.def:218
-#: builtins/history.def:243 builtins/history.def:250
+#: builtins/history.def:197 builtins/history.def:209 builtins/history.def:220
+#: builtins/history.def:245 builtins/history.def:252
 msgid "history position"
 msgstr "vị trí lịch sử"
 
-#: builtins/history.def:278
+#: builtins/history.def:280
 #, fuzzy
 msgid "empty filename"
 msgstr "tên biến mảng vẫn trống"
 
-#: builtins/history.def:280 subst.c:8215
+#: builtins/history.def:282 subst.c:8226
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: tham số null hoặc chưa được đặt"
 
-#: builtins/history.def:349
+#: builtins/history.def:362
 #, fuzzy, c-format
 msgid "%s: invalid timestamp"
 msgstr "%s: đối số không hợp lệ"
 
-#: builtins/history.def:457
+#: builtins/history.def:470
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: gặp lỗi khi khai triển lịch sử"
@@ -641,16 +647,16 @@ msgstr "%s: gặp lỗi khi khai triển lịch sử"
 msgid "no other options allowed with `-x'"
 msgstr "không cho phép dùng tùy chọn thêm với “-x”"
 
-#: builtins/kill.def:213
+#: builtins/kill.def:214
 #, c-format
 msgid "%s: arguments must be process or job IDs"
 msgstr "%s: đối số phải là ID tiến trình hoặc công việc"
 
-#: builtins/kill.def:275
+#: builtins/kill.def:280
 msgid "Unknown error"
 msgstr "Lỗi không rõ"
 
-#: builtins/let.def:96 builtins/let.def:120 expr.c:633 expr.c:651
+#: builtins/let.def:96 builtins/let.def:120 expr.c:647 expr.c:665
 msgid "expression expected"
 msgstr "cần biểu thức"
 
@@ -687,35 +693,35 @@ msgstr "tên biến mảng vẫn trống"
 msgid "array variable support required"
 msgstr "cần hỗ trợ biến mảng"
 
-#: builtins/printf.def:477
+#: builtins/printf.def:483
 #, c-format
 msgid "`%s': missing format character"
 msgstr "“%s”: thiếu ký tự định dạng"
 
-#: builtins/printf.def:603
+#: builtins/printf.def:609
 #, c-format
 msgid "`%c': invalid time format specification"
 msgstr "“%c”: đặc tả định dạng thời gian không đúng"
 
-#: builtins/printf.def:705
+#: builtins/printf.def:711
 msgid "string length"
 msgstr ""
 
-#: builtins/printf.def:805
+#: builtins/printf.def:811
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "“%c”: ký tự định dạng không hợp lệ"
 
-#: builtins/printf.def:922
+#: builtins/printf.def:928
 #, c-format
 msgid "format parsing problem: %s"
 msgstr "vấn đề phân tích cú pháp định dạng: %s"
 
-#: builtins/printf.def:1107
+#: builtins/printf.def:1113
 msgid "missing hex digit for \\x"
 msgstr "thiếu chữ số thập lục phân cho \\x"
 
-#: builtins/printf.def:1122
+#: builtins/printf.def:1128
 #, c-format
 msgid "missing unicode digit for \\%c"
 msgstr "thiếu chữ số unicode cho \\%c"
@@ -868,11 +874,6 @@ msgstr ""
 msgid "%s: invalid timeout specification"
 msgstr "%s: sai đặc tả thời gian chờ tối đa"
 
-#: builtins/read.def:909
-#, fuzzy
-msgid "read error"
-msgstr "lỗi đọc: %d: %s"
-
 #: builtins/return.def:73
 msgid "can only `return' from a function or sourced script"
 msgstr "chỉ có thể “return” từ một hàm hoặc văn lệnh được “source”"
@@ -965,26 +966,26 @@ msgstr "%s là %s\n"
 msgid "%s is hashed (%s)\n"
 msgstr "%s được băm (%s)\n"
 
-#: builtins/ulimit.def:401
+#: builtins/ulimit.def:403
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: đối số giới hạn không hợp lệ"
 
-#: builtins/ulimit.def:427
+#: builtins/ulimit.def:429
 #, c-format
 msgid "`%c': bad command"
 msgstr "“%c”: câu lệnh sai"
 
-#: builtins/ulimit.def:463 builtins/ulimit.def:733
+#: builtins/ulimit.def:465 builtins/ulimit.def:748
 #, fuzzy
 msgid "cannot get limit"
 msgstr "%s: không thể lấy giới hạn: %s"
 
-#: builtins/ulimit.def:496
+#: builtins/ulimit.def:498
 msgid "limit"
 msgstr "giới hạn"
 
-#: builtins/ulimit.def:509 builtins/ulimit.def:797
+#: builtins/ulimit.def:511 builtins/ulimit.def:812
 #, fuzzy
 msgid "cannot modify limit"
 msgstr "%s: không thể sửa đổi giới hạn: %s"
@@ -998,7 +999,7 @@ msgstr "số bát phân"
 msgid "`%c': invalid symbolic mode operator"
 msgstr "“%c”: toán tử chế độ ký hiệu không hợp lệ"
 
-#: builtins/umask.def:341
+#: builtins/umask.def:345
 #, c-format
 msgid "`%c': invalid symbolic mode character"
 msgstr "“%c”: ký tự chế độ ký hiệu không hợp lệ"
@@ -1049,7 +1050,7 @@ msgstr "nhảy sai"
 msgid "%s: unbound variable"
 msgstr "%s: biến chưa liên kết"
 
-#: eval.c:256
+#: eval.c:260
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\aquá thời hạn đợi dữ liệu nhập: tự động đăng xuất\n"
 
@@ -1058,153 +1059,153 @@ msgstr "\aquá thời hạn đợi dữ liệu nhập: tự động đăng xuấ
 msgid "cannot redirect standard input from /dev/null"
 msgstr "không thể chuyển hướng đầu vào chuẩn từ /dev/null: %s"
 
-#: execute_cmd.c:1404
+#: execute_cmd.c:1412
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "ĐỊNH DẠNG THỜI GIAN: “%c”: ký tự định dạng không hợp lệ"
 
-#: execute_cmd.c:2485
+#: execute_cmd.c:2493
 #, c-format
 msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr ""
 
-#: execute_cmd.c:2639
+#: execute_cmd.c:2647
 msgid "pipe error"
 msgstr "lỗi ống dẫn"
 
-#: execute_cmd.c:4092
+#: execute_cmd.c:4100
 #, c-format
 msgid "invalid regular expression `%s': %s"
 msgstr ""
 
-#: execute_cmd.c:4094
+#: execute_cmd.c:4102
 #, c-format
 msgid "invalid regular expression `%s'"
 msgstr ""
 
-#: execute_cmd.c:5048
+#: execute_cmd.c:5056
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: vượt quá mức độ eval lồng nhau tối đa (%d)"
 
-#: execute_cmd.c:5061
+#: execute_cmd.c:5069
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: vượt quá mức độ nguồn lồng nhau tối đa (%d)"
 
-#: execute_cmd.c:5190
+#: execute_cmd.c:5198
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: vượt quá mức độ các hàm lồng nhau tối đa (%d)"
 
-#: execute_cmd.c:5728
+#: execute_cmd.c:5754
 #, fuzzy
 msgid "command not found"
 msgstr "%s: không tìm thấy lệnh"
 
-#: execute_cmd.c:5757
+#: execute_cmd.c:5783
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: bị hạn chế: không thể dùng “/” trong tên lệnh"
 
-#: execute_cmd.c:6150
+#: execute_cmd.c:6176
 #, fuzzy
 msgid "bad interpreter"
 msgstr "%s: %s: bộ thông dịch sai"
 
-#: execute_cmd.c:6159
+#: execute_cmd.c:6185
 #, fuzzy, c-format
 msgid "%s: cannot execute: required file not found"
 msgstr "%s: không thể thực hiện tập tin nhị phân"
 
-#: execute_cmd.c:6335
+#: execute_cmd.c:6361
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "không thể nhân đôi fd %d thành fd %d"
 
-#: expr.c:265
+#: expr.c:272
 msgid "expression recursion level exceeded"
 msgstr "vượt quá ngưỡng đệ quy của biểu thức"
 
-#: expr.c:293
+#: expr.c:300
 msgid "recursion stack underflow"
 msgstr "tràn ngược ngăn xếp đệ quy"
 
-#: expr.c:471
+#: expr.c:485
 #, fuzzy
 msgid "arithmetic syntax error in expression"
 msgstr "lỗi cú pháp trong biểu thức"
 
-#: expr.c:515
+#: expr.c:529
 msgid "attempted assignment to non-variable"
 msgstr "thử gán cho thứ không phải biến"
 
-#: expr.c:524
+#: expr.c:538
 #, fuzzy
 msgid "arithmetic syntax error in variable assignment"
 msgstr "lỗi cú pháp trong biểu thức"
 
-#: expr.c:538 expr.c:905
+#: expr.c:552 expr.c:917
 msgid "division by 0"
 msgstr "chia cho không"
 
-#: expr.c:586
+#: expr.c:600
 msgid "bug: bad expassign token"
 msgstr "lỗi: “token expassign” sai"
 
-#: expr.c:640
+#: expr.c:654
 msgid "`:' expected for conditional expression"
 msgstr "cần “:” cho biểu thức điều kiện"
 
-#: expr.c:967
+#: expr.c:979
 msgid "exponent less than 0"
 msgstr "số mũ nhỏ hơn 0"
 
-#: expr.c:1028
+#: expr.c:1040
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "cần định danh sau tăng/giảm dần trước"
 
-#: expr.c:1055
+#: expr.c:1067
 msgid "missing `)'"
 msgstr "thiếu “)”"
 
-#: expr.c:1106 expr.c:1489
+#: expr.c:1120 expr.c:1507
 #, fuzzy
 msgid "arithmetic syntax error: operand expected"
 msgstr "lỗi cú pháp: cần toán hạng"
 
-#: expr.c:1450 expr.c:1471
+#: expr.c:1468 expr.c:1489
 msgid "--: assignment requires lvalue"
 msgstr ""
 
-#: expr.c:1452 expr.c:1473
+#: expr.c:1470 expr.c:1491
 msgid "++: assignment requires lvalue"
 msgstr ""
 
-#: expr.c:1491
+#: expr.c:1509
 #, fuzzy
 msgid "arithmetic syntax error: invalid arithmetic operator"
 msgstr "lỗi cú pháp: toán tử số học không hợp lệ"
 
-#: expr.c:1514
+#: expr.c:1532
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (thẻ bài lỗi là \"%s\")"
 
-#: expr.c:1577
+#: expr.c:1595
 msgid "invalid arithmetic base"
 msgstr "cơ số (toán học) không hợp lệ"
 
-#: expr.c:1586
+#: expr.c:1604
 #, fuzzy
 msgid "invalid integer constant"
 msgstr "%s: sai số lượng dòng"
 
-#: expr.c:1602
+#: expr.c:1620
 msgid "value too great for base"
 msgstr "cơ số có giá trị quá lớn"
 
-#: expr.c:1653
+#: expr.c:1671
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: lỗi biểu thức\n"
@@ -1218,7 +1219,7 @@ msgstr "getcwd: không thể truy cập thư mục cấp trên"
 msgid "`%s': is a special builtin"
 msgstr "“%s”: là lệnh tích hợp đặc biệt"
 
-#: input.c:98 subst.c:6540
+#: input.c:98 subst.c:6542
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "không thể đặt lại chế độ “nodelay” cho fd %d"
@@ -1319,79 +1320,79 @@ msgstr "  (wd: %s)"
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid tiến trình con (%ld thành %ld)"
 
-#: jobs.c:2753 nojobs.c:640
+#: jobs.c:2754 nojobs.c:640
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld không phải là tiến trình con của hệ vỏ này"
 
-#: jobs.c:3049
+#: jobs.c:3052
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Không có mục ghi về tiến trình %ld"
 
-#: jobs.c:3407
+#: jobs.c:3410
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: công việc %d bị dừng chạy"
 
-#: jobs.c:3835
+#: jobs.c:3838
 #, fuzzy, c-format
 msgid "%s: no current jobs"
 msgstr "%s: không có công việc như vậy"
 
-#: jobs.c:3842
+#: jobs.c:3845
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: công việc bị chấm dứt"
 
-#: jobs.c:3851
+#: jobs.c:3854
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: công việc %d đã đang chạy nền"
 
-#: jobs.c:4089
+#: jobs.c:4092
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: đang bật WNOHANG để tránh bị chặn vô hạn"
 
-#: jobs.c:4638
+#: jobs.c:4641
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: dòng %d: "
 
-#: jobs.c:4654 nojobs.c:895
+#: jobs.c:4657 nojobs.c:895
 #, c-format
 msgid " (core dumped)"
 msgstr " (xuất ra core)"
 
-#: jobs.c:4674 jobs.c:4694
+#: jobs.c:4677 jobs.c:4697
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(wd ngay: %s)\n"
 
-#: jobs.c:4738
+#: jobs.c:4741
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp bị lỗi"
 
-#: jobs.c:4794
+#: jobs.c:4797
 #, fuzzy
 msgid "initialize_job_control: no job control in background"
 msgstr "initialize_job_control: kỷ luật dòng"
 
-#: jobs.c:4810
+#: jobs.c:4813
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: kỷ luật dòng"
 
 # Nghĩa chữ : dừng dịch
-#: jobs.c:4820
+#: jobs.c:4823
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4841 jobs.c:4850
+#: jobs.c:4844 jobs.c:4853
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "không thể đặt nhóm tiến trình cuối cùng (%d)"
 
-#: jobs.c:4855
+#: jobs.c:4858
 msgid "no job control in this shell"
 msgstr "không có điều khiển công việc trong hệ vỏ này"
 
@@ -1557,7 +1558,7 @@ msgstr "lỗi ghi: %s"
 msgid "maximum here-document count exceeded"
 msgstr "vượt quá số lượng tài-liệu-đây tối đa"
 
-#: parse.y:3901 parse.y:4799 parse.y:6853
+#: parse.y:3901 parse.y:4799 parse.y:6859
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "gặp kết thúc tập tin bất thường trong khi tìm “%c” tương ứng"
@@ -1626,45 +1627,45 @@ msgstr "gặp thẻ bài bất thường “%s” trong câu lệnh điều ki�
 msgid "unexpected token %d in conditional command"
 msgstr "gặp thẻ bài bất thường “%d” trong câu lệnh điều kiện"
 
-#: parse.y:6821
+#: parse.y:6827
 #, fuzzy, c-format
 msgid "syntax error near unexpected token `%s' while looking for matching `%c'"
 msgstr "gặp kết thúc tập tin bất thường trong khi tìm “%c” tương ứng"
 
-#: parse.y:6823
+#: parse.y:6829
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "có lỗi cú pháp ở gần thẻ bài bất thường “%s”"
 
-#: parse.y:6842
+#: parse.y:6848
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "lỗi cú pháp ở gần “%s”"
 
-#: parse.y:6861
+#: parse.y:6867
 #, fuzzy, c-format
 msgid "syntax error: unexpected end of file from `%s' command on line %d"
 msgstr "lỗi cú pháp: kết thúc tập tin bất thường"
 
-#: parse.y:6863
+#: parse.y:6869
 #, fuzzy, c-format
 msgid "syntax error: unexpected end of file from command on line %d"
 msgstr "lỗi cú pháp: kết thúc tập tin bất thường"
 
-#: parse.y:6867
+#: parse.y:6873
 msgid "syntax error: unexpected end of file"
 msgstr "lỗi cú pháp: kết thúc tập tin bất thường"
 
-#: parse.y:6867
+#: parse.y:6873
 msgid "syntax error"
 msgstr "lỗi cú pháp"
 
-#: parse.y:6916
+#: parse.y:6922
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Dùng \"%s\" để rời hệ vỏ.\n"
 
-#: parse.y:7114
+#: parse.y:7120
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "gặp kết thúc tập tin bất thường trong khi tìm “)” tương ứng"
 
@@ -1713,40 +1714,40 @@ msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: “%c”: ký tự định dạng không hợp lệ"
 
-#: redir.c:145 redir.c:193
+#: redir.c:146 redir.c:194
 msgid "file descriptor out of range"
 msgstr "bộ mô tả tập tin ở ngoại phạm vi"
 
-#: redir.c:200
+#: redir.c:201
 #, fuzzy
 msgid "ambiguous redirect"
 msgstr "%s: chuyển hướng chưa rõ ràng"
 
-#: redir.c:204
+#: redir.c:205
 #, fuzzy
 msgid "cannot overwrite existing file"
 msgstr "%s: không thể ghi đè lên tập tin đã có"
 
-#: redir.c:209
+#: redir.c:210
 #, fuzzy
 msgid "restricted: cannot redirect output"
 msgstr "%s: bị hạn chế: không thể chuyển hướng kết xuất"
 
-#: redir.c:214
+#: redir.c:215
 #, fuzzy
 msgid "cannot create temp file for here-document"
 msgstr "không thể tạo tập tin tạm thời cho tài liệu này: %s"
 
-#: redir.c:218
+#: redir.c:219
 #, fuzzy
 msgid "cannot assign fd to variable"
 msgstr "%s: không thể gán fd vào biến"
 
-#: redir.c:633
+#: redir.c:639
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port không được hỗ trợ nếu không có mạng"
 
-#: redir.c:937 redir.c:1051 redir.c:1109 redir.c:1273
+#: redir.c:945 redir.c:1062 redir.c:1124 redir.c:1291
 msgid "redirection error: cannot duplicate fd"
 msgstr "lỗi chuyển hướng: không thể nhân đôi fd"
 
@@ -1767,35 +1768,39 @@ msgstr ""
 msgid "%c%c: invalid option"
 msgstr "%c%c: tùy chọn không hợp lệ"
 
-#: shell.c:1357
+#: shell.c:1354
 #, c-format
 msgid "cannot set uid to %d: effective uid %d"
 msgstr "không thể đặt uid thành %d: uid chịu tác động %d"
 
-#: shell.c:1373
+#: shell.c:1370
 #, c-format
 msgid "cannot set gid to %d: effective gid %d"
 msgstr "không thể đặt gid thành %d: gid chịu tác động %d"
 
-#: shell.c:1562
+#: shell.c:1559
 msgid "cannot start debugger; debugging mode disabled"
 msgstr ""
 
-#: shell.c:1675
+#: shell.c:1672
 #, c-format
 msgid "%s: Is a directory"
 msgstr "%s: Là một thư mục"
 
-#: shell.c:1891
+#: shell.c:1748 shell.c:1750
+msgid "error creating buffered stream"
+msgstr ""
+
+#: shell.c:1899
 msgid "I have no name!"
 msgstr "Không có tên!"
 
-#: shell.c:2055
+#: shell.c:2063
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, phiên bản %s-(%s)\n"
 
-#: shell.c:2056
+#: shell.c:2064
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1804,52 +1809,52 @@ msgstr ""
 "Cách dùng:\t%s [tùy chọn GNU dài] [tùy chọn] …\n"
 "\t\t%s [tùy chọn GNU dài] [tùy chọn] tập-tin-văn-lệnh …\n"
 
-#: shell.c:2058
+#: shell.c:2066
 msgid "GNU long options:\n"
 msgstr "Tùy chọn dài:\n"
 
-#: shell.c:2062
+#: shell.c:2070
 msgid "Shell options:\n"
 msgstr "Tùy chọn:\n"
 
-#: shell.c:2063
+#: shell.c:2071
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-ilrsD hoặc -c lệnh hay -O tùy-chọn-ngắn\t\t(chỉ gọi)\n"
 
-#: shell.c:2082
+#: shell.c:2090
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s hoặc -o tùy-chọn\n"
 
-#: shell.c:2088
+#: shell.c:2096
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr "Gõ “%s -c \"help set\"” để xem thông tin về các tùy chọn hệ vỏ.\n"
 
-#: shell.c:2089
+#: shell.c:2097
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr "Gõ “%s -c help” để xem thông tin về các lệnh hệ vỏ tích hợp.\n"
 
-#: shell.c:2090
+#: shell.c:2098
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr ""
 "Dùng lệnh “bashbug” để thông báo lỗi.\n"
 "Báo cáo các lỗi dịch cho: <http://translationproject.org/team/vi.html>.\n"
 
-#: shell.c:2092
+#: shell.c:2100
 #, c-format
 msgid "bash home page: <http://www.gnu.org/software/bash>\n"
 msgstr "Trang chủ bash: <http://www.gnu.org/software/bash/>\n"
 
-#: shell.c:2093
+#: shell.c:2101
 #, c-format
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr ""
 "Trợ giúp chung về cách sử dụng phần mềm GNU : <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:808
+#: sig.c:809
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: thao tác không hợp lệ"
@@ -2019,113 +2024,113 @@ msgstr "yêu cầu thông tin"
 msgid "Unknown Signal #%d"
 msgstr "Tín hiệu lạ #%d"
 
-#: subst.c:1501 subst.c:1793 subst.c:1999
+#: subst.c:1503 subst.c:1795 subst.c:2001
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "sai chỉ số phụ: không có đóng “%s” trong %s"
 
-#: subst.c:3599
+#: subst.c:3601
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: không thể gán danh sách cho bộ phận của mảng"
 
-#: subst.c:6379 subst.c:6395
+#: subst.c:6381 subst.c:6397
 msgid "cannot make pipe for process substitution"
 msgstr "không thể tạo ống dẫn để thay thế tiến trình"
 
-#: subst.c:6455
+#: subst.c:6457
 msgid "cannot make child for process substitution"
 msgstr "không thể tạo tiến trình con để thay thế tiến trình"
 
-#: subst.c:6530
+#: subst.c:6532
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "không thể mở ống dẫn đặt tên %s để đọc"
 
-#: subst.c:6532
+#: subst.c:6534
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "không thể mở ống dẫn có tên %s để ghi"
 
-#: subst.c:6555
+#: subst.c:6557
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "không thể nhân đôi ống dẫn đặt tên %s thành fd %d"
 
-#: subst.c:6721
+#: subst.c:6723
 #, fuzzy
 msgid "command substitution: ignored null byte in input"
 msgstr "sai thay thế: không có \"“\" đóng trong %s"
 
-#: subst.c:6960
+#: subst.c:6962
 msgid "function_substitute: cannot open anonymous file for output"
 msgstr ""
 
-#: subst.c:7034
+#: subst.c:7036
 #, fuzzy
 msgid "function_substitute: cannot duplicate anonymous file as standard output"
 msgstr "command_substitute: không thể nhân đôi ống dẫn thành fd 1"
 
-#: subst.c:7208 subst.c:7229
+#: subst.c:7210 subst.c:7231
 msgid "cannot make pipe for command substitution"
 msgstr "không thể tạo ống dẫn để thay thế lệnh"
 
-#: subst.c:7280
+#: subst.c:7282
 msgid "cannot make child for command substitution"
 msgstr "không thể tạo tiến trình con để thay thế lệnh"
 
-#: subst.c:7313
+#: subst.c:7315
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: không thể nhân đôi ống dẫn thành fd 1"
 
-#: subst.c:7802 subst.c:10978
+#: subst.c:7813 subst.c:10989
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: tên biến không hợp lệ cho một tham chiếu tên"
 
-#: subst.c:7895 subst.c:7913 subst.c:8089
+#: subst.c:7906 subst.c:7924 subst.c:8100
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: triển khai gián tiếp không hợp lệ"
 
-#: subst.c:7929 subst.c:8097
+#: subst.c:7940 subst.c:8108
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "“%s”: tên biến không hợp lệ"
 
-#: subst.c:8114 subst.c:10260 subst.c:10287
+#: subst.c:8125 subst.c:10271 subst.c:10298
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: thay thế sai"
 
-#: subst.c:8213
+#: subst.c:8224
 #, fuzzy, c-format
 msgid "%s: parameter not set"
 msgstr "%s: tham số null hoặc chưa được đặt"
 
-#: subst.c:8469 subst.c:8484
+#: subst.c:8480 subst.c:8495
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: biểu thức chuỗi con < 0"
 
-#: subst.c:10386
+#: subst.c:10397
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: không thể gán bằng cách này"
 
-#: subst.c:10844
+#: subst.c:10855
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr ""
 "phiên bản hệ vỏ mới sẽ ép buộc ước lượng dưới dạng một hàm thay thế số học"
 
-#: subst.c:11552
+#: subst.c:11563
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "sai thay thế: không có \"“\" đóng trong %s"
 
-#: subst.c:12626
+#: subst.c:12636
 #, c-format
 msgid "no match: %s"
 msgstr "không khớp: %s"
@@ -2236,56 +2241,56 @@ msgstr "%s: tên biến không hợp lệ cho một tham chiếu tên"
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: không có ngữ cảnh hàm ở phạm vi hiện thời"
 
-#: variables.c:4791
+#: variables.c:4816
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s có exportstr null"
 
-#: variables.c:4796 variables.c:4805
+#: variables.c:4821 variables.c:4830
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "sai ký tự %d trong exportstr cho %s"
 
-#: variables.c:4811
+#: variables.c:4836
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "không có “=” trong exportstr cho %s"
 
-#: variables.c:5329
+#: variables.c:5354
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "pop_var_context: đầu của shell_variables (các biến hệ vỏ) không phải là ngữ "
 "cảnh hàm"
 
-#: variables.c:5342
+#: variables.c:5367
 msgid "pop_var_context: no global_variables context"
 msgstr ""
 "pop_var_context: không có ngữ cảnh global_variables (các biến toàn cục)"
 
-#: variables.c:5432
+#: variables.c:5457
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: đầu của shell_variables (các biến hệ vỏ) không phải là phạm vi "
 "môi trường tạm thời"
 
-#: variables.c:6423
+#: variables.c:6448
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: không thể mở như là TẬP-TIN"
 
-#: variables.c:6428
+#: variables.c:6453
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: sai đặt giá trị cho bộ mô tả tập tin vết"
 
-#: variables.c:6472
+#: variables.c:6497
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: giá trị so sánh nằm ngoài phạm vi"
 
 #: version.c:50
 #, fuzzy
-msgid "Copyright (C) 2024 Free Software Foundation, Inc."
+msgid "Copyright (C) 2025 Free Software Foundation, Inc."
 msgstr "Tác quyền (C) năm 2014 của Tổ chức Quỹ Phần mềm Tự do, Inc."
 
 #: version.c:51
@@ -2498,7 +2503,8 @@ msgid "unset [-f] [-v] [-n] [name ...]"
 msgstr "unset [-f] [-v] [-n] [TÊN …]"
 
 #: builtins.c:146
-msgid "export [-fn] [name[=value] ...] or export -p"
+#, fuzzy
+msgid "export [-fn] [name[=value] ...] or export -p [-f]"
 msgstr "export [-fn] [TÊN[=GIÁ-TRỊ] …] hoặc export -p"
 
 #: builtins.c:148
@@ -3059,6 +3065,7 @@ msgstr ""
 "    Lúc nào cũng không thành công."
 
 #: builtins.c:476
+#, fuzzy
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -3070,7 +3077,8 @@ msgid ""
 "    Options:\n"
 "      -p    use a default value for PATH that is guaranteed to find all of\n"
 "            the standard utilities\n"
-"      -v    print a description of COMMAND similar to the `type' builtin\n"
+"      -v    print a single word indicating the command or filename that\n"
+"            invokes COMMAND\n"
 "      -V    print a more verbose description of each COMMAND\n"
 "    \n"
 "    Exit Status:\n"
@@ -3092,7 +3100,7 @@ msgstr ""
 "    Trả lại trạng thái thoát của LỆNH, hoặc thất bại nếu không tìm\n"
 "    thấy LỆNH."
 
-#: builtins.c:495
+#: builtins.c:496
 #, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
@@ -3170,7 +3178,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công trừ khi đưa ra tùy chọn sai hoặc gặp lỗi khi gán biến."
 
-#: builtins.c:538
+#: builtins.c:539
 #, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
@@ -3181,7 +3189,7 @@ msgstr ""
 "\n"
 "    Lệnh này đã lạc hậu. Xem “help declare”."
 
-#: builtins.c:546
+#: builtins.c:547
 #, fuzzy
 msgid ""
 "Define local variables.\n"
@@ -3211,7 +3219,7 @@ msgstr ""
 "    Trả lại thành công trừ khi đưa ra tùy chọn sai hay gặp lỗi,\n"
 "    hoặc nếu hệ vỏ không chạy hàm."
 
-#: builtins.c:566
+#: builtins.c:567
 #, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
@@ -3279,7 +3287,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không gặp lỗi khi ghi."
 
-#: builtins.c:606
+#: builtins.c:607
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3301,7 +3309,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không gặp lỗi ghi."
 
-#: builtins.c:621
+#: builtins.c:622
 #, fuzzy
 msgid ""
 "Enable and disable shell builtins.\n"
@@ -3358,7 +3366,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công trừ khi TÊN không phải lệnh tích hợp hoặc gặp lỗi."
 
-#: builtins.c:654
+#: builtins.c:655
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -3377,7 +3385,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái thoát của câu lệnh hay thành công nếu lệnh rỗng."
 
-#: builtins.c:666
+#: builtins.c:667
 #, fuzzy
 msgid ""
 "Parse option arguments.\n"
@@ -3454,7 +3462,7 @@ msgstr ""
 "    Trả lại thành công nếu tìm thấy một tùy chọn; không thành công nếu\n"
 "    gặp kết thúc các tùy chọn, hoặc nếu gặp lỗi."
 
-#: builtins.c:708
+#: builtins.c:709
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -3494,7 +3502,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công trừ khi không tìm được LỆNH hoặc gặp lỗi chuyển hướng."
 
-#: builtins.c:729
+#: builtins.c:730
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3506,7 +3514,7 @@ msgstr ""
 "    Thoát khỏi hệ vỏ với trạng thái N. Không xác định N thì trạng thái\n"
 "    thoát là trạng thái của lệnh cuối cùng được chạy."
 
-#: builtins.c:738
+#: builtins.c:739
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3519,7 +3527,7 @@ msgstr ""
 "   Thoát khỏi hệ vỏ đăng nhập với trạng thái N. Trả về lỗi nếu không\n"
 "   phải hệ vỏ đăng nhập."
 
-#: builtins.c:748
+#: builtins.c:749
 #, fuzzy
 msgid ""
 "Display or execute commands from the history list.\n"
@@ -3574,7 +3582,7 @@ msgstr ""
 "    Trả lại thành công hay trạng thái của câu lệnh được thực thi; gặp\n"
 "    lỗi thì khác số không."
 
-#: builtins.c:780
+#: builtins.c:781
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3595,7 +3603,7 @@ msgstr ""
 "    Trạng thái của câu lệnh được nâng lên trước; hoặc thất bại nếu xảy\n"
 "    ra lỗi."
 
-#: builtins.c:795
+#: builtins.c:796
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3618,7 +3626,7 @@ msgstr ""
 "    Trả lại thành công nếu chức năng điều khiển công việc được bật và\n"
 "    không gặp lỗi."
 
-#: builtins.c:809
+#: builtins.c:810
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3662,7 +3670,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu tìm được TÊN và không đưa ra tùy chọn sai."
 
-#: builtins.c:834
+#: builtins.c:835
 #, fuzzy
 msgid ""
 "Display information about builtin commands.\n"
@@ -3702,7 +3710,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu tìm được MẪU và không đưa ra tùy chọn sai."
 
-#: builtins.c:858
+#: builtins.c:859
 #, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
@@ -3714,6 +3722,8 @@ msgid ""
 "      -c\tclear the history list by deleting all of the entries\n"
 "      -d offset\tdelete the history entry at position OFFSET. Negative\n"
 "    \t\toffsets count back from the end of the history list\n"
+"      -d start-end\tdelete the history entries beginning at position START\n"
+"    \t\tthrough position END.\n"
 "    \n"
 "      -a\tappend history lines from this session to the history file\n"
 "      -n\tread all history lines not already read from the history file\n"
@@ -3773,7 +3783,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không gặp tùy chọn sai hay gặp lỗi."
 
-#: builtins.c:899
+#: builtins.c:902
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3816,7 +3826,7 @@ msgstr ""
 "    Trả lại thành công nếu không gặp tùy chọn sai hay gặp lỗi.\n"
 "    Đưa ra “-x” thì trả lại trạng thái thoát của LỆNH."
 
-#: builtins.c:926
+#: builtins.c:929
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3847,7 +3857,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không đưa ra tùy chọn hay ĐTCV sai."
 
-#: builtins.c:945
+#: builtins.c:948
 #, fuzzy
 msgid ""
 "Send a signal to a job.\n"
@@ -3889,7 +3899,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không đưa ra tùy chọn sai hay gặp lỗi."
 
-#: builtins.c:969
+#: builtins.c:972
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -3973,7 +3983,7 @@ msgstr ""
 "    Nếu ĐỐI-SỐ cuối cùng được định giá thành 0 thì trả về 1; không thì\n"
 "    trả về 0."
 
-#: builtins.c:1014
+#: builtins.c:1017
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -4072,7 +4082,7 @@ msgstr ""
 "    Mã trả lại là số không, nếu không gặp kết thúc tập tin, hay chờ quá\n"
 "    lâu, hoặc đưa ra bộ mô tả tập tin sai làm đối số cho “-u”."
 
-#: builtins.c:1064
+#: builtins.c:1067
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -4093,7 +4103,7 @@ msgstr ""
 "    Trả lại N, hoặc bị lỗi nếu hệ vỏ không đang chạy một hàm hay văn\n"
 "    lệnh."
 
-#: builtins.c:1077
+#: builtins.c:1080
 #, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
@@ -4270,7 +4280,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công trừ phi gặp tùy chọn sai."
 
-#: builtins.c:1166
+#: builtins.c:1169
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -4309,7 +4319,8 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không đưa ra tùy chọn sai hay TÊN chỉ-đọc."
 
-#: builtins.c:1188
+#: builtins.c:1191
+#, fuzzy
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4320,7 +4331,7 @@ msgid ""
 "    Options:\n"
 "      -f\trefer to shell functions\n"
 "      -n\tremove the export property from each NAME\n"
-"      -p\tdisplay a list of all exported variables and functions\n"
+"      -p\tdisplay a list of all exported variables or functions\n"
 "    \n"
 "    An argument of `--' disables further option processing.\n"
 "    \n"
@@ -4342,7 +4353,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không đưa ra tùy chọn hay TÊN sai,"
 
-#: builtins.c:1207
+#: builtins.c:1210
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4380,7 +4391,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không đưa ra tùy chọn sai hay TÊN không hợp lệ."
 
-#: builtins.c:1229
+#: builtins.c:1232
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4398,7 +4409,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công trừ khi N âm hay lớn hơn $#."
 
-#: builtins.c:1241 builtins.c:1257
+#: builtins.c:1244 builtins.c:1260
 #, fuzzy
 msgid ""
 "Execute commands from a file in the current shell.\n"
@@ -4424,7 +4435,7 @@ msgstr ""
 "    Trả lại trạng thái của câu lệnh cuối cùng được thực thi trong\n"
 "    TẬP-TIN; không thành công nếu không thể đọc TẬP-TIN."
 
-#: builtins.c:1274
+#: builtins.c:1277
 #, fuzzy
 msgid ""
 "Suspend shell execution.\n"
@@ -4452,7 +4463,7 @@ msgstr ""
 "    Trả lại thành công trừ khi chức năng điều khiển công việc không\n"
 "    được bật hoặc gặp lỗi."
 
-#: builtins.c:1292
+#: builtins.c:1295
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4611,7 +4622,7 @@ msgstr ""
 "    Trả lại thành công nếu BTHỨC định giá là Đúng; không thành công\n"
 "    nếu BTHỨC định giá thành Sai hay đối số được chỉ ra sai."
 
-#: builtins.c:1374
+#: builtins.c:1377
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4623,7 +4634,7 @@ msgstr ""
 "    Lệnh này cùng chức năng lệnh tích hợp \"test\", nhưng đối số cuối\n"
 "    cùng phải là ký tự “]” để khớp với “[” ở đầu."
 
-#: builtins.c:1383
+#: builtins.c:1386
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4642,7 +4653,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Lúc nào cũng thành công."
 
-#: builtins.c:1395
+#: builtins.c:1398
 #, fuzzy
 msgid ""
 "Trap signals and other events.\n"
@@ -4725,7 +4736,7 @@ msgstr ""
 "    Trả lại thành công trừ phi đưa ra ĐTTH sai hay tùy chọn\n"
 "    sai."
 
-#: builtins.c:1438
+#: builtins.c:1441
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4782,7 +4793,7 @@ msgstr ""
 "    Trả lại thành công nếu tìm thấy tất cả các TÊN; bị lỗi nếu không tìm "
 "thấy."
 
-#: builtins.c:1469
+#: builtins.c:1472
 #, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
@@ -4880,7 +4891,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không đưa ra tùy chọn sai hay có lỗi phát sinh."
 
-#: builtins.c:1524
+#: builtins.c:1527
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4913,7 +4924,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không có CHẾ_ĐỘ sai hay tùy chọn sai."
 
-#: builtins.c:1544
+#: builtins.c:1547
 #, fuzzy
 msgid ""
 "Wait for job completion and return exit status.\n"
@@ -4961,7 +4972,7 @@ msgstr ""
 "    Trả về trạng thái của ID cuối; không thành công nếu ID sai hoặc đưa\n"
 "    ra tùy chọn sai."
 
-#: builtins.c:1575
+#: builtins.c:1578
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4985,7 +4996,7 @@ msgstr ""
 "    Trả lại trạng thái của PID; không thành công nếu PID sai, hoặc nếu\n"
 "    đưa ra tùy chọn sai."
 
-#: builtins.c:1590
+#: builtins.c:1593
 msgid ""
 "Execute PIPELINE, which can be a simple command, and negate PIPELINE's\n"
 "    return status.\n"
@@ -4994,7 +5005,7 @@ msgid ""
 "    The logical negation of PIPELINE's return status."
 msgstr ""
 
-#: builtins.c:1600
+#: builtins.c:1603
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -5017,7 +5028,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của câu lệnh cuối cùng được chạy."
 
-#: builtins.c:1614
+#: builtins.c:1617
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -5047,7 +5058,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của câu lệnh cuối cùng được chạy."
 
-#: builtins.c:1632
+#: builtins.c:1635
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -5081,7 +5092,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của câu lệnh cuối cùng được chạy."
 
-#: builtins.c:1653
+#: builtins.c:1656
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -5110,7 +5121,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trạng thái trả về là trạng thái trả về của ỐNG-DẪN."
 
-#: builtins.c:1670
+#: builtins.c:1673
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -5128,7 +5139,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của câu lệnh cuối cùng được chạy."
 
-#: builtins.c:1682
+#: builtins.c:1685
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -5163,7 +5174,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của câu lệnh cuối cùng được chạy."
 
-#: builtins.c:1699
+#: builtins.c:1702
 #, fuzzy
 msgid ""
 "Execute commands as long as a test succeeds.\n"
@@ -5184,7 +5195,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của câu lệnh cuối cùng được chạy."
 
-#: builtins.c:1711
+#: builtins.c:1714
 #, fuzzy
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
@@ -5205,7 +5216,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của câu lệnh cuối cùng được chạy."
 
-#: builtins.c:1723
+#: builtins.c:1726
 #, fuzzy
 msgid ""
 "Create a coprocess named NAME.\n"
@@ -5227,7 +5238,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái thoát của câu LỆNH."
 
-#: builtins.c:1737
+#: builtins.c:1740
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -5250,7 +5261,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu TÊN không phải chỉ đọc."
 
-#: builtins.c:1751
+#: builtins.c:1754
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -5268,7 +5279,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của câu lệnh cuối cùng được chạy."
 
-#: builtins.c:1763
+#: builtins.c:1766
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -5291,7 +5302,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại trạng thái của công việc đã tiếp tục lại."
 
-#: builtins.c:1778
+#: builtins.c:1781
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expression.\n"
@@ -5310,7 +5321,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại 1 nếu BTHỨC tính là 0; không thì trả lại 0."
 
-#: builtins.c:1790
+#: builtins.c:1793
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -5359,7 +5370,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    0 hay 1 phụ thuộc vào giá trị của BTHỨC."
 
-#: builtins.c:1816
+#: builtins.c:1819
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5463,7 +5474,7 @@ msgstr ""
 "    HISTIGNORE\tDanh sách mẫu cách bằng dấu hai chấm dùng để quyết định\n"
 "        \tnhững câu lệnh nào nên được lưu vào danh sách lịch sử.\n"
 
-#: builtins.c:1873
+#: builtins.c:1876
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5517,7 +5528,7 @@ msgstr ""
 "    Trả lại thành công nếu không đưa ra đối số sai, cũng không sai\n"
 "    chuyển đổi thư mục."
 
-#: builtins.c:1907
+#: builtins.c:1910
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5565,7 +5576,7 @@ msgstr ""
 "    Trả lại thành công nếu không đưa ra đối số sai, cũng không sai\n"
 "    chuyển đổi thư mục."
 
-#: builtins.c:1937
+#: builtins.c:1940
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5618,7 +5629,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả về thành công nếu không đưa ra tùy chọn sai hay gặp lỗi."
 
-#: builtins.c:1968
+#: builtins.c:1971
 #, fuzzy
 msgid ""
 "Set and unset shell options.\n"
@@ -5655,7 +5666,7 @@ msgstr ""
 "    Trả lại thành công nếu TÊN_TÙY_CHỌN được bật; không thành công nếu\n"
 "    đưa ra tùy chọn sai hay TÊN_TÙY_CHỌN bị tắt."
 
-#: builtins.c:1989
+#: builtins.c:1992
 #, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
@@ -5724,7 +5735,7 @@ msgstr ""
 "    Trả lại thành công trừ phi đưa ra tùy chọn sai hay gặp lỗi khi ghi\n"
 "    hay gán."
 
-#: builtins.c:2025
+#: builtins.c:2028
 #, fuzzy
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
@@ -5776,7 +5787,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không đưa ra tùy chọn sai hay gặp lỗi."
 
-#: builtins.c:2055
+#: builtins.c:2058
 #, fuzzy
 msgid ""
 "Display possible completions depending on the options.\n"
@@ -5802,7 +5813,7 @@ msgstr ""
 "    Trạng thái thoát:\n"
 "    Trả lại thành công nếu không đưa ra tùy chọn sai hay gặp lỗi."
 
-#: builtins.c:2073
+#: builtins.c:2076
 #, fuzzy
 msgid ""
 "Modify or display completion options.\n"
@@ -5861,7 +5872,7 @@ msgstr ""
 "    Trả lại thành công trừ phi đưa ra tùy chọn sai, hoặc TÊN có một\n"
 "    đặc tả tự hoàn thiện được xác định."
 
-#: builtins.c:2104
+#: builtins.c:2107
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
@@ -5934,7 +5945,7 @@ msgstr ""
 "    Trả lại thành công trừ phi đưa ra tùy chọn sai và MẢNG không phải\n"
 "    chỉ đọc hay không là một mảng chỉ số."
 
-#: builtins.c:2140
+#: builtins.c:2143
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"

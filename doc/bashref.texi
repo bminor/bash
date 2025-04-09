@@ -4370,9 +4370,11 @@ refer to shell functions; otherwise the names refer to shell variables.
 
 The @option{-n} option means to unexport each name: no longer mark
 it for export.
-If no @var{name}s are supplied, or if the @option{-p} option is given,
-@code{export} displays a list of names of all exported variables on the
-standard output.
+If no @var{name}s are supplied, or if only
+the @option{-p} option is given,
+@code{export} displays a list of names of all exported
+variables on the standard output.
+Using @option{-p} and @option{-f} together displays exported functions.
 The @option{-p} option displays output in a form that may be reused as input.
 
 @code{export} allows the value of a variable to be set at the same time
@@ -7301,8 +7303,13 @@ the shell does not save the command history when it exits.
 @item HISTFILESIZE
 The maximum number of lines contained in the history file.
 When this variable is assigned a value, the history file is truncated,
-if necessary, to contain no more than that number of lines
+if necessary, to contain no more than
+the number of history entries
+that total no more than that number of lines
 by removing the oldest entries.
+If the history list contains multi-line entries,
+the history file may contain more lines than this maximum
+to avoid leaving partial history entries.
 The history file is also truncated to this size after
 writing it when a shell exits or by the @code{history} builtin.
 If the value is 0, the history file is truncated to zero size.

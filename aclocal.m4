@@ -2240,3 +2240,25 @@ else
 fi
 AC_DEFINE_UNQUOTED([FNMATCH_EQUIV_FALLBACK], [$bash_cv_fnmatch_equiv_value], [Whether fnmatch can be used for bracket equivalence classes])
 ])
+
+AC_DEFUN([BASH_FUNC_STRCHRNUL],
+[
+  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
+  AC_CACHE_CHECK([whether strchrnul works],
+      [bash_cv_func_strchrnul_works],
+      [AC_RUN_IFELSE([AC_LANG_PROGRAM(
+[[
+#include <string.h>
+]],
+[[const char *buf = "abc";
+      return strchrnul (buf, 'd') != buf + 3;
+]]
+)],
+[bash_cv_func_strchrnul_works=yes], [bash_cv_func_strchrnul_works=no],
+[bash_cv_func_strchrnul_works=no]
+)])
+
+if test "$bash_cv_func_strchrnul_works" = "no"; then
+AC_LIBOBJ([strchrnul])
+fi
+])

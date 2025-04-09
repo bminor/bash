@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.076])dnl
+AC_REVISION([for Bash 5.3, version 5.077])dnl
 
 define(bashvers, 5.3)
 define(relstatus, rc1)
@@ -898,7 +898,6 @@ AC_REPLACE_FUNCS(getcwd memset)
 AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoumax)
 AC_REPLACE_FUNCS(dprintf)
-AC_REPLACE_FUNCS(strchrnul)
 AC_REPLACE_FUNCS(strdup)
 AC_REPLACE_FUNCS(strlcpy)
 AC_REPLACE_FUNCS(reallocarray)
@@ -1048,6 +1047,8 @@ dnl Miscellaneous Bash tests
 if test "$ac_cv_func_lstat" = "no"; then
 BASH_FUNC_LSTAT
 fi
+
+BASH_FUNC_STRCHRNUL
 
 dnl behavior of system calls and library functions
 BASH_FUNC_DUP2_CLOEXEC_CHECK
