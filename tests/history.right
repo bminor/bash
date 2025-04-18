@@ -372,3 +372,25 @@ d
     5  history
 ./history8.sub: line 15: history: 72: history position out of range
 ./history8.sub: line 16: history: -72: history position out of range
+    1  echo below zero
+    2  cat <<EOF
+
+
+
+a
+
+b
+
+c
+set -o vi
+a
+bbb
+
+
+exit
+EOF
+    3  echo one	# leading blank lines get removed
+    4  echo two	# blank lines after a non-blank are preserved
+
+
+    5  echo three

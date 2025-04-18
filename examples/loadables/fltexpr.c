@@ -215,6 +215,20 @@ static sh_float_t xjn(sh_float_t d1, sh_float_t d2) { int x = d1; return (jn (x,
 static sh_float_t xyn(sh_float_t d1, sh_float_t d2) { int x = d1; return (yn (x, d2)); }
 static sh_float_t xldexp(sh_float_t d1, sh_float_t d2) { int x = d2; return (ldexp (d1, x)); }
 
+/* Some additional math functions that aren't in libm */
+static sh_float_t xcot(sh_float_t d) { return (1.0 / tan(d)); }
+static sh_float_t xcoth(sh_float_t d) { return (cosh(d) / sinh(d)); }
+
+static sh_float_t xroundp(sh_float_t d1, sh_float_t d2)
+{
+  sh_float_t m, r;
+  int prec = d2;
+
+  m = pow(10.0, prec);
+  r = round(d1 * m) / m;
+  return r;
+}
+
 typedef int imathfunc1(sh_float_t);
 typedef int imathfunc2(sh_float_t, sh_float_t);
 typedef sh_float_t mathfunc1(sh_float_t);
@@ -250,6 +264,8 @@ FLTEXPR_MATHFUN mathfuncs[] =
   { "ceil",	1,	{ .func1 = ceil }	},
   { "cos",	1,	{ .func1 = cos }	},  
   { "cosh",	1,	{ .func1 = cosh }	},
+  { "cot",	1,	{ .func1 = xcot }	},
+  { "coth",	1,	{ .func1 = xcoth }	},
   { "erf",	1,	{ .func1 = erf }	},
   { "erfc",	1,	{ .func1 = erfc }	},
   { "exp",	1,	{ .func1 = exp }	},
@@ -288,6 +304,7 @@ FLTEXPR_MATHFUN mathfuncs[] =
   { "nextafter",2,	{ .func2 = nextafter }	},
   { "pow",	2,	{ .func2 = pow }	},
   { "remainder",2,	{ .func2 = remainder }	},
+  { "roundp",	2,	{ .func2 = xroundp }	},
   { "ldexp",	2,	{ .func2 = xldexp }	},
   { "jn",	2,	{ .func2 = xjn }	},
   { "scalbn",	2,	{ .func2 = xscalbn }	},

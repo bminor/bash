@@ -1,16 +1,16 @@
 # Swedish translation of bash
-# Copyright © 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2018, 2019, 2020, 2022 Free Software Foundation, Inc.
+# Copyright © 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2018, 2019, 2020, 2022, 2025 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
 #
-# Göran Uddeborg <goeran@uddeborg.se>, 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2018, 2019, 2020, 2022.
+# Göran Uddeborg <goeran@uddeborg.se>, 2008, 2009, 2010, 2011, 2013, 2014, 2015, 2016, 2018, 2019, 2020, 2022, 2025.
 #
-# $Revision: 1.31 $
+# $Revision: 1.33 $
 msgid ""
 msgstr ""
-"Project-Id-Version: bash 5.2-rc1\n"
+"Project-Id-Version: bash 5.3-rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-08 11:34-0400\n"
-"PO-Revision-Date: 2022-06-17 22:31+0200\n"
+"POT-Creation-Date: 2024-11-12 11:51-0500\n"
+"PO-Revision-Date: 2025-04-12 21:35+0200\n"
 "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -46,47 +46,44 @@ msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: måste använda index vid tilldelning av associativ vektor"
 
 #: bashhist.c:464
-#, fuzzy
 msgid "cannot create"
-msgstr "%s: det går inte att skapa: %s"
+msgstr "det går inte att skapa"
 
-#: bashline.c:4638
+#: bashline.c:4628
 msgid "bash_execute_unix_command: cannot find keymap for command"
-msgstr ""
-"bash_execute_unix_command: det går inte att hitta en tangentbindning för "
-"kommandot"
+msgstr "bash_execute_unix_command: det går inte att hitta en tangentbindning för kommandot"
 
-#: bashline.c:4809
+#: bashline.c:4799
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: första ickeblanka tecknet är inte '\"'"
 
-#: bashline.c:4838
+#: bashline.c:4828
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "ingen avslutande ”%c” i %s"
 
-#: bashline.c:4869
-#, fuzzy, c-format
+#: bashline.c:4859
+#, c-format
 msgid "%s: missing separator"
-msgstr "%s: kolonseparator saknas"
+msgstr "%s: separator saknas"
 
-#: bashline.c:4916
+#: bashline.c:4906
 #, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "”%s”: det går inte att avbinda i kommandotangentbindning"
 
-#: braces.c:340
+#: braces.c:320
 #, c-format
 msgid "brace expansion: cannot allocate memory for %s"
 msgstr "klammerexpansion: det går inte att allokera minne för %s"
 
-#: braces.c:403
-#, fuzzy, c-format
+#: braces.c:383
+#, c-format
 msgid "brace expansion: failed to allocate memory for %s elements"
-msgstr "klammerexpansion: misslyckades att allokera minne för %u element"
+msgstr "klammerexpansion: misslyckades att allokera minne för %s element"
 
-#: braces.c:462
+#: braces.c:442
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "klammerexpansion: misslyckades att allokera minne för ”%s”"
@@ -106,9 +103,8 @@ msgid "`%s': invalid keymap name"
 msgstr "”%s”: ogiltigt tangentbindningsnamn"
 
 #: builtins/bind.def:277
-#, fuzzy
 msgid "cannot read"
-msgstr "%s: det går inte att läsa: %s"
+msgstr "det går inte att läsa"
 
 #: builtins/bind.def:353 builtins/bind.def:382
 #, c-format
@@ -139,7 +135,6 @@ msgid "only meaningful in a `for', `while', or `until' loop"
 msgstr "endast meningsfullt i en ”for”-, ”while”- eller ”until”-slinga"
 
 #: builtins/caller.def:135
-#, fuzzy
 msgid ""
 "Returns the context of the current subroutine call.\n"
 "    \n"
@@ -154,7 +149,7 @@ msgid ""
 "    Returns 0 unless the shell is not executing a shell function or EXPR\n"
 "    is invalid."
 msgstr ""
-"Returnera kontexten för det aktuella funktionsanropet.\n"
+"Returnerar kontexten för det aktuella funktionsanropet.\n"
 "    \n"
 "    Utan UTTR, returneras ”$rad $filnamn”.  Med UTTR, returneras\n"
 "    ”$rad $subrutin $filnamn”.  Denna extra information kan användas för\n"
@@ -236,7 +231,7 @@ msgstr "ogiltigt oktalt tal"
 msgid "invalid hex number"
 msgstr "ogiltigt hexadecimalt tal"
 
-#: builtins/common.c:223 expr.c:1577 expr.c:1591
+#: builtins/common.c:223 expr.c:1559 expr.c:1573
 msgid "invalid number"
 msgstr "ogiltigt tal"
 
@@ -289,9 +284,9 @@ msgid "no job control"
 msgstr "ingen jobbstyrning"
 
 #: builtins/common.c:279
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid job specification"
-msgstr "%s: ogiltig tidsgränsspecifikation"
+msgstr "%s: ogiltig jobbspecifikation"
 
 #: builtins/common.c:289
 #, c-format
@@ -308,24 +303,20 @@ msgid "%s: not a shell builtin"
 msgstr "%s: inte inbyggt i skalet"
 
 #: builtins/common.c:307
-#, fuzzy
 msgid "write error"
-msgstr "skrivfel: %s"
+msgstr "skrivfel"
 
 #: builtins/common.c:314
-#, fuzzy
 msgid "error setting terminal attributes"
-msgstr "fel när terminalattribut ställdes in: %s"
+msgstr "fel när terminalattribut ställdes in"
 
 #: builtins/common.c:316
-#, fuzzy
 msgid "error getting terminal attributes"
-msgstr "fel när terminalattribut hämtades: %s"
+msgstr "fel när terminalattribut hämtades"
 
 #: builtins/common.c:611
-#, fuzzy
 msgid "error retrieving current directory"
-msgstr "%s: fel när aktuell katalog hämtades: %s: %s\n"
+msgstr "fel när aktuell katalog hämtades"
 
 #: builtins/common.c:675 builtins/common.c:677
 #, c-format
@@ -333,9 +324,9 @@ msgid "%s: ambiguous job spec"
 msgstr "%s: tvetydig jobbspecifikation"
 
 #: builtins/common.c:709
-#, fuzzy, c-format
+#, c-format
 msgid "%s: job specification requires leading `%%'"
-msgstr "%s: flaggan kräver ett argument"
+msgstr "%s: en jobbspecifikation kräver ett inledande ”%%”"
 
 #: builtins/common.c:937
 msgid "help not available in this version"
@@ -387,7 +378,7 @@ msgstr "kan endast användas i en funktion"
 msgid "cannot use `-f' to make functions"
 msgstr "det går inte att använda ”-f” för att göra funktioner"
 
-#: builtins/declare.def:499 execute_cmd.c:6320
+#: builtins/declare.def:499 execute_cmd.c:6294
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: endast läsbar funktion"
@@ -439,7 +430,7 @@ msgstr "det går inte att öppna delat objekt %s: %s"
 #: builtins/enable.def:408
 #, c-format
 msgid "%s: builtin names may not contain slashes"
-msgstr ""
+msgstr "%s: inbyggda namn får inte innehålla snedstreck"
 
 #: builtins/enable.def:423
 #, c-format
@@ -466,7 +457,7 @@ msgstr "%s: inte dynamiskt laddad"
 msgid "%s: cannot delete: %s"
 msgstr "%s: kan inte ta bort: %s"
 
-#: builtins/evalfile.c:137 builtins/hash.def:190 execute_cmd.c:6140
+#: builtins/evalfile.c:137 builtins/hash.def:190 execute_cmd.c:6114
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: är en katalog"
@@ -481,21 +472,19 @@ msgstr "%s: inte en normal fil"
 msgid "%s: file is too large"
 msgstr "%s: filen är för stor"
 
-#: builtins/evalfile.c:189 builtins/evalfile.c:207 execute_cmd.c:6222
-#: shell.c:1687
-#, fuzzy
+#: builtins/evalfile.c:189 builtins/evalfile.c:207 execute_cmd.c:6196
+#: shell.c:1690
 msgid "cannot execute binary file"
-msgstr "%s: det går inte att köra binär fil"
+msgstr "det går inte att köra binär fil"
 
 #: builtins/evalstring.c:478
-#, fuzzy, c-format
+#, c-format
 msgid "%s: ignoring function definition attempt"
-msgstr "fel vid import av funktionsdefinition för ”%s”"
+msgstr "%s: ignorerar försök till funktionsdefinition"
 
-#: builtins/exec.def:158 builtins/exec.def:160 builtins/exec.def:249
-#, fuzzy
+#: builtins/exec.def:157 builtins/exec.def:159 builtins/exec.def:248
 msgid "cannot execute"
-msgstr "%s: kan inte köra: %s"
+msgstr "kan inte köra"
 
 #: builtins/exit.def:61
 #, c-format
@@ -526,9 +515,8 @@ msgid "history specification"
 msgstr "historiespecifikation"
 
 #: builtins/fc.def:462
-#, fuzzy
 msgid "cannot open temp file"
-msgstr "%s: det går inte att öppna temporärfil: %s"
+msgstr "det går inte att öppna temporärfil"
 
 #: builtins/fg_bg.def:150 builtins/jobs.def:293
 msgid "current"
@@ -579,24 +567,14 @@ msgstr ""
 
 #: builtins/help.def:185
 #, c-format
-msgid ""
-"no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
-msgstr ""
-"inget hjälpämne matchar ”%s”.  Prova ”help help” eller ”man -k %s” eller "
-"”info %s”."
+msgid "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
+msgstr "inget hjälpämne matchar ”%s”.  Prova ”help help” eller ”man -k %s” eller ”info %s”."
 
 #: builtins/help.def:214
-#, fuzzy
 msgid "cannot open"
-msgstr "det går inte att suspendera"
+msgstr "det går inte att öppna"
 
-#: builtins/help.def:264 builtins/help.def:306 builtins/history.def:306
-#: builtins/history.def:325 builtins/read.def:909
-#, fuzzy
-msgid "read error"
-msgstr "läsfel: %d: %s"
-
-#: builtins/help.def:517
+#: builtins/help.def:500
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -616,31 +594,30 @@ msgstr ""
 "En stjärna (*) bredvid ett namn betyder att det kommandot är avstängt.\n"
 "\n"
 
-#: builtins/history.def:164
+#: builtins/history.def:162
 msgid "cannot use more than one of -anrw"
 msgstr "det går inte att använda mer än en av -anrw"
 
-#: builtins/history.def:197 builtins/history.def:209 builtins/history.def:220
-#: builtins/history.def:245 builtins/history.def:252
+#: builtins/history.def:195 builtins/history.def:207 builtins/history.def:218
+#: builtins/history.def:243 builtins/history.def:250
 msgid "history position"
 msgstr "historieposition"
 
-#: builtins/history.def:280
-#, fuzzy
+#: builtins/history.def:278
 msgid "empty filename"
-msgstr "tomt vektorvariabelnamn"
+msgstr "tomt filnamn"
 
-#: builtins/history.def:282 subst.c:8226
+#: builtins/history.def:280 subst.c:8215
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parametern tom eller inte satt"
 
-#: builtins/history.def:362
+#: builtins/history.def:349
 #, c-format
 msgid "%s: invalid timestamp"
 msgstr "%s: ogiltig tidsstämpel"
 
-#: builtins/history.def:470
+#: builtins/history.def:457
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: historieexpansionen misslyckades"
@@ -649,16 +626,16 @@ msgstr "%s: historieexpansionen misslyckades"
 msgid "no other options allowed with `-x'"
 msgstr "inga andra flaggor är tillåtna med ”-x”"
 
-#: builtins/kill.def:214
+#: builtins/kill.def:213
 #, c-format
 msgid "%s: arguments must be process or job IDs"
 msgstr "%s: argument måste vara processer eller jobb-id:n"
 
-#: builtins/kill.def:280
+#: builtins/kill.def:275
 msgid "Unknown error"
 msgstr "Okänt fel"
 
-#: builtins/let.def:96 builtins/let.def:120 expr.c:647 expr.c:665
+#: builtins/let.def:96 builtins/let.def:120 expr.c:633 expr.c:651
 msgid "expression expected"
 msgstr "uttryck förväntades"
 
@@ -668,9 +645,8 @@ msgid "%s: invalid file descriptor specification"
 msgstr "%s: ogiltig filbeskrivarspecifikation"
 
 #: builtins/mapfile.def:257 builtins/read.def:380
-#, fuzzy
 msgid "invalid file descriptor"
-msgstr "%d: ogiltig filbeskrivare: %s"
+msgstr "ogiltig filbeskrivare"
 
 #: builtins/mapfile.def:266 builtins/mapfile.def:304
 #, c-format
@@ -695,35 +671,35 @@ msgstr "tomt vektorvariabelnamn"
 msgid "array variable support required"
 msgstr "stöd för vektorvariabler krävs"
 
-#: builtins/printf.def:483
+#: builtins/printf.def:477
 #, c-format
 msgid "`%s': missing format character"
 msgstr "”%s”: formateringstecken saknas"
 
-#: builtins/printf.def:609
+#: builtins/printf.def:603
 #, c-format
 msgid "`%c': invalid time format specification"
 msgstr "”%c”: ogiltig specifikation av tidsformat"
 
-#: builtins/printf.def:711
+#: builtins/printf.def:705
 msgid "string length"
-msgstr ""
+msgstr "stränglängd"
 
-#: builtins/printf.def:811
+#: builtins/printf.def:805
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "”%c”: ogiltigt formateringstecken"
 
-#: builtins/printf.def:928
+#: builtins/printf.def:922
 #, c-format
 msgid "format parsing problem: %s"
 msgstr "formattolkningsproblem: %s"
 
-#: builtins/printf.def:1113
+#: builtins/printf.def:1107
 msgid "missing hex digit for \\x"
 msgstr "hexadecimal siffra saknas för \\x"
 
-#: builtins/printf.def:1128
+#: builtins/printf.def:1122
 #, c-format
 msgid "missing unicode digit for \\%c"
 msgstr "unicode-siffra saknas för \\%c"
@@ -764,12 +740,10 @@ msgid ""
 "    \twith its position in the stack\n"
 "    \n"
 "    Arguments:\n"
-"      +N\tDisplays the Nth entry counting from the left of the list shown "
-"by\n"
+"      +N\tDisplays the Nth entry counting from the left of the list shown by\n"
 "    \tdirs when invoked without options, starting with zero.\n"
 "    \n"
-"      -N\tDisplays the Nth entry counting from the right of the list shown "
-"by\n"
+"      -N\tDisplays the Nth entry counting from the right of the list shown by\n"
 "\tdirs when invoked without options, starting with zero."
 msgstr ""
 "Visa listan av kataloger i minnet just nu.  Kataloger hamnar i listan\n"
@@ -880,10 +854,13 @@ msgstr ""
 msgid "%s: invalid timeout specification"
 msgstr "%s: ogiltig tidsgränsspecifikation"
 
+#: builtins/read.def:909
+msgid "read error"
+msgstr "läsfel"
+
 #: builtins/return.def:73
 msgid "can only `return' from a function or sourced script"
-msgstr ""
-"det går bara att göra ”return” från en funktion eller källinläst skript"
+msgstr "det går bara att göra ”return” från en funktion eller källinläst skript"
 
 #: builtins/set.def:863
 msgid "cannot simultaneously unset a function and a variable"
@@ -973,29 +950,27 @@ msgstr "%s är %s\n"
 msgid "%s is hashed (%s)\n"
 msgstr "%s är hashad (%s)\n"
 
-#: builtins/ulimit.def:403
+#: builtins/ulimit.def:401
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: ogiltigt gränsargument"
 
-#: builtins/ulimit.def:429
+#: builtins/ulimit.def:427
 #, c-format
 msgid "`%c': bad command"
 msgstr "”%c”: felaktigt kommando"
 
-#: builtins/ulimit.def:465 builtins/ulimit.def:748
-#, fuzzy
+#: builtins/ulimit.def:463 builtins/ulimit.def:733
 msgid "cannot get limit"
-msgstr "%s: kan inte avgöra gränsen: %s"
+msgstr "kan inte avgöra gränsen"
 
-#: builtins/ulimit.def:498
+#: builtins/ulimit.def:496
 msgid "limit"
 msgstr "gräns"
 
-#: builtins/ulimit.def:511 builtins/ulimit.def:812
-#, fuzzy
+#: builtins/ulimit.def:509 builtins/ulimit.def:797
 msgid "cannot modify limit"
-msgstr "%s: kan inte ändra gränsen: %s"
+msgstr "kan inte ändra gränsen"
 
 #: builtins/umask.def:114
 msgid "octal number"
@@ -1006,7 +981,7 @@ msgstr "oktalt tal"
 msgid "`%c': invalid symbolic mode operator"
 msgstr "”%c”: ogiltig operator för symboliskt läge"
 
-#: builtins/umask.def:345
+#: builtins/umask.def:341
 #, c-format
 msgid "`%c': invalid symbolic mode character"
 msgstr "”%c”: ogiltigt tecken för symboliskt läge"
@@ -1057,161 +1032,154 @@ msgstr "felaktigt hopp"
 msgid "%s: unbound variable"
 msgstr "%s: obunden variabel"
 
-#: eval.c:260
+#: eval.c:256
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\atiden gick ut i väntan på indata: automatisk utloggning\n"
 
 #: execute_cmd.c:606
-#, fuzzy
 msgid "cannot redirect standard input from /dev/null"
-msgstr "det går inte att omdirigera standard in från /dev/null: %s"
+msgstr "det går inte att omdirigera standard in från /dev/null"
 
-#: execute_cmd.c:1412
+#: execute_cmd.c:1404
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: ”%c”: ogiltigt formateringstecken"
 
-#: execute_cmd.c:2493
+#: execute_cmd.c:2485
 #, c-format
 msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr "execute_coproc: coproc [%d:%s] finns fortfarande"
 
-#: execute_cmd.c:2647
+#: execute_cmd.c:2639
 msgid "pipe error"
 msgstr "rörfel"
 
-#: execute_cmd.c:4100
+#: execute_cmd.c:4092
 #, c-format
 msgid "invalid regular expression `%s': %s"
-msgstr ""
+msgstr "felaktigt reguljärt uttryck ”%s”: %s"
 
-#: execute_cmd.c:4102
+#: execute_cmd.c:4094
 #, c-format
 msgid "invalid regular expression `%s'"
-msgstr ""
+msgstr "felaktigt reguljärt uttryck ”%s”"
 
-#: execute_cmd.c:5056
+#: execute_cmd.c:5048
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: maximal nästning av eval överskriden (%d)"
 
-#: execute_cmd.c:5069
+#: execute_cmd.c:5061
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: maximal nästning av source överskriden (%d)"
 
-#: execute_cmd.c:5198
+#: execute_cmd.c:5190
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: maximal nästning av funktioner överskriden (%d)"
 
-#: execute_cmd.c:5754
-#, fuzzy
+#: execute_cmd.c:5728
 msgid "command not found"
-msgstr "%s: kommandot finns inte"
+msgstr "kommandot finns inte"
 
-#: execute_cmd.c:5783
+#: execute_cmd.c:5757
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: begränsat: det går inte att ange ”/” i kommandonamn"
 
-#: execute_cmd.c:6176
-#, fuzzy
+#: execute_cmd.c:6150
 msgid "bad interpreter"
-msgstr "%s: %s: felaktig tolk"
+msgstr "felaktig tolk"
 
-#: execute_cmd.c:6185
+#: execute_cmd.c:6159
 #, c-format
 msgid "%s: cannot execute: required file not found"
 msgstr "%s: det går inte att köra: en nödvändig fil finns inte"
 
-#: execute_cmd.c:6361
+#: execute_cmd.c:6335
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "det går inte att duplicera fb %d till fb %d"
 
-#: expr.c:272
+#: expr.c:265
 msgid "expression recursion level exceeded"
 msgstr "rekursionsnivå i uttryck överskriden"
 
-#: expr.c:300
+#: expr.c:293
 msgid "recursion stack underflow"
 msgstr "underspill i rekursionsstacken"
 
-#: expr.c:485
-#, fuzzy
+#: expr.c:471
 msgid "arithmetic syntax error in expression"
-msgstr "syntaxfel i uttrycket"
+msgstr "aritmetiskt syntaxfel i uttrycket"
 
-#: expr.c:529
+#: expr.c:515
 msgid "attempted assignment to non-variable"
 msgstr "försök att tilldela till en icke-variabel"
 
-#: expr.c:538
-#, fuzzy
+#: expr.c:524
 msgid "arithmetic syntax error in variable assignment"
-msgstr "syntaxfel i variabeltilldelning"
+msgstr "aritmetiskt syntaxfel i variabeltilldelning"
 
-#: expr.c:552 expr.c:917
+#: expr.c:538 expr.c:905
 msgid "division by 0"
 msgstr "division med 0"
 
-#: expr.c:600
+#: expr.c:586
 msgid "bug: bad expassign token"
 msgstr "fel: felaktig expassign-symbol"
 
-#: expr.c:654
+#: expr.c:640
 msgid "`:' expected for conditional expression"
 msgstr "”:” förväntades i villkorligt uttryck"
 
-#: expr.c:979
+#: expr.c:967
 msgid "exponent less than 0"
 msgstr "exponenten är mindre än 0"
 
-#: expr.c:1040
+#: expr.c:1028
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "en identifierare förväntades efter pre-ökning eller pre-minskning"
 
-#: expr.c:1067
+#: expr.c:1055
 msgid "missing `)'"
 msgstr "”)” saknas"
 
-#: expr.c:1120 expr.c:1507
-#, fuzzy
+#: expr.c:1106 expr.c:1489
 msgid "arithmetic syntax error: operand expected"
-msgstr "syntaxfel: en operand förväntades"
+msgstr "aritmetiskt syntaxfel: en operand förväntades"
 
-#: expr.c:1468 expr.c:1489
+#: expr.c:1450 expr.c:1471
 msgid "--: assignment requires lvalue"
-msgstr ""
+msgstr "--: tilldelning kräver ett l-värde"
 
-#: expr.c:1470 expr.c:1491
+#: expr.c:1452 expr.c:1473
 msgid "++: assignment requires lvalue"
-msgstr ""
+msgstr "++: tilldelning kräver ett l-värde"
 
-#: expr.c:1509
-#, fuzzy
+#: expr.c:1491
 msgid "arithmetic syntax error: invalid arithmetic operator"
-msgstr "syntaxfel: ogiltig aritmetisk operator"
+msgstr "aritmetiskt syntaxfel: ogiltig aritmetisk operator"
 
-#: expr.c:1532
+#: expr.c:1514
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (felsymbol är ”%s”)"
 
-#: expr.c:1595
+#: expr.c:1577
 msgid "invalid arithmetic base"
 msgstr "ogiltig aritmetisk bas"
 
-#: expr.c:1604
+#: expr.c:1586
 msgid "invalid integer constant"
 msgstr "felaktig heltalskonstant"
 
-#: expr.c:1620
+#: expr.c:1602
 msgid "value too great for base"
 msgstr "värdet är för stort för basen"
 
-#: expr.c:1671
+#: expr.c:1653
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: uttrycksfel\n"
@@ -1225,7 +1193,7 @@ msgstr "getcwd: det går inte att komma åt föräldrakatalogen"
 msgid "`%s': is a special builtin"
 msgstr "”%s”: är en speciell inbyggd"
 
-#: input.c:98 subst.c:6542
+#: input.c:98 subst.c:6540
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "det går inte att återställa fördröjningsfritt läge för fb %d"
@@ -1233,8 +1201,7 @@ msgstr "det går inte att återställa fördröjningsfritt läge för fb %d"
 #: input.c:254
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
-msgstr ""
-"det går inte att allokera en ny filbeskrivare för bashindata från fb %d"
+msgstr "det går inte att allokera en ny filbeskrivare för bashindata från fb %d"
 
 #: input.c:262
 #, c-format
@@ -1326,77 +1293,77 @@ msgstr "  (ak: %s)"
 msgid "child setpgid (%ld to %ld)"
 msgstr "barns setpgid (%ld till %ld)"
 
-#: jobs.c:2754 nojobs.c:640
+#: jobs.c:2753 nojobs.c:640
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld är inte ett barn till detta skal"
 
-#: jobs.c:3052
+#: jobs.c:3049
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Ingen uppgift om process %ld"
 
-#: jobs.c:3410
+#: jobs.c:3407
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: jobb %d är stoppat"
 
-#: jobs.c:3838
+#: jobs.c:3835
 #, c-format
 msgid "%s: no current jobs"
 msgstr "%s: inga aktuella jobb"
 
-#: jobs.c:3845
+#: jobs.c:3842
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: jobbet har avslutat"
 
-#: jobs.c:3854
+#: jobs.c:3851
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: jobb %d är redan i bakgrunden"
 
-#: jobs.c:4092
+#: jobs.c:4089
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: slår på WNOHANG för att undvika oändlig blockering"
 
-#: jobs.c:4641
+#: jobs.c:4638
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: rad %d: "
 
-#: jobs.c:4657 nojobs.c:895
+#: jobs.c:4654 nojobs.c:895
 #, c-format
 msgid " (core dumped)"
 msgstr " (minnesutskrift skapad)"
 
-#: jobs.c:4677 jobs.c:4697
+#: jobs.c:4674 jobs.c:4694
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(ak nu: %s)\n"
 
-#: jobs.c:4741
+#: jobs.c:4738
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp misslyckades"
 
-#: jobs.c:4797
+#: jobs.c:4794
 msgid "initialize_job_control: no job control in background"
 msgstr "initialize_job_control: ingen jobbstyrning i bakgrunden"
 
-#: jobs.c:4813
+#: jobs.c:4810
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: linjedisciplin"
 
-#: jobs.c:4823
+#: jobs.c:4820
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4844 jobs.c:4853
+#: jobs.c:4841 jobs.c:4850
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "det går inte att sätta terminalprocessgrupp (%d)"
 
-#: jobs.c:4858
+#: jobs.c:4855
 msgid "no job control in this shell"
 msgstr "ingen jobbstyrning i detta skal"
 
@@ -1497,9 +1464,8 @@ msgid "network operations not supported"
 msgstr "nätverksoperationer stöds inte"
 
 #: locale.c:226 locale.c:228 locale.c:301 locale.c:303
-#, fuzzy
 msgid "cannot change locale"
-msgstr "setlocale: %s: det går inte att ändra lokal (%s)"
+msgstr "det går inte att ändra lokal"
 
 #: mailcheck.c:435
 msgid "You have mail in $_"
@@ -1540,28 +1506,22 @@ msgstr "här-dokument på rad %d avgränsas av filslut (ville ha ”%s”)"
 #: make_cmd.c:722
 #, c-format
 msgid "make_redirection: redirection instruction `%d' out of range"
-msgstr ""
-"make_redirection: omdirigeringsinstruktion ”%d” utanför giltigt intervall"
+msgstr "make_redirection: omdirigeringsinstruktion ”%d” utanför giltigt intervall"
 
 #: parse.y:2572
 #, c-format
-msgid ""
-"shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line "
-"truncated"
-msgstr ""
-"shell_getc: shell_input_line_size (%zu) överstiger SIZE_MAX (%lu): raden "
-"avhuggen"
+msgid "shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line truncated"
+msgstr "shell_getc: shell_input_line_size (%zu) överstiger SIZE_MAX (%lu): raden avhuggen"
 
 #: parse.y:2864
-#, fuzzy
 msgid "script file read error"
-msgstr "skrivfel: %s"
+msgstr "läsfel av skriptfilen"
 
 #: parse.y:3101
 msgid "maximum here-document count exceeded"
 msgstr "maximalt antal av här-dokument överskridet"
 
-#: parse.y:3901 parse.y:4799 parse.y:6859
+#: parse.y:3901 parse.y:4799 parse.y:6853
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "oväntat filslut vid sökning efter matchande ”%c”"
@@ -1630,52 +1590,51 @@ msgstr "oväntad symbol ”%s” i villkorligt kommando"
 msgid "unexpected token %d in conditional command"
 msgstr "oväntad symbol %d i villkorligt kommando"
 
-#: parse.y:6827
-#, fuzzy, c-format
+#: parse.y:6821
+#, c-format
 msgid "syntax error near unexpected token `%s' while looking for matching `%c'"
-msgstr "oväntat filslut vid sökning efter matchande ”%c”"
+msgstr "syntaxfel nära oväntad symbol ”%s” vid sökning efter matchande ”%c”"
 
-#: parse.y:6829
+#: parse.y:6823
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "syntaxfel nära den oväntade symbolen ”%s”"
 
-#: parse.y:6848
+#: parse.y:6842
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "syntaxfel nära ”%s”"
 
-#: parse.y:6867
-#, fuzzy, c-format
+#: parse.y:6861
+#, c-format
 msgid "syntax error: unexpected end of file from `%s' command on line %d"
-msgstr "syntaxfel: oväntat filslut"
+msgstr "syntaxfel: oväntat filslut från kommandot ”%s” på rad %d"
 
-#: parse.y:6869
-#, fuzzy, c-format
+#: parse.y:6863
+#, c-format
 msgid "syntax error: unexpected end of file from command on line %d"
-msgstr "syntaxfel: oväntat filslut"
+msgstr "syntaxfel: oväntat filslut från kommandot på rad %d"
 
-#: parse.y:6873
+#: parse.y:6867
 msgid "syntax error: unexpected end of file"
 msgstr "syntaxfel: oväntat filslut"
 
-#: parse.y:6873
+#: parse.y:6867
 msgid "syntax error"
 msgstr "syntaxfel"
 
-#: parse.y:6922
+#: parse.y:6916
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Använd ”%s” för att lämna skalet.\n"
 
-#: parse.y:7120
+#: parse.y:7114
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "oväntat filslut när matchande ”)” söktes"
 
 #: pathexp.c:897
-#, fuzzy
 msgid "invalid glob sort type"
-msgstr "ogiltig bas"
+msgstr "ogiltig glob-sorteringstyp"
 
 #: pcomplete.c:1070
 #, c-format
@@ -1716,40 +1675,35 @@ msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: ”%c”: ogiltigt formateringstecken"
 
-#: redir.c:146 redir.c:194
+#: redir.c:145 redir.c:193
 msgid "file descriptor out of range"
 msgstr "filbeskrivare utanför giltigt intervall"
 
-#: redir.c:201
-#, fuzzy
+#: redir.c:200
 msgid "ambiguous redirect"
-msgstr "%s: tvetydig omdirigering"
+msgstr "tvetydig omdirigering"
 
-#: redir.c:205
-#, fuzzy
+#: redir.c:204
 msgid "cannot overwrite existing file"
-msgstr "%s: det går inte att skriva över en existerande fil"
+msgstr "det går inte att skriva över en existerande fil"
 
-#: redir.c:210
-#, fuzzy
+#: redir.c:209
 msgid "restricted: cannot redirect output"
-msgstr "%s: begränsat: det går inte att omdirigera utdata"
+msgstr "begränsat: det går inte att omdirigera utdata"
 
-#: redir.c:215
-#, fuzzy
+#: redir.c:214
 msgid "cannot create temp file for here-document"
-msgstr "det går inte att skapa temporärfil för här-dokument: %s"
+msgstr "det går inte att skapa temporärfil för här-dokument"
 
-#: redir.c:219
-#, fuzzy
+#: redir.c:218
 msgid "cannot assign fd to variable"
-msgstr "%s: det går inte att tilldela fb till variabel"
+msgstr "det går inte att tilldela fb till variabel"
 
-#: redir.c:639
+#: redir.c:633
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port stöds inte utan nätverksfunktion"
 
-#: redir.c:945 redir.c:1062 redir.c:1124 redir.c:1291
+#: redir.c:937 redir.c:1051 redir.c:1109 redir.c:1273
 msgid "redirection error: cannot duplicate fd"
 msgstr "omdirigeringsfel: det går inte att duplicera fb"
 
@@ -1770,39 +1724,35 @@ msgstr "läget för snygg utskrift ignoreras i interaktiva skal"
 msgid "%c%c: invalid option"
 msgstr "%c%c: ogiltig flagga"
 
-#: shell.c:1354
+#: shell.c:1357
 #, c-format
 msgid "cannot set uid to %d: effective uid %d"
 msgstr "det går sätta uid till %d: effektiv uid %d"
 
-#: shell.c:1370
+#: shell.c:1373
 #, c-format
 msgid "cannot set gid to %d: effective gid %d"
 msgstr "det går inte att sätta gid till %d: effektiv gid %d"
 
-#: shell.c:1559
+#: shell.c:1562
 msgid "cannot start debugger; debugging mode disabled"
 msgstr "kan inte starta felsökaren, felsökningsläge avaktiverat"
 
-#: shell.c:1672
+#: shell.c:1675
 #, c-format
 msgid "%s: Is a directory"
 msgstr "%s: är en katalog"
 
-#: shell.c:1748 shell.c:1750
-msgid "error creating buffered stream"
-msgstr ""
-
-#: shell.c:1899
+#: shell.c:1891
 msgid "I have no name!"
 msgstr "Jag har inget namn!"
 
-#: shell.c:2063
+#: shell.c:2055
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, version %s-(%s)\n"
 
-#: shell.c:2064
+#: shell.c:2056
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1811,52 +1761,51 @@ msgstr ""
 "Användning:\t%s [GNU lång flagga] [flagga] ...\n"
 "\t\t%s [GNU lång flagga] [flagga] skriptfil ...\n"
 
-#: shell.c:2066
+#: shell.c:2058
 msgid "GNU long options:\n"
 msgstr "GNU långa flaggor:\n"
 
-#: shell.c:2070
+#: shell.c:2062
 msgid "Shell options:\n"
 msgstr "Skalflaggor:\n"
 
-#: shell.c:2071
+#: shell.c:2063
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-ilrsD eller -c kommando eller -O shopt_flagga\t\t(bara uppstart)\n"
 
-#: shell.c:2090
+#: shell.c:2082
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s eller -o flagga\n"
 
-#: shell.c:2096
+#: shell.c:2088
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr "Skriv ”%s -c 'help set'” för mer information om skalflaggor.\n"
 
-#: shell.c:2097
+#: shell.c:2089
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr "Skriv ”%s -c help” för mer information om inbyggda skalkommandon.\n"
 
-#: shell.c:2098
+#: shell.c:2090
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr ""
 "Använd kommandot ”bashbug” för att rapportera fel.\n"
 "Skicka synpunkter på översättningen till <tp-sv@listor.tp-sv.se>.\n"
 
-#: shell.c:2100
+#: shell.c:2092
 #, c-format
 msgid "bash home page: <http://www.gnu.org/software/bash>\n"
 msgstr "bash hemsida: <http://www.gnu.org/software/bash>\n"
 
-#: shell.c:2101
+#: shell.c:2093
 #, c-format
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
-msgstr ""
-"Allmän hjälp i att använda GNU-program: <http://www.gnu.org/gethelp/>\n"
+msgstr "Allmän hjälp i att använda GNU-program: <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:809
+#: sig.c:808
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: ogiltig operation"
@@ -2026,113 +1975,108 @@ msgstr "Informationsbegäran"
 msgid "Unknown Signal #%d"
 msgstr "Okänd signal nr %d"
 
-#: subst.c:1503 subst.c:1795 subst.c:2001
+#: subst.c:1501 subst.c:1793 subst.c:1999
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "felaktig substitution: ingen avslutande ”%s” i %s"
 
-#: subst.c:3601
+#: subst.c:3599
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: det går inte att tilldela listor till vektormedlemmar"
 
-#: subst.c:6381 subst.c:6397
+#: subst.c:6379 subst.c:6395
 msgid "cannot make pipe for process substitution"
 msgstr "det går inte att skapa rör för processubstitution"
 
-#: subst.c:6457
+#: subst.c:6455
 msgid "cannot make child for process substitution"
 msgstr "det går inte att skapa barn för processubstitution"
 
-#: subst.c:6532
+#: subst.c:6530
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "det går inte att öppna namngivet rör %s för läsning"
 
-#: subst.c:6534
+#: subst.c:6532
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "det går inte att öppna namngivet rör %s för skrivning"
 
-#: subst.c:6557
+#: subst.c:6555
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "det går inte att duplicera namngivet rör %s som fb %d"
 
-#: subst.c:6723
+#: subst.c:6721
 msgid "command substitution: ignored null byte in input"
 msgstr "kommandoersättning: ignorerade nollbyte i indata"
 
-#: subst.c:6962
+#: subst.c:6960
 msgid "function_substitute: cannot open anonymous file for output"
-msgstr ""
+msgstr "function_substitute: kan inte öppna anonyma filer för utdata"
 
-#: subst.c:7036
-#, fuzzy
+#: subst.c:7034
 msgid "function_substitute: cannot duplicate anonymous file as standard output"
-msgstr "command_substitute: det går inte att duplicera rör som fb 1"
+msgstr "function_substitute: det går inte att duplicera en anonym fil som standard ut"
 
-#: subst.c:7210 subst.c:7231
+#: subst.c:7208 subst.c:7229
 msgid "cannot make pipe for command substitution"
 msgstr "det går inte att skapa rör för kommandosubstitution"
 
-#: subst.c:7282
+#: subst.c:7280
 msgid "cannot make child for command substitution"
 msgstr "det går inte att skapa barn för kommandosubstitution"
 
-#: subst.c:7315
+#: subst.c:7313
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: det går inte att duplicera rör som fb 1"
 
-#: subst.c:7813 subst.c:10989
+#: subst.c:7802 subst.c:10978
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: ogiltigt variabelnamn för referens"
 
-#: subst.c:7906 subst.c:7924 subst.c:8100
+#: subst.c:7895 subst.c:7913 subst.c:8089
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: felaktig indirekt expansion"
 
-#: subst.c:7940 subst.c:8108
+#: subst.c:7929 subst.c:8097
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: felaktigt variabelnamn"
 
-#: subst.c:8125 subst.c:10271 subst.c:10298
+#: subst.c:8114 subst.c:10260 subst.c:10287
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: felaktig substitution"
 
-#: subst.c:8224
+#: subst.c:8213
 #, c-format
 msgid "%s: parameter not set"
 msgstr "%s: parametern är inte satt"
 
-#: subst.c:8480 subst.c:8495
+#: subst.c:8469 subst.c:8484
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: delstränguttryck < 0"
 
-#: subst.c:10397
+#: subst.c:10386
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: det går inte att tilldela på detta sätt"
 
-#: subst.c:10855
-msgid ""
-"future versions of the shell will force evaluation as an arithmetic "
-"substitution"
-msgstr ""
-"framtida versioner av skalet kommer att framtvinga evaluering som en "
-"aritmetisk substitution"
+#: subst.c:10844
+msgid "future versions of the shell will force evaluation as an arithmetic substitution"
+msgstr "framtida versioner av skalet kommer att framtvinga evaluering som en aritmetisk substitution"
 
-#: subst.c:11563
+#: subst.c:11552
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "felaktig ersättning: ingen avslutande ”`” i %s"
 
-#: subst.c:12636
+#: subst.c:12626
 #, c-format
 msgid "no match: %s"
 msgstr "ingen matchning: %s"
@@ -2142,9 +2086,9 @@ msgid "argument expected"
 msgstr "argument förväntades"
 
 #: test.c:164
-#, fuzzy, c-format
+#, c-format
 msgid "%s: integer expected"
-msgstr "%s: heltalsuttryck förväntades"
+msgstr "%s: heltal förväntades"
 
 #: test.c:292
 msgid "`)' expected"
@@ -2186,11 +2130,8 @@ msgstr "run_pending_traps: felaktigt värde i trap_list[%d]: %p"
 
 #: trap.c:459
 #, c-format
-msgid ""
-"run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
-msgstr ""
-"run_pending_traps: signalhanterare är SIG_DFL, skickar om %d (%s) till mig "
-"själv"
+msgid "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
+msgstr "run_pending_traps: signalhanterare är SIG_DFL, skickar om %d (%s) till mig själv"
 
 #: trap.c:592
 #, c-format
@@ -2198,9 +2139,8 @@ msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: felaktig signal %d"
 
 #: unwind_prot.c:246 unwind_prot.c:292
-#, fuzzy
 msgid "frame not found"
-msgstr "%s: filen finns inte"
+msgstr "ramen finns inte"
 
 #: variables.c:441
 #, c-format
@@ -2216,9 +2156,9 @@ msgstr "skalnivå (%d) för hög, återställer till 1"
 #: variables.c:2315 variables.c:2350 variables.c:2378 variables.c:2405
 #: variables.c:2431 variables.c:3274 variables.c:3282 variables.c:3797
 #: variables.c:3841
-#, fuzzy, c-format
+#, c-format
 msgid "%s: maximum nameref depth (%d) exceeded"
-msgstr "maximalt antal av här-dokument överskridet"
+msgstr "%s: maximalt nameref-djup (%d) överskridet"
 
 #: variables.c:2641
 msgid "make_local_variable: no function context at current scope"
@@ -2243,62 +2183,55 @@ msgstr "%s: tilldelar ett heltal till en namnreferens"
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: ingen funktionskontext i aktuellt sammanhang"
 
-#: variables.c:4816
+#: variables.c:4791
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s har tom exportstr"
 
-#: variables.c:4821 variables.c:4830
+#: variables.c:4796 variables.c:4805
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "ogiltigt tecken %d i exportstr för %s"
 
-#: variables.c:4836
+#: variables.c:4811
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "inget ”=” i exportstr för %s"
 
-#: variables.c:5354
+#: variables.c:5329
 msgid "pop_var_context: head of shell_variables not a function context"
-msgstr ""
-"pop_var_context: huvudet på shell_variables är inte en funktionskontext"
+msgstr "pop_var_context: huvudet på shell_variables är inte en funktionskontext"
 
-#: variables.c:5367
+#: variables.c:5342
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: ingen kontext global_variables"
 
-#: variables.c:5457
+#: variables.c:5432
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
-msgstr ""
-"pop_scope: huvudet på shell_variables är inte en temporär omgivningsräckvidd"
+msgstr "pop_scope: huvudet på shell_variables är inte en temporär omgivningsräckvidd"
 
-#: variables.c:6448
+#: variables.c:6423
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: går inte att öppna som FILE"
 
-#: variables.c:6453
+#: variables.c:6428
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: ogiltigt värde för spårningsfilbeskrivare"
 
-#: variables.c:6497
+#: variables.c:6472
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: kompatibilitetsvärde utanför giltigt intervall"
 
 #: version.c:50
-#, fuzzy
-msgid "Copyright (C) 2025 Free Software Foundation, Inc."
-msgstr "Copyright © 2022 Free Software Foundation, Inc."
+msgid "Copyright (C) 2024 Free Software Foundation, Inc."
+msgstr "Copyright © 2024 Free Software Foundation, Inc."
 
 #: version.c:51
-msgid ""
-"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
-"html>\n"
-msgstr ""
-"Licens GPLv3+: GNU GPL version 3 eller senare <http://gnu.org/licenses/gpl."
-"html>\n"
+msgid "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+msgstr "Licens GPLv3+: GNU GPL version 3 eller senare <http://gnu.org/licenses/gpl.html>\n"
 
 #: version.c:90
 #, c-format
@@ -2307,8 +2240,7 @@ msgstr "GNU bash, version %s (%s)\n"
 
 #: version.c:95
 msgid "This is free software; you are free to change and redistribute it."
-msgstr ""
-"Detta är fri programvara, du får fritt ändra och vidaredistribuera den."
+msgstr "Detta är fri programvara, du får fritt ändra och vidaredistribuera den."
 
 #: version.c:96
 msgid "There is NO WARRANTY, to the extent permitted by law."
@@ -2343,13 +2275,8 @@ msgid "unalias [-a] name [name ...]"
 msgstr "unalias [-a] namn [namn ...]"
 
 #: builtins.c:53
-msgid ""
-"bind [-lpsvPSVX] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-"
-"x keyseq:shell-command] [keyseq:readline-function or readline-command]"
-msgstr ""
-"bind [-lpvsPVSX] [-m tangentkarta] [-f filnamn] [-q namn] [-u namn] [-r "
-"tangentsekv] [-x tangentsekv:skalkommando] [tangentsekv:readline-funktion "
-"eller readline-kommando]"
+msgid "bind [-lpsvPSVX] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]"
+msgstr "bind [-lpvsPVSX] [-m tangentkarta] [-f filnamn] [-q namn] [-u namn] [-r tangentsekv] [-x tangentsekv:skalkommando] [tangentsekv:readline-funktion eller readline-kommando]"
 
 #: builtins.c:56
 msgid "break [n]"
@@ -2368,9 +2295,8 @@ msgid "caller [expr]"
 msgstr "caller [uttr]"
 
 #: builtins.c:66
-#, fuzzy
 msgid "cd [-L|[-P [-e]]] [-@] [dir]"
-msgstr "cd [-L|[-P [-e]] [-@]] [kat]"
+msgstr "cd [-L|[-P [-e]]] [-@] [kat]"
 
 #: builtins.c:68
 msgid "pwd [-LP]"
@@ -2381,20 +2307,12 @@ msgid "command [-pVv] command [arg ...]"
 msgstr "command [-pVv] kommando [arg ...]"
 
 #: builtins.c:78
-msgid ""
-"declare [-aAfFgiIlnrtux] [name[=value] ...] or declare -p [-aAfFilnrtux] "
-"[name ...]"
-msgstr ""
-"declare [-aAfFgiIlnrtux] [namn[=värde] …] eller declare -p [-aAfFilnrtux] "
-"[namn …]"
+msgid "declare [-aAfFgiIlnrtux] [name[=value] ...] or declare -p [-aAfFilnrtux] [name ...]"
+msgstr "declare [-aAfFgiIlnrtux] [namn[=värde] …] eller declare -p [-aAfFilnrtux] [namn …]"
 
 #: builtins.c:80
-msgid ""
-"typeset [-aAfFgiIlnrtux] name[=value] ... or typeset -p [-aAfFilnrtux] "
-"[name ...]"
-msgstr ""
-"typeset [-aAfFgiIlnrtux] namn[=värde] … eller typeset -p [-aAfFilnrtux] "
-"[namn …]"
+msgid "typeset [-aAfFgiIlnrtux] name[=value] ... or typeset -p [-aAfFilnrtux] [name ...]"
+msgstr "typeset [-aAfFgiIlnrtux] namn[=värde] … eller typeset -p [-aAfFilnrtux] [namn …]"
 
 #: builtins.c:82
 msgid "local [option] name[=value] ..."
@@ -2434,8 +2352,7 @@ msgstr "logout [n]"
 
 #: builtins.c:105
 msgid "fc [-e ename] [-lnr] [first] [last] or fc -s [pat=rep] [command]"
-msgstr ""
-"fc [-e rnamn] [-lnr] [första] [sista] eller fc -s [mnst=ers] [kommando]"
+msgstr "fc [-e rnamn] [-lnr] [första] [sista] eller fc -s [mnst=ers] [kommando]"
 
 #: builtins.c:109
 msgid "fg [job_spec]"
@@ -2454,12 +2371,8 @@ msgid "help [-dms] [pattern ...]"
 msgstr "help [-dms] [mönster ...]"
 
 #: builtins.c:123
-msgid ""
-"history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg "
-"[arg...]"
-msgstr ""
-"history [-c] [-d avstånd] [n] eller history -anrw [filnamn] eller history -"
-"ps arg [arg...]"
+msgid "history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg [arg...]"
+msgstr "history [-c] [-d avstånd] [n] eller history -anrw [filnamn] eller history -ps arg [arg...]"
 
 #: builtins.c:127
 msgid "jobs [-lnprs] [jobspec ...] or jobs -x command [args]"
@@ -2470,25 +2383,16 @@ msgid "disown [-h] [-ar] [jobspec ... | pid ...]"
 msgstr "disown [-h] [-ar] [jobbspec … | pid …]"
 
 #: builtins.c:134
-msgid ""
-"kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l "
-"[sigspec]"
-msgstr ""
-"kill [-s sigspec | -n signum | -sigspec] pid | jobbspec ... eller kill -l "
-"[sigspec]"
+msgid "kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]"
+msgstr "kill [-s sigspec | -n signum | -sigspec] pid | jobbspec ... eller kill -l [sigspec]"
 
 #: builtins.c:136
 msgid "let arg [arg ...]"
 msgstr "let arg [arg ...]"
 
 #: builtins.c:138
-#, fuzzy
-msgid ""
-"read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p "
-"prompt] [-t timeout] [-u fd] [name ...]"
-msgstr ""
-"read [-ers] [-a vektor] [-d avgr] [-i text] [-n ntkn] [-N ntkn] [-p prompt] "
-"[-t tidgräns] [-u fb] [namn ...]"
+msgid "read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]"
+msgstr "read [-Eers] [-a vektor] [-d avgr] [-i text] [-n ntkn] [-N ntkn] [-p prompt] [-t tidgräns] [-u fb] [namn ...]"
 
 #: builtins.c:140
 msgid "return [n]"
@@ -2503,8 +2407,7 @@ msgid "unset [-f] [-v] [-n] [name ...]"
 msgstr "unset [-f] [-v] [-n] [namn …]"
 
 #: builtins.c:146
-#, fuzzy
-msgid "export [-fn] [name[=value] ...] or export -p [-f]"
+msgid "export [-fn] [name[=value] ...] or export -p"
 msgstr "export [-fn] [namn[=värde] ...] eller export -p"
 
 #: builtins.c:148
@@ -2516,14 +2419,12 @@ msgid "shift [n]"
 msgstr "shift [n]"
 
 #: builtins.c:152
-#, fuzzy
 msgid "source [-p path] filename [arguments]"
-msgstr "source filnamn [argument]"
+msgstr "source [-p sökväg] filnamn [argument]"
 
 #: builtins.c:154
-#, fuzzy
 msgid ". [-p path] filename [arguments]"
-msgstr ". filnamn [argument]"
+msgstr ". [-p sökväg] filnamn [argument]"
 
 #: builtins.c:157
 msgid "suspend [-f]"
@@ -2538,9 +2439,8 @@ msgid "[ arg... ]"
 msgstr "[ arg... ]"
 
 #: builtins.c:166
-#, fuzzy
 msgid "trap [-Plp] [[action] signal_spec ...]"
-msgstr "trap [-lp] [[arg] signalspec ...]"
+msgstr "trap [-Plp] [[åtgärd] signalspec …]"
 
 #: builtins.c:168
 msgid "type [-afptP] name [name ...]"
@@ -2564,7 +2464,7 @@ msgstr "wait [pid …]"
 
 #: builtins.c:184
 msgid "! PIPELINE"
-msgstr ""
+msgstr "! RÖR"
 
 #: builtins.c:186
 msgid "for NAME [in WORDS ... ] ; do COMMANDS; done"
@@ -2587,12 +2487,8 @@ msgid "case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac"
 msgstr "case ORD in [MÖNSTER [| MÖNSTER]...) KOMMANDON ;;]... esac"
 
 #: builtins.c:196
-msgid ""
-"if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else "
-"COMMANDS; ] fi"
-msgstr ""
-"if KOMMANDON; then KOMMANDON; [ elif KOMMANDON; then KOMMANDON; ]... [ else "
-"KOMMANDON; ] fi"
+msgid "if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else COMMANDS; ] fi"
+msgstr "if KOMMANDON; then KOMMANDON; [ elif KOMMANDON; then KOMMANDON; ]... [ else KOMMANDON; ] fi"
 
 #: builtins.c:198
 msgid "while COMMANDS; do COMMANDS-2; done"
@@ -2651,44 +2547,24 @@ msgid "printf [-v var] format [arguments]"
 msgstr "printf [-v var] format [argument]"
 
 #: builtins.c:233
-msgid ""
-"complete [-abcdefgjksuv] [-pr] [-DEI] [-o option] [-A action] [-G globpat] [-"
-"W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
-"suffix] [name ...]"
-msgstr ""
-"complete [-abcdefgjksuv] [-pr] [-DEI] [-o flagga] [-A åtgärd] [-G globmnst] "
-"[-W ordlista] [-F funktion] [-C kommando] [-X filtermnst] [-P prefix] [-S "
-"suffix] [namn …]"
+msgid "complete [-abcdefgjksuv] [-pr] [-DEI] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]"
+msgstr "complete [-abcdefgjksuv] [-pr] [-DEI] [-o flagga] [-A åtgärd] [-G globmnst] [-W ordlista] [-F funktion] [-C kommando] [-X filtermnst] [-P prefix] [-S suffix] [namn …]"
 
 #: builtins.c:237
-#, fuzzy
-msgid ""
-"compgen [-V varname] [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-"
-"W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
-"suffix] [word]"
-msgstr ""
-"compgen [-abcdefgjksuv] [-o flagga]  [-A åtgärd] [-G globmnst] [-W ordlista] "
-"[-F funktion] [-C kommando] [-X filtermnst] [-P prefix] [-S suffix] [ord]"
+msgid "compgen [-V varname] [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
+msgstr "compgen [-V varnamn] [-abcdefgjksuv] [-o flagga]  [-A åtgärd] [-G globmnst] [-W ordlista] [-F funktion] [-C kommando] [-X filtermnst] [-P prefix] [-S suffix] [ord]"
 
 #: builtins.c:241
 msgid "compopt [-o|+o option] [-DEI] [name ...]"
 msgstr "compopt [-o|+o flagga] [-DEI] [namn …]"
 
 #: builtins.c:244
-msgid ""
-"mapfile [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
-"callback] [-c quantum] [array]"
-msgstr ""
-"mapfile [-d avgränsare] [-n antal] [-O start] [-s antal] [-t] [-u fb] [-C "
-"återanrop] [-c kvanta] [vektor]"
+msgid "mapfile [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
+msgstr "mapfile [-d avgränsare] [-n antal] [-O start] [-s antal] [-t] [-u fb] [-C återanrop] [-c kvanta] [vektor]"
 
 #: builtins.c:246
-msgid ""
-"readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
-"callback] [-c quantum] [array]"
-msgstr ""
-"readarray [-d avgränsare] [-n antal] [-O start] [-s antal] [-t] [-u fb] [-C "
-"återanrop] [-c kvanta] [vektor]"
+msgid "readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
+msgstr "readarray [-d avgränsare] [-n antal] [-O start] [-s antal] [-t] [-u fb] [-C återanrop] [-c kvanta] [vektor]"
 
 #: builtins.c:258
 msgid ""
@@ -2705,14 +2581,12 @@ msgid ""
 "      -p\tprint all defined aliases in a reusable format\n"
 "    \n"
 "    Exit Status:\n"
-"    alias returns true unless a NAME is supplied for which no alias has "
-"been\n"
+"    alias returns true unless a NAME is supplied for which no alias has been\n"
 "    defined."
 msgstr ""
 "Definiera eller visa alias.\n"
 "    \n"
-"    Utan argument skriver ”alias” listan på alias på den återanvändbara "
-"formen\n"
+"    Utan argument skriver ”alias” listan på alias på den återanvändbara formen\n"
 "    ”alias NAMN=VÄRDE” på standard ut.\n"
 "    \n"
 "    Annars är ett alias definierat för varje NAMN vars VÄRDE är angivet.\n"
@@ -2743,7 +2617,6 @@ msgstr ""
 "    Returnerar framgång om inte ett NAMN inte är ett existerande alias."
 
 #: builtins.c:293
-#, fuzzy
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2755,34 +2628,28 @@ msgid ""
 "    Options:\n"
 "      -m  keymap         Use KEYMAP as the keymap for the duration of this\n"
 "                         command.  Acceptable keymap names are emacs,\n"
-"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-"
-"move,\n"
+"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,\n"
 "                         vi-command, and vi-insert.\n"
 "      -l                 List names of functions.\n"
 "      -P                 List function names and bindings.\n"
 "      -p                 List functions and bindings in a form that can be\n"
 "                         reused as input.\n"
-"      -S                 List key sequences that invoke macros and their "
-"values\n"
-"      -s                 List key sequences that invoke macros and their "
-"values\n"
+"      -S                 List key sequences that invoke macros and their values\n"
+"      -s                 List key sequences that invoke macros and their values\n"
 "                         in a form that can be reused as input.\n"
 "      -V                 List variable names and values\n"
 "      -v                 List variable names and values in a form that can\n"
 "                         be reused as input.\n"
 "      -q  function-name  Query about which keys invoke the named function.\n"
-"      -u  function-name  Unbind all keys which are bound to the named "
-"function.\n"
+"      -u  function-name  Unbind all keys which are bound to the named function.\n"
 "      -r  keyseq         Remove the binding for KEYSEQ.\n"
 "      -f  filename       Read key bindings from FILENAME.\n"
 "      -x  keyseq:shell-command\tCause SHELL-COMMAND to be executed when\n"
 "    \t\t\t\tKEYSEQ is entered.\n"
-"      -X                 List key sequences bound with -x and associated "
-"commands\n"
+"      -X                 List key sequences bound with -x and associated commands\n"
 "                         in a form that can be reused as input.\n"
 "    \n"
-"    If arguments remain after option processing, the -p and -P options "
-"treat\n"
+"    If arguments remain after option processing, the -p and -P options treat\n"
 "    them as readline command names and restrict output to those names.\n"
 "    \n"
 "    Exit Status:\n"
@@ -2790,36 +2657,28 @@ msgid ""
 msgstr ""
 "Sätt Readline-tangentbindningar och -variabler.\n"
 "    \n"
-"    Bind en tangentsekvens till en Readline-funktion eller -makro, eller "
-"sätt\n"
+"    Bind en tangentsekvens till en Readline-funktion eller -makro, eller sätt\n"
 "    en Readline-variabel.  Syntaxen för argument vid sidan om flaggor är\n"
-"    densamma som den i ~/.inputrc, men måste skickas som ett ensamt "
-"argument:\n"
+"    densamma som den i ~/.inputrc, men måste skickas som ett ensamt argument:\n"
 "    t.ex., bind '\"\\C-x\\C-r\": re-read-init-file'.\n"
 "    \n"
 "    Flaggor:\n"
 "      -m  tangentkarta   Använt TANGENTKARTA som tangentkarta under detta\n"
 "                         kommando.  Acceptabla tangentkartenamn är emacs,\n"
-"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-"
-"move,\n"
+"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,\n"
 "                         vi-command och vi-insert.\n"
 "      -l                 Lista namnen på funktioner.\n"
 "      -P                 Lista funktionsnamn och bindningar.\n"
-"      -p                 Lista funktioner och bindningar på ett sätt som "
-"kan\n"
+"      -p                 Lista funktioner och bindningar på ett sätt som kan\n"
 "                         återanvändas som indata.\n"
-"      -S                 Lista tangentsekvenser som anropar makron och "
-"deras\n"
+"      -S                 Lista tangentsekvenser som anropar makron och deras\n"
 "                         värden.\n"
-"      -s                 Lista tangentsekvenser som anropar makron och "
-"deras\n"
-"                         värden på ett sätt som kan återanvändas som "
-"indata.\n"
+"      -s                 Lista tangentsekvenser som anropar makron och deras\n"
+"                         värden på ett sätt som kan återanvändas som indata.\n"
 "      -V                 Lista variabelnamn och värden\n"
 "      -v                 Lista variabelnamn och värden på ett sätt som kan\n"
 "                         återanvändas som indata.\n"
-"      -q  funktionsnamn  Fråga efter vilka tangenter som anropar den "
-"namngivna\n"
+"      -q  funktionsnamn  Fråga efter vilka tangenter som anropar den namngivna\n"
 "                         funktionen\n"
 "      -u  funktionsnamn  Tag bort alla tangenter som är bundna till den\n"
 "                         namngivna funktionen.\n"
@@ -2827,11 +2686,12 @@ msgstr ""
 "      -f  filnamn        Läs tangentbindningar från FILNAMN.\n"
 "      -x  tangentsekv:skalkommando  Gör så att SKALKOMMANDO körs när\n"
 "    \t\t\t\t    TANGENTSEKV skrivs.\n"
-"      -X                 Lista tangentsekvenser bundna med -x och "
-"tillhörande\n"
+"      -X                 Lista tangentsekvenser bundna med -x och tillhörande\n"
 "                         kommandon på ett format som kan återanvändas som\n"
 "                         indata.\n"
 "    \n"
+"    Om argument återstår efter flagghanteringen betraktar flaggorna -p och -P\n"
+"    dem som readline-kommandonamn och begränsar utdata till dessa namn.\n"
 "    Slutstatus:\n"
 "    bind returnerar 0 om inte en okänd flagga ges eller ett fel inträffar."
 
@@ -2865,8 +2725,7 @@ msgid ""
 msgstr ""
 "Återuppta for-, while eller until-slinga.\n"
 "    \n"
-"    Återuppta nästa iteration i den omslutande FOR-, WHILE- eller UNTIL-"
-"slingan.\n"
+"    Återuppta nästa iteration i den omslutande FOR-, WHILE- eller UNTIL-slingan.\n"
 "    Om N anges, återuppta den N:e omslutande slingan.\n"
 "    \n"
 "    Slutstatus:\n"
@@ -2878,8 +2737,7 @@ msgid ""
 "    \n"
 "    Execute SHELL-BUILTIN with arguments ARGs without performing command\n"
 "    lookup.  This is useful when you wish to reimplement a shell builtin\n"
-"    as a shell function, but need to execute the builtin within the "
-"function.\n"
+"    as a shell function, but need to execute the builtin within the function.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns the exit status of SHELL-BUILTIN, or false if SHELL-BUILTIN is\n"
@@ -2887,15 +2745,13 @@ msgid ""
 msgstr ""
 "Exekvera en i skalet inbyggd funktion.\n"
 "    \n"
-"    Exekvera SKALINBYGGD med argument ARG utan att utföra "
-"kommandouppslagning.\n"
+"    Exekvera SKALINBYGGD med argument ARG utan att utföra kommandouppslagning.\n"
 "    Detta är användbart när du vill implementera om en inbyggd funktion i\n"
 "    skalet som en skalfunktion, men behöver köra den inbyggda funktionen i\n"
 "    skalfunktionen.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar slutstatus från SKALINBYGGD, eller falskt om SKALINBYGGD "
-"inte\n"
+"    Returnerar slutstatus från SKALINBYGGD, eller falskt om SKALINBYGGD inte\n"
 "    är inbyggd i skalet."
 
 #: builtins.c:374
@@ -2927,26 +2783,19 @@ msgstr ""
 "    ogiltigt."
 
 #: builtins.c:392
-#, fuzzy
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
-"    Change the current directory to DIR.  The default DIR is the value of "
-"the\n"
+"    Change the current directory to DIR.  The default DIR is the value of the\n"
 "    HOME shell variable. If DIR is \"-\", it is converted to $OLDPWD.\n"
 "    \n"
-"    The variable CDPATH defines the search path for the directory "
-"containing\n"
-"    DIR.  Alternative directory names in CDPATH are separated by a colon "
-"(:).\n"
-"    A null directory name is the same as the current directory.  If DIR "
-"begins\n"
+"    The variable CDPATH defines the search path for the directory containing\n"
+"    DIR.  Alternative directory names in CDPATH are separated by a colon (:).\n"
+"    A null directory name is the same as the current directory.  If DIR begins\n"
 "    with a slash (/), then CDPATH is not used.\n"
 "    \n"
-"    If the directory is not found, and the shell option `cdable_vars' is "
-"set,\n"
-"    the word is assumed to be  a variable name.  If that variable has a "
-"value,\n"
+"    If the directory is not found, and the shell option `cdable_vars' is set,\n"
+"    the word is assumed to be  a variable name.  If that variable has a value,\n"
 "    its value is used for DIR.\n"
 "    \n"
 "    Options:\n"
@@ -2962,19 +2811,17 @@ msgid ""
 "    \t\tattributes as a directory containing the file attributes\n"
 "    \n"
 "    The default is to follow symbolic links, as if `-L' were specified.\n"
-"    `..' is processed by removing the immediately previous pathname "
-"component\n"
+"    `..' is processed by removing the immediately previous pathname component\n"
 "    back to a slash or the beginning of DIR.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns 0 if the directory is changed, and if $PWD is set successfully "
-"when\n"
+"    Returns 0 if the directory is changed, and if $PWD is set successfully when\n"
 "    -P is used; non-zero otherwise."
 msgstr ""
 "Ändra skalets arbetskatalog.\n"
 "    \n"
 "    Ändra den aktuella katalogen till KAT.  Standardvärde på KAT är värdet\n"
-"    på skalvariabeln HOME.\n"
+"    på skalvariabeln HOME. Om KAT är ”-” konverteras den till $OLDPWD.\n"
 "    \n"
 "    Variabeln CDPATH definierar sökvägen för katalogen som innehåller KAT.\n"
 "    Alternativa katalognamn i CDPATH separeras av ett kolon (:).  Ett tomt\n"
@@ -2993,8 +2840,7 @@ msgstr ""
 "    \t”..”\n"
 "        -e\tom flaggan -P ges, och det inte går att avgöra den aktuella\n"
 "    \tkatalogen, returnera då med status skild från noll\n"
-"        -@  på system som stödjer det, presentera en fil med utökade "
-"attribut\n"
+"        -@  på system som stödjer det, presentera en fil med utökade attribut\n"
 "            som en katalog som innehåller filattributen\n"
 "    \n"
 "    Standardvärde är att följa symboliska länkar, som om ”-L” vore angivet.\n"
@@ -3030,8 +2876,7 @@ msgstr ""
 "    Som standard beter sig ”pwd” som om ”-L” vore angivet.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar 0 om inte en ogiltig flagga anges eller den aktuella "
-"katalogen\n"
+"    Returnerar 0 om inte en ogiltig flagga anges eller den aktuella katalogen\n"
 "    inte kan läsas."
 
 #: builtins.c:447
@@ -3075,20 +2920,17 @@ msgstr ""
 "    Misslyckas alltid."
 
 #: builtins.c:476
-#, fuzzy
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
 "    Runs COMMAND with ARGS suppressing  shell function lookup, or display\n"
-"    information about the specified COMMANDs.  Can be used to invoke "
-"commands\n"
+"    information about the specified COMMANDs.  Can be used to invoke commands\n"
 "    on disk when a function with the same name exists.\n"
 "    \n"
 "    Options:\n"
 "      -p    use a default value for PATH that is guaranteed to find all of\n"
 "            the standard utilities\n"
-"      -v    print a single word indicating the command or filename that\n"
-"            invokes COMMAND\n"
+"      -v    print a description of COMMAND similar to the `type' builtin\n"
 "      -V    print a more verbose description of each COMMAND\n"
 "    \n"
 "    Exit Status:\n"
@@ -3107,12 +2949,10 @@ msgstr ""
 "      -V    skriv en mer utförlig beskrivning om varje KOMMANDO\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar slutstatus från KOMMANDO, eller misslyckande om KOMMANDO "
-"inte\n"
+"    Returnerar slutstatus från KOMMANDO, eller misslyckande om KOMMANDO inte\n"
 "    finns."
 
-#: builtins.c:496
-#, fuzzy
+#: builtins.c:495
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -3146,8 +2986,7 @@ msgid ""
 "    Variables with the integer attribute have arithmetic evaluation (see\n"
 "    the `let' command) performed when the variable is assigned a value.\n"
 "    \n"
-"    When used in a function, `declare' makes NAMEs local, as with the "
-"`local'\n"
+"    When used in a function, `declare' makes NAMEs local, as with the `local'\n"
 "    command.  The `-g' option suppresses this behavior.\n"
 "    \n"
 "    Exit Status:\n"
@@ -3173,29 +3012,27 @@ msgstr ""
 "      -a\tför att göra NAMN till indexerade vektorer (om det stöds)\n"
 "      -A\tför att göra NAMN till associativa vektorer (om det stöds)\n"
 "      -i\tför att ge NAMN attributet ”heltal”\n"
-"      -l\tför att konvertera värdet av varje NAMN till gemena vid "
-"tilldelning\n"
+"      -l\tför att konvertera värdet av varje NAMN till gemena vid tilldelning\n"
 "      -n\tgör NAMN till en referens till variabeln som namnges som värde\n"
 "      -r\tför att göra NAMN endast läsbart\n"
 "      -t\tför att ge NAMN attributet ”spåra”\n"
-"      -u\tför att konvertera värdet av varje NAMN till versaler vid "
-"tilldelning\n"
+"      -u\tför att konvertera värdet av varje NAMN till versaler vid tilldelning\n"
 "      -x\tför att exportera NAMN\n"
 "    \n"
-"    Användning av ”+” istället för ”-” slår av det angivna attributet.\n"
+"    Genom att använda ”+” istället för ”-” slås det angivna attributet av,\n"
+"    utom för a, A och r..\n"
 "    \n"
 "    För variabler med attributet heltal utförs aritmetisk beräkning (se\n"
 "    kommandot ”let”) när variabeln tilldelas ett värde.\n"
 "    \n"
-"    Vid användning i en funktion gör ”declare” NAMN lokala, som med "
-"kommandot\n"
+"    Vid användning i en funktion gör ”declare” NAMN lokala, som med kommandot\n"
 "    ”local”.  Flaggan ”-g” åsidosätter detta beteende.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returnerar framgång om inte en ogiltig flagga ges eller ett fel vid\n"
 "    variabeltilldelning inträffar."
 
-#: builtins.c:539
+#: builtins.c:538
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -3205,8 +3042,7 @@ msgstr ""
 "    \n"
 "    En synonym för ”declare”.  Se ”help declare”."
 
-#: builtins.c:547
-#, fuzzy
+#: builtins.c:546
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -3228,20 +3064,21 @@ msgstr ""
 "    Skapa en lokal variabel kallad NAMN, och ge den VÄRDE.  FLAGGA kan\n"
 "    vara alla flaggor som accepteras av ”declare”.\n"
 "    \n"
-"    Lokala variabler kan endast användas i en funktion; de är synliga "
-"endast\n"
+"    Om något NAMN är ”-” sparar local uppsättningen av skalflaggor och\n"
+"    återställer dem när funktionen returnerar.\n"
+"    \n"
+"    Lokala variabler kan endast användas i en funktion; de är synliga endast\n"
 "    för funktionen de definieras i och dess barn.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returnerar framgång om inte en ogiltig flagga ges, ett fel vid\n"
 "    variabeltilldelning inträffar eller skalet inte exekverar en funktion."
 
-#: builtins.c:567
+#: builtins.c:566
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
-"    Display the ARGs, separated by a single space character and followed by "
-"a\n"
+"    Display the ARGs, separated by a single space character and followed by a\n"
 "    newline, on the standard output.\n"
 "    \n"
 "    Options:\n"
@@ -3265,11 +3102,9 @@ msgid ""
 "    \t\t0 to 3 octal digits\n"
 "      \\xHH\tthe eight-bit character whose value is HH (hexadecimal).  HH\n"
 "    \t\tcan be one or two hex digits\n"
-"      \\uHHHH\tthe Unicode character whose value is the hexadecimal value "
-"HHHH.\n"
+"      \\uHHHH\tthe Unicode character whose value is the hexadecimal value HHHH.\n"
 "    \t\tHHHH can be one to four hex digits.\n"
-"      \\UHHHHHHHH the Unicode character whose value is the hexadecimal "
-"value\n"
+"      \\UHHHHHHHH the Unicode character whose value is the hexadecimal value\n"
 "    \t\tHHHHHHHH. HHHHHHHH can be one to eight hex digits.\n"
 "    \n"
 "    Exit Status:\n"
@@ -3301,8 +3136,7 @@ msgstr ""
 "    \t\t0 till 3 oktala siffror\n"
 "      \\xHH\tdet åttabitarstecken vars värde är HH (hexadecimalt).  HH\n"
 "    \t\tkan vara en eller två hexadecimala siffror\n"
-"      \\uHHHH\tdet Unicode-tecken vars värde är det hexadeimala värdet "
-"HHHH.\n"
+"      \\uHHHH\tdet Unicode-tecken vars värde är det hexadeimala värdet HHHH.\n"
 "    \t\tHHHH kan vara en till fyra hexadecimala siffror.\n"
 "      \\UHHHHHHHH det Unicode-tecken vars värde är det hexadecimala värdet\n"
 "    \t\tHHHHHHHH.  HHHHHHHH kan vara en till åtta hexadecimala siffror.\n"
@@ -3310,7 +3144,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om inte ett skrivfel inträffar."
 
-#: builtins.c:607
+#: builtins.c:606
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3332,8 +3166,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om inte ett skrivfel inträffar."
 
-#: builtins.c:622
-#, fuzzy
+#: builtins.c:621
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -3355,8 +3188,7 @@ msgid ""
 "    \n"
 "    On systems with dynamic loading, the shell variable BASH_LOADABLES_PATH\n"
 "    defines a search path for the directory containing FILENAMEs that do\n"
-"    not contain a slash. It may include \".\" to force a search of the "
-"current\n"
+"    not contain a slash. It may include \".\" to force a search of the current\n"
 "    directory.\n"
 "    \n"
 "    To use the `test' found in $PATH instead of the shell builtin\n"
@@ -3385,6 +3217,11 @@ msgstr ""
 "      -d\tTa bort en inbyggd inläst med -f\n"
 "    \n"
 "    Utan flaggor aktiveras varje NAMN.\n"
+"\n"
+"    På system med dynamisk länkning definerar skalvariabeln\n"
+"    BASH_LOADABLES_PATH en sökväg för katalogen som innehåller FILNAMN som\n"
+"    inte innehåller ett snedstreck. Den kan innehålla ”.” för att tvinga\n"
+"    fram sökning av den aktuella katalogen.\n"
 "    \n"
 "    För att använda den ”test” som finns i sökvägen istället för den i\n"
 "    skalet inbyggda versionen, skriv ”enable -n test”.\n"
@@ -3393,12 +3230,11 @@ msgstr ""
 "    Returnerar framgång om inte NAMN inte är inbyggd i skalet eller ett fel\n"
 "    inträffar."
 
-#: builtins.c:655
+#: builtins.c:654
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
-"    Combine ARGs into a single string, use the result as input to the "
-"shell,\n"
+"    Combine ARGs into a single string, use the result as input to the shell,\n"
 "    and execute the resulting commands.\n"
 "    \n"
 "    Exit Status:\n"
@@ -3406,14 +3242,13 @@ msgid ""
 msgstr ""
 "Exekvera argument som ett skalkommando.\n"
 "    \n"
-"    Kombinera ARGument till en enda sträng, och använd resultatet som "
-"indata\n"
+"    Kombinera ARGument till en enda sträng, och använd resultatet som indata\n"
 "    till skalet och exekvera de resulterande kommandona.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returnerar slutstatus av kommandot eller framgång om kommandot är tomt."
 
-#: builtins.c:667
+#: builtins.c:666
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -3490,13 +3325,12 @@ msgstr ""
 "    Returnerar framgång om en flagga hittas, misslyckas om slutet av\n"
 "    flaggorna nås eller ett fel inträffar."
 
-#: builtins.c:709
+#: builtins.c:708
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
 "    Execute COMMAND, replacing this shell with the specified program.\n"
-"    ARGUMENTS become the arguments to COMMAND.  If COMMAND is not "
-"specified,\n"
+"    ARGUMENTS become the arguments to COMMAND.  If COMMAND is not specified,\n"
 "    any redirections take effect in the current shell.\n"
 "    \n"
 "    Options:\n"
@@ -3504,18 +3338,15 @@ msgid ""
 "      -c\texecute COMMAND with an empty environment\n"
 "      -l\tplace a dash in the zeroth argument to COMMAND\n"
 "    \n"
-"    If the command cannot be executed, a non-interactive shell exits, "
-"unless\n"
+"    If the command cannot be executed, a non-interactive shell exits, unless\n"
 "    the shell option `execfail' is set.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless COMMAND is not found or a redirection error "
-"occurs."
+"    Returns success unless COMMAND is not found or a redirection error occurs."
 msgstr ""
 "Ersätt skalet med det givna kommandot.\n"
 "    \n"
-"    Exekvera KOMMANDO genom att ersätta detta skal med det angivna "
-"programmet.\n"
+"    Exekvera KOMMANDO genom att ersätta detta skal med det angivna programmet.\n"
 "    ARGUMENT blir argument till KOMMANDO.  Om KOMMANDO inte anges kommer\n"
 "    eventuella omdirigeringar att gälla för det aktuella skalet.\n"
 "    \n"
@@ -3531,7 +3362,7 @@ msgstr ""
 "    Returnerar framgång om inte KOMMANDO inte finns eller ett fel vid\n"
 "    omdirigering inträffar."
 
-#: builtins.c:730
+#: builtins.c:729
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3543,12 +3374,11 @@ msgstr ""
 "    Avslutar skalet med statusen N.  Om N utelämnas är slutstatusen den\n"
 "    hos det sist körda kommandot."
 
-#: builtins.c:739
+#: builtins.c:738
 msgid ""
 "Exit a login shell.\n"
 "    \n"
-"    Exits a login shell with exit status N.  Returns an error if not "
-"executed\n"
+"    Exits a login shell with exit status N.  Returns an error if not executed\n"
 "    in a login shell."
 msgstr ""
 "Avsluta ett inloggningsskal.\n"
@@ -3556,20 +3386,17 @@ msgstr ""
 "    Avslutar ett inloggningsskal med slutstatus N.  Returnerar ett fel om\n"
 "    det inte körs i ett inloggningsskal."
 
-#: builtins.c:749
-#, fuzzy
+#: builtins.c:748
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
-"    fc is used to list or edit and re-execute commands from the history "
-"list.\n"
+"    fc is used to list or edit and re-execute commands from the history list.\n"
 "    FIRST and LAST can be numbers specifying the range, or FIRST can be a\n"
 "    string, which means the most recent command beginning with that\n"
 "    string.\n"
 "    \n"
 "    Options:\n"
-"      -e ENAME\tselect which editor to use.  Default is FCEDIT, then "
-"EDITOR,\n"
+"      -e ENAME\tselect which editor to use.  Default is FCEDIT, then EDITOR,\n"
 "    \t\tthen vi\n"
 "      -l \tlist lines instead of editing\n"
 "      -n\tomit line numbers when listing\n"
@@ -3585,8 +3412,7 @@ msgid ""
 "    The history builtin also operates on the history list.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success or status of executed command; non-zero if an error "
-"occurs."
+"    Returns success or status of executed command; non-zero if an error occurs."
 msgstr ""
 "Visa eller kör kommandon från historielistan.\n"
 "    \n"
@@ -3605,16 +3431,17 @@ msgstr ""
 "    Med formatet ”fc -s [mnst=ers ...] [kommando]” körs KOMMANDO om efter\n"
 "    att substitutionen GAMMALT=NYTT har utförts.\n"
 "    \n"
-"    Ett användbart alias att använda med detta är r=\"fc -s\", så att "
-"skriva\n"
+"    Ett användbart alias att använda med detta är r=\"fc -s\", så att skriva\n"
 "    ”r cc” kör senaste kommandot som börjar med ”cc” och att skriva ”r” kör\n"
 "    om senaste kommandot.\n"
+"\n"
+"    Den inbyggda history arbetar även med historielistan.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returnerar framgång eller status på exekverat kommando, skilt från noll\n"
 "    om ett fel inträffar."
 
-#: builtins.c:781
+#: builtins.c:780
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3635,14 +3462,12 @@ msgstr ""
 "    Status på kommandot som placerades i förgrunden, eller misslyckande om\n"
 "    ett fel inträffar."
 
-#: builtins.c:796
+#: builtins.c:795
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
-"    Place the jobs identified by each JOB_SPEC in the background, as if "
-"they\n"
-"    had been started with `&'.  If JOB_SPEC is not present, the shell's "
-"notion\n"
+"    Place the jobs identified by each JOB_SPEC in the background, as if they\n"
+"    had been started with `&'.  If JOB_SPEC is not present, the shell's notion\n"
 "    of the current job is used.\n"
 "    \n"
 "    Exit Status:\n"
@@ -3650,23 +3475,20 @@ msgid ""
 msgstr ""
 "Flytta jobb till bakgrunden.\n"
 "    \n"
-"    Placera jobben som identifieras av varje JOBBSPEC i bakgrunden som om "
-"de\n"
+"    Placera jobben som identifieras av varje JOBBSPEC i bakgrunden som om de\n"
 "    hade startats med ”&”.  Om ingen JOBBSPEC finns används skalets begrepp\n"
 "    om det aktuella jobbet.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte jobbstyrning inte är aktiverat eller ett "
-"fel\n"
+"    Returnerar framgång om inte jobbstyrning inte är aktiverat eller ett fel\n"
 "    inträffar."
 
-#: builtins.c:810
+#: builtins.c:809
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
 "    Determine and remember the full pathname of each command NAME.  If\n"
-"    no arguments are given, information about remembered commands is "
-"displayed.\n"
+"    no arguments are given, information about remembered commands is displayed.\n"
 "    \n"
 "    Options:\n"
 "      -d\tforget the remembered location of each NAME\n"
@@ -3686,8 +3508,7 @@ msgstr ""
 "Kom ihåg eller visa programlägen.\n"
 "    \n"
 "    Bestäm och kom ihåg den fullständiga sökvägen till varje kommando NAMN.\n"
-"    Om inget argument ges visas information om kommandon som finns i "
-"minnet.\n"
+"    Om inget argument ges visas information om kommandon som finns i minnet.\n"
 "    \n"
 "    Flaggor:\n"
 "      -d\tglöm platsen i minnet för varje NAMN\n"
@@ -3703,7 +3524,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om inte NAMN inte hittas eller en ogiltig flagga ges."
 
-#: builtins.c:835
+#: builtins.c:834
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3721,14 +3542,12 @@ msgid ""
 "      PATTERN\tPattern specifying a help topic\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless PATTERN is not found or an invalid option is "
-"given."
+"    Returns success unless PATTERN is not found or an invalid option is given."
 msgstr ""
 "Visa information om inbyggda kommandon.\n"
 "    \n"
 "    Visar korta sammanfattningar om inbyggda kommandon.  Om MÖNSTER anges\n"
-"    ges detaljerad hjälp om alla kommandon som matchar MÖNSTER, annars "
-"skrivs\n"
+"    ges detaljerad hjälp om alla kommandon som matchar MÖNSTER, annars skrivs\n"
 "    listan med hjälpämnen.\n"
 "    \n"
 "    Flaggor:\n"
@@ -3741,11 +3560,9 @@ msgstr ""
 "      MÖNSTER\tMönster som anger hjälpämnen\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte MÖNSTER inte finns eller en ogiltig flagga "
-"ges."
+"    Returnerar framgång om inte MÖNSTER inte finns eller en ogiltig flagga ges."
 
-#: builtins.c:859
-#, fuzzy
+#: builtins.c:858
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3756,8 +3573,6 @@ msgid ""
 "      -c\tclear the history list by deleting all of the entries\n"
 "      -d offset\tdelete the history entry at position OFFSET. Negative\n"
 "    \t\toffsets count back from the end of the history list\n"
-"      -d start-end\tdelete the history entries beginning at position START\n"
-"    \t\tthrough position END.\n"
 "    \n"
 "      -a\tappend history lines from this session to the history file\n"
 "      -n\tread all history lines not already read from the history file\n"
@@ -3779,8 +3594,7 @@ msgid ""
 "    \n"
 "    If the HISTTIMEFORMAT variable is set and not null, its value is used\n"
 "    as a format string for strftime(3) to print the time stamp associated\n"
-"    with each displayed history entry.  No time stamps are printed "
-"otherwise.\n"
+"    with each displayed history entry.  No time stamps are printed otherwise.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
@@ -3806,18 +3620,18 @@ msgstr ""
 "      -s\tlägg till ARG till historielistan som en ensam post\n"
 "    \n"
 "    Om FILNAMN anges används det som historiefil.  Annars, om HISTFILE har\n"
-"    ett värde används det, annars ~/.bash_history.\n"
+"    ett värde används det. Om FILNAMN inte anges och HISTFILE inte är satt\n"
+"    eller tomt, har flaggorna -a, -n, -r och -w ingen effekt och returnerar\n"
+"    lyckat resultat.\n"
 "    \n"
 "    Om variabeln HISTTIMEFORMAT är satt och inte tom används dess värde som\n"
-"    en formatsträng till strftime(3) för att skriva tidsstämplar "
-"tillhörande\n"
+"    en formatsträng till strftime(3) för att skriva tidsstämplar tillhörande\n"
 "    varje visad historiepost.  Inga tidsstämplar skrivs annars.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel "
-"inträffar."
+"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel inträffar."
 
-#: builtins.c:902
+#: builtins.c:899
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3857,11 +3671,10 @@ msgstr ""
 "    i ARG har ersatts med process-id:t för det jobbets processgruppledare.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel "
-"inträffar.\n"
+"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel inträffar.\n"
 "    Om -x används returneras slutstatus från KOMMANDO."
 
-#: builtins.c:929
+#: builtins.c:926
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3891,7 +3704,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om inte en ogiltig flagga eller JOBBSPEC ges."
 
-#: builtins.c:948
+#: builtins.c:945
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3915,8 +3728,7 @@ msgid ""
 msgstr ""
 "Skicka en signal till ett jobb.\n"
 "    \n"
-"    Skicka processerna som identifieras av PID eller JOBBSPEC signalerna "
-"som\n"
+"    Skicka processerna som identifieras av PID eller JOBBSPEC signalerna som\n"
 "    namnges av SIGSPEC eller SIGNUM.  Om varken SIGSPEC eller SIGNUM är\n"
 "    angivna antas SIGTERM.\n"
 "    \n"
@@ -3927,25 +3739,22 @@ msgstr ""
 "    \t\tsignalnummer som namn skall listas för\n"
 "      -L\tsynonym för -l\n"
 "    \n"
-"    Kill är inbyggt i skalet av två skäl: det tillåter att jobb-id:n "
-"används\n"
-"    istället för process-id:n, och det tillåter processer att dödas om "
-"gränsen\n"
+"    Kill är inbyggt i skalet av två skäl: det tillåter att jobb-id:n används\n"
+"    istället för process-id:n, och det tillåter processer att dödas om gränsen\n"
 "    för hur många processer du får skapa har nåtts.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returnerar framgång om inte en ogiltig flagga angivits eller ett fel\n"
 "    inträffar."
 
-#: builtins.c:972
+#: builtins.c:969
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
 "    Evaluate each ARG as an arithmetic expression.  Evaluation is done in\n"
 "    fixed-width integers with no check for overflow, though division by 0\n"
 "    is trapped and flagged as an error.  The following list of operators is\n"
-"    grouped into levels of equal-precedence operators.  The levels are "
-"listed\n"
+"    grouped into levels of equal-precedence operators.  The levels are listed\n"
 "    in order of decreasing precedence.\n"
 "    \n"
 "    \tid++, id--\tvariable post-increment, post-decrement\n"
@@ -3983,12 +3792,10 @@ msgid ""
 msgstr ""
 "Evaluera aritmetiska uttryck.\n"
 "    \n"
-"    Evaluera varje ARG som ett aritmetiskt uttryck.  Evaluering görs i "
-"heltal\n"
+"    Evaluera varje ARG som ett aritmetiskt uttryck.  Evaluering görs i heltal\n"
 "    med fix bredd utan kontroll av spill, fast division med 0 fångas och\n"
 "    flaggas som ett fel.  Följande lista över operatorer är grupperad i\n"
-"    nivåer av operatorer med samma precedens.  Nivåerna är listade i "
-"ordning\n"
+"    nivåer av operatorer med samma precedens.  Nivåerna är listade i ordning\n"
 "    med sjunkande precedens.\n"
 "    \n"
 "    \tid++, id--\tpostinkrementering av variabel, postdekrementering\n"
@@ -4017,32 +3824,25 @@ msgstr ""
 "    uttryck.  Variablerna behöver inte ha sina heltalsattribut påslagna för\n"
 "    att användas i ett uttryck.\n"
 "    \n"
-"    Operatorer beräknas i precedensordning.  Deluttryck i parenteser "
-"beräknas\n"
+"    Operatorer beräknas i precedensordning.  Deluttryck i parenteser beräknas\n"
 "    först och kan åsidosätta precedensreglerna ovan.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Om det sista ARG beräknas till 0, returnerar let 1; let returnerar 0 "
-"annars."
+"    Om det sista ARG beräknas till 0, returnerar let 1; let returnerar 0 annars."
 
-#: builtins.c:1017
-#, fuzzy
+#: builtins.c:1014
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
 "    Reads a single line from the standard input, or from file descriptor FD\n"
-"    if the -u option is supplied.  The line is split into fields as with "
-"word\n"
+"    if the -u option is supplied.  The line is split into fields as with word\n"
 "    splitting, and the first word is assigned to the first NAME, the second\n"
 "    word to the second NAME, and so on, with any leftover words assigned to\n"
-"    the last NAME.  Only the characters found in $IFS are recognized as "
-"word\n"
-"    delimiters. By default, the backslash character escapes delimiter "
-"characters\n"
+"    the last NAME.  Only the characters found in $IFS are recognized as word\n"
+"    delimiters. By default, the backslash character escapes delimiter characters\n"
 "    and newline.\n"
 "    \n"
-"    If no NAMEs are supplied, the line read is stored in the REPLY "
-"variable.\n"
+"    If no NAMEs are supplied, the line read is stored in the REPLY variable.\n"
 "    \n"
 "    Options:\n"
 "      -a array\tassign the words read to sequential indices of the array\n"
@@ -4056,8 +3856,7 @@ msgid ""
 "      -n nchars\treturn after reading NCHARS characters rather than waiting\n"
 "    \t\tfor a newline, but honor a delimiter if fewer than\n"
 "    \t\tNCHARS characters are read before the delimiter\n"
-"      -N nchars\treturn only after reading exactly NCHARS characters, "
-"unless\n"
+"      -N nchars\treturn only after reading exactly NCHARS characters, unless\n"
 "    \t\tEOF is encountered or read times out, ignoring any\n"
 "    \t\tdelimiter\n"
 "      -p prompt\toutput the string PROMPT without a trailing newline before\n"
@@ -4075,19 +3874,15 @@ msgid ""
 "      -u fd\tread from file descriptor FD instead of the standard input\n"
 "    \n"
 "    Exit Status:\n"
-"    The return code is zero, unless end-of-file is encountered, read times "
-"out\n"
-"    (in which case it's greater than 128), a variable assignment error "
-"occurs,\n"
+"    The return code is zero, unless end-of-file is encountered, read times out\n"
+"    (in which case it's greater than 128), a variable assignment error occurs,\n"
 "    or an invalid file descriptor is supplied as the argument to -u."
 msgstr ""
 "Läs en rad från standard in och dela upp den i fält.\n"
 "    \n"
 "    Läser en ensam rad från standard in, eller från filbeskrivare FB om\n"
-"    flaggan -u ges.  Raden delas upp i fält som vid orduppdelning, och "
-"första\n"
-"    ordet tilldelas det första NAMNet, andra ordet till det andra NAMNet, "
-"och\n"
+"    flaggan -u ges.  Raden delas upp i fält som vid orduppdelning, och första\n"
+"    ordet tilldelas det första NAMNet, andra ordet till det andra NAMNet, och\n"
 "    så vidare, med eventuella återstående ord tilldelade till det sista\n"
 "    NAMNet.  Endast tecknen som finns i $IFS används som ordavgränsare. Som\n"
 "    standard skyddar tecknet omvänt snedstreck avgränsningstecken och\n"
@@ -4096,18 +3891,19 @@ msgstr ""
 "    Om inga NAMN anges, lagras den inlästa raden i variabeln REPLY.\n"
 "    \n"
 "    Flaggor:\n"
-"      -a vektor\ttilldela de inlästa orden till sekventiella index i "
-"vektor-\n"
+"      -a vektor\ttilldela de inlästa orden till sekventiella index i vektor-\n"
 "    \t\tvariabeln VEKTOR, med start från noll\n"
 "      -d avgr\tfortsätt tills det första tecknet i AVGR lästs, istället för\n"
 "    \t\tnyrad\n"
 "      -e\tanvänd Readline för att få in raden\n"
+"      -E\tanvänd Readline för att få in raden och använd bash\n"
+"\t\tstandardkomplettering istället för Readlines\n"
+"                standardkomplettering\n"
 "      -i text\tAnvänd TEXT som starttext för Readline\n"
 "      -n ntkn\treturnera efter att ha läst NTKN tecken istället för att\n"
 "    \t\tvänta på en nyrad, men ta hänsyn till en avgränsare om färre\n"
 "    \t\tän NTKN tecken lästs före avgränsaren\n"
-"      -N ntkn\treturnera endast efter att ha läst exakt NTKN tecken, om "
-"inte\n"
+"      -N ntkn\treturnera endast efter att ha läst exakt NTKN tecken, om inte\n"
 "    \t\tfilslut påträffades eller tidsgränsen överskreds, ignorera\n"
 "    \t\talla avgränsare\n"
 "      -p prompt\tskriv ut strängen PROMPT utan en avslutande nyrad före\n"
@@ -4118,19 +3914,17 @@ msgstr ""
 "    \t\tkomplett rad lästs inom TIDSGRÄNS sekunder.  Värdet på variabeln\n"
 "    \t\tTMOUT är standardvärdet på tidsgränsen.  TIDSGRÄNS kan vara ett\n"
 "    \t\tdecimaltal.  Om TIDSGRÄNS är 0 returnerar read direkt, utan\n"
-"                att försöka läsa några data, och returnerar lyckad status "
-"bara\n"
+"                att försöka läsa några data, och returnerar lyckad status bara\n"
 "\t\tom det finns indata tillgängligt på den angivna filbeskrivaren.\n"
 "                Slutstatus är större än 128 om tidsgränsen överskrids\n"
 "      -u fb\tläs från filbeskrivare FB istället för standard in\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returkoden är noll om inte filslut nås, läsningens tidsgräns överskrids\n"
-"    (då den är större än 128), ett fel vid variabeltilldelning inträffar "
-"eller\n"
+"    (då den är större än 128), ett fel vid variabeltilldelning inträffar eller\n"
 "    en ogiltig filbeskrivare ges som argument till -u."
 
-#: builtins.c:1067
+#: builtins.c:1064
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -4151,8 +3945,7 @@ msgstr ""
 "    Returnerar N, eller misslyckande om skalet inte kör en funktion eller\n"
 "    skript."
 
-#: builtins.c:1080
-#, fuzzy
+#: builtins.c:1077
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -4195,8 +3988,7 @@ msgid ""
 "              physical     same as -P\n"
 "              pipefail     the return value of a pipeline is the status of\n"
 "                           the last command to exit with a non-zero status,\n"
-"                           or zero if no command exited with a non-zero "
-"status\n"
+"                           or zero if no command exited with a non-zero status\n"
 "              posix        change the behavior of bash where the default\n"
 "                           operation differs from the Posix standard to\n"
 "                           match the standard\n"
@@ -4220,8 +4012,7 @@ msgid ""
 "          by default when the shell is interactive.\n"
 "      -P  If set, do not resolve symbolic links when executing commands\n"
 "          such as cd which change the current directory.\n"
-"      -T  If set, the DEBUG and RETURN traps are inherited by shell "
-"functions.\n"
+"      -T  If set, the DEBUG and RETURN traps are inherited by shell functions.\n"
 "      --  Assign any remaining arguments to the positional parameters.\n"
 "          If there are no remaining arguments, the positional parameters\n"
 "          are unset.\n"
@@ -4252,8 +4043,7 @@ msgstr ""
 "      -e  Avsluta omedelbart om ett kommando avslutar med nollskild status.\n"
 "      -f  Avaktivera filnamnsgenerering (globbing).\n"
 "      -h  Kom ihåg platsen för kommandon när de slås upp.\n"
-"      -k  Alla tilldelningsargument placeras i miljön för ett kommando, "
-"inte\n"
+"      -k  Alla tilldelningsargument placeras i miljön för ett kommando, inte\n"
 "          bara de som föregår kommandonamnet.\n"
 "      -m  Jobbstyrning är aktiverat.\n"
 "      -n  Läs kommandon men exekvera dem inte.\n"
@@ -4268,8 +4058,7 @@ msgstr ""
 "              hashall      samma som -h\n"
 "              histexpand   samma som -H\n"
 "              history      aktivera kommandohistoria\n"
-"              ignoreeof    skalet kommer inte avsluta vid läsning av "
-"filslut\n"
+"              ignoreeof    skalet kommer inte avsluta vid läsning av filslut\n"
 "              interactive-comments\n"
 "                           tillåt kommentarer att förekomma i interaktiva\n"
 "                           kommandon\n"
@@ -4296,8 +4085,7 @@ msgstr ""
 "              xtrace       samma som -x\n"
 "      -p  Slås på när den verkliga och effektiva användar-id:n inte stämmer\n"
 "          överens.  Avaktiverar bearbetning av $ENV-filen och import av\n"
-"          skalfunktioner.  Att slå av denna flagga får den effektiva uid "
-"och\n"
+"          skalfunktioner.  Att slå av denna flagga får den effektiva uid och\n"
 "          gid att sättas till den verkliga uid och gid.\n"
 "      -t  Avsluta efter att ha läst och exekverat ett kommando.\n"
 "      -u  Behandla osatta variabler som fel vid substitution.\n"
@@ -4312,16 +4100,17 @@ msgstr ""
 "      -P  Om satt löses inte symboliska länkar upp när kommandon såsom cd\n"
 "          körs som ändrar aktuell katalog.\n"
 "      -T  Om satt ärvs DEBUG och RETURN-fällorna av skalfunktioner.\n"
-"      --  Tilldela eventuella återstående argument till "
-"positionsparametrar.\n"
+"      --  Tilldela eventuella återstående argument till positionsparametrar.\n"
 "          Om det inte finns några återstående argument nollställs\n"
 "          positionsparametrarna.\n"
-"      -   Tilldela eventuella återstående argument till "
-"positionsparametrar.\n"
+"      -   Tilldela eventuella återstående argument till positionsparametrar.\n"
 "          Flaggorna -x och -v slås av.\n"
 "    \n"
-"    Användning av + istället för - får dessa flaggor att slås av.  "
-"Flaggorna\n"
+"    Om -o ges utan något flaggnamn skriver set ut de aktuella skalflaggornas\n"
+"    inställning. Om +o ges utan något flaggnamn skriver set en serie med\n"
+"    set-kommandon för att återkskapa de nuvarande flagginställningarna.\n"
+"    \n"
+"    Användning av + istället för - får dessa flaggor att slås av.  Flaggorna\n"
 "    kan även användas vid uppstart av skalet.  Den aktuella uppsättningen\n"
 "    flaggor finns i $-.  De återstående n ARGumenten är positionsparametrar\n"
 "    och tilldelas, i ordning, till $1, $2, .. $n.  Om inga ARGument ges\n"
@@ -4330,7 +4119,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om inte en ogiltig flagga ges."
 
-#: builtins.c:1169
+#: builtins.c:1166
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -4342,8 +4131,7 @@ msgid ""
 "      -n\ttreat each NAME as a name reference and unset the variable itself\n"
 "    \t\trather than the variable it references\n"
 "    \n"
-"    Without options, unset first tries to unset a variable, and if that "
-"fails,\n"
+"    Without options, unset first tries to unset a variable, and if that fails,\n"
 "    tries to unset a function.\n"
 "    \n"
 "    Some variables cannot be unset; also see `readonly'.\n"
@@ -4370,19 +4158,17 @@ msgstr ""
 "    Returnerar framgång om inte en ogiltig flagga ges eller NAMN endast är\n"
 "    läsbart."
 
-#: builtins.c:1191
-#, fuzzy
+#: builtins.c:1188
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
 "    Marks each NAME for automatic export to the environment of subsequently\n"
-"    executed commands.  If VALUE is supplied, assign VALUE before "
-"exporting.\n"
+"    executed commands.  If VALUE is supplied, assign VALUE before exporting.\n"
 "    \n"
 "    Options:\n"
 "      -f\trefer to shell functions\n"
 "      -n\tremove the export property from each NAME\n"
-"      -p\tdisplay a list of all exported variables or functions\n"
+"      -p\tdisplay a list of all exported variables and functions\n"
 "    \n"
 "    An argument of `--' disables further option processing.\n"
 "    \n"
@@ -4404,7 +4190,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om inte en ogiltig flagga ges eller NAMN är ogiltigt."
 
-#: builtins.c:1210
+#: builtins.c:1207
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4442,7 +4228,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om inte en ogiltig flagga ges eller NAMN är ogiltigt."
 
-#: builtins.c:1232
+#: builtins.c:1229
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4454,15 +4240,13 @@ msgid ""
 msgstr ""
 "Skifta positionsparametrar.\n"
 "    \n"
-"    Byt namn på positionsparametrarna $N+1,$N+2 ... till $1,$2 ...  Om N "
-"inte\n"
+"    Byt namn på positionsparametrarna $N+1,$N+2 ... till $1,$2 ...  Om N inte\n"
 "    anges antas det vara 1.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returnerar framgång om inte N är negativt eller större än $#."
 
-#: builtins.c:1244 builtins.c:1260
-#, fuzzy
+#: builtins.c:1241 builtins.c:1257
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4470,8 +4254,7 @@ msgid ""
 "    -p option is supplied, the PATH argument is treated as a colon-\n"
 "    separated list of directories to search for FILENAME. If -p is not\n"
 "    supplied, $PATH is searched to find FILENAME. If any ARGUMENTS are\n"
-"    supplied, they become the positional parameters when FILENAME is "
-"executed.\n"
+"    supplied, they become the positional parameters when FILENAME is executed.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns the status of the last command executed in FILENAME; fails if\n"
@@ -4479,17 +4262,17 @@ msgid ""
 msgstr ""
 "Exekvera kommandon från en fil i det aktuella skalet.\n"
 "    \n"
-"    Läs och exekvera kommandon från FILNAMN i det aktuella skalet.  "
-"Posterna\n"
-"    i $PATH används för att hitta katalogen som innehåller FILNAMN.  Om\n"
-"    något ARGUMENT ges blir de positionsparametrar när FILNAMN körs.\n"
+"    Läs och exekvera kommandon från FILNAMN i det aktuella skalet. Om flaggan\n"
+"    -p anges tas argumentet SÖKVÄG som en kolonseparerad lista med kataloger\n"
+"    att söka efter FILNAMN i. Om -p inte anges söks $PATH för att hitta\n"
+"    FILNAMN. Om några ARGUMENT ges blir de positionsparametrar när FILNAMN\n"
+"    körs.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returnerar status på det sista kommandot som körs i FILNAMN, misslyckas\n"
 "    om FILNAMN inte kan läsas."
 
-#: builtins.c:1277
-#, fuzzy
+#: builtins.c:1274
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4507,17 +4290,18 @@ msgstr ""
 "Suspendera skalexekvering.\n"
 "    \n"
 "    Suspendera exekveringen av detta skal tills det får en SIGCONT-signal.\n"
-"    Om det inte framtvingas kan inloggningsskal inte suspenderas.\n"
+"    Om det inte framtvingas kan inloggningsskal och skal utan jobbstyrning.\n"
+"    inte suspenderas.\n"
 "    \n"
 "    Flaggor:\n"
 "      -f\tframtvinga suspendering, även om skalet är ett inloggningsskal\n"
+"\t\teller jobbstyrning inte är aktiverat.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte jobbstyrning inte är aktiverat eller ett "
-"fel\n"
+"    Returnerar framgång om inte jobbstyrning inte är aktiverat eller ett fel\n"
 "    inträffar."
 
-#: builtins.c:1295
+#: builtins.c:1292
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4551,8 +4335,7 @@ msgid ""
 "      -x FILE        True if the file is executable by you.\n"
 "      -O FILE        True if the file is effectively owned by you.\n"
 "      -G FILE        True if the file is effectively owned by your group.\n"
-"      -N FILE        True if the file has been modified since it was last "
-"read.\n"
+"      -N FILE        True if the file has been modified since it was last read.\n"
 "    \n"
 "      FILE1 -nt FILE2  True if file1 is newer than file2 (according to\n"
 "                       modification date).\n"
@@ -4573,8 +4356,7 @@ msgid ""
 "      STRING1 != STRING2\n"
 "                     True if the strings are not equal.\n"
 "      STRING1 < STRING2\n"
-"                     True if STRING1 sorts before STRING2 "
-"lexicographically.\n"
+"                     True if STRING1 sorts before STRING2 lexicographically.\n"
 "      STRING1 > STRING2\n"
 "                     True if STRING1 sorts after STRING2 lexicographically.\n"
 "    \n"
@@ -4660,8 +4442,7 @@ msgstr ""
 "    \n"
 "      -o FLAGGA      Sant om skalflaggan FLAGGA är aktiv.\n"
 "      -v VAR         Sant om skalvariabeln VAR är satt.\n"
-"      -R VAR         Sant om skalvariabeln VAR är satt och är en "
-"namnreferens.\n"
+"      -R VAR         Sant om skalvariabeln VAR är satt och är en namnreferens.\n"
 "      ! UTTR         Sant om uttr är falskt.\n"
 "      UTTR1 -a UTTR2 Sant om både uttr1 OCH uttr2 är sanna.\n"
 "      UTTR1 -o UTTR2 Sant om antingen uttr1 ELLER uttr2 är sanna.\n"
@@ -4677,7 +4458,7 @@ msgstr ""
 "    Returnerar framgång om UTTR beräknas till sant.  Misslyckas ifall UTTR\n"
 "    beräknas till falskt eller ett ogiltigt argument ges."
 
-#: builtins.c:1377
+#: builtins.c:1374
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4689,12 +4470,11 @@ msgstr ""
 "    Detta är en synonym till det inbyggda ”test”, men det sista argumentet\n"
 "    måste vara en bokstavlig ”]”, för att matcha den inledande ”[”."
 
-#: builtins.c:1386
+#: builtins.c:1383
 msgid ""
 "Display process times.\n"
 "    \n"
-"    Prints the accumulated user and system times for the shell and all of "
-"its\n"
+"    Prints the accumulated user and system times for the shell and all of its\n"
 "    child processes.\n"
 "    \n"
 "    Exit Status:\n"
@@ -4702,20 +4482,17 @@ msgid ""
 msgstr ""
 "Visa processtider.\n"
 "    \n"
-"    Skriver ut den sammanlagda användar- och systemtiden för skalet och "
-"alla\n"
+"    Skriver ut den sammanlagda användar- och systemtiden för skalet och alla\n"
 "    dess barnprocesser.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Lyckas alltid."
 
-#: builtins.c:1398
-#, fuzzy
+#: builtins.c:1395
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
-"    Defines and activates handlers to be run when the shell receives "
-"signals\n"
+"    Defines and activates handlers to be run when the shell receives signals\n"
 "    or other conditions.\n"
 "    \n"
 "    ACTION is a command to be read and executed when the shell receives the\n"
@@ -4725,17 +4502,14 @@ msgid ""
 "    shell and by the commands it invokes.\n"
 "    \n"
 "    If a SIGNAL_SPEC is EXIT (0) ACTION is executed on exit from the shell.\n"
-"    If a SIGNAL_SPEC is DEBUG, ACTION is executed before every simple "
-"command\n"
+"    If a SIGNAL_SPEC is DEBUG, ACTION is executed before every simple command\n"
 "    and selected other commands. If a SIGNAL_SPEC is RETURN, ACTION is\n"
 "    executed each time a shell function or a script run by the . or source\n"
-"    builtins finishes executing.  A SIGNAL_SPEC of ERR means to execute "
-"ACTION\n"
+"    builtins finishes executing.  A SIGNAL_SPEC of ERR means to execute ACTION\n"
 "    each time a command's failure would cause the shell to exit when the -e\n"
 "    option is enabled.\n"
 "    \n"
-"    If no arguments are supplied, trap prints the list of commands "
-"associated\n"
+"    If no arguments are supplied, trap prints the list of commands associated\n"
 "    with each trapped signal in a form that may be reused as shell input to\n"
 "    restore the same signal dispositions.\n"
 "    \n"
@@ -4744,56 +4518,58 @@ msgid ""
 "      -p\tdisplay the trap commands associated with each SIGNAL_SPEC in a\n"
 "    \t\tform that may be reused as shell input; or for all trapped\n"
 "    \t\tsignals if no arguments are supplied\n"
-"      -P\tdisplay the trap commands associated with each SIGNAL_SPEC. At "
-"least\n"
+"      -P\tdisplay the trap commands associated with each SIGNAL_SPEC. At least\n"
 "    \t\tone SIGNAL_SPEC must be supplied. -P and -p cannot be used\n"
 "    \t\ttogether.\n"
 "    \n"
-"    Each SIGNAL_SPEC is either a signal name in <signal.h> or a signal "
-"number.\n"
+"    Each SIGNAL_SPEC is either a signal name in <signal.h> or a signal number.\n"
 "    Signal names are case insensitive and the SIG prefix is optional.  A\n"
 "    signal may be sent to the shell with \"kill -signal $$\".\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless a SIGSPEC is invalid or an invalid option is "
-"given."
+"    Returns success unless a SIGSPEC is invalid or an invalid option is given."
 msgstr ""
 "Fånga signaler och andra händelser.\n"
 "    \n"
 "    Definierar och aktiverar hanterare som skall köras när skalet tar emot\n"
 "    signaler eller andra omständigheter.\n"
 "    \n"
-"    ARG är ett kommando som skall läsas och exekveras när skalet tar emot\n"
-"    signalen SIGNALSPEC.  Om ARG inte anges (och en ensam SIGNALSPEC ges)\n"
-"    eller ”-” återställs varje angiven signal till sitt originalvärde.  Om\n"
-"    ARG är den tomma strängen ignoreras varje SIGNALSPEC av skalet och av\n"
+"    ÅTGÄRD är ett kommando som skall läsas och exekveras när skalet tar emot\n"
+"    signalen SIGNALSPEC. Om ÅTGÄRD saknas (och en ensam SIGNALSPEC ges)\n"
+"    eller ”-” återställs varje angiven signal till sitt originalvärde. Om\n"
+"    ÅTGÄRD är den tomma strängen ignoreras varje SIGNALSPEC av skalet och av\n"
 "    kommandon det startar.\n"
 "    \n"
-"    Om en SIGNALSPEC är EXIT (0) exekveras ARG vid avslut från skalet.  Om\n"
-"    en SIGNALSPEC är DEBUG exekveras ARG före varje enkelt kommando.  Om\n"
-"    en SIGNALSPEC är RETURN exekveras ARG varje gång en skalfunktion eller\n"
-"    ett skript kört med den inbyggda . eller source avslutar körningen.  En\n"
-"    SIGNALSPEC ERR betyder att köra ARG varje gång ett kommandos felstatus\n"
-"    skulle fått skalet att avsluta om flaggan -e vore satt.\n"
+"    Om en SIGNALSPEC är EXIT (0) exekveras ÅTGÄRD vid avslut från skalet.\n"
+"    Om en SIGNALSPEC är DEBUG exekveras ÅTGÄRD före varje enkelt kommando och\n"
+"    utvalda andra kommandon. Om en SIGNALSPEC är RETURN exekveras ÅTGÄRD varje\n"
+"    gång en skalfunktion eller ett skript kört med den inbyggda . eller source\n"
+"    avslutar körningen. En SIGNALSPEC ERR betyder att köra ÅTGÄRD varje gång\n"
+"    ett kommandos felstatus skulle fått skalet att avsluta om flaggan -e vore\n"
+"    satt.\n"
 "    \n"
-"    Om inga argument ges skriver trap listan av kommandon som hör till "
-"varje\n"
-"    signal.\n"
+"    Om inga argument ges skriver trap listan av kommandon som hör till varje\n"
+"    signal på ett format som kan återanvändas som skalindatea för att\n"
+"    återställa samma signalhanteringar.\n"
 "    \n"
 "    Flaggor:\n"
 "      -l\tskriv en lista av signalnamn och deras motsvarande nummer\n"
-"      -p\tvisa trap-kommandona associerade med varje SIGNALSPEC\n"
+"      -p\tvisa trap-kommandona associerade med varje SIGNALSPEC på ett\n"
+"\t        format som kan återanvändas som skalindata; eller för alla\n"
+"\t\tfångade signaler om inga argument anges\n"
+"      -P\tvisa trap-kommandona associerade med varje SIGNALSPEC.\n"
+"\t\tÅtminstone SIGNALSPEC måste anges. -P och -p kan inte användas\n"
+"\t\ttillsammans.\n"
 "    \n"
 "    Varje SIGNALSPEC är antingen ett signalnamn i <signal.h> eller ett\n"
-"    signalnummer.  Signalnamn är skiftlägesokänsliga och SIG-prefixet är\n"
-"    frivilligt.  En signal kan skickas till skalet med ”kill -signal $$”.\n"
+"    signalnummer. Signalnamn är skiftlägesokänsliga och SIG-prefixet är\n"
+"    frivilligt. En signal kan skickas till skalet med ”kill -signal $$”.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte en SIGSPEC är ogiltig eller en ogiltig "
-"flagga\n"
+"    Returnerar framgång om inte en SIGSPEC är ogiltig eller en ogiltig flagga\n"
 "    ges."
 
-#: builtins.c:1441
+#: builtins.c:1438
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4819,8 +4595,7 @@ msgid ""
 "      NAME\tCommand name to be interpreted.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success if all of the NAMEs are found; fails if any are not "
-"found."
+"    Returns success if all of the NAMEs are found; fails if any are not found."
 msgstr ""
 "Visa information om kommandotyper.\n"
 "    \n"
@@ -4848,13 +4623,11 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om alla NAMNen finns, misslyckas om något inte finns."
 
-#: builtins.c:1472
-#, fuzzy
+#: builtins.c:1469
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
-"    Provides control over the resources available to the shell and "
-"processes\n"
+"    Provides control over the resources available to the shell and processes\n"
 "    it creates, on systems that allow such control.\n"
 "    \n"
 "    Options:\n"
@@ -4904,8 +4677,7 @@ msgid ""
 msgstr ""
 "Modifiera skalresursgränser.\n"
 "    \n"
-"    Ger kontroll över resurserna som är tillgängliga till skalet och "
-"processer\n"
+"    Ger kontroll över resurserna som är tillgängliga till skalet och processer\n"
 "    det skapar, på system som möjliggör sådan styrning.\n"
 "    \n"
 "    Flaggor:\n"
@@ -4940,20 +4712,20 @@ msgstr ""
 "    \n"
 "    Om GRÄNS anges är det ett nytt värde för den specificerade resursen; de\n"
 "    speciella GRÄNS-värdena ”soft”, ”hard” och ”unlimited” står för den\n"
-"    aktuella mjuka gränsen, den aktuella hårda gränsen respektive ingen "
-"gräns.\n"
+"    aktuella mjuka gränsen, den aktuella hårda gränsen respektive ingen gräns.\n"
 "    Annars skrivs det aktuella värdet på den specificerade resursen.  Om\n"
 "    ingen flagga ges antas -f.\n"
 "    \n"
-"    Värden är i 1024-bytesteg, utom för -t som är i sekunder, -p som är i "
-"steg\n"
-"    på 512 byte och -u som är ett antal processer utan någon skalning.\n"
+"    Värden är i 1024-bytesteg, utom för -t, som är i sekunder; -p som är i\n"
+"    steg om 512 byte; -R, som är i mikrosekunder; -b, som är i byte; och\n"
+"    -e, -i, -k, -n, -q, -r, -u, -x och -P som tar ett värde utan skala.\n"
+"\n"
+"    I posix-läge är värden som ges till -c och -f i 512-bytesteg.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte en ogiltig flagga anges eller ett fel "
-"inträffar."
+"    Returnerar framgång om inte en ogiltig flagga anges eller ett fel inträffar."
 
-#: builtins.c:1527
+#: builtins.c:1524
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4975,8 +4747,7 @@ msgstr ""
 "    Sätter användarens filskapningsmask till RÄTTIGHETER.  Om RÄTTIGHETER\n"
 "    utelämnas skrivs det aktuella värdet på masken.\n"
 "    \n"
-"    Om RÄTTIGHETER börjar med en siffra tolkas det som ett oktalt tal, "
-"annars\n"
+"    Om RÄTTIGHETER börjar med en siffra tolkas det som ett oktalt tal, annars\n"
 "    är det en symbolisk rättighetssträng som den som tas av chmod(1).\n"
 "    \n"
 "    Flaggor:\n"
@@ -4985,31 +4756,26 @@ msgstr ""
 "      -S\tgör utmatningen symbolisk, annars används oktala tal\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte RÄTTIGHETER är ogiltig eller en ogiltig "
-"flagga\n"
+"    Returnerar framgång om inte RÄTTIGHETER är ogiltig eller en ogiltig flagga\n"
 "    ges."
 
-#: builtins.c:1547
+#: builtins.c:1544
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
-"    Waits for each process identified by an ID, which may be a process ID or "
-"a\n"
+"    Waits for each process identified by an ID, which may be a process ID or a\n"
 "    job specification, and reports its termination status.  If ID is not\n"
 "    given, waits for all currently active child processes, and the return\n"
 "    status is zero.  If ID is a job specification, waits for all processes\n"
 "    in that job's pipeline.\n"
 "    \n"
-"    If the -n option is supplied, waits for a single job from the list of "
-"IDs,\n"
-"    or, if no IDs are supplied, for the next job to complete and returns "
-"its\n"
+"    If the -n option is supplied, waits for a single job from the list of IDs,\n"
+"    or, if no IDs are supplied, for the next job to complete and returns its\n"
 "    exit status.\n"
 "    \n"
 "    If the -p option is supplied, the process or job identifier of the job\n"
 "    for which the exit status is returned is assigned to the variable VAR\n"
-"    named by the option argument. The variable will be unset initially, "
-"before\n"
+"    named by the option argument. The variable will be unset initially, before\n"
 "    any assignment. This is useful only when the -n option is supplied.\n"
 "    \n"
 "    If the -f option is supplied, and job control is enabled, waits for the\n"
@@ -5025,12 +4791,10 @@ msgstr ""
 "    Väntar på varje process som identifieras av ett ID, som kan vara en\n"
 "    process-id eller en jobbspecifikation, och rapportera dess\n"
 "    avslutningsstatus.  Om ID inte ges, vänta på alla nu körande\n"
-"    barnprocesser, och returstatus är noll.  Om ID är en "
-"jobbspecifikation, \n"
+"    barnprocesser, och returstatus är noll.  Om ID är en jobbspecifikation, \n"
 "    vänta på alla processer i det jobbets rör.\n"
 "    \n"
-"    Om flaggan -n ges väntar på ett enda jobb från listan av ID:n, eller, "
-"om\n"
+"    Om flaggan -n ges väntar på ett enda jobb från listan av ID:n, eller, om\n"
 "    inga ID:n ges, nästa jobb som avslutar och returnera dess slutstatus.\n"
 "    \n"
 "    Om flaggan -p ges tilldelas till variabeln VAR som ges som ges som\n"
@@ -5045,18 +4809,16 @@ msgstr ""
 "    Returnerar status på den sista ID, misslyckas ifall ID är ogiltig\n"
 "    eller en ogiltig flagga ges."
 
-#: builtins.c:1578
+#: builtins.c:1575
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
-"    Waits for each process specified by a PID and reports its termination "
-"status.\n"
+"    Waits for each process specified by a PID and reports its termination status.\n"
 "    If PID is not given, waits for all currently active child processes,\n"
 "    and the return status is zero.  PID must be a process ID.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the status of the last PID; fails if PID is invalid or an "
-"invalid\n"
+"    Returns the status of the last PID; fails if PID is invalid or an invalid\n"
 "    option is given."
 msgstr ""
 "Vänta på att en process blir färdig och returnerar slutstatus.\n"
@@ -5069,7 +4831,7 @@ msgstr ""
 "    Returnerar status på den sista PID, misslyckas ifall PID är ogiltig\n"
 "    eller en ogiltig flagga ges."
 
-#: builtins.c:1593
+#: builtins.c:1590
 msgid ""
 "Execute PIPELINE, which can be a simple command, and negate PIPELINE's\n"
 "    return status.\n"
@@ -5077,8 +4839,13 @@ msgid ""
 "    Exit Status:\n"
 "    The logical negation of PIPELINE's return status."
 msgstr ""
+"Kör RÖR, som kan vara ett enkelt kommando, och negera RÖR:ets\n"
+"    returstatus.\n"
+"\n"
+"    Slutstatus:\n"
+"    Den logiska negationen av RÖR:ets returstatus."
 
-#: builtins.c:1603
+#: builtins.c:1600
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -5100,7 +4867,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar status för det sist exekverade kommandot."
 
-#: builtins.c:1617
+#: builtins.c:1614
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -5130,7 +4897,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar statusen från det sist exekverade kommandot."
 
-#: builtins.c:1635
+#: builtins.c:1632
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -5165,7 +4932,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar statusen från det sist exekverade kommandot."
 
-#: builtins.c:1656
+#: builtins.c:1653
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -5194,7 +4961,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returstatusen är returstatusen från RÖR."
 
-#: builtins.c:1673
+#: builtins.c:1670
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -5212,21 +4979,16 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar statusen från det sist exekverade kommandot."
 
-#: builtins.c:1685
+#: builtins.c:1682
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
-"    The `if COMMANDS' list is executed.  If its exit status is zero, then "
-"the\n"
-"    `then COMMANDS' list is executed.  Otherwise, each `elif COMMANDS' list "
-"is\n"
+"    The `if COMMANDS' list is executed.  If its exit status is zero, then the\n"
+"    `then COMMANDS' list is executed.  Otherwise, each `elif COMMANDS' list is\n"
 "    executed in turn, and if its exit status is zero, the corresponding\n"
-"    `then COMMANDS' list is executed and the if command completes.  "
-"Otherwise,\n"
-"    the `else COMMANDS' list is executed, if present.  The exit status of "
-"the\n"
-"    entire construct is the exit status of the last command executed, or "
-"zero\n"
+"    `then COMMANDS' list is executed and the if command completes.  Otherwise,\n"
+"    the `else COMMANDS' list is executed, if present.  The exit status of the\n"
+"    entire construct is the exit status of the last command executed, or zero\n"
 "    if no condition tested true.\n"
 "    \n"
 "    Exit Status:\n"
@@ -5234,12 +4996,10 @@ msgid ""
 msgstr ""
 "Exekvera kommandon baserat på ett villkor.\n"
 "    \n"
-"    Listan ”if KOMMANDON” exekveras.  Om dess slutstatus är noll så "
-"exekveras\n"
+"    Listan ”if KOMMANDON” exekveras.  Om dess slutstatus är noll så exekveras\n"
 "    listan ”then KOMMANDON”.  Annars exekveras varje lista ”elif KOMMANDON”\n"
 "    i tur och ordning, och om dess slutstatus är noll exekveras motsvarande\n"
-"    lista ”then KOMMANDON” och if-kommandot avslutar.  Annars exekveras "
-"listan\n"
+"    lista ”then KOMMANDON” och if-kommandot avslutar.  Annars exekveras listan\n"
 "    ”else KOMMANDON” om den finns.  Slutstatus av hela konstruktionen är\n"
 "    slutstatusen på det sist exekverade kommandot, eller noll om inget\n"
 "    villkor returnerade sant.\n"
@@ -5247,12 +5007,11 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar status från det sist exekverade kommandot."
 
-#: builtins.c:1702
+#: builtins.c:1699
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
-"    Expand and execute COMMANDS-2 as long as the final command in COMMANDS "
-"has\n"
+"    Expand and execute COMMANDS-2 as long as the final command in COMMANDS has\n"
 "    an exit status of zero.\n"
 "    \n"
 "    Exit Status:\n"
@@ -5266,12 +5025,11 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar statusen från det sist exekverade kommandot."
 
-#: builtins.c:1714
+#: builtins.c:1711
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
-"    Expand and execute COMMANDS-2 as long as the final command in COMMANDS "
-"has\n"
+"    Expand and execute COMMANDS-2 as long as the final command in COMMANDS has\n"
 "    an exit status which is not zero.\n"
 "    \n"
 "    Exit Status:\n"
@@ -5285,7 +5043,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar statusen från det sist exekverade kommandot."
 
-#: builtins.c:1726
+#: builtins.c:1723
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -5307,13 +5065,12 @@ msgstr ""
 "    Slutstatus:\n"
 "    Kommandot coproc returnerar slutstatusen 0."
 
-#: builtins.c:1740
+#: builtins.c:1737
 msgid ""
 "Define shell function.\n"
 "    \n"
 "    Create a shell function named NAME.  When invoked as a simple command,\n"
-"    NAME runs COMMANDs in the calling shell's context.  When NAME is "
-"invoked,\n"
+"    NAME runs COMMANDs in the calling shell's context.  When NAME is invoked,\n"
 "    the arguments are passed to the function as $1...$n, and the function's\n"
 "    name is in $FUNCNAME.\n"
 "    \n"
@@ -5330,7 +5087,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar framgång om inte NAMN endast är läsbart."
 
-#: builtins.c:1754
+#: builtins.c:1751
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -5348,7 +5105,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar statusen från det sist exekverade kommandot."
 
-#: builtins.c:1766
+#: builtins.c:1763
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -5372,7 +5129,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar statusen på det återupptagna jobbet."
 
-#: builtins.c:1781
+#: builtins.c:1778
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -5390,16 +5147,13 @@ msgstr ""
 "    Slutstatus:\n"
 "    Returnerar 1 om UTTRYCK beräknas till 0, returnerar 0 annars."
 
-#: builtins.c:1793
+#: builtins.c:1790
 msgid ""
 "Execute conditional command.\n"
 "    \n"
-"    Returns a status of 0 or 1 depending on the evaluation of the "
-"conditional\n"
-"    expression EXPRESSION.  Expressions are composed of the same primaries "
-"used\n"
-"    by the `test' builtin, and may be combined using the following "
-"operators:\n"
+"    Returns a status of 0 or 1 depending on the evaluation of the conditional\n"
+"    expression EXPRESSION.  Expressions are composed of the same primaries used\n"
+"    by the `test' builtin, and may be combined using the following operators:\n"
 "    \n"
 "      ( EXPRESSION )\tReturns the value of EXPRESSION\n"
 "      ! EXPRESSION\t\tTrue if EXPRESSION is false; else false\n"
@@ -5420,8 +5174,7 @@ msgstr ""
 "Kör ett villkorligt kommando.\n"
 "    \n"
 "    Returnerar en status av 0 eller 1 beroende på evalueringen av det\n"
-"    villkorliga uttrycket UTTRYCK.  Uttryck är sammansatta av samma "
-"primitiver\n"
+"    villkorliga uttrycket UTTRYCK.  Uttryck är sammansatta av samma primitiver\n"
 "    som används av det inbyggda ”test”, och kan kombineras med följande\n"
 "    operatorer:\n"
 "    \n"
@@ -5432,8 +5185,7 @@ msgstr ""
 "                        falskt\n"
 "    \n"
 "    När operatorerna ”==” och ”!=” används används strängen till höger om\n"
-"    som ett mönster och mönstermatchning utförs.  När operatorn ”=~” "
-"används\n"
+"    som ett mönster och mönstermatchning utförs.  När operatorn ”=~” används\n"
 "    matchas strängen till höger om operatorn som ett reguljärt uttryck.\n"
 "    \n"
 "    Operatorerna && och || beräknar inte UTTR2 om UTTR1 är tillräckligt för\n"
@@ -5442,7 +5194,7 @@ msgstr ""
 "    Slutstatus:\n"
 "    0 eller 1 beroende på värdet av UTTRYCK."
 
-#: builtins.c:1819
+#: builtins.c:1816
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5547,7 +5299,7 @@ msgstr ""
 "    HISTIGNORE\tEn kolonseparerad lista av mönster som används för att\n"
 "    \t\tbestämma vilka kommandon som skall sparas i historielistan.\n"
 
-#: builtins.c:1876
+#: builtins.c:1873
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5605,7 +5357,7 @@ msgstr ""
 "    Returnerar framgång om inte ett ogiltigt argument ges eller bytet av\n"
 "    katalog misslyckas."
 
-#: builtins.c:1910
+#: builtins.c:1907
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5655,7 +5407,7 @@ msgstr ""
 "    Returnerar framgång om inte ett ogiltigt argument ges eller bytet av\n"
 "    katalog misslyckas."
 
-#: builtins.c:1940
+#: builtins.c:1937
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5705,10 +5457,9 @@ msgstr ""
 "    \t\tav dirs när det anropas utan flaggor, med början från noll.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel "
-"inträffar."
+"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel inträffar."
 
-#: builtins.c:1971
+#: builtins.c:1968
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5744,8 +5495,7 @@ msgstr ""
 "    Returnerar framgång om FLGNAMN är aktiverat, misslyckas om en ogiltig\n"
 "    flagga ges eller FLGNAMN är avaktiverat."
 
-#: builtins.c:1992
-#, fuzzy
+#: builtins.c:1989
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -5753,36 +5503,29 @@ msgid ""
 "      -v var\tassign the output to shell variable VAR rather than\n"
 "    \t\tdisplay it on the standard output\n"
 "    \n"
-"    FORMAT is a character string which contains three types of objects: "
-"plain\n"
-"    characters, which are simply copied to standard output; character "
-"escape\n"
+"    FORMAT is a character string which contains three types of objects: plain\n"
+"    characters, which are simply copied to standard output; character escape\n"
 "    sequences, which are converted and copied to the standard output; and\n"
-"    format specifications, each of which causes printing of the next "
-"successive\n"
+"    format specifications, each of which causes printing of the next successive\n"
 "    argument.\n"
 "    \n"
-"    In addition to the standard format characters csndiouxXeEfFgGaA "
-"described\n"
+"    In addition to the standard format characters csndiouxXeEfFgGaA described\n"
 "    in printf(3), printf interprets:\n"
 "    \n"
 "      %b\texpand backslash escape sequences in the corresponding argument\n"
 "      %q\tquote the argument in a way that can be reused as shell input\n"
 "      %Q\tlike %q, but apply any precision to the unquoted argument before\n"
 "    \t\tquoting\n"
-"      %(fmt)T\toutput the date-time string resulting from using FMT as a "
-"format\n"
+"      %(fmt)T\toutput the date-time string resulting from using FMT as a format\n"
 "    \t        string for strftime(3)\n"
 "    \n"
 "    The format is re-used as necessary to consume all of the arguments.  If\n"
 "    there are fewer arguments than the format requires,  extra format\n"
-"    specifications behave as if a zero value or null string, as "
-"appropriate,\n"
+"    specifications behave as if a zero value or null string, as appropriate,\n"
 "    had been supplied.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or a write or "
-"assignment\n"
+"    Returns success unless an invalid option is given or a write or assignment\n"
 "    error occurs."
 msgstr ""
 "Formatera och skriv ARGUMENT styrda av FORMAT.\n"
@@ -5793,11 +5536,10 @@ msgstr ""
 "    \n"
 "    FORMAT är en teckensträng som innehåller tre sorters objekt: vanliga\n"
 "    tecken, som helt enkelt kopieras till standard ut, teckenstyrsekvenser\n"
-"    som konverteras och kopieras till standard ut och "
-"formatspecifikationer,\n"
+"    som konverteras och kopieras till standard ut och formatspecifikationer,\n"
 "    där var och en medför utskrift av det nästföljande argumentet.\n"
 "    \n"
-"    Förutom de standardformatspecifikationer som beskrivs a printf(1),\n"
+"    Förutom standardformattecknen csndiouxXeEfFgGaA som beskrivs a printf(3),\n"
 "    tolkar printf:\n"
 "    \n"
 "      %b\texpandera bakstrecksstyrsekvenser i motsvarande argument\n"
@@ -5817,15 +5559,12 @@ msgstr ""
 "    Returnerar framgång om inte en ogiltig flagga ges eller ett skriv-\n"
 "    eller tilldelningsfel inträffar."
 
-#: builtins.c:2028
-#, fuzzy
+#: builtins.c:2025
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
-"    For each NAME, specify how arguments are to be completed.  If no "
-"options\n"
-"    or NAMEs are supplied, display existing completion specifications in a "
-"way\n"
+"    For each NAME, specify how arguments are to be completed.  If no options\n"
+"    or NAMEs are supplied, display existing completion specifications in a way\n"
 "    that allows them to be reused as input.\n"
 "    \n"
 "    Options:\n"
@@ -5840,19 +5579,17 @@ msgid ""
 "    \t\tcommand) word\n"
 "    \n"
 "    When completion is attempted, the actions are applied in the order the\n"
-"    uppercase-letter options are listed above. If multiple options are "
-"supplied,\n"
-"    the -D option takes precedence over -E, and both take precedence over -"
-"I.\n"
+"    uppercase-letter options are listed above. If multiple options are supplied,\n"
+"    the -D option takes precedence over -E, and both take precedence over -I.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
-"Ange hur argument skal kompletteras av Readline.\n"
+"Ange hur argument skall kompletteras av Readline.\n"
 "    \n"
-"    För varje NAMN, ange hur argument skall kompletteras.  Om inga flaggor\n"
-"    är givna skrivs nuvarande kompletteringsspecifikationer ut på ett sätt\n"
-"    som gör att de kan användas som indata.\n"
+"    För varje NAMN, ange hur argument skall kompletteras. Om inga flaggor\n"
+"    eller NAMN ges, visa nuvarande kompletteringsspecifikationer på ett sätt\n"
+"    som gör att de kan återanvändas som indata.\n"
 "    \n"
 "    Flaggor:\n"
 "      -p\tskriv existerande kompletteringsspecifikationer på ett\n"
@@ -5869,21 +5606,17 @@ msgstr ""
 "    flaggan -D företräde framför -E, och båda har företräde framför -I.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel "
-"inträffar."
+"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel inträffar."
 
-#: builtins.c:2058
-#, fuzzy
+#: builtins.c:2055
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
 "    Intended to be used from within a shell function generating possible\n"
-"    completions.  If the optional WORD argument is present, generate "
-"matches\n"
+"    completions.  If the optional WORD argument is present, generate matches\n"
 "    against WORD.\n"
 "    \n"
-"    If the -V option is supplied, store the possible completions in the "
-"indexed\n"
+"    If the -V option is supplied, store the possible completions in the indexed\n"
 "    array VARNAME instead of printing them to the standard output.\n"
 "    \n"
 "    Exit Status:\n"
@@ -5892,23 +5625,22 @@ msgstr ""
 "Visa möjliga kompletteringar beroende på flaggorna.\n"
 "    \n"
 "    Avsett att användas inifrån en skalfunktion för att generera möjliga\n"
-"    kompletteringar.  Om det valfria argumentet ORD är givet genereras\n"
+"    kompletteringar. Om det valfria argumentet ORD är givet, generera\n"
 "    matchningar av ORD.\n"
+"\n"
+"    Om flaggan -V ges, lagra de möjliga kompletteringarna i den indexerade\n"
+"    vektorn VARNAMN istället för att skriva dem på standard ut.\n"
 "    \n"
 "    Slutstatus:\n"
-"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel "
-"inträffar."
+"    Returnerar framgång om inte en ogiltig flagga ges eller ett fel inträffar."
 
-#: builtins.c:2076
+#: builtins.c:2073
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
-"    Modify the completion options for each NAME, or, if no NAMEs are "
-"supplied,\n"
-"    the completion currently being executed.  If no OPTIONs are given, "
-"print\n"
-"    the completion options for each NAME or the current completion "
-"specification.\n"
+"    Modify the completion options for each NAME, or, if no NAMEs are supplied,\n"
+"    the completion currently being executed.  If no OPTIONs are given, print\n"
+"    the completion options for each NAME or the current completion specification.\n"
 "    \n"
 "    Options:\n"
 "    \t-o option\tSet completion option OPTION for each NAME\n"
@@ -5932,8 +5664,7 @@ msgid ""
 msgstr ""
 "Modifiera eller visa kompletteringsflaggor.\n"
 "    \n"
-"    Modifiera kompletteringsflaggorna för varje NAMN, eller, om inga NAMN "
-"är\n"
+"    Modifiera kompletteringsflaggorna för varje NAMN, eller, om inga NAMN är\n"
 "    givna, den komplettering som för närvarande körs.  Om ingen FLAGGA är\n"
 "    given skrivs kompletteringsflaggorna för varje NAMN eller den aktuella\n"
 "    kompletteringsspecifikationen.\n"
@@ -5949,8 +5680,7 @@ msgstr ""
 "    Argument:\n"
 "    \n"
 "    Varje NAMN refererar till ett kommando för vilket en kompletterings-\n"
-"    specifikation måste ha definierats tidigare med det inbyggda "
-"”complete”.\n"
+"    specifikation måste ha definierats tidigare med det inbyggda ”complete”.\n"
 "    Om inget NAMN ges måste compopt anropas av en funktion som just nu\n"
 "    genererar kompletteringar, och flaggorna för den just nu exekverande\n"
 "    kompletteringsgeneratorn modifieras.\n"
@@ -5959,26 +5689,21 @@ msgstr ""
 "    Returnerar framgång om inte en ogiltig flagga ges eller NAMN inte har\n"
 "    någon kompletteringsspecifikation definierad."
 
-#: builtins.c:2107
+#: builtins.c:2104
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
-"    Read lines from the standard input into the indexed array variable "
-"ARRAY, or\n"
-"    from file descriptor FD if the -u option is supplied.  The variable "
-"MAPFILE\n"
+"    Read lines from the standard input into the indexed array variable ARRAY, or\n"
+"    from file descriptor FD if the -u option is supplied.  The variable MAPFILE\n"
 "    is the default ARRAY.\n"
 "    \n"
 "    Options:\n"
 "      -d delim\tUse DELIM to terminate lines, instead of newline\n"
-"      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are "
-"copied\n"
-"      -O origin\tBegin assigning to ARRAY at index ORIGIN.  The default "
-"index is 0\n"
+"      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are copied\n"
+"      -O origin\tBegin assigning to ARRAY at index ORIGIN.  The default index is 0\n"
 "      -s count\tDiscard the first COUNT lines read\n"
 "      -t\tRemove a trailing DELIM from each line read (default newline)\n"
-"      -u fd\tRead lines from file descriptor FD instead of the standard "
-"input\n"
+"      -u fd\tRead lines from file descriptor FD instead of the standard input\n"
 "      -C callback\tEvaluate CALLBACK each time QUANTUM lines are read\n"
 "      -c quantum\tSpecify the number of lines read between each call to\n"
 "    \t\t\tCALLBACK\n"
@@ -5991,13 +5716,11 @@ msgid ""
 "    element to be assigned and the line to be assigned to that element\n"
 "    as additional arguments.\n"
 "    \n"
-"    If not supplied with an explicit origin, mapfile will clear ARRAY "
-"before\n"
+"    If not supplied with an explicit origin, mapfile will clear ARRAY before\n"
 "    assigning to it.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or ARRAY is readonly "
-"or\n"
+"    Returns success unless an invalid option is given or ARRAY is readonly or\n"
 "    not an indexed array."
 msgstr ""
 "Läs rader från standard in till en indexerad vektorvariabel.\n"
@@ -6008,10 +5731,8 @@ msgstr ""
 "    \n"
 "    Flaggor:\n"
 "      -d avgr   Använd AVGR för att avsluta rader, istället för nyrad\n"
-"      -n antal\tKopiera högs ANTAL rader.  Om ANTAL är 0 kopieras alla "
-"rader\n"
-"      -O start\tBörja tilldela till VEKTOR vid index START.  Standardindex "
-"är 0\n"
+"      -n antal\tKopiera högs ANTAL rader.  Om ANTAL är 0 kopieras alla rader\n"
+"      -O start\tBörja tilldela till VEKTOR vid index START.  Standardindex är 0\n"
 "      -s antal \tSläng de första ANTAL inlästa raderna\n"
 "      -t\tTa bort en avslutande AVGR från varje inläst rad (nyrad som\n"
 "                standard)\n"
@@ -6024,19 +5745,17 @@ msgstr ""
 "      VEKTOR\tNamn på vektorvariabel att använda för fildata\n"
 "    \n"
 "    Om -C ges utan -c är standardkvanta 5000.  När ÅTERANROP evalueras får\n"
-"    den indexet på nästa vektorelement att tilldelas och raden att "
-"tilldelas\n"
+"    den indexet på nästa vektorelement att tilldelas och raden att tilldelas\n"
 "    till det elementet som extra argument.\n"
 "    \n"
-"    Om det inte ges någon specificerad start kommer mapfile nollställa "
-"VEKTOR\n"
+"    Om det inte ges någon specificerad start kommer mapfile nollställa VEKTOR\n"
 "    före tilldelning till den.\n"
 "    \n"
 "    Slutstatus:\n"
 "    Returnerar framgång om inte en ogiltig flagga ges eller VEKTOR är\n"
 "    oföränderlig eller inte en indexerad vektor."
 
-#: builtins.c:2143
+#: builtins.c:2140
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
@@ -6045,57 +5764,3 @@ msgstr ""
 "Läs rader från en fil till en vektorvariabel.\n"
 "    \n"
 "    En synonym till ”mapfile”."
-
-#, c-format
-#~ msgid "%s: cannot open: %s"
-#~ msgstr "%s: det går inte att öppna: %s"
-
-#, c-format
-#~ msgid "%s: inlib failed"
-#~ msgstr "%s: inlib misslyckades"
-
-#, c-format
-#~ msgid "%s: %s"
-#~ msgstr "%s: %s"
-
-#, c-format
-#~ msgid "%s: cannot execute binary file: %s"
-#~ msgstr "%s: det går inte att köra binär fil: %s"
-
-#, c-format
-#~ msgid "setlocale: LC_ALL: cannot change locale (%s)"
-#~ msgstr "setlocale: LC_ALL: det går inte att ändra lokal (%s)"
-
-#, c-format
-#~ msgid "setlocale: LC_ALL: cannot change locale (%s): %s"
-#~ msgstr "setlocale: LC_ALL: det går inte att ändra lokal (%s): %s"
-
-#, c-format
-#~ msgid "setlocale: %s: cannot change locale (%s): %s"
-#~ msgstr "setlocale: %s: det går inte att ändra lokal (%s): %s"
-
-#~ msgid ""
-#~ "Returns the context of the current subroutine call.\n"
-#~ "    \n"
-#~ "    Without EXPR, returns \"$line $filename\".  With EXPR, returns\n"
-#~ "    \"$line $subroutine $filename\"; this extra information can be used "
-#~ "to\n"
-#~ "    provide a stack trace.\n"
-#~ "    \n"
-#~ "    The value of EXPR indicates how many call frames to go back before "
-#~ "the\n"
-#~ "    current one; the top frame is frame 0."
-#~ msgstr ""
-#~ "Returnerar kontexten för det aktuella subrutinsanropet.\n"
-#~ "    \n"
-#~ "    Utan UTTR, returneras ”$rad $filnamn”.  Med UTTR, returneras\n"
-#~ "    ”$rad $subrutin $filnamn”.  Denna extra information kan användas för\n"
-#~ "    att ge en stackspårning.\n"
-#~ "    \n"
-#~ "    Värdet på UTTR indikerar hur många anropsramar att gå tillbaka före "
-#~ "den\n"
-#~ "    aktuella, toppramen är ram 0."
-
-#, c-format
-#~ msgid "warning: %s: %s"
-#~ msgstr "varning: %s: %s"

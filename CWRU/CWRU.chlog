@@ -11124,3 +11124,21 @@ doc/bash.1,doc/bashref.texi
 builtins/history.def
 	- add history -d start-end to the long doc
 	  From a report from Duncan Roe <duncan_roe@optusnet.com.au>
+
+				    4/9
+				    ---
+lib/readline/histfile.c
+	- read_history_range: changes to not skip blank lines if we are
+	  reading a history file with multiline history entries.
+	  From a report by Jens Schmidt <farblos@vodafonemail.de>
+
+				   4/11
+				   ----
+bashline.c
+	- attempt_shell_completion: move the check for char_is_quoted from
+	  check_redir to the caller, set in_command_position to 0 if the
+	  command separator is quoted
+	  From https://savannah.gnu.org/support/?111224 david@mandelberg.org
+	- check_extglob: break check for extended glob out into separate
+	  function, call from attempted_shell_completion, set in_command_position
+	  to -1 if it returns 1, as with the old call to check_redir
