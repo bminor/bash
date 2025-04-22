@@ -34,4 +34,24 @@ echo abcd | {
 	echo a = $a
 }
 
+# incomplete and invalid multibyte characters followed by the delimiter
+printf 'A\0B\315\0C\226\0' | while IFS= read -rd '' f; do printf '<%q>\n' "$f"; done
+printf 'A\nB\315\nC\226\n' | while IFS= read -r f; do printf '<%q>\n' "$f"; done
+
+printf '%b\0' winter spring 'summer\0200apple\0200banana\0200cherry' automn |
+   while IFS= read -rd "" season; do LC_ALL=C printf "<%q>\n" "$season"; done
+
+printf '%b\200' winter 'spring\0375' summer automn |
+  while IFS= read -rd $'\200' season; do LC_ALL=C printf "<%q>\n" "$season"; done
+
+: ${TMPDIR:=/tmp}
+INFILE=$TMPDIR/read-in-$$
+printf '%b\243' winter 'spring\0375' '\0277summer' '\0277' automn > $INFILE
+
+LANG=zh_HK.big5hkscs
+while IFS= read -rd $'\243' season; do
+	LC_ALL=C printf "<%q>\n" "$season"
+done < $INFILE
+
+rm -f $INFILE
 exit 0

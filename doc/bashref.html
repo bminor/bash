@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 24 February 2025).
+the Bash shell (version 5.3, 7 April 2025).
 
-This is Edition 5.3, last updated 24 February 2025,
+This is Edition 5.3, last updated 7 April 2025,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 24 February 2025).
+the Bash shell (version 5.3, 7 April 2025).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 24 February 2025,
+<p>This is Edition 5.3, last updated 7 April 2025,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -4887,9 +4887,11 @@ refer to shell functions; otherwise the names refer to shell variables.
 </p>
 <p>The <samp class="option">-n</samp> option means to unexport each name: no longer mark
 it for export.
-If no <var class="var">name</var>s are supplied, or if the <samp class="option">-p</samp> option is given,
-<code class="code">export</code> displays a list of names of all exported variables on the
-standard output.
+If no <var class="var">name</var>s are supplied, or if only
+the <samp class="option">-p</samp> option is given,
+<code class="code">export</code> displays a list of names of all exported
+variables on the standard output.
+Using <samp class="option">-p</samp> and <samp class="option">-f</samp> together displays exported functions.
 The <samp class="option">-p</samp> option displays output in a form that may be reused as input.
 </p>
 <p><code class="code">export</code> allows the value of a variable to be set at the same time
@@ -8107,8 +8109,13 @@ the shell does not save the command history when it exits.
 <dt><a id="index-HISTFILESIZE"></a><span><code class="code">HISTFILESIZE</code><a class="copiable-link" href="#index-HISTFILESIZE"> &para;</a></span></dt>
 <dd><p>The maximum number of lines contained in the history file.
 When this variable is assigned a value, the history file is truncated,
-if necessary, to contain no more than that number of lines
+if necessary, to contain no more than
+the number of history entries
+that total no more than that number of lines
 by removing the oldest entries.
+If the history list contains multi-line entries,
+the history file may contain more lines than this maximum
+to avoid leaving partial history entries.
 The history file is also truncated to this size after
 writing it when a shell exits or by the <code class="code">history</code> builtin.
 If the value is 0, the history file is truncated to zero size.

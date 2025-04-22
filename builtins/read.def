@@ -1192,14 +1192,14 @@ read_mbchar (int fd, char *string, int ind, int ch, int delim, int unbuffered)
 	}
       else if (ret == (size_t)-1)
 	{
-	  /* If we read a delimiter character that makes this an invalid
-	     multibyte character, we can't just add it to the input string
-	     and treat it as a byte. We need to push it back so a subsequent
-	     zread will pick it up. */
-	  if ((unsigned char)c == delim)
+	  /* If we read (i > 1) a delimiter character (c == delimiter)
+	     that makes this an invalid multibyte character, we can't just
+	     add it to the input string and treat it as a byte.
+	     We need to push it back so a subsequent zread will pick it up. */
+	  if (i > 1 && (unsigned char)c == delim)
 	    {
 	      zungetc ((unsigned char)c);
-	      mbchar[--i] = '\0';		/* unget the delimiter */
+	      i--;
 	    }
 	  break;		/* invalid multibyte character */
 	}

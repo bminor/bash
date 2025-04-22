@@ -11142,3 +11142,12 @@ bashline.c
 	- check_extglob: break check for extended glob out into separate
 	  function, call from attempted_shell_completion, set in_command_position
 	  to -1 if it returns 1, as with the old call to check_redir
+
+				   4/21
+				   ----
+builtins/read.def
+	- read_mbchar: if we read a delimiter character that makes an
+	  incomplete multibyte character into an invalid multibyte character,
+	  only push the delimiter back if we read that character ourselves
+	  (i > 1).
+	  Report from Greg Wooledge <greg@wooledge.org>

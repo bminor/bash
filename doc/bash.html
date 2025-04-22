@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2025 February 24<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2025 April 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -3291,8 +3291,13 @@ the shell does not save the command history when it exits.
 <DD>
 The maximum number of lines contained in the history file.
 When this variable is assigned a value, the history file is truncated,
-if necessary, to contain no more than that number of lines
+if necessary, to contain no more than
+the number of history entries
+that total no more than that number of lines
 by removing the oldest entries.
+If the history list contains multi-line entries,
+the history file may contain more lines than this maximum
+to avoid leaving partial history entries.
 The history file is also truncated to this size after
 writing it when a shell exits or by the
 <B>history</B>
@@ -12740,7 +12745,7 @@ Any trap on
 is executed before the shell terminates.
 <DT><B>export</B> [<B>-fn</B>] [<I>name</I>[=<I>value</I>]] ...<DD>
 
-<DT><B>export -p</B>
+<DT><B>export -p [-f</B>]
 
 <DD>
 
@@ -12764,11 +12769,14 @@ option unexports, or removes the export attribute, from each <I>name</I>.
 If no
 <I>names</I>
 
-are given, or if the
+are given, or if only the
 <B>-p</B>
 
-option is supplied, <B>export</B> prints a list of names of all exported
+option is supplied,
+<B>export</B> displays a list of names of all exported
 variables on the standard output.
+Using <B>-p</B> and <B>-f</B> together displays exported functions.
+The <B>-p</B> option displays output in a form that may be reused as input.
 <DT><DD>
 <B>export</B> allows the value of a variable to be set when it is exported
 or unexported by following the variable name with =<I>value</I>.
@@ -16813,7 +16821,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2025 February 24<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2025 April 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16922,7 +16930,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20250331/doc/bash.1.<BR>
-Time: 31 March 2025 10:28:25 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20250418/doc/bash.1.<BR>
+Time: 22 April 2025 10:00:07 EDT
 </BODY>
 </HTML>
