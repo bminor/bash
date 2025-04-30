@@ -11151,3 +11151,38 @@ builtins/read.def
 	  only push the delimiter back if we read that character ourselves
 	  (i > 1).
 	  Report from Greg Wooledge <greg@wooledge.org>
+
+				   4/23
+				   ----
+parse.y
+	- pop_delimiter: only decrement delimiter_depth if it's > 0, since
+	  reset_parser() may have set it to 0 after the matching call to
+	  push_delimiter
+	  Report from Grisha Levit <grishalevit@gmail.com> based on a report
+	  from Александр Ушаков <aushakov@astralinux.ru>
+
+				   4/25
+				   ----
+parse.y
+	- read_a_line: if the shell is interactive, and not reading from a
+	  string, check whether a previous call to shell_getc has set
+	  EOF_Reached and return EOF in this case, after resetting the
+	  current token to '\n'. This makes EOFs that are not the first
+	  character on the line `sticky' instead of just token delimiters.
+	  From https://savannah.gnu.org/bugs/?67045
+	- history_delimiting_chars: if it looks like we just finished a
+	  subshell, and the line we're adding begins with an operator that
+	  can't follow a semicolon, return a newline
+	  From https://savannah.gnu.org/patch/?10517
+
+				   4/28
+				   ----
+parse.y
+	- parse_arith_command: if the character after the first right paren
+	  isn't a right paren, making the construct a nested subshell, push
+	  that character back and return the subshell command as the current
+	  token string, which we push onto the pushed string list. Reading
+	  one character more can cause synchronization problems with backslash
+	  newline, among other things.
+	  From https://savannah.gnu.org/patch/?10517
+
