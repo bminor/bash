@@ -1159,7 +1159,7 @@ static int
 read_mbchar (int fd, char *string, int ind, int ch, int delim, int unbuffered)
 {
   char mbchar[MB_LEN_MAX + 1];
-  int i, n, r;
+  int i, n, r, delim_ind;
   char c;
   size_t ret;
   mbstate_t ps, ps_back;
@@ -1167,7 +1167,8 @@ read_mbchar (int fd, char *string, int ind, int ch, int delim, int unbuffered)
 
   memset (&ps, '\0', sizeof (mbstate_t));
   memset (&ps_back, '\0', sizeof (mbstate_t));
-  
+
+  delim_ind = 0;
   mbchar[0] = ch;
   i = 1;
   for (n = 0; n <= MB_LEN_MAX; n++)
@@ -1187,19 +1188,24 @@ read_mbchar (int fd, char *string, int ind, int ch, int delim, int unbuffered)
 	    r = zreadc (fd, &c);
 	  if (r <= 0)
 	    goto mbchar_return;
+	  if ((unsigned char)c == delim)
+	    delim_ind = i;
 	  mbchar[i++] = c;	
 	  continue;
 	}
       else if (ret == (size_t)-1)
 	{
-	  /* If we read (i > 1) a delimiter character (c == delimiter)
-	     that makes this an invalid multibyte character, we can't just
-	     add it to the input string and treat it as a byte.
-	     We need to push it back so a subsequent zread will pick it up. */
-	  if (i > 1 && (unsigned char)c == delim)
+	  /* If we read (i > 1) a delimiter character (delim_ind >= 1)
+	     that is a part of this invalid multibyte character, we can't
+	     just add it to the input string and treat it as a byte.
+	     We need to push it and everything we read after it back so a
+	     subsequent zread will pick it up. */
+	  if (i > 1 && delim_ind >= 1)
 	    {
-	      zungetc ((unsigned char)c);
-	      i--;
+	      size_t j;
+	      for (j = delim_ind; j < i; j++)
+		zungetc ((unsigned char)mbchar[j]);
+	      i = delim_ind;
 	    }
 	  break;		/* invalid multibyte character */
 	}

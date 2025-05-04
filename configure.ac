@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.077])dnl
+AC_REVISION([for Bash 5.3, version 5.078])dnl
 
 define(bashvers, 5.3)
 define(relstatus, rc1)
@@ -874,7 +874,8 @@ AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getentropy getgroups \
 		gethostname getpagesize getpeername getrandom getrlimit \
 		getrusage gettimeofday kill killpg lstat nanosleep \
 		pselect readlink \
-		select setdtablesize setitimer tcgetpgrp uname ulimit waitpid)
+		select setdtablesize setitimer statfs \
+		tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions

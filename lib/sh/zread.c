@@ -57,8 +57,41 @@ void zreset (void);
 
 int zungetc (int);
 
-/* Provide one character of pushback whether we are using read or zread. */
-static int zpushedchar = -1;
+/* Provide 16 bytes of pushback whether we are using read or zread. Only used
+   by the read builtin when reading invalid multibyte characters. */
+#define ZPUSHSIZE 16
+
+static size_t zpushind, zpopind;
+static unsigned char zpushbuf[ZPUSHSIZE];
+static unsigned char zbufchar;
+
+static inline int
+zbufpop(unsigned char *cp)
+{
+  if (zpushind == zpopind)
+    return (0);
+  *cp = zpushbuf[zpopind++];
+  if (zpopind == zpushind)
+    zpopind = zpushind = 0;	/* reset, buffer empty */
+  return 1;
+}
+
+static inline int
+zbufpush(int c)
+{
+  if (zpushind == ZPUSHSIZE - 1)
+    return 0;
+  zpushbuf[zpushind++] = c;
+  return 1;
+}
+
+/* Add C to the pushback buffer. Can't push back EOF */
+int
+zungetc (int c)
+{
+  zbufpush (c);
+  return c;
+}
 
 /* Read LEN bytes from FD into BUF.  Retry the read on EINTR.  Any other
    error causes the loop to break. */
@@ -69,11 +102,10 @@ zread (int fd, char *buf, size_t len)
 
   check_signals ();	/* check for signals before a blocking read */
 
-  /* If we pushed a char back, return it immediately */
-  if (zpushedchar != -1)
+  /* If we pushed chars back, return the oldest one immediately */
+  if (zbufpop (&zbufchar))
     {
-      *buf = (unsigned char)zpushedchar;
-      zpushedchar = -1;
+      *buf = zbufchar;
       return 1;
     }
 
@@ -114,11 +146,10 @@ zreadretry (int fd, char *buf, size_t len)
   ssize_t r;
   int nintr;
 
-  /* If we pushed a char back, return it immediately */
-  if (zpushedchar != -1)
+  /* If we pushed chars back, return the oldest one immediately */
+  if (zbufpop (&zbufchar))
     {
-      *buf = (unsigned char)zpushedchar;
-      zpushedchar = -1;
+      *buf = zbufchar;
       return 1;
     }
 
@@ -143,14 +174,13 @@ zreadintr (int fd, char *buf, size_t len)
 {
   check_signals ();
 
-  /* If we pushed a char back, return it immediately */
-  if (zpushedchar != -1)
-    {
-      *buf = (unsigned char)zpushedchar;
-      zpushedchar = -1;
-      return 1;
-    }
-
+  /* If we pushed chars back, return the oldest one immediately */
+  if (zbufpop (&zbufchar))  
+    {    
+      *buf = zbufchar;        
+      return 1;              
+    }                            
+        
   return (read (fd, buf, len));
 }
 
@@ -166,14 +196,13 @@ zreadc (int fd, char *cp)
 {
   ssize_t nr;
 
-  /* If we pushed a char back, return it immediately */
-  if (zpushedchar != -1 && cp)
-    {
-      *cp = (unsigned char)zpushedchar;
-      zpushedchar = -1;
-      return 1;
-    }
-
+  /* If we pushed chars back, return the oldest one immediately */
+  if (cp && zbufpop (&zbufchar))  
+    {    
+      *cp = zbufchar;        
+      return 1;              
+    }                            
+        
   if (lind == lused || lused == 0)
     {
       nr = zread (fd, lbuf, sizeof (lbuf));
@@ -197,12 +226,11 @@ zreadcintr (int fd, char *cp)
 {
   ssize_t nr;
 
-  /* If we pushed a char back, return it immediately */
-  if (zpushedchar != -1 && cp)
-    {
-      *cp = (unsigned char)zpushedchar;
-      zpushedchar = -1;
-      return 1;
+  /* If we pushed chars back, return the oldest one immediately */
+  if (cp && zbufpop (&zbufchar))  
+    {    
+      *cp = zbufchar;        
+      return 1;              
     }
 
   if (lind == lused || lused == 0)
@@ -228,11 +256,11 @@ zreadn (int fd, char *cp, size_t len)
 {
   ssize_t nr;
 
-  if (zpushedchar != -1 && cp)
-    {
-      *cp = zpushedchar;
-      zpushedchar = -1;
-      return 1;
+  /* If we pushed chars back, return the oldest one immediately */
+  if (cp && zbufpop (&zbufchar))  
+    {    
+      *cp = zbufchar;        
+      return 1;              
     }
 
   if (lind == lused || lused == 0)
@@ -253,25 +281,11 @@ zreadn (int fd, char *cp, size_t len)
   return 1;
 }
 
-int
-zungetc (int c)
-{
-  if (zpushedchar == -1)
-    {
-      zpushedchar = c;
-      return c;
-    }
-
-  if (c == EOF || lind == 0)
-    return (EOF);
-  lbuf[--lind] = c;		/* XXX */
-  return c;
-}
-
 void
 zreset (void)
 {
   lind = lused = 0;
+  zpushind = zpopind = 0;
 }
 
 /* Sync the seek pointer for FD so that the kernel's idea of the last char
@@ -287,5 +301,8 @@ zsyncfd (int fd)
     r = lseek (fd, -off, SEEK_CUR);
 
   if (r != -1)
-    lused = lind = 0;
+    {
+      lused = lind = 0;
+      zpushind = zpopind = 0;
+    }
 }

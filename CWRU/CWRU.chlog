@@ -11186,3 +11186,27 @@ parse.y
 	  newline, among other things.
 	  From https://savannah.gnu.org/patch/?10517
 
+				   4/29
+				   ----
+builtins/evalstring.c
+	- parse_string: only run the top-level unwind-protects if we're
+	  actually going to be calling jump_to_top_level(); otherwise let
+	  xparse_dolparen take care of it
+	  From a report by Александр Ушаков <aushakov@astralinux.ru>
+
+				    5/1
+				    ---
+lib/sh/zread.c
+	- zungetc: rework to use a local 16-byte buffer so we can push back
+	  multiple characters whether we use read or zread
+	- zread/zreadretry/zreadintr/zreadc/zreadcintr/zreadn: changed to use
+	  zpopbuf to check whether we have pushed back bytes
+	- zreset,zsyncfd: reset the pushback buffer indices
+
+builtins/read.def
+	- read_mbchar: handle the delimiter being part of an invalid multibyte
+	  character, not just the byte that makes the multibyte character
+	  invalid: keep track of where the delimiter char is in the buffer and
+	  use zungetc to push back that character and everything we read
+	  after it so subsequent buffered (zread) or unbuffered (read) reads
+	  will return them
