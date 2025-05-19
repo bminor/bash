@@ -11210,3 +11210,42 @@ builtins/read.def
 	  use zungetc to push back that character and everything we read
 	  after it so subsequent buffered (zread) or unbuffered (read) reads
 	  will return them
+
+				    5/2
+				    ---
+lib/readline/display.c,lib/readline/histexpand.c,lib/readline/history.c,
+lib/readline/input.c,lib/readline/search.c,lib/readline/shell.c,
+lib/readline/util.c,lib/readline/readline.c,lib/readline/histfile.c
+	- fixes for issues (unused variables, etc.) uncovered by static
+	  analysis
+	  All from a report by Siteshwar Vashisht <svashisht@redhat.com>
+
+				   5/16
+				   ----
+lib/readline/terminal.c
+	- NEED_EXTERN_PC: add __gnu_hurd__ to the systems that require this
+	  if not using ncurses; rework the structure of the defines
+	  Report from Collin Funk <collin.funk1@gmail.com>
+
+braces.c
+	- brace_gobbler: don't mark an expression as BRACE_SEQ if we've
+	  already seen a comma and marked it as BRACE_COMMA, so we treat
+	  it as a comma brace expansion.
+	  From a report by Sam James <sam@gentoo.org>
+
+support/install-sh
+	- new version from coreutils-git (2024-12-03.03); renamed from install.sh
+
+aclocal.m4
+	- AM_PROG_INSTALL_SH, AM_PROG_INSTALL_STRIP: added from automake
+
+configure.ac
+	- call AM_PROG_INSTALL_SH, AM_PROG_INSTALL_STRIP
+
+Makefile.in
+	- STRIP: let configure substitute it from AC_CHECK_TOOL result
+	- INSTALL_STRIP_PROGRAM: let configure substitute it from
+	  AM_PROG_INSTALL_STRIP
+	- install-strip: change to set INSTALL_PROGRAM=${INSTALL_STRIP_PROGRAM}
+	  to avoid hard-coding `-s' in the recipe
+	All from a report by NR <nroycea+gnu@gmail.com>

@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.078])dnl
+AC_REVISION([for Bash 5.3, version 5.079])dnl
 
 define(bashvers, 5.3)
 define(relstatus, rc1)
@@ -32,7 +32,7 @@ dnl make sure we are using a recent autoconf version
 AC_PREREQ(2.69)
 
 AC_CONFIG_SRCDIR(shell.h)
-dnl where to find install.sh, config.sub, and config.guess
+dnl where to find install-sh, config.sub, and config.guess
 AC_CONFIG_AUX_DIR(./support)
 AC_CONFIG_HEADERS(config.h buildconf.h)
 
@@ -694,6 +694,9 @@ test -n "$ARFLAGS" || ARFLAGS="cr"
 AC_PROG_RANLIB
 AC_PROG_YACC
 AC_PROG_MAKE_SET
+
+AM_PROG_INSTALL_SH
+AM_PROG_INSTALL_STRIP
 
 case "$ac_cv_prog_YACC" in
 *bison*)	;;

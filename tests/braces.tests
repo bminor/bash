@@ -141,6 +141,12 @@ echo {{a,c}..{1..4}}
 echo {{1,2,3}..4}
 echo {6..{7,8,9}}
 
+# these are not valid sequence expressions but are valid brace expansions
+echo {a,../a.cfg}
+echo {a..,/a.cfg}
+echo {a..b,/a.cfg}
+echo {a,b../a.cfg}
+
 # these are all invalid brace expansions
 
 echo {abcde.f}

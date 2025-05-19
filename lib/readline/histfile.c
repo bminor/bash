@@ -182,6 +182,7 @@ history_filename (const char *filename)
   return (return_val);
 }
 
+#if defined (DEBUG)
 static char *
 history_backupfile (const char *filename)
 {
@@ -208,6 +209,7 @@ history_backupfile (const char *filename)
   ret[len+1] = '\0';
   return ret;
 }
+#endif
   
 static char *
 history_tempfile (const char *filename)
@@ -485,6 +487,7 @@ history_rename (const char *old, const char *new)
 #endif
 }
 
+#if defined (DEBUG)
 /* Save FILENAME to BACK, handling case where FILENAME is a symlink
    (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
 static int
@@ -503,6 +506,7 @@ histfile_backup (const char *filename, const char *back)
 #endif
   return (history_rename (filename, back));
 }
+#endif
 
 /* Restore ORIG from BACKUP handling case where ORIG is a symlink
    (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
@@ -723,13 +727,13 @@ static int
 history_write_slow (int fd, HIST_ENTRY **the_history, int nelements, int overwrite)
 {
   FILE *fp;
-  int i, j, e;
+  int i, e;
 
   fp = fdopen (fd, overwrite ? "w" : "a");
   if (fp == 0)
     return -1;
 
-  for (j = 0, i = history_length - nelements; i < history_length; i++)
+  for (i = history_length - nelements; i < history_length; i++)
     {
       if (history_write_timestamps && the_history[i]->timestamp && the_history[i]->timestamp[0])
 	fprintf (fp, "%s\n", the_history[i]->timestamp);

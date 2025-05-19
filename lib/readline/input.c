@@ -921,7 +921,7 @@ rl_getc (FILE *stream)
 
 /* fprintf(stderr, "rl_getc: result = %d errno = %d\n", result, errno); */
 
-handle_error:
+      /* Handle errors here. */
       osig = _rl_caught_signal;
       ostate = rl_readline_state;
 

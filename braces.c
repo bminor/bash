@@ -783,8 +783,9 @@ comsub:
 	  commas++;
 	}
       else if (satisfy == '}' && STREQN (text+i, BRACE_SEQ_SPECIFIER, 2) &&
-      		text[i+2] != satisfy && level == 0)
+      		text[i+2] != satisfy && level == 0 && btype == BRACE_NONE)
 	{
+	  /* The check against BRACE_NONE gives the comma higher precedence */
 	  btype = BRACE_SEQ;
 	  commas++;
 	}
