@@ -23,11 +23,7 @@
 #  include <config.h>
 #else	/* CROSS_COMPILING */
 /* A conservative set of defines based on POSIX/SUS3/XPG6 */
-#  define HAVE_UNISTD_H
-#  define HAVE_STRING_H
-#  define HAVE_STDLIB_H
-
-#  define HAVE_RENAME
+#  include <buildconf.h>
 #endif /* CROSS_COMPILING */
 
 #if defined (HAVE_UNISTD_H)

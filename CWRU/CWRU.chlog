@@ -1,4 +1,3 @@
-\
 				 12/6/2020
 				 ---------
 
@@ -11248,4 +11247,24 @@ Makefile.in
 	  AM_PROG_INSTALL_STRIP
 	- install-strip: change to set INSTALL_PROGRAM=${INSTALL_STRIP_PROGRAM}
 	  to avoid hard-coding `-s' in the recipe
-	All from a report by NR <nroycea+gnu@gmail.com>
+	  All from a report by NR <nroycea+gnu@gmail.com>
+
+				   5/18
+				   ----
+subst.c
+	- param_expand: if we expand a nameref that references an unset array
+	  variable reference, make sure we enforce `nounset', with the usual
+	  exceptions for `@' and `*' subscripts
+	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   5/22
+				   ----
+buildconf.h.in
+	- add additional defines for conservative ISO C/POSIX environment
+	- add HAVE_C_BOOL define in case someone cross-compiles with a C23
+	  compiler
+	  From a report by Bruce Dubbs <bdubbs@linuxfromscratch.org>
+
+builtins/mkbuiltins.c
+	- include buildconf.h instead of having separate defines when
+	  cross-compiling

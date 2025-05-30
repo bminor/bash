@@ -8596,7 +8596,8 @@ not when the function is executed, because a function definition
 is itself a command.
 As a consequence, aliases
 defined in a function are not available until after that
-function is executed.  To be safe, always put
+function is executed.
+To be safe, always put
 alias definitions on a separate line, and do not use @code{alias}
 in compound commands.
 
@@ -9586,11 +9587,22 @@ statuses after the @code{wait} builtin returns it.
 
 @end enumerate
 
-There is other @sc{posix} behavior that Bash does not implement by
+There is additional @sc{posix} behavior that Bash does not implement by
 default even when in @sc{posix} mode.
 Specifically:
 
 @enumerate
+
+@item
+@sc{posix} requires that word splitting be byte-oriented.
+That is, each @emph{byte} in the value of @env{IFS} potentially splits a
+word, even if that byte is part of a multibyte character in @env{IFS}
+or part of multibyte character in the word.
+Bash allows multibyte characters in the value of @env{IFS}, treating
+a valid multibyte character as a single delimiter, and will not
+split a valid multibyte character even if one of the bytes composing that
+character appears in @env{IFS}.
+This is @sc{posix} interpretation 1560, further modified by issue 1924.
 
 @item
 The @code{fc} builtin checks @code{$EDITOR} as a program to edit history

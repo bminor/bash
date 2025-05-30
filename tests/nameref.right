@@ -535,16 +535,16 @@ declare -ai a=([0]="5")
 declare -ai a=([0]="6")
 declare -ai a=([0]="42")
 declare -ai a=([0]="1")
-./nameref23.sub: line 16: declare: b: not found
+./nameref23.sub: line 29: declare: b: not found
 declare -ai a=([0]="1")
 declare -- b="1"
 declare -ai a=([0]="1")
 declare -- b="11"
 declare -ai a=([0]="1")
 declare -- b="110"
-./nameref23.sub: line 26: declare: `1': invalid variable name for name reference
+./nameref23.sub: line 39: declare: `1': invalid variable name for name reference
 declare -ai a=([0]="1")
-./nameref23.sub: line 28: declare: b: not found
+./nameref23.sub: line 41: declare: b: not found
 declare -ai a=([0]="4")
 declare -in b="a[0]"
 declare -ai a=([0]="6")
@@ -574,3 +574,15 @@ declare -ai a=([0]="0" [1]="16")
 3
 3
 5
+/usr/local/build/bash/bash-current/bash: line 1: a[k]: unbound variable
+ok 1
+/usr/local/build/bash/bash-current/bash: line 1: r0: unbound variable
+ok 2
+/usr/local/build/bash/bash-current/bash: line 1: r: unbound variable
+ok 3
+/usr/local/build/bash/bash-current/bash: line 1: k: unbound variable
+ok 4
+ok 5
+ok 6
+ok 7
+ok 8

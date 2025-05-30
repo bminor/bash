@@ -1,3 +1,45 @@
+This document details the changes between this version, bash-5.3-rc2, and
+the previous version, bash-5.3-rc1.
+
+1. Changes to Bash
+
+a. Fixed a problem with invoking the correct programmable completion compspec
+   if the line contains a quoted command separator before point.
+
+b. Fixed a bug in the `read' builtin that caused it to skip the delimiter if
+   it appeared in an invalid multibyte character.
+
+c. Fixed a bug with parsing command substitutions that caused a syntax error
+   to pop too many input sources.
+
+d. Fixed an issue with recursive parsing that caused the parser to reset and
+   pop all the delimiters off the stack; the caller needs to check for that
+   possibility.
+
+e. Fixed an issue with interactive input that caused EOF not to exit the
+   shell if it was read as part of a here-document.
+
+f. Fixed an issue with a backslash-newline appearing after a right paren in
+   a nested subshell command.
+
+g. Fixed an issue with invalid sequence expressions in brace expansions.
+
+h. Fixed an issue with a nameref variable referencing an unset array element
+   when the nounset option is enabled.
+
+2. Changes to Readline
+
+a. The history library no longer skips blank lines while it is reading a
+   multiline history entry from a history file.
+
+3. New Features in Bash
+
+a. The `install-strip' and `strip' Makefile targets now deal with cross-
+   compiling.
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.3-rc1, and
 the previous version, bash-5.3-beta.
 
