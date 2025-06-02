@@ -809,7 +809,7 @@ rl_redisplay (void)
 {
   int in, out, c, linenum, cursor_linenum;
   int inv_botlin, lb_botlin, lb_linenum, o_cpos;
-  int newlines, lpos, temp, num, prompt_lines_estimate;
+  int newlines, lpos, temp, num;
   char *prompt_this_line;
   char cur_face;
   int hl_begin, hl_end;
@@ -1013,9 +1013,6 @@ rl_redisplay (void)
   /* XXX - There is code that assumes that all the invisible characters occur
      on the first and last prompt lines; change that to use
      local_prompt_invis_chars */
-
-  /* This is zero-based, used to set the newlines */
-  prompt_lines_estimate = lpos / _rl_screenwidth;
 
   /* what if lpos is already >= _rl_screenwidth before we start drawing the
      contents of the command line? */
@@ -1908,7 +1905,6 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 	  if (newwidth > 0)
 	    {
 	      int i, j;
-	      char *optr;
 
 	      puts_face (new, new_face, newbytes);
 	      _rl_last_c_pos = newwidth;

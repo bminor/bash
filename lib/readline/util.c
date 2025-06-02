@@ -292,7 +292,7 @@ _rl_strpbrk (const char *string1, const char *string2)
   register const char *scan;
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t ps;
-  register int i, v;
+  int v;
 
   memset (&ps, 0, sizeof (mbstate_t));
 #endif

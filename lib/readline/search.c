@@ -590,7 +590,6 @@ rl_history_search_internal (int count, int dir)
 {
   HIST_ENTRY *temp;
   int ret, oldpos, newcol;
-  char *t;
 
   oldpos = where_history ();	/* where are we now? */
   temp = (HIST_ENTRY *)NULL;
@@ -650,6 +649,7 @@ rl_history_search_internal (int count, int dir)
   else
     {
 #if 0
+      char *t;
       t = strstr (rl_line_buffer, history_search_string);	/* XXX */
       rl_point = t ? (int)(t - rl_line_buffer) + _rl_history_search_len : rl_end;
 #else

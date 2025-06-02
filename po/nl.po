@@ -1,5 +1,5 @@
 # Dutch translations for GNU bash.
-# Copyright (C) 2022 Free Software Foundation, Inc.
+# Copyright (C) 2025 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
 #
 # «Lernfähiger Software! Ich lach mich kaputt!»
@@ -20,14 +20,14 @@
 # Erick Branderhorst <branderh@iaehv.nl>, 1996.
 # Julie Vermeersch <julie@lambda1.be>, 2004.
 # Erwin Poeze <erwin.poeze@gmail.com>, 2009.
-# Benno Schulenberg <benno@vertaalt.nl>, 2006, 2008, 2010, 2011, 2013, 2014.
-# Benno Schulenberg <benno@vertaalt.nl>, 2015, 2016, 2019, 2020, 2022.
+# Benno Schulenberg <vertaling@coevern.nl>, 2006, 2008, 2010, 2011, 2013, 2014.
+# Benno Schulenberg <vertaling@coevern.nl>, 2015, 2016, 2019, 2020, 2022. 2025.
 msgid ""
 msgstr ""
-"Project-Id-Version: bash-5.2-rc1\n"
+"Project-Id-Version: bash-5.3-rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-12 11:51-0500\n"
-"PO-Revision-Date: 2022-06-23 10:18+0200\n"
+"POT-Creation-Date: 2025-04-22 09:37-0400\n"
+"PO-Revision-Date: 2025-04-09 17:18+0200\n"
 "Last-Translator: Benno Schulenberg <vertaling@coevern.nl>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "Language: nl\n"
@@ -63,46 +63,45 @@ msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: een index is nodig bij toekenning aan associatief array"
 
 #: bashhist.c:464
-#, fuzzy
 msgid "cannot create"
-msgstr "Kan %s niet aanmaken: %s"
+msgstr "kan niet aanmaken"
 
-#: bashline.c:4628
+#: bashline.c:4642
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command(): kan voor opdracht geen toetsenkaart vinden"
 
-#: bashline.c:4799
+#: bashline.c:4813
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: eerste teken dat geen witruimte is is niet '\"'"
 
-#: bashline.c:4828
+#: bashline.c:4842
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "geen sluit-'%c' in %s"
 
-#: bashline.c:4859
-#, fuzzy, c-format
+#: bashline.c:4873
+#, c-format
 msgid "%s: missing separator"
-msgstr "%s: ontbrekend scheidingsteken (dubbele punt)"
+msgstr "%s: ontbrekend scheidingsteken"
 
-#: bashline.c:4906
+#: bashline.c:4920
 #, c-format
 msgid "`%s': cannot unbind in command keymap"
 msgstr "Kan '%s' niet losmaken in toetsenkaart"
 
-#: braces.c:320
+#: braces.c:340
 #, c-format
 msgid "brace expansion: cannot allocate memory for %s"
 msgstr "accoladevervanging: onvoldoende geheugen beschikbaar voor %s"
 
-#: braces.c:383
-#, fuzzy, c-format
+#: braces.c:403
+#, c-format
 msgid "brace expansion: failed to allocate memory for %s elements"
-msgstr "accoladevervanging: onvoldoende geheugen beschikbaar voor %u elementen"
+msgstr "accoladevervanging: onvoldoende geheugen beschikbaar voor %s elementen"
 
-#: braces.c:442
+#: braces.c:462
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "accoladevervanging: onvoldoende geheugen beschikbaar voor '%s'"
@@ -122,9 +121,8 @@ msgid "`%s': invalid keymap name"
 msgstr "'%s': ongeldige naam voor toetsenkaart"
 
 #: builtins/bind.def:277
-#, fuzzy
 msgid "cannot read"
-msgstr "Kan %s niet lezen: %s"
+msgstr "kan niet lezen"
 
 #: builtins/bind.def:353 builtins/bind.def:382
 #, c-format
@@ -155,7 +153,6 @@ msgid "only meaningful in a `for', `while', or `until' loop"
 msgstr "heeft alleen betekenis in een 'for'-, 'while'- of 'until'-lus"
 
 #: builtins/caller.def:135
-#, fuzzy
 msgid ""
 "Returns the context of the current subroutine call.\n"
 "    \n"
@@ -174,9 +171,11 @@ msgstr ""
 "\n"
 "    Zonder argument produceert het \"$regelnummer $bestandsnaam\"; met\n"
 "    argument \"$regelnummer $functienaam $bestandsnaam\".  Deze tweede\n"
-"    vorm kan gebruikt worden om een 'stack trace' te produceren.  De\n"
-"    waarde van het argument geeft aan hoeveel frames er teruggegaan\n"
-"    moet worden; het huidige frame heeft nummer 0.\n"
+"    vorm kan gebruikt worden om een 'stack trace' te produceren.\n"
+"\n"
+"    De waarde van het argument geeft aan hoeveel aanroepframes er "
+"teruggegaan\n"
+"    moet worden vanaf de huidige; het bovenste frame is frame 0.\n"
 "\n"
 "    De afsluitwaarde is 0, tenzij de shell momenteel geen functie uitvoert\n"
 "    of EXPRESSIE ongeldig is."
@@ -250,7 +249,7 @@ msgstr "ongeldig octaal getal"
 msgid "invalid hex number"
 msgstr "ongeldig hexadecimaal getal"
 
-#: builtins/common.c:223 expr.c:1559 expr.c:1573
+#: builtins/common.c:223 expr.c:1577 expr.c:1591
 msgid "invalid number"
 msgstr "ongeldig getal"
 
@@ -303,9 +302,9 @@ msgid "no job control"
 msgstr "geen taakbesturing"
 
 #: builtins/common.c:279
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid job specification"
-msgstr "%s: ongeldige aanduiding van tijdslimiet"
+msgstr "%s: ongeldige taakaanduiding"
 
 #: builtins/common.c:289
 #, c-format
@@ -322,24 +321,20 @@ msgid "%s: not a shell builtin"
 msgstr "%s: is geen ingebouwde opdracht van de shell"
 
 #: builtins/common.c:307
-#, fuzzy
 msgid "write error"
-msgstr "schrijffout: %s"
+msgstr "schrijffout"
 
 #: builtins/common.c:314
-#, fuzzy
 msgid "error setting terminal attributes"
-msgstr "fout tijdens instellen van terminaleigenschappen: %s"
+msgstr "fout bij instellen van terminaleigenschappen"
 
 #: builtins/common.c:316
-#, fuzzy
 msgid "error getting terminal attributes"
-msgstr "fout tijdens verkrijgen van terminaleigenschappen: %s"
+msgstr "fout bij verkrijgen van terminaleigenschappen"
 
 #: builtins/common.c:611
-#, fuzzy
 msgid "error retrieving current directory"
-msgstr "%s: fout tijdens bepalen van huidige map: %s: %s\n"
+msgstr "fout bij bepalen van huidige map"
 
 #: builtins/common.c:675 builtins/common.c:677
 #, c-format
@@ -347,9 +342,9 @@ msgid "%s: ambiguous job spec"
 msgstr "%s: taakaanduiding is niet eenduidig"
 
 #: builtins/common.c:709
-#, fuzzy, c-format
+#, c-format
 msgid "%s: job specification requires leading `%%'"
-msgstr "%s: optie vereist een argument"
+msgstr "%s: taakaanduiding vereist een voorafgaande '%%'"
 
 #: builtins/common.c:937
 msgid "help not available in this version"
@@ -401,7 +396,7 @@ msgstr "kan alleen worden gebruikt binnen een functie"
 msgid "cannot use `-f' to make functions"
 msgstr "'-f' kan niet gebruikt worden om een functie te definiëren"
 
-#: builtins/declare.def:499 execute_cmd.c:6294
+#: builtins/declare.def:499 execute_cmd.c:6320
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: is een alleen-lezen functie"
@@ -453,7 +448,7 @@ msgstr "kan gedeeld object %s niet openen: %s"
 #: builtins/enable.def:408
 #, c-format
 msgid "%s: builtin names may not contain slashes"
-msgstr ""
+msgstr "%s: ingebouwde namen mogen geen schuine strepen bevatten"
 
 #: builtins/enable.def:423
 #, c-format
@@ -480,7 +475,7 @@ msgstr "%s: is niet dynamisch geladen"
 msgid "%s: cannot delete: %s"
 msgstr "Kan %s niet verwijderen: %s"
 
-#: builtins/evalfile.c:137 builtins/hash.def:190 execute_cmd.c:6114
+#: builtins/evalfile.c:137 builtins/hash.def:190 execute_cmd.c:6140
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: is een map"
@@ -495,21 +490,19 @@ msgstr "%s: is geen normaal bestand"
 msgid "%s: file is too large"
 msgstr "%s: bestand is te groot"
 
-#: builtins/evalfile.c:189 builtins/evalfile.c:207 execute_cmd.c:6196
-#: shell.c:1690
-#, fuzzy
+#: builtins/evalfile.c:189 builtins/evalfile.c:207 execute_cmd.c:6222
+#: shell.c:1687
 msgid "cannot execute binary file"
-msgstr "%s: kan binair bestand niet uitvoeren"
+msgstr "kan binair bestand niet uitvoeren"
 
 #: builtins/evalstring.c:478
-#, fuzzy, c-format
+#, c-format
 msgid "%s: ignoring function definition attempt"
-msgstr "fout tijdens importeren van functiedefinitie voor '%s'"
+msgstr "%s: poging tot functiedefinitie wordt genegeerd"
 
-#: builtins/exec.def:157 builtins/exec.def:159 builtins/exec.def:248
-#, fuzzy
+#: builtins/exec.def:158 builtins/exec.def:160 builtins/exec.def:249
 msgid "cannot execute"
-msgstr "Kan %s niet uitvoeren: %s"
+msgstr "kan niet uitvoeren"
 
 #: builtins/exit.def:61
 #, c-format
@@ -540,9 +533,8 @@ msgid "history specification"
 msgstr "geschiedenisaanduiding"
 
 #: builtins/fc.def:462
-#, fuzzy
 msgid "cannot open temp file"
-msgstr "Kan tijdelijk bestand '%s' niet openen: %s"
+msgstr "kan tijdelijk bestand niet openen"
 
 #: builtins/fg_bg.def:150 builtins/jobs.def:293
 msgid "current"
@@ -600,11 +592,15 @@ msgstr ""
 "Probeer 'help help' of 'man -k %s' of 'info %s'."
 
 #: builtins/help.def:214
-#, fuzzy
 msgid "cannot open"
-msgstr "kan niet pauzeren"
+msgstr "kan niet openen"
 
-#: builtins/help.def:500
+#: builtins/help.def:264 builtins/help.def:306 builtins/history.def:306
+#: builtins/history.def:325 builtins/read.def:909
+msgid "read error"
+msgstr "leesfout"
+
+#: builtins/help.def:517
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -626,31 +622,30 @@ msgstr ""
 "is.)\n"
 "\n"
 
-#: builtins/history.def:162
+#: builtins/history.def:164
 msgid "cannot use more than one of -anrw"
 msgstr "slechts één van '-a', '-n', '-r' of '-w' is mogelijk"
 
-#: builtins/history.def:195 builtins/history.def:207 builtins/history.def:218
-#: builtins/history.def:243 builtins/history.def:250
+#: builtins/history.def:197 builtins/history.def:209 builtins/history.def:220
+#: builtins/history.def:245 builtins/history.def:252
 msgid "history position"
 msgstr "geschiedenispositie"
 
-#: builtins/history.def:278
-#, fuzzy
+#: builtins/history.def:280
 msgid "empty filename"
-msgstr "lege naam van array-variabele"
+msgstr "lege bestandsnaam"
 
-#: builtins/history.def:280 subst.c:8215
+#: builtins/history.def:282 subst.c:8226
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: lege parameter, of niet ingesteld"
 
-#: builtins/history.def:349
+#: builtins/history.def:362
 #, c-format
 msgid "%s: invalid timestamp"
 msgstr "%s: ongeldig tijdsstempel"
 
-#: builtins/history.def:457
+#: builtins/history.def:470
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: geschiedenisexpansie is mislukt"
@@ -659,16 +654,16 @@ msgstr "%s: geschiedenisexpansie is mislukt"
 msgid "no other options allowed with `-x'"
 msgstr "bij '-x' zijn geen andere opties toegestaan"
 
-#: builtins/kill.def:213
+#: builtins/kill.def:214
 #, c-format
 msgid "%s: arguments must be process or job IDs"
 msgstr "%s: argumenten moeten proces-IDs of taak-IDs zijn"
 
-#: builtins/kill.def:275
+#: builtins/kill.def:280
 msgid "Unknown error"
 msgstr "Onbekende fout"
 
-#: builtins/let.def:96 builtins/let.def:120 expr.c:633 expr.c:651
+#: builtins/let.def:96 builtins/let.def:120 expr.c:647 expr.c:665
 msgid "expression expected"
 msgstr "uitdrukking werd verwacht"
 
@@ -678,9 +673,8 @@ msgid "%s: invalid file descriptor specification"
 msgstr "%s: ongeldige aanduiding van bestandsdescriptor"
 
 #: builtins/mapfile.def:257 builtins/read.def:380
-#, fuzzy
 msgid "invalid file descriptor"
-msgstr "%d: ongeldige bestandsdescriptor: %s"
+msgstr "ongeldige bestandsdescriptor"
 
 #: builtins/mapfile.def:266 builtins/mapfile.def:304
 #, c-format
@@ -707,35 +701,35 @@ msgstr "lege naam van array-variabele"
 msgid "array variable support required"
 msgstr "ondersteuning van arrayvariabelen is vereist"
 
-#: builtins/printf.def:477
+#: builtins/printf.def:483
 #, c-format
 msgid "`%s': missing format character"
 msgstr "'%s': ontbrekend opmaakteken"
 
-#: builtins/printf.def:603
+#: builtins/printf.def:609
 #, c-format
 msgid "`%c': invalid time format specification"
 msgstr "'%c': ongeldige aanduiding van tijdsopmaak"
 
-#: builtins/printf.def:705
+#: builtins/printf.def:711
 msgid "string length"
-msgstr ""
+msgstr "tekenreekslengte"
 
-#: builtins/printf.def:805
+#: builtins/printf.def:811
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "'%c': ongeldig opmaakteken"
 
-#: builtins/printf.def:922
+#: builtins/printf.def:928
 #, c-format
 msgid "format parsing problem: %s"
 msgstr "probleem bij ontleden van opmaak: %s"
 
-#: builtins/printf.def:1107
+#: builtins/printf.def:1113
 msgid "missing hex digit for \\x"
 msgstr "ontbrekend hexadecimaal cijfer bij \\x"
 
-#: builtins/printf.def:1122
+#: builtins/printf.def:1128
 #, c-format
 msgid "missing unicode digit for \\%c"
 msgstr "ontbrekend Unicode-cijfer bij \\%c"
@@ -886,11 +880,6 @@ msgstr ""
 msgid "%s: invalid timeout specification"
 msgstr "%s: ongeldige aanduiding van tijdslimiet"
 
-#: builtins/read.def:909
-#, fuzzy
-msgid "read error"
-msgstr "leesfout: %d: %s"
-
 #: builtins/return.def:73
 msgid "can only `return' from a function or sourced script"
 msgstr ""
@@ -985,29 +974,27 @@ msgstr "%s is %s\n"
 msgid "%s is hashed (%s)\n"
 msgstr "%s is gehasht (%s)\n"
 
-#: builtins/ulimit.def:401
+#: builtins/ulimit.def:403
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: ongeldige limietwaarde"
 
-#: builtins/ulimit.def:427
+#: builtins/ulimit.def:429
 #, c-format
 msgid "`%c': bad command"
 msgstr "'%c': ongeldige opdracht"
 
-#: builtins/ulimit.def:463 builtins/ulimit.def:733
-#, fuzzy
+#: builtins/ulimit.def:465 builtins/ulimit.def:748
 msgid "cannot get limit"
-msgstr "%s: kan de limiet niet bepalen: %s"
+msgstr "kan de limiet niet verkrijgen"
 
-#: builtins/ulimit.def:496
+#: builtins/ulimit.def:498
 msgid "limit"
 msgstr "limiet"
 
-#: builtins/ulimit.def:509 builtins/ulimit.def:797
-#, fuzzy
+#: builtins/ulimit.def:511 builtins/ulimit.def:812
 msgid "cannot modify limit"
-msgstr "%s: kan de limiet niet wijzigen: %s"
+msgstr "kan de limiet niet wijzigen"
 
 #: builtins/umask.def:114
 msgid "octal number"
@@ -1018,7 +1005,7 @@ msgstr "octaal getal"
 msgid "`%c': invalid symbolic mode operator"
 msgstr "'%c': ongeldige operator in symbolische modus"
 
-#: builtins/umask.def:341
+#: builtins/umask.def:345
 #, c-format
 msgid "`%c': invalid symbolic mode character"
 msgstr "'%c': ongeldig teken in symbolische modus"
@@ -1069,161 +1056,154 @@ msgstr "ongeldige sprong"
 msgid "%s: unbound variable"
 msgstr "%s: ongebonden variabele"
 
-#: eval.c:256
+#: eval.c:260
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\awachten op invoer duurde te lang -- automatisch afgemeld\n"
 
 #: execute_cmd.c:606
-#, fuzzy
 msgid "cannot redirect standard input from /dev/null"
-msgstr "kan standaardinvoer niet omleiden vanaf /dev/null: %s"
+msgstr "kan standaardinvoer niet omleiden vanaf /dev/null"
 
-#: execute_cmd.c:1404
+#: execute_cmd.c:1412
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: '%c': ongeldig opmaakteken"
 
-#: execute_cmd.c:2485
+#: execute_cmd.c:2493
 #, c-format
 msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr "execute_coproc(): coproc [%d:%s] bestaat nog steeds"
 
-#: execute_cmd.c:2639
+#: execute_cmd.c:2647
 msgid "pipe error"
 msgstr "pijpfout"
 
-#: execute_cmd.c:4092
+#: execute_cmd.c:4100
 #, c-format
 msgid "invalid regular expression `%s': %s"
-msgstr ""
+msgstr "ongeldige reguliere expressie '%s': %s"
 
-#: execute_cmd.c:4094
+#: execute_cmd.c:4102
 #, c-format
 msgid "invalid regular expression `%s'"
-msgstr ""
+msgstr "ongeldige reguliere expressie '%s'"
 
-#: execute_cmd.c:5048
+#: execute_cmd.c:5056
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: maximum 'eval'-nestingsniveau is overschreden (%d)"
 
-#: execute_cmd.c:5061
+#: execute_cmd.c:5069
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: maximum 'source'-nestingsniveau is overschreden (%d)"
 
-#: execute_cmd.c:5190
+#: execute_cmd.c:5198
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: maximum functie-nestingsniveau is overschreden (%d)"
 
-#: execute_cmd.c:5728
-#, fuzzy
+#: execute_cmd.c:5754
 msgid "command not found"
-msgstr "%s: opdracht niet gevonden"
+msgstr "opdracht niet gevonden"
 
-#: execute_cmd.c:5757
+#: execute_cmd.c:5783
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: beperkte modus: '/' in opdrachtnamen is niet toegestaan"
 
-#: execute_cmd.c:6150
-#, fuzzy
+#: execute_cmd.c:6176
 msgid "bad interpreter"
-msgstr "%s: %s: ongeldige interpreter"
+msgstr "ongeldige interpreter"
 
-#: execute_cmd.c:6159
+#: execute_cmd.c:6185
 #, c-format
 msgid "%s: cannot execute: required file not found"
 msgstr "%s: kan niet uitvoeren: vereist bestand is niet gevonden"
 
-#: execute_cmd.c:6335
+#: execute_cmd.c:6361
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "kan bestandsdescriptor %d niet dupliceren naar bestandsdescriptor %d"
 
-#: expr.c:265
+#: expr.c:272
 msgid "expression recursion level exceeded"
 msgstr "recursieniveau van expressies is overschreden"
 
-#: expr.c:293
+#: expr.c:300
 msgid "recursion stack underflow"
 msgstr "recursiestapel-onderloop"
 
-#: expr.c:471
-#, fuzzy
+#: expr.c:485
 msgid "arithmetic syntax error in expression"
-msgstr "syntaxfout in expressie"
+msgstr "rekenkundige syntaxfout in expressie"
 
-#: expr.c:515
+#: expr.c:529
 msgid "attempted assignment to non-variable"
 msgstr "poging tot toewijzing aan een niet-variabele"
 
-#: expr.c:524
-#, fuzzy
+#: expr.c:538
 msgid "arithmetic syntax error in variable assignment"
-msgstr "syntaxfout in toewijzing aan variabele"
+msgstr "rekenkundige syntaxfout in toewijzing aan variabele"
 
-#: expr.c:538 expr.c:905
+#: expr.c:552 expr.c:917
 msgid "division by 0"
 msgstr "deling door nul"
 
-#: expr.c:586
+#: expr.c:600
 msgid "bug: bad expassign token"
 msgstr "**interne fout**: onjuist symbool in toewijzingsexpressie"
 
-#: expr.c:640
+#: expr.c:654
 msgid "`:' expected for conditional expression"
 msgstr "':' werd verwacht voor een voorwaardelijke expressie"
 
-#: expr.c:967
+#: expr.c:979
 msgid "exponent less than 0"
 msgstr "exponent is kleiner dan 0"
 
-#: expr.c:1028
+#: expr.c:1040
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "naam verwacht na pre-increment of pre-decrement"
 
-#: expr.c:1055
+#: expr.c:1067
 msgid "missing `)'"
 msgstr "ontbrekend ')'"
 
-#: expr.c:1106 expr.c:1489
-#, fuzzy
+#: expr.c:1120 expr.c:1507
 msgid "arithmetic syntax error: operand expected"
-msgstr "syntaxfout: operator verwacht"
+msgstr "rekenkundige syntaxfout: operator verwacht"
 
-#: expr.c:1450 expr.c:1471
+#: expr.c:1468 expr.c:1489
 msgid "--: assignment requires lvalue"
-msgstr ""
+msgstr "--: toewijzing vereist 'lvalue'"
 
-#: expr.c:1452 expr.c:1473
+#: expr.c:1470 expr.c:1491
 msgid "++: assignment requires lvalue"
-msgstr ""
+msgstr "++: toewijzing vereist 'lvalue'"
 
-#: expr.c:1491
-#, fuzzy
+#: expr.c:1509
 msgid "arithmetic syntax error: invalid arithmetic operator"
 msgstr "syntaxfout: ongeldige rekenkundige operator"
 
-#: expr.c:1514
+#: expr.c:1532
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (het onjuiste symbool is \"%s\")"
 
-#: expr.c:1577
+#: expr.c:1595
 msgid "invalid arithmetic base"
 msgstr "ongeldige rekenkundige basis"
 
-#: expr.c:1586
+#: expr.c:1604
 msgid "invalid integer constant"
 msgstr "ongeldige integerconstante"
 
-#: expr.c:1602
+#: expr.c:1620
 msgid "value too great for base"
 msgstr "waarde is te groot voor basis"
 
-#: expr.c:1653
+#: expr.c:1671
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: expressiefout\n"
@@ -1237,7 +1217,7 @@ msgstr "getwd(): kan geen geen toegang verkrijgen tot bovenliggende mappen"
 msgid "`%s': is a special builtin"
 msgstr "'%s' is een speciale ingebouwde shell-functie"
 
-#: input.c:98 subst.c:6540
+#: input.c:98 subst.c:6542
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "kan 'nodelay'-modus niet uitschakelen voor bestandsdescriptor %d"
@@ -1340,79 +1320,79 @@ msgstr "  (werkmap: %s)"
 msgid "child setpgid (%ld to %ld)"
 msgstr "instellen van procesgroep %2$ld van dochter %1$ld"
 
-#: jobs.c:2753 nojobs.c:640
+#: jobs.c:2754 nojobs.c:640
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait(): PID %ld is geen dochterproces van deze shell"
 
-#: jobs.c:3049
+#: jobs.c:3052
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for(): proces %ld is nergens geregistreerd"
 
-#: jobs.c:3407
+#: jobs.c:3410
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job(): taak %d is gepauzeerd"
 
-#: jobs.c:3835
+#: jobs.c:3838
 #, c-format
 msgid "%s: no current jobs"
 msgstr "%s: geen lopende taken"
 
-#: jobs.c:3842
+#: jobs.c:3845
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: taak is afgesloten"
 
-#: jobs.c:3851
+#: jobs.c:3854
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: taak %d draait al op de achtergrond"
 
-#: jobs.c:4089
+#: jobs.c:4092
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr ""
 "waitchld(): WNOHANG wordt ingeschakeld om een onbegrensde blokkering te "
 "vermijden"
 
-#: jobs.c:4638
+#: jobs.c:4641
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: regel %d: "
 
-#: jobs.c:4654 nojobs.c:895
+#: jobs.c:4657 nojobs.c:895
 #, c-format
 msgid " (core dumped)"
 msgstr " (geheugendump gemaakt)"
 
-#: jobs.c:4674 jobs.c:4694
+#: jobs.c:4677 jobs.c:4697
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(werkmap is nu: %s)\n"
 
-#: jobs.c:4738
+#: jobs.c:4741
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp() is mislukt"
 
-#: jobs.c:4794
+#: jobs.c:4797
 msgid "initialize_job_control: no job control in background"
 msgstr "initialize_job_control: geen taakbesturing in de achtergrond"
 
-#: jobs.c:4810
+#: jobs.c:4813
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: lijnprotocol"
 
-#: jobs.c:4820
+#: jobs.c:4823
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid()"
 
-#: jobs.c:4841 jobs.c:4850
+#: jobs.c:4844 jobs.c:4853
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "kan procesgroep (%d) van terminal niet instellen"
 
-#: jobs.c:4855
+#: jobs.c:4858
 msgid "no job control in this shell"
 msgstr "er is geen taakbesturing in deze shell"
 
@@ -1513,9 +1493,8 @@ msgid "network operations not supported"
 msgstr "netwerkoperaties worden niet ondersteund"
 
 #: locale.c:226 locale.c:228 locale.c:301 locale.c:303
-#, fuzzy
 msgid "cannot change locale"
-msgstr "setlocale(): %s: kan niet van taalregio veranderen (%s)"
+msgstr "kan niet van taalregio veranderen"
 
 #: mailcheck.c:435
 msgid "You have mail in $_"
@@ -1570,15 +1549,14 @@ msgstr ""
 "regel is afgekapt"
 
 #: parse.y:2864
-#, fuzzy
 msgid "script file read error"
-msgstr "schrijffout: %s"
+msgstr "leesfout in scriptbestand"
 
 #: parse.y:3101
 msgid "maximum here-document count exceeded"
 msgstr "maximum aantal \"hier\"-documenten is overschreden"
 
-#: parse.y:3901 parse.y:4799 parse.y:6853
+#: parse.y:3901 parse.y:4799 parse.y:6859
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "onverwacht bestandseinde tijdens zoeken naar bijpassende '%c'"
@@ -1648,52 +1626,52 @@ msgstr "onverwacht symbool '%s' in conditionele opdracht"
 msgid "unexpected token %d in conditional command"
 msgstr "onverwacht symbool %d in conditionele opdracht"
 
-#: parse.y:6821
-#, fuzzy, c-format
+#: parse.y:6827
+#, c-format
 msgid "syntax error near unexpected token `%s' while looking for matching `%c'"
-msgstr "onverwacht bestandseinde tijdens zoeken naar bijpassende '%c'"
+msgstr ""
+"syntaxfout nabij onverwacht symbool '%s' tijdens zoeken naar bijpassende '%c'"
 
-#: parse.y:6823
+#: parse.y:6829
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "syntaxfout nabij onverwacht symbool '%s'"
 
-#: parse.y:6842
+#: parse.y:6848
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "syntaxfout nabij '%s'"
 
-#: parse.y:6861
-#, fuzzy, c-format
-msgid "syntax error: unexpected end of file from `%s' command on line %d"
-msgstr "syntaxfout: onverwacht bestandseinde"
-
-#: parse.y:6863
-#, fuzzy, c-format
-msgid "syntax error: unexpected end of file from command on line %d"
-msgstr "syntaxfout: onverwacht bestandseinde"
-
 #: parse.y:6867
+#, c-format
+msgid "syntax error: unexpected end of file from `%s' command on line %d"
+msgstr "syntaxfout: onverwacht bestandseinde van '%s'-opdracht op regel %d "
+
+#: parse.y:6869
+#, c-format
+msgid "syntax error: unexpected end of file from command on line %d"
+msgstr "syntaxfout: onverwacht bestandseinde van opdracht op regel %d "
+
+#: parse.y:6873
 msgid "syntax error: unexpected end of file"
 msgstr "syntaxfout: onverwacht bestandseinde"
 
-#: parse.y:6867
+#: parse.y:6873
 msgid "syntax error"
 msgstr "syntaxfout"
 
-#: parse.y:6916
+#: parse.y:6922
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Gebruik \"%s\" om de shell te verlaten.\n"
 
-#: parse.y:7114
+#: parse.y:7120
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "onverwacht bestandseinde tijdens zoeken naar bijpassende ')'"
 
 #: pathexp.c:897
-#, fuzzy
 msgid "invalid glob sort type"
-msgstr "ongeldige basis"
+msgstr "ongeldig 'glob'-sorteringstype"
 
 #: pcomplete.c:1070
 #, c-format
@@ -1736,40 +1714,35 @@ msgstr ""
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf(): '%c': ongeldig opmaakteken"
 
-#: redir.c:145 redir.c:193
+#: redir.c:146 redir.c:194
 msgid "file descriptor out of range"
 msgstr "bestandsdescriptor valt buiten bereik"
 
-#: redir.c:200
-#, fuzzy
+#: redir.c:201
 msgid "ambiguous redirect"
-msgstr "%s: omleiding is niet eenduidig"
+msgstr "omleiding is niet eenduidig"
 
-#: redir.c:204
-#, fuzzy
+#: redir.c:205
 msgid "cannot overwrite existing file"
-msgstr "%s: kan bestaand bestand niet overschrijven"
+msgstr "kan bestaand bestand niet overschrijven"
 
-#: redir.c:209
-#, fuzzy
+#: redir.c:210
 msgid "restricted: cannot redirect output"
-msgstr "%s: beperkte modus: omleiden van uitvoer is niet toegestaan"
+msgstr "beperkte modus: omleiden van uitvoer is niet toegestaan"
 
-#: redir.c:214
-#, fuzzy
+#: redir.c:215
 msgid "cannot create temp file for here-document"
-msgstr "kan geen tijdelijk bestand maken voor \"hier\"-document: %s"
+msgstr "kan geen tijdelijk bestand maken voor \"hier\"-document"
 
-#: redir.c:218
-#, fuzzy
+#: redir.c:219
 msgid "cannot assign fd to variable"
-msgstr "%s: kan bestandsdescriptor niet toewijzen aan variabele"
+msgstr "kan bestandsdescriptor niet toewijzen aan variabele"
 
-#: redir.c:633
+#: redir.c:639
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port is niet mogelijk zonder netwerk"
 
-#: redir.c:937 redir.c:1051 redir.c:1109 redir.c:1273
+#: redir.c:945 redir.c:1062 redir.c:1124 redir.c:1291
 msgid "redirection error: cannot duplicate fd"
 msgstr "omleidingsfout: kan bestandsdescriptor niet dupliceren"
 
@@ -1790,35 +1763,39 @@ msgstr "pretty-printing-modus wordt genegeerd in interactieve shells"
 msgid "%c%c: invalid option"
 msgstr "%c%c: ongeldige optie"
 
-#: shell.c:1357
+#: shell.c:1354
 #, c-format
 msgid "cannot set uid to %d: effective uid %d"
 msgstr "kan UID niet op %d instellen; effectieve UID is %d"
 
-#: shell.c:1373
+#: shell.c:1370
 #, c-format
 msgid "cannot set gid to %d: effective gid %d"
 msgstr "kan GID niet op %d instellen; effectieve GID is %d"
 
-#: shell.c:1562
+#: shell.c:1559
 msgid "cannot start debugger; debugging mode disabled"
 msgstr "kan debugger niet starten; debugging-modus is uitgeschakeld"
 
-#: shell.c:1675
+#: shell.c:1672
 #, c-format
 msgid "%s: Is a directory"
 msgstr "%s: is een map"
 
-#: shell.c:1891
+#: shell.c:1748 shell.c:1750
+msgid "error creating buffered stream"
+msgstr ""
+
+#: shell.c:1899
 msgid "I have no name!"
 msgstr "Ik heb geen naam!"
 
-#: shell.c:2055
+#: shell.c:2063
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, versie %s-(%s)\n"
 
-#: shell.c:2056
+#: shell.c:2064
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1827,51 +1804,51 @@ msgstr ""
 "Gebruik:  %s [opties]\n"
 "          %s [opties] scriptbestand...\n"
 
-#: shell.c:2058
+#: shell.c:2066
 msgid "GNU long options:\n"
 msgstr "Lange opties:\n"
 
-#: shell.c:2062
+#: shell.c:2070
 msgid "Shell options:\n"
 msgstr "Korte opties:\n"
 
-#: shell.c:2063
+#: shell.c:2071
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-ilrsD,  of -c OPDRACHT,  of -O SHOPT-OPTIE    (enkel bij aanroep)\n"
 
-#: shell.c:2082
+#: shell.c:2090
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s,  of -o optie    (veranderbaar via 'set')\n"
 
-#: shell.c:2088
+#: shell.c:2096
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr "Typ '%s -c \"help set\"' voor meer informatie over shell-opties.\n"
 
-#: shell.c:2089
+#: shell.c:2097
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "Typ '%s -c help' voor meer informatie over ingebouwde shell-functies.\n"
 
-#: shell.c:2090
+#: shell.c:2098
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Gebruik de opdracht 'bashbug' om fouten in bash te rapporteren.\n"
 
-#: shell.c:2092
+#: shell.c:2100
 #, c-format
 msgid "bash home page: <http://www.gnu.org/software/bash>\n"
 msgstr "Webpagina van 'bash': <http://www.gnu.org/software/bash>\n"
 
-#: shell.c:2093
+#: shell.c:2101
 #, c-format
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr ""
 "Algemene hulp bij gebruik van GNU-software: <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:808
+#: sig.c:809
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask(): %d: ongeldige operatie"
@@ -2044,102 +2021,102 @@ msgstr "Verzoek om informatie"
 msgid "Unknown Signal #%d"
 msgstr "Onbekend signaal #%d"
 
-#: subst.c:1501 subst.c:1793 subst.c:1999
+#: subst.c:1503 subst.c:1795 subst.c:2001
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "ongeldige vervanging: geen sluit-'%s' in %s"
 
-#: subst.c:3599
+#: subst.c:3601
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: kan geen lijst toewijzen aan een array-element"
 
-#: subst.c:6379 subst.c:6395
+#: subst.c:6381 subst.c:6397
 msgid "cannot make pipe for process substitution"
 msgstr "kan geen pijp maken voor procesvervanging"
 
-#: subst.c:6455
+#: subst.c:6457
 msgid "cannot make child for process substitution"
 msgstr "kan geen dochterproces maken voor procesvervanging"
 
-#: subst.c:6530
+#: subst.c:6532
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "kan pijp genaamd %s niet openen om te lezen"
 
-#: subst.c:6532
+#: subst.c:6534
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "kan pijp genaamd %s niet openen om te schrijven"
 
-#: subst.c:6555
+#: subst.c:6557
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "kan pijp genaamd %s niet dupliceren als bestandsdescriptor %d"
 
-#: subst.c:6721
+#: subst.c:6723
 msgid "command substitution: ignored null byte in input"
 msgstr "opdrachtsubstitutie: null-byte in invoer is genegeerd"
 
-#: subst.c:6960
+#: subst.c:6962
 msgid "function_substitute: cannot open anonymous file for output"
-msgstr ""
+msgstr "function_substitute(): kan anoniem bestand niet openen voor uitvoer"
 
-#: subst.c:7034
-#, fuzzy
+#: subst.c:7036
 msgid "function_substitute: cannot duplicate anonymous file as standard output"
 msgstr ""
-"command_substitute(): kan pijp niet dupliceren als bestandsdescriptor 1"
+"function_substitute(): kan anoniem bestand niet dupliceren als "
+"standaarduitvoer"
 
-#: subst.c:7208 subst.c:7229
+#: subst.c:7210 subst.c:7231
 msgid "cannot make pipe for command substitution"
 msgstr "kan geen pijp maken voor opdrachtvervanging"
 
-#: subst.c:7280
+#: subst.c:7282
 msgid "cannot make child for command substitution"
 msgstr "kan geen dochterproces maken voor opdrachtvervanging"
 
-#: subst.c:7313
+#: subst.c:7315
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr ""
 "command_substitute(): kan pijp niet dupliceren als bestandsdescriptor 1"
 
-#: subst.c:7802 subst.c:10978
+#: subst.c:7813 subst.c:10989
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: ongeldige variabelenaam voor naamsverwijzing"
 
-#: subst.c:7895 subst.c:7913 subst.c:8089
+#: subst.c:7906 subst.c:7924 subst.c:8100
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: ongeldige indirecte expansie"
 
-#: subst.c:7929 subst.c:8097
+#: subst.c:7940 subst.c:8108
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: ongeldige variabelenaam"
 
-#: subst.c:8114 subst.c:10260 subst.c:10287
+#: subst.c:8125 subst.c:10271 subst.c:10298
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: ongeldige vervanging"
 
-#: subst.c:8213
+#: subst.c:8224
 #, c-format
 msgid "%s: parameter not set"
 msgstr "%s: parameter is niet ingesteld"
 
-#: subst.c:8469 subst.c:8484
+#: subst.c:8480 subst.c:8495
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: resultaat van deeltekenreeks is kleiner dan nul"
 
-#: subst.c:10386
+#: subst.c:10397
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: kan niet op deze manier toewijzen"
 
-#: subst.c:10844
+#: subst.c:10855
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
@@ -2147,12 +2124,12 @@ msgstr ""
 "toekomstige versies van de shell zullen dit als een rekenkundige vervanging "
 "evalueren"
 
-#: subst.c:11552
+#: subst.c:11563
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "ongeldige vervanging: geen afsluitende '`' in %s"
 
-#: subst.c:12626
+#: subst.c:12636
 #, c-format
 msgid "no match: %s"
 msgstr "geen overeenkomst: %s"
@@ -2162,9 +2139,9 @@ msgid "argument expected"
 msgstr "argument werd verwacht"
 
 #: test.c:164
-#, fuzzy, c-format
+#, c-format
 msgid "%s: integer expected"
-msgstr "%s: een geheel-getaluitdrukking werd verwacht"
+msgstr "%s: geheel getal werd verwacht"
 
 #: test.c:292
 msgid "`)' expected"
@@ -2218,9 +2195,8 @@ msgid "trap_handler: bad signal %d"
 msgstr "trap_handler(): ongeldig signaal %d"
 
 #: unwind_prot.c:246 unwind_prot.c:292
-#, fuzzy
 msgid "frame not found"
-msgstr "%s: bestand niet gevonden"
+msgstr "frame niet gevonden"
 
 #: variables.c:441
 #, c-format
@@ -2236,9 +2212,9 @@ msgstr "shell-niveau is te hoog (%d); teruggezet op 1"
 #: variables.c:2315 variables.c:2350 variables.c:2378 variables.c:2405
 #: variables.c:2431 variables.c:3274 variables.c:3282 variables.c:3797
 #: variables.c:3841
-#, fuzzy, c-format
+#, c-format
 msgid "%s: maximum nameref depth (%d) exceeded"
-msgstr "maximum aantal \"hier\"-documenten is overschreden"
+msgstr "%s: maximum 'nameref'-diepte (%d) is overschreden"
 
 #: variables.c:2641
 msgid "make_local_variable: no function context at current scope"
@@ -2265,53 +2241,53 @@ msgid "all_local_variables: no function context at current scope"
 msgstr ""
 "all_local_variables(): er is geen functiecontext in huidige geldigheidsbereik"
 
-#: variables.c:4791
+#: variables.c:4816
 #, c-format
 msgid "%s has null exportstr"
 msgstr "*** %s heeft lege export-tekenreeks"
 
-#: variables.c:4796 variables.c:4805
+#: variables.c:4821 variables.c:4830
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "*** ongeldig teken '%d' in export-tekenreeks voor %s"
 
-#: variables.c:4811
+#: variables.c:4836
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "*** geen '=' in export-tekenreeks voor %s"
 
-#: variables.c:5329
+#: variables.c:5354
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context(): top van 'shell_variables' is geen functiecontext"
 
-#: variables.c:5342
+#: variables.c:5367
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context(): er is geen 'global_variables'-context"
 
-#: variables.c:5432
+#: variables.c:5457
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope(): top van 'shell_variables' is geen tijdelijk geldigheidsbereik"
 
-#: variables.c:6423
+#: variables.c:6448
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: Kan %s niet openen als BESTAND"
 
-#: variables.c:6428
+#: variables.c:6453
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: ongeldige waarde %s voor 'trace'-bestandsdescriptor"
 
-#: variables.c:6472
+#: variables.c:6497
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: compatibiliteitswaarde valt buiten bereik"
 
 #: version.c:50
 #, fuzzy
-msgid "Copyright (C) 2024 Free Software Foundation, Inc."
-msgstr "Copyright (C) 2022 Free Software Foundation, Inc."
+msgid "Copyright (C) 2025 Free Software Foundation, Inc."
+msgstr "Copyright (C) 2024 Free Software Foundation, Inc."
 
 #: version.c:51
 msgid ""
@@ -2388,12 +2364,9 @@ msgstr "builtin [INGEBOUWDE_SHELLFUNCTIE [ARGUMENT...]]"
 msgid "caller [expr]"
 msgstr "caller [EXPRESSIE]"
 
-# XXX FIXME  is this right?
-# can -@ only combine with -P, not with -L?
 #: builtins.c:66
-#, fuzzy
 msgid "cd [-L|[-P [-e]]] [-@] [dir]"
-msgstr "cd [-L|(-P [-e])] [-@] [MAP]"
+msgstr "cd [-L|[-P [-e]]] [-@] [MAP]"
 
 #: builtins.c:68
 msgid "pwd [-LP]"
@@ -2408,16 +2381,16 @@ msgid ""
 "declare [-aAfFgiIlnrtux] [name[=value] ...] or declare -p [-aAfFilnrtux] "
 "[name ...]"
 msgstr ""
-"declare [-aAfFgiIlnrtux] [NAAM[=WAARDE] ...] of declare -p [-aAfFilnrtux] "
-"[NAAM ...]"
+"declare [-aAfFgiIlnrtux] [NAAM[=WAARDE] ...]\n"
+"     of: declare -p [-aAfFilnrtux] [NAAM ...]"
 
 #: builtins.c:80
 msgid ""
 "typeset [-aAfFgiIlnrtux] name[=value] ... or typeset -p [-aAfFilnrtux] "
 "[name ...]"
 msgstr ""
-"typeset [-aAfFgiIlnrtux] NAAM[=WAARDE] ... of typeset -p [-aAfFilnrtux] "
-"[NAAM ...]"
+"typeset [-aAfFgiIlnrtux] NAAM[=WAARDE] ...\n"
+"     of: typeset -p [-aAfFilnrtux] [NAAM ...]"
 
 #: builtins.c:82
 msgid "local [option] name[=value] ..."
@@ -2482,13 +2455,15 @@ msgid ""
 "history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg "
 "[arg...]"
 msgstr ""
-"history [-c] [-d POSITIE] [N]   of:  history -anrw [BESTANDSNAAM]   of:  "
-"history -ps ARGUMENT..."
+"history [-c] [-d POSITIE] [N]\n"
+"     of: history -anrw [BESTANDSNAAM]\n"
+"     of: history -ps ARGUMENT..."
 
 #: builtins.c:127
 msgid "jobs [-lnprs] [jobspec ...] or jobs -x command [args]"
 msgstr ""
-"jobs [-lnprs] [TAAKAANDUIDING...]   of:  jobs -x OPDRACHT [ARGUMENT...]"
+"jobs [-lnprs] [TAAKAANDUIDING...]\n"
+"  of: jobs -x OPDRACHT [ARGUMENT...]"
 
 #: builtins.c:131
 msgid "disown [-h] [-ar] [jobspec ... | pid ...]"
@@ -2507,12 +2482,11 @@ msgid "let arg [arg ...]"
 msgstr "let ARGUMENT..."
 
 #: builtins.c:138
-#, fuzzy
 msgid ""
 "read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p "
 "prompt] [-t timeout] [-u fd] [name ...]"
 msgstr ""
-"read [-ers] [-a ARRAY] [-d SCHEIDINGSTEKEN] [-i TEKST] [-p PROMPT]\n"
+"read [-Eers] [-a ARRAY] [-d SCHEIDINGSTEKEN] [-i TEKST] [-p PROMPT]\n"
 "           [-n AANTAL_TEKENS] [-N AANTAL_TEKENS] [-t TIJDSLIMIET]\n"
 "           [-u BESTANDSDESCRIPTOR]  [NAAM...]"
 
@@ -2529,7 +2503,8 @@ msgid "unset [-f] [-v] [-n] [name ...]"
 msgstr "unset [-f] [-v] [-n] [NAAM...]"
 
 #: builtins.c:146
-msgid "export [-fn] [name[=value] ...] or export -p"
+#, fuzzy
+msgid "export [-fn] [name[=value] ...] or export -p [-f]"
 msgstr "export [-fn] [NAAM[=WAARDE] ...]   of:  export -p"
 
 #: builtins.c:148
@@ -2541,14 +2516,12 @@ msgid "shift [n]"
 msgstr "shift [N]"
 
 #: builtins.c:152
-#, fuzzy
 msgid "source [-p path] filename [arguments]"
-msgstr "source BESTANDSNAAM [ARGUMENTEN]"
+msgstr "source [-p PAD] BESTANDSNAAM [ARGUMENTEN]"
 
 #: builtins.c:154
-#, fuzzy
 msgid ". [-p path] filename [arguments]"
-msgstr ". BESTANDSNAAM [ARGUMENTEN]"
+msgstr ". [-p PAD] BESTANDSNAAM [ARGUMENTEN]"
 
 #: builtins.c:157
 msgid "suspend [-f]"
@@ -2563,9 +2536,8 @@ msgid "[ arg... ]"
 msgstr "[ EXPRESSIE... ]"
 
 #: builtins.c:166
-#, fuzzy
 msgid "trap [-Plp] [[action] signal_spec ...]"
-msgstr "trap [-lp] [[ARGUMENT] SIGNAALAANDUIDING...]"
+msgstr "trap [-Plp] [[ACTIE] SIGNAALAANDUIDING...]"
 
 #: builtins.c:168
 msgid "type [-afptP] name [name ...]"
@@ -2589,7 +2561,7 @@ msgstr "wait [-n] [PID ...]"
 
 #: builtins.c:184
 msgid "! PIPELINE"
-msgstr ""
+msgstr "! PIJPLIJN"
 
 #: builtins.c:186
 msgid "for NAME [in WORDS ... ] ; do COMMANDS; done"
@@ -2616,8 +2588,8 @@ msgid ""
 "if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else "
 "COMMANDS; ] fi"
 msgstr ""
-"if OPDRACHTEN; then OPDRACHTEN; [elif OPDRACHTEN; then OPDRACHTEN;]... [else "
-"OPDRACHTEN;] fi"
+"if OPDRACHTEN; then OPDRACHTEN; [elif OPDRACHTEN; then OPDRACHTEN;]...\n"
+"                   [else OPDRACHTEN;] fi"
 
 #: builtins.c:198
 msgid "while COMMANDS; do COMMANDS-2; done"
@@ -2681,20 +2653,20 @@ msgid ""
 "W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
 "suffix] [name ...]"
 msgstr ""
-"complete [-abcdefgjksuv] [-pr] [-DEI] [-o OPTIE] [-A ACTIE] [-C OPDRACHT]\n"
-"                   [-F FUNCTIE] [-G PATROON] [-P PREFIX] [-S SUFFIX]\n"
-"                   [-W WOORDENLIJST] [-X FILTERPATROON]  [NAAM...]"
+"complete [-abcdefgjksuv] [-pr] [-DEI] [-o OPTIE] [-A ACTIE]\n"
+"                   [-C OPDRACHT] [-F FUNCTIE] [-G PATROON] [-P PREFIX]\n"
+"                   [-S SUFFIX] [-W WOORDENLIJST] [-X FILTERPATROON]  "
+"[NAAM...]"
 
 #: builtins.c:237
-#, fuzzy
 msgid ""
 "compgen [-V varname] [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-"
 "W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
 "suffix] [word]"
 msgstr ""
-"compgen [-abcdefgjksuv] [-o OPTIE] [-A ACTIE] [-C OPDRACHT] [-F FUNCTIE]\n"
-"                 [-G PATROON] [-P PREFIX] [-S SUFFIX]\n"
-"                 [-W WOORDENLIJST] [-X FILTERPATROON]  [WOORD]"
+"compgen [-V VARIABELENAAM] [-abcdefgjksuv] [-o OPTIE] [-A ACTIE]\n"
+"                 [-C OPDRACHT] [-F FUNCTIE] [-G PATROON] [-P PREFIX]\n"
+"                 [-S SUFFIX] [-W WOORDENLIJST] [-X FILTERPATROON]  [WOORD]"
 
 #: builtins.c:241
 msgid "compopt [-o|+o option] [-DEI] [name ...]"
@@ -2714,9 +2686,8 @@ msgid ""
 "readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
 "callback] [-c quantum] [array]"
 msgstr ""
-"readarray [-d SCHEIDINGSTEKEN] [-n AANTAL] [-O BEGIN] [-s AANTAL] [-t]\n"
-"                 [-u BESTANDSDESCRIPTOR] [-C FUNCTIE] [-c HOEVEELHEID] "
-"[ARRAY]"
+"readarray [-d SCHEIDINGSTEKEN] [-n AANTAL] [-O BEGIN] [-s AANTAL]\n"
+"           [-t] [-u BESTANDSDESCRIPTOR] [-C FUNCTIE] [-c HOEVEELHEID] [ARRAY]"
 
 #: builtins.c:258
 msgid ""
@@ -2741,6 +2712,7 @@ msgstr ""
 "\n"
 "    Zonder argumenten, of met optie '-p', toont 'alias' op standaarduitvoer\n"
 "    de huidige lijst van aliassen in de vorm: alias NAAM='VERVANGING'.\n"
+"\n"
 "    Met argumenten, wordt er een alias gedefinieerd voor elke NAAM waarvoor\n"
 "    een VERVANGING gegeven is.  Als de VERVANGING eindigt op een spatie, "
 "dan\n"
@@ -2768,7 +2740,6 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij NAAM geen bestaande alias is."
 
 #: builtins.c:293
-#, fuzzy
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2851,9 +2822,12 @@ msgstr ""
 "                           in een vorm die hergebruikt kan worden als "
 "invoer\n"
 "\n"
-"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er "
-"een\n"
-"    fout optrad."
+"    Als er na optieverwerking argumenten overblijven, dan zien '-p' en '-P'\n"
+"    deze als 'readline'-opdrachtnamen en beperken de uitvoer tot deze "
+"namen.\n"
+"\n"
+"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
+"    een fout optrad."
 
 #: builtins.c:335
 msgid ""
@@ -2937,7 +2911,6 @@ msgstr ""
 "    of EXPRESSIE ongeldig is."
 
 #: builtins.c:392
-#, fuzzy
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
@@ -2984,7 +2957,9 @@ msgstr ""
 "De huidige map wijzigen.\n"
 "\n"
 "    Wijzigt de huidige map naar de gegeven MAP.  Als geen MAP gegeven is,\n"
-"    dan wordt de waarde van de variabele HOME gebruikt.\n"
+"    dan wordt de waarde van de variabele HOME gebruikt.  Als MAP \"-\" is, "
+"dan\n"
+"    wordt dit omgezet naar $OLDPWD.\n"
 "\n"
 "    De variabele CDPATH definieert de mappen waarin naar MAP gezocht wordt.\n"
 "    De mapnamen in CDPATH worden gescheiden door dubbele punten (:); een\n"
@@ -3075,6 +3050,7 @@ msgid ""
 msgstr "Geeft altijd afsluitwaarde 1, horend bij \"mislukt\"."
 
 #: builtins.c:476
+#, fuzzy
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -3086,7 +3062,8 @@ msgid ""
 "    Options:\n"
 "      -p    use a default value for PATH that is guaranteed to find all of\n"
 "            the standard utilities\n"
-"      -v    print a description of COMMAND similar to the `type' builtin\n"
+"      -v    print a single word indicating the command or filename that\n"
+"            invokes COMMAND\n"
 "      -V    print a more verbose description of each COMMAND\n"
 "    \n"
 "    Exit Status:\n"
@@ -3108,8 +3085,7 @@ msgstr ""
 "    De afsluitwaarde is die van de uitgevoerde OPDRACHT,\n"
 "    of 1 als de OPDRACHT niet gevonden is."
 
-#: builtins.c:495
-#, fuzzy
+#: builtins.c:496
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -3184,7 +3160,7 @@ msgstr ""
 "      -x   de gegeven variabelen exporteren\n"
 "\n"
 "    Een '+' in plaats van een '-' voor de letter schakelt de betreffende\n"
-"    eigenschap uit.\n"
+"    eigenschap uit, behalve voor a, A, en r.\n"
 "\n"
 "    Bij variabelen met de 'geheel getal'-eigenschap wordt bij toewijzingen\n"
 "    een rekenkundige evaluatie gedaan (zie 'let').\n"
@@ -3192,11 +3168,10 @@ msgstr ""
 "    Als 'declare' wordt gebruikt in een functie, dan maakt het elke gegeven\n"
 "    naam lokaal, net zoals de opdracht 'local'.  Optie '-g' onderdrukt dit.\n"
 "\n"
-"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er "
-"een\n"
-"    toekenningsfout optrad."
+"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
+"    een toekenningsfout optrad."
 
-#: builtins.c:538
+#: builtins.c:539
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -3206,8 +3181,7 @@ msgstr ""
 "\n"
 "    Een synoniem van 'declare'.  Zie 'help declare'."
 
-#: builtins.c:546
-#, fuzzy
+#: builtins.c:547
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -3229,6 +3203,9 @@ msgstr ""
 "    Maakt een lokale variabele NAAM aan, en kent deze de waarde WAARDE toe.\n"
 "    OPTIE kan elke optie zijn die ook door 'declare' geaccepteerd wordt.\n"
 "\n"
+"    Als een naam \"-\" is, dan bewaart 'local' de set van shell-opties en\n"
+"    herstelt ze wanneer de functie terugkeert.\n"
+"\n"
 "    'local' kan alleen binnen een functie gebruikt worden, en zorgt ervoor\n"
 "    dat het geldigheidsbereik van de variabele NAAM beperkt wordt tot de\n"
 "    betreffende functie en diens dochters.\n"
@@ -3236,7 +3213,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd, er een\n"
 "    toekenningsfout optrad, of de shell geen functie aan het uitvoeren is."
 
-#: builtins.c:566
+#: builtins.c:567
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3307,7 +3284,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0, tenzij een schrijffout optrad."
 
-#: builtins.c:606
+#: builtins.c:607
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3326,8 +3303,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0, tenzij een schrijffout optrad."
 
-#: builtins.c:621
-#, fuzzy
+#: builtins.c:622
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -3364,7 +3340,7 @@ msgstr ""
 "    Schakelt ingebouwde opdrachten in of uit.  Dit laatste maakt het "
 "mogelijk\n"
 "    om een bestand op schijf uit te voeren dat dezelfde naam heeft als een\n"
-"    ingebouwde opdracht, zonder het volledige pad op te moeten geven.\n"
+"    ingebouwde opdracht, zonder het volledige pad op te hoeven geven.\n"
 "\n"
 "    Opties:\n"
 "      -a   de ingebouwde opdrachten tonen en of ze in- of uitgeschakeld "
@@ -3383,13 +3359,18 @@ msgstr ""
 "worden\n"
 "    de ingeschakelde opdrachten getoond (of met '-n' de uitgeschakelde).\n"
 "\n"
+"    Op systemen met dynamisch laden definieert de shell-variabele\n"
+"    BASH_LOADABLES_PATH een zoekpad voor de map die BESTANDSNAAMen bevat\n"
+"    zonder schuine streep. Deze variabele mag ook \".\" bevatten om een\n"
+"    doorzoeken van de huidige map af te dwingen.\n"
+"\n"
 "    Voorbeeld: om in plaats van de ingebouwde 'test' het bestand 'test' te\n"
 "    gebruiken dat zich in uw zoekpad PATH bevindt, typt u 'enable -n test'.\n"
 "\n"
 "    De afsluitwaarde is 0, tenzij NAAM geen ingebouwde shell-opdracht is of\n"
 "    er een fout optreedt."
 
-#: builtins.c:654
+#: builtins.c:655
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -3410,7 +3391,7 @@ msgstr ""
 "opdracht\n"
 "    leeg is."
 
-#: builtins.c:666
+#: builtins.c:667
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -3489,7 +3470,7 @@ msgstr ""
 "    De afsluitwaarde is 0 als er een optie gevonden werd, of niet-nul als\n"
 "    het einde van de opties bereikt werd of als er een fout optrad."
 
-#: builtins.c:708
+#: builtins.c:709
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -3530,7 +3511,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij OPDRACHT niet gevonden wordt of er een\n"
 "    omleidingsfout optreedt."
 
-#: builtins.c:729
+#: builtins.c:730
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3542,7 +3523,7 @@ msgstr ""
 "    Beëindigt de shell met een afsluitwaarde van N.  Zonder N is de\n"
 "    afsluitwaarde die van de laatst uitgevoerde opdracht."
 
-#: builtins.c:738
+#: builtins.c:739
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3555,8 +3536,7 @@ msgstr ""
 "    Beëindigt een login-shell met een afsluitwaarde van N.  Geeft een\n"
 "    foutmelding als de huidige shell geen login-shell is."
 
-#: builtins.c:748
-#, fuzzy
+#: builtins.c:749
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -3610,10 +3590,12 @@ msgstr ""
 "    'r' de laatste opdracht opnieuw uitvoert, en het typen van 'r cc' de\n"
 "    laatste opdracht die met 'cc' begon opnieuw uitvoert.\n"
 "\n"
+"    De ingebouwde opdracht 'history' werkt ook op de geschiedenislijst.\n"
+"\n"
 "    De afsluitwaarde is die van de uitgevoerde opdracht, of 0 als er niets\n"
 "    uitgevoerd werd, of niet-nul als er een fout optrad."
 
-#: builtins.c:780
+#: builtins.c:781
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3636,7 +3618,7 @@ msgstr ""
 "er\n"
 "    een fout optreedt."
 
-#: builtins.c:795
+#: builtins.c:796
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3661,7 +3643,7 @@ msgstr ""
 "fout\n"
 "    optreedt."
 
-#: builtins.c:809
+#: builtins.c:810
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3703,7 +3685,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij NAAM niet gevonden wordt of een ongeldige\n"
 "    optie gegeven werd."
 
-#: builtins.c:834
+#: builtins.c:835
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3740,7 +3722,7 @@ msgstr ""
 "ongeldige\n"
 "    optie gegeven werd."
 
-#: builtins.c:858
+#: builtins.c:859
 #, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
@@ -3752,6 +3734,8 @@ msgid ""
 "      -c\tclear the history list by deleting all of the entries\n"
 "      -d offset\tdelete the history entry at position OFFSET. Negative\n"
 "    \t\toffsets count back from the end of the history list\n"
+"      -d start-end\tdelete the history entries beginning at position START\n"
+"    \t\tthrough position END.\n"
 "    \n"
 "      -a\tappend history lines from this session to the history file\n"
 "      -n\tread all history lines not already read from the history file\n"
@@ -3804,9 +3788,14 @@ msgstr ""
 "             tonen zonder dit in de geschiedenis op te slaan\n"
 "      -s   de ARGUMENTen als één enkel item aan de geschiedenis toevoegen\n"
 "\n"
-"    Als een BESTANDSNAAM gegeven is, dan wordt dat gebruikt als het\n"
-"    geschiedenisbestand, anders wordt de waarde van HISTFILE gebruikt, en\n"
-"    als die variabele leeg is, dan ~/.bash_history.\n"
+"    Als een BESTANDSNAAM gegeven is, dan wordt dat bestand gebruikt als het\n"
+"    geschiedenisbestand, anders de waarde van HISTFILE als deze niet leeg "
+"is.\n"
+"    Zonder BESTANDSNAAM en zonder HISTFILE hebben de opties '-a', '-n', '-"
+"r',\n"
+"    en '-w' geen effect en retourneren succes.\n"
+"\n"
+"    De ingebouwde opdracht 'fc' werkt ook op de geschiedenislijst.\n"
 "\n"
 "    Als de variabele HISTTIMEFORMAT ingesteld en niet leeg is, dan wordt de\n"
 "    waarde ervan gebruikt als een opmaaktekenreeks for strftime(3), om een\n"
@@ -3814,11 +3803,10 @@ msgstr ""
 "geen\n"
 "    tijdsstempels getoond.\n"
 "\n"
-"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er "
-"een\n"
-"    fout optrad."
+"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
+"    een fout optrad."
 
-#: builtins.c:899
+#: builtins.c:902
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3864,7 +3852,7 @@ msgstr ""
 "een\n"
 "    fout optrad.  Met optie '-x' is de afsluitwaarde die van OPDRACHT."
 
-#: builtins.c:926
+#: builtins.c:929
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3896,7 +3884,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij een ongeldige optie of TAAKAANDUIDING\n"
 "    gegeven werd."
 
-#: builtins.c:945
+#: builtins.c:948
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3939,11 +3927,10 @@ msgstr ""
 "    aantal processen bereikt is hoeft u geen nieuw proces te starten om een\n"
 "    ander proces te elimineren.\n"
 "\n"
-"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er "
-"een\n"
-"    fout optrad."
+"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
+"    een fout optrad."
 
-#: builtins.c:969
+#: builtins.c:972
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -4032,8 +4019,7 @@ msgstr ""
 "    Als het laatste ARGUMENT evalueert tot 0, dan is de afsluitwaarde van\n"
 "    'let' 1; anders 0."
 
-#: builtins.c:1014
-#, fuzzy
+#: builtins.c:1017
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
@@ -4111,6 +4097,10 @@ msgstr ""
 "      -d TEKEN   doorgaan met lezen tot TEKEN gelezen wordt (i.p.v. LF-"
 "teken)\n"
 "      -e         'readline' gebruiken om de regel in te lezen\n"
+"      -E         'readline' gebruiken om de regel in te lezen en de "
+"standaard\n"
+"                   completering van 'bash' gebruiken i.p.v. die van "
+"'readline'\n"
 "      -i TEKST   door 'readline' te gebruiken begintekst\n"
 "      -n AANTAL  stoppen na maximaal dit aantal tekens gelezen te hebben, "
 "of\n"
@@ -4138,10 +4128,10 @@ msgstr ""
 "standaardinvoer\n"
 "\n"
 "    De afsluitwaarde is 0, tenzij einde-van-bestand (EOF) bereikt werd,\n"
-"    de tijdslimiet overschreden werd, er een toekenningsfout optrad, of een\n"
-"    ongeldige bestandsdescriptor als argument van '-u' gegeven werd."
+"    de tijdslimiet overschreden werd, er een toekenningsfout optrad, of\n"
+"    een ongeldige bestandsdescriptor als argument van '-u' gegeven werd."
 
-#: builtins.c:1064
+#: builtins.c:1067
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -4162,8 +4152,7 @@ msgstr ""
 "    uitvoeren is."
 
 # Voor de duidelijkheid is de tekstvolgorde veranderd.
-#: builtins.c:1077
-#, fuzzy
+#: builtins.c:1080
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -4311,6 +4300,12 @@ msgstr ""
 "          parameters; maar zonder argumenten worden de bestaande niet "
 "gewist\n"
 "\n"
+"    Als -o gegeven wordt zonder optienaam, dan toont 'set' de huidige "
+"optie-\n"
+"    instellingen van de shell.  Als +o gegeven wordt zonder optienaam, dan\n"
+"    toont 'set' een reeks opdrachten om de huidige instellingen te "
+"hermaken.\n"
+"\n"
 "    De opties kunnen ook gebruikt worden bij het starten van de shell.\n"
 "    De huidige toestand van de eigenschappen is te vinden in $-.  Eventuele\n"
 "    extra argumenten van 'set' worden begrepen als positionele parameters\n"
@@ -4353,7 +4348,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd."
 
-#: builtins.c:1166
+#: builtins.c:1169
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -4391,7 +4386,8 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of een\n"
 "    NAAM alleen-lezen is."
 
-#: builtins.c:1188
+#: builtins.c:1191
+#, fuzzy
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4402,7 +4398,7 @@ msgid ""
 "    Options:\n"
 "      -f\trefer to shell functions\n"
 "      -n\tremove the export property from each NAME\n"
-"      -p\tdisplay a list of all exported variables and functions\n"
+"      -p\tdisplay a list of all exported variables or functions\n"
 "    \n"
 "    An argument of `--' disables further option processing.\n"
 "    \n"
@@ -4425,7 +4421,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0, tenzij een ongeldige optie of NAAM gegeven werd."
 
-#: builtins.c:1207
+#: builtins.c:1210
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4463,7 +4459,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0, tenzij een ongeldige optie of NAAM gegeven werd."
 
-#: builtins.c:1229
+#: builtins.c:1232
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4480,8 +4476,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0 tenzij N negatief is of groter dan $#."
 
-#: builtins.c:1241 builtins.c:1257
-#, fuzzy
+#: builtins.c:1244 builtins.c:1260
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4500,16 +4495,22 @@ msgstr ""
 "\n"
 "    Leest opdrachten uit het gegeven bestand en voert deze uit in de "
 "huidige\n"
-"    shell.  De mappen in PATH worden nagezocht om het genoemde bestand te\n"
-"    vinden.  Als er verder nog argumenten gegeven zijn, dan worden dit de\n"
-"    positionele parameters tijdens de uitvoering van het genoemde bestand.\n"
+"    shell.  Als optie '-p' gegeven is, dan wordt het PAD-argument begrepen "
+"als\n"
+"    een dubbelepunt-gescheiden lijst van mappen waarin naar BESTANDSNAAM "
+"gezocht\n"
+"    moet worden.  Zonder optie '-p', worden de mappen in $PATH nagezocht om "
+"het\n"
+"    genoemde bestand te vinden.  Als er verder nog argumenten gegeven zijn, "
+"dan\n"
+"    worden dit de positionele parameters tijdens de uitvoering van het "
+"bestand.\n"
 "\n"
 "    De afsluitwaarde is die van de laatst uitgevoerde opdracht in het "
 "gegeven\n"
 "    bestand, of 1 als dit bestand niet gelezen kan worden."
 
-#: builtins.c:1274
-#, fuzzy
+#: builtins.c:1277
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4526,18 +4527,22 @@ msgid ""
 msgstr ""
 "Uitvoering van de shell pauzeren.\n"
 "\n"
-"    Pauzeert de uitvoering van deze shell totdat een SIGCONT-signaal\n"
-"    ontvangen wordt.  Een login-shell kan niet gepauzeerd worden, tenzij\n"
-"    optie '-f' gegeven is.\n"
+"    Pauzeert de uitvoering van deze shell totdat een SIGCONT-signaal "
+"ontvangen\n"
+"    wordt.  Tenzij gedwongen, kunnen login-shells en shells zonder "
+"taakbeheer\n"
+"    niet gepauzeerd worden.\n"
 "\n"
 "    Optie:\n"
-"      -f   pauzering afdwingen, ook als dit een login-shell is\n"
+"      -f   pauzering afdwingen, ook als dit een login-shell of een shell "
+"zonder\n"
+"             taakbeheer is\n"
 "\n"
 "    De afsluitwaarde is 0, tenzij taakbeheer uitgeschakeld is of er een "
 "fout\n"
 "    optreedt."
 
-#: builtins.c:1292
+#: builtins.c:1295
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4687,7 +4692,7 @@ msgstr ""
 "    De afsluitwaarde is 0 als EXPRESSIE waar is, 1 als EXPRESSIE onwaar is,\n"
 "    en 2 als een ongeldig argument gegeven werd."
 
-#: builtins.c:1374
+#: builtins.c:1377
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4699,7 +4704,7 @@ msgstr ""
 "    Dit is een synoniem voor de ingebouwde functie 'test', behalve dat\n"
 "    het laatste argument een ']' moet zijn, horend bij de begin-'['."
 
-#: builtins.c:1383
+#: builtins.c:1386
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4718,8 +4723,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is altijd 0."
 
-#: builtins.c:1395
-#, fuzzy
+#: builtins.c:1398
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -4772,36 +4776,40 @@ msgstr ""
 "    Definieert en activeert afhandelingsprocedures die uitgevoerd moeten\n"
 "    worden wanneer de shell een signaal of andere gebeurtenissen ontvangt.\n"
 "\n"
-"    ARGUMENT is een opdracht die gelezen en uitgevoerd wordt wanneer de "
-"shell\n"
-"    een van de opgegeven signalen ontvangt.  Als ARGUMENT ontbreekt en er "
-"één\n"
-"    signaal gegeven is, of wanneer ARGUMENT '-' is, dan worden de opgegeven\n"
+"    ACTIE is een opdracht die gelezen en uitgevoerd moet worden wanneer de\n"
+"    shell een van de opgegeven signalen ontvangt.  Als ACTIE ontbreekt en "
+"er\n"
+"    één signaal gegeven is, of wanneer ACTIE '-' is, dan worden de "
+"opgegeven\n"
 "    signalen teruggezet op de waarde die ze hadden bij het starten van deze\n"
-"    shell.  Als ARGUMENT de lege tekenreeks is, dan worden de opgegeven\n"
-"    signalen genegeerd door zowel deze shell als door alle "
-"dochterprocessen.\n"
+"    shell.  Als ACTIE de lege tekenreeks is, dan worden de opgegeven "
+"signalen\n"
+"    genegeerd door zowel deze shell als door alle dochterprocessen.\n"
 "\n"
-"    Als EXIT (0) als signaal opgegeven wordt, dan wordt ARGUMENT uitgevoerd\n"
-"    bij het afsluiten van de shell.  Als DEBUG als signaal opgegeven wordt,\n"
-"    dan wordt ARGUMENT uitgevoerd vóór elke enkelvoudige opdracht.  Als "
-"RETURN\n"
-"    als signaal opgegeven wordt, dan wordt ARGUMENT uitgevoerd elke keer "
-"als\n"
-"    een functie (of een met 'source' aangeroepen script) terugkeert.  Als "
-"ERR\n"
-"    als signaal opgegeven wordt, dan wordt ARGUMENT uitgevoerd elke keer "
-"als\n"
+"    Als EXIT (0) als signaal opgegeven wordt, dan wordt ACTIE uitgevoerd "
+"bij\n"
+"    het afsluiten van de shell.  Als DEBUG als signaal opgegeven wordt, dan\n"
+"    wordt ACTIE uitgevoerd vóór elke enkelvoudige opdracht.  Als RETURN als\n"
+"    signaal opgegeven wordt, dan wordt ACTIE uitgevoerd elke keer als een\n"
+"    functie (of een met 'source' aangeroepen script) terugkeert.  Als ERR\n"
+"    als signaal opgegeven wordt, dan wordt ACTIE uitgevoerd elke keer als\n"
 "    de mislukking van een opdracht de shell zou beëindigen als optie '-e'\n"
 "    gegeven was.\n"
 "\n"
 "    Als er geen enkel argument gegeven is, dan toont 'trap' welke "
 "opdrachten\n"
-"    er met welke signalen verbonden zijn.\n"
+"    er met welke signalen verbonden zijn, in een vorm die gebruikt kan "
+"worden\n"
+"    als shell-invoer om dezelfde signaalafvangingen te herstellen.\n"
 "\n"
 "    Opties:\n"
 "      -l   een overzicht tonen van signaalnummers en hun namen\n"
-"      -p   voor elk gegeven signaal tonen welke opdracht ermee verbonden is\n"
+"      -p   voor elk gegeven signaal tonen welke opdracht ermee verbonden is, "
+"in\n"
+"             een vorm die gebruikt kan worden als shell-invoer; als geen "
+"signaal\n"
+"             gegeven is, dan de opdrachten voor alle afgevangen signalen "
+"tonen\n"
 "\n"
 "    Signalen kunnen als naam of als nummer opgegeven worden, in hoofd- of "
 "in\n"
@@ -4812,7 +4820,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij een ongeldige optie of SIGNAALAANDUIDING\n"
 "    gegeven werd."
 
-#: builtins.c:1438
+#: builtins.c:1441
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4865,8 +4873,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0 als elke NAAM gevonden werd, anders 1."
 
-#: builtins.c:1469
-#, fuzzy
+#: builtins.c:1472
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -4962,16 +4969,18 @@ msgstr ""
 "    huidige zachte grens, de huidige harde grens, en onbegrensd.\n"
 "    Als geen optie gegeven is, dan wordt optie '-f' aangenomen.\n"
 "\n"
-"    De waardes gaan in stappen van 1024 bytes, behalve voor '-t', die in\n"
-"    seconden is, voor '-p', die in stappen van 512 bytes gaat, en voor '-"
-"u',\n"
-"    dat een ongeschaald aantal is.\n"
+"    De waardes gaan in stappen van 1024 bytes -- behalve voor '-t', die in\n"
+"    seconden is; voor '-p', die in stappen van 512 bytes gaat; voor '-R', "
+"die\n"
+"    in microseconden is; voor '-b' die in bytes is; en voor '-e', '-i', '-"
+"k',\n"
+"    '-n', '-q', '-r', '-u', '-x', en '-P' die ongeschaalde waarden "
+"accepteren.\n"
 "\n"
-"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er "
-"een\n"
-"    fout optrad."
+"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
+"    een fout optrad."
 
-#: builtins.c:1524
+#: builtins.c:1527
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -5007,7 +5016,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij MODUS ongeldig is of een ongeldige optie\n"
 "    gegeven werd."
 
-#: builtins.c:1544
+#: builtins.c:1547
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -5071,7 +5080,7 @@ msgstr ""
 "de\n"
 "    shell geen dochters heeft waarop gewacht wordt."
 
-#: builtins.c:1575
+#: builtins.c:1578
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -5095,7 +5104,7 @@ msgstr ""
 "    De afsluitwaarde is die van de laatste PID, 1 als PID ongeldig is,\n"
 "    of 2 als een ongeldige optie gegeven werd."
 
-#: builtins.c:1590
+#: builtins.c:1593
 msgid ""
 "Execute PIPELINE, which can be a simple command, and negate PIPELINE's\n"
 "    return status.\n"
@@ -5103,8 +5112,14 @@ msgid ""
 "    Exit Status:\n"
 "    The logical negation of PIPELINE's return status."
 msgstr ""
+"Een PIJPLIJN uitvoeren (dit kan een enkele opdracht zijn) en diens "
+"afsluitwaarde\n"
+"logisch omkeren.\n"
+"\n"
+"De afsluitwaarde is de logische ontkenning van de afsluitwaarde van de "
+"PIJPLIJN."
 
-#: builtins.c:1600
+#: builtins.c:1603
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -5125,7 +5140,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de laatst uitgevoerde opdracht."
 
-#: builtins.c:1614
+#: builtins.c:1617
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -5152,7 +5167,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de laatst uitgevoerde opdracht."
 
-#: builtins.c:1632
+#: builtins.c:1635
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -5189,7 +5204,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de laatst uitgevoerde opdracht."
 
-#: builtins.c:1653
+#: builtins.c:1656
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -5217,7 +5232,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de PIJPLIJN."
 
-#: builtins.c:1670
+#: builtins.c:1673
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -5235,7 +5250,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de laatst uitgevoerde opdracht."
 
-#: builtins.c:1682
+#: builtins.c:1685
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -5270,7 +5285,7 @@ msgstr ""
 "uitgevoerde\n"
 "    deelopdracht, of nul als geen enkele 'if' of 'elif' nul opleverde."
 
-#: builtins.c:1699
+#: builtins.c:1702
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -5288,7 +5303,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de laatst uitgevoerde opdracht."
 
-#: builtins.c:1711
+#: builtins.c:1714
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -5306,7 +5321,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de laatst uitgevoerde opdracht."
 
-#: builtins.c:1723
+#: builtins.c:1726
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -5327,7 +5342,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde van coproc is 0."
 
-#: builtins.c:1737
+#: builtins.c:1740
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -5349,7 +5364,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0, tenzij NAAM onveranderbaar is."
 
-#: builtins.c:1751
+#: builtins.c:1754
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -5366,7 +5381,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de laatst uitgevoerde opdracht."
 
-#: builtins.c:1763
+#: builtins.c:1766
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -5390,7 +5405,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is die van de hervatte taak."
 
-#: builtins.c:1778
+#: builtins.c:1781
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -5407,7 +5422,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 1 als de EXPRESSIE tot 0 evalueert; anders 0."
 
-#: builtins.c:1790
+#: builtins.c:1793
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -5462,7 +5477,7 @@ msgstr ""
 "\n"
 "    De afsluitwaarde is 0 of 1, afhankelijk van EXPRESSIE."
 
-#: builtins.c:1816
+#: builtins.c:1819
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5576,7 +5591,7 @@ msgstr ""
 "het\n"
 "                    geschiedeniscommentaarteken, gewoonlijk '#'\n"
 
-#: builtins.c:1873
+#: builtins.c:1876
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5629,7 +5644,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij een ongeldig argument gegeven werd of de\n"
 "    mapwijziging mislukte."
 
-#: builtins.c:1907
+#: builtins.c:1910
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5678,7 +5693,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij een ongeldig argument gegeven werd of de\n"
 "    mapwijziging mislukte."
 
-#: builtins.c:1937
+#: builtins.c:1940
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5725,11 +5740,10 @@ msgstr ""
 "      -N   Het N-de item tonen, tellend vanaf rechts, van de lijst getoond\n"
 "           door 'dirs' wanneer opgeroepen zonder opties, beginnend bij nul.\n"
 "\n"
-"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er "
-"een\n"
-"    fout optrad."
+"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
+"    een fout optrad."
 
-#: builtins.c:1968
+#: builtins.c:1971
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5770,8 +5784,7 @@ msgstr ""
 "    een ongeldige optienaam gegeven werd, en de afsluitwaarde is 2 als een\n"
 "    ongeldige optie gegeven werd."
 
-#: builtins.c:1989
-#, fuzzy
+#: builtins.c:1992
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -5824,7 +5837,8 @@ msgstr ""
 "    die omgezet worden en dan naar standaarduitvoer gekopieerd worden;\n"
 "    en opmaaksymbolen, die elk steeds het volgende argument doen printen.\n"
 "\n"
-"    Naast de standaard %-opmaaksymbolen van printf(1), \"diouxXfeEgGcs\",\n"
+"    Naast de standaard %-opmaaksymbolen van printf(1), "
+"\"diouxXfeEgGaAcsn\",\n"
 "    betekent %b dat de backslash-stuurtekens in het betreffende argument\n"
 "    omgezet moeten worden, en betekent %q dat het argument op zo'n manier\n"
 "    aangehaald moet worden dat het als invoer voor de shell hergebruikt\n"
@@ -5842,12 +5856,10 @@ msgstr ""
 "de\n"
 "    waarde nul of een lege tekenreeks gegeven werd.\n"
 "\n"
-"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er "
-"een\n"
-"    schrijf- of toekenningsfout optrad."
+"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
+"    een schrijf- of toekenningsfout optrad."
 
-#: builtins.c:2025
-#, fuzzy
+#: builtins.c:2028
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -5879,8 +5891,9 @@ msgid ""
 msgstr ""
 "Aangeven hoe argumenten door 'readline' gecompleteerd moeten worden.\n"
 "\n"
-"    Geeft voor elke gegeven NAAM aan hoe de argumenten gecompleteerd dienen\n"
-"    te worden.  Zonder opties worden de bestaande "
+"    Geeft voor elke gegeven NAAM aan hoe de argumenten gecompleteerd dienen "
+"te\n"
+"    worden.  Zonder argumenten worden de bestaande "
 "completeringsvoorschriften\n"
 "    getoond (in een vorm die als invoer hergebruikt kan worden).\n"
 "\n"
@@ -5902,8 +5915,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
 "    een fout optrad."
 
-#: builtins.c:2055
-#, fuzzy
+#: builtins.c:2058
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -5925,11 +5937,15 @@ msgstr ""
 "    genereert.  Als het optionele argument WOORD aanwezig is, worden alleen\n"
 "    de daarbij passende completeringen gegenereerd.\n"
 "\n"
-"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er "
-"een\n"
-"    fout optrad."
+"    Als optie '-V' gegeven is, worden de mogelijke completeringen "
+"opgeslagen\n"
+"    in het array VARIABELENAAM in plaats van ze op standaarduitvoer te "
+"tonen.\n"
+"\n"
+"    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of er\n"
+"    een fout optrad."
 
-#: builtins.c:2073
+#: builtins.c:2076
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -5987,7 +6003,7 @@ msgstr ""
 "    De afsluitwaarde is 0, tenzij een ongeldige optie gegeven werd of voor\n"
 "    NAAM geen completeringsvoorschrift gedefinieerd is."
 
-#: builtins.c:2104
+#: builtins.c:2107
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
@@ -6047,8 +6063,7 @@ msgstr ""
 "FUNCTIE\n"
 "\n"
 "    Argument:\n"
-"      ARRAY        naam van array-variabele waarin regels ingelezen moeten "
-"worden\n"
+"      ARRAY        naam van variabele waarin regels ingelezen moeten worden\n"
 "\n"
 "    Als '-C' gegeven is zonder '-c', is de standaard-HOEVEELHEID 5000.\n"
 "    Wanneer FUNCTIE aangeroepen wordt, dan wordt hieraan de index van het\n"
@@ -6062,7 +6077,7 @@ msgstr ""
 "of\n"
 "    een ongeldige optie gegeven werd."
 
-#: builtins.c:2140
+#: builtins.c:2143
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
@@ -6073,18 +6088,6 @@ msgstr ""
 "    Een synoniem voor 'mapfile'."
 
 #, c-format
-#~ msgid "%s: cannot open: %s"
-#~ msgstr "Kan %s niet openen: %s"
-
-#, c-format
-#~ msgid "%s: inlib failed"
-#~ msgstr "%s: 'inlib' is mislukt"
-
-#, c-format
-#~ msgid "%s: %s"
-#~ msgstr "%s: %s"
-
-#, c-format
 #~ msgid "%s: cannot execute binary file: %s"
 #~ msgstr "%s: kan binair bestand %s niet uitvoeren"
 
@@ -6092,72 +6095,11 @@ msgstr ""
 #~ msgid "setlocale: LC_ALL: cannot change locale (%s)"
 #~ msgstr "setlocale(): LC_ALL: kan niet van taalregio veranderen (%s)"
 
-#, c-format
-#~ msgid "setlocale: LC_ALL: cannot change locale (%s): %s"
-#~ msgstr "setlocale(): LC_ALL: kan niet van taalregio veranderen (%s): %s"
-
-#, c-format
-#~ msgid "setlocale: %s: cannot change locale (%s): %s"
-#~ msgstr "setlocale(): %s: kan niet van taalregio veranderen (%s): %s"
-
-#~ msgid ""
-#~ "Returns the context of the current subroutine call.\n"
-#~ "    \n"
-#~ "    Without EXPR, returns \"$line $filename\".  With EXPR, returns\n"
-#~ "    \"$line $subroutine $filename\"; this extra information can be used "
-#~ "to\n"
-#~ "    provide a stack trace.\n"
-#~ "    \n"
-#~ "    The value of EXPR indicates how many call frames to go back before "
-#~ "the\n"
-#~ "    current one; the top frame is frame 0."
-#~ msgstr ""
-#~ "De context van de aanroep van de huidige functie tonen.\n"
-#~ "\n"
-#~ "    Zonder argument produceert het \"$regelnummer $bestandsnaam\"; met\n"
-#~ "    argument \"$regelnummer $functienaam $bestandsnaam\".  Deze tweede\n"
-#~ "    vorm kan gebruikt worden om een 'stack trace' te produceren.\n"
-#~ "\n"
-#~ "    De waarde van het argument geeft aan hoeveel frames er teruggegaan\n"
-#~ "    moet worden vanaf de huidige; het bovenste frame heeft nummer 0."
-
-#, c-format
-#~ msgid "warning: %s: %s"
-#~ msgstr "waarschuwing: %s: %s"
-
 #~ msgid "%s: invalid associative array key"
 #~ msgstr "%s: ongeldige sleutel voor associatief array"
-
-#~ msgid ""
-#~ "Returns the context of the current subroutine call.\n"
-#~ "    \n"
-#~ "    Without EXPR, returns "
-#~ msgstr ""
-#~ "De context geven van de huidige functie-aanroep.\n"
-#~ "\n"
-#~ "    Zonder EXPR, resulteert "
 
 #~ msgid "add_process: process %5ld (%s) in the_pipeline"
 #~ msgstr "add_process(): proces %5ld (%s) in de pijplijn"
 
 #~ msgid "Unknown Signal #"
 #~ msgstr "Onbekend signaalnummer"
-
-# Dit is een commandonaam.
-#~ msgid "true"
-#~ msgstr "true"
-
-# Dit is een commandonaam.
-#~ msgid "false"
-#~ msgstr "false"
-
-# Dit is een commandonaam.
-#~ msgid "times"
-#~ msgstr "times"
-
-#~ msgid ""
-#~ "License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl."
-#~ "html>\n"
-#~ msgstr ""
-#~ "De licentie is GPLv2+: GNU GPL versie 2 of later.\n"
-#~ "Zie http://gnu.org/licenses/gpl.html voor de volledige tekst.\n"

@@ -1,4 +1,4 @@
-# Makefile for bash-5.3, version 5.8
+# Makefile for bash-5.3, version 5.10
 #
 # Copyright (C) 1996-2025 Free Software Foundation, Inc.
 
@@ -79,14 +79,17 @@ AR = @AR@
 ARFLAGS = @ARFLAGS@
 RANLIB = @RANLIB@
 SIZE = @SIZE@
-STRIP = strip
+STRIP = @STRIP@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALLMODE= -m 0755
 INSTALLMODE2 = -m 0555
+
+install_sh = @install_sh@
 
 CTAGS = ctags
 CTAGSFLAGS = -x
@@ -923,7 +926,7 @@ install:	.made installdirs
 	-( cd $(LOADABLES_DIR) && $(MAKE) $(BASH_MAKEFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 install-strip:
-	$(MAKE) $(BASH_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' \
+	$(MAKE) $(BASH_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_STRIP_PROGRAM)' \
 		prefix=${prefix} exec_prefix=${exec_prefix} \
 		DESTDIR=$(DESTDIR) install
 

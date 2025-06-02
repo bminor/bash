@@ -1,4 +1,3 @@
-
 				 12/6/2020
 				 ---------
 
@@ -11103,3 +11102,169 @@ lib/sh/gettimeofday.c
 	- updated from version in gnulib
 
 [bash-5.3-rc1 frozen]
+
+				    4/4
+				    ---
+examples/loadables/fltexpr.c
+	- add support for function calls; support almost all math function
+	  calls in math.h
+	- add support for pi, gamma, e mathematical constants
+
+				    4/7
+				    ---
+doc/bash.1,doc/bashref.texi
+	- HISTFILESIZE: note that the history file will contain complete
+	  history entries whose lines may total slightly more than
+	  $HISTFILESIZE if the entries contain multiple lines
+	  From a report from Jens Schmidt <farblos@vodafonemail.de>
+	- export: note that you can use -f with -p to display exported functions
+	  From a report from Duncan Roe <duncan_roe@optusnet.com.au>
+
+builtins/history.def
+	- add history -d start-end to the long doc
+	  From a report from Duncan Roe <duncan_roe@optusnet.com.au>
+
+				    4/9
+				    ---
+lib/readline/histfile.c
+	- read_history_range: changes to not skip blank lines if we are
+	  reading a history file with multiline history entries.
+	  From a report by Jens Schmidt <farblos@vodafonemail.de>
+
+				   4/11
+				   ----
+bashline.c
+	- attempt_shell_completion: move the check for char_is_quoted from
+	  check_redir to the caller, set in_command_position to 0 if the
+	  command separator is quoted
+	  From https://savannah.gnu.org/support/?111224 david@mandelberg.org
+	- check_extglob: break check for extended glob out into separate
+	  function, call from attempted_shell_completion, set in_command_position
+	  to -1 if it returns 1, as with the old call to check_redir
+
+				   4/21
+				   ----
+builtins/read.def
+	- read_mbchar: if we read a delimiter character that makes an
+	  incomplete multibyte character into an invalid multibyte character,
+	  only push the delimiter back if we read that character ourselves
+	  (i > 1).
+	  Report from Greg Wooledge <greg@wooledge.org>
+
+				   4/23
+				   ----
+parse.y
+	- pop_delimiter: only decrement delimiter_depth if it's > 0, since
+	  reset_parser() may have set it to 0 after the matching call to
+	  push_delimiter
+	  Report from Grisha Levit <grishalevit@gmail.com> based on a report
+	  from Александр Ушаков <aushakov@astralinux.ru>
+
+				   4/25
+				   ----
+parse.y
+	- read_a_line: if the shell is interactive, and not reading from a
+	  string, check whether a previous call to shell_getc has set
+	  EOF_Reached and return EOF in this case, after resetting the
+	  current token to '\n'. This makes EOFs that are not the first
+	  character on the line `sticky' instead of just token delimiters.
+	  From https://savannah.gnu.org/bugs/?67045
+	- history_delimiting_chars: if it looks like we just finished a
+	  subshell, and the line we're adding begins with an operator that
+	  can't follow a semicolon, return a newline
+	  From https://savannah.gnu.org/patch/?10517
+
+				   4/28
+				   ----
+parse.y
+	- parse_arith_command: if the character after the first right paren
+	  isn't a right paren, making the construct a nested subshell, push
+	  that character back and return the subshell command as the current
+	  token string, which we push onto the pushed string list. Reading
+	  one character more can cause synchronization problems with backslash
+	  newline, among other things.
+	  From https://savannah.gnu.org/patch/?10517
+
+				   4/29
+				   ----
+builtins/evalstring.c
+	- parse_string: only run the top-level unwind-protects if we're
+	  actually going to be calling jump_to_top_level(); otherwise let
+	  xparse_dolparen take care of it
+	  From a report by Александр Ушаков <aushakov@astralinux.ru>
+
+				    5/1
+				    ---
+lib/sh/zread.c
+	- zungetc: rework to use a local 16-byte buffer so we can push back
+	  multiple characters whether we use read or zread
+	- zread/zreadretry/zreadintr/zreadc/zreadcintr/zreadn: changed to use
+	  zpopbuf to check whether we have pushed back bytes
+	- zreset,zsyncfd: reset the pushback buffer indices
+
+builtins/read.def
+	- read_mbchar: handle the delimiter being part of an invalid multibyte
+	  character, not just the byte that makes the multibyte character
+	  invalid: keep track of where the delimiter char is in the buffer and
+	  use zungetc to push back that character and everything we read
+	  after it so subsequent buffered (zread) or unbuffered (read) reads
+	  will return them
+
+				    5/2
+				    ---
+lib/readline/display.c,lib/readline/histexpand.c,lib/readline/history.c,
+lib/readline/input.c,lib/readline/search.c,lib/readline/shell.c,
+lib/readline/util.c,lib/readline/readline.c,lib/readline/histfile.c
+	- fixes for issues (unused variables, etc.) uncovered by static
+	  analysis
+	  All from a report by Siteshwar Vashisht <svashisht@redhat.com>
+
+				   5/16
+				   ----
+lib/readline/terminal.c
+	- NEED_EXTERN_PC: add __gnu_hurd__ to the systems that require this
+	  if not using ncurses; rework the structure of the defines
+	  Report from Collin Funk <collin.funk1@gmail.com>
+
+braces.c
+	- brace_gobbler: don't mark an expression as BRACE_SEQ if we've
+	  already seen a comma and marked it as BRACE_COMMA, so we treat
+	  it as a comma brace expansion.
+	  From a report by Sam James <sam@gentoo.org>
+
+support/install-sh
+	- new version from coreutils-git (2024-12-03.03); renamed from install.sh
+
+aclocal.m4
+	- AM_PROG_INSTALL_SH, AM_PROG_INSTALL_STRIP: added from automake
+
+configure.ac
+	- call AM_PROG_INSTALL_SH, AM_PROG_INSTALL_STRIP
+
+Makefile.in
+	- STRIP: let configure substitute it from AC_CHECK_TOOL result
+	- INSTALL_STRIP_PROGRAM: let configure substitute it from
+	  AM_PROG_INSTALL_STRIP
+	- install-strip: change to set INSTALL_PROGRAM=${INSTALL_STRIP_PROGRAM}
+	  to avoid hard-coding `-s' in the recipe
+	  All from a report by NR <nroycea+gnu@gmail.com>
+
+				   5/18
+				   ----
+subst.c
+	- param_expand: if we expand a nameref that references an unset array
+	  variable reference, make sure we enforce `nounset', with the usual
+	  exceptions for `@' and `*' subscripts
+	  From a report from Emanuele Torre <torreemanuele6@gmail.com>
+
+				   5/22
+				   ----
+buildconf.h.in
+	- add additional defines for conservative ISO C/POSIX environment
+	- add HAVE_C_BOOL define in case someone cross-compiles with a C23
+	  compiler
+	  From a report by Bruce Dubbs <bdubbs@linuxfromscratch.org>
+
+builtins/mkbuiltins.c
+	- include buildconf.h instead of having separate defines when
+	  cross-compiling

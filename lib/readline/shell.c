@@ -118,8 +118,10 @@ sh_single_quote (char *string)
 /* Set the environment variables LINES and COLUMNS to lines and cols,
    respectively. */
 static char setenv_buf[INT_STRLEN_BOUND (int) + 1];
+#if defined (HAVE_PUTENV) && !defined (HAVE_SETENV)
 static char putenv_buf1[INT_STRLEN_BOUND (int) + 6 + 1];	/* sizeof("LINES=") == 6 */
 static char putenv_buf2[INT_STRLEN_BOUND (int) + 8 + 1];	/* sizeof("COLUMNS=") == 8 */
+#endif
 
 void
 sh_set_lines_and_columns (int lines, int cols)

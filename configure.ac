@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.076])dnl
+AC_REVISION([for Bash 5.3, version 5.080])dnl
 
 define(bashvers, 5.3)
-define(relstatus, rc1)
+define(relstatus, rc2)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -32,7 +32,7 @@ dnl make sure we are using a recent autoconf version
 AC_PREREQ(2.69)
 
 AC_CONFIG_SRCDIR(shell.h)
-dnl where to find install.sh, config.sub, and config.guess
+dnl where to find install-sh, config.sub, and config.guess
 AC_CONFIG_AUX_DIR(./support)
 AC_CONFIG_HEADERS(config.h buildconf.h)
 
@@ -695,6 +695,9 @@ AC_PROG_RANLIB
 AC_PROG_YACC
 AC_PROG_MAKE_SET
 
+AM_PROG_INSTALL_SH
+AM_PROG_INSTALL_STRIP
+
 case "$ac_cv_prog_YACC" in
 *bison*)	;;
 *)	AC_MSG_WARN([bison not available; needed to process parse.y]) ;;
@@ -874,7 +877,8 @@ AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getentropy getgroups \
 		gethostname getpagesize getpeername getrandom getrlimit \
 		getrusage gettimeofday kill killpg lstat nanosleep \
 		pselect readlink \
-		select setdtablesize setitimer tcgetpgrp uname ulimit waitpid)
+		select setdtablesize setitimer statfs \
+		tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions
@@ -898,7 +902,6 @@ AC_REPLACE_FUNCS(getcwd memset)
 AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoumax)
 AC_REPLACE_FUNCS(dprintf)
-AC_REPLACE_FUNCS(strchrnul)
 AC_REPLACE_FUNCS(strdup)
 AC_REPLACE_FUNCS(strlcpy)
 AC_REPLACE_FUNCS(reallocarray)
@@ -1048,6 +1051,8 @@ dnl Miscellaneous Bash tests
 if test "$ac_cv_func_lstat" = "no"; then
 BASH_FUNC_LSTAT
 fi
+
+BASH_FUNC_STRCHRNUL
 
 dnl behavior of system calls and library functions
 BASH_FUNC_DUP2_CLOEXEC_CHECK

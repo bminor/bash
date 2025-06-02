@@ -79,9 +79,11 @@ main (int c, char **v)
   /* Set the default locale values according to environment variables. */
   setlocale (LC_ALL, "");
 
+#if defined (SIGWINCH)
   /* Handle window size changes when readline is not active and reading
      characters. */
   signal (SIGWINCH, sighandler);
+#endif
   
   /* Install the line handler. */
   rl_callback_handler_install (prompt, cb_linehandler);

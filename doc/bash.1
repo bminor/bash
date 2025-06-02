@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Feb 24 16:09:49 EST 2025
+.\"	Last Change: Mon Apr  7 16:59:13 EDT 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -21,7 +21,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 February 24" "GNU Bash 5.3"
+.TH BASH 1 "2025 April 7" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -1449,7 +1449,7 @@ is applied to an array variable using compound assignment
 below),
 the variable's value is not unset
 (as it is when using
-.@ = ),
+.Q = ),
 and new values are appended to the array
 beginning at one greater than the array's maximum index (for indexed arrays)
 or added as additional key\-value pairs in an associative array.
@@ -2617,8 +2617,13 @@ the shell does not save the command history when it exits.
 .B HISTFILESIZE
 The maximum number of lines contained in the history file.
 When this variable is assigned a value, the history file is truncated,
-if necessary, to contain no more than that number of lines
+if necessary, to contain no more than
+the number of history entries
+that total no more than that number of lines
 by removing the oldest entries.
+If the history list contains multi-line entries,
+the history file may contain more lines than this maximum
+to avoid leaving partial history entries.
 The history file is also truncated to this size after
 writing it when a shell exits or by the
 .B \%history
@@ -10174,7 +10179,7 @@ is executed before the shell terminates.
 \fBexport\fP [\fB\-fn\fP\^] [\fIname\fP[=\fIvalue\fP]] .\|.\|.
 .PD 0
 .TP
-.B export \-p
+.B export \-p [\fB\-f\fP\^]
 .PD
 The supplied
 .I names
@@ -10191,10 +10196,13 @@ The
 option unexports, or removes the export attribute, from each \fIname\fP.
 If no
 .I names
-are given, or if the
+are given, or if only the
 .B \-p
-option is supplied, \fBexport\fP prints a list of names of all exported
+option is supplied,
+\fBexport\fP displays a list of names of all exported
 variables on the standard output.
+Using \fB\-p\fP and \fB\-f\fP together displays exported functions.
+The \fB\-p\fP option displays output in a form that may be reused as input.
 .IP
 \fBexport\fP allows the value of a variable to be set when it is exported
 or unexported by following the variable name with =\fIvalue\fP.

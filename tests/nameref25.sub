@@ -1,0 +1,12 @@
+# issues with nounset and references to nameref variables whose value
+# contains an unset variable
+
+$THIS_SH -uc 'a=() k=; "${a[k]}"' bash ||  echo ok 1
+$THIS_SH -uc 'declare -n r0=b ; : "$r0"' bash || echo ok 2
+$THIS_SH -uc 'a=() k=; declare -n r='a[k]' ; : "$r"' bash || echo ok 3
+$THIS_SH -uc 'declare -n r='a[k]' ; : "$r"' bash || echo ok 4
+
+$THIS_SH -uc 'a=() k=; declare -n r='a[@]' ; : "$r"' bash && echo ok 5
+$THIS_SH -uc 'declare -n r='a[@]' ; : "$r"' bash && echo ok 6
+$THIS_SH -uc 'a=() k=; declare -n r='a[*]' ; : "$r"' bash && echo ok 7
+$THIS_SH -uc 'declare -n r='a[*]' ; : "$r"' bash && echo ok 8

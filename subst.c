@@ -10974,9 +10974,26 @@ comsub:
 	    {
 	      chk_atstar (temp, quoted, pflags, quoted_dollar_at_p, contains_dollar_at);
 	      tdesc = parameter_brace_expand_word (temp, SPECIAL_VAR (temp, 0), quoted, pflags, 0);
-	      free (temp1);
 	      if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
-		return (tdesc);
+		{
+		  free (temp1);
+		  return (tdesc);
+		}
+	      /* check for a nameref pointing to an  unset array reference
+		 where the subscript is not `@' or `*' and enforce nounset
+		 if enabled. */
+	      if ((tdesc == 0 || tdesc->word == 0) && unbound_vars_is_error)
+		{
+		  char *sub;
+		  sub = mbschr (temp, LBRACK);
+		  if (DOLLAR_AT_STAR (sub[1]) == 0 || sub[2] != RBRACK)
+		    {
+		      temp = (char *)NULL;
+		      goto unbound_variable;
+		    }
+		}		    
+
+	      free (temp1);
 	      ret = tdesc;
 	      goto return0;
 	    }

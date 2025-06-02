@@ -119,6 +119,7 @@ typedef double sh_float_t;
 #define PREDEC	15	/* --var */
 #define POSTINC	16	/* var++ */
 #define POSTDEC	17	/* var-- */
+#define FUNC	18	/* function call */
 #define EQ	'='
 #define GT	'>'
 #define LT	'<'
@@ -147,6 +148,10 @@ typedef double sh_float_t;
 #define SHFLOAT_MANT_DIG	DBL_MANT_DIG
 #define SHFLOAT_LENGTH_MODIFIER	'l';
 #define SHFLOAT_STRTOD		strtod
+
+#ifndef M_EGAMMA
+#define M_EGAMMA 0.57721566490153286060651209008240243
+#endif
 
 struct lvalue
 {
@@ -184,6 +189,150 @@ static int	already_expanded;
 static struct lvalue curlval = {0, 0, 0, -1};
 static struct lvalue lastlval = {0, 0, 0, -1};
 
+/* Function equivalents for POSIX math.h macros. */
+static int xfpclassify(sh_float_t d) { return fpclassify(d); }
+static int xisinf(sh_float_t d) { return isinf(d); }
+static int xisnan(sh_float_t d) { return isnan(d); }
+static int xisnormal(sh_float_t d) { return isnormal(d); }
+static int xisfinite(sh_float_t d) { return isfinite(d); }
+static int xsignbit(sh_float_t d) { return signbit(d); }
+
+static int xisgreater(sh_float_t d1, sh_float_t d2) { return isgreater(d1, d2); }
+static int xisgreaterequal(sh_float_t d1, sh_float_t d2) { return isgreaterequal(d1, d2); }
+static int xisless(sh_float_t d1, sh_float_t d2) { return isless(d1, d2); }
+static int xislessequal(sh_float_t d1, sh_float_t d2) { return islessequal(d1, d2); }
+static int xislessgreater(sh_float_t d1, sh_float_t d2) { return islessgreater(d1, d2); }
+static int xisunordered(sh_float_t d1, sh_float_t d2) { return isunordered(d1, d2); }
+
+static int xisinfinite(sh_float_t d) { return (fpclassify(d) == FP_INFINITE); }
+static int xissubnormal(sh_float_t d) { return (fpclassify(d) == FP_SUBNORMAL); }
+static int xiszero(sh_float_t d) { return (fpclassify(d) == FP_ZERO); }
+
+/* Function replacements for some math functions that don't conform to the
+   supported prototypes. */
+static sh_float_t xscalbn(sh_float_t d1, sh_float_t d2) { int x = d2; return (scalbn (d1, x)); }
+static sh_float_t xjn(sh_float_t d1, sh_float_t d2) { int x = d1; return (jn (x, d2)); }
+static sh_float_t xyn(sh_float_t d1, sh_float_t d2) { int x = d1; return (yn (x, d2)); }
+static sh_float_t xldexp(sh_float_t d1, sh_float_t d2) { int x = d2; return (ldexp (d1, x)); }
+
+/* Some additional math functions that aren't in libm */
+static sh_float_t xcot(sh_float_t d) { return (1.0 / tan(d)); }
+static sh_float_t xcoth(sh_float_t d) { return (cosh(d) / sinh(d)); }
+
+static sh_float_t xroundp(sh_float_t d1, sh_float_t d2)
+{
+  sh_float_t m, r;
+  int prec = d2;
+
+  m = pow(10.0, prec);
+  r = round(d1 * m) / m;
+  return r;
+}
+
+typedef int imathfunc1(sh_float_t);
+typedef int imathfunc2(sh_float_t, sh_float_t);
+typedef sh_float_t mathfunc1(sh_float_t);
+typedef sh_float_t mathfunc2(sh_float_t, sh_float_t);
+typedef sh_float_t mathfunc3(sh_float_t, sh_float_t, sh_float_t);
+
+typedef struct
+{
+  char *name;
+  int nargs;		/* > 0, function returns double; < 0, function returns int */
+  union
+    {
+      mathfunc1 *func1;
+      mathfunc2 *func2;
+      mathfunc3 *func3;
+      imathfunc1 *ifunc1;
+      imathfunc2 *ifunc2;
+    } f;
+} FLTEXPR_MATHFUN;
+
+/* Not implemented yet: functions that don't fit one of the supported
+   calling prototypes, with a couple of exceptions */
+FLTEXPR_MATHFUN mathfuncs[] =
+{
+  { "abs",	1,	{ .func1 = fabs }	},
+  { "acos",	1,	{ .func1 = acos }	},
+  { "acosh",	1,	{ .func1 = acosh }	},
+  { "asin",	1,	{ .func1 = asin }	},
+  { "asinh",	1,	{ .func1 = asinh }	},
+  { "atan",	1,	{ .func1 = atan }	},
+  { "atanh",	1,	{ .func1 = atanh }	},
+  { "cbrt",	1,	{ .func1 = cbrt }	},
+  { "ceil",	1,	{ .func1 = ceil }	},
+  { "cos",	1,	{ .func1 = cos }	},  
+  { "cosh",	1,	{ .func1 = cosh }	},
+  { "cot",	1,	{ .func1 = xcot }	},
+  { "coth",	1,	{ .func1 = xcoth }	},
+  { "erf",	1,	{ .func1 = erf }	},
+  { "erfc",	1,	{ .func1 = erfc }	},
+  { "exp",	1,	{ .func1 = exp }	},
+  { "exp2",	1,	{ .func1 = exp2 }	},
+  { "expm1",	1,	{ .func1 = expm1 }	},
+  { "fabs",	1,	{ .func1 = fabs }	},
+  { "floor",	1,	{ .func1 = floor }	},
+  { "j0",	1,	{ .func1 = j0 }		},
+  { "j1",	1,	{ .func1 = j1 }		},
+  { "lgamma",	1,	{ .func1 = lgamma }	},
+  { "log",	1,	{ .func1 = log }	},
+  { "log10",	1,	{ .func1 = log10 }	},
+  { "log1p",	1,	{ .func1 = log1p }	},
+  { "log2",	1,	{ .func1 = log2 }	},
+  { "logb",	1,	{ .func1 = logb }	},
+  { "nearbyint",1,	{ .func1 = nearbyint }	},
+  { "rint",	1,	{ .func1 = rint }	},
+  { "round",	1,	{ .func1 = round }	},
+  { "sin",	1,	{ .func1 = sin }	},
+  { "sinh",	1,	{ .func1 = sinh }	},
+  { "sqrt",	1,	{ .func1 = sqrt }	},
+  { "tan",	1,	{ .func1 = tan }	},
+  { "tanh",	1,	{ .func1 = tanh }	},
+  { "tgamma",	1,	{ .func1 = tgamma }	},
+  { "trunc",	1,	{ .func1 = trunc }	},
+  { "y0",	1,	{ .func1 = y0 }		},
+  { "y1",	1,	{ .func1 = y1 }		},
+
+  { "atan2",	2,	{ .func2 = atan2 }	},
+  { "copysign",	2,	{ .func2 = copysign }	},
+  { "fdim",	2,	{ .func2 = fdim }	},
+  { "fmax",	2,	{ .func2 = fmax }	},
+  { "fmin",	2,	{ .func2 = fmin }	},
+  { "fmod",	2,	{ .func2 = fmod }	},
+  { "hypot",	2,	{ .func2 = hypot }	},
+  { "nextafter",2,	{ .func2 = nextafter }	},
+  { "pow",	2,	{ .func2 = pow }	},
+  { "remainder",2,	{ .func2 = remainder }	},
+  { "roundp",	2,	{ .func2 = xroundp }	},
+  { "ldexp",	2,	{ .func2 = xldexp }	},
+  { "jn",	2,	{ .func2 = xjn }	},
+  { "scalbn",	2,	{ .func2 = xscalbn }	},
+  { "yn",	2,	{ .func2 = xyn }	},
+
+  { "fma",	3,	{ .func3 = fma }	},
+ 
+  { "fpclassify",-1,	{ .ifunc1 = xfpclassify }	},
+  { "isfinite",	-1,	{ .ifunc1 = xisfinite }		},
+  { "isinf",	-1,	{ .ifunc1 = xisinf }		},
+  { "isinfinite",-1,	{ .ifunc1 = xisinfinite }	},
+  { "isnan",	-1,	{ .ifunc1 = xisnan }		},
+  { "isnormal",	-1,	{ .ifunc1 = xisnormal }		},
+  { "issubnormal",-1,	{ .ifunc1 = xissubnormal }	},
+  { "iszero",	-1,	{ .ifunc1 = xiszero }		},
+  { "ilogb",	-1,	{ .ifunc1 = ilogb }		},
+  { "signbit",	-1,	{ .ifunc1 = xsignbit }		},
+ 
+  { "isgreater",-2,	{ .ifunc2 = xisgreater }	},
+  { "isgreaterequal",-2,{ .ifunc2 = xisgreaterequal }	},
+  { "isless",	-2,	{ .ifunc2 = xisless }		},
+  { "islessequal", -2,	{ .ifunc2 = xislessequal }	},
+  { "islessgreater",-2,	{ .ifunc2 = xislessgreater }	},
+  { "isunordered",-2,	{ .ifunc2 = xisunordered }	},
+
+  { NULL, 	0,	NULL	}
+};
+
 static sh_float_t nanval, infval;
 
 static int	is_arithop (int);
@@ -194,10 +343,15 @@ static void	init_lvalue (struct lvalue *);
 static struct lvalue *alloc_lvalue (void);
 static void	free_lvalue (struct lvalue *);
 
-static sh_float_t	fltexpr_streval (char *, int, struct lvalue *);
+static sh_float_t fltexpr_streval (char *, int, struct lvalue *);
+
+static int fltexpr_findfunc (char *);
+static sh_float_t fltexpr_funeval (char *, struct lvalue *);
+static sh_float_t expfunc (int);
+
 static void	evalerror (const char *);
 
-static sh_float_t	fltexpr_strtod (const char *, char **);
+static sh_float_t fltexpr_strtod (const char *, char **);
 static char	*fltexpr_format (sh_float_t);
 
 #if defined (ARRAYS)
@@ -368,7 +522,7 @@ fltexpr_format (sh_float_t val)
   *p++ = '.';
   *p++ = '*';
   *p++ = SHFLOAT_LENGTH_MODIFIER;
-  *p++ = 'g';	/* XXX */
+  *p++ = 'g';
   *p = '\0';
 
   retsize = sizeof (ret);
@@ -1019,10 +1173,72 @@ exp0 (void)
 
       readtok ();
     }
+  else if (curtok == FUNC)
+    {
+      val = expfunc (tokval);
+      lasttok = FUNC;
+      curtok = NUM;
+
+      readtok ();	/* skip over closing right paren, expfunc checks syntax */
+    }
   else
     evalerror (_("arithmetic syntax error: operand expected"));
 
   return (val);
+}
+
+/* Evaluate a math function call with some minimal error checking. */
+static sh_float_t
+expfunc (int ind)
+{
+  FLTEXPR_MATHFUN func;
+  sh_float_t arg1, arg2, arg3, val;
+  int nargs, ival;
+
+  func = mathfuncs[ind];
+  /* If func.nargs > 0, the function returns double and takes func.nargs arguments;
+     if func.nargs < 0, the function returns int and takes -func.nargs arguments. */
+  nargs = (func.nargs > 0) ? func.nargs : -func.nargs;
+
+  readtok();
+  if (curtok != LPAR)
+    evalerror (_("function call: expected left paren"));
+
+  readtok ();
+  arg1 = expassign ();
+  if (nargs > 1)
+    {
+      if (curtok != COMMA)
+	evalerror (_("function call: expected comma"));
+      readtok ();		/* consume the comma */
+      arg2 = expassign ();
+    }
+  if (nargs > 2)
+    {
+      if (curtok != COMMA)
+	evalerror (_("function call: expected comma"));
+      readtok ();		/* consume the comma */
+      arg3 = expassign ();
+    }
+
+  if (curtok != RPAR)
+    evalerror (_("function call: expected right paren"));
+
+  switch (func.nargs)
+    {
+    case 1:
+      val = (*func.f.func1) (arg1); break;
+    case 2:
+      val = (*func.f.func2) (arg1, arg2); break;
+    case 3:
+      val = (*func.f.func3) (arg1, arg2, arg3); break;
+    case -1:
+      ival = (*func.f.ifunc1) (arg1); val = ival; break;
+    case -2:
+      ival = (*func.f.ifunc2) (arg1, arg2); val = ival; break;
+    }
+
+  return val;
 }
 
 static void
@@ -1048,6 +1264,17 @@ static void
 free_lvalue (struct lvalue *lv)
 {
   free (lv);		/* should be inlined */
+}
+
+static int
+fltexpr_findfunc (char *name)
+{
+  int i;
+
+  for (i = 0; mathfuncs[i].name; i++)
+    if (STREQ (name, mathfuncs[i].name))
+      return i;
+  return -1;
 }
 
 static sh_float_t
@@ -1263,12 +1490,33 @@ readtok (void)
       lasttok = curtok;
       curtok = NUM;
     }
+  else if (strncasecmp (tp, "PI", 2) == 0 && (isalnum (tp[2]) == 0))
+    {
+      cp = tp + 2;
+      tokval = M_PI;
+      lasttok = curtok;
+      curtok = NUM;
+    }
+  else if (strncasecmp (tp, "GAMMA", 2) == 0 && (isalnum (tp[5]) == 0))
+    {
+      cp = tp + 5;
+      tokval = M_EGAMMA;
+      lasttok = curtok;
+      curtok = NUM;
+    }
+  else if ((tp[0] == 'E' || tp[0] == 'e') && (isalnum (tp[1]) == 0))
+    {
+      cp = tp + 1;
+      tokval = M_E;
+      lasttok = curtok;
+      curtok = NUM;
+    }
   else if (legal_variable_starter (c))
     {
       /* variable names not preceded with a dollar sign are shell variables. */
       char *savecp;
       FLTEXPR_CONTEXT ec;
-      int peektok;
+      int peektok, ind;
 
       while (legal_variable_char (c))
 	c = *cp++;
@@ -1312,6 +1560,18 @@ readtok (void)
       RESTORETOK (&ec);
       cp = savecp;
 
+      ind = -1;
+      if ((ind = fltexpr_findfunc (tokstr)) != -1 && peektok == LPAR)
+	{
+	  lasttok = curtok;
+	  curtok = FUNC;
+	  tokval = ind;		/* overload this here for expfunc */
+	  tp = cp;
+	  return;		/* XXX */
+	}
+      else if (ind == -1 && peektok == LPAR)
+	evalerror (_("unrecognized function name"));
+	
       /* The tests for PREINC and PREDEC aren't strictly correct, but they
 	 preserve old behavior if a construct like --x=9 is given. */
       if (lasttok == PREINC || lasttok == PREDEC || peektok != EQ)

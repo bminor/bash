@@ -4370,9 +4370,11 @@ refer to shell functions; otherwise the names refer to shell variables.
 
 The @option{-n} option means to unexport each name: no longer mark
 it for export.
-If no @var{name}s are supplied, or if the @option{-p} option is given,
-@code{export} displays a list of names of all exported variables on the
-standard output.
+If no @var{name}s are supplied, or if only
+the @option{-p} option is given,
+@code{export} displays a list of names of all exported
+variables on the standard output.
+Using @option{-p} and @option{-f} together displays exported functions.
 The @option{-p} option displays output in a form that may be reused as input.
 
 @code{export} allows the value of a variable to be set at the same time
@@ -7301,8 +7303,13 @@ the shell does not save the command history when it exits.
 @item HISTFILESIZE
 The maximum number of lines contained in the history file.
 When this variable is assigned a value, the history file is truncated,
-if necessary, to contain no more than that number of lines
+if necessary, to contain no more than
+the number of history entries
+that total no more than that number of lines
 by removing the oldest entries.
+If the history list contains multi-line entries,
+the history file may contain more lines than this maximum
+to avoid leaving partial history entries.
 The history file is also truncated to this size after
 writing it when a shell exits or by the @code{history} builtin.
 If the value is 0, the history file is truncated to zero size.
@@ -8589,7 +8596,8 @@ not when the function is executed, because a function definition
 is itself a command.
 As a consequence, aliases
 defined in a function are not available until after that
-function is executed.  To be safe, always put
+function is executed.
+To be safe, always put
 alias definitions on a separate line, and do not use @code{alias}
 in compound commands.
 
@@ -8902,8 +8910,8 @@ If the @code{popd} command is successful,
 Bash runs @code{dirs} to show the final contents of the directory stack,
 and the return status is 0.
 
-@btindex pushd
 @item pushd
+@btindex pushd
 @example
 pushd [-n] [@var{+N} | @var{-N} | @var{dir}]
 @end example
@@ -9579,11 +9587,22 @@ statuses after the @code{wait} builtin returns it.
 
 @end enumerate
 
-There is other @sc{posix} behavior that Bash does not implement by
+There is additional @sc{posix} behavior that Bash does not implement by
 default even when in @sc{posix} mode.
 Specifically:
 
 @enumerate
+
+@item
+@sc{posix} requires that word splitting be byte-oriented.
+That is, each @emph{byte} in the value of @env{IFS} potentially splits a
+word, even if that byte is part of a multibyte character in @env{IFS}
+or part of multibyte character in the word.
+Bash allows multibyte characters in the value of @env{IFS}, treating
+a valid multibyte character as a single delimiter, and will not
+split a valid multibyte character even if one of the bytes composing that
+character appears in @env{IFS}.
+This is @sc{posix} interpretation 1560, further modified by issue 1924.
 
 @item
 The @code{fc} builtin checks @code{$EDITOR} as a program to edit history
@@ -9829,6 +9848,12 @@ the arguments as key sequences to bind.
 Interactive shells will notify the user of completed jobs while sourcing a
 script.
 Newer versions defer notification until script execution completes.
+@ignore
+@item
+Bash will not try to execute a shell function whose name contains a slash.
+Previous versions disallowed this in @sc{posix} mode but allowed it by
+default.
+@end ignore
 @end itemize
 
 @end table

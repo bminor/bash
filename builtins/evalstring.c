@@ -725,7 +725,8 @@ parse_string (char *string, const char *from_file, int flags, COMMAND **cmdp, ch
 
       if (current_token == yacc_EOF || current_token == shell_eof_token)
 	{
-	  if (current_token == shell_eof_token)
+	  /* check for EOFTOKEN out of paranoia */
+	  if ((parser_state & PST_EOFTOKEN) && (current_token == shell_eof_token))
 	    rewind_input_string ();
 	  break;
 	}
@@ -744,10 +745,10 @@ out:
      us, after doing cleanup */
   if (should_jump_to_top_level)
     {
-      if (parse_and_execute_level == 0)
-	top_level_cleanup ();
       if (code == DISCARD)
 	return -DISCARD;
+      if (parse_and_execute_level == 0)
+	top_level_cleanup ();
       jump_to_top_level (code);
     }
 

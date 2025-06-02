@@ -2214,7 +2214,15 @@ read_a_line (int remove_quoted_newline)
       QUIT;
 
       /* If we're reading the here-document from an alias, use shell_getc */
-      c = heredoc_string ? shell_getc (0) : yy_getc ();
+      if (interactive && EOF_Reached && heredoc_string == 0)
+	{
+	  c = EOF;
+	  EOF_Reached = 0;
+	  if (current_token == yacc_EOF)
+	    current_token = '\n';		/* reset state */
+	}
+      else
+	c = heredoc_string ? shell_getc (0) : yy_getc ();
 
       /* Ignore null bytes in input. */
       if (c == 0)
@@ -2451,7 +2459,10 @@ static struct dstack temp_dstack = { (char *)NULL, 0, 0 };
     } \
   while (0)
 
-#define pop_delimiter(ds)	ds.delimiter_depth--
+/* The parsing or expansion code may have called reset_parser() between the
+   time push_delimiter was called and this call to pop_delimiter, which resets
+   delimiter_depth to 0, so we check. */
+#define pop_delimiter(ds) do { if (ds.delimiter_depth > 0) ds.delimiter_depth--; } while (0)
 
 /* Return the next shell input character.  This always reads characters
    from shell_input_line; when that line is exhausted, it is time to
@@ -4983,11 +4994,12 @@ parse_arith_cmd (char **ep, int adddq)
     }
   else				/* nested subshell */
     {
+      shell_ungetc (c);
+
       tokstr[0] = '(';
       strncpy (tokstr + 1, ttok, ttoklen - 1);
       tokstr[ttoklen] = ')';
-      tokstr[ttoklen+1] = c;
-      tokstr[ttoklen+2] = '\0';
+      tokstr[ttoklen+1] = '\0';
     }
 
   *ep = tokstr;
@@ -5990,6 +6002,10 @@ static const int no_semi_successors[] = {
   0
 };
 
+static const int no_semi_predecessors[] = {
+'&', '|', ';', 0
+};
+
 /* If we are not within a delimited expression, try to be smart
    about which separators can be semi-colons and which must be
    newlines.  Returns the string that should be added into the
@@ -5999,6 +6015,7 @@ char *
 history_delimiting_chars (const char *line)
 {
   static int last_was_heredoc = 0;	/* was the last entry the start of a here document? */
+  const char *lp;
   register int i;
 
   if ((parser_state & PST_HEREDOC) == 0)
@@ -6045,6 +6062,9 @@ history_delimiting_chars (const char *line)
   if (parser_state & PST_COMPASSIGN)
     return (" ");
 
+  for (lp = line; *lp && shellblank(*lp); lp++)
+    ;
+
   /* First, handle some special cases. */
   /*(*/
   /* If we just read `()', assume it's a function definition, and don't
@@ -6061,7 +6081,15 @@ history_delimiting_chars (const char *line)
       else if (parser_state & PST_CASESTMT)	/* case statement pattern */
 	return " ";
       else
-	return "; ";				/* (...) subshell */
+	{
+	  /* (...) subshell. Make sure this line doesn't start with an
+	     operator that cannot be preceded by a semicolon. If it can't
+	     (basically the command terminators), return a newline. */
+	  for (i = 0; no_semi_predecessors[i]; i++)
+	    if (*lp == no_semi_predecessors[i])
+	      return "\n";
+	  return "; ";
+	}
     }
   else if (token_before_that == WORD && two_tokens_ago == FUNCTION)
     return " ";		/* function def using `function name' without `()' */

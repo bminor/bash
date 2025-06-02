@@ -182,6 +182,7 @@ history_filename (const char *filename)
   return (return_val);
 }
 
+#if defined (DEBUG)
 static char *
 history_backupfile (const char *filename)
 {
@@ -208,6 +209,7 @@ history_backupfile (const char *filename)
   ret[len+1] = '\0';
   return ret;
 }
+#endif
   
 static char *
 history_tempfile (const char *filename)
@@ -267,6 +269,7 @@ read_history_range (const char *filename, int from, int to)
   register char *line_start, *line_end, *p;
   char *input, *buffer, *bufend, *last_ts;
   int file, current_line, chars_read, has_timestamps, reset_comment_char;
+  int skipblanks, default_skipblanks;
   struct stat finfo;
   size_t file_size;
 #if defined (EFBIG)
@@ -380,6 +383,9 @@ read_history_range (const char *filename, int from, int to)
   has_timestamps = HIST_TIMESTAMP_START (buffer);
   history_multiline_entries += has_timestamps && history_write_timestamps;
 
+  /* default is to skip blank lines unless history entries are multiline */
+  default_skipblanks = history_multiline_entries == 0;
+
   /* Skip lines until we are at FROM. */
   if (has_timestamps)
     last_ts = buffer;
@@ -405,6 +411,8 @@ read_history_range (const char *filename, int from, int to)
 	  }
       }
 
+  skipblanks = default_skipblanks;
+
   /* If there are lines left to gobble, then gobble them now. */
   for (line_end = line_start; line_end < bufend; line_end++)
     if (*line_end == '\n')
@@ -415,10 +423,16 @@ read_history_range (const char *filename, int from, int to)
 	else
 	  *line_end = '\0';
 
-	if (*line_start)
+	if (*line_start || skipblanks == 0)
 	  {
 	    if (HIST_TIMESTAMP_START(line_start) == 0)
 	      {
+		/* If we have multiline entries (default_skipblanks == 0), we
+		   don't want to skip blanks here, since we turned that on at
+		   the last timestamp line. Consider doing this even if
+		   default_skipblanks == 1 in order not to lose blank lines in
+		   commands. */
+		skipblanks = default_skipblanks;
 	      	if (last_ts == NULL && history_length > 0 && history_multiline_entries)
 		  _hs_append_history_line (history_length - 1, line_start);
 		else
@@ -433,6 +447,9 @@ read_history_range (const char *filename, int from, int to)
 	      {
 		last_ts = line_start;
 		current_line--;
+		/* Even if we're not skipping blank lines by default, we want
+		   to skip leading blank lines after a timestamp. */
+		skipblanks = 1;
 	      }
 	  }
 
@@ -470,6 +487,7 @@ history_rename (const char *old, const char *new)
 #endif
 }
 
+#if defined (DEBUG)
 /* Save FILENAME to BACK, handling case where FILENAME is a symlink
    (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
 static int
@@ -488,6 +506,7 @@ histfile_backup (const char *filename, const char *back)
 #endif
   return (history_rename (filename, back));
 }
+#endif
 
 /* Restore ORIG from BACKUP handling case where ORIG is a symlink
    (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
@@ -708,13 +727,13 @@ static int
 history_write_slow (int fd, HIST_ENTRY **the_history, int nelements, int overwrite)
 {
   FILE *fp;
-  int i, j, e;
+  int i, e;
 
   fp = fdopen (fd, overwrite ? "w" : "a");
   if (fp == 0)
     return -1;
 
-  for (j = 0, i = history_length - nelements; i < history_length; i++)
+  for (i = history_length - nelements; i < history_length; i++)
     {
       if (history_write_timestamps && the_history[i]->timestamp && the_history[i]->timestamp[0])
 	fprintf (fp, "%s\n", the_history[i]->timestamp);
