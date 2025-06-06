@@ -362,14 +362,23 @@ The following list is what's changed when POSIX mode is in effect:
   75. Bash removes an exited background process's status from the list
      of such statuses after the ‘wait’ builtin returns it.
 
-There is other POSIX behavior that Bash does not implement by default
-even when in POSIX mode.  Specifically:
+There is additional POSIX behavior that Bash does not implement by
+default even when in POSIX mode.  Specifically:
 
-  1. The ‘fc’ builtin checks ‘$EDITOR’ as a program to edit history
+  1. POSIX requires that word splitting be byte-oriented.  That is, each
+     _byte_ in the value of ‘IFS’ potentially splits a word, even if
+     that byte is part of a multibyte character in ‘IFS’ or part of
+     multibyte character in the word.  Bash allows multibyte characters
+     in the value of ‘IFS’, treating a valid multibyte character as a
+     single delimiter, and will not split a valid multibyte character
+     even if one of the bytes composing that character appears in ‘IFS’.
+     This is POSIX interpretation 1560, further modified by issue 1924.
+
+  2. The ‘fc’ builtin checks ‘$EDITOR’ as a program to edit history
      entries if ‘FCEDIT’ is unset, rather than defaulting directly to
      ‘ed’.  ‘fc’ uses ‘ed’ if ‘EDITOR’ is unset.
 
-  2. As noted above, Bash requires the ‘xpg_echo’ option to be enabled
+  3. As noted above, Bash requires the ‘xpg_echo’ option to be enabled
      for the ‘echo’ builtin to be fully conformant.
 
 Bash can be configured to be POSIX-conformant by default, by specifying

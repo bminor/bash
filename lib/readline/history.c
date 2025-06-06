@@ -1,6 +1,6 @@
 /* history.c -- standalone history library */
 
-/* Copyright (C) 1989-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2025 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.

@@ -5536,6 +5536,10 @@ execute_subshell_builtin_or_function (WORD_LIST *words, REDIRECT *redirects,
 
       if (result == EXITPROG || result == EXITBLTIN)
 	subshell_exit (last_command_exit_value);
+#if 0	/* TAG:bash-5.4 https://savannah.gnu.org/support/?109840 6/5/2025 */
+      else if (result == ERREXIT)
+	subshell_exit (last_command_exit_value ? last_command_exit_value : EXECUTION_FAILURE);
+#endif
       else if (result)
 	subshell_exit (EXECUTION_FAILURE);
       else if (funcvalue)

@@ -1,6 +1,6 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2021,2023-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2021,2023-2025 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.

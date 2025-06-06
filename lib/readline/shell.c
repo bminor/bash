@@ -1,7 +1,7 @@
 /* shell.c -- readline utility functions that are normally provided by
 	      bash when readline is linked as part of the shell. */
 
-/* Copyright (C) 1997-2009,2017,2021 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2025 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
