@@ -184,12 +184,12 @@ function a=2 ()
     printf "FUNCNAME: %s\n" $FUNCNAME
 }
 FUNCNAME: a=2
-<(:)
-<(:) is a function
-<(:) () 
-{ 
-    echo $FUNCNAME
-}
+./func5.sub: line 44: `<(:)': not a valid identifier
+./func5.sub: line 45: <(:): command not found
+./func5.sub: line 46: type: <(:): not found
+./func5.sub: line 51: `'a b c'': not a valid identifier
+./func5.sub: line 52: a b c: command not found
+./func5.sub: line 53: type: a b c: not found
 posix mode:
 type
 break is a special shell builtin
@@ -241,7 +241,7 @@ break ()
 }
 execution
 inside function break
-./func5.sub: line 86: `break': is a special builtin
+./func5.sub: line 94: `break': is a special builtin
 !! is a function
 !! () 
 { 

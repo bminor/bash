@@ -430,7 +430,8 @@ valid_function_name (const char *name, int flags)
 
 /* Return 1 if this is an identifier that can be used as a function name
    when declaring a function. We don't allow `$' for historical reasons.
-   We allow quotes (for now), slashes, and pretty much everything else.
+   We don't allow quotes (for now), but we allow slashes and pretty much
+   everything else.
    If (FLAGS&4) is non-zero, we check that the name is not one of the POSIX
    special builtins (this is the shell enforcing a POSIX application
    requirement). We allow reserved words, even though it's unlikely anyone
@@ -446,7 +447,11 @@ valid_function_word (WORD_DESC *word, int flags)
   char *name;
 
   name = word->word;
-  if ((word->flags & W_HASDOLLAR))		/* allow quotes for now */
+#if 0	/*TAG: bash-5.4 */
+  if (word->flags & W_HASDOLLAR)		/* allow quotes for now */
+#else
+  if (word->flags & (W_HASDOLLAR|W_QUOTED))	/* don't allow quotes for now */
+#endif
     {
       err_invalidid (name);
       return (0);

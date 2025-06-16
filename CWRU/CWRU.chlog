@@ -11268,3 +11268,21 @@ buildconf.h.in
 builtins/mkbuiltins.c
 	- include buildconf.h instead of having separate defines when
 	  cross-compiling
+
+				   6/11
+				   ----
+lib/readline/terminal.c
+	- rework change from 5/16 to add __gnu_hurd__ to the list of systems
+	  that don't need extern PC/UP/BC
+	  Reported by Joel Ebel <jbebel@google.com> as a static link failure
+	  due to multiply-defined symbols
+
+				   6/12
+				   ----
+general.c
+	- valid_function_word: back out change from 2/4/2023 that allowed
+	  quoted characters in function names.
+	  Inspired by discussion with Robert Elz <kre@munnari.oz.au> and
+	  Koichi Murase <myoga.murase@gmail.com>
+
+	  

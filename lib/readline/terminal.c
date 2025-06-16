@@ -105,17 +105,12 @@ static int tcap_initialized;
 /* Systems for which PC/BC/UP are defined in the curses library and need an
    extern definition here. */
 #if !defined (__linux__) && !defined (__gnu_hurd__) && !defined (NCURSES_VERSION)
-#  define NEED_EXTERN_PC
-#endif /* !__linux__ && !__gnu_hurd__ && !NCURSES_VERSION */
-
-#if defined (__EMX__)
-#  define NEED_EXTERN_PC
-#endif
-
-#if defined (NEED_EXTERN_PC)
-extern 
-#  endif /* NEED_EXTERN_PC */
+#  if defined (__EMX__) || defined (NEED_EXTERN_PC)
+extern
+#  endif /* __EMX__ || NEED_EXTERN_PC */
 char PC, *BC, *UP;
+#endif /* !__linux__ && !NCURSES_VERSION */
+
 
 /* Some strings to control terminal actions.  These are output by tputs (). */
 char *_rl_term_clreol;

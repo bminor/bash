@@ -37,12 +37,20 @@ set +o posix
 
 a\=2
 
+# these are still errors, but one day will not be
 <(:) ()
 {
 	echo $FUNCNAME
 }
 \<\(:\)
 type '<(:)'
+
+'a b c' ()
+{
+	echo function a b c
+}
+a\ b\ c
+type 'a b c'
 
 break()
 {

@@ -5535,7 +5535,11 @@ read_token_word (int character)
 	      strcpy (token + token_index, ttok);
 	      token_index += ttoklen;
 	      FREE (ttok);
+#if 0	/*TAG: bash-5.4 kre@munnari.oz.au 6/12/2025 */
 	      dollar_present |= character == '$';
+#else
+	      dollar_present = 1;
+#endif
 	      all_digit_token = 0;
 	      goto next_character;
 	    }
