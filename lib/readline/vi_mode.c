@@ -1833,6 +1833,7 @@ _rl_vi_callback_char_search (_rl_callback_generic_arg *data)
 
   if (c <= 0)
     {
+      /* XXX - unset _rl_callback_func here? */
       RL_UNSETSTATE (RL_STATE_CHARSEARCH);
       return -1;
     }
