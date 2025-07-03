@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2024 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <error.h>
-#include <libintl.h>
-#include <locale.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,6 +40,11 @@ extern int errno;
 #define VAL_ULONG_MAX		-1003
 #define VAL_SSIZE_MAX		-1004
 #define VAL_SIZE_MAX		-1005
+
+/* We don't want to collide with anything else. */
+#ifndef _CS_PATH
+#define _CS_PATH	-1001
+#endif
 
 struct conf
   {
@@ -120,7 +123,7 @@ static const struct conf vars[] =
 #ifdef _SC_CHAR_MAX
     { "CHAR_MAX", _SC_CHAR_MAX, SYSCONF },
 #else
-    { "CHAR_BIT", CHAR_MAX, CONSTANT },
+    { "CHAR_MAX", CHAR_MAX, CONSTANT },
 #endif
 #ifdef _SC_CHAR_MIN
     { "CHAR_MIN", _SC_CHAR_MIN, SYSCONF },
@@ -269,9 +272,15 @@ static const struct conf vars[] =
 #ifdef _SC_AVPHYS_PAGES
     { "_AVPHYS_PAGES", _SC_AVPHYS_PAGES, SYSCONF },
 #endif
+#ifdef _SC_NPROCESSORS_CONF
     { "_NPROCESSORS_CONF", _SC_NPROCESSORS_CONF, SYSCONF },
+#endif
+#ifdef _SC_NPROCESSORS_ONLN
     { "_NPROCESSORS_ONLN", _SC_NPROCESSORS_ONLN, SYSCONF },
+#endif
+#ifdef _SC_PHYS_PAGES
     { "_PHYS_PAGES", _SC_PHYS_PAGES, SYSCONF },
+#endif
 #ifdef _SC_ARG_MAX
     { "_POSIX_ARG_MAX", _SC_ARG_MAX, SYSCONF },
 #else
@@ -329,7 +338,9 @@ static const struct conf vars[] =
     { "_POSIX_PRIORITIZED_IO", _SC_PRIORITIZED_IO, SYSCONF },
 #endif
     { "_POSIX_PRIORITY_SCHEDULING", _SC_PRIORITY_SCHEDULING, SYSCONF },
+#ifdef _SC_REALTIME_SIGNALS
     { "_POSIX_REALTIME_SIGNALS", _SC_REALTIME_SIGNALS, SYSCONF },
+#endif
     { "_POSIX_SAVED_IDS", _SC_SAVED_IDS, SYSCONF },
 #ifdef _SC_SELECT
     { "_POSIX_SELECT", _SC_SELECT, SYSCONF },
@@ -366,7 +377,9 @@ static const struct conf vars[] =
     { "_POSIX_THREAD_PROCESS_SHARED", _SC_THREAD_PROCESS_SHARED, SYSCONF },
     { "_POSIX_THREAD_SAFE_FUNCTIONS", _SC_THREAD_SAFE_FUNCTIONS, SYSCONF },
     { "_POSIX_TIMERS", _SC_TIMERS, SYSCONF },
+#ifdef _SC_TIMER_MAX
     { "TIMER_MAX", _SC_TIMER_MAX, SYSCONF },
+#endif
 #ifdef _POSIX_TZNAME_MAX
     { "_POSIX_TZNAME_MAX", _SC_TZNAME_MAX, SYSCONF },
 #else
@@ -743,8 +756,12 @@ static const struct conf vars[] =
     { "_POSIX_C_LANG_SUPPORT_R", _SC_C_LANG_SUPPORT_R, SYSCONF },
 #endif
     { "_POSIX_CLOCK_SELECTION", _SC_CLOCK_SELECTION, SYSCONF },
+#ifdef _SC_CPUTIME
     { "_POSIX_CPUTIME", _SC_CPUTIME, SYSCONF },
+#endif
+#ifdef _SC_THREAD_CPUTIME
     { "_POSIX_THREAD_CPUTIME", _SC_THREAD_CPUTIME, SYSCONF },
+#endif
 #ifdef _SC_DEVICE_SPECIFIC
     { "_POSIX_DEVICE_SPECIFIC", _SC_DEVICE_SPECIFIC, SYSCONF },
 #endif
@@ -826,7 +843,9 @@ static const struct conf vars[] =
 #ifdef _SC_AIO_PRIO_DELTA_MAX
     { "AIO_PRIO_DELTA_MAX", _SC_AIO_PRIO_DELTA_MAX, SYSCONF },
 #endif
+#ifdef _SC_DELAYTIMER_MAX
     { "DELAYTIMER_MAX", _SC_DELAYTIMER_MAX, SYSCONF },
+#endif
     { "HOST_NAME_MAX", _SC_HOST_NAME_MAX, SYSCONF },
     { "LOGIN_NAME_MAX", _SC_LOGIN_NAME_MAX, SYSCONF },
     { "MQ_OPEN_MAX", _SC_MQ_OPEN_MAX, SYSCONF },
@@ -846,15 +865,21 @@ static const struct conf vars[] =
 #ifdef _SC_TRACE_LOG
     { "_POSIX_TRACE_LOG", _SC_TRACE_LOG, SYSCONF },
 #endif
+#ifdef _SC_RTSIG_MAX
     { "RTSIG_MAX", _SC_RTSIG_MAX, SYSCONF },
+#endif
 #ifdef _SC_SEM_NSEMS_MAX
     { "SEM_NSEMS_MAX", _SC_SEM_NSEMS_MAX, SYSCONF },
 #endif
 #ifdef _SC_SEM_VALUE_MAX
     { "SEM_VALUE_MAX", _SC_SEM_VALUE_MAX, SYSCONF },
 #endif
+#ifdef _SC_SIGQUEUE_MAX
     { "SIGQUEUE_MAX", _SC_SIGQUEUE_MAX, SYSCONF },
+#endif
+#ifdef _PC_FILESIZEBITS
     { "FILESIZEBITS", _PC_FILESIZEBITS, PATHCONF },
+#endif
 #ifdef _PC_ALLOC_SIZE_MIN
     { "POSIX_ALLOC_SIZE_MIN", _PC_ALLOC_SIZE_MIN, PATHCONF },
 #endif
@@ -870,7 +895,9 @@ static const struct conf vars[] =
 #ifdef _PC_REC_XFER_ALIGN
     { "POSIX_REC_XFER_ALIGN", _PC_REC_XFER_ALIGN, PATHCONF },
 #endif
+#ifdef _PC_SYMLINK_MAX
     { "SYMLINK_MAX", _PC_SYMLINK_MAX, PATHCONF },
+#endif
 #ifdef _PC_2_SYMLINKS
     { "POSIX2_SYMLINKS", _PC_2_SYMLINKS, PATHCONF },
 #endif
@@ -912,9 +939,34 @@ static const struct conf vars[] =
   };
 
 static int getconf_print (const struct conf *, const char *, int);
-static int getconf_all (void);
+static int getconf_all (WORD_LIST *);
 static int getconf_one (WORD_LIST *);
 static int getconf_internal (const struct conf *, int);
+
+#ifndef HAVE_CONFSTR
+/* If we don't have confstr, this will only support `getconf PATH'. */
+
+static size_t
+confstr (int name, char *buf, size_t len)
+{
+  char *p;
+  size_t n;
+
+  switch (name)
+    {
+    case _CS_PATH:
+      p = conf_standard_path ();
+      n = STRLEN (p) + 1;
+      if (len != 0 && buf != 0)
+	strlcpy (buf, p, len);
+      free (p);
+      return n;
+    default:
+      errno = EINVAL;
+      return 0;
+    }
+}
+#endif /* !HAVE_CONFSTR */
 
 static int
 getconf_internal (const struct conf *c, int all)
@@ -981,17 +1033,24 @@ getconf_internal (const struct conf *c, int all)
 }
     
 static int
-getconf_all (void)
+getconf_all (WORD_LIST *list)
 {
   const struct conf *c;
   char *path;
   int r;
 
   r = EXECUTION_SUCCESS;
+  path = list ? list->word->word : "/";
   for (c = vars; c->name != NULL; ++c)
     {
-      printf("%-35s", c->name);
-      path = "/";		/* XXX for now */
+#if 0
+      if (c->call == PATHCONF && path == 0)
+	continue;	/* Don't print pathconf vars if no path supplied */
+      if (c->call != PATHCONF && path)
+	continue;	/* Only print pathconf vars if path supplied */
+#endif
+      /* The output format for getconf -a is required by POSIX interp 1808 */
+      printf("%s: ", c->name);
       if (getconf_print (c, path, 1) == EXECUTION_FAILURE)
         r = EXECUTION_FAILURE;
     }
@@ -1019,12 +1078,12 @@ getconf_one (WORD_LIST *list)
       return (EXECUTION_FAILURE);
     }
 
-  if (c->call_name == PATHCONF && list->next == 0)
+  if (c->call == PATHCONF && list->next == 0)
     {
       builtin_usage ();
       return (EX_USAGE);
     }
-  else if (c->call_name != PATHCONF && list->next)
+  else if (c->call != PATHCONF && list->next)
     {
       builtin_usage ();
       return (EX_USAGE);
@@ -1135,13 +1194,19 @@ getconf_builtin (WORD_LIST *list)
     }
 
   list = loptend;
-  if ((aflag == 0 && list == 0) || (aflag && list) || list_length(list) > 2)
+  if ((aflag == 0 && list == 0) || (list && list_length((GENERIC_LIST *)list) > 2))
     {
       builtin_usage();
       return (EX_USAGE);
     }
+  else if (aflag && list && (list->word == 0 || list->word->word == 0 || *list->word->word == 0))
+    {
+      /* No null pathnames with -a */
+      builtin_usage();
+      return (EX_USAGE);
+    }
 
-  r = aflag ? getconf_all () : getconf_one (list);
+  r = aflag ? getconf_all (list) : getconf_one (list);
   return r;
 }
 
@@ -1158,6 +1223,6 @@ struct builtin getconf_struct = {
 	getconf_builtin,
 	BUILTIN_ENABLED,
 	getconf_doc,
-	"getconf -[ah] or getconf [-v spec] sysvar or getconf [-v spec] pathvar pathname",
+	"getconf -[ah] [file] or getconf [-v spec] sysvar or getconf [-v spec] pathvar pathname",
 	0
 };

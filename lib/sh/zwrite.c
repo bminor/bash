@@ -1,6 +1,6 @@
 /* zwrite - write contents of buffer to file descriptor, retrying on error */
 
-/* Copyright (C) 1999-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2002, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,12 +36,11 @@ extern int errno;
    it is interrupted.  We retry three times if we get a zero-length
    write.  Any other signal causes this function to return prematurely. */
 int
-zwrite (fd, buf, nb)
-     int fd;
-     char *buf;
-     size_t nb;
+zwrite (int fd, char *buf, size_t nb)
 {
-  int n, i, nt;
+  int nt;
+  size_t n;
+  ssize_t i;
 
   for (n = nb, nt = 0;;)
     {

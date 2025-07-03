@@ -1,6 +1,6 @@
 /* eaccess.c - eaccess replacement for the shell, plus other access functions. */
 
-/* Copyright (C) 2006-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2020,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,15 +52,14 @@ extern int errno;
 #define F_OK 0
 #endif /* R_OK */
 
-static int path_is_devfd PARAMS((const char *));
-static int sh_stataccess PARAMS((const char *, int));
+static int path_is_devfd (const char *);
+static int sh_stataccess (const char *, int);
 #if HAVE_DECL_SETREGID
-static int sh_euidaccess PARAMS((const char *, int));
+static int sh_euidaccess (const char *, int);
 #endif
 
 static int
-path_is_devfd (path)
-     const char *path;
+path_is_devfd (const char *path)
 {
   if (path[0] == '/' && path[1] == 'd' && strncmp (path, "/dev/fd/", 8) == 0)
     return 1;
@@ -78,9 +77,7 @@ path_is_devfd (path)
 /* A wrapper for stat () which disallows pathnames that are empty strings
    and handles /dev/fd emulation on systems that don't have it. */
 int
-sh_stat (path, finfo)
-     const char *path;
-     struct stat *finfo;
+sh_stat (const char *path, struct stat *finfo)
 {
   static char *pbuf = 0;
 
@@ -97,7 +94,7 @@ sh_stat (path, finfo)
       intmax_t fd;
       int r;
 
-      if (legal_number (path + 8, &fd) && fd == (int)fd)
+      if (valid_number (path + 8, &fd) && fd == (int)fd)
         {
           r = fstat ((int)fd, finfo);
           if (r == 0 || errno != EBADF)
@@ -112,7 +109,7 @@ sh_stat (path, finfo)
      effectively a no-op. */
       pbuf = xrealloc (pbuf, sizeof (DEV_FD_PREFIX) + strlen (path + 8));
       strcpy (pbuf, DEV_FD_PREFIX);
-      strcat (pbuf, path + 8);
+      strcpy (pbuf + sizeof (DEV_FD_PREFIX) - 1, path + 8);
       return (stat (pbuf, finfo));
 #endif /* !HAVE_DEV_FD */
     }
@@ -136,9 +133,7 @@ sh_stat (path, finfo)
    and don't make the mistake of telling root that any file is
    executable.  This version uses stat(2). */
 static int
-sh_stataccess (path, mode)
-     const char *path;
-     int mode;
+sh_stataccess (const char *path, int mode)
 {
   struct stat st;
 
@@ -173,9 +168,7 @@ sh_stataccess (path, mode)
 /* Version to call when uid != euid or gid != egid.  We temporarily swap
    the effective and real uid and gid as appropriate. */
 static int
-sh_euidaccess (path, mode)
-     const char *path;
-     int mode;
+sh_euidaccess (const char *path, int mode)
 {
   int r, e;
 
@@ -198,9 +191,7 @@ sh_euidaccess (path, mode)
 #endif
 
 int
-sh_eaccess (path, mode)
-     const char *path;
-     int mode;
+sh_eaccess (const char *path, int mode)
 {
   int ret;
 

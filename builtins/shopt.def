@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2021 Free Software Foundation, Inc.
+Copyright (C) 1994-2025 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,8 +52,6 @@ $END
 
 #include <stdio.h>
 
-#include "version.h"
-
 #include "../bashintl.h"
 
 #include "../shell.h"
@@ -72,7 +70,7 @@ $END
 #define UNSETOPT	0
 #define SETOPT		1
 
-#define OPTFMT		"%-15s\t%s\n"
+#define OPTFMT		"%-20s\t%s\n"
 
 extern int allow_null_glob_expansion, fail_glob_expansion, glob_dot_filenames;
 extern int cdable_vars, mail_warning, source_uses_path;
@@ -97,6 +95,7 @@ extern int localvar_unset;
 extern int varassign_redir_autoclose;
 extern int singlequote_translations;
 extern int patsub_replacement;
+extern int bash_source_fullpath;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -109,7 +108,7 @@ extern int force_fignore;
 extern int dircomplete_spelling, dircomplete_expand;
 extern int complete_fullquote;
 
-extern int enable_hostname_completion PARAMS((int));
+extern int enable_hostname_completion (int);
 #endif
 
 #if defined (PROGRAMMABLE_COMPLETION)
@@ -122,7 +121,6 @@ extern int debugging_mode;
 #endif
 
 #if defined (ARRAY_VARS)
-extern int assoc_expand_once;
 extern int array_expand_once;
 int expand_once_flag;
 #endif
@@ -131,33 +129,33 @@ int expand_once_flag;
 extern int syslog_history;
 #endif
 
-static void shopt_error PARAMS((char *));
+static void shopt_error (char *);
 
-static int set_shellopts_after_change PARAMS((char *, int));
-static int set_compatibility_level PARAMS((char *, int));
+static int set_shellopts_after_change (char *, int);
+static int set_compatibility_level (char *, int);
 
 #if defined (RESTRICTED_SHELL)
-static int set_restricted_shell PARAMS((char *, int));
+static int set_restricted_shell (char *, int);
 #endif
 
 #if defined (READLINE)
-static int shopt_enable_hostname_completion PARAMS((char *, int));
-static int shopt_set_complete_direxpand PARAMS((char *, int));
+static int shopt_enable_hostname_completion (char *, int);
+static int shopt_set_complete_direxpand (char *, int);
 #endif
 
 #if defined (ARRAY_VARS)
-static int set_assoc_expand PARAMS((char *, int));
+static int set_array_expand (char *, int);
 #endif
 
 #if defined (EXTENDED_GLOB)
 int extglob_flag = EXTGLOB_DEFAULT;
-static int shopt_set_extglob PARAMS((char *, int));
+static int shopt_set_extglob (char *, int);
 #endif
 
 int expaliases_flag = 0;
-static int shopt_set_expaliases PARAMS((char *, int));
+static int shopt_set_expaliases (char *, int);
 
-static int shopt_set_debug_mode PARAMS((char *, int));
+static int shopt_set_debug_mode (char *, int);
 
 static int shopt_login_shell;
 static int shopt_compat31;
@@ -168,7 +166,7 @@ static int shopt_compat42;
 static int shopt_compat43;
 static int shopt_compat44;
 
-typedef int shopt_set_func_t PARAMS((char *, int));
+typedef int shopt_set_func_t (char *, int);
 
 /* If you add a new variable name here, make sure to set the default value
    appropriately in reset_shopt_options. */
@@ -178,9 +176,13 @@ static struct {
   int  *value;
   shopt_set_func_t *set_func;
 } shopt_vars[] = {
+#if defined (ARRAY_VARS)
+  { "array_expand_once", &expand_once_flag, set_array_expand },
+  { "assoc_expand_once", &expand_once_flag, set_array_expand },
+#endif
   { "autocd", &autocd, (shopt_set_func_t *)NULL },
 #if defined (ARRAY_VARS)
-  { "assoc_expand_once", &expand_once_flag, set_assoc_expand },
+  { "bash_source_fullpath", &bash_source_fullpath, (shopt_set_func_t *)NULL },
 #endif
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
@@ -276,14 +278,14 @@ static struct {
 static const char * const on = "on";
 static const char * const off = "off";
 
-static int find_shopt PARAMS((char *));
-static int toggle_shopts PARAMS((int, WORD_LIST *, int));
-static void print_shopt PARAMS((char *, int, int));
-static int list_shopts PARAMS((WORD_LIST *, int));
-static int list_some_shopts PARAMS((int, int));
-static int list_shopt_o_options PARAMS((WORD_LIST *, int));
-static int list_some_o_options PARAMS((int, int));
-static int set_shopt_o_options PARAMS((int, WORD_LIST *, int));
+static int find_shopt (char *);
+static int toggle_shopts (int, WORD_LIST *, int);
+static void print_shopt (char *, int, int);
+static int list_shopts (WORD_LIST *, int);
+static int list_some_shopts (int, int);
+static int list_shopt_o_options (WORD_LIST *, int);
+static int list_some_o_options (int, int);
+static int set_shopt_o_options (int, WORD_LIST *, int);
 
 #define SFLAG	0x01
 #define UFLAG	0x02
@@ -292,8 +294,7 @@ static int set_shopt_o_options PARAMS((int, WORD_LIST *, int));
 #define PFLAG	0x10
 
 int
-shopt_builtin (list)
-     WORD_LIST *list;
+shopt_builtin (WORD_LIST *list)
 {
   int opt, flags, rval;
 
@@ -351,7 +352,7 @@ shopt_builtin (list)
 /* Reset the options managed by `shopt' to the values they would have at
    shell startup.  Variables from shopt_vars. */
 void
-reset_shopt_options ()
+reset_shopt_options (void)
 {
   autocd = cdable_vars = cdspelling = 0;
   check_hashed_filenames = CHECKHASH_DEFAULT;
@@ -375,7 +376,8 @@ reset_shopt_options ()
   source_uses_path = promptvars = 1;
   varassign_redir_autoclose = 0;
   singlequote_translations = 0;
-  patsub_replacement = 1;
+  patsub_replacement = PATSUB_REPLACE_DEFAULT;
+  bash_source_fullpath = BASH_SOURCE_FULLPATH_DEFAULT;
 
 #if defined (JOB_CONTROL)
   check_jobs_at_exit = 0;
@@ -384,9 +386,10 @@ reset_shopt_options ()
 #if defined (EXTENDED_GLOB)
   extended_glob = extglob_flag = EXTGLOB_DEFAULT;
 #endif
+  glob_always_skip_dot_and_dotdot = 1;		/* new default as of bash-5.2 */
 
 #if defined (ARRAY_VARS)
-  expand_once_flag = assoc_expand_once = 0;
+  expand_once_flag = array_expand_once = 0;
 #endif
 
 #if defined (HISTORY)
@@ -430,12 +433,15 @@ reset_shopt_options ()
   xpg_echo = 0;
 #endif /* DEFAULT_ECHO_TO_XPG */
 
+#if defined (DEBUGGER)
+  debugging_mode = 0;
+#endif
+
   shopt_login_shell = login_shell;
 }
 
 static int
-find_shopt (name)
-     char *name;
+find_shopt (char *name)
 {
   int i;
 
@@ -446,17 +452,13 @@ find_shopt (name)
 }
 
 static void
-shopt_error (s)
-     char *s;
+shopt_error (char *s)
 {
   builtin_error (_("%s: invalid shell option name"), s);
 }
 
 static int
-toggle_shopts (mode, list, quiet)
-     int mode;
-     WORD_LIST *list;
-     int quiet;
+toggle_shopts (int mode, WORD_LIST *list, int quiet)
 {
   WORD_LIST *l;
   int ind, rval;
@@ -485,9 +487,7 @@ toggle_shopts (mode, list, quiet)
 }
 
 static void
-print_shopt (name, val, flags)
-     char *name;
-     int val, flags;
+print_shopt (char *name, int val, int flags)
 {
   if (flags & PFLAG)
     printf ("shopt %s %s\n", val ? "-s" : "-u", name);
@@ -498,9 +498,7 @@ print_shopt (name, val, flags)
 /* List the values of all or any of the `shopt' options.  Returns 0 if
    all were listed or all variables queried were on; 1 otherwise. */
 static int
-list_shopts (list, flags)
-     WORD_LIST *list;
-     int flags;
+list_shopts (WORD_LIST *list, int flags)
 {
   WORD_LIST *l;
   int i, val, rval;
@@ -536,8 +534,7 @@ list_shopts (list, flags)
 }
 
 static int
-list_some_shopts (mode, flags)
-     int mode, flags;
+list_some_shopts (int mode, int flags)
 {
   int val, i;
 
@@ -551,9 +548,7 @@ list_some_shopts (mode, flags)
 }
 
 static int
-list_shopt_o_options (list, flags)
-     WORD_LIST *list;
-     int flags;
+list_shopt_o_options (WORD_LIST *list, int flags)
 {
   WORD_LIST *l;
   int val, rval;
@@ -588,8 +583,7 @@ list_shopt_o_options (list, flags)
 }
 
 static int
-list_some_o_options (mode, flags)
-     int mode, flags;
+list_some_o_options (int mode, int flags)
 {
   if ((flags & QFLAG) == 0)
     list_minus_o_opts (mode, (flags & PFLAG));
@@ -597,10 +591,7 @@ list_some_o_options (mode, flags)
 }
 
 static int
-set_shopt_o_options (mode, list, quiet)
-     int mode;
-     WORD_LIST *list;
-     int quiet;
+set_shopt_o_options (int mode, WORD_LIST *list, int quiet)
 {
   WORD_LIST *l;
   int rval;
@@ -617,18 +608,14 @@ set_shopt_o_options (mode, list, quiet)
 /* If we set or unset interactive_comments with shopt, make sure the
    change is reflected in $SHELLOPTS. */
 static int
-set_shellopts_after_change (option_name, mode)
-     char *option_name;
-     int mode;
+set_shellopts_after_change (char *option_name, int mode)
 {
   set_shellopts ();
   return (0);
 }
 
 static int
-shopt_set_debug_mode (option_name, mode)
-     char *option_name;
-     int mode;
+shopt_set_debug_mode (char *option_name, int mode)
 {
 #if defined (DEBUGGER)
   error_trace_mode = function_trace_mode = debugging_mode;
@@ -640,9 +627,7 @@ shopt_set_debug_mode (option_name, mode)
 }
 
 static int
-shopt_set_expaliases (option_name, mode)
-     char *option_name;
-     int mode;
+shopt_set_expaliases (char *option_name, int mode)
 {
   expand_aliases = expaliases_flag;
   return 0;
@@ -650,9 +635,7 @@ shopt_set_expaliases (option_name, mode)
 
 #if defined (EXTENDED_GLOB)
 static int
-shopt_set_extglob (option_name, mode)
-     char *option_name;
-     int mode;
+shopt_set_extglob (char *option_name, int mode)
 {
   extended_glob = extglob_flag;
   return 0;
@@ -661,26 +644,21 @@ shopt_set_extglob (option_name, mode)
 
 #if defined (READLINE)
 static int
-shopt_enable_hostname_completion (option_name, mode)
-     char *option_name;
-     int mode;
+shopt_enable_hostname_completion (char *option_name, int mode)
 {
   return (enable_hostname_completion (mode));
 }
 #endif
 
 static int
-set_compatibility_level (option_name, mode)
-     char *option_name;
-     int mode;
+set_compatibility_level (char *option_name, int mode)
 {
   int ind, oldval;
   char *rhs;
 
   /* If we're unsetting one of the compatibility options, make sure the
      current value is in the range of the compatNN space. */
-  if (mode == 0)
-    oldval = shell_compatibility_level;
+  oldval = (mode == 0) ? shell_compatibility_level : 0;
 
   /* If we're setting something, redo some of the work we did above in
      toggle_shopt().  Unset everything and reset the appropriate option
@@ -709,10 +687,10 @@ set_compatibility_level (option_name, mode)
     shell_compatibility_level = 43;
   else if (shopt_compat44)
     shell_compatibility_level = 44;
-  else if (oldval > 44 && shell_compatibility_level < DEFAULT_COMPAT_LEVEL)
+  else if (oldval > 44 && shell_compatibility_level < default_compatibility_level)
     ;
   else
-    shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+    shell_compatibility_level = default_compatibility_level;
 
   /* Make sure the current compatibility level is reflected in BASH_COMPAT */
   rhs = itos (shell_compatibility_level);
@@ -725,14 +703,17 @@ set_compatibility_level (option_name, mode)
 /* Set and unset the various compatibility options from the value of
    shell_compatibility_level; used by sv_shcompat */
 void
-set_compatibility_opts ()
+set_compatibility_opts (void)
 {
   shopt_compat31 = shopt_compat32 = 0;
   shopt_compat40 = shopt_compat41 = shopt_compat42 = shopt_compat43 = 0;
   shopt_compat44 = 0;
+  if (shell_compatibility_level == default_compatibility_level)
+    return;
+
   switch (shell_compatibility_level)
     {
-      case DEFAULT_COMPAT_LEVEL:
+      case 52:			/* completeness */
       case 51:			/* completeness */
       case 50:
 	break;
@@ -755,9 +736,7 @@ set_compatibility_opts ()
 
 #if defined (READLINE)
 static int
-shopt_set_complete_direxpand (option_name, mode)
-     char *option_name;
-     int mode;
+shopt_set_complete_direxpand (char *option_name, int mode)
 {
   set_directory_hook ();
   return 0;
@@ -768,9 +747,7 @@ shopt_set_complete_direxpand (option_name, mode)
 /* Don't allow the value of restricted_shell to be modified. */
 
 static int
-set_restricted_shell (option_name, mode)
-     char *option_name;
-     int mode;
+set_restricted_shell (char *option_name, int mode)
 {
   static int save_restricted = -1;
 
@@ -784,19 +761,18 @@ set_restricted_shell (option_name, mode)
 
 /* Not static so shell.c can call it to initialize shopt_login_shell */
 int
-set_login_shell (option_name, mode)
-     char *option_name;
-     int mode;
+set_login_shell (char *option_name, int mode)
 {
   shopt_login_shell = login_shell != 0;
   return (0);
 }
 
 char **
-get_shopt_options ()
+get_shopt_options (void)
 {
   char **ret;
-  int n, i;
+  int i;
+  size_t n;
 
   n = sizeof (shopt_vars) / sizeof (shopt_vars[0]);
   ret = strvec_create (n + 1);
@@ -812,9 +788,7 @@ get_shopt_options ()
  * REUSABLE is 1 if we want to print output in a form that may be reused.
  */
 int
-shopt_setopt (name, mode)
-     char *name;
-     int mode;
+shopt_setopt (char *name, int mode)
 {
   WORD_LIST *wl;
   int r;
@@ -826,9 +800,7 @@ shopt_setopt (name, mode)
 }
 
 int
-shopt_listopt (name, reusable)
-     char *name;
-     int reusable;
+shopt_listopt (char *name, int reusable)
 {
   int i;
 
@@ -847,11 +819,12 @@ shopt_listopt (name, reusable)
 }
 
 void
-set_bashopts ()
+set_bashopts (void)
 {
   char *value;
   char tflag[N_SHOPT_OPTIONS];
-  int vsize, i, vptr, *ip, exported;
+  int i, exported;
+  size_t vsize, vptr;
   SHELL_VAR *v;
 
   for (vsize = i = 0; shopt_vars[i].name; i++)
@@ -882,17 +855,12 @@ set_bashopts ()
 
   v = find_variable ("BASHOPTS");
 
-  /* Turn off the read-only attribute so we can bind the new value, and
-     note whether or not the variable was exported. */
-  if (v)
-    {
-      VUNSETATTR (v, att_readonly);
-      exported = exported_p (v);
-    }
-  else
-    exported = 0;
+  /* Note whether or not the variable was exported so we can adjust after the
+     assignment. */
+  exported = v ? exported_p (v) : 0;
 
-  v = bind_variable ("BASHOPTS", value, 0);
+  /* ASS_FORCE so we don't have to temporarily turn off readonly */
+  v = bind_variable ("BASHOPTS", value, ASS_FORCE);
 
   /* Turn the read-only attribute back on, and turn off the export attribute
      if it was set implicitly by mark_modified_vars and SHELLOPTS was not
@@ -905,8 +873,7 @@ set_bashopts ()
 }
 
 void
-parse_bashopts (value)
-     char *value;
+parse_bashopts (char *value)
 {
   char *vname;
   int vptr, ind;
@@ -926,8 +893,7 @@ parse_bashopts (value)
 }
 
 void
-initialize_bashopts (no_bashopts)
-     int no_bashopts;
+initialize_bashopts (int no_bashopts)
 {
   char *temp;
   SHELL_VAR *var;
@@ -953,14 +919,12 @@ initialize_bashopts (no_bashopts)
 
 #if defined (ARRAY_VARS)
 static int
-set_assoc_expand (option_name, mode)
-     char *option_name;
-     int mode;
+set_array_expand (char *option_name, int mode)
 {
 #if 0 /* leave this disabled */
   if (shell_compatibility_level <= 51)
 #endif
-    assoc_expand_once = expand_once_flag;
+    array_expand_once = expand_once_flag;
   return 0;
 }
 #endif

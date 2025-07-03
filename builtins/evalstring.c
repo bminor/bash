@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,36 +63,53 @@ extern int errno;
 
 int parse_and_execute_level = 0;
 
-static int cat_file PARAMS((REDIRECT *));
+static int cat_file (REDIRECT *);
 
 #define PE_TAG "parse_and_execute top"
 #define PS_TAG "parse_string top"
 
 #if defined (HISTORY)
 static void
-set_history_remembering ()
+uw_set_history_remembering (void *ignore)
 {
   remember_on_history = enable_history_list;
 }
+
 #endif
 
 static void
-restore_lastcom (x)
-     char *x;
+uw_restore_lastcom (void *x)
 {
   FREE (the_printed_command_except_trap);
   the_printed_command_except_trap = x;
 }
 
+static void
+uw_set_current_prompt_level (void *x)
+{
+  set_current_prompt_level ((intptr_t) x);
+}
+
+static void
+uw_pop_stream (void *x)
+{
+  pop_stream ();
+}
+
+static void
+uw_parser_restore_alias (void *x)
+{
+  parser_restore_alias ();
+}
+
 int
-should_optimize_fork (command, subshell)
-     COMMAND *command;
-     int subshell;
+should_optimize_fork (COMMAND *command, int subshell)
 {
   return (running_trap == 0 &&
       command->type == cm_simple &&
       signal_is_trapped (EXIT_TRAP) == 0 &&
       signal_is_trapped (ERROR_TRAP) == 0 &&
+      (variable_context == 0 || signal_is_trapped (RETURN_TRAP) == 0) &&
       any_signals_trapped () < 0 &&
       (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
       ((command->flags & CMD_TIME_PIPELINE) == 0) &&
@@ -102,9 +119,10 @@ should_optimize_fork (command, subshell)
 /* This has extra tests to account for STARTUP_STATE == 2, which is for
    -c command but has been extended to command and process substitution
    (basically any time you call parse_and_execute in a subshell). */
+/* ssh_reading_startup_files will never be non-zero unless someone goes
+   and uncomments SSH_SOURCE_BASHRC in config-top.h */
 int
-should_suppress_fork (command)
-     COMMAND *command;
+should_suppress_fork (COMMAND *command)
 {
   int subshell;
 
@@ -112,22 +130,22 @@ should_suppress_fork (command)
   return (startup_state == 2 && parse_and_execute_level == 1 &&
 	  *bash_input.location.string == '\0' &&
 	  parser_expanding_alias () == 0 &&
+	  job_control_active_p () == 0 &&
+	  ssh_reading_startup_files == 0 &&
 	  should_optimize_fork (command, subshell));
 }
 
 int
-can_optimize_connection (command)
-     COMMAND *command;
+can_optimize_connection (COMMAND *command)
 {
-  return (*bash_input.location.string == '\0' &&
+  return ((bash_input.type != st_string || *bash_input.location.string == '\0') &&
 	  parser_expanding_alias () == 0 &&
 	  (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
 	  command->value.Connection->second->type == cm_simple);
 }
 
 void
-optimize_connection_fork (command)
-     COMMAND *command;
+optimize_connection_fork (COMMAND *command)
 {
   if (command->type == cm_connection &&
       (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
@@ -141,8 +159,7 @@ optimize_connection_fork (command)
 }
 
 void
-optimize_subshell_command (command)
-     COMMAND *command;
+optimize_subshell_command (COMMAND *command)
 {
   if (should_optimize_fork (command, 0))
     {
@@ -160,8 +177,7 @@ optimize_subshell_command (command)
 }
 
 void
-optimize_shell_function (command)
-     COMMAND *command;
+optimize_shell_function (COMMAND *command)
 {
   COMMAND *fc;
 
@@ -172,16 +188,15 @@ optimize_shell_function (command)
       fc->flags |= CMD_NO_FORK;
       fc->value.Simple->flags |= CMD_NO_FORK;
     }
-  else if (fc->type == cm_connection && can_optimize_connection (fc) && should_suppress_fork (fc->value.Connection->second))
+  else if (fc->type == cm_connection && can_optimize_connection (fc))
     {
-      fc->value.Connection->second->flags |= CMD_NO_FORK;
-      fc->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
-    }  
+      fc->value.Connection->second->flags |= CMD_TRY_OPTIMIZING;
+      fc->value.Connection->second->value.Simple->flags |= CMD_TRY_OPTIMIZING;
+    }
 }
 
 int
-can_optimize_cat_file (command)
-     COMMAND *command;
+can_optimize_cat_file (COMMAND *command)
 {
   return (command->type == cm_simple && !command->redirects &&
 	    (command->flags & CMD_TIME_PIPELINE) == 0 &&
@@ -194,8 +209,7 @@ can_optimize_cat_file (command)
 
 /* How to force parse_and_execute () to clean up after itself. */
 void
-parse_and_execute_cleanup (old_running_trap)
-     int old_running_trap;
+parse_and_execute_cleanup (int old_running_trap)
 {
   if (running_trap > 0)
     {
@@ -215,10 +229,7 @@ parse_and_execute_cleanup (old_running_trap)
 }
 
 static void
-parse_prologue (string, flags, tag)
-     char *string;
-     int flags;
-     char *tag;
+parse_prologue (char *string, int flags, char *tag)
 {
   char *orig_string, *lastcom;
   int x;
@@ -232,14 +243,17 @@ parse_prologue (string, flags, tag)
   unwind_protect_int (line_number);
   unwind_protect_int (line_number_for_err_trap);
   unwind_protect_int (loop_level);
-  unwind_protect_int (executing_list);
+  unwind_protect_int (interrupt_execution);
   unwind_protect_int (comsub_ignore_return);
+  unwind_protect_int (builtin_ignoring_errexit);
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     unwind_protect_int (interactive);
+  if (flags & SEVAL_NOTIFY)
+    unwind_protect_int (want_job_notifications);
 
 #if defined (HISTORY)
   if (parse_and_execute_level == 0)
-    add_unwind_protect (set_history_remembering, (char *)NULL);
+    add_unwind_protect (uw_set_history_remembering, (char *)NULL);
   else
     unwind_protect_int (remember_on_history);	/* can be used in scripts */
 #  if defined (BANG_HISTORY)
@@ -250,18 +264,18 @@ parse_prologue (string, flags, tag)
   if (interactive_shell)
     {
       x = get_current_prompt_level ();
-      add_unwind_protect (set_current_prompt_level, x);
+      add_unwind_protect (uw_set_current_prompt_level, (void *) (intptr_t) x);
     }
 
   if (the_printed_command_except_trap)
     {
       lastcom = savestring (the_printed_command_except_trap);
-      add_unwind_protect (restore_lastcom, lastcom);
+      add_unwind_protect (uw_restore_lastcom, lastcom);
     }
 
-  add_unwind_protect (pop_stream, (char *)NULL);
+  add_unwind_protect (uw_pop_stream, (char *)NULL);
   if (parser_expanding_alias ())
-    add_unwind_protect (parser_restore_alias, (char *)NULL);
+    add_unwind_protect (uw_parser_restore_alias, (char *)NULL);
 
   if (orig_string && ((flags & SEVAL_NOFREE) == 0))
     add_unwind_protect (xfree, orig_string);
@@ -269,6 +283,9 @@ parse_prologue (string, flags, tag)
 
   if (flags & (SEVAL_NONINT|SEVAL_INTERACT))
     interactive = (flags & SEVAL_NONINT) ? 0 : 1;
+
+  if (flags & SEVAL_NOTIFY)
+    want_job_notifications = 1;
 
 #if defined (HISTORY)
   if (flags & SEVAL_NOHIST)
@@ -291,15 +308,13 @@ parse_prologue (string, flags, tag)
    	(flags & SEVAL_RESETLINE) -> reset line_number to 1
    	(flags & SEVAL_NOHISTEXP) -> history_expansion_inhibited -> 1
    	(flags & SEVAL_NOOPTIMIZE) -> don't try to turn on optimizing flags
+   	(flags & SEVAL_NOTIFY) -> print job status notifications
 */
 
 int
-parse_and_execute (string, from_file, flags)
-     char *string;
-     const char *from_file;
-     int flags;
+parse_and_execute (char *string, const char *from_file, int flags)
 {
-  int code, lreset;
+  int code, lreset, ignore_return;
   volatile int should_jump_to_top_level, last_result;
   COMMAND *volatile command;
   volatile sigset_t pe_sigmask;
@@ -309,6 +324,8 @@ parse_and_execute (string, from_file, flags)
   parse_and_execute_level++;
 
   lreset = flags & SEVAL_RESETLINE;
+  ignore_return = (this_shell_builtin == eval_builtin || this_shell_builtin == source_builtin) &&
+		  builtin_ignoring_errexit;
 
 #if defined (HAVE_POSIX_SIGNALS)
   /* If we longjmp and are going to go on, use this to restore signal mask */
@@ -408,6 +425,7 @@ parse_and_execute (string, from_file, flags)
 		run_unwind_frame ("pe_dispose");
 	      last_result = last_command_exit_value = EXECUTION_FAILURE; /* XXX */
 	      set_pipestatus_from_exit (last_command_exit_value);
+	      
 	      if (subshell_environment)
 		{
 		  should_jump_to_top_level = 1;
@@ -461,6 +479,8 @@ parse_and_execute (string, from_file, flags)
 		      should_jump_to_top_level = 0;
 		      last_result = last_command_exit_value = EX_BADUSAGE;
 		      set_pipestatus_from_exit (last_command_exit_value);
+		      dispose_command (command);
+		      global_command = (COMMAND *)NULL;
 		      reset_parser ();
 		      break;
 		    }
@@ -468,12 +488,15 @@ parse_and_execute (string, from_file, flags)
 
 	      bitmap = new_fd_bitmap (FD_BITMAP_SIZE);
 	      begin_unwind_frame ("pe_dispose");
-	      add_unwind_protect (dispose_fd_bitmap, bitmap);
-	      add_unwind_protect (dispose_command, command);	/* XXX */
+	      add_unwind_protect (uw_dispose_fd_bitmap, bitmap);
+	      add_unwind_protect (uw_dispose_command, command);	/* XXX */
 
 	      global_command = (COMMAND *)NULL;
 
 	      if ((subshell_environment & SUBSHELL_COMSUB) && comsub_ignore_return)
+		command->flags |= CMD_IGNORE_RETURN;
+
+	      if (ignore_return)
 		command->flags |= CMD_IGNORE_RETURN;
 
 #if defined (ONESHOT)
@@ -522,9 +545,12 @@ parse_and_execute (string, from_file, flags)
 		 the global value of the flag (expaliases_flag) changes). */
 	      local_expalias = expand_aliases;
 	      local_alflag = expaliases_flag;
-	      if (subshell_environment & SUBSHELL_COMSUB)
+	      if ((subshell_environment & SUBSHELL_COMSUB) || executing_funsub)
 		expand_aliases = expaliases_flag;
 
+	      /* This functionality is now implemented as part of
+		 subst.c:command_substitute(). */
+#if 0
 	      /* See if this is a candidate for $( <file ). */
 	      if (startup_state == 2 &&
 		  (subshell_environment & SUBSHELL_COMSUB) &&
@@ -532,10 +558,12 @@ parse_and_execute (string, from_file, flags)
 		  can_optimize_cat_file (command))
 		{
 		  int r;
+INTERNAL_DEBUG(("parse_and_execute: calling cat_file, parse_and_execute_level = %d", parse_and_execute_level));
 		  r = cat_file (command->value.Simple->redirects);
 		  last_result = (r < 0) ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
 		}
 	      else
+#endif
 		last_result = execute_command_internal
 				(command, 0, NO_PIPE, NO_PIPE, bitmap);
 	      dispose_command (command);
@@ -543,7 +571,7 @@ parse_and_execute (string, from_file, flags)
 	      discard_unwind_frame ("pe_dispose");
 
 	      /* If the global value didn't change, we restore what we had. */
-	      if ((subshell_environment & SUBSHELL_COMSUB) && local_alflag == expaliases_flag)
+	      if (((subshell_environment & SUBSHELL_COMSUB) || executing_funsub) && local_alflag == expaliases_flag)
 		expand_aliases = local_expalias;
 
 	      if (flags & SEVAL_ONECMD)
@@ -599,12 +627,7 @@ parse_and_execute (string, from_file, flags)
    command substitutions during parsing to obey Posix rules about finding
    the end of the command and balancing parens. */
 int
-parse_string (string, from_file, flags, cmdp, endp)
-     char *string;
-     const char *from_file;
-     int flags;
-     COMMAND **cmdp;
-     char **endp;
+parse_string (char *string, const char *from_file, int flags, COMMAND **cmdp, char **endp)
 {
   int code, nc;
   volatile int should_jump_to_top_level;
@@ -612,6 +635,7 @@ parse_string (string, from_file, flags, cmdp, endp)
   char *ostring;
   volatile sigset_t ps_sigmask;
 
+  /* unwind-protects common to this and parse_and_execute */
   parse_prologue (string, flags, PS_TAG);
 
 #if defined (HAVE_POSIX_SIGNALS)
@@ -682,6 +706,10 @@ parse_string (string, from_file, flags, cmdp, endp)
 	  else
 	    dispose_command (global_command);
 	  global_command = (COMMAND *)NULL;
+	  /* Presumably this is an error if we haven't consumed the
+	     entire string, but we let the caller deal with it. */
+	  if (flags & SEVAL_ONECMD)
+	    break;
 	}
       else
 	{
@@ -697,7 +725,8 @@ parse_string (string, from_file, flags, cmdp, endp)
 
       if (current_token == yacc_EOF || current_token == shell_eof_token)
 	{
-	  if (current_token == shell_eof_token)
+	  /* check for EOFTOKEN out of paranoia */
+	  if ((parser_state & PST_EOFTOKEN) && (current_token == shell_eof_token))
 	    rewind_input_string ();
 	  break;
 	}
@@ -716,10 +745,10 @@ out:
      us, after doing cleanup */
   if (should_jump_to_top_level)
     {
-      if (parse_and_execute_level == 0)
-	top_level_cleanup ();
       if (code == DISCARD)
 	return -DISCARD;
+      if (parse_and_execute_level == 0)
+	top_level_cleanup ();
       jump_to_top_level (code);
     }
 
@@ -727,12 +756,10 @@ out:
 }
 
 int
-open_redir_file (r, fnp)
-     REDIRECT *r;
-     char **fnp;
+open_redir_file (REDIRECT *r, char **fnp)
 {
   char *fn;
-  int fd, rval;
+  int fd;
 
   if (r->instruction != r_input_direction)
     return -1;
@@ -753,7 +780,7 @@ open_redir_file (r, fnp)
   fd = open(fn, O_RDONLY);
   if (fd < 0)
     {
-      file_error (fn);
+      internal_error ("%s: %s", fn, strerror (errno));
       free (fn);
       if (fnp)
 	*fnp = 0;
@@ -772,8 +799,7 @@ open_redir_file (r, fnp)
    returning errors as appropriate, then just cats the file to the standard
    output. */
 static int
-cat_file (r)
-     REDIRECT *r;
+cat_file (REDIRECT *r)
 {
   char *fn;
   int fd, rval;
@@ -791,10 +817,7 @@ cat_file (r)
 }
 
 int
-evalstring (string, from_file, flags)
-     char *string;
-     const char *from_file;
-     int flags;
+evalstring (char *string, const char *from_file, int flags)
 {
   volatile int r, rflag, rcatch;
   volatile int was_trap;

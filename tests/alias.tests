@@ -40,6 +40,8 @@ qfoo
 unalias qfoo qbar qbaz quux
 
 unalias -a
+# error
+unalias foo
 
 alias foo='echo '
 alias bar=baz
@@ -54,8 +56,15 @@ unalias foo bar baz
 alias foo='a=() b=""
 for i in 1; do echo hi; done'
 foo
-
 unalias foo
+
+alias L='m=("x")'
+L
+declare -p m
+
+# invalid alias names generate errors
+alias '\$'=xx
+BASH_ALIASES['\$']=xx
 
 ${THIS_SH} ./alias1.sub
 ${THIS_SH} ./alias2.sub
@@ -63,3 +72,4 @@ ${THIS_SH} ./alias3.sub
 ${THIS_SH} ./alias4.sub
 ${THIS_SH} ./alias5.sub
 ${THIS_SH} ./alias6.sub
+${THIS_SH} ./alias7.sub

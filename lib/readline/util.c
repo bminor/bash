@@ -1,6 +1,6 @@
 /* util.c -- readline utility functions */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -43,8 +43,8 @@
 #include <ctype.h>
 
 /* System-specific feature definitions and include files. */
-#include "rldefs.h"
 #include "rlmbutil.h"
+#include "rldefs.h"
 
 #if defined (TIOCSTAT_IN_SYS_IOCTL)
 #  include <sys/ioctl.h>
@@ -112,6 +112,7 @@ _rl_abort_internal (void)
   RL_UNSETSTATE (RL_STATE_MULTIKEY);	/* XXX */
 
   rl_last_func = (rl_command_func_t *)NULL;
+  _rl_command_to_execute = 0;
 
   _rl_longjmp (_rl_top_level, 1);
   return (0);
@@ -205,9 +206,9 @@ rl_tilde_expand (int ignore, int key)
   end = start;
   do
     end++;
-  while (whitespace (rl_line_buffer[end]) == 0 && end < rl_end);
+  while (end < rl_end && whitespace (rl_line_buffer[end]) == 0);
 
-  if (whitespace (rl_line_buffer[end]) || end >= rl_end)
+  if (end >= rl_end || whitespace (rl_line_buffer[end]))
     end--;
 
   /* If the first character of the current word is a tilde, perform
@@ -229,26 +230,12 @@ rl_tilde_expand (int ignore, int key)
   return (0);
 }
 
-#if defined (USE_VARARGS)
 void
-#if defined (PREFER_STDARG)
 _rl_ttymsg (const char *format, ...)
-#else
-_rl_ttymsg (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#if defined (PREFER_VARARGS)
-  char *format;
-#endif
 
-#if defined (PREFER_STDARG)
   va_start (args, format);
-#else
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   fprintf (stderr, "readline: ");
   vfprintf (stderr, format, args);
@@ -261,24 +248,11 @@ _rl_ttymsg (va_alist)
 }
 
 void
-#if defined (PREFER_STDARG)
 _rl_errmsg (const char *format, ...)
-#else
-_rl_errmsg (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#if defined (PREFER_VARARGS)
-  char *format;
-#endif
 
-#if defined (PREFER_STDARG)
   va_start (args, format);
-#else
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   fprintf (stderr, "readline: ");
   vfprintf (stderr, format, args);
@@ -287,28 +261,6 @@ _rl_errmsg (va_alist)
 
   va_end (args);
 }
-
-#else /* !USE_VARARGS */
-void
-_rl_ttymsg (format, arg1, arg2)
-     char *format;
-{
-  fprintf (stderr, "readline: ");
-  fprintf (stderr, format, arg1, arg2);
-  fprintf (stderr, "\n");
-
-  rl_forced_update_display ();
-}
-
-void
-_rl_errmsg (format, arg1, arg2)
-     char *format;
-{
-  fprintf (stderr, "readline: ");
-  fprintf (stderr, format, arg1, arg2);
-  fprintf (stderr, "\n");
-}
-#endif /* !USE_VARARGS */
 
 /* **************************************************************** */
 /*								    */
@@ -321,7 +273,8 @@ _rl_errmsg (format, arg1, arg2)
 char *
 _rl_strindex (const char *s1, const char *s2)
 {
-  register int i, l, len;
+  int i;
+  size_t l, len;
 
   for (i = 0, l = strlen (s2), len = strlen (s1); (len - i) >= l; i++)
     if (_rl_strnicmp (s1 + i, s2, l) == 0)
@@ -329,16 +282,17 @@ _rl_strindex (const char *s1, const char *s2)
   return ((char *)NULL);
 }
 
-#ifndef HAVE_STRPBRK
+#if !defined (HAVE_STRPBRK) || defined (HANDLE_MULTIBYTE)
 /* Find the first occurrence in STRING1 of any character from STRING2.
-   Return a pointer to the character in STRING1. */
+   Return a pointer to the character in STRING1. Understands multibyte
+   characters. */
 char *
 _rl_strpbrk (const char *string1, const char *string2)
 {
   register const char *scan;
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t ps;
-  register int i, v;
+  int v;
 
   memset (&ps, 0, sizeof (mbstate_t));
 #endif
@@ -417,6 +371,48 @@ _rl_stricmp (const char *string1, const char *string2)
 }
 #endif /* !HAVE_STRCASECMP */
 
+/* Compare the first N characters of S1 and S2 without regard to case. If
+   FLAGS&1, apply the mapping specified by completion-map-case and make
+   `-' and `_' equivalent. Returns 1 if the strings are equal. */
+int
+_rl_strcaseeqn(const char *s1, const char *s2, size_t n, int flags)
+{
+  int c1, c2;
+  int d;
+
+  if ((flags & 1) == 0)
+    return (_rl_strnicmp (s1, s2, n) == 0);
+
+  do
+    {
+      c1 = _rl_to_lower (*s1);
+      c2 = _rl_to_lower (*s2);
+
+      d = c1 - c2;
+      if ((*s1 == '-' || *s1 == '_') && (*s2 == '-' || *s2 == '_'))
+	d = 0;		/* case insensitive character mapping */
+      if (d != 0)
+	return 0;
+      s1++;
+      s2++;
+      n--;
+    }
+  while (n != 0);
+
+  return 1;
+}
+
+/* Return 1 if the characters C1 and C2 are equal without regard to case.
+   If FLAGS&1, apply the mapping specified by completion-map-case and make
+   `-' and `_' equivalent. */
+int
+_rl_charcasecmp (int c1, int c2, int flags)
+{
+  if ((flags & 1) && (c1 == '-' || c1 == '_') && (c2 == '-' || c2 == '_'))
+    return 1;
+  return ( _rl_to_lower (c1) == _rl_to_lower (c2));
+}
+
 /* Stupid comparison routine for qsort () ing strings. */
 int
 _rl_qsort_string_compare (char **s1, char **s2)
@@ -464,28 +460,14 @@ _rl_savestring (const char *s)
 }
 
 #if defined (DEBUG)
-#if defined (USE_VARARGS)
 static FILE *_rl_tracefp;
 
 void
-#if defined (PREFER_STDARG)
 _rl_trace (const char *format, ...)
-#else
-_rl_trace (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
-#if defined (PREFER_VARARGS)
-  char *format;
-#endif
 
-#if defined (PREFER_STDARG)
   va_start (args, format);
-#else
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   if (_rl_tracefp == 0)
     _rl_tropen ();
@@ -531,7 +513,6 @@ _rl_settracefp (FILE *fp)
 {
   _rl_tracefp = fp;
 }
-#endif
 #endif /* DEBUG */
 
 
@@ -556,7 +537,10 @@ _rl_audit_tty (char *string)
   size = strlen (string) + 1;
 
   if (NLMSG_SPACE (size) > MAX_AUDIT_MESSAGE_LENGTH)
-    return;
+    {
+      close (fd);
+      return;
+    }
 
   memset (&req, 0, sizeof(req));
   req.nlh.nlmsg_len = NLMSG_SPACE (size);

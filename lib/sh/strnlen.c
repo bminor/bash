@@ -1,6 +1,6 @@
 /* strnlen - return length of passed string, with length limit */
 
-/* Copyright (C) 2004 Free Software Foundation, Inc.
+/* Copyright (C) 2004, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -35,9 +35,7 @@
 /* Find the length of S, but scan at most MAXLEN characters.  If no '\0'
    terminator is found within the first MAXLEN characters, return MAXLEN. */
 size_t
-strnlen (s, maxlen)
-     register const char *s;
-     size_t maxlen;
+strnlen (const char *s, size_t maxlen)
 {
   register const char *e;
   size_t n;

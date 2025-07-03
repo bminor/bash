@@ -26,14 +26,18 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
-extern char	*strrchr();
 static char	*signames[NSIG];
 
 char	*progname;
 
-void	sigstat();
+void	sigstat(int);
+void	init_signames(void);
 
+int
 main(argc, argv)
 int	argc;
 char	**argv;
@@ -83,6 +87,7 @@ int	sig;
 		printf("%s: signal is trapped (?)\n", signame);
 }
 
+void
 init_signames()
 {
 	register int i;

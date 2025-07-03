@@ -1,7 +1,7 @@
 This file is getopts.def, from which is created getopts.c.
 It implements the builtin "getopts" in Bash.
 
-Copyright (C) 1987-2019 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -86,23 +86,21 @@ $END
 #define G_INVALID_OPT	-2
 #define G_ARG_MISSING	-3
 
-static int getopts_unbind_variable PARAMS((char *));
-static int getopts_bind_variable PARAMS((char *, char *));
-static int dogetopts PARAMS((int, char **));
+static int getopts_unbind_variable (char *);
+static int getopts_bind_variable (char *, char *);
+static int dogetopts (int, char **);
 
 /* getopts_reset is magic code for when OPTIND is reset.  N is the
    value that has just been assigned to OPTIND. */
 void
-getopts_reset (newind)
-     int newind;
+getopts_reset (int newind)
 {
   sh_optind = newind;
   sh_badopt = 0;
 }
 
 static int
-getopts_unbind_variable (name)
-     char *name;
+getopts_unbind_variable (char *name)
 {
 #if 0
   return (unbind_variable (name));
@@ -112,15 +110,14 @@ getopts_unbind_variable (name)
 }
 
 static int
-getopts_bind_variable (name, value)
-     char *name, *value;
+getopts_bind_variable (char *name, char *value)
 {
   SHELL_VAR *v;
 
-  if (legal_identifier (name))
+  if (valid_identifier (name))
     {
       v = bind_variable (name, value, 0);
-      if (v && (readonly_p (v) || noassign_p (v)))
+      if (v && ASSIGN_DISALLOWED (v, 0))
 	return (EX_MISCERROR);
       return (v ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
@@ -159,9 +156,7 @@ getopts_bind_variable (name, value)
  */
 
 static int
-dogetopts (argc, argv)
-     int argc;
-     char **argv;
+dogetopts (int argc, char **argv)
 {
   int ret, special_error, old_opterr, i, n;
   char strval[2], numval[16];
@@ -312,28 +307,20 @@ dogetopts (argc, argv)
 
 /* The getopts builtin.  Build an argv, and call dogetopts with it. */
 int
-getopts_builtin (list)
-     WORD_LIST *list;
+getopts_builtin (WORD_LIST *list)
 {
   char **av;
   int ac, ret;
+
+  if (no_options (list))
+    return (EX_USAGE);
+  list = loptend;	/* skip over possible `--' */
 
   if (list == 0)
     {
       builtin_usage ();
       return EX_USAGE;
     }
-
-  reset_internal_getopt ();
-  if ((ret = internal_getopt (list, "")) != -1)
-    {
-      if (ret == GETOPT_HELP)
-	builtin_help ();
-      else
-	builtin_usage ();
-      return (EX_USAGE);
-    }
-  list = loptend;
 
   av = make_builtin_argv (list, &ac);
   ret = dogetopts (ac, av);

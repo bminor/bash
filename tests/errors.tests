@@ -24,6 +24,7 @@ set +e
 set +o posix
 
 # various alias/unalias errors
+unalias
 
 # at some point, this may mean to `export' an alias, like ksh, but
 # for now it is an error
@@ -33,7 +34,33 @@ alias hoowah
 unalias hoowah
 
 # the iteration variable must be a valid identifier
-for 1 in a b c; do echo $1; done
+for 1 in a b c
+do
+	echo $1
+done
+for f\1 in a b c ; do echo $f ; done
+
+# in posix mode, it's a fatal error
+(set -o posix
+for invalid-name in a b c; do echo $1; done; echo after posix for)
+(set -o posix
+for f\1 in a b c ; do echo $f ; done; echo after posix for 2)
+
+# same with select
+select 1 in a b c; do echo $REPLY; done
+select f\1 in a b c ; do echo $REPLY ; done
+select invalid-name in a b c; do echo $REPLY; done
+
+(set -o posix ; select 1 in a b c; do echo $REPLY; done; echo after posix select)
+(set -o posix ; select f\1 in a b c ; do echo $REPLY ; done ; echo after posix select 2)
+
+# even in functions
+bad-select()
+{
+        select $1 in a b c ; do echo $REPLY ; done
+}
+bad-select 'a b'
+unset -f bad-select
 
 # try to rebind a read-only function
 func()
@@ -85,6 +112,9 @@ declare -f func='() { echo "this is func"; }'
 # bad option to exec -- this should not exit the script
 exec -i /bin/sh
 
+# trying to exec non-executable file is a fatal error
+( exec ./errors1.sub 2>/dev/null ; echo after failed exec )
+
 # try to export -f something that is not a function -- this should be
 # an error, not create an `invisible function'
 export -f XPATH
@@ -119,13 +149,12 @@ hash notthere
 # bad option to hash, although it may mean `verbose' at some future point
 hash -v
 
+# hash -d requires an argument
+hash -d
+
 # turn off hashing, then try to hash something
 set +o hashall
 hash -p ${THIS_SH} ${THIS_SH##*/}
-
-# bad identifiers to declare/readonly/export
-export AA[4]
-readonly AA[4]
 
 declare -a AA
 unset AA[-2]
@@ -146,10 +175,13 @@ AA=(one two three)
 shopt -s shift_verbose
 shift $(( $# + 5 ))
 shift -2
+shift -- $(( $# + 5 ))
+shift -- -2
 
 # bad shell options
 shopt -s no_such_option
 shopt no_such_option
+shopt -s -o no_such_option
 
 # non-octal digits for umask and other errors
 umask 09
@@ -161,7 +193,7 @@ umask -i
 
 # bad assignments shouldn't change the umask
 mask=$(umask)
-umask g=u
+umask g=p
 mask2=$(umask)
 if [ "$mask" != "$mask2" ]; then
 	echo "umask errors change process umask"
@@ -193,6 +225,12 @@ cd -
 cd /bin/sh	# error - not a directory
 OLDPWD=/tmp/cd-notthere
 cd -
+# too many arguments
+cd one two three
+# cd doesn't like it if PWD is readonly
+${THIS_SH} -c 'readonly PWD ; cd / ; echo $?' bash
+# or if OLDPWD is readonly
+${THIS_SH} -c 'readonly OLDPWD ; cd / ; echo $?' bash
 
 # various `source/.' errors
 .
@@ -210,14 +248,32 @@ enable sh bash
 # try to set and unset shell options simultaneously
 shopt -s -u checkhash
 
+# error
+read -x
+
 # this is an error -- bad timeout spec
 read -t var < /dev/null
 
 # try to read into an invalid identifier
 read /bin/sh < /dev/null
+read A /bin/sh < /dev/null
+read -a invalid-name < /dev/null
 
 # try to read into a readonly variable
 read VAR < /dev/null
+
+# invalid file descriptor
+read -u XX < /dev/null
+read -u 42 < /dev/null
+
+# same with mapfile
+mapfile -u XX A < /dev/null
+mapfile -u 42 A < /dev/null
+unset -v A
+
+# invalid identifier arguments to mapfile
+mapfile '' </dev/null
+mapfile invalid-var < /dev/null
 
 # bad option to readonly/export
 readonly -x foo
@@ -252,6 +308,9 @@ for z in 1 2 3; do
 	echo $x
 done
 
+# invalid option
+builtin -x
+
 # builtin with non-builtin
 builtin bash
 
@@ -261,6 +320,7 @@ bg
 fg
 
 # argument required
+kill
 kill -s
 # bad argument
 kill -S
@@ -268,9 +328,20 @@ kill -S
 kill -INT ''
 # argument required
 kill -INT
+# bad signal specification
+kill -l SIGBAD
+# bad signal specification
+kill -l BAD
+# bad process specification
+kill -HUP @12
+
+# cannot unset non-unsettable variables
+unset -v BASH_LINENO BASH_SOURCE
 
 # bad shell option names
 set -o trackall		# bash is not ksh
+set -q			# this is an error
+set -i			# this is not allowed
 
 # problem with versions through bash-4.2
 readonly xx=5
@@ -294,13 +365,31 @@ ${THIS_SH} -o posix ./errors7.sub
 ${THIS_SH} ./errors8.sub
 ${THIS_SH} ./errors9.sub
 
+# invalid numeric arguments and too many arguments
+${THIS_SH} ./errors10.sub
+
+# invalid identifiers to readonly/export
+${THIS_SH} ./errors11.sub
+
+# EOF when parsing compound commands
+${THIS_SH} ./errors12.sub
+
 ${THIS_SH} -c 'return ; echo after return' bash
 ${THIS_SH} -o posix -c 'return ; echo after return' bash
 
-# this must be last!
-# in posix mode, a function name must be a valid identifier
-# this can't go in posix2.tests, since it causes the shell to exit
-# immediately
+# various posix-mode special builtin fatal (or not) errors
+
+# posix says unsetting readonly variables is a fatal error
+${THIS_SH} -o posix -c 'readonly a=a ; unset -v a; echo after unset 1' sh
+# the same with non-identifiers
+${THIS_SH} -o posix -c 'unset -v a-b; echo after unset 2' sh
+# and sourcing a non-existent file is fatal too
+${THIS_SH} -o posix -c '. /nosuchfile ; echo after source' sh
+# but trap specifying a bad signal nunber is non-fatal
+${THIS_SH} -o posix -c 'trap "echo bad" SIGNOSIG; echo after trap' sh
+
+# in posix mode, this is no longer a fatal error
+# a function name does not have to be a valid identifier
 set -o posix
 function !! () { fc -s "$@" ; }
 set +o posix

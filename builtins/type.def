@@ -1,7 +1,7 @@
 This file is type.def, from which is created type.c.
 It implements the builtin "type" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -64,6 +64,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../builtins.h"
 #include "../parser.h"
 #include "../execute_cmd.h"
 #include "../findcmd.h"
@@ -75,8 +76,6 @@ $END
 
 #include "common.h"
 #include "bashgetopt.h"
-
-extern int find_reserved_word PARAMS((char *));
 
 /* For each word in LIST, find out what the shell is going to do with
    it as a simple command. i.e., which file would this shell use to
@@ -107,8 +106,7 @@ extern int find_reserved_word PARAMS((char *));
  */
 
 int
-type_builtin (list)
-     WORD_LIST *list;
+type_builtin (WORD_LIST *list)
 {
   int dflags, any_failed, opt;
   WORD_LIST *this;
@@ -163,7 +161,7 @@ type_builtin (list)
 	  dflags |= CDESC_TYPE;
 	  dflags &= ~(CDESC_PATH_ONLY|CDESC_SHORTDESC);
 	  break;
-	case 'P':	/* shorthand for type -ap */
+	case 'P':	/* force path search only plus hash table lookup */
 	  dflags |= (CDESC_PATH_ONLY|CDESC_FORCE_PATH);
 	  dflags &= ~(CDESC_TYPE|CDESC_SHORTDESC);
 	  break;
@@ -210,11 +208,9 @@ type_builtin (list)
  * return after finding it once.
  */
 int
-describe_command (command, dflags)
-     char *command;
-     int dflags;
+describe_command (char *command, int dflags)
 {
-  int found, i, found_file, f, all;
+  int found, i, found_file, f, all, skipbuiltin;
   char *full_path, *x, *pathlist;
   SHELL_VAR *func;
 #if defined (ALIAS)
@@ -242,7 +238,7 @@ describe_command (command, dflags)
 
       found = 1;
 
-      if (all == 0)
+      if (all == 0)		/* type -p returns, any executable file would not have precedence */
 	return (1);
     }
 #endif /* ALIAS */
@@ -258,6 +254,24 @@ describe_command (command, dflags)
 	printf ("%s\n", command);
 
       found = 1;
+
+      if (all == 0)
+	return (1);
+    }
+
+  /* In posix mode, we find special builtins before shell functions. */
+  /* find_shell_builtin sets current_builtin as a side effect */
+  skipbuiltin = 0;
+  if (posixly_correct && (dflags & CDESC_FORCE_PATH) == 0 && find_shell_builtin (command) != 0 && (current_builtin->flags & SPECIAL_BUILTIN))
+    {
+      if (dflags & CDESC_TYPE)
+	puts ("builtin"); 
+      else if (dflags & CDESC_SHORTDESC)
+	printf (_("%s is a special shell builtin\n"), command);
+      else if (dflags & CDESC_REUSABLE)
+	printf ("%s\n", command);
+
+      skipbuiltin = found = 1;
 
       if (all == 0)
 	return (1);
@@ -289,13 +303,14 @@ describe_command (command, dflags)
     }
 
   /* Command is a builtin? */
-  if (((dflags & CDESC_FORCE_PATH) == 0) && find_shell_builtin (command))
+  /* find_shell_builtin sets current_builtin as a side effect */
+  if (skipbuiltin == 0 && ((dflags & CDESC_FORCE_PATH) == 0) && find_shell_builtin (command))
     {
       if (dflags & CDESC_TYPE)
 	puts ("builtin");
       else if (dflags & CDESC_SHORTDESC)
 	{
-	  if (posixly_correct && find_special_builtin (command) != 0)
+	  if (posixly_correct && (current_builtin->flags & SPECIAL_BUILTIN))
 	    printf (_("%s is a special shell builtin\n"), command);
 	  else
 	    printf (_("%s is a shell builtin\n"), command);
@@ -345,7 +360,8 @@ describe_command (command, dflags)
 	    printf ("%s\n", full_path);
 
 	  free (full_path);
-	  return (1);
+	  if (all == 0)
+	    return (1);
 	}
     }
 
@@ -371,6 +387,7 @@ describe_command (command, dflags)
 	 probably doesn't exist.  Check whether or not the command is an
 	 executable file.  If it's not, don't report a match.  This is
 	 the default posix mode behavior */
+      /* This code path isn't executed any more as of 3/2023. */
       if (STREQ (full_path, command) || posixly_correct)
 	{
 	  f = file_status (full_path);

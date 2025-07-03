@@ -82,6 +82,12 @@ long_comment text after
 # comment
 comment foo bar
 
+# make sure escaped newlines in alias bodies are processed correctly
+alias xx='echo line with \
+escaped newline'
+xx
+unalias xx
+
 # alias ending in a tab
 alias foo="\
 	echo \"bar\" \
@@ -98,3 +104,4 @@ foo>&2
 
 alias a='printf "<%s>\n" \'
 a|cat
+

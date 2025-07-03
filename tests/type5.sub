@@ -1,0 +1,59 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# make sure . is not in $PATH
+PATH=/bin:/usr/bin:/usr/local/bin
+OPATH=$PATH
+
+# test type -P
+
+# executable in current directory
+TDIR=$TMPDIR/type-$$
+[ -d "$TDIR" ] || mkdir "$TDIR"
+cd -P "$TDIR" || exit 1
+
+touch e ; chmod +x e; type -P e; rm -f e
+
+shopt -s expand_aliases
+
+type cat
+alias cat='echo cat'
+type -f cat
+type -P cat
+
+# some random tests
+
+# the difference between posix and default modes
+type break
+set -o posix; type break; set +o posix
+
+# test with PATH empty and unset
+realdir=$(pwd -P)
+touch e ; chmod +x e
+
+PATH=
+type -p e
+unset PATH
+z=$(type -p e)
+
+case $z in
+*/e)	;;
+*)	echo 'type: unset PATH does not prefix with physical path to $PWD' ;;
+esac
+PATH=$OPATH
+
+rm -f e
+
+cd "$OLDPWD"
+rm -rf "$TDIR"

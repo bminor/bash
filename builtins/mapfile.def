@@ -2,7 +2,7 @@ This file is mapfile.def, from which is created mapfile.c.
 It implements the builtin "mapfile" in Bash.
 
 Copyright (C) 2005-2006 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008-2021 Free Software Foundation, Inc.
+Copyright (C) 2008-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -92,7 +92,7 @@ extern int errno;
 
 #if defined (ARRAY_VARS)
 
-static int run_callback PARAMS((const char *, unsigned int, const char *));
+static int run_callback (const char *, unsigned int, const char *);
 
 #define DEFAULT_ARRAY_NAME	"MAPFILE"
 #define DEFAULT_VARIABLE_NAME	"MAPLINE"	/* not used right now */
@@ -104,13 +104,8 @@ static int run_callback PARAMS((const char *, unsigned int, const char *));
 #define MAPF_CLEARARRAY	0x01
 #define MAPF_CHOP	0x02
 
-static int delim;
-
 static int
-run_callback (callback, curindex, curline)
-     const char *callback;
-     unsigned int curindex;
-     const char *curline;
+run_callback (const char *callback, unsigned int curindex, const char *curline)
 {
   unsigned int execlen;
   char  *execstr, *qline;
@@ -134,9 +129,7 @@ run_callback (callback, curindex, curline)
 }
 
 static void
-do_chop(line, delim)
-     char *line;
-     unsigned char delim;
+do_chop(char *line, unsigned char delim)
 {
   int length;
 
@@ -146,12 +139,8 @@ do_chop(line, delim)
 }
 
 static int
-mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_name, delim, flags)
-     int fd;
-     long line_count_goal, origin, nskip, callback_quantum;
-     char *callback, *array_name;
-     int delim;
-     int flags;
+mapfile (int fd, long line_count_goal, long origin, long nskip, long callback_quantum,
+	 char *callback, char *array_name, int delim, int flags)
 {
   char *line;
   size_t line_length;
@@ -231,10 +220,9 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
 }
 
 int
-mapfile_builtin (list)
-     WORD_LIST *list;
+mapfile_builtin (WORD_LIST *list)
 {
-  int opt, code, fd, flags;
+  int opt, code, fd, flags, delim;
   intmax_t intval;
   long lines, origin, nskip, callback_quantum;
   char *array_name, *callback;
@@ -255,7 +243,7 @@ mapfile_builtin (list)
 	  delim = *list_optarg;
 	  break;
 	case 'u':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
 	      builtin_error (_("%s: invalid file descriptor specification"), list_optarg);
@@ -266,13 +254,13 @@ mapfile_builtin (list)
 
 	  if (sh_validfd (fd) == 0)
 	    {
-	      builtin_error (_("%d: invalid file descriptor: %s"), fd, strerror (errno));
+	      builtin_error ("%d: %s: %s", fd, _("invalid file descriptor"), strerror (errno));
 	      return (EXECUTION_FAILURE);
 	    }
 	  break;	  
 
 	case 'n':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid line count"), list_optarg);
@@ -283,7 +271,7 @@ mapfile_builtin (list)
 	  break;
 
 	case 'O':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid array origin"), list_optarg);
@@ -300,7 +288,7 @@ mapfile_builtin (list)
 	  callback = list_optarg;
 	  break;
 	case 'c':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval <= 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid callback quantum"), list_optarg);
@@ -310,7 +298,7 @@ mapfile_builtin (list)
 	    callback_quantum = intval;
 	  break;
 	case 's':
-	  code = legal_number (list_optarg, &intval);
+	  code = valid_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (unsigned)intval)
 	    {
 	      builtin_error (_("%s: invalid line count"), list_optarg);
@@ -342,7 +330,7 @@ mapfile_builtin (list)
   else
     array_name = list->word->word;
   
-  if (legal_identifier (array_name) == 0)
+  if (valid_identifier (array_name) == 0)
     {
       sh_invalidid (array_name);
       return (EXECUTION_FAILURE);
@@ -354,8 +342,7 @@ mapfile_builtin (list)
 #else
 
 int
-mapfile_builtin (list)
-     WORD_LIST *list;
+mapfile_builtin (WORD_LIST *list)
 {
   builtin_error (_("array variable support required"));
   return (EXECUTION_FAILURE);

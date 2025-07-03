@@ -26,5 +26,22 @@ bar
 cat <&$v
 
 type bar
+unset -f bar
+
+bar()
+{
+exec {v}<<-EOF
+	line 1
+	line 2
+	line 3
+EOF
+echo $v
+}
+
+bar
+
+cat <&$v
+
+type bar
 
 exit 0

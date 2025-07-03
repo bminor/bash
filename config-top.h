@@ -1,6 +1,6 @@
 /* config-top.h - various user-settable options not under the control of autoconf. */
 
-/* Copyright (C) 2002-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,11 +31,6 @@
    error messages about multiple directory arguments to `cd'. */
 #define CD_COMPLAINS
 
-/* Define BUFFERED_INPUT if you want the shell to do its own input
-   buffering, rather than using stdio.  Do not undefine this; it's
-   required to preserve semantics required by POSIX. */
-#define BUFFERED_INPUT
-
 /* Define ONESHOT if you want sh -c 'command' to avoid forking to execute
    `command' whenever possible.  This is a big efficiency improvement. */
 #define ONESHOT
@@ -50,9 +45,9 @@
    when a job like `cat jobs.c | exit 1' terminates due to a SIGPIPE. */
 #define DONT_REPORT_SIGPIPE
 
-/* Define DONT_REPORT_SIGTERM if you don't want to see `Terminates' message
+/* Define DONT_REPORT_SIGTERM if you don't want to see `Terminated' message
    when a job exits due to SIGTERM, since that's the default signal sent
-   by the kill builtin. */
+   by the kill builtin. Only effective for non-interactive shells. */
 #define DONT_REPORT_SIGTERM
 
 /* Define DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS if you don't want builtins
@@ -74,7 +69,7 @@
    the Posix.2 confstr () function, or CS_PATH define are not present. */
 #ifndef STANDARD_UTILS_PATH
 #define STANDARD_UTILS_PATH \
-  "/bin:/usr/bin:/sbin:/usr/sbin:/etc:/usr/etc"
+  "/bin:/usr/bin:/sbin:/usr/sbin"
 #endif
 
 /* The default path for enable -f */
@@ -145,7 +140,7 @@
 /* Define as 1 if you want to enable code that implements multiple coprocs
    executing simultaneously */
 #ifndef MULTIPLE_COPROCS
-#  define MULTIPLE_COPROCS 0
+#  define MULTIPLE_COPROCS 1
 #endif
 
 /* Define to 0 if you want the checkwinsize option off by default, 1 if you
@@ -199,3 +194,18 @@
 /* Undefine or define to 0 if you don't want to allow associative array
    assignment using a compound list of key-value pairs. */
 #define ASSOC_KVPAIR_ASSIGNMENT 1
+
+/* Define if you want read errors in non-interactive shells to be fatal
+   errors instead of the historical practice of treating them as EOF. The
+   next version of POSIX will require this (interp 1629). */
+#define FATAL_READERROR	1
+
+/* Define to 0 if you want the `patsub_replacement' shell option to be disabled
+   by default. */
+#ifndef PATSUB_REPLACE_DEFAULT
+#define PATSUB_REPLACE_DEFAULT	1
+#endif
+
+/* Define to 1 if you want posix mode to restrict shell function names to
+   shell NAMEs. */
+/* #define POSIX_RESTRICT_FUNCNAME 0 */

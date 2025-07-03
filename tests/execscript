@@ -1,9 +1,25 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 export LC_ALL=C
 export LANG=C
 
 if [ $UID -eq 0 ]; then
         echo "execscript: the test suite should not be run as root" >&2
 fi
+
+# this should succeed silently
+$cmd &
 
 set -- one two three
 echo before exec1.sub: "$@"
@@ -20,6 +36,14 @@ export PATH
 
 notthere
 echo $?
+
+# now let's set up a command-not-found hook
+command_not_found_handle()
+{
+        echo we would do something here with $1
+}
+notthere a b c
+unset -f command_not_found_handle
 
 # this is iffy, since the error messages may vary from system to system
 # and /tmp might not exist
@@ -43,6 +67,14 @@ echo $?
 ${THIS_SH} /
 echo $?
 
+# trying to exec a directory is a fatal error
+${THIS_SH} -c 'exec . ; default: after exec directory' bash
+POSIXLY_CORRECT=1 ${THIS_SH} -c 'exec . ; posix: after exec directory' posix-bash
+
+# even if preceded by `command'
+${THIS_SH} -c 'command exec . ; default: after command exec directory 2' bash
+POSIXLY_CORRECT=1 ${THIS_SH} -c 'command exec . ; posix: after command exec directory 2' posix-bash
+
 # try sourcing a directory
 . /
 echo $?
@@ -65,15 +97,23 @@ ${THIS_SH} ./exec3.sub
 rm -f $TMPDIR/bashenv
 unset BASH_ENV
 
+# these results should be the same as with an empty PATH
+PATH=.
+
+notthere
+echo $?
+command notthere
+echo $?
+command -p notthere
+echo $?
+
 # we're resetting the $PATH to empty, so this should be last
 PATH=
 
 notthere
 echo $?
-
 command notthere
 echo $?
-
 command -p notthere
 echo $?
 
@@ -158,3 +198,12 @@ $THIS_SH -c '/bin/echo c && /bin/echo d && echo e'
 
 ${THIS_SH} ./exec13.sub
 ${THIS_SH} ./exec14.sub
+
+# problems with fork optimization in bash-5.2
+${THIS_SH} ./exec15.sub
+
+# problems with set -e and inverting commands' return status
+${THIS_SH} ./exec16.sub
+
+# test behavior of redirections when exec fails and does not exit the shell
+${THIS_SH} ./exec17.sub

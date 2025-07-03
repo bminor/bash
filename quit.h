@@ -45,6 +45,7 @@ extern volatile sig_atomic_t terminating_signal;
 #define DELINTERRUPT interrupt_state--
 
 #define ISINTERRUPT interrupt_state != 0
+#define ISTERMSIG   terminating_signal != 0
 
 /* The same sort of thing, this time just for signals that would ordinarily
    cause the shell to terminate. */
@@ -72,4 +73,19 @@ extern volatile sig_atomic_t terminating_signal;
   do { \
     if (sigterm_received) termsig_handler (SIGTERM); \
   } while (0)
+
+#define CHECK_WINCH \
+do { \
+  if (sigwinch_received) \
+    { \
+      sigwinch_received = 0; \
+      get_new_window_size (0, (int *)0, (int *)0); \
+    } \
+} while (0)
+
+#define ZRESET() \
+  do { \
+    if (interrupt_state) zreset (); \
+  } while (0)
+
 #endif /* _QUIT_H_ */

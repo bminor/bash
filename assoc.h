@@ -1,7 +1,7 @@
 /* assoc.h -- definitions for the interface exported by assoc.c that allows
    the rest of the shell to manipulate associative array variables. */
 
-/* Copyright (C) 2008,2009-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,31 +36,31 @@
 
 #define assoc_walk(h, f)	(hash_walk((h), (f))
 
-extern void assoc_dispose PARAMS((HASH_TABLE *));
-extern void assoc_flush PARAMS((HASH_TABLE *));
+extern void assoc_dispose (HASH_TABLE *);
+extern void assoc_flush (HASH_TABLE *);
 
-extern int assoc_insert PARAMS((HASH_TABLE *, char *, char *));
-extern PTR_T assoc_replace PARAMS((HASH_TABLE *, char *, char *));
-extern void assoc_remove PARAMS((HASH_TABLE *, char *));
+extern int assoc_insert (HASH_TABLE *, char *, char *);
+extern PTR_T assoc_replace (HASH_TABLE *, char *, char *);
+extern void assoc_remove (HASH_TABLE *, const char *);
 
-extern char *assoc_reference PARAMS((HASH_TABLE *, char *));
+extern char *assoc_reference (HASH_TABLE *, const char *);
 
-extern char *assoc_subrange PARAMS((HASH_TABLE *, arrayind_t, arrayind_t, int, int, int));
-extern char *assoc_patsub PARAMS((HASH_TABLE *, char *, char *, int));
-extern char *assoc_modcase PARAMS((HASH_TABLE *, char *, int, int));
+extern char *assoc_subrange (HASH_TABLE *, arrayind_t, arrayind_t, int, int, int);
+extern char *assoc_patsub (HASH_TABLE *, char *, char *, int);
+extern char *assoc_modcase (HASH_TABLE *, char *, int, int);
 
-extern HASH_TABLE *assoc_quote PARAMS((HASH_TABLE *));
-extern HASH_TABLE *assoc_quote_escapes PARAMS((HASH_TABLE *));
-extern HASH_TABLE *assoc_dequote PARAMS((HASH_TABLE *));
-extern HASH_TABLE *assoc_dequote_escapes PARAMS((HASH_TABLE *));
-extern HASH_TABLE *assoc_remove_quoted_nulls PARAMS((HASH_TABLE *));
+extern HASH_TABLE *assoc_quote (HASH_TABLE *);
+extern HASH_TABLE *assoc_quote_escapes (HASH_TABLE *);
+extern HASH_TABLE *assoc_dequote (HASH_TABLE *);
+extern HASH_TABLE *assoc_dequote_escapes (HASH_TABLE *);
+extern HASH_TABLE *assoc_remove_quoted_nulls (HASH_TABLE *);
 
-extern char *assoc_to_kvpair PARAMS((HASH_TABLE *, int));
-extern char *assoc_to_assign PARAMS((HASH_TABLE *, int));
+extern char *assoc_to_kvpair (HASH_TABLE *, int);
+extern char *assoc_to_assign (HASH_TABLE *, int);
 
-extern WORD_LIST *assoc_to_word_list PARAMS((HASH_TABLE *));
-extern WORD_LIST *assoc_keys_to_word_list PARAMS((HASH_TABLE *));
-extern WORD_LIST *assoc_to_kvpair_list PARAMS((HASH_TABLE *));
+extern WORD_LIST *assoc_to_word_list (HASH_TABLE *);
+extern WORD_LIST *assoc_keys_to_word_list (HASH_TABLE *);
+extern WORD_LIST *assoc_to_kvpair_list (HASH_TABLE *);
 
-extern char *assoc_to_string PARAMS((HASH_TABLE *, char *, int));
+extern char *assoc_to_string (HASH_TABLE *, char *, int);
 #endif /* _ASSOC_H_ */

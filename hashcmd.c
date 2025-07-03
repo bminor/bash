@@ -1,7 +1,7 @@
 /* hashcmd.c - functions for managing a hash table mapping command names to
 	       full pathnames. */
 
-/* Copyright (C) 1997-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,25 +37,24 @@
 
 HASH_TABLE *hashed_filenames = (HASH_TABLE *)NULL;
 
-static void phash_freedata PARAMS((PTR_T));
+static void phash_freedata (PTR_T);
 
 void
-phash_create ()
+phash_create (void)
 {
   if (hashed_filenames == 0)
     hashed_filenames = hash_create (FILENAME_HASH_BUCKETS);
 }
 
 static void
-phash_freedata (data)
-     PTR_T data;
+phash_freedata (PTR_T data)
 {
   free (((PATH_DATA *)data)->path);
   free (data);
 }
 
 void
-phash_flush ()
+phash_flush (void)
 {
   if (hashed_filenames)
     hash_flush (hashed_filenames, phash_freedata);
@@ -63,13 +62,15 @@ phash_flush ()
 
 /* Remove FILENAME from the table of hashed commands. */
 int
-phash_remove (filename)
-     const char *filename;
+phash_remove (const char *filename)
 {
   register BUCKET_CONTENTS *item;
 
-  if (hashing_enabled == 0 || hashed_filenames == 0)
+  if (hashing_enabled == 0)
     return 0;
+
+  if (hashed_filenames == 0)
+    return 1;
 
   item = hash_remove (filename, hashed_filenames, 0);
   if (item)
@@ -89,9 +90,7 @@ phash_remove (filename)
    in a directory in $PATH that is not an absolute pathname.
    FOUND is the initial value for times_found. */
 void
-phash_insert (filename, full_path, check_dot, found)
-     char *filename, *full_path;
-     int check_dot, found;
+phash_insert (char *filename, char *full_path, int check_dot, int found)
 {
   register BUCKET_CONTENTS *item;
 
@@ -113,7 +112,7 @@ phash_insert (filename, full_path, check_dot, found)
   pathdata(item)->flags = 0;
   if (check_dot)
     pathdata(item)->flags |= HASH_CHKDOT;
-  if (*full_path != '/')
+  if (RELPATH (full_path))
     pathdata(item)->flags |= HASH_RELPATH;
   item->times_found = found;
 }
@@ -124,8 +123,7 @@ phash_insert (filename, full_path, check_dot, found)
    returns a newly-allocated string; the caller is responsible
    for freeing it. */
 char *
-phash_search (filename)
-     const char *filename;
+phash_search (const char *filename)
 {
   register BUCKET_CONTENTS *item;
   char *path, *dotted_filename, *tail;

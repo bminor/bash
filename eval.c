@@ -1,6 +1,6 @@
 /* eval.c -- reading and evaluating commands. */
 
-/* Copyright (C) 1996-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,13 +48,17 @@
 #  include "bashhist.h"
 #endif
 
-static void send_pwd_to_eterm PARAMS((void));
-static sighandler alrm_catcher PARAMS((int));
+#if defined (JOB_CONTROL)
+#  include "jobs.h"
+#endif
+
+static void send_pwd_to_eterm (void);
+static sighandler alrm_catcher (int);
 
 /* Read and execute commands until EOF is reached.  This assumes that
    the input source has already been initialized. */
 int
-reader_loop ()
+reader_loop (void)
 {
   int our_indirection_level;
   COMMAND * volatile current_command;
@@ -91,7 +95,11 @@ reader_loop ()
 	    {
 	      /* Some kind of throw to top_level has occurred. */
 	    case ERREXIT:
-	      if (exit_immediately_on_error)
+	      /* POSIX says to exit on error "as if by executing the
+		 exit special built-in utility with no arguments," so we
+		 don't reset any local contexts and keep the execution
+		 context in a shell function if we were executing one. */
+	      if (exit_immediately_on_error && posixly_correct == 0)
 		reset_local_contexts ();	/* not in a function */
 	    case FORCE_EOF:
 	    case EXITPROG:
@@ -153,14 +161,18 @@ reader_loop ()
 	      if (interactive && ps0_prompt)
 		{
 		  char *ps0_string;
+		  int old_eof;
 
-		  ps0_string = decode_prompt_string (ps0_prompt);
+		  old_eof = EOF_Reached;
+		  EOF_Reached = 0;
+		  ps0_string = decode_prompt_string (ps0_prompt, 1);
 		  if (ps0_string && *ps0_string)
 		    {
 		      fprintf (stderr, "%s", ps0_string);
 		      fflush (stderr);
 		    }
 		  free (ps0_string);
+		  EOF_Reached = old_eof;
 		}
 
 	      current_command_number++;
@@ -179,6 +191,11 @@ reader_loop ()
 		  current_command = (COMMAND *)NULL;
 		}
 	    }
+	  if (EOF_Reached && interactive && ignoreeof && parse_and_execute_level == 0 && code != EXITBLTIN)
+	    {
+	      if (handle_ignoreeof (1))
+		EOF_Reached = 0;
+	    }
 	}
       else
 	{
@@ -195,7 +212,7 @@ reader_loop ()
 
 /* Pretty print shell scripts */
 int
-pretty_print_loop ()
+pretty_print_loop (void)
 {
   COMMAND *current_command;
   char *command_to_print;
@@ -204,6 +221,7 @@ pretty_print_loop ()
 
   global_posix_mode = posixly_correct;
   last_was_newline = 0;
+  unset_readahead_token ();
   while (EOF_Reached == 0)
     {
       code = setjmp_nosigs (top_level);
@@ -235,8 +253,7 @@ pretty_print_loop ()
 }
 
 static sighandler
-alrm_catcher(i)
-     int i;
+alrm_catcher(int i)
 {
   char *msg;
 
@@ -251,7 +268,7 @@ alrm_catcher(i)
 /* Send an escape sequence to emacs term mode to tell it the
    current working directory. */
 static void
-send_pwd_to_eterm ()
+send_pwd_to_eterm (void)
 {
   char *pwd, *f;
 
@@ -266,9 +283,7 @@ send_pwd_to_eterm ()
 #if defined (ARRAY_VARS)
 /* Caller ensures that A has a non-zero number of elements */
 int
-execute_array_command (a, v)
-     ARRAY *a;
-     void *v;
+execute_array_command (ARRAY *a, void *v)
 {
   char *tag;
   char **argv;
@@ -288,7 +303,7 @@ execute_array_command (a, v)
 #endif
   
 static void
-execute_prompt_command ()
+execute_prompt_command (void)
 {
   char *command_to_execute;
   SHELL_VAR *pcv;
@@ -320,12 +335,13 @@ execute_prompt_command ()
    leaves the parsed command in the global variable GLOBAL_COMMAND.
    This is where PROMPT_COMMAND is executed. */
 int
-parse_command ()
+parse_command (void)
 {
-  int r;
+  int r, old_parsing;
 
   need_here_doc = 0;
-  run_pending_traps ();
+  if ((parser_state & (PST_CMDSUBST|PST_FUNSUBST)) == 0)
+    run_pending_traps ();
 
   /* Allow the execution of a random command just before the printing
      of each primary prompt.  If the shell variable PROMPT_COMMAND
@@ -335,6 +351,9 @@ parse_command ()
      actually printed. */
   if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
+#if defined (JOB_CONTROL)
+      notify_and_cleanup (-1);
+#endif
 #if defined (READLINE)
       if (no_line_editing || (bash_input.type == st_stdin && parser_will_prompt ()))
 #endif
@@ -344,11 +363,14 @@ parse_command ()
 	send_pwd_to_eterm ();	/* Yuck */
     }
 
+  old_parsing = parsing_command;
+  parsing_command = 1;
   current_command_line_count = 0;
   r = yyparse ();
 
   if (need_here_doc)
     gather_here_documents ();
+  parsing_command = old_parsing;
 
   return (r);
 }
@@ -357,7 +379,7 @@ parse_command ()
    is left in the globval variable GLOBAL_COMMAND for use by reader_loop.
    This is where the shell timeout code is executed. */
 int
-read_command ()
+read_command (void)
 {
   SHELL_VAR *tmout_var;
   int tmout_len, result;

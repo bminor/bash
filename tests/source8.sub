@@ -1,0 +1,68 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# test various uses of source -p
+
+: ${THIS_SH:=./bash}
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+
+: ${TMPDIR:=/var/tmp}
+export TDIR=${TMPDIR}/cwd-$$
+export SDIR=${TMPDIR}/source-$$
+mkdir -p $TDIR || { echo "$TDIR: cannot create" >&2; exit 1; }
+mkdir -p $SDIR || { echo "$SDIR: cannot create" >&2; exit 1; }
+
+cd ${TDIR} || { echo "${TDIR}: cannot cd" >&2; 	exit 1; }
+
+FN=${SDIR}/improbable-filename
+
+cat >$FN << EOF
+echo an improbable filename
+EOF
+cat >cwd-filename <<EOF
+echo file in the current directory
+EOF
+
+trap 'rm -rf ${TDIR} ${SDIR}' 0
+
+# not found in $PATH
+. improbable-filename
+source improbable-filename
+
+# searches path supplied with -p
+. -p $SDIR:. improbable-filename
+source -p $SDIR:. improbable-filename
+
+# -p works even without sourcepath
+shopt -u sourcepath
+. -p $SDIR:. improbable-filename
+source -p $SDIR:. improbable-filename
+shopt -s sourcepath
+
+# does not search the current directory with -p
+. cwd-filename
+. -p $SDIR cwd-filename
+
+# but does if . is in the path argument
+source -p $SDIR:. cwd-filename
+
+# but does not in posix mode, where special builtins failing exits the shell
+${THIS_SH} -c 'set -o posix ; . cwd-filename' bash
+${THIS_SH} -c 'set -o posix ; . -p $SDIR cwd-filename' bash
+
+# a null PATH argument is the same as "."
+. -p '' cwd-filename
+source -p '' cwd-filename
+
+cd $OLDPWD

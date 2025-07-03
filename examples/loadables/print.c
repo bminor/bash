@@ -3,7 +3,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -42,8 +42,8 @@
 extern int errno;
 #endif
 
-int print_builtin ();
-static int printargs ();
+int print_builtin (WORD_LIST *);
+static int printargs (WORD_LIST *, FILE *);
 
 static FILE *ofp;
 
@@ -72,8 +72,7 @@ struct builtin print_struct = {
 #endif
 
 int
-print_builtin (list)
-     WORD_LIST *list;
+print_builtin (WORD_LIST *list)
 {
   int c, r, nflag, raw, ofd, sflag;
   intmax_t lfd;
@@ -110,7 +109,7 @@ print_builtin (list)
 	case 'p':
 	  break;	/* NOP */
 	case 'u':
-	  if (all_digits (list_optarg) && legal_number (list_optarg, &lfd) && lfd == (int)lfd)
+	  if (all_digits (list_optarg) && valid_number (list_optarg, &lfd) && lfd == (int)lfd)
 	    ofd = lfd;
 	  else
 	    {
@@ -170,9 +169,7 @@ opt_end:
 }
 
 static int
-printargs (list, ofp)
-     WORD_LIST *list;
-     FILE *ofp;
+printargs (WORD_LIST *list, FILE *ofp)
 {
   WORD_LIST *l;
   char *ostr;
@@ -180,7 +177,7 @@ printargs (list, ofp)
 
   for (sawc = 0, l = list; l; l = l->next)
     {
-      ostr = ansicstr (l->word->word, strlen (l->word->word), 0, &sawc, (int *)0);
+      ostr = ansicstr (l->word->word, strlen (l->word->word), 0, &sawc, 0);
       if (ostr)
 	fprintf (ofp, "%s", ostr);
       free (ostr);

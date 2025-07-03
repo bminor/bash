@@ -2,7 +2,7 @@
 # Makefile for the Bash library
 #
 #
-# Copyright (C) 1998-2022 Free Software Foundation, Inc.
+# Copyright (C) 1998-2024 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ LIBBUILD = ${BUILD_DIR}/lib
 BASHINCDIR = ${topdir}/include
 
 INTL_LIBSRC = ${topdir}/lib/intl
+INTL_LIBDIR = ${LIBBUILD}/intl
 INTL_BUILDDIR = ${LIBBUILD}/intl
 INTL_INC = @INTL_INC@
 LIBINTL_H = @LIBINTL_H@
@@ -55,6 +56,8 @@ MV = mv
 
 SHELL = @MAKE_SHELL@
 
+DEBUG = @DEBUG@
+
 CFLAGS = @CFLAGS@
 LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
 STYLE_CFLAGS = @STYLE_CFLAGS@
@@ -62,6 +65,8 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@ @LOCAL_LDFLAGS@
 
 PROFILE_FLAGS = @PROFILE_FLAGS@
+
+ADDON_CFLAGS =
 
 DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
@@ -91,15 +96,17 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   fmtulong.c fmtullong.c fmtumax.c shmatch.c strnlen.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c mbschr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
-	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
-	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
+	   wcsdup.c fpurge.c zgetline.c mbscmp.c mbsncmp.c  uconvert.c \
+	   ufuncs.c casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
 	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
-	   strvis.c utf8.c random.c gettimeofday.c timers.c
+	   strvis.c strlcpy.c strscpy.c utf8.c random.c gettimeofday.c \
+	   timers.c anonfile.c reallocarray.c compat.c
 
 # The header files for this library.
 HSOURCES = 
 
 # The object files contained in $(LIBRARY_NAME)
+LIBOBJDIR =
 LIBOBJS = @LIBOBJS@
 OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  itos.o zread.o zwrite.o shtty.o shmatch.o eaccess.o \
@@ -107,8 +114,9 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  pathphys.o tmpfile.o stringlist.o stringvec.o spell.o shquote.o \
 	  strtrans.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
-	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
+	  fpurge.o zgetline.o mbscmp.o mbsncmp.o uconvert.o ufuncs.o casemod.o \
 	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o strvis.o \
+	  strscpy.o anonfile.o compat.o \
 	  utf8.o random.o gettimeofday.o timers.o wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
@@ -127,26 +135,30 @@ force:
 # include files.
 install:
 
-clean:
+.PHONY: clean maintainer-clean distclean mostlyclean
+
+mostlyclean:
 	$(RM) $(OBJECTS) $(LIBRARY_NAME)
 
 realclean distclean maintainer-clean: clean
 	$(RM) Makefile
 
-mostlyclean: clean
+clean: mostlyclean
 
 # Dependencies
 
-${BUILD_DIR}/version.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
-	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} version.h )
+#${BUILD_DIR}/version.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
+#	-( cd ${BUILD_DIR} && ${MAKE} ${BASH_MAKEFLAGS} version.h )
 
 ${BUILD_DIR}/pathnames.h: ${BUILD_DIR}/config.h ${BUILD_DIR}/Makefile Makefile
-	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} pathnames.h )
+	-( cd ${BUILD_DIR} && ${MAKE} ${BASH_MAKEFLAGS} pathnames.h )
 
 # rules for losing makes, like SunOS
+anonfile.o: anonfile.c
 casemod.o: casemod.c
 clktck.o: clktck.c
 clock.o: clock.c
+compat.o: compat.c
 eaccess.o: eaccess.c
 dprintf.o: dprintf.c
 fmtullong.o: fmtullong.c
@@ -165,6 +177,7 @@ makepath.o: makepath.c
 mbscasecmp.o: mbscasecmp.c
 mbschr.o: mbschr.c
 mbscmp.o: mbscmp.c
+mbsncmp.o: mbsncmp.c
 memset.o: memset.c
 mktime.o: mktime.c
 netconn.o: netconn.c
@@ -173,6 +186,7 @@ oslib.o: oslib.c
 pathcanon.o: pathcanon.c
 pathphys.o: pathphys.c
 random.o: random.c
+reallocarray.o: reallocarray.c
 rename.o: rename.c
 setlinebuf.o: setlinebuf.c
 shmatch.o: shmatch.c
@@ -199,6 +213,8 @@ strtoull.o: strtoull.c
 strtoumax.o: strtoumax.c
 strtrans.o: strtrans.c
 strvis.o: strvis.c
+strlcpy.o: strlcpy.c
+strscpy.o: strscpy.c
 timers.o: timers.c
 times.o: times.c
 timeval.o: timeval.c
@@ -226,9 +242,11 @@ strtoul.o: strtol.c
 strtoull.o: strtol.c
 
 # all files in the library depend on config.h
+anonfile.o: ${BUILD_DIR}/config.h
 casemod.o: ${BUILD_DIR}/config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
+compat.o: ${BUILD_DIR}/config.h
 eaccess.o: ${BUILD_DIR}/config.h
 dprintf.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h
@@ -247,6 +265,7 @@ makepath.o: ${BUILD_DIR}/config.h
 mbscasecmp.o: ${BUILD_DIR}/config.h
 mbschr.o: ${BUILD_DIR}/config.h
 mbscmp.o: ${BUILD_DIR}/config.h
+mbsncmp.o: ${BUILD_DIR}/config.h
 memset.o: ${BUILD_DIR}/config.h
 mktime.o: ${BUILD_DIR}/config.h
 netconn.o: ${BUILD_DIR}/config.h
@@ -255,6 +274,7 @@ oslib.o: ${BUILD_DIR}/config.h
 pathcanon.o: ${BUILD_DIR}/config.h
 pathphys.o: ${BUILD_DIR}/config.h
 random.o: ${BUILD_DIR}/config.h
+reallocarray.o: ${BUILD_DIR}/config.h
 rename.o: ${BUILD_DIR}/config.h
 setlinebuf.o: ${BUILD_DIR}/config.h
 shmatch.o: ${BUILD_DIR}/config.h
@@ -281,6 +301,8 @@ strtoull.o: ${BUILD_DIR}/config.h
 strtoumax.o: ${BUILD_DIR}/config.h
 strtrans.o: ${BUILD_DIR}/config.h
 strvis.o: ${BUILD_DIR}/config.h
+strlcpy.o: ${BUILD_DIR}/config.h
+strscpy.o: ${BUILD_DIR}/config.h
 timers.o: ${BUILD_DIR}/config.h
 times.o: ${BUILD_DIR}/config.h
 timeval.o: ${BUILD_DIR}/config.h
@@ -519,6 +541,14 @@ strvis.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
 strvis.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 strvis.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h
 
+strlcpy.o: ${topdir}/bashansi.h
+strlcpy.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
+strlcpy.o: ${BASHINCDIR}/typemax.h
+
+strscpy.o: ${topdir}/bashansi.h
+strscpy.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
+strscpy.o: ${BASHINCDIR}/typemax.h
+
 times.o: ${BASHINCDIR}/systimes.h
 times.o: ${BASHINCDIR}/posixtime.h
 
@@ -537,7 +567,6 @@ tmpfile.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 tmpfile.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 tmpfile.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
 
-uconvert.o: ${topdir}/bashtypes.h
 uconvert.o: ${BASHINCDIR}/chartypes.h
 uconvert.o: ${topdir}/shell.h ${topdir}/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
 uconvert.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
@@ -548,6 +577,7 @@ uconvert.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 uconvert.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
 
 ufuncs.o: ${topdir}/bashtypes.h
+ufuncs.o: ${BASHINCDIR}/posixtime.h ${BASHINCDIR}/posixselect.h
 
 clock.o: ${BASHINCDIR}/posixtime.h
 
@@ -606,6 +636,10 @@ mbscmp.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 mbscmp.o: ${BASHINCDIR}/stdc.h
 mbscmp.o: ${topdir}/xmalloc.h
 
+mbsncmp.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+mbsncmp.o: ${BASHINCDIR}/stdc.h
+mbsncmp.o: ${topdir}/xmalloc.h
+
 casemod.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 casemod.o: ${BASHINCDIR}/stdc.h
 casemod.o: ${topdir}/xmalloc.h
@@ -655,3 +689,27 @@ zmapfd.o: ${BASHINCDIR}/stdc.h
 zmapfd.o: ${topdir}/command.h
 zmapfd.o: ${topdir}/general.h
 zmapfd.o: ${topdir}/bashtypes.h ${BASHINCDIR}/chartypes.h ${topdir}/xmalloc.h
+
+anonfile.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+anonfile.o: ${topdir}/bashtypes.h
+anonfile.o: ${BASHINCDIR}/filecntl.h
+anonfile.o: ${topdir}/shell.h ${topdir}/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+anonfile.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
+anonfile.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h ${topdir}/conftypes.h
+anonfile.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
+anonfile.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
+anonfile.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
+anonfile.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
+
+reallocarray.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+
+compat.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+compat.o: ${topdir}/bashtypes.h
+compat.o: ${BASHINCDIR}/filecntl.h
+compat.o: ${topdir}/shell.h ${topdir}/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h
+compat.o: ${topdir}/command.h ${BASHINCDIR}/stdc.h ${topdir}/error.h
+compat.o: ${topdir}/general.h ${topdir}/bashtypes.h ${topdir}/variables.h ${topdir}/conftypes.h
+compat.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
+compat.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
+compat.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
+compat.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h

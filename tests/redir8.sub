@@ -22,6 +22,11 @@ ${THIS_SH} -c 'exec 8>&1; echo fd 8 >&8' 8>u
 cat u
 rm -f u
 
+# command preceding exec acts as if `command' isn't there
+${THIS_SH} -c 'command exec 10>&1; echo fd 10 >&10; echo next fd' 10>u
+cat u
+rm -f u
+
 exec 10>u
 exec 10>&1; echo 'fd 10' >&10
 cat u

@@ -1,6 +1,6 @@
 /* evalfile.c - read and evaluate commands from a file or file descriptor */
 
-/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,7 +58,7 @@
 extern int errno;
 #endif
 
-/* Flags for _evalfile() */
+/* Flags for evalfile_internal() */
 #define FEVAL_ENOENTOK		0x001
 #define FEVAL_BUILTIN		0x002
 #define FEVAL_UNWINDPROT	0x004
@@ -68,18 +68,18 @@ extern int errno;
 #define FEVAL_CHECKBINARY	0x040
 #define FEVAL_REGFILE		0x080
 #define FEVAL_NOPUSHARGS	0x100
+#define FEVAL_RETRY		0x200
 
 /* How many `levels' of sourced files we have. */
 int sourcelevel = 0;
 
 static int
-_evalfile (filename, flags)
-     const char *filename;
-     int flags;
+evalfile_internal (const char *filename, int flags)
 {
   volatile int old_interactive;
   procenv_t old_return_catch;
-  int return_val, fd, result, pflags, i, nnull;
+  int return_val, fd, result, pflags, nnull;
+  size_t i;
   ssize_t nr;			/* return value from read(2) */
   char *string;
   struct stat finfo;
@@ -98,24 +98,23 @@ _evalfile (filename, flags)
 
   USE_VAR(pflags);
 
-#if defined (ARRAY_VARS)
-  GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
-  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
-  GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
-#  if defined (DEBUGGER)
-  GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
-  GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
-#  endif
-#endif
-
-  fd = open (filename, O_RDONLY);
+  errno = 0;
+  do
+    {
+      fd = open (filename, O_RDONLY);
+      result = errno;
+      if (fd < 0 && result == EINTR)
+        QUIT;
+      errno = result;
+    }
+  while (fd < 0 && errno == EINTR && (flags & FEVAL_RETRY));
 
   if (fd < 0 || (fstat (fd, &finfo) == -1))
     {
-      i = errno;
+      result = errno;
       if (fd >= 0)
 	close (fd);
-      errno = i;
+      errno = result;
 
 file_error_and_exit:
       if (((flags & FEVAL_ENOENTOK) == 0) || errno != ENOENT)
@@ -153,7 +152,7 @@ file_error_and_exit:
       (*errfunc) (_("%s: file is too large"), filename);
       close (fd);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
-    }      
+    }
 
   if (S_ISREG (finfo.st_mode) && file_size <= SSIZE_MAX)
     {
@@ -161,6 +160,8 @@ file_error_and_exit:
       nr = read (fd, string, file_size);
       if (nr >= 0)
 	string[nr] = '\0';
+      if (nr != file_size)
+	nr = -1;		/* XXX - didn't get the whole file */
     }
   else
     nr = zmapfd (fd, &string, 0);
@@ -185,7 +186,7 @@ file_error_and_exit:
       check_binary_file (string, (nr > 80) ? 80 : nr))
     {
       free (string);
-      (*errfunc) (_("%s: cannot execute binary file"), filename);
+      (*errfunc) ("%s: %s", filename, _("cannot execute binary file"));
       return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
     }
 
@@ -203,7 +204,7 @@ file_error_and_exit:
 	    if ((flags & FEVAL_BUILTIN) && ++nnull > 256)
 	      {
 		free (string);
-		(*errfunc) (_("%s: cannot execute binary file"), filename);
+		(*errfunc) ("%s: %s", filename, _("cannot execute binary file"));
 		return ((flags & FEVAL_BUILTIN) ? EX_BINARY_FILE : -1);
 	      }
           }
@@ -211,13 +212,15 @@ file_error_and_exit:
 
   if (flags & FEVAL_UNWINDPROT)
     {
-      begin_unwind_frame ("_evalfile");
+      begin_unwind_frame ("evalfile_internal");
 
       unwind_protect_int (return_catch_flag);
       unwind_protect_jmp_buf (return_catch);
       if (flags & FEVAL_NONINT)
 	unwind_protect_int (interactive);
       unwind_protect_int (sourcelevel);
+      unwind_protect_int (want_job_notifications);
+      unwind_protect_int (retain_fifos);
     }
   else
     {
@@ -231,9 +234,21 @@ file_error_and_exit:
 
   return_catch_flag++;
   sourcelevel++;
+  if (interactive_shell && shell_compatibility_level <= 52)
+    want_job_notifications++;
+
+  retain_fifos++;			/* XXX */
 
 #if defined (ARRAY_VARS)
-  array_push (bash_source_a, (char *)filename);
+  GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
+  GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
+  GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
+#  if defined (DEBUGGER)
+  GET_ARRAY_FROM_VAR ("BASH_ARGV", bash_argv_v, bash_argv_a);
+  GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
+#  endif
+
+  push_source (bash_source_a, (char *)filename);
   t = itos (executing_line_number ());
   array_push (bash_lineno_a, t);
   free (t);
@@ -247,7 +262,7 @@ file_error_and_exit:
   fa->funcname_a = funcname_a;
   fa->funcname_v = funcname_v;
   if (flags & FEVAL_UNWINDPROT)
-    add_unwind_protect (restore_funcarray_state, fa);
+    add_unwind_protect (uw_restore_funcarray_state, fa);
 
 #  if defined (DEBUGGER)
   /* Have to figure out a better way to do this when `source' is supplied
@@ -260,7 +275,7 @@ file_error_and_exit:
       tt[0] = '1'; tt[1] = '\0';
       array_push (bash_argc_a, tt);
       if (flags & FEVAL_UNWINDPROT)
-	add_unwind_protect (pop_args, 0);
+	add_unwind_protect (uw_pop_args, 0);
     }
 #  endif
 #endif
@@ -285,7 +300,7 @@ file_error_and_exit:
     result = parse_and_execute (string, filename, pflags);
 
   if (flags & FEVAL_UNWINDPROT)
-    run_unwind_frame ("_evalfile");
+    run_unwind_frame ("evalfile_internal");
   else
     {
       if (flags & FEVAL_NONINT)
@@ -304,6 +319,9 @@ file_error_and_exit:
 #endif
       return_catch_flag--;
       sourcelevel--;
+      if (interactive_shell && shell_compatibility_level <= 52)
+	want_job_notifications--;
+      retain_fifos--;
       COPY_PROCENV (old_return_catch, return_catch);
     }
 
@@ -316,43 +334,38 @@ file_error_and_exit:
 }
 
 int
-maybe_execute_file (fname, force_noninteractive)
-     const char *fname;
-     int force_noninteractive;
+maybe_execute_file (const char *fname, int force_noninteractive)
 {
   char *filename;
   int result, flags;
 
   filename = bash_tilde_expand (fname, 0);
-  flags = FEVAL_ENOENTOK;
+  flags = FEVAL_ENOENTOK|FEVAL_RETRY;
   if (force_noninteractive)
     flags |= FEVAL_NONINT;
-  result = _evalfile (filename, flags);
+  result = evalfile_internal (filename, flags);
   free (filename);
   return result;
 }
 
 int
-force_execute_file (fname, force_noninteractive)
-     const char *fname;
-     int force_noninteractive;
+force_execute_file (const char *fname, int force_noninteractive)
 {
   char *filename;
   int result, flags;
 
   filename = bash_tilde_expand (fname, 0);
-  flags = 0;
+  flags = FEVAL_RETRY;
   if (force_noninteractive)
     flags |= FEVAL_NONINT;
-  result = _evalfile (filename, flags);
+  result = evalfile_internal (filename, flags);
   free (filename);
   return result;
 }
 
 #if defined (HISTORY)
 int
-fc_execute_file (filename)
-     const char *filename;
+fc_execute_file (const char *filename)
 {
   int flags;
 
@@ -360,14 +373,12 @@ fc_execute_file (filename)
      remember_on_history is set.  We use FEVAL_BUILTIN to return
      the result of parse_and_execute. */
   flags = FEVAL_ENOENTOK|FEVAL_HISTORY|FEVAL_REGFILE|FEVAL_BUILTIN;
-  return (_evalfile (filename, flags));
+  return (evalfile_internal (filename, flags));
 }
 #endif /* HISTORY */
 
 int
-source_file (filename, sflags)
-     const char *filename;
-     int sflags;
+source_file (const char *filename, int sflags)
 {
   int flags, rval;
 
@@ -377,7 +388,7 @@ source_file (filename, sflags)
   /* POSIX shells exit if non-interactive and file error. */
   if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
     flags |= FEVAL_LONGJMP;
-  rval = _evalfile (filename, flags);
+  rval = evalfile_internal (filename, flags);
 
   run_return_trap ();
   return rval;

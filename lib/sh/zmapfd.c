@@ -1,6 +1,6 @@
 /* zmapfd - read contents of file descriptor into a newly-allocated buffer */
 
-/* Copyright (C) 2006-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,23 +40,18 @@ extern int errno;
 #  define ZBUFSIZ 4096
 #endif
 
-extern ssize_t zread PARAMS((int, char *, size_t));
+extern ssize_t zread (int, char *, size_t);
 
 /* Dump contents of file descriptor FD to *OSTR.  FN is the filename for
    error messages (not used right now). */
-int
-zmapfd (fd, ostr, fn)
-     int fd;
-     char **ostr;
-     char *fn;
+ssize_t
+zmapfd (int fd, char **ostr, const char *fn)
 {
   ssize_t nr;
-  int rval;
   char lbuf[ZBUFSIZ];
   char *result;
   size_t rsize, rind;
 
-  rval = 0;
   result = (char *)xmalloc (rsize = ZBUFSIZ);
   rind = 0;
 
@@ -64,10 +59,7 @@ zmapfd (fd, ostr, fn)
     {
       nr = zread (fd, lbuf, sizeof (lbuf));
       if (nr == 0)
-	{
-	  rval = rind;
-	  break;
-	}
+	break;
       else if (nr < 0)
 	{
 	  free (result);
@@ -89,5 +81,5 @@ zmapfd (fd, ostr, fn)
   else
     free (result);
 
-  return rval;
+  return (ssize_t)rind;
 }

@@ -78,6 +78,7 @@ cat > $TDIR/rlvers.c << EOF
 #include <stdio.h>
 extern char *rl_library_version;
 
+int
 main()
 {
 	printf("%s\n", rl_library_version ? rl_library_version : "0");

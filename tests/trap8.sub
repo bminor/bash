@@ -1,0 +1,14 @@
+# tests for traps on SIGCHLD and async commands
+
+set -m
+
+trap 'echo CHLD' SIGCHLD
+
+{ echo before ; : ; echo after; } &
+wait
+
+sleep 1 &
+sleep 1 &
+
+sleep 1
+wait

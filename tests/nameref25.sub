@@ -1,0 +1,25 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# issues with nounset and references to nameref variables whose value
+# contains an unset variable
+
+$THIS_SH -uc 'a=() k=; "${a[k]}"' bash ||  echo ok 1
+$THIS_SH -uc 'declare -n r0=b ; : "$r0"' bash || echo ok 2
+$THIS_SH -uc 'a=() k=; declare -n r='a[k]' ; : "$r"' bash || echo ok 3
+$THIS_SH -uc 'declare -n r='a[k]' ; : "$r"' bash || echo ok 4
+
+$THIS_SH -uc 'a=() k=; declare -n r='a[@]' ; : "$r"' bash && echo ok 5
+$THIS_SH -uc 'declare -n r='a[@]' ; : "$r"' bash && echo ok 6
+$THIS_SH -uc 'a=() k=; declare -n r='a[*]' ; : "$r"' bash && echo ok 7
+$THIS_SH -uc 'declare -n r='a[*]' ; : "$r"' bash && echo ok 8

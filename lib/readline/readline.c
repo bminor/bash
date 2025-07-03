@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -262,7 +262,7 @@ _rl_keyseq_cxt *_rl_kscxt = 0;
 
 int rl_executing_key;
 char *rl_executing_keyseq = 0;
-int _rl_executing_keyseq_size = 0;
+size_t _rl_executing_keyseq_size = 0;
 
 struct _rl_cmd _rl_pending_command;
 struct _rl_cmd *_rl_command_to_execute = (struct _rl_cmd *)NULL;
@@ -474,16 +474,11 @@ readline_internal_setup (void)
   RL_CHECK_SIGNALS ();
 }
 
-STATIC_CALLBACK char *
-readline_internal_teardown (int eof)
+STATIC_CALLBACK void
+readline_common_teardown (void)
 {
   char *temp;
   HIST_ENTRY *entry;
-
-  RL_CHECK_SIGNALS ();
-
-  if (eof)
-    RL_SETSTATE (RL_STATE_EOF);		/* XXX */
 
   /* Restore the original of this history line, iff the line that we
      are editing was originally in the history, AND the line has changed. */
@@ -510,6 +505,17 @@ readline_internal_teardown (int eof)
      rid of it now. */
   if (rl_undo_list)
     rl_free_undo_list ();
+}
+	
+STATIC_CALLBACK char *
+readline_internal_teardown (int eof)
+{
+  RL_CHECK_SIGNALS ();
+
+  if (eof)
+    RL_SETSTATE (RL_STATE_EOF);		/* XXX */
+
+  readline_common_teardown ();
 
   /* Disable the meta key, if this terminal has one and we were told to use it.
      The check whether or not we sent the enable string is in
@@ -537,7 +543,11 @@ _rl_internal_char_cleanup (void)
     rl_vi_check ();
 #endif /* VI_MODE */
 
+#if defined (HANDLE_MULTIBYTE)
+  if (rl_num_chars_to_read && _rl_mbstrlen (rl_line_buffer) >= rl_num_chars_to_read)
+#else
   if (rl_num_chars_to_read && rl_end >= rl_num_chars_to_read)
+#endif
     {
       (*rl_redisplay_function) ();
       _rl_want_redisplay = 0;
@@ -566,6 +576,7 @@ readline_internal_charloop (void)
 {
   static int lastc, eof_found;
   int c, code, lk, r;
+  static procenv_t olevel;
 
   lastc = EOF;
 
@@ -576,6 +587,9 @@ readline_internal_charloop (void)
 #endif
       lk = _rl_last_command_was_kill;
 
+      /* Save and restore _rl_top_level even though most of the time it
+	 doesn't matter. */
+      memcpy ((void *)olevel, (void *)_rl_top_level, sizeof (procenv_t));
 #if defined (HAVE_POSIX_SIGSETJMP)
       code = sigsetjmp (_rl_top_level, 0);
 #else
@@ -586,13 +600,14 @@ readline_internal_charloop (void)
 	{
 	  (*rl_redisplay_function) ();
 	  _rl_want_redisplay = 0;
+	  if (RL_ISSTATE (RL_STATE_CALLBACK))
+	    memcpy ((void *)_rl_top_level, (void *)olevel, sizeof (procenv_t));
 
 	  /* If we longjmped because of a timeout, handle it here. */
 	  if (RL_ISSTATE (RL_STATE_TIMEOUT))
 	    {
 	      RL_SETSTATE (RL_STATE_DONE);
-	      rl_done = 1;
-	      return 1;
+	      return (rl_done = 1);
 	    }
 
 	  /* If we get here, we're not being called from something dispatched
@@ -703,6 +718,7 @@ readline_internal_charloop (void)
       _rl_internal_char_cleanup ();
 
 #if defined (READLINE_CALLBACKS)
+      memcpy ((void *)_rl_top_level, (void *)olevel, sizeof (procenv_t));
       return 0;
 #else
     }
@@ -899,8 +915,17 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
 	{
 	  /* Special case rl_do_lowercase_version (). */
 	  if (func == rl_do_lowercase_version)
-	    /* Should we do anything special if key == ANYOTHERKEY? */
-	    return (_rl_dispatch (_rl_to_lower ((unsigned char)key), map));
+	    {
+	      /* Should we do anything special if key == ANYOTHERKEY? */
+	      newkey = _rl_to_lower ((unsigned char)key);
+	      if (newkey != key)
+		return (_rl_dispatch (newkey, map));
+	      else
+		{
+		  rl_ding ();		/* gentle failure */
+		  return 0;
+		}
+	    }
 
 	  rl_executing_keymap = map;
 	  rl_executing_key = key;
@@ -1109,7 +1134,11 @@ _rl_subseq_result (int r, Keymap map, int key, int got_subseq)
       type = m[ANYOTHERKEY].type;
       func = m[ANYOTHERKEY].function;
       if (type == ISFUNC && func == rl_do_lowercase_version)
-	r = _rl_dispatch (_rl_to_lower ((unsigned char)key), map);
+	{
+	  int newkey = _rl_to_lower ((unsigned char)key);
+	  /* check that there is actually a lowercase version to avoid infinite recursion */
+	  r = (newkey != key) ? _rl_dispatch (newkey, map) : 1;
+	}
       else if (type == ISFUNC)
 	{
 	  /* If we shadowed a function, whatever it is, we somehow need a
@@ -1193,6 +1222,7 @@ rl_initialize (void)
 
   /* We aren't done yet.  We haven't even gotten started yet! */
   rl_done = 0;
+  rl_eof_found = 0;
   RL_UNSETSTATE(RL_STATE_DONE|RL_STATE_TIMEOUT|RL_STATE_EOF);
 
   /* Tell the history routines what is going on. */
@@ -1322,9 +1352,8 @@ readline_initialize_everything (void)
     _rl_parse_colors ();
 #endif
 
-  rl_executing_keyseq = malloc (_rl_executing_keyseq_size = 16);
-  if (rl_executing_keyseq)
-    rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
+  rl_executing_keyseq = xmalloc (_rl_executing_keyseq_size = 16);
+  rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
 }
 
 /* If this system allows us to look at the values of the regular
@@ -1337,6 +1366,7 @@ readline_default_bindings (void)
     rl_tty_set_default_bindings (_rl_keymap);
 }
 
+#if defined (DEBUG)
 /* Reset the default bindings for the terminal special characters we're
    interested in back to rl_insert and read the new ones. */
 static void
@@ -1348,6 +1378,7 @@ reset_default_bindings (void)
       rl_tty_set_default_bindings (_rl_keymap);
     }
 }
+#endif
 
 /* Bind some common arrow key sequences in MAP. */
 static void
@@ -1562,7 +1593,7 @@ void
 _rl_add_executing_keyseq (int key)
 {
   RESIZE_KEYSEQ_BUFFER ();
- rl_executing_keyseq[rl_key_sequence_length++] = key;
+  rl_executing_keyseq[rl_key_sequence_length++] = key;
 }
 
 /* `delete' the last character added to the executing key sequence. Use this

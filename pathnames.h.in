@@ -1,6 +1,6 @@
 /* pathnames.h -- absolute filenames that bash wants for various defaults. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009,2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

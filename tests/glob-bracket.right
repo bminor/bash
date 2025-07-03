@@ -1,0 +1,103 @@
+--- $GLOBIGNORE vs fnmatch(3) ---
+#1: pat=ab/cd/efg        yes/yes
+#2: pat=ab[/]cd/efg      no/no
+#3: pat=ab[/a]cd/efg     no/no
+#4: pat=ab[a/]cd/efg     no/no
+#5: pat=ab[!a]cd/efg     no/no
+#6: pat=ab[.-0]cd/efg    no/no
+#7: pat=*/*/efg          yes/yes
+#8: pat=*[/]*/efg        no/no
+#9: pat=*[/a]*/efg       no/no
+#10: pat=*[a/]*/efg       no/no
+#11: pat=*[!a]*/efg       no/no
+#12: pat=*[.-0]*/efg      no/no
+#13: pat=*/*/efg          yes/yes
+#14: pat=*[b]/*/efg       yes/yes
+#15: pat=*[ab]/*/efg      yes/yes
+#16: pat=*[ba]/*/efg      yes/yes
+#17: pat=*[!a]/*/efg      yes/yes
+#18: pat=*[a-c]/*/efg     yes/yes
+#19: pat=ab@(/)cd/efg     yes/yes
+#20: pat=*@(/)cd/efg      no/no
+#21: pat=*/cd/efg         yes/yes
+
+---Tests for a slash in bracket expressions---
+#22: pat=ab[/]ef              str=ab[/]ef          yes/yes
+#23: pat=ab[/]ef              str=ab/ef            no/no
+#24: pat=ab[c/d]ef            str=ab[c/d]ef        yes/yes
+#25: pat=ab[c/d]ef            str=abcef            no/no
+#26: pat=ab[.-/]ef            str=ab[.-/]ef        yes/yes
+#27: pat=ab[.-/]ef            str=ab.ef            no/no
+#28: pat=ab[[=/=]]ef          str=ab[[=/=]]ef      yes/yes
+#29: pat=ab[[=/=]]ef          str=ab/ef            no/no
+#30: pat=ab[[=c=]/]ef         str=ab[=/]ef         yes/yes
+#31: pat=ab[[=c=]/]ef         str=abcef            no/no
+#32: pat=ab[[:alpha:]/]ef     str=ab[:/]ef         yes/yes
+#33: pat=ab[[:alpha:]/]ef     str=abxef            no/no
+#34: pat=ab[/[abc]]ef         str=ab[/c]ef         yes/yes
+#35: pat=ab[/[abc]]ef         str=abc]ef           no/no
+#36: pat=ab[c[=/=]]ef         str=ab[c[=/=]]ef     yes/yes
+#37: pat=ab[c[=/=]]ef         str=abc[=/=]ef       no/no
+#38: pat=ab[c[=/=]]ef         str=abcef            no/no
+#39: pat=a[b\/c]              str=a[b/c]           yes/yes
+#40: pat=a[b\/c]              str=ab               no/no
+#41: pat=a[b\/c]              str=ac               no/no
+
+---Tests for incomplete bracket expressions---
+#42: pat=ab[c                 str=ab[c             yes/yes
+#43: pat=ab[c                 str=abc              no/no
+#44: pat=ab[c[=d=             str=ab[c[=d=         yes/yes
+#45: pat=ab[c[=d=             str=abc              no/no
+#46: pat=ab[c[.d              str=ab[c[.d          yes/yes
+#47: pat=ab[c[.d              str=abc              no/no
+#48: pat=ab[c[:alpha:         str=ab[c[:alpha:     yes/yes
+#49: pat=ab[c[:alpha:         str=abc              no/no
+#50: pat=ab[c-                str=ab[c-            yes/yes
+#51: pat=ab[c-                str=abc              no/no
+#52: pat=ab[c\                str=ab[c\            yes/yes
+#53: pat=ab[c\                str=abc              no/no
+#54: pat=ab[[\                str=ab[[\            yes/yes
+#55: pat=ab[[\                str=ab[              no/no
+
+--- PATSCAN vs BRACKMATCH ---
+#56: pat=@([[.].])A])         str=]                yes/yes
+#57: pat=@([[.].])A])         str===]A])           no/no
+#58: pat=@([[.].])A])         str=AA])             no/no
+#59: pat=@([[=]=])A])         str=]                no/no
+#60: pat=@([[=]=])A])         str===]A])           yes/yes
+#61: pat=@([[=]=])A])         str=AA])             no/no
+
+--- BRACKMATCH: after match vs before match ---
+#62: pat=[[=]=]ab]            str=a                no/no
+#63: pat=[[.[=.]ab]           str=a                yes/yes
+#64: pat=[[.[==].]ab]         str=a                yes/yes
+
+#65: pat=[a[=]=]b]            str=a                no/no
+#66: pat=[a[.[=.]b]           str=a                yes/yes
+#67: pat=[a[.[==].]b]         str=a                yes/yes
+
+#68: pat=[a[=]=]b]            str=b                no/no
+#69: pat=[a[=]=]b]            str=a=]b]            yes/yes
+#70: pat=[a[.[=.]b]           str=b                yes/yes
+#71: pat=[a[.[=.]b]           str=ab]              no/no
+#72: pat=[a[.[==].]b]         str=b                yes/yes
+#73: pat=[a[.[==].]b]         str=ab]              no/no
+
+--- incomplete POSIX brackets ---
+#74: pat=x[a[:y]              str=x[               yes/yes
+#75: pat=x[a[:y]              str=x:               yes/yes
+#76: pat=x[a[:y]              str=xy               yes/yes
+#77: pat=x[a[:y]              str=x[ay             no/no
+
+#78: pat=x[a[.y]              str=x[               yes/yes
+#79: pat=x[a[.y]              str=x.               yes/yes
+#80: pat=x[a[.y]              str=xy               yes/yes
+#81: pat=x[a[.y]              str=x[ay             no/no
+
+#82: pat=x[a[=y]              str=x[               yes/yes
+#83: pat=x[a[=y]              str=x=               yes/yes
+#84: pat=x[a[=y]              str=xy               yes/yes
+#85: pat=x[a[=y]              str=x[ay             no/no
+
+--- MISC tests ---
+#86: pat=a\                   str=a\               yes/yes

@@ -34,6 +34,8 @@ a=4 b=7 ss=4 declare -i ss
 a=4 b=7 foo
 echo after: $a
 
+exec 7>&- 4>&-
+
 unset a
 a=4 echo foo 2>&1 >&$(foo) | { grep -q 'Bad file' || echo 'redir11 bad 3'; }
 a=1 echo foo 2>&1 >&$(foo) | { grep -q 'Bad file' || echo 'redir11 bad 4'; }

@@ -80,6 +80,19 @@ echo AND list succeeded
 
 false || echo OR list succeeded
 
+# more compound commands containing failing commands
+for (( f=0; f<10; f++ )); do
+	printf '%.2d ' $f
+	false
+done && echo done
+echo
+
+for f in {0..9}; do
+	printf '%.2d ' $f
+	false
+done && echo done
+echo
+
 ! false
 echo ! succeeded
 

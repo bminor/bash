@@ -1,7 +1,7 @@
 /* strcasestr.c - Find if one string appears as a substring of another string,
 		  without regard to case. */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -30,9 +30,7 @@
    match in s1.  The compare is case insensitive.  This is a
    case-insensitive strstr(3). */
 char *
-strcasestr (s1, s2)
-     const char *s1;
-     const char *s2;
+strcasestr (const char *s1, const char *s2)
 {
   register int i, l, len, c;
 

@@ -49,6 +49,17 @@ echo ${var}{x,y}
 
 unset var varx vary
 
+# make sure ${ is parsed as a word expansion, since it may contain other
+# expansions
+a=4
+echo "${a#'$('\'}"
+echo "${a-'$('\'}"
+echo "${a+'$('\'}"
+
+echo "${a#aaaa'$(aaaa'aaa)aaa\'}"
+echo "${a#aaaa'$(aaaa)'aaaa\'}"
+unset -v a
+
 # new sequence brace operators
 echo {1..10}
 
@@ -110,10 +121,43 @@ echo {z..a..-2}
 # make sure brace expansion handles ints > 2**31 - 1 using intmax_t
 echo {2147483645..2147483649}
 
+# want zero-padding here
+echo {00..10}
+echo {00..10..2}
+
 # unwanted zero-padding -- fixed post-bash-4.0
 echo {10..0..2}
 echo {10..0..-2}
 echo {-50..-0..5}
+
+# the outer sequence expression is invalid but the other brace expansions are ok
+# fixed post-bash-5.2
+
+echo {{1,2,3}..{7,8,9}}
+echo {{a..c}..{1..3}}
+echo {{a..c}..{1,10}}
+echo {{a,c}..{1..4}}
+
+echo {{1,2,3}..4}
+echo {6..{7,8,9}}
+
+# these are not valid sequence expressions but are valid brace expansions
+echo {a,../a.cfg}
+echo {a..,/a.cfg}
+echo {a..b,/a.cfg}
+echo {a,b../a.cfg}
+
+echo {1..4,5..8}
+echo {1..4,8}
+echo {1,5..8}
+
+# these are all invalid brace expansions
+
+echo {abcde.f}
+echo X{..a}Z
+echo 0{1..}2
+echo {a..1..5}
+echo {x,y}{1..a}{0,1,2}
 
 # bad
 echo {1..10.f}

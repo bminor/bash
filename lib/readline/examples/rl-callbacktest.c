@@ -23,12 +23,15 @@
 #  include <readline/history.h>
 #endif
 
+#if !defined (errno)
 extern int errno;
+#endif
 
 static void cb_linehandler (char *);
 static void signandler (int);
 
-int running, sigwinch_received;
+int running;
+int sigwinch_received;
 const char *prompt = "rltest$ ";
 
 /* Handle SIGWINCH and window size changes when readline is not active and
@@ -73,10 +76,14 @@ main (int c, char **v)
   fd_set fds;
   int r;
 
+  /* Set the default locale values according to environment variables. */
   setlocale (LC_ALL, "");
 
-  /* Handle SIGWINCH */
+#if defined (SIGWINCH)
+  /* Handle window size changes when readline is not active and reading
+     characters. */
   signal (SIGWINCH, sighandler);
+#endif
   
   /* Install the line handler. */
   rl_callback_handler_install (prompt, cb_linehandler);

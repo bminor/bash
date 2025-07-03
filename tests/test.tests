@@ -27,6 +27,9 @@ t()
 	echo $?
 }
 
+echo 't'
+t
+
 echo 't -a noexist'
 t -a noexist
 echo 't -a run-all'
@@ -244,6 +247,10 @@ t 700 -le 1000 -a -n "1" -a "20" = "20"
 echo 't ! \( 700 -le 1000 -a -n "1" -a "20" = "20" \)'
 t ! \( 700 -le 1000 -a -n "1" -a "20" = "20" \)
 
+# more traditional parsing algorithm
+echo 't -n xx -a -z "" -a -t 0 -a -t'
+t -n xx -a -z "" -a -t 0 -a -t
+
 touch /tmp/abc
 sleep 2
 touch /tmp/def
@@ -264,6 +271,29 @@ echo 't /tmp/abc -ef /tmp/ghi'
 t /tmp/abc -ef /tmp/ghi
 
 rm /tmp/abc /tmp/def /tmp/ghi
+
+touch /tmp/abc
+
+echo 't noexist -ot /tmp/abc'
+t noexist -ot /tmp/abc
+
+echo 't /tmp/abc -ot noexist'
+t /tmp/abc -ot noexist
+
+echo 't noexist -nt /tmp/abc'
+t noexist -nt /tmp/abc
+
+echo 't noexist -ef /tmp/abc'
+t noexist -ef /tmp/abc
+
+echo 't -N noexist'
+t -N noexist
+
+# false; it's been read since modified
+echo 't -N /tmp/abc'
+t -N /tmp/abc
+
+rm -f /tmp/abc
 
 echo 't -r /dev/fd/0'
 t -r /dev/fd/0
@@ -317,6 +347,9 @@ set=set
 echo 't -v set'
 t -v set
 
+echo 't -R UID'
+t -R UID
+
 echo 't xx -a yy'
 t xx -a yy
 echo 't xx -o ""'
@@ -349,6 +382,8 @@ echo 't ( -E )'
 t \( -E \)
 echo 't ( "" )'
 t \( "" \)
+echo 't ( -n xx )'
+t \( -n xx \)
 
 z=42
 
@@ -397,7 +432,7 @@ fi
 echo "t 4+3 -eq 7"
 t 4+3 -eq 7
 echo "b 4-5 -eq 7"
-b 4+3 -eq 7
+b 4-5 -eq 7
 
 echo "t 9 -eq 4+5"
 t 9 -eq 4+5
@@ -430,8 +465,14 @@ t -A v
 t 4 -eq 4 -a 2 -ne 5 -a 4 -ne
 # too many arguments
 t 4 -eq 4 -a 3 4
+# syntax error
+t -n xx -a -z "" -a -t 0 -t
+# argument expected
+t -n xx -a -z "" -a -t 0 -a
 
 [
+echo $?
+[ -n xx
 echo $?
 
 t \( \)
@@ -452,5 +493,16 @@ t -t /dev/tty4444444...
 
 # fixed in bash-4.0-beta
 t -t ' '
+
+# ambiguous parenthesized test expressions with more than 4 arguments
+
+t true -a \( ! -a \)
+t true -a \( -n foo \)
+t true -a \( foo \)
+
+t 1 = 1 -a \( \)
+t \( \)
+
+t 1 = 1 -a \( \) -a -n ""
 
 ${THIS_SH} ./test1.sub

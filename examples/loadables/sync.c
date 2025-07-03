@@ -1,7 +1,7 @@
 /* sync - sync the disks by forcing pending filesystem writes to complete */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -23,23 +23,69 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <errno.h>
+#include <fcntl.h>
 
 #include "builtins.h"
 #include "shell.h"
+#include "common.h"
 #include "bashgetopt.h"
 
+#ifndef errno
+extern int errno;
+#endif
+
 int
-sync_builtin (list)
-     WORD_LIST *list;
+sync_builtin (WORD_LIST *list)
 {
-  sync();
-  return (EXECUTION_SUCCESS);
+  int fd, status;
+  WORD_LIST *l;
+  char *fn;
+
+  if (no_options (list))
+    return (EX_USAGE);
+  list = loptend;
+
+  if (list == 0)
+    {  
+      sync();
+      return (EXECUTION_SUCCESS);
+    }
+
+  status = EXECUTION_SUCCESS;
+  for (l = list; l; l = l->next)
+    {
+      fn = l->word->word;
+      fd = open (fn, O_WRONLY);
+      if (fd < 0)
+	fd = open (fn, O_RDONLY);
+
+      if (fd < 0)
+	{
+	  file_error (fn);
+	  status = EXECUTION_FAILURE;
+	  continue;
+	}
+
+      if (fsync (fd) < 0)
+	{
+	  builtin_error ("%s: cannot sync: %s", fn, strerror (errno));
+	  status = EXECUTION_FAILURE;
+	}
+      close (fd);
+    }
+
+  return (status);
 }
 
 char *sync_doc[] = {
-	"Sync disks.",
-	""
-	"Force completion of pending disk writes",
+	"Sync disks or specified files.",
+	"",
+	"If one or more FILEs is supplied, force completion of pending writes",
+	"to those files. Otherwise, force completion of any pending disk",
+	"writes.",
+	"",
+	"Exit Status: zero unless any FILE could not be synced.",
 	(char *)NULL
 };
 
@@ -48,6 +94,6 @@ struct builtin sync_struct = {
 	sync_builtin,		/* function implementing the builtin */
 	BUILTIN_ENABLED,	/* initial flags for builtin */
 	sync_doc,		/* array of long documentation strings. */
-	"sync",			/* usage synopsis; becomes short_doc */
+	"sync [file ...]",	/* usage synopsis; becomes short_doc */
 	0			/* reserved for internal use */
 };

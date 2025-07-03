@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -58,11 +58,10 @@ static FLIST *tee_flist;
 
 extern int interrupt_immediately;
 
-extern char *strerror ();
+extern char *strerror (int);
 
 int
-tee_builtin (list)
-     WORD_LIST *list;
+tee_builtin (WORD_LIST *list)
 {
   int opt, append, nointr, rval, fd, fflags;
   int n, nr, nw;

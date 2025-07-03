@@ -1,6 +1,6 @@
 /* zread - read data from file descriptor into buffer with retries */
 
-/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,24 +41,74 @@ extern int errno;
 #  define ZBUFSIZ 4096
 #endif
 
-extern int executing_builtin;
+#ifndef EOF
+#  define EOF -1
+#endif
+
+extern int executing_builtin, interrupt_state;
 
 extern void check_signals_and_traps (void);
 extern void check_signals (void);
 extern int signal_is_trapped (int);
 extern int read_builtin_timeout (int);
 
+/* Forward declarations */
+void zreset (void);
+
+int zungetc (int);
+
+/* Provide 16 bytes of pushback whether we are using read or zread. Only used
+   by the read builtin when reading invalid multibyte characters. */
+#define ZPUSHSIZE 16
+
+static size_t zpushind, zpopind;
+static unsigned char zpushbuf[ZPUSHSIZE];
+static unsigned char zbufchar;
+
+static inline int
+zbufpop(unsigned char *cp)
+{
+  if (zpushind == zpopind)
+    return (0);
+  *cp = zpushbuf[zpopind++];
+  if (zpopind == zpushind)
+    zpopind = zpushind = 0;	/* reset, buffer empty */
+  return 1;
+}
+
+static inline int
+zbufpush(int c)
+{
+  if (zpushind == ZPUSHSIZE - 1)
+    return 0;
+  zpushbuf[zpushind++] = c;
+  return 1;
+}
+
+/* Add C to the pushback buffer. Can't push back EOF */
+int
+zungetc (int c)
+{
+  zbufpush (c);
+  return c;
+}
+
 /* Read LEN bytes from FD into BUF.  Retry the read on EINTR.  Any other
    error causes the loop to break. */
 ssize_t
-zread (fd, buf, len)
-     int fd;
-     char *buf;
-     size_t len;
+zread (int fd, char *buf, size_t len)
 {
   ssize_t r;
 
   check_signals ();	/* check for signals before a blocking read */
+
+  /* If we pushed chars back, return the oldest one immediately */
+  if (zbufpop (&zbufchar))
+    {
+      *buf = zbufchar;
+      return 1;
+    }
+
   /* should generalize into a mechanism where different parts of the shell can
      `register' timeouts and have them checked here. */
   while (((r = read_builtin_timeout (fd)) < 0 || (r = read (fd, buf, len)) < 0) &&
@@ -69,7 +119,11 @@ zread (fd, buf, len)
       /* XXX - bash-5.0 */
       /* We check executing_builtin and run traps here for backwards compatibility */
       if (executing_builtin)
-	check_signals_and_traps ();	/* XXX - should it be check_signals()? */
+	{
+	  if (interrupt_state)
+	    zreset ();
+	  check_signals_and_traps ();	/* XXX - should it be check_signals()? */
+	}
       else
 	check_signals ();
       errno = t;
@@ -87,13 +141,17 @@ zread (fd, buf, len)
 #define NUM_INTR 3
 
 ssize_t
-zreadretry (fd, buf, len)
-     int fd;
-     char *buf;
-     size_t len;
+zreadretry (int fd, char *buf, size_t len)
 {
   ssize_t r;
   int nintr;
+
+  /* If we pushed chars back, return the oldest one immediately */
+  if (zbufpop (&zbufchar))
+    {
+      *buf = zbufchar;
+      return 1;
+    }
 
   for (nintr = 0; ; )
     {
@@ -112,12 +170,17 @@ zreadretry (fd, buf, len)
 
 /* Call read(2) and allow it to be interrupted.  Just a stub for now. */
 ssize_t
-zreadintr (fd, buf, len)
-     int fd;
-     char *buf;
-     size_t len;
+zreadintr (int fd, char *buf, size_t len)
 {
   check_signals ();
+
+  /* If we pushed chars back, return the oldest one immediately */
+  if (zbufpop (&zbufchar))  
+    {    
+      *buf = zbufchar;        
+      return 1;              
+    }                            
+        
   return (read (fd, buf, len));
 }
 
@@ -129,12 +192,17 @@ static char lbuf[ZBUFSIZ];
 static size_t lind, lused;
 
 ssize_t
-zreadc (fd, cp)
-     int fd;
-     char *cp;
+zreadc (int fd, char *cp)
 {
   ssize_t nr;
 
+  /* If we pushed chars back, return the oldest one immediately */
+  if (cp && zbufpop (&zbufchar))  
+    {    
+      *cp = zbufchar;        
+      return 1;              
+    }                            
+        
   if (lind == lused || lused == 0)
     {
       nr = zread (fd, lbuf, sizeof (lbuf));
@@ -154,11 +222,16 @@ zreadc (fd, cp)
 /* Don't mix calls to zreadc and zreadcintr in the same function, since they
    use the same local buffer. */
 ssize_t
-zreadcintr (fd, cp)
-     int fd;
-     char *cp;
+zreadcintr (int fd, char *cp)
 {
   ssize_t nr;
+
+  /* If we pushed chars back, return the oldest one immediately */
+  if (cp && zbufpop (&zbufchar))  
+    {    
+      *cp = zbufchar;        
+      return 1;              
+    }
 
   if (lind == lused || lused == 0)
     {
@@ -179,12 +252,16 @@ zreadcintr (fd, cp)
 /* Like zreadc, but read a specified number of characters at a time.  Used
    for `read -N'. */
 ssize_t
-zreadn (fd, cp, len)
-     int fd;
-     char *cp;
-     size_t len;
+zreadn (int fd, char *cp, size_t len)
 {
   ssize_t nr;
+
+  /* If we pushed chars back, return the oldest one immediately */
+  if (cp && zbufpop (&zbufchar))  
+    {    
+      *cp = zbufchar;        
+      return 1;              
+    }
 
   if (lind == lused || lused == 0)
     {
@@ -205,16 +282,16 @@ zreadn (fd, cp, len)
 }
 
 void
-zreset ()
+zreset (void)
 {
   lind = lused = 0;
+  zpushind = zpopind = 0;
 }
 
 /* Sync the seek pointer for FD so that the kernel's idea of the last char
    read is the last char returned by zreadc. */
 void
-zsyncfd (fd)
-     int fd;
+zsyncfd (int fd)
 {
   off_t off, r;
 
@@ -224,5 +301,8 @@ zsyncfd (fd)
     r = lseek (fd, -off, SEEK_CUR);
 
   if (r != -1)
-    lused = lind = 0;
+    {
+      lused = lind = 0;
+      zpushind = zpopind = 0;
+    }
 }

@@ -3,7 +3,7 @@ argv[1] = <foo>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
-./new-exp.tests: line 41: HOME: }: syntax error: operand expected (error token is "}")
+./new-exp.tests: line 41: HOME: }: arithmetic syntax error: operand expected (error token is "}")
 unset
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
@@ -59,6 +59,7 @@ argv[1] = <4>
 argv[1] = <op>
 argv[1] = <abcdefghijklmnop>
 argv[1] = <abcdefghijklmnop>
+./new-exp.tests: line 189: bad-var: invalid variable name
 argv[1] = <a>
 argv[2] = <b>
 argv[3] = <c>
@@ -66,8 +67,8 @@ argv[4] = <d>
 argv[1] = <a>
 argv[2] = <b c>
 argv[3] = <d>
-./new-exp.tests: line 197: ABX: unbound variable
-./new-exp.tests: line 201: $6: cannot assign in this way
+./new-exp.tests: line 202: ABX: unbound variable
+./new-exp.tests: line 206: $6: cannot assign in this way
 argv[1] = <xxcde>
 argv[1] = <axxde>
 argv[1] = <abxyz>
@@ -176,7 +177,7 @@ a
 ./new-exp2.sub: line 62: 1111111111111111111111: command not found
 
 argv[1] = <6>
-./new-exp.tests: line 302: ${#:}: bad substitution
+./new-exp.tests: line 307: ${#:}: bad substitution
 argv[1] = <'>
 argv[1] = <">
 argv[1] = <"hello">
@@ -411,13 +412,13 @@ argv[6] = <w>
 argv[7] = <x>
 argv[8] = <y>
 argv[9] = <z>
-./new-exp.tests: line 520: $9: unbound variable
-./new-exp.tests: line 521: 9: unbound variable
-./new-exp.tests: line 522: UNSET: unbound variable
-./new-exp.tests: line 523: UNSET: unbound variable
-./new-exp.tests: line 524: UNSET: unbound variable
-./new-exp.tests: line 525: UNSET: unbound variable
-./new-exp.tests: line 526: UNSET: unbound variable
+./new-exp.tests: line 525: $9: unbound variable
+./new-exp.tests: line 526: 9: unbound variable
+./new-exp.tests: line 527: UNSET: unbound variable
+./new-exp.tests: line 528: UNSET: unbound variable
+./new-exp.tests: line 529: UNSET: unbound variable
+./new-exp.tests: line 530: UNSET: unbound variable
+./new-exp.tests: line 531: UNSET: unbound variable
 argv[1] = <5>
 argv[1] = <#>
 argv[1] = <#>
@@ -464,7 +465,7 @@ Case05---3---A:B:C---
 Case06---1---A B C::---
 Case07---3---A:B:C---
 Case08---3---A:B:C---
-./new-exp.tests: line 546: ${$(($#-1))}: bad substitution
+./new-exp.tests: line 551: ${$(($#-1))}: bad substitution
 argv[1] = <a>
 argv[2] = <b>
 argv[3] = <c>
@@ -481,8 +482,8 @@ argv[1] = <a>
 argv[1] = <a>
 argv[2] = <b>
 argv[1] = <>
-./new-exp.tests: line 565: $(($# - 2)): substring expression < 0
-./new-exp.tests: line 567: -2: substring expression < 0
+./new-exp.tests: line 570: $(($# - 2)): substring expression < 0
+./new-exp.tests: line 572: -2: substring expression < 0
 argv[1] = <bin>
 argv[2] = <bin>
 argv[3] = <ucb>
@@ -625,13 +626,13 @@ bash: line 1: ${x@C}: bad substitution
 <'ab cd'> 
 <'4'> <'ab cd'> 
 <> 
-argv[1] = <host(2)[5.2]$ >
 < 	
 >
 <' \t\n'>
 < 	
 >
 <$' \t\n'>
+$'\001\001'
 declare -r x='ab '\''cd'\'' ef'
 set -- 'ab' 'cd ef' '' 'gh' 
 declare -a A=([0]="ab" [1]="cd ef" [2]="" [3]="gh") 
@@ -648,7 +649,15 @@ i
 declare -i foo
 A
 declare -A foo
-./new-exp10.sub: line 118: ${V@}: bad substitution
+LOWER
+Lower
+argv[1] = <host(2)[5.3]$ >
+argv[1] = <~$ >
+argv[1] = <^A[0]~$ >
+argv[1] = <^A^G^B[0:1]~\$ >
+argv[1] = </ bash$ >
+argv[1] = <1^J/ bash$ >
+./new-exp10.sub: line 153: ${V@}: bad substitution
 abcxxxdef
 abcÃ¥def
 ḅć
@@ -792,4 +801,10 @@ otwone
 argv[1] = </>
 argv[1] = </>
 
+1/##2/%3
+1/##2/##3
+1##2/%3
+1/%%2/#3
+1/%%2/%%3
+1%%2/#3
 ./new-exp.tests: line 1: ABXD: parameter unset

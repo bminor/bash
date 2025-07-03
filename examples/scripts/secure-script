@@ -1,0 +1,31 @@
+# if we are worried somehow about inheriting a function for unset or exec,
+# set posix mode, then unset it later
+POSIXLY_CORRECT=1
+
+# make sure to run with bash -p to prevent inheriting functions. you can
+# do this (if the script does not need to run setuid) or use the
+# POSIXLY_CORRECT setting above (as long as you run set +o posix as done below)
+#case $SHELLOPTS in
+#*privileged*)	;;
+#*)	\exec /bin/bash -p $0 "$@" ;;
+#esac
+
+# unset is a special builtin and will be found before functions; quoting it
+# will prevent alias expansion
+# add any other shell builtins you're concerned about
+\unset -f command builtin unset shopt set unalias hash
+\unset -f read true exit echo printf
+
+# remove all aliases and disable alias expansion
+\unalias -a
+\shopt -u expand_aliases
+
+# and make sure we're no longer running in posix mode
+set +o posix
+
+# get rid of any hashed commands
+hash -r
+
+# if you're concerned about PATH spoofing, make sure to have a path that
+# will find the standard utilities
+#PATH=$(command getconf -p getconf PATH):$PATH

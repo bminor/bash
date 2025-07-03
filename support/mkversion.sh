@@ -5,7 +5,7 @@
 # in the makefile.  This creates a file named by the -o option,
 # otherwise everything is echoed to the standard output.
 
-# Copyright (C) 1996-2020 Free Software Foundation, Inc.
+# Copyright (C) 1996-2022 Free Software Foundation, Inc.
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -153,8 +153,8 @@ echo "#define SCCSVERSION \"@(#)Bash version ${sccs_string}\""
 # extern function declarations
 #echo
 #echo '/* Functions from version.c. */'
-#echo 'extern char *shell_version_string PARAMS((void));'
-#echo 'extern void show_shell_version PARAMS((int));'
+#echo 'extern char *shell_version_string (void);'
+#echo 'extern void show_shell_version (int);'
 
 if [ -n "$inc_build" ]; then
 	# Make sure we can write to .build

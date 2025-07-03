@@ -35,8 +35,7 @@ static char *stderrbuf = 0;
 
 /* Cause STREAM to buffer lines as opposed to characters or blocks. */
 int
-sh_setlinebuf (stream)
-     FILE *stream;
+sh_setlinebuf (FILE *stream)
 {
 #if !defined (HAVE_SETLINEBUF) && !defined (HAVE_SETVBUF)
   return (0);

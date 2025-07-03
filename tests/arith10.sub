@@ -1,0 +1,95 @@
+#   Copyright 2025 The Free Software Foundation
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# let's see how various arithmetic contexts handle embedded double quotes and
+# empty expressions
+
+declare -a a
+
+afunc()
+{
+	a[0]=0
+
+	( a[" "]=10 ; declare -p a )
+	( (( a[" "]=11 )) ; declare -p a )
+	( : $(( a[" "]=12 )) ; declare -p a )
+	( let a\[" "\]=13 ; declare -p a )
+
+	( declare "a[\" \"]=14" ; declare -p a )
+
+	( a[\" \"]=15; declare -p a )
+	( (( a[\" \"]=16 )) ; declare -p a )
+	( : $(( a[\" \"]=17 )) ; declare -p a )
+	( let "a[\" \"]"=18 ; declare -p a )
+
+	( a[\"\"]=19 ; declare -p a )
+	( (( a[\"\"]=20 )) ; declare -p a  )
+	( : $(( a[\"\"]=21 )) ; declare -p a )
+	( let "a[\"\"]"=22 ; declare -p a )
+
+	( a[""]=23 ; declare -p a )
+	( (( a[""]=24 )); declare -p a )
+	( : $(( a[""]=25 )); declare -p a )
+	( let 'a[""]=26' ; declare -p a )
+}
+
+echo == arraysub ==
+shopt -u assoc_expand_once
+echo === assoc_expand_once unset ===
+afunc
+
+unset a
+declare -a a
+
+shopt -s assoc_expand_once
+echo === assoc_expand_once set ===
+afunc
+unset a
+
+echo == substring ==
+a=12345
+
+echo ${a:0:2}
+echo ${a::2}
+
+echo ${a:2:0}
+echo ${a:2:}
+echo ${a:2}
+
+echo == cond ==
+[[ "" -gt 1 ]] ; echo $?
+[[ 1 -le "" ]] ; echo $?
+[[ 0 -eq "" ]] ; echo $?
+
+echo == arithsub ==
+echo $(( )) ; echo 1 $?
+echo $(( "" )) ; echo 2 $?
+echo $(( \"\" )) ; echo 3 $?
+echo $(()) ; echo 4 $?
+a=$(( )) ; echo 5 $?
+a=$(( "" )) ; echo 6 $?
+
+echo == arithcmd ==
+(( )) ; echo 1 $?
+(( "" )) ; echo 2 $?
+(( " " )) ; echo 3 $?
+(( 1 - "" )) ; echo 4 $?
+
+echo == letbltin ==
+let '' ; echo 1 $?
+let ' ' ; echo 2 $?
+let '0 - ""' ; echo 3 $?
+let "0 - \"\"" ; echo 4 $?

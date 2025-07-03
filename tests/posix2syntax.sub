@@ -63,4 +63,39 @@ in
 	foo) echo "ok 1";;
 esac' $bashname
 
+# POSIX grammar rule 6 with <linebreak> consisting of multiple newlines and
+# nested case and for commands
+
+case x in x)
+for x
+in x
+do
+echo $x
+done
+esac
+
+# need to recognize IN here
+case x in x)
+for x
+
+
+in x
+do
+echo $x
+done
+esac
+
+# recognize both IN and DO
+case x in x)
+for x
+
+
+in x
+
+
+
+do
+echo $x
+done
+esac
 

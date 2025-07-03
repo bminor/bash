@@ -2,7 +2,7 @@
  * mksyntax.c - construct shell syntax table for fast char attribute lookup.
  */
 
-/* Copyright (C) 2000-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2009,2012,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -20,28 +20,25 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
+/* assume C90/POSIX-1992 compilation environment if cross-compiling */
 
-#include <stdio.h>
-#include "bashansi.h"
-#include "chartypes.h"
-#include <errno.h>
-
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
+#ifndef CROSS_COMPILING
+#  include <config.h>
+#else
+#  include <buildconf.h>
 #endif
 
-#include "syntax.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
 
-extern int optind;
-extern char *optarg;
+#include "chartypes.h"
+#include "syntax.h"
 
 #ifndef errno
 extern int errno;
-#endif
-
-#ifndef HAVE_STRERROR
-extern char *strerror();
 #endif
 
 struct wordflag {
@@ -84,7 +81,7 @@ char	includes[] = "\
 #include \"syntax.h\"\n\n";
 
 static void
-usage()
+usage(void)
 {
   fprintf (stderr, "%s: usage: %s [-d] [-o filename]\n", progname, progname);
   exit (2);
@@ -92,8 +89,7 @@ usage()
 
 #ifdef INCLUDE_UNUSED
 static int
-getcflag (s)
-     char *s;
+getcflag (char *s)
 {
   int i;
 
@@ -105,8 +101,7 @@ getcflag (s)
 #endif
 
 static char *
-cdesc (i)
-     int i;
+cdesc (int i)
 {
   static char xbuf[16];
 
@@ -130,13 +125,8 @@ cdesc (i)
     
   switch (i)
     {
-#ifdef __STDC__
     case '\a': xbuf[1] = 'a'; break;
     case '\v': xbuf[1] = 'v'; break;
-#else
-    case '\007': xbuf[1] = 'a'; break;
-    case 0x0B: xbuf[1] = 'v'; break;
-#endif
     case '\b': xbuf[1] = 'b'; break;
     case '\f': xbuf[1] = 'f'; break;
     case '\n': xbuf[1] = 'n'; break;
@@ -149,8 +139,7 @@ cdesc (i)
 }
 
 static char *
-getcstr (f)
-     int f;
+getcstr (int f)
 {
   int i;
 
@@ -161,9 +150,7 @@ getcstr (f)
 }
 
 static void
-addcstr (str, flag)
-     char *str;
-     int flag;
+addcstr (char *str, int flag)
 {
   char *s, *fstr;
   unsigned char uc;
@@ -183,9 +170,7 @@ addcstr (str, flag)
 }
 
 static void
-addcchar (c, flag)
-     unsigned char c;
-     int flag;
+addcchar (unsigned char c, int flag)
 {
   char *fstr;
 
@@ -198,7 +183,7 @@ addcchar (c, flag)
 }
 
 static void
-addblanks ()
+addblanks (void)
 {
   register int i;
   unsigned char uc;
@@ -215,7 +200,7 @@ addblanks ()
 
 /* load up the correct flag values in lsyntax */
 static void
-load_lsyntax ()
+load_lsyntax (void)
 {
   /* shell metacharacters */
   addcstr (shell_meta_chars, CSHMETA);
@@ -252,9 +237,7 @@ load_lsyntax ()
 }
 
 static void
-dump_lflags (fp, ind)
-     FILE *fp;
-     int ind;
+dump_lflags (FILE *fp, int ind)
 {
   int xflags, first, i;
 
@@ -278,9 +261,7 @@ dump_lflags (fp, ind)
 }
 
 static void
-wcomment (fp, i)
-     FILE *fp;
-     int i;
+wcomment (FILE *fp, int i)
 {
   fputs ("\t\t/* ", fp);
 
@@ -290,8 +271,7 @@ wcomment (fp, i)
 }
 
 static void
-dump_lsyntax (fp)
-     FILE *fp;
+dump_lsyntax (FILE *fp)
 {
   int i;
 
@@ -311,9 +291,7 @@ dump_lsyntax (fp)
 }
 
 int
-main(argc, argv)
-     int argc;
-     char **argv;
+main(int argc, char **argv)
 {
   int opt, i;
   char *filename;
@@ -375,41 +353,3 @@ main(argc, argv)
     fclose (fp);
   exit (0);
 }
-
-
-#if !defined (HAVE_STRERROR)
-
-#include <bashtypes.h>
-#if defined (HAVE_SYS_PARAM_H)
-#  include <sys/param.h>
-#endif
-
-#if defined (HAVE_UNISTD_H)
-#  include <unistd.h>
-#endif
-
-/* Return a string corresponding to the error number E.  From
-   the ANSI C spec. */
-#if defined (strerror)
-#  undef strerror
-#endif
-
-char *
-strerror (e)
-     int e;
-{
-  static char emsg[40];
-#if defined (HAVE_SYS_ERRLIST)
-  extern int sys_nerr;
-  extern char *sys_errlist[];
-
-  if (e > 0 && e < sys_nerr)
-    return (sys_errlist[e]);
-  else
-#endif /* HAVE_SYS_ERRLIST */
-    {
-      sprintf (emsg, "Unknown system error %d", e);
-      return (&emsg[0]);
-    }
-}
-#endif /* HAVE_STRERROR */

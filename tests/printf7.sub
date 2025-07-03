@@ -1,0 +1,91 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+: ${TMPDIR:=/tmp}
+TMPF=$TMPDIR/printf-oflow-$RANDOM
+
+printf_overflow ()
+{
+	local r;
+
+	line=$1 ; shift
+	rm -f "$TMPF"
+	printf "$@"  2>$TMPF
+	r=$?
+	if [ ! -s "$TMPF" ]; then
+		echo "printf7.sub: $line: expected overflow error output to stderr" >&2
+	fi
+	rm -f "$TMPF"
+	return $r
+}
+
+# tests of integer overflow for field width and precision arguments
+INT_MAX=$(getconf INT_MAX 2>/dev/null)
+[ -z "$INT_MAX" ] && INT_MAX=2147483647		# assume 32 bits
+TOOBIG=${INT_MAX}0				# effectively multiply by 10 
+
+printf_overflow $LINENO '[%*s]\n' "${TOOBIG}"
+printf_overflow $LINENO '[%*s]\n' "${TOOBIG}" X
+
+printf_overflow $LINENO -v VAR '[%*s]' "${TOOBIG}"
+echo VAR="$VAR"
+unset -v VAR
+printf_overflow $LINENO -v VAR '[%*s]' "${TOOBIG}" X
+echo VAR="$VAR"
+unset -v VAR
+
+TOOBIG=9223372036854775825
+
+printf_overflow $LINENO '[%*s]\n' "${TOOBIG}"
+printf_overflow $LINENO '[%*s]\n' "${TOOBIG}" X
+
+printf_overflow $LINENO -v VAR '[%*s]' "${TOOBIG}"
+echo VAR="$VAR"
+unset -v VAR
+printf_overflow $LINENO -v VAR '[%*s]' "${TOOBIG}" X
+echo VAR="$VAR"
+unset -v VAR
+
+TOOBIG=$(( $INT_MAX * 10 ))
+
+printf_overflow $LINENO '[%.*s]\n' "${TOOBIG}"
+printf_overflow $LINENO '[%.*s]\n' "${TOOBIG}" X
+
+printf_overflow $LINENO -v VAR '[%.*s]' "${TOOBIG}"
+echo VAR="$VAR"
+unset -v VAR
+printf_overflow $LINENO -v VAR '[%.*s]' "${TOOBIG}" X
+echo VAR="$VAR"
+unset -v VAR
+
+TOOBIG=9223372036854775825
+
+printf_overflow $LINENO '[%.*s]\n' "${TOOBIG}"
+printf_overflow $LINENO '[%.*s]\n' "${TOOBIG}" X
+
+printf_overflow $LINENO -v VAR '[%.*s]' "${TOOBIG}"
+echo VAR="$VAR"
+unset -v VAR
+printf_overflow $LINENO -v VAR '[%.*s]' "${TOOBIG}" X
+echo VAR="$VAR"
+unset -v VAR
+
+# out of range inline precisions
+
+# can't test %s, too many varying implementations
+#printf "%.${TOOBIG}s\n" XY
+printf -v VAR "%.${TOOBIG}s\n" XY
+echo $VAR
+unset -v VAR
+printf_overflow $LINENO "%.${TOOBIG}Q\n" XY

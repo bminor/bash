@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,7 +58,7 @@ $END
 #include <errno.h>
 
 #include <filecntl.h>
-#include <stddef.h>
+#include "../bashansi.h"
 
 #include "../bashintl.h"
 
@@ -79,22 +79,22 @@ extern int errno;
 extern const char * const bash_copyright;
 extern const char * const bash_license;
 
-static void show_builtin_command_help PARAMS((void));
-static int open_helpfile PARAMS((char *));
-static void show_desc PARAMS((char *, int));
-static void show_manpage PARAMS((char *, int));
-static void show_longdoc PARAMS((int));
+static void show_builtin_command_help (void);
+static int open_helpfile (const char *);
+static void show_desc (char *, int);
+static void show_manpage (char *, int);
+static void show_longdoc (int);
 
 /* Print out a list of the known functions in the shell, and what they do.
    If LIST is supplied, print out the list which matches for each pattern
    specified. */
 int
-help_builtin (list)
-     WORD_LIST *list;
+help_builtin (WORD_LIST *list)
 {
   register int i;
   char *pattern, *name;
-  int plen, match_found, sflag, dflag, mflag, m, pass, this_found;
+  int match_found, sflag, dflag, mflag, m, pass, this_found;
+  size_t plen;
 
   dflag = sflag = mflag = 0;
   reset_internal_getopt ();
@@ -190,37 +190,28 @@ help_builtin (list)
 }
 
 void
-builtin_help ()
+builtin_help (void)
 {
   int ind;
-  ptrdiff_t d;
 
   current_builtin = builtin_address_internal (this_command_name, 0);
   if (current_builtin == 0)
     return;
 
-  d = current_builtin - shell_builtins;
-
-#if defined (__STDC__)
-  ind = (int)d;
-#else
-  ind = (int)d / sizeof (struct builtin);
-#endif
-
+  ind = current_builtin - shell_builtins;
   printf ("%s: %s\n", this_command_name, _(shell_builtins[ind].short_doc));
   show_longdoc (ind);  
 }
 
 static int
-open_helpfile (name)
-     char *name;
+open_helpfile (const char *name)
 {
   int fd;
 
   fd = open (name, O_RDONLY);
   if (fd == -1)
     {
-      builtin_error (_("%s: cannot open: %s"), name, strerror (errno));
+      builtin_error ("%s: %s: %s", name, _("cannot open"), strerror (errno));
       return -1;
     }
   return fd;
@@ -230,8 +221,7 @@ open_helpfile (name)
    used, the long_doc array contains one string -- the full pathname of the
    help file for this builtin.  */
 static void
-show_longdoc (i)
-     int i;
+show_longdoc (int i)
 {
   register int j;
   char * const *doc;
@@ -253,15 +243,14 @@ show_longdoc (i)
 }
 
 static void
-show_desc (name, i)
-     char *name;
-     int i;
+show_desc (char *name, int i)
 {
-  register int j, r;
-  char **doc, *line;
+  int j;
+  ssize_t r;
+  char * const *doc, *line;
   int fd, usefile;
 
-  doc = (char **)shell_builtins[i].long_doc;
+  doc = shell_builtins[i].long_doc;
 
   usefile = (doc && doc[0] && *doc[0] == '/' && doc[1] == (char *)NULL);
   if (usefile)
@@ -270,19 +259,22 @@ show_desc (name, i)
       if (fd < 0)
 	return;
       r = zmapfd (fd, &line, doc[0]);
+      if (r < 0)
+	{
+	  builtin_error ("%s: %s: %s", doc[0], _("read error"), strerror (errno));
+	  free (line);
+	  line = (char *)NULL;
+	}
       close (fd);
-      /* XXX - handle errors if zmapfd returns < 0 */
     }
   else
     line = doc ? doc[0] : (char *)NULL;
 
   printf ("%s - ", name);
-  for (j = 0; line && line[j]; j++)
-    {
-      putchar (line[j]);
-      if (line[j] == '\n')
-	break;
-    }
+  /* Don't assume LINE ends with a newline. */
+  for (j = 0; line && line[j] && line[j] != '\n'; j++)
+    putchar (line[j]);
+  putchar ('\n');
   
   fflush (stdout);
 
@@ -292,15 +284,15 @@ show_desc (name, i)
 
 /* Print builtin help in pseudo-manpage format. */
 static void
-show_manpage (name, i)
-     char *name;
-     int i;
+show_manpage (char *name, int i)
 {
   register int j;
-  char **doc, *line;
+  ssize_t r;
+  char * const *doc;
+  char *line;
   int fd, usefile;
 
-  doc = (char **)shell_builtins[i].long_doc;
+  doc = shell_builtins[i].long_doc;
 
   usefile = (doc && doc[0] && *doc[0] == '/' && doc[1] == (char *)NULL);
   if (usefile)
@@ -308,7 +300,13 @@ show_manpage (name, i)
       fd = open_helpfile (doc[0]);
       if (fd < 0)
 	return;
-      zmapfd (fd, &line, doc[0]);
+      r = zmapfd (fd, &line, doc[0]);
+      if (r < 0)
+	{
+	  builtin_error ("%s: %s: %s", doc[0], _("read error"), strerror (errno));
+	  free (line);
+	  line = (char *)NULL;
+	}
       close (fd);
     }
   else
@@ -323,6 +321,10 @@ show_manpage (name, i)
       if (line[j] == '\n')
 	break;
     }
+  /* If the line doesn't end with a newline, e.g., if it's a loadable builtin,
+     add one. */
+  if (line[j] != '\n')
+    putchar ('\n');
   printf ("\n");
 
   /* SYNOPSIS */
@@ -366,14 +368,10 @@ show_manpage (name, i)
 }
 
 static void
-dispcolumn (i, buf, bufsize, width, height)
-     int i;
-     char *buf;
-     size_t bufsize;
-     int width, height;
+dispcolumn (int i, char *buf, size_t bufsize, int width, int height)
 {
   int j;
-  int dispcols;
+  size_t dispcols;
   char *helpdoc;
 
   /* first column */
@@ -408,11 +406,7 @@ dispcolumn (i, buf, bufsize, width, height)
 
 #if defined (HANDLE_MULTIBYTE)
 static void
-wdispcolumn (i, buf, bufsize, width, height)
-     int i;
-     char *buf;
-     size_t bufsize;
-     int width, height;
+wdispcolumn (int i, char *buf, size_t bufsize, int width, int height)
 {
   int j;
   int dispcols, dispchars;
@@ -513,9 +507,9 @@ wdispcolumn (i, buf, bufsize, width, height)
 #endif /* HANDLE_MULTIBYTE */
 
 static void
-show_builtin_command_help ()
+show_builtin_command_help (void)
 {
-  int i, j;
+  int i;
   int height, width;
   char *t, blurb[128];
 

@@ -22,6 +22,8 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <config.h>
+
 #include <fcntl.h>
 #include <errno.h>
 
@@ -32,13 +34,11 @@
 extern int errno;
 #endif
 
-extern char *strerror ();
-extern char **make_builtin_argv ();
+extern char *strerror (int);
+extern char **make_builtin_argv (WORD_LIST *, int *);
 
 static int
-fcopy(fd, fn)
-int	fd;
-char	*fn;
+fcopy(int fd, char *fn)
 {
 	char	buf[4096], *s;
 	int	n, w, e;
@@ -70,21 +70,20 @@ char	*fn;
 }
 
 int
-cat_main (argc, argv)
-int	argc;
-char	**argv;
+cat_main (int argc, char **argv)
 {
-	int	i, fd, r;
+	int	i, fd, r, closefd;
 	char	*s;
 
 	if (argc == 1)
 		return (fcopy(0, "standard input"));
 
-	for (i = r = 1; i < argc; i++) {
+	for (i = 1, r = 0; i < argc; i++) {
 		QUIT;
-		if (argv[i][0] == '-' && argv[i][1] == '\0')
+		if (argv[i][0] == '-' && argv[i][1] == '\0') {
 			fd = 0;
-		else {
+			closefd = 0;
+		} else {
 			fd = open(argv[i], O_RDONLY, 0666);
 			if (fd < 0) {
 				s = strerror(errno);
@@ -93,11 +92,13 @@ char	**argv;
 				write(2, ": ", 2);
 				write(2, s, strlen(s));
 				write(2, "\n", 1);
+				r++;
 				continue;
 			}
+			closefd = 1;
 		}
-		r = fcopy(fd, argv[i]);
-		if (fd != 0)
+		r += fcopy(fd, argv[i]);
+		if (closefd)
 			close(fd);
 	}
 	QUIT;
@@ -105,8 +106,7 @@ char	**argv;
 }
 
 int
-cat_builtin(list)
-WORD_LIST *list;
+cat_builtin(WORD_LIST *list)
 {
 	char	**v;
 	int	c, r;
@@ -116,7 +116,7 @@ WORD_LIST *list;
 	r = cat_main(c, v);
 	free(v);
 
-	return r;
+	return r;	/* relies on EXECUTION_SUCCESS being 0 */
 }
 
 char *cat_doc[] = {

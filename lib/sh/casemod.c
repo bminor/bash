@@ -1,6 +1,6 @@
 /* casemod.c -- functions to change case of strings */
 
-/* Copyright (C) 2008-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -67,7 +67,7 @@
 
 #define CASE_USEWORDS	0x1000		/* modify behavior to act on words in passed string */
 
-extern char *substring PARAMS((char *, int, int));
+extern char *substring (char *, size_t, size_t);
 
 #ifndef UCHAR_MAX
 #  define UCHAR_MAX	TYPE_MAXIMUM(unsigned char)
@@ -75,9 +75,7 @@ extern char *substring PARAMS((char *, int, int));
 
 #if defined (HANDLE_MULTIBYTE)
 static wchar_t
-cval (s, i, l)
-     char *s;
-     int i, l;
+cval (char *s, int i, int l)
 {
   size_t tmp;
   wchar_t wc;
@@ -98,10 +96,7 @@ cval (s, i, l)
 /* Modify the case of characters in STRING matching PAT based on the value of
    FLAGS.  If PAT is null, modify the case of each character */
 char *
-sh_modcase (string, pat, flags)
-     const char *string;
-     char *pat;
-     int flags;
+sh_modcase (const char *string, char *pat, int flags)
 {
   int start, next, end, retind;
   int inword, c, nc, nop, match, usewords;
@@ -111,8 +106,7 @@ sh_modcase (string, pat, flags)
 #if defined (HANDLE_MULTIBYTE)
   wchar_t nwc;
   char mb[MB_LEN_MAX+1];
-  int mlen;
-  size_t m;
+  size_t m, mlen;
   mbstate_t state;
 #endif
 
@@ -254,8 +248,9 @@ singlebyte:
 	  else
 	    {
 	      mlen = wcrtomb (mb, nwc, &state);
-	      if (mlen > 0)
-		mb[mlen] = '\0';
+	      if (MB_INVALIDCH (mlen))
+		strncpy (mb, string + start, mlen = m);			
+	      mb[mlen] = '\0';
 	      /* Don't assume the same width */
 	      strncpy (ret + retind, mb, mlen);
 	      retind += mlen;

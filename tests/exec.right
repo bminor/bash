@@ -5,17 +5,22 @@ after exec1.sub with args: 0
 
 after exec1.sub without args: 0
 after exec1.sub: one two three
-./execscript: line 21: notthere: command not found
+./execscript: line 37: notthere: command not found
 127
+we would do something here with notthere
 /tmp/bash: notthere: No such file or directory
 127
 /bin/sh: /bin/sh: cannot execute binary file
 126
-./execscript: line 40: /: Is a directory
+./execscript: line 64: /: Is a directory
 126
 /: /: Is a directory
 126
-./execscript: line 47: .: /: is a directory
+bash: line 1: exec: .: cannot execute: Is a directory
+posix-bash: line 1: exec: .: cannot execute: Is a directory
+bash: line 1: exec: .: cannot execute: Is a directory
+posix-bash: line 1: exec: .: cannot execute: Is a directory
+./execscript: line 79: .: /: is a directory
 1
 126
 0
@@ -24,18 +29,25 @@ trap -- 'echo EXIT' EXIT
 trap -- '' SIGTERM
 trap -- 'echo USR1' SIGUSR1
 USR1
-./exec3.sub: line 27: /tmp/bash-notthere: No such file or directory
-./exec3.sub: after failed exec: 127
+./exec3.sub: line 38: /tmp/bash-notthere: No such file or directory
+./exec3.sub: ENOENT: after failed exec: 127
+./exec3.sub: line 43: exec: bash-notthere: not found
 trap -- 'echo EXIT' EXIT
 trap -- '' SIGTERM
 trap -- 'echo USR1' SIGUSR1
 USR1
 EXIT
-./execscript: line 71: notthere: No such file or directory
+./execscript: line 103: notthere: command not found
 127
-./execscript: line 74: notthere: No such file or directory
+./execscript: line 105: notthere: command not found
 127
-./execscript: line 77: notthere: command not found
+./execscript: line 107: notthere: command not found
+127
+./execscript: line 113: notthere: command not found
+127
+./execscript: line 115: notthere: command not found
+127
+./execscript: line 117: notthere: command not found
 127
 this is sh
 this is sh
@@ -59,8 +71,15 @@ this is ohio-state
 1
 0
 1
+1 hi 1
+2 hi 0
+!
+!
+0
+1
+0
 testb
-expand_aliases 	on
+expand_aliases      	on
 1
 1
 1
@@ -170,3 +189,83 @@ w
 x
 y
 z
+Darwin
+x
+archive
+install
+s
+sub1
+sub2
+test
+68
+archive
+install
+s
+sub1
+sub2
+test
+44
+archive
+install
+s
+sub1
+sub2
+test
+86
+2
+78
+1 start
+2 start
+sub3
+1 done
+42
+test invert
+reached subshell
+reached group
+reached async group
+reached timed group
+reached simple
+reached if test
+reached if body
+reached while test
+reached while body
+reached until test
+reached until body
+reached func
+reached for
+reached arith for
+1) a
+2) b
+3) c
+#? reached select
+reached case
+reached arith
+reached cond
+reached coproc body
+reached pipeline element invert
+reached AND-AND body
+reached OR-OR body
+reached AND-AND group
+reached OR-OR group
+./exec17.sub: line 26: exec: notthere: not found
+after failed exec: 127
+./exec17.sub: line 31: exec: notthere: not found
+after failed exec with output redirection
+./exec17.sub: line 36: exec: notthere: not found
+./exec17.sub: line 37: 4: Bad file descriptor
+./exec17.sub: line 40: .: Is a directory
+after failed redir stdout
+after failed redir stderr
+./exec17.sub: line 44: exec: notthere: not found
+after failed exec with input redirection
+./exec17.sub: line 50: exec: notthere: not found
+after failed exec: 127
+./exec17.sub: line 55: exec: notthere: not found
+after failed exec with output redirection
+./exec17.sub: line 60: exec: notthere: not found
+./exec17.sub: line 61: 4: Bad file descriptor
+./exec17.sub: line 64: .: Is a directory
+after failed redir stdout
+after failed redir stderr
+./exec17.sub: line 68: exec: notthere: not found
+after failed exec with input redirection

@@ -237,6 +237,15 @@ POSIX=/usr/posix
 expect '<10>'
 recho ${#POSIX}
 
+# this was a problem through bash-5.2 -- it would skip random numbers because
+# of multiple calls to find_variable
+RANDOM=42
+expect '<5>'
+recho ${#RANDOM}	# 17772
+declare -i RANDOM=42
+expect '<5>'
+recho ${#RANDOM}	# 17772
+
 # remove shortest trailing match
 x=file.c
 expect '<file.o>'

@@ -54,4 +54,20 @@ fc -l 1 99
 echo out of range 4
 fc -l -20 -40
 
+HISTSIZE=10
+history -c
+
+echo a
+echo b
+echo c
+
+# out of range specs aren't errors
+fc -e - 48
+fc -s -- -42
+
+echo d
+echo e
+
+fc -l
+
 unset HISTFILE	# suppress writing history file

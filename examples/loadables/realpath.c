@@ -22,7 +22,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009,2021,2022 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2021,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -61,7 +61,7 @@
 extern int	errno;
 #endif
 
-extern char	*sh_realpath();
+extern char	*sh_realpath(const char *, char *);
 
 int
 realpath_builtin(WORD_LIST *list)
@@ -122,7 +122,7 @@ realpath_builtin(WORD_LIST *list)
 	}
 
 #if defined (ARRAY_VARS)
-	if (aflag && legal_identifier (aname) == 0) {
+	if (aflag && valid_identifier (aname) == 0) {
 		sh_invalidid(aname);
 		return (EXECUTION_FAILURE);
 	}
@@ -165,10 +165,12 @@ realpath_builtin(WORD_LIST *list)
 				builtin_error("%s: %s", p, strerror(errno));
 			continue;
 		}
+#if defined (ARRAY_VARS)
 		if (aflag) {
 			bind_array_element (v, ind, r, 0);
 			ind++;
 		}
+#endif
 		if (qflag == 0) {
 			if (vflag)
 				printf ("%s -> ", p);

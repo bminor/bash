@@ -1,7 +1,7 @@
 /* input_avail.c -- check whether or not data is available for reading on a
 		    specified file descriptor. */
 
-/* Copyright (C) 2008,2009-2019 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009-2019,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -61,8 +61,7 @@ extern int errno;
 /* Return >= 1 if select/FIONREAD indicates data available for reading on
    file descriptor FD; 0 if no data available.  Return -1 on error. */
 int
-input_avail (fd)
-     int fd;
+input_avail (int fd)
 {
   int result, chars_avail;
 #if defined(HAVE_SELECT)
@@ -100,9 +99,7 @@ input_avail (fd)
 /* Wait until NCHARS are available for reading on file descriptor FD.
    This can wait indefinitely. Return -1 on error. */
 int
-nchars_avail (fd, nchars)
-     int fd;
-     int nchars;
+nchars_avail (int fd, int nchars)
 {
   int result, chars_avail;
 #if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
@@ -122,6 +119,8 @@ nchars_avail (fd, nchars)
   FD_ZERO (&exceptfds);
   FD_SET (fd, &readfds);
   FD_SET (fd, &exceptfds);
+#endif
+#if defined (HAVE_SELECT) || defined (HAVE_PSELECT)
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &set);
 #  ifdef SIGCHLD
   sigaddset (&set, SIGCHLD);

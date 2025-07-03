@@ -149,6 +149,7 @@ bashtypes.h	f
 mailcheck.h	f
 xmalloc.h	f
 pathnames.h.in	f
+buildconf.h.in	f
 # order is important here
 y.tab.c		F
 y.tab.h		F
@@ -211,6 +212,7 @@ builtins/bashgetopt.c	f
 builtins/common.h	f
 builtins/bashgetopt.h	f
 #cross-build/cygwin32.cache	f
+cross-build/msys32.cache	f
 cross-build/x86-beos.cache	f
 cross-build/opennt.cache	f
 cross-build/qnx.cache	f
@@ -218,6 +220,7 @@ include/ansi_stdlib.h	f
 include/chartypes.h	f
 include/filecntl.h	f
 include/gettext.h	f
+include/intprops-internal.h	f
 include/maxpath.h	f
 include/memalloc.h	f
 include/ocache.h	f
@@ -232,10 +235,12 @@ include/shmbutil.h	f
 include/shtty.h		f
 include/stat-time.h	f
 include/stdc.h		f
+include/stdckdint.in.h	f
 include/systimes.h	f
 include/timer.h		f
 include/typemax.h	f
 include/unionwait.h	f
+include/unlocked-io.h	f
 lib/glob/Makefile.in	f
 lib/glob/sm_loop.c	f
 lib/glob/smatch.c	f
@@ -250,48 +255,78 @@ lib/glob/xmbsrtowcs.c	f
 lib/glob/collsyms.h	f
 lib/glob/doc/Makefile	f
 lib/glob/doc/glob.texi	f
-lib/glob/ndir.h		f
-lib/intl/ChangeLog	f
 lib/intl/Makefile.in	f
 lib/intl/VERSION	f
+lib/intl/ref-add.sin	f
+lib/intl/ref-del.sin	f
 lib/intl/bindtextdom.c	f
-lib/intl/config.charset	f
 lib/intl/dcgettext.c	f
 lib/intl/dcigettext.c	f
 lib/intl/dcngettext.c	f
 lib/intl/dgettext.c	f
 lib/intl/dngettext.c	f
-lib/intl/eval-plural.h	f
 lib/intl/explodename.c	f
 lib/intl/finddomain.c	f
 lib/intl/gettext.c	f
-lib/intl/gettextP.h	f
-lib/intl/gmo.h		f
-lib/intl/hash-string.h	f
+lib/intl/hash-string.c	f
 lib/intl/intl-compat.c	f
+lib/intl/intl-exports.c	f
 lib/intl/l10nflist.c	f
-lib/intl/libgnuintl.h.in	f
-lib/intl/loadinfo.h	f
+lib/intl/langprefs.c	f
 lib/intl/loadmsgcat.c	f
 lib/intl/localcharset.c	f
-lib/intl/localcharset.h	f
-lib/intl/locale.alias	f
 lib/intl/localealias.c	f
+lib/intl/localename-table.c	f
 lib/intl/localename.c	f
+lib/intl/lock.c		f
 lib/intl/log.c		f
 lib/intl/ngettext.c	f
 lib/intl/os2compat.c	f
-lib/intl/os2compat.h	f
 lib/intl/osdep.c	f
 lib/intl/plural-exp.c	f
-lib/intl/plural-exp.h	f
 lib/intl/plural.c	f
 lib/intl/plural.y	f
-lib/intl/ref-add.sin	f
-lib/intl/ref-del.sin	f
+lib/intl/printf-args.c	f
+lib/intl/printf-parse.c	f
+lib/intl/printf.c	f
 lib/intl/relocatable.c	f
-lib/intl/relocatable.h	f
+lib/intl/setlocale-lock.c	f
+lib/intl/setlocale.c	f
+lib/intl/setlocale_null.c	f
 lib/intl/textdomain.c	f
+lib/intl/threadlib.c	f
+lib/intl/tsearch.c	f
+lib/intl/vasnprintf.c	f
+lib/intl/version.c	f
+lib/intl/xsize.c	f
+lib/intl/arg-nonnull.h	f
+lib/intl/attribute.h	f
+lib/intl/eval-plural.h	f
+lib/intl/export.h	f
+lib/intl/filename.h	f
+lib/intl/flexmember.h	f
+lib/intl/gettextP.h	f
+lib/intl/gmo.h	f
+lib/intl/hash-string.h	f
+lib/intl/libgnuintl.in.h	f
+lib/intl/loadinfo.h	f
+lib/intl/localcharset.h	f
+lib/intl/localename-table.in.h	f
+lib/intl/lock.h	f
+lib/intl/os2compat.h	f
+lib/intl/plural-exp.h	f
+lib/intl/plural.h	f
+lib/intl/printf-args.h	f
+lib/intl/printf-parse.h	f
+lib/intl/relocatable.h	f
+lib/intl/setlocale_null.h	f
+lib/intl/thread-optim.h	f
+lib/intl/tsearch.h	f
+lib/intl/vasnprintf.h	f
+lib/intl/vasnwprintf.h	f
+lib/intl/verify.h	f
+lib/intl/wprintf-parse.h	f
+lib/intl/xsize.h	f
 lib/malloc/Makefile.in	f
 lib/malloc/getpagesize.h	f
 lib/malloc/imalloc.h	f
@@ -307,6 +342,7 @@ lib/malloc/trace.c	f
 lib/malloc/watch.c	f
 lib/malloc/xmalloc.c	f
 lib/malloc/xleaktrace	f	755
+lib/malloc/sbrk.c	f
 lib/malloc/stub.c	f
 lib/malloc/i386-alloca.s	f
 lib/malloc/x386-alloca.s	f
@@ -398,9 +434,11 @@ lib/readline/examples/rl.c	f
 lib/readline/examples/rlcat.c	f
 lib/readline/examples/Inputrc	f
 lib/sh/Makefile.in	f
+lib/sh/anonfile.c	f
 lib/sh/casemod.c	f
 lib/sh/clktck.c		f
 lib/sh/clock.c		f
+lib/sh/compat.c		f
 lib/sh/dprintf.c	f
 lib/sh/eaccess.c	f
 lib/sh/fmtullong.c	f
@@ -419,6 +457,7 @@ lib/sh/makepath.c	f
 lib/sh/mbscasecmp.c	f
 lib/sh/mbschr.c		f
 lib/sh/mbscmp.c		f
+lib/sh/mbsncmp.c	f
 lib/sh/memset.c		f
 lib/sh/mktime.c		f
 lib/sh/netconn.c	f
@@ -427,6 +466,7 @@ lib/sh/oslib.c		f
 lib/sh/pathcanon.c	f
 lib/sh/pathphys.c	f
 lib/sh/random.c		f
+lib/sh/reallocarray.c	f
 lib/sh/rename.c		f
 lib/sh/setlinebuf.c	f
 lib/sh/shmatch.c	f
@@ -443,8 +483,10 @@ lib/sh/strerror.c	f
 lib/sh/strftime.c	f
 lib/sh/stringlist.c	f
 lib/sh/stringvec.c	f
+lib/sh/strlcpy.c	f
 lib/sh/strnlen.c	f
 lib/sh/strpbrk.c	f
+lib/sh/strscpy.c	f
 lib/sh/strstr.c		f
 lib/sh/strtod.c		f
 lib/sh/strtoimax.c	f
@@ -484,12 +526,17 @@ lib/tilde/Makefile.in	f
 lib/tilde/tilde.c	f
 lib/tilde/tilde.h	f
 lib/tilde/shell.c	f
+m4/unlocked-io.m4	f
 m4/strtoimax.m4		f
 m4/stat-time.m4		f
 m4/timespec.m4		f
+m4/bison.m4		f
+m4/c-bool.m4		f
 m4/codeset.m4		f
+m4/d-type.m4		f
 m4/extern-inline.m4	f
 m4/fcntl-o.m4		f
+m4/flexmember.m4	f
 m4/gettext.m4		f
 m4/glibc2.m4		f
 m4/glibc21.m4		f
@@ -507,6 +554,7 @@ m4/lcmessage.m4		f
 m4/lib-ld.m4		f
 m4/lib-link.m4		f
 m4/lib-prefix.m4	f
+m4/locale_h.m4		f
 m4/lock.m4		f
 m4/nls.m4		f
 m4/po.m4		f
@@ -575,6 +623,8 @@ po/it.gmo		f
 po/it.po		f
 po/ja.gmo		f
 po/ja.po		f
+po/ka.gmo		f
+po/ka.po		f
 po/ko.gmo		f
 po/ko.po		f
 po/lt.gmo		f
@@ -596,6 +646,8 @@ po/ru.po		f
 po/sk.gmo		f
 po/sk.po		f
 po/sl.gmo		f
+po/sq.po		f
+po/sq.gmo		f
 po/sr.po		f
 po/sr.gmo		f
 po/sl.po		f
@@ -620,7 +672,6 @@ CWRU/misc/sigstat.c	f
 CWRU/misc/bison		f
 CWRU/misc/errlist.c	f
 CWRU/misc/hpux10-dlfcn.h	f
-CWRU/PLATFORMS		f
 CWRU/README		f
 CWRU/changelog		f
 CWRU/sh-redir-hack	f
@@ -644,11 +695,8 @@ doc/fdl.txt	f
 #
 doc/article.ps	f
 doc/rose94.ps	f
-doc/bash.ps		f
-doc/bashbug.ps	f
-doc/builtins.ps	f
-doc/rbash.ps	f
-doc/bashref.ps	f
+#doc/bash.ps		f
+#doc/bashref.ps	f
 doc/bashref.dvi	f
 doc/bash.0		f
 doc/bashbug.0		f
@@ -660,6 +708,8 @@ doc/bashref.html	f
 doc/article.pdf	f
 doc/bash.pdf	f
 doc/bashref.pdf	f
+doc/builtins.pdf	f
+doc/rbash.pdf	f
 doc/rose94.pdf	f
 doc/aosa-bash.pdf	f
 doc/aosa-bash-full.pdf	f
@@ -667,7 +717,7 @@ doc/aosa-bash-full.pdf	f
 support/Makefile.in	f
 support/bash.pc.in	f
 support/bashversion.c	f
-support/checkbashisms	f	755
+#support/checkbashisms	f	755
 support/config.guess	f
 support/config.rpath	f	755
 support/config.sub	f
@@ -682,7 +732,8 @@ support/mkinstalldirs	f	755
 support/mkversion.sh	f	755
 support/mksignames.c	f
 support/signames.c	f
-support/bashbug.sh	f
+support/siglen.c	f
+#support/bashbug.sh	f
 support/bashbug.sh.in	f
 support/man2html.c	f
 support/recho.c		f
@@ -690,10 +741,10 @@ support/zecho.c		f
 support/xcase.c		f
 support/SYMLINKS	f
 support/fixlinks	f	755
-support/install.sh	f	755
+support/install-sh	f	755
 support/texi2dvi	f	755
 support/texi2html	f	755
-support/xenix-link.sh	f	755
+#support/xenix-link.sh	f	755
 support/shobj-conf	f	755
 support/rlvers.sh	f	755
 examples/INDEX.txt	f
@@ -728,15 +779,20 @@ examples/loadables/seq.c	f
 examples/loadables/setpgid.c	f
 examples/loadables/sleep.c	f
 examples/loadables/strftime.c	f
+examples/loadables/strptime.c	f
 examples/loadables/truefalse.c	f
 examples/loadables/getconf.h	f
 examples/loadables/getconf.c	f
 examples/loadables/fdflags.c	f
 examples/loadables/finfo.c	f
+examples/loadables/fltexpr.c	f
 examples/loadables/cat.c	f
+examples/loadables/chmod.c	f
 examples/loadables/csv.c	f
 examples/loadables/dsv.c	f
+examples/loadables/kv.c		f
 examples/loadables/cut.c	f
+examples/loadables/ocut.c	f
 examples/loadables/logname.c	f
 examples/loadables/basename.c	f
 examples/loadables/dirname.c	f
@@ -813,6 +869,7 @@ examples/functions/notify.bash	f
 #examples/functions/repeat3	f
 examples/functions/seq		f
 examples/functions/seq2		f
+examples/functions/setalrm	f
 examples/functions/shcat	f
 examples/functions/shcat2	f
 examples/functions/sort-pos-params	f
@@ -844,6 +901,7 @@ examples/scripts/inpath		f
 #examples/scripts/scrollbar2	f
 #examples/scripts/self-repro	f
 #examples/scripts/showperm.bash	f
+examples/scripts/secure-script	f
 examples/scripts/shprompt	f
 examples/scripts/spin.bash	f
 #examples/scripts/timeout	f
@@ -892,6 +950,7 @@ tests/alias3.sub	f
 tests/alias4.sub	f
 tests/alias5.sub	f
 tests/alias6.sub	f
+tests/alias7.sub	f
 tests/alias.right	f
 tests/appendop.tests	f
 tests/appendop1.sub	f
@@ -909,6 +968,8 @@ tests/arith5.sub	f
 tests/arith6.sub	f
 tests/arith7.sub	f
 tests/arith8.sub	f
+tests/arith9.sub	f
+tests/arith10.sub	f
 tests/array.tests	f
 tests/array.right	f
 tests/array1.sub	f
@@ -941,6 +1002,9 @@ tests/array27.sub	f
 tests/array28.sub	f
 tests/array29.sub	f
 tests/array30.sub	f
+tests/array31.sub	f
+tests/array32.sub	f
+tests/array33.sub	f
 tests/array-at-star	f
 tests/array2.right	f
 tests/assoc.tests	f
@@ -963,6 +1027,7 @@ tests/assoc15.sub	f
 tests/assoc16.sub	f
 tests/assoc17.sub	f
 tests/assoc18.sub	f
+tests/assoc19.sub	f
 tests/attr.tests	f
 tests/attr.right	f
 tests/attr1.sub		f
@@ -978,6 +1043,11 @@ tests/builtins4.sub	f
 tests/builtins5.sub	f
 tests/builtins6.sub	f
 tests/builtins7.sub	f
+tests/builtins8.sub	f
+tests/builtins9.sub	f
+tests/builtins10.sub	f
+tests/builtins11.sub	f
+tests/builtins12.sub	f
 tests/source1.sub	f
 tests/source2.sub	f
 tests/source3.sub	f
@@ -985,6 +1055,7 @@ tests/source4.sub	f
 tests/source5.sub	f
 tests/source6.sub	f
 tests/source7.sub	f
+tests/source8.sub	f
 tests/case.tests	f
 tests/case.right	f
 tests/case1.sub		f
@@ -1003,6 +1074,15 @@ tests/comsub3.sub	f
 tests/comsub4.sub	f
 tests/comsub5.sub	f
 tests/comsub6.sub	f
+tests/comsub7.sub	f
+tests/comsub2.tests	f
+tests/comsub2.right	f
+tests/comsub21.sub	f
+tests/comsub22.sub	f
+tests/comsub23.sub	f
+tests/comsub24.sub	f
+tests/comsub25.sub	f
+tests/comsub26.sub	f
 tests/comsub-eof.tests	f
 tests/comsub-eof0.sub	f
 tests/comsub-eof1.sub	f
@@ -1021,9 +1101,11 @@ tests/comsub-posix5.sub	f
 tests/comsub-posix6.sub	f
 tests/cond.tests	f
 tests/cond.right	f
+tests/cond-error1.sub	f
 tests/cond-regexp1.sub	f
 tests/cond-regexp2.sub	f
 tests/cond-regexp3.sub	f
+tests/cond-xtrace1.sub	f
 tests/coproc.tests	f
 tests/coproc.right	f
 tests/cprint.tests	f
@@ -1063,6 +1145,7 @@ tests/dollar-star7.sub	f
 tests/dollar-star8.sub	f
 tests/dollar-star9.sub	f
 tests/dollar-star10.sub	f
+tests/dollar-star11.sub	f
 tests/dollar.right	f
 tests/dstack.tests	f
 tests/dstack.right	f
@@ -1081,6 +1164,9 @@ tests/errors6.sub	f
 tests/errors7.sub	f
 tests/errors8.sub	f
 tests/errors9.sub	f
+tests/errors10.sub	f
+tests/errors11.sub	f
+tests/errors12.sub	f
 tests/execscript	f
 tests/exec.right	f
 tests/exec1.sub		f	755
@@ -1097,6 +1183,9 @@ tests/exec11.sub	f
 tests/exec12.sub	f
 tests/exec13.sub	f
 tests/exec14.sub	f
+tests/exec15.sub	f
+tests/exec16.sub	f
+tests/exec17.sub	f
 tests/exp.tests		f
 tests/exp.right		f
 tests/exp1.sub		f
@@ -1131,12 +1220,14 @@ tests/extglob4.sub	f
 tests/extglob5.sub	f
 tests/extglob6.sub	f
 tests/extglob7.sub	f
+tests/extglob8.sub	f
 tests/func.tests	f
 tests/func.right	f
 tests/func1.sub		f
 tests/func2.sub		f
 tests/func3.sub		f
 tests/func4.sub		f
+tests/func5.sub		f
 tests/getopts.tests	f
 tests/getopts.right	f
 tests/getopts1.sub	f
@@ -1160,12 +1251,15 @@ tests/glob7.sub		f
 tests/glob8.sub		f
 tests/glob9.sub		f
 tests/glob10.sub	f
+tests/glob11.sub	f
 tests/glob.right	f
 tests/globstar.tests	f
 tests/globstar.right	f
 tests/globstar1.sub	f
 tests/globstar2.sub	f
 tests/globstar3.sub	f
+tests/glob-bracket.tests	f
+tests/glob-bracket.right	f
 tests/heredoc.tests	f
 tests/heredoc.right	f
 tests/heredoc1.sub	f
@@ -1175,6 +1269,9 @@ tests/heredoc4.sub	f
 tests/heredoc5.sub	f
 tests/heredoc6.sub	f
 tests/heredoc7.sub	f
+tests/heredoc8.sub	f
+tests/heredoc9.sub	f
+tests/heredoc10.sub	f
 tests/herestr.tests	f
 tests/herestr.right	f
 tests/herestr1.sub	f
@@ -1196,6 +1293,9 @@ tests/history3.sub	f
 tests/history4.sub	f
 tests/history5.sub	f
 tests/history6.sub	f
+tests/history7.sub	f
+tests/history8.sub	f
+tests/history9.sub	f
 tests/ifs.tests		f
 tests/ifs.right		f
 tests/ifs1.sub		f
@@ -1208,7 +1308,13 @@ tests/intl.tests	f
 tests/intl1.sub		f
 tests/intl2.sub		f
 tests/intl3.sub		f
+tests/intl4.sub		f
 tests/intl.right	f
+tests/invocation.tests	f
+tests/invocation.right	f
+tests/invocation1.sub	f
+tests/invocation2.sub	f
+tests/invocation3.sub	f
 tests/iquote.tests	f
 tests/iquote.right	f
 tests/iquote1.sub	f
@@ -1222,6 +1328,8 @@ tests/jobs4.sub		f
 tests/jobs5.sub		f
 tests/jobs6.sub		f
 tests/jobs7.sub		f
+tests/jobs8.sub		f
+tests/jobs9.sub		f
 tests/jobs.right	f
 tests/lastpipe.right	f
 tests/lastpipe.tests	f
@@ -1259,6 +1367,8 @@ tests/nameref20.sub	f
 tests/nameref21.sub	f
 tests/nameref22.sub	f
 tests/nameref23.sub	f
+tests/nameref24.sub	f
+tests/nameref25.sub	f
 tests/nameref.right	f
 tests/new-exp.tests	f
 tests/new-exp1.sub	f
@@ -1325,6 +1435,9 @@ tests/printf1.sub	f
 tests/printf2.sub	f
 tests/printf3.sub	f
 tests/printf4.sub	f
+tests/printf5.sub	f
+tests/printf6.sub	f
+tests/printf7.sub	f
 tests/procsub.tests	f
 tests/procsub.right	f
 tests/procsub1.sub	f
@@ -1352,6 +1465,8 @@ tests/read5.sub		f
 tests/read6.sub		f
 tests/read7.sub		f
 tests/read8.sub		f
+tests/read9.sub		f
+tests/read10.sub	f
 tests/redir.tests	f
 tests/redir.right	f
 tests/redir1.sub	f
@@ -1368,6 +1483,8 @@ tests/redir8.sub	f
 tests/redir9.sub	f
 tests/redir10.sub	f
 tests/redir11.sub	f
+tests/redir12.sub	f
+tests/redir13.in	f
 tests/rhs-exp.tests	f
 tests/rhs-exp.right	f
 tests/rhs-exp1.sub	f
@@ -1391,6 +1508,7 @@ tests/run-case		f
 tests/run-casemod	f
 tests/run-complete	f
 tests/run-comsub	f
+tests/run-comsub2	f
 tests/run-comsub-eof	f
 tests/run-comsub-posix	f
 tests/run-cond		f
@@ -1411,6 +1529,7 @@ tests/run-extglob3	f
 tests/run-func		f
 tests/run-getopts	f
 tests/run-glob-test	f
+tests/run-glob-bracket	f
 tests/run-globstar	f
 tests/run-heredoc	f
 tests/run-herestr	f
@@ -1420,6 +1539,7 @@ tests/run-ifs		f
 tests/run-ifs-posix	f
 tests/run-input-test	f
 tests/run-intl		f
+tests/run-invocation	f
 tests/run-iquote	f
 tests/run-invert	f
 tests/run-jobs		f
@@ -1468,6 +1588,7 @@ tests/set-e3a.sub	f
 tests/set-e.right	f
 tests/set-x.tests	f
 tests/set-x1.sub	f
+tests/set-x2.sub	f
 tests/set-x.right	f
 tests/shopt.tests	f
 tests/shopt1.sub	f
@@ -1491,12 +1612,16 @@ tests/trap3.sub		f
 tests/trap4.sub		f
 tests/trap5.sub		f
 tests/trap6.sub		f
+tests/trap7.sub		f
+tests/trap8.sub		f
+tests/trap9.sub		f
 tests/type.tests	f
 tests/type.right	f
 tests/type1.sub		f
 tests/type2.sub		f
 tests/type3.sub		f
 tests/type4.sub		f
+tests/type5.sub		f
 tests/unicode1.sub	f
 tests/unicode2.sub	f
 tests/unicode3.sub	f
@@ -1525,6 +1650,9 @@ tests/varenv19.sub	f
 tests/varenv20.sub	f
 tests/varenv21.sub	f
 tests/varenv22.sub	f
+tests/varenv23.sub	f
+tests/varenv24.sub	f
+tests/varenv25.sub	f
 tests/version		f
 tests/version.mini	f
 tests/vredir.tests	f

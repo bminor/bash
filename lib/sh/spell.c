@@ -1,6 +1,6 @@
 /* spell.c -- spelling correction for pathnames. */
 
-/* Copyright (C) 2000-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,8 +40,8 @@
 #include <maxpath.h>
 #include <stdc.h>
 
-static int mindist PARAMS((char *, char *, char *));
-static int spdist PARAMS((char *, char *));
+static int mindist (const char *, char *, char *);
+static int spdist (char *, char *);
 
 /*
  * `spname' and its helpers are inspired by the code in "The UNIX
@@ -59,9 +59,7 @@ static int spdist PARAMS((char *, char *));
  *	Stores corrected name in `newname'.
  */
 int
-spname(oldname, newname)
-     char *oldname;
-     char *newname;
+spname(char *oldname, char *newname)
 {
   char *op, *np, *p;
   char guess[PATH_MAX + 1], best[PATH_MAX + 1];
@@ -104,10 +102,7 @@ spname(oldname, newname)
  *  Search directory for a guess
  */
 static int
-mindist(dir, guess, best)
-     char *dir;
-     char *guess;
-     char *best;
+mindist(const char *dir, char *guess, char *best)
 {
   DIR *fd;
   struct dirent *dp;
@@ -140,7 +135,7 @@ mindist(dir, guess, best)
   (void)closedir(fd);
 
   /* Don't return `.' */
-  if (best[0] == '.' && best[1] == '\0')
+  if (dist != 3 && best[0] == '.' && best[1] == '\0')
     dist = 3;
   return dist;
 }
@@ -155,8 +150,7 @@ mindist(dir, guess, best)
  *      3 otherwise
  */
 static int
-spdist(cur, new)
-     char *cur, *new;
+spdist(char *cur, char *new)
 {
   while (*cur == *new)
     {
@@ -188,10 +182,9 @@ spdist(cur, new)
 }
 
 char *
-dirspell (dirname)
-     char *dirname;
+dirspell (char *dirname)
 {
-  int n;
+  size_t n;
   char *guess;
 
   n = (strlen (dirname) * 3 + 1) / 2 + 1;

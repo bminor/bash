@@ -1,6 +1,6 @@
 /* stats.c - malloc statistics */
 
-/*  Copyright (C) 2001-2020 Free Software Foundation, Inc.
+/*  Copyright (C) 2001-2022 Free Software Foundation, Inc.
 
     This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -34,17 +34,16 @@
 
 #include "mstats.h"
 
-extern int malloc_free_blocks PARAMS((int));
+extern int malloc_free_blocks (int);
 
 extern int malloc_mmap_threshold;
 
 extern struct _malstats _mstats;
 
-extern FILE *_imalloc_fopen PARAMS((char *, char *, char *, char *, size_t));
+extern FILE *_imalloc_fopen (char *, char *, char *, char *, size_t);
 
 struct bucket_stats
-malloc_bucket_stats (size)
-     int size;
+malloc_bucket_stats (int size)
 {
   struct bucket_stats v;
 
@@ -75,7 +74,7 @@ malloc_bucket_stats (size)
    is the total number of bytes in use.  These two fields are fairly
    expensive to compute, so we do it only when asked to. */
 struct _malstats
-malloc_stats ()
+malloc_stats (void)
 {
   struct _malstats result;
   struct bucket_stats v;
@@ -93,9 +92,7 @@ malloc_stats ()
 }
 
 static void
-_print_malloc_stats (s, fp)
-     char *s;
-     FILE *fp;
+_print_malloc_stats (char *s, FILE *fp)
 {
   register int i;
   unsigned long totused, totfree;
@@ -128,16 +125,13 @@ _print_malloc_stats (s, fp)
 }
 
 void
-print_malloc_stats (s)
-     char *s;
+print_malloc_stats (char *s)
 {
   _print_malloc_stats (s, stderr);
 }
 
 void
-fprint_malloc_stats (s, fp)
-     char *s;
-     FILE *fp;
+fprint_malloc_stats (char *s, FILE *fp)
 {
   _print_malloc_stats (s, fp);
 }
@@ -145,8 +139,7 @@ fprint_malloc_stats (s, fp)
 #define TRACEROOT "/var/tmp/maltrace/stats."
 
 void
-trace_malloc_stats (s, fn)
-     char *s, *fn;
+trace_malloc_stats (char *s, char *fn)
 {
   FILE *fp;
   char defname[sizeof (TRACEROOT) + 64];
@@ -166,12 +159,7 @@ trace_malloc_stats (s, fn)
 
 #if defined (MALLOC_STATS) || defined (MALLOC_TRACE)
 FILE *
-_imalloc_fopen (s, fn, def, defbuf, defsiz)
-     char *s;
-     char *fn;
-     char *def;
-     char *defbuf;
-     size_t defsiz;
+_imalloc_fopen (char *s, char *fn, char *def, char *defbuf, size_t defsiz)
 {
   char fname[1024];
   long l;

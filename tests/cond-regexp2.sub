@@ -11,15 +11,45 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+: ${TMPDIR:=/tmp}
+TMPF=$TMPDIR/cond-invalid-$RANDOM
+
+cond_invalid()
+{
+	local r;
+	rm -f "$TMPF"
+	line=$1 ; shift
+	lhs=$1 ; shift
+	rhs=$1 ; shift
+
+	[[ $lhs =~ $rhs ]] 2>"$TMPF"
+	r=$?
+	if [ ! -s "$TMPF" ]; then
+		 echo "cond-regexp2.sub: $line: expected invalid regexp error output to stderr" >&2
+	fi
+	rm -f "$TMPF"
+	return $r;
+}
+
 [[ "\\" =~ ["."] ]] && echo bad 1
 
 [[ "\\" =~ "[.]" ]] && echo bad 2
 
-[[ "\\" =~ [\. ]] && echo bad 3
+cond_invalid $LINENO '\\' '[\.'  && echo bad 3
 
 [[ "\\" =~ [\.] ]] && echo bad 4
 
 [[ "\\" =~ [\\] ]] || echo bad 5
+
+cond_invalid $LINENO x '[z-a]' && echo bad 6
+
+cond_invalid $LINENO x '[[:invalid:]abc]' && echo bad 7
+
+exp='x\'
+cond_invalid $LINENO x "$exp" && echo bad 8
+
+exp='a(xb'
+cond_invalid $LINENO x "$exp"  && echo bad 9
 
 [[ dog =~ [[=d=]].. ]] && echo ok 1
 [[ d.. =~ [[=d=]]\.\. ]] && echo ok 2

@@ -39,13 +39,7 @@ extern char *utf8_mbschr (const char *, int);	/* XXX */
    legacy strchr() might return the wrong value. */
 
 char *
-#if defined (PROTOTYPES)
 mbschr (const char *s, int c)
-#else
-mbschr (s, c)
-     const char *s;
-     int c;
-#endif
 {
 #if HANDLE_MULTIBYTE
   char *pos;

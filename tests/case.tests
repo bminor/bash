@@ -66,6 +66,15 @@ case " " in ( [" "] ) echo ok;; ( * ) echo no;; esac
 case esac in (esac) echo esac;; esac
 case k in else|done|time|esac) for f in 1 2 3 ; do :; done esac
 
+# null words and patterns
+var=value
+case $unset in
+'')	echo unset word ok 1 ;;&
+$unset|$var)	echo unset word ok 2 ;;&
+unset|$unset)	echo unset word ok 3 ;;
+*)	echo unset word bad ;;
+esac
+
 # tests of quote removal and pattern matching
 ${THIS_SH} ./case1.sub
 ${THIS_SH} ./case2.sub

@@ -1,6 +1,6 @@
 /* strerror.c - string corresponding to a particular value of errno. */
 
-/* Copyright (C) 1995 Free Software Foundation, Inc.
+/* Copyright (C) 1995,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,8 +49,7 @@ extern int errno;
 static char *errbase = "Unknown system error ";
 
 char *
-strerror (e)
-     int e;
+strerror (int e)
 {
   static char emsg[40];
 #if defined (HAVE_SYS_ERRLIST)

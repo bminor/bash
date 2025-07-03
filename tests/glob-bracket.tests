@@ -1,0 +1,309 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# tests of various aspects of pathname expansion, mostly dealing with bracket
+# expressions
+#
+# Derived from tests contributed by Koichi Murase <myoga.murase@gmail.com>
+
+LC_COLLATE=C
+
+ORIG_DIR=$PWD
+
+: ${TMPDIR:=/tmp} ${BUILD_DIR:=$ORIG_DIR}
+
+trap 'rm -rf $TESTDIR $WORK_DIR' EXIT
+
+WORK_DIR=${TMPDIR}/globtest-$$
+
+mkdir $WORK_DIR || {
+	echo "glob-bracket: cannot create directory $WORK_DIR" >&2
+	exit 1
+}
+cd $WORK_DIR || {
+	echo "glob-bracket: cannot cd to directory $WORK_DIR" >&2
+	exit 1
+}
+
+eval $(grep -E '^(CC |SHOBJ_).*=' $BUILD_DIR/examples/loadables/Makefile | sed -e 's/[ ]*=[ ]*/="/' -e 's/\$@/strmatch/' -e 's/$/"/' )
+
+if [ "$SHOBJ_STATUS" != "supported" ]; then
+	echo "glob-bracket: shared objects not supported, cannot continue" >&2
+	exit 2
+fi
+
+# we assume gcc as a default here
+: ${CC:=gcc}
+
+cat > fnmatch.c <<-EOF
+	#include <fnmatch.h>
+	#include <stdlib.h>
+	#include <stdio.h>
+
+	int main(int argc, char **argv) {
+	  if (2 >= argc) {
+	    fprintf(stderr, "usage: fnmatch string pattern\n");
+	    exit(2);
+	  }
+
+#ifdef FNM_EXTMATCH
+	  int flags = FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH;
+#else
+	  int flags = FNM_PATHNAME | FNM_PERIOD;
+#endif
+	  if (fnmatch(argv[2], argv[1], flags) == 0)
+	    return 0;
+	  return 1;
+	}
+EOF
+$CC -O2 -o fnmatch fnmatch.c
+rm -f fnmatch.c
+
+if [ ! -f fnmatch ] ; then
+	echo "glob-bracket: cannot create fnmatch executable" >&2
+	exit 2
+fi
+
+cat > strmatch.c <<-EOF
+	#define BUILTIN_ENABLED 0x01
+	struct word_desc { char* word; int flags; };
+	struct word_list { struct word_list* next; struct word_desc* word; };
+	struct builtin {
+	  const char* name;
+	  int (*function)(struct word_list*);
+	  int flags;
+	  const char** long_doc;
+	  const char* short_doc;
+	  char* handle;
+	};
+
+	/*#include <glob/strmatch.h>*/
+	int strmatch(char *pattern, char *string, int flags);
+	#define FNM_PATHNAME    (1 << 0)
+	#define FNM_NOESCAPE    (1 << 1)
+	#define FNM_PERIOD      (1 << 2)
+	#define FNM_LEADING_DIR (1 << 3)
+	#define FNM_CASEFOLD    (1 << 4)
+	#define FNM_EXTMATCH    (1 << 5)
+	#define FNM_FIRSTCHAR   (1 << 6)
+	#define FNM_DOTDOT      (1 << 7)
+
+	static int strmatch_builtin(struct word_list* list) {
+	  char *str, *pat;
+	  if (!list || !list->word) return 2;
+	  str = list->word->word;
+	  if (!list->next || !list->next->word) return 2;
+	  pat = list->next->word->word;
+
+	  if (strmatch (pat, str, FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH) == 0)
+	    return 0;
+	  return 1;
+	}
+	static const char* strmatch_doc[] = { "This is a builtin to test the behavior of strmatch", 0 };
+	struct builtin strmatch_struct = { "strmatch", strmatch_builtin, BUILTIN_ENABLED, strmatch_doc, "strmatch string pattern", 0, };
+EOF
+
+${SHOBJ_CC} ${SHOBJ_CFLAGS} -c -o strmatch.o strmatch.c
+rm -f strmatch.c
+
+${SHOBJ_LD} ${SHOBJ_LDFLAGS} ${SHOBJ_XLDFLAGS} -o strmatch.so strmatch.o ${SHOBJ_LIBS}
+rm -f strmatch.o
+
+if [ ! -f strmatch.so ] ; then
+	echo "glob-bracket: cannot create strmatch loadable builtin" >&2
+	exit 2
+fi
+
+enable -f ./strmatch.so strmatch || {
+	echo "glob-bracket: cannot load strmatch builtin" >&2
+	exit 2
+}
+	
+check_count=1
+
+if [ -z "$BASH_TSTOUT" ]; then
+	yes=$'\033[32myes\033[m' no=$'\033[31mno\033[m'
+else
+	yes=yes no=no
+fi
+
+function check {
+  # bash impl
+  if strmatch "$2" "$1"; then
+    local strmatch=$yes
+  else
+    local strmatch=$no
+  fi
+
+  # fnmatch
+  local expect=${3-}
+  if [[ ! $expect ]]; then
+    if $WORK_DIR/fnmatch "$2" "$1"; then
+      expect=$yes
+    else
+      expect=$no
+    fi
+  fi
+  printf '#%d: pat=%-20s str=%-16s %s/%s\n' "$((check_count++))" "$1" "$2" "$strmatch" "$expect"
+}
+
+function pcheck {
+  local GLOBIGNORE=$1
+
+  # bash impl
+  local -a f=(*/*/efg*)
+  if [[ $f == '*/*/efg*' ]]; then
+    local strmatch=$yes
+  else
+    local strmatch=$no
+  fi
+
+  # Linux fnmatch
+  local fnmatch=${2-}
+  if [[ ! $fnmatch ]]; then
+    if $WORK_DIR/fnmatch ab/cd/efg "$1"; then
+      fnmatch=$yes
+    else
+      fnmatch=$no
+    fi
+  fi
+
+  printf '#%d: pat=%-16s %s/%s\n' "$((check_count++))" "$1" "$strmatch" "$fnmatch"
+}
+
+TESTDIR=${TMPDIR}/pathtest-$$
+TESTPATH=${TESTDIR}/ab/cd/efg
+mkdir -p $TESTPATH
+
+if [ -d "$TESTPATH" ] && cd "$TESTDIR"; then
+echo '--- $GLOBIGNORE vs fnmatch(3) ---'
+pcheck 'ab/cd/efg'
+pcheck 'ab[/]cd/efg'
+pcheck 'ab[/a]cd/efg'
+pcheck 'ab[a/]cd/efg'
+pcheck 'ab[!a]cd/efg'
+pcheck 'ab[.-0]cd/efg'
+pcheck '*/*/efg'
+pcheck '*[/]*/efg'
+pcheck '*[/a]*/efg'
+pcheck '*[a/]*/efg'
+pcheck '*[!a]*/efg'
+pcheck '*[.-0]*/efg'
+
+pcheck '*/*/efg'
+pcheck '*[b]/*/efg'
+pcheck '*[ab]/*/efg'
+pcheck '*[ba]/*/efg'
+pcheck '*[!a]/*/efg'
+pcheck '*[a-c]/*/efg'
+
+shopt -s extglob
+pcheck 'ab@(/)cd/efg'	"$yes"
+pcheck '*@(/)cd/efg'	"$no"
+pcheck '*/cd/efg'
+shopt -u extglob
+
+cd "$WORK_DIR"
+fi
+
+echo
+echo '---Tests for a slash in bracket expressions---'
+check 'ab[/]ef'          'ab[/]ef'     "$yes"
+check 'ab[/]ef'          'ab/ef'       "$no"
+check 'ab[c/d]ef'        'ab[c/d]ef'   "$yes"
+check 'ab[c/d]ef'        'abcef'       "$no"
+check 'ab[.-/]ef'        'ab[.-/]ef'   "$yes"
+check 'ab[.-/]ef'        'ab.ef'       "$no"
+check 'ab[[=/=]]ef'      'ab[[=/=]]ef' "$yes"
+check 'ab[[=/=]]ef'      'ab/ef'       "$no"
+check 'ab[[=c=]/]ef'     'ab[=/]ef'    "$yes"
+check 'ab[[=c=]/]ef'     'abcef'       "$no"
+check 'ab[[:alpha:]/]ef' 'ab[:/]ef'    "$yes"
+check 'ab[[:alpha:]/]ef' 'abxef'       "$no"
+check 'ab[/[abc]]ef'     'ab[/c]ef'    "$yes"
+check 'ab[/[abc]]ef'     'abc]ef'      "$no"
+check 'ab[c[=/=]]ef'     'ab[c[=/=]]ef' "$yes"
+check 'ab[c[=/=]]ef'     'abc[=/=]ef'   "$no"
+check 'ab[c[=/=]]ef'     'abcef'        "$no"
+check 'a[b\/c]'          'a[b/c]'      "$yes"
+check 'a[b\/c]'          'ab'          "$no"
+check 'a[b\/c]'          'ac'          "$no"
+
+echo
+echo '---Tests for incomplete bracket expressions---'
+check 'ab[c'             'ab[c'         "$yes"
+check 'ab[c'             'abc'          "$no"
+check 'ab[c[=d='         'ab[c[=d='     "$yes"
+check 'ab[c[=d='         'abc'          "$no"
+check 'ab[c[.d'          'ab[c[.d'      "$yes"
+check 'ab[c[.d'          'abc'          "$no"
+check 'ab[c[:alpha:'     'ab[c[:alpha:' "$yes"
+check 'ab[c[:alpha:'     'abc'          "$no"
+check 'ab[c-'            'ab[c-'        "$yes"
+check 'ab[c-'            'abc'          "$no"
+check 'ab[c\'            'ab[c\'        "$yes"
+check 'ab[c\'            'abc'          "$no"
+check 'ab[[\'            'ab[[\'        "$yes"
+check 'ab[[\'            'ab['          "$no"
+
+echo
+echo '--- PATSCAN vs BRACKMATCH ---'
+check '@([[.].])A])' ']'        "$yes"
+check '@([[.].])A])' '==]A])'   "$no"
+check '@([[.].])A])' 'AA])'     "$no"
+check '@([[=]=])A])' ']'        "$no"
+check '@([[=]=])A])' '==]A])'   "$yes"
+check '@([[=]=])A])' 'AA])'     "$no"
+
+echo
+echo '--- BRACKMATCH: after match vs before match ---'
+check '[[=]=]ab]'    'a'     "$no"
+check '[[.[=.]ab]'   'a'     "$yes"
+check '[[.[==].]ab]' 'a'     "$yes"
+echo
+check '[a[=]=]b]'    'a'     "$no"
+check '[a[.[=.]b]'   'a'     "$yes"
+check '[a[.[==].]b]' 'a'     "$yes"
+echo
+check '[a[=]=]b]'    'b'     "$no"
+check '[a[=]=]b]'    'a=]b]' "$yes"
+check '[a[.[=.]b]'   'b'     "$yes"
+check '[a[.[=.]b]'   'ab]'   "$no"
+check '[a[.[==].]b]' 'b'     "$yes"
+check '[a[.[==].]b]' 'ab]'   "$no"
+
+echo
+echo '--- incomplete POSIX brackets ---'
+check 'x[a[:y]' 'x['   "$yes"
+check 'x[a[:y]' 'x:'   "$yes"
+check 'x[a[:y]' 'xy'   "$yes"
+check 'x[a[:y]' 'x[ay' "$no"
+echo                   
+check 'x[a[.y]' 'x['   "$yes"
+check 'x[a[.y]' 'x.'   "$yes"
+check 'x[a[.y]' 'xy'   "$yes"
+check 'x[a[.y]' 'x[ay' "$no"
+echo                   
+check 'x[a[=y]' 'x['   "$yes"
+check 'x[a[=y]' 'x='   "$yes"
+check 'x[a[=y]' 'xy'   "$yes"
+check 'x[a[=y]' 'x[ay' "$no"
+
+echo
+echo '--- MISC tests ---'
+check 'a\'               'a\'          "$yes"
+
+cd $ORIG_DIR
+
+enable -d strmatch	# just testing
+exit 0

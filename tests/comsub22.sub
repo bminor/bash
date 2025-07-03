@@ -1,0 +1,26 @@
+# tests for inheriting set -e into command substitutions
+
+set -e
+var=value
+echo "outside before: $var"
+echo "${
+	echo "inside before: $var"
+	var=funsub
+	echo "inside after: $var"
+	false;
+	echo inside: after false
+}" xxx
+echo "outside after: $var"
+
+set -o posix
+echo =====posix mode=====
+var=value
+echo "outside before: $var"
+echo "${
+	echo "inside before: $var"
+	var=funsub
+	echo "inside after: $var"
+	false;
+	echo inside: after false
+}" xxx
+echo "outside after: $var"

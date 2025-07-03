@@ -1,6 +1,6 @@
 /* xcase - change uppercase characters to lowercase or vice versa. */
 
-/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
 
@@ -23,14 +23,11 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#include "bashansi.h"
 #include <errno.h>
+#include <unistd.h>
 
 #ifndef errno
 extern int errno;
@@ -42,9 +39,7 @@ extern int optind;
 #define UPPER	2
 
 int
-main(ac, av)
-int	ac;
-char	**av;
+main(int ac, char **av)
 {
 	int	c, x;
 	int	op;

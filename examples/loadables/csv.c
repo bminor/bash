@@ -2,7 +2,7 @@
 	 fields */
 
 /*
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020,2022 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@
 
 #include "loadables.h"
 
+#if defined (ARRAY_VARS)
+
 #define CSV_ARRAY_DEFAULT	"CSV"
 
 #define NQUOTE	0
@@ -39,9 +41,7 @@
    element of array variable CSV, starting at index 0. The format of LINE is
    as described in RFC 4180. */
 static int
-csvsplit (csv, line, dstring)
-     SHELL_VAR *csv;
-     char *line, *dstring;
+csvsplit (SHELL_VAR *csv, char *line, char *dstring)
 {
   arrayind_t ind;
   char *field, *prev, *buf, *xbuf;
@@ -101,12 +101,13 @@ csvsplit (csv, line, dstring)
 
   return (rval = ind);				/* number of fields */
 }
+#endif
 
 int
-csv_builtin (list)
-     WORD_LIST *list;
+csv_builtin (WORD_LIST *list)
 {
   int opt, rval;
+#if defined (ARRAY_VARS)
   char *array_name, *csvstring;
   SHELL_VAR *v;
 
@@ -132,7 +133,7 @@ csv_builtin (list)
   if (array_name == 0)
     array_name = CSV_ARRAY_DEFAULT;
 
-  if (legal_identifier (array_name) == 0)
+  if (valid_identifier (array_name) == 0)
     {
       sh_invalidid (array_name);
       return (EXECUTION_FAILURE);
@@ -167,6 +168,10 @@ csv_builtin (list)
 
   opt = csvsplit (v, csvstring, ",");
   /* Maybe do something with OPT here, it's the number of fields */
+#else
+  builtin_error ("arrays not available");
+  rval = EXECUTION_FAILURE;
+#endif
 
   return (rval);
 }
@@ -174,16 +179,14 @@ csv_builtin (list)
 /* Called when builtin is enabled and loaded from the shared object.  If this
    function returns 0, the load fails. */
 int
-csv_builtin_load (name)
-     char *name;
+csv_builtin_load (char *name)
 {
   return (1);
 }
 
 /* Called when builtin is disabled. */
 void
-csv_builtin_unload (name)
-     char *name;
+csv_builtin_unload (char *name)
 {
 }
 

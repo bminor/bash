@@ -1,0 +1,107 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# these are ok
+
+function a=2
+{
+	printf "FUNCNAME: %s\n" $FUNCNAME
+}
+
+function 11111
+{
+	printf "FUNCNAME: %s\n" $FUNCNAME
+}
+
+# but this is still not
+function sys$read
+{
+	printf "FUNCNAME: %s\n" $FUNCNAME
+}
+	
+declare -f
+set -o posix
+declare -f
+set +o posix
+
+a\=2
+
+# these are still errors, but one day will not be
+<(:) ()
+{
+	echo $FUNCNAME
+}
+\<\(:\)
+type '<(:)'
+
+'a b c' ()
+{
+	echo function a b c
+}
+a\ b\ c
+type 'a b c'
+
+break()
+{
+	echo inside function $FUNCNAME
+}
+
+testfunc()
+{
+	echo type
+	type break
+	type -t break
+	echo command -v
+	command -v break
+	echo command -V
+	command -V break
+
+	echo type -a
+	type -a break
+	echo declare
+	declare -f break
+	echo execution
+	break
+}
+
+set -o posix
+echo posix mode:
+testfunc
+
+set +o posix
+echo default mode:
+testfunc
+unset -f testfunc break
+
+# but in posix mode, declaring such a function is a fatal error
+( set -o posix
+break()
+{
+        echo FUNCNAME: $FUNCNAME
+}
+echo after
+)
+
+# in posix mode, functions whose names are invalid identifiers are
+# no longer fatal errors
+( set -o posix
+!! () { fc -s "$@" ; }
+type \!\!
+)
+
+# you can create such functions and print them in posix mode
+set -o posix
+!! () { fc -s "$@" ; }
+type '!!'
+set +o posix

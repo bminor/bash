@@ -1,30 +1,27 @@
-/* dgettext.c - Implementation of the dgettext(3) function. */
+/* Implementation of the dgettext(3) function.
+   Copyright (C) 1995-2016 Free Software Foundation, Inc.
 
-/* Copyright (C) 1995-1997, 2000, 2001, 2002, 2006-2009 Free Software Foundation, Inc.
-
-   This file is part of GNU Bash.
-
-   Bash is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation; either version 2.1 of the License, or
    (at your option) any later version.
 
-   Bash is distributed in the hope that it will be useful,
+   This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
-*/
+   You should have received a copy of the GNU Lesser General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
+#include "gettextP.h"
+
 #include <locale.h>
 
-#include "gettextP.h"
 #ifdef _LIBC
 # include <libintl.h>
 #else
@@ -39,7 +36,7 @@
    prefix.  So we have to make a difference here.  */
 #ifdef _LIBC
 # define DGETTEXT __dgettext
-# define DCGETTEXT INTUSE(__dcgettext)
+# define DCGETTEXT __dcgettext
 #else
 # define DGETTEXT libintl_dgettext
 # define DCGETTEXT libintl_dcgettext
@@ -48,9 +45,7 @@
 /* Look up MSGID in the DOMAINNAME message catalog of the current
    LC_MESSAGES locale.  */
 char *
-DGETTEXT (domainname, msgid)
-     const char *domainname;
-     const char *msgid;
+DGETTEXT (const char *domainname, const char *msgid)
 {
   return DCGETTEXT (domainname, msgid, LC_MESSAGES);
 }

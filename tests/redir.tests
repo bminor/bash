@@ -19,25 +19,39 @@ export LANG=C
 # catch-all for remaining untested redirection stuff
 set +o posix
 
+# this should succeed silently
+cat </dev/null >/dev/null 2>&1
+
 echo abc > /tmp/redir-test
 cat /tmp/redir-test
 
 set -o noclobber
 
-#this should be an error
+#this should be an error, so it needs the same fixed filename
 echo def > /tmp/redir-test
 cat /tmp/redir-test
 
 # but this should succeed
-echo def > /tmp/redir-test-2
-cat /tmp/redir-test-2
+echo def > $TMPDIR/redir-test-2
+cat $TMPDIR/redir-test-2
 
 # and so should this
 echo def >| /tmp/redir-test
 cat /tmp/redir-test
 
+# this should work as normal
+echo ghi >| $TMPDIR/redir-test-3
+cat $TMPDIR/redir-test-3
+
 set +o noclobber
-rm /tmp/redir-test /tmp/redir-test-2
+rm -f /tmp/redir-test
+rm -f $TMPDIR/redir-test-2 $TMPDIR/redir-test-3
+
+# these are errors
+fd=-1
+exec <&$fd
+exec $fd</dev/null
+unset -v fd
 
 # this should be an error
 z="a b"
@@ -71,7 +85,7 @@ cat $TMPDIR/bash-c
 echo "Point 5"
 
 # clean up before running scripts
-exec 4>&- 5>&- 6<&-
+exec 4>&- 5>&- 6<&$unset-		# ksh93 quirk with unset variable
 
 rm -f $TMPDIR/bash-a $TMPDIR/bash-b $TMPDIR/bash-c
 
@@ -194,7 +208,7 @@ ${THIS_SH} ./redir7.sub
 ${THIS_SH} ./redir8.sub
 
 exec 9>&2
-command exec 2>$TMPDIR/foo-$$
+command exec 2>>$TMPDIR/foo-$$
 echo whatsis >&2
 echo cat /tmp/foo
 cat $TMPDIR/foo-$$
@@ -203,7 +217,8 @@ exec 2>&9
 exec 9>&-
 
 ${THIS_SH} ./redir9.sub
-
 ${THIS_SH} ./redir10.sub
-
 ${THIS_SH} ./redir11.sub
+${THIS_SH} ./redir12.sub
+
+${THIS_SH} < ./redir13.in

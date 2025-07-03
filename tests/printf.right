@@ -1,5 +1,10 @@
 printf: usage: printf [-v var] format [arguments]
 printf: usage: printf [-v var] format [arguments]
+./printf.tests: line 44: printf: -x: invalid option
+printf: usage: printf [-v var] format [arguments]
+./printf.tests: line 47: printf: `invalid-var': not a valid identifier
+abc
+./printf.tests: line 48: printf: `invalid-var': not a valid identifier
 10
 	one
 one\ctwo
@@ -13,6 +18,11 @@ unquoted
 unquoted quoted
 unquoted    quoted
 this\&that
+echo a\\;ls
+echo a\'\;ls
+echo 'a'\''b'\;ls
+\*
+\*
 1 2 3 4 5 
 onestring 0 0 0
 onestring 0 0 0.00
@@ -30,7 +40,7 @@ A7
 --\"abcd\"--
 --\'abcd\'--
 --a\x--
-./printf.tests: line 95: printf: missing hex digit for \x
+./printf.tests: line 133: printf: missing hex digit for \x
 --\x--
 ----
 ----
@@ -91,12 +101,12 @@ A7
 26
 26
 26
-./printf.tests: line 219: printf: `%10': missing format character
-./printf.tests: line 220: printf: `M': invalid format character
-ab./printf.tests: line 223: printf: `y': invalid format character
-./printf.tests: line 226: printf: GNU: invalid number
+./printf.tests: line 257: printf: `%10': missing format character
+./printf.tests: line 258: printf: `M': invalid format character
+ab./printf.tests: line 261: printf: `y': invalid format character
+./printf.tests: line 264: printf: GNU: invalid number
 0
-./printf.tests: line 227: printf: GNU: invalid number
+./printf.tests: line 265: printf: GNU: invalid number
 0
 -
 (foo )(bar )
@@ -149,6 +159,20 @@ b
 xx
 xx
 <   ><   >
+0
+^@
+0
+0.00
+''
+''
+9223372036854775807
+-9223372036854775808
+./printf.tests: line 386: printf: +: invalid number
+0
+./printf.tests: line 387: printf: z: invalid number
+0
+./printf.tests: line 388: printf: : invalid number
+0
 	one
 one\ctwo
 4\.2
@@ -161,6 +185,8 @@ unquoted
 unquoted quoted
 unquoted    quoted
 this\&that
+'no-quotes-needed'
+'quotes;needed'
 1 2 3 4 5 
 onestring 0 0 0
 onestring 0 0 0.00
@@ -174,7 +200,7 @@ A7
 --\"abcd\"--
 --\'abcd\'--
 --a\x--
-./printf1.sub: line 107: printf: missing hex digit for \x
+./printf1.sub: line 111: printf: missing hex digit for \x
 --\x--
 ----
 ----
@@ -235,12 +261,12 @@ A7
 26
 26
 26
-./printf1.sub: line 293: printf: `%10': missing format character
-./printf1.sub: line 294: printf: `M': invalid format character
-./printf1.sub: line 297: printf: `y': invalid format character
-./printf1.sub: line 300: printf: GNU: invalid number
+./printf1.sub: line 297: printf: `%10': missing format character
+./printf1.sub: line 298: printf: `M': invalid format character
+./printf1.sub: line 301: printf: `y': invalid format character
+./printf1.sub: line 304: printf: GNU: invalid number
 0
-./printf1.sub: line 302: printf: GNU: invalid number
+./printf1.sub: line 306: printf: GNU: invalid number
 0
 -
 (foo )(bar )
@@ -296,3 +322,71 @@ x      +123x
 x      +123x
 x      +123x
 x      +123x
+abcd
+ab
+ 123
+  123
+ 173
+  7b
+  7B
+  hello
+ hello
+ 123
+ 6
+123 --
+123  --
+173 --
+7b  --
+7B  --
+hello  --
+hello --
+123 --
+6 --
+0000000 000                                                            
+0000001
+0000000 000                                                            
+0000001
+0000000 340 262 207 340 262 263 340 262 277 340 262 225 340 263 206 340
+0000010 262 227 340 262 263 340 263 201 012                            
+0000019
+0000000 340 262 207 340 262 263 012                                    
+0000007
+0000000 340 262 207 012                                                
+0000004
+0000000 340 262 207 340 262 263 012                                    
+0000007
+0000000 040 040 340 262 207 340 262 263 012                            
+0000009
+0000000 340 262 207 340 262 263 040 040 055 055 055 012                
+000000c
+0000000 340 262 207 012                                                
+0000004
+0000000 340 262 207 012                                                
+0000004
+0000000 340 262 207 012                                                
+0000004
+0000000 340 262 207 012                                                
+0000004
+0000000 040 040 040 340 262 207 012                                    
+0000007
+0000000 340 262 207 040 040 040 055 055 055 012                        
+000000a
+[][]
+[]
+[X]
+VAR=[]
+VAR=[X]
+[]
+[X]
+VAR=[]
+VAR=[X]
+[]
+[X]
+VAR=[]
+VAR=[X]
+[]
+[X]
+VAR=[]
+VAR=[X]
+XY
+XY

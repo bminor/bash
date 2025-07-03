@@ -1,0 +1,28 @@
+: ${THIS_SH:=./bash}
+
+# all parse errors
+${THIS_SH} -c '[[ ( -n xx' bash
+${THIS_SH} -c '[[ ( -n xx )' bash
+
+${THIS_SH} -c '[[ ( -t X ) ]' bash
+
+${THIS_SH} -c '[[ -n &' bash
+${THIS_SH} -c '[[ -n XX &' bash
+${THIS_SH} -c '[[ -n XX & ]' bash
+
+${THIS_SH} -c '[[ 4 & ]]' bash
+${THIS_SH} -c '[[ 4 > & ]]' bash
+
+${THIS_SH} -c '[[ & ]]' bash
+${THIS_SH} -c '[[ -Q 7 ]]' bash
+${THIS_SH} -c '[[ -n < ]]' bash
+
+# let's see what failed cond commands do with ERR trap
+trap 'echo ERR: $LINENO: -$BASH_COMMAND- failed' ERR
+[[ -n $unset ]]
+
+func()
+{
+	[[ -z nonempty ]]
+}
+func

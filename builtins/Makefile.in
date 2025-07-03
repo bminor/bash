@@ -1,6 +1,6 @@
 # This Makefile for building libbuiltins.a is in -*- text -*- for Emacs.
 #
-# Copyright (C) 1996-2022 Free Software Foundation, Inc.
+# Copyright (C) 1996-2024 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -56,6 +56,8 @@ BUILD_DIR = @BUILD_DIR@
 
 LIBBUILD = ${BUILD_DIR}/lib
 
+DEBUG = @DEBUG@
+
 PROFILE_FLAGS = @PROFILE_FLAGS@
 CFLAGS = @CFLAGS@
 CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@ @CROSS_COMPILE@
@@ -77,6 +79,9 @@ BASHINCDIR = ${topdir}/include
 
 RL_INCLUDEDIR = @RL_INCLUDEDIR@
 
+HIST_LIBSRC = ${topdir}/lib/readline
+RL_LIBSRC = ${topdir}/lib/readline
+
 INTL_LIBSRC = ${topdir}/lib/intl
 INTL_BUILDDIR = ${LIBBUILD}/intl
 INTL_LIBDIR = ${INTL_BUILDDIR}
@@ -92,9 +97,10 @@ HELPFILES_TARGET = @HELPFILES_TARGET@
 
 INCLUDES = -I. -I.. @RL_INCLUDE@ -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib -I$(srcdir) ${INTL_INC}
 
-BASE_CCFLAGS = ${PROFILE_FLAGS} $(DEFS) $(LOCAL_DEFS) $(SYSTEM_FLAGS) \
+BASE_CCFLAGS = ${PROFILE_FLAGS} $(DEFS) $(LOCAL_DEFS) \
 	 ${INCLUDES} $(STYLE_CFLAGS) $(LOCAL_CFLAGS)
 
+ADDON_CFLAGS=
 CCFLAGS = ${ADDON_CFLAGS} $(BASE_CCFLAGS) $(CPPFLAGS) $(CFLAGS)
 
 CCFLAGS_FOR_BUILD = $(BASE_CCFLAGS) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
@@ -107,6 +113,8 @@ MKBUILTINS = mkbuiltins$(EXEEXT)
 DIRECTDEFINE = -D $(srcdir)
 HELPDIRDEFINE = @HELPDIRDEFINE@
 HELPSTRINGS = @HELPSTRINGS@
+
+STDCKDINT_H = @STDCKDINT_H@
 
 # xxx this is bad style
 RL_LIBSRC = $(topdir)/lib/readline
@@ -252,6 +260,8 @@ documentation: builtins.texi
 builtins.texi: $(MKBUILTINS)
 	./$(MKBUILTINS) -documentonly $(DEFSRC)
 
+.PHONY: basic-clean clean maintainer-clean distclean mostlyclean maybe-clean
+
 clean:
 	$(RM) $(OFILES) $(CREATED_FILES) libbuiltins.a
 	$(RM) $(MKBUILTINS) gen-helpfiles $(CREATED_OBJECTS)
@@ -265,8 +275,9 @@ distclean maintainer-clean: clean
 
 $(OFILES):	$(MKBUILTINS) ../config.h
 
-../version.h: ../config.h ../Makefile Makefile
-	-( cd ${BUILD_DIR} && ${MAKE} ${MFLAGS} version.h )
+# sketchy rule here
+#../version.h: ../config.h ../Makefile Makefile
+#	-( cd ${BUILD_DIR} && ${MAKE} ${BASH_MAKEFLAGS} version.h )
 
 # maintainer special - for now
 po:	builtins.c
@@ -275,7 +286,7 @@ po:	builtins.c
 ${LIBINTL_H}:
 	@echo making $@ in ${INTL_BUILDDIR}
 	@(cd ${INTL_BUILDDIR} && \
-		$(MAKE) $(MFLAGS) libintl.h) || exit 1
+		$(MAKE) $(BASH_MAKEFLAGS) libintl.h) || exit 1
 
 # dependencies
 
@@ -343,6 +354,7 @@ common.o: $(topdir)/builtins.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 common.o: $(topdir)/subst.h $(topdir)/execute_cmd.h $(topdir)/error.h
 common.o: $(topdir)/externs.h ../pathnames.h ./builtext.h
 common.o: $(BASHINCDIR)/chartypes.h
+common.o: $(BASHINCDIR)/unlocked-io.h
 evalfile.o: $(topdir)/bashtypes.h $(BASHINCDIR)/posixstat.h ${BASHINCDIR}/filecntl.h
 evalfile.o: $(topdir)/bashansi.h $(BASHINCDIR)/ansi_stdlib.h
 evalfile.o: $(topdir)/shell.h $(topdir)/syntax.h ../config.h $(topdir)/bashjmp.h
@@ -439,6 +451,7 @@ echo.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h $(topdir)/
 echo.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
 echo.o: $(BASHINCDIR)/maxpath.h ../pathnames.h
 echo.o: $(srcdir)/common.h
+echo.o: $(BASHINCDIR)/unlocked-io.h
 enable.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 enable.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 enable.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
@@ -468,6 +481,7 @@ exit.o: $(topdir)/subst.h $(topdir)/externs.h  $(topdir)/jobs.h
 exit.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
 exit.o: $(topdir)/execute_cmd.h
 exit.o: $(BASHINCDIR)/maxpath.h ./builtext.h ../pathnames.h
+exit.o: $(BASHINCDIR)/unlocked-io.h
 fc.o: $(topdir)/bashtypes.h $(BASHINCDIR)/posixstat.h
 fc.o: $(topdir)/builtins.h $(topdir)/command.h $(srcdir)/bashgetopt.h
 fc.o: $(topdir)/bashhist.h $(topdir)/parser.h
@@ -478,6 +492,7 @@ fc.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/shell.h $(topdir)/syntax.h
 fc.o: $(topdir)/flags.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
 fc.o: $(topdir)/bashansi.h $(BASHINCDIR)/ansi_stdlib.h $(BASHINCDIR)/chartypes.h
 fc.o: ../pathnames.h
+fc.o: $(BASHINCDIR)/unlocked-io.h
 fg_bg.o: $(topdir)/bashtypes.h $(srcdir)/bashgetopt.h
 fg_bg.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 fg_bg.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
@@ -498,6 +513,7 @@ hash.o: $(topdir)/findcmd.h $(topdir)/hashlib.h $(topdir)/sig.h
 hash.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 hash.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 hash.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h
+hash.o: $(BASHINCDIR)/unlocked-io.h
 hash.o: $(topdir)/conftypes.h $(topdir)/execute_cmd.h
 hash.o: $(srcdir)/common.h $(BASHINCDIR)/maxpath.h ../pathnames.h
 help.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
@@ -507,6 +523,7 @@ help.o: $(topdir)/subst.h $(topdir)/externs.h $(BASHINCDIR)/maxpath.h
 help.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h
 help.o: $(topdir)/conftypes.h $(topdir)/execute_cmd.h
 help.o: ${srcdir}/common.h $(topdir)/sig.h ../pathnames.h
+help.o: $(BASHINCDIR)/unlocked-io.h
 history.o: $(topdir)/bashtypes.h
 history.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 history.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
@@ -515,6 +532,7 @@ history.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/sig.h  $(topdir)/pars
 history.o: ${BASHINCDIR}/filecntl.h $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h
 history.o: $(topdir)/variables.h $(topdir)/conftypes.h $(topdir)/bashhist.h $(BASHINCDIR)/maxpath.h
 history.o: ../pathnames.h
+history.o: $(BASHINCDIR)/unlocked-io.h
 inlib.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 inlib.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 inlib.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
@@ -538,6 +556,7 @@ let.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h $(topdir)/s
 let.o: $(topdir)/subst.h $(topdir)/externs.h $(BASHINCDIR)/maxpath.h
 let.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
 let.o: ../pathnames.h
+let.o: $(BASHINCDIR)/unlocked-io.h
 printf.o: ../config.h $(BASHINCDIR)/memalloc.h $(topdir)/bashjmp.h
 printf.o: $(topdir)/command.h $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 printf.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
@@ -547,6 +566,8 @@ printf.o: $(topdir)/variables.h $(topdir)/conftypes.h $(BASHINCDIR)/stdc.h $(src
 printf.o: $(topdir)/bashtypes.h ${srcdir}/common.h $(BASHINCDIR)/chartypes.h
 printf.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 printf.o: ../pathnames.h
+printf.o: $(BASHINCDIR)/unlocked-io.h
+printf.o: ${STDCKDINT_H} ${BASHINCDIR}/intprops-internal.h
 pushd.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 pushd.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 pushd.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
@@ -554,6 +575,7 @@ pushd.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/sig.h
 pushd.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
 pushd.o: $(BASHINCDIR)/maxpath.h $(srcdir)/common.h ./builtext.h
 pushd.o: ../pathnames.h
+pushd.o: $(BASHINCDIR)/unlocked-io.h
 read.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 read.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 read.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
@@ -562,6 +584,7 @@ read.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/v
 read.o: $(BASHINCDIR)/shtty.h $(topdir)/sig.h
 read.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 read.o: $(topdir)/arrayfunc.h ../pathnames.h
+read.o: $(BASHINCDIR)/unlocked-io.h
 return.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 return.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
 return.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h $(topdir)/sig.h
@@ -622,6 +645,7 @@ times.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h $(topdir)
 times.o: $(topdir)/subst.h $(topdir)/externs.h $(BASHINCDIR)/maxpath.h
 times.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
 times.o: $(BASHINCDIR)/posixtime.h ../pathnames.h
+times.o: $(BASHINCDIR)/unlocked-io.h
 trap.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 trap.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h $(topdir)/externs.h
 trap.o: $(topdir)/quit.h $(srcdir)/common.h $(BASHINCDIR)/maxpath.h $(topdir)/sig.h
@@ -671,7 +695,34 @@ mapfile.o: $(topdir)/subst.h $(topdir)/externs.h $(BASHINCDIR)/maxpath.h
 mapfile.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/variables.h $(topdir)/conftypes.h
 mapfile.o: $(topdir)/arrayfunc.h ../pathnames.h
 
-#bind.o: $(RL_LIBSRC)chardefs.h $(RL_LIBSRC)readline.h $(RL_LIBSRC)keymaps.h
+bind.o: $(RL_LIBSRC)/rlconf.h
+bind.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+bind.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+bind.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+complete.o: $(RL_LIBSRC)/rlconf.h
+complete.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+complete.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+complete.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+history.o: $(RL_LIBSRC)/rlconf.h
+history.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+history.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+history.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+read.o: $(RL_LIBSRC)/rlconf.h
+read.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+read.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+read.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+set.o: $(RL_LIBSRC)/rlconf.h
+set.o: $(RL_LIBSRC)/keymaps.h $(RL_LIBSRC)/rlstdc.h
+set.o: $(RL_LIBSRC)/chardefs.h $(RL_LIBSRC)/readline.h
+set.o: $(RL_LIBSRC)/rltypedefs.h ${RL_LIBSRC}/rlmbutil.h
+
+common.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+evalfile.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+evalstring.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+bind.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+fc.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+history.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
+shopt.o: $(HIST_LIBSRC)/history.h $(RL_LIBSRC)/rlstdc.h
 
 # libintl dependencies
 bind.o: ${topdir}/bashintl.h ${LIBINTL_H} $(BASHINCDIR)/gettext.h

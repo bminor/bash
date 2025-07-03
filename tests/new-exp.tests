@@ -184,6 +184,11 @@ recho ${a-$z}
 expect nothing
 recho ${!1-$z}
 
+expect an error
+v=bad-var
+echo ${!v}
+unset -v v
+
 set -- a 'b c' d
 unset foo
 foo=@
@@ -649,6 +654,18 @@ patfunc foo
 
 # caused core dumps because of bad bracket expression parsing in bash-5.0
 eval : $'${x/#[0\xef\xbf\xbd\\Z[:]]}'
+
+a=1/%2/%3
+echo "${a/\%/##}"
+echo "${a//\%/##}"
+echo "${a/\/%/##}"
+
+b=1/#2/#3
+echo "${b/\#/%%}"
+echo "${b//\#/%%}"
+echo "${b/\/#/%%}"
+
+unset a b
 
 expect $0: 'ABXD: parameter unset'
 ${THIS_SH} -c 'recho ${ABXD:?"parameter unset"}' $0

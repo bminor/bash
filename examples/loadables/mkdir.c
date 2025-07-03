@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -42,15 +42,14 @@ extern int errno;
 
 #define ISOCTAL(c)	((c) >= '0' && (c) <= '7')
 
-extern int parse_symbolic_mode ();
+extern int parse_symbolic_mode (char *, mode_t);
 
-static int make_path ();
+static int make_path (char *, int, int, int);
 
 static int original_umask;
 
 int
-mkdir_builtin (list)
-     WORD_LIST *list;
+mkdir_builtin (WORD_LIST *list)
 {
   int opt, pflag, mflag, omode, rval, nmode, parent_mode;
   char *mode;
@@ -134,15 +133,14 @@ mkdir_builtin (list)
    this changes the process's umask; make sure that all paths leading to a
    return reset it to ORIGINAL_UMASK */
 static int
-make_path (path, user_mode, nmode, parent_mode)
-     char *path;
-     int user_mode;
-     int nmode, parent_mode;
+make_path (char *path, int user_mode, int nmode, int parent_mode)
 {
-  int oumask;
+  mode_t oumask;
   struct stat sb;
   char *p, *npath;
+  int tail;
 
+  /* If we don't have to do any work, don't do any work. */
   if (stat (path, &sb) == 0)
     {
       if (S_ISDIR (sb.st_mode) == 0)
@@ -170,46 +168,62 @@ make_path (path, user_mode, nmode, parent_mode)
   while (*p == '/')
     p++;
 
-  while (p = strchr (p, '/'))
+  tail = 0;
+  while (tail == 0)
     {
-      *p = '\0';
-      if (stat (npath, &sb) != 0)
+      if (*p == '\0')
+	tail = 1;
+      else
+	p = strchr (p, '/');
+      if (p)
+	*p = '\0';
+      else
+	tail = 1;
+      if (mkdir (npath, 0) < 0)
 	{
-	  if (mkdir (npath, 0))
+	  /* "Each dir operand that names an existing directory shall be
+	      ignored without error." */
+	  if (errno == EEXIST || errno == EISDIR)
+	    {
+	      int e = errno;
+	      int fail = 0;
+
+	      if (stat (npath, &sb) != 0)
+		{
+		  fail = 1;
+		  builtin_error ("cannot create directory `%s': %s", npath, strerror (e));
+		}
+	      else if (e == EEXIST && S_ISDIR (sb.st_mode) == 0)
+		{
+		  fail = 1;
+		  builtin_error ("`%s': file exists but is not a directory", npath);
+		}
+	      if (fail)
+		{
+		  umask (original_umask);
+		  free (npath);
+		  return 1;
+		}
+	    }
+	  else
 	    {
 	      builtin_error ("cannot create directory `%s': %s", npath, strerror (errno));
 	      umask (original_umask);
 	      free (npath);
 	      return 1;
 	    }
-	  if (chmod (npath, parent_mode) != 0)
-	    {
-	      builtin_error ("cannot chmod directory `%s': %s", npath, strerror (errno));
-	      umask (original_umask);
-	      free (npath);
-	      return 1;
-	    }
 	}
-      else if (S_ISDIR (sb.st_mode) == 0)
-        {
-          builtin_error ("`%s': file exists but is not a directory", npath);
-          umask (original_umask);
-          free (npath);
-          return 1;
-        }
-
-      *p++ = '/';	/* restore slash */
-      while (*p == '/')
+      if (chmod (npath, (tail == 0) ? parent_mode : nmode) != 0)
+	{
+	  builtin_error ("cannot chmod directory `%s': %s", npath, strerror (errno));
+	  umask (original_umask);
+	  free (npath);
+	  return 1;
+	}
+      if (tail == 0)
+	*p++ = '/';	/* restore slash */
+      while (p && *p == '/')	/* skip consecutive slashes or trailing slash */
 	p++;
-    }
-
-  /* Create the final directory component. */
-  if (stat (npath, &sb) && mkdir (npath, nmode))
-    {
-      builtin_error ("cannot create directory `%s': %s", npath, strerror (errno));
-      umask (original_umask);
-      free (npath);
-      return 1;
     }
 
   umask (original_umask);

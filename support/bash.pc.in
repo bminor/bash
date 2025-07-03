@@ -8,9 +8,10 @@ libdir=@libdir@
 loadablesdir=@loadablesdir@
 headersdir=${includedir}/@PACKAGE_NAME@
 
-LOCAL_CFLAGS = @LOCAL_CFLAGS@
+DEFS = @DEFS@
 LOCAL_DEFS = @LOCAL_DEFS@
-CCFLAGS = ${LOCAL_DEFS} ${LOCAL_CFLAGS}
+LOCAL_CFLAGS = @LOCAL_CFLAGS@
+CCFLAGS = ${DEFS} ${LOCAL_DEFS} ${LOCAL_CFLAGS}
 
 CC = @CC@
 SHOBJ_CC = @SHOBJ_CC@

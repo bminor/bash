@@ -1,6 +1,6 @@
 /* timers - functions to manage shell timers */
 
-/* Copyright (C) 2021 Free Software Foundation, Inc.
+/* Copyright (C) 2021,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,6 +45,10 @@ extern int errno;
 
 #ifndef FREE
 #define FREE(s)  do { if (s) free (s); } while (0)
+#endif
+
+#ifndef USEC_PER_SEC
+#  define USEC_PER_SEC 1000000
 #endif
 
 extern unsigned int falarm (unsigned int, unsigned int);

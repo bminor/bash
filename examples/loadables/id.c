@@ -10,7 +10,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2009,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -41,9 +41,9 @@
 #endif
 
 #if !defined (HAVE_GETPW_DECLS)
-extern struct passwd *getpwuid ();
+extern struct passwd *getpwuid (uid_t);
 #endif
-extern struct group *getgrgid ();
+extern struct group *getgrgid (gid_t);
 
 #include "shell.h"
 #include "builtins.h"
@@ -66,16 +66,15 @@ static gid_t rgid, egid;
 
 static char *id_user;
 
-static int inituser ();
+static int inituser (char *);
 
-static int id_pruser ();
-static int id_prgrp ();
-static int id_prgroups ();
-static int id_prall ();
+static int id_pruser (int);
+static int id_prgrp (int);
+static int id_prgroups (char *);
+static int id_prall (char *);
 
 int
-id_builtin (list)
-     WORD_LIST *list;
+id_builtin (WORD_LIST *list)
 {
   int opt;
   char *user;
@@ -134,8 +133,7 @@ id_builtin (list)
 }
 
 static int
-inituser (uname)
-     char *uname;
+inituser (char *uname)
 {
   struct passwd *pwd;
 
@@ -162,8 +160,7 @@ inituser (uname)
 
 /* Print the name or value of user ID UID. */
 static int
-id_pruser (uid)
-     int uid;
+id_pruser (int uid)
 {
   struct passwd *pwd = NULL;
   int r;
@@ -186,8 +183,7 @@ id_pruser (uid)
 /* Print the name or value of group ID GID. */
 
 static int
-id_prgrp (gid)
-     int gid;
+id_prgrp (int gid)
 {
   struct group *grp = NULL;
   int r;
@@ -209,8 +205,7 @@ id_prgrp (gid)
 }
 
 static int
-id_prgroups (uname)
-     char *uname;
+id_prgroups (char *uname)
 {
   int *glist, ng, i, r;
 
@@ -243,8 +238,7 @@ id_prgroups (uname)
 }
 
 static int
-id_prall (uname)
-     char *uname;
+id_prall (char *uname)
 {
   int r, i, ng, *glist;
   struct passwd *pwd;

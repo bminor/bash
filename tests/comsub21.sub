@@ -1,0 +1,65 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# posix-mode alias expansion in nofork command substitutions within
+# other constructs
+
+DATE='Mon Aug 29 20:03:02 EDT 2022'
+shopt -s expand_aliases
+
+alias number="echo 123"
+
+echo ${ number; }
+echo $(( ${ number; } ))
+(( ${ number; } )) ; echo $?
+
+set -o posix
+echo ${ number; }
+echo $(( ${ number; } ))
+(( ${ number; } )) ; echo $?
+set +o posix
+
+# have to turn it back on after leaving posix mode
+shopt -s expand_aliases
+
+alias my_alias='echo $DATE'
+
+echo ${ eval my_alias; }
+echo ${ my_alias; }
+
+set -o posix
+echo ${ eval my_alias; }
+echo ${	my_alias; }
+set +o posix ; shopt -s expand_aliases
+
+alias e=echo
+alias v='e 123'
+
+set -o posix
+echo ${ v; }
+echo ${ echo before ; v; }
+echo ${	for f in 0; do
+echo in for
+done; v; }
+set +o posix ; shopt -s expand_aliases
+
+alias let='let --'
+
+let '1 == 1'
+: ${ let '1 == 1'; }
+
+set -o posix
+let '1 == 1'
+: ${ let '1 == 1'; }
+set +o posix ; shopt -s expand_aliases

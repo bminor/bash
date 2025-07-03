@@ -1,6 +1,6 @@
 /* xmalloc.c -- safe versions of malloc and realloc */
 
-/* Copyright (C) 1991-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2016,2023-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the GNU Bourne Again SHell.
 
@@ -29,22 +29,15 @@
 #  include <unistd.h>
 #endif
 
-#if defined (HAVE_STDLIB_H)
-#  include <stdlib.h>
-#else
-#  include "ansi_stdlib.h"
-#endif /* HAVE_STDLIB_H */
+#include "bashansi.h"
+#include <stdckdint.h>
 
 #include "error.h"
 
 #include "bashintl.h"
 
 #if !defined (PTR_T)
-#  if defined (__STDC__)
-#    define PTR_T void *
-#  else
-#    define PTR_T char *
-#  endif /* !__STDC__ */
+#  define PTR_T void *
 #endif /* !PTR_T */
 
 #if HAVE_SBRK && !HAVE_DECL_SBRK
@@ -74,7 +67,7 @@ do { \
 } while (0)
 
 static size_t
-findbrk ()
+findbrk (void)
 {
   FINDBRK();
   return (char *)sbrk (0) - (char *)lbreak;
@@ -84,9 +77,7 @@ findbrk ()
 #endif
 
 static void
-allocerr (func, bytes)
-     const char *func;
-     size_t bytes;
+allocerr (const char *func, size_t bytes)
 {
 #if HAVE_SBRK && defined (USING_BASH_MALLOC)
       allocated = findbrk ();
@@ -100,8 +91,7 @@ allocerr (func, bytes)
    to hold BYTES number of bytes.  If the memory cannot be allocated,
    print an error message and abort. */
 PTR_T
-xmalloc (bytes)
-     size_t bytes;
+xmalloc (size_t bytes)
 {
   PTR_T temp;
 
@@ -120,9 +110,7 @@ xmalloc (bytes)
 }
 
 PTR_T
-xrealloc (pointer, bytes)
-     PTR_T pointer;
-     size_t bytes;
+xrealloc (PTR_T pointer, size_t bytes)
 {
   PTR_T temp;
 
@@ -140,11 +128,26 @@ xrealloc (pointer, bytes)
   return (temp);
 }
 
+/* Reallocate the storage addressed by POINTER so that it is of
+   size NMEMB*SIZE, preserving contents like realloc does.
+   If POINTER is null, allocate new storage.  This is like
+   glibc reallocarray except that it never returns a null pointer;
+   if storage is exhausted it reports an error and exits. */
+PTR_T
+xreallocarray (PTR_T ptr, size_t nmemb, size_t size)
+{
+  size_t nbytes;
+
+  if (ckd_mul (&nbytes, nmemb, size))
+    allocerr ("xreallocarray", (size_t)-1);
+	        
+  return xrealloc (ptr, nbytes);
+}
+
 /* Use this as the function to call when adding unwind protects so we
    don't need to know what free() returns. */
 void
-xfree (string)
-     PTR_T string;
+xfree (PTR_T string)
 {
   if (string)
     free (string);
@@ -154,11 +157,7 @@ xfree (string)
 #include <malloc/shmalloc.h>
 
 static void
-sh_allocerr (func, bytes, file, line)
-     const char *func;
-     size_t bytes;
-     char *file;
-     int line;
+sh_allocerr (const char *func, size_t bytes, char *file, int line)
 {
 #if HAVE_SBRK
       allocated = findbrk ();
@@ -169,10 +168,7 @@ sh_allocerr (func, bytes, file, line)
 }
 
 PTR_T
-sh_xmalloc (bytes, file, line)
-     size_t bytes;
-     char *file;
-     int line;
+sh_xmalloc (size_t bytes, char *file, int line)
 {
   PTR_T temp;
 
@@ -191,11 +187,7 @@ sh_xmalloc (bytes, file, line)
 }
 
 PTR_T
-sh_xrealloc (pointer, bytes, file, line)
-     PTR_T pointer;
-     size_t bytes;
-     char *file;
-     int line;
+sh_xrealloc (PTR_T pointer, size_t bytes, char *file, int line)
 {
   PTR_T temp;
 
@@ -213,11 +205,19 @@ sh_xrealloc (pointer, bytes, file, line)
   return (temp);
 }
 
+PTR_T
+sh_xreallocarray (PTR_T ptr, size_t nmemb, size_t size, char *file, int line)
+{
+  size_t nbytes;
+
+  if (ckd_mul (&nbytes, nmemb, size))
+    sh_allocerr ("xreallocarray", (size_t)-1, file, line);
+	        
+  return sh_xrealloc (ptr, nbytes, file, line);
+}
+
 void
-sh_xfree (string, file, line)
-     PTR_T string;
-     char *file;
-     int line;
+sh_xfree (PTR_T string, char *file, int line)
 {
   if (string)
     sh_free (string, file, line);

@@ -1,7 +1,6 @@
 /* accept - listen for and accept a remote network connection on a given port */
-
 /*
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020,2022,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -42,8 +41,7 @@
 static int accept_bind_variable (char *, int);
 
 int
-accept_builtin (list)
-     WORD_LIST *list;
+accept_builtin (WORD_LIST *list)
 {
   SHELL_VAR *v;
   intmax_t iport;
@@ -105,7 +103,7 @@ accept_builtin (list)
       return (EX_USAGE);
     }
 
-  if (legal_number (list->word->word, &iport) == 0 || iport < 0 || iport > TYPE_MAXIMUM (unsigned short))
+  if (valid_number (list->word->word, &iport) == 0 || iport < 0 || iport > TYPE_MAXIMUM (unsigned short))
     {
       builtin_error ("%s: invalid port number", list->word->word);
       return (EXECUTION_FAILURE);
@@ -194,9 +192,7 @@ accept_builtin (list)
 }
 
 static int
-accept_bind_variable (varname, intval)
-     char *varname;
-     int intval;
+accept_bind_variable (char *varname, int intval)
 {
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND (int) + 1], *p;

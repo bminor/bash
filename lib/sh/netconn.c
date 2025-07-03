@@ -1,6 +1,6 @@
 /* netconn.c -- is a particular file descriptor a network connection?. */
 
-/* Copyright (C) 2002-2005 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2005,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,8 +41,7 @@
 
 /* Is FD a socket or network connection? */
 int
-isnetconn (fd)
-     int fd;
+isnetconn (int fd)
 {
 #if defined (HAVE_SYS_SOCKET_H) && defined (HAVE_GETPEERNAME) && !defined (SVR4_2) && !defined (__BEOS__)
   int rv;

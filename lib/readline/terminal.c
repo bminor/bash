@@ -1,6 +1,6 @@
 /* terminal.c -- controlling the terminal with termcap. */
 
-/* Copyright (C) 1996-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2025 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -69,7 +69,7 @@
 #include "rlshell.h"
 #include "xmalloc.h"
 
-#if defined (__MINGW32__)
+#if defined (_WIN32)
 #  include <windows.h>
 #  include <wincon.h>
 
@@ -102,17 +102,21 @@ static char *term_string_buffer = (char *)NULL;
 
 static int tcap_initialized;
 
-#if !defined (__linux__) && !defined (NCURSES_VERSION)
+/* Systems for which PC/BC/UP are defined in the curses library and need an
+   extern definition here. */
+#if !defined (__linux__) && !defined (__gnu_hurd__) && !defined (NCURSES_VERSION)
 #  if defined (__EMX__) || defined (NEED_EXTERN_PC)
-extern 
+extern
 #  endif /* __EMX__ || NEED_EXTERN_PC */
 char PC, *BC, *UP;
 #endif /* !__linux__ && !NCURSES_VERSION */
+
 
 /* Some strings to control terminal actions.  These are output by tputs (). */
 char *_rl_term_clreol;
 char *_rl_term_clrpag;
 char *_rl_term_clrscroll;
+char *_rl_term_ho;
 char *_rl_term_cr;
 char *_rl_term_backspace;
 char *_rl_term_goto;
@@ -185,6 +189,12 @@ static char *_rl_term_kN;
 static char *_rl_term_vs;	/* very visible */
 static char *_rl_term_ve;	/* normal */
 
+/* Bracketed paste */
+static char *_rl_term_BE;	/* enable */
+static char *_rl_term_BD;	/* disable */
+static char *_rl_term_PS;	/* paste start */
+static char *_rl_term_PE;	/* paste end */
+
 /* User-settable color sequences to begin and end the active region. Defaults
    are rl_term_so and rl_term_se on non-dumb terminals. */
 char *_rl_active_region_start_color = NULL;
@@ -214,6 +224,9 @@ int _rl_enable_keypad;
 /* Non-zero means the user wants to enable a meta key. */
 int _rl_enable_meta = 1;
 
+/* Non-zero means this is an ANSI-compatible terminal; assume it is. */
+int _rl_term_isansi = RL_ANSI_TERM_DEFAULT;
+
 #if defined (__EMX__)
 static void
 _emx_get_screensize (int *swp, int *shp)
@@ -229,7 +242,7 @@ _emx_get_screensize (int *swp, int *shp)
 }
 #endif
 
-#if defined (__MINGW32__)
+#if defined (_WIN32)
 static void
 _win_get_screensize (int *swp, int *shp)
 {
@@ -248,6 +261,30 @@ _win_get_screensize (int *swp, int *shp)
 }
 #endif
 
+int
+_rl_tcgetwinsize (int tty, struct winsize *wp)
+{
+#if defined (HAVE_TCGETWINSIZE)
+  return (tcgetwinsize (tty, wp));
+#elif defined (TIOCGWINSZ)
+  return (ioctl (tty, TIOCGWINSZ, wp));
+#else
+  return -1;
+#endif
+}
+
+void
+_rl_tcsetwinsize (int tty, struct winsize *wp)
+{
+#if defined (HAVE_TCGETWINSIZE)
+  tcsetwinsize (tty, wp);
+#elif defined (TIOCGWINSZ)
+  ioctl (tty, TIOCSWINSZ, wp);
+#else
+  ;
+#endif
+}
+
 /* Get readline's idea of the screen size.  TTY is a file descriptor open
    to the terminal.  If IGNORE_ENV is true, we do not pay attention to the
    values of $LINES and $COLUMNS.  The tests for TERM_STRING_BUFFER being
@@ -256,23 +293,23 @@ void
 _rl_get_screen_size (int tty, int ignore_env)
 {
   char *ss;
-#if defined (TIOCGWINSZ)
+#if defined (TIOCGWINSZ) || defined (HAVE_TCGETWINSIZE)
   struct winsize window_size;
-#endif /* TIOCGWINSZ */
+#endif /* TIOCGWINSZ || HAVE_TCGETWINSIZE */
   int wr, wc;
 
   wr = wc = -1;
-#if defined (TIOCGWINSZ)
-  if (ioctl (tty, TIOCGWINSZ, &window_size) == 0)
+#if defined (TIOCGWINSZ) || defined (HAVE_TCGETWINSIZE)
+  if (_rl_tcgetwinsize (tty, &window_size) == 0)
     {
       wc = (int) window_size.ws_col;
       wr = (int) window_size.ws_row;
     }
-#endif /* TIOCGWINSZ */
+#endif /* TIOCGWINSZ || HAVE_TCGETWINSIZE */
 
 #if defined (__EMX__)
   _emx_get_screensize (&wc, &wr);
-#elif defined (__MINGW32__)
+#elif defined (_WIN32) && !defined (__CYGWIN__)
   _win_get_screensize (&wc, &wr);
 #endif
 
@@ -415,14 +452,19 @@ struct _tc_string {
 static const struct _tc_string tc_strings[] =
 {
   { "@7", &_rl_term_at7 },
+  { "BD", &_rl_term_BD },
+  { "BE", &_rl_term_BE },
   { "DC", &_rl_term_DC },
   { "E3", &_rl_term_clrscroll },
   { "IC", &_rl_term_IC },
+  { "PE", &_rl_term_PE },
+  { "PS", &_rl_term_PS },
   { "ce", &_rl_term_clreol },
   { "cl", &_rl_term_clrpag },
   { "cr", &_rl_term_cr },
   { "dc", &_rl_term_dc },
   { "ei", &_rl_term_ei },
+  { "ho", &_rl_term_ho },
   { "ic", &_rl_term_ic },
   { "im", &_rl_term_im },
   { "kD", &_rl_term_kD },	/* delete */
@@ -466,6 +508,63 @@ get_term_capabilities (char **bp)
   tcap_initialized = 1;
 }
 
+struct _term_name {
+     const char * const name;
+     size_t len;
+};
+
+/* Non-exhaustive list of ANSI/ECMA terminals. */
+static const struct _term_name ansiterms[] =
+{
+  { "xterm",	5 },
+  { "rxvt",	4 },
+  { "eterm",	5 },
+  { "screen",	6 },
+  { "tmux",	4 },
+  { "vt100",	5 },
+  { "vt102",	5 },
+  { "vt220",	5 },
+  { "vt320",	5 },
+  { "ansi",	4 },
+  { "scoansi",	7 },
+  { "cygwin",	6 },
+  { "linux", 	5 },
+  { "konsole",	7 },
+  { "bvterm",	6 },
+  {  0, 0 }
+};
+
+static inline int
+iscsi (const char *s)
+{
+  return ((s[0] == ESC && s[1] == '[') ? 2
+				       : ((unsigned char)s[0] == 0x9b) ? 1 : 0);
+}
+
+static int
+_rl_check_ansi_terminal (const char *terminal_name)
+{
+  int i;
+  size_t len;
+
+  for (i = 0; ansiterms[i].name; i++)
+    if (STREQN (terminal_name, ansiterms[i].name, ansiterms[i].len))
+      return 1;
+
+  if (_rl_term_clreol == 0 || _rl_term_forward_char == 0 ||
+      _rl_term_ho == 0 || _rl_term_up == 0)
+    return 0;
+
+  /* check some common capabilities */
+  if (((len = iscsi (_rl_term_clreol)) && _rl_term_clreol[len] == 'K') &&	/* ce */
+      ((len = iscsi (_rl_term_forward_char)) && _rl_term_forward_char[len] == 'C') &&	/* nd */
+      ((len = iscsi (_rl_term_ho)) && _rl_term_ho[len] == 'H') &&	/* ho */
+      ((len = iscsi (_rl_term_up)) && _rl_term_up[len] == 'A'))		/* up */
+    return 1;
+
+  return 0;
+}
+
 int
 _rl_init_terminal_io (const char *terminal_name)
 {
@@ -480,7 +579,10 @@ _rl_init_terminal_io (const char *terminal_name)
   if (term == 0)
     term = "dumb";
 
-  dumbterm = STREQ (term, "dumb");
+  _rl_term_isansi = RL_ANSI_TERM_DEFAULT;
+  dumbterm = STREQ (term, "dumb") || STREQ (term, "vt52") || STREQ (term, "adm3a");
+  if (dumbterm)
+    _rl_term_isansi = 0;
 
   reset_region_colors = 1;
 
@@ -492,11 +594,13 @@ _rl_init_terminal_io (const char *terminal_name)
   _rl_terminal_can_insert = term_has_meta = _rl_term_autowrap = 0;
   _rl_term_cr = "\r";
   _rl_term_backspace = (char *)NULL;
+  _rl_term_ho = (char *)NULL;
   _rl_term_goto = _rl_term_pc = _rl_term_ip = (char *)NULL;
   _rl_term_ks = _rl_term_ke =_rl_term_vs = _rl_term_ve = (char *)NULL;
   _rl_term_kh = _rl_term_kH = _rl_term_at7 = _rl_term_kI = (char *)NULL;
   _rl_term_kN = _rl_term_kP = (char *)NULL;
   _rl_term_so = _rl_term_se = (char *)NULL;
+  _rl_term_BD = _rl_term_BE = _rl_term_PE = _rl_term_PS = (char *)NULL;
 #if defined(HACK_TERMCAP_MOTION)
   _rl_term_forward_char = (char *)NULL;
 #endif
@@ -553,6 +657,7 @@ _rl_init_terminal_io (const char *terminal_name)
       /* Everything below here is used by the redisplay code (tputs). */
       _rl_screenchars = _rl_screenwidth * _rl_screenheight;
       _rl_term_cr = "\r";
+      _rl_term_ho = (char *)NULL;
       _rl_term_im = _rl_term_ei = _rl_term_ic = _rl_term_IC = (char *)NULL;
       _rl_term_up = _rl_term_dc = _rl_term_DC = _rl_visible_bell = (char *)NULL;
       _rl_term_ku = _rl_term_kd = _rl_term_kl = _rl_term_kr = (char *)NULL;
@@ -565,8 +670,11 @@ _rl_init_terminal_io (const char *terminal_name)
       _rl_term_so = _rl_term_se = (char *)NULL;
       _rl_terminal_can_insert = term_has_meta = 0;
 
+      _rl_term_isansi = 0;	/* not an ANSI terminal */
+
       /* Assume generic unknown terminal can't handle the enable/disable
 	 escape sequences */
+      _rl_term_BD = _rl_term_BE = _rl_term_PE = _rl_term_PS = (char *)NULL;
       _rl_enable_bracketed_paste = 0;
 
       /* No terminal so/se capabilities. */
@@ -625,9 +733,13 @@ _rl_init_terminal_io (const char *terminal_name)
   bind_termcap_arrow_keys (vi_insertion_keymap);
 #endif /* VI_MODE */
 
+  if (dumbterm == 0 && _rl_term_isansi == 0)
+    _rl_term_isansi = _rl_check_ansi_terminal (terminal_name);
+
   /* There's no way to determine whether or not a given terminal supports
-     bracketed paste mode, so we assume a terminal named "dumb" does not. */
-  if (dumbterm)
+     bracketed paste mode, so we assume a non-ANSI terminal (as best as we
+     can determine) does not. */
+  if (_rl_term_isansi == 0)
     _rl_enable_bracketed_paste = _rl_enable_active_region = 0;
 
   if (reset_region_colors)

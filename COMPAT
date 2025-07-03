@@ -2,13 +2,13 @@ Compatibility with previous versions
 ====================================
 
 This document details the incompatibilities between this version of bash,
-bash-5.2, and the previous widely-available versions, bash-3.2 (which is
+bash-5.3, and the previous widely-available versions, bash-3.2 (which is
 still the `standard' version for Mac OS X), 4.2/4.3 (which are still
-standard on a few Linux distributions), and bash-4.4/bash-5.0/bash-5.1,
-the current widely-available versions.  These were discovered by users of
-bash-2.x through 5.x, so this list is not comprehensive.  Some of these
-incompatibilities occur between the current version and versions 2.0 and
-above. 
+standard on a few Linux distributions), and bash-4.4 and
+bash-5.0/bash-5.1/bash-5.2, the current widely-available versions.
+These were discovered by users of bash-2.x through 5.x, so this list is not
+comprehensive.  Some of these incompatibilities occur between the current
+version and versions 2.0 and above. 
 
 1.  Bash uses a new quoting syntax, $"...", to do locale-specific
     string translation.  Users who have relied on the (undocumented)
@@ -315,118 +315,126 @@ above.
     string if there is not enough input.  Previous versions discarded the
     characters read.
 
-41. Beginning with bash-4.0, when one of the commands in a pipeline is killed
-    by a SIGINT while executing a command list, the shell acts as if it
-    received the interrupt.  This can be disabled by setting the compat31 or
-    compat32 shell options.
-
-42. Bash-4.0 changes the handling of the set -e option so that the shell exits
+41. Bash-4.0 changes the handling of the set -e option so that the shell exits
     if a pipeline fails (and not just if the last command in the failing
     pipeline is a simple command).  This is not as Posix specifies.  There is
     work underway to update this portion of the standard; the bash-4.0
     behavior attempts to capture the consensus at the time of release.
 
-43. Bash-4.0 fixes a Posix mode bug that caused the . (source) builtin to
+42. Bash-4.0 fixes a Posix mode bug that caused the . (source) builtin to
     search the current directory for its filename argument, even if "." is
     not in $PATH.  Posix says that the shell shouldn't look in $PWD in this
     case.
 
-44. Bash-4.1 uses the current locale when comparing strings using the < and
+43. Bash-4.1 uses the current locale when comparing strings using the < and
     > operators to the `[[' command.  This can be reverted to the previous
     behavior (ASCII collating and strcmp(3)) by setting one of the
     `compatNN' shopt options, where NN is less than 41.
 
-45. Bash-4.1 conforms to the current Posix specification for `set -u':
+44. Bash-4.1 conforms to the current Posix specification for `set -u':
     expansions of $@ and $* when there are no positional parameters do not
     cause the shell to exit.
 
-46. Bash-4.1 implements the current Posix specification for `set -e' and
+45. Bash-4.1 implements the current Posix specification for `set -e' and
     exits when any command fails, not just a simple command or pipeline.
 
-47. Command substitutions now remove the caller's trap strings when trap is
+46. Command substitutions now remove the caller's trap strings when trap is
     run to set a new trap in the subshell.  Previous to bash-4.2, the old
     trap strings persisted even though the actual signal handlers were reset.
 
-48. When in Posix mode, a single quote is not treated specially in a
+47. When in Posix mode, a single quote is not treated specially in a
     double-quoted ${...} expansion, unless the expansion operator is
     # or % or the new `//', `^', or `,' expansions.  In particular, it
     does not define a new quoting context.  This is from Posix interpretation
     221.
 
-49. Posix mode shells no longer exit if a variable assignment error occurs
+48. Posix mode shells no longer exit if a variable assignment error occurs
     with an assignment preceding a command that is not a special builtin.
 
-50. Bash-4.2 attempts to preserve what the user typed when performing word
+49. Bash-4.2 attempts to preserve what the user typed when performing word
     completion, instead of, for instance, expanding shell variable
     references to their value.
 
-51. When in Posix mode, bash-4.2 exits if the filename supplied as an argument
+50. When in Posix mode, bash-4.2 exits if the filename supplied as an argument
     to `.' is not found and the shell is not interactive.
 
-52. When compiled for strict Posix compatibility, bash-4.3 does not enable
+51. When compiled for strict Posix compatibility, bash-4.3 does not enable
     history expansion by default in interactive shells, since it results in
     a non-conforming environment.
 
-53. Bash-4.3 runs the replacement string in the pattern substitution word
+52. Bash-4.3 runs the replacement string in the pattern substitution word
     expansion through quote removal.  The code already treats quote
     characters in the replacement string as special; if it treats them as
     special, then quote removal should remove them.
 
-54. Bash-4.4 no longer considers a reference to ${a[@]} or ${a[*]}, where `a'
+53. Bash-4.4 no longer considers a reference to ${a[@]} or ${a[*]}, where `a'
     is an array without any elements set, to be a reference to an unset
     variable.  This means that such a reference will not cause the shell to
     exit when the `-u' option is enabled.
 
-55. Bash-4.4 allows double quotes to quote the history expansion character (!)
+54. Bash-4.4 allows double quotes to quote the history expansion character (!)
     when in Posix mode, since Posix specifies the effects of double quotes.
 
-56. Bash-4.4 does not inherit $PS4 from the environment if running as root.
+55. Bash-4.4 does not inherit $PS4 from the environment if running as root.
 
-57. Bash-4.4 doesn't allow a `break' or `continue' in a function to affect
+56. Bash-4.4 doesn't allow a `break' or `continue' in a function to affect
     loop execution in the calling context.
 
-58. Bash-4.4 no longer expands tildes in $PATH elements when in Posix mode.
+57. Bash-4.4 no longer expands tildes in $PATH elements when in Posix mode.
 
-59. Bash-4.4 does not attempt to perform a compound array assignment if an
+58. Bash-4.4 does not attempt to perform a compound array assignment if an
     argument to `declare' or a similar builtin expands to a word that looks
     like a compound array assignment (e.g. declare w=$x where x='(foo)').
 
-60. Bash-5.0 only sets up BASH_ARGV and BASH_ARGC at startup if extended
+59. Bash-5.0 only sets up BASH_ARGV and BASH_ARGC at startup if extended
     debugging mode is active. The old behavior of unconditionally setting
     BASH_ARGC and BASH_ARGV is available at compatibility levels less than
     or equal to 44.
 
-61. Bash-5.0 doesn't allow a `break' or `continue' in a subshell to attempt
+60. Bash-5.0 doesn't allow a `break' or `continue' in a subshell to attempt
     to break or continue loop execution inherited from the calling context.
 
-62. Bash-5.0 doesn't allow variable assignments preceding builtins like
+61. Bash-5.0 doesn't allow variable assignments preceding builtins like
     export and readonly to modify variables with the same name in preceding
     contexts (including the global context) unless the shell is in posix
     mode, since export and readonly are special builtins.
 
-63. Bash-5.1 changes the way posix-mode shells handle assignment statements
+62. Bash-5.1 changes the way posix-mode shells handle assignment statements
     preceding shell function calls. Previous versions of POSIX specified that
     such assignments would persist after the function returned; subsequent
     versions of the standard removed that requirement (interpretation #654).
     Bash-5.1 posix mode assignment statements preceding shell function calls
     do not persist after the function returns.
 
-64. Bash-5.1 reverts to the bash-4.4 treatment of pathname expansion of words
+63. Bash-5.1 reverts to the bash-4.4 treatment of pathname expansion of words
     containing backslashes but no other special globbing characters. This comes
     after a protracted discussion and a POSIX interpretation (#1234).
 
-65. In bash-5.1, disabling posix mode attempts to restore the state of several
+64. In bash-5.1, disabling posix mode attempts to restore the state of several
     options that posix mode modifies to the state they had before enabling
     posix mode. Previous versions restored these options to default values.
 
-66. Bash-5.2 attempts to prevent double-expansion of array subscripts under
+65. Bash-5.2 attempts to prevent double-expansion of array subscripts under
     certain circumstances, especially arithmetic evaluation, by acting as if
     the `assoc_expand_once' shell option were set.
 
-67. The `unset' builtin in bash-5.2 treats array subscripts `@' and `*'
+66. The `unset' builtin in bash-5.2 treats array subscripts `@' and `*'
     differently than previous versions, and differently depending on whether
     the array is indexed or associative.
 
+67. The `test' builtin in bash-5.3 treats parenthesized subexpressions when
+    given more than four arguments differently. It scans forward for a
+    closing paren and counts the number of arguments between the parens. If
+    there are four or fewer, it uses the posix test algorithm on the
+    subexpression.
+
+68. The bind builtin's -p and -P options treat any arguments remaining after
+    option processing as bindable command names for which to print any key
+    bindings.
+
+69. Interactive shells will notify the user of completed jobs while sourcing
+    a script. Newer versions defer notification until script execution
+    completes.
 
 Shell Compatibility Level
 =========================
@@ -485,10 +493,6 @@ compat31
 compat32
 	- the < and > operators to the [[ command do not consider the current
 	  locale when comparing strings; they use ASCII ordering
-	- interrupting a command list such as "a ; b ; c" causes the execution
-	  of the next command in the list (in bash-4.0 and later versions,
-	  the shell acts as if it received the interrupt, so interrupting
-	  one command in a list aborts the execution of the entire list)
 
 compat40
 	- the < and > operators to the [[ command do not consider the current
@@ -516,10 +520,6 @@ compat42
 	  single quotes are not special within double-quoted word expansions
 
 compat43
-	- the shell does not print a warning message if an attempt is made to
-	  use a quoted compound assignment as an argument to declare
-	  (declare -a foo='(1 2)'). Later versions warn that this usage is
-	  deprecated.
 	- word expansion errors are considered non-fatal errors that cause the
 	  current command to fail, even in posix mode (the default behavior is
 	  to make them fatal errors that cause the shell to exit)
@@ -588,6 +588,14 @@ compat51 (set using BASH_COMPAT)
 	  expansion time if extglob hasn't been enabled by the time the
 	  command is executed.
 
+compat52 (set using BASH_COMPAT)
+	- the test builtin uses its historical algorithm for parsing
+	  expressions composed of five or more primaries.
+	- the -p and -P options to the bind builtin treat remaining arguments
+	  as bindable command names for which to print any key bindings
+	- interactive shells will notify the user of completed jobs while
+	  sourcing a script. Newer versions defer notification until script
+	  execution completes.
 -------------------------------------------------------------------------------
 
 Copying and distribution of this file, with or without modification,

@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,6 +44,8 @@ re-executed after the substitution OLD=NEW is performed.
 A useful alias to use with this is r='fc -s', so that typing `r cc'
 runs the last command beginning with `cc' and typing `r' re-executes
 the last command.
+
+The history builtin also operates on the history list.
 
 Exit Status:
 Returns success or status of executed command; non-zero if an error occurs.
@@ -94,9 +96,11 @@ extern int errno;
 #define HN_LISTING	0x01
 #define HN_FIRST	0x02
 
-extern int unlink PARAMS((const char *));
+#ifndef HAVE_UNISTD_H
+extern int unlink (const char *);
+#endif
 
-extern FILE *sh_mktmpfp PARAMS((char *, int, char **));
+extern FILE *sh_mktmpfp (char *, int, char **);
 
 extern int suppress_debug_trap_verbose;
 
@@ -154,20 +158,26 @@ typedef struct repl {
 		} \
 	} while (0)
 
-static char *fc_dosubs PARAMS((char *, REPL *));
-static char *fc_gethist PARAMS((char *, HIST_ENTRY **, int));
-static int fc_gethnum PARAMS((char *, HIST_ENTRY **, int));
-static int fc_number PARAMS((WORD_LIST *));
-static void fc_replhist PARAMS((char *));
+static char *fc_dosubs (char *, REPL *);
+static char *fc_gethist (char *, HIST_ENTRY **, int);
+static int fc_gethnum (char *, HIST_ENTRY **, int);
+static int fc_number (WORD_LIST *);
+static void fc_replhist (char *);
 #ifdef INCLUDE_UNUSED
-static char *fc_readline PARAMS((FILE *));
-static void fc_addhist PARAMS((char *));
+static char *fc_readline (FILE *);
+static void fc_addhist (char *);
 #endif
 
 static void
-set_verbose_flag ()
+uw_set_verbose_flag (void *ignore)
 {
   echo_input_at_read = verbose_flag;
+}
+
+static void
+uw_unlink (void *fn)
+{
+  unlink ((const char *)fn);
 }
 
 /* String to execute on a file that we want to edit. */
@@ -179,8 +189,7 @@ set_verbose_flag ()
 #endif
 
 int
-fc_builtin (list)
-     WORD_LIST *list;
+fc_builtin (WORD_LIST *list)
 {
   register int i;
   register char *sep;
@@ -273,6 +282,15 @@ fc_builtin (list)
       if (command == NULL)
 	{
 	  builtin_error (_("no command found"));
+	  if (rlist)
+	    FREE_RLIST ();
+
+	  return (EXECUTION_FAILURE);
+	}
+
+      if (posixly_correct && list && list->next)
+	{
+	  builtin_error (_("too many arguments"));
 	  if (rlist)
 	    FREE_RLIST ();
 
@@ -441,7 +459,7 @@ fc_builtin (list)
       stream = sh_mktmpfp ("bash-fc", MT_USERANDOM|MT_USETMPDIR, &fn);
       if (stream == 0)
 	{
-	  builtin_error (_("%s: cannot open temp file: %s"), fn ? fn : "", strerror (errno));
+	  builtin_error ("%s: %s: %s", fn ? fn : "", _("cannot open temp file"), strerror (errno));
 	  FREE (fn);
 	  return (EXECUTION_FAILURE);
 	}
@@ -515,8 +533,8 @@ fc_builtin (list)
      will be echoed as they are read by the parser. */
   begin_unwind_frame ("fc builtin");
   add_unwind_protect (xfree, fn);
-  add_unwind_protect (unlink, fn);
-  add_unwind_protect (set_verbose_flag, (char *)NULL);
+  add_unwind_protect (uw_unlink, fn);
+  add_unwind_protect (uw_set_verbose_flag, (char *)NULL);
   unwind_protect_int (suppress_debug_trap_verbose);
   echo_input_at_read = 1;
   suppress_debug_trap_verbose = 1;
@@ -529,8 +547,7 @@ fc_builtin (list)
 
 /* Return 1 if LIST->word->word is a legal number for fc's use. */
 static int
-fc_number (list)
-     WORD_LIST *list;
+fc_number (WORD_LIST *list)
 {
   char *s;
 
@@ -539,7 +556,7 @@ fc_number (list)
   s = list->word->word;
   if (*s == '-')
     s++;
-  return (legal_number (s, (intmax_t *)NULL));
+  return (valid_number (s, (intmax_t *)NULL));
 }
 
 /* Return an absolute index into HLIST which corresponds to COMMAND.  If
@@ -549,14 +566,12 @@ fc_number (list)
    are executing them. If MODE includes HN_FIRST we are looking for the
    first history number specification. */
 static int
-fc_gethnum (command, hlist, mode)
-     char *command;
-     HIST_ENTRY **hlist;
-     int mode;
+fc_gethnum (char *command, HIST_ENTRY **hlist, int mode)
 {
-  int sign, n, clen, rh;
-  register int i, j, last_hist, real_last, listing;
-  register char *s;
+  int sign, n, rh;
+  size_t clen;
+  int i, j, last_hist, real_last, listing;
+  char *s;
 
   listing = mode & HN_LISTING;
   sign = 1;
@@ -654,10 +669,7 @@ fc_gethnum (command, hlist, mode)
    COMMAND in HLIST, and return a malloc()'ed copy of it.
    MODE is 1 if we are listing commands, 0 if we are executing them. */
 static char *
-fc_gethist (command, hlist, mode)
-     char *command;
-     HIST_ENTRY **hlist;
-     int mode;
+fc_gethist (char *command, HIST_ENTRY **hlist, int mode)
 {
   int i;
 
@@ -677,10 +689,12 @@ fc_gethist (command, hlist, mode)
    one at a time.  This can read unlimited length lines.  The
    caller should free the storage. */
 static char *
-fc_readline (stream)
-     FILE *stream;
+fc_readline (FILE *stream)
 {
   register int c;
+#ifdef __MSYS__
+  register int d;
+#endif
   int line_len = 0, lindex = 0;
   char *line = (char *)NULL;
 
@@ -688,6 +702,11 @@ fc_readline (stream)
     {
       if ((lindex + 2) >= line_len)
 	line = (char *)xrealloc (line, (line_len += 128));
+
+#ifdef __MSYS__
+      if (d == '\r')
+	lindex--;
+#endif
 
       if (c == '\n')
 	{
@@ -697,6 +716,10 @@ fc_readline (stream)
 	}
       else
 	line[lindex++] = c;
+
+#ifdef __MSYS__
+      d = c;
+#endif
     }
 
   if (!lindex)
@@ -721,9 +744,7 @@ fc_readline (stream)
    Return a pointer to a malloc'ed string which contains the substituted
    command. */
 static char *
-fc_dosubs (command, subs)
-     char *command;
-     REPL *subs;
+fc_dosubs (char *command, REPL *subs)
 {
   register char *new, *t;
   register REPL *r;
@@ -742,10 +763,9 @@ fc_dosubs (command, subs)
    become the history entry, and that `fc' should never appear in the
    history list.  This way you can do `r' to your heart's content. */
 static void
-fc_replhist (command)
-     char *command;
+fc_replhist (char *command)
 {
-  int n;
+  size_t n;
 
   if (command == 0 || *command == '\0')
     return;
@@ -764,8 +784,7 @@ fc_replhist (command)
 #ifdef INCLUDE_UNUSED
 /* Add LINE to the history, after removing a single trailing newline. */
 static void
-fc_addhist (line)
-     char *line;
+fc_addhist (char *line)
 {
   register int n;
 

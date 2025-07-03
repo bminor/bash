@@ -1,0 +1,51 @@
+/* buildconf.h -- config definitions from build environment for tools needed
+		  at build time */
+
+/* Copyright (C) 2024 Free Software Foundation, Inc.
+
+   This file is part of GNU Bash, the Bourne Again SHell.
+
+   Bash is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   Bash is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Bash.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#if !defined (BUILDCONF_H_)
+#define BUILDCONF_H_
+
+/* assume C90/POSIX-1992 compilation environment if cross-compiling */
+
+/* pacify glibc */
+#ifndef _POSIX_C_SOURCE
+#  define _POSIX_C_SOURCE 2
+#  define _XOPEN_SOURCE 500
+#endif
+
+#define HAVE_LOCALE_H 1
+
+#define HAVE_UNISTD_H 1
+#define HAVE_STRING_H 1
+#define HAVE_STDLIB_H 1
+
+#define HAVE_RENAME
+
+/* defining this implies a C23 environment */
+#undef HAVE_C_BOOL
+
+/* Don't assume this; it's from C99; let syntax.h define a replacement */
+/* #undef HAVE_ISBLANK */
+
+#undef PROCESS_SUBSTITUTION
+
+#undef EXTENDED_GLOB
+
+#endif /* BUILDCONF_H */

@@ -1,6 +1,6 @@
 /* shmbutil.h -- utility functions for multibyte characters. */
 
-/* Copyright (C) 2002-2019 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,13 +29,13 @@
 #if defined (HANDLE_MULTIBYTE)
 #include "shmbchar.h"
 
-extern size_t xwcsrtombs PARAMS((char *, const wchar_t **, size_t, mbstate_t *));
-extern size_t xmbsrtowcs PARAMS((wchar_t *, const char **, size_t, mbstate_t *));
-extern size_t xdupmbstowcs PARAMS((wchar_t **, char ***, const char *));
+extern size_t xwcsrtombs (char *, const wchar_t **, size_t, mbstate_t *);
+extern size_t xmbsrtowcs (wchar_t *, const char **, size_t, mbstate_t *);
+extern size_t xdupmbstowcs (wchar_t **, char ***, const char *);
 
-extern size_t mbstrlen PARAMS((const char *));
+extern size_t mbstrlen (const char *);
 
-extern char *xstrchr PARAMS((const char *, int));
+extern char *xstrchr (const char *, int);
 
 extern int locale_mb_cur_max;	/* XXX */
 extern int locale_utf8locale;	/* XXX */
@@ -54,6 +54,9 @@ extern int locale_utf8locale;	/* XXX */
 #define UTF8_SINGLEBYTE(c)	(((c) & 0x80) == 0)
 #define UTF8_MBFIRSTCHAR(c)	(((c) & 0xc0) == 0xc0)
 #define UTF8_MBCHAR(c)		(((c) & 0xc0) == 0x80)
+
+/* Is an eight-bit quantity a valid character in the current locale? */
+#define VALID_SINGLEBYTE_CHAR(c)  (locale_utf8locale == 0 || ((c) & 0x80) == 0)
 
 #else /* !HANDLE_MULTIBYTE */
 
@@ -82,6 +85,8 @@ extern int locale_utf8locale;	/* XXX */
 
 #define UTF8_SINGLEBYTE(c)	(1)
 #define UTF8_MBFIRSTCHAR(c)	(0)
+
+#define VALID_SINGLEBYTE_CHAR(c)  (1)
 
 #endif /* !HANDLE_MULTIBYTE */
 
@@ -555,5 +560,26 @@ extern int locale_utf8locale;	/* XXX */
 \
 	    goto add_string
 
+#endif /* HANDLE_MULTIBYTE */
+
+#if defined (HANDLE_MULTIBYTE)
+static inline size_t
+mbcharlen(char *s, size_t maxlen)
+{
+  size_t l;
+  DECLARE_MBSTATE;
+  
+  if (maxlen == 1 || is_basic (*s))
+    return 1;
+  else if (locale_utf8locale && UTF8_SINGLEBYTE (*s))
+    return (*s != 0);
+  else        
+    l = mbrlen (s, maxlen, &state);
+  if (MB_INVALIDCH (l))  
+    return (1);
+  return l;
+}
+#else  
+#define mbcharlen(s, n)      (1)
 #endif /* HANDLE_MULTIBYTE */
 #endif /* _SH_MBUTIL_H_ */

@@ -1,7 +1,7 @@
 This file is jobs.def, from which is created jobs.c.
 It implements the builtins "jobs" and "disown" in Bash.
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -61,6 +61,7 @@ $END
 #include "../shell.h"
 #include "../jobs.h"
 #include "../execute_cmd.h"
+#include "../parser.h"
 #include "bashgetopt.h"
 #include "common.h"
 
@@ -68,7 +69,7 @@ $END
 #define JSTATE_RUNNING	0x1
 #define JSTATE_STOPPED	0x2
 
-static int execute_list_with_replacements PARAMS((WORD_LIST *));
+static int execute_list_with_replacements (WORD_LIST *);
 
 /* The `jobs' command.  Prints outs a list of active jobs.  If the
    argument `-l' is given, then the process id's are printed also.
@@ -79,8 +80,7 @@ static int execute_list_with_replacements PARAMS((WORD_LIST *));
    group leader and execute the command.  The -r and -s options mean
    to print info about running and stopped jobs only, respectively. */
 int
-jobs_builtin (list)
-     WORD_LIST *list;
+jobs_builtin (WORD_LIST *list)
 {
   int form, execute, state, opt, any_failed, job;
   sigset_t set, oset;
@@ -136,6 +136,9 @@ jobs_builtin (list)
 	{
 	case JSTATE_ANY:
 	  list_all_jobs (form);
+	  /* POSIX says to remove terminated jobs from the list after the jobs
+	     builtin reports their status. */
+	  notify_and_cleanup (-1);	/* the notify part will be a no-op */
 	  break;
 	case JSTATE_RUNNING:
 	  list_running_jobs (form);
@@ -152,7 +155,7 @@ jobs_builtin (list)
       BLOCK_CHILD (set, oset);
       job = get_job_spec (list);
 
-      if ((job == NO_JOB) || jobs == 0 || get_job_by_jid (job) == 0)
+      if ((job == NO_JOB) || jobs == 0 || INVALID_JOB (job) || get_job_by_jid (job) == 0)
 	{
 	  sh_badjob (list->word->word);
 	  any_failed++;
@@ -163,12 +166,16 @@ jobs_builtin (list)
       UNBLOCK_CHILD (oset);
       list = list->next;
     }
+  /* POSIX says to remove terminated jobs from the list after the jobs
+     builtin reports their status. */
+  if (posixly_correct == 0 || interactive_shell == 0 || interactive == 0)
+    notify_and_cleanup (-1);	/* XXX - why here? list_one_job already deletes dead jobs */
+
   return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }
 
 static int
-execute_list_with_replacements (list)
-     WORD_LIST *list;
+execute_list_with_replacements (WORD_LIST *list)
 {
   register WORD_LIST *l;
   int job, result;
@@ -195,13 +202,13 @@ execute_list_with_replacements (list)
   /* Next make a new simple command and execute it. */
   begin_unwind_frame ("jobs_builtin");
 
-  command = make_bare_simple_command ();
+  command = make_bare_simple_command (line_number);
   command->value.Simple->words = copy_word_list (list);
   command->value.Simple->redirects = (REDIRECT *)NULL;
   command->flags |= CMD_INHIBIT_EXPANSION;
   command->value.Simple->flags |= CMD_INHIBIT_EXPANSION;
 
-  add_unwind_protect (dispose_command, command);
+  add_unwind_protect (uw_dispose_command, command);
   result = execute_command (command);
   dispose_command (command);
 
@@ -231,8 +238,7 @@ $END
 
 #if defined (JOB_CONTROL)
 int
-disown_builtin (list)
-     WORD_LIST *list;
+disown_builtin (WORD_LIST *list)
 {
   int opt, job, retval, nohup_only, running_jobs, all_jobs;
   sigset_t set, oset;
@@ -275,13 +281,16 @@ disown_builtin (list)
   do
     {
       BLOCK_CHILD (set, oset);
-      job = (list && legal_number (list->word->word, &pid_value) && pid_value == (pid_t) pid_value)
+      job = (list && valid_number (list->word->word, &pid_value) && pid_value == (pid_t) pid_value)
 		? get_job_by_pid ((pid_t) pid_value, 0, 0)
 		: get_job_spec (list);
 
       if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))
 	{
-	  sh_badjob (list ? list->word->word : _("current"));
+	  if (job == BAD_JOBSPEC)
+	    sh_invalidjob (list->word->word);
+	  else
+	    sh_badjob (list ? list->word->word : _("current"));
 	  retval = EXECUTION_FAILURE;
 	}
       else if (nohup_only)

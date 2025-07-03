@@ -1,6 +1,6 @@
 /* clktck.c - get the value of CLK_TCK. */
 
-/* Copyright (C) 1997 Free Software Foundation, Inc.
+/* Copyright (C) 1997,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,7 +44,7 @@
 #endif /* !HAVE_SYSCONF && !_SC_CLK_TCK */
 
 long
-get_clk_tck ()
+get_clk_tck (void)
 {
   static long retval = 0;
 

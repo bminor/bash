@@ -126,3 +126,21 @@ echo
 for (( i = 4; ;i--)) ; do echo $i; if (( $i == 0 )); then break; fi; done
 
 for (( i = 4;;i--)) ; do echo $i; if (( $i == 0 )); then break; fi; done
+i=4 ; for (( ;;i--)) ; do echo -n $i; if (( i == 0 )); then break; fi; done; echo
+
+# arithmetic for commands with expression errors
+
+for (( i=1; i < 4; 7++ )); do echo ok$i ; done
+for (( i=2; i < 4/0; 7++ )); do echo whoops1 ; done
+for (( i=2/0; i < 4; 7++ )); do echo whoops2 ; done
+
+for (( 7=4 ; 7 > 7; )); do echo whoops3; done
+
+for ((j=;;)); do :; done
+echo X
+break
+echo Y
+
+# arithmetic for commands need to skip over command substitutions
+for (( $(case x in x) esac);; )); do break; done
+for (( ${ case x in x) esac; };; )); do break; done

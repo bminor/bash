@@ -1,6 +1,6 @@
 /* pathphys.c -- return pathname with all symlinks expanded. */
 
-/* Copyright (C) 2000-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2020,2022-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,13 +46,10 @@
 extern int errno;
 #endif /* !errno */
 
-extern char *get_working_directory PARAMS((char *));
+extern char *get_working_directory (char *);
 
-static int
-_path_readlink (path, buf, bufsiz)
-     char *path;
-     char *buf;
-     int bufsiz;
+static inline ssize_t
+_path_readlink (char *path, char *buf, size_t bufsiz)
 {
 #ifdef HAVE_READLINK
   return readlink (path, buf, bufsiz);
@@ -72,13 +69,17 @@ _path_readlink (path, buf, bufsiz)
  */
 
 char *
-sh_physpath (path, flags)
-     char *path;
-     int flags;
+sh_physpath (char *path, int flags)
 {
   char tbuf[PATH_MAX+1], linkbuf[PATH_MAX+1];
   char *result, *p, *q, *qsave, *qbase, *workpath;
-  int double_slash_path, linklen, nlink;
+  int double_slash_path, nlink;
+  ssize_t r;
+  size_t linklen;
+
+#ifdef __CYGWIN__
+  return realpath (path, NULL);
+#endif
 
   linklen = strlen (path);
 
@@ -103,13 +104,8 @@ sh_physpath (path, flags)
 
   /* This always gets an absolute pathname. */
 
-  /* POSIX.2 says to leave a leading `//' alone.  On cygwin, we skip over any
-     leading `x:' (dos drive name). */
-#if defined (__CYGWIN__)
-  qbase = (ISALPHA((unsigned char)workpath[0]) && workpath[1] == ':') ? workpath + 3 : workpath + 1;
-#else
+  /* POSIX.2 says to leave a leading `//' alone. */
   qbase = workpath + 1;
-#endif
   double_slash_path = DOUBLE_SLASH (workpath);
   qbase += double_slash_path;
 
@@ -164,13 +160,14 @@ sh_physpath (path, flags)
 
 	  *q = '\0';
 
-	  linklen = _path_readlink (result, linkbuf, PATH_MAX);
-	  if (linklen < 0)	/* if errno == EINVAL, it's not a symlink */
+	  r = _path_readlink (result, linkbuf, PATH_MAX);
+	  if (r < 0)	/* if errno == EINVAL, it's not a symlink */
 	    {
 	      if (errno != EINVAL)
 		goto error;
 	      continue;
 	    }
+	  linklen = r;
 
 	  /* It's a symlink, and the value is in LINKBUF. */
 	  nlink++;
@@ -214,11 +211,7 @@ error:
 	    {
 	      q = result;
 	      /* Duplicating some code here... */
-#if defined (__CYGWIN__)
-	      qbase = (ISALPHA((unsigned char)workpath[0]) && workpath[1] == ':') ? workpath + 3 : workpath + 1;
-#else
 	      qbase = workpath + 1;
-#endif
 	      double_slash_path = DOUBLE_SLASH (workpath);
 	      qbase += double_slash_path;
     
@@ -252,9 +245,7 @@ error:
 }
 
 char *
-sh_realpath (pathname, resolved)
-     const char *pathname;
-     char *resolved;
+sh_realpath (const char *pathname, char *resolved)
 {
   char *tdir, *wd;
 

@@ -1,6 +1,6 @@
 dnl 'extern inline' a la ISO C99.
 
-dnl Copyright 2012-2019 Free Software Foundation, Inc.
+dnl Copyright 2012-2022 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -17,7 +17,8 @@ AC_DEFUN([gl_EXTERN_INLINE],
    mishandles inline functions that call each other.  E.g., for 'inline void f
    (void) { } inline void g (void) { f (); }', c99 incorrectly complains
    'reference to static identifier "f" in extern inline function'.
-   This bug was observed with Sun C 5.12 SunOS_i386 2011/11/16.
+   This bug was observed with Oracle Developer Studio 12.6
+   (Sun C 5.15 SunOS_sparc 2017/05/30).
 
    Suppress extern inline (with or without __attribute__ ((__gnu_inline__)))
    on configurations that mistakenly use 'static inline' to implement
@@ -32,7 +33,7 @@ AC_DEFUN([gl_EXTERN_INLINE],
      https://lists.gnu.org/r/bug-gnulib/2012-12/msg00023.html
 
      DragonFly; see
-     http://muscles.dragonflybsd.org/bulk/bleeding-edge-potential/latest-per-pkg/ah-tty-0.3.12.log
+     http://muscles.dragonflybsd.org/bulk/clang-master-potential/20141111_102002/logs/ah-tty-0.3.12.log
 
      FreeBSD; see:
      https://lists.gnu.org/r/bug-gnulib/2014-07/msg00104.html
@@ -83,8 +84,8 @@ AC_DEFUN([gl_EXTERN_INLINE],
 # define _GL_EXTERN_INLINE extern
 # define _GL_EXTERN_INLINE_IN_USE
 #else
-# define _GL_INLINE static _GL_UNUSED
-# define _GL_EXTERN_INLINE static _GL_UNUSED
+# define _GL_INLINE _GL_UNUSED static
+# define _GL_EXTERN_INLINE _GL_UNUSED static
 #endif
 
 /* In GCC 4.6 (inclusive) to 5.1 (exclusive),

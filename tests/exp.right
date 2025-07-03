@@ -88,6 +88,8 @@ argv[1] = <abc>
 argv[1] = <abc>
 argv[1] = <posix>
 argv[1] = <10>
+argv[1] = <5>
+argv[1] = <5>
 argv[1] = <file.o>
 argv[1] = <posix>
 argv[1] = </src/cmd>
@@ -164,6 +166,20 @@ argv[2] = <^?>
 argv[1] = <^A^?>
 argv[1] = <^A^?^A^?>
 argv[1] = <^A^A^?>
+argv[1] = <\^A>
+argv[1] = <^A>
+argv[1] = <\^A>
+argv[1] = <\^A>
+argv[1] = <^A>
+argv[1] = <^A>
+argv[1] = <^A^A>
+argv[1] = <^A^A>
+argv[1] = <\^A>
+argv[1] = <\^A>
+argv[1] = <\^A^?>
+argv[1] = <\^A^?>
+argv[1] = <^\^A ^\^?>
+argv[1] = <^A ^_>
 0.net
 0.net0
 
@@ -236,7 +252,7 @@ declare -- var="x\001y\177z"$
 argv[1] = <$'x\001y\177z'>
 argv[1] = <x^Ay^?z>
 var=$'x\001y\177z'
-./exp8.sub: line 30: xyz: syntax error: invalid arithmetic operator (error token is "z")
+./exp8.sub: line 30: xyz: arithmetic syntax error: invalid arithmetic operator (error token is "z")
 declare -a array=()
 declare -a array=([0]=$'x\001y\177z')
 argv[1] = <x^Ay^?z>

@@ -3,7 +3,7 @@ dnl Bash specific tests
 dnl
 dnl Some derived from PDKSH 5.1.3 autoconf tests
 dnl
-dnl Copyright (C) 1987-2021 Free Software Foundation, Inc.
+dnl Copyright (C) 1987-2025 Free Software Foundation, Inc.
 dnl
 
 dnl
@@ -69,11 +69,7 @@ AC_DEFUN(BASH_DECL_PRINTF,
 AC_CACHE_VAL(bash_cv_printf_declared,
 [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
-#ifdef __STDC__
 typedef int (*_bashfunc)(const char *, ...);
-#else
-typedef int (*_bashfunc)();
-#endif
 #include <stdlib.h>
 int
 main()
@@ -238,6 +234,9 @@ AC_CACHE_VAL(bash_cv_dup2_broken,
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 int
 main()
 {
@@ -432,6 +431,7 @@ AC_CACHE_VAL(bash_cv_sizeof_rlim_cur,
 #endif
 #include <stdlib.h>
 #include <sys/resource.h>
+int
 main()
 {
 struct rlimit r;
@@ -457,6 +457,7 @@ AC_CACHE_VAL(bash_cv_sizeof_quad_t,
 #include <stdint.h>
 #endif
 
+int
 main()
 {
 #if HAVE_QUAD_T
@@ -558,18 +559,8 @@ AC_CACHE_VAL(bash_cv_getenv_redef,
 #  include <unistd.h>
 #endif
 #include <stdlib.h>
-#ifndef __STDC__
-#  ifndef const
-#    define const
-#  endif
-#endif
 char *
-getenv (name)
-#if defined (__linux__) || defined (__bsdi__) || defined (convex)
-     const char *name;
-#else
-     char const *name;
-#endif /* !__linux__ && !__bsdi__ && !convex */
+getenv (const char *name)
 {
 return "42";
 }
@@ -599,7 +590,6 @@ fi
 # We should check for putenv before calling this
 AC_DEFUN(BASH_FUNC_STD_PUTENV,
 [
-AC_REQUIRE([AC_C_PROTOTYPES])
 AC_CACHE_CHECK([for standard-conformant putenv declaration], bash_cv_std_putenv,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_STDLIB_H
@@ -608,16 +598,7 @@ AC_CACHE_CHECK([for standard-conformant putenv declaration], bash_cv_std_putenv,
 #if HAVE_STDDEF_H
 #include <stddef.h>
 #endif
-#ifndef __STDC__
-#  ifndef const
-#    define const
-#  endif
-#endif
-#ifdef PROTOTYPES
 extern int putenv (char *);
-#else
-extern int putenv ();
-#endif
 ]], [[return (putenv == 0);]] )],
 [bash_cv_std_putenv=yes], [bash_cv_std_putenv=no]
 )])
@@ -629,7 +610,6 @@ fi
 # We should check for unsetenv before calling this
 AC_DEFUN(BASH_FUNC_STD_UNSETENV,
 [
-AC_REQUIRE([AC_C_PROTOTYPES])
 AC_CACHE_CHECK([for standard-conformant unsetenv declaration], bash_cv_std_unsetenv,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_STDLIB_H
@@ -638,16 +618,7 @@ AC_CACHE_CHECK([for standard-conformant unsetenv declaration], bash_cv_std_unset
 #if HAVE_STDDEF_H
 #include <stddef.h>
 #endif
-#ifndef __STDC__
-#  ifndef const
-#    define const
-#  endif
-#endif
-#ifdef PROTOTYPES
 extern int unsetenv (const char *);
-#else
-extern int unsetenv ();
-#endif
 ]], [[return (unsetenv == 0);]] )],
 [bash_cv_std_unsetenv=yes], [bash_cv_std_unsetenv=no]
 )])
@@ -841,9 +812,7 @@ AC_CACHE_VAL(bash_cv_func_strcoll_broken,
 #include <stdlib.h>
 
 int
-main(c, v)
-int     c;
-char    *v[];
+main(int c, char **v)
 {
         int     r1, r2;
         char    *deflocale, *defcoll;
@@ -966,8 +935,8 @@ AC_CACHE_VAL(bash_cv_termcap_lib,
   [AC_CHECK_LIB(termcap, tgetent, bash_cv_termcap_lib=libtermcap,
     [AC_CHECK_LIB(tinfo, tgetent, bash_cv_termcap_lib=libtinfo,
         [AC_CHECK_LIB(curses, tgetent, bash_cv_termcap_lib=libcurses,
-	    [AC_CHECK_LIB(ncurses, tgetent, bash_cv_termcap_lib=libncurses,
-                [AC_CHECK_LIB(ncursesw, tgetent, bash_cv_termcap_lib=libncursesw,
+	    [AC_CHECK_LIB(ncursesw, tgetent, bash_cv_termcap_lib=libncursesw,
+                [AC_CHECK_LIB(ncurses, tgetent, bash_cv_termcap_lib=libncurses,
 	            bash_cv_termcap_lib=gnutermcap)])])])])])])
 if test "X$_bash_needmsg" = "Xyes"; then
 AC_MSG_CHECKING(which library has the termcap functions)
@@ -983,8 +952,14 @@ TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libtinfo; then
 TERMCAP_LIB=-ltinfo
 TERMCAP_DEP=
+elif test $bash_cv_termcap_lib = libncursesw; then
+TERMCAP_LIB=-lncursesw
+TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libncurses; then
 TERMCAP_LIB=-lncurses
+TERMCAP_DEP=
+elif test $bash_cv_termcap_lib = libcurses; then
+TERMCAP_LIB=-lcurses
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libc; then
 TERMCAP_LIB=
@@ -1050,7 +1025,7 @@ dnl like _AC_STRUCT_DIRENT(MEMBER) but public
 AC_DEFUN(BASH_STRUCT_DIRENT,
 [
 AC_REQUIRE([AC_HEADER_DIRENT])
-AC_CHECK_MEMBERS(struct dirent.$1, bash_cv_dirent_has_$1=yes, bash_cv_dirent_has_$1=no,
+AC_CHECK_MEMBERS(struct dirent.$1, [], [],
 [[
 #include <stdio.h>
 #include <sys/types.h>
@@ -1074,35 +1049,9 @@ AC_CHECK_MEMBERS(struct dirent.$1, bash_cv_dirent_has_$1=yes, bash_cv_dirent_has
 ]])
 ])
 
-AC_DEFUN(BASH_STRUCT_DIRENT_D_INO,
-[AC_REQUIRE([AC_HEADER_DIRENT])
-AC_MSG_CHECKING(for struct dirent.d_ino)
-AC_CACHE_VAL(bash_cv_dirent_has_d_ino, [BASH_STRUCT_DIRENT([d_ino])])
-AC_MSG_RESULT($bash_cv_dirent_has_d_ino)
-if test $bash_cv_dirent_has_d_ino = yes; then
-AC_DEFINE(HAVE_STRUCT_DIRENT_D_INO)
-fi
-])
-
-AC_DEFUN(BASH_STRUCT_DIRENT_D_FILENO,
-[AC_REQUIRE([AC_HEADER_DIRENT])
-AC_MSG_CHECKING(for struct dirent.d_fileno)
-AC_CACHE_VAL(bash_cv_dirent_has_d_fileno, [BASH_STRUCT_DIRENT([d_fileno])])
-AC_MSG_RESULT($bash_cv_dirent_has_d_fileno)
-if test $bash_cv_dirent_has_d_fileno = yes; then
-AC_DEFINE(HAVE_STRUCT_DIRENT_D_FILENO)
-fi
-])
-
-AC_DEFUN(BASH_STRUCT_DIRENT_D_NAMLEN,
-[AC_REQUIRE([AC_HEADER_DIRENT])
-AC_MSG_CHECKING(for struct dirent.d_namlen)
-AC_CACHE_VAL(bash_cv_dirent_has_d_namlen, [BASH_STRUCT_DIRENT([d_namlen])])
-AC_MSG_RESULT($bash_cv_dirent_has_d_namlen)
-if test $bash_cv_dirent_has_d_namlen = yes; then
-AC_DEFINE(HAVE_STRUCT_DIRENT_D_NAMLEN)
-fi
-])
+AC_DEFUN([BASH_STRUCT_DIRENT_D_INO], [BASH_STRUCT_DIRENT([d_ino])])
+AC_DEFUN([BASH_STRUCT_DIRENT_D_FILENO], [BASH_STRUCT_DIRENT([d_fileno])])
+AC_DEFUN([BASH_STRUCT_DIRENT_D_NAMLEN], [BASH_STRUCT_DIRENT([d_namlen])])
 
 AC_DEFUN(BASH_STRUCT_TIMEVAL,
 [AC_MSG_CHECKING(for struct timeval in sys/time.h and time.h)
@@ -1345,15 +1294,13 @@ AC_CACHE_VAL(bash_cv_must_reinstall_sighandlers,
 #endif
 #include <stdlib.h>
 
-typedef void sigfunc();
+typedef void sigfunc(int);
 
 volatile int nsigint;
 
 #ifdef HAVE_POSIX_SIGNALS
 sigfunc *
-set_signal_handler(sig, handler)
-     int sig;
-     sigfunc *handler;
+set_signal_handler(int sig, sigfunc *handler)
 {
   struct sigaction act, oact;
   act.sa_handler = handler;
@@ -1368,8 +1315,7 @@ set_signal_handler(sig, handler)
 #endif
 
 void
-sigint(s)
-int s;
+sigint(int s)
 {
   nsigint++;
 }
@@ -1607,13 +1553,15 @@ AC_DEFUN(BASH_CHECK_DEV_FD,
 [AC_MSG_CHECKING(whether /dev/fd is available)
 AC_CACHE_VAL(bash_cv_dev_fd,
 [bash_cv_dev_fd=""
-if test -d /dev/fd  && (exec test -r /dev/fd/0 < /dev/null) ; then
+if test -d /dev/fd && (exec test -r /dev/fd/0 < /dev/null) ; then
 # check for systems like FreeBSD 5 that only provide /dev/fd/[012]
    if (exec test -r /dev/fd/3 3</dev/null) ; then
      bash_cv_dev_fd=standard
    else
      bash_cv_dev_fd=absent
    fi
+elif test "$host_os" = "openedition" && (exec test -r /dev/fd0 < /dev/null); then
+  bash_cv_dev_fd=nodir		# /dev/fdN via character device
 fi
 if test -z "$bash_cv_dev_fd" ; then 
   if test -d /proc/self/fd && (exec test -r /proc/self/fd/0 < /dev/null) ; then
@@ -1630,6 +1578,9 @@ if test $bash_cv_dev_fd = "standard"; then
 elif test $bash_cv_dev_fd = "whacky"; then
   AC_DEFINE(HAVE_DEV_FD)
   AC_DEFINE(DEV_FD_PREFIX, "/proc/self/fd/")
+elif test $bash_cv_dev_fd = "nodir"; then
+  AC_DEFINE(HAVE_DEV_FD)
+  AC_DEFINE(DEV_FD_PREFIX, "/dev/fd")
 fi
 ])
 
@@ -1758,8 +1709,9 @@ AC_CHECK_HEADERS(langinfo.h)
 AC_CHECK_HEADERS(mbstr.h)
 
 AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
-AC_CHECK_FUNC(mbscasecmp, AC_DEFINE(HAVE_MBSCMP))
+AC_CHECK_FUNC(mbscasecmp, AC_DEFINE(HAVE_MBSCASECMP))
 AC_CHECK_FUNC(mbscmp, AC_DEFINE(HAVE_MBSCMP))
+AC_CHECK_FUNC(mbsncmp, AC_DEFINE(HAVE_MBSNCMP))
 AC_CHECK_FUNC(mbsnrtowcs, AC_DEFINE(HAVE_MBSNRTOWCS))
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
 
@@ -1770,6 +1722,7 @@ AC_CHECK_FUNC(wcscoll, AC_DEFINE(HAVE_WCSCOLL))
 AC_CHECK_FUNC(wcsdup, AC_DEFINE(HAVE_WCSDUP))
 AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
 AC_CHECK_FUNC(wctype, AC_DEFINE(HAVE_WCTYPE))
+AC_CHECK_FUNC(wcsnrtombs, AC_DEFINE(HAVE_WCSNRTOMBS))
 
 AC_REPLACE_FUNCS(wcswidth)
 
@@ -1834,14 +1787,15 @@ bash_cv_wcwidth_broken,
 #include <wchar.h>
 
 int
-main(c, v)
-int     c;
-char    **v;
+main(int c, char **v)
 {
         int     w;
 
         setlocale(LC_ALL, "en_US.UTF-8");
         w = wcwidth (0x0301);
+	if (w != 0)
+	  exit (0);
+	w = wcwidth (0x200b);
         exit (w == 0);  /* exit 0 if wcwidth broken */
 }
 ]])], [bash_cv_wcwidth_broken=yes], [bash_cv_wcwidth_broken=no],
@@ -2093,31 +2047,17 @@ AC_DEFUN([BASH_FUNC_VSNPRINTF],
   if test X$ac_cv_func_vsnprintf = Xyes; then
     AC_CACHE_CHECK([for standard-conformant vsnprintf], [bash_cv_func_vsnprintf],
       [AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 
 static int
-#if HAVE_STDARG_H
 foo(const char *fmt, ...)
-#else
-foo(format, va_alist)
-     const char *format;
-     va_dcl
-#endif
 {
   va_list args;
   int n;
 
-#if HAVE_STDARG_H
   va_start(args, fmt);
-#else
-  va_start(args);
-#endif
   n = vsnprintf(0, 0, fmt, args);
   va_end (args);
   return n;
@@ -2154,9 +2094,7 @@ AC_CACHE_VAL(bash_cv_wexitstatus_offset,
 #include <sys/wait.h>
 
 int
-main(c, v)
-     int c;
-     char **v;
+main(int c, char **v)
 {
   pid_t pid, p;
   int s, i, n;
@@ -2230,6 +2168,43 @@ main(int c, char **v)
   fi
 ])
 
+AC_DEFUN([BASH_FUNC_BRK],
+[
+  AC_MSG_CHECKING([for brk])
+  AC_CACHE_VAL(ac_cv_func_brk,
+  [AC_LINK_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[#include <unistd.h>]],
+		[[ void *x = brk (0); ]])],
+	[ac_cv_func_brk=yes],[ac_cv_func_brk=no])])
+  AC_MSG_RESULT($ac_cv_func_brk)
+  if test X$ac_cv_func_brk = Xyes; then
+    AC_CACHE_CHECK([for working brk], [bash_cv_func_brk],
+      [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdlib.h>
+#include <unistd.h>
+
+int
+main(int c, char **v)
+{
+	void *x;
+
+	x = brk (0);
+	exit ((x == (void *)-1) ? 1 : 0);
+}
+]])],[bash_cv_func_brk=yes],[bash_cv_func_brk=no],[AC_MSG_WARN([cannot check working brk if cross-compiling])
+    bash_cv_func_brk=yes
+])])
+    if test $bash_cv_func_brk = no; then
+      ac_cv_func_brk=no
+    fi
+  fi
+  if test $ac_cv_func_brk = yes; then
+    AC_DEFINE(HAVE_BRK, 1,
+      [Define if you have a working brk function.])
+  fi
+])
+
 AC_DEFUN(BASH_FUNC_FNMATCH_EQUIV_FALLBACK,
 [AC_MSG_CHECKING(whether fnmatch can be used to check bracket equivalence classes)
 AC_CACHE_VAL(bash_cv_fnmatch_equiv_fallback,
@@ -2265,3 +2240,68 @@ else
 fi
 AC_DEFINE_UNQUOTED([FNMATCH_EQUIV_FALLBACK], [$bash_cv_fnmatch_equiv_value], [Whether fnmatch can be used for bracket equivalence classes])
 ])
+
+AC_DEFUN([BASH_FUNC_STRCHRNUL],
+[
+  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
+  AC_CACHE_CHECK([whether strchrnul works],
+      [bash_cv_func_strchrnul_works],
+      [AC_RUN_IFELSE([AC_LANG_PROGRAM(
+[[
+#include <string.h>
+]],
+[[const char *buf = "abc";
+      return strchrnul (buf, 'd') != buf + 3;
+]]
+)],
+[bash_cv_func_strchrnul_works=yes], [bash_cv_func_strchrnul_works=no],
+[bash_cv_func_strchrnul_works=no]
+)])
+
+if test "$bash_cv_func_strchrnul_works" = "no"; then
+AC_LIBOBJ([strchrnul])
+fi
+])
+
+# AM_PROG_INSTALL_STRIP
+# ---------------------
+# One issue with vendor 'install' (even GNU) is that you can't
+# specify the program used to strip binaries.  This is especially
+# annoying in cross-compiling environments, where the build's strip
+# is unlikely to handle the host's binaries.
+# Fortunately install-sh will honor a STRIPPROG variable, so we
+# always use install-sh in "make install-strip", and initialize
+# STRIPPROG with the value of the STRIP variable (set by the user).
+AC_DEFUN([AM_PROG_INSTALL_STRIP],
+[AC_REQUIRE([AM_PROG_INSTALL_SH])dnl
+# Installed binaries are usually stripped using 'strip' when the user
+# run "make install-strip".  However 'strip' might not be the right
+# tool to use in cross-compilation environments, therefore Automake
+# will honor the 'STRIP' environment variable to overrule this program.
+dnl Don't test for $cross_compiling = yes, because it might be 'maybe'.
+#if test "$cross_compiling" != no; then
+  AC_CHECK_TOOL([STRIP], [strip], :)
+#fi
+INSTALL_STRIP_PROGRAM="\$(install_sh) -c -s"
+AC_SUBST([INSTALL_STRIP_PROGRAM])])
+
+AC_DEFUN([AM_AUX_DIR_EXPAND],
+[AC_REQUIRE([AC_CONFIG_AUX_DIR_DEFAULT])dnl
+# Expand $ac_aux_dir to an absolute path.
+am_aux_dir=`cd "$ac_aux_dir" && pwd`
+])
+
+# AM_PROG_INSTALL_SH
+# ------------------
+# Define $install_sh.
+AC_DEFUN([AM_PROG_INSTALL_SH],
+[AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
+if test x"${install_sh+set}" != xset; then
+  case $am_aux_dir in
+  *\ * | *\	*)
+    install_sh="\${SHELL} '$am_aux_dir/install-sh'" ;;
+  *)
+    install_sh="\${SHELL} $am_aux_dir/install-sh"
+  esac
+fi
+AC_SUBST([install_sh])])

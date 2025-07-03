@@ -1,6 +1,6 @@
 /* input.c -- character input functions for readline. */
 
-/* Copyright (C) 1994-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2025 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -25,6 +25,13 @@
 #  define _XOPEN_SOURCE_EXTENDED 1
 #  define _TANDEM_SOURCE 1
 #  include <floss.h>
+#endif
+
+/* These are needed to get the declaration of 'alarm' when including
+   <unistd.h>. I'm not sure it's needed, but the compiler might require it. */
+#if defined (__MINGW32__)
+#  define __USE_MINGW_ALARM
+#  define _POSIX
 #endif
 
 #if defined (HAVE_CONFIG_H)
@@ -138,19 +145,13 @@ win32_isatty (int fd)
 
 /* Readline timeouts */
 
-/* I don't know how to set a timeout for _getch() in MinGW32, so we use
-   SIGALRM. */
-#if (defined (HAVE_PSELECT) || defined (HAVE_SELECT)) && !defined (__MINGW32__)
-#  define RL_TIMEOUT_USE_SELECT
-#else
-#  define RL_TIMEOUT_USE_SIGALRM
-#endif
+/* We now define RL_TIMEOUT_USE_SELECT or RL_TIMEOUT_USE_SIGALRM in rlprivate.h */
 
 int rl_set_timeout (unsigned int, unsigned int);
 int rl_timeout_remaining (unsigned int *, unsigned int *);
 
 int _rl_timeout_init (void);
-int _rl_timeout_sigalrm_handler (void);
+int _rl_timeout_handle_sigalrm (void);
 #if defined (RL_TIMEOUT_USE_SELECT)
 int _rl_timeout_select (int, fd_set *, fd_set *, fd_set *, const struct timeval *, const sigset_t *);
 #endif
@@ -255,33 +256,48 @@ rl_gather_tyi (void)
   struct timeval timeout;
 #endif
 
+  result = -1;
   chars_avail = 0;
   input = 0;
   tty = fileno (rl_instream);
 
+  /* Move this up here to give it first shot, but it can't set chars_avail */
+  /* XXX - need rl_chars_available_hook? */
+  if (rl_input_available_hook)
+    {
+      result = (*rl_input_available_hook) ();
+      if (result == 0)
+        result = -1;
+    }
+
 #if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
-  FD_ZERO (&readfds);
-  FD_ZERO (&exceptfds);
-  FD_SET (tty, &readfds);
-  FD_SET (tty, &exceptfds);
-  USEC_TO_TIMEVAL (_keyboard_input_timeout, timeout);
+  if (result == -1)
+    {
+      FD_ZERO (&readfds);
+      FD_ZERO (&exceptfds);
+      FD_SET (tty, &readfds);
+      FD_SET (tty, &exceptfds);
+      USEC_TO_TIMEVAL (_keyboard_input_timeout, timeout);
 #if defined (RL_TIMEOUT_USE_SELECT)
-  result = _rl_timeout_select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout, NULL);
+      result = _rl_timeout_select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout, NULL);
 #else
-  result = select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
+      result = select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout);
 #endif
-  if (result <= 0)
-    return 0;	/* Nothing to read. */
+      if (result <= 0)
+	return 0;	/* Nothing to read. */
+    }
 #endif
 
-  result = -1;
-  errno = 0;
 #if defined (FIONREAD)
-  result = ioctl (tty, FIONREAD, &chars_avail);
-  if (result == -1 && errno == EIO)
-    return -1;
   if (result == -1)
-    chars_avail = 0;
+    {
+      errno = 0;
+      result = ioctl (tty, FIONREAD, &chars_avail);
+      if (result == -1 && errno == EIO)
+	return -1;
+      if (result == -1)
+	chars_avail = 0;
+    }
 #endif
 
 #if defined (O_NDELAY)
@@ -308,8 +324,11 @@ rl_gather_tyi (void)
 #if defined (__MINGW32__)
   /* Use getch/_kbhit to check for available console input, in the same way
      that we read it normally. */
-   chars_avail = isatty (tty) ? _kbhit () : 0;
-   result = 0;
+   if (result == -1)
+     {
+       chars_avail = isatty (tty) ? _kbhit () : 0;
+       result = 0;
+     }
 #endif
 
   /* If there's nothing available, don't waste time trying to read
@@ -535,7 +554,16 @@ reset_alarm ()
   timerclear (&it.it_value);
   setitimer (ITIMER_REAL, &it, NULL);
 }
-#  else
+#  else /* !HAVE_SETITIMER */
+#    if defined (__MINGW32_MAJOR_VERSION)
+/* mingw.org's MinGW doesn't have alarm(3).  */
+unsigned int
+alarm (unsigned int seconds)
+{
+  return 0;
+}
+#    endif /* __MINGW32_MAJOR_VERSION */
+
 static int
 set_alarm (unsigned int *secs, unsigned int *usecs)
 {
@@ -550,8 +578,8 @@ reset_alarm ()
 {
   alarm (0);
 }
-#  endif
-#endif
+#  endif /* !HAVE_SETITIMER */
+#endif /* RL_TIMEOUT_USE_SIGALRM */
 
 /* Set a timeout which will be used for the next call of `readline
    ()'.  When (0, 0) are specified the timeout is cleared.  */
@@ -651,7 +679,7 @@ rl_timeout_remaining (unsigned int *secs, unsigned int *usecs)
 
 /* This should only be called if RL_TIMEOUT_USE_SELECT is defined. */
 
-#if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
+#if defined (RL_TIMEOUT_USE_SELECT)
 int
 _rl_timeout_select (int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, const struct timeval *timeout, const sigset_t *sigmask)
 {
@@ -804,7 +832,7 @@ rl_read_key (void)
 int
 rl_getc (FILE *stream)
 {
-  int result;
+  int result, ostate, osig;
   unsigned char c;
   int fd;
 #if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
@@ -815,12 +843,26 @@ rl_getc (FILE *stream)
   fd = fileno (stream);
   while (1)
     {
+      osig = _rl_caught_signal;
+      ostate = rl_readline_state;
+
       RL_CHECK_SIGNALS ();
+
+#if defined (READLINE_CALLBACKS)
+      /* Do signal handling post-processing here, but just in callback mode
+	 for right now because the signal cleanup can change some of the
+	 callback state, and we need to either let the application have a
+	 chance to react or abort some current operation that gets cleaned
+	 up by rl_callback_sigcleanup(). If not, we'll just run through the
+	 loop again. */
+      if (osig != 0 && (ostate & RL_STATE_CALLBACK))
+	goto postproc_signal;
+#endif
 
       /* We know at this point that _rl_caught_signal == 0 */
 
 #if defined (__MINGW32__)
-      if (isatty (fd)
+      if (isatty (fd))
 	return (_getch ());	/* "There is no error return." */
 #endif
       result = 0;
@@ -879,7 +921,10 @@ rl_getc (FILE *stream)
 
 /* fprintf(stderr, "rl_getc: result = %d errno = %d\n", result, errno); */
 
-handle_error:
+      /* Handle errors here. */
+      osig = _rl_caught_signal;
+      ostate = rl_readline_state;
+
       /* If the error that we received was EINTR, then try again,
 	 this is simply an interrupted system call to read ().  We allow
 	 the read to be interrupted if we caught SIGHUP, SIGTERM, or any
@@ -920,8 +965,17 @@ handle_error:
         RL_CHECK_SIGNALS ();
 #endif  /* SIGALRM */
 
+postproc_signal:
+      /* POSIX says read(2)/pselect(2)/select(2) don't return EINTR for any
+	 reason other than being interrupted by a signal, so we can safely
+	 call the application's signal event hook. */
       if (rl_signal_event_hook)
 	(*rl_signal_event_hook) ();
+#if defined (READLINE_CALLBACKS)
+      else if (osig == SIGINT && (ostate & RL_STATE_CALLBACK) && (ostate & (RL_STATE_ISEARCH|RL_STATE_NSEARCH|RL_STATE_NUMERICARG)))
+        /* just these cases for now */
+        _rl_abort_internal ();
+#endif
     }
 }
 

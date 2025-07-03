@@ -2,7 +2,7 @@
 
 /* Modified to run with the GNU shell Apr 25, 1988 by bfox. */
 
-/* Copyright (C) 1987-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,6 +70,13 @@ extern int errno;
 #endif /* !STREQ */
 #define STRCOLLEQ(a, b) ((a)[0] == (b)[0] && strcoll ((a), (b)) == 0)
 
+/* Same as ISOPTION from builtins/common.h */
+#define ISPRIMARY(s, c)	(s[0] == '-' && s[1] == c && s[2] == '\0')
+#define ANDOR(s)  (s[0] == '-' && (s[1] == 'a' || s[1] == 'o') && s[2] == 0)
+
+/* single-character tokens like `!', `(', and `)' */
+#define ISTOKEN(s, c)	(s[0] == (c) && s[1] == '\0')
+
 #if !defined (R_OK)
 #define R_OK 4
 #define W_OK 2
@@ -103,35 +110,37 @@ static int test_error_return;
 #define test_exit(val) \
 	do { test_error_return = val; sh_longjmp (test_exit_buf, 1); } while (0)
 
-extern int sh_stat PARAMS((const char *, struct stat *));
+extern int sh_stat (const char *, struct stat *);
 
 static int pos;		/* The offset of the current argument in ARGV. */
 static int argc;	/* The number of arguments present in ARGV. */
 static char **argv;	/* The argument list. */
 static int noeval;
 
-static void test_syntax_error PARAMS((char *, char *)) __attribute__((__noreturn__));
-static void beyond PARAMS((void)) __attribute__((__noreturn__));
-static void integer_expected_error PARAMS((char *)) __attribute__((__noreturn__));
+static void test_syntax_error (char *, char *) __attribute__((__noreturn__));
+static void beyond (void) __attribute__((__noreturn__));
+static void integer_expected_error (char *) __attribute__((__noreturn__));
 
-static int unary_operator PARAMS((void));
-static int binary_operator PARAMS((void));
-static int two_arguments PARAMS((void));
-static int three_arguments PARAMS((void));
-static int posixtest PARAMS((void));
+static int unary_test (char *, char *, int);
+static int binary_test (char *, char *, char *, int);
 
-static int expr PARAMS((void));
-static int term PARAMS((void));
-static int and PARAMS((void));
-static int or PARAMS((void));
+static int unary_operator (void);
+static int binary_operator (void);
+static int two_arguments (void);
+static int three_arguments (void);
+static int posixtest (int);
 
-static int filecomp PARAMS((char *, char *, int));
-static int arithcomp PARAMS((char *, char *, int, int));
-static int patcomp PARAMS((char *, char *, int));
+static int expr (void);
+static int term (void);
+static int and (void);
+static int or (void);
+
+static int filecomp (const char *, const char *, int);
+static int arithcomp (char *, char *, int, int);
+static int patcomp (char *, char *, int);
 
 static void
-test_syntax_error (format, arg)
-     char *format, *arg;
+test_syntax_error (char *format, char *arg)
 {
   builtin_error (format, arg);
   test_exit (TEST_ERREXIT_STATUS);
@@ -142,7 +151,7 @@ test_syntax_error (format, arg)
  *	error condition)
  */
 static void
-beyond ()
+beyond (void)
 {
   test_syntax_error (_("argument expected"), (char *)NULL);
 }
@@ -150,10 +159,9 @@ beyond ()
 /* Syntax error for when an integer argument was expected, but
    something else was found. */
 static void
-integer_expected_error (pch)
-     char *pch;
+integer_expected_error (char *pch)
 {
-  test_syntax_error (_("%s: integer expression expected"), pch);
+  test_syntax_error (_("%s: integer expected"), pch);
 }
 
 /* Increment our position in the argument list.  Check that we're not
@@ -167,7 +175,7 @@ integer_expected_error (pch)
  *	or
  */
 static int
-expr ()
+expr (void)
 {
   if (pos >= argc)
     beyond ();
@@ -181,12 +189,12 @@ expr ()
  *	and '-o' or
  */
 static int
-or ()
+or (void)
 {
   int value, v2;
 
   value = and ();
-  if (pos < argc && argv[pos][0] == '-' && argv[pos][1] == 'o' && !argv[pos][2])
+  if (pos < argc && ISPRIMARY (argv[pos], 'o'))
     {
       advance (0);
       v2 = or ();
@@ -202,12 +210,12 @@ or ()
  *	term '-a' and
  */
 static int
-and ()
+and (void)
 {
   int value, v2;
 
   value = term ();
-  if (pos < argc && argv[pos][0] == '-' && argv[pos][1] == 'a' && !argv[pos][2])
+  if (pos < argc && ISPRIMARY (argv[pos], 'a'))
     {
       advance (0);
       v2 = and ();
@@ -236,7 +244,7 @@ and ()
  *	positive and negative integers
  */
 static int
-term ()
+term (void)
 {
   int value;
 
@@ -259,8 +267,27 @@ term ()
   /* A paren-bracketed argument. */
   if (argv[pos][0] == '(' && argv[pos][1] == '\0') /* ) */
     {
+      int nargs, count;
+
       advance (1);
-      value = expr ();
+      /* Steal an idea from coreutils and scan forward to check where the right
+	 paren appears to prevent some ambiguity. If we find a valid sub-
+	 expression that has 1-4 arguments, call posixtest on it. Handle
+	 nested subexpressions. ( */
+      for (nargs = count = 1; pos + nargs < argc; nargs++)
+	{
+	  if (ISTOKEN (argv[pos+nargs], ')'))
+	    count--;
+	  else if (ISTOKEN (argv[pos+nargs], '('))	/*)*/
+	    count++;
+	  if (count == 0)
+	    break;
+	}
+      /* only use posixtest if we have a valid parenthesized expression */
+      if (shell_compatibility_level > 52 && pos + nargs < argc && nargs <= 4)
+	value = posixtest (nargs);
+      else
+	value = expr ();
       if (argv[pos] == 0) /* ( */
 	test_syntax_error (_("`)' expected"), (char *)NULL);
       else if (argv[pos][0] != ')' || argv[pos][1]) /* ( */
@@ -288,10 +315,7 @@ term ()
 }
 
 static int
-stat_mtime (fn, st, ts)
-     char *fn;
-     struct stat *st;
-     struct timespec *ts;
+stat_mtime (const char *fn, struct stat *st, struct timespec *ts)
 {
   int r;
 
@@ -303,9 +327,7 @@ stat_mtime (fn, st, ts)
 }
 
 static int
-filecomp (s, t, op)
-     char *s, *t;
-     int op;
+filecomp (const char *s, const char *t, int op)
 {
   struct stat st1, st2;
   struct timespec ts1, ts2;
@@ -332,9 +354,7 @@ filecomp (s, t, op)
 }
 
 static int
-arithcomp (s, t, op, flags)
-     char *s, *t;
-     int op, flags;
+arithcomp (char *s, char *t, int op, int flags)
 {
   intmax_t l, r;
   int expok;
@@ -353,9 +373,9 @@ arithcomp (s, t, op, flags)
     }
   else
     {
-      if (legal_number (s, &l) == 0)
+      if (valid_number (s, &l) == 0)
 	integer_expected_error (s);
-      if (legal_number (t, &r) == 0)
+      if (valid_number (t, &r) == 0)
 	integer_expected_error (t);
     }
 
@@ -373,9 +393,7 @@ arithcomp (s, t, op, flags)
 }
 
 static int
-patcomp (string, pat, op)
-     char *string, *pat;
-     int op;
+patcomp (char *string, char *pat, int op)
 {
   int m;
 
@@ -383,10 +401,8 @@ patcomp (string, pat, op)
   return ((op == EQ) ? (m == 0) : (m != 0));
 }
 
-int
-binary_test (op, arg1, arg2, flags)
-     char *op, *arg1, *arg2;
-     int flags;
+static int
+binary_test (char *op, char *arg1, char *arg2, int flags)
 {
   int patmatch;
 
@@ -397,7 +413,10 @@ binary_test (op, arg1, arg2, flags)
   else if ((op[0] == '>' || op[0] == '<') && op[1] == '\0')
     {
 #if defined (HAVE_STRCOLL)
-      if (shell_compatibility_level > 40 && flags & TEST_LOCALE)
+      /* POSIX interp 375 */
+      if (posixly_correct && (flags & TEST_LOCALE))
+	return ((op[0] == '>') ? (strcoll (arg1, arg2) > 0) : (strcoll (arg1, arg2) < 0));
+      else if (shell_compatibility_level > 40 && (flags & TEST_LOCALE))
 	return ((op[0] == '>') ? (strcoll (arg1, arg2) > 0) : (strcoll (arg1, arg2) < 0));
       else
 #endif
@@ -438,9 +457,8 @@ binary_test (op, arg1, arg2, flags)
   return (FALSE);	/* should never get here */
 }
 
-
 static int
-binary_operator ()
+binary_operator (void)
 {
   int value;
   char *w;
@@ -450,7 +468,8 @@ binary_operator ()
       ((w[0] == '>' || w[0] == '<') && w[1] == '\0') ||		/* <, > */
       (w[0] == '!' && w[1] == '=' && w[2] == '\0'))		/* != */
     {
-      value = binary_test (w, argv[pos], argv[pos + 2], 0);
+      /* POSIX interp 375 11/9/2022 */
+      value = binary_test (w, argv[pos], argv[pos + 2], (posixly_correct ? TEST_LOCALE : 0));
       pos += 3;
       return (value);
     }
@@ -477,7 +496,7 @@ binary_operator ()
 }
 
 static int
-unary_operator ()
+unary_operator (void)
 {
   char *op;
   intmax_t r;
@@ -487,20 +506,23 @@ unary_operator ()
     return (FALSE);
 
   /* the only tricky case is `-t', which may or may not take an argument. */
-  if (op[1] == 't')
+  if (posixly_correct == 0 && op[1] == 't')
     {
       advance (0);
       if (pos < argc)
 	{
-	  if (legal_number (argv[pos], &r))
+	  if (valid_number (argv[pos], &r))
 	    {
 	      advance (0);
 	      return (unary_test (op, argv[pos - 1], 0));
 	    }
+	  else if (argc >= 5 && ANDOR (argv[pos]))
+	    return (unary_test (op, "1", 0));	  
 	  else
-	    return (FALSE);
+	    integer_expected_error (argv[pos]);
 	}
       else
+	/* this is not called when pos == argc; the one-argument code is used */
 	return (unary_test (op, "1", 0));
     }
 
@@ -512,10 +534,8 @@ unary_operator ()
   return (unary_test (op, argv[pos - 1], 0));
 }
 
-int
-unary_test (op, arg, flags)
-     char *op, *arg;
-     int flags;
+static int
+unary_test (char *op, char *arg, int flags)
 {
   intmax_t r;
   struct stat stat_buf;
@@ -614,8 +634,8 @@ unary_test (op, arg, flags)
 #endif
 
     case 't':	/* File fd is a terminal? */
-      if (legal_number (arg, &r) == 0)
-	return (FALSE);
+      if (valid_number (arg, &r) == 0)
+	integer_expected_error (arg);
       return ((r == (int)r) && isatty ((int)r));
 
     case 'n':			/* True if arg has some length. */
@@ -629,7 +649,7 @@ unary_test (op, arg, flags)
 
     case 'v':
 #if defined (ARRAY_VARS)
-      aflags = assoc_expand_once ? AV_NOEXPAND : 0;
+      aflags = array_expand_once ? AV_NOEXPAND : 0;
       if (valid_array_reference (arg, aflags))
 	{
 	  char *t;
@@ -637,7 +657,7 @@ unary_test (op, arg, flags)
 	  array_eltstate_t es;
 
 	  /* Let's assume that this has already been expanded once. */
-	  /* XXX - TAG:bash-5.2 fix with corresponding fix to execute_cmd.c:
+	  /* bash-5.2 fix with corresponding fix to execute_cmd.c:
 	     execute_cond_node() that passes TEST_ARRAYEXP in FLAGS */
 
 	  if (shell_compatibility_level > 51)
@@ -652,7 +672,7 @@ unary_test (op, arg, flags)
 	  flush_eltstate (&es);
 	  return ret;
 	}
-      else if (legal_number (arg, &r))		/* -v n == is $n set? */
+      else if (valid_number (arg, &r))		/* -v n == is $n set? */
 	return ((r >= 0 && r <= number_of_args()) ? TRUE : FALSE);
       v = find_variable (arg);
       if (v && invisible_p (v) == 0 && array_p (v))
@@ -684,8 +704,7 @@ unary_test (op, arg, flags)
 
 /* Return TRUE if OP is one of the test command's binary operators. */
 int
-test_binop (op)
-     char *op;
+test_binop (char *op)
 {
   if (op[0] == '=' && op[1] == '\0')
     return (1);		/* '=' */
@@ -738,8 +757,7 @@ test_binop (op)
 
 /* Return non-zero if OP is one of the test command's unary operators. */
 int
-test_unop (op)
-     char *op;
+test_unop (char *op)
 {
   if (op[0] != '-' || (op[1] && op[2] != 0))
     return (0);
@@ -759,10 +777,13 @@ test_unop (op)
 }
 
 static int
-two_arguments ()
+two_arguments (void)
 {
   if (argv[pos][0] == '!' && argv[pos][1] == '\0')
-    return (argv[pos + 1][0] == '\0');
+    {
+      advance (0);
+      return (argv[pos++][0] == '\0');
+    }
   else if (argv[pos][0] == '-' && argv[pos][1] && argv[pos][2] == '\0')
     {
       if (test_unop (argv[pos]))
@@ -776,40 +797,35 @@ two_arguments ()
   return (0);
 }
 
-#define ANDOR(s)  (s[0] == '-' && (s[1] == 'a' || s[1] == 'o') && s[2] == 0)
-
 /* This could be augmented to handle `-t' as equivalent to `-t 1', but
    POSIX requires that `-t' be given an argument. */
 #define ONE_ARG_TEST(s)		((s)[0] != '\0')
 
 static int
-three_arguments ()
+three_arguments (void)
 {
   int value;
 
   if (test_binop (argv[pos+1]))
-    {
-      value = binary_operator ();
-      pos = argc;
-    }
+    value = binary_operator ();
   else if (ANDOR (argv[pos+1]))
     {
       if (argv[pos+1][1] == 'a')
 	value = ONE_ARG_TEST(argv[pos]) && ONE_ARG_TEST(argv[pos+2]);
       else
 	value = ONE_ARG_TEST(argv[pos]) || ONE_ARG_TEST(argv[pos+2]);
-      pos = argc;
+      pos += 3;
     }
   else if (argv[pos][0] == '!' && argv[pos][1] == '\0')
     {
       advance (1);
       value = !two_arguments ();
-      pos = argc;
     }
-  else if (argv[pos][0] == '(' && argv[pos+2][0] == ')')
+  else if (ISTOKEN (argv[pos], '(') && ISTOKEN (argv[pos+2], ')'))
     {
-      value = ONE_ARG_TEST(argv[pos+1]);
-      pos = argc;
+      advance (0);
+      value = ONE_ARG_TEST(argv[pos]);
+      pos += 2;
     }
   else
     test_syntax_error (_("%s: binary operator expected"), argv[pos+1]);
@@ -819,25 +835,23 @@ three_arguments ()
 
 /* This is an implementation of a Posix.2 proposal by David Korn. */
 static int
-posixtest ()
+posixtest (int nargs)
 {
   int value;
 
-  switch (argc - 1)	/* one extra passed in */
+  switch (nargs)
     {
       case 0:
 	value = FALSE;
-	pos = argc;
 	break;
 
       case 1:
 	value = ONE_ARG_TEST(argv[1]);
-	pos = argc;
+	advance (0);
 	break;
 
       case 2:
 	value = two_arguments ();
-	pos = argc;
 	break;
 
       case 3:
@@ -851,11 +865,11 @@ posixtest ()
 	    value = !three_arguments ();
 	    break;
 	  }
-	else if (argv[pos][0] == '(' && argv[pos][1] == '\0' && argv[argc-1][0] == ')' && argv[argc-1][1] == '\0')
+	else if (ISTOKEN (argv[pos], '(') && ISTOKEN (argv[pos+3], ')'))
 	  {
 	    advance (1);
 	    value = two_arguments ();
-	    pos = argc;
+	    advance (0);
 	    break;
 	  }
 	/* FALLTHROUGH */
@@ -866,6 +880,23 @@ posixtest ()
   return (value);
 }
 
+#if defined (COND_COMMAND)
+int
+cond_test (char *op, char *arg1, char *arg2, int flags)
+{
+  int code, ret;
+
+  code = setjmp_nosigs (test_exit_buf);
+
+  if (code)
+    return (test_error_return);
+
+  ret = arg2 ? binary_test (op, arg1, arg2, flags) : unary_test (op, arg1, flags);
+
+  return (ret ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+}
+#endif
+
 /*
  * [:
  *	'[' expr ']'
@@ -873,9 +904,7 @@ posixtest ()
  *	test expr
  */
 int
-test_command (margc, margv)
-     int margc;
-     char **margv;
+test_command (int margc, char **margv)
 {
   int value;
   int code;
@@ -907,7 +936,7 @@ test_command (margc, margv)
     test_exit (SHELL_BOOLEAN (FALSE));
 
   noeval = 0;
-  value = posixtest ();
+  value = posixtest (argc - 1);
 
   if (pos != argc)
     {

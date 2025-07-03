@@ -39,3 +39,26 @@ var=40 func
 
 echo expect 50
 var=50 command printenv var
+
+# this behaves the same in bash and posix mode
+export -n var	# make sure it's not exported
+echo expect 60
+var=60 export var
+declare -p var
+
+# this behaves differently in bash and posix mode: `.' is a special builtin
+unset -v var
+var=outside
+echo 'var=assignment' >$TMPFILE
+
+echo expect outside
+var=temp . $TMPFILE
+echo $var
+
+set -o posix
+echo expect assignment
+var=temp . $TMPFILE
+echo $var
+
+rm -f $TMPFILE
+unset -v var

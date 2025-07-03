@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2016,2022 Free Software Foundation, Inc.
+   Copyright (C) 2016,2022-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -46,6 +46,8 @@
 extern int	errno;
 #endif
 
+#if defined (ARRAY_VARS)
+
 #define ST_NAME		0
 #define ST_DEV		1
 #define ST_INO		2
@@ -80,17 +82,14 @@ static char *arraysubs[] =
 static char *stattime (time_t, const char *);
 
 static int
-getstat (fname, flags, sp)
-     const char *fname;
-     int flags;
-     struct stat *sp;
+getstat (const char *fname, int flags, struct stat *sp)
 {
   intmax_t lfd;
   int fd, r;
 
   if (strncmp (fname, "/dev/fd/", 8) == 0)
     {
-      if ((legal_number(fname + 8, &lfd) == 0) || (int)lfd != lfd)
+      if ((valid_number(fname + 8, &lfd) == 0) || (int)lfd != lfd)
 	{
 	  errno = EINVAL;
 	  return -1;
@@ -109,9 +108,7 @@ getstat (fname, flags, sp)
 }
 
 static char *
-statlink (fname, sp)
-     char *fname;
-     struct stat *sp;
+statlink (char *fname, struct stat *sp)
 {
 #if defined (HAVE_READLINK)
   char linkbuf[PATH_MAX];
@@ -128,8 +125,7 @@ statlink (fname, sp)
 }
 
 static char *
-octalperms (m)
-     int m;
+octalperms (int m)
 {
   int operms;
   char *ret;
@@ -170,8 +166,7 @@ octalperms (m)
 }
 
 static char *
-statperms (m)
-     int m;
+statperms (int m)
 {
   char ubits[4], gbits[4], obits[4];	/* u=rwx,g=rwx,o=rwx */
   int i;
@@ -217,8 +212,7 @@ statperms (m)
 }
 
 static char *
-statmode(mode)
-     int mode;
+statmode(int mode)
 {
   char *modestr, *m;
 
@@ -260,9 +254,7 @@ statmode(mode)
 }
 
 static char *
-stattime (t, timefmt)
-     time_t t;
-     const char *timefmt;
+stattime (time_t t, const char *timefmt)
 {
   char *tbuf, *ret;
   const char *fmt;
@@ -271,6 +263,8 @@ stattime (t, timefmt)
 
   fmt = timefmt ? timefmt : DEFTIMEFMT;
   tm = localtime (&t);
+  if (tm == 0)
+    return (itos (t));
 
   ret = xmalloc (TIMELEN_MAX);
 
@@ -282,12 +276,7 @@ stattime (t, timefmt)
 }
 
 static char *
-statval (which, fname, flags, fmt, sp)
-     int which;
-     char *fname;
-     int flags;
-     char *fmt;
-     struct stat *sp;
+statval (int which, char *fname, int flags, char *fmt, struct stat *sp)
 {
   int temp;
 
@@ -332,13 +321,7 @@ statval (which, fname, flags, fmt, sp)
 }
 
 static int
-loadstat (vname, var, fname, flags, fmt, sp)
-     char *vname;
-     SHELL_VAR *var;
-     char *fname;
-     int flags;
-     char *fmt;
-     struct stat *sp;
+loadstat (char *vname, SHELL_VAR *var, char *fname, int flags, char *fmt, struct stat *sp)
 {
   int i;
   char *key, *value;
@@ -349,14 +332,16 @@ loadstat (vname, var, fname, flags, fmt, sp)
       key = savestring (arraysubs[i]);
       value = statval (i, fname, flags, fmt, sp);
       v = bind_assoc_variable (var, vname, key, value, ASS_FORCE);
+      free (value);
     }
   return 0;
 }
+#endif
 
 int
-stat_builtin (list)
-     WORD_LIST *list;
+stat_builtin (WORD_LIST *list)
 {
+#if defined (ARRAY_VARS)
   int opt, flags;
   char *aname, *fname, *timefmt;
   struct stat st;
@@ -390,7 +375,7 @@ stat_builtin (list)
 	}
     }
 
-  if (legal_identifier (aname) == 0)
+  if (valid_identifier (aname) == 0)
     {
       sh_invalidid (aname);
       return (EXECUTION_FAILURE);
@@ -429,6 +414,10 @@ stat_builtin (list)
     }
 
   return (EXECUTION_SUCCESS);
+#else
+  builtin_error ("arrays not available");
+  return (EXECUTION_FAILURE);
+#endif
 }
 
 /* An array of strings forming the `long' documentation for a builtin xxx,

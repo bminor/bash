@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020,2022-2024 Free Software Foundation, Inc.
 
    Bash is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -14,6 +14,10 @@
    You should have received a copy of the GNU General Public License
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
+/* Contributed by Geir Hauge <geir.hauge@gmail.com> */
+
+#include <config.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
@@ -36,7 +40,8 @@ static int reverse_flag;
 static int numeric_flag;
 
 static int
-compare(const void *p1, const void *p2) {
+compare(const void *p1, const void *p2)
+{
     const sort_element e1 = *(sort_element *) p1;
     const sort_element e2 = *(sort_element *) p2;
 
@@ -55,7 +60,8 @@ compare(const void *p1, const void *p2) {
 }
 
 static int
-sort_index(SHELL_VAR *dest, SHELL_VAR *source) {
+sort_index(SHELL_VAR *dest, SHELL_VAR *source)
+{
     HASH_TABLE *hash;
     BUCKET_CONTENTS *bucket;
     sort_element *sa;
@@ -70,7 +76,7 @@ sort_index(SHELL_VAR *dest, SHELL_VAR *source) {
     if (assoc_p(source)) {
         hash = assoc_cell(source);
         n = hash->nentries;
-        sa = xmalloc(n * sizeof(sort_element));
+        sa = n ? xmalloc(n * sizeof(sort_element)) : 0;
         i = 0;
         for ( j = 0; j < hash->nbuckets; ++j ) {
             bucket = hash->bucket_array[j];
@@ -89,7 +95,7 @@ sort_index(SHELL_VAR *dest, SHELL_VAR *source) {
     else {
         array = array_cell(source);
         n = array_num_elements(array);
-        sa = xmalloc(n * sizeof(sort_element));
+        sa = n ? xmalloc(n * sizeof(sort_element)) : 0;
         i = 0;
 
         for (ae = element_forw(array->head); ae != array->head; ae = element_forw(ae)) {
@@ -105,12 +111,12 @@ sort_index(SHELL_VAR *dest, SHELL_VAR *source) {
     // sanity check
     if ( i != n ) {
         builtin_error("%s: corrupt array", source->name);
+        xfree (sa);
         return EXECUTION_FAILURE;
     }
 
-    qsort(sa, n, sizeof(sort_element), compare);
-
-    array_flush(dest_array);
+    if (n)
+	qsort(sa, n, sizeof(sort_element), compare);
 
     for ( i = 0; i < n; ++i ) {
         if ( assoc_p(source) )
@@ -121,11 +127,13 @@ sort_index(SHELL_VAR *dest, SHELL_VAR *source) {
         array_insert(dest_array, i, key);
     }
 
+    xfree (sa);
     return EXECUTION_SUCCESS;
 }
 
 static int
-sort_inplace(SHELL_VAR *var) {
+sort_inplace(SHELL_VAR *var)
+{
     size_t i, n;
     ARRAY *a;
     ARRAY_ELEMENT *ae;
@@ -152,6 +160,7 @@ sort_inplace(SHELL_VAR *var) {
     // sanity check
     if ( i != n ) {
         builtin_error("%s: corrupt array", var->name);
+        xfree (sa);
         return EXECUTION_FAILURE;
     }
 
@@ -174,7 +183,8 @@ sort_inplace(SHELL_VAR *var) {
 }
 
 int
-asort_builtin(WORD_LIST *list) {
+asort_builtin(WORD_LIST *list)
+{
     SHELL_VAR *var, *var2;
     char *word;
     int opt, ret;
@@ -202,7 +212,7 @@ asort_builtin(WORD_LIST *list) {
         return EX_USAGE;
     }
 
-    if (legal_identifier (list->word->word) == 0) {
+    if (valid_identifier (list->word->word) == 0) {
         sh_invalidid (list->word->word);
         return EXECUTION_FAILURE;
     }
@@ -212,18 +222,18 @@ asort_builtin(WORD_LIST *list) {
             builtin_usage();
             return EX_USAGE;
         }
-        if (legal_identifier (list->next->word->word) == 0) {
+        if (valid_identifier (list->next->word->word) == 0) {
             sh_invalidid (list->next->word->word);
             return EXECUTION_FAILURE;
         }
-        var = find_or_make_array_variable(list->word->word, 1);
-        if (var == 0)
-            return EXECUTION_FAILURE;
         var2 = find_variable(list->next->word->word);
         if ( !var2 || ( !array_p(var2) && !assoc_p(var2) ) ) {
             builtin_error("%s: Not an array", list->next->word->word);
             return EXECUTION_FAILURE;
         }
+        var = builtin_find_indexed_array(list->word->word, 1);
+        if (var == 0)
+            return EXECUTION_FAILURE;
         return sort_index(var, var2);
     }
 

@@ -54,3 +54,13 @@ echo "coprocs created"
 }
 
 type mkcoprocs
+
+unset -f mkcoprocs
+
+# make sure that simple commands are printed without the coproc name
+mkcoprocs ()
+{
+	coproc cat -u - &
+	read -u ${COPROC[0]} msg
+}
+type mkcoprocs

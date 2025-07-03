@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -141,6 +141,10 @@ Options:
   -   Assign any remaining arguments to the positional parameters.
       The -x and -v options are turned off.
 
+If -o is supplied with no option-name, set prints the current shell
+option settings. If +o is supplied with no option-name, set prints a
+series of set commands to recreate the current option settings.
+
 Using + rather than - causes these flags to be turned off.  The
 flags can also be used upon invocation of the shell.  The current
 set of flags may be found in $-.  The remaining n ARGs are positional
@@ -151,24 +155,24 @@ Exit Status:
 Returns success unless an invalid option is given.
 $END
 
-typedef int setopt_set_func_t PARAMS((int, char *));
-typedef int setopt_get_func_t PARAMS((char *));
+typedef int setopt_set_func_t (int, char *);
+typedef int setopt_get_func_t (char *);
 
-static int find_minus_o_option PARAMS((char *));
+static int find_minus_o_option (char *);
 
-static void print_minus_o_option PARAMS((char *, int, int));
-static void print_all_shell_variables PARAMS((void));
+static void print_minus_o_option (char *, int, int);
+static void print_all_shell_variables (void);
 
-static int set_ignoreeof PARAMS((int, char *));
-static int set_posix_mode PARAMS((int, char *));
+static int set_ignoreeof (int, char *);
+static int set_posix_mode (int, char *);
 
 #if defined (READLINE)
-static int set_edit_mode PARAMS((int, char *));
-static int get_edit_mode PARAMS((char *));
+static int set_edit_mode (int, char *);
+static int get_edit_mode (char *);
 #endif
 
 #if defined (HISTORY)
-static int bash_set_history PARAMS((int, char *));
+static int bash_set_history (int, char *);
 #endif
 
 static const char * const on = "on";
@@ -245,8 +249,7 @@ const struct {
 			   : (*o_options[i].variable = (onoff == FLAG_ON)))
 
 static int
-find_minus_o_option (name)
-     char *name;
+find_minus_o_option (char *name)
 {
   register int i;
 
@@ -257,8 +260,7 @@ find_minus_o_option (name)
 }
 
 int
-minus_o_option_value (name)
-     char *name;
+minus_o_option_value (char *name)
 {
   register int	i;
   int *on_or_off;
@@ -279,9 +281,7 @@ minus_o_option_value (name)
 #define MINUS_O_FORMAT "%-15s\t%s\n"
 
 static void
-print_minus_o_option (name, value, pflag)
-     char *name;
-     int value, pflag;
+print_minus_o_option (char *name, int value, int pflag)
 {
   if (pflag == 0)
     printf (MINUS_O_FORMAT, name, value ? on : off);
@@ -290,8 +290,7 @@ print_minus_o_option (name, value, pflag)
 }
 
 void
-list_minus_o_opts (mode, reusable)
-     int mode, reusable;
+list_minus_o_opts (int mode, int reusable)
 {
   register int	i;
   int *on_or_off, value;
@@ -317,7 +316,7 @@ list_minus_o_opts (mode, reusable)
 }
 
 char **
-get_minus_o_opts ()
+get_minus_o_opts (void)
 {
   char **ret;
   int i;
@@ -330,10 +329,11 @@ get_minus_o_opts ()
 }
 
 char *
-get_current_options ()
+get_current_options (void)
 {
   char *temp;
-  int i, posixopts;
+  int i;
+  size_t posixopts;
 
   posixopts = num_posix_options ();	/* shopts modified by posix mode */
   /* Make the buffer big enough to hold the set -o options and the shopt
@@ -355,8 +355,7 @@ get_current_options ()
 }
 
 void
-set_current_options (bitmap)
-     const char *bitmap;
+set_current_options (const char *bitmap)
 {
   int i, v, cv, *on_or_off;
 
@@ -388,9 +387,7 @@ set_current_options (bitmap)
 }
 
 static int
-set_ignoreeof (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+set_ignoreeof (int on_or_off, char *option_name)
 {
   ignoreeof = on_or_off == FLAG_ON;
   unbind_variable_noref ("ignoreeof");
@@ -403,9 +400,7 @@ set_ignoreeof (on_or_off, option_name)
 }
 
 static int
-set_posix_mode (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+set_posix_mode (int on_or_off, char *option_name)
 {
   /* short-circuit on no-op */
   if ((on_or_off == FLAG_ON && posixly_correct) ||
@@ -424,9 +419,7 @@ set_posix_mode (on_or_off, option_name)
 #if defined (READLINE)
 /* Magic.  This code `knows' how readline handles rl_editing_mode. */
 static int
-set_edit_mode (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+set_edit_mode (int on_or_off, char *option_name)
 {
   int isemacs;
 
@@ -434,7 +427,7 @@ set_edit_mode (on_or_off, option_name)
     {
       rl_variable_bind ("editing-mode", option_name);
 
-      if (interactive)
+      if (interactive && command_execution_string == 0)
 	with_input_from_stdin ();
       no_line_editing = 0;
     }
@@ -443,7 +436,7 @@ set_edit_mode (on_or_off, option_name)
       isemacs = rl_editing_mode == 1;
       if ((isemacs && *option_name == 'e') || (!isemacs && *option_name == 'v'))
 	{
-	  if (interactive)
+	  if (interactive && command_execution_string == 0)
 	    with_input_from_stream (stdin, "stdin");
 	  no_line_editing = 1;
 	}
@@ -452,8 +445,7 @@ set_edit_mode (on_or_off, option_name)
 }
 
 static int
-get_edit_mode (name)
-     char *name;
+get_edit_mode (char *name)
 {
   return (*name == 'e' ? no_line_editing == 0 && rl_editing_mode == 1
 		       : no_line_editing == 0 && rl_editing_mode == 0);
@@ -462,9 +454,7 @@ get_edit_mode (name)
 
 #if defined (HISTORY)
 static int
-bash_set_history (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+bash_set_history (int on_or_off, char *option_name)
 {
   if (on_or_off == FLAG_ON)
     {
@@ -483,9 +473,7 @@ bash_set_history (on_or_off, option_name)
 #endif
 
 int
-set_minus_o_option (on_or_off, option_name)
-     int on_or_off;
-     char *option_name;
+set_minus_o_option (int on_or_off, char *option_name)
 {
   register int i;
 
@@ -515,7 +503,7 @@ set_minus_o_option (on_or_off, option_name)
 }
 
 static void
-print_all_shell_variables ()
+print_all_shell_variables (void)
 {
   SHELL_VAR **vars;
 
@@ -540,11 +528,12 @@ print_all_shell_variables ()
 }
 
 void
-set_shellopts ()
+set_shellopts (void)
 {
   char *value;
   char tflag[N_O_OPTIONS];
-  int vsize, i, vptr, *ip, exported;
+  int i, *ip, exported;
+  size_t vsize, vptr;
   SHELL_VAR *v;
 
   for (vsize = i = 0; o_options[i].name; i++)
@@ -584,17 +573,12 @@ set_shellopts ()
 
   v = find_variable ("SHELLOPTS");
 
-  /* Turn off the read-only attribute so we can bind the new value, and
-     note whether or not the variable was exported. */
-  if (v)
-    {
-      VUNSETATTR (v, att_readonly);
-      exported = exported_p (v);
-    }
-  else
-    exported = 0;
+  /* Note whether or not the variable was exported so we can adjust after the
+     assignment. */
+  exported = v ? exported_p (v) : 0;
 
-  v = bind_variable ("SHELLOPTS", value, 0);
+  /* ASS_FORCE so we don't have to temporarily turn off readonly */
+  v = bind_variable ("SHELLOPTS", value, ASS_FORCE);
 
   /* Turn the read-only attribute back on, and turn off the export attribute
      if it was set implicitly by mark_modified_vars and SHELLOPTS was not
@@ -607,8 +591,7 @@ set_shellopts ()
 }
 
 void
-parse_shellopts (value)
-     char *value;
+parse_shellopts (char *value)
 {
   char *vname;
   int vptr;
@@ -622,8 +605,7 @@ parse_shellopts (value)
 }
 
 void
-initialize_shell_options (no_shellopts)
-     int no_shellopts;
+initialize_shell_options (int no_shellopts)
 {
   char *temp;
   SHELL_VAR *var;
@@ -651,10 +633,12 @@ initialize_shell_options (no_shellopts)
    called from execute_cmd.c:initialize_subshell() when setting up a subshell
    to run an executable shell script without a leading `#!'. */
 void
-reset_shell_options ()
+reset_shell_options (void)
 {
   pipefail_opt = 0;
   ignoreeof = 0;
+
+  interactive_comments = 1;
 
 #if defined (STRICT_POSIX)
   posixly_correct = 1;
@@ -671,8 +655,7 @@ reset_shell_options ()
    then print out the values of the variables instead.  If LIST contains
    non-flags, then set $1 - $9 to the successive words of LIST. */
 int
-set_builtin (list)
-     WORD_LIST *list;
+set_builtin (WORD_LIST *list)
 {
   int on_or_off, flag_name, force_assignment, opts_changed, rv, r;
   register char *arg;
@@ -830,15 +813,26 @@ $END
 
 #define NEXT_VARIABLE()	any_failed++; list = list->next; continue;
 
+#define RESTORE_NAME() \
+do { \
+  tname = name + strlen (name); \
+  if (tname == t - 1)	/* probably a paranoid check */ \
+    { \
+      tname[0] = '['; \
+      t[strlen (t)] = ']'; \
+    } \
+} while (0)
+
 int
-unset_builtin (list)
-  WORD_LIST *list;
+unset_builtin (WORD_LIST *list)
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
   int global_unset_func, global_unset_var, vflags, base_vflags, valid_id;
+  int posix_utility_error;
   char *name, *tname;
 
-  unset_function = unset_variable = unset_array = nameref = any_failed = 0;
+  unset_function = unset_variable = unset_array = nameref = 0;
+  posix_utility_error = any_failed = 0;
   global_unset_func = global_unset_var = 0;
 
   reset_internal_getopt ();
@@ -873,7 +867,7 @@ unset_builtin (list)
     nameref = 0;
 
 #if defined (ARRAY_VARS)
-  base_vflags = assoc_expand_once ? VA_NOEXPAND : 0;
+  base_vflags = array_expand_once ? VA_NOEXPAND : 0;
 #endif
 
   while (list)
@@ -891,23 +885,26 @@ unset_builtin (list)
 
 #if defined (ARRAY_VARS)
       vflags = builtin_arrayref_flags (list->word, base_vflags);
-#endif
-
-#if defined (ARRAY_VARS)
       unset_array = 0;
       /* XXX valid array reference second arg was 0 */
-      if (!unset_function && nameref == 0 && tokenize_array_reference (name, vflags, &t))
+      /* XXX tokenize_array_reference modifies NAME if it succeeds */
+      if (unset_function == 0 && nameref == 0 && tokenize_array_reference (name, vflags, &t))
 	unset_array = 1;
 #endif
+
       /* Get error checking out of the way first.  The low-level functions
 	 just perform the unset, relying on the caller to verify. */
-      valid_id = legal_identifier (name);
+      valid_id = valid_identifier (name);
 
       /* Whether or not we are in posix mode, if neither -f nor -v appears,
 	 skip over trying to unset variables with invalid names and just
 	 treat them as potential shell function names. */
       if (global_unset_func == 0 && global_unset_var == 0 && valid_id == 0)
 	{
+#if defined (ARRAY_VARS)
+	  if (unset_array)
+	    RESTORE_NAME ();
+#endif
 	  unset_variable = unset_array = 0;
 	  unset_function = 1;
 	}
@@ -918,6 +915,7 @@ unset_builtin (list)
       if (unset_function == 0 && valid_id == 0)
 	{
 	  sh_invalidid (name);
+	  posix_utility_error++;
 	  NEXT_VARIABLE ();
 	}
 
@@ -930,6 +928,7 @@ unset_builtin (list)
       if (var && unset_function == 0 && non_unsettable_p (var))
 	{
 	  builtin_error (_("%s: cannot unset"), name);
+	  posix_utility_error++;
 	  NEXT_VARIABLE ();
 	}
 
@@ -941,8 +940,20 @@ unset_builtin (list)
 	 find a function after unsuccessfully searching for a variable,
 	 note that we're acting on a function now as if -f were
 	 supplied.  The readonly check below takes care of it. */
-      if (var == 0 && nameref == 0 &&  unset_variable == 0 && unset_function == 0)
+      if (var == 0 && nameref == 0 && unset_variable == 0 && unset_function == 0)
 	{
+#if defined (ARRAY_VARS)
+	  /* We modified NAME in the call to tokenize_array_reference, so we
+	     need to restore it here. We turned the original `[' and `]' into
+	     NULL, to isolate the array name and subscript. This only happens
+	     if tokenize_array_reference succeeds with a non-NULL subscript
+	     pointer, and UNSET_ARRAY is set to 1 only in this case. */ 
+	  if (unset_array)
+	    {
+	      RESTORE_NAME();
+	      unset_array = 0;
+	    }
+#endif
 	  if (var = find_function (name))
 	    unset_function = 1;
 	}
@@ -952,6 +963,7 @@ unset_builtin (list)
 	{
 	  builtin_error (_("%s: cannot unset: readonly %s"),
 			 var->name, unset_function ? "function" : "variable");
+	  posix_utility_error++;
 	  NEXT_VARIABLE ();
 	}
 
@@ -987,6 +999,7 @@ unset_builtin (list)
 		  int len;
 
 		  tname = savestring (nameref_cell (var));
+		  tem = 0;
 		  if (var = array_variable_part (tname, 0, &t, &len))
 		    {
 		      /* change to what unbind_array_element now expects */
@@ -1000,16 +1013,22 @@ unset_builtin (list)
 #endif
 		tem = unbind_variable (nameref_cell (var));
 	    }
+	  else if (posixly_correct && var && tempvar_p (var))
+	    tem = posix_unbind_tempvar (name);
 	  else
 	    tem = unbind_variable (name);
 	}
+      else if (posixly_correct && unset_function == 0 && nameref == 0 && var && tempvar_p (var))
+	tem = posix_unbind_tempvar (name);
       else
 	tem = unset_function ? unbind_func (name) : (nameref ? unbind_nameref (name) : unbind_variable (name));
 
       /* This is what Posix.2 says:  ``If neither -f nor -v
 	 is specified, the name refers to a variable; if a variable by
-	 that name does not exist, a function by that name, if any,
-	 shall be unset.'' */
+	 that name does not exist, it is unspecified whether  a function
+	 by that name, if any, shall be unset.'' The unspecified part is a
+	 recent addition, so we continue to try to unset a shell function if
+	 we don't find a variable named NAME. */
       if (tem == -1 && nameref == 0 && unset_function == 0 && unset_variable == 0)
 	tem = unbind_func (name);
 
@@ -1024,5 +1043,5 @@ unset_builtin (list)
       list = list->next;
     }
 
-  return (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
+  return (any_failed ? (posix_utility_error ? EX_UTILERROR : EXECUTION_FAILURE) : EXECUTION_SUCCESS);
 }

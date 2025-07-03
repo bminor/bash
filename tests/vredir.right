@@ -5,16 +5,18 @@ foo 3
 bar is a function
 bar () 
 { 
-    exec {v}> $TMPFILE;
+    exec {v}>> $TMPFILE;
     echo $v
 }
 ./vredir.tests: line 19: v: readonly variable
 ./vredir.tests: line 19: v: cannot assign fd to variable
 42
+./vredir.tests: line 38: v: readonly variable
+./vredir.tests: line 38: v: cannot assign fd to variable
 bar is a function
 bar () 
 { 
-    exec {v}> $TMPFILE;
+    exec {v}>> $TMPFILE;
     echo $v
 }
 10
@@ -25,6 +27,21 @@ bar is a function
 bar () 
 { 
     exec {v}<<EOF
+line 1
+line 2
+line 3
+EOF
+
+    echo $v
+}
+11
+line 1
+line 2
+line 3
+bar is a function
+bar () 
+{ 
+    exec {v}<<-EOF
 line 1
 line 2
 line 3
@@ -72,6 +89,9 @@ swizzle ()
     exec {stdin}<&$fd0;
     exec {stdout}>&$fd1
 }
+10 11
+10 11
+./vredir4.sub: line 51: ${output}: Bad file descriptor
 12 10
 a
 a
@@ -98,4 +118,6 @@ swizzle ()
     exec {stdin}<&${fd[0]}-;
     exec {stdout}>&${fd[1]}-
 }
-./vredir8.sub: line 12: $fd: Bad file descriptor
+redir 2
+./vredir8.sub: line 33: $fd: Bad file descriptor
+./vredir8.sub: line 38: $fd: Bad file descriptor

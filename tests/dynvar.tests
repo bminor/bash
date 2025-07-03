@@ -47,6 +47,11 @@ after=$SECONDS
 if (( $after > $before )); then echo SECONDS ok; fi
 unset before after
 
+# do the best we can to test assignment to SECONDS
+SECONDS=2
+sleep 1
+[[ $SECONDS -ge 10 ]] && echo 'SECONDS: bad value assignment'
+
 # EPOCHSECONDS
 
 # not exact, but should work
@@ -99,4 +104,23 @@ ${THIS_SH} -c 'echo $BASH_COMMAND'
 
 # FUNCNAME tested in func.tests
 # RANDOM tested in varenv.sh
-# LINENO tested in dbg-support
+# LINENO tested in dbg-support, misc additional tests here
+arith_lineno()
+{
+	echo $LINENO
+	for f in 1 ; do echo $LINENO; done
+	for (( f=1 ; f < 2; f++ )); do echo $LINENO; done
+	echo $(( $LINENO ))
+	(( 1 == 1 )) && echo $LINENO
+	(( LINENO / 0 ))
+}
+arith_lineno
+
+# assignments to noassign variables are ignored
+FUNCNAME=42
+echo $? $FUNCNAME
+
+GROUPS[0]=-1
+echo $?
+
+[[ ${GROUPS[0]} != -1 ]] || echo GROUPS noassign error

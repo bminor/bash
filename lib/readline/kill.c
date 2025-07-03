@@ -1,6 +1,6 @@
 /* kill.c -- kill ring management. */
 
-/* Copyright (C) 1994-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2024 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -348,15 +348,15 @@ rl_unix_filename_rubout (int count, int key)
       if (count <= 0)
 	count = 1;
 
-      while (count--)
+      while (rl_point > 0 && count--)
 	{
 	  c = rl_line_buffer[rl_point - 1];
 
 	  /* First move backwards through whitespace */
 	  while (rl_point && whitespace (c))
 	    {
-	      rl_point--;
-	      c = rl_line_buffer[rl_point - 1];
+	      if (--rl_point)
+		c = rl_line_buffer[rl_point - 1];
 	    }
 
 	  /* Consume one or more slashes. */
@@ -377,14 +377,14 @@ rl_unix_filename_rubout (int count, int key)
 
 	  while (rl_point && (whitespace (c) || c == '/'))
 	    {
-	      rl_point--;
-	      c = rl_line_buffer[rl_point - 1];
+	      if (--rl_point)
+		c = rl_line_buffer[rl_point - 1];
 	    }
 
 	  while (rl_point && (whitespace (c) == 0) && c != '/')
 	    {
-	      rl_point--;	/* XXX - multibyte? */
-	      c = rl_line_buffer[rl_point - 1];
+	      if (--rl_point)	/* XXX - multibyte? */
+		c = rl_line_buffer[rl_point - 1];
 	    }
 	}
 
@@ -569,7 +569,7 @@ rl_vi_yank_pop (int count, int key)
     }
 
   l = strlen (rl_kill_ring[rl_kill_index]);
-#if 0 /* TAG:readline-8.3 8/29/2022 matteopaolini1995@gmail.com */
+#if 1
   origpoint = rl_point;
   n = rl_point - l + 1;
 #else
@@ -577,7 +577,7 @@ rl_vi_yank_pop (int count, int key)
 #endif
   if (n >= 0 && STREQN (rl_line_buffer + n, rl_kill_ring[rl_kill_index], l))
     {
-#if 0 /* TAG:readline-8.3 */
+#if 1
       rl_delete_text (n, n + l);		/* remember vi cursor positioning */
       rl_point = origpoint - l;
 #else
@@ -737,12 +737,9 @@ _rl_bracketed_text (size_t *lenp)
     }
   RL_UNSETSTATE (RL_STATE_MOREINPUT);
 
-  if (c >= 0)
-    {
-      if (len == cap)
-	buf = xrealloc (buf, cap + 1);
-      buf[len] = '\0';
-    }
+  if (len == cap)
+    buf = xrealloc (buf, cap + 1);
+  buf[len] = '\0';
 
   if (lenp)
     *lenp = len;
@@ -756,8 +753,8 @@ _rl_bracketed_text (size_t *lenp)
 int
 rl_bracketed_paste_begin (int count, int key)
 {
-  int retval, c;
-  size_t len, cap;
+  int retval;
+  size_t len;
   char *buf;
 
   buf = _rl_bracketed_text (&len);
@@ -774,12 +771,12 @@ int
 _rl_read_bracketed_paste_prefix (int c)
 {
   char pbuf[BRACK_PASTE_SLEN+1], *pbpref;
-  int key, ind, j;
+  int key, ind;
 
   pbpref = BRACK_PASTE_PREF;		/* XXX - debugging */
   if (c != pbpref[0])
     return (0);
-  pbuf[ind = 0] = c;
+  pbuf[ind = 0] = key = c;
   while (ind < BRACK_PASTE_SLEN-1 &&
 	 (RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
          _rl_pushed_input_available () == 0 &&
@@ -846,7 +843,7 @@ _rl_bracketed_read_key ()
 int
 _rl_bracketed_read_mbstring (char *mb, int mlen)
 {
-  int c, r;
+  int c;
 
   c = _rl_bracketed_read_key ();
   if (c < 0)
@@ -865,6 +862,8 @@ _rl_bracketed_read_mbstring (char *mb, int mlen)
 
 /* A special paste command for Windows users. */
 #if defined (_WIN32)
+#define WIN32_LEAN_AND_MEAN
+
 #include <windows.h>
 
 int

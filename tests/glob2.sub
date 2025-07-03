@@ -14,11 +14,11 @@
 . ./test-glue-functions
 
 # this locale causes problems all over the place
-if locale -a | grep -i '^zh_HK\.big5hkscs' >/dev/null ; then
+if locale -a | grep -i '^zh_TW\.big5' >/dev/null ; then
         :
 else
-        echo "glob2.sub: warning: you do not have the zh_HK.big5hkscs locale installed;" >&2
-        echo "glob2.sub: warning: that will cause some of these tests to fail." >&2
+        echo "glob2.sub: warning: you do not have the zh_TW.big5 locale installed;" >&2
+        echo "glob2.sub: warning: that may cause some of these tests to fail." >&2
 fi
 
 var='ab\'
@@ -41,7 +41,7 @@ esac
 [[ $var = $var ]] && echo ok 4
 [[ $var = $'ab\134' ]] && echo ok 5
 
-LC_ALL=zh_HK.big5hkscs
+LC_ALL=zh_TW.big5
 
 read a b c <<< $'\u3b1 b c\n'
 echo $b
@@ -62,4 +62,4 @@ printf "%s" "a${alpha}b" | LC_ALL=C od -b | _intl_normalize_spaces
 a=$'\u3b1'
 [[ $a = $a ]] && echo ok 6
 
-LC_ALL=zh_HK.big5hkscs ${THIS_SH} -c $'[[ \u3b1 = \u3b1 ]]' && echo ok 7
+LC_ALL=zh_TW.big5 ${THIS_SH} -c $'[[ \u3b1 = \u3b1 ]]' && echo ok 7

@@ -1,6 +1,6 @@
 /* bashgetopt.c -- `getopt' for use by the builtins. */
 
-/* Copyright (C) 1992-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,9 +48,7 @@ WORD_LIST	*lcurrent = (WORD_LIST *)NULL;
 WORD_LIST	*loptend;	/* Points to the first non-option argument in the list */
 
 int
-internal_getopt(list, opts)
-WORD_LIST	*list;
-char		*opts;
+internal_getopt(WORD_LIST *list, char *opts)
 {
 	register int c;
 	register char *cp;
@@ -154,7 +152,7 @@ char		*opts;
 				list_optflags = 0;
 			}
 		} else {
-			if (lcurrent->next && legal_number(lcurrent->next->word->word, (intmax_t *)0)) {
+			if (lcurrent->next && valid_number(lcurrent->next->word->word, (intmax_t *)0)) {
 				lcurrent = lcurrent->next;
 				list_optarg = lcurrent->word->word;
 				list_optflags = lcurrent->word->flags;
@@ -187,7 +185,7 @@ char		*opts;
  */
 
 void
-reset_internal_getopt ()
+reset_internal_getopt (void)
 {
 	lhead = lcurrent = loptend = (WORD_LIST *)NULL;
 	sp = 1;

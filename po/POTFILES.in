@@ -1,5 +1,5 @@
 # List of source files containing translatable strings.
-# Copyright (C) 2004 Free Software Foundation, Inc.
+# Copyright (C) 2004-2024 Free Software Foundation, Inc.
 
 arrayfunc.c
 bashhist.c
@@ -15,6 +15,7 @@ builtins/complete.def
 builtins/declare.def
 builtins/enable.def
 builtins/evalfile.c
+builtins/evalstring.c
 builtins/exec.def
 builtins/exit.def
 builtins/fc.def
@@ -23,7 +24,6 @@ builtins/getopt.c
 builtins/hash.def
 builtins/help.def
 builtins/history.def
-builtins/inlib.def
 builtins/jobs.def
 builtins/kill.def
 builtins/let.def
@@ -39,6 +39,7 @@ builtins/shift.def
 builtins/shopt.def
 builtins/source.def
 builtins/suspend.def
+builtins/test.def
 builtins/type.def
 builtins/ulimit.def
 builtins/umask.def
@@ -49,11 +50,8 @@ expr.c
 general.c
 input.c
 jobs.c
-lib/intl/os2compat.c
 lib/malloc/malloc.c
-lib/malloc/stats.c
 lib/malloc/table.c
-lib/malloc/watch.c
 lib/sh/fmtulong.c
 lib/sh/netopen.c
 locale.c
@@ -61,6 +59,7 @@ mailcheck.c
 make_cmd.c
 nojobs.c
 parse.y
+pathexp.c
 pcomplete.c
 pcomplib.c
 print_cmd.c
@@ -71,10 +70,13 @@ siglist.c
 subst.c
 test.c
 trap.c
+unwind_prot.c
 variables.c
 version.c
-version2.c
+#version2.c
 xmalloc.c
+
+lib/intl/plural.c
 
 # Apparently gettext's defaults cannot handle files that exist outside of the
 # source directory, like in the build directory

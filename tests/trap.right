@@ -105,11 +105,34 @@ fn
 after 1
 fn
 after 2
+declare -- baz=$'bar\nfoo'
+before
+after
+CHLD
+CHLD
+CHLD
+CHLD
+BASH_TRAPSIG = USR1
+func=7
+222
+exit=0
+exit=0
+A
+In trap-argument: last command preceding the trap action
+In a function call: last command in the trap action
 caught a child death
 caught a child death
 caught a child death
 trap -- 'echo caught a child death' SIGCHLD
+echo caught a child death
+./trap.tests: line 118: trap: cannot specify both -p and -P
+./trap.tests: line 119: trap: -P requires at least one signal name
+trap: usage: trap [-Plp] [[action] signal_spec ...]
+./trap.tests: line 121: trap: -x: invalid option
+trap: usage: trap [-Plp] [[action] signal_spec ...]
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGABRT
 trap -- 'echo caught a child death' SIGCHLD
+trap: usage: trap [-Plp] [[action] signal_spec ...]
+echo exiting
 exiting

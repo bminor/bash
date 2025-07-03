@@ -2,7 +2,7 @@
 
    Modified by Chet Ramey for Readline.
 
-   Copyright (C) 1985, 1988, 1990-1991, 1995-2021
+   Copyright (C) 1985, 1988, 1990-1991, 1995-2021, 2023
    Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -73,7 +73,7 @@
 static bool is_colored (enum indicator_no type);
 static void restore_default_color (void);
 
-#define RL_COLOR_PREFIX_EXTENSION	".readline-colored-completion-prefix"
+#define RL_COLOR_PREFIX_EXTENSION	"readline-colored-completion-prefix"
 
 COLOR_EXT_TYPE *_rl_color_ext_list = 0;
 

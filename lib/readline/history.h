@@ -1,6 +1,6 @@
 /* history.h -- the names of functions that you can call in history. */
 
-/* Copyright (C) 1989-2022 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2023 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -36,15 +36,11 @@ extern "C" {
 #  include <readline/rltypedefs.h>
 #endif
 
-#ifdef __STDC__
 typedef void *histdata_t;
-#else
-typedef char *histdata_t;
-#endif
 
 /* Let's not step on anyone else's define for now, since we don't use this yet. */
 #ifndef HS_HISTORY_VERSION
-#  define HS_HISTORY_VERSION 0x0802	/* History 8.2 */
+#  define HS_HISTORY_VERSION 0x0803	/* History 8.3 */
 #endif
 
 /* The structure used to store a history entry. */
@@ -53,6 +49,10 @@ typedef struct _hist_entry {
   char *timestamp;		/* char * rather than time_t for read/write */
   histdata_t data;
 } HIST_ENTRY;
+
+#ifndef HIST_ENTRY_DEFINED
+#  define HIST_ENTRY_DEFINED
+#endif
 
 /* Size of the history-library-managed space in history entry HS. */
 #define HISTENT_BYTES(hs)	(strlen ((hs)->line) + strlen ((hs)->timestamp))
@@ -232,7 +232,7 @@ extern int history_truncate_file (const char *, int);
 
   If an error occurred in expansion, then OUTPUT contains a descriptive
   error message. */
-extern int history_expand (char *, char **);
+extern int history_expand (const char *, char **);
 
 /* Extract a string segment consisting of the FIRST through LAST
    arguments present in STRING.  Arguments are broken up as in

@@ -11,45 +11,33 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Originally donated by John Kearney <dethrophes@web.de> Tue, 21 Feb 2012
+# Updates from Grisha Levit <grishalevit@gmail.com> 22 Nov 2023
+#
 unset LC_ALL
 
 ErrorCnt=0
 TestCnt=0
 
-  function check_valid_var_name {
-    case "${1:?Missing Variable Name}" in
-      [!a-zA-Z_]* | *[!a-zA-Z_0-9]* ) return 3;;
-    esac
-  }
-  # get_array_element VariableName ArrayName ArrayElement
-  function get_array_element {
-    check_valid_var_name "${1:?Missing Variable Name}" || return $?
-    check_valid_var_name "${2:?Missing Array Name}" || return $?
-    eval "${1}"'="${'"${2}"'["${3:?Missing Array Index}"]}"'
-  }
-  # unset_array_element VarName ArrayName
-  function get_array_element_cnt {
-    check_valid_var_name "${1:?Missing Variable Name}" || return $?
-    check_valid_var_name "${2:?Missing Array Name}" || return $?
-    eval "${1}"'="${#'"${2}"'[@]}"'
-  }
-
+localewarn()
+{
+	echo "unicode1.sub: warning: you do not have the $1 locale installed;" >&2
+	echo "unicode1.sub: that will cause some of these tests to be skipped." >&2
+}
 
 function TestCodePage {
     local TargetCharset="${1:?Missing Test charset}"
-    local EChar RChar TCnt
-    get_array_element_cnt TCnt "${2:?Missing Array Name}"
-    for (( x=1 ; x<${TCnt} ; x++ )); do
-      get_array_element EChar "${2}"  ${x}
-      if [ -n "${EChar}" ]; then
+    local EChar RChar Uval x
+    local -n Array=${2:?Missing Array Name}
+    for x in "${!Array[@]}"; do
 	let TestCnt+=1
+	EChar=${Array[$x]}
 	printf -v UVal '\\U%08x' "${x}"
 	LC_CTYPE=${TargetCharset} printf -v RChar "${UVal}" 2>/dev/null
 	if [ "${EChar}" != "${RChar}" ]; then
 	  let ErrorCnt+=1
-	  printf "${TargetCharset}: Error Encoding U+%08X to ${TL} [ \"%q\" != \"%q\" ]\n" "${x}" "${EChar}" "${RChar}"
+	  printf "%s: Error Encoding U+%08X [ \"%q\" != \"%q\" ]\n" "${TargetCharset}" "${x}" "${EChar}" "${RChar}"
 	fi
-      fi
     done
 }
 
@@ -113,15 +101,28 @@ fr_FR_ISO_8859_1=(
 if locale -a | grep -i '^fr_FR\.ISO8859.*1$' >/dev/null ; then
 	TestCodePage fr_FR.ISO8859-1 fr_FR_ISO_8859_1
 else
-	echo "unicode1.sub: warning: you do not have the fr_FR.ISO8859-1 locale installed;" >&2
-	echo "unicode1.sub: that will cause some of these tests to be skipped." >&2
+	localewarn fr_FR.ISO8859-1
+
 fi
 
 zh_TW_BIG5=(
- [0x00f6]=$'\366' [0x00f7]=$'\367' [0x00f8]=$'\370' [0x00f9]=$'\371' [0x00fa]=$'\372'
- [0x00fb]=$'\373' [0x00fc]=$'\374' [0x00fd]=$'\375' [0x00fe]=$'\376'	
+# these are the original incorrect tests
+# [0x00f6]=$'\366' [0x00f7]=$'\367' [0x00f8]=$'\370' [0x00f9]=$'\371' [0x00fa]=$'\372'
+# [0x00fb]='\373' [0x00fc]=$'\374' [0x00fd]=$'\375' [0x00fe]=$'\376'	
+# some valid encodings
+  [0x03A8]=$'\243Z' [0x03A9]=$'\243[' [0x03B1]=$'\243\\' [0x03B2]=$'\243]'
+  [0x03B3]=$'\243^' [0x03B4]=$'\243_' [0x03B5]=$'\243`'  [0x03B6]=$'\243a'
+# and some invalid ones that output \u0XX
+# can't use these any more; macos 14 (sonoma) broke libiconv
+#  [0x00fb]='\u00FB' [0x00fc]='\u00FC' [0x00fd]='\u00FD' [0x00fe]='\u00FE'
 )
-TestCodePage zh_TW.BIG5 zh_TW_BIG5
+
+# this locale causes problems all over the place
+if locale -a | grep -i '^zh_TW\.big5' >/dev/null ; then
+	TestCodePage zh_TW.BIG5 zh_TW_BIG5
+else
+	localewarn zh_TW.BIG5
+fi
 
 jp_JP_SHIFT_JIS=(
   [0x0001]=$'\x01' #  START OF HEADING
@@ -320,14 +321,13 @@ jp_JP_SHIFT_JIS=(
 if locale -a | grep -i '^ja_JP.SJIS' >/dev/null ; then
 	TestCodePage ja_JP.SJIS jp_JP_SHIFT_JIS
 else
-	echo "unicode1.sub: warning: you do not have the ja_JP.SJIS locale installed;" >&2
-	echo "unicode1.sub: that will cause some of these tests to be skipped." >&2
+	localewarn ja_JP.SJIS
 fi
 
-#for ((x=1;x<1000;x++)); do printf ' [0x%04x]=%-11q' "$x" "$(printf "$(printf '\\U%08x' $x)")" ; [ $(($x%5)) = 0 ] && echo; done
+#for ((x=1;x<1000;x++)); do printf -v u '\\U%08x' "$x"; printf ' [0x%04x]=%-11q' "$x" "${u@E}"; [ $(($x%5)) = 0 ] && echo; done
 C_UTF_8=(
  [0x0001]=$'\001'     [0x0002]=$'\002'     [0x0003]=$'\003'     [0x0004]=$'\004'     [0x0005]=$'\005'    
- [0x0006]=$'\006'     [0x0007]=$'\a'       [0x0008]=$'\b'       [0x0009]=$'\t'       [0x000a]=''         
+ [0x0006]=$'\006'     [0x0007]=$'\a'       [0x0008]=$'\b'       [0x0009]=$'\t'       [0x000a]=$'\n'         
  [0x000b]=$'\v'       [0x000c]=$'\f'       [0x000d]=$'\r'       [0x000e]=$'\016'     [0x000f]=$'\017'    
  [0x0010]=$'\020'     [0x0011]=$'\021'     [0x0012]=$'\022'     [0x0013]=$'\023'     [0x0014]=$'\024'    
  [0x0015]=$'\025'     [0x0016]=$'\026'     [0x0017]=$'\027'     [0x0018]=$'\030'     [0x0019]=$'\031'    

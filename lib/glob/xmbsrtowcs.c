@@ -1,6 +1,6 @@
 /* xmbsrtowcs.c -- replacement function for mbsrtowcs */
 
-/* Copyright (C) 2002-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -47,7 +47,7 @@ extern int errno;
 #endif
 
 #if ! HAVE_STRCHRNUL
-extern char *strchrnul PARAMS((const char *, int));
+extern char *strchrnul (const char *, int);
 #endif
 
 /* On some locales (ex. ja_JP.sjis), mbsrtowc doesn't convert 0x5c to U<0x5c>.
@@ -57,11 +57,7 @@ static mbstate_t local_state;
 static int local_state_use = 0;
 
 size_t
-xmbsrtowcs (dest, src, len, pstate)
-    wchar_t *dest;
-    const char **src;
-    size_t len;
-    mbstate_t *pstate;
+xmbsrtowcs (wchar_t *dest, const char **src, size_t len, mbstate_t *pstate)
 {
   mbstate_t *ps;
   size_t mblength, wclength, n;
@@ -139,16 +135,15 @@ xmbsrtowcs (dest, src, len, pstate)
 }
 
 #if HAVE_MBSNRTOWCS
-/* Convert a multibyte string to a wide character string. Memory for the
-   new wide character string is obtained with malloc.
+/* Convert a multibyte string SRC to a wide character string and store the
+   result in *DESTP. Memory for the new wide character string is obtained
+   with malloc.
 
    Fast multiple-character version of xdupmbstowcs used when the indices are
    not required and mbsnrtowcs is available. */
 
 static size_t
-xdupmbstowcs2 (destp, src)
-    wchar_t **destp;	/* Store the pointer to the wide character string */
-    const char *src;	/* Multibyte character string */
+xdupmbstowcs2 (wchar_t **destp, const char *src)
 {
   const char *p;	/* Conversion start position of src */
   wchar_t *wsbuf;	/* Buffer for wide characters. */
@@ -258,11 +253,12 @@ xdupmbstowcs2 (destp, src)
 }
 #endif /* HAVE_MBSNRTOWCS */
 
-/* Convert a multibyte string to a wide character string. Memory for the
-   new wide character string is obtained with malloc.
+/* Convert a multibyte string SRC to a wide character string and store the
+   result in *DESTP. Memory for the new wide character string is obtained
+   with malloc.
 
    The return value is the length of the wide character string. Returns a
-   pointer to the wide character string in DESTP. If INDICESP is not NULL,
+   pointer to the wide character string in *DESTP. If INDICESP is not NULL,
    INDICESP stores the pointer to the pointer array. Each pointer is to
    the first byte of each multibyte character. Memory for the pointer array
    is obtained with malloc, too.
@@ -270,10 +266,7 @@ xdupmbstowcs2 (destp, src)
    of DESTP and INDICESP are NULL. */
 
 size_t
-xdupmbstowcs (destp, indicesp, src)
-    wchar_t **destp;	/* Store the pointer to the wide character string */
-    char ***indicesp;	/* Store the pointer to the pointer array. */
-    const char *src;	/* Multibyte character string */
+xdupmbstowcs (wchar_t **destp, char ***indicesp, const char *src)
 {
   const char *p;	/* Conversion start position of src */
   wchar_t wc;		/* Created wide character by conversion */
@@ -426,7 +419,6 @@ xwcsrtombs (char *dest, const wchar_t **srcp, size_t len, mbstate_t *ps)
   size_t cur_max;			/* XXX - locale_cur_max */
   char buf[64], *destptr, *tmp_dest;
   unsigned char uc;
-  mbstate_t prev_state;
 
   cur_max = MB_CUR_MAX;
   if (cur_max > sizeof (buf))		/* Holy cow. */

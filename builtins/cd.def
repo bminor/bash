@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -56,13 +56,13 @@ extern int errno;
 
 extern const char * const bash_getcwd_errstr;
 
-static int bindpwd PARAMS((int));
-static int setpwd PARAMS((char *));
-static char *resetpwd PARAMS((char *));
-static int change_to_directory PARAMS((char *, int, int));
+static int bindpwd (int);
+static int setpwd (char *);
+static char *resetpwd (char *);
+static int change_to_directory (char *, int, int);
 
-static int cdxattr PARAMS((char *, char **));
-static void resetxattr PARAMS((void));
+static int cdxattr (char *, char **);
+static void resetxattr (void);
 
 /* Change this to 1 to get cd spelling correction by default. */
 int cdspelling = 0;
@@ -75,7 +75,7 @@ static int xattrfd = -1;
 
 $BUILTIN cd
 $FUNCTION cd_builtin
-$SHORT_DOC cd [-L|[-P [-e]] [-@]] [dir]
+$SHORT_DOC cd [-L|[-P [-e]]] [-@] [dir]
 Change the shell working directory.
 
 Change the current directory to DIR.  The default DIR is the value of the
@@ -115,8 +115,7 @@ $END
 
 /* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
 static int
-setpwd (dirname)
-     char *dirname;
+setpwd (char *dirname)
 {
   int old_anm;
   SHELL_VAR *tvar;
@@ -134,8 +133,7 @@ setpwd (dirname)
 }
 
 static int
-bindpwd (no_symlinks)
-     int no_symlinks;
+bindpwd (int no_symlinks)
 {
   char *dirname, *pwdvar;
   int old_anm, r, canon_failed;
@@ -160,10 +158,9 @@ bindpwd (no_symlinks)
   pwdvar = get_string_value ("PWD");
 
   tvar = bind_variable ("OLDPWD", pwdvar, 0);
-  if (tvar && readonly_p (tvar))
+  if (tvar == 0 || readonly_p (tvar))
     r = EXECUTION_FAILURE;
-
-  if (old_anm == 0 && array_needs_making && exported_p (tvar))
+  else if (old_anm == 0 && array_needs_making && exported_p (tvar))
     {
       update_export_env_inplace ("OLDPWD=", 7, pwdvar);
       array_needs_making = 0;
@@ -183,8 +180,7 @@ bindpwd (no_symlinks)
 /* Call get_working_directory to reset the value of
    the_current_working_directory () */
 static char *
-resetpwd (caller)
-     char *caller;
+resetpwd (char *caller)
 {
   char *tdir;
       
@@ -194,10 +190,9 @@ resetpwd (caller)
   return (tdir);
 }
 
+/* return new constructed directory name in *NDIRP */
 static int
-cdxattr (dir, ndirp)
-     char *dir;		/* don't assume we can always free DIR */
-     char **ndirp;	/* return new constructed directory name */
+cdxattr (char *dir, char **ndirp)
 {
 #if defined (O_XATTR)
   int apfd, fd, r, e;
@@ -241,7 +236,7 @@ cdxattr (dir, ndirp)
 
 /* Clean up the O_XATTR baggage.  Currently only closes xattrfd */
 static void
-resetxattr ()
+resetxattr (void)
 {
 #if defined (O_XATTR)
   if (xattrfd >= 0)
@@ -264,8 +259,7 @@ resetxattr ()
    so the programming interface is simple, and it handles errors and
    restrictions properly. */
 int
-cd_builtin (list)
-     WORD_LIST *list;
+cd_builtin (WORD_LIST *list)
 {
   char *dirname, *cdpath, *path, *temp;
   int path_index, no_symlinks, opt, lflag, e;
@@ -320,9 +314,9 @@ cd_builtin (list)
   if (list == 0)
     {
       /* `cd' without arguments is equivalent to `cd $HOME' */
-      dirname = get_string_value ("HOME");
+      dirname = get_string_value ("HOME");	/* POSIX cd step 2 */
 
-      if (dirname == 0)
+      if (dirname == 0)			/* POSIX cd step 1 */
 	{
 	  builtin_error (_("HOME not set"));
 	  return (EXECUTION_FAILURE);
@@ -333,16 +327,14 @@ cd_builtin (list)
   else if (list->next)
     {
       builtin_error (_("too many arguments"));
-      return (EXECUTION_FAILURE);
+      return (EX_USAGE);
     }
 #endif
-#if 0
   else if (list->word->word[0] == '\0')
     {
-      builtin_error (_("null directory"));
+      builtin_error (_("null directory"));	/* POSIX cd implementation defined */
       return (EXECUTION_FAILURE);
     }
-#endif
   else if (list->word->word[0] == '-' && list->word->word[1] == '\0')
     {
       /* This is `cd -', equivalent to `cd $OLDPWD' */
@@ -353,19 +345,14 @@ cd_builtin (list)
 	  builtin_error (_("OLDPWD not set"));
 	  return (EXECUTION_FAILURE);
 	}
-#if 0
-      lflag = interactive ? LCD_PRINTPATH : 0;
-#else
-      lflag = LCD_PRINTPATH;		/* According to SUSv3 */
-#endif
+      lflag = LCD_PRINTPATH;		/* POSIX cd `-' operand */
     }
-  else if (absolute_pathname (list->word->word))
+  else
     dirname = list->word->word;
-  else if (privileged_mode == 0 && (cdpath = get_string_value ("CDPATH")))
-    {
-      dirname = list->word->word;
 
-      /* Find directory in $CDPATH. */
+  if (privileged_mode == 0 && absolute_pathname (dirname) == 0 && (cdpath = get_string_value ("CDPATH")))
+    {
+      /* Find directory in $CDPATH, POSIX cd step 5. */
       path_index = 0;
       while (path = extract_colon_unit (cdpath, &path_index))
 	{
@@ -395,23 +382,7 @@ cd_builtin (list)
 	  else
 	    free (temp);
 	}
-
-#if 0
-      /* changed for bash-4.2 Posix cd description steps 5-6 */
-      /* POSIX.2 says that if `.' does not appear in $CDPATH, we don't
-	 try the current directory, so we just punt now with an error
-	 message if POSIXLY_CORRECT is non-zero.  The check for cdpath[0]
-	 is so we don't mistakenly treat a CDPATH value of "" as not
-	 specifying the current directory. */
-      if (posixly_correct && cdpath[0])
-	{
-	  builtin_error ("%s: %s", dirname, strerror (ENOENT));
-	  return (EXECUTION_FAILURE);
-	}
-#endif
     }
-  else
-    dirname = list->word->word;
 
   /* When we get here, DIRNAME is the directory to change to.  If we
      chdir successfully, just return. */
@@ -456,6 +427,7 @@ cd_builtin (list)
   builtin_error ("%s: %s", temp, strerror (e));
   if (temp != dirname)
     free (temp);
+  /* posix says to return >1 if eflag && no_symlinks?? */
   return (EXECUTION_FAILURE);
 }
 
@@ -482,8 +454,7 @@ static int verbatim_pwd;
 
 /* Print the name of the current working directory. */
 int
-pwd_builtin (list)
-     WORD_LIST *list;
+pwd_builtin (WORD_LIST *list)
 {
   char *directory;
   int opt, pflag;
@@ -548,9 +519,7 @@ pwd_builtin (list)
    to the working directory.  Return 1 on success, 0 on failure. */
 
 static int
-change_to_directory (newdir, nolinks, xattr)
-     char *newdir;
-     int nolinks, xattr;
+change_to_directory (char *newdir, int nolinks, int xattr)
 {
   char *t, *tdir, *ndir;
   int err, canon_failed, r, ndlen;
@@ -568,8 +537,11 @@ change_to_directory (newdir, nolinks, xattr)
   /* TDIR is either the canonicalized absolute pathname of NEWDIR
      (nolinks == 0) or the absolute physical pathname of NEWDIR
      (nolinks != 0). */
-  tdir = nolinks ? sh_physpath (t, 0)
-		 : sh_canonpath (t, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+  if (t && *t)
+    tdir = nolinks ? sh_physpath (t, 0)
+		   : sh_canonpath (t, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+  else
+    tdir = NULL;
 
   ndlen = strlen (newdir);
 
@@ -662,9 +634,17 @@ change_to_directory (newdir, nolinks, xattr)
 
   /* We're not in physical mode (nolinks == 0), but we failed to change to
      the canonicalized directory name (TDIR).  Try what the user passed
-     verbatim. If we succeed, reinitialize the_current_working_directory.
-     POSIX requires that we just fail here, so we do in posix mode. */
-  if (posixly_correct == 0 && chdir (newdir) == 0)
+     verbatim. If we succeed, reinitialize the_current_working_directory. */
+
+  /* The first block is step 9 in the POSIX cd algorithm. */
+  if (posixly_correct && ndlen < PATH_MAX && strlen (tdir) >= PATH_MAX)
+    r = chdir (newdir);
+  else if (posixly_correct == 0)
+    r = chdir (newdir);
+  else
+    r = -1;
+
+  if (r == 0)
     {
       t = resetpwd ("cd");
       if (t == 0)

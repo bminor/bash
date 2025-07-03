@@ -26,3 +26,22 @@ fn
 echo after 2
 
 unset -f fn
+
+# make sure the RETURN trap is run in a command substitution
+foo() { trap 'echo foo' RETURN; /bin/echo bar; }
+baz=$( foo )
+declare -p baz
+
+unset -v baz
+unset -f foo
+
+# since this sets the exit trap, it has to go last
+
+set +o functrace
+# posix interp 1602
+ReturnFalse()
+{
+	false ; return
+}
+
+trap 'ReturnFalse && echo "woops"' EXIT

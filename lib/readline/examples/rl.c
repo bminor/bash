@@ -5,7 +5,7 @@
  * usage: rl [-p prompt] [-u unit] [-d default] [-n nchars]
  */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2023 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library for
    reading lines of text with interactive input and history editing.
@@ -55,15 +55,11 @@ extern void exit();
 extern int optind;
 extern char *optarg;
 
-#if !defined (strchr) && !defined (__STDC__)
-extern char *strrchr();
-#endif
-
 static char *progname;
 static char *deftext;
 
 static int
-set_deftext ()
+set_deftext (void)
 {
   if (deftext)
     {
@@ -75,16 +71,14 @@ set_deftext ()
 }
 
 static void
-usage()
+usage(void)
 {
   fprintf (stderr, "%s: usage: %s [-p prompt] [-u unit] [-d default] [-n nchars]\n",
 		progname, progname);
 }
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   char *temp, *prompt;
   struct stat sb;

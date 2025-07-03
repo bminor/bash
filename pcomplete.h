@@ -1,7 +1,7 @@
 /* pcomplete.h - structure definitions and other stuff for programmable
 		 completion. */
 
-/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -76,8 +76,9 @@ typedef struct compspec {
 #define COPT_BASHDEFAULT (1<<6)
 #define COPT_PLUSDIRS	(1<<7)
 #define COPT_NOSORT	(1<<8)
+#define COPT_FULLQUOTE	(1<<9)
 
-#define COPT_LASTUSER	COPT_NOSORT
+#define COPT_LASTUSER	COPT_FULLQUOTE
 
 #define PCOMP_RETRYFAIL (COPT_LASTUSER << 1)
 #define PCOMP_NOTFOUND	(COPT_LASTUSER << 2)
@@ -87,7 +88,7 @@ typedef struct compspec {
    completions. */
 typedef struct _list_of_items {
   int flags;
-  int (*list_getter) PARAMS((struct _list_of_items *));	/* function to call to get the list */
+  int (*list_getter) (struct _list_of_items *);	/* function to call to get the list */
 
   STRINGLIST *slist;
 
@@ -147,31 +148,31 @@ extern COMPSPEC *pcomp_curcs;
 extern const char *pcomp_curcmd;
 
 /* Functions from pcomplib.c */
-extern COMPSPEC *compspec_create PARAMS((void));
-extern void compspec_dispose PARAMS((COMPSPEC *));
-extern COMPSPEC *compspec_copy PARAMS((COMPSPEC *));
+extern COMPSPEC *compspec_create (void);
+extern void compspec_dispose (COMPSPEC *);
+extern COMPSPEC *compspec_copy (COMPSPEC *);
 
-extern void progcomp_create PARAMS((void));
-extern void progcomp_flush PARAMS((void));
-extern void progcomp_dispose PARAMS((void));
+extern void progcomp_create (void);
+extern void progcomp_flush (void);
+extern void progcomp_dispose (void);
 
-extern int progcomp_size PARAMS((void));
+extern int progcomp_size (void);
 
-extern int progcomp_insert PARAMS((char *, COMPSPEC *));
-extern int progcomp_remove PARAMS((char *));
+extern int progcomp_insert (char *, COMPSPEC *);
+extern int progcomp_remove (const char *);
 
-extern COMPSPEC *progcomp_search PARAMS((const char *));
+extern COMPSPEC *progcomp_search (const char *);
 
-extern void progcomp_walk PARAMS((hash_wfunc *));
+extern void progcomp_walk (hash_wfunc *);
 
 /* Functions from pcomplete.c */
-extern void set_itemlist_dirty PARAMS((ITEMLIST *));
+extern void set_itemlist_dirty (ITEMLIST *);
 
-extern STRINGLIST *completions_to_stringlist PARAMS((char **));
+extern STRINGLIST *completions_to_stringlist (char **);
 
-extern STRINGLIST *gen_compspec_completions PARAMS((COMPSPEC *, const char *, const char *, int, int, int *));
-extern char **programmable_completions PARAMS((const char *, const char *, int, int, int *));
+extern STRINGLIST *gen_compspec_completions (COMPSPEC *, const char *, const char *, int, int, int *);
+extern char **programmable_completions (const char *, const char *, int, int, int *);
 
-extern void pcomp_set_readline_variables PARAMS((int, int));
-extern void pcomp_set_compspec_options PARAMS((COMPSPEC *, int, int));
+extern void pcomp_set_readline_variables (int, int);
+extern void pcomp_set_compspec_options (COMPSPEC *, int, int);
 #endif /* _PCOMPLETE_H_ */

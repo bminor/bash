@@ -1,6 +1,6 @@
 /* xmalloc.c -- safe versions of malloc and realloc */
 
-/* Copyright (C) 1991-2003 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2003, 2022 Free Software Foundation, Inc.
 
    This file is part of GNU Readline, a library for reading lines
    of text with interactive input and history editing.
@@ -33,13 +33,7 @@
 
 /* Generic pointer type. */
 #ifndef PTR_T
-
-#if defined (__STDC__)
 #  define PTR_T void *
-#else
-#  define PTR_T char *
-#endif
-
 #endif /* PTR_T */
 
 /* **************************************************************** */
@@ -49,8 +43,7 @@
 /* **************************************************************** */
 
 static void
-memory_error_and_abort (fname)
-     char *fname;
+memory_error_and_abort (char *fname)
 {
   fprintf (stderr, "%s: out of virtual memory\n", fname);
   exit (2);
@@ -60,8 +53,7 @@ memory_error_and_abort (fname)
    to hold BYTES number of bytes.  If the memory cannot be allocated,
    print an error message and abort. */
 PTR_T
-xmalloc (bytes)
-     size_t bytes;
+xmalloc (size_t bytes)
 {
   PTR_T temp;
 
@@ -72,9 +64,7 @@ xmalloc (bytes)
 }
 
 PTR_T
-xrealloc (pointer, bytes)
-     PTR_T pointer;
-     size_t bytes;
+xrealloc (PTR_T pointer, size_t bytes)
 {
   PTR_T temp;
 
@@ -86,8 +76,7 @@ xrealloc (pointer, bytes)
 }
 
 void
-xfree (string)
-     PTR_T string;
+xfree (PTR_T string)
 {
   if (string)
     free (string);

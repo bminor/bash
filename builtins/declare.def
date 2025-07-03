@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,7 +49,8 @@ Options which set attributes:
   -u	to convert the value of each NAME to upper case on assignment
   -x	to make NAMEs export
 
-Using `+' instead of `-' turns off the given attribute.
+Using `+' instead of `-' turns off the given attribute, except for a,
+A, and r.
 
 Variables with the integer attribute have arithmetic evaluation (see
 the `let' command) performed when the variable is assigned a value.
@@ -90,16 +91,15 @@ $END
 #include "builtext.h"
 #include "bashgetopt.h"
 
-static SHELL_VAR *declare_find_variable PARAMS((const char *, int, int));
-static char *declare_build_newname PARAMS((char *, char *, int, char *, int));
-static char *declare_transform_name PARAMS((char *, int, int));
+static SHELL_VAR *declare_find_variable (const char *, int, int);
+static char *declare_build_newname (char *, char *, int, char *, int);
+static char *declare_transform_name (char *, int, int);
 
-static int declare_internal PARAMS((register WORD_LIST *, int));
+static int declare_internal (register WORD_LIST *, int);
 
 /* Declare or change variable attributes. */
 int
-declare_builtin (list)
-     register WORD_LIST *list;
+declare_builtin (WORD_LIST *list)
 {
   return (declare_internal (list, 0));
 }
@@ -112,6 +112,9 @@ Define local variables.
 Create a local variable called NAME, and give it VALUE.  OPTION can
 be any option accepted by `declare'.
 
+If any NAME is "-", local saves the set of shell options and restores
+them when the function returns.
+
 Local variables can only be used within a function; they are visible
 only to the function where they are defined and its children.
 
@@ -120,8 +123,7 @@ Returns success unless an invalid option is supplied, a variable
 assignment error occurs, or the shell is not executing a function.
 $END
 int
-local_builtin (list)
-     register WORD_LIST *list;
+local_builtin (WORD_LIST *list)
 {
   /* Catch a straight `local --help' before checking function context */
   if (list && list->word && STREQ (list->word->word, "--help"))
@@ -146,21 +148,15 @@ local_builtin (list)
 #endif
 
 static SHELL_VAR *
-declare_find_variable (name, mkglobal, chklocal)
-     const char *name;
-     int mkglobal, chklocal;
+declare_find_variable (const char *name, int mkglobal, int chklocal)
 {
   SHELL_VAR *var;
 
   if (mkglobal == 0)
     return (find_variable (name));
   else if (chklocal)
-    {
-      var = find_variable (name);
-      if (var && local_p (var) && var->context == variable_context)
-	return var;
-      return (find_global_variable (name));
-    }
+    /* Changed to find variables at previous local scopes 6/12/2024 */
+    return (find_variable (name));
   else
     return (find_global_variable (name));
 }
@@ -169,11 +165,7 @@ declare_find_variable (name, mkglobal, chklocal)
 	NAME[SUBSCRIPT][[+]=VALUE]
    from expanding a nameref into NAME */
 static char *
-declare_build_newname (name, subscript_start, offset, value, aflags)
-     char *name, *subscript_start;
-     int offset;
-     char *value;
-     int aflags;
+declare_build_newname (char *name, char *subscript_start, int offset, char *value, int aflags)
 {
   size_t namelen, savelen;
   char *ret;
@@ -203,9 +195,7 @@ declare_build_newname (name, subscript_start, offset, value, aflags)
 }
 
 static char *
-declare_transform_name (name, flags_on, flags_off)
-     char *name;
-     int flags_on, flags_off;
+declare_transform_name (char *name, int flags_on, int flags_off)
 {
   SHELL_VAR *var, *v;
   char *newname;
@@ -227,11 +217,48 @@ declare_transform_name (name, flags_on, flags_off)
   return (newname);
 }
 
+/* Some option combinations that don't make any sense */
+static int
+declare_invalid_opts (int flags_on, int flags_off)
+{
+  if ((flags_on & att_function) && (flags_on & (att_array|att_assoc|att_integer|att_nameref)))
+    {
+      char *optchar;
+
+      if (flags_on & att_nameref)
+	optchar = "-n";
+      else if (flags_on & att_integer)
+	optchar = "-i";
+      else if (flags_on & att_assoc)
+	optchar = "-A";
+      else if (flags_on & att_array)
+	optchar = "-a";
+
+      sh_invalidopt (optchar);	
+      return (EXECUTION_FAILURE);
+    }
+  else if ((flags_on & att_assoc) && (flags_off & att_assoc))
+    {
+      sh_invalidopt ("-A");
+      return (EX_BADUSAGE);
+    }
+  else if ((flags_on & att_array) && (flags_off & att_array))
+    {
+      sh_invalidopt ("-a");
+      return (EX_BADUSAGE);
+    }
+  else if ((flags_on & att_assoc) && (flags_on & att_array))
+    {
+      sh_invalidopt ("-a");
+      return (EX_BADUSAGE);
+    }
+
+  return 0;
+}
+
 /* The workhorse function. */
 static int
-declare_internal (list, local_var)
-     register WORD_LIST *list;
-     int local_var;
+declare_internal (WORD_LIST *list, int local_var)
 {
   int flags_on, flags_off, *flags;
   int any_failed, assign_error, pflag, nodefs, opt, onref, offref;
@@ -255,6 +282,10 @@ declare_internal (list, local_var)
 	case 'a':
 #if defined (ARRAY_VARS)
 	  *flags |= att_array;
+#if 0
+	  if (flags == &flags_on)
+	    *flags &= ~att_assoc;	/* last one wins */
+#endif
 	  break;
 #else
 	  builtin_usage ();
@@ -263,6 +294,10 @@ declare_internal (list, local_var)
 	case 'A':
 #if defined (ARRAY_VARS)
 	  *flags |= att_assoc;
+#if 0
+	  if (flags == &flags_on)
+	    *flags &= ~att_array;	/* last one wins */
+#endif
 	  break;
 #else
 	  builtin_usage ();
@@ -278,7 +313,7 @@ declare_internal (list, local_var)
 	case 'f':
 	  *flags |= att_function;
 	  break;
-	case 'G':
+	case 'G':			/* undocumented, used internally */
 	  if (flags == &flags_on)
 	    chklocal = 1;
 	  /*FALLTHROUGH*/
@@ -370,24 +405,11 @@ declare_internal (list, local_var)
       return (sh_chkwrite (any_failed ? EXECUTION_FAILURE : EXECUTION_SUCCESS));
     }
 
-  /* Some option combinations that don't make any sense */
-  if ((flags_on & att_function) && (flags_on & (att_array|att_assoc|att_integer|att_nameref)))
-    {
-      char *optchar;
-
-      if (flags_on & att_nameref)
-	optchar = "-n";
-      else if (flags_on & att_integer)
-	optchar = "-i";
-      else if (flags_on & att_assoc)
-	optchar = "-A";
-      else if (flags_on & att_array)
-	optchar = "-a";
-
-      sh_invalidopt (optchar);	
-      return (EXECUTION_FAILURE);
-    }
-
+  /* check for some invalid option combinations that are usage errors */
+  opt = declare_invalid_opts (flags_on, flags_off);
+  if (opt != 0)
+    return (opt);
+  
 #define NEXT_VARIABLE() free (name); list = list->next; continue
 
   /* There are arguments left, so we are making variables. */
@@ -404,7 +426,7 @@ declare_internal (list, local_var)
       name = savestring (list->word->word);
       wflags = list->word->flags;
 #if defined (ARRAY_VARS)
-      assoc_noexpand = assoc_expand_once && (wflags & W_ASSIGNMENT);
+      assoc_noexpand = array_expand_once && (wflags & W_ASSIGNMENT);
 #else
       assoc_noexpand = 0;
 #endif
@@ -442,9 +464,14 @@ declare_internal (list, local_var)
       /* Can't define functions using assignment statements */
       if (offset && (flags_on & att_function))	/* declare -f [-rix] foo=bar */
 	{
-	  builtin_error (_("cannot use `-f' to make functions"));
-	  free (name);
-	  return (EXECUTION_FAILURE);
+	  if (var = find_function (name))
+	    offset = 0;
+	  else
+	    {
+	      builtin_error (_("cannot use `-f' to make functions"));
+	      free (name);
+	      return (EXECUTION_FAILURE);
+	    }
 	}
 
       /* There should be a way, however, to let people look at a particular
@@ -456,7 +483,7 @@ declare_internal (list, local_var)
 	  /* Should we restrict this when the shell is in posix mode even if
 	     the function was created before the shell entered posix mode?
 	     Previous versions of the shell enforced the restriction. */
-	  if (posixly_correct && legal_identifier (name) == 0)
+	  if (posixly_correct && valid_identifier (name) == 0)
 	    {
 	      sh_invalidid (name);
 	      assign_error++;
@@ -583,7 +610,7 @@ restart_new_var_name:
 #endif
 
       /* Ensure the argument is a valid, well-formed shell identifier. */
-      if (legal_identifier (name) == 0)
+      if (valid_identifier (name) == 0)
 	{
 	  sh_invalidid (name);
 	  assign_error++;
@@ -644,6 +671,10 @@ restart_new_var_name:
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }
+	  /* See below; ksh93 doesn't allow the nameref attribute to be removed
+	     from a readonly nameref that has a value, even if it doesn't
+	     reference an existing variable, so we don't allow it for
+	     compatibility. */
 	  if (var && nameref_p (var) && readonly_p (var) && nameref_cell (var) && (flags_off & att_nameref))
 	    {
 	      sh_readonly (name);
@@ -683,7 +714,7 @@ restart_new_var_name:
 	  if (refvar && nameref_p (refvar) == 0)
 	    refvar = 0;
 	  /* If the nameref is readonly but doesn't have a value, ksh93
-	     allows the nameref attribute to be removed.  If it's readonly
+	     allows the nameref attribute to be removed. If it's readonly
 	     and has a value, even if the value doesn't reference an
 	     existing variable, we disallow the modification */
 	  if (refvar && nameref_cell (refvar) && readonly_p (refvar))
@@ -847,11 +878,24 @@ restart_new_var_name:
 	  NEXT_VARIABLE ();
 	}
       /* Cannot use declare to assign value to readonly or noassign variable. */
-      else if ((readonly_p (var) || noassign_p (var)) && offset)
+      else if (ASSIGN_DISALLOWED (var, 0) && offset)
 	{
 	  if (readonly_p (var))
-	    sh_readonly (name);
-	  assign_error++;
+	    {
+	      sh_readonly (name);
+	      assign_error++;
+	    }
+	  /* just ignore attempts to assign to noassign variables; returning
+	     EXECUTION_FAILURE would cause set -e to exit the shell. */
+	  NEXT_VARIABLE ();
+	}
+      /* Cannot set or unset invalid attributes on readonly variables */
+      else if (readonly_p (var) && ((flags_on & invalid_readonly_attrs) || (flags_off & invalid_readonly_attrs)))
+	{
+	  /* The restrictions on namerefs and readonly variables are handled
+	     above. */
+	  sh_readonly (name_cell (var));
+	  any_failed++;
 	  NEXT_VARIABLE ();
 	}
 
@@ -884,7 +928,7 @@ restart_new_var_name:
 	simple_array_assign = 1;
       else if ((making_array_special || creating_array || array_exists) && offset)
 	{
-	  int vlen;
+	  size_t vlen;
 	  vlen = STRLEN (value);
 /*itrace("declare_builtin: name = %s value = %s flags = %d", name, value, wflags);*/
 
@@ -1001,7 +1045,10 @@ restart_new_var_name:
       /* If we found this variable in the temporary environment, as with
 	 `var=value declare -x var', make sure it is treated identically
 	 to `var=value export var'.  Do the same for `declare -r' and
-	 `readonly'.  Preserve the attributes, except for att_tempvar. */
+	 `readonly'.  Preserve the attributes, except for att_tempvar.
+	 This doesn't happen in functions, since declare in shell functions
+	 always creates local variables (that inherit their value from the
+	 tempenv variable). We don't check variable_context; maybe we should. */
       /* XXX -- should this create a variable in the global scope, or
 	 modify the local variable flags?  ksh93 has it modify the
 	 global scope.
@@ -1010,22 +1057,32 @@ restart_new_var_name:
       if ((flags_on & (att_exported|att_readonly)) && tempvar_p (var))
 	{
 	  SHELL_VAR *tv;
-	  char *tvalue;
 
+	  /* Temporary environment? Or in the local variable context? */
 	  tv = find_tempenv_variable (name_cell (var));
 	  if (tv)
 	    {
-	      tvalue = var_isset (var) ? savestring (value_cell (var)) : savestring ("");
-	      tv = bind_variable (name_cell (var), tvalue, 0);
+	      /* We don't bother with modifying the temporary env because
+		 we're already using it. */
+	      tv = bind_variable (name_cell (var), value_cell (var), ASS_NOTEMPENV);
+
 	      if (tv)
 		{
+#if defined (ARRAY_VARS)
+		  /* copy array value if array variable */
+		  if ((array_p (var) || assoc_p (var)))
+		    arrayvar_copyval (var, tv);
+#endif
+		  /* then copy attributes */
 		  tv->attributes |= var->attributes & ~att_tempvar;
-		  if (tv->context > 0)
+		  if (tv->context > 0 && local_p (var) == 0)	/* just paranoia here */
 		    VSETATTR (tv, att_propagate);
 		}
-	      free (tvalue);
 	    }
-	  VSETATTR (var, att_propagate);
+	  /* XXX - don't propagate local variables back to a previous scope,
+	     even in posix mode. */
+	  if (local_p (var) == 0)
+	    VSETATTR (var, att_propagate);
 	}
 
       /* Turn on nameref attribute we deferred above. */

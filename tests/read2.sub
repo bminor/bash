@@ -53,7 +53,7 @@ echo abcde | {
 	echo $a
 }
 
-read -t .0001 a <<<abcde
+read -t .001 a <<<abcde
 echo $a
 
 # this is the original test that prompted the change to sh_timers
@@ -70,3 +70,8 @@ done
 
 cd $OLDPWD
 rm -f $TMPDIR/a.pipe		# paranoia
+
+TMOUT=.001
+read a <<<abcde
+echo $a
+

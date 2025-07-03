@@ -114,7 +114,7 @@ sunos5*-*gcc*|solaris2*-*gcc*)
 	;;
 
 sunos5*|solaris2*)
-	SHOBJ_CFLAGS='-K pic'
+	SHOBJ_CFLAGS='-fPIC'	# was -K pic
 	SHOBJ_LD=/usr/ccs/bin/ld
 	SHOBJ_LDFLAGS='-G -dy -z text -i -h $@'
 
@@ -480,6 +480,24 @@ cygwin*)
 	SHOBJ_LD='$(CC)'
 	SHOBJ_LDFLAGS='-shared -Wl,--enable-auto-import -Wl,--enable-auto-image-base -Wl,--export-all -Wl,--out-implib=$(@).a'
 	SHLIB_LIBPREF='cyg'
+	SHLIB_LIBSUFF='dll'
+	SHLIB_LIBVERSION='$(SHLIB_DLLVERSION).$(SHLIB_LIBSUFF)'
+	SHLIB_LIBS='$(TERMCAP_LIB)'
+
+	SHLIB_DOT=
+	# For official cygwin releases, DLLVERSION will be defined in the
+	# environment of configure, and will be incremented any time the API
+	# changes in a non-backwards compatible manner.  Otherwise, it is just
+	# SHLIB_MAJOR.
+	if [ -n "$DLLVERSION" ] ; then
+		SHLIB_DLLVERSION="$DLLVERSION"
+	fi
+	;;
+
+msys*)
+	SHOBJ_LD='$(CC)'
+	SHOBJ_LDFLAGS='-shared -Wl,--enable-auto-import -Wl,--enable-auto-image-base -Wl,--export-all -Wl,--out-implib=$(@).a'
+	SHLIB_LIBPREF='msys-'
 	SHLIB_LIBSUFF='dll'
 	SHLIB_LIBVERSION='$(SHLIB_DLLVERSION).$(SHLIB_LIBSUFF)'
 	SHLIB_LIBS='$(TERMCAP_LIB)'

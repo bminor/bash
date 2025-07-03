@@ -1,9 +1,13 @@
 abc
-./redir.tests: line 28: /tmp/redir-test: cannot overwrite existing file
+./redir.tests: line 31: /tmp/redir-test: cannot overwrite existing file
 abc
 def
 def
-./redir.tests: line 44: $z: ambiguous redirect
+ghi
+./redir.tests: line 52: -1: ambiguous redirect
+./redir.tests: line 53: exec: -1: invalid option
+exec: usage: exec [-cl] [-a name] [command [argument ...]] [redirection ...]
+./redir.tests: line 58: $z: ambiguous redirect
 Point 1
 Point 2
 to a
@@ -44,7 +48,7 @@ kl
 ab
 cd
 cd
-./redir.tests: line 170: redir1.*: No such file or directory
+./redir.tests: line 184: redir1.*: No such file or directory
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation, either version 3 of the License, or
@@ -114,6 +118,8 @@ c4 is 4
 fd 10
 fd 8
 fd 10
+next fd
+fd 10
 fd 8
 1
 2
@@ -154,10 +160,25 @@ foo
 1
 7
 after: 42
-./redir11.sub: line 53: $(ss= declare -i ss): ambiguous redirect
+./redir11.sub: line 55: $(ss= declare -i ss): ambiguous redirect
 after: 42
 a+=3
 foo
 foo
-./redir11.sub: line 75: 42: No such file or directory
+./redir11.sub: line 77: 42: No such file or directory
 42
+./redir12.sub: line 27: unwritable-file: Permission denied
+1 x =
+./redir12.sub: line 31: unwritable-file: cannot overwrite existing file
+1 x =
+./redir12.sub: line 34: unwritable-file: Permission denied
+1 x =
+./redir12.sub: line 38: unreadable-file: Permission denied
+./redir12.sub: line 44: unwritable-file: Permission denied
+got error ERR
+after ERR trap: 1
+./redir12.sub: line 48: unwritable-file: Permission denied
+./redir12.sub: line 53: unreadable-file: Permission denied
+got error ERR
+./redir12.sub: line 56: unreadable-file: Permission denied
+/tmp

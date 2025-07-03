@@ -1,7 +1,7 @@
 This file is enable.def, from which is created enable.c.
 It implements the builtin "enable" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc. 
+Copyright (C) 1987-2024 Free Software Foundation, Inc. 
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,6 +40,11 @@ Options controlling dynamic loading:
   -d	Remove a builtin loaded with -f
 
 Without options, each NAME is enabled.
+
+On systems with dynamic loading, the shell variable BASH_LOADABLES_PATH
+defines a search path for the directory containing FILENAMEs that do
+not contain a slash. It may include "." to force a search of the current
+directory.
 
 To use the `test' found in $PATH instead of the shell builtin
 version, type `enable -n test'.
@@ -85,13 +90,13 @@ $END
 #define SFLAG	0x20
 
 #if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
-static int dyn_load_builtin PARAMS((WORD_LIST *, int, char *));
+static int dyn_load_builtin (WORD_LIST *, int, char *);
 #endif
 
 #if defined (HAVE_DLCLOSE)
-static int dyn_unload_builtin PARAMS((char *));
-static void delete_builtin PARAMS((struct builtin *));
-static int local_dlclose PARAMS((void *));
+static int dyn_unload_builtin (char *);
+static void delete_builtin (struct builtin *);
+static int local_dlclose (void *);
 #endif
 
 #define STRUCT_SUFFIX	"_struct"
@@ -99,15 +104,14 @@ static int local_dlclose PARAMS((void *));
 #define LOAD_SUFFIX	"_builtin_load"
 #define UNLOAD_SUFFIX	"_builtin_unload"
 
-static void list_some_builtins PARAMS((int));
-static int enable_shell_command PARAMS((char *, int));
+static void list_some_builtins (int);
+static int enable_shell_command (char *, int);
 
 /* Enable/disable shell commands present in LIST.  If list is not specified,
    then print out a list of shell commands showing which are enabled and
    which are disabled. */
 int
-enable_builtin (list)
-     WORD_LIST *list;
+enable_builtin (WORD_LIST *list)
 {
   int result, flags;
   int opt, filter;
@@ -194,6 +198,8 @@ enable_builtin (list)
 	result = EXECUTION_FAILURE;	/* normalize return value */
 #if defined (PROGRAMMABLE_COMPLETION)
       set_itemlist_dirty (&it_builtins);
+      set_itemlist_dirty (&it_enabled);
+      set_itemlist_dirty (&it_disabled);
 #endif
     }
 #endif
@@ -209,6 +215,8 @@ enable_builtin (list)
 	}
 #if defined (PROGRAMMABLE_COMPLETION)
       set_itemlist_dirty (&it_builtins);
+      set_itemlist_dirty (&it_enabled);
+      set_itemlist_dirty (&it_disabled);
 #endif
     }
 #endif
@@ -216,32 +224,41 @@ enable_builtin (list)
     {
       while (list)
 	{
-	  opt = enable_shell_command (list->word->word, flags & NFLAG);
+	  char *command;
+
+	  command = list->word->word;
+	  opt = enable_shell_command (command, flags & NFLAG);
 	  next = list->next;
 
 #if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
 	  /* If we try to enable a non-existent builtin, and we have dynamic
 	     loading, try the equivalent of `enable -f name name'. */
-	  if (opt == EX_NOTFOUND)
+#if defined (RESTRICTED_SHELL)
+	  if (*command && (flags & NFLAG) == 0 && opt == EX_NOTFOUND && restricted == 0)
+#else
+	  if (*command && (flags & NFLAG) == 0 && opt == EX_NOTFOUND)
+#endif
 	    {
 	      int dflags, r;
 	      
 	      dflags = ENABLED|SILENT|((flags & SFLAG) ? SPECIAL : 0);
 
 	      list->next = 0;
-	      r = dyn_load_builtin (list, dflags, list->word->word);
+	      r = dyn_load_builtin (list, dflags, command);
 	      list->next = next;
 	      if (r == EXECUTION_SUCCESS)
 		opt = r;
 #if defined (PROGRAMMABLE_COMPLETION)
 	      set_itemlist_dirty (&it_builtins);
+	      set_itemlist_dirty (&it_enabled);
+	      set_itemlist_dirty (&it_disabled);
 #endif
 	    }
 #endif
 
 	  if (opt == EX_NOTFOUND)
 	    {
-	      sh_notbuiltin (list->word->word);
+	      sh_notbuiltin (command);
 	      result = EXECUTION_FAILURE;
 	    }
 	  else if (opt != EXECUTION_SUCCESS)
@@ -254,10 +271,9 @@ enable_builtin (list)
 }
 
 /* List some builtins.
-   FILTER is a mask with two slots: ENABLED and DISABLED. */
+   FILTER is a mask with three slots: SPECIAL, ENABLED, and DISABLED. */
 static void
-list_some_builtins (filter)
-     int filter;
+list_some_builtins (int filter)
 {
   register int i;
 
@@ -281,9 +297,7 @@ list_some_builtins (filter)
 /* Enable the shell command NAME.  If DISABLE_P is non-zero, then
    disable NAME instead. */
 static int
-enable_shell_command (name, disable_p)
-     char *name;
-     int disable_p;
+enable_shell_command (char *name, int disable_p)
 {
   struct builtin *b;
 
@@ -318,15 +332,13 @@ enable_shell_command (name, disable_p)
 #endif
 
 static int
-dyn_load_builtin (list, flags, filename)
-     WORD_LIST *list;
-     int flags;
-     char *filename;
+dyn_load_builtin (WORD_LIST *list, int flags, char *filename)
 {
   WORD_LIST *l;
   void *handle;
   
-  int total, size, new, replaced, r;
+  int total, replaced, r;
+  size_t size, new;
   char *struct_name, *name, *funcname;
   sh_load_func_t *loadfunc;
   struct builtin **new_builtins, *b, *new_shell_builtins, *old_builtin;
@@ -339,32 +351,33 @@ dyn_load_builtin (list, flags, filename)
 #define RTLD_LAZY 1
 #endif
 
-  handle = 0;
-  if (absolute_program (filename) == 0)
-    {
-      loadables_path = get_string_value ("BASH_LOADABLES_PATH");
-      if (loadables_path)
-	{
-	  load_path = find_in_path (filename, loadables_path, FS_NODIRS|FS_EXEC_PREFERRED);
-	  if (load_path)
-	    {
 #if defined (_AIX)
-	      handle = dlopen (load_path, RTLD_NOW|RTLD_GLOBAL);
+#  define DLFLAGS (RTLD_NOW|RTLD_GLOBAL)
 #else
-	      handle = dlopen (load_path, RTLD_LAZY);
+#  define DLFLAGS RTLD_LAZY
 #endif /* !_AIX */
-	      free (load_path);
-	    }
+
+  handle = 0;
+  if (absolute_program (filename))
+    handle = dlopen (filename, DLFLAGS);
+  else if (loadables_path = path_value ("BASH_LOADABLES_PATH", 1))
+    {
+      /* If we have a loadables path, don't fall back to the current directory. */
+      load_path = find_in_path (filename, loadables_path, FS_NODIRS|FS_EXEC_PREFERRED);
+      if (load_path)
+	{
+	  handle = dlopen (load_path, DLFLAGS);
+	  free (load_path);
 	}
     }
+  else		/* no loadables path, look in current directory */
+    {
+      char *openname;
 
-  /* Fall back to current directory for now */
-  if (handle == 0)
-#if defined (_AIX)
-    handle = dlopen (filename, RTLD_NOW|RTLD_GLOBAL);
-#else
-    handle = dlopen (filename, RTLD_LAZY);
-#endif /* !_AIX */
+      openname = make_absolute (filename, ".");
+      handle = dlopen (openname, DLFLAGS);
+      free (openname);
+    }
 
   if (handle == 0)
     {
@@ -387,9 +400,14 @@ dyn_load_builtin (list, flags, filename)
   /* For each new builtin in the shared object, find it and its describing
      structure.  If this is overwriting an existing builtin, do so, otherwise
      save the loaded struct for creating the new list of builtins. */
-  for (replaced = new = 0; list; list = list->next)
+  for (replaced = 0, new = 0; list; list = list->next)
     {
       name = list->word->word;
+      if (absolute_program (name))
+	{
+	  builtin_error (_("%s: builtin names may not contain slashes"), name);
+	  continue;
+	}
 
       size = strlen (name);
       struct_name = (char *)xmalloc (size + 8);
@@ -433,6 +451,8 @@ dyn_load_builtin (list, flags, filename)
       b->flags &= ~STATIC_BUILTIN;
       if (flags & SPECIAL)
 	b->flags |= SPECIAL_BUILTIN;
+      if (flags & DISABLED)
+	b->flags &= ~BUILTIN_ENABLED;
       b->handle = handle;
 
       if (old_builtin)
@@ -483,18 +503,13 @@ dyn_load_builtin (list, flags, filename)
 
 #if defined (HAVE_DLCLOSE)
 static void
-delete_builtin (b)
-     struct builtin *b;
+delete_builtin (struct builtin *b)
 {
   int ind, size;
   struct builtin *new_shell_builtins;
 
   /* XXX - funky pointer arithmetic - XXX */
-#ifdef __STDC__
   ind = b - shell_builtins;
-#else
-  ind = ((int)b - (int)shell_builtins) / sizeof (struct builtin);
-#endif
   size = num_shell_builtins * sizeof (struct builtin);
   new_shell_builtins = (struct builtin *)xmalloc (size);
 
@@ -519,8 +534,7 @@ delete_builtin (b)
 /* Tenon's MachTen has a dlclose that doesn't return a value, so we
    finesse it with a local wrapper. */
 static int
-local_dlclose (handle)
-     void *handle;
+local_dlclose (void *handle)
 {
 #if !defined (__MACHTEN__)
   return (dlclose (handle));
@@ -531,14 +545,14 @@ local_dlclose (handle)
 }
 
 static int
-dyn_unload_builtin (name)
-     char *name;
+dyn_unload_builtin (char *name)
 {
   struct builtin *b;
   void *handle;
   char *funcname;
   sh_unload_func_t *unloadfunc;
-  int ref, i, size;
+  int ref, i;
+  size_t size;
 
   b = builtin_address_internal (name, 1);
   if (b == 0)

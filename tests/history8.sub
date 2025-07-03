@@ -1,0 +1,18 @@
+trap 'rm -f "$OUT"' 0 1 2 3 6 15
+
+HISTFILE=$TMPDIR/fchist-$$ ; OUT=$HISTFILE
+unset HISTIGNORE HISTCONTROL
+set -o history
+
+echo a
+echo b
+echo c
+echo d
+
+history -d 2
+history
+
+history -d 72
+history -d -72
+
+unset HISTFILE

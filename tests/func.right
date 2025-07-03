@@ -166,4 +166,97 @@ after FUNCNEST unset: f = 201
 ./func4.sub: line 23: foo: maximum function nesting level exceeded (20)
 1
 after FUNCNEST assign: f = 38
+./func5.sub: line 31: `sys$read': not a valid identifier
+11111 () 
+{ 
+    printf "FUNCNAME: %s\n" $FUNCNAME
+}
+function a=2 () 
+{ 
+    printf "FUNCNAME: %s\n" $FUNCNAME
+}
+11111 () 
+{ 
+    printf "FUNCNAME: %s\n" $FUNCNAME
+}
+function a=2 () 
+{ 
+    printf "FUNCNAME: %s\n" $FUNCNAME
+}
+FUNCNAME: a=2
+./func5.sub: line 44: `<(:)': not a valid identifier
+./func5.sub: line 45: <(:): command not found
+./func5.sub: line 46: type: <(:): not found
+./func5.sub: line 51: `'a b c'': not a valid identifier
+./func5.sub: line 52: a b c: command not found
+./func5.sub: line 53: type: a b c: not found
+posix mode:
+type
+break is a special shell builtin
+builtin
+command -v
+break
+command -V
+break is a special shell builtin
+type -a
+break is a special shell builtin
+break is a function
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+declare
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+execution
+default mode:
+type
+break is a function
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+function
+command -v
+break
+command -V
+break is a function
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+type -a
+break is a function
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+break is a shell builtin
+declare
+break () 
+{ 
+    echo inside function $FUNCNAME
+}
+execution
+inside function break
+./func5.sub: line 94: `break': is a special builtin
+!! is a function
+!! () 
+{ 
+    fc -s "$@"
+}
+!! is a function
+!! () 
+{ 
+    fc -s "$@"
+}
 5
+rfunc () 
+{ 
+    local -;
+    local var;
+    local -p
+}
+declare -fr rfunc

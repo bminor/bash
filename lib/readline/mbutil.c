@@ -1,6 +1,6 @@
 /* mbutil.c -- readline multibyte character utility functions */
 
-/* Copyright (C) 2001-2021 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2024 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -147,8 +147,63 @@ _rl_utf8_mblen (const char *s, size_t n)
   return -1;
 }
 
+static size_t
+_rl_utf8_mbstrlen (const char *s)
+{
+  size_t clen, nc;
+  int mb_cur_max;
+
+  nc = 0;
+  mb_cur_max = MB_CUR_MAX;
+  while (*s && (clen = (size_t)_rl_utf8_mblen(s, mb_cur_max)) != 0)
+    {
+      if (MB_INVALIDCH (clen))
+	clen = 1;
+      s += clen;
+      nc++;
+    }
+  return nc;
+}
+
+static size_t
+_rl_gen_mbstrlen (const char *s)
+{
+  size_t clen, nc;
+  mbstate_t mbs = { 0 }, mbsbak = { 0 };
+  int f, mb_cur_max;
+
+  nc = 0;
+  mb_cur_max = MB_CUR_MAX;
+  while (*s && (clen = (f = _rl_is_basic (*s)) ? 1 : mbrlen(s, mb_cur_max, &mbs)) != 0)
+    {
+      if (MB_INVALIDCH(clen))
+	{
+	  clen = 1;     /* assume single byte */
+	  mbs = mbsbak;
+	}
+
+      if (f == 0)
+	mbsbak = mbs;
+
+      s += clen;
+      nc++;
+    }
+  return nc;
+}
+
+size_t
+_rl_mbstrlen (const char *s)
+{
+  if (MB_CUR_MAX == 1)
+    return (strlen (s));
+  else if (_rl_utf8locale)
+    return (_rl_utf8_mbstrlen (s));
+  else
+    return (_rl_gen_mbstrlen (s));
+}
+
 static int
-_rl_find_next_mbchar_internal (char *string, int seed, int count, int find_non_zero)
+_rl_find_next_mbchar_internal (const char *string, int seed, int count, int find_non_zero)
 {
   size_t tmp, len;
   mbstate_t ps;
@@ -216,11 +271,13 @@ _rl_find_next_mbchar_internal (char *string, int seed, int count, int find_non_z
 
   if (find_non_zero)
     {
-      tmp = MBRTOWC (&wc, string + point, strlen (string + point), &ps);
+      len = strlen (string + point);
+      tmp = MBRTOWC (&wc, string + point, len, &ps);
       while (MB_NULLWCH (tmp) == 0 && MB_INVALIDCH (tmp) == 0 && WCWIDTH (wc) == 0)
 	{
 	  point += tmp;
-	  tmp = MBRTOWC (&wc, string + point, strlen (string + point), &ps);
+	  len -= tmp;
+	  tmp = MBRTOWC (&wc, string + point, len, &ps);
 	}
     }
 
@@ -228,7 +285,7 @@ _rl_find_next_mbchar_internal (char *string, int seed, int count, int find_non_z
 }
 
 static inline int
-_rl_test_nonzero (char *string, int ind, int len)
+_rl_test_nonzero (const char *string, int ind, int len)
 {
   size_t tmp;
   WCHAR_T wc;
@@ -242,9 +299,8 @@ _rl_test_nonzero (char *string, int ind, int len)
 
 /* experimental -- needs to handle zero-width characters better */
 static int
-_rl_find_prev_utf8char (char *string, int seed, int find_non_zero)
+_rl_find_prev_utf8char (const char *string, int seed, int find_non_zero)
 {
-  char *s;
   unsigned char b;
   int save, prev;
   size_t len;
@@ -262,11 +318,16 @@ _rl_find_prev_utf8char (char *string, int seed, int find_non_zero)
       save = prev;
 
       /* Move back until we're not in the middle of a multibyte char */
+#if 0
       if (UTF8_MBCHAR (b))
 	{
 	  while (prev > 0 && (b = (unsigned char)string[--prev]) && UTF8_MBCHAR (b))
 	    ;
 	}
+#else
+      while (prev > 0 && (b = (unsigned char)string[--prev]) && UTF8_MBFIRSTCHAR (b) == 0)
+	;
+#endif
 
       if (UTF8_MBFIRSTCHAR (b))
 	{
@@ -288,7 +349,7 @@ _rl_find_prev_utf8char (char *string, int seed, int find_non_zero)
 }  
 
 /*static*/ int
-_rl_find_prev_mbchar_internal (char *string, int seed, int find_non_zero)
+_rl_find_prev_mbchar_internal (const char *string, int seed, int find_non_zero)
 {
   mbstate_t ps;
   int prev, non_zero_prev, point, length;
@@ -356,19 +417,19 @@ _rl_find_prev_mbchar_internal (char *string, int seed, int find_non_zero)
    if an invalid multibyte sequence was encountered. It returns (size_t)(-2) 
    if it couldn't parse a complete  multibyte character.  */
 int
-_rl_get_char_len (char *src, mbstate_t *ps)
+_rl_get_char_len (const char *src, mbstate_t *ps)
 {
   size_t tmp, l;
   int mb_cur_max;
 
   /* Look at no more than MB_CUR_MAX characters */
-  l = (size_t)strlen (src);
-  if (_rl_utf8locale && l > 0 && UTF8_SINGLEBYTE(*src))
+  l = strlen (src);
+  if (_rl_utf8locale && l >= 0 && UTF8_SINGLEBYTE(*src))
     tmp = (*src != 0) ? 1 : 0;
   else
     {
       mb_cur_max = MB_CUR_MAX;
-      tmp = mbrlen((const char *)src, (l < mb_cur_max) ? l : mb_cur_max, ps);
+      tmp = mbrlen(src, (l < mb_cur_max) ? l : mb_cur_max, ps);
     }
   if (tmp == (size_t)(-2))
     {
@@ -394,7 +455,7 @@ _rl_get_char_len (char *src, mbstate_t *ps)
 /* compare the specified two characters. If the characters matched,
    return 1. Otherwise return 0. */
 int
-_rl_compare_chars (char *buf1, int pos1, mbstate_t *ps1, char *buf2, int pos2, mbstate_t *ps2)
+_rl_compare_chars (const char *buf1, int pos1, mbstate_t *ps1, const char *buf2, int pos2, mbstate_t *ps2)
 {
   int i, w1, w2;
 
@@ -417,7 +478,7 @@ _rl_compare_chars (char *buf1, int pos1, mbstate_t *ps1, char *buf2, int pos2, m
    if point is invalid (point < 0 || more than string length),
    it returns -1 */
 int
-_rl_adjust_point (char *string, int point, mbstate_t *ps)
+_rl_adjust_point (const char *string, int point, mbstate_t *ps)
 {
   size_t tmp;
   int length, pos;
@@ -457,7 +518,7 @@ _rl_adjust_point (char *string, int point, mbstate_t *ps)
 }
 
 int
-_rl_is_mbchar_matched (char *string, int seed, int end, char *mbchar, int length)
+_rl_is_mbchar_matched (const char *string, int seed, int end, char *mbchar, int length)
 {
   int i;
 
@@ -471,19 +532,19 @@ _rl_is_mbchar_matched (char *string, int seed, int end, char *mbchar, int length
 }
 
 WCHAR_T
-_rl_char_value (char *buf, int ind)
+_rl_char_value (const char *buf, int ind)
 {
   size_t tmp;
   WCHAR_T wc;
   mbstate_t ps;
-  int l;
+  size_t l;
 
   if (MB_LEN_MAX == 1 || rl_byte_oriented)
     return ((WCHAR_T) buf[ind]);
   if (_rl_utf8locale && UTF8_SINGLEBYTE(buf[ind]))
     return ((WCHAR_T) buf[ind]);
   l = strlen (buf);
-  if (ind >= l - 1)
+  if (ind + 1 >= l)
     return ((WCHAR_T) buf[ind]);
   if (l < ind)			/* Sanity check */
     l = strlen (buf+ind);
@@ -500,7 +561,7 @@ _rl_char_value (char *buf, int ind)
    characters. */
 #undef _rl_find_next_mbchar
 int
-_rl_find_next_mbchar (char *string, int seed, int count, int flags)
+_rl_find_next_mbchar (const char *string, int seed, int count, int flags)
 {
 #if defined (HANDLE_MULTIBYTE)
   return _rl_find_next_mbchar_internal (string, seed, count, flags);
@@ -514,11 +575,86 @@ _rl_find_next_mbchar (char *string, int seed, int count, int flags)
    we look for non-zero-width multibyte characters. */
 #undef _rl_find_prev_mbchar
 int
-_rl_find_prev_mbchar (char *string, int seed, int flags)
+_rl_find_prev_mbchar (const char *string, int seed, int flags)
 {
 #if defined (HANDLE_MULTIBYTE)
   return _rl_find_prev_mbchar_internal (string, seed, flags);
 #else
   return ((seed == 0) ? seed : seed - 1);
 #endif
+}
+
+/* Compare the first N characters of S1 and S2 without regard to case. If
+   FLAGS&1, apply the mapping specified by completion-map-case and make
+   `-' and `_' equivalent. Returns 1 if the strings are equal. */
+int
+_rl_mb_strcaseeqn (const char *s1, size_t l1, const char *s2, size_t l2, size_t n, int flags)
+{
+  size_t v1, v2;
+  mbstate_t ps1, ps2;
+  WCHAR_T wc1, wc2;
+
+  memset (&ps1, 0, sizeof (mbstate_t));
+  memset (&ps2, 0, sizeof (mbstate_t));
+
+  do
+    {
+      v1 = MBRTOWC(&wc1, s1, l1, &ps1);
+      v2 = MBRTOWC(&wc2, s2, l2, &ps2);
+      if (v1 == 0 && v2 == 0)
+	return 1;
+      else if (MB_INVALIDCH(v1) || MB_INVALIDCH(v2))
+ 	{
+ 	  int d;
+ 	  d = _rl_to_lower (*s1) - _rl_to_lower (*s2);	/* do byte comparison */
+	  if ((flags & 1) && (*s1 == '-' || *s1 == '_') && (*s2 == '-' || *s2 == '_'))
+	    d = 0;		/* case insensitive character mapping */
+	  if (d != 0)
+	    return 0;
+	  s1++;
+	  s2++;
+	  n--;
+	  continue;
+ 	}
+      wc1 = towlower(wc1);
+      wc2 = towlower(wc2);
+      s1 += v1;
+      s2 += v1;
+      n -= v1;
+      if ((flags & 1) && (wc1 == L'-' || wc1 == L'_') && (wc2 == L'-' || wc2 == L'_'))
+	continue;
+      if (wc1 != wc2)
+	return 0;
+    }
+  while (n != 0);
+
+  return 1;
+}
+
+/* Return 1 if the multibyte characters pointed to by S1 and S2 are equal
+   without regard to case. If FLAGS&1, apply the mapping specified by
+   completion-map-case and make `-' and `_' equivalent. */
+int
+_rl_mb_charcasecmp (const char *s1, mbstate_t *ps1, const char *s2, mbstate_t *ps2, int flags)
+{
+  int d;
+  size_t v1, v2;
+  wchar_t wc1, wc2;
+
+  d = MB_CUR_MAX;
+  v1 = MBRTOWC(&wc1, s1, d, ps1);
+  v2 = MBRTOWC(&wc2, s2, d, ps2);
+  if (v1 == 0 && v2 == 0)
+    return 1;
+  else if (MB_INVALIDCH(v1) || MB_INVALIDCH(v2))
+    {
+      if ((flags & 1) && (*s1 == '-' || *s1 == '_') && (*s2 == '-' || *s2 == '_'))
+	return 1;
+      return (_rl_to_lower (*s1) == _rl_to_lower (*s2));
+    }
+  wc1 = towlower(wc1);
+  wc2 = towlower(wc2);
+  if ((flags & 1) && (wc1 == L'-' || wc1 == L'_') && (wc2 == L'-' || wc2 == L'_'))
+    return 1;
+  return (wc1 == wc2);
 }

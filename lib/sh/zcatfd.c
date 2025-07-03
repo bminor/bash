@@ -1,6 +1,6 @@
 /* zcatfd - copy contents of file descriptor to another */
 
-/* Copyright (C) 2002-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,15 +38,13 @@ extern int errno;
 #  define ZBUFSIZ 4096
 #endif
 
-extern ssize_t zread PARAMS((int, char *, size_t));
-extern int zwrite PARAMS((int, char *, ssize_t));
+extern ssize_t zread (int, char *, size_t);
+extern int zwrite (int, char *, ssize_t);
 
 /* Dump contents of file descriptor FD to OFD.  FN is the filename for
    error messages (not used right now). */
 int
-zcatfd (fd, ofd, fn)
-     int fd, ofd;
-     char *fn;
+zcatfd (int fd, int ofd, const char *fn)
 {
   ssize_t nr;
   int rval;

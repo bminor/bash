@@ -14,6 +14,24 @@
 LC_ALL=C
 LC_NUMERIC=C
 
+: ${TMPDIR:=/tmp}
+TMPF=$TMPDIR/printf-oflow-$RANDOM
+
+printf_overflow ()
+{
+        local r;
+
+        line=$1 ; shift
+        rm -f "$TMPF"
+        printf "$@"  2>$TMPF
+        r=$?
+        if [ ! -s "$TMPF" ]; then
+                echo "printf.tests: $line: expected overflow error output to stderr" >&2
+        fi
+        rm -f "$TMPF"
+        return $r
+}
+
 # these should output error messages -- the format is required
 printf
 printf --
@@ -21,6 +39,13 @@ printf --
 # these should output nothing
 printf ""
 printf -- ""
+
+# this is an error
+printf -x
+
+# these are errors
+printf -v invalid-var 'abc\n'
+printf '%s\n%n' abc invalid-var
 
 # in the future this may mean to put the output into VAR, but for
 # now it is an error
@@ -59,6 +84,19 @@ printf "%s %q\n" unquoted quoted
 printf "%s%10q\n" unquoted quoted
 
 printf "%q\n" 'this&that'
+
+# %Q is like %q but treats the precision differently
+S="a'b"
+S1="${S@Q}"
+T=';ls'
+
+printf 'echo %.2q%q\n' "$S" "$T"
+printf 'echo %.2Q%Q\n' "$S" "$T"	# note the difference
+# a different way to do it
+printf 'echo %.*s%q\n' ${#S1} "$S1" "$T"
+
+printf '%.1Q\n' '**'
+printf '%.*Q\n' 1 '**'
 
 # make sure the format string is reused to use up arguments
 printf "%d " 1 2 3 4 5; printf "\n"
@@ -324,11 +362,37 @@ printf -v var "%b" @(hugo); echo "x${var}x"
 # make sure that missing arguments are always handled like the empty string
 printf "<%3s><%3b>\n"
 
+# other format specifiers with missing arguments
+# 0
+printf '%d\n'
+# null char
+printf '%c\n'
+
+printf '%x\n'
+printf '%4.2f\n'
+
+printf '%b'
+printf '%q\n'
+printf '%Q\n'
+
+# let's test some out-of-range integer errors for POSIX-specified behavior
+TOOBIG=9223372036854775825
+TOOSMALL=-9223372036854775815
+
+printf_overflow $LINENO '%d\n' "$TOOBIG"
+printf_overflow $LINENO '%d\n' "$TOOSMALL"
+
+# arguments that are not completely converted generate warning messages
+printf '%d\n' +
+printf '%d\n' z
+printf '%d\n' ''
+
 # tests variable assignment with -v
 ${THIS_SH} ./printf1.sub
-
 ${THIS_SH} ./printf2.sub
-
 ${THIS_SH} ./printf3.sub
-
 ${THIS_SH} ./printf4.sub
+${THIS_SH} ./printf5.sub
+# multibyte characters with %ls/%S and %lc/%C
+${THIS_SH} ./printf6.sub
+${THIS_SH} ./printf7.sub

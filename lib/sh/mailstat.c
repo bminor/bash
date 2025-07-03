@@ -1,6 +1,6 @@
 /* mailstat.c -- stat a mailbox file, handling maildir-type mail directories */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,9 +52,7 @@
  */
 
 int
-mailstat(path, st)
-     const char *path;
-     struct stat *st;
+mailstat(const char *path, struct stat *st)
 {
   static struct stat st_new_last, st_ret_last;
   struct stat st_ret, st_tmp;

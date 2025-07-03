@@ -46,10 +46,6 @@ extern char *realloc ();
 #include <string.h>
 #endif
 
-#if !defined (HAVE_BCOPY) && (defined (HAVE_STRING_H) || defined (STDC_HEADERS))
-#  define bcopy(s, d, n)	memcpy ((d), (s), (n))
-#endif
-
 #else /* not HAVE_CONFIG_H */
 
 #ifdef HAVE_STDLIB_H
@@ -64,17 +60,11 @@ char *realloc ();
 #include <string.h>
 #endif
 
-/* Do this after the include, in case string.h prototypes bcopy.  */
-#if (defined(HAVE_STRING_H) || defined(STDC_HEADERS)) && !defined(bcopy)
-#define bcopy(s, d, n) memcpy ((d), (s), (n))
-#endif
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef _POSIX_VERSION
+
 #include <fcntl.h>
-#endif
 
 #endif /* not HAVE_CONFIG_H */
 
@@ -110,30 +100,31 @@ int bufsize = 128;
 #endif
 
 #ifndef emacs
+static void memory_out (void);
+static void *xmalloc (size_t);
+static void *xrealloc (void *, size_t);
+
 static void
-memory_out ()
+memory_out (void)
 {
   write (2, "virtual memory exhausted\n", 25);
   exit (1);
 }
 
-static char *
-xmalloc (size)
-     unsigned size;
+static void *
+xmalloc (size_t size)
 {
-  register char *tem = malloc (size);
+  register void *tem = malloc (size);
 
   if (!tem)
     memory_out ();
   return tem;
 }
 
-static char *
-xrealloc (ptr, size)
-     char *ptr;
-     unsigned size;
+static void *
+xrealloc (void *ptr, size_t size)
 {
-  register char *tem = realloc (ptr, size);
+  register void *tem = realloc (ptr, size);
 
   if (!tem)
     memory_out ();
@@ -147,15 +138,15 @@ xrealloc (ptr, size)
    for tgetnum, tgetflag and tgetstr to find.  */
 static char *term_entry;
 
-static char *tgetst1 ();
+static char *find_capability (char *, char *);
+static char *tgetst1 (char *, char **);
 
 /* Search entry BP for capability CAP.
    Return a pointer to the capability (in BP) if found,
    0 if not found.  */
 
 static char *
-find_capability (bp, cap)
-     register char *bp, *cap;
+find_capability (char *bp, char *cap)
 {
   for (; *bp; bp++)
     if (bp[0] == ':'
@@ -167,8 +158,7 @@ find_capability (bp, cap)
 
 __private_extern__
 int
-tgetnum (cap)
-     char *cap;
+tgetnum (char *cap)
 {
   register char *ptr = find_capability (term_entry, cap);
   if (!ptr || ptr[-1] != '#')
@@ -178,8 +168,7 @@ tgetnum (cap)
 
 __private_extern__
 int
-tgetflag (cap)
-     char *cap;
+tgetflag (char *cap)
 {
   register char *ptr = find_capability (term_entry, cap);
   return ptr && ptr[-1] == ':';
@@ -192,9 +181,7 @@ tgetflag (cap)
 
 __private_extern__
 char *
-tgetstr (cap, area)
-     char *cap;
-     char **area;
+tgetstr (char *cap, char **area)
 {
   register char *ptr = find_capability (term_entry, cap);
   if (!ptr || (ptr[-1] != '=' && ptr[-1] != '~'))
@@ -220,9 +207,7 @@ static char esctab[]
    or NULL if PTR is NULL.  */
 
 static char *
-tgetst1 (ptr, area)
-     char *ptr;
-     char **area;
+tgetst1 (char *ptr, char **area)
 {
   register char *p, *r;
   register int c;
@@ -313,10 +298,7 @@ static int speeds[] =
 
 __private_extern__
 int
-tputs (str, nlines, outfun)
-     register char *str;
-     int nlines;
-     register int (*outfun) ();
+tputs (char *str, int nlines, int (*outfun)(int))
 {
   register int padcount = 0;
   register int speed;
@@ -392,10 +374,10 @@ struct buffer
 
 /* Forward declarations of static functions.  */
 
-static int scan_file ();
-static char *gobble_line ();
-static int compare_contin ();
-static int name_match ();
+static int scan_file (char *, int, struct buffer *);
+static char *gobble_line (int, struct buffer *, char *);
+static int compare_contin (char *, char *);
+static int name_match (char *, char *);
 
 #ifdef VMS
 
@@ -451,8 +433,7 @@ valid_filename_p (fn)
 
 __private_extern__
 int
-tgetent (bp, name)
-     char *bp, *name;
+tgetent (char *bp, char *name)
 {
   register char *termcap_name;
   register int fd;
@@ -462,7 +443,7 @@ tgetent (bp, name)
   char *term;
   int malloc_size = 0;
   register int c;
-  char *tcenv;			/* TERMCAP value, if it contains :tc=.  */
+  char *tcenv = NULL;		/* TERMCAP value, if it contains :tc=.  */
   char *indirect = NULL;	/* Terminal type in :tc= in TERMCAP value.  */
   int filep;
 
@@ -536,7 +517,10 @@ tgetent (bp, name)
   fd = open (termcap_name, O_RDONLY, 0);
 #endif
   if (fd < 0)
-    return -1;
+    {
+      free (indirect);
+      return -1;
+    }
 
   buf.size = BUFSIZE;
   /* Add 1 to size to ensure room for terminating null.  */
@@ -618,10 +602,7 @@ tgetent (bp, name)
    or 0 if no entry is found in the file.  */
 
 static int
-scan_file (str, fd, bufp)
-     char *str;
-     int fd;
-     register struct buffer *bufp;
+scan_file (char *str, int fd, struct buffer *bufp)
 {
   register char *end;
 
@@ -658,8 +639,7 @@ scan_file (str, fd, bufp)
    by termcap entry LINE.  */
 
 static int
-name_match (line, name)
-     char *line, *name;
+name_match (char *line, char *name)
 {
   register char *tem;
 
@@ -674,8 +654,7 @@ name_match (line, name)
 }
 
 static int
-compare_contin (str1, str2)
-     register char *str1, *str2;
+compare_contin (char *str1, char *str2)
 {
   register int c1, c2;
   while (1)
@@ -715,10 +694,7 @@ compare_contin (str1, str2)
    thing as one line.  The caller decides when a line is continued.  */
 
 static char *
-gobble_line (fd, bufp, append_end)
-     int fd;
-     register struct buffer *bufp;
-     char *append_end;
+gobble_line (int fd, struct buffer *bufp, char *append_end)
 {
   register char *end;
   register int nread;
@@ -751,7 +727,7 @@ gobble_line (fd, bufp, append_end)
       else
 	{
 	  append_end -= bufp->ptr - buf;
-	  bcopy (bufp->ptr, buf, bufp->full -= bufp->ptr - buf);
+	  memcpy (buf, bufp->ptr, bufp->full -= bufp->ptr - buf);
 	  bufp->ptr = buf;
 	}
       if (!(nread = read (fd, buf + bufp->full, bufp->size - bufp->full)))
@@ -796,8 +772,7 @@ main (argc, argv)
   printf ("am: %d\n", tgetflag ("am"));
 }
 
-tprint (cap)
-     char *cap;
+tprint (char *cap)
 {
   char *x = tgetstr (cap, 0);
   register char *y;

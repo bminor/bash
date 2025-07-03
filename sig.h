@@ -1,6 +1,6 @@
 /* sig.h -- header file for signal handler definitions. */
 
-/* Copyright (C) 1994-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -32,7 +32,7 @@
 #endif
 
 #define sighandler void
-typedef void SigHandler PARAMS((int));
+typedef void SigHandler (int);
 
 #define SIGRETURN(n)	return
 
@@ -42,7 +42,7 @@ typedef void SigHandler PARAMS((int));
 #if !defined (HAVE_POSIX_SIGNALS)
 #  define set_signal_handler(sig, handler) (SigHandler *)signal (sig, handler)
 #else
-extern SigHandler *set_signal_handler PARAMS((int, SigHandler *));	/* in sig.c */
+extern SigHandler *set_signal_handler (int, SigHandler *);	/* in sig.c */
 #endif /* _POSIX_VERSION */
 
 #if !defined (SIGCHLD) && defined (SIGCLD)
@@ -108,29 +108,33 @@ extern volatile sig_atomic_t sigterm_received;
 extern int interrupt_immediately;	/* no longer used */
 extern int terminate_immediately;
 
+extern volatile int builtin_catch_sigpipe;	/* not used yet */
+
 /* Functions from sig.c. */
-extern sighandler termsig_sighandler PARAMS((int));
-extern void termsig_handler PARAMS((int));
-extern sighandler sigint_sighandler PARAMS((int));
-extern void initialize_signals PARAMS((int));
-extern void initialize_terminating_signals PARAMS((void));
-extern void reset_terminating_signals PARAMS((void));
-extern void top_level_cleanup PARAMS((void));
-extern void throw_to_top_level PARAMS((void));
-extern void jump_to_top_level PARAMS((int)) __attribute__((__noreturn__));
-extern void restore_sigmask PARAMS((void));
+extern sighandler termsig_sighandler (int);
+extern void termsig_handler (int);
+extern sighandler sigint_sighandler (int);
+extern void initialize_signals (int);
+extern void initialize_terminating_signals (void);
+extern void reset_terminating_signals (void);
+extern void top_level_cleanup (void);
+extern void throw_to_top_level (void);
+extern void jump_to_top_level (int) __attribute__((__noreturn__));
+extern void restore_sigmask (void);
 
-extern sighandler sigwinch_sighandler PARAMS((int));
-extern void set_sigwinch_handler PARAMS((void));
-extern void unset_sigwinch_handler PARAMS((void));
+extern sighandler sigwinch_sighandler (int);
+extern void set_sigwinch_handler (void);
+extern void unset_sigwinch_handler (void);
 
-extern sighandler sigterm_sighandler PARAMS((int));
+extern sighandler sigterm_sighandler (int);
+
+extern void sigpipe_handler (int);
 
 /* Functions defined in trap.c. */
-extern SigHandler *set_sigint_handler PARAMS((void));
-extern SigHandler *trap_to_sighandler PARAMS((int));
-extern sighandler trap_handler PARAMS((int));
+extern SigHandler *set_sigint_handler (void);
+extern SigHandler *trap_to_sighandler (int);
+extern sighandler trap_handler (int);
 
-extern int block_trapped_signals PARAMS((sigset_t *, sigset_t *));
-extern int unblock_trapped_signals PARAMS((sigset_t *));
+extern int block_trapped_signals (sigset_t *, sigset_t *);
+extern int unblock_trapped_signals (sigset_t *);
 #endif /* _SIG_H_ */

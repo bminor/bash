@@ -1,4 +1,4 @@
-/* Copyright (C) 2001, 2006, 2009, 2010, 2012, 2015-2018 Free Software Foundation, Inc.
+/* Copyright (C) 2001, 2006, 2009, 2010, 2012, 2015-2018, 2022 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -31,16 +31,18 @@ extern int errno;
 
 #if IS_BASIC_ASCII
 
-/* Bit table of characters in the ISO C "basic character set".  */
+/* Bit table of characters in the POSIX "portable character set", which
+   POSIX guarantees to be single-byte and in practice are safe to treat
+   like the ISO C "basic character set".  */
 const unsigned int is_basic_table [UCHAR_MAX / 32 + 1] =
 {
-  0x00001a00,           /* '\t' '\v' '\f' */
-  0xffffffef,           /* ' '...'#' '%'...'?' */
-  0xfffffffe,           /* 'A'...'Z' '[' '\\' ']' '^' '_' */
-  0x7ffffffe            /* 'a'...'z' '{' '|' '}' '~' */
+  0x00003f81,           /* '\0' '\007' '\010' '\t' '\n' '\v' '\f' '\r' */
+  0xffffffff,           /* ' '......'?' */
+  0xffffffff,           /* '@' 'A'...'Z' '[' '\\' ']' '^' '_' */
+  0x7fffffff            /* '`' 'a'...'z' '{' '|' '}' '~' */
   /* The remaining bits are 0.  */
 };
-
+	
 #endif /* IS_BASIC_ASCII */
 
 extern int locale_utf8locale;
@@ -51,8 +53,7 @@ extern int utf8_mblen (const char *, size_t);
 /* Count the number of characters in S, counting multi-byte characters as a
    single character. */
 size_t
-mbstrlen (s)
-     const char *s;
+mbstrlen (const char *s)
 {
   size_t clen, nc;
   mbstate_t mbs = { 0 }, mbsbak = { 0 };
@@ -81,8 +82,7 @@ mbstrlen (s)
 /* XXX - if we know that the locale is UTF-8, we can just check whether or
    not any byte has the eighth bit turned on */
 char *
-mbsmbchar (s)
-     const char *s;
+mbsmbchar (const char *s)
 {
   char *t;
   size_t clen;
@@ -115,10 +115,7 @@ mbsmbchar (s)
 }
 
 int
-sh_mbsnlen(src, srclen, maxlen)
-     const char *src;
-     size_t srclen;
-     int maxlen;
+sh_mbsnlen(const char *src, size_t srclen, int maxlen)
 {
   int count;
   int sind;

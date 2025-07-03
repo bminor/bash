@@ -1,0 +1,79 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# more odds and ends for nofork command substitution
+
+# make sure parsing is right within conditional commands
+[[ ${ echo -n "[${ echo -n foo; }]" ; } == '[foo]' ]] || echo bad 1
+[[ "${ echo -n "[${ echo -n foo; }]" ; }" == '[foo]' ]] || echo bad 1
+
+# mix multiple calls to parse_and_execute
+got=$(eval 'x=${ for i in test; do case $i in test) echo .;; esac; done; }' ; echo $x)
+echo $got
+
+# mix compound assignment and nofork command substitution
+: ${ a=(1 2 3 ${ echo 4;} ); }
+declare -p a
+unset a
+
+# function execution with side effects
+int=0
+incr()
+{
+	echo incr: $int
+	(( int++ ))
+}
+: ${ incr; }
+: ${ incr; }
+declare -p int
+
+# expansion inside here-document body
+int=0
+: <<EOF
+${ incr; }
+EOF
+echo after here-doc: $int
+
+# jobs list in nofork command substitution
+sleep 1 &
+sleep 1 &
+
+jl1=${ jobs; }
+printf '%s\n' "$jl1"
+
+jl2=${ jobs; }
+printf '%s\n' "$jl2"
+
+# nofork command substitution doesn't affect the shell's random number sequence
+RANDOM=42
+echo $RANDOM ${ echo $RANDOM; }
+
+RANDOM=42
+echo $RANDOM $RANDOM
+
+# here-documents and other word expansions with comsub/funsub on the rhs
+
+exec 4<<EOF
+we should try rhs
+${word-$(echo comsub)}
+and
+${word-${ echo funsub; }}
+in here-documents
+EOF
+
+cat <&4
+exec 4<&-
+
+echo after all they ${word-$(echo work here)}
+echo and ${word-${ echo work here; }}

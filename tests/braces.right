@@ -22,6 +22,11 @@ foobar foobaz
 bazx bazy
 vx vy
 bazx bazy
+4
+4
+./braces.tests: command substitution: line 59: unexpected EOF while looking for matching `)'
+4
+4
 1 2 3 4 5 6 7 8 9 10
 0..10 braces
 0 1 2 3 4 5 6 7 8 9 10 braces
@@ -58,9 +63,29 @@ a b c d e f g h i j k l m n o p q r s t u v w x y z
 a c e g i k m o q s u w y
 z x v t r p n l j h f d b
 2147483645 2147483646 2147483647 2147483648 2147483649
+00 01 02 03 04 05 06 07 08 09 10
+00 02 04 06 08 10
 10 8 6 4 2 0
 10 8 6 4 2 0
 -50 -45 -40 -35 -30 -25 -20 -15 -10 -5 0
+{1..7} {1..8} {1..9} {2..7} {2..8} {2..9} {3..7} {3..8} {3..9}
+{a..1} {a..2} {a..3} {b..1} {b..2} {b..3} {c..1} {c..2} {c..3}
+{a..1} {a..10} {b..1} {b..10} {c..1} {c..10}
+{a..1} {a..2} {a..3} {a..4} {c..1} {c..2} {c..3} {c..4}
+{1..4} {2..4} {3..4}
+{6..7} {6..8} {6..9}
+a ../a.cfg
+a.. /a.cfg
+a..b /a.cfg
+a b../a.cfg
+1..4 5..8
+1..4 8
+1 5..8
+{abcde.f}
+X{..a}Z
+0{1..}2
+{a..1..5}
+x{1..a}0 x{1..a}1 x{1..a}2 y{1..a}0 y{1..a}1 y{1..a}2
 {1..10.f}
 {1..ff}
 {1..10..ff}

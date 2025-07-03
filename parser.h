@@ -1,7 +1,7 @@
 /* parser.h -- Everything you wanted to know about the parser, but were
    afraid to ask. */
 
-/* Copyright (C) 1995-2021 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,7 +29,7 @@
 #define PST_CASEPAT	0x000001	/* in a case pattern list */
 #define PST_ALEXPNEXT	0x000002	/* expand next word for aliases */
 #define PST_ALLOWOPNBRC	0x000004	/* allow open brace for function def */
-#define PST_NEEDCLOSBRC	0x000008	/* need close brace */
+#define PST_NEEDCLOSBRC	0x000008	/* need close brace -- unused */
 #define PST_DBLPAREN	0x000010	/* double-paren parsing - unused */
 #define PST_SUBSHELL	0x000020	/* ( ... ) subshell */
 #define PST_CMDSUBST	0x000040	/* $( ... ) command substitution */
@@ -51,6 +51,9 @@
 #define PST_NOEXPAND	0x400000	/* don't expand anything in read_token_word; for command substitution */
 #define PST_NOERROR	0x800000	/* don't print error messages in yyerror */
 #define PST_STRING	0x1000000	/* parsing a string to a command or word list */
+#define PST_CMDBLTIN	0x2000000	/* last token was the `command' builtin */
+#define PST_FUNSUBST	0x4000000	/* parsing a foreground command substitution */
+#define PST_FORCMD	0x8000000	/* parsing for command -- not used yet */
 
 /* Definition of the delimiter stack.  Needed by parse.y and bashhist.c. */
 struct dstack {
@@ -74,6 +77,14 @@ struct dstack {
 #define DOLBRACE_QUOTE	0x40	/* single quote is special in double quotes */
 #define DOLBRACE_QUOTE2	0x80	/* single quote is semi-special in double quotes */
 
+/* characters that can appear following ${ to introduce a nofork command
+   substitution. */
+#if 0
+#define FUNSUB_CHAR(n) ((n) == ' ' || (n) == '\t' || (n) == '\n' || (n) == '|' || (n) == '(')	/* ) */
+#else
+#define FUNSUB_CHAR(n) ((n) == ' ' || (n) == '\t' || (n) == '\n' || (n) == '|')
+#endif
+
 /* variable declarations from parse.y */
 extern struct dstack dstack;
 
@@ -93,6 +104,7 @@ extern int shell_eof_token;
 extern int current_token;
 extern int parser_state;
 extern int need_here_doc;
+extern int heredoc_string;
 
 extern int ignoreeof;
 extern int eof_encountered;

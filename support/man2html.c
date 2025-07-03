@@ -452,10 +452,19 @@ print_sig(void)
 	struct tm *timetm;
 	time_t  clock;
 
-	datbuf[0] = '\0';
+#ifdef HAVE_GETTIMEOFDAY
+	struct timeval tv;
+	gettimeofday (&tv, 0);
+	clock = tv.tv_sec;
+#else
 	clock = time(NULL);
+#endif
 	timetm = localtime(&clock);
-	strftime(datbuf, MED_STR_MAX, TIMEFORMAT, timetm);
+	datbuf[0] = '\0';
+	if (timetm)
+	  strftime(datbuf, MED_STR_MAX, TIMEFORMAT, timetm);
+	else
+	  strcpy (datbuf, "??");
 	printf(signature, manpage, datbuf);
 }
 
@@ -809,7 +818,7 @@ out_html(char *c)
 	} else if (output_possible) {
 		while (*c) {
 			outbuffer[obp++] = *c;
-			if (*c == '\n' || obp > HUGE_STR_MAX) {
+			if (*c == '\n' || obp >= HUGE_STR_MAX) {
 				outbuffer[obp] = '\0';
 				add_links(outbuffer);
 				obp = 0;

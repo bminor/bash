@@ -32,6 +32,11 @@ ${THIS_SH} ./jobs5.sub
 ${THIS_SH} ./jobs6.sub
 
 ${THIS_SH} ./jobs7.sub
+# more disown -h tests
+${THIS_SH} ./jobs8.sub
+
+# wait interrupted by signal for which a trap has been set
+${THIS_SH} ./jobs9.sub
 
 jobs
 echo $?
@@ -40,16 +45,23 @@ echo $?
 wait %1
 
 # make sure we can't fg a job started when job control was not active
-sleep 30 &
+sleep 20 &
 pid=$!
 fg %1
 # make sure the killed processes don't cause a message
 exec 5>&2
 exec 2>/dev/null
-kill -n 9 $pid
-wait    # make sure we reap the processes while stderr is still redirected
-exec 2>&5
+kill -n9 $pid
+wait $pid   # make sure we reap the processes while stderr is still redirected
 
+sleep 30 &
+pid2=$!
+kill -sHUP $pid2
+wait $pid2
+exec 2>&5
+unset -v pid pid2
+
+# 
 echo wait-for-pid
 sleep 4 &
 wait $!
@@ -131,6 +143,9 @@ disown %1
 # this, however, is an error
 disown %2
 
+# this is definitely an error
+disown -h @12
+
 echo wait-for-non-child
 wait 1
 echo $?
@@ -205,5 +220,14 @@ kill -STOP %1
 sleep 2	# give time for the shell to get the stop notification
 echo after KILL -STOP, foregrounding %1
 fg %1
-
 echo done
+
+# these are all errors
+
+set +m
+
+jobs -q
+
+suspend -z
+suspend
+suspend --

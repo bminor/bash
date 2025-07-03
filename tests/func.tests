@@ -166,6 +166,7 @@ export -f zf
 
 ${THIS_SH} -c 'type -t zf'
 ${THIS_SH} -c 'type zf'
+unset -f zf
 
 ${THIS_SH} ./func1.sub
 
@@ -178,6 +179,9 @@ ${THIS_SH} ./func3.sub
 
 # FUNCNEST testing
 ${THIS_SH} ./func4.sub
+
+# function naming restrictions
+${THIS_SH} ./func5.sub
 
 unset -f myfunction
 myfunction() {
@@ -194,5 +198,16 @@ segv()
 
 segv
 echo $?
+
+# functions can have attributes
+rfunc()
+{
+	local -
+	local var
+
+	local -p
+}
+readonly -f rfunc
+readonly -f
 
 exit 0

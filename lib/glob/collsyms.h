@@ -1,7 +1,7 @@
 /* collsyms.h -- collating symbol names and their corresponding characters
 		 (in ascii) as given by POSIX.2 in table 2.8. */
 
-/* Copyright (C) 1997-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2002,2023 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,11 +38,7 @@ static __COLLSYM POSIXCOLL [] =
 	{  L("EOT"),			L('\004') },
 	{  L("ENQ"),			L('\005') },
 	{  L("ACK"),			L('\006') },
-#ifdef __STDC__
 	{  L("alert"),			L('\a') },
-#else
-	{  L("alert"),			L('\007') },
-#endif
 	{  L("BS"),			L('\010') },
 	{  L("backspace"),		L('\b') },
 	{  L("HT"),			L('\011') },

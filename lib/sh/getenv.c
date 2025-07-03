@@ -1,7 +1,7 @@
 /* getenv.c - get environment variable value from the shell's variable
 	      list. */
 
-/* Copyright (C) 1997-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2002,2023-2024 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -47,8 +47,7 @@ extern char **environ;
 static char *last_tempenv_value = (char *)NULL;
 
 char *
-getenv (name)
-     const char *name;
+getenv (const char *name)
 {
   SHELL_VAR *var;
 
@@ -71,7 +70,8 @@ getenv (name)
     }
   else if (environ)
     {
-      register int i, len;
+      int i;
+      size_t len;
 
       /* In some cases, s5r3 invokes getenv() before main(); BSD systems
 	 using gprof also exhibit this behavior.  This means that
@@ -90,20 +90,14 @@ getenv (name)
 
 /* Some versions of Unix use _getenv instead. */
 char *
-_getenv (name)
-     const char *name;
+_getenv (const char *name)
 {
   return (getenv (name));
 }
 
 /* SUSv3 says argument is a `char *'; BSD implementations disagree */
 int
-putenv (str)
-#ifndef HAVE_STD_PUTENV
-     const char *str;
-#else
-     char *str;
-#endif
+putenv (char *str)
 {
   SHELL_VAR *var;
   char *name, *value;
@@ -142,22 +136,14 @@ putenv (str)
 
 #if 0
 int
-_putenv (name)
-#ifndef HAVE_STD_PUTENV
-     const char *name;
-#else
-     char *name;
-#endif
+_putenv (char *name)
 {
   return putenv (name);
 }
 #endif
 
 int
-setenv (name, value, rewrite)
-     const char *name;
-     const char *value;
-     int rewrite;
+setenv (const char *name, const char *value, int rewrite)
 {
   SHELL_VAR *var;
   char *v;
@@ -188,33 +174,22 @@ setenv (name, value, rewrite)
 
 #if 0
 int
-_setenv (name, value, rewrite)
-     const char *name;
-     const char *value;
-     int rewrite;
+_setenv (const char *name, const char *value, int rewrite)
 {
   return setenv (name, value, rewrite);
 }
 #endif
 
-/* SUSv3 says unsetenv returns int; existing implementations (BSD) disagree. */
+/* SUSv3 says unsetenv returns int; existing implementations (BSD) disagree.
+   POSIX says int. */
 
-#ifdef HAVE_STD_UNSETENV
-#define UNSETENV_RETURN(N)	return(N)
-#define UNSETENV_RETTYPE	int
-#else
-#define UNSETENV_RETURN(N)	return
-#define UNSETENV_RETTYPE	void
-#endif
-
-UNSETENV_RETTYPE
-unsetenv (name)
-     const char *name;
+int
+unsetenv (const char *name)
 {
   if (name == 0 || *name == '\0' || strchr (name, '=') != 0)
     {
       errno = EINVAL;
-      UNSETENV_RETURN(-1);
+      return (-1);
     }
 
   /* XXX - should we just remove the export attribute here? */
@@ -228,6 +203,6 @@ unsetenv (name)
     VUNSETATTR (v, att_exported);
 #endif
 
-  UNSETENV_RETURN(0);
+  return (0);
 }
 #endif /* CAN_REDEFINE_GETENV */

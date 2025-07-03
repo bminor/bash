@@ -40,6 +40,8 @@ argv[2] = <qix>
 argv[1] = <qux qix>
 declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <2>
+./assoc.tests: line 99: [$unset]: bad array subscript
+0
 argv[1] = <7>
 argv[1] = <qux>
 argv[2] = <qix>
@@ -283,7 +285,7 @@ declare -A assoc=(["*"]="star" ["!"]="bang" ["@"]="at" )
 at
 star
 declare -A a=(["@"]="at" )
-./assoc13.sub: line 22: ia[@]: bad array subscript
+./assoc13.sub: line 35: ia[@]: bad array subscript
 declare -a ia
 declare -A a=(["@"]="at2" )
 declare -A a=(["@"]="    string" )
@@ -398,3 +400,10 @@ declare -A A=()
 declare -A A=(["]"]="rbracket" ["["]="lbracket" )
 declare -A A=()
 5: ok 1
+declare -A aa=([key]="/homes/cj/Desktop" )
+declare -A aa=([key]="/homes/cj/Desktop" )
+declare -A aa=([k2]="/homes/cj/Library" [key]="/homes/cj/Desktop" )
+declare -A aa=([/homes/cj/key]="/homes/cj/Desktop" )
+declare -A aa=([/homes/cj/Documents]="/homes/cj/Library" [/homes/cj/key]="/homes/cj/Desktop" )
+declare -A aa=([/homes/cj/Documents]="/homes/cj/Library" [/homes/cj/key]="/homes/cj/Desktop:/homes/cj/Documents:/homes/cj/Applications" )
+declare -A aa=([/homes/cj/Documents]="/homes/cj/Library" [/homes/cj/key]="/homes/cj/Desktop:/homes/cj/Documents:/homes/cj/Applications" )

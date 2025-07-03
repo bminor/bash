@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2021 Free Software Foundation, Inc.
+Copyright (C) 1987-2024 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,6 +57,9 @@ Options:
   -X                 List key sequences bound with -x and associated commands
                      in a form that can be reused as input.
 
+If arguments remain after option processing, the -p and -P options treat
+them as readline command names and restrict output to those names.
+
 Exit Status:
 bind returns 0 unless an unrecognized option is given or an error occurs.
 $END
@@ -86,9 +89,9 @@ extern int errno;
 #include "bashgetopt.h"
 #include "common.h"
 
-static int query_bindings PARAMS((char *));
-static int unbind_command PARAMS((char *));
-static int unbind_keyseq PARAMS((char *));
+static int query_bindings (char *);
+static int unbind_command (char *);
+static int unbind_keyseq (char *);
 
 #define BIND_RETURN(x)  do { return_code = x; goto bind_exit; } while (0)
 
@@ -108,23 +111,16 @@ static int unbind_keyseq PARAMS((char *));
 #define XXFLAG	0x2000
 
 int
-bind_builtin (list)
-     WORD_LIST *list;
+bind_builtin (WORD_LIST *list)
 {
   int return_code;
   Keymap kmap, saved_keymap;
   int flags, opt;
   char *initfile, *map_name, *fun_name, *unbind_name, *remove_seq, *cmd_seq, *t;
+  WORD_LIST *savelist;
 
   if (no_line_editing)
-    {
-#if 0
-      builtin_error (_("line editing not enabled"));
-      return (EXECUTION_FAILURE);
-#else
-      builtin_warning (_("line editing not enabled"));
-#endif
-    }
+    builtin_warning (_("line editing not enabled"));
 
   kmap = saved_keymap = (Keymap) NULL;
   flags = 0;
@@ -192,7 +188,7 @@ bind_builtin (list)
 	case 'X':
 	  flags |= XXFLAG;
 	  break;
-	case GETOPT_HELP:
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  BIND_RETURN (EX_USAGE);
@@ -227,10 +223,39 @@ bind_builtin (list)
     rl_list_funmap_names ();
 
   if (flags & PFLAG)
-    rl_function_dumper (1);
+    {
+      if (shell_compatibility_level <= 52 || list == 0)
+	rl_function_dumper (1);
+      else
+	{
+	  /* Allow both -p and -P to have a crack at the additional
+	     arguments, just like supplying both -p and -P without
+	     arguments displays the full set of bindings twice in
+	     two separate formats. Otherwise, -p takes all the
+	     arguments and -P prints all the bindings. */
+	  savelist = (flags & PPFLAG) ? list : (WORD_LIST *)NULL;
+	  while (list)
+	    {
+	      rl_print_keybinding (list->word->word, kmap, 1);
+	      list = list->next;
+	    }
+	  list = savelist;
+	}
+    }
 
+  /* should combine this with the above clause */
   if (flags & PPFLAG)
-    rl_function_dumper (0);
+    {
+      if (shell_compatibility_level <= 52 || list == 0)
+	rl_function_dumper (0);
+      else
+	while (list)
+	  {
+	    rl_print_keybinding (list->word->word, kmap, 0);
+	    list = list->next;
+	  }
+    }
+
 
   if (flags & SFLAG)
     rl_macro_dumper (1);
@@ -249,7 +274,7 @@ bind_builtin (list)
       if (rl_read_init_file (initfile) != 0)
 	{
 	  t = printable_filename (initfile, 0);
-	  builtin_error (_("%s: cannot read: %s"), t, strerror (errno));
+	  builtin_error ("%s: %s: %s", t, _("cannot read"), strerror (errno));
 	  if (t != initfile)
 	    free (t);
 	  BIND_RETURN (EXECUTION_FAILURE);
@@ -277,7 +302,8 @@ bind_builtin (list)
   /* Process the rest of the arguments as binding specifications. */
   while (list)
     {
-      int olen, nlen, d, i;
+      size_t olen, nlen;
+      int d, i;
       char **obindings, **nbindings;
 
       obindings = rl_invoking_keyseqs (bash_execute_unix_command);
@@ -315,8 +341,7 @@ bind_builtin (list)
 }
 
 static int
-query_bindings (name)
-     char *name;
+query_bindings (char *name)
 {
   rl_command_func_t *function;
   char **keyseqs;
@@ -347,8 +372,7 @@ query_bindings (name)
 }
 
 static int
-unbind_command (name)
-     char *name;
+unbind_command (char *name)
 {
   rl_command_func_t *function;
 
@@ -364,8 +388,7 @@ unbind_command (name)
 }
 
 static int
-unbind_keyseq (seq)
-     char *seq;
+unbind_keyseq (char *seq)
 {
   char *kseq;
   int kslen, type;

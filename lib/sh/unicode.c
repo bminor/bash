@@ -1,6 +1,6 @@
 /* unicode.c - functions to convert unicode characters */
 
-/* Copyright (C) 2010-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2020,2022 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,6 +35,10 @@
 #  include <iconv.h>
 #endif
 
+#if HAVE_LANGINFO_CODESET
+#  include <langinfo.h>
+#endif
+
 #include <xmalloc.h>
 
 #ifndef USHORT_MAX
@@ -50,9 +54,9 @@
 #endif /* !STREQ */
 
 #if defined (HAVE_LOCALE_CHARSET)
-extern const char *locale_charset PARAMS((void));
+extern const char *locale_charset (void);
 #else
-extern char *get_locale_var PARAMS((char *));
+extern char *get_locale_var (const char *);
 #endif
 
 extern int locale_utf8locale;
@@ -67,7 +71,7 @@ static iconv_t localconv;
 static char charsetbuf[40];
 
 static char *
-stub_charset ()
+stub_charset (void)
 {
   char *locale, *s, *t;
 
@@ -94,7 +98,7 @@ stub_charset ()
 #endif
 
 void
-u32reset ()
+u32reset (void)
 {
 #if defined (HAVE_ICONV)
   if (u32init && localconv != (iconv_t)-1)
@@ -109,9 +113,7 @@ u32reset ()
 
 /* u32toascii ? */
 int
-u32tochar (x, s)
-     unsigned long x;
-     char *s;
+u32tochar (unsigned long x, char *s)
 {
   int l;
 
@@ -136,9 +138,7 @@ u32tochar (x, s)
 }
 
 int
-u32tocesc (wc, s)
-     u_bits32_t wc;
-     char *s;
+u32tocesc (u_bits32_t wc, char *s)
 {
   int l;
 
@@ -151,9 +151,7 @@ u32tocesc (wc, s)
 
 /* Convert unsigned 32-bit int to utf-8 character string */
 int
-u32toutf8 (wc, s)
-     u_bits32_t wc;
-     char *s;
+u32toutf8 (u_bits32_t wc, char *s)
 {
   int l;
 
@@ -214,9 +212,7 @@ u32toutf8 (wc, s)
 /* Convert a 32-bit unsigned int (unicode) to a UTF-16 string.  Rarely used,
    only if sizeof(wchar_t) == 2. */
 int
-u32toutf16 (c, s)
-     u_bits32_t c;
-     wchar_t *s;
+u32toutf16 (u_bits32_t c, wchar_t *s)
 {
   int l;
 
@@ -240,9 +236,7 @@ u32toutf16 (c, s)
 /* convert a single unicode-32 character into a multibyte string and put the
    result in S, which must be large enough (at least max(10,MB_LEN_MAX) bytes) */
 int
-u32cconv (c, s)
-     unsigned long c;
-     char *s;
+u32cconv (unsigned long c, char *s)
 {
   wchar_t wc;
   wchar_t ws[3];
@@ -268,17 +262,18 @@ u32cconv (c, s)
 #endif
 
 #if HAVE_ICONV
-  /* this is mostly from coreutils-8.5/lib/unicodeio.c */
+  /* this is mostly from coreutils-8.5/lib/unicodeio.c but prefers nl_langinfo
+     to be consistent with locale.c:locale_isutf8() */
   if (u32init == 0)
     {
       utf8locale = locale_utf8locale;
       localconv = (iconv_t)-1;
       if (utf8locale == 0)
 	{
-#if HAVE_LOCALE_CHARSET
-	  charset = locale_charset ();
-#elif HAVE_NL_LANGINFO
+#if HAVE_LANGINFO_CODESET
 	  charset = nl_langinfo (CODESET);
+#elif HAVE_LOCALE_CHARSET
+	  charset = locale_charset ();
 #else
 	  charset = stub_charset ();
 #endif
@@ -333,7 +328,7 @@ u32cconv (c, s)
 }
 #else
 void
-u32reset ()
+u32reset (void)
 {
 }
 #endif /* HANDLE_MULTIBYTE */
