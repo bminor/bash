@@ -25,16 +25,16 @@ posix-bash: line 1: exec: .: cannot execute: Is a directory
 126
 0
 this is bashenv
-trap -- 'echo EXIT' EXIT
 trap -- '' SIGTERM
 trap -- 'echo USR1' SIGUSR1
+trap -- 'rm -f x.sh x.output ; echo EXIT' EXIT
 USR1
-./exec3.sub: line 38: /tmp/bash-notthere: No such file or directory
+./exec3.sub: line 45: /tmp/bash-notthere: No such file or directory
 ./exec3.sub: ENOENT: after failed exec: 127
-./exec3.sub: line 43: exec: bash-notthere: not found
-trap -- 'echo EXIT' EXIT
+./exec3.sub: line 50: exec: bash-notthere: not found
 trap -- '' SIGTERM
 trap -- 'echo USR1' SIGUSR1
+trap -- 'rm -f x.sh x.output ; echo EXIT' EXIT
 USR1
 EXIT
 ./execscript: line 103: notthere: command not found

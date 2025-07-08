@@ -4142,7 +4142,7 @@ vi_advance_point (void)
 	}
     }
 #else
-    rl_point++:
+    rl_point++;
 #endif
   return point;
 }
