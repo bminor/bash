@@ -11295,3 +11295,52 @@ parse.y
 				    ---
 tests/printf7.sub,tests/exec3.sub
 	- changes to compensate for some system differences (macos/Linux/BSD)
+
+				    7/6
+				    ---
+parse.y,input.h
+	- execute_variable_command: takes an additional FLAGS argument; right
+	  now only takes one value. If FLAGS != 0, we save and restore the
+	  parser state
+
+eval.c,array.h
+	- execute_array_command: takes an additional flags argument to pass to
+	  execute_variable_command for each array element
+	- execute_prompt_command: call execute_array_command or execute_variable_command
+	  with 0 as the appropriate flags argument, since we don't need to
+	  save and restore the parser state at the point we're calling this
+	  Fixes bug reported by Carl Johnson <carl.johnson.new.hampshire@gmail.com>
+
+lib/readline/display.c
+	- WRAP_OFFSET: make sure local_prompt_invis_chars is non-null before
+	  dereferencing it
+	  Fixes bug reported by Tobias Powalowski <tobias.powalowski@pm.me>
+
+				    7/7
+				    ---
+lib/readline/mbutil.c
+	- Make sure _rl_mb_strcaseeqn and _rl_mb_charcasecmp are protected by
+	  HAVE_MULTIBYTE
+	  Report from Bernd Kuhls <bernd@kuhls.net>
+
+lib/readline/doc/rltech.texi
+	- rl_complete_internal: document that the `?' specifier will insert a
+	  single completion if the last completion failed, and that `|' will
+	  display possible completions unconditionally.
+
+bashline.c
+	- bash_glob_list_expansions: use `|' to force listing possible
+	  completions even in the presence of a single completion after previous
+	  completion failure
+	  Based on report from A4-Tacks <wdsjxhno1001@163.com>
+
+lib/readline/mbutil.c
+	- _rl_utf8_mblen: accept 4-byte UTF-8 characters beginning with 0xF4
+	  Report from Collin Funk <collin.funk1@gmail.com>
+
+				    7/8
+				    ---
+builtins/printf.def
+	- printstr: only adjust precision if the decoded precision is >= 0,
+	  since decodeint returns -1 on overflow/failure
+

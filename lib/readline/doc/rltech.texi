@@ -2098,7 +2098,10 @@ Readline.
 @deftypefun int rl_complete_internal (int what_to_do)
 Complete the word at or before point.
 @var{what_to_do} says what to do with the completion.
-A value of @samp{?} means list the possible completions.
+A value of @samp{?} means list the possible completions,
+but to insert a single completion if the last completion failed to find
+any matches.
+@samp{|} unconditionally lists the possible completions.
 @samp{TAB} means do standard completion.
 @samp{*} means insert all of the possible completions.
 @samp{!} means to display all of the possible completions,

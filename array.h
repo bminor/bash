@@ -177,6 +177,6 @@ extern arrayind_t element_back (ARRAY *, arrayind_t);
 #define ALL_ELEMENT_SUB(c)	((c) == '@' || (c) == '*')
 
 /* In eval.c, but uses ARRAY * */
-extern int execute_array_command (ARRAY *, void *);
+extern int execute_array_command (ARRAY *, void *, int);
 
 #endif /* _ARRAY_H_ */

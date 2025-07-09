@@ -4090,7 +4090,7 @@ bash_glob_expand_word (int count, int key)
 static int
 bash_glob_list_expansions (int count, int key)
 {
-  return bash_glob_completion_internal ('?');
+  return bash_glob_completion_internal ('|');
 }
 
 static int

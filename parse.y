@@ -3008,17 +3008,19 @@ discard_until (int character)
 }
 
 void
-execute_variable_command (const char *command, const char *vname)
+execute_variable_command (const char *command, const char *vname, int flags)
 {
   char *last_lastarg;
   sh_parser_state_t ps;
 
-  save_parser_state (&ps);
+  if (flags)
+    save_parser_state (&ps);
   last_lastarg = save_lastarg ();
 
   parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE|SEVAL_NOTIFY);
 
-  restore_parser_state (&ps);
+  if (flags)
+    restore_parser_state (&ps);
   bind_lastarg (last_lastarg);
   FREE (last_lastarg);
 

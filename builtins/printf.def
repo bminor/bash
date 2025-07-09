@@ -914,7 +914,7 @@ printstr (char *fmt, char *string, size_t len, int fieldwidth, int precision)
 	  pr = decodeint (&fmt, 1, -1);
 	  /* pr < precision means we adjusted precision in printf_builtin
 	     for the quoted string length (%Q), so we use the adjusted value */
-#if 0 /*TAG:bash-5.4 20250702 */
+#if 1 /*TAG:bash-5.4 20250702 */
 	  if (pr >= 0 && pr < precision)
 #else
 	  if (pr < precision)

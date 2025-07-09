@@ -283,7 +283,7 @@ send_pwd_to_eterm (void)
 #if defined (ARRAY_VARS)
 /* Caller ensures that A has a non-zero number of elements */
 int
-execute_array_command (ARRAY *a, void *v)
+execute_array_command (ARRAY *a, void *v, int flags)
 {
   char *tag;
   char **argv;
@@ -295,7 +295,7 @@ execute_array_command (ARRAY *a, void *v)
   for (i = 0; i < argc; i++)
     {
       if (argv[i] && argv[i][0])
-	execute_variable_command (argv[i], tag);
+	execute_variable_command (argv[i], tag, flags);
     }
   strvec_dispose (argv);
   return 0;
@@ -318,7 +318,7 @@ execute_prompt_command (void)
   if (array_p (pcv))
     {
       if ((pcmds = array_cell (pcv)) && array_num_elements (pcmds) > 0)
-	execute_array_command (pcmds, "PROMPT_COMMAND");
+	execute_array_command (pcmds, "PROMPT_COMMAND", 0);
       return;
     }
   else if (assoc_p (pcv))
@@ -327,7 +327,7 @@ execute_prompt_command (void)
 
   command_to_execute = value_cell (pcv);
   if (command_to_execute && *command_to_execute)
-    execute_variable_command (command_to_execute, "PROMPT_COMMAND");
+    execute_variable_command (command_to_execute, "PROMPT_COMMAND", 0);
 }
 
 /* Call the YACC-generated parser and return the status of the parse.

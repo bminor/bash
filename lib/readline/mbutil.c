@@ -121,7 +121,7 @@ _rl_utf8_mblen (const char *s, size_t n)
 		return 3;
 	    }
 	}
-      else if (c < 0xf4)
+      else if (c <= 0xf4)
 	{
 	  if (n == 1)
 	    return -2;
@@ -584,6 +584,7 @@ _rl_find_prev_mbchar (const char *string, int seed, int flags)
 #endif
 }
 
+#if defined (HANDLE_MULTIBYTE)
 /* Compare the first N characters of S1 and S2 without regard to case. If
    FLAGS&1, apply the mapping specified by completion-map-case and make
    `-' and `_' equivalent. Returns 1 if the strings are equal. */
@@ -658,3 +659,4 @@ _rl_mb_charcasecmp (const char *s1, mbstate_t *ps1, const char *s2, mbstate_t *p
     return 1;
   return (wc1 == wc2);
 }
+#endif

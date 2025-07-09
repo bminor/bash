@@ -74,10 +74,6 @@
 
 typedef SHELL_VAR **SVFUNC (void);
 
-#ifndef HAVE_STRPBRK
-extern char *strpbrk (char *, char *);
-#endif
-
 extern STRING_INT_ALIST word_token_alist[];
 extern char *signal_names[];
 
