@@ -1,0 +1,65 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# make sure all internal backslash quoting for array subscripts in arithmetic
+# contexts is removed appropriately before the expression is evaluated
+
+a=(0 1 2)
+b=(0 1 2)
+x=0
+
+((i=$x,a[b[i]]))
+let "i=$x,a[b[i]]"
+
+echo $((i=$x,a[b[i]]))
+for (( i=$x,a[b[i]]; i != 0; i--)); do echo a; done
+
+yy[i=$x,a[b[i]]]=10
+declare -p yy
+unset yy
+
+declare -i yy
+yy=i=$x,a[b[i]]
+unset yy
+
+[[ i=$x,a[b[i]] -gt 0 ]]
+
+echo ${var:i=$x,a[b[i]]:4}
+
+unset i a b
+
+xxxx=4
+foo='$(echo xxxx)'
+
+# errors
+
+echo $(( $foo ))
+echo $(( b[~foo/$xxxx] ))	# still attempts tilde expansion
+echo $(( b[~foo * $xxxx] ))
+
+# but associative arrays work, not arithmetic expressions
+typeset -A b
+xxxx=4
+foo='$(echo comsub)'
+
+echo $(( b[~foo * $xxxx] ))
+
+# original report
+
+x[3]=10 i=3 a[5]=42 p=15
+# comparison throws error
+(( a[p - x[i]] > 10)) && echo Y
+
+# errors
+foo=1
+echo $(( 'foo' ))

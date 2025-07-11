@@ -11344,3 +11344,22 @@ builtins/printf.def
 	- printstr: only adjust precision if the decoded precision is >= 0,
 	  since decodeint returns -1 on overflow/failure
 
+lib/readline/input.c
+	- _rl_gather_tyi: if the input-available hook returns success,
+	  indicating that input is available, set chars_avail to 1, assuming
+	  there is at minimum a single character of input available
+	- _rl_gather_tyi: if pselect/select return non-zero, indicating that
+	  input is available, set result = -1 before going on so subsequent
+	  branches will check how many chars are available and set chars_avail
+	  Report from Dmitri A. Sergatskov <dasergatskov@gmail.com>
+
+				   7/10
+				   ----
+subst.c
+	- ARITH_EXP_CHARS: remove ~ from set because we don't perform tilde
+	  expansion when expanding arithmetic expressions
+	- string_quote_removal: if quoted includes Q_ARITH, indicating we are
+	  expanding an arithmetic expression for a compound command or array
+	  subscript, remove backslashes quoting `[', `]', and `~', since those
+	  are quoted by expand_array_subscript but not dequoted anywhere else
+	  Fixes quoting bug reported by Isabella Bosia <izaberina@gmail.com>

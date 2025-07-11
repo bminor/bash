@@ -3795,9 +3795,9 @@ pos_params (const char *string, int start, int end, int quoted, int pflags)
 #define EXP_CHAR(s) (s == '$' || s == '`' || s == CTLESC || s == '~')
 #endif
 
-/* We don't perform process substitution in arithmetic expressions, so don't
-   bother checking for it. */
-#define ARITH_EXP_CHAR(s) (s == '$' || s == '`' || s == CTLESC || s == '~')
+/* We don't perform process substitution or tilde expansion in arithmetic
+   expressions, so don't bother checking for them. */
+#define ARITH_EXP_CHAR(s) (s == '$' || s == '`' || s == CTLESC)
 
 /* If there are any characters in STRING that require full expansion,
    then call FUNC to expand STRING; otherwise just perform quote
@@ -12215,6 +12215,14 @@ string_quote_removal (const char *string, int quoted)
 	      *r++ = '\\';
 	      break;
 	    }
+#if defined (ARRAY_VARS)
+	  /* The only special characters that matter here are []~, since those
+	     are backslash-quoted in expand_array_subscript but not dequoted
+	     by the statement following this one. */
+	  if ((quoted & Q_ARITH) && (c == LBRACK || c == RBRACK || c == '~'))
+	    ;		/* placeholder here */
+	  else
+#endif
 	  if (((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || dquote) && (sh_syntaxtab[c] & CBSDQUOTE) == 0)
 	    *r++ = '\\';
 	  /* FALLTHROUGH */

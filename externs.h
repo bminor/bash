@@ -27,7 +27,8 @@
 #include "stdc.h"
 
 /* Functions from expr.c. */
-#define EXP_EXPANDED	0x01
+#define EXP_EXPANDED	0x01	/* already expanded */
+#define EXP_QUOTED	0x02	/* expanded, needs internal quote removal, not used yet */
 
 extern intmax_t evalexp (const char *, int, int *);
 

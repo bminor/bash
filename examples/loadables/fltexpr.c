@@ -148,6 +148,7 @@ typedef double sh_float_t;
 #define SHFLOAT_MANT_DIG	DBL_MANT_DIG
 #define SHFLOAT_LENGTH_MODIFIER	'l';
 #define SHFLOAT_STRTOD		strtod
+#define SHFLOAT_HUGE_VAL	HUGE_VAL
 
 #ifndef M_EGAMMA
 #define M_EGAMMA 0.57721566490153286060651209008240243
@@ -489,9 +490,11 @@ fltexpr_strtod (const char *nptr, char **ep)
 
   errno = 0;
   r = SHFLOAT_STRTOD (nptr, &xp);
-  if (errno == ERANGE)
+  if (errno == ERANGE && (r == SHFLOAT_HUGE_VAL || r == -SHFLOAT_HUGE_VAL))
+    r = (r == SHFLOAT_HUGE_VAL) ? infval : -infval;
+  else if (errno == ERANGE)
     evalerror ("number out of range");
-  else if (r == 0 && *ep == nptr)
+  else if (r == 0 && xp == nptr)
     evalerror ("invalid number");
   if (ep)
     *ep = xp;

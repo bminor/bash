@@ -355,15 +355,24 @@ declare -a a=([0]="0")
 3 1
 ./arith10.sub: line 95: let: 0 - "": arithmetic syntax error: operand expected (error token is """")
 4 1
+0
+declare -a yy=([0]="10")
+
+./arith11.sub: line 46: $(echo xxxx) : arithmetic syntax error: operand expected (error token is "$(echo xxxx) ")
+./arith11.sub: line 47: $(echo xxxx): arithmetic syntax error: operand expected (error token is "$(echo xxxx)")
+./arith11.sub: line 48: $(echo xxxx): arithmetic syntax error: operand expected (error token is "$(echo xxxx)")
+0
+Y
+./arith11.sub: line 65: 'foo' : arithmetic syntax error: operand expected (error token is "'foo' ")
 8 12
-./arith.tests: line 335: ((: x=9 y=41 : arithmetic syntax error in expression (error token is "y=41 ")
-./arith.tests: line 339: a b: arithmetic syntax error in expression (error token is "b")
-./arith.tests: line 340: ((: a b: arithmetic syntax error in expression (error token is "b")
+./arith.tests: line 338: ((: x=9 y=41 : arithmetic syntax error in expression (error token is "y=41 ")
+./arith.tests: line 342: a b: arithmetic syntax error in expression (error token is "b")
+./arith.tests: line 343: ((: a b: arithmetic syntax error in expression (error token is "b")
 42
 42
 42
 42
 42
 42
-./arith.tests: line 355: 'foo' : arithmetic syntax error: operand expected (error token is "'foo' ")
-./arith.tests: line 358: b[c]d: arithmetic syntax error in expression (error token is "d")
+./arith.tests: line 358: 'foo' : arithmetic syntax error: operand expected (error token is "'foo' ")
+./arith.tests: line 361: b[c]d: arithmetic syntax error in expression (error token is "d")
