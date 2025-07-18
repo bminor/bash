@@ -3143,14 +3143,14 @@ rl_message (const char *format, ...)
 
 #if defined (HAVE_VSNPRINTF)
   bneed = vsnprintf (msg_buf, msg_bufsiz, format, args);
-  if (bneed >= msg_bufsiz - 1)
+  if (bneed > msg_bufsiz - 1)
     {
       msg_bufsiz = bneed + 1;
       msg_buf = xrealloc (msg_buf, msg_bufsiz);
       va_end (args);
 
       va_start (args, format);
-      vsnprintf (msg_buf, msg_bufsiz - 1, format, args);
+      vsnprintf (msg_buf, msg_bufsiz, format, args);
     }
 #else
   vsprintf (msg_buf, format, args);

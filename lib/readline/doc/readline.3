@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Dec 30 11:27:47 EST 2024
+.\"	Last Change: Tue Jul 15 10:19:29 EDT 2025
 .\"
-.TH READLINE 3 "2024 December 30" "GNU Readline 8.3"
+.TH READLINE 3 "2024 July 15" "GNU Readline 8.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -473,6 +473,10 @@ Type
 .Q "stty \-a"
 at a \fBbash\fP prompt to see your current terminal settings,
 including the special control characters (usually \fBcchars\fP).
+This binding takes place on each call to \fBreadline\fP,
+so changes made by
+.Q stty
+can take effect.
 .TP
 .B blink\-matching\-paren (Off)
 If set to \fBOn\fP, \fBreadline\fP attempts to briefly move the cursor to an

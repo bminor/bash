@@ -195,7 +195,6 @@ typedef struct element {
 
 /* What a command looks like. */
 typedef struct command {
-  enum command_type type;	/* FOR CASE WHILE IF CONNECTION or SIMPLE. */
   int flags;			/* Flags controlling execution environment. */
   int line;			/* line number the command starts on */
   REDIRECT *redirects;		/* Special redirects for FOR CASE, etc. */
@@ -223,6 +222,7 @@ typedef struct command {
     struct subshell_com *Subshell;
     struct coproc_com *Coproc;
   } value;
+  enum command_type type;	/* FOR CASE WHILE IF CONNECTION SIMPLE, etc. */
 } COMMAND;
 
 /* Structure used to represent the CONNECTION type. */
@@ -337,9 +337,9 @@ typedef struct cond_com {
 typedef struct simple_com {
   int flags;			/* See description of CMD flags. */
   int line;			/* line number the command starts on */
+  REDIRECT *redirects;		/* Redirections to perform. */
   WORD_LIST *words;		/* The program name, the arguments,
 				   variable assignments, etc. */
-  REDIRECT *redirects;		/* Redirections to perform. */
 } SIMPLE_COM;
 
 /* The "function definition" command. */

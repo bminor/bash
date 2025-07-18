@@ -302,7 +302,10 @@ dogetopts (int argc, char **argv)
 
   strval[0] = (char) ret;
   strval[1] = '\0';
-  return (getopts_bind_variable (name, strval));
+  ret = getopts_bind_variable (name, strval);
+  if (ret != EXECUTION_SUCCESS)
+    sh_getopt_reset ();
+  return ret;
 }
 
 /* The getopts builtin.  Build an argv, and call dogetopts with it. */

@@ -11363,3 +11363,57 @@ subst.c
 	  subscript, remove backslashes quoting `[', `]', and `~', since those
 	  are quoted by expand_array_subscript but not dequoted anywhere else
 	  Fixes quoting bug reported by Isabella Bosia <izaberina@gmail.com>
+
+				   7/14
+				   ----
+jobs.c
+	- wait_for_any_job: in posix mode, only look in the bgpids list if
+	  JWAIT_WAITING isn't set in FLAGS, indicating that wait -n didn't
+	  get any pid or job arguments
+	  Fixes bug reported by John Sidles <jasidles@gmail.com>
+
+lib/readline/display.c
+	- rl_message: reallocate msg_buf only if vsnprintf returns a count
+	  greater than msg_bufsiz - 1, and allow vsnprintf to write a full
+	  msg_bufsiz bytes, since the count it returns includes the
+	  trailing NULL.
+	  Report and fix from Torgny Lyon <torgny@abc.se>
+
+				   7/15
+				   ----
+builtins/evalfile.c
+	- evalfile_internal: if we get a short read, less than the file size
+	  as reported by the kernel, don't treat it as an error
+	  Report from Emanuele Torre <torreemanuele6@gmail.com>
+
+doc/bash.1,lib/readline/doc/readline.3,lib/readline/doc/rluser.texi
+	- bind-tty-special-chars: clarify that the bindings take place on
+	  each call to readline()
+
+				   7/16
+				   ----
+command.h
+	- make sure the first few members of a COMMAND and a SIMPLE_COM are
+	  aligned so casts from the latter to the former work correctly on
+	  systems with fat pointers.
+	  From https://savannah.gnu.org/bugs/?67323
+
+				   7/17
+				   ----
+lib/sh/anonfile.c
+	- anonshmopen: remove shm_open code; just use shm_mkstemp if it's
+	  available.
+	  From https://savannah.gnu.org/bugs/index.php?67326
+
+builtins/getopt.c
+	- sh_getopt_restore_state: make sure not to set `nextchar' beyond the
+	  end of the current argument, in case someone called getopts twice
+	  without resetting OPTIND.
+	  Fixes asan bug reported by Nathan Mills <the.true.nathan.mills@gmail.com>
+
+builtins/getopt.c,builtins/getopt.h
+	- sh_getopt_reset: small function to reset nextchar and sh_charindex
+
+builtins/getopts.def
+	- dogetopts: call sh_getopt_reset when binding the name variable fails
+	  for some reason

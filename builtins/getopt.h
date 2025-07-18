@@ -79,4 +79,6 @@ extern void sh_getopt_dispose_istate (sh_getopt_state_t *);
 extern sh_getopt_state_t *sh_getopt_save_istate (void);
 extern void sh_getopt_restore_istate (sh_getopt_state_t *);
 
+extern void sh_getopt_reset (void);
+
 #endif /* _SH_GETOPT_H */

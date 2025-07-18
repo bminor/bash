@@ -215,8 +215,13 @@ sh_getopt (int argc, char *const *argv, const char *optstring)
 void
 sh_getopt_restore_state (char **argv)
 {
+  size_t len;
+
   if (nextchar && argv && argv[sh_curopt])
-    nextchar = argv[sh_curopt] + sh_charindex;
+    {
+      len = strlen (argv[sh_curopt]);
+      nextchar = (sh_charindex <= len) ? argv[sh_curopt] + sh_charindex : NULL;
+    }
 }
 
 sh_getopt_state_t *
@@ -274,7 +279,15 @@ sh_getopt_debug_restore_state (char **argv)
     }
 }
 #endif
- 
+
+/* When we want to reset things on an error */
+void
+sh_getopt_reset (void)
+{
+  nextchar = NULL;
+  sh_charindex = 0;
+}
+
 #ifdef TEST
 
 /* Compile with -DTEST to make an executable for use in testing
