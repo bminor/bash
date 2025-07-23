@@ -3538,7 +3538,7 @@ return_procsub:
   /* There aren't any dead jobs in the jobs table, but let's see if there's
      one in bgpids. We can do this in posix mode because we'll remove any
      one we find from the table, preserving existing semantics. */
-  if (posixly_correct && (t = bgp_findone ()))
+  if (posixly_correct && (flags & JWAIT_WAITING) == 0 && (t = bgp_findone ()))
     {
       pid = t->pid;
       r = t->status;
