@@ -247,6 +247,8 @@ extern sh_parser_state_t *save_parser_state (sh_parser_state_t *);
 extern void restore_parser_state (sh_parser_state_t *);
 extern void flush_parser_state (sh_parser_state_t *);
 extern void uw_restore_parser_state (void *);
+extern void exec_restore_parser_state (sh_parser_state_t *);
+extern void parser_unset_string_list (void);
 
 extern sh_input_line_state_t *save_input_line_state (sh_input_line_state_t *);
 extern void restore_input_line_state (sh_input_line_state_t *);

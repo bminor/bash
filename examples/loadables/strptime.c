@@ -188,7 +188,8 @@ strptime_builtin (WORD_LIST *list)
 {
   char *s;
   struct tm t, *tm;
-  time_t now, secs;
+  time_t now;
+  intmax_t secs;
   char *datestr, *format;
   int i, opt;
 
@@ -227,7 +228,7 @@ strptime_builtin (WORD_LIST *list)
       if (STREQ (datestr, date_time_modifiers[i].shorthand))
 	{
 	  secs = now + date_time_modifiers[i].incr;
-	  printf ("%ld\n", secs);    
+	  printf ("%jd\n", secs);    
 	  return (EXECUTION_SUCCESS);
 	}
     }
@@ -265,7 +266,7 @@ strptime_builtin (WORD_LIST *list)
   if (s && *s)
     builtin_warning("%s: not completely converted (%s)", datestr, s);
 
-  printf ("%ld\n", secs);    
+  printf ("%jd\n", secs);    
   return (EXECUTION_SUCCESS);
 }
 

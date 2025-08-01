@@ -17,7 +17,7 @@ export LANG=C
 # test out the new $(< filename) code
 # it should be exactly equivalent to $(cat filename)
 
-FILENAME=$TMPDIR/bashtmp.x$$
+FILENAME=$TMPDIR/bashtmp.x$$ ; rm -f $TMPDIR/bashtmp.x*
 
 trap 'rm -f $FILENAME' 0
 

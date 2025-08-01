@@ -1473,23 +1473,22 @@ pipeline:	pipeline '|' newline_list pipeline
 	|	pipeline BAR_AND newline_list pipeline
 			{
 			  /* Make cmd1 |& cmd2 equivalent to cmd1 2>&1 | cmd2 */
-			  COMMAND *tc;
 			  REDIRECTEE rd, sd;
-			  REDIRECT *r;
+			  REDIRECT *r, **rp;
 
-			  tc = $1->type == cm_simple ? (COMMAND *)$1->value.Simple : $1;
+			  rp = $1->type == cm_simple ? &$1->value.Simple->redirects : &$1->redirects;
 			  sd.dest = 2;
 			  rd.dest = 1;
 			  r = make_redirection (sd, r_duplicating_output, rd, 0);
-			  if (tc->redirects)
+			  if (*rp)
 			    {
 			      register REDIRECT *t;
-			      for (t = tc->redirects; t->next; t = t->next)
+			      for (t = *rp; t->next; t = t->next)
 				;
 			      t->next = r;
 			    }
 			  else
-			    tc->redirects = r;
+			    *rp = r;
 
 			  $$ = command_connect ($1, $4, '|');
 			}
@@ -2164,6 +2163,12 @@ parser_restore_alias (void)
 #else
   ;
 #endif
+}
+
+void
+parser_unset_string_list (void)
+{
+  pushed_string_list = (STRING_SAVER *)NULL;
 }
 
 #if defined (ALIAS)
@@ -3008,19 +3013,18 @@ discard_until (int character)
 }
 
 void
-execute_variable_command (const char *command, const char *vname, int flags)
+execute_variable_command (const char *command, const char *vname)
 {
   char *last_lastarg;
   sh_parser_state_t ps;
 
-  if (flags)
-    save_parser_state (&ps);
+  save_parser_state (&ps);
+  pushed_string_list = (STRING_SAVER *)NULL;
   last_lastarg = save_lastarg ();
 
   parse_and_execute (savestring (command), vname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOOPTIMIZE|SEVAL_NOTIFY);
 
-  if (flags)
-    restore_parser_state (&ps);
+  restore_parser_state (&ps);
   bind_lastarg (last_lastarg);
   FREE (last_lastarg);
 
@@ -4459,7 +4463,6 @@ parse_comsub (int qc, int open, int close, size_t *lenp, int flags)
   char *ret, *tcmd;
   size_t retlen;
   sh_parser_state_t ps;
-  STRING_SAVER *saved_strings;
   COMMAND *saved_global, *parsed_command;
 
   /* Posix interp 217 says arithmetic expressions have precedence, so
@@ -4625,9 +4628,7 @@ INTERNAL_DEBUG(("current_token (%d) != shell_eof_token (%c)", current_token, she
   /* We don't want to restore the old pushed string list, since we might have
      used it to consume additional input from an alias while parsing this
      command substitution. */
-  saved_strings = pushed_string_list;
-  restore_parser_state (&ps);
-  pushed_string_list = saved_strings;
+  exec_restore_parser_state (&ps);
 
   simplecmd_lineno = save_lineno;
 
@@ -7353,6 +7354,20 @@ void
 uw_restore_parser_state (void *ps)
 {
   restore_parser_state (ps);
+}
+
+/* Special version of restore parser state for cases where we called
+   parse_and_execute(), which may have modified the pushed string list
+   out from underneath us. We may need to use this in other places,
+   like running traps while processing aliases. */
+void
+exec_restore_parser_state (sh_parser_state_t *ps)
+{
+  STRING_SAVER *ss;
+
+  ss = pushed_string_list;
+  restore_parser_state (ps);
+  pushed_string_list = ss;
 }
 
 /* Free the parts of a parser state struct that have allocated memory. */

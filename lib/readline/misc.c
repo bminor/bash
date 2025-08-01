@@ -137,6 +137,7 @@ _rl_arg_dispatch (_rl_arg_cxt cxt, int c)
       else
 	{
 	  key = _rl_bracketed_read_key ();
+	  /* XXX - add to macro def? */
 	  rl_restore_prompt ();
 	  rl_clear_message ();
 	  RL_UNSETSTATE(RL_STATE_NUMERICARG);

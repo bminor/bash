@@ -32,7 +32,8 @@ AC_DEFUN([gl_FCNTL_O_FLAGS],
            # defined sleep(n) _sleep ((n) * 1000)
            #endif
            #include <fcntl.h>
-           ]GL_MDA_DEFINES[
+           ]
+	   [
            #ifndef O_NOATIME
             #define O_NOATIME 0
            #endif

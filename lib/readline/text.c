@@ -1786,12 +1786,16 @@ static int
 _rl_char_search (int count, int fdir, int bdir)
 {
   char mbchar[MB_LEN_MAX];
-  int mb_len;
+  int mb_len, i;
 
   mb_len = _rl_read_mbchar (mbchar, MB_LEN_MAX);
 
   if (mb_len <= 0)
     return 1;
+
+  if (RL_ISSTATE (RL_STATE_MACRODEF))
+    for (i = 0; i < mb_len; i++)
+      _rl_add_macro_char (mbchar[i]);
 
   if (count < 0)
     return (_rl_char_search_internal (-count, bdir, mbchar, mb_len));
@@ -1805,8 +1809,12 @@ _rl_char_search (int count, int fdir, int bdir)
   int c;
 
   c = _rl_bracketed_read_key ();
+
   if (c < 0)
     return 1;
+
+  if (RL_ISSTATE (RL_STATE_MACRODEF))
+    _rl_add_macro_char (c);
 
   if (count < 0)
     return (_rl_char_search_internal (-count, bdir, c));

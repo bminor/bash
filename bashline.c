@@ -984,6 +984,7 @@ edit_and_execute_command (int count, int c, int editing_mode, const char *edit_c
     (*rl_deprep_term_function) ();
   rl_clear_signals ();
   save_parser_state (&ps);
+  parser_unset_string_list ();
   r = parse_and_execute (command, (editing_mode == VI_EDITING_MODE) ? "v" : "C-xC-e", SEVAL_NOHIST);
   restore_parser_state (&ps);
 
@@ -4680,6 +4681,7 @@ bash_execute_unix_command (int count, int key)
 
   begin_unwind_frame ("execute-unix-command");
   save_parser_state (&ps);
+  parser_unset_string_list ();
   rl_clear_signals ();
   add_unwind_protect (uw_unbind_readline_variables, 0);
   add_unwind_protect (uw_restore_parser_state, &ps);

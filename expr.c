@@ -145,10 +145,6 @@
    lowest precedence. */
 #define EXP_LOWEST	expcomma
 
-#ifndef MAX_INT_LEN
-#  define MAX_INT_LEN 32
-#endif
-
 struct lvalue
 {
   char *tokstr;		/* possibly-rewritten lvalue if not NULL */
@@ -581,10 +577,10 @@ expassign (void)
 	      lvalue -= value;
 	      break;
 	    case LSH:
-	      lvalue <<= value;
+	      lvalue = (uintmax_t)lvalue << (value & (TYPE_WIDTH(uintmax_t) - 1));
 	      break;
 	    case RSH:
-	      lvalue >>= value;
+	      lvalue >>= (value & (TYPE_WIDTH(uintmax_t) - 1));
 	      break;
 	    case BAND:
 	      lvalue &= value;
@@ -841,7 +837,7 @@ expcompare (void)
 static intmax_t
 expshift (void)
 {
-  register intmax_t val1, val2;
+  intmax_t val1, val2;
 
   val1 = expaddsub ();
 
@@ -853,9 +849,9 @@ expshift (void)
       val2 = expaddsub ();
 
       if (op == LSH)
-	val1 = val1 << val2;
+	val1 = (uintmax_t)val1 << (val2 & (TYPE_WIDTH(uintmax_t) - 1));
       else
-	val1 = val1 >> val2;
+	val1 = val1 >> (val2 & (TYPE_WIDTH(uintmax_t) - 1));
       lasttok = NUM;
     }
 

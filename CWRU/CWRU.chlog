@@ -11417,3 +11417,67 @@ builtins/getopt.c,builtins/getopt.h
 builtins/getopts.def
 	- dogetopts: call sh_getopt_reset when binding the name variable fails
 	  for some reason
+
+				   7/18
+				   ----
+lib/readline/text.c
+	- _rl_char_search: make sure that character search arguments are
+	  added to any macro currently being defined
+	  Report from A4-Tacks <wdsjxhno1001@163.com>
+
+lib/readline/histfile.c
+	- read_history_slow: new function that just reads the history file in
+	  4096-byte chunks until EOF, used when the history file isn't a
+	  regular file.
+	- read_history_range: use read_history_slow when the history file isn't
+	  a regular file
+	  Suggested by several, most recently by <macbeth.112358@gmail.com> in 2/25
+
+				   7/19
+				   ----
+parse.y,input.h,eval.c,array.h
+	- revert changes from 7/6 based on report from
+	  Sam James <sam@gentoo.org>
+
+parse.y
+	- exec_restore_parser_state: version of restore_parser_state that
+	  doesn't restore the pushed string list, since some calls to
+	  parse_and_execute may modify it out from underneath us
+	- parse_comsub: use exec_restore_parser_state instead of inline code
+	  (the version in parse_compound_assignment is a little more complex)
+	- parser_unset_string_list: extern function to set pushed_string_list
+	  to NULL from outside parse.y
+	- execute_variable_command: set pushed_string_list to NULL after
+	  saving the parser state, since we don't want parse_and_execute to
+	  pop a string off the list that was there before it was called
+	  Fixes bug reported by Carl Johnson <carl.johnson.new.hampshire@gmail.com>
+
+shell.h
+	- exec_restore_parser_state: extern declaration
+	- parser_unset_string_list: extern declaration
+
+trap.c
+	- _run_trap_internal: use parser_unset_string_list after saving
+	  parser_state to fix bug with DEBUG trap if it's invoked during
+	  an alias ending with a newline (similar to issue from 7/6)
+	- run_pending_traps: call parser_unset_string_list as above
+
+				   7/21
+				   ----
+bashline.c
+	- bash_execute_unix_command,edit_and_execute_command: use
+	  parser_unset_string_list after saving parser_state; executing a
+	  command while readline is active shouldn't modify any existing
+	  parser state
+
+				   7/25
+				   ----
+command.h
+	- revert changes to COMMAND and SIMPLE_COM from 7/16
+	  From a report by Jessica Clarke <jrtc27@jrtc27.com>
+
+expr.c
+	- expassign,expshift: avoid C23 undefined behavior when performing
+	  left and right arithmetic shifts
+	  From https://savannah.gnu.org/patch/?10532
+	  bkallus <benjamin.p.kallus.gr@dartmouth.edu>

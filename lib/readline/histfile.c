@@ -58,6 +58,7 @@
 #  include <unistd.h>
 #endif
 
+#include <string.h>
 #include <ctype.h>
 
 #if defined (__EMX__)
@@ -144,6 +145,9 @@ static char *history_tempfile (const char *);
 static int histfile_backup (const char *, const char *);
 static int histfile_restore (const char *, const char *);
 static int history_rename (const char *, const char *);
+
+static int history_write_slow (int, HIST_ENTRY **, int, int);
+static ssize_t history_read_slow (int, char **);
 
 /* Return the string that should be used in the place of this
    filename.  This only matters when you don't specify the
@@ -258,6 +262,69 @@ read_history (const char *filename)
   return (read_history_range (filename, 0, -1));
 }
 
+#define RBUFSIZE	4096
+
+/* Read from a non-regular file until EOF, assuming we can't trust the file
+   size as reported by fstat. */
+static ssize_t
+history_read_slow (int fd, char **bufp)
+{
+  char *ret, *r;
+  size_t retsize, retlen;
+  char rbuf[RBUFSIZE];
+  ssize_t nr, nw;
+
+  if (bufp == 0)
+    return -1;
+
+  retsize = RBUFSIZE;
+  ret = malloc(retsize);
+  if (ret == 0)
+    return -1;
+  retlen = 0;
+
+  while (nr = read (fd, rbuf, sizeof (rbuf)))
+    {
+      if (nr < 0)
+	{
+	  free (ret);
+	  *bufp = NULL;
+	  return -1;
+	}
+
+      if (retlen >= retsize - nr - 1)
+	{
+	  retsize *= 2;
+	  r = realloc (ret, retsize);
+	  if (r == 0)
+	    {
+	      free(ret);
+	      *bufp = NULL;
+	      return -1;
+	    }
+	  ret = r;
+	}
+      memcpy (ret + retlen, rbuf, nr);
+      retlen += nr;
+    }
+  if (retlen + 1 >= retsize)
+    {
+      retsize += 1;
+      r = realloc (ret, retsize);
+      if (r == 0)
+	{
+	  free (ret);
+	  *bufp = NULL;
+	  return -1;
+	}
+      ret = r;
+    }		
+  ret[retlen] = '\0';
+
+  *bufp = ret;
+  return (ssize_t)retlen;
+}
+
 /* Read a range of lines from FILENAME, adding them to the history list.
    Start reading at the FROM'th line and end at the TO'th.  If FROM
    is zero, start at the beginning.  If TO is less than FROM, read
@@ -294,12 +361,15 @@ read_history_range (const char *filename, int from, int to)
 
   if (S_ISREG (finfo.st_mode) == 0)
     {
-#ifdef EFTYPE
-      errno = EFTYPE;
-#else
-      errno = EINVAL;
-#endif
-      goto error_and_exit;
+      chars_read = history_read_slow (file, &buffer);
+      if (chars_read == 0)
+	{
+	  free (buffer);
+	  free (input);
+	  close (file);
+	  return 0;
+	}
+      goto after_file_read;
     }
   else
     {
@@ -341,6 +411,8 @@ read_history_range (const char *filename, int from, int to)
 
   chars_read = read (file, buffer, file_size);
 #endif
+
+after_file_read:
   if (chars_read < 0)
     {
   error_and_exit:

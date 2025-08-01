@@ -467,6 +467,7 @@ run_pending_traps (void)
 	      trap_command = savestring (old_trap);
 
 	      save_parser_state (&pstate);
+	      parser_unset_string_list ();
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
 	      save_tempenv = temporary_env;
@@ -1160,6 +1161,8 @@ _run_trap_internal (int sig, char *tag)
 #endif
 
       save_parser_state (&pstate);
+      parser_unset_string_list ();
+
       save_subst_varlist = subst_assign_varlist;
       subst_assign_varlist = 0;
       save_tempenv = temporary_env;
