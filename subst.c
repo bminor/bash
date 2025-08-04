@@ -11508,8 +11508,6 @@ add_string:
 	    }
 	
 	case '$':
-	  if (expanded_something)
-	    *expanded_something = 1;
 	  local_expanded = 1;
 
 	  temp_has_dollar_at = 0;
@@ -11521,11 +11519,14 @@ add_string:
 	  if (word->flags & W_COMPLETE)
 	    pflags |= PF_COMPLETE;
 
-	  tword = param_expand (string, &sindex, quoted, expanded_something,
+	  tword = param_expand (string, &sindex, quoted, &local_expanded,
 			       &temp_has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);
 	  has_dollar_at += temp_has_dollar_at;
 	  split_on_spaces += (tword->flags & W_SPLITSPACE);
+
+	  if (expanded_something)
+	    *expanded_something |= local_expanded;
 
 	  if (tword == &expand_wdesc_error || tword == &expand_wdesc_fatal)
 	    {
@@ -11586,7 +11587,6 @@ add_string:
 		
 	    if (expanded_something)
 	      *expanded_something = 1;
-	    local_expanded = 1;
 
 	    if (word->flags & W_NOCOMSUB)
 	      /* sindex + 1 because string[sindex] == '`' */
@@ -11768,7 +11768,6 @@ add_twochars:
 		    *contains_dollar_at = 1;
 		  if (expanded_something)
 		    *expanded_something = 1;
-		  local_expanded = 1;
 		}
 	    }
 	  else

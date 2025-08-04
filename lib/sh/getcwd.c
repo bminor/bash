@@ -186,8 +186,18 @@ getcwd (char *buf, size_t size)
       dirstream = opendir (dotp);
       if (dirstream == NULL)
 	goto lose;
-      while ((d = readdir (dirstream)) != NULL)
+      for (;;)
 	{
+	  errno = 0;
+	  d = readdir (dirstream);
+
+	  if (d == NULL)
+	    {
+	      if (errno == 0)
+		errno = ENOENT;
+	      break;
+	    }
+
 	  if (d->d_name[0] == '.' &&
 	      (d->d_name[1] == '\0' ||
 		(d->d_name[1] == '.' && d->d_name[2] == '\0')))
@@ -208,27 +218,14 @@ getcwd (char *buf, size_t size)
 	      memcpy (&name[dotlist + dotsize - dotp + 1],
 		      d->d_name, namlen + 1);
 	      if (lstat (name, &st) < 0)
-		{
-#if 0
-		  int save = errno;
-		  (void) closedir (dirstream);
-		  errno = save;
-		  goto lose;
-#else
-		  saved_errno = errno;
-#endif
-		}
+		saved_errno = errno;
 	      if (st.st_dev == thisdev && st.st_ino == thisino)
 		break;
 	    }
 	}
       if (d == NULL)
 	{
-#if 0
-	  int save = errno;
-#else
 	  int save = errno ? errno : saved_errno;
-#endif
 	  (void) closedir (dirstream);
 	  errno = save;
 	  goto lose;

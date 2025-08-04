@@ -5571,6 +5571,53 @@ if test "x$ac_cv_lib_tinfo_tgetent" = xyes
 then :
   bash_cv_termcap_lib=libtinfo
 else case e in #(
+  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for tgetent in -ltinfow" >&5
+printf %s "checking for tgetent in -ltinfow... " >&6; }
+if test ${ac_cv_lib_tinfow_tgetent+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-ltinfow  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.
+   The 'extern "C"' is for builds by C++ compilers;
+   although this is not generally supported in C code supporting it here
+   has little cost and some practical benefit (sr 110532).  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char tgetent (void);
+int
+main (void)
+{
+return tgetent ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_tinfow_tgetent=yes
+else case e in #(
+  e) ac_cv_lib_tinfow_tgetent=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tinfow_tgetent" >&5
+printf "%s\n" "$ac_cv_lib_tinfow_tgetent" >&6; }
+if test "x$ac_cv_lib_tinfow_tgetent" = xyes
+then :
+  bash_cv_termcap_lib=libtinfow
+else case e in #(
   e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for tgetent in -lcurses" >&5
 printf %s "checking for tgetent in -lcurses... " >&6; }
 if test ${ac_cv_lib_curses_tgetent+y}
@@ -5733,6 +5780,9 @@ fi
  ;;
 esac
 fi
+ ;;
+esac
+fi
 
 if test "X$_bash_needmsg" = "Xyes"; then
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking which library has the termcap functions" >&5
@@ -5749,6 +5799,9 @@ TERMCAP_LIB=-ltermcap
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libtinfo; then
 TERMCAP_LIB=-ltinfo
+TERMCAP_DEP=
+elif test $bash_cv_termcap_lib = libtinfow; then
+TERMCAP_LIB=-ltinfow
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libncursesw; then
 TERMCAP_LIB=-lncursesw
@@ -9357,8 +9410,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:9360: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:9361: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:9413: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:9414: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -9384,7 +9437,7 @@ rm -rf conftest*
 
           ;;
       esac
-      echo "$as_me:9387: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:9440: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -9562,7 +9615,7 @@ fi
 
         fi
       fi
-      echo "$as_me:9565: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:9618: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 printf %s "checking whether POSIX threads API is available... " >&6; }
@@ -9809,8 +9862,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:9812: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:9813: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:9865: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:9866: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -9836,7 +9889,7 @@ rm -rf conftest*
 
           ;;
       esac
-      echo "$as_me:9839: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:9892: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -10014,7 +10067,7 @@ fi
 
         fi
       fi
-      echo "$as_me:10017: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:10070: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 printf %s "checking whether POSIX threads API is available... " >&6; }
@@ -22805,6 +22858,53 @@ if test "x$ac_cv_lib_tinfo_tgetent" = xyes
 then :
   bash_cv_termcap_lib=libtinfo
 else case e in #(
+  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for tgetent in -ltinfow" >&5
+printf %s "checking for tgetent in -ltinfow... " >&6; }
+if test ${ac_cv_lib_tinfow_tgetent+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-ltinfow  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.
+   The 'extern "C"' is for builds by C++ compilers;
+   although this is not generally supported in C code supporting it here
+   has little cost and some practical benefit (sr 110532).  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char tgetent (void);
+int
+main (void)
+{
+return tgetent ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_tinfow_tgetent=yes
+else case e in #(
+  e) ac_cv_lib_tinfow_tgetent=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tinfow_tgetent" >&5
+printf "%s\n" "$ac_cv_lib_tinfow_tgetent" >&6; }
+if test "x$ac_cv_lib_tinfow_tgetent" = xyes
+then :
+  bash_cv_termcap_lib=libtinfow
+else case e in #(
   e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for tgetent in -lcurses" >&5
 printf %s "checking for tgetent in -lcurses... " >&6; }
 if test ${ac_cv_lib_curses_tgetent+y}
@@ -22967,6 +23067,9 @@ fi
  ;;
 esac
 fi
+ ;;
+esac
+fi
 
 if test "X$_bash_needmsg" = "Xyes"; then
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking which library has the termcap functions" >&5
@@ -22983,6 +23086,9 @@ TERMCAP_LIB=-ltermcap
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libtinfo; then
 TERMCAP_LIB=-ltinfo
+TERMCAP_DEP=
+elif test $bash_cv_termcap_lib = libtinfow; then
+TERMCAP_LIB=-ltinfow
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libncursesw; then
 TERMCAP_LIB=-lncursesw

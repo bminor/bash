@@ -11476,8 +11476,42 @@ command.h
 	- revert changes to COMMAND and SIMPLE_COM from 7/16
 	  From a report by Jessica Clarke <jrtc27@jrtc27.com>
 
+parse.y
+	- pipeline: in BAR_AND form of the pipeline production, use a
+	  REDIRECT ** to manipulate the redirection list instead of trying
+	  to cast a COMAND * to a SIMPLE_COM *
+	  From a report by Jessica Clarke <jrtc27@jrtc27.com>
+
 expr.c
 	- expassign,expshift: avoid C23 undefined behavior when performing
 	  left and right arithmetic shifts
 	  From https://savannah.gnu.org/patch/?10532
 	  bkallus <benjamin.p.kallus.gr@dartmouth.edu>
+
+				   7/28
+				   ----
+subst.c
+	- expand_word_internal: if we see a `$' and call param_expand, pass a
+	  local copy of expanded_something and OR it into expanded_something,
+	  so this function can set it to 0 if we get a trailing $ or a $!
+	  when there are no background pids.
+	  From ahmedwaldsaaid@gmail.com via https://savannah.gnu.org/bugs/index.php?67358
+	  Fix suggested by Oğuz <oguzismailuysal@gmail.com>
+
+				    8/1
+				    ---
+lib/sh/getcwd.c
+	- getcwd: set errno to 0 before calling readdir to avoid a stale
+	  value if readdir() returns NULL and distinguish errors from the
+	  end of the directory. If readdir() returns NULL without changing
+	  errno, set it to ENOENT.
+	  From a report by Richard Weinberger <richard@sigma-star.at>
+
+aclocal.m4
+	- BASH_CHECK_LIB_TERMCAP: add libtinfow to the library list to search
+	  From a report by Дилян Палаузов <dilyan.palauzov@aegee.org>
+
+execute_cmd.c
+	- execute_subshell_builtin_or_function: fix to propagate exit statuses
+	  of builtins run in subshells back to the calling shell
+	  From https://savannah.gnu.org/support/?109840

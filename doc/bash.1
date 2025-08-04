@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Jul 15 10:19:08 EDT 2025
+.\"	Last Change: Wed Jul 30 14:47:58 EDT 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -21,7 +21,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 July 15" "GNU Bash 5.3"
+.TH BASH 1 "2025 July 30" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -9260,6 +9260,7 @@ if \fIdir\fP is not supplied, the value of the
 .SM
 .B HOME
 shell variable is used as \fIdir\fP.
+If \fIdir\fP is the empty string, \fBcd\fP treats it as an error.
 The variable
 .SM
 .B CDPATH

@@ -934,10 +934,11 @@ AC_CACHE_VAL(bash_cv_termcap_lib,
 [AC_CHECK_FUNC(tgetent, bash_cv_termcap_lib=libc,
   [AC_CHECK_LIB(termcap, tgetent, bash_cv_termcap_lib=libtermcap,
     [AC_CHECK_LIB(tinfo, tgetent, bash_cv_termcap_lib=libtinfo,
+      [AC_CHECK_LIB(tinfow, tgetent, bash_cv_termcap_lib=libtinfow,
         [AC_CHECK_LIB(curses, tgetent, bash_cv_termcap_lib=libcurses,
-	    [AC_CHECK_LIB(ncursesw, tgetent, bash_cv_termcap_lib=libncursesw,
-                [AC_CHECK_LIB(ncurses, tgetent, bash_cv_termcap_lib=libncurses,
-	            bash_cv_termcap_lib=gnutermcap)])])])])])])
+	  [AC_CHECK_LIB(ncursesw, tgetent, bash_cv_termcap_lib=libncursesw,
+            [AC_CHECK_LIB(ncurses, tgetent, bash_cv_termcap_lib=libncurses,
+	      bash_cv_termcap_lib=gnutermcap)])])])])])])])
 if test "X$_bash_needmsg" = "Xyes"; then
 AC_MSG_CHECKING(which library has the termcap functions)
 fi
@@ -951,6 +952,9 @@ TERMCAP_LIB=-ltermcap
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libtinfo; then
 TERMCAP_LIB=-ltinfo
+TERMCAP_DEP=
+elif test $bash_cv_termcap_lib = libtinfow; then
+TERMCAP_LIB=-ltinfow
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libncursesw; then
 TERMCAP_LIB=-lncursesw
