@@ -3934,7 +3934,7 @@ parameter $? (@pxref{Special Parameters}).
 Bash itself returns the exit status of the last command
 executed, unless a syntax error occurs, in which case it exits
 with a non-zero value.
-See also the @code{exit} builtin command (@pxref{Bourne Shell Builtins}.
+See also the @code{exit} builtin command (@pxref{Bourne Shell Builtins}).
 
 @node Signals
 @subsection Signals
@@ -3951,7 +3951,7 @@ If job control is in effect (@pxref{Job Control}), Bash
 ignores @code{SIGTTIN}, @code{SIGTTOU}, and @code{SIGTSTP}.
 
 The @code{trap} builtin modifies the shell's signal handling, as
-described below (@pxref{Bourne Shell Builtins}.
+described below (@pxref{Bourne Shell Builtins}).
 
 Non-builtin commands Bash executes have signal handlers set to the
 values inherited by the shell from its parent,
@@ -6546,7 +6546,7 @@ performing filename expansion.
 @item nocasematch
 If set, Bash matches patterns in a case-insensitive fashion when
 performing matching while executing @code{case} or @code{[[}
-conditional commands (@pxref{Conditional Constructs},
+conditional commands (@pxref{Conditional Constructs}),
 when performing pattern substitution word expansions,
 or when filtering possible completions as part of programmable completion.
 
@@ -7574,7 +7574,7 @@ subsequently reset.
 @item READLINE_ARGUMENT
 Any numeric argument given to a Readline
 command that was defined using
-@samp{bind -x} (@pxref{Bash Builtins}
+@samp{bind -x} (@pxref{Bash Builtins})
 when it was invoked.
 
 @item READLINE_LINE
@@ -9195,7 +9195,7 @@ Bash ensures that the @env{POSIXLY_CORRECT} variable is set.
 @item
 Bash reads and executes the @sc{posix} startup files
 (@env{$ENV}) rather than
-the normal Bash files (@pxref{Bash Startup Files}.
+the normal Bash files (@pxref{Bash Startup Files}).
 
 @item
 Alias expansion is always enabled, even in non-interactive shells.
@@ -10623,10 +10623,17 @@ The @file{NOTES} file contains a list of systems for
 which this should be turned off, and @code{configure} disables this
 option automatically for a number of systems.
 
-@item --with-curses
-Use the curses library instead of the termcap library.
+@item --with-curses[=@var{LIBNAME}]
+Use the curses library instead of the termcap library as the library
+where the linker can find the termcap functions.
 @code{configure} usually chooses this automatically, since most systems
 include the termcap functions in the curses library.
+If @var{LIBNAME} is supplied, @code{configure} does not search for an
+appropriate library and uses @var{LIBNAME} instead.
+@var{LIBNAME} should be either an argument for the linker
+(e.g., @option{-l@var{libname}})
+or a filename
+(e.g., @file{/opt/local/lib/libncursesw.so}).
 
 @item --with-gnu-malloc
 A synonym for @code{--with-bash-malloc}.
@@ -11306,7 +11313,7 @@ using @code{export -f} (@pxref{Shell Functions}).
 
 @item
 The Bash @code{export} and @code{readonly} builtins
-(@pxref{Bourne Shell Builtins} can
+(@pxref{Bourne Shell Builtins}) can
 take a @option{-f} option to act on shell functions, a @option{-p} option to
 display variables with various attributes set in a format that can be
 used as shell input, a @option{-n} option to remove various variable

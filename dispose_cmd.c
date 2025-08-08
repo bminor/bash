@@ -270,11 +270,7 @@ dispose_words (WORD_LIST *list)
       t = list;
       list = list->next;
       dispose_word (t->word);
-#if 0
-      free (t);
-#else
       ocache_free (wlcache, WORD_LIST, t);
-#endif
     }
 }
 

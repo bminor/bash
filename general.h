@@ -178,12 +178,15 @@ STREQN(const char *a, const char *b, size_t n)
    CSIZE is the currently-allocated size of STR (int)
    SINCR is how much to increment CSIZE before calling xrealloc (int) */
 
+/* old code used to use a loop:
+	while ((cind) + (room) >= csize) \
+	  csize += (sincr); \
+*/
 #define RESIZE_MALLOCED_BUFFER(str, cind, room, csize, sincr) \
   do { \
     if ((cind) + (room) >= csize) \
       { \
-	while ((cind) + (room) >= csize) \
-	  csize += (sincr); \
+	csize += ((cind) + (room) - csize + (sincr)) / (sincr) * (sincr); \
 	str = xrealloc (str, csize); \
       } \
   } while (0)

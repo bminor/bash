@@ -943,18 +943,23 @@ if test "X$_bash_needmsg" = "Xyes"; then
 AC_MSG_CHECKING(which library has the termcap functions)
 fi
 AC_MSG_RESULT(using $bash_cv_termcap_lib)
-if test $bash_cv_termcap_lib = gnutermcap && test -z "$prefer_curses"; then
+# we assume that anyone specifying --with-curses=library is savvy enough to
+# put it in a place that the linker can find it without a special -L option
+if test "$opt_curses" != "no" && test "$opt_curses" != "yes" ; then
+TERMCAP_LIB="$opt_curses"
+TERMCAP_DEP=
+elif test $bash_cv_termcap_lib = gnutermcap && test -z "$prefer_curses"; then
 LDFLAGS="$LDFLAGS -L./lib/termcap"
 TERMCAP_LIB="./lib/termcap/libtermcap.a"
 TERMCAP_DEP="./lib/termcap/libtermcap.a"
 elif test $bash_cv_termcap_lib = libtermcap && test -z "$prefer_curses"; then
 TERMCAP_LIB=-ltermcap
 TERMCAP_DEP=
-elif test $bash_cv_termcap_lib = libtinfo; then
-TERMCAP_LIB=-ltinfo
-TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libtinfow; then
 TERMCAP_LIB=-ltinfow
+TERMCAP_DEP=
+elif test $bash_cv_termcap_lib = libtinfo; then
+TERMCAP_LIB=-ltinfo
 TERMCAP_DEP=
 elif test $bash_cv_termcap_lib = libncursesw; then
 TERMCAP_LIB=-lncursesw

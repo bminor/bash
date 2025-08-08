@@ -4008,6 +4008,11 @@ expand_arith_string (char *string, int quoted)
 #endif
       td.word = savestring (string);
       list = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
+      /* If call_expand_word_internal returns one of these errors, we know
+	 that no_longjmp_on_fatal_error is set and td.word was freed */
+      if (list == &expand_word_error || list == &expand_word_fatal)
+	return ((char *)NULL);		/* XXX for now */
+
       /* This takes care of the calls from expand_string_leave_quoted and
 	 expand_string */
       if (list)
@@ -4086,6 +4091,10 @@ cond_expand_word (WORD_DESC *w, int special)
   qflags = (special == 3) ? Q_ARITH : 0;
   l = call_expand_word_internal (w, qflags, 0, (int *)0, (int *)0);
   expand_no_split_dollar_star = 0;
+
+  if (l == &expand_word_error || l == &expand_word_fatal)
+    return ((char *)NULL);		/* XXX for now */
+
   if (l)
     {
       if (special == 0)			/* LHS */
@@ -4291,9 +4300,9 @@ call_expand_word_internal (WORD_DESC *w, int q, int i, int *c, int *e)
 	 to exit in most cases). */
       w->word = (char *)NULL;
       last_command_exit_value = EXECUTION_FAILURE;
-      exp_jump_to_top_level ((result == &expand_word_error) ? DISCARD : FORCE_EOF);
-      /* NOTREACHED */
-      return (NULL);
+      if (no_longjmp_on_fatal_error == 0)
+	exp_jump_to_top_level ((result == &expand_word_error) ? DISCARD : FORCE_EOF);
+      return (result);
     }
   else
     return (result);
@@ -4316,6 +4325,8 @@ expand_string_internal (const char *string, int quoted)
   td.word = savestring (string);
 
   tresult = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
+  if (tresult == &expand_word_error || tresult == &expand_word_fatal)
+    return ((WORD_LIST *)NULL);		/* XXX for now */
 
   FREE (td.word);
   return (tresult);
@@ -4378,6 +4389,9 @@ expand_string_assignment (const char *string, int quoted)
   FREE (td.word);
 
   expand_no_split_dollar_star = 0;
+
+  if (value == &expand_word_error || value == &expand_word_fatal)
+    return ((WORD_LIST *)NULL);		/* XXX for now */
 
   if (value)
     {
@@ -4496,6 +4510,8 @@ expand_string_for_rhs (const char *string, int quoted, int op, int pflags, int *
   td.word = savestring (string);
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
   expand_no_split_dollar_star = old_nosplit;
+  if (tresult == &expand_word_error || tresult == &expand_word_fatal)
+    return ((WORD_LIST *)NULL);		/* XXX for now */
   free (td.word);
 
   return (tresult);
@@ -4519,6 +4535,8 @@ expand_string_for_pat (const char *string, int quoted, int *dollar_at_p, int *ex
   td.word = savestring (string);
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
   expand_no_split_dollar_star = oexp;
+  if (tresult == &expand_word_error || tresult == &expand_word_fatal)
+    return ((WORD_LIST *)NULL);		/* XXX for now */
   free (td.word);
 
   return (tresult);
@@ -4557,6 +4575,9 @@ expand_word (WORD_DESC *word, int quoted)
   WORD_LIST *result, *tresult;
 
   tresult = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
+  if (tresult == &expand_word_error || tresult == &expand_word_fatal)
+    return ((WORD_LIST *)NULL);		/* XXX for now */
+
   result = word_list_split (tresult);
   dispose_words (tresult);
   return (result ? dequote_list (result) : result);
@@ -4575,8 +4596,7 @@ expand_word_unsplit (WORD_DESC *word, int quoted)
 }
 
 /* Perform shell expansions on WORD, but do not perform word splitting or
-   quote removal on the result.  Virtually identical to expand_word_unsplit;
-   could be combined if implementations don't diverge. */
+   quote removal on the result. */
 WORD_LIST *
 expand_word_leave_quoted (WORD_DESC *word, int quoted)
 {
@@ -4588,6 +4608,8 @@ expand_word_leave_quoted (WORD_DESC *word, int quoted)
   word->flags |= W_NOSPLIT2;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = 0;
+  if (result == &expand_word_error || result == &expand_word_fatal)
+    return ((WORD_LIST *)NULL);		/* XXX for now */
 
   return result;
 }
@@ -10153,9 +10175,16 @@ parameter_brace_expand (char *string, size_t *indexp, int quoted, int pflags, in
 
   /* All the cases where an expansion can possibly generate an unbound
      variable error. */
+#if 0	/* TAG:bash-5.4 konsolebox <konsolebox@gmail.com> 10/1/2024 */
+  if (want_substring || want_patsub || want_casemod ||
+       (c == '@' && want_attributes == 0) || c == '#' || c == '%' || c == RBRACE)
+#else
   if (want_substring || want_patsub || want_casemod || c == '@' || c == '#' || c == '%' || c == RBRACE)
+#endif
     {
-      if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]) && all_element_arrayref == 0)
+      if (var_is_set == 0 && unbound_vars_is_error &&
+	  ((name[0] != '@' && name[0] != '*') || name[1]) &&
+	  all_element_arrayref == 0)
 	{
 	  set_exit_status (EXECUTION_FAILURE);
 	  err_unboundvar (name);
@@ -11076,6 +11105,9 @@ expand_subscript_string (const char *string, int quoted)
   expand_no_split_dollar_star = 1;
   tlist = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = oe;
+
+  if (tlist == &expand_word_error || tlist == &expand_word_fatal)
+    return ((char *)NULL);		/* XXX for now */
 
   if (tlist)
     {

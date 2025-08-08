@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.3, version 5.080])dnl
+AC_REVISION([for Bash 5.3, version 5.082])dnl
 
 define(bashvers, 5.3)
 define(relstatus, maint)
@@ -137,7 +137,7 @@ if test "$opt_afs" = yes; then
 	AC_DEFINE(AFS)
 fi
 
-if test "$opt_curses" = yes; then
+if test "$opt_curses" != "no" ; then
 	prefer_curses=yes
 fi
 
@@ -588,7 +588,7 @@ then
 	RL_LIB_READLINE_VERSION
 
 	case "$ac_cv_rl_version" in
-	8*|9*)	;;
+	8.3*|9*)	;;
 	*)	opt_with_installed_readline=no 
 		AC_MSG_WARN([installed readline library is too old to be linked with bash])
 		AC_MSG_WARN([using private bash version])

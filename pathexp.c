@@ -391,8 +391,6 @@ convert_to_backslash:
 	}
       else if (pathname[i] == '\\' && (qflags & QGLOB_REGEXP))
         last_was_backslash = 1;
-#if 0
-      /* TAG:bash-5.4 Takaaki Konno <re_c25@yahoo.co.jp> 6/23/2025 */
       else if (pathname[i] == CTLNUL && (qflags & QGLOB_CVTNULL)
 				     && (qflags & QGLOB_CTLESC))
 	/* If we have an unescaped CTLNUL in the string, and QFLAGS says
@@ -401,7 +399,6 @@ convert_to_backslash:
 	   happen when the pattern contains a quoted null string adjacent
 	   to non-null characters, and it is not removed by quote removal. */
 	continue;
-#endif
 
       temp[j++] = pathname[i];
     }

@@ -248,10 +248,15 @@ the Bash ‘configure’ recognizes.
      systems for which this should be turned off, and ‘configure’
      disables this option automatically for a number of systems.
 
-‘--with-curses’
-     Use the curses library instead of the termcap library.  ‘configure’
-     usually chooses this automatically, since most systems include the
-     termcap functions in the curses library.
+‘--with-curses[=LIBNAME]’
+     Use the curses library instead of the termcap library as the
+     library where the linker can find the termcap functions.
+     ‘configure’ usually chooses this automatically, since most systems
+     include the termcap functions in the curses library.  If LIBNAME is
+     supplied, ‘configure’ does not search for an appropriate library
+     and uses LIBNAME instead.  LIBNAME should be either an argument for
+     the linker (e.g., ‘-lLIBNAME’) or a filename (e.g.,
+     ‘/opt/local/lib/libncursesw.so’).
 
 ‘--with-gnu-malloc’
      A synonym for ‘--with-bash-malloc’.
