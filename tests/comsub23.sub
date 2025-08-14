@@ -77,3 +77,21 @@ exec 4<&-
 
 echo after all they ${word-$(echo work here)}
 echo and ${word-${ echo work here; }}
+
+unset x
+
+set -- 'a[${ break;}]'
+declare -in x
+
+for x do :; done
+echo after for
+
+true; for (( ; $? == 0; ${ ! break;} )); do echo uname; done
+echo after arith for
+
+declare -i z
+select z in 'a[${ break;}]'
+do
+	echo $z
+done <<<1
+echo after select

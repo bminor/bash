@@ -144,6 +144,11 @@ typedef struct _vlist {
 
 #define attmask_scope	0x0f00000
 
+/* Internal attributes used for variable state management. */
+#define att_assigning	0x1000000
+
+#define attmask_state	0xf000000
+
 #define exported_p(var)		((((var)->attributes) & (att_exported)))
 #define readonly_p(var)		((((var)->attributes) & (att_readonly)))
 #define array_p(var)		((((var)->attributes) & (att_array)))

@@ -11563,3 +11563,26 @@ subst.c
 	  expand_word_leave_quoted: if call_expand_word_internal returns an
 	  error, return a NULL WORD_LIST *
 	  Fixes bug with PS1 expansion reported by smart.outfit080@8shield.net
+
+config.h.in
+	- MAJOR_IN_MKDEV: fix typo
+
+				    8/8
+				    ---
+execute_cmd.c
+	- CHECK_BREAK_AND_CONTINUE: macro to encapsulate common code for
+	  testing `breaking' and `continuing' while in loops
+	- execute_for_command,execute_arith_for_command,execute_select_command,
+	  execute_while_or_until: replace common code with CHECK_BREAK_AND_CONTINUE
+	- execute_for_command,execute_select_command: add call to
+	  CHECK_BREAK_AND_CONTINUE after binding variable, in case it contains
+	  a nofork comsub that executes break or continue
+	  Report from Oğuz <oguzismailuysal@gmail.com>
+
+				   8/11
+				   ----
+builtins/declare.def
+	- declare_internal: if the value of an assignment statement expands to
+	  an invalid value for a nameref variable, but the original value is
+	  valid, add an error message for the assignment error
+	  Report from Oğuz <oguzismailuysal@gmail.com>

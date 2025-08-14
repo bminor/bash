@@ -320,6 +320,21 @@ do { \
     } \
 } while (0)
 
+/* Common code to check whether `break' or `continue' was executed. */
+#define CHECK_BREAK_AND_CONTINUE() \
+      if (breaking) \
+	{ \
+	  breaking--; \
+	  break; \
+	} \
+      if (continuing) \
+	{ \
+	  continuing--; \
+	  if (continuing) \
+	    break; \
+	} \
+      do { } while (0)
+
 /* A sort of function nesting level counter */
 int funcnest = 0;
 int funcnest_max = 0;
@@ -3079,6 +3094,8 @@ execute_for_command (FOR_COM *for_command)
       else
 	v = bind_variable (identifier, list->word->word, 0);
 
+      CHECK_BREAK_AND_CONTINUE();
+
       if (v == 0 || ASSIGN_DISALLOWED (v, 0))
 	{
 	  line_number = save_line_number;
@@ -3105,18 +3122,7 @@ execute_for_command (FOR_COM *for_command)
       REAP ();
       QUIT;
 
-      if (breaking)
-	{
-	  breaking--;
-	  break;
-	}
-
-      if (continuing)
-	{
-	  continuing--;
-	  if (continuing)
-	    break;
-	}
+      CHECK_BREAK_AND_CONTINUE();
     }
 
   loop_level--; interrupt_execution--; retain_fifos--;
@@ -3249,17 +3255,7 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
       /* If the step or test expressions execute `break' or `continue' in a
 	 nofork command substitution or by some other means, break the loop
 	 here. */
-      if (breaking)
-	{
-	  breaking--;
-	  break;
-	}
-      if (continuing)
-	{
-	  continuing--;
-	  if (continuing)
-	    break;
-	}
+      CHECK_BREAK_AND_CONTINUE();
 
       if (expok == 0)
 	break;
@@ -3274,18 +3270,7 @@ execute_arith_for_command (ARITH_FOR_COM *arith_for_command)
       QUIT;
 
       /* Handle any `break' or `continue' commands executed by the body. */
-      if (breaking)
-	{
-	  breaking--;
-	  break;
-	}
-
-      if (continuing)
-	{
-	  continuing--;
-	  if (continuing)
-	    break;
-	}
+      CHECK_BREAK_AND_CONTINUE();
 
       /* Evaluate the step expression. */
       line_number = arith_lineno;
@@ -3601,23 +3586,14 @@ execute_select_command (SELECT_COM *select_command)
 
       stupidly_hack_special_variables (identifier);
 
+      CHECK_BREAK_AND_CONTINUE();
+
       retval = execute_command (select_command->action);
 
       REAP ();
       QUIT;
 
-      if (breaking)
-	{
-	  breaking--;
-	  break;
-	}
-
-      if (continuing)
-	{
-	  continuing--;
-	  if (continuing)
-	    break;
-	}
+      CHECK_BREAK_AND_CONTINUE();
 
 #if defined (KSH_COMPATIBLE_SELECT)
       show_menu = 0;
@@ -3837,18 +3813,7 @@ execute_while_or_until (WHILE_COM *while_command, int type)
 
       REAP ();
 
-      if (breaking)
-	{
-	  breaking--;
-	  break;
-	}
-
-      if (continuing)
-	{
-	  continuing--;
-	  if (continuing)
-	    break;
-	}
+      CHECK_BREAK_AND_CONTINUE();
     }
   loop_level--; interrupt_execution--;
 

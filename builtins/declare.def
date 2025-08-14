@@ -1032,6 +1032,9 @@ restart_new_var_name:
 	    {
 	      if (valid_nameref_value (value, 1) == 0)
 		sh_invalidid (value);
+	      /* what else can cause this to fail? */
+	      else if (flags_on & att_integer)
+		builtin_error ("%s: expands to invalid variable name for name reference", value);
 	      assign_error++;
 	      /* XXX - unset this variable? or leave it as normal var? */
 	      if (created_var)

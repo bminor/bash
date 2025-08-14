@@ -7514,8 +7514,13 @@ array_length_reference (const char *s)
 
   /* If unbound variables should generate an error, report one and return
      failure. */
+#if 0 /*TAG:bash-5.4 myoga.murase@gmail.com 4/7/2025 */
+  if ((var == 0 || invisible_p (var)) && unbound_vars_is_error)
+#else
   if ((var == 0 || invisible_p (var) || (assoc_p (var) == 0 && array_p (var) == 0)) && unbound_vars_is_error)
+#endif
     {
+unbound_array_error:
       set_exit_status (EXECUTION_FAILURE);
 #if 1
       /* If the array isn't subscripted with `@' or `*', it's an error. */
@@ -7536,6 +7541,11 @@ array_length_reference (const char *s)
   /* We support a couple of expansions for variables that are not arrays.
      We'll return the length of the value for v[0], and 1 for v[@] or
      v[*].  Return 0 for everything else. */
+#if 0 /*TAG:bash-5.4 myoga.murase@gmail.com 4/7/2025 */
+  /* If the variable is set, but not an array or assoc variable, nounset is
+     enabled, and the subscript is not one of @, *, or 0, it is an error
+     treated the same as in previous versions. */
+#endif
 
   array = array_p (var) ? array_cell (var) : (ARRAY *)NULL;
   h = assoc_p (var) ? assoc_cell (var) : (HASH_TABLE *)NULL;
@@ -7546,6 +7556,10 @@ array_length_reference (const char *s)
 	return (h ? assoc_num_elements (h) : 0);
       else if (array_p (var))
 	return (array ? array_num_elements (array) : 0);
+#if 0 /*TAG:bash-5.4 myoga.murase@gmail.com 4/7/2025 */
+      else if (unbound_vars_is_error && var_isset (var) == 0)
+	goto unbound_array_error;	/* still non-fatal error */
+#endif
       else
 	return (var_isset (var) ? 1 : 0);
     }
@@ -7585,6 +7599,11 @@ array_length_reference (const char *s)
 	}
       if (array_p (var))
 	t = array_reference (array, ind);
+#if 0 /*TAG:bash-5.4 myoga.murase@gmail.com 4/7/2025 */
+      /* if nounset is enabled, scalar variables may only be indexed with 0 */
+      else if (unbound_vars_is_error && (var_isset (var) == 0 || ind != 0))
+	goto unbound_array_error;	/* still fatal error */
+#endif
       else
 	t = (ind == 0) ? value_cell (var) : (char *)NULL;
     }
