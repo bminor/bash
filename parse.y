@@ -2500,6 +2500,8 @@ shell_getc (int remove_quoted_newline)
      something on the pushed list of strings, then we don't want to go
      off and get another line.  We let the code down below handle it. */
 
+  /* If we're reading input from the keyboard or from a file, fetch
+     another line from the current source. */
   if (!shell_input_line || ((!shell_input_line[shell_input_line_index]) &&
 			    (pushed_string_list == (STRING_SAVER *)NULL)))
 #else /* !ALIAS && !DPAREN_ARITHMETIC */
@@ -2741,11 +2743,11 @@ shell_getc (int remove_quoted_newline)
 	     going to be removing quoted newlines, since that will eat the
 	     backslash.  Add another backslash instead (will be removed by
 	     word expansion). */
-	  if (bash_input.type == st_string && expanding_alias() == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
+	  if (bash_input.type == st_string && expanding_alias () == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
 	    shell_input_line[shell_input_line_len] = '\\';
-	  else if (bash_input.type == st_bstream && expanding_alias() == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
+	  else if (bash_input.type == st_bstream && expanding_alias () == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
 	    shell_input_line[shell_input_line_len] = '\\';
-	  else if (interactive == 0 && bash_input.type == st_stream && expanding_alias() == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
+	  else if (interactive == 0 && bash_input.type == st_stream && expanding_alias () == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
 	    shell_input_line[shell_input_line_len] = '\\';
 	  else
 	    shell_input_line[shell_input_line_len] = '\n';
@@ -2905,6 +2907,18 @@ pop_alias:
       shell_input_line_index = 0;
       goto restart_read;
     }
+
+#if 0	/*TAG:bash-5.4 wyeth2485@gmail.com 8/15/2025 */
+  /* When we're reading input from a string, we don't increment line_number
+     until now. If we're being called from read_token_word(), this will be
+     pushed back into the input string with shell_ungetc for the next call
+     to read_token() to consume. We don't want to increment line_number
+     twice, so this requires cooperation from shell_ungetc (decrement
+     line_number if we're pushing back a newline while parsing an alias
+     expansion). */
+  if (uc == '\n' && expanding_alias () && pushed_string_list->flags == PSH_ALIAS)
+    line_number++;
+#endif
 #endif
 
   return (uc);
@@ -2922,6 +2936,11 @@ shell_ungetc (int c)
     shell_input_line[--shell_input_line_index] = c;
   else
     eol_ungetc_lookahead = c;
+
+#if 0	/*TAG:bash-5.4 wyeth2485@gmail.com 8/15/2025 */
+  if (c == '\n' && expanding_alias () && heredoc_string == 0 && line_number > 0)
+    line_number--;
+#endif
 }
 
 /* Push S back into shell_input_line; updating shell_input_line_index */

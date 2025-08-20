@@ -446,8 +446,10 @@ extern void _rl_signal_handler (int);
 
 extern void _rl_block_sigint (void);
 extern void _rl_release_sigint (void);
+extern int _rl_sigint_blocked_p (void);
 extern void _rl_block_sigwinch (void);
 extern void _rl_release_sigwinch (void);
+extern int _rl_sigwinch_blocked_p (void);
 
 extern void _rl_state_sigcleanup (void);
 

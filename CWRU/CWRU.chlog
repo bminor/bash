@@ -11586,3 +11586,42 @@ builtins/declare.def
 	  an invalid value for a nameref variable, but the original value is
 	  valid, add an error message for the assignment error
 	  Report from Oğuz <oguzismailuysal@gmail.com>
+
+				   8/12
+				   ----
+subst.c
+	- function_substitute: unwind-protect redirection_undo_list and
+	  exec_redirection_undo_list so the funsub command doesn't undo them
+	  prematurely
+	  Report from jdhedden@gmail.com
+
+				   8/13
+				   ----
+execute_cmd.c
+	- bind_lastarg: don't try to bind the argument in the temporary
+	  environment; just skip that and bind in the closest enclosing
+	  scope
+	  Report from Nathan Mills <the.true.nathan.mills@gmail.com>
+
+				   8/15
+				   ----
+arrayfunc.c
+	- convert_var_to_array,convert_var_to_assoc: call
+	  stupidly_hack_special_variables to clean up any state associated
+	  with the variable (e.g., IFS).
+	  Report from Nathan Mills <the.true.nathan.mills@gmail.com>
+
+subst.c
+	- setifs: if a script attempts to make IFS an array variable, use
+	  element 0 or "0" as appropriate.
+	  Report from Nathan Mills <the.true.nathan.mills@gmail.com>
+
+				   8/19
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_cleanup: to avoid problems caused by calling this from
+	  normal isearch termination and from signal cleanup code, turn off
+	  the RL_STATE_ISEARCH flag and set _rl_iscxt to NULL before doing
+	  anything else that would cause signals to be processed.
+	  Report and fix from Grisha Levit <grishalevit@gmail.com> based on
+	  a report from penguin p <tgckpg@gmail.com>

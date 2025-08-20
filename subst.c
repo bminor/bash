@@ -206,6 +206,8 @@ extern int wordexp_only;
 extern int singlequote_translations;
 extern int extended_quote;
 
+extern REDIRECT *exec_redirection_undo_list, *redirection_undo_list;
+
 #if !defined (HAVE_WCSDUP) && defined (HANDLE_MULTIBYTE)
 extern wchar_t *wcsdup (const wchar_t *);
 #endif
@@ -7022,7 +7024,12 @@ function_substitute (char *string, int quoted, int flags)
       add_unwind_protect (uw_restore_pipestatus_array, psa);
     }
 #endif
-  
+
+  unwind_protect_pointer (redirection_undo_list);
+  redirection_undo_list = NULL;
+  unwind_protect_pointer (exec_redirection_undo_list);
+  exec_redirection_undo_list = NULL;
+
   subst_assign_varlist = 0;
 
   temporary_env = 0;
@@ -12358,11 +12365,15 @@ word_list_quote_removal (WORD_LIST *list, int quoted)
 void
 setifs (SHELL_VAR *v)
 {
-  char *t;
+  char *t, *value;
   unsigned char uc;
 
   ifs_var = v;
-  ifs_value = (v && value_cell (v)) ? value_cell (v) : " \t\n";
+  /* If we do not want to support IFS as an array variable here, check that
+     V is not an array (array_p(v) == 0 && assoc_p (v) == 0) as part of the
+     test to call get_variable_value and set VALUE to NULL if it is. */
+  value = v ? get_variable_value (v) : (char *)NULL;
+  ifs_value = (v && value) ? value : " \t\n";
 
   ifs_is_set = ifs_var != 0;
   ifs_is_null = ifs_is_set && (*ifs_value == 0);

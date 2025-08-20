@@ -4156,7 +4156,7 @@ bind_lastarg (char *arg)
 
   if (arg == 0)
     arg = "";
-  var = bind_variable ("_", arg, 0);
+  var = bind_variable ("_", arg, ASS_NOTEMPENV);
   if (var)
     VUNSETATTR (var, att_exported);
 }

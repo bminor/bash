@@ -680,6 +680,12 @@ _rl_release_sigint (void)
     RL_CHECK_SIGNALS ();
 }
 
+int
+_rl_sigint_blocked_p (void)
+{
+  return sigint_blocked;
+}
+
 /* Cause SIGWINCH to not be delivered until the corresponding call to
    release_sigwinch(). */
 void
@@ -734,6 +740,12 @@ _rl_release_sigwinch (void)
 #endif /* SIGWINCH */
 
   sigwinch_blocked = 0;
+}
+
+int
+_rl_sigwinch_blocked_p (void)
+{
+  return sigwinch_blocked;
 }
 
 /* **************************************************************** */

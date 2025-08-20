@@ -102,6 +102,7 @@ convert_var_to_array (SHELL_VAR *var)
   /* Since namerefs can't be array variables, turn off nameref attribute */
   VUNSETATTR (var, att_nameref);
 
+  stupidly_hack_special_variables (var->name);
   return var;
 }
 
@@ -139,6 +140,7 @@ convert_var_to_assoc (SHELL_VAR *var)
   /* Since namerefs can't be array variables, turn off nameref attribute */
   VUNSETATTR (var, att_nameref);
 
+  stupidly_hack_special_variables (var->name);
   return var;
 }
 

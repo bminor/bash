@@ -173,6 +173,8 @@ typedef struct _vlist {
 #define tempvar_p(var)		((((var)->attributes) & (att_tempvar)))
 #define propagate_p(var)	((((var)->attributes) & (att_propagate)))
 
+#define assigning_p(var)	((((var)->attributes) & (att_assigning)))
+
 /* Variable names: lvalues */
 #define name_cell(var)		((var)->name)
 
