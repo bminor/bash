@@ -4415,9 +4415,11 @@ bash_quote_filename (char *s, int rtype, char *qcp)
      quoted correctly using backslashes (a backslash-newline pair is
      special to the shell parser). */
   expchar = nextch = closer = 0;
+  /* Only check whether the file exists if we're quoting a single completion.
+     Otherwise, it's a common prefix and probably doesn't exist. */
   if (*qcp == '\0' && cs == COMPLETE_BSQUOTE && dircomplete_expand == 0 &&
       (expchar = bash_check_expchar (s, 0, &nextch, &closer)) &&
-      file_exists (s) == 0)
+      rtype == SINGLE_MATCH && file_exists (s) == 0)
     {
       /* If it looks like the name is subject to expansion, see if we want to
 	 double-quote it. */

@@ -11625,3 +11625,28 @@ lib/readline/isearch.c
 	  anything else that would cause signals to be processed.
 	  Report and fix from Grisha Levit <grishalevit@gmail.com> based on
 	  a report from penguin p <tgckpg@gmail.com>
+
+				   8/21
+				   ----
+lib/readline/input.c
+	- rl_getc: it is possible, though extremely unlikely, for read(2)
+	  to both succeed (result == 1) and receive a signal
+	  (_rl_caught_signal != 0).
+	  We know we have a signal we're interested in, since readline's
+	  handler was called, so we want to handle it immediately and defer
+	  returning the character we read until the next time through the loop.
+	  From a report from penguin p <tgckpg@gmail.com>
+	- rl_getc: if the application's SIGINT signal handler returns without
+	  longjmping or exiting the program, make sure to abort out of
+	  searches and numeric arguments, because the readline signal handler
+	  has freed necessary state. Previously we did this only for the
+	  callback interface
+
+				   8/22
+				   ----
+bashline.c
+	- bash_quote_filename: only check whether the file exists and change
+	  the quote character accordingly if we have a single match.
+	  Otherwise, it's a prefix and likely doesn't exist, so we'll stick
+	  with the default backslash completion quoting style.
+	  Fixes completion quoting issue from Aaron Laws <dartme18@gmail.com>

@@ -825,8 +825,14 @@ rl_read_key (void)
 	{
 	  if (rl_get_char (&c) == 0)
 	    c = (*rl_getc_function) (rl_instream);
-/* fprintf(stderr, "rl_read_key: calling RL_CHECK_SIGNALS: _rl_caught_signal = %d\r\n", _rl_caught_signal); */
+if (_rl_caught_signal)
+ {
+fprintf(stderr, "rl_read_key: calling RL_CHECK_SIGNALS: c = %d _rl_caught_signal = %d\r\n", c, _rl_caught_signal);
+   if (c > 0)
+     rl_stuff_char (c);
+   c = -1;
 	  RL_CHECK_SIGNALS ();
+ }
 	}
     }
 
@@ -837,13 +843,14 @@ int
 rl_getc (FILE *stream)
 {
   int result, ostate, osig;
-  unsigned char c;
+  unsigned char c, savec;
   int fd;
 #if defined (HAVE_PSELECT) || defined (HAVE_SELECT)
   sigset_t empty_set;
   fd_set readfds;
 #endif
 
+  savec = 0;
   fd = fileno (stream);
   while (1)
     {
@@ -859,11 +866,18 @@ rl_getc (FILE *stream)
 	 chance to react or abort some current operation that gets cleaned
 	 up by rl_callback_sigcleanup(). If not, we'll just run through the
 	 loop again. */
-      if (osig != 0 && (ostate & RL_STATE_CALLBACK))
+      if (osig != 0 && (ostate & RL_STATE_CALLBACK))	/* XXX - when not in callback mode also? */
 	goto postproc_signal;
 #endif
 
       /* We know at this point that _rl_caught_signal == 0 */
+
+      if (savec > 0)
+	{
+	  c = savec;
+	  savec = 0;
+	  return c;
+	}
 
 #if defined (__MINGW32__)
       if (isatty (fd))
@@ -887,6 +901,20 @@ rl_getc (FILE *stream)
 #endif
       if (result >= 0)
 	result = read (fd, &c, sizeof (unsigned char));
+
+/* fprintf(stderr, "rl_getc: read result = %d errno = %d _rl_caught_signal = %d\n", result, errno, _rl_caught_signal); */
+      /* It is possible, though extremely unlikely, for read to both succeed
+	 (result == 1) and receive a signal (_rl_caught_signal != 0). We
+	 know we have a signal we're interested in, since readline's handler
+	 was called, so we want to handle it below and defer returning the
+	 character we read until the next time through the loop. */
+      if (result > 0 && _rl_caught_signal != 0)
+	{
+	  if (c > 0)	/* if result == 1 we assume that c is valid */
+	    savec = c;	/* one level of pushback */
+	  result = -1;
+	  errno = EINTR;
+	}
 
       if (result == sizeof (unsigned char))
 	return (c);
@@ -923,7 +951,7 @@ rl_getc (FILE *stream)
 #undef X_EWOULDBLOCK
 #undef X_EAGAIN
 
-/* fprintf(stderr, "rl_getc: result = %d errno = %d\n", result, errno); */
+/* fprintf(stderr, "rl_getc: read result = %d errno = %d _rl_caught_signal = %d\n", result, errno, _rl_caught_signal); */
 
       /* Handle errors here. */
       osig = _rl_caught_signal;
@@ -975,11 +1003,11 @@ postproc_signal:
 	 call the application's signal event hook. */
       if (rl_signal_event_hook)
 	(*rl_signal_event_hook) ();
-#if defined (READLINE_CALLBACKS)
-      else if (osig == SIGINT && (ostate & RL_STATE_CALLBACK) && (ostate & (RL_STATE_ISEARCH|RL_STATE_NSEARCH|RL_STATE_NUMERICARG)))
+      /* If the application's SIGINT handler returns, make sure we abort out of
+	 searches and numeric arguments because we've freed necessary state. */
+      if (osig == SIGINT && (ostate & (RL_STATE_ISEARCH|RL_STATE_NSEARCH|RL_STATE_NUMERICARG)))
         /* just these cases for now */
         _rl_abort_internal ();
-#endif
     }
 }
 
