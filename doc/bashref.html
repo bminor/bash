@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 18 May 2025).
+the Bash shell (version 5.3, 7 August 2025).
 
-This is Edition 5.3, last updated 18 May 2025,
+This is Edition 5.3, last updated 7 August 2025,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 18 May 2025).
+the Bash shell (version 5.3, 7 August 2025).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 18 May 2025,
+<p>This is Edition 5.3, last updated 7 August 2025,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -4434,7 +4434,7 @@ parameter $? (see <a class="pxref" href="#Special-Parameters">Special Parameters
 <p>Bash itself returns the exit status of the last command
 executed, unless a syntax error occurs, in which case it exits
 with a non-zero value.
-See also the <code class="code">exit</code> builtin command (see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>.
+See also the <code class="code">exit</code> builtin command (see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>).
 </p>
 <hr>
 </div>
@@ -4457,7 +4457,7 @@ If job control is in effect (see <a class="pxref" href="#Job-Control">Job Contro
 ignores <code class="code">SIGTTIN</code>, <code class="code">SIGTTOU</code>, and <code class="code">SIGTSTP</code>.
 </p>
 <p>The <code class="code">trap</code> builtin modifies the shell&rsquo;s signal handling, as
-described below (see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>.
+described below (see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>).
 </p>
 <p>Non-builtin commands Bash executes have signal handlers set to the
 values inherited by the shell from its parent,
@@ -4758,6 +4758,7 @@ cd -P [-e] [-@] [<var class="var">directory</var>]
 <p>Change the current working directory to <var class="var">directory</var>.
 If <var class="var">directory</var> is not supplied, the value of the <code class="env">HOME</code>
 shell variable is used as <var class="var">directory</var>.
+If <var class="var">directory</var> is the empty string, <code class="code">cd</code> treats it as an error.
 If the shell variable
 <code class="env">CDPATH</code> exists,
 and <var class="var">directory</var> does not begin with a slash,
@@ -7252,7 +7253,7 @@ performing filename expansion.
 <dt><code class="code">nocasematch</code></dt>
 <dd><p>If set, Bash matches patterns in a case-insensitive fashion when
 performing matching while executing <code class="code">case</code> or <code class="code">[[</code>
-conditional commands (see <a class="pxref" href="#Conditional-Constructs">Conditional Constructs</a>,
+conditional commands (see <a class="pxref" href="#Conditional-Constructs">Conditional Constructs</a>),
 when performing pattern substitution word expansions,
 or when filtering possible completions as part of programmable completion.
 </p>
@@ -8413,7 +8414,7 @@ subsequently reset.
 <dt><a id="index-READLINE_005fARGUMENT"></a><span><code class="code">READLINE_ARGUMENT</code><a class="copiable-link" href="#index-READLINE_005fARGUMENT"> &para;</a></span></dt>
 <dd><p>Any numeric argument given to a Readline
 command that was defined using
-&lsquo;<samp class="samp">bind -x</samp>&rsquo; (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>
+&lsquo;<samp class="samp">bind -x</samp>&rsquo; (see <a class="pxref" href="#Bash-Builtins">Bash Builtin Commands</a>)
 when it was invoked.
 </p>
 </dd>
@@ -9465,7 +9466,7 @@ by name in an expression.
 when it is referenced, or when a variable which has been given the  
 <code class="code">integer</code> attribute using &lsquo;<samp class="samp">declare -i</samp>&rsquo; is assigned a value.
 A null value evaluates to 0.
-A shell variable need not have its <code class="code">integer</code> attribute turned on
+A shell variable need not have its <code class="code">integer</code> attribute enabled
 to be used in an expression.
 </p>
 <p>Integer constants follow the C language definition, without suffixes or
@@ -10219,7 +10220,7 @@ startup files.
 
 </li><li> Bash reads and executes the <small class="sc">POSIX</small> startup files
 (<code class="env">$ENV</code>) rather than
-the normal Bash files (see <a class="pxref" href="#Bash-Startup-Files">Bash Startup Files</a>.
+the normal Bash files (see <a class="pxref" href="#Bash-Startup-Files">Bash Startup Files</a>).
 
 </li><li> Alias expansion is always enabled, even in non-interactive shells.
 
@@ -11724,6 +11725,10 @@ Readline equivalents.
 These override the default Readline bindings described here.
 Type &lsquo;<samp class="samp">stty -a</samp>&rsquo; at a Bash prompt to see your current terminal settings,
 including the special control characters (usually <code class="code">cchars</code>).
+This binding takes place on each call to <code class="code">readline()</code>,
+so changes made by
+&lsquo;<samp class="samp">stty</samp>&rsquo;
+can take effect.
 </p>
 </dd>
 <dt><a id="index-blink_002dmatching_002dparen"></a><span><code class="code">blink-matching-paren</code><a class="copiable-link" href="#index-blink_002dmatching_002dparen"> &para;</a></span></dt>
@@ -13643,6 +13648,25 @@ the standard output.
 Backslash will escape a newline, if necessary.
 These are added to the set of possible completions.
 </p>
+<p>External commands that are invoked to generate completions
+(&quot;external completers&quot;)
+receive the word preceding the completion word as an argument,
+as described above.
+This provides context that is sometimes useful, but may include
+information that is considered sensitive or part of a word expansion
+that will not appear in the command line after expansion.
+That word may be visible in process listings or in audit logs.
+This may be a concern to users and completion specification authors
+if there is sensitive information on the command line before
+expansion, since completion takes place before words are expanded.
+If this is an issue, completion authors should use functions as
+wrappers around external commands and pass context information to the
+external command in a different way.
+External completers can infer context from the <var class="var">COMP_LINE</var>
+and <var class="var">COMP_POINT</var> environment variables, but they need to ensure
+they break words in the same way Readline does, using the
+<var class="var">COMP_WORDBREAKS</var> variable.
+</p>
 <p>After generating all of the possible completions,
 Bash applies any filter
 specified with the <samp class="option">-X</samp> option to the completions in the list.
@@ -15266,10 +15290,17 @@ which this should be turned off, and <code class="code">configure</code> disable
 option automatically for a number of systems.
 </p>
 </dd>
-<dt><code class="code">--with-curses</code></dt>
-<dd><p>Use the curses library instead of the termcap library.
+<dt><code class="code">--with-curses[=<var class="var">LIBNAME</var>]</code></dt>
+<dd><p>Use the curses library instead of the termcap library as the library
+where the linker can find the termcap functions.
 <code class="code">configure</code> usually chooses this automatically, since most systems
 include the termcap functions in the curses library.
+If <var class="var">LIBNAME</var> is supplied, <code class="code">configure</code> does not search for an
+appropriate library and uses <var class="var">LIBNAME</var> instead.
+<var class="var">LIBNAME</var> should be either an argument for the linker
+(e.g., <samp class="option">-l<var class="var">libname</var></samp>)
+or a filename
+(e.g., <samp class="file">/opt/local/lib/libncursesw.so</samp>).
 </p>
 </dd>
 <dt><code class="code">--with-gnu-malloc</code></dt>
@@ -15935,7 +15966,7 @@ command, and what the zeroth argument to the command is to be
 using <code class="code">export -f</code> (see <a class="pxref" href="#Shell-Functions">Shell Functions</a>).
 
 </li><li>The Bash <code class="code">export</code> and <code class="code">readonly</code> builtins
-(see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a> can
+(see <a class="pxref" href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>) can
 take a <samp class="option">-f</samp> option to act on shell functions, a <samp class="option">-p</samp> option to
 display variables with various attributes set in a format that can be
 used as shell input, a <samp class="option">-n</samp> option to remove various variable

@@ -7,15 +7,15 @@ declare -A fluff=([foo]="one" [bar]="two" )
 declare -A fluff=([foo]="one" [bar]="two" )
 declare -A fluff=([bar]="two" )
 declare -A fluff=([qux]="assigned" [bar]="newval" )
-./assoc.tests: line 39: chaff: four: must use subscript when assigning associative array
+./assoc.tests: line 41: chaff: four: must use subscript when assigning associative array
 declare -A BASH_ALIASES=()
 declare -A BASH_CMDS=()
 declare -Ai chaff=([one]="10" [zero]="5" )
-declare -Ar waste=([pid]="42134" [lineno]="41" [source]="./assoc.tests" [version]="4.0-devel" )
+declare -Ar waste=([pid]="42134" [lineno]="43" [source]="./assoc.tests" [version]="4.0-devel" )
 declare -A wheat=([two]="b" [three]="c" [one]="a" [zero]="0" )
 declare -A chaff=(["hello world"]="flip" [one]="10" [zero]="5" )
-./assoc.tests: line 51: waste: readonly variable
-./assoc.tests: line 52: unset: waste: cannot unset: readonly variable
+./assoc.tests: line 53: waste: readonly variable
+./assoc.tests: line 54: unset: waste: cannot unset: readonly variable
 declare -A chaff=(["*"]="12" ["hello world"]="flip" [one]="a" )
 flip
 argv[1] = <multiple>
@@ -33,14 +33,14 @@ argv[3] = <12>
 argv[4] = <flip>
 argv[5] = <a>
 argv[1] = <multiple words 12 flip a>
-./assoc.tests: line 71: declare: chaff: cannot destroy array variables in this way
+./assoc.tests: line 73: declare: chaff: cannot destroy array variables in this way
 declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <qux>
 argv[2] = <qix>
 argv[1] = <qux qix>
 declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <2>
-./assoc.tests: line 99: [$unset]: bad array subscript
+./assoc.tests: line 101: [$unset]: bad array subscript
 0
 argv[1] = <7>
 argv[1] = <qux>
@@ -78,6 +78,7 @@ bin bin . bin ucb sbin bin sbin
 \usr\local\bin \bin . \usr\bin \usr\ucb \usr\sbin \bin \sbin
 \usr\local\bin \bin . \usr\bin \usr\ucb \usr\sbin \bin \sbin
 ([a]=1)
+	assoc1.sub
 
 foo qux
 /usr/sbin/foo /usr/local/bin/qux
@@ -88,6 +89,7 @@ hits	command
    0	/usr/local/bin/qux
 foo sh blat qux
 /usr/sbin/foo /bin/sh /sbin/blat /usr/local/bin/qux
+	assoc2.sub
 
 foo qux
 argv[1] = </usr/sbin/foo>
@@ -102,6 +104,7 @@ argv[1] = <cd /blat ; echo $PWD>
 argv[2] = </usr/sbin/foo>
 argv[3] = </bin/bash --login -o posix>
 argv[4] = </usr/local/bin/qux -l>
+	assoc3.sub
 outside: outside
 declare -A BASH_ALIASES=()
 declare -A BASH_CMDS=()
@@ -110,6 +113,7 @@ argv[1] = <inside:>
 argv[2] = <six>
 argv[3] = <foo quux>
 outside 2: outside
+	assoc4.sub
 argv[1] = </barq//fooq>
 argv[1] = <>
 argv[2] = <barq>
@@ -135,6 +139,7 @@ argv[1] = <>
 argv[2] = <BARQ>
 argv[3] = <>
 argv[4] = <FOOQ>
+	assoc5.sub
 abc
 def
 def
@@ -144,6 +149,7 @@ myarray=(["]"]="def" [foo]="bleh" ["a]a"]="abc" ["a]=test1;#a"]="123" )
 
 123
 myarray=(["]"]="def" ["a]=test2;#a"]="def" [foo]="bleh" ["a]a"]="abc" ["a]=test1;#a"]="123" )
+	assoc6.sub
 bar"bie
 doll
 declare -A foo=(["bar\"bie"]="doll" )
@@ -189,6 +195,7 @@ declare -A foo=(["bar\\]bie"]="doll" )
 bar${foo}bie
 doll
 declare -A foo=(["bar\${foo}bie"]="doll" )
+	assoc7.sub
 bar
 after printf
 after use: 0
@@ -198,6 +205,8 @@ declare -A assoc=([two]="twoless" [three]="three" [one]="onemore" )
 declare -Ar assoc=([two]="twoless" [three]="three" [one]="onemore" )
 declare -A hash=([key]="value1" )
 declare -A hash=([key]="value1 value2" )
+	assoc8.sub
+	assoc9.sub
 declare -A b=([")"]="" ["\""]="" ["]"]="" ["\\"]="" ["\`"]="" )
 declare -A b=(["]"]="" ["\`"]="" )
 declare -A dict=(["'"]="3" ["\""]="1" ["\\"]="4" ["\`"]="2" )
@@ -228,6 +237,7 @@ declare -A assoc=()
 foo]bar
 bip
 declare -A foo=(["foo]bar"]="bip" )
+	assoc10.sub
 ./assoc10.sub: line 14: declare: a: cannot convert indexed to associative array
 f: declare -a a
 ./assoc10.sub: line 17: declare: a: cannot convert associative to indexed array
@@ -237,6 +247,7 @@ f: declare -a a
 main: declare -- a="7"
 f: declare -A a
 main: declare -- a="42"
+	assoc11.sub
 declare -A a=([3]="" [1]="2" )
 declare -A foo=([d]="4" [c]="3" [b]="2" [a]="1" )
 foo=( d "4" c "3" b "2" a "1" )
@@ -263,6 +274,7 @@ declare -A a=([")"]="rparen" ["\""]="dquote" ["]"]="rbracket" ["\\"]="bs" )
 declare -A a=([")"]="rparen" ["\""]="dquote" ["]"]="rbracket" ["\\"]="bs" )
 declare -Arx foo=([two]="2" [three]="3" [one]="1" )
 ./assoc11.sub: line 90: foo: readonly variable
+	assoc12.sub
 declare -A v1=(["1 2"]="3" )
 declare -A v2=(["1 2"]="3" )
 declare -A v3=(["1 2"]="3" )
@@ -281,6 +293,7 @@ declare -A v3=(["1 2"]="3 4 5" ["\$xtra"]="xtra" )
 declare -A v1=(["20 40 80"]="new xtra" ["1 2"]="3 4 5" )
 declare -A v2=(["20 40 80"]="new xtra" ["1 2"]="3 4 5" )
 declare -A v3=(["1 2"]="3 4 5" ["\$xtra"]="new xtra" )
+	assoc13.sub
 declare -A assoc=(["*"]="star" ["!"]="bang" ["@"]="at" )
 at
 star
@@ -290,6 +303,7 @@ declare -a ia
 declare -A a=(["@"]="at2" )
 declare -A a=(["@"]="    string" )
 declare -A a=(["*"]="star2" ["@"]="at" )
+	assoc14.sub
 declare -A assoc=([hello]="world" ["key with spaces"]="value with spaces" [foo]="bar" [one]="1" )
 argv[1] = <world>
 argv[2] = <value with spaces>
@@ -331,6 +345,7 @@ argv[7] = <'foo'>
 argv[8] = <'bar'>
 declare -A clone=([hello]="world" ["key with spaces"]="value with spaces" [foo]="bar" [one]="1" )
 declare -A posparams=([hello]="world" ["key with spaces"]="value with spaces" [foo]="bar" [one]="1" )
+	assoc15.sub
 declare -A var=([$'\001']=$'\001\001\001\001' )
 declare -A v2=([$'\001']=$'\001\001\001\001' )
 argv[1] = <^A>
@@ -354,6 +369,7 @@ declare -A var=([two]=$'ab\001cd' [one]=$'\001\001\001\001' )
 declare -A foo=([two]=$'ab\001cd' [one]=$'\001\001\001\001' )
 declare -A foo=([$'\001']=$'ab\001cd' )
 declare -A foo=([$'\001']=$'\001\001\001\001' )
+	assoc16.sub
 declare -A A=(["\$(echo Darwin ; echo stderr>&2)"]="darjeeling" [Darwin]="darjeeling" )
 stderr
 darjsharking
@@ -385,6 +401,7 @@ set
 stderr
 42
 42
+	assoc17.sub
 declare -A A=(["]"]="rbracket" ["["]="lbracket" )
 declare -A A=()
 declare -A A=(["]"]="rbracket" ["["]="lbracket" )
@@ -395,11 +412,13 @@ declare -A A=(["]"]="rbracket" ["["]="lbracket" )
 declare -A A=()
 declare -A A=(["]"]="rbracket" ["["]="lbracket" )
 declare -A A=()
+	assoc18.sub
 declare -A A=(["]"]="rbracket" ["["]="lbracket" )
 declare -A A=()
 declare -A A=(["]"]="rbracket" ["["]="lbracket" )
 declare -A A=()
 5: ok 1
+	assoc19.sub
 declare -A aa=([key]="/homes/cj/Desktop" )
 declare -A aa=([key]="/homes/cj/Desktop" )
 declare -A aa=([k2]="/homes/cj/Library" [key]="/homes/cj/Desktop" )

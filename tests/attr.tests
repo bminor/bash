@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 a=(outside)
 
 f1() { readonly a=(1) ; }
@@ -49,6 +51,5 @@ f4
 echo -n after f4:
 declare -p d
 
-${THIS_SH} ./attr1.sub
-${THIS_SH} ./attr2.sub
-
+test_runsub ./attr1.sub
+test_runsub ./attr2.sub

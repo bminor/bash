@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2025 April 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2025 August 25<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -6785,7 +6785,7 @@ when it is referenced, or when a variable which has been given the
 <I>integer</I> attribute using <B>declare -i</B> is assigned a value.
 A null value evaluates to 0.
 A shell variable need not have its <I>integer</I> attribute
-turned on to be used in an expression.
+enabled to be used in an expression.
 <P>
 
 Integer constants follow the C language definition, without suffixes or
@@ -8770,6 +8770,10 @@ Type
 
 at a <B>bash</B> prompt to see your current terminal settings,
 including the special control characters (usually <B>cchars</B>).
+This binding takes place on each call to <B>readline</B>,
+so changes made by
+
+can take effect.
 <DT><B>blink-matching-paren (Off)</B>
 
 <DD>
@@ -10528,6 +10532,36 @@ Backslash will escape a newline, if necessary.
 These are added to the set of possible completions.
 <P>
 
+External commands that are invoked to generate completions (
+
+receive the word preceding the completion word as an argument,
+as described above.
+This provides context that is sometimes useful, but may include  
+information that is considered sensitive or part of a word expansion
+that will not appear in the command line after expansion.
+That word may be visible in process listings or in audit logs.
+This may be a concern to users and completion specification authors
+if there is sensitive information on the command line before
+expansion, since completion takes place before words are expanded.
+If this is an issue, completion authors should use functions as
+wrappers around external commands and pass context information to the
+external command in a different way.
+External completers can infer context from the
+<FONT SIZE=-1><B>COMP_LINE</B>
+
+</FONT>
+and
+<FONT SIZE=-1><B>COMP_POINT</B>
+
+</FONT>
+environment variables, but they need to ensure
+they break words in the same way <B>readline</B> does, using the
+<FONT SIZE=-1><B>COMP_WORDBREAKS</B>
+
+</FONT>
+variable.
+<P>
+
 After generating all of the possible completions,
 <B>bash</B> applies any filter
 specified with the <B>-X</B> option to the completions in the list.
@@ -11629,6 +11663,7 @@ if <I>dir</I> is not supplied, the value of the
 
 </FONT>
 shell variable is used as <I>dir</I>.
+If <I>dir</I> is the empty string, <B>cd</B> treats it as an error.
 The variable
 <FONT SIZE=-1><B>CDPATH</B>
 
@@ -16821,7 +16856,7 @@ Array variables may not (yet) be exported.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2025 April 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.3<TH ALIGN=CENTER width=33%>2025 August 25<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -16930,7 +16965,7 @@ Array variables may not (yet) be exported.
 <DT><A HREF="#lbDJ">BUGS</A><DD>
 </DL>
 <HR>
-This document was created by man2html from /usr/local/src/bash/bash-20250502/doc/bash.1.<BR>
-Time: 04 May 2025 17:25:09 EDT
+This document was created by man2html from /usr/local/src/bash/bash-20250822/doc/bash.1.<BR>
+Time: 25 August 2025 11:45:48 EDT
 </BODY>
 </HTML>

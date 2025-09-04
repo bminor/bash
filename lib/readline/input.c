@@ -825,14 +825,14 @@ rl_read_key (void)
 	{
 	  if (rl_get_char (&c) == 0)
 	    c = (*rl_getc_function) (rl_instream);
-if (_rl_caught_signal)
- {
-fprintf(stderr, "rl_read_key: calling RL_CHECK_SIGNALS: c = %d _rl_caught_signal = %d\r\n", c, _rl_caught_signal);
-   if (c > 0)
-     rl_stuff_char (c);
-   c = -1;
-	  RL_CHECK_SIGNALS ();
- }
+	  /* This can happen if rl_getc_function != rl_getc */
+	  if (_rl_caught_signal)
+	    {
+	      if (c > 0)
+		rl_stuff_char (c);
+	      c = -1;
+	      RL_CHECK_SIGNALS ();
+	    }
 	}
     }
 
@@ -1005,7 +1005,7 @@ postproc_signal:
 	(*rl_signal_event_hook) ();
       /* If the application's SIGINT handler returns, make sure we abort out of
 	 searches and numeric arguments because we've freed necessary state. */
-      if (osig == SIGINT && (ostate & (RL_STATE_ISEARCH|RL_STATE_NSEARCH|RL_STATE_NUMERICARG)))
+      if (osig == SIGINT && (ostate & (RL_STATE_ISEARCH|RL_STATE_NSEARCH|RL_STATE_NUMERICARG|RL_STATE_MOREINPUT)))
         /* just these cases for now */
         _rl_abort_internal ();
     }

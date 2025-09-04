@@ -85,11 +85,11 @@ Line editing can be enabled at any time using the @option{-o emacs} or
 The following paragraphs use Emacs style to
 describe the notation used to represent keystrokes.
 
-The text @kbd{C-k} is read as `Control-K' and describes the character
+The text @kbd{C-k} is read as ``Control-K'' and describes the character
 produced when the @key{k} key is pressed while the Control key
 is depressed.
 
-The text @kbd{M-k} is read as `Meta-K' and describes the character
+The text @kbd{M-k} is read as ``Meta-K'' and describes the character
 produced when the Meta key (if you have one) is depressed, and the @key{k}
 key is pressed (a @dfn{meta character}), then both are released.
 The Meta key is labeled @key{ALT} or @key{Option} on many keyboards.
@@ -120,7 +120,7 @@ you can make @kbd{M-key} key bindings you specify
 (see @code{Key Bindings} in @ref{Readline Init File Syntax})
 do the same thing by setting the @code{force-meta-prefix} variable.
 
-The text @kbd{M-C-k} is read as `Meta-Control-k' and describes the
+The text @kbd{M-C-k} is read as ``Meta-Control-k'' and describes the
 character produced by metafying @kbd{C-k}.
 
 In addition, several keys have their own names.
@@ -178,10 +178,10 @@ and then correct your mistake.
 Afterwards, you can move the cursor to the right with @kbd{C-f}.
 
 When you add text in the middle of a line, you will notice that characters
-to the right of the cursor are `pushed over' to make room for the text
+to the right of the cursor are ``pushed over'' to make room for the text
 that you have inserted.
 Likewise, when you delete text behind the cursor,
-characters to the right of the cursor are `pulled back' to fill in the
+characters to the right of the cursor are ``pulled back'' to fill in the
 blank space created by the removal of the text.
 These are the bare
 essentials for editing the text of an input line:
@@ -244,9 +244,9 @@ operate on characters while meta keystrokes operate on words.
 @dfn{Killing} text means to delete the text from the line, but to save
 it away for later use, usually by @dfn{yanking} (re-inserting)
 it back into the line.
-(`Cut' and `paste' are more recent jargon for `kill' and `yank'.)
+(``Cut'' and ``paste'' are more recent jargon for ``kill'' and ``yank''.)
 
-If the description for a command says that it `kills' text, then you can
+If the description for a command says that it ``kills'' text, then you can
 be sure that you can get the text back in a different (or the same)
 place later.
 
@@ -307,9 +307,10 @@ act in a backward direction.
 For example, to kill text back to the
 start of the line, you might type @samp{M-- C-k}.
 
-The general way to pass numeric arguments to a command is to type meta
-digits before the command.
-If the first `digit' typed is a minus
+The general way to pass numeric arguments to a command is to type
+the Meta key and then digits (``meta digits'')
+before the command.
+If the first ``digit'' typed is a minus
 sign (@samp{-}), then the sign of the argument will be negative.
 Once you have typed one meta digit to get the argument started, you can
 type the remainder of the digits, and then the command.
@@ -1420,11 +1421,11 @@ If this line is a modified history line, then restore the history line
 to its original state.
 
 @item previous-history (C-p)
-Move `back' through the history list, fetching the previous command.
+Move ``back'' through the history list, fetching the previous command.
 This may also be bound to the up arrow key on some keyboards.
 
 @item next-history (C-n)
-Move `forward' through the history list, fetching the next command.
+Move ``forward'' through the history list, fetching the next command.
 This may also be bound to the down arrow key on some keyboards.
 
 @item beginning-of-history (M-<)
@@ -1435,25 +1436,26 @@ Move to the end of the input history, i.e., the line currently
 being entered.
 
 @item reverse-search-history (C-r)
-Search backward starting at the current line and moving `up' through
+Search backward starting at the current line and moving ``up'' through
 the history as necessary.
 This is an incremental search.
 This command sets the region to the matched text and activates the region.
 
 @item forward-search-history (C-s)
-Search forward starting at the current line and moving `down' through
+Search forward starting at the current line and moving ``down'' through
 the history as necessary.
 This is an incremental search.
 This command sets the region to the matched text and activates the region.
 
 @item non-incremental-reverse-search-history (M-p)
-Search backward starting at the current line and moving `up'
+Search backward starting at the current line and moving ``up''
+
 through the history as necessary using a non-incremental search
 for a string supplied by the user.
 The search string may match anywhere in a history line.
 
 @item non-incremental-forward-search-history (M-n)
-Search forward starting at the current line and moving `down'
+Search forward starting at the current line and moving ``down''
 through the history as necessary using a non-incremental search
 for a string supplied by the user.
 The search string may match anywhere in a history line.
@@ -2135,8 +2137,8 @@ when in @code{vi} mode and to vi-editing-mode in @code{emacs} mode).
 The Readline default is @code{emacs} mode.
 
 When you enter a line in @code{vi} mode, you are already placed in
-`insertion' mode, as if you had typed an @samp{i}.  Pressing @key{ESC}
-switches you into `command' mode, where you can edit the text of the
+``insertion'' mode, as if you had typed an @samp{i}.  Pressing @key{ESC}
+switches you into ``command'' mode, where you can edit the text of the
 line with the standard @code{vi} movement keys, move to previous
 history lines with @samp{k} and subsequent lines with @samp{j}, and
 so forth.
@@ -2258,6 +2260,25 @@ It should print a list of completions, one per line, to
 the standard output.
 Backslash will escape a newline, if necessary.
 These are added to the set of possible completions.
+
+External commands that are invoked to generate completions
+("external completers")
+receive the word preceding the completion word as an argument,
+as described above.
+This provides context that is sometimes useful, but may include
+information that is considered sensitive or part of a word expansion
+that will not appear in the command line after expansion.
+That word may be visible in process listings or in audit logs.
+This may be a concern to users and completion specification authors
+if there is sensitive information on the command line before
+expansion, since completion takes place before words are expanded.
+If this is an issue, completion authors should use functions as
+wrappers around external commands and pass context information to the
+external command in a different way.
+External completers can infer context from the @var{COMP_LINE}
+and @var{COMP_POINT} environment variables, but they need to ensure
+they break words in the same way Readline does, using the
+@var{COMP_WORDBREAKS} variable.
 
 After generating all of the possible completions,
 Bash applies any filter

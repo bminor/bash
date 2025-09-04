@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 set +o posix
 declare -i iv jv
 
@@ -296,36 +298,36 @@ unset -v x
 echo $(( "`echo 1+1`" ))
 echo $(( `echo 1+1` ))
 
-${THIS_SH} ./arith1.sub
-${THIS_SH} ./arith2.sub
-${THIS_SH} ./arith3.sub
-${THIS_SH} ./arith4.sub
+test_runsub ./arith1.sub
+test_runsub ./arith2.sub
+test_runsub ./arith3.sub
+test_runsub ./arith4.sub
 
 # make sure arithmetic expansion handles ints > 2**31 - 1 using intmax_t
 echo $(( 2147483645 + 4 ))
 
 # other tests using INTMAX_MIN and INTMAX_MAX that cause exceptions if not
 # handled correctly -- problem through bash-4.2
-${THIS_SH} ./arith5.sub
+test_runsub ./arith5.sub
 
 # problems with suppressing evaluation present through bash-4.2
-${THIS_SH} ./arith6.sub
+test_runsub ./arith6.sub
 
 # problems with parsing arithmetic expressions containing colons that are
 # part of word expansions such as substring extraction
-${THIS_SH} ./arith7.sub
+test_runsub ./arith7.sub
 
 # problems with evaluation of conditional expressions
-${THIS_SH} ./arith8.sub
+test_runsub ./arith8.sub
 
 # expressions with unset variables and nounset enabled
-${THIS_SH} ./arith9.sub
+test_runsub ./arith9.sub
 
 # empty expressions in various arithmetic evaluation contexts
-${THIS_SH} ./arith10.sub
+test_runsub ./arith10.sub
 
 # internal quoting for array subscripts
-${THIS_SH} ./arith11.sub
+test_runsub ./arith11.sub
 
 x=4
 y=7

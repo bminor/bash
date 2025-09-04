@@ -2026,11 +2026,11 @@ _rl_readstr_init (int pchar, int flags)
   rl_end = rl_point = 0;
 
   p = _rl_make_prompt_for_search (pchar ? pchar : '@');
+
+  RL_SETSTATE (RL_STATE_READSTR);
   cxt->flags |= READSTR_FREEPMT;
   rl_message ("%s", p);
   xfree (p);
-
-  RL_SETSTATE (RL_STATE_READSTR);
 
   _rl_rscxt = cxt;  
 

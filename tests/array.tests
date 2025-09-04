@@ -11,6 +11,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
 
 # Filter stdin to remove builtin array variables that are
 # automatically set and possibly contain values that vary.
@@ -270,14 +271,14 @@ badarray=( metacharacters like & need to be quoted in compound assignments)
 set -u
 ( echo ${#narray[4]} )
 
-${THIS_SH} ./array1.sub
-${THIS_SH} ./array2.sub
+test_runsub ./array1.sub
+test_runsub ./array2.sub
 
 # some old bugs and ksh93 compatibility tests
-${THIS_SH} ./array3.sub
+test_runsub ./array3.sub
 
 # some compound assignment parsing problems that showed up in bash-3.1-release
-${THIS_SH} ./array4.sub
+test_runsub ./array4.sub
 
 set +u
 cd ${TMPDIR:=/tmp}
@@ -426,35 +427,35 @@ BASH_ARGV[1]=foo ; echo FIN5:$?
 declare BASH_ARGV[1]=foo ; echo FIN6:$?
 
 # tests for bash-3.1 problems
-${THIS_SH} ./array5.sub
+test_runsub ./array5.sub
 
 # tests for post-bash-3.2 problems, most fixed in bash-3.2 patches
-${THIS_SH} ./array6.sub
-${THIS_SH} ./array7.sub
+test_runsub ./array6.sub
+test_runsub ./array7.sub
 
-${THIS_SH} ./array8.sub
-${THIS_SH} ./array9.sub
-${THIS_SH} ./array10.sub
-${THIS_SH} ./array11.sub
-${THIS_SH} ./array12.sub
-${THIS_SH} ./array13.sub
-${THIS_SH} ./array14.sub
-${THIS_SH} ./array15.sub
-${THIS_SH} ./array16.sub
-${THIS_SH} ./array17.sub
-${THIS_SH} ./array18.sub
-${THIS_SH} ./array19.sub
-${THIS_SH} ./array20.sub
-${THIS_SH} ./array21.sub
-${THIS_SH} ./array22.sub
-${THIS_SH} ./array23.sub
-${THIS_SH} ./array24.sub
-${THIS_SH} ./array25.sub
-${THIS_SH} ./array26.sub
-${THIS_SH} ./array27.sub
-${THIS_SH} ./array28.sub
-${THIS_SH} ./array29.sub
-${THIS_SH} ./array30.sub
-${THIS_SH} ./array31.sub
-${THIS_SH} ./array32.sub
-${THIS_SH} ./array33.sub
+test_runsub ./array8.sub
+test_runsub ./array9.sub
+test_runsub ./array10.sub
+test_runsub ./array11.sub
+test_runsub ./array12.sub
+test_runsub ./array13.sub
+test_runsub ./array14.sub
+test_runsub ./array15.sub
+test_runsub ./array16.sub
+test_runsub ./array17.sub
+test_runsub ./array18.sub
+test_runsub ./array19.sub
+test_runsub ./array20.sub
+test_runsub ./array21.sub
+test_runsub ./array22.sub
+test_runsub ./array23.sub
+test_runsub ./array24.sub
+test_runsub ./array25.sub
+test_runsub ./array26.sub
+test_runsub ./array27.sub
+test_runsub ./array28.sub
+test_runsub ./array29.sub
+test_runsub ./array30.sub
+test_runsub ./array31.sub
+test_runsub ./array32.sub
+test_runsub ./array33.sub

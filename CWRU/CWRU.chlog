@@ -11650,3 +11650,36 @@ bashline.c
 	  Otherwise, it's a prefix and likely doesn't exist, so we'll stick
 	  with the default backslash completion quoting style.
 	  Fixes completion quoting issue from Aaron Laws <dartme18@gmail.com>
+
+				   8/29
+				   ----
+builtins/declare.def
+	- declare_invalid_opts: reject attempts to use -n with -i, since you
+	  can't have nameref variables referring to positional parameters
+
+lib/readline/isearch.c
+	- rl_display_search: if the search string contains a control char,
+	  display it using the same translation (^C) as in other places
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				    9/4
+				    ---
+lib/readline/input.c
+	- rl_getc: add RL_STATE_MOREINPUT to the list of states that cause
+	  a received SIGINT to call _rl_abort_internal
+
+lib/readline/display.c
+	- rl_redisplay: put setting RL_STATE_REDISPLAYING outside the calls
+	  to _rl_block_sigint and _rl_release_sigint
+
+lib/readline/text.c
+	- _rl_readstr_init: set RL_STATE_READSTR before calling rl_message
+	  to prompt for the command name so we know we're in readstr if we
+	  get a SIGINT
+
+lib/readline/signals.c
+	- _rl_release_sigint: after calling RL_CHECK_SIGNALS, call _rl_abort_internal
+	  if the state indicates that we are in one of the places that can
+	  call rl_message. That takes care of the case where redisplay gets a
+	  SIGINT while `blocking' it.
+	  Report from Grisha Levit <grishalevit@gmail.com>

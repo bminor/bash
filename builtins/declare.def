@@ -252,6 +252,12 @@ declare_invalid_opts (int flags_on, int flags_off)
       sh_invalidopt ("-a");
       return (EX_BADUSAGE);
     }
+  /* Ineffective, since you can't have namerefs referencing positional parameters */
+  else if ((flags_on & att_nameref) && (flags_on & att_integer))
+    {
+      builtin_error ("cannot use -n with -i");
+      return (EX_BADUSAGE);
+    }
 
   return 0;
 }

@@ -826,10 +826,10 @@ rl_redisplay (void)
   if (_rl_echoing_p == 0)
     return;
 
+  RL_SETSTATE (RL_STATE_REDISPLAYING);
   /* Block keyboard interrupts because this function manipulates global
      data structures. */
   _rl_block_sigint ();  
-  RL_SETSTATE (RL_STATE_REDISPLAYING);
 
   cur_face = FACE_NORMAL;
   /* Can turn this into an array for multiple highlighted objects in addition
@@ -1708,8 +1708,8 @@ rl_redisplay (void)
     _rl_quick_redisplay = 0;
   }
 
-  RL_UNSETSTATE (RL_STATE_REDISPLAYING);
   _rl_release_sigint ();
+  RL_UNSETSTATE (RL_STATE_REDISPLAYING);
 }
 
 static void

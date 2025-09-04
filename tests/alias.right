@@ -1,12 +1,13 @@
 alias: 0
 alias: 0
-./alias.tests: line 38: qfoo: command not found
-./alias.tests: line 44: unalias: foo: not found
+./alias.tests: line 40: qfoo: command not found
+./alias.tests: line 46: unalias: foo: not found
 quux
 hi
 declare -a m=([0]="x")
-./alias.tests: line 66: alias: `\$': invalid alias name
-./alias.tests: line 67: `\$': invalid alias name
+./alias.tests: line 68: alias: `\$': invalid alias name
+./alias.tests: line 69: `\$': invalid alias name
+	alias1.sub
 bar
 value
 bar
@@ -15,6 +16,7 @@ OK
 OK
 OK
 OK
+	alias2.sub
 one
 two
 three
@@ -23,6 +25,8 @@ one
 two
 three
 four
+	alias3.sub
+	alias4.sub
 Error: bar
 ok 1
 ok 2
@@ -40,14 +44,17 @@ bar
 bad
 0
 <|cat>
+	alias5.sub
 foo
 bar
 baz
 foo
 bar
 baz
+	alias6.sub
 <áa>
 <aá>
+	alias7.sub
 bar
 foo bar x
 foo

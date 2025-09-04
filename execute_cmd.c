@@ -1601,9 +1601,17 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
   USE_VAR(asynchronous);
 
   subshell_level++;
+  /* should_redir_stdin reflects whether we are executing an asynchronous
+     command terminated by a `&'. */
   should_redir_stdin = (asynchronous && (command->flags & CMD_STDIN_REDIR) &&
 			  pipe_in == NO_PIPE &&
+#if 0	/*TAG:bash-5.4 POSIX interp 1913 */
+			 /* POSIX interp 1913 says that the redirection of fd 0
+			    from /dev/null is unconditional. */
+			  (posixly_correct || stdin_redirects (command->redirects) == 0));
+#else
 			  stdin_redirects (command->redirects) == 0);
+#endif
 
   invert = (command->flags & CMD_INVERT_RETURN) != 0;
   user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
@@ -2848,10 +2856,20 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 	 if we are currently in a subshell via `( xxx )', or if job
 	 control is not active then the standard input for an
 	 asynchronous command is forced to /dev/null. */
+      /* If we want to make this /dev/null redirection unconditional in posix
+	 mode, change this to check posixly_correct */
 #if defined (JOB_CONTROL)
+#if 0	/*TAG:bash-5.4 POSIX interp 1913 */
+      if (((subshell_environment || !job_control) && !stdin_redir) || posixly_correct)
+#else
       if ((subshell_environment || !job_control) && !stdin_redir)
+#endif
+#else
+#if 0	/*TAG:bash-5.4 POSIX interp 1913 */
+      if (!stdin_redir || posixly_correct)
 #else
       if (!stdin_redir)
+#endif
 #endif /* JOB_CONTROL */
 	tc->flags |= CMD_STDIN_REDIR;
 
@@ -4803,7 +4821,13 @@ run_builtin:
 	    {
 	      if ((cmdflags & CMD_STDIN_REDIR) &&
 		    pipe_in == NO_PIPE &&
+#if 0	/*TAG:bash-5.4 POSIX interp 1913 */
+		    /* POSIX interp 1913 says that the redirection of fd 0
+		       from /dev/null is unconditional. */
+		    (posixly_correct || stdin_redirects (simple_command->redirects) == 0))
+#else
 		    (stdin_redirects (simple_command->redirects) == 0))
+#endif
 		async_redirect_stdin ();
 	      setup_async_signals ();
 	    }
@@ -5817,7 +5841,13 @@ execute_disk_command (WORD_LIST *words, REDIRECT *redirects, char *command_line,
 	{
 	  if ((cmdflags & CMD_STDIN_REDIR) &&
 		pipe_in == NO_PIPE &&
+#if 0	/*TAG:bash-5.4 POSIX interp 1913 */
+		/* POSIX interp 1913 says that the redirection of fd 0
+		   from /dev/null is unconditional. */
+		(posixly_correct || stdin_redirects (redirects) == 0))
+#else
 		(stdin_redirects (redirects) == 0))
+#endif
 	    async_redirect_stdin ();
 	  setup_async_signals ();
 	}

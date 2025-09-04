@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 # basic cases
 a=1
 a+=4
@@ -96,5 +98,5 @@ echo $x
 
 x+=5
 
-${THIS_SH} ./appendop1.sub
-${THIS_SH} ./appendop2.sub
+test_runsub ./appendop1.sub
+test_runsub ./appendop2.sub

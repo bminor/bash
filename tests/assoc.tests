@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 # TEST - basic declaration and assignment
 typeset -A fluff
 declare -A
@@ -199,19 +201,19 @@ if [ "$T" != "${T[0]}" ]; then
 	echo 'assoc.tests: $T and ${T[0]} mismatch'
 fi
 
-${THIS_SH} ./assoc1.sub
+test_runsub ./assoc1.sub
 
-${THIS_SH} ./assoc2.sub
+test_runsub ./assoc2.sub
 
-${THIS_SH} ./assoc3.sub
+test_runsub ./assoc3.sub
 
-${THIS_SH} ./assoc4.sub
+test_runsub ./assoc4.sub
 
-${THIS_SH} ./assoc5.sub
+test_runsub ./assoc5.sub
 
-${THIS_SH} ./assoc6.sub
+test_runsub ./assoc6.sub
 
-${THIS_SH} ./assoc7.sub
+test_runsub ./assoc7.sub
 
 # test converting between scalars and assoc arrays
 unset assoc
@@ -240,36 +242,36 @@ declare -p hash
 
 unset hash
 
-${THIS_SH} ./assoc8.sub
+test_runsub ./assoc8.sub
 
 # new shopt option to prevent multiple expansion of assoc array subscripts
-${THIS_SH} ./assoc9.sub
+test_runsub ./assoc9.sub
 
-${THIS_SH} ./assoc10.sub
+test_runsub ./assoc10.sub
 
 # test assigning associative arrays using compound key/value pair assignments
-${THIS_SH} ./assoc11.sub
+test_runsub ./assoc11.sub
 
 # more kvpair associative array assignment tests
-${THIS_SH} ./assoc12.sub
+test_runsub ./assoc12.sub
 
 # assignment to @ and *
-${THIS_SH} ./assoc13.sub
+test_runsub ./assoc13.sub
 
 # tests of the @k transformation on associative arrays
-${THIS_SH} ./assoc14.sub
+test_runsub ./assoc14.sub
 
 # tests with subscripts and values containing 0x01 (some indexed array tests too)
-${THIS_SH} ./assoc15.sub
+test_runsub ./assoc15.sub
 
 # tests with subscripts being expanded more than one in ${xxx} word expansions
-${THIS_SH} ./assoc16.sub
+test_runsub ./assoc16.sub
 
 # tests with `[' and `]' subscripts and `unset'
-${THIS_SH} ./assoc17.sub
+test_runsub ./assoc17.sub
 
 # tests with `[' and `]' subscripts and printf/read/wait builtins
-${THIS_SH} ./assoc18.sub
+test_runsub ./assoc18.sub
 
 # tests with tilde expansion in keys and values post-bash-5.2
-${THIS_SH} ./assoc19.sub
+test_runsub ./assoc19.sub

@@ -10352,6 +10352,22 @@ of completions, one per line, to the standard output.  Backslash will
 escape a newline, if necessary.  These are added to the set of possible
 completions.
 
+   External commands that are invoked to generate completions ("external
+completers") receive the word preceding the completion word as an
+argument, as described above.  This provides context that is sometimes
+useful, but may include information that is considered sensitive or part
+of a word expansion that will not appear in the command line after
+expansion.  That word may be visible in process listings or in audit
+logs.  This may be a concern to users and completion specification
+authors if there is sensitive information on the command line before
+expansion, since completion takes place before words are expanded.  If
+this is an issue, completion authors should use functions as wrappers
+around external commands and pass context information to the external
+command in a different way.  External completers can infer context from
+the COMP_LINE and COMP_POINT environment variables, but they need to
+ensure they break words in the same way Readline does, using the
+COMP_WORDBREAKS variable.
+
    After generating all of the possible completions, Bash applies any
 filter specified with the ‘-X’ option to the completions in the list.
 The filter is a pattern as used for pathname expansion; a ‘&’ in the
@@ -13725,33 +13741,33 @@ Node: Keyboard Macros454402
 Node: Miscellaneous Commands455106
 Node: Readline vi Mode461676
 Node: Programmable Completion462656
-Node: Programmable Completion Builtins471396
-Node: A Programmable Completion Example483136
-Node: Using History Interactively488484
-Node: Bash History Facilities489168
-Node: Bash History Builtins492906
-Node: History Interaction499380
-Node: Event Designators504333
-Node: Word Designators505914
-Node: Modifiers508309
-Node: Installing Bash510249
-Node: Basic Installation511368
-Node: Compilers and Options515247
-Node: Compiling For Multiple Architectures516000
-Node: Installation Names517756
-Node: Specifying the System Type519993
-Node: Sharing Defaults520742
-Node: Operation Controls521459
-Node: Optional Features522481
-Node: Reporting Bugs535207
-Node: Major Differences From The Bourne Shell536567
-Node: GNU Free Documentation License557997
-Node: Indexes583177
-Node: Builtin Index583631
-Node: Reserved Word Index590732
-Node: Variable Index593180
-Node: Function Index610596
-Node: Concept Index624594
+Node: Programmable Completion Builtins472395
+Node: A Programmable Completion Example484135
+Node: Using History Interactively489483
+Node: Bash History Facilities490167
+Node: Bash History Builtins493905
+Node: History Interaction500379
+Node: Event Designators505332
+Node: Word Designators506913
+Node: Modifiers509308
+Node: Installing Bash511248
+Node: Basic Installation512367
+Node: Compilers and Options516246
+Node: Compiling For Multiple Architectures516999
+Node: Installation Names518755
+Node: Specifying the System Type520992
+Node: Sharing Defaults521741
+Node: Operation Controls522458
+Node: Optional Features523480
+Node: Reporting Bugs536206
+Node: Major Differences From The Bourne Shell537566
+Node: GNU Free Documentation License558996
+Node: Indexes584176
+Node: Builtin Index584630
+Node: Reserved Word Index591731
+Node: Variable Index594179
+Node: Function Index611595
+Node: Concept Index625593
 
 End Tag Table
 

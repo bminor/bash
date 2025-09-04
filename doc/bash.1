@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jul 30 14:47:58 EDT 2025
+.\"	Last Change: Mon Aug 25 11:35:58 EDT 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -21,7 +21,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 July 30" "GNU Bash 5.3"
+.TH BASH 1 "2025 August 25" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -4938,9 +4938,9 @@ This allows
 here-documents within shell scripts to be indented in a
 natural fashion.
 .PP
-If the delimiter is not quoted, the
+If the delimiter is not quoted, the shell treats the
 .B \e<newline>
-sequence is treated as a line continuation: the two lines are joined
+sequence as a line continuation: the two lines are joined
 and the backslash-newline is removed.
 This happens while reading the here-document, before the check for
 the ending delimiter, so joined lines can form the end delimiter.
@@ -8367,6 +8367,32 @@ It should print a list of completions, one per line, to the
 standard output.
 Backslash will escape a newline, if necessary.
 These are added to the set of possible completions.
+.PP
+External commands that are invoked to generate completions (
+.Q "external completers" )
+receive the word preceding the completion word as an argument,
+as described above.
+This provides context that is sometimes useful, but may include  
+information that is considered sensitive or part of a word expansion
+that will not appear in the command line after expansion.
+That word may be visible in process listings or in audit logs.
+This may be a concern to users and completion specification authors
+if there is sensitive information on the command line before
+expansion, since completion takes place before words are expanded.
+If this is an issue, completion authors should use functions as
+wrappers around external commands and pass context information to the
+external command in a different way.
+External completers can infer context from the
+.SM
+.B COMP_LINE
+and
+.SM
+.B COMP_POINT
+environment variables, but they need to ensure
+they break words in the same way \fBreadline\fP does, using the
+.SM
+.B COMP_WORDBREAKS
+variable.
 .PP
 After generating all of the possible completions,
 \fBbash\fP applies any filter

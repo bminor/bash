@@ -194,12 +194,13 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
        ccdd [--LL] [--@@] [_d_i_r]
        ccdd --PP [--ee] [--@@] [_d_i_r]
               Change the current directory to _d_i_r.  if _d_i_r  is  not  supplied,
-              the  value of the HHOOMMEE shell variable is used as _d_i_r.  The vari-
-              able CCDDPPAATTHH exists, and _d_i_r does not begin with a slash (/),  ccdd
-              uses it as a search path: the shell searches each directory name
-              in  CCDDPPAATTHH  for  _d_i_r.  Alternative directory names in CCDDPPAATTHH are
-              separated by a colon (:).  A null directory name  in  CCDDPPAATTHH  is
-              the same as the current directory, i.e.,
+              the  value of the HHOOMMEE shell variable is used as _d_i_r.  If _d_i_r is
+              the empty string, ccdd treats it as an error.  The variable CCDDPPAATTHH
+              exists, and _d_i_r does not begin with a slash (/), ccdd uses it as a
+              search path: the shell searches each directory  name  in  CCDDPPAATTHH
+              for _d_i_r.  Alternative directory names in CCDDPPAATTHH are separated by
+              a colon (:).  A null directory name in CCDDPPAATTHH is the same as the
+              current directory, i.e.,
 
               The  --PP option causes ccdd to use the physical directory structure
               by resolving symbolic links while traversing _d_i_r and before pro-

@@ -12,6 +12,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # place holder for future alias testing
+. ./test-aux-functions
+
 shopt -s expand_aliases
 
 # alias/unalias tests originally in builtins.tests
@@ -66,10 +68,10 @@ declare -p m
 alias '\$'=xx
 BASH_ALIASES['\$']=xx
 
-${THIS_SH} ./alias1.sub
-${THIS_SH} ./alias2.sub
-${THIS_SH} ./alias3.sub
-${THIS_SH} ./alias4.sub
-${THIS_SH} ./alias5.sub
-${THIS_SH} ./alias6.sub
-${THIS_SH} ./alias7.sub
+test_runsub ./alias1.sub
+test_runsub ./alias2.sub
+test_runsub ./alias3.sub
+test_runsub ./alias4.sub
+test_runsub ./alias5.sub
+test_runsub ./alias6.sub
+test_runsub ./alias7.sub
