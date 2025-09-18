@@ -2096,6 +2096,8 @@ print_pipeline (PROCESS *p, int job_index, int format, FILE *stream)
 	      if (es == 0)
 		es = 2;	/* strlen ("| ") */
 	      name_padding = LONGEST_SIGNAL_DESC - es;
+	      if (name_padding <= 0)
+		name_padding = 1;
 
 	      fprintf (stream, "%*s", name_padding, "");
 

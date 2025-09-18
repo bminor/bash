@@ -890,7 +890,7 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
     {
       if (map[ESC].type == ISKMAP)
 	{
-	  if (RL_ISSTATE (RL_STATE_MACRODEF))
+	  if (RL_ISSTATE (RL_STATE_MACRODEF) && RL_ISSTATE (RL_STATE_MACROINPUT) == 0)
 	    _rl_add_macro_char (ESC);
 	  RESIZE_KEYSEQ_BUFFER ();
 	  rl_executing_keyseq[rl_key_sequence_length++] = ESC;
@@ -903,7 +903,7 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
       return 0;
     }
 
-  if (RL_ISSTATE (RL_STATE_MACRODEF))
+  if (RL_ISSTATE (RL_STATE_MACRODEF) && RL_ISSTATE (RL_STATE_MACROINPUT) == 0)
     _rl_add_macro_char (key);
 
   r = 0;

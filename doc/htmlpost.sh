@@ -7,13 +7,13 @@
 #
 
 sed -e 's|<B>gnu.bash.bug</B>|<A HREF="news:gnu.bash.bug">gnu.bash.bug</A>|g' \
-    -e 's|<I>/bin/bash</I>|<A HREF="file:/bin/bash"><I>/bin/bash</I></A>|g' \
-    -e 's|<I>/etc/profile</I>|<A HREF="file:/etc/profile"><I>/etc/profile</I></A>|g' \
-    -e 's|<I>~/.bash_profile</I>|<A HREF="file:~/.bash_profile"><I>~/.bash_profile</I></A>|g' \
-    -e 's|<I>~/.bash_login</I>|<A HREF="file:~/.bash_login"><I>~/.bash_login</I></A>|g' \
-    -e 's|<I>~/.profile</I>|<A HREF="file:~/.profile"><I>~/.profile</I></A>|g' \
-    -e 's|<I>~/.bashrc</I>|<A HREF="file:~/.bashrc"><I>~/.bashrc</I></A>|g' \
-    -e 's|<I>~/.bash_logout</I>|<A HREF="file:~/.bash_logout"><I>~/.bash_logout</I></A>|g' \
-    -e 's|<I>~/.bash_history</I>|<A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>|g' \
-    -e 's|<I>~/.inputrc</I>|<A HREF="file:~/.inputrc"><I>~/.inputrc</I></A>|g' \
-    -e 's|<I>/etc/inputrc</I>|<A HREF="file:/etc/inputrc"><I>/etc/inputrc</I></A>|g'
+    -e 's|<[iI]>/bin/bash</[iI]>|<A HREF="file:/bin/bash"><i>/bin/bash</i></A>|g' \
+    -e 's|<[iI]>/etc/profile</[iI]>|<A HREF="file:/etc/profile"><i>/etc/profile</i></A>|g' \
+    -e 's|<[iI]>~/.bash_profile</[iI]>|<A HREF="file:~/.bash_profile"><i>~/.bash_profile</i></A>|g' \
+    -e 's|<[iI]>~/.bash_login</[iI]>|<A HREF="file:~/.bash_login"><i>~/.bash_login</i></A>|g' \
+    -e 's|<[iI]>~/.profile</[iI]>|<A HREF="file:~/.profile"><i>~/.profile</i></A>|g' \
+    -e 's|<[iI]>~/.bashrc</[iI]>|<A HREF="file:~/.bashrc"><i>~/.bashrc</i></A>|g' \
+    -e 's|<[iI]>~/.bash_logout</[iI]>|<A HREF="file:~/.bash_logout"><i>~/.bash_logout</i></A>|g' \
+    -e 's|<[iI]>~/.bash_history</[iI]>|<A HREF="file:~/.bash_history"><i>~/.bash_history</i></A>|g' \
+    -e 's|<[iI]>~/.inputrc</[iI]>|<A HREF="file:~/.inputrc"><i>~/.inputrc</i></A>|g' \
+    -e 's|<[iI]>/etc/inputrc</[iI]>|<A HREF="file:/etc/inputrc"><i>/etc/inputrc</i></A>|g'

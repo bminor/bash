@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2024 Free Software Foundation, Inc.
+Copyright (C) 1987-2025 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,8 +39,10 @@ Options:
   -p	display the attributes and value of each NAME
 
 Options which set attributes:
+#ifdef ARRAY_VARS
   -a	to make NAMEs indexed arrays (if supported)
   -A	to make NAMEs associative arrays (if supported)
+#endif
   -i	to make NAMEs have the `integer' attribute
   -l	to convert the value of each NAME to lower case on assignment
   -n	make NAME a reference to the variable named by its value
@@ -131,7 +133,7 @@ local_builtin (WORD_LIST *list)
       builtin_help ();
       return (EX_USAGE);
     }
-    
+
   if (variable_context)
     return (declare_internal (list, 1));
   else
@@ -199,7 +201,7 @@ declare_transform_name (char *name, int flags_on, int flags_off)
 {
   SHELL_VAR *var, *v;
   char *newname;
-  
+
   var = find_variable (name);
   if (var == 0)
     newname = nameref_transform_name (name, ASS_MKLOCAL);
@@ -234,7 +236,7 @@ declare_invalid_opts (int flags_on, int flags_off)
       else if (flags_on & att_array)
 	optchar = "-a";
 
-      sh_invalidopt (optchar);	
+      sh_invalidopt (optchar);
       return (EXECUTION_FAILURE);
     }
   else if ((flags_on & att_assoc) && (flags_off & att_assoc))
@@ -255,7 +257,7 @@ declare_invalid_opts (int flags_on, int flags_off)
   /* Ineffective, since you can't have namerefs referencing positional parameters */
   else if ((flags_on & att_nameref) && (flags_on & att_integer))
     {
-      builtin_error ("cannot use -n with -i");
+      builtin_error (_("cannot use -n with -i"));
       return (EX_BADUSAGE);
     }
 
@@ -415,7 +417,7 @@ declare_internal (WORD_LIST *list, int local_var)
   opt = declare_invalid_opts (flags_on, flags_off);
   if (opt != 0)
     return (opt);
-  
+
 #define NEXT_VARIABLE() free (name); list = list->next; continue
 
   /* There are arguments left, so we are making variables. */
@@ -520,7 +522,7 @@ declare_internal (WORD_LIST *list, int local_var)
 		    }
 		  else
 #endif /* DEBUGGER */
-		    {	
+		    {
 		      t = nodefs ? name_cell (var) : named_function_string (name, function_cell (var), FUNC_MULTILINE|FUNC_EXTERNAL);
 		      printf ("%s\n", t);
 		      any_failed = sh_chkwrite (any_failed);
@@ -876,7 +878,7 @@ restart_new_var_name:
 
       /* Readonly variable error checking. */
 
-      /* Cannot use declare +r to turn off readonly attribute. */ 
+      /* Cannot use declare +r to turn off readonly attribute. */
       if (readonly_p (var) && (flags_off & att_readonly))
 	{
 	  sh_readonly (name_cell (var));
@@ -1040,7 +1042,7 @@ restart_new_var_name:
 		sh_invalidid (value);
 	      /* what else can cause this to fail? */
 	      else if (flags_on & att_integer)
-		builtin_error ("%s: expands to invalid variable name for name reference", value);
+		builtin_error (_("%s: expands to invalid variable name for name reference"), value);
 	      assign_error++;
 	      /* XXX - unset this variable? or leave it as normal var? */
 	      if (created_var)

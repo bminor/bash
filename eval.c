@@ -178,7 +178,7 @@ reader_loop (void)
 	      current_command_number++;
 
 	      executing = 1;
-	      stdin_redir = 0;
+	      stdin_redirected = 0;
 
 	      execute_command (current_command);
 

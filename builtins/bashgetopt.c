@@ -35,7 +35,7 @@
 
 #define ISOPT(s)	(((*(s) == '-') || (plus && *(s) == '+')) && (s)[1])
 #define NOTOPT(s)	(((*(s) != '-') && (!plus || *(s) != '+')) || (s)[1] == '\0')
-			
+
 static int	sp;
 
 char    *list_optarg;

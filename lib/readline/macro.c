@@ -241,11 +241,13 @@ _rl_kill_kbd_macro (void)
    End the definition with rl_end_kbd_macro ().
    If a numeric argument was explicitly typed, then append this
    definition to the end of the existing macro, and start by
-   re-executing the existing macro. */
+   re-executing the existing macro.
+   We don't allow recursive keyboard macro definitions or keyboard macro
+   definitions while reading input from a bound macro. */
 int
 rl_start_kbd_macro (int ignore1, int ignore2)
 {
-  if (RL_ISSTATE (RL_STATE_MACRODEF))
+  if (RL_ISSTATE (RL_STATE_MACRODEF|RL_STATE_MACROINPUT))
     {
       _rl_abort_internal ();
       return 1;

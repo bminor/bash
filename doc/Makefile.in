@@ -68,7 +68,8 @@ RL_LIBDIR = $(topdir)/lib/readline
 MAKEINFO    = makeinfo
 TEXI2DVI    = ${SUPPORT_SRCDIR}/texi2dvi
 TEXI2HTML   = ${SUPPORT_SRCDIR}/texi2html
-MAN2HTML    = ${BUILD_DIR}/support/man2html
+#MAN2HTML    = ${BUILD_DIR}/support/man2html
+MAN2HTML    = ${GROFF} -Thtml -man
 HTMLPOST    = ${srcdir}/htmlpost.sh
 QUIETPS	    = #set this to -q to shut up dvips
 PAPERSIZE   = letter	# change to a4 for A4-size paper
@@ -153,7 +154,7 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/fdl.texi $(srcdir)/version.texi
 #	$(RM) $@
 #	-${TEXI2PDF} $<
 
-all: info dvi text html pdf $(MAN2HTML)
+all: info dvi text html pdf # $(MAN2HTML)
 nodvi: ps info text html
 everything: all ps
 

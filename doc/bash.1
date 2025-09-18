@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Aug 25 11:35:58 EDT 2025
+.\"	Last Change: Sat Sep  6 15:27:27 EDT 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -21,7 +21,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 August 25" "GNU Bash 5.3"
+.TH BASH 1 "2025 September 6" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -552,17 +552,32 @@ It is one of the following symbols:
 .SH "RESERVED WORDS"
 \fIReserved words\fP are words that have a special meaning to the shell.
 The following words are recognized as reserved when unquoted and either
+.IP \(bu
 the first word of a command (see
 .SM
 .B "SHELL GRAMMAR"
-below), the third word of a
+below);
+.IP \(bu
+the first word following a reserved word
+other than \fBcase\fP, \fBfor\fP, \fBselect\fP, or \fBin\fP;
+.IP \(bu
+the third word of a
 .B case
+command
+(only \fBin\fP is valid);
+.IP \(bu
+the third word of a
+.B for
 or
 .B select
-command
-(only \fBin\fP is valid), or the third word of a
-.B for
-command (only \fBin\fP and \fBdo\fP are valid):
+command (only \fBin\fP and \fBdo\fP are valid);
+.IP \(bu
+following a control operator.
+.PP
+The shell will also recognize reserved words where the syntax of a command
+specifically requires the reserved word as the only correct token.
+.PP
+The following are reserved words:
 .if t .RS
 .PP
 .B
@@ -667,48 +682,18 @@ If the \fBlastpipe\fP option is enabled using the \fBshopt\fP builtin
 and job control is not active,
 the last element of a pipeline may be run by the shell process.
 .SS Lists
-A \fIlist\fP is a sequence of one or more pipelines separated by one
-of the operators
-.BR ; ,
-.BR & ,
-.BR && ,
-or
-.BR || ,
-and optionally terminated by one of
+A \fIlist\fP is a sequence of one or more AND or OR lists
+separated by one of the operators
 .BR ; ,
 .BR & ,
 or
-.BR <newline> .
-.PP
-Of these list operators,
-.B &&
-and
-.B ||
-have equal precedence, followed by
-.B ;
-and
-.BR & ,
-which have equal precedence.
-.PP
-A sequence of one or more newlines may appear in a \fIlist\fP instead
-of a semicolon to delimit commands.
-.PP
-If a command is terminated by the control operator
-.BR & ,
-the shell executes the command in the \fIbackground\fP
-in a subshell.
-The shell does not wait for the command to
-finish, and the return status is 0.
-These are referred to as \fIasynchronous\fP commands.
-Commands separated by a
-.B ;
-are executed sequentially; the shell waits for each
-command to terminate in turn.
-The return status is the exit status of the last command executed.
+.BR <newline> ,
+and optionally terminated by one of those three characters.
 .PP
 AND and OR lists are sequences of one or more pipelines separated by the
 \fB&&\fP and \fB||\fP control operators, respectively.
 AND and OR lists are executed with left associativity.
+.PP
 An AND list has the form
 .RS
 .PP
@@ -733,6 +718,35 @@ returns a non-zero exit status.
 The return status of
 AND and OR lists is the exit status of the last command
 executed in the list.
+.PP
+Of these list operators,
+.B &&
+and
+.B ||
+have equal precedence, followed by
+.B ;
+and
+.BR & ,
+which have equal precedence.
+.PP
+A sequence of one or more newlines may appear in a \fIlist\fP instead
+of a semicolon to delimit commands.
+.PP
+If a command is terminated by the control operator
+.BR & ,
+the shell executes the command in the \fIbackground\fP
+in a subshell.
+The shell does not wait for the command to
+finish, and the return status is 0.
+These are referred to as \fIasynchronous\fP commands.
+Commands separated or terminated by
+.B ;
+(or an equivalent
+.BR <newline> )
+are executed sequentially; the shell waits for each
+command to terminate in turn.
+.PP
+The return status of a list is the exit status of the last command executed.
 .SS Compound Commands
 A \fIcompound command\fP is one of the following.
 In most cases a \fIlist\fP in a command's description may be separated from
@@ -904,7 +918,7 @@ the entire conditional expression.
 .RE
 .TP
 \fBfor\fP \fIname\fP [ [ \fBin\fP \fIword .\|.\|.\&\fP ] ; ] \fBdo\fP \fIlist\fP ; \fBdone\fP
-First, expand The list of words following \fBin\fP, generating a list
+First, expand the list of words following \fBin\fP, generating a list
 of items.
 Then, the variable \fIname\fP is set to each element of this list
 in turn, and \fIlist\fP is executed each time.
@@ -938,7 +952,7 @@ Use the \fBbreak\fP and \fPcontinue\fP builtins
 below)
 to control loop execution.
 .TP
-\fBselect\fP \fIname\fP [ \fBin\fP \fIword\fP ] ; \fBdo\fP \fIlist\fP ; \fBdone\fP
+\fBselect\fP \fIname\fP [ [ \fBin\fP \fIword .\|.\|.\&\fP ] ; ] \fBdo\fP \fIlist\fP ; \fBdone\fP
 First, expand the list of words following \fBin\fP,
 generating a list of items, and print the set of expanded words
 the standard error, each preceded by a number.
@@ -985,8 +999,6 @@ using the matching rules
 described under
 .B "Pattern Matching"
 below.
-A pattern list is a set of one or more patterns separated by \|,
-and the ) operator terminates the pattern list.
 The \fIword\fP is expanded using tilde
 expansion, parameter and variable expansion, arithmetic expansion,
 command substitution, process substitution and quote removal.
@@ -997,19 +1009,28 @@ If the
 .B nocasematch
 shell option is enabled, the match is performed without regard to the case
 of alphabetic characters.
-A \fIclause\fP is a pattern list and an associated \fIlist\fP.
+.IP
+A \fIpattern list\fP is a set of one or more patterns separated by
+.BR | ,
+and terminated by the \fB)\fP operator.
+A case \fIclause\fP is a pattern list and an associated \fIlist\fP,
+terminated by \fB;;\fP, \fB;&\fP, or \fB;;&\fP.
+The terminator is optional for the last clause preceding \fBesac\fP.
+There may be an arbitrary number of case clauses.
+The first pattern that matches determines the
+\fIlist\fP that is executed.
 .IP
 When a match is found, \fBcase\fP executes the corresponding \fIlist\fP.
-If the \fB;;\fP operator terminates the case clause, the \fBcase\fP
-command completes after the first match.
-Using \fB;&\fP in place of \fB;;\fP causes execution to continue with
-the \fIlist\fP associated with the next pattern list.
-Using \fB;;&\fP in place of \fB;;\fP causes the shell to test the next
-pattern list in the statement, if any, and execute any associated \fIlist\fP
+If the \fB;;\fP operator terminates the case clause,
+the \fBcase\fP command completes after the first match.
+Using the \fB;&\fP terminator continues execution with
+the \fIlist\fP associated with the next clause, if any.
+Using the \fB;;&\fP terminator causes the shell to test the pattern list
+in the next clause, if any, and execute any associated \fIlist\fP
 if the match succeeds,
 continuing the case statement execution as if the pattern list had not matched.
-The exit status is zero if no pattern matches.
 .IP
+The exit status is zero if no pattern matches.
 Otherwise, it is the exit status of the
 last command executed in the last \fIlist\fP executed.
 .TP

@@ -341,10 +341,10 @@ parse_and_execute (char *string, const char *from_file, int flags)
   if (parser_expanding_alias ())
     /* push current shell_input_line */
     parser_save_alias ();
-  
+
   if (lreset == 0)
     line_number--;
-    
+
   indirection_level++;
 
   code = should_jump_to_top_level = 0;
@@ -425,7 +425,7 @@ parse_and_execute (char *string, const char *from_file, int flags)
 		run_unwind_frame ("pe_dispose");
 	      last_result = last_command_exit_value = EXECUTION_FAILURE; /* XXX */
 	      set_pipestatus_from_exit (last_command_exit_value);
-	      
+
 	      if (subshell_environment)
 		{
 		  should_jump_to_top_level = 1;
@@ -698,7 +698,7 @@ parse_string (char *string, const char *from_file, int flags, COMMAND **cmdp, ch
 	      break;
 	    }
 	}
-	  
+
       if (parse_command () == 0)
 	{
 	  if (cmdp)
@@ -861,6 +861,6 @@ evalstring (char *string, const char *from_file, int flags)
 	  sh_longjmp (return_catch, 1);
 	}
     }
-    
+
   return (r);
 }

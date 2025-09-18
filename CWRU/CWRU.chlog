@@ -11683,3 +11683,54 @@ lib/readline/signals.c
 	  call rl_message. That takes care of the case where redisplay gets a
 	  SIGINT while `blocking' it.
 	  Report from Grisha Levit <grishalevit@gmail.com>
+
+jobs.c
+	- print_pipeline: make sure we separate the fatal signal description
+	  from the pipeline command by at least one space
+
+				    9/6
+				    ---
+doc/Makefile.in
+	- MAN2HTML: experimental change to use `groff -Thtml -man' to
+	  generate HTML versions of man pages instead of man2html
+
+doc/bash.1,doc/bashref.texi
+	- reserved words: add clarifying language about when reserved words
+	  are recognized
+	- lists: modify description to define lists as sequences of and-or
+	  lists; clarify list terminators
+	- select: update synopsis to indicate a word list and optional
+	  semicolon like `for'
+	- case: rearrange description to introduce pattern lists and expand
+	  the definition of a case clause to include the terminator, which
+	  is optional for the last clause
+	  From a report by Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				    9/8
+				    ---
+lib/glob/smatch.c
+	- charcmp_wc: don't restrict codepoints to 0..UCHAR_MAX; this will
+	  eventually break with multibyte character codepoints
+	  From a report from Duncan Roe <duncan_roe@optusnet.com.au>; fix
+	  suggested by Grisha Levit <grishalevit@gmail.com>
+
+				   9/11
+				   ----
+[prayers for the victims of 9/11/2001]
+
+lib/readline/macro.c
+        - rl_start_kbd_macro: don't allow keyboard macro definitions while
+          reading input from a bound macro.
+	  Suggested by Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/readline.c,lib/readline/text.c
+	- _rl_dispatch_subseq,_rl_insert_next,_rl_char_search: if we're
+	  defining a keyboard macro, don't insert the expanded value of a
+	  macro that is bound to a key sequence added to the keyboard macro
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   9/12
+				   ----
+builtins/mkbuiltins.c
+	- some minor code cleanups
+	  Patch from Martin D Kealey <martin@kurahaupo.gen.nz>

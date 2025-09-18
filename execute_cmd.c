@@ -196,7 +196,7 @@ static int execute_intern_function (WORD_DESC *, FUNCTION_DEF *);
 
 /* Set to 1 if fd 0 was the subject of redirection to a subshell.  Global
    so that reader_loop can set it to zero before executing a command. */
-int stdin_redir;
+int stdin_redirected;
 
 /* The name of the command that is currently being executed.
    `test' needs this, for example. */
@@ -484,7 +484,8 @@ execute_command (COMMAND *command)
   return (result);
 }
 
-/* Return 1 if TYPE is a shell control structure type. */
+/* Return 1 if TYPE is a shell control structure type (compound command, but
+   not a user-specified subshell). */
 static int
 shell_control_structure (enum command_type type)
 {
@@ -840,7 +841,10 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 #endif /* COMMAND_TIMING */
 
   if (shell_control_structure (command->type) && command->redirects)
-    stdin_redir = stdin_redirects (command->redirects);
+{
+    stdin_redirected = stdin_redirects (command->redirects);
+/*itrace("execute_command_internal: compound command with redirects: stdin_redirected = %d", stdin_redirected); */
+}
 
 #if defined (PROCESS_SUBSTITUTION)
 #  if !defined (HAVE_DEV_FD)
@@ -1605,13 +1609,7 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
      command terminated by a `&'. */
   should_redir_stdin = (asynchronous && (command->flags & CMD_STDIN_REDIR) &&
 			  pipe_in == NO_PIPE &&
-#if 0	/*TAG:bash-5.4 POSIX interp 1913 */
-			 /* POSIX interp 1913 says that the redirection of fd 0
-			    from /dev/null is unconditional. */
-			  (posixly_correct || stdin_redirects (command->redirects) == 0));
-#else
 			  stdin_redirects (command->redirects) == 0);
-#endif
 
   invert = (command->flags & CMD_INVERT_RETURN) != 0;
   user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
@@ -1753,18 +1751,23 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
      executed as part of that compound command. */
   if (user_subshell)
     {
-      stdin_redir = stdin_redirects (command->redirects) || pipe_in != NO_PIPE;
+/* itrace("execute_in_subshell: user subshell: before calling stdin_redirects: stdin_redirected = %d", stdin_redirected); */
+      stdin_redirected = stdin_redirects (command->redirects) || pipe_in != NO_PIPE;
+/* itrace("execute_in_subshell: user subshell: after calling stdin_redirects: stdin_redirected = %d", stdin_redirected); */
 #if 0
       restore_default_signal (EXIT_TRAP);	/* XXX - reset_signal_handlers above */
 #endif
     }
   else if (shell_control_structure (command->type) && pipe_in != NO_PIPE)
-    stdin_redir = 1;
+{
+/*itrace("execute_in_subshell: setting stdin_redirected to 1 for compound command with input pipe");*/
+    stdin_redirected = 1;
+}
 
   /* If this is an asynchronous command (command &), we want to
      redirect the standard input from /dev/null in the absence of
      any specific redirection involving stdin. */
-  if (should_redir_stdin && stdin_redir == 0)
+  if (should_redir_stdin && stdin_redirected == 0)
     async_redirect_stdin ();
 
   /* In any case, we are not reading our command input from stdin. */
@@ -2852,6 +2855,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
 	tc->flags |= CMD_IGNORE_RETURN;
       tc->flags |= CMD_AMPERSAND;
 
+/* itrace("execute_connection: async command: stdin_redirected = %d", stdin_redirected);*/
       /* If this shell was compiled without job control support,
 	 if we are currently in a subshell via `( xxx )', or if job
 	 control is not active then the standard input for an
@@ -2859,17 +2863,9 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
       /* If we want to make this /dev/null redirection unconditional in posix
 	 mode, change this to check posixly_correct */
 #if defined (JOB_CONTROL)
-#if 0	/*TAG:bash-5.4 POSIX interp 1913 */
-      if (((subshell_environment || !job_control) && !stdin_redir) || posixly_correct)
+      if ((subshell_environment || !job_control) && !stdin_redirected)
 #else
-      if ((subshell_environment || !job_control) && !stdin_redir)
-#endif
-#else
-#if 0	/*TAG:bash-5.4 POSIX interp 1913 */
-      if (!stdin_redir || posixly_correct)
-#else
-      if (!stdin_redir)
-#endif
+      if (!stdin_redirected)
 #endif /* JOB_CONTROL */
 	tc->flags |= CMD_STDIN_REDIR;
 
@@ -4550,7 +4546,7 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
 
 	  /* If we fork because of an input pipe, note input pipe for later to
 	     inhibit async commands from redirecting stdin from /dev/null */
-	  stdin_redir |= pipe_in != NO_PIPE;
+	  stdin_redirected |= pipe_in != NO_PIPE;
 
 	  do_piping (pipe_in, pipe_out);
 	  pipe_in = pipe_out = NO_PIPE;

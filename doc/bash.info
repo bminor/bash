@@ -1,9 +1,9 @@
 This is bash.info, produced by makeinfo version 7.2 from bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 7 August 2025).
+Bash shell (version 5.3, 6 September 2025).
 
-   This is Edition 5.3, last updated 7 August 2025, of ‘The GNU Bash
+   This is Edition 5.3, last updated 6 September 2025, of ‘The GNU Bash
 Reference Manual’, for ‘Bash’, Version 5.3.
 
    Copyright © 1988-2025 Free Software Foundation, Inc.
@@ -26,10 +26,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 7 August 2025).  The Bash home page is
+Bash shell (version 5.3, 6 September 2025).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.3, last updated 7 August 2025, of ‘The GNU Bash
+   This is Edition 5.3, last updated 6 September 2025, of ‘The GNU Bash
 Reference Manual’, for ‘Bash’, Version 5.3.
 
    Bash contains features that appear in other popular shells, and some
@@ -259,9 +259,9 @@ Bash is an acronym for ‘Bourne-Again SHell’.  The Bourne shell is the
 traditional Unix shell originally written by Stephen Bourne.  All of the
 Bourne shell builtin commands are available in Bash, and the rules for
 evaluation and quoting are taken from the POSIX specification for the
-'standard' Unix shell.
+"standard" Unix shell.
 
-   This chapter briefly summarizes the shell's 'building blocks':
+   This chapter briefly summarizes the shell's "building blocks":
 commands, control structures, shell functions, shell parameters, shell
 expansions, redirections, which are a way to direct input and output
 from and to named files, and how the shell executes commands.
@@ -642,17 +642,26 @@ File: bash.info,  Node: Reserved Words,  Next: Simple Commands,  Up: Shell Comma
 Reserved words are words that have special meaning to the shell.  They
 are used to begin and end the shell's compound commands.
 
-   The following words are recognized as reserved when unquoted and the
-first word of a command (see below for exceptions):
+   Reserved words are recognized as reserved when unquoted and either
+
+   • the first word of a command;
+   • the first word following a reserved word other than ‘case’, ‘for’,
+     ‘select’, or ‘in’;
+   • the third word of a ‘case’ command (only ‘in’ is valid);
+   • the third word of a ‘for’ or ‘select’ command (only ‘in’ and ‘do’
+     are valid);
+   • following a control operator.
+
+The shell will also recognize reserved words where the syntax of a
+command specifically requires the reserved word as the only correct
+token.
+
+   The following are reserved words:
 
 ‘if’    ‘then’  ‘elif’  ‘else’  ‘fi’      ‘time’
 ‘for’   ‘in’    ‘until’ ‘while’ ‘do’      ‘done’
 ‘case’  ‘esac’  ‘coproc’‘select’‘function’
 ‘{’     ‘}’     ‘[[’    ‘]]’    ‘!’
-
-‘in’ is recognized as a reserved word if it is the third word of a
-‘case’ or ‘select’ command.  ‘in’ and ‘do’ are recognized as reserved
-words if they are the third word in a ‘for’ command.
 
 
 File: bash.info,  Node: Simple Commands,  Next: Pipelines,  Prev: Reserved Words,  Up: Shell Commands
@@ -740,9 +749,30 @@ File: bash.info,  Node: Lists,  Next: Compound Commands,  Prev: Pipelines,  Up: 
 3.2.4 Lists of Commands
 -----------------------
 
-A ‘list’ is a sequence of one or more pipelines separated by one of the
-operators ‘;’, ‘&’, ‘&&’, or ‘||’, and optionally terminated by one of
-‘;’, ‘&’, or a ‘newline’.
+A ‘list’ is a sequence of one or more AND or OR lists separated by one
+of the operators ‘;’ or ‘&’, or a ‘newline’, and optionally terminated
+by one of those three characters.
+
+   AND and OR lists are sequences of one or more pipelines separated by
+the control operators ‘&&’ and ‘||’, respectively.  AND and OR lists are
+executed with left associativity.
+
+   An AND list has the form
+
+     COMMAND1 && COMMAND2
+
+COMMAND2 is executed if, and only if, COMMAND1 returns an exit status of
+zero (success).
+
+   An OR list has the form
+
+     COMMAND1 || COMMAND2
+
+COMMAND2 is executed if, and only if, COMMAND1 returns a non-zero exit
+status.
+
+   The return status of AND and OR lists is the exit status of the last
+command executed in the list.
 
    Of these list operators, ‘&&’ and ‘||’ have equal precedence,
 followed by ‘;’ and ‘&’, which have equal precedence.
@@ -759,28 +789,12 @@ active (*note Job Control::), the standard input for asynchronous
 commands, in the absence of any explicit redirections, is redirected
 from ‘/dev/null’.
 
-   Commands separated by a ‘;’ are executed sequentially; the shell
-waits for each command to terminate in turn.  The return status is the
-exit status of the last command executed.
+   Commands separated or terminated by ‘;’ (or equivalent ‘newline’) are
+executed sequentially; the shell waits for each command to terminate in
+turn.
 
-   AND and OR lists are sequences of one or more pipelines separated by
-the control operators ‘&&’ and ‘||’, respectively.  AND and OR lists are
-executed with left associativity.
-
-   An AND list has the form
-     COMMAND1 && COMMAND2
-
-COMMAND2 is executed if, and only if, COMMAND1 returns an exit status of
-zero (success).
-
-   An OR list has the form
-     COMMAND1 || COMMAND2
-
-COMMAND2 is executed if, and only if, COMMAND1 returns a non-zero exit
-status.
-
-   The return status of AND and OR lists is the exit status of the last
-command executed in the list.
+   The return status of a list is the exit status of the last command
+executed.
 
 
 File: bash.info,  Node: Compound Commands,  Next: Coprocesses,  Prev: Lists,  Up: Shell Commands
@@ -909,27 +923,25 @@ File: bash.info,  Node: Conditional Constructs,  Next: Command Grouping,  Prev: 
      ‘case’ will selectively execute the COMMAND-LIST corresponding to
      the first PATTERN that matches WORD, proceeding from the first
      pattern to the last.  The match is performed according to the rules
-     described below in *note Pattern Matching::.  If the ‘nocasematch’
+     described below in *note Pattern Matching::.  The WORD undergoes
+     tilde expansion, parameter expansion, command substitution, process
+     substitution, arithmetic expansion, and quote removal (*note Shell
+     Parameter Expansion::) before the shell attempts to match the
+     pattern.  Each PATTERN examined undergoes tilde expansion,
+     parameter expansion, command substitution, arithmetic expansion,
+     process substitution, and quote removal.  If the ‘nocasematch’
      shell option (see the description of ‘shopt’ in *note The Shopt
      Builtin::) is enabled, the match is performed without regard to the
-     case of alphabetic characters.  The ‘|’ is used to separate
-     multiple patterns in a pattern list, and the ‘)’ operator
-     terminates the pattern list.  A pattern list and an associated
-     COMMAND-LIST is known as a CLAUSE.
+     case of alphabetic characters.
 
-     Each clause must be terminated with ‘;;’, ‘;&’, or ‘;;&’.  The WORD
-     undergoes tilde expansion, parameter expansion, command
-     substitution, process substitution, arithmetic expansion, and quote
-     removal (*note Shell Parameter Expansion::) before the shell
-     attempts to match the pattern.  Each PATTERN undergoes tilde
-     expansion, parameter expansion, command substitution, arithmetic
-     expansion, process substitution, and quote removal.
-
-     There may be an arbitrary number of ‘case’ clauses, each terminated
-     by a ‘;;’, ‘;&’, or ‘;;&’.  The first pattern that matches
-     determines the command-list that is executed.  It's a common idiom
-     to use ‘*’ as the final pattern to define the default case, since
-     that pattern will always match.
+     A pattern list is a set of one or more patterns separated by ‘|’,
+     and terminated by the ‘)’ operator.  A case CLAUSE is a pattern
+     list and an associated COMMAND-LIST, terminated by ‘;;’, ‘;&’, or
+     ‘;;&’.  The terminator is optional for the last clause preceding
+     ‘esac’.  There may be an arbitrary number of ‘case’ clauses.  The
+     first pattern that matches determines the command-list that is
+     executed.  It's a common idiom to use ‘*’ as the final pattern to
+     define the default case, since that pattern will always match.
 
      Here is an example using ‘case’ in a script that could be used to
      describe one interesting feature of an animal:
@@ -944,13 +956,15 @@ File: bash.info,  Node: Conditional Constructs,  Next: Command Grouping,  Prev: 
           esac
           echo " legs."
 
-     If the ‘;;’ operator is used, the ‘case’ command completes after
-     the first pattern match.  Using ‘;&’ in place of ‘;;’ causes
-     execution to continue with the COMMAND-LIST associated with the
-     next clause, if any.  Using ‘;;&’ in place of ‘;;’ causes the shell
-     to test the patterns in the next clause, if any, and execute any
-     associated COMMAND-LIST if the match succeeds, continuing the case
-     statement execution as if the pattern list had not matched.
+     When a match is found, ‘case’ executes the corresponding
+     COMMAND-LIST.  If the ‘;;’ operator terminates the case clause, the
+     ‘case’ command completes after the first pattern match.  Using the
+     ‘;&’ terminator continues execution with the COMMAND-LIST
+     associated with the next clause, if any.  Using the ‘;;&’
+     terminator causes the shell to test the pattern list in the next
+     clause, if any, and execute any associated COMMAND-LIST if the
+     match succeeds, continuing the case statement execution as if the
+     pattern list had not matched.
 
      The return status is zero if no PATTERN matches.  Otherwise, the
      return status is the exit status of the last COMMAND-LIST executed.
@@ -2890,12 +2904,12 @@ characters ‘\’, ‘$’, and ‘`’; however, double quote characters have 
 special meaning.
 
    If the redirection operator is ‘<<-’, the shell strips leading tab
-characters are stripped from input lines and the line containing
-DELIMITER.  This allows here-documents within shell scripts to be
-indented in a natural fashion.
+characters from input lines and the line containing DELIMITER.  This
+allows here-documents within shell scripts to be indented in a natural
+fashion.
 
-   If the delimiter is not quoted, the ‘\<newline>’ sequence is treated
-as a line continuation: the two lines are joined and the
+   If the delimiter is not quoted, the shell treats the ‘\<newline>’
+sequence as a line continuation: the two lines are joined and the
 backslash-newline is removed.  This happens while reading the
 here-document, before the check for the ending delimiter, so joined
 lines can form the end delimiter.
@@ -7770,10 +7784,10 @@ startup files.
      result from a ‘$PATH’ search.
 
   22. The message printed by the job control code and builtins when a
-     job exits with a non-zero status is 'Done(status)'.
+     job exits with a non-zero status is "Done(status)".
 
   23. The message printed by the job control code and builtins when a
-     job is stopped is 'Stopped(SIGNAME)', where SIGNAME is, for
+     job is stopped is "Stopped(SIGNAME)", where SIGNAME is, for
      example, ‘SIGTSTP’.
 
   24. If the shell is interactive, Bash does not perform job
@@ -8527,10 +8541,10 @@ File: bash.info,  Node: Introduction and Notation,  Next: Readline Interaction, 
 The following paragraphs use Emacs style to describe the notation used
 to represent keystrokes.
 
-   The text ‘C-k’ is read as 'Control-K' and describes the character
+   The text ‘C-k’ is read as "Control-K" and describes the character
 produced when the <k> key is pressed while the Control key is depressed.
 
-   The text ‘M-k’ is read as 'Meta-K' and describes the character
+   The text ‘M-k’ is read as "Meta-K" and describes the character
 produced when the Meta key (if you have one) is depressed, and the <k>
 key is pressed (a “meta character”), then both are released.  The Meta
 key is labeled <ALT> or <Option> on many keyboards.  On keyboards with
@@ -8557,7 +8571,7 @@ you can make ‘M-key’ key bindings you specify (see ‘Key Bindings’ in
 *note Readline Init File Syntax::) do the same thing by setting the
 ‘force-meta-prefix’ variable.
 
-   The text ‘M-C-k’ is read as 'Meta-Control-k' and describes the
+   The text ‘M-C-k’ is read as "Meta-Control-k" and describes the
 character produced by metafying ‘C-k’.
 
    In addition, several keys have their own names.  Specifically, <DEL>,
@@ -8609,9 +8623,9 @@ you have typed several other characters.  In that case, you can type
 Afterwards, you can move the cursor to the right with ‘C-f’.
 
    When you add text in the middle of a line, you will notice that
-characters to the right of the cursor are 'pushed over' to make room for
+characters to the right of the cursor are "pushed over" to make room for
 the text that you have inserted.  Likewise, when you delete text behind
-the cursor, characters to the right of the cursor are 'pulled back' to
+the cursor, characters to the right of the cursor are "pulled back" to
 fill in the blank space created by the removal of the text.  These are
 the bare essentials for editing the text of an input line:
 
@@ -8669,9 +8683,9 @@ File: bash.info,  Node: Readline Killing Commands,  Next: Readline Arguments,  P
 
 “Killing” text means to delete the text from the line, but to save it
 away for later use, usually by “yanking” (re-inserting) it back into the
-line.  ('Cut' and 'paste' are more recent jargon for 'kill' and 'yank'.)
+line.  ("Cut" and "paste" are more recent jargon for "kill" and "yank".)
 
-   If the description for a command says that it 'kills' text, then you
+   If the description for a command says that it "kills" text, then you
 can be sure that you can get the text back in a different (or the same)
 place later.
 
@@ -8726,13 +8740,14 @@ command which normally acts in a forward direction, that command will
 act in a backward direction.  For example, to kill text back to the
 start of the line, you might type ‘M-- C-k’.
 
-   The general way to pass numeric arguments to a command is to type
-meta digits before the command.  If the first 'digit' typed is a minus
-sign (‘-’), then the sign of the argument will be negative.  Once you
-have typed one meta digit to get the argument started, you can type the
-remainder of the digits, and then the command.  For example, to give the
-‘C-d’ command an argument of 10, you could type ‘M-1 0 C-d’, which will
-delete the next ten characters on the input line.
+   The general way to pass numeric arguments to a command is to type the
+Meta key and then digits ("meta digits") before the command.  If the
+first "digit" typed is a minus sign (‘-’), then the sign of the argument
+will be negative.  Once you have typed one meta digit to get the
+argument started, you can type the remainder of the digits, and then the
+command.  For example, to give the ‘C-d’ command an argument of 10, you
+could type ‘M-1 0 C-d’, which will delete the next ten characters on the
+input line.
 
 
 File: bash.info,  Node: Searching,  Prev: Readline Arguments,  Up: Readline Interaction
@@ -9650,12 +9665,12 @@ File: bash.info,  Node: Commands For History,  Next: Commands For Text,  Prev: C
      original state.
 
 ‘previous-history (C-p)’
-     Move 'back' through the history list, fetching the previous
+     Move "back" through the history list, fetching the previous
      command.  This may also be bound to the up arrow key on some
      keyboards.
 
 ‘next-history (C-n)’
-     Move 'forward' through the history list, fetching the next command.
+     Move "forward" through the history list, fetching the next command.
      This may also be bound to the down arrow key on some keyboards.
 
 ‘beginning-of-history (M-<)’
@@ -9666,25 +9681,26 @@ File: bash.info,  Node: Commands For History,  Next: Commands For Text,  Prev: C
      being entered.
 
 ‘reverse-search-history (C-r)’
-     Search backward starting at the current line and moving 'up'
+     Search backward starting at the current line and moving "up"
      through the history as necessary.  This is an incremental search.
      This command sets the region to the matched text and activates the
      region.
 
 ‘forward-search-history (C-s)’
-     Search forward starting at the current line and moving 'down'
+     Search forward starting at the current line and moving "down"
      through the history as necessary.  This is an incremental search.
      This command sets the region to the matched text and activates the
      region.
 
 ‘non-incremental-reverse-search-history (M-p)’
-     Search backward starting at the current line and moving 'up'
+     Search backward starting at the current line and moving "up"
+
      through the history as necessary using a non-incremental search for
      a string supplied by the user.  The search string may match
      anywhere in a history line.
 
 ‘non-incremental-forward-search-history (M-n)’
-     Search forward starting at the current line and moving 'down'
+     Search forward starting at the current line and moving "down"
      through the history as necessary using a non-incremental search for
      a string supplied by the user.  The search string may match
      anywhere in a history line.
@@ -10260,8 +10276,8 @@ Set Builtin::) to switch interactively between ‘emacs’ and ‘vi’ editing
 modes, The Readline default is ‘emacs’ mode.
 
    When you enter a line in ‘vi’ mode, you are already placed in
-'insertion' mode, as if you had typed an ‘i’.  Pressing <ESC> switches
-you into 'command' mode, where you can edit the text of the line with
+"insertion" mode, as if you had typed an ‘i’.  Pressing <ESC> switches
+you into "command" mode, where you can edit the text of the line with
 the standard ‘vi’ movement keys, move to previous history lines with ‘k’
 and subsequent lines with ‘j’, and so forth.
 
@@ -11901,7 +11917,7 @@ FTP from <ftp://ftp.gnu.org/pub/gnu/bash/> and from
 ‘bashbug’ command to submit a bug report or use the form at the Bash
 project page (https://savannah.gnu.org/projects/bash/).  If you have a
 fix, you are encouraged to submit that as well!  Suggestions and
-'philosophical' bug reports may be mailed to <bug-bash@gnu.org> or
+"philosophical" bug reports may be mailed to <bug-bash@gnu.org> or
 <help-bash@gnu.org>.
 
    All bug reports should include:
@@ -11909,7 +11925,7 @@ fix, you are encouraged to submit that as well!  Suggestions and
    • The hardware and operating system.
    • The compiler used to compile Bash.
    • A description of the bug behavior.
-   • A short script or 'recipe' which exercises the bug and may be used
+   • A short script or "recipe" which exercises the bug and may be used
      to reproduce it.
 
 ‘bashbug’ inserts the first three items automatically into the template
@@ -13338,7 +13354,7 @@ D.4 Function Index
 * export-completions ():                 Commands For Completion.
                                                               (line  44)
 * fetch-history ():                      Commands For History.
-                                                              (line 108)
+                                                              (line 109)
 * forward-backward-delete-char ():       Commands For Text.   (line  23)
 * forward-char (C-f):                    Commands For Moving. (line  14)
 * forward-search-history (C-s):          Commands For History.
@@ -13355,13 +13371,13 @@ D.4 Function Index
 * history-expand-line (M-^):             Miscellaneous Commands.
                                                               (line 127)
 * history-search-backward ():            Commands For History.
-                                                              (line  53)
+                                                              (line  54)
 * history-search-forward ():             Commands For History.
-                                                              (line  60)
+                                                              (line  61)
 * history-substring-search-backward ():  Commands For History.
-                                                              (line  67)
+                                                              (line  68)
 * history-substring-search-forward ():   Commands For History.
-                                                              (line  73)
+                                                              (line  74)
 * insert-comment (M-#):                  Miscellaneous Commands.
                                                               (line  59)
 * insert-completions (M-*):              Commands For Completion.
@@ -13386,11 +13402,11 @@ D.4 Function Index
                                                               (line  18)
 * next-screen-line ():                   Commands For Moving. (line  45)
 * non-incremental-forward-search-history (M-n): Commands For History.
-                                                              (line  47)
+                                                              (line  48)
 * non-incremental-reverse-search-history (M-p): Commands For History.
                                                               (line  41)
 * operate-and-get-next (C-o):            Commands For History.
-                                                              (line 101)
+                                                              (line 102)
 * overwrite-mode ():                     Commands For Text.   (line  77)
 * possible-command-completions (C-x !):  Commands For Completion.
                                                               (line 111)
@@ -13452,9 +13468,9 @@ D.4 Function Index
 * yank (C-y):                            Commands For Killing.
                                                               (line  72)
 * yank-last-arg (M-. or M-_):            Commands For History.
-                                                              (line  89)
+                                                              (line  90)
 * yank-nth-arg (M-C-y):                  Commands For History.
-                                                              (line  79)
+                                                              (line  80)
 * yank-pop (M-y):                        Commands For Killing.
                                                               (line  75)
 
@@ -13635,138 +13651,138 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top895
-Node: Introduction2830
-Node: What is Bash?3043
-Node: What is a shell?4176
-Node: Definitions6786
-Node: Basic Shell Features10113
-Node: Shell Syntax11337
-Node: Shell Operation12364
-Node: Quoting13655
-Node: Escape Character14993
-Node: Single Quotes15528
-Node: Double Quotes15877
-Node: ANSI-C Quoting17222
-Node: Locale Translation18616
-Node: Creating Internationalized Scripts20019
-Node: Comments24217
-Node: Shell Commands24984
-Node: Reserved Words25923
-Node: Simple Commands26788
-Node: Pipelines27450
-Node: Lists30706
-Node: Compound Commands32578
-Node: Looping Constructs33587
-Node: Conditional Constructs36136
-Node: Command Grouping51206
-Node: Coprocesses52698
-Node: GNU Parallel55384
-Node: Shell Functions56302
-Node: Shell Parameters64750
-Node: Positional Parameters69651
-Node: Special Parameters70741
-Node: Shell Expansions74202
-Node: Brace Expansion76391
-Node: Tilde Expansion79727
-Node: Shell Parameter Expansion82682
-Node: Command Substitution103325
-Node: Arithmetic Expansion106854
-Node: Process Substitution108030
-Node: Word Splitting109138
-Node: Filename Expansion111582
-Node: Pattern Matching114806
-Node: Quote Removal120529
-Node: Redirections120833
-Node: Executing Commands131096
-Node: Simple Command Expansion131763
-Node: Command Search and Execution133871
-Node: Command Execution Environment136315
-Node: Environment139763
-Node: Exit Status141666
-Node: Signals143725
-Node: Shell Scripts148655
-Node: Shell Builtin Commands151953
-Node: Bourne Shell Builtins154064
-Node: Bash Builtins180783
-Node: Modifying Shell Behavior217707
-Node: The Set Builtin218049
-Node: The Shopt Builtin230043
-Node: Special Builtins247096
-Node: Shell Variables248085
-Node: Bourne Shell Variables248519
-Node: Bash Variables251027
-Node: Bash Features290152
-Node: Invoking Bash291166
-Node: Bash Startup Files297750
-Node: Interactive Shells302992
-Node: What is an Interactive Shell?303400
-Node: Is this Shell Interactive?304062
-Node: Interactive Shell Behavior304886
-Node: Bash Conditional Expressions308647
-Node: Shell Arithmetic314064
-Node: Aliases317391
-Node: Arrays320525
-Node: The Directory Stack328113
-Node: Directory Stack Builtins328910
-Node: Controlling the Prompt333355
-Node: The Restricted Shell336240
-Node: Bash POSIX Mode339122
-Node: Shell Compatibility Mode358069
-Node: Job Control367076
-Node: Job Control Basics367533
-Node: Job Control Builtins373901
-Node: Job Control Variables380583
-Node: Command Line Editing381814
-Node: Introduction and Notation383517
-Node: Readline Interaction385869
-Node: Readline Bare Essentials387057
-Node: Readline Movement Commands388865
-Node: Readline Killing Commands389861
-Node: Readline Arguments391884
-Node: Searching392941
-Node: Readline Init File395184
-Node: Readline Init File Syntax396487
-Node: Conditional Init Constructs423438
-Node: Sample Init File427823
-Node: Bindable Readline Commands430943
-Node: Commands For Moving432481
-Node: Commands For History434945
-Node: Commands For Text440335
-Node: Commands For Killing444460
-Node: Numeric Arguments447248
-Node: Commands For Completion448400
-Node: Keyboard Macros454096
-Node: Miscellaneous Commands454797
-Node: Readline vi Mode461364
-Node: Programmable Completion462341
-Node: Programmable Completion Builtins472077
-Node: A Programmable Completion Example483814
-Node: Using History Interactively489159
-Node: Bash History Facilities489840
-Node: Bash History Builtins493575
-Node: History Interaction500046
-Node: Event Designators504996
-Node: Word Designators506574
-Node: Modifiers508966
-Node: Installing Bash510903
-Node: Basic Installation512019
-Node: Compilers and Options515895
-Node: Compiling For Multiple Architectures516645
-Node: Installation Names518398
-Node: Specifying the System Type520632
-Node: Sharing Defaults521378
-Node: Operation Controls522092
-Node: Optional Features523111
-Node: Reporting Bugs535834
-Node: Major Differences From The Bourne Shell537191
-Node: GNU Free Documentation License558618
-Node: Indexes583795
-Node: Builtin Index584246
-Node: Reserved Word Index591344
-Node: Variable Index593789
-Node: Function Index611202
-Node: Concept Index625197
+Node: Top901
+Node: Introduction2842
+Node: What is Bash?3055
+Node: What is a shell?4188
+Node: Definitions6798
+Node: Basic Shell Features10125
+Node: Shell Syntax11349
+Node: Shell Operation12376
+Node: Quoting13667
+Node: Escape Character15005
+Node: Single Quotes15540
+Node: Double Quotes15889
+Node: ANSI-C Quoting17234
+Node: Locale Translation18628
+Node: Creating Internationalized Scripts20031
+Node: Comments24229
+Node: Shell Commands24996
+Node: Reserved Words25935
+Node: Simple Commands27078
+Node: Pipelines27740
+Node: Lists30996
+Node: Compound Commands32916
+Node: Looping Constructs33925
+Node: Conditional Constructs36474
+Node: Command Grouping51611
+Node: Coprocesses53103
+Node: GNU Parallel55789
+Node: Shell Functions56707
+Node: Shell Parameters65155
+Node: Positional Parameters70056
+Node: Special Parameters71146
+Node: Shell Expansions74607
+Node: Brace Expansion76796
+Node: Tilde Expansion80132
+Node: Shell Parameter Expansion83087
+Node: Command Substitution103730
+Node: Arithmetic Expansion107259
+Node: Process Substitution108435
+Node: Word Splitting109543
+Node: Filename Expansion111987
+Node: Pattern Matching115211
+Node: Quote Removal120934
+Node: Redirections121238
+Node: Executing Commands131494
+Node: Simple Command Expansion132161
+Node: Command Search and Execution134269
+Node: Command Execution Environment136713
+Node: Environment140161
+Node: Exit Status142064
+Node: Signals144123
+Node: Shell Scripts149053
+Node: Shell Builtin Commands152351
+Node: Bourne Shell Builtins154462
+Node: Bash Builtins181181
+Node: Modifying Shell Behavior218105
+Node: The Set Builtin218447
+Node: The Shopt Builtin230441
+Node: Special Builtins247494
+Node: Shell Variables248483
+Node: Bourne Shell Variables248917
+Node: Bash Variables251425
+Node: Bash Features290550
+Node: Invoking Bash291564
+Node: Bash Startup Files298148
+Node: Interactive Shells303390
+Node: What is an Interactive Shell?303798
+Node: Is this Shell Interactive?304460
+Node: Interactive Shell Behavior305284
+Node: Bash Conditional Expressions309045
+Node: Shell Arithmetic314462
+Node: Aliases317789
+Node: Arrays320923
+Node: The Directory Stack328511
+Node: Directory Stack Builtins329308
+Node: Controlling the Prompt333753
+Node: The Restricted Shell336638
+Node: Bash POSIX Mode339520
+Node: Shell Compatibility Mode358467
+Node: Job Control367474
+Node: Job Control Basics367931
+Node: Job Control Builtins374299
+Node: Job Control Variables380981
+Node: Command Line Editing382212
+Node: Introduction and Notation383915
+Node: Readline Interaction386267
+Node: Readline Bare Essentials387455
+Node: Readline Movement Commands389263
+Node: Readline Killing Commands390259
+Node: Readline Arguments392282
+Node: Searching393372
+Node: Readline Init File395615
+Node: Readline Init File Syntax396918
+Node: Conditional Init Constructs423869
+Node: Sample Init File428254
+Node: Bindable Readline Commands431374
+Node: Commands For Moving432912
+Node: Commands For History435376
+Node: Commands For Text440767
+Node: Commands For Killing444892
+Node: Numeric Arguments447680
+Node: Commands For Completion448832
+Node: Keyboard Macros454528
+Node: Miscellaneous Commands455229
+Node: Readline vi Mode461796
+Node: Programmable Completion462773
+Node: Programmable Completion Builtins472509
+Node: A Programmable Completion Example484246
+Node: Using History Interactively489591
+Node: Bash History Facilities490272
+Node: Bash History Builtins494007
+Node: History Interaction500478
+Node: Event Designators505428
+Node: Word Designators507006
+Node: Modifiers509398
+Node: Installing Bash511335
+Node: Basic Installation512451
+Node: Compilers and Options516327
+Node: Compiling For Multiple Architectures517077
+Node: Installation Names518830
+Node: Specifying the System Type521064
+Node: Sharing Defaults521810
+Node: Operation Controls522524
+Node: Optional Features523543
+Node: Reporting Bugs536266
+Node: Major Differences From The Bourne Shell537623
+Node: GNU Free Documentation License559050
+Node: Indexes584227
+Node: Builtin Index584678
+Node: Reserved Word Index591776
+Node: Variable Index594221
+Node: Function Index611634
+Node: Concept Index625629
 
 End Tag Table
 

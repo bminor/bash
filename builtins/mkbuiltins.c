@@ -183,7 +183,7 @@ char *arrayvar_builtins[] =
   "typeset", "unset", "wait",		/*]*/
   (char *)NULL
 };
-	
+
 /* Forward declarations. */
 static int is_special_builtin (char *);
 static int is_assignment_builtin (char *);
@@ -288,6 +288,8 @@ main (int argc, char **argv)
 
   if (include_filename == 0)
     include_filename = extern_filename;
+  if (include_filename == 0)
+    include_filename = "builtext.h";
 
   /* If there are no files to process, just quit now. */
   if (arg_index == argc)
@@ -328,7 +330,7 @@ main (int argc, char **argv)
   /* Process the .def files. */
   while (arg_index < argc)
     {
-      register char *arg;
+      char *arg;
 
       arg = argv[arg_index++];
 
@@ -399,7 +401,7 @@ array_create (int width)
 ARRAY *
 copy_string_array (ARRAY *array)
 {
-  register int i;
+  int i;
   ARRAY *copy;
 
   if (!array)
@@ -412,7 +414,7 @@ copy_string_array (ARRAY *array)
   copy->width = array->width;
 
   copy->array = (char **)xmalloc ((1 + array->sindex) * sizeof (char *));
-  
+
   for (i = 0; i < array->sindex; i++)
     copy->array[i] = savestring (array->array[i]);
 
@@ -484,7 +486,7 @@ HANDLER_ENTRY handlers[] = {
 HANDLER_ENTRY *
 find_directive (char *directive)
 {
-  register int i;
+  int i;
 
   for (i = 0; handlers[i].directive; i++)
     if (strcmp (handlers[i].directive, directive) == 0)
@@ -513,7 +515,7 @@ int output_cpp_line_info = 0;
 void
 extract_info (char *filename, FILE *structfile, FILE *externfile)
 {
-  register int i;
+  int i;
   DEF_FILE *defs;
   struct stat finfo;
   size_t file_size;
@@ -578,7 +580,7 @@ extract_info (char *filename, FILE *structfile, FILE *externfile)
 
       if (*line == '$')
 	{
-	  register int j;
+	  int j;
 	  char *directive;
 	  HANDLER_ENTRY *handler;
 
@@ -653,7 +655,7 @@ extract_info (char *filename, FILE *structfile, FILE *externfile)
 static void
 free_builtin (BUILTIN_DESC *builtin)
 {
-  register int i;
+  int i;
 
   free_safely (builtin->name);
   free_safely (builtin->function);
@@ -675,8 +677,8 @@ free_builtin (BUILTIN_DESC *builtin)
 void
 free_defs (DEF_FILE *defs)
 {
-  register int i;
-  register BUILTIN_DESC *builtin;
+  int i;
+  BUILTIN_DESC *builtin;
 
   if (defs->production)
     free (defs->production);
@@ -718,7 +720,7 @@ strip_whitespace (char *string)
 void
 remove_trailing_whitespace (char *string)
 {
-  register int i;
+  int i;
 
   i = strlen (string) - 1;
 
@@ -769,7 +771,7 @@ current_builtin (char *directive, DEF_FILE *defs)
 void
 add_documentation (DEF_FILE *defs, char *line)
 {
-  register BUILTIN_DESC *builtin;
+  BUILTIN_DESC *builtin;
 
   builtin = current_builtin ("(implied LONGDOC)", defs);
 
@@ -837,7 +839,7 @@ builtin_handler (char *self, DEF_FILE *defs, char *arg)
 int
 function_handler (char *self, DEF_FILE *defs, char *arg)
 {
-  register BUILTIN_DESC *builtin;
+  BUILTIN_DESC *builtin;
 
   builtin = current_builtin (self, defs);
 
@@ -859,7 +861,7 @@ function_handler (char *self, DEF_FILE *defs, char *arg)
 int
 docname_handler (char *self, DEF_FILE *defs, char *arg)
 {
-  register BUILTIN_DESC *builtin;
+  BUILTIN_DESC *builtin;
 
   builtin = current_builtin (self, defs);
 
@@ -876,7 +878,7 @@ docname_handler (char *self, DEF_FILE *defs, char *arg)
 int
 short_doc_handler (char *self, DEF_FILE *defs, char *arg)
 {
-  register BUILTIN_DESC *builtin;
+  BUILTIN_DESC *builtin;
 
   builtin = current_builtin (self, defs);
 
@@ -900,7 +902,7 @@ comment_handler (char *self, DEF_FILE *defs, char *arg)
 int
 depends_on_handler (char *self, DEF_FILE *defs, char *arg)
 {
-  register BUILTIN_DESC *builtin;
+  BUILTIN_DESC *builtin;
   char *dependent;
 
   builtin = current_builtin (self, defs);
@@ -1077,7 +1079,7 @@ char *structfile_header[] = {
   "/* This file is manufactured by ./mkbuiltins, and should not be",
   "   edited by hand.  See the source to mkbuiltins for details. */",
   "",
-  "/* Copyright (C) 1987-2022 Free Software Foundation, Inc.",
+  "/* Copyright (C) 1987-2025 Free Software Foundation, Inc.",
   "",
   "   This file is part of GNU Bash, the Bourne Again SHell.",
   "",
@@ -1130,16 +1132,14 @@ char *structfile_footer[] = {
 void
 write_file_headers (FILE *structfile, FILE *externfile)
 {
-  register int i;
+  int i;
 
   if (structfile)
     {
       for (i = 0; structfile_header[i]; i++)
 	fprintf (structfile, "%s\n", structfile_header[i]);
 
-      fprintf (structfile, "#include \"%s\"\n",
-	       include_filename ? include_filename : "builtext.h");
-
+      fprintf (structfile, "#include \"%s\"\n", include_filename);
       fprintf (structfile, "#include \"bashintl.h\"\n");
 
       fprintf (structfile, "\nstruct builtin static_shell_builtins[] = {\n");
@@ -1147,8 +1147,7 @@ write_file_headers (FILE *structfile, FILE *externfile)
 
   if (externfile)
     fprintf (externfile,
-	     "/* %s - The list of builtins found in libbuiltins.a. */\n",
-	     include_filename ? include_filename : "builtext.h");
+	     "/* %s - The list of builtins found in libbuiltins.a. */\n", include_filename);
 }
 
 /* Write out any necessary closing information for
@@ -1156,7 +1155,7 @@ write_file_headers (FILE *structfile, FILE *externfile)
 void
 write_file_footers (FILE *structfile, FILE *externfile)
 {
-  register int i;
+  int i;
 
   /* Write out the footers. */
   if (structfile)
@@ -1171,12 +1170,12 @@ write_file_footers (FILE *structfile, FILE *externfile)
 void
 write_builtins (DEF_FILE *defs, FILE *structfile, FILE *externfile)
 {
-  register int i;
+  int i;
 
   /* Write out the information. */
   if (defs->builtins)
     {
-      register BUILTIN_DESC *builtin;
+      BUILTIN_DESC *builtin;
 
       for (i = 0; i < defs->builtins->sindex; i++)
 	{
@@ -1275,8 +1274,8 @@ write_builtins (DEF_FILE *defs, FILE *structfile, FILE *externfile)
 void
 write_longdocs (FILE *stream, ARRAY *builtins)
 {
-  register int i;
-  register BUILTIN_DESC *builtin;
+  int i;
+  BUILTIN_DESC *builtin;
   char *dname;
   char *sarray[2];
 
@@ -1312,7 +1311,7 @@ write_longdocs (FILE *stream, ARRAY *builtins)
 void
 write_dummy_declarations (FILE *stream, ARRAY *builtins)
 {
-  register int i;
+  int i;
   BUILTIN_DESC *builtin;
 
   for (i = 0; structfile_header[i]; i++)
@@ -1336,7 +1335,7 @@ write_dummy_declarations (FILE *stream, ARRAY *builtins)
 void
 write_ifdefs (FILE *stream, char **defines)
 {
-  register int i;
+  int i;
 
   if (!stream)
     return;
@@ -1365,7 +1364,7 @@ write_ifdefs (FILE *stream, char **defines)
 void
 write_endifs (FILE *stream, char **defines)
 {
-  register int i;
+  int i;
 
   if (!stream)
     return;
@@ -1390,8 +1389,8 @@ write_endifs (FILE *stream, char **defines)
 void
 write_documentation (FILE *stream, char **documentation, int indentation, int flags)
 {
-  register int i, j;
-  register char *line;
+  int i, j;
+  char *line;
   int string_array, texinfo, base_indent, filename_p;
 
   if (stream == 0)
@@ -1456,16 +1455,9 @@ write_documentation (FILE *stream, char **documentation, int indentation, int fl
 	{
 	  for (j = 0; line[j]; j++)
 	    {
-	      switch (line[j])
-		{
-		case '\\':
-		case '"':
-		  fprintf (stream, "\\%c", line[j]);
-		  break;
-
-		default:
-		  fprintf (stream, "%c", line[j]);
-		}
+	      if (line[j] == '\\' || line[j] == '"')
+		fputc ('\\', stream);
+	      fputc (line[j], stream);
 	    }
 
 	  /* closing right paren for gettext */
@@ -1489,14 +1481,12 @@ write_documentation (FILE *stream, char **documentation, int indentation, int fl
 		case '@':
 		case '{':
 		case '}':
-		  fprintf (stream, "@%c", line[j]);
+		  fputc ('@', stream);
 		  break;
-
-		default:
-		  fprintf (stream, "%c", line[j]);
 		}
+	      fputc (line[j], stream);
 	    }
-	  fprintf (stream, "\n");
+	  fputc ('\n', stream);
 	}
       else
 	fprintf (stream, "%s\n", line);
@@ -1554,12 +1544,12 @@ write_helpfiles (ARRAY *builtins)
       free (helpfile);
     }
   return 0;
-}      
-      	        
+}
+
 static int
 _find_in_table (char *name, char **name_table)
 {
-  register int i;
+  int i;
 
   for (i = 0; name_table[i]; i++)
     if (strcmp (name, name_table[i]) == 0)

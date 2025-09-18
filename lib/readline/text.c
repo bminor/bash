@@ -1047,7 +1047,7 @@ _rl_insert_next (int count)
   if (c < 0)
     return 1;
 
-  if (RL_ISSTATE (RL_STATE_MACRODEF))
+  if (RL_ISSTATE (RL_STATE_MACRODEF) && RL_ISSTATE (RL_STATE_MACROINPUT) == 0)
     _rl_add_macro_char (c);
 
 #if defined (HANDLE_SIGNALS)
@@ -1793,7 +1793,7 @@ _rl_char_search (int count, int fdir, int bdir)
   if (mb_len <= 0)
     return 1;
 
-  if (RL_ISSTATE (RL_STATE_MACRODEF))
+  if (RL_ISSTATE (RL_STATE_MACRODEF) && RL_ISSTATE (RL_STATE_MACROINPUT) == 0)
     for (i = 0; i < mb_len; i++)
       _rl_add_macro_char (mbchar[i]);
 
@@ -1813,7 +1813,7 @@ _rl_char_search (int count, int fdir, int bdir)
   if (c < 0)
     return 1;
 
-  if (RL_ISSTATE (RL_STATE_MACRODEF))
+  if (RL_ISSTATE (RL_STATE_MACRODEF) && RL_ISSTATE (RL_STATE_MACROINPUT) == 0)
     _rl_add_macro_char (c);
 
   if (count < 0)

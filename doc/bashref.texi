@@ -732,8 +732,29 @@ some other grouping.
 Reserved words are words that have special meaning to the shell.
 They are used to begin and end the shell's compound commands.
 
-The following words are recognized as reserved when unquoted and 
-the first word of a command (see below for exceptions):
+Reserved words are recognized as reserved when unquoted and either
+
+@itemize @bullet
+@item
+the first word of a command;
+@item
+the first word following a reserved word
+other than @code{case}, @code{for}, @code{select}, or @code{in};
+@item
+the third word of a @code{case} command
+(only @code{in} is valid);
+@item
+the third word of a @code{for} or @code{select}
+command (only @code{in} and @code{do} are valid);
+@item
+following a control operator.
+@end itemize
+
+@noindent
+The shell will also recognize reserved words where the syntax of a command
+specifically requires the reserved word as the only correct token.
+
+The following are reserved words:
 
 @multitable @columnfractions .1 .1 .1 .1 .12 .1
 @item @code{if} @tab @code{then} @tab @code{elif}
@@ -744,12 +765,6 @@ the first word of a command (see below for exceptions):
 @tab @code{select} @tab @code{function}
 @item @code{@{} @tab @code{@}} @tab @code{[[} @tab @code{]]} @tab @code{!}
 @end multitable
-
-@noindent
-@code{in} is recognized as a reserved word if it is the third word of a
-@code{case} or @code{select} command.
-@code{in} and @code{do} are recognized as reserved
-words if they are the third word in a @code{for} command.
 
 @node Simple Commands
 @subsection Simple Commands
@@ -851,10 +866,39 @@ The return status of an asynchronous pipeline is 0.
 @subsection Lists of Commands
 @cindex commands, lists
 
-A @code{list} is a sequence of one or more pipelines separated by one
-of the operators @samp{;}, @samp{&}, @samp{&&}, or @samp{||},
-and optionally terminated by one of @samp{;}, @samp{&}, or a
-@code{newline}.
+A @code{list} is a sequence of one or more @sc{and} or @sc{or} lists
+separated by one of the operators
+@samp{;} or @samp{&}, or a @code{newline},
+and optionally terminated by one of those three characters.
+
+@sc{and} and @sc{or} lists are sequences of one or more pipelines
+separated by the control operators @samp{&&} and @samp{||},
+respectively.
+@sc{and} and @sc{or} lists are executed with left associativity.
+
+An @sc{and} list has the form
+
+@example
+@var{command1} && @var{command2}
+@end example
+
+@noindent
+@var{command2} is executed if, and only if, @var{command1}
+returns an exit status of zero (success).
+
+An @sc{or} list has the form
+
+@example
+@var{command1} || @var{command2}
+@end example
+
+@noindent
+@var{command2} is executed if, and only if, @var{command1}
+returns a non-zero exit status.
+
+The return status of
+@sc{and} and @sc{or} lists is the exit status of the last command
+executed in the list.
 
 Of these list operators, @samp{&&} and @samp{||}
 have equal precedence, followed by @samp{;} and @samp{&},
@@ -873,36 +917,12 @@ When job control is not active (@pxref{Job Control}),
 the standard input for asynchronous commands, in the absence of any
 explicit redirections, is redirected from @code{/dev/null}.
 
-Commands separated by a @samp{;} are executed sequentially; the shell
-waits for each command to terminate in turn.
-The return status is the exit status of the last command executed.
+Commands separated or terminated by 
+@samp{;} (or equivalent @code{newline})
+are executed sequentially; the shell waits for each
+command to terminate in turn.
 
-@sc{and} and @sc{or} lists are sequences of one or more pipelines
-separated by the control operators @samp{&&} and @samp{||},
-respectively.
-@sc{and} and @sc{or} lists are executed with left associativity.
-
-An @sc{and} list has the form
-@example
-@var{command1} && @var{command2}
-@end example
-
-@noindent
-@var{command2} is executed if, and only if, @var{command1}
-returns an exit status of zero (success).
-
-An @sc{or} list has the form
-@example
-@var{command1} || @var{command2}
-@end example
-
-@noindent
-@var{command2} is executed if, and only if, @var{command1}
-returns a non-zero exit status.
-
-The return status of
-@sc{and} and @sc{or} lists is the exit status of the last command
-executed in the list.
+The return status of a list is the exit status of the last command executed.
 
 @node Compound Commands
 @subsection Compound Commands
@@ -1058,26 +1078,24 @@ the first @var{pattern} that matches @var{word},
 proceeding from the first pattern to the last.
 The match is performed according
 to the rules described below in @ref{Pattern Matching}.
-If the @code{nocasematch} shell option
-(see the description of @code{shopt} in @ref{The Shopt Builtin})
-is enabled, the match is performed without regard to the case
-of alphabetic characters.
-The @samp{|} is used to separate multiple patterns in a pattern list,
-and the @samp{)} operator terminates the pattern list.
-A pattern list and an associated @var{command-list} is known
-as a @var{clause}.
-
-Each clause must be terminated with @samp{;;}, @samp{;&}, or @samp{;;&}.
 The @var{word} undergoes tilde expansion, parameter expansion, command
 substitution, process substitution, arithmetic expansion, and quote removal
 (@pxref{Shell Parameter Expansion})
 before the shell attempts to match the pattern.
-Each @var{pattern} undergoes tilde expansion, parameter expansion,
+Each @var{pattern} examined undergoes tilde expansion, parameter expansion,
 command substitution, arithmetic expansion, process substitution, and
 quote removal.
+If the @code{nocasematch} shell option
+(see the description of @code{shopt} in @ref{The Shopt Builtin})
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
 
-There may be an arbitrary number of @code{case} clauses, each terminated
-by a @samp{;;}, @samp{;&}, or @samp{;;&}.
+A pattern list is a set of one or more patterns separated by @samp{|},
+and terminated by the @samp{)} operator.
+A case @var{clause} is a pattern list and an associated @var{command-list},
+terminated by @samp{;;}, @samp{;&}, or @samp{;;&}.
+The terminator is optional for the last clause preceding @code{esac}.
+There may be an arbitrary number of @code{case} clauses.
 The first pattern that matches determines the
 command-list that is executed.
 It's a common idiom to use @samp{*} as the final pattern to define the
@@ -1100,11 +1118,13 @@ echo " legs."
 
 @noindent
 
-If the @samp{;;} operator is used, the @code{case} command completes
-after the first pattern match.
-Using @samp{;&}  in place of @samp{;;} causes execution to continue with
+When a match is found, @code{case} executes
+the corresponding @var{command-list}.
+If the @samp{;;} operator terminates the case clause,
+the @code{case} command completes after the first pattern match.
+Using the @samp{;&} terminator continues execution with
 the @var{command-list} associated with the next clause, if any.
-Using @samp{;;&} in place of @samp{;;} causes the shell to test the patterns
+Using the @samp{;;&} terminator causes the shell to test the pattern list
 in the next clause, if any, and execute any associated @var{command-list}
 if the match succeeds,
 continuing the case statement execution as if the pattern list had not matched.

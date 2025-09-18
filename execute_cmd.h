@@ -59,7 +59,7 @@ extern int executing_command_builtin;
 extern int funcnest, funcnest_max;
 extern int evalnest, evalnest_max;
 extern int sourcenest, sourcenest_max;
-extern int stdin_redir;
+extern int stdin_redirected;
 extern int line_number_for_err_trap;
 
 extern char *the_printed_command_except_trap;
