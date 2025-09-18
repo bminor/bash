@@ -1,6 +1,6 @@
 /* kill.c -- kill ring management. */
 
-/* Copyright (C) 1994-2024 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2025 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -718,7 +718,7 @@ _rl_bracketed_text (size_t *lenp)
   RL_SETSTATE (RL_STATE_MOREINPUT);
   while ((c = rl_read_key ()) >= 0)
     {
-      if (RL_ISSTATE (RL_STATE_MACRODEF))
+      if (RL_ISSTATE (RL_STATE_MACRODEF) && RL_ISSTATE (RL_STATE_MACROINPUT) == 0)
 	_rl_add_macro_char (c);
 
       if (c == '\r')		/* XXX */
@@ -736,7 +736,11 @@ _rl_bracketed_text (size_t *lenp)
 	}
     }
   RL_UNSETSTATE (RL_STATE_MOREINPUT);
-
+  if (c < 0)		/* read error */
+    {
+      free (buf);
+      _rl_abort_internal ();
+    }
   if (len == cap)
     buf = xrealloc (buf, cap + 1);
   buf[len] = '\0';
@@ -790,7 +794,7 @@ _rl_read_bracketed_paste_prefix (int c)
         break;
     }
 
-  if (ind < BRACK_PASTE_SLEN-1)		/* read incomplete sequence */
+  if (ind < BRACK_PASTE_SLEN-1 || key != BRACK_PASTE_LAST)	/* read incomplete sequence */
     {
       while (ind >= 0)
 	_rl_unget_char (pbuf[ind--]);

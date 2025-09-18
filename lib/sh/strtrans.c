@@ -227,30 +227,24 @@ ansic_quote (const char *str, int flags, int *rlen)
 {
   char *r, *ret;
   const char  *s;
-  size_t l, rsize;
   unsigned char c;
+#if defined (HANDLE_MULTIBYTE)
   size_t clen;
   int b;
-#if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
+  DECLARE_MBSTATE;
 #endif
 
   if (str == 0 || *str == 0)
     return ((char *)0);
 
-  l = strlen (str);
-  rsize = 4 * l + 4;
-  r = ret = (char *)xmalloc (rsize);
+  r = ret = (char *)xmalloc (4 * strlen (str) + 4);
 
   *r++ = '$';
   *r++ = '\'';
 
   for (s = str; c = *s; s++)
     {
-      b = 1;		/* 1 == add backslash; 0 == no backslash */
-      l = 1;
-      clen = 1;
-
       switch (c)
 	{
 	case ESC: c = 'E'; break;
@@ -266,37 +260,38 @@ ansic_quote (const char *str, int flags, int *rlen)
 	  break;
 	default:
 #if defined (HANDLE_MULTIBYTE)
-	  b = is_basic (c);
-	  /* XXX - clen comparison to 0 is dicey */
-	  if ((b == 0 && ((clen = mbrtowc (&wc, s, MB_CUR_MAX, 0)) < 0 || MB_INVALIDCH (clen) || iswprint (wc) == 0)) ||
-	      (b == 1 && ISPRINT (c) == 0))
-#else
-	  if (ISPRINT (c) == 0)
-#endif
+	  if (is_basic (c) == 0)
 	    {
-	      *r++ = '\\';
-	      *r++ = TOCHAR ((c >> 6) & 07);
-	      *r++ = TOCHAR ((c >> 3) & 07);
-	      *r++ = TOCHAR (c & 07);
-	      continue;
+	      clen = mbrtowc (&wc, s, MB_CUR_MAX, &state);
+	      if (clen == 0)
+		break;
+	      if (MB_INVALIDCH (clen))
+		INITIALIZE_MBSTATE;
+	      else if (iswprint (wc))
+		{
+		  for (b = 0; b < (int)clen; b++)
+		    *r++ = (unsigned char)s[b];
+		  s += clen - 1;	/* -1 because of the increment above */
+		  continue;
+		}
 	    }
-	  l = 0;
-	  break;
-	}
-      if (b == 0 && clen == 0)
-	break;
+	  else
+#endif
+	    if (ISPRINT (c))
+	      {
+		*r++ = c;
+		continue;
+	      }
 
-      if (l)
-	*r++ = '\\';
-
-      if (clen == 1)
-	*r++ = c;
-      else
-	{
-	  for (b = 0; b < (int)clen; b++)
-	    *r++ = (unsigned char)s[b];
-	  s += clen - 1;	/* -1 because of the increment above */
+	    *r++ = '\\';
+	    *r++ = TOCHAR ((c >> 6) & 07);
+	    *r++ = TOCHAR ((c >> 3) & 07);
+	    *r++ = TOCHAR (c & 07);
+	    continue;
 	}
+
+      *r++ = '\\';
+      *r++ = c;
     }
 
   *r++ = '\'';

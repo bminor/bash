@@ -11723,10 +11723,11 @@ lib/readline/macro.c
           reading input from a bound macro.
 	  Suggested by Grisha Levit <grishalevit@gmail.com>
 
-lib/readline/readline.c,lib/readline/text.c
-	- _rl_dispatch_subseq,_rl_insert_next,_rl_char_search: if we're
-	  defining a keyboard macro, don't insert the expanded value of a
-	  macro that is bound to a key sequence added to the keyboard macro
+lib/readline/readline.c,lib/readline/text.c,lib/readline/kill.c
+	- _rl_dispatch_subseq,_rl_insert_next,_rl_char_search,
+	  _rl_bracketed_text: if we're defining a keyboard macro, don't
+	  insert the expanded value of a macro that is bound to a key
+	  sequence added to the keyboard macro
 	  Report and patch from Grisha Levit <grishalevit@gmail.com>
 
 				   9/12
@@ -11734,3 +11735,36 @@ lib/readline/readline.c,lib/readline/text.c
 builtins/mkbuiltins.c
 	- some minor code cleanups
 	  Patch from Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				   9/15
+				   ----
+lib/readline/kill.c
+	- _rl_read_bracketed_paste_prefix: if we read the bracketed paste
+	  prefix except for the last character (key != BRACK_PASTE_LAST),
+	  return 0, since we didn't read a valid prefix
+	  Report from Grisha Levit <grishalevit@gmail.com>
+	- _rl_bracketed_text: if _rl_read_key returns < 0, abort trying
+	  to read the string
+
+lib/readline/text.c
+	- _rl_readstr_init: set _rl_rscxt after we finish initializing cxt,
+	  before the call to rl_message
+	  Report from Grisha Levit <grishalevit@gmail.com>
+	- _rl_readstr_getchar: if _rl_read_mbstring returns and _rl_caught_signal
+	  is != 0, treat this as a failure and return -1 after handling the
+	  signal
+	- _rl_read_command_name: if _rl_readstr_getchar returns -1, but
+	  _rl_rscxt is NULL, assume this was the result of a signal and call
+	  _rl_abort_internal accordingly
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/input.c
+	- rl_getc: skip trying to read a character if we have a signal pending
+	  when we enter this function in all cases, not just callback mode.
+	  Suggestion from Grisha Levit <grishalevit@gmail.com>
+
+lib/sh/strtrans.c
+	- ansic_quote: handle the undefined state of the internal state
+	  pointer when encountering an invalid wide character by using our
+	  own mbstate_t and reinitializing it on EILSEQ.
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>

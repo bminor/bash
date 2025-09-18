@@ -44,11 +44,15 @@ Options which set attributes:
   -A	to make NAMEs associative arrays (if supported)
 #endif
   -i	to make NAMEs have the `integer' attribute
+#ifdef CASEMOD_ATTRS
   -l	to convert the value of each NAME to lower case on assignment
+#endif
   -n	make NAME a reference to the variable named by its value
   -r	to make NAMEs readonly
   -t	to make NAMEs have the `trace' attribute
+#ifdef CASEMOD_ATTRS
   -u	to convert the value of each NAME to upper case on assignment
+#endif
   -x	to make NAMEs export
 
 Using `+' instead of `-' turns off the given attribute, except for a,

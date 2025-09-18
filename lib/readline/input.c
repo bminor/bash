@@ -859,16 +859,14 @@ rl_getc (FILE *stream)
 
       RL_CHECK_SIGNALS ();
 
-#if defined (READLINE_CALLBACKS)
-      /* Do signal handling post-processing here, but just in callback mode
-	 for right now because the signal cleanup can change some of the
+      /* Do signal handling post-processing here, not just in callback mode
+	 now, because the signal cleanup can change some of the readline and
 	 callback state, and we need to either let the application have a
 	 chance to react or abort some current operation that gets cleaned
-	 up by rl_callback_sigcleanup(). If not, we'll just run through the
-	 loop again. */
-      if (osig != 0 && (ostate & RL_STATE_CALLBACK))	/* XXX - when not in callback mode also? */
+	 up by rl_callback_sigcleanup() or another signal cleanup function.
+	 If not, we'll just run through the loop again. */
+      if (osig != 0)
 	goto postproc_signal;
-#endif
 
       /* We know at this point that _rl_caught_signal == 0 */
 
