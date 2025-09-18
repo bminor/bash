@@ -251,7 +251,7 @@ wait_builtin (WORD_LIST *list)
      currently active background processes. */
   if (list == 0)
     {
-      opt = wait_for_background_pids (&pstat);
+      opt = wait_for_background_pids (wflags, &pstat);
 #if 0
       /* Compatibility with NetBSD sh: don't set VNAME since it doesn't
 	 correspond to the return status. */

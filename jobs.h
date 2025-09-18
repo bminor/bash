@@ -305,7 +305,7 @@ extern int job_exit_signal (int);
 extern int process_exit_status (WAIT);
 
 extern int wait_for_single_pid (pid_t, int);
-extern int wait_for_background_pids (struct procstat *);
+extern int wait_for_background_pids (int, struct procstat *);
 extern int wait_for (pid_t, int);
 extern int wait_for_job (int, int, struct procstat *);
 extern int wait_for_any_job (int, struct procstat *);

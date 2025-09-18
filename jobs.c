@@ -2096,8 +2096,6 @@ print_pipeline (PROCESS *p, int job_index, int format, FILE *stream)
 	      if (es == 0)
 		es = 2;	/* strlen ("| ") */
 	      name_padding = LONGEST_SIGNAL_DESC - es;
-	      if (name_padding <= 0)
-		name_padding = 1;
 
 	      fprintf (stream, "%*s", name_padding, "");
 
@@ -2795,7 +2793,7 @@ no_child:
 
 /* Wait for all of the background processes started by this shell to finish. */
 int
-wait_for_background_pids (struct procstat *ps)
+wait_for_background_pids (int wflags, struct procstat *ps)
 {
   register int i, r;
   int any_stopped, check_async, njobs;
@@ -2835,7 +2833,7 @@ wait_for_background_pids (struct procstat *ps)
       UNBLOCK_CHILD (oset);
       QUIT;
       errno = 0;		/* XXX */
-      r = wait_for_single_pid (pid, JWAIT_PERROR);
+      r = wait_for_single_pid (pid, JWAIT_PERROR|wflags);
       if (ps)
 	{
 	  ps->pid = pid;

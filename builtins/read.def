@@ -538,7 +538,8 @@ read_builtin (WORD_LIST *list)
 	     so we have to save input_string temporarily, run the unwind-
 	     protects, then restore input_string so we can use it later */
 	  orig_input_string = 0;
-	  input_string[i] = '\0';	/* make sure it's terminated */
+	  if (i >= 0)
+	    input_string[i] = '\0';	/* make sure it's terminated */
 	  if (i == 0)
 	    {
 	      t = (char *)xmalloc (1);

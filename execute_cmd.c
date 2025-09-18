@@ -335,6 +335,8 @@ do { \
 	} \
       do { } while (0)
 
+#define ERROR_TRAP_SET() (signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0)
+
 /* A sort of function nesting level counter */
 int funcnest = 0;
 int funcnest_max = 0;
@@ -639,7 +641,8 @@ async_redirect_stdin (void)
 int
 execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, struct fd_bitmap *fds_to_close)
 {
-  int exec_result, user_subshell, invert, ignore_return, was_error_trap, fork_flags;
+  int exec_result, user_subshell, invert, ignore_return, fork_flags;
+  int was_error_trap, want_to_run_error_trap;
   REDIRECT *my_undo_list, *exec_undo_list;
   char *tcmd;
   volatile int save_line_number;
@@ -769,7 +772,7 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 
 	  if (asynchronous == 0)
 	    {
-	      was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
+	      was_error_trap = ERROR_TRAP_SET ();
 	      invert = (command->flags & CMD_INVERT_RETURN) != 0;
 	      ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
 
@@ -867,7 +870,7 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 
   /* Handle WHILE FOR CASE etc. with redirections.  (Also '&' input
      redirection.)  */
-  was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
+  was_error_trap = ERROR_TRAP_SET ();
   ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
 
   if (do_redirections (command->redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
@@ -930,12 +933,18 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 #if defined (RECYCLES_PIDS)
 	last_made_pid = NO_PID;
 #endif
-	was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
+	was_error_trap = ERROR_TRAP_SET ();
+	want_to_run_error_trap = ignore_return == 0 && invert == 0 &&
+		    pipe_in == NO_PIPE && pipe_out == NO_PIPE &&
+		    (command->value.Simple->flags & CMD_COMMAND_BUILTIN) == 0;
 
 	if ((ignore_return || invert) && command->value.Simple)
 	  command->value.Simple->flags |= CMD_IGNORE_RETURN;
 	if (command->flags & CMD_STDIN_REDIR)
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
+
+	if (want_to_run_error_trap)
+	  command->value.Simple->flags |= CMD_WANT_ERR_TRAP;
 
 	begin_unwind_frame ("simple_lineno");
 	add_unwind_protect (uw_restore_lineno, (void *) (intptr_t) save_line_number);
@@ -1009,10 +1018,10 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
 	 trap if the command run by the `command' builtin fails; we want to
 	 defer that until the command builtin itself returns failure. */
       /* 2020/07/14 -- this changes with how the command builtin is handled */ 
-      if (was_error_trap && ignore_return == 0 && invert == 0 &&
-	    pipe_in == NO_PIPE && pipe_out == NO_PIPE &&
-	    (command->value.Simple->flags & CMD_COMMAND_BUILTIN) == 0 &&
-	    exec_result != EXECUTION_SUCCESS)
+      /* XXX - what happens if a function is called that sets the ERR trap
+	 then returns a non-zero exit status? Have to check here using
+	 ERROR_TRAP_SET() instead of relying on was_error_trap */
+      if (was_error_trap && want_to_run_error_trap && exec_result != EXECUTION_SUCCESS)
 	{
 	  last_command_exit_value = exec_result;
 	  line_number = line_number_for_err_trap;
@@ -1147,7 +1156,7 @@ execute_command_internal (COMMAND *command, int asynchronous, int pipe_in, int p
     case cm_cond:
 #endif
     case cm_function_def:
-      was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
+      was_error_trap = ERROR_TRAP_SET ();
 #if defined (DPAREN_ARITHMETIC)
       if (ignore_return && command->type == cm_arith)
 	command->value.Arith->flags |= CMD_IGNORE_RETURN;
@@ -2920,7 +2929,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
       break;
 
     case '|':
-      was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
+      was_error_trap = ERROR_TRAP_SET ();
       SET_LINE_NUMBER (line_number);	/* XXX - save value? */
       exec_result = execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 
@@ -5145,6 +5154,16 @@ uw_restore_funcarray_state (void *fa)
 #endif
 
 static void
+restore_bash_command (void *oldcmd)
+{
+  if (the_printed_command_except_trap != (char *)oldcmd)
+    {
+      FREE (the_printed_command_except_trap);
+      the_printed_command_except_trap = oldcmd;
+    }
+}
+
+static void
 function_misc_cleanup (void)
 {
   if (variable_context == 0 || this_shell_function == 0)
@@ -5168,6 +5187,9 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
   int return_val, result, lineno;
   COMMAND *tc, *fc, *save_current;
   char *debug_trap, *error_trap, *return_trap;
+#if 0
+  int have_error_trap, want_to_run_error_trap;
+#endif
 #if defined (ARRAY_VARS)
   SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
   ARRAY *funcname_a;
@@ -5199,6 +5221,11 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
   tc = (COMMAND *)copy_command (function_cell (var));
   if (tc && (flags & CMD_IGNORE_RETURN))
     tc->flags |= CMD_IGNORE_RETURN;
+
+#if 0
+  have_error_trap = ERROR_TRAP_SET () && error_trace_mode;
+  want_to_run_error_trap = flags & CMD_WANT_ERR_TRAP;
+#endif
 
   /* A limited attempt at optimization: shell functions at the end of command
      substitutions that are already marked NO_FORK. */
@@ -5232,6 +5259,7 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
       unwind_protect_pointer (this_shell_function);
       unwind_protect_int (funcnest);
       unwind_protect_int (loop_level);
+      add_unwind_protect (restore_bash_command, savestring (the_printed_command_except_trap));
     }
   else
     push_context (var->name, subshell, temporary_env);	/* don't unwind-protect for subshells */
@@ -5361,6 +5389,11 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
       save_current = currently_executing_command;
       if (from_return_trap == 0)
 	run_return_trap ();
+#if 0
+      /* An ERR trap on a return <non-zero> won't be run anywhere else */
+      if (result != EXECUTION_SUCCESS && have_error_trap && want_to_run_error_trap)
+	run_error_trap ();
+#endif
       currently_executing_command = save_current;
     }
   else

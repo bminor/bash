@@ -192,6 +192,7 @@ typedef struct element {
 #define CMD_LASTPIPE	    0x2000
 #define CMD_STDPATH	    0x4000	/* use standard path for command lookup */
 #define CMD_TRY_OPTIMIZING  0x8000	/* try to optimize this simple command */
+#define CMD_WANT_ERR_TRAP	0x10000
 
 /* What a command looks like. */
 typedef struct command {

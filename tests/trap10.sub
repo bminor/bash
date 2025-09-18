@@ -11,49 +11,30 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-set +e
-trap 'echo ERRTRAP' ERR
 
-false
-false
-false
+trap 'echo ERR: $LINENO: -$BASH_COMMAND- failed' ERR
 
-echo after falses
+# the conditional command will fail, then func will fail
+func()
+{
+        [[ -z nonempty ]]
+}
+# func will fail
+func
 
-if ! false; then
-	echo if negation ok
-fi
+set -E
+# the conditional command will fail, then func will fail
+func
+set +E
 
-! false
-echo after negation 
+func2()
+{
+	return 1
+}
+# func2 will fail
+func2
 
-while false; do
-	echo while negation ok
-done
-
-echo after while
-
-./trap2a.sub
-
-echo $(false ; echo command substitution)
-
-# test behavior of failed commands following `command' builtin
-command false
-
-(command false)
-command false | echo bar
-
-(false)
-
-exit 42 | command false
-
-command command command false
-
-unset FALSE
-FALSE=$(type -P false)
-if [ -z "$FALSE" ]; then
-        FALSE='command false'
-fi
-
-command $FALSE
-command command command $FALSE
+# if we change so that `return 1' triffers the ERR trap, this will change
+set -E
+func2
+set +E

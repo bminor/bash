@@ -11768,3 +11768,30 @@ lib/sh/strtrans.c
 	  pointer when encountering an invalid wide character by using our
 	  own mbstate_t and reinitializing it on EILSEQ.
 	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   9/17
+				   ----
+builtins/read.def
+	- read_builtin: make sure i is >= 0 after a timeout longjmp before
+	  trying to terminate input_string
+	  From a report from Duncan Roe <duncan_roe@optusnet.com.au>
+
+jobs.c,jobs.h
+	- wait_for_background_pids: now takes a new first argument, WFLAGS.
+	  Used by wait builtin to pass through JWAIT_FORCE
+
+builtins/wait.def
+	- wait_builtin: if wait doesn't have any pid or job arguments, make
+	  sure to pass JWAIT_FORCE through to wait_for_background_pids so
+	  we make sure to wait for all background jobs to terminate
+	  Inspired by report from Robert Elz <kre@munnari.oz.au>
+
+doc/bash.1,doc/bashref.texi
+	- wait: update description of -f to include wait with no arguments
+
+				   9/18
+				   ----
+execute_cmd.c
+	- execute_function: save and restore the_printed_command_except_trap
+	  (reflected in $BASH_COMMAND) around shell function calls
+	  From a report by Mike Jonkmans <bashbug@jonkmans.nl>

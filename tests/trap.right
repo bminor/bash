@@ -120,15 +120,20 @@ exit=0
 A
 In trap-argument: last command preceding the trap action
 In a function call: last command in the trap action
+ERR: 23: -func- failed
+ERR: 20: -[[ -z nonempty ]]- failed
+ERR: 27: -func- failed
+ERR: 35: -func2- failed
+ERR: 39: -func2- failed
 caught a child death
 caught a child death
 caught a child death
 trap -- 'echo caught a child death' SIGCHLD
 echo caught a child death
-./trap.tests: line 118: trap: cannot specify both -p and -P
-./trap.tests: line 119: trap: -P requires at least one signal name
+./trap.tests: line 121: trap: cannot specify both -p and -P
+./trap.tests: line 122: trap: -P requires at least one signal name
 trap: usage: trap [-Plp] [[action] signal_spec ...]
-./trap.tests: line 121: trap: -x: invalid option
+./trap.tests: line 124: trap: -x: invalid option
 trap: usage: trap [-Plp] [[action] signal_spec ...]
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGABRT
