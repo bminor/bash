@@ -1016,7 +1016,11 @@ printwidestr (char *fmt, wchar_t *wstring, size_t len, int fieldwidth, int preci
 	  pr = decodeint (&fmt, 1, -1);
 	  /* pr < precision means we adjusted precision in printf_builtin
 	     for the quoted string length (%Q), so we use the adjusted value */
+#if 1 /*TAG:bash-5.4 20250702 */
+	  if (pr >= 0 && pr < precision)
+#else
 	  if (pr < precision)
+#endif
 	    pr = precision;
 	}
       else

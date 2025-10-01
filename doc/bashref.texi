@@ -3190,18 +3190,26 @@ character in the set.
 
 The sorting order of characters in range expressions,
 and the characters included in the range,
-are determined by the current locale and the values of the
+are determined by the collating sequence of the
+current locale and the values of the
 @env{LC_COLLATE} and @env{LC_ALL} shell variables, if set.
 
-For example, in the default C locale, @samp{[a-dx-z]} is equivalent to
+For example, in the default C locale,
+@samp{[a-dx-z]}
+is equivalent to
 @samp{[abcdxyz]}.
 Many locales sort characters in dictionary order, and in these locales
-@samp{[a-dx-z]} is typically not equivalent to @samp{[abcdxyz]};
-it might be equivalent to @samp{[aBbCcDdxYyZz]}, for example.
-To obtain
-the traditional interpretation of ranges in bracket expressions, you can
-force the use of the C locale by setting the @env{LC_COLLATE} or
-@env{LC_ALL} environment variable to the value @samp{C}, or enable the
+@samp{[a-dx-z]}
+is typically not equivalent to
+@samp{[abcdxyz]};
+it might be equivalent to
+@samp{[aBbCcDdxYyZz]}
+or
+@samp{[aAbBcCdxXyYz]}.
+To obtain the traditional interpretation of ranges in bracket expressions,
+you can force the use of the C locale by setting the
+@env{LC_COLLATE} or @env{LC_ALL}
+environment variables to the value @samp{C}, or enable the
 @code{globasciiranges} shell option.
 
 Within a bracket expression, @dfn{character classes} can be specified

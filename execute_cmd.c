@@ -1505,7 +1505,7 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
       before = shellstart;
 #else
       before.tms_utime = before.tms_stime = before.tms_cutime = before.tms_cstime = 0;
-      tbefore = shell_start_time;
+      tbefore = shell_start_time * get_clk_tck ();
 #endif
     }
 

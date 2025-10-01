@@ -4442,7 +4442,7 @@ bash_quote_filename (char *s, int rtype, char *qcp)
     cs = COMPLETE_SQUOTE;
   else if (*qcp == '"')
     {
-      if ((expchar = bash_check_expchar (s, 0, &nextch, &closer)) == '$' || expchar == '`')
+      if (((expchar = bash_check_expchar (s, 0, &nextch, &closer)) == '$' || expchar == '`') && rtype == SINGLE_MATCH && file_exists (s) == 0)
 	cs = COMPLETE_DQUOTE2;
       else
 	cs = COMPLETE_DQUOTE;

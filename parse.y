@@ -3558,6 +3558,8 @@ reset_parser (void)
 
   simplecmd_lineno = line_number;
 
+  shell_eof_token = 0;		/* no longer parsing command substitution */
+
   current_token = '\n';		/* XXX */
   last_read_token = '\n';
   token_to_read = '\n';

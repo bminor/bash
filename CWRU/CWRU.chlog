@@ -11832,4 +11832,33 @@ builtins/read.def
 	  -n/-N/-d options
 	- read_builtin: call check_read_input instead of input_avail if we
 	  have a zero timeout
-	  From a report by pourko@tutamail.com
+	  Report from pourko@tutamail.com
+
+bashline.c
+	- bash_quote_filename: if the user supplies an opening double quote
+	  and the word being completed contains a `$' or ``', make sure there
+	  is a single match and it doesn't exist as a filename before setting
+	  the quoting style to COMPLETE_DQUOTE2.
+	  This is similar to the change from 8/22.
+	  Report from Koichi Murase <myoga.murase@gmail.com>
+
+				   9/25
+				   ----
+builtins/printf.def
+	- printwidestr: handle precision < 0 as an overflow return from
+	  decodeint; don't adjust pr in this case so the string gets printed.
+	  Same as fix to printstr from 7/8
+	  Report from pourko@tutamail.com
+
+				   9/29
+				   ----
+execute_cmd.c
+	- time_command: if we don't have gettimeofday or getrusage, and we're
+	  using times(3), make sure we convert from seconds to CLK_TCKs
+	  when assigning tbefore from shell_start_time (use get_clk_tck())
+	  Report from pourko2@tutamail.com
+
+parse.y
+	- reset_parser: reset shell_eof_token to 0, rely on callers to restore
+	  it if they need to
+	  Report from Grisha Levit <grishalevit@gmail.com>

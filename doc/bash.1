@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Sep 19 12:19:06 EDT 2025
+.\"	Last Change: Wed Sep 24 09:35:41 EDT 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -21,7 +21,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 September 19" "GNU Bash 5.3"
+.TH BASH 1 "2025 September 24" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -4544,13 +4544,27 @@ include it as the first character in the set.
 .IP
 The sorting order of characters in range expressions,
 and the characters included in the range,
-are determined by the current locale and the values of the
+are determined by the collating sequence of the
+current locale and the values of the
 .SM
 .B LC_COLLATE
 or
 .SM
 .B LC_ALL
 shell variables, if set.
+.IP
+For example, in the C locale,
+.B [a\-d]
+is equivalent to
+.BR [abcd] .
+Many locales sort characters in dictionary order, and in these locales
+.B [a\-d]
+is typically not equivalent to
+.BR [abcd] ;
+it might be equivalent to
+.B [aBbCcDd]
+or
+.BR [aAbBcCd] .
 To obtain the traditional interpretation of range expressions, where
 .B [a\-d]
 is equivalent to

@@ -167,7 +167,8 @@ ${THIS_SH} -c 'VAR=0; VAR=1 command exec; exit ${VAR}'
         exec /var/empty/nosuch
         echo bad
 ) 2>/dev/null
-[ $? = 127 ] || echo FAIL: bad exit status $? at $LINENO
+r=$?
+[ $r = 127 ] || echo FAIL: bad exit status $r at $LINENO
 
 unset FALSE
 if [ -x /bin/false ]; then
