@@ -31,14 +31,14 @@
 \entry{comments, shell}{9}{comments, shell}
 \entry{commands, shell}{9}{commands, shell}
 \entry{reserved words}{9}{reserved words}
-\entry{commands, simple}{9}{commands, simple}
+\entry{commands, simple}{10}{commands, simple}
 \entry{pipeline}{10}{pipeline}
 \entry{commands, pipelines}{10}{commands, pipelines}
 \entry{command timing}{10}{command timing}
 \entry{commands, lists}{11}{commands, lists}
 \entry{commands, compound}{11}{commands, compound}
 \entry{commands, looping}{12}{commands, looping}
-\entry{commands, conditional}{12}{commands, conditional}
+\entry{commands, conditional}{13}{commands, conditional}
 \entry{commands, grouping}{18}{commands, grouping}
 \entry{coprocess}{18}{coprocess}
 \entry{shell function}{19}{shell function}
@@ -47,8 +47,8 @@
 \entry{variable, shell}{22}{variable, shell}
 \entry{shell variable}{22}{shell variable}
 \entry{parameters, positional}{23}{parameters, positional}
-\entry{parameters, special}{23}{parameters, special}
-\entry{expansion}{24}{expansion}
+\entry{parameters, special}{24}{parameters, special}
+\entry{expansion}{25}{expansion}
 \entry{brace expansion}{25}{brace expansion}
 \entry{expansion, brace}{25}{expansion, brace}
 \entry{tilde expansion}{26}{tilde expansion}
@@ -58,7 +58,7 @@
 \entry{command substitution}{36}{command substitution}
 \entry{expansion, arithmetic}{37}{expansion, arithmetic}
 \entry{arithmetic expansion}{37}{arithmetic expansion}
-\entry{process substitution}{37}{process substitution}
+\entry{process substitution}{38}{process substitution}
 \entry{word splitting}{38}{word splitting}
 \entry{expansion, filename}{39}{expansion, filename}
 \entry{expansion, pathname}{39}{expansion, pathname}
@@ -71,7 +71,7 @@
 \entry{command execution}{46}{command execution}
 \entry{command search}{46}{command search}
 \entry{execution environment}{46}{execution environment}
-\entry{environment}{47}{environment}
+\entry{environment}{48}{environment}
 \entry{exit status}{48}{exit status}
 \entry{signal handling}{49}{signal handling}
 \entry{shell script}{50}{shell script}

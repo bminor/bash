@@ -83,6 +83,8 @@ ansicstr (const char *string, size_t len, int flags, int *sawc, size_t *rlen)
 	      (locale_utf8locale == 0 && mb_cur_max > 0 && is_basic (c) == 0))
 	    {
 	      clen = mbrtowc (&wc, s - 1, mb_cur_max, 0);
+	      if (MB_NULLWCH (clen))
+		break;			/* it apparently can happen */
 	      if (MB_INVALIDCH (clen))
 		clen = 1;
 	    }
@@ -263,8 +265,8 @@ ansic_quote (const char *str, int flags, int *rlen)
 	  if (is_basic (c) == 0)
 	    {
 	      clen = mbrtowc (&wc, s, MB_CUR_MAX, &state);
-	      if (clen == 0)
-		break;
+	      if (MB_NULLWCH (clen))
+		goto quote_end;
 	      if (MB_INVALIDCH (clen))
 		INITIALIZE_MBSTATE;
 	      else if (iswprint (wc))
@@ -283,17 +285,18 @@ ansic_quote (const char *str, int flags, int *rlen)
 		continue;
 	      }
 
-	    *r++ = '\\';
-	    *r++ = TOCHAR ((c >> 6) & 07);
-	    *r++ = TOCHAR ((c >> 3) & 07);
-	    *r++ = TOCHAR (c & 07);
-	    continue;
+	  *r++ = '\\';
+	  *r++ = TOCHAR ((c >> 6) & 07);
+	  *r++ = TOCHAR ((c >> 3) & 07);
+	  *r++ = TOCHAR (c & 07);
+	  continue;
 	}
 
       *r++ = '\\';
       *r++ = c;
     }
 
+quote_end:
   *r++ = '\'';
   *r = '\0';
   if (rlen)

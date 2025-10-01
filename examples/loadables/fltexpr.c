@@ -1588,7 +1588,7 @@ readtok (void)
       lasttok = curtok;
       curtok = STR;
     }
-  else if (DIGIT(c))
+  else if (DIGIT (c) || (c == locale_decpoint () && DIGIT (*cp)))
     {
       /* Let strtod figure out where to end the floating-point value and let
 	 the parser figure out what's valid. */

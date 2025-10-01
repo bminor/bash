@@ -1,7 +1,7 @@
 This file is builtin.def, from which is created builtin.c.
 It implements the builtin "builtin" in Bash.
 
-Copyright (C) 1987-2017,2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2017,2022-2025 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,9 +54,10 @@ builtin_builtin (WORD_LIST *list)
 {
   sh_builtin_func_t *function;
   register char *command;
+  int r;
 
-  if (no_options (list))
-    return (EX_USAGE);
+  if (r = no_options (list))
+    return (r == EX_HELPOPT ? EXECUTION_SUCCESS : EX_USAGE);
   list = loptend;	/* skip over possible `--' */
 
   if (list == 0)

@@ -31,14 +31,14 @@ do { \
   if ((l) && (l)->word && ISHELP((l)->word->word)) \
     { \
       builtin_help (); \
-      return (EX_USAGE); \
+      return (EXECUTION_SUCCESS); \
     } \
 } while (0)
 
 #define CASE_HELPOPT \
   case GETOPT_HELP: \
     builtin_help (); \
-    return (EX_USAGE)
+    return (EXECUTION_SUCCESS)
 
 /* Flag values for parse_and_execute () and parse_string () */
 #define SEVAL_NONINT	0x001

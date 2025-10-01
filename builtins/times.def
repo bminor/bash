@@ -1,7 +1,7 @@
 This file is times.def, from which is created times.c.
 It implements the builtin "times" in Bash.
 
-Copyright (C) 1987-2009,2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2009,2022-2025 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -64,13 +64,14 @@ $END
 int
 times_builtin (WORD_LIST *list)
 {
+  int r;
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_TIMEVAL) && defined (RUSAGE_SELF)
   struct rusage self, kids;
 
   USE_VAR(list);
 
-  if (no_options (list))
-    return (EX_USAGE);
+  if (r = no_options (list))
+    return (r == EX_HELPOPT ? EXECUTION_SUCCESS : EX_USAGE);
 
   getrusage (RUSAGE_SELF, &self);
   getrusage (RUSAGE_CHILDREN, &kids);	/* terminated child processes */
@@ -92,8 +93,8 @@ times_builtin (WORD_LIST *list)
 
   USE_VAR(list);
 
-  if (no_options (list))
-    return (EX_USAGE);
+  if (r = no_options (list))
+    return (r == EX_HELPOPT ? EXECUTION_SUCCESS : EX_USAGE);
 
   times (&t);
 
@@ -110,8 +111,8 @@ times_builtin (WORD_LIST *list)
 
   USE_VAR(list);
 
-  if (no_options (list))
-    return (EX_USAGE);
+  if (r = no_options (list))
+    return (r == EX_HELPOPT ? EXECUTION_SUCCESS : EX_USAGE);
   printf ("0.00 0.00\n0.00 0.00\n");
 
 #  endif /* HAVE_TIMES */

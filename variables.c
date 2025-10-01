@@ -3636,7 +3636,7 @@ assign_in_env (const WORD_DESC *word, int flags)
 
   if (flags)
     {
-      if (STREQ (newname, "POSIXLY_CORRECT") || STREQ (newname, "POSIX_PEDANDTIC"))
+      if (STREQ (newname, "POSIXLY_CORRECT") || STREQ (newname, "POSIX_PEDANTIC"))
 	save_posix_options ();		/* XXX one level of saving right now */
       stupidly_hack_special_variables (newname);
     }

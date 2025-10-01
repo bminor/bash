@@ -164,7 +164,7 @@ no_options (WORD_LIST *list)
       if (opt == GETOPT_HELP)
 	{
 	  builtin_help ();
-	  return (2);
+	  return (EX_HELPOPT);
 	}
       builtin_usage ();
       return (1);

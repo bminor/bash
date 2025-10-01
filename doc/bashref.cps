@@ -23,13 +23,13 @@
 \entry{command substitution}{36}
 \entry{command timing}{10}
 \entry{commands, compound}{11}
-\entry{commands, conditional}{12}
+\entry{commands, conditional}{13}
 \entry{commands, grouping}{18}
 \entry{commands, lists}{11}
 \entry{commands, looping}{12}
 \entry{commands, pipelines}{10}
 \entry{commands, shell}{9}
-\entry{commands, simple}{9}
+\entry{commands, simple}{10}
 \entry{comments, shell}{9}
 \entry{Compatibility Level}{121}
 \entry{Compatibility Mode}{121}
@@ -43,12 +43,12 @@
 \entry{dollar-single quote quoting}{6}
 \initial {E}
 \entry{editing command lines}{131}
-\entry{environment}{47}
+\entry{environment}{48}
 \entry{evaluation, arithmetic}{107}
 \entry{event designators}{172}
 \entry{execution environment}{46}
 \entry{exit status}{3, 48}
-\entry{expansion}{24}
+\entry{expansion}{25}
 \entry{expansion, arithmetic}{37}
 \entry{expansion, brace}{25}
 \entry{expansion, filename}{39}
@@ -99,7 +99,7 @@
 \entry{parameter expansion}{27}
 \entry{parameters}{22}
 \entry{parameters, positional}{23}
-\entry{parameters, special}{23}
+\entry{parameters, special}{24}
 \entry{pathname expansion}{39}
 \entry{pattern matching}{39}
 \entry{pipeline}{10}
@@ -108,7 +108,7 @@
 \entry{POSIX Mode}{116}
 \entry{process group}{3}
 \entry{process group ID}{3}
-\entry{process substitution}{37}
+\entry{process substitution}{38}
 \entry{programmable completion}{158}
 \entry{prompting}{114}
 \initial {Q}

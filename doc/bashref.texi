@@ -4187,6 +4187,12 @@ Other builtins that accept arguments but are not specified as accepting
 options interpret arguments beginning with @samp{-} as invalid options and
 require @samp{--} to prevent this interpretation.
 
+All builtins except
+@code{:}, @code{true}, @code{false}, @code{echo}, and @code{test}/@code{[}
+accept @samp{--help} as a special option.
+If @samp{--help} is supplied, these builtins output
+a help message and exit with a status of 0.  
+
 @node Bourne Shell Builtins
 @section Bourne Shell Builtins
 

@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.23.0 -->
-<!-- CreationDate: Sat Sep  6 15:33:53 2025 -->
+<!-- CreationDate: Fri Sep 19 16:30:11 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -10521,7 +10521,13 @@ arguments beginning with <b>&minus;</b> without requiring
 but are not specified as accepting options interpret
 arguments beginning with <b>&minus;</b> as invalid options
 and require <b>&minus;&minus;</b> to prevent this
-interpretation. <b><br>
+interpretation.</p>
+
+<p style="margin-left:9%; margin-top: 1em">All builtins
+except <b>:</b>, <b>true</b>, <b>false</b>, <b>echo</b>, and
+<b>test</b>/<b>[</b> accept <b>--help</b> as a special
+option. If <b>--help</b> is supplied, these builtins output
+a help message and exit with a status of 0. <b><br>
 :</b> [<i>arguments</i>]</p>
 
 <p style="margin-left:18%;">No effect; the command does
@@ -15552,7 +15558,8 @@ useful only when used with the <b>&minus;n</b> option.</p>
 <b>&minus;f</b> option, when job control is enabled, forces
 <b>wait</b> to wait for each <i>id</i> to terminate before
 returning its status, instead of returning when it changes
-status.</p>
+status. If there are no <i>id</i> arguments, <b>wait</b>
+waits until all background processes have terminated.</p>
 
 <p style="margin-left:18%; margin-top: 1em">If none of the
 <i>id</i>s specify one of the shell&rsquo;s active child

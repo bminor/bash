@@ -11795,3 +11795,41 @@ execute_cmd.c
 	- execute_function: save and restore the_printed_command_except_trap
 	  (reflected in $BASH_COMMAND) around shell function calls
 	  From a report by Mike Jonkmans <bashbug@jonkmans.nl>
+
+				   9/19
+				   ----
+builtins/common.h
+	- CHECK_HELPOPT, CASE_HELPOPT: return EXECUTION_SUCCESS if --help is
+	  supplied
+	  From a report by pourko@tutamail.com
+
+shell.h,builtins/common.c
+	- no_options: return EX_HELPOPT if --help is supplied to allow callers
+	  to return success
+
+builtins/getopts.def,builtins/times.def,builtins/builtin.def,builtins/eval.def
+	- return EXECUTION_SUCCESS if no_options returns EX_HELPOPT
+	  From a report by pourko@tutamail.com
+
+Makefile.in
+	- man2html: remove from dependencies, since we're currently using
+	  groff to build HTML man pages
+
+				   9/22
+				   ----
+lib/sh/strtrans.c
+	- ansicstr: break out of the loop if mbrtowc returns 0 (NULL wchar_t)
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+	- ansic_quote: go to the end of the quoting loop on a null wide
+	  character; use a goto since we're in a switch statement
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   9/23
+				   ----
+builtins/read.def
+	- check_read_input: new function, call input_avail but optionally
+	  change the terminal settings to what they would be if supplied the
+	  -n/-N/-d options
+	- read_builtin: call check_read_input instead of input_avail if we
+	  have a zero timeout
+	  From a report by pourko@tutamail.com

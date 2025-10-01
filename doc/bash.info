@@ -1,9 +1,9 @@
 This is bash.info, produced by makeinfo version 7.2 from bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 6 September 2025).
+Bash shell (version 5.3, 19 September 2025).
 
-   This is Edition 5.3, last updated 6 September 2025, of ‘The GNU Bash
+   This is Edition 5.3, last updated 19 September 2025, of ‘The GNU Bash
 Reference Manual’, for ‘Bash’, Version 5.3.
 
    Copyright © 1988-2025 Free Software Foundation, Inc.
@@ -26,10 +26,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.3, 6 September 2025).  The Bash home page is
+Bash shell (version 5.3, 19 September 2025).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.3, last updated 6 September 2025, of ‘The GNU Bash
+   This is Edition 5.3, last updated 19 September 2025, of ‘The GNU Bash
 Reference Manual’, for ‘Bash’, Version 5.3.
 
    Bash contains features that appear in other popular shells, and some
@@ -3451,6 +3451,10 @@ arguments beginning with ‘-’ without requiring ‘--’.  Other builtins
 that accept arguments but are not specified as accepting options
 interpret arguments beginning with ‘-’ as invalid options and require
 ‘--’ to prevent this interpretation.
+
+   All builtins except ‘:’, ‘true’, ‘false’, ‘echo’, and ‘test’/‘[’
+accept ‘--help’ as a special option.  If ‘--help’ is supplied, these
+builtins output a help message and exit with a status of 0.
 
 
 File: bash.info,  Node: Bourne Shell Builtins,  Next: Bash Builtins,  Up: Shell Builtin Commands
@@ -8435,7 +8439,9 @@ File: bash.info,  Node: Job Control Builtins,  Next: Job Control Variables,  Pre
 
      Supplying the ‘-f’ option, when job control is enabled, forces
      ‘wait’ to wait for each ID to terminate before returning its
-     status, instead of returning when it changes status.
+     status, instead of returning when it changes status.  If there are
+     no ID arguments, ‘wait’ waits until all background processes have
+     terminated.
 
      If none of the IDs specify one of the shell's an active child
      processes, the return status is 127.  If ‘wait’ is interrupted by a
@@ -12902,7 +12908,7 @@ D.1 Index of Shell Builtin Commands
 * dirs:                                  Directory Stack Builtins.
                                                               (line   7)
 * disown:                                Job Control Builtins.
-                                                              (line 120)
+                                                              (line 122)
 * echo:                                  Bash Builtins.       (line 284)
 * enable:                                Bash Builtins.       (line 337)
 * eval:                                  Bourne Shell Builtins.
@@ -12953,7 +12959,7 @@ D.1 Index of Shell Builtin Commands
 * shopt:                                 The Shopt Builtin.   (line   9)
 * source:                                Bash Builtins.       (line 678)
 * suspend:                               Job Control Builtins.
-                                                              (line 139)
+                                                              (line 141)
 * test:                                  Bourne Shell Builtins.
                                                               (line 340)
 * times:                                 Bourne Shell Builtins.
@@ -13651,138 +13657,138 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top901
-Node: Introduction2842
-Node: What is Bash?3055
-Node: What is a shell?4188
-Node: Definitions6798
-Node: Basic Shell Features10125
-Node: Shell Syntax11349
-Node: Shell Operation12376
-Node: Quoting13667
-Node: Escape Character15005
-Node: Single Quotes15540
-Node: Double Quotes15889
-Node: ANSI-C Quoting17234
-Node: Locale Translation18628
-Node: Creating Internationalized Scripts20031
-Node: Comments24229
-Node: Shell Commands24996
-Node: Reserved Words25935
-Node: Simple Commands27078
-Node: Pipelines27740
-Node: Lists30996
-Node: Compound Commands32916
-Node: Looping Constructs33925
-Node: Conditional Constructs36474
-Node: Command Grouping51611
-Node: Coprocesses53103
-Node: GNU Parallel55789
-Node: Shell Functions56707
-Node: Shell Parameters65155
-Node: Positional Parameters70056
-Node: Special Parameters71146
-Node: Shell Expansions74607
-Node: Brace Expansion76796
-Node: Tilde Expansion80132
-Node: Shell Parameter Expansion83087
-Node: Command Substitution103730
-Node: Arithmetic Expansion107259
-Node: Process Substitution108435
-Node: Word Splitting109543
-Node: Filename Expansion111987
-Node: Pattern Matching115211
-Node: Quote Removal120934
-Node: Redirections121238
-Node: Executing Commands131494
-Node: Simple Command Expansion132161
-Node: Command Search and Execution134269
-Node: Command Execution Environment136713
-Node: Environment140161
-Node: Exit Status142064
-Node: Signals144123
-Node: Shell Scripts149053
-Node: Shell Builtin Commands152351
-Node: Bourne Shell Builtins154462
-Node: Bash Builtins181181
-Node: Modifying Shell Behavior218105
-Node: The Set Builtin218447
-Node: The Shopt Builtin230441
-Node: Special Builtins247494
-Node: Shell Variables248483
-Node: Bourne Shell Variables248917
-Node: Bash Variables251425
-Node: Bash Features290550
-Node: Invoking Bash291564
-Node: Bash Startup Files298148
-Node: Interactive Shells303390
-Node: What is an Interactive Shell?303798
-Node: Is this Shell Interactive?304460
-Node: Interactive Shell Behavior305284
-Node: Bash Conditional Expressions309045
-Node: Shell Arithmetic314462
-Node: Aliases317789
-Node: Arrays320923
-Node: The Directory Stack328511
-Node: Directory Stack Builtins329308
-Node: Controlling the Prompt333753
-Node: The Restricted Shell336638
-Node: Bash POSIX Mode339520
-Node: Shell Compatibility Mode358467
-Node: Job Control367474
-Node: Job Control Basics367931
-Node: Job Control Builtins374299
-Node: Job Control Variables380981
-Node: Command Line Editing382212
-Node: Introduction and Notation383915
-Node: Readline Interaction386267
-Node: Readline Bare Essentials387455
-Node: Readline Movement Commands389263
-Node: Readline Killing Commands390259
-Node: Readline Arguments392282
-Node: Searching393372
-Node: Readline Init File395615
-Node: Readline Init File Syntax396918
-Node: Conditional Init Constructs423869
-Node: Sample Init File428254
-Node: Bindable Readline Commands431374
-Node: Commands For Moving432912
-Node: Commands For History435376
-Node: Commands For Text440767
-Node: Commands For Killing444892
-Node: Numeric Arguments447680
-Node: Commands For Completion448832
-Node: Keyboard Macros454528
-Node: Miscellaneous Commands455229
-Node: Readline vi Mode461796
-Node: Programmable Completion462773
-Node: Programmable Completion Builtins472509
-Node: A Programmable Completion Example484246
-Node: Using History Interactively489591
-Node: Bash History Facilities490272
-Node: Bash History Builtins494007
-Node: History Interaction500478
-Node: Event Designators505428
-Node: Word Designators507006
-Node: Modifiers509398
-Node: Installing Bash511335
-Node: Basic Installation512451
-Node: Compilers and Options516327
-Node: Compiling For Multiple Architectures517077
-Node: Installation Names518830
-Node: Specifying the System Type521064
-Node: Sharing Defaults521810
-Node: Operation Controls522524
-Node: Optional Features523543
-Node: Reporting Bugs536266
-Node: Major Differences From The Bourne Shell537623
-Node: GNU Free Documentation License559050
-Node: Indexes584227
-Node: Builtin Index584678
-Node: Reserved Word Index591776
-Node: Variable Index594221
-Node: Function Index611634
-Node: Concept Index625629
+Node: Top903
+Node: Introduction2846
+Node: What is Bash?3059
+Node: What is a shell?4192
+Node: Definitions6802
+Node: Basic Shell Features10129
+Node: Shell Syntax11353
+Node: Shell Operation12380
+Node: Quoting13671
+Node: Escape Character15009
+Node: Single Quotes15544
+Node: Double Quotes15893
+Node: ANSI-C Quoting17238
+Node: Locale Translation18632
+Node: Creating Internationalized Scripts20035
+Node: Comments24233
+Node: Shell Commands25000
+Node: Reserved Words25939
+Node: Simple Commands27082
+Node: Pipelines27744
+Node: Lists31000
+Node: Compound Commands32920
+Node: Looping Constructs33929
+Node: Conditional Constructs36478
+Node: Command Grouping51615
+Node: Coprocesses53107
+Node: GNU Parallel55793
+Node: Shell Functions56711
+Node: Shell Parameters65159
+Node: Positional Parameters70060
+Node: Special Parameters71150
+Node: Shell Expansions74611
+Node: Brace Expansion76800
+Node: Tilde Expansion80136
+Node: Shell Parameter Expansion83091
+Node: Command Substitution103734
+Node: Arithmetic Expansion107263
+Node: Process Substitution108439
+Node: Word Splitting109547
+Node: Filename Expansion111991
+Node: Pattern Matching115215
+Node: Quote Removal120938
+Node: Redirections121242
+Node: Executing Commands131498
+Node: Simple Command Expansion132165
+Node: Command Search and Execution134273
+Node: Command Execution Environment136717
+Node: Environment140165
+Node: Exit Status142068
+Node: Signals144127
+Node: Shell Scripts149057
+Node: Shell Builtin Commands152355
+Node: Bourne Shell Builtins154696
+Node: Bash Builtins181415
+Node: Modifying Shell Behavior218339
+Node: The Set Builtin218681
+Node: The Shopt Builtin230675
+Node: Special Builtins247728
+Node: Shell Variables248717
+Node: Bourne Shell Variables249151
+Node: Bash Variables251659
+Node: Bash Features290784
+Node: Invoking Bash291798
+Node: Bash Startup Files298382
+Node: Interactive Shells303624
+Node: What is an Interactive Shell?304032
+Node: Is this Shell Interactive?304694
+Node: Interactive Shell Behavior305518
+Node: Bash Conditional Expressions309279
+Node: Shell Arithmetic314696
+Node: Aliases318023
+Node: Arrays321157
+Node: The Directory Stack328745
+Node: Directory Stack Builtins329542
+Node: Controlling the Prompt333987
+Node: The Restricted Shell336872
+Node: Bash POSIX Mode339754
+Node: Shell Compatibility Mode358701
+Node: Job Control367708
+Node: Job Control Basics368165
+Node: Job Control Builtins374533
+Node: Job Control Variables381321
+Node: Command Line Editing382552
+Node: Introduction and Notation384255
+Node: Readline Interaction386607
+Node: Readline Bare Essentials387795
+Node: Readline Movement Commands389603
+Node: Readline Killing Commands390599
+Node: Readline Arguments392622
+Node: Searching393712
+Node: Readline Init File395955
+Node: Readline Init File Syntax397258
+Node: Conditional Init Constructs424209
+Node: Sample Init File428594
+Node: Bindable Readline Commands431714
+Node: Commands For Moving433252
+Node: Commands For History435716
+Node: Commands For Text441107
+Node: Commands For Killing445232
+Node: Numeric Arguments448020
+Node: Commands For Completion449172
+Node: Keyboard Macros454868
+Node: Miscellaneous Commands455569
+Node: Readline vi Mode462136
+Node: Programmable Completion463113
+Node: Programmable Completion Builtins472849
+Node: A Programmable Completion Example484586
+Node: Using History Interactively489931
+Node: Bash History Facilities490612
+Node: Bash History Builtins494347
+Node: History Interaction500818
+Node: Event Designators505768
+Node: Word Designators507346
+Node: Modifiers509738
+Node: Installing Bash511675
+Node: Basic Installation512791
+Node: Compilers and Options516667
+Node: Compiling For Multiple Architectures517417
+Node: Installation Names519170
+Node: Specifying the System Type521404
+Node: Sharing Defaults522150
+Node: Operation Controls522864
+Node: Optional Features523883
+Node: Reporting Bugs536606
+Node: Major Differences From The Bourne Shell537963
+Node: GNU Free Documentation License559390
+Node: Indexes584567
+Node: Builtin Index585018
+Node: Reserved Word Index592116
+Node: Variable Index594561
+Node: Function Index611974
+Node: Concept Index625969
 
 End Tag Table
 

@@ -216,6 +216,28 @@ uw_reset_rl_instream (void *fp)
 }
 #endif
 
+/* Check whether there is input on FD after setting the terminal settings to
+   what they would be if the read was actually performed. */
+static int
+check_read_input (int fd, int change_term)
+{
+  TTYSTRUCT ttattrs, ttset;
+  int r;
+
+  if (change_term)
+    {
+      ttgetattr (fd, &ttattrs);
+      ttset = ttattrs;
+      r = ttfd_onechar (fd, &ttset);
+      if (r < 0)
+	sh_ttyerror (1);
+    }
+  r = input_avail (fd);
+  if (change_term)
+    ttsetattr (fd, &ttattrs);
+  return r;
+}
+
 /* Read the value of the shell variables whose names follow.
    The reading is done from the current input stream, whatever
    that may be.  Successive words of the input line are assigned
@@ -300,7 +322,8 @@ read_builtin (WORD_LIST *list)
 
   mb_cur_max = MB_CUR_MAX;
   tmsec = tmusec = 0;		/* no timeout */
-  nr = nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
+  nr = nchars = input_is_pipe = unbuffered_read = have_timeout = 0;
+  input_is_tty = -1;	/* not checked yet */
   delim = '\n';		/* read until newline */
   ignore_delim = nflag = 0;
 
@@ -395,7 +418,12 @@ read_builtin (WORD_LIST *list)
   /* `read -t 0 var' tests whether input is available with select/FIONREAD,
      and fails if those are unavailable */
   if (have_timeout && tmsec == 0 && tmusec == 0)
-    return (input_avail (fd) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+    {
+      int ct;		/* change terminal settings */
+
+      ct = (nflag || delim) && isatty (fd);
+      return (check_read_input (fd, ct) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+    }
 
   /* Convenience: check early whether or not the first of possibly several
      variable names is a valid identifier, and bail early if so. */
@@ -477,6 +505,7 @@ read_builtin (WORD_LIST *list)
 #else
   input_is_tty = 1;
 #endif
+
   if (input_is_tty == 0)
 #ifndef __CYGWIN__
     input_is_pipe = fd_ispipe (fd);

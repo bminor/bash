@@ -1,7 +1,7 @@
 This file is eval.def, from which is created eval.c.
 It implements the builtin "eval" in Bash.
 
-Copyright (C) 1987-2016,2022 Free Software Foundation, Inc.
+Copyright (C) 1987-2016,2022-2025 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,8 +48,10 @@ $END
 int
 eval_builtin (WORD_LIST *list)
 {
-  if (no_options (list))
-    return (EX_USAGE);
+  int r;
+
+  if (r = no_options (list))
+    return (r == EX_HELPOPT ? EXECUTION_SUCCESS : EX_USAGE);
   list = loptend;	/* skip over possible `--' */
 
   return (list ? evalstring (string_list (list), "eval", SEVAL_NOHIST|SEVAL_NOOPTIMIZE) : EXECUTION_SUCCESS);

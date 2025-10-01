@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Sep  6 15:27:27 EDT 2025
+.\"	Last Change: Fri Sep 19 12:19:06 EDT 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -21,7 +21,7 @@
 .ds zY \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 September 6" "GNU Bash 5.3"
+.TH BASH 1 "2025 September 19" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -9015,6 +9015,12 @@ and \fBshift\fP builtins accept and process arguments beginning with
 Other builtins that accept arguments but are not specified as accepting
 options interpret arguments beginning with \fB\-\fP as invalid options and
 require \fB\-\-\fP to prevent this interpretation.
+.PP
+All builtins except
+\fB:\fP, \fBtrue\fP, \fBfalse\fP, \fBecho\fP, and \fBtest\fP/\fB[\fP
+accept \fB--help\fP as a special option.
+If \fB--help\fP is supplied, these builtins output
+a help message and exit with a status of 0.
 .PP
 .PD 0
 .TP

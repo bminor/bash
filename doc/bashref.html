@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 6 September 2025).
+the Bash shell (version 5.3, 19 September 2025).
 
-This is Edition 5.3, last updated 6 September 2025,
+This is Edition 5.3, last updated 19 September 2025,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 6 September 2025).
+the Bash shell (version 5.3, 19 September 2025).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 6 September 2025,
+<p>This is Edition 5.3, last updated 19 September 2025,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -4688,6 +4688,12 @@ with &lsquo;<samp class="samp">-</samp>&rsquo; without requiring &lsquo;<samp cl
 Other builtins that accept arguments but are not specified as accepting
 options interpret arguments beginning with &lsquo;<samp class="samp">-</samp>&rsquo; as invalid options and
 require &lsquo;<samp class="samp">--</samp>&rsquo; to prevent this interpretation.
+</p>
+<p>All builtins except
+<code class="code">:</code>, <code class="code">true</code>, <code class="code">false</code>, <code class="code">echo</code>, and <code class="code">test</code>/<code class="code">[</code>
+accept &lsquo;<samp class="samp">--help</samp>&rsquo; as a special option.
+If &lsquo;<samp class="samp">--help</samp>&rsquo; is supplied, these builtins output
+a help message and exit with a status of 0.  
 </p>
 <ul class="mini-toc">
 <li><a href="#Bourne-Shell-Builtins" accesskey="1">Bourne Shell Builtins</a></li>
@@ -11131,6 +11137,8 @@ This is useful only when used with the <samp class="option">-n</samp> option.
 <p>Supplying the <samp class="option">-f</samp> option, when job control is enabled,
 forces <code class="code">wait</code> to wait for each <var class="var">id</var> to terminate before
 returning its status, instead of returning when it changes status.
+If there are no <var class="var">id</var> arguments,
+<code class="code">wait</code> waits until all background processes have terminated.
 </p>
 <p>If none of the <var class="var">id</var>s specify one of the shell&rsquo;s an active child
 processes, the return status is 127.

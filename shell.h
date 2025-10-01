@@ -75,6 +75,8 @@ extern int EOF_Reached;
 #define EX_DISKFALLBACK	262	/* fall back to disk command from builtin */
 #define EX_UTILERROR	263	/* Posix special builtin utility error */
 
+#define EX_HELPOPT	264
+
 /* Flag values that control parameter pattern substitution. */
 #define MATCH_ANY	0x000
 #define MATCH_BEG	0x001
