@@ -47,7 +47,7 @@
 
 #include "shell.h"
 #include "execute_cmd.h"
-#include "typemax.h"		/* SIZE_MAX if needed */
+#include "typemax.h"		/* PTRDIFF_MAX if needed */
 #include "trap.h"
 #include "flags.h"
 #include "parser.h"
@@ -2579,21 +2579,21 @@ shell_getc (int remove_quoted_newline)
 	  /* If we can't put 256 bytes more into the buffer, allocate
 	     everything we can and fill it as full as we can. */
 	  /* XXX - we ignore rest of line using `truncating' flag */
-	  if (shell_input_line_size > (SIZE_MAX - 256))
+	  if (shell_input_line_size > (PTRDIFF_MAX - 256))
 	    {
 	      size_t n;
 
-	      n = SIZE_MAX - i;	/* how much more can we put into the buffer? */
+	      n = PTRDIFF_MAX - i;	/* how much more can we put into the buffer? */
 	      if (n <= 2)	/* we have to save 1 for the newline added below */
 		{
 		  if (truncating == 0)
-		    internal_warning(_("shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line truncated"), shell_input_line_size, (unsigned long)SIZE_MAX);
+		    internal_warning(_("shell_getc: shell_input_line_size (%zu) exceeds PTRDIFF_MAX (%lu): line truncated"), shell_input_line_size, (unsigned long)PTRDIFF_MAX);
 		  shell_input_line[i] = '\0';
 		  truncating = 1;
 		}
-	      if (shell_input_line_size < SIZE_MAX)
+	      if (shell_input_line_size < PTRDIFF_MAX)
 		{
-		  shell_input_line_size = SIZE_MAX;
+		  shell_input_line_size = PTRDIFF_MAX;
 		  shell_input_line = xrealloc (shell_input_line, shell_input_line_size);
 		}
 	    }
@@ -2735,7 +2735,7 @@ shell_getc (int remove_quoted_newline)
 	 not already end in an EOF character.  */
       if (shell_input_line_terminator != EOF && shell_input_line_terminator != READERR)
 	{
-	  if (shell_input_line_size + 3 < SIZE_MAX && (shell_input_line_len+3 > shell_input_line_size))
+	  if (shell_input_line_size + 3 < PTRDIFF_MAX && (shell_input_line_len+3 > shell_input_line_size))
 	    shell_input_line = (char *)xrealloc (shell_input_line,
 					1 + (shell_input_line_size += 2));
 

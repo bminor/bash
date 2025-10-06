@@ -119,6 +119,10 @@ static const unsigned long long int maxquad = ULLONG_MAX;
 #  define SIZE_MAX	((size_t) ~(size_t)0)
 #endif
 
+#ifndef PTRDIFF_MAX
+#  define PTRDIFF_MAX  TYPE_MAXIMUM(ptrdiff_t)
+#endif
+
 #ifndef sh_imaxabs
 #  define sh_imaxabs(x)	(((x) >= 0) ? (x) : -(x))
 #endif

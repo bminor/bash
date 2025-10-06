@@ -7174,8 +7174,13 @@ A colon-separated list of suffixes to ignore when performing
 filename completion.
 A filename whose suffix matches one of the entries in 
 @env{FIGNORE}
-is excluded from the list of matched filenames.  A sample
-value is @samp{.o:~}
+is excluded from the list of matched filenames.
+A sample value is
+@samp{.o:~}.
+Since tilde expansion takes place after
+@samp{:}
+in assignment statements,
+make sure to quote assignments appropriately to avoid it as appropriate.
 
 @item FUNCNAME
 An array variable containing the names of all shell functions

@@ -622,8 +622,7 @@ read_builtin (WORD_LIST *list)
 	  termsave.attrs = ttattrs;
 
 	  ttset = ttattrs;	  
-	  i = silent ? ttfd_cbreak (fd, &ttset) : ttfd_onechar (fd, &ttset);
-	  if (i < 0)
+	  if ((silent ? ttfd_cbreak (fd, &ttset) : ttfd_onechar (fd, &ttset)) < 0)
 	    sh_ttyerror (1);
 	  tty_modified = 1;
 	  add_unwind_protect (uw_ttyrestore, &termsave);
@@ -639,8 +638,7 @@ read_builtin (WORD_LIST *list)
       termsave.attrs = ttattrs;
 
       ttset = ttattrs;
-      i = ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
-      if (i < 0)
+      if (ttfd_noecho (fd, &ttset) < 0)
 	sh_ttyerror (1);
 
       tty_modified = 1;

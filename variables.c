@@ -3166,7 +3166,7 @@ assign_value:
 	  INVALIDATE_EXPORTSTR (entry);
 	  optimized_assignment (entry, value, aflags);
 
-	  if (mark_modified_vars)
+	  if (mark_modified_vars && (aflags & ASS_NOEXPORT) == 0)
 	    VSETATTR (entry, att_exported);
 
 	  if (exported_p (entry))
@@ -3208,7 +3208,7 @@ assign_value:
 	}
     }
 
-  if (mark_modified_vars)
+  if (mark_modified_vars && (aflags & ASS_NOEXPORT) == 0)
     VSETATTR (entry, att_exported);
 
   if (exported_p (entry))
@@ -3363,7 +3363,7 @@ bind_variable_value (SHELL_VAR *var, char *value, int aflags)
 
   INVALIDATE_EXPORTSTR (var);
 
-  if (mark_modified_vars)
+  if (mark_modified_vars && (aflags & ASS_NOEXPORT) == 0)
     VSETATTR (var, att_exported);
 
   if (exported_p (var))

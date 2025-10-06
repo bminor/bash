@@ -1408,7 +1408,7 @@ print_formatted_time (FILE *fp, char *format,
 	    cpu = 10000;
 #endif
 	  sum = cpu / 100;
-	  sum_frac = (cpu % 100) * 10;
+	  sum_frac = (cpu % 100) * 10000;	/* convert to microseconds */
 	  len = mkfmt (ts, 2, 0, sum, sum_frac);
 	  RESIZE_MALLOCED_BUFFER (str, sindex, len, ssize, 64);
 	  strcpy (str + sindex, ts);
@@ -1468,9 +1468,6 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   struct timeval real, user, sys;
   struct timeval before, after;
-#  if defined (HAVE_STRUCT_TIMEZONE)
-  struct timezone dtz;				/* posix doesn't define this */
-#  endif
   struct rusage selfb, selfa, kidsb, kidsa;	/* a = after, b = before */
 #else
 #  if defined (HAVE_TIMES)
@@ -1479,24 +1476,28 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
 #  endif
 #endif
 
+  rv = EXECUTION_SUCCESS;		/* suppress uninitialized use warnings */
+
+  rs = us = ss = 0;
+  rsf = usf = ssf = 0;
+  cpu = 0;
+
+  old_subshell = subshell_environment;
+  posix_time = command && (command->flags & CMD_TIME_POSIX);
+  nullcmd = (command == 0) || (command->type == cm_simple && command->value.Simple->words == 0 && command->value.Simple->redirects == 0);
+
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
-#  if defined (HAVE_STRUCT_TIMEZONE)
-  gettimeofday (&before, &dtz);
-#  else
-  gettimeofday (&before, NULL);
-#  endif /* !HAVE_STRUCT_TIMEZONE */
   getrusage (RUSAGE_SELF, &selfb);
   getrusage (RUSAGE_CHILDREN, &kidsb);
+  gettimeofday (&before, NULL);
 #else
 #  if defined (HAVE_TIMES)
   tbefore = times (&before);
 #  endif
 #endif
 
-  old_subshell = subshell_environment;
-  posix_time = command && (command->flags & CMD_TIME_POSIX);
-
-  nullcmd = (command == 0) || (command->type == cm_simple && command->value.Simple->words == 0 && command->value.Simple->redirects == 0);
+  /* In posix mode, `time' without argument is equivalent to `times', but
+     obeys TIMEFORMAT. This is from POSIX interp 267 */
   if (posixly_correct && nullcmd)
     {
 #if defined (HAVE_GETRUSAGE)
@@ -1508,35 +1509,27 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
       tbefore = shell_start_time * get_clk_tck ();
 #endif
     }
+  else
+    {
+      old_flags = command->flags;
+      COPY_PROCENV (top_level, save_top_level);
+      command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
+      code = setjmp_nosigs (top_level);
+      if (code == NOT_JUMPED)
+	rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+      COPY_PROCENV (save_top_level, top_level);
+      if (code == NOT_JUMPED)
+	command->flags = old_flags;
 
-  rv = EXECUTION_SUCCESS;		/* suppress uninitialized use warnings */
-  old_flags = command->flags;
-  COPY_PROCENV (top_level, save_top_level);
-  command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
-  code = setjmp_nosigs (top_level);
-  if (code == NOT_JUMPED)
-    rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
-  COPY_PROCENV (save_top_level, top_level);
-
-  if (code == NOT_JUMPED)
-    command->flags = old_flags;
-
-  /* If we're jumping in a different subshell environment than we started,
-     don't bother printing timing stats, just keep longjmping back to the
-     original top level. */
-  if (code != NOT_JUMPED && subshell_environment && subshell_environment != old_subshell)
-    sh_longjmp (top_level, code);
-
-  rs = us = ss = 0;
-  rsf = usf = ssf = 0;
-  cpu = 0;
+      /* If we're jumping in a different subshell environment than we started,
+	 don't bother printing timing stats, just keep longjmping back to the
+	 original top level. */
+      if (code != NOT_JUMPED && subshell_environment && subshell_environment != old_subshell)
+	sh_longjmp (top_level, code);
+    }
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
-#  if defined (HAVE_STRUCT_TIMEZONE)
-  gettimeofday (&after, &dtz);
-#  else
   gettimeofday (&after, NULL);
-#  endif /* !HAVE_STRUCT_TIMEZONE */
   getrusage (RUSAGE_SELF, &selfa);
   getrusage (RUSAGE_CHILDREN, &kidsa);
 

@@ -11862,3 +11862,52 @@ parse.y
 	- reset_parser: reset shell_eof_token to 0, rely on callers to restore
 	  it if they need to
 	  Report from Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- print_formatted_time: when processing %P, sum_frac should be in
+	  microseconds; missed when making max precision 6 back in 6/2023
+	  Report from pourko2@tutamail.com
+
+				   9/30
+				   ----
+subst.h
+	- ASS_NOEXPORT: don't export the variable being assigned even if
+	  `allexport' is enabled
+
+builtins/set.def
+	- set_shellopts: pass ASS_NOEXPORT so we don't have to mess with
+	  unsetting the export attribute
+
+builtins/shopt.def
+	- set_bashopts: pass ASS_NOEXPORT so we don't have to mess with
+	  unsetting the export attribute
+
+variables.c
+	- bind_variable_internal,bind_variable_value: if ASS_NOEXPORT is set in
+	  the flags argument, don't export the variable even if `allexport'
+	  (mark_modified_vars) is set.
+	  Patch from Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				   10/1
+				   ----
+include/typemax.h
+	- PTRDIFF_MAX: add default max value for ptrdiff_t if the system
+	  doesn't provide one
+
+parse.y
+	- SIZE_MAX -> PTRDIFF_MAX to avoid spurious compiler warning
+	  Patch from Martin D Kealey <martin@kurahaupo.gen.nz> and
+	  Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- time_command: don't bother with time zone info in gettimeofday()
+	- time_command: don't bother trying to execute a null command in
+	  posix mode, since we just want timing information since the shell
+	  started
+
+				   10/3
+				   ----
+builtins/read.def
+	- read_builtin: don't use i as a return value for functions and then
+	  as an index into input_string without resetting it
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
