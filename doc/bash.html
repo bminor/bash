@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.23.0 -->
-<!-- CreationDate: Fri Sep 19 16:30:11 2025 -->
+<!-- CreationDate: Mon Oct  6 15:30:30 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -2903,7 +2903,10 @@ suffixes to ignore when performing filename completion (see
 <b><small>READLINE</small></b> below). A filename whose
 suffix matches one of the entries in
 <b><small>FIGNORE</small></b> is excluded from the list of
-matched filenames. A sample value is &ldquo;.o:~&rdquo;.</p>
+matched filenames. A sample value is &ldquo;.o:~&rdquo;.
+Since tilde expansion takes place after &ldquo;:&rdquo; in
+assignment statements, make sure to quote assignments
+appropriately to avoid it as appropriate.</p>
 
 <p style="margin-left:9%;"><b>FUNCNEST</b></p>
 
@@ -4922,12 +4925,20 @@ include it as the first character in the set.</p></td></tr>
 
 <p style="margin-left:27%; margin-top: 1em">The sorting
 order of characters in range expressions, and the characters
-included in the range, are determined by the current locale
-and the values of the <b><small>LC_COLLATE</small></b> or
-<b><small>LC_ALL</small></b> shell variables, if set. To
-obtain the traditional interpretation of range expressions,
-where <b>[a&minus;d]</b> is equivalent to <b>[abcd]</b>, set
-the value of the <b>LC_COLLATE</b> or <b>LC_ALL</b> shell
+included in the range, are determined by the collating
+sequence of the current locale and the values of the
+<b><small>LC_COLLATE</small></b> or
+<b><small>LC_ALL</small></b> shell variables, if set.</p>
+
+<p style="margin-left:27%; margin-top: 1em">For example, in
+the C locale, <b>[a&minus;d]</b> is equivalent to
+<b>[abcd]</b>. Many locales sort characters in dictionary
+order, and in these locales <b>[a&minus;d]</b> is typically
+not equivalent to <b>[abcd]</b>; it might be equivalent to
+<b>[aBbCcDd]</b> or <b>[aAbBcCd]</b>. To obtain the
+traditional interpretation of range expressions, where
+<b>[a&minus;d]</b> is equivalent to <b>[abcd]</b>, set the
+value of the <b>LC_COLLATE</b> or <b>LC_ALL</b> shell
 variables to <b>C</b>, or enable the <b>globasciiranges</b>
 shell option.</p>
 
@@ -6694,7 +6705,8 @@ not kill an interactive shell), and catches and handles
 <b><small>SIGINT</small></b> (so that the <b>wait</b>
 builtin is interruptible). When <b>bash</b> receives
 <b><small>SIGINT</small></b><small>,</small> it breaks out
-of any executing loops. In all cases, <b>bash</b> ignores
+of any executing loops and command lists. In all cases,
+<b>bash</b> ignores
 <b><small>SIGQUIT</small></b><small>.</small> If job control
 is in effect, <b>bash</b> ignores
 <b><small>SIGTTIN</small></b><small>,
@@ -16275,21 +16287,21 @@ the script.</p>
 
 <p style="margin-left:9%; margin-top: 1em"><i>Bash
 Reference Manual</i>, Brian Fox and Chet Ramey <i><br>
-The Gnu Readline Library</i>, Brian Fox and Chet Ramey
+The GNU Readline Library</i>, Brian Fox and Chet Ramey
 <i><br>
-The Gnu History Library</i>, Brian Fox and Chet Ramey
-<i><br>
-Portable Operating System Interface (POSIX) Part 2: Shell
-and <br>
-Utilities</i>, IEEE &mdash;</p>
+The GNU History Library</i>, Brian Fox and Chet Ramey <br>
+POSIX.1-2024, The IEEE and The Open Group</p>
 
 
-<p style="margin-left:18%;">http://pubs.opengroup.org/onlinepubs/9799919799/</p>
+<p style="margin-left:18%;"><a href="https://pubs.opengroup.org/onlinepubs/9799919799/">https://pubs.opengroup.org/onlinepubs/9799919799/</a></p>
+
+<p style="margin-left:9%;">a description of posix mode</p>
 
 
-<p style="margin-left:9%;">http://tiswww.case.edu/~chet/bash/POSIX
-&mdash; a description of posix mode <i><br>
-sh</i>(1), <i>ksh</i>(1), <i>csh</i>(1) <i><br>
+<p style="margin-left:18%;"><a href="http://tiswww.case.edu/~chet/bash/POSIX">http://tiswww.case.edu/~chet/bash/POSIX</a></p>
+
+<p style="margin-left:9%;"><i>sh</i>(1), <i>ksh</i>(1),
+<i>csh</i>(1) <i><br>
 emacs</i>(1), <i>vi</i>(1) <i><br>
 readline</i>(3)</p>
 
@@ -16339,13 +16351,11 @@ initialization file</p>
 </h2>
 
 
-<p style="margin-left:9%; margin-top: 1em">Brian Fox, Free
-Software Foundation <br>
-bfox@gnu.org</p>
 
-<p style="margin-left:9%; margin-top: 1em">Chet Ramey, Case
-Western Reserve University <br>
-chet.ramey@case.edu</p>
+<p style="margin-left:9%; margin-top: 1em"><a href="mailto:bfox@gnu.org">Brian
+Fox, Free Software Foundation</a> <br>
+<a href="mailto:chet.ramey@case.edu">Chet Ramey, Case
+Western Reserve University</a></p>
 
 <h2>BUG REPORTS
 <a name="BUG REPORTS"></a>
@@ -16357,33 +16367,148 @@ bug in <b>bash</b>, you should report it. But first, you
 should make sure that it really is a bug, and that it
 appears in the latest version of <b>bash</b>. The latest
 version is always available from
-<i>ftp://ftp.gnu.org/pub/gnu/bash/</i> and
-<i>http://git.savannah.gnu.org/cgit/bash.git/snapshot/bash-master.tar.gz</i>.</p>
+<a href="ftp://ftp.gnu.org/pub/gnu/bash/">ftp://ftp.gnu.org/pub/gnu/bash/</a>
+and
+<a href="http://git.savannah.gnu.org/cgit/bash.git/snapshot/bash-master.tar.gz">http://git.savannah.gnu.org/cgit/bash.git/snapshot/bash-master.tar.gz</a>.</p>
 
 <p style="margin-left:9%; margin-top: 1em">Once you have
 determined that a bug actually exists, use the
 <i>bashbug</i> command to submit a bug report. If you have a
 fix, you are encouraged to mail that as well! You may send
 suggestions and &ldquo;philosophical&rdquo; bug reports to
-<i>bug-bash@gnu.org</i> or post them to the Usenet newsgroup
-<b>gnu.bash.bug</b>.</p>
+<a href="mailto:bug-bash@gnu.org">bug-bash@gnu.org</a> or
+post them to the Usenet newsgroup <b>gnu.bash.bug</b>.</p>
 
-<p style="margin-left:9%; margin-top: 1em">ALL bug reports
-should include: <br>
-The version number of <b>bash</b> <br>
-The hardware and operating system <br>
-The compiler used to compile <br>
-A description of the bug behavior <br>
-A short script or &ldquo;recipe&rdquo; which exercises the
-bug</p>
+<p style="margin-left:9%; margin-top: 1em"><i>All</i> bug
+reports should include:</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="1%">
+
+
+<p>&bull;</p></td>
+<td width="2%"></td>
+<td width="66%">
+
+
+<p>the version number of <b>bash</b> (&ldquo;echo
+$BASH_VERSION&rdquo;),</p> </td>
+<td width="22%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="1%">
+
+
+<p>&bull;</p></td>
+<td width="2%"></td>
+<td width="66%">
+
+
+<p>the host platform and operating system (&ldquo;uname
+&minus;a&rdquo;),</p> </td>
+<td width="22%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="1%">
+
+
+<p>&bull;</p></td>
+<td width="2%"></td>
+<td width="66%">
+
+
+<p>either</p></td>
+<td width="22%">
+</td></tr>
+</table>
+
+<p style="margin-left:14%; margin-top: 1em">(a)</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="9%"></td>
+<td width="1%"></td>
+<td width="81%">
+
+
+<p style="margin-top: 1em">if you or an administrator built
+and installed <b>bash</b> from source, the name and version
+of the compiler used to build it, as reported by
+<b>bash</b>&rsquo;s &ldquo;configure&rdquo; script; or</p></td></tr>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="9%">
+
+
+<p>(b)</p></td>
+<td width="1%"></td>
+<td width="81%">
+
+
+<p>if your site uses a distributor&rsquo;s <b>bash</b>
+package, the version of that package (for example,
+&ldquo;dpkg &minus;i bash&rdquo; or &ldquo;rpm &minus;qi
+bash&rdquo;),</p> </td></tr>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="9%">
+
+
+<p>&bull;</p></td>
+<td width="1%"></td>
+<td width="81%">
+</td></tr>
+</table>
+
+<p style="margin-left:12%; margin-top: 1em">a description
+of the behavior <b>bash</b> exhibited,</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="1%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="2%"></td>
+<td width="87%">
+
+
+<p style="margin-top: 1em">a description of the behavior
+you expected from <b>bash</b>, and</p></td>
+<td width="1%">
+</td></tr>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="1%">
+
+
+<p>&bull;</p></td>
+<td width="2%"></td>
+<td width="87%">
+
+
+<p>a short shell script or &ldquo;recipe&rdquo; exercising
+the unexpected behavior.</p></td>
+<td width="1%">
+</td></tr>
+</table>
 
 <p style="margin-left:9%; margin-top: 1em"><i>bashbug</i>
 inserts the first three items automatically into the
 template it provides for filing a bug report.</p>
 
-<p style="margin-left:9%; margin-top: 1em">Comments and bug
-reports concerning this manual page should be directed to
-<i>chet.ramey@case.edu</i>.</p>
+<p style="margin-left:9%; margin-top: 1em">Please send
+comments and bug reports concerning this manual page to
+<a href="mailto:bug-bash@gnu.org">bug-bash@gnu.org</a>.</p>
 
 <h2>BUGS
 <a name="BUGS"></a>
@@ -16394,8 +16519,9 @@ reports concerning this manual page should be directed to
 big and too slow.</p>
 
 <p style="margin-left:9%; margin-top: 1em">There are some
-subtle differences between <b>bash</b> and traditional
-versions of <b>sh</b>, mostly because of the
+subtle differences between <b>bash</b> and historical
+versions of <b>sh</b>, due mostly to <b>bash</b>&rsquo;s
+independent implementation and the evolution of the
 <small>POSIX</small> specification.</p>
 
 <p style="margin-left:9%; margin-top: 1em">Aliases are

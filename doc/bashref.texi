@@ -2306,7 +2306,7 @@ In each of the cases below, @var{word} is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
 
 When not performing substring expansion, using the forms described
-below (e.g., @samp{:-}), Bash tests for a parameter that is unset or null.
+below (e.g., @samp{:@minus{}}), Bash tests for a parameter that is unset or null.
 Omitting the colon results in a test only for a parameter that is unset.
 Put another way, if the colon is included,
 the operator tests for both @var{parameter}'s existence and that its value
@@ -2444,7 +2444,7 @@ a number of characters, and the expansion is the characters between
 @var{offset} and that result.
 
 Note that a negative offset must be separated from the colon by at least
-one space to avoid being confused with the @samp{:-} expansion.
+one space to avoid being confused with the @samp{:@minus{}} expansion.
 
 Here are some examples illustrating substring expansion on parameters and
 subscripted arrays:
@@ -3973,7 +3973,8 @@ it ignores @code{SIGTERM}
 (so that @samp{kill 0} does not kill an interactive shell),
 and catches and handles @code{SIGINT}
 (so that the @code{wait} builtin is interruptible).
-When Bash receives a @code{SIGINT}, it breaks out of any executing loops.
+When Bash receives a @code{SIGINT},
+it breaks out of any executing loops and command lists.
 In all cases, Bash ignores @code{SIGQUIT}.
 If job control is in effect (@pxref{Job Control}), Bash
 ignores @code{SIGTTIN}, @code{SIGTTOU}, and @code{SIGTSTP}.

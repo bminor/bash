@@ -6,15 +6,18 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Jul 15 10:19:29 EDT 2025
+.\"	Last Change: Mon Oct  6 09:58:21 EDT 2025
 .\"
-.TH READLINE 3 "2024 July 15" "GNU Readline 8.3"
+.TH READLINE 3 "2025 October 6" "GNU Readline 8.3"
+.\" Ensure this string is initialized to avoid groff warnings.
+.ds zX \" empty
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
 .ds " \(dq
 .ds ^ \(ha
 .ds ~ \(ti
+.ds : \:\" hyphenless break point (e.g., for long file names and URLs)
 .\}
 .el \{\
 .ds ' '
@@ -22,6 +25,7 @@
 .ds " ""\" two adjacent quotes and no space before this comment
 .ds ^ ^
 .ds ~ ~
+.ds : \" empty
 .\}
 .
 .\" File Name macro.  This used to be `.PN', for Path Name,
@@ -42,6 +46,43 @@
 .  if n "\\$1"\\$2
 .\}
 ..
+.if \n(.g .ig zX
+.\" The following macro definitions are from groff's "an-ext.tmac".
+.
+.\" Prepare link text for mail/web hyperlinks.  `MT` and `UR` call this.
+.de mV
+.  ds mU \\$1\"
+..
+.\" Emit hyperlink.  The optional argument supplies trailing punctuation
+.\" after link text.  `ME` and `UE` call this.
+.de mQ
+.  mY
+.  nh
+<\\*(mU>\\$1
+.  hy \\n(mH
+.  rm mU
+..
+.\" Start URL.
+.\" .UR url
+.de UR
+.  mV \\$1
+..
+.\" End URL.
+.\" .UE [punctuation]
+.de UE
+.  mQ \\$1
+..
+.\" Start email address.
+.\" .MT address
+.de MT
+.  mV \\$1
+..
+.\" End email address.
+.\" .ME [punctuation]
+.de ME
+.  mQ \\$1
+..
+.zX
 .SH NAME
 readline \- get a line from a user with editing
 .SH SYNOPSIS
@@ -1845,9 +1886,9 @@ VI Command Mode functions
 .SH "SEE ALSO"
 .PD 0
 .TP
-\fIThe Gnu Readline Library\fP, Brian Fox and Chet Ramey
+\fIThe GNU Readline Library\fP, Brian Fox and Chet Ramey
 .TP
-\fIThe Gnu History Library\fP, Brian Fox and Chet Ramey
+\fIThe GNU History Library\fP, Brian Fox and Chet Ramey
 .TP
 \fIbash\fP(1)
 .PD
@@ -1858,34 +1899,40 @@ VI Command Mode functions
 Individual \fBreadline\fP initialization file
 .PD
 .SH AUTHORS
+.MT bfox@\*:gnu\*:.org
 Brian Fox, Free Software Foundation
-.br
-bfox@gnu.org
+.ME
 .PP
+.MT chet\*:.ramey@\*:case\*:.edu
 Chet Ramey, Case Western Reserve University
-.br
-chet.ramey@case.edu
-.SH BUG REPORTS
+.ME
+.SH "BUG REPORTS"
 If you find a bug in
 .BR readline ,
-you should report it.  But first, you should
+you should report it.
+But first, you should
 make sure that it really is a bug, and that it appears in the latest
 version of the
 .B readline
 library that you have.
 .PP
 Once you have determined that a bug actually exists, mail a
-bug report to \fIbug\-readline\fP@\fIgnu.org\fP.
-If you have a fix, you are welcome to mail that
-as well!  Suggestions and
+bug report to
+.MT bug\-readline@\*:gnu\*:.org
+.ME .
+If you have a fix, you are welcome to mail that as well!
+Please send suggestions and
 .Q philosophical
-bug reports may be mailed
-to \fPbug-readline\fP@\fIgnu.org\fP or posted to the Usenet
+bug reports
+to
+.MT bug\-readline@\*:gnu\*:.org
+.ME
+or post them to the
+Usenet
 newsgroup
-.BR gnu.bash.bug .
+.BR gnu\*:.bash\*:.bug .
 .PP
-Comments and bug reports concerning
-this manual page should be directed to
-.IR chet.ramey@case.edu .
-.SH BUGS
-It's too big and too slow.
+Please send comments and bug reports concerning
+this manual page to
+.MT bug\-readline@\*:gnu\*:.org
+.ME .

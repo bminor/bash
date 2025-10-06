@@ -102,6 +102,10 @@ convert_var_to_array (SHELL_VAR *var)
   /* Since namerefs can't be array variables, turn off nameref attribute */
   VUNSETATTR (var, att_nameref);
 
+  /* Temporary environment variables can't be array variables */
+/* itrace("convert_var_to_array: turning off att_tempvar for %s", var->name);*/
+  VUNSETATTR (var, att_tempvar);
+
   stupidly_hack_special_variables (var->name);
   return var;
 }
@@ -139,6 +143,10 @@ convert_var_to_assoc (SHELL_VAR *var)
 
   /* Since namerefs can't be array variables, turn off nameref attribute */
   VUNSETATTR (var, att_nameref);
+
+  /* Temporary environment variables can't be array variables */
+/*itrace("convert_var_to_assoc: turning off att_tempvar for %s", var->name);*/
+  VUNSETATTR (var, att_tempvar);
 
   stupidly_hack_special_variables (var->name);
   return var;

@@ -421,7 +421,7 @@ read_builtin (WORD_LIST *list)
     {
       int ct;		/* change terminal settings */
 
-      ct = (nflag || delim) && isatty (fd);
+      ct = (nflag || delim != '\n') && isatty (fd);
       return (check_read_input (fd, ct) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
 

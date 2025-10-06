@@ -11911,3 +11911,30 @@ builtins/read.def
 	- read_builtin: don't use i as a return value for functions and then
 	  as an index into input_string without resetting it
 	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- make_new_array_variable,make_new_assoc_variable: since temporary
+	  variables can't be arrays, turn off the att_tempvar attribute if
+	  we are making a variable and `inheriting' the temporary environment
+	  instance
+
+arrayfunc.c
+	- convert_var_to_array,convert_var_to_assoc: ditto turning off the
+	  att_tempvar attribute
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   10/6
+				   ----
+doc/bash.1,doc/bashref.texi,lib/readline/readline.3,lib/readline/history.3
+	- minor updates for bug workarounds and HTML output
+	- rework the BUG REPORTS section
+	- introduce groff macros for email addresses and URLs
+
+examples/loadables/Makefile.in,examples/loadables/Makefile.inc.in
+	- use `GNU' consistently instead of `Gnu'
+	  Patches from G. Branden Robinson <g.branden.robinson@gmail.com>
+
+builtins/read.def
+	- read_builtin: check whether `delim' is not a newline before calling
+	  check_read_input
+	  Report from pourko2@tutamail.com

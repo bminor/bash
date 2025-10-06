@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 19 September 2025).
+the Bash shell (version 5.3, 24 September 2025).
 
-This is Edition 5.3, last updated 19 September 2025,
+This is Edition 5.3, last updated 24 September 2025,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 19 September 2025).
+the Bash shell (version 5.3, 24 September 2025).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 19 September 2025,
+<p>This is Edition 5.3, last updated 24 September 2025,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -2705,7 +2705,7 @@ introduce indirection.
 parameter expansion, command substitution, and arithmetic expansion.
 </p>
 <p>When not performing substring expansion, using the forms described
-below (e.g., &lsquo;<samp class="samp">:-</samp>&rsquo;), Bash tests for a parameter that is unset or null.
+below (e.g., &lsquo;<samp class="samp">:&minus;</samp>&rsquo;), Bash tests for a parameter that is unset or null.
 Omitting the colon results in a test only for a parameter that is unset.
 Put another way, if the colon is included,
 the operator tests for both <var class="var">parameter</var>&rsquo;s existence and that its value
@@ -2846,7 +2846,7 @@ a number of characters, and the expansion is the characters between
 <var class="var">offset</var> and that result.
 </p>
 <p>Note that a negative offset must be separated from the colon by at least
-one space to avoid being confused with the &lsquo;<samp class="samp">:-</samp>&rsquo; expansion.
+one space to avoid being confused with the &lsquo;<samp class="samp">:&minus;</samp>&rsquo; expansion.
 </p>
 <p>Here are some examples illustrating substring expansion on parameters and
 subscripted arrays:
@@ -3633,18 +3633,26 @@ character in the set.
 </p>
 <p>The sorting order of characters in range expressions,
 and the characters included in the range,
-are determined by the current locale and the values of the
+are determined by the collating sequence of the
+current locale and the values of the
 <code class="env">LC_COLLATE</code> and <code class="env">LC_ALL</code> shell variables, if set.
 </p>
-<p>For example, in the default C locale, &lsquo;<samp class="samp">[a-dx-z]</samp>&rsquo; is equivalent to
+<p>For example, in the default C locale,
+&lsquo;<samp class="samp">[a-dx-z]</samp>&rsquo;
+is equivalent to
 &lsquo;<samp class="samp">[abcdxyz]</samp>&rsquo;.
 Many locales sort characters in dictionary order, and in these locales
-&lsquo;<samp class="samp">[a-dx-z]</samp>&rsquo; is typically not equivalent to &lsquo;<samp class="samp">[abcdxyz]</samp>&rsquo;;
-it might be equivalent to &lsquo;<samp class="samp">[aBbCcDdxYyZz]</samp>&rsquo;, for example.
-To obtain
-the traditional interpretation of ranges in bracket expressions, you can
-force the use of the C locale by setting the <code class="env">LC_COLLATE</code> or
-<code class="env">LC_ALL</code> environment variable to the value &lsquo;<samp class="samp">C</samp>&rsquo;, or enable the
+&lsquo;<samp class="samp">[a-dx-z]</samp>&rsquo;
+is typically not equivalent to
+&lsquo;<samp class="samp">[abcdxyz]</samp>&rsquo;;
+it might be equivalent to
+&lsquo;<samp class="samp">[aBbCcDdxYyZz]</samp>&rsquo;
+or
+&lsquo;<samp class="samp">[aAbBcCdxXyYz]</samp>&rsquo;.
+To obtain the traditional interpretation of ranges in bracket expressions,
+you can force the use of the C locale by setting the
+<code class="env">LC_COLLATE</code> or <code class="env">LC_ALL</code>
+environment variables to the value &lsquo;<samp class="samp">C</samp>&rsquo;, or enable the
 <code class="code">globasciiranges</code> shell option.
 </p>
 <p>Within a bracket expression, <em class="dfn">character classes</em> can be specified
@@ -4466,7 +4474,8 @@ it ignores <code class="code">SIGTERM</code>
 (so that &lsquo;<samp class="samp">kill 0</samp>&rsquo; does not kill an interactive shell),
 and catches and handles <code class="code">SIGINT</code>
 (so that the <code class="code">wait</code> builtin is interruptible).
-When Bash receives a <code class="code">SIGINT</code>, it breaks out of any executing loops.
+When Bash receives a <code class="code">SIGINT</code>,
+it breaks out of any executing loops and command lists.
 In all cases, Bash ignores <code class="code">SIGQUIT</code>.
 If job control is in effect (see <a class="pxref" href="#Job-Control">Job Control</a>), Bash
 ignores <code class="code">SIGTTIN</code>, <code class="code">SIGTTOU</code>, and <code class="code">SIGTSTP</code>.
@@ -7957,8 +7966,13 @@ option.
 filename completion.
 A filename whose suffix matches one of the entries in 
 <code class="env">FIGNORE</code>
-is excluded from the list of matched filenames.  A sample
-value is &lsquo;<samp class="samp">.o:~</samp>&rsquo;
+is excluded from the list of matched filenames.
+A sample value is
+&lsquo;<samp class="samp">.o:~</samp>&rsquo;.
+Since tilde expansion takes place after
+&lsquo;<samp class="samp">:</samp>&rsquo;
+in assignment statements,
+make sure to quote assignments appropriately to avoid it as appropriate.
 </p>
 </dd>
 <dt><a id="index-FUNCNAME"></a><span><code class="code">FUNCNAME</code><a class="copiable-link" href="#index-FUNCNAME"> &para;</a></span></dt>

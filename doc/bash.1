@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Sep 24 09:35:41 EDT 2025
+.\"	Last Change: Mon Oct  6 09:57:24 EDT 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -19,15 +19,17 @@
 .\" Ensure the macros/strings are initialized to avoid groff warnings.
 .ds zZ \" empty
 .ds zY \" empty
+.ds zX \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 September 24" "GNU Bash 5.3"
+.TH BASH 1 "2025 October 6" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
 .ds " \(dq
 .ds ^ \(ha
 .ds ~ \(ti
+.ds : \:\" hyphenless break point (e.g., for long file names and URLs)
 .\}
 .el \{\
 .ds ' '
@@ -35,6 +37,7 @@
 .ds " ""\" two adjacent quotes and no space before this comment
 .ds ^ ^
 .ds ~ ~
+.ds : \" empty
 .\}
 .
 .\" File Name macro.  This used to be `.PN', for Path Name,
@@ -63,6 +66,43 @@
 .  if n \%"\\$1"\\$2
 .\}
 ..
+.if \n(.g .ig zX
+.\" The following macro definitions are from groff's "an-ext.tmac".
+.
+.\" Prepare link text for mail/web hyperlinks.  `MT` and `UR` call this.
+.de mV
+.  ds mU \\$1\"
+..
+.\" Emit hyperlink.  The optional argument supplies trailing punctuation
+.\" after link text.  `ME` and `UE` call this.
+.de mQ
+.  mY
+.  nh
+<\\*(mU>\\$1
+.  hy \\n(mH
+.  rm mU
+..
+.\" Start URL.
+.\" .UR url
+.de UR
+.  mV \\$1
+..
+.\" End URL.
+.\" .UE [punctuation]
+.de UE
+.  mQ \\$1
+..
+.\" Start email address.
+.\" .MT address
+.de MT
+.  mV \\$1
+..
+.\" End email address.
+.\" .ME [punctuation]
+.de ME
+.  mQ \\$1
+..
+.zX
 .SH NAME
 bash \- GNU Bourne-Again SHell
 .SH SYNOPSIS
@@ -5995,7 +6035,7 @@ and catches and handles
 When \fBbash\fP receives
 .SM
 .BR SIGINT ,
-it breaks out of any executing loops.
+it breaks out of any executing loops and command lists.
 In all cases, \fBbash\fP ignores
 .SM
 .BR SIGQUIT .
@@ -13450,14 +13490,17 @@ script.
 .TP
 \fIBash Reference Manual\fP, Brian Fox and Chet Ramey
 .TP
-\fIThe Gnu Readline Library\fP, Brian Fox and Chet Ramey
+\fIThe GNU Readline Library\fP, Brian Fox and Chet Ramey
 .TP
-\fIThe Gnu History Library\fP, Brian Fox and Chet Ramey
+\fIThe GNU History Library\fP, Brian Fox and Chet Ramey
 .TP
-\fIPortable Operating System Interface (POSIX) Part 2: Shell and Utilities\fP, IEEE \(em
-http://pubs.opengroup.org/onlinepubs/9799919799/
+POSIX.1-2024, The IEEE and The Open Group
+.UR https://pubs.opengroup.org/onlinepubs/9799919799/
+.UE
 .TP
-http://tiswww.case.edu/\*~chet/bash/POSIX \(em a description of posix mode
+a description of posix mode
+.UR http://tiswww.case.edu/\*~chet/bash/POSIX
+.UE
 .TP
 \fIsh\fP(1), \fIksh\fP(1), \fIcsh\fP(1)
 .TP
@@ -13491,14 +13534,14 @@ command history
 Individual \fIreadline\fP initialization file
 .PD
 .SH AUTHORS
+.MT bfox@\*:gnu\*:.org
 Brian Fox, Free Software Foundation
-.br
-bfox@gnu.org
+.ME
 .PP
+.MT chet\*:.ramey@\*:case\*:.edu
 Chet Ramey, Case Western Reserve University
-.br
-chet.ramey@case.edu
-.SH BUG REPORTS
+.ME
+.SH "BUG REPORTS"
 If you find a bug in
 .BR bash ,
 you should report it.  But first, you should
@@ -13506,8 +13549,12 @@ make sure that it really is a bug, and that it appears in the latest
 version of
 .BR bash .
 The latest version is always available from
-\fIftp://ftp.gnu.org/pub/gnu/bash/\fP and
-\fIhttp://git.savannah.gnu.org/cgit/bash.git/snapshot/bash-master.tar.gz\fP.
+.UR ftp://ftp.gnu.org/pub/gnu/bash/
+.UE
+and
+.UR http://\*:git\*:.savannah\*:.gnu\*:.org/\*:cgit/\*:bash\*:.git/\
+\*:snapshot/\*:bash\-master\*:.tar.\*:gz
+.UE .
 .PP
 Once you have determined that a bug actually exists, use the
 .I bashbug
@@ -13515,42 +13562,85 @@ command to submit a bug report.
 If you have a fix, you are encouraged to mail that as well!
 You may send suggestions and
 .Q philosophical
-bug reports to \fIbug-bash@gnu.org\fP or post them to the Usenet
+bug reports to
+.MT bug\-bash@\*:gnu\*:.org
+.ME
+or post them to the
+Usenet
 newsgroup
-.BR gnu.bash.bug .
+.BR gnu\*:.bash\*:.bug .
 .PP
-ALL bug reports should include:
+.I All
+bug reports should include:
 .PP
 .PD 0
-.TP 20
-The version number of \fBbash\fP
-.TP
-The hardware and operating system
-.TP
-The compiler used to compile
-.TP
-A description of the bug behavior
-.TP
-A short script or \c
-.Q recipe " \c"
-which exercises the bug
+.IP \(bu 2n
+the version number of
+.B bash
+(\c
+.Q "echo $BASH_VERSION"\c
+),
+.IP \(bu
+the host platform and operating system
+(\c
+.Q "uname \-a"\c
+),
+.IP \(bu
+either
+.RS 4n
+.IP (a) 4n
+if you or an administrator built and installed
+.B bash
+from source,
+the name and version of the compiler used to build it,
+as reported by
+.BR bash 's
+.QN configure
+script;
+or
+.IP (b) 4n
+if your site uses a distributor's
+.B bash
+package,
+the version of that package
+(for example,
+.Q "dpkg \-i bash"
+or
+.Q "rpm \-qi bash"\c
+),
+.RE
+.IP \(bu
+a description of the behavior
+.B bash
+exhibited,
+.IP \(bu
+a description of the behavior you expected from
+.BR bash ,
+and
+.IP \(bu
+a short shell script or
+.Q recipe
+exercising the unexpected behavior.
 .PD
 .PP
 .I bashbug
 inserts the first three items automatically into the template
 it provides for filing a bug report.
 .PP
-Comments and bug reports concerning
-this manual page should be directed to
-.IR chet.ramey@case.edu .
+Please send comments and bug reports concerning
+this manual page to
+.MT bug\-bash@\*:gnu\*:.org
+.ME .
 .SH BUGS
 It's too big and too slow.
 .PP
 There are some subtle differences between
 .B bash
-and traditional versions of
+and historical versions of
 .BR sh ,
-mostly because of the
+due mostly to
+.BR bash 's
+independent implementation and the evolution of the
 .SM POSIX
 specification.
 .PP
