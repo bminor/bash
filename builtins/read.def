@@ -817,7 +817,9 @@ read_builtin (WORD_LIST *list)
 	  x = (char *)xrealloc (input_string, size += 128);
 
 	  /* Only need to change unwind-protect if input_string changes */
+#ifndef __CHERI_PURE_CAPABILITY__
 	  if (x != input_string)
+#endif
 	    {
 	      input_string = x;
 	      remove_unwind_protect ();

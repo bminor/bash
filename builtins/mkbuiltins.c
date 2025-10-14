@@ -525,7 +525,7 @@ extract_info (char *filename, FILE *structfile, FILE *externfile)
   if (stat (filename, &finfo) == -1)
     file_error (filename);
 
-  fd = open (filename, O_RDONLY, 0666);
+  fd = open (filename, O_RDONLY);
 
   if (fd == -1)
     file_error (filename);

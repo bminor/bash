@@ -354,7 +354,7 @@ read_history_range (const char *filename, int from, int to)
   if (input == 0)
     return 0;
   errno = 0;
-  file = open (input, O_RDONLY|O_BINARY, 0666);
+  file = open (input, O_RDONLY|O_BINARY);
 
   if ((file < 0) || (fstat (file, &finfo) == -1))
     goto error_and_exit;
@@ -623,7 +623,7 @@ history_truncate_file (const char *fname, int lines)
   if (filename == 0)
     return 0;
   tempname = 0;
-  file = open (filename, O_RDONLY|O_BINARY, 0666);
+  file = open (filename, O_RDONLY|O_BINARY);
   rv = exists = 0;
 
   orig_lines = lines;

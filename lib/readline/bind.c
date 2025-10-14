@@ -967,12 +967,12 @@ _rl_read_file (char *filename, size_t *sizep)
   char *buffer;
   int i, file;
 
-  file = open (filename, O_RDONLY, 0666);
+  file = open (filename, O_RDONLY);
   /* If the open is interrupted, retry once */
   if (file < 0 && errno == EINTR)
     {
       RL_CHECK_SIGNALS ();
-      file = open (filename, O_RDONLY, 0666);
+      file = open (filename, O_RDONLY);
     }
   
   if ((file < 0) || (fstat (file, &finfo) < 0))

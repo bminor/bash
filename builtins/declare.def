@@ -775,10 +775,21 @@ restart_new_var_name:
       */
       if (var == 0 && (mkglobal || flags_on || flags_off || offset))
 	{
-	  refvar = mkglobal ? find_global_variable_last_nameref (name, 0) : find_variable_last_nameref (name, 0);
+	  refvar = mkglobal ? find_global_variable_last_nameref (name, 1) : find_variable_last_nameref (name, 1);
 	  if (refvar && nameref_p (refvar) == 0)
 	    refvar = 0;
-	  if (refvar)
+	  /* If we are trying to set attributes for an unset nameref variable,
+	     we have a couple of choices: we can set the attributes on the
+	     nameref itself, or we can remove the nameref attribute from the
+	     variable and treat it as an unset variable with the new
+	     attribute(s). The former is what bash has traditionally done; the
+	     latter is what ksh93 does. */
+	  if (refvar && nameref_cell (refvar) == 0)
+	    {
+	      var = refvar;
+	      refvar = 0;
+	    }
+	  if (refvar && nameref_cell (refvar))
 	    var = declare_find_variable (nameref_cell (refvar), mkglobal, 0);
 	  if (refvar && var == 0)
 	    {

@@ -119,6 +119,17 @@ gettimeofday (struct timeval *restrict tv, void *restrict tz)
   return 0;
 
 #else /* !WINDOWS_NATIVE */
+#  if defined (HAVE_CLOCK_GETTIME) && defined (CLOCK_REALTIME)
+  struct timespec ts;
+  int r;
+
+  r = clock_gettime (CLOCK_REALTIME, &ts);
+  if (r == 0)
+    {
+      TIMESPEC_TO_TIMEVAL(tv, &ts);
+      return 0;
+    }
+#  endif /* !CLOCK_GETTIME */
 
   tv->tv_sec = (time_t) time ((time_t *)0);
   tv->tv_usec = 0;

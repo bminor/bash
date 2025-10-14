@@ -2971,7 +2971,7 @@ make_variable_value (SHELL_VAR *var, const char *value, int flags)
 	  if (value)
 	    strcpy (retval+olen, value);
 	}
-      else if (*value)
+      else if (value && *value)
 	retval = savestring (value);
       else
 	{

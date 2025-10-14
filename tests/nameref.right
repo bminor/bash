@@ -183,7 +183,7 @@ declare -n foo="bar"
 ./nameref11.sub: line 14: declare: `/': invalid variable name for name reference
 ./nameref11.sub: line 15: declare: `/': invalid variable name for name reference
 ./nameref11.sub: line 16: `/': not a valid identifier
-./nameref11.sub: line 17: declare: `/': not a valid identifier
+./nameref11.sub: line 17: declare: `/': invalid variable name for name reference
 ./nameref11.sub: line 18: `/': not a valid identifier
 1) /
 #? ./nameref11.sub: line 19: `/': not a valid identifier
@@ -243,12 +243,12 @@ declare -r RO2="a"
 declare -n r
 declare -a foo
 declare -a foo=([0]="7")
-./nameref12.sub: line 39: declare: `42': not a valid identifier
-./nameref12.sub: line 40: declare: x: not found
+./nameref12.sub: line 39: declare: `42': invalid variable name for name reference
+declare -n x
 declare -nr RO="foo"
 /
-./nameref12.sub: line 58: declare: `7*6': not a valid identifier
-./nameref12.sub: line 58: declare: foo: not found
+./nameref12.sub: line 58: declare: `7*6': invalid variable name for name reference
+declare -n foo
 ./nameref12.sub: line 60: `7*6': not a valid identifier
 declare -n ref="var"
 declare -n ref="var"
@@ -381,6 +381,7 @@ declare -- bar
 ./nameref17.sub: line 28: declare: foo0: readonly variable
 declare -nr foo1
 ./nameref17.sub: line 37: typeset: foo1: readonly variable
+./nameref17.sub: line 38: typeset: foo1: readonly variable
 declare -nr foo1
 declare -n foo2="bar"
 declare -r bar

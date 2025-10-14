@@ -11938,3 +11938,49 @@ builtins/read.def
 	- read_builtin: check whether `delim' is not a newline before calling
 	  check_read_input
 	  Report from pourko2@tutamail.com
+
+builtins/read.def
+	- read_builtin: CHERI systems require that we update the unwind-protect
+	  after every xrealloc, not just if the pointer changes
+	  From https://savannah.gnu.org/bugs/?67586
+
+				   10/7
+				   ----
+doc/bash.1,lib/readline/doc/readline.3,lib/readline/doc/history.3
+	- remove mention of Usenet and gnu.bash.bug. End of an era.
+
+lib/sh/gettimeofday.c
+	- gettimeofday: if we're replacing this function on a non-Windows
+	  system, prefer clock_gettime (CLOCK_REALTIME, ...) if it's available
+	  instead of just filling in the seconds from time(3)
+
+				   10/9
+				   ----
+lib/readline/text.c
+	- rl_insert: don't try to optimize runs of typeahead characters if we
+	  are defining a keyboard macro
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+				   10/12
+				   -----
+variables.c
+	- make_variable_value: make sure to check whether VALUE is non-NULL
+	  before trying to strdup it; not all callers check
+	  Report from Александр Ушаков <anushakov@edu.hse.ru>
+
+				   10/13riable`
+				   -----
+builtins/declare.def
+	- declare_internal: if we are trying to set the attributes or value
+	  for an unset nameref variable (attributes but no value), allow
+	  the attribute or value setting to happen on the nameref, and don't
+	  destroy the nameref variable on an assignment error
+	  Report from Александр Ушаков <anushakov@edu.hse.ru>
+
+execute_cmd.c
+	- execute_for_command,eval_arith_for_expr,execute_select_command,
+	  execute_case_command,execute_arith_command,execute_cond_command,
+	  execute_simple_command: save and restore currently_executing_command
+	  around calls to run_debug_trap the same way we do it for
+	  run_return_trap
+	  Report from Александр Ушаков <anushakov@edu.hse.ru>

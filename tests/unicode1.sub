@@ -19,6 +19,8 @@ unset LC_ALL
 ErrorCnt=0
 TestCnt=0
 
+. ./test-aux-functions
+
 localewarn()
 {
 	echo "unicode1.sub: warning: you do not have the $1 locale installed;" >&2
@@ -98,8 +100,9 @@ fr_FR_ISO_8859_1=(
 )
 
 # this locale causes problems all over the place
-if locale -a | grep -i '^fr_FR\.ISO8859.*1$' >/dev/null ; then
-	TestCodePage fr_FR.ISO8859-1 fr_FR_ISO_8859_1
+FR_LOCALE=$(locale -a | grep -i '^fr_FR\.ISO8859-1' | sed 1q)
+if [ -n "$FR_LOCALE" ]; then
+	TestCodePage ${FR_LOCALE} fr_FR_ISO_8859_1
 else
 	localewarn fr_FR.ISO8859-1
 
@@ -118,8 +121,8 @@ zh_TW_BIG5=(
 )
 
 # this locale causes problems all over the place
-if locale -a | grep -i '^zh_TW\.big5' >/dev/null ; then
-	TestCodePage zh_TW.BIG5 zh_TW_BIG5
+if [ -n "$ZH_LOCALE" ]; then
+	TestCodePage $ZH_LOCALE zh_TW_BIG5
 else
 	localewarn zh_TW.BIG5
 fi

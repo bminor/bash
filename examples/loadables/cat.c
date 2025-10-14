@@ -84,7 +84,7 @@ cat_main (int argc, char **argv)
 			fd = 0;
 			closefd = 0;
 		} else {
-			fd = open(argv[i], O_RDONLY, 0666);
+			fd = open(argv[i], O_RDONLY);
 			if (fd < 0) {
 				s = strerror(errno);
 				write(2, "cat: cannot open ", 17);

@@ -522,7 +522,7 @@ use_tempfile:
   /* In an attempt to avoid races, we close the first fd only after opening
      the second. */
   /* Make the document really temporary.  Also make it the input. */
-  fd2 = open (filename, O_RDONLY|O_BINARY, 0600);
+  fd2 = open (filename, O_RDONLY|O_BINARY);
 
   if (fd2 < 0)
     {
@@ -729,16 +729,6 @@ redir_open (char *filename, int flags, int mode, enum r_instruction ri)
 	  errno = e;
 	}
       while (fd < 0 && errno == EINTR);
-
-#if 0	/* reportedly no longer needed */
-#if defined (AFS)
-      if ((fd < 0) && (errno == EACCES))
-	{
-	  fd = open (filename, flags & ~O_CREAT, mode);
-	  errno = EACCES;	/* restore errno */
-	}
-#endif /* AFS */
-#endif
     }
 
   return fd;

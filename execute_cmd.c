@@ -3022,6 +3022,7 @@ execute_for_command (FOR_COM *for_command)
 {
   WORD_LIST *releaser, *list;
   SHELL_VAR *v;
+  COMMAND *save_current;
   char *identifier;
   int retval, save_line_number;
 #if 0
@@ -3081,7 +3082,10 @@ execute_for_command (FOR_COM *for_command)
 	  the_printed_command_except_trap = savestring (the_printed_command);
 	}
 
+      save_current = currently_executing_command;
       retval = run_debug_trap ();
+      currently_executing_command = save_current;
+
 #if defined (DEBUGGER)
       /* In debugging mode, if the DEBUG trap returns a non-zero status, we
 	 skip the command. */
@@ -3188,6 +3192,7 @@ eval_arith_for_expr (WORD_LIST *l, int *okp)
   intmax_t expresult;
   int r, eflag;
   char *expr, *temp;
+  COMMAND *save_current;
 
   expr = l->next ? string_list (l) : l->word->word;
   temp = expand_arith_string (expr, Q_DOUBLE_QUOTES|Q_ARITH);
@@ -3206,7 +3211,10 @@ eval_arith_for_expr (WORD_LIST *l, int *okp)
 	  the_printed_command_except_trap = savestring (the_printed_command);
 	}
 
+      save_current = currently_executing_command;
       r = run_debug_trap ();
+      currently_executing_command = save_current;
+
 #if defined (DEBUGGER)
       /* In debugging mode, if the DEBUG trap returns a non-zero status, we
 	 skip the command. */
@@ -3499,6 +3507,7 @@ execute_select_command (SELECT_COM *select_command)
   SHELL_VAR *v;
   char *identifier, *ps3_prompt, *selection;
   int retval, list_len, show_menu, save_line_number;
+  COMMAND *save_current;
 
   if (check_identifier (select_command->name, 1) == 0)
     {
@@ -3526,7 +3535,10 @@ execute_select_command (SELECT_COM *select_command)
       the_printed_command_except_trap = savestring (the_printed_command);
     }
 
+  save_current = currently_executing_command;
   retval = run_debug_trap ();
+  currently_executing_command = save_current;
+
 #if defined (DEBUGGER)
   /* In debugging mode, if the DEBUG trap returns a non-zero status, we
      skip the command. */
@@ -3640,6 +3652,7 @@ execute_case_command (CASE_COM *case_command)
   PATTERN_LIST *clauses;
   char *word, *pattern;
   int retval, match, ignore_return, save_line_number, qflags;
+  COMMAND *save_current;
 
   save_line_number = line_number;
   line_number = case_command->line;
@@ -3657,7 +3670,10 @@ execute_case_command (CASE_COM *case_command)
       the_printed_command_except_trap = savestring (the_printed_command);
     }
 
+  save_current = currently_executing_command;
   retval = run_debug_trap();
+  currently_executing_command = save_current;
+
 #if defined (DEBUGGER)
   /* In debugging mode, if the DEBUG trap returns a non-zero status, we
      skip the command. */
@@ -3877,6 +3893,7 @@ execute_arith_command (ARITH_COM *arith_command)
   intmax_t expresult;
   WORD_LIST *new;
   char *exp, *t;
+  COMMAND *save_current;
 
   expresult = 0;
 
@@ -3898,7 +3915,10 @@ execute_arith_command (ARITH_COM *arith_command)
   /* Run the debug trap before each arithmetic command, but do it after we
      update the line number information and before we expand the various
      words in the expression. */
+  save_current = currently_executing_command;
   retval = run_debug_trap ();
+  currently_executing_command = save_current;
+
 #if defined (DEBUGGER)
   /* In debugging mode, if the DEBUG trap returns a non-zero status, we
      skip the command. */
@@ -4113,6 +4133,7 @@ static int
 execute_cond_command (COND_COM *cond_command)
 {
   int retval, save_line_number;
+  COMMAND *save_current;
 
   save_line_number = line_number;
 
@@ -4131,7 +4152,10 @@ execute_cond_command (COND_COM *cond_command)
 
   /* Run the debug trap before each conditional command, but do it after we
      update the line number information. */
+  save_current = currently_executing_command;
   retval = run_debug_trap ();
+  currently_executing_command = save_current;
+
 #if defined (DEBUGGER)
   /* In debugging mode, if the DEBUG trap returns a non-zero status, we
      skip the command. */
@@ -4455,6 +4479,7 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
   pid_t old_last_async_pid;
   sh_builtin_func_t *builtin;
   SHELL_VAR *func;
+  COMMAND *save_current;
   volatile int old_builtin, old_command_builtin;
 
   result = EXECUTION_SUCCESS;
@@ -4484,7 +4509,10 @@ execute_simple_command (SIMPLE_COM *simple_command, int pipe_in, int pipe_out, i
 
   /* Run the debug trap before each simple command, but do it after we
      update the line number information. */
+  save_current = currently_executing_command;
   result = run_debug_trap ();
+  currently_executing_command = save_current;
+
 #if defined (DEBUGGER)
   /* In debugging mode, if the DEBUG trap returns a non-zero status, we
      skip the command. */
@@ -5396,13 +5424,13 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
       showing_function_line = 1;
       save_current = currently_executing_command;
       result = run_debug_trap ();
+      currently_executing_command = save_current;
 #if defined (DEBUGGER)
       /* In debugging mode, if the DEBUG trap returns a non-zero status, we
 	 skip the command. */
       if (debugging_mode == 0 || result == EXECUTION_SUCCESS)
 	{
 	  showing_function_line = 0;
-	  currently_executing_command = save_current;
 	  result = execute_command_internal (fc, 0, NO_PIPE, NO_PIPE, fds_to_close);
 
 	  /* Run the RETURN trap in the function's context */
@@ -5411,7 +5439,6 @@ execute_function (SHELL_VAR *var, WORD_LIST *words, int flags, struct fd_bitmap 
 	  currently_executing_command = save_current;
 	}
 #else
-      currently_executing_command = save_current;
       result = execute_command_internal (fc, 0, NO_PIPE, NO_PIPE, fds_to_close);
 
       save_current = currently_executing_command;
