@@ -35,9 +35,10 @@ echo $foo
 foo=one echo $foo
 
 set +x
+. ./test-aux-functions
 
 # test BASH_XTRACEFD
-${THIS_SH} ./set-x1.sub
+test_runsub ./set-x1.sub
 
 # compound assignment printing
-${THIS_SH} ./set-x2.sub
+test_runsub ./set-x2.sub

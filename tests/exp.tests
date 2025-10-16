@@ -19,6 +19,8 @@
 #
 # Chet Ramey
 
+. ./test-aux-functions
+
 #
 # If you comment out the body of this function, you can do a diff against
 # `expansion-tests.right' to see if the shell is behaving correctly
@@ -415,21 +417,16 @@ echo ${a//\?/ }
 
 ${THIS_SH} -c 'var=a:b: ; IFS=" :" ; recho $var""' bash
 
-${THIS_SH} ./exp1.sub
-
-${THIS_SH} ./exp2.sub
-
-${THIS_SH} ./exp3.sub
-
-${THIS_SH} ./exp4.sub
-
-${THIS_SH} ./exp5.sub
-
-${THIS_SH} ./exp6.sub
-${THIS_SH} ./exp7.sub
-${THIS_SH} ./exp8.sub
-${THIS_SH} ./exp9.sub
-${THIS_SH} ./exp10.sub
-${THIS_SH} ./exp11.sub
-${THIS_SH} ./exp12.sub
-${THIS_SH} ./exp13.sub
+test_runsub ./exp1.sub
+test_runsub ./exp2.sub
+test_runsub ./exp3.sub
+test_runsub ./exp4.sub
+test_runsub ./exp5.sub
+test_runsub ./exp6.sub
+test_runsub ./exp7.sub
+test_runsub ./exp8.sub
+test_runsub ./exp9.sub
+test_runsub ./exp10.sub
+test_runsub ./exp11.sub
+test_runsub ./exp12.sub
+test_runsub ./exp13.sub

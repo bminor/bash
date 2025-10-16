@@ -13,6 +13,7 @@
 #
 
 # a set of tests for associative arrays in arithmetic contexts
+. ./test-aux-functions
 
 declare -A assoc
 key='x],b[$(echo uname >&2)'
@@ -153,12 +154,12 @@ echo $?
 (( expr ))
 echo $?
 
-${THIS_SH} ./quotearray1.sub
-${THIS_SH} ./quotearray2.sub
-${THIS_SH} ./quotearray3.sub
+test_runsub ./quotearray1.sub
+test_runsub ./quotearray2.sub
+test_runsub ./quotearray3.sub
 
 # behavior of builtins with array subscripts @ and *
-${THIS_SH} ./quotearray4.sub
+test_runsub ./quotearray4.sub
 
 # behavior of unset with quoted and unquoted array arguments
-${THIS_SH} ./quotearray5.sub
+test_runsub ./quotearray5.sub

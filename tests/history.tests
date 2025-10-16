@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 trap 'rm $TMPDIR/newhistory' 0
 
 # bad options
@@ -124,14 +126,14 @@ set +o history
 shopt -q -o history
 echo $?
 
-${THIS_SH} ./history1.sub
+test_runsub ./history1.sub
 rm -f $TMPDIR/foohist-*
 
-${THIS_SH} ./history2.sub
-${THIS_SH} ./history3.sub
-${THIS_SH} ./history4.sub
-${THIS_SH} ./history5.sub
-${THIS_SH} ./history6.sub
-${THIS_SH} ./history7.sub
-${THIS_SH} ./history8.sub
-${THIS_SH} ./history9.sub
+test_runsub ./history2.sub
+test_runsub ./history3.sub
+test_runsub ./history4.sub
+test_runsub ./history5.sub
+test_runsub ./history6.sub
+test_runsub ./history7.sub
+test_runsub ./history8.sub
+test_runsub ./history9.sub

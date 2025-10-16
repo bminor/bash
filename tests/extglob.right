@@ -79,6 +79,7 @@ a b a,b a-b a.b a:b a;b a_b
 a b a,b a-b a.b a:b a;b a_b
 argv[1] = <ef>
 a,b
+	extglob1.sub
 a.c
 a.c
 a.c
@@ -88,10 +89,12 @@ a.c
 ok 1
 ok 2
 ok 3
+	extglob1a.sub
 a ab
 a ab
 a ab
 a
+	extglob3.sub
 *(.)
 a.log
 *(foo)
@@ -104,6 +107,7 @@ a.log
 *(foo|bar).*
 a.log
 a.log
+	extglob4.sub
 .x .y .z
 a b c
 .x .y .z a b c
@@ -113,7 +117,9 @@ a b c
 a b c
 .x .y .z a b c
 .x .y .z a b c
+	extglob5.sub
 *
+	extglob6.sub
 .b a
 .b a
 a .b
@@ -124,6 +130,7 @@ a .b
 a .b
 .b
 .b
+	extglob7.sub
 dotglob: .a .foo bar
 @(.foo)
 .foo
@@ -182,6 +189,7 @@ no dotglob: .a .foo bar
 ? . .. .a .foo
 *
 bar
+	extglob8.sub
 extglob             	off
 x
 extglob             	off

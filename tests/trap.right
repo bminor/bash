@@ -5,9 +5,9 @@ trap -- 'echo aborting' SIGINT
 trap -- 'echo aborting' SIGQUIT
 trap -- 'echo aborting' SIGABRT
 trap -- 'echo aborting' SIGTERM
-[33] debug
-debug line
 [35] debug
+debug line
+[37] debug
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGHUP
 trap -- 'echo aborting' SIGINT
@@ -15,10 +15,10 @@ trap -- 'echo aborting' SIGQUIT
 trap -- 'echo aborting' SIGABRT
 trap -- 'echo aborting' SIGTERM
 trap -- 'echo [$LINENO] debug' DEBUG
-[37] debug
-func[29] funcdebug
+[39] debug
+func[31] funcdebug
 funcdebug line
-./trap.tests[39] funcdebug
+./trap.tests[41] funcdebug
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGHUP
 trap -- 'echo aborting' SIGINT
@@ -26,14 +26,14 @@ trap -- 'echo aborting' SIGQUIT
 trap -- 'echo aborting' SIGABRT
 trap -- 'echo aborting' SIGTERM
 trap -- 'echo ${FUNCNAME:-$0}[$LINENO] funcdebug' DEBUG
-./trap.tests[41] funcdebug
-./trap.tests[46] debug
-./trap.tests[47] debug
-func2[43] debug
-func2[44] debug
-func2debug line
+./trap.tests[43] funcdebug
+./trap.tests[48] debug
 ./trap.tests[49] debug
+func2[45] debug
+func2[46] debug
+func2debug line
 ./trap.tests[51] debug
+./trap.tests[53] debug
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGHUP
 trap -- 'echo aborting' SIGINT
@@ -53,7 +53,9 @@ trap -- 'echo aborting' SIGQUIT
 trap -- 'echo aborting' SIGABRT
 trap -- 'echo aborting' SIGTERM
 0
+	trap1.sub
 trap -- '' SIGUSR2
+	trap2.sub
 ERRTRAP
 ERRTRAP
 ERRTRAP
@@ -72,6 +74,7 @@ ERRTRAP
 ERRTRAP
 ERRTRAP
 ERRTRAP
+	trap3.sub
 +[6] echo 1
 1
 +[7] echo 2
@@ -83,6 +86,7 @@ ERRTRAP
 trap: 8
 +[9] echo 4
 4
+	trap4.sub
 exit subshell 1
 current shell
 exit subshell 2
@@ -101,17 +105,21 @@ sleep 2
 wait $!
 exit
 in trap EXIT
+	trap6.sub
 fn
 after 1
 fn
 after 2
 declare -- baz=$'bar\nfoo'
+	trap7.sub
+	trap8.sub
 before
 after
 CHLD
 CHLD
 CHLD
 CHLD
+	trap9.sub
 BASH_TRAPSIG = USR1
 func=7
 222
@@ -120,6 +128,7 @@ exit=0
 A
 In trap-argument: last command preceding the trap action
 In a function call: last command in the trap action
+	trap10.sub
 ERR: 23: -func- failed
 ERR: 20: -[[ -z nonempty ]]- failed
 ERR: 27: -func- failed
@@ -130,10 +139,10 @@ caught a child death
 caught a child death
 trap -- 'echo caught a child death' SIGCHLD
 echo caught a child death
-./trap.tests: line 121: trap: cannot specify both -p and -P
-./trap.tests: line 122: trap: -P requires at least one signal name
+./trap.tests: line 125: trap: cannot specify both -p and -P
+./trap.tests: line 126: trap: -P requires at least one signal name
 trap: usage: trap [-Plp] [[action] signal_spec ...]
-./trap.tests: line 124: trap: -x: invalid option
+./trap.tests: line 128: trap: -x: invalid option
 trap: usage: trap [-Plp] [[action] signal_spec ...]
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGABRT

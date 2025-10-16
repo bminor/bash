@@ -11,32 +11,34 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 # test out %+, jobs -p, and $! agreement in a subshell first
-${THIS_SH} ./jobs1.sub
+test_runsub ./jobs1.sub
 
 # test out fg/bg failure in a subshell
-${THIS_SH} ./jobs2.sub
+test_runsub ./jobs2.sub
 
 # test out behavior of waiting for background pids -- bug in versions
 # before 2.03
-${THIS_SH} ./jobs3.sub
+test_runsub ./jobs3.sub
 
 # test out behavior of using job control notation when job control is not
 # active
-${THIS_SH} ./jobs4.sub
+test_runsub ./jobs4.sub
 
 # test out wait -n framework
-${THIS_SH} ./jobs5.sub
+test_runsub ./jobs5.sub
 
 # test out wait -f framework
-${THIS_SH} ./jobs6.sub
+test_runsub ./jobs6.sub
 
-${THIS_SH} ./jobs7.sub
+test_runsub ./jobs7.sub
 # more disown -h tests
-${THIS_SH} ./jobs8.sub
+test_runsub ./jobs8.sub
 
 # wait interrupted by signal for which a trap has been set
-${THIS_SH} ./jobs9.sub
+test_runsub ./jobs9.sub
 
 jobs
 echo $?

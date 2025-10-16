@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 declare -a A
 mapfile A < mapfile.data
 for (( i = 0 ; i < ${#A[@]} ; i++ )); do
@@ -58,5 +60,5 @@ mapfile -t -d $'\xff' array <<<"$s"
 declare -p array
 unset -v s array
 
-${THIS_SH} ./mapfile1.sub
-${THIS_SH} ./mapfile2.sub
+test_runsub ./mapfile1.sub
+test_runsub ./mapfile2.sub

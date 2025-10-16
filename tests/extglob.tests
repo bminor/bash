@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+.  ./test-aux-functions
+#
 # test the ksh-like extended globbing features: [!@*?+](patlist)
 
 shopt -s extglob
@@ -384,13 +386,13 @@ foo=
 foo=${foo/#*([.])}
 unset foo
 
-${THIS_SH} ./extglob1.sub
-${THIS_SH} ./extglob1a.sub
-${THIS_SH} ./extglob3.sub
-${THIS_SH} ./extglob4.sub
-${THIS_SH} ./extglob5.sub
-${THIS_SH} ./extglob6.sub
-${THIS_SH} ./extglob7.sub
-${THIS_SH} ./extglob8.sub
+test_runsub ./extglob1.sub
+test_runsub ./extglob1a.sub
+test_runsub ./extglob3.sub
+test_runsub ./extglob4.sub
+test_runsub ./extglob5.sub
+test_runsub ./extglob6.sub
+test_runsub ./extglob7.sub
+test_runsub ./extglob8.sub
 
 exit 0

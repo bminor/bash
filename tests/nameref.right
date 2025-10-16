@@ -27,20 +27,23 @@ changevar: expect <three four five>
 argv[1] = <three four five>
 expect <three four five>
 argv[1] = <three four five>
-./nameref.tests: line 106: foo: readonly variable
-./nameref.tests: line 107: foo: readonly variable
+./nameref.tests: line 108: foo: readonly variable
+./nameref.tests: line 109: foo: readonly variable
 one
 one
-./nameref.tests: line 119: foo: readonly variable
-./nameref.tests: line 116: foo: readonly variable
+./nameref.tests: line 121: foo: readonly variable
+./nameref.tests: line 118: foo: readonly variable
 one
 abxde
 abxde
+	nameref1.sub
 one
 bar
 
+	nameref2.sub
 ./nameref2.sub: line 5: foo: readonly variable
 
+	nameref3.sub
 expect <unset>
 argv[1] = <unset>
 expect <unset>
@@ -57,6 +60,7 @@ two
 three
 unset
 four
+	nameref4.sub
 0
 expect <a b>
 a b
@@ -97,6 +101,7 @@ X
 expect <X>
 X
 errors = 0
+	nameref5.sub
 1
 2
 v1: 1
@@ -114,6 +119,7 @@ ref -> one, value: 1
 ref -> two, value: 2
 ref -> three, value: 3
 final state: ref -> three, value: 3
+	nameref6.sub
 ./nameref6.sub: line 15: typeset: x: nameref variable self references not allowed
 ./nameref6.sub: line 18: typeset: x[3]: reference variable cannot be an array
 ./nameref6.sub: line 25: typeset: x: reference variable cannot be an array
@@ -123,8 +129,10 @@ y -- 0
 2 -- 0
 2 -- 0
 y -- 0
+	nameref7.sub
 bar
 unset
+	nameref8.sub
 ./nameref8.sub: line 16: typeset: warning: v: circular name reference
 ./nameref8.sub: line 16: warning: v: circular name reference
 ./nameref8.sub: line 18: warning: v: maximum nameref depth (8) exceeded
@@ -143,10 +151,12 @@ local
 ./nameref8.sub: line 67: warning: x: circular name reference
 ./nameref8.sub: line 68: warning: x: circular name reference
 x =
+	nameref9.sub
 idx2
 idX2
 idx2
 idX2
+	nameref10.sub
 declare -n foo="x[\$zero]"
 42
 declare -a x=([0]="4")
@@ -180,6 +190,7 @@ declare -i bar="8"
 8
 declare -n foo="bar"
 ./nameref10.sub: line 77: typeset: bar: not found
+	nameref11.sub
 ./nameref11.sub: line 14: declare: `/': invalid variable name for name reference
 ./nameref11.sub: line 15: declare: `/': invalid variable name for name reference
 ./nameref11.sub: line 16: `/': not a valid identifier
@@ -210,33 +221,34 @@ x
 declare -a r=()
 ./nameref11.sub: line 33: declare: r: reference variable cannot be an array
 ./nameref11.sub: line 34: printf: `/': not a valid identifier
-./nameref11.sub: line 36: `': not a valid identifier
-./nameref11.sub: line 37: declare: `': not a valid identifier
 ./nameref11.sub: line 38: `': not a valid identifier
-./nameref11.sub: line 39: printf: `': not a valid identifier
-./nameref11.sub: line 40: declare: `': invalid variable name for name reference
+./nameref11.sub: line 39: declare: `': not a valid identifier
+./nameref11.sub: line 40: `': not a valid identifier
+./nameref11.sub: line 41: printf: `': not a valid identifier
+./nameref11.sub: line 42: declare: `': invalid variable name for name reference
 declare -r ROVAR="42"
-./nameref11.sub: line 45: ROVAR: readonly variable
-./nameref11.sub: line 45: ROVAR: cannot unset: readonly variable
+./nameref11.sub: line 47: ROVAR: readonly variable
+./nameref11.sub: line 47: ROVAR: cannot unset: readonly variable
 declare -r ROVAR="42"
 ./nameref11.sub
-./nameref11.sub: line 47: `@': not a valid identifier
+./nameref11.sub: line 49: `@': not a valid identifier
 ./nameref11.sub
 declare -n ref="x"
-./nameref11.sub: line 52: RO: readonly variable
+./nameref11.sub: line 54: RO: readonly variable
 declare -r RO_PID
-./nameref11.sub: line 52: RO: cannot unset: readonly variable
+./nameref11.sub: line 54: RO: cannot unset: readonly variable
 declare -r RO="x"
-./nameref11.sub: line 52: declare: RO_PID: not found
-./nameref11.sub: line 54: RO2: readonly variable
+./nameref11.sub: line 54: declare: RO_PID: not found
+./nameref11.sub: line 56: RO2: readonly variable
 declare -r RO2="a"
 2
-./nameref11.sub: line 65: typeset: `2': invalid variable name for name reference
+./nameref11.sub: line 67: typeset: `2': invalid variable name for name reference
 2
-./nameref11.sub: line 70: typeset: `2': invalid variable name for name reference
+./nameref11.sub: line 72: typeset: `2': invalid variable name for name reference
 2
-./nameref11.sub: line 75: foo[2]: invalid indirect expansion
-./nameref11.sub: line 76: bar: invalid indirect expansion
+./nameref11.sub: line 77: foo[2]: invalid indirect expansion
+./nameref11.sub: line 78: bar: invalid indirect expansion
+	nameref12.sub
 ./nameref12.sub: line 19: declare: `/': invalid variable name for name reference
 ./nameref12.sub: line 22: declare: `%': invalid variable name for name reference
 ./nameref12.sub: line 26: `^': not a valid identifier
@@ -262,6 +274,7 @@ declare -n ref
 declare -- ref="global"
 declare -a var=([0]="foo2")
 ./nameref12.sub: line 113: declare: global: not found
+	nameref13.sub
 declare -- a
 declare -n r="a"
 declare -- a
@@ -278,6 +291,7 @@ declare -n r
 declare -n foo
 ./nameref13.sub: line 110: typeset: `12345': invalid variable name for name reference
 declare -n foo
+	nameref14.sub
 declare -nx ref="var"
 var
 var
@@ -300,6 +314,7 @@ after
 declare -n ref="var"
 ./nameref14.sub: line 45: typeset: var: not found
 declare -n ref="var"
+	nameref15.sub
 ./nameref15.sub: line 14: local: warning: a: circular name reference
 ./nameref15.sub: line 14: warning: a: circular name reference
 ./nameref15.sub: line 14: `a[0]': not a valid identifier
@@ -356,6 +371,7 @@ declare -a v=([0]="0")
 declare -a xref=([1]="one")
 ./nameref15.sub: line 126: warning: xref: removing nameref attribute
 declare -a xref=([1]="one")
+	nameref16.sub
 declare -n r1="y"
 declare -n r2="x"
 ./nameref16.sub: line 25: typeset: x: not found
@@ -372,6 +388,7 @@ declare -n r1="y"
 declare -n r2="x"
 declare -- x="one"
 declare -- y="two"
+	nameref17.sub
 ./nameref17.sub: line 21: declare: bar: not found
 ./nameref17.sub: line 22: unset: foo0: cannot unset: readonly variable
 declare -nr foo0="bar"
@@ -409,6 +426,7 @@ declare -nr foo5
 declare -r foo5
 declare -nr foo5
 declare -r foo5
+	nameref18.sub
 ./nameref18.sub: line 15: mapfile: `XXX[0]': not a valid identifier
 ./nameref18.sub: line 16: declare: XXX[0]: not found
 ./nameref18.sub: line 22: `XXX[0]': not a valid identifier
@@ -450,6 +468,7 @@ argv[2] = <2>
 argv[3] = <31>
 argv[4] = <2>
 argv[5] = <3>
+	nameref19.sub
 declare -n foo="bar"
 declare -- foo="bar"
 ./nameref19.sub: line 22: declare: bar: not found
@@ -468,6 +487,7 @@ declare -- foo="bar"
 declare -- bar
 8
 declare -n ivar="foo"
+	nameref20.sub
 declare -a v=([0]="Y")
 r: <Y>
 v: <Y>
@@ -497,6 +517,7 @@ declare -- ref="Y"
 declare -- ref="Y"
 ./nameref20.sub: line 74: declare: var: not found
 declare -- ref="Y"
+	nameref21.sub
 declare -n ref="var"
 declare -A var=([2]="" )
 declare -n ref="var"
@@ -511,6 +532,7 @@ declare -n ref="var"
 declare -ai var=([1]="0")
 declare -n ref="var"
 declare -- var="1"
+	nameref22.sub
 a string with spaces
 many spaces
 declare -n foo="bar[0]"
@@ -532,6 +554,7 @@ declare -a array
 declare -ai array=([0]="one")
 declare -a array=([0]="zero")
 declare -a array=([0]="one" [1]="two" [2]="three")
+	nameref23.sub
 declare -ai a=([0]="5")
 declare -ai a=([0]="6")
 declare -ai a=([0]="42")
@@ -566,6 +589,7 @@ declare -ai a=([0]="0" [1]="16")
 12
 16
 declare -ai a=([0]="0" [1]="16")
+	nameref24.sub
 ./nameref24.sub: line 24: declare: `': not a valid identifier
 ./nameref24.sub: line 25: declare: `a&b': invalid variable name for name reference
 3
@@ -577,6 +601,7 @@ declare -ai a=([0]="0" [1]="16")
 3
 3
 5
+	nameref25.sub
 bash: line 1: a[k]: unbound variable
 ok 1
 bash: line 1: r0: unbound variable

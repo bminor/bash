@@ -18,6 +18,8 @@ if [ $UID -eq 0 ]; then
         echo "execscript: the test suite should not be run as root" >&2
 fi
 
+. ./test-aux-functions
+
 # this should succeed silently
 $cmd &
 
@@ -129,13 +131,13 @@ echo ${PATH-unset}
 
 echo "echo ok" | ${THIS_SH} -t
 
-${THIS_SH} ./exec2.sub
+test_runsub ./exec2.sub
 echo $?
 
-${THIS_SH} ./exec4.sub
+test_runsub ./exec4.sub
 
 # try exec'ing a command that cannot be found in $PATH
-${THIS_SH} ./exec5.sub
+test_runsub ./exec5.sub
 
 # this was a bug in bash versions before bash-2.04
 ${THIS_SH} -c 'cat </dev/null | cat >/dev/null' >&-
@@ -143,17 +145,17 @@ ${THIS_SH} -c 'cat </dev/null | cat >/dev/null' >&-
 # checks for proper return values in subshell commands with inverted return
 # values
 
-${THIS_SH} ./exec6.sub
+test_runsub ./exec6.sub
 
 # checks for properly deciding what constitutes an executable file
-${THIS_SH} ./exec7.sub
+test_runsub ./exec7.sub
 
 HISTFILE= ${THIS_SH} --norc -i ${PWD}/exec8.sub
 
-${THIS_SH} ./exec9.sub
+test_runsub ./exec9.sub
 
-${THIS_SH} ./exec10.sub
-${THIS_SH} ./exec11.sub
+test_runsub ./exec10.sub
+test_runsub ./exec11.sub
 
 true | `echo true` &
 
@@ -181,13 +183,13 @@ fi
 
 # problem with undoing redirections before running exit trap through bash-4.3
 
-${THIS_SH} ./exec12.sub false	# function
-${THIS_SH} ./exec12.sub command false
-${THIS_SH} ./exec12.sub $FALSE
+test_runsub ./exec12.sub false	# function
+test_runsub ./exec12.sub command false
+test_runsub ./exec12.sub $FALSE
 
-${THIS_SH} ./exec12.sub notfound
-${THIS_SH} ./exec12.sub syntaxerror
-${THIS_SH} ./exec12.sub nosuchcommand
+test_runsub ./exec12.sub notfound
+test_runsub ./exec12.sub syntaxerror
+test_runsub ./exec12.sub nosuchcommand
 
 # problem with fork optimization in bash-4.4-alpha
 
@@ -197,14 +199,14 @@ $THIS_SH -c 'echo A && /bin/echo B'
 $THIS_SH -c '/bin/echo c && echo d'
 $THIS_SH -c '/bin/echo c && /bin/echo d && echo e'
 
-${THIS_SH} ./exec13.sub
-${THIS_SH} ./exec14.sub
+test_runsub ./exec13.sub
+test_runsub ./exec14.sub
 
 # problems with fork optimization in bash-5.2
-${THIS_SH} ./exec15.sub
+test_runsub ./exec15.sub
 
 # problems with set -e and inverting commands' return status
-${THIS_SH} ./exec16.sub
+test_runsub ./exec16.sub
 
 # test behavior of redirections when exec fails and does not exit the shell
-${THIS_SH} ./exec17.sub
+test_runsub ./exec17.sub

@@ -11,6 +11,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
 
 : ${THIS_SH:=./bash}
 
@@ -34,12 +35,12 @@ unset BASH_ARGV0
 { ${THIS_SH} -c 'echo $-' bash | grep c >/dev/null; } && echo '$- for -c includes c'
 
 # BASHOPTS
-${THIS_SH} ./invocation1.sub
+test_runsub ./invocation1.sub
 # SHELLOPTS
-${THIS_SH} ./invocation2.sub
+test_runsub ./invocation2.sub
 
 # rudimentary pretty-print tests
-${THIS_SH} ./invocation3.sub
+test_runsub ./invocation3.sub
 
 : ${TMPDIR:=/tmp}
 TDIR=$TMPDIR/invocation-$$

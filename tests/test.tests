@@ -15,6 +15,8 @@ if (( $UID == 0 )); then
 	echo "test-tests: the test suite should not be run as root" >&2
 fi
 
+. ./test-aux-functions
+
 b()
 {
 	[ "$@" ]
@@ -505,4 +507,4 @@ t \( \)
 
 t 1 = 1 -a \( \) -a -n ""
 
-${THIS_SH} ./test1.sub
+test_runsub ./test1.sub

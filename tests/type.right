@@ -1,7 +1,7 @@
-./type.tests: line 22: type: -r: invalid option
+./type.tests: line 24: type: -r: invalid option
 type: usage: type [-afptP] name [name ...]
-./type.tests: line 25: type: notthere: not found
-./type.tests: line 29: command: notthere: not found
+./type.tests: line 27: type: notthere: not found
+./type.tests: line 31: command: notthere: not found
 function
 keyword
 builtin
@@ -25,7 +25,7 @@ func ()
 }
 while
 while is a shell keyword
-./type.tests: line 59: type: morealias: not found
+./type.tests: line 61: type: morealias: not found
 alias morealias='more'
 alias morealias='more'
 morealias is aliased to `more'
@@ -38,8 +38,8 @@ builtin
 builtin is a shell builtin
 /bin/sh
 /bin/sh is /bin/sh
-./type.tests: line 81: type: func: not found
-./type.tests: line 83: type: m: not found
+./type.tests: line 83: type: func: not found
+./type.tests: line 85: type: m: not found
 /bin/sh
 /tmp/bash
 bash is hashed (/tmp/bash)
@@ -52,6 +52,7 @@ f ()
 { 
     v='^A'
 }
+	type1.sub
 foo is a function
 foo () 
 { 
@@ -62,6 +63,7 @@ bar ()
 { 
     echo $(< x1)
 }
+	type2.sub
 foo is a function
 foo () 
 { 
@@ -81,6 +83,7 @@ qux
 
 bar
 qux
+	type3.sub
 foo is a function
 foo () 
 { 
@@ -97,6 +100,7 @@ EOF
 a:file
 b:file
 c:file
+	type4.sub
 bb is a function
 bb () 
 { 
@@ -139,6 +143,7 @@ mkcoprocs ()
 { 
     coproc cat -u - & read -u ${COPROC[0]} msg
 }
+	type5.sub
 cat is /bin/cat
 cat is aliased to `echo cat'
 /bin/cat

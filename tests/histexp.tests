@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 LC_ALL=C
 LANG=C
 trap 'rm $TMPDIR/newhistory' 0
@@ -153,10 +155,10 @@ echo !$ ; echo !:2:p
 echo $((1+2))
 echo !!:1
 
-${THIS_SH} ./histexp1.sub
-${THIS_SH} ./histexp2.sub
-${THIS_SH} ./histexp3.sub
-${THIS_SH} ./histexp4.sub
-${THIS_SH} ./histexp5.sub
-${THIS_SH} ./histexp6.sub
-${THIS_SH} ./histexp7.sub
+test_runsub ./histexp1.sub
+test_runsub ./histexp2.sub
+test_runsub ./histexp3.sub
+test_runsub ./histexp4.sub
+test_runsub ./histexp5.sub
+test_runsub ./histexp6.sub
+test_runsub ./histexp7.sub

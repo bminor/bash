@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 echo " a " | (read x; echo "$x.")
 
 echo " a  b  " | ( read x y ; echo -"$x"-"$y"- )
@@ -106,31 +108,31 @@ EOF
 echo a = $a b = $b c = $c stat = $?
 
 # test read -d delim behavior
-${THIS_SH} ./read1.sub
+test_runsub ./read1.sub
 
 # test read -t timeout behavior
-${THIS_SH} ./read2.sub
+test_runsub ./read2.sub
 
 # test read -n nchars behavior
-${THIS_SH} ./read3.sub
+test_runsub ./read3.sub
 
 # test read -u fd behavior
-${THIS_SH} ./read4.sub
+test_runsub ./read4.sub
 
 # test behavior when IFS is not the default -- bug through bash-2.05b
-${THIS_SH} ./read5.sub
+test_runsub ./read5.sub
 
 # test behavior of read -t 0
-${THIS_SH} ./read6.sub
+test_runsub ./read6.sub
 
 # test behavior of readline timeouts
-${THIS_SH} ./read7.sub
+test_runsub ./read7.sub
 
 # test behavior of read -n and read -d on regular files
-${THIS_SH} ./read8.sub
+test_runsub ./read8.sub
 
 # test behavior of trailing IFS whitespace - POSIX conformance
-${THIS_SH} ./read9.sub
+test_runsub ./read9.sub
 
 # test behavior of read builtin modifying $IFS
-${THIS_SH} ./read10.sub
+test_runsub ./read10.sub

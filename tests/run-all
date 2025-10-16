@@ -56,15 +56,52 @@ ${THIS_SH} ./version
 
 rm -f ${BASH_TSTOUT}
 
+export TAB='	'
+
 echo Any output from any test, unless otherwise noted, indicates a possible anomaly
+
+# keep track of passed and failed tests and report them
+if [ -t 1 ]; then
+	# can't rely on having $'...' or printf understanding \e
+	# bright red background, white foreground text
+	CSTART=$(printf '\033[01;101;37m') CEND=$(printf '\033[0m')
+else
+	CSTART= CEND=
+fi
+
+passed=0
+total=0
+failed=0
+
+if [ -n "$BASH_TSTOUT_SAVEDIR" ] && [ -d "$BASH_TSTOUT_SAVEDIR" ]; then
+	echo "Using $BASH_TSTOUT_SAVEDIR to save output from failed tests"
+else
+	unset BASH_TSTOUT_SAVEDIR
+fi
 
 for x in run-*
 do
 	case $x in
 	$0|run-minimal|run-gprof)	;;
-	*.orig|*~) ;;
-	*)	echo $x ; sh $x ; rm -f ${BASH_TSTOUT} ;;
+	*.orig|*.save|*~) ;;
+	*)	echo $x
+		total=$(( $total + 1 ))
+		if sh $x; then
+			passed=$(( $passed + 1 ))
+		else
+			failed=$(( $failed + 1 ))
+			echo "${CSTART}${x}: NON-ZERO exit status $?${CEND}"
+			if [ -n "$BASH_TSTOUT_SAVEDIR" ]; then
+				mv ${BASH_TSTOUT} ${BASH_TSTOUT_SAVEDIR}/${x}-${SUFFIX}
+				echo "${CSTART}output saved to ${BASH_TSTOUT_SAVEDIR}/${x}-${SUFFIX}${CEND}"
+			elif [ $failed -eq 1 ]; then
+				echo "${CSTART}Set environment variable BASH_TSTOUT_SAVEDIR to a directory to save failed test output${CEND}"
+			fi
+		fi
+		rm -f ${BASH_TSTOUT}
+		;;
 	esac
 done
 
-exit 0
+echo "${CSTART}${passed}/${total} tests succeeded${CEND}"
+exit $failed

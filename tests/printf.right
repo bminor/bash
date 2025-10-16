@@ -1,10 +1,10 @@
 printf: usage: printf [-v var] format [arguments]
 printf: usage: printf [-v var] format [arguments]
-./printf.tests: line 44: printf: -x: invalid option
+./printf.tests: line 46: printf: -x: invalid option
 printf: usage: printf [-v var] format [arguments]
-./printf.tests: line 47: printf: `invalid-var': not a valid identifier
+./printf.tests: line 49: printf: `invalid-var': not a valid identifier
 abc
-./printf.tests: line 48: printf: `invalid-var': not a valid identifier
+./printf.tests: line 50: printf: `invalid-var': not a valid identifier
 10
 	one
 one\ctwo
@@ -40,7 +40,7 @@ A7
 --\"abcd\"--
 --\'abcd\'--
 --a\x--
-./printf.tests: line 133: printf: missing hex digit for \x
+./printf.tests: line 135: printf: missing hex digit for \x
 --\x--
 ----
 ----
@@ -101,12 +101,12 @@ A7
 26
 26
 26
-./printf.tests: line 257: printf: `%10': missing format character
-./printf.tests: line 258: printf: `M': invalid format character
-ab./printf.tests: line 261: printf: `y': invalid format character
-./printf.tests: line 264: printf: GNU: invalid number
+./printf.tests: line 259: printf: `%10': missing format character
+./printf.tests: line 260: printf: `M': invalid format character
+ab./printf.tests: line 263: printf: `y': invalid format character
+./printf.tests: line 266: printf: GNU: invalid number
 0
-./printf.tests: line 265: printf: GNU: invalid number
+./printf.tests: line 267: printf: GNU: invalid number
 0
 -
 (foo )(bar )
@@ -167,12 +167,13 @@ xx
 ''
 9223372036854775807
 -9223372036854775808
-./printf.tests: line 386: printf: +: invalid number
+./printf.tests: line 388: printf: +: invalid number
 0
-./printf.tests: line 387: printf: z: invalid number
+./printf.tests: line 389: printf: z: invalid number
 0
-./printf.tests: line 388: printf: : invalid number
+./printf.tests: line 390: printf: : invalid number
 0
+	printf1.sub
 	one
 one\ctwo
 4\.2
@@ -277,6 +278,8 @@ A7
 ^G
 ^Ge
 "?
+	printf2.sub
+	printf3.sub
 16:09:15
 ./printf3.sub: line 27: printf: warning: `Z': invalid time format specification
 %(abde)Z
@@ -288,6 +291,7 @@ random time: 2010-05-30 04:09:15 PM -0400
 local time: Sun May 30 16:09:15 EDT 2010
 Sun May 30 16:09:15 EDT 2010             date-style time
 05/30/10 (foo) 16:09:15                  date-style time
+	printf4.sub
 x       123x
 x       123x
 x       123x
@@ -322,6 +326,7 @@ x      +123x
 x      +123x
 x      +123x
 x      +123x
+	printf5.sub
 abcd
 ab
  123
@@ -342,6 +347,7 @@ hello  --
 hello --
 123 --
 6 --
+	printf6.sub
 0000000 000                                                            
 0000001
 0000000 000                                                            
@@ -372,6 +378,7 @@ hello --
 0000000 340 262 207 040 040 040 055 055 055 012                        
 000000a
 [][]
+	printf7.sub
 []
 [X]
 VAR=[]

@@ -11,7 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+. ./test-aux-functions
+#
 # first, let's start with the basics
 
 recho "$@"
@@ -240,96 +241,96 @@ esac
 
 # tests for the effect of quoting $* and $@ in an assignment context (plus
 # arrays) -- bugs through bash 4.2
-${THIS_SH} ./dollar-at-star1.sub
+test_runsub ./dollar-at-star1.sub
 
 # more tests for expanding $@ and $* in a context where there is no word
 # splitting
-${THIS_SH} ./dollar-at-star2.sub
-${THIS_SH} ./dollar-at-star3.sub
-${THIS_SH} ./dollar-at-star4.sub
-${THIS_SH} ./dollar-at-star5.sub
-${THIS_SH} ./dollar-at-star6.sub
-${THIS_SH} ./dollar-at-star7.sub
+test_runsub ./dollar-at-star2.sub
+test_runsub ./dollar-at-star3.sub
+test_runsub ./dollar-at-star4.sub
+test_runsub ./dollar-at-star5.sub
+test_runsub ./dollar-at-star6.sub
+test_runsub ./dollar-at-star7.sub
 
 # tests for expansions of $@ and ${a[@]} (vs. $* and ${a[*]}) on the RHS of
 # assignment statements with non-default IFS: $@ expands to args or array
 # members separated by spaces
-${THIS_SH} ./dollar-at-star8.sub
+test_runsub ./dollar-at-star8.sub
 
 # more tests of the expansions of $@ and $* (and their array equivalents)
 # with different values for IFS
-${THIS_SH} ./dollar-at-star9.sub
+test_runsub ./dollar-at-star9.sub
 
 # tests for expansions of "$*" and "$@" and their array equivalents when $1 == ''
 # and we're using the POSIX word expansions
-${THIS_SH} ./dollar-at-star10.sub
-${THIS_SH} ./dollar-at-star11.sub
+test_runsub ./dollar-at-star10.sub
+test_runsub ./dollar-at-star11.sub
 
 # tests for special expansion of "$*" and "${array[*]}" when used with other
 # expansions -- bugs through bash-2.05b
-${THIS_SH} ./dollar-star1.sub
+test_runsub ./dollar-star1.sub
 
 # tests for expansion of "$@" on rhs of things like ${param:+word}.  Bugs
 # though bash-2.05b
-${THIS_SH} ./dollar-at1.sub
+test_runsub ./dollar-at1.sub
 
 # tests for expansion of other variables in double-quoted strings containing
 # $@.  Bugs through bash-2.05b
-${THIS_SH} ./dollar-at2.sub
+test_runsub ./dollar-at2.sub
 
 # tests for various expansions of $* in different contexts -- word split,
 # no splitting, etc. when $IFS is NUL
-${THIS_SH} ./dollar-star2.sub
+test_runsub ./dollar-star2.sub
 
 # tests for expansions of "${array[*]}" and "${array[@]}" when $IFS is not the
 # default and the array contains null elements
-${THIS_SH} ./dollar-star3.sub
+test_runsub ./dollar-star3.sub
 
 # test for set -u and expansions of $@ when there are no positional parameters
-${THIS_SH} ./dollar-at3.sub
+test_runsub ./dollar-at3.sub
 # test for set -u and expansions of $* when there are no positional parameters
-${THIS_SH} ./dollar-star4.sub
+test_runsub ./dollar-star4.sub
 
 # tests for expansions of $* when IFS is null
-${THIS_SH} ./dollar-star5.sub
+test_runsub ./dollar-star5.sub
 
 # tests for inappropriate word splitting through bash-4.2
-${THIS_SH} ./dollar-at4.sub
+test_runsub ./dollar-at4.sub
 
 # tests for problems with "$@" preceded and followed by other quoted expansions
 # through bash-4.2
-${THIS_SH} ./dollar-at5.sub
+test_runsub ./dollar-at5.sub
 
 # tests for problems with "${@:1}" and other expansions with null entries
 # in positional parameters
-${THIS_SH} ./dollar-at6.sub
+test_runsub ./dollar-at6.sub
 
 # tests for expansions of $* when $1 == ""; problem through bash-4.2
-${THIS_SH} ./dollar-star6.sub
+test_runsub ./dollar-star6.sub
 
 # tests for expansions of $* (unquoted) when IFS changes (e.g., ${IFS:=-})
 # problem through bash-4.2
-${THIS_SH} ./dollar-star7.sub
+test_runsub ./dollar-star7.sub
 
 # tests for expansions of $* (unquoted) when IFS is null and word splitting is
 # not going to be performed.
 # problem through bash-4.4 in some parameter expansion contexts
-${THIS_SH} ./dollar-star8.sub
+test_runsub ./dollar-star8.sub
 
 # tests for expansions of "$@" when there are no positional parameter or when
 # $1 == '' and the expansion is preceded by something that results in a quoted
 # null string
-${THIS_SH} ./dollar-at7.sub
+test_runsub ./dollar-at7.sub
 
 # tests for expansions of $* when in an assignment context (no splitting) and
 # IFS is null
-${THIS_SH} ./dollar-star9.sub
+test_runsub ./dollar-star9.sub
 
 # more tests for expansions of $* when not splitting with IFS set or unset and
 # null strings as the positional parameters
-${THIS_SH} ./dollar-star10.sub
+test_runsub ./dollar-star10.sub
 
 # tests for expansions of $* when IFS=$'\1'
-${THIS_SH} ./dollar-star11.sub
+test_runsub ./dollar-star11.sub
 
 exit 0

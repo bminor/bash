@@ -5,14 +5,14 @@ after exec1.sub with args: 0
 
 after exec1.sub without args: 0
 after exec1.sub: one two three
-./execscript: line 37: notthere: command not found
+./execscript: line 39: notthere: command not found
 127
 we would do something here with notthere
 /tmp/bash: notthere: No such file or directory
 127
 /bin/sh: /bin/sh: cannot execute binary file
 126
-./execscript: line 64: /: Is a directory
+./execscript: line 66: /: Is a directory
 126
 /: /: Is a directory
 126
@@ -20,7 +20,7 @@ bash: line 1: exec: .: cannot execute: Is a directory
 posix-bash: line 1: exec: .: cannot execute: Is a directory
 bash: line 1: exec: .: cannot execute: Is a directory
 posix-bash: line 1: exec: .: cannot execute: Is a directory
-./execscript: line 79: .: /: is a directory
+./execscript: line 81: .: /: is a directory
 1
 126
 0
@@ -37,26 +37,30 @@ trap -- 'echo USR1' SIGUSR1
 trap -- 'rm -f x.sh x.output ; echo EXIT' EXIT
 USR1
 EXIT
-./execscript: line 103: notthere: command not found
-127
 ./execscript: line 105: notthere: command not found
 127
 ./execscript: line 107: notthere: command not found
 127
-./execscript: line 113: notthere: command not found
+./execscript: line 109: notthere: command not found
 127
 ./execscript: line 115: notthere: command not found
 127
 ./execscript: line 117: notthere: command not found
 127
+./execscript: line 119: notthere: command not found
+127
 this is sh
 this is sh
 unset
 ok
+	exec2.sub
 5
+	exec4.sub
+	exec5.sub
 ./exec5.sub: line 4: exec: bash-notthere: not found
 127
 this is ohio-state
+	exec6.sub
 0
 1
 1
@@ -78,8 +82,10 @@ this is ohio-state
 0
 1
 0
+	exec7.sub
 testb
 expand_aliases      	on
+	exec9.sub
 1
 1
 1
@@ -88,6 +94,7 @@ expand_aliases      	on
 0
 0
 0
+	exec10.sub
 /usr/local/bin:/usr/GNU/bin:/usr/bin:/bin:.
 cannot find cat in $TMPDIR
 cannot find cat with empty $PATH
@@ -95,6 +102,7 @@ PATH = /usr/local/bin:/usr/GNU/bin:/usr/bin:/bin:.
 cannot find cat in $TMPDIR with hash
 cannot find cat with empty $PATH with hash
 PATH = /usr/local/bin:/usr/GNU/bin:/usr/bin:/bin:.
+	exec11.sub
 trap -- 'echo foo $BASH_SUBSHELL' EXIT
 trap -- 'echo USR1 $BASHPID' SIGUSR1
 between
@@ -109,11 +117,17 @@ group pipeline: 1
 EXIT-group.1
 foo 0
 after
+	exec12.sub
 exit code: 1
+	exec12.sub
 exit code: 1
+	exec12.sub
 exit code: 1
+	exec12.sub
 exit code: 1
+	exec12.sub
 exit code: 1
+	exec12.sub
 exit code: 1
 a
 b
@@ -125,6 +139,7 @@ d
 c
 d
 e
+	exec13.sub
 x1
 x1a
 x2
@@ -133,6 +148,7 @@ x2b
 x3
 x3a
 x3b
+	exec14.sub
 WORKS
 done
 WORKS
@@ -189,6 +205,7 @@ w
 x
 y
 z
+	exec15.sub
 Darwin
 x
 archive
@@ -219,6 +236,7 @@ test
 sub3
 1 done
 42
+	exec16.sub
 test invert
 reached subshell
 reached group
@@ -247,6 +265,7 @@ reached AND-AND body
 reached OR-OR body
 reached AND-AND group
 reached OR-OR group
+	exec17.sub
 ./exec17.sub: line 26: exec: notthere: not found
 after failed exec: 127
 ./exec17.sub: line 31: exec: notthere: not found

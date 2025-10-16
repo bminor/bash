@@ -12,7 +12,7 @@ returns: 0
 returns: 0
 returns: 1
 returns: 0
-./cond.tests: line 65: [[: X: integer expected
+./cond.tests: line 66: [[: X: integer expected
 returns: 2
 returns: 0
 returns: 1
@@ -29,7 +29,7 @@ returns: 0
 returns: 1
 returns: 1
 returns: 0
-./cond.tests: line 126: [[: 4+: arithmetic syntax error: operand expected (error token is "+")
+./cond.tests: line 127: [[: 4+: arithmetic syntax error: operand expected (error token is "+")
 returns: 1
 returns: 0
 returns: 0
@@ -60,6 +60,7 @@ ok c3
 ok c4
 ok c5
 ok c6
+	cond-regexp1.sub
 match 1
 match 2
 match 3
@@ -84,6 +85,7 @@ match control-a 2
 match control-a 3
 match control-a 4
 match control-a 5
+	cond-regexp2.sub
 ok 1
 ok 2
 ok 3
@@ -97,6 +99,7 @@ ok 9
 ok 10
 ok 11
 ok 12
+	cond-regexp3.sub
 argv[1] = <\^?>
 0
 1
@@ -148,6 +151,7 @@ ok 5
 ok 6
 ok 7
 ok 8
+	cond-error1.sub
 bash: -c: line 1: unexpected token `EOF', expected `)'
 bash: -c: line 2: syntax error: unexpected end of file from `[[' command on line 1
 bash: -c: line 1: unexpected EOF while looking for `]]'
@@ -181,6 +185,7 @@ bash: -c: line 1: syntax error near `<'
 bash: -c: line 1: `[[ -n < ]]'
 ERR: 22: -[[ -n $unset ]]- failed
 ERR: 28: -func- failed
+	cond-xtrace1.sub
 + [[ -t X ]]
 ./cond-xtrace1.sub: line 6: [[: X: integer expected
 + [[ '' > 7 ]]

@@ -19,14 +19,14 @@ argv[1] = <>
 argv[1] = <>
 aa,bb
 JOBaa bb cc ddCONTROL
-./comsub2.tests: line 68: p: command not found
+./comsub2.tests: line 69: p: command not found
 NOTFOUND
-./comsub2.tests: line 75: p: command not found
-./comsub2.tests: line 75: p: command not found
+./comsub2.tests: line 76: p: command not found
+./comsub2.tests: line 76: p: command not found
 expand_aliases      	off
 expand_aliases      	off
 outside:
-./comsub2.tests: line 79: alias: p: not found
+./comsub2.tests: line 80: alias: p: not found
 alias e='echo inside redefine'
 expand_aliases      	off
 1
@@ -34,7 +34,7 @@ expand_aliases      	on
 2
 expand_aliases      	on
 outside:
-./comsub2.tests: line 89: alias: p: not found
+./comsub2.tests: line 90: alias: p: not found
 expand_aliases      	on
 1
 xx
@@ -62,6 +62,7 @@ one two
 42
 42
 42
+	comsub21.sub
 123
 123
 0
@@ -75,6 +76,7 @@ Mon Aug 29 20:03:02 EDT 2022
 123
 before 123
 in for 123
+	comsub22.sub
 outside before: value
 inside before: value
 inside after: funsub
@@ -82,6 +84,7 @@ inside: after false xxx
 outside after: funsub
 =====posix mode=====
 outside before: value
+	comsub23.sub
 .
 declare -a a=([0]="1" [1]="2" [2]="3" [3]="4")
 declare -- int="2"
@@ -104,6 +107,7 @@ uname
 after arith for
 1) a[${ break;}]
 #? after select
+	comsub24.sub
 a b c == 1 2 3
  == 1 2 3
 before return
@@ -115,6 +119,7 @@ declare -- IFS=" "
 *???
 *???
 yyy zzzz
+	comsub25.sub
 argv[1] = <AA^ABB>
 argv[1] = <AA^OBB>
 argv[1] = <AA^?BB>
@@ -178,6 +183,7 @@ argv[1] = <AA>
 argv[2] = <BB>
 argv[1] = <AA BB>
 argv[1] = <AA BB>
+	comsub26.sub
 inside1-inside2-outside
 BEFOREAA
 BB

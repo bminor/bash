@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 case foo in
 bar)	echo skip ;;
 foo)	echo fallthrough ;&
@@ -76,7 +78,7 @@ unset|$unset)	echo unset word ok 3 ;;
 esac
 
 # tests of quote removal and pattern matching
-${THIS_SH} ./case1.sub
-${THIS_SH} ./case2.sub
-${THIS_SH} ./case3.sub
-${THIS_SH} ./case4.sub
+test_runsub ./case1.sub
+test_runsub ./case2.sub
+test_runsub ./case3.sub
+test_runsub ./case4.sub

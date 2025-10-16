@@ -37,6 +37,10 @@ argv[1] = <'bar>
 argv[1] = <foo 'bar baz>
 argv[1] = <}z>
 argv[1] = <''z}>
+	posixexp1.sub
+	posixexp1.sub
+	posixexp2.sub
+	posixexp3.sub
 argv[1] = <1>
 argv[2] = <2>
 argv[1] = <1>
@@ -79,6 +83,7 @@ argv[1] = <1 2>
 argv[1] = <1 2>
 argv[1] = <12>
 argv[1] = <12>
+	posixexp4.sub
 normal IFS
 argv[1] = <abc>
 argv[2] = <def>
@@ -112,6 +117,7 @@ argv[2] = <def ghi>
 argv[3] = <jkl >
 argv[1] = < abc def ghi jkl >
 argv[1] = < abc def ghi jkl >
+	posixexp5.sub
 
 001: IFS = (unset): unset -v foo; set -- ${foo=$*}
 soh stx etx del   / soh stx etx del
@@ -256,6 +262,7 @@ soh stx etx del   / soh stx etx del
 
 048: IFS = sp  ht  nl: foo=; set -- "${foo:=$@}"
 soh stx etx del   / soh stx etx del
+	posixexp6.sub
 argv[1] = <^A^B^C^?>
 argv[1] = <^A^B^C^?>
 argv[1] = <^A^B^C^?>
@@ -275,6 +282,7 @@ argv[2] = <b>
 [  abc    def  ghi  jkl /  abc    def  ghi  jkl ]
 [  abc    def  ghi  jkl ]
 [  abc    def  ghi  jkl /  abc    def  ghi  jkl /  abc    def  ghi  jkl ]
+	posixexp7.sub
 1: OK
 2: $'not'
 3: OK
@@ -300,9 +308,10 @@ tOK
 ./posixexp7.sub: line 70: ${'x1'%'t'}: bad substitution
 ./posixexp7.sub: line 73: ${'x1'%'t'}: bad substitution
 ./posixexp7.sub: line 74: ${'x1'%'t'}: bad substitution
+	posixexp8.sub
 "A"
 A
 argv[1] = <"A">
 argv[1] = <A>
 argv[1] = <A>
-./posixexp.tests: line 97: unexpected EOF while looking for matching `}'
+./posixexp.tests: line 101: unexpected EOF while looking for matching `}'

@@ -12,6 +12,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 : ${TMPDIR:=/tmp}
+. ./test-aux-functions
 
 export LC_ALL=C
 export LANG=C
@@ -92,13 +93,14 @@ rm -f $TMPDIR/bash-a $TMPDIR/bash-b $TMPDIR/bash-c
 #
 # Test the effect of input buffering on the shell's input
 #
+printf '\tredir1.sub\n'
 ${THIS_SH} < redir1.sub
 
 # more open, close, duplicate file descriptors
-${THIS_SH} ./redir3.sub < ./redir3.in1
+test_runsub ./redir3.sub < ./redir3.in1
 
 # still more redirections
-${THIS_SH} ./redir4.sub < redir4.in1
+test_runsub ./redir4.sub < redir4.in1
 
 # various forms of null redirection
 testf()
@@ -184,10 +186,10 @@ set -o posix
 cat < redir1.*
 
 # test ksh93 dup-and-close (move fd) redirections
-${THIS_SH} ./redir5.sub
+test_runsub ./redir5.sub
 
 # test behavior after a write error with a builtin command
-${THIS_SH} ./redir6.sub
+test_runsub ./redir6.sub
 
 # problem with redirections using fds bash uses internally
 : ${TMPDIR:=$TMPDIR}
@@ -203,9 +205,9 @@ echo before block
 
 echo after block
 
-${THIS_SH} ./redir7.sub
+test_runsub ./redir7.sub
 
-${THIS_SH} ./redir8.sub
+test_runsub ./redir8.sub
 
 exec 9>&2
 command exec 2>>$TMPDIR/foo-$$
@@ -216,9 +218,9 @@ rm -f $TMPDIR/foo-$$
 exec 2>&9
 exec 9>&-
 
-${THIS_SH} ./redir9.sub
-${THIS_SH} ./redir10.sub
-${THIS_SH} ./redir11.sub
-${THIS_SH} ./redir12.sub
+test_runsub ./redir9.sub
+test_runsub ./redir10.sub
+test_runsub ./redir11.sub
+test_runsub ./redir12.sub
 
 ${THIS_SH} < ./redir13.in

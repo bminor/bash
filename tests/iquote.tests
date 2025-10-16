@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 # bug in bash up to and including bash-3.0 (including patches)
 #
 # problem is conflict between CTLNUL used internally to denote quoted null
@@ -155,4 +157,4 @@ recho ccc""ddd
 recho "eeefff"
 recho ggg"$(echo $'\177')"hhh
 
-${THIS_SH} ./iquote1.sub
+test_runsub ./iquote1.sub

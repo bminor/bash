@@ -31,8 +31,9 @@ argv[1] = < foo>
 argv[1] = <foo>
 argv[1] = <foo>
 argv[1] = < foo>
-./read.tests: line 101: b: readonly variable
+./read.tests: line 103: b: readonly variable
 a = a b = c = stat = 2
+	read1.sub
 a = abcdefg
 xyz
 a = xyz
@@ -52,6 +53,7 @@ a = abc
 <$'spring\375'>
 <summer>
 <automn>
+	read2.sub
 timeout 1: ok
 unset or null 1
 timeout 2: ok
@@ -64,6 +66,7 @@ unset or null 3
 abcde
 abcde
 abcde
+	read3.sub
 ./read3.sub: line 17: read: -1: invalid number
 abc
 defg
@@ -71,10 +74,12 @@ ab
 abc
 #
 0
+	read4.sub
 while read -u 3 var
 do
 echo "$var"
 done 3<$0
+	read5.sub
 argv[1] = <>
 argv[1] = <>
 argv[1] = <>
@@ -86,9 +91,11 @@ argv[2] = <>
 argv[3] = <>
 FOO
 0 0 0
+	read6.sub
 0
 0
 1
+	read7.sub
 timeout 1: ok
 unset or null 1
 timeout 2: ok
@@ -99,10 +106,13 @@ timeout 4: ok
 abcde
 abcde
 
+	read8.sub
 one
 two three four
 one
 two three four
+	read9.sub
+	read10.sub
 IFS=[,] var=[abc] rest=[def,ghi]
 IFS=[] var=[abc] rest=[def,ghi]
 IFS=[ ] var=[  abc] rest=[def,ghi ]

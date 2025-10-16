@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 # tests for miscellaneous builtins not tested elsewhere
 set +p
 set +o posix
@@ -164,18 +166,22 @@ unset -v SFILE
 
 AVAR=AVAR
 
+printf '\tsource1.sub\n'
 . ./source1.sub
 AVAR=foo . ./source1.sub
 
+printf '\tsource2.sub\n'
 . ./source2.sub
 echo $?
 
+printf '\tsource3.sub\n'
 set -- a b c
 . ./source3.sub
 
 # make sure source with arguments does not change the shell's positional
 # parameters, but that the sourced file sees the arguments as its
 # positional parameters
+printf '\tsource3.sub\n'
 echo "$@"
 . ./source3.sub x y z
 echo "$@"
@@ -184,6 +190,7 @@ echo "$@"
 # should be reflected in the calling shell's positional parameters.  this
 # also tests one of the shopt options that controls source using $PATH to
 # find the script
+printf '\tsource4.sub\n'
 echo "$@"
 shopt -u sourcepath
 . source4.sub
@@ -191,29 +198,31 @@ echo "$@"
 
 # this is complicated when the sourced scripts gets its own positional
 # parameters from arguments to `.'
+printf '\tsource4.sub\n'
 set -- a b c
 echo "$@"
 . source4.sub x y z
 echo "$@"
 
 # test out cd and $CDPATH
-${THIS_SH} ./builtins1.sub
+test_runsub ./builtins1.sub
 
 # test behavior of `.' when given a non-existent file argument
-${THIS_SH} ./source5.sub
+test_runsub ./source5.sub
 
 # test bugs in sourcing non-regular files, fixed post-bash-3.2
-${THIS_SH} ./source6.sub
+test_runsub ./source6.sub
 
 # test bugs with source called from multiline aliases and other contexts
-${THIS_SH} ./source7.sub
+test_runsub ./source7.sub
 
 # test source/. -p path
-${THIS_SH} ./source8.sub
+test_runsub ./source8.sub
 
 # in posix mode, assignment statements preceding special builtins are
 # reflected in the shell environment.  `.' and `eval' need special-case
 # code.
+printf '\tsource1.sub\n'
 set -o posix
 echo $AVAR
 AVAR=foo . ./source1.sub
@@ -284,37 +293,37 @@ y=$(kill -l SIGINT)
 unset -v x y
 
 # test behavior of shopt xpg_echo
-${THIS_SH} ./builtins2.sub
+test_runsub ./builtins2.sub
 
 # test behavior of declare -g
-${THIS_SH} ./builtins3.sub
+test_runsub ./builtins3.sub
 
 # test behavior of using declare to create variables without assigning values
-${THIS_SH} ./builtins4.sub
+test_runsub ./builtins4.sub
 
 # test behavior of set and unset array variables
-${THIS_SH} ./builtins5.sub
+test_runsub ./builtins5.sub
 
 # test behavior of unset builtin with -f and -v options
-${THIS_SH} ./builtins6.sub
+test_runsub ./builtins6.sub
 
 # test behavior of command builtin after changing it to a pseudo-keyword
-${THIS_SH} ./builtins7.sub
+test_runsub ./builtins7.sub
 
 # POSIX complete symbolic umask tests
-${THIS_SH} ./builtins8.sub
+test_runsub ./builtins8.sub
 
 # hash tests
-${THIS_SH} ./builtins9.sub
+test_runsub ./builtins9.sub
 
 # help tests
-${THIS_SH} ./builtins10.sub
+test_runsub ./builtins10.sub
 
 # ulimit tests
-${THIS_SH} ./builtins11.sub
+test_runsub ./builtins11.sub
 
 # pushd/popd/dirs
-${THIS_SH} ./builtins12.sub
+test_runsub ./builtins12.sub
 
 shift 0	# succeeds silently
 

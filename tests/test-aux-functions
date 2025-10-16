@@ -17,18 +17,18 @@ test_runsub()
 	scriptname=${1##*/}
 	printf '\t%s\n' "${scriptname}"
 
-	${THIS_SH} "$1"
+	${THIS_SH} "$@"
 }
 
 # some useful locale variables
 ZH_LOCALE=$(locale -a | grep -i '^zh_TW\.big5' | sed 1q)
-ZH_DEFAULT=$(locale | grep ^LC_CTYPE | sed 's:^.*=::' | tr -d '"')
+ZH_DEFAULT=zh_TW.big5
 
 US_LOCALE=$(locale -a | grep -i '^en_US\.utf-8' | sed 1q)
 if [ -z "$US_LOCALE" ]; then
 	US_LOCALE=$(locale -a | grep -i '^en_US\.utf8' | sed 1q)
 fi
-CTYPE_DEFAULT=$ZH_DEFAULT
+CTYPE_DEFAULT=$(locale | grep ^LC_CTYPE | sed 's:^.*=::' | tr -d '"')
 
 # figure out default locale; use LC_CTYPE value since that is what we use it for
 if [ -n "$LC_ALL" ]; then

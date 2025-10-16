@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 set +o posix
 
 hash -r
@@ -104,8 +106,8 @@ f() {
 
 type f | cat -v
 
-${THIS_SH} type1.sub
-${THIS_SH} type2.sub
-${THIS_SH} type3.sub
-${THIS_SH} type4.sub
-${THIS_SH} type5.sub
+test_runsub type1.sub
+test_runsub type2.sub
+test_runsub type3.sub
+test_runsub type4.sub
+test_runsub type5.sub

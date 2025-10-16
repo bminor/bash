@@ -11984,3 +11984,25 @@ execute_cmd.c
 	  around calls to run_debug_trap the same way we do it for
 	  run_return_trap
 	  Report from Александр Ушаков <anushakov@edu.hse.ru>
+
+				   10/14
+				   -----
+tests/run-all
+	- keep track of how many tests run and how many exit with status 0,
+	  and report tests that exit with a non-zero status
+	  Report and patch from Alexander Bantyev <alexander.bantyev@tweag.io>
+	- keep output of failed tests if the BASH_TSTOUT_SAVEDIR environment
+	  variable is set to a valid directory
+	  Report and patch from Alexander Bantyev <alexander.bantyev@tweag.io>
+
+				   10/15
+				   -----
+tests/run-*
+	- indent the second and subsequent lines of warning messages so they
+	  stand out a little more
+
+tests/*.tests
+	- use test_runsub to run sub-tests instead of calling ${THIS_SH}
+	  directly, so we can print a message with the name of the sub-test
+	  script into the output. This will help with identifying the script
+	  that fails

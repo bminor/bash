@@ -1,6 +1,5 @@
-
 TEST_NAME='dbg-support'
-TEST_FILE="/tmp/${TEST_NAME}.check"
+TEST_FILE="${BASH_TSTOUT}"
 ${THIS_SH} ./${TEST_NAME}.tests > $TEST_FILE 2>&1 < /dev/null
 set -f
 diff $TEST_FILE ${TEST_NAME}.right && rm -f $TEST_FILE

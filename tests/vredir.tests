@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 : ${TMPDIR:=/var/tmp}
 TMPFILE=$TMPDIR/foo
 
@@ -46,19 +48,13 @@ rm -f $TMPFILE
 
 type bar
 
-${THIS_SH} ./vredir1.sub
-
-${THIS_SH} ./vredir2.sub
-
-${THIS_SH} ./vredir3.sub
-
-${THIS_SH} ./vredir4.sub
-
-${THIS_SH} ./vredir5.sub
-
-${THIS_SH} ./vredir6.sub
-
-${THIS_SH} ./vredir7.sub
-${THIS_SH} ./vredir8.sub
+test_runsub ./vredir1.sub
+test_runsub ./vredir2.sub
+test_runsub ./vredir3.sub
+test_runsub ./vredir4.sub
+test_runsub ./vredir5.sub
+test_runsub ./vredir6.sub
+test_runsub ./vredir7.sub
+test_runsub ./vredir8.sub
 
 exit 0

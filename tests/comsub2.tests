@@ -11,7 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+. ./test-aux-functions
+#
 # initial set of tests for ${Ccommand; } nofork command substitution
 
 # basic functionality
@@ -145,9 +146,9 @@ echo $(( ${ echo 14 + 18; }+ 10))
 echo ${ echo $(( 24+18 )); }
 
 # alias expansion and nested funsubs in other constructs
-${THIS_SH} ./comsub21.sub
-${THIS_SH} ./comsub22.sub
-${THIS_SH} ./comsub23.sub
-${THIS_SH} ./comsub24.sub
-${THIS_SH} ./comsub25.sub
-${THIS_SH} ./comsub26.sub
+test_runsub ./comsub21.sub
+test_runsub ./comsub22.sub
+test_runsub ./comsub23.sub
+test_runsub ./comsub24.sub
+test_runsub ./comsub25.sub
+test_runsub ./comsub26.sub

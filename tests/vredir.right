@@ -8,17 +8,18 @@ bar ()
     exec {v}>> $TMPFILE;
     echo $v
 }
-./vredir.tests: line 19: v: readonly variable
-./vredir.tests: line 19: v: cannot assign fd to variable
+./vredir.tests: line 21: v: readonly variable
+./vredir.tests: line 21: v: cannot assign fd to variable
 42
-./vredir.tests: line 38: v: readonly variable
-./vredir.tests: line 38: v: cannot assign fd to variable
+./vredir.tests: line 40: v: readonly variable
+./vredir.tests: line 40: v: cannot assign fd to variable
 bar is a function
 bar () 
 { 
     exec {v}>> $TMPFILE;
     echo $v
 }
+	vredir1.sub
 10
 line 1
 line 2
@@ -49,6 +50,7 @@ EOF
 
     echo $v
 }
+	vredir2.sub
 10
 foo 1
 foo 2
@@ -76,8 +78,10 @@ iclosev ()
 /bin/sh
 /bin/tcsh
 /bin/zsh
+	vredir3.sub
 ./vredir3.sub: line 4: v: ambiguous redirect
 after
+	vredir4.sub
 10 11
 a
 a
@@ -92,6 +96,7 @@ swizzle ()
 10 11
 10 11
 ./vredir4.sub: line 51: ${output}: Bad file descriptor
+	vredir5.sub
 12 10
 a
 a
@@ -103,10 +108,12 @@ swizzle ()
     exec {stdin}<&$fd0-;
     exec {stdout}>&$fd1-
 }
+	vredir6.sub
 ok 1
 ./vredir6.sub: redirection error: cannot duplicate fd: Invalid argument
 ./vredir6.sub: line 13: /dev/null: Invalid argument
 unset
+	vredir7.sub
 12 10
 a
 a
@@ -118,6 +125,7 @@ swizzle ()
     exec {stdin}<&${fd[0]}-;
     exec {stdout}>&${fd[1]}-
 }
+	vredir8.sub
 redir 2
 ./vredir8.sub: line 33: $fd: Bad file descriptor
 ./vredir8.sub: line 38: $fd: Bad file descriptor

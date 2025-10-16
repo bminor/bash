@@ -148,28 +148,30 @@ type fff
 export -f fff
 ${THIS_SH} -c 'type fff'
 
-${THIS_SH} ./heredoc1.sub
+. ./test-aux-functions
+
+test_runsub ./heredoc1.sub
 
 # test heredocs in command substitutions
-${THIS_SH} ./heredoc2.sub
-${THIS_SH} ./heredoc3.sub
-${THIS_SH} ./heredoc4.sub
+test_runsub ./heredoc2.sub
+test_runsub ./heredoc3.sub
+test_runsub ./heredoc4.sub
 
 # heredoc tests that use different size documents to test pipe implementation
-${THIS_SH} ./heredoc5.sub
+test_runsub ./heredoc5.sub
 
 # test $'...' and $"..." quoted strings in here-documents
-${THIS_SH} ./heredoc6.sub
+test_runsub ./heredoc6.sub
 
 # interaction between here-documents and command substitutions
-${THIS_SH} ./heredoc7.sub
-${THIS_SH} ./heredoc8.sub
+test_runsub ./heredoc7.sub
+test_runsub ./heredoc8.sub
 
 # various tests for printing here-documents in function bodies
-${THIS_SH} ./heredoc9.sub
+test_runsub ./heredoc9.sub
 
 # test various combinations of here-documents and aliases
-${THIS_SH} ./heredoc10.sub
+test_runsub ./heredoc10.sub
 
 echo $(
 	cat <<< "comsub here-string"

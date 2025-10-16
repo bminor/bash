@@ -51,6 +51,7 @@ ENDOFINPUT
 
     aa=1
 }
+	heredoc1.sub
 foo is a function
 foo () 
 { 
@@ -70,7 +71,9 @@ qux
 
 bar
 qux
+	heredoc2.sub
 abc def geh
+	heredoc3.sub
 ./heredoc3.sub: line 20: warning: here-document at line 18 delimited by end-of-file (wanted `EOF')
 = here is the text =
 ./heredoc3.sub: line 26: warning: here-document at line 24 delimited by end-of-file (wanted `EOF')
@@ -96,6 +99,7 @@ hello
 end hello<NL>\END
 ./heredoc3.sub: line 98: warning: here-document at line 96 delimited by end-of-file (wanted `EOF')
 ./heredoc3.sub: line 99: syntax error: unexpected end of file from `(' command on line 96
+	heredoc4.sub
 heredoc1
 EOF
 Ok:0
@@ -104,6 +108,8 @@ argv[2] = <threefour>
 argv[1] = <two>
 argv[2] = <threefi>
 argv[3] = <ve>
+	heredoc5.sub
+	heredoc6.sub
 1: OK
 2: OK
 3: OK
@@ -124,6 +130,7 @@ argv[3] = <ve>
 5: ${x#$pat}
 6: ${y#$'not'}
 7: ${y#'not'}
+	heredoc7.sub
 ./heredoc7.sub: line 17: warning: command substitution: 1 unterminated here-document
 foo bar
 ./heredoc7.sub: line 21: after: command not found
@@ -131,6 +138,8 @@ foo bar
 ./heredoc7.sub: line 26: foobar: command not found
 ./heredoc7.sub: line 27: EOF: command not found
 grep: *.c: No such file or directory
+	heredoc8.sub
+	heredoc9.sub
 foo () 
 { 
     echo begin;
@@ -153,6 +162,7 @@ HERE
         echo 3 4;
     done
 }
+	heredoc10.sub
 hello
 world
 hello
@@ -162,7 +172,7 @@ here-doc line 2
 here-document
 here-document
 comsub here-string
-./heredoc.tests: line 184: warning: here-document at line 181 delimited by end-of-file (wanted `')
+./heredoc.tests: line 186: warning: here-document at line 183 delimited by end-of-file (wanted `')
 hi
 there
 ''

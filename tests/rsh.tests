@@ -12,13 +12,14 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # test restricted shell mode -- these should all be errors
+. ./test-aux-functions
 #
 # things not tested for:
 #	adding builtins dynamically with enable -f
 #	importing function definitions from environment
 
-${THIS_SH} ./rsh1.sub
-${THIS_SH} ./rsh2.sub
+test_runsub ./rsh1.sub
+test_runsub ./rsh2.sub
 
 set -r
 

@@ -1,7 +1,7 @@
-./history.tests: line 17: history: -x: invalid option
+./history.tests: line 19: history: -x: invalid option
 history: usage: history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg [arg...]
-./history.tests: line 19: history: cannot use more than one of -anrw
-./history.tests: line 22: fc: -v: invalid option
+./history.tests: line 21: history: cannot use more than one of -anrw
+./history.tests: line 24: fc: -v: invalid option
 fc: usage: fc [-e ename] [-lnr] [first] [last] or fc -s [pat=rep] [command]
     1  for i in one two three; do echo $i; done
     2  /bin/sh -c 'echo this is $0'
@@ -97,7 +97,7 @@ line 2 for history
 6	 HISTFILE=$TMPDIR/newhistory
 7	 echo displaying \$HISTFILE after history -a
 8	 cat $HISTFILE
-./history.tests: line 91: fc: no command found
+./history.tests: line 93: fc: no command found
    15  echo line 2 for history
    16  unset HISTSIZE
    17  unset HISTFILE
@@ -107,7 +107,7 @@ echo xx xb xc
 xx xb xc
 echo 44 48 4c
 44 48 4c
-./history.tests: line 106: fc: no command found
+./history.tests: line 108: fc: no command found
 aa
 bb
 cc
@@ -121,6 +121,7 @@ echo cc
 echo cc
 cc
 1
+	history1.sub
 one
 two
 three
@@ -142,10 +143,12 @@ two
 three
 (exit 42)
 42
+	history2.sub
 5.3
 echo ${BASH_VERSION%\.*}
 5.3
 	 echo ${BASH_VERSION%\.*}
+	history3.sub
 a
 b
 c
@@ -182,6 +185,7 @@ i
 
 ./history3.sub: line 48: history: @42: invalid number
 ./history3.sub: line 49: history: @42: numeric argument required
+	history4.sub
 
 0
 1
@@ -231,6 +235,7 @@ mid
 right)
 A
 B
+	history5.sub
 a
 b
 ./history5.sub: line 24: fc: history specification out of range
@@ -284,6 +289,7 @@ e
 6	 echo a
 7	 echo d
 8	 echo e
+	history6.sub
 1
 2
 3
@@ -317,6 +323,7 @@ e
     7  echo 9
     8  echo 10
     5  echo 10
+	history7.sub
 $ 1
 $ 2
 $ 3
@@ -361,6 +368,7 @@ $ 1
 $ 2
 $ exit
 0
+	history8.sub
 a
 b
 c
@@ -372,6 +380,7 @@ d
     5  history
 ./history8.sub: line 15: history: 72: history position out of range
 ./history8.sub: line 16: history: -72: history position out of range
+	history9.sub
     1  echo below zero
     2  cat <<EOF
 

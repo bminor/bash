@@ -20,18 +20,20 @@ expect()
 :	# if needed, change me to echo expect "$@"
 }
 
+. ./test-aux-functions
+
 # First, a test that bash-2.01.1 fails
-${THIS_SH} ./glob1.sub
-${THIS_SH} ./glob2.sub
-${THIS_SH} ./glob3.sub
-${THIS_SH} ./glob4.sub
-${THIS_SH} ./glob5.sub
-${THIS_SH} ./glob6.sub
-${THIS_SH} ./glob7.sub
-${THIS_SH} ./glob8.sub
-${THIS_SH} ./glob9.sub
-${THIS_SH} ./glob10.sub
-${THIS_SH} ./glob11.sub
+test_runsub ./glob1.sub
+test_runsub ./glob2.sub
+test_runsub ./glob3.sub
+test_runsub ./glob4.sub
+test_runsub ./glob5.sub
+test_runsub ./glob6.sub
+test_runsub ./glob7.sub
+test_runsub ./glob8.sub
+test_runsub ./glob9.sub
+test_runsub ./glob10.sub
+test_runsub ./glob11.sub
 
 MYDIR=$PWD	# save where we are
 
@@ -64,7 +66,7 @@ mkdir tmp
 touch tmp/l1 tmp/l2 tmp/l3
 builtin echo tmp/l[12] tmp/*4 tmp/*3
 shopt -s failglob
-builtin echo tmp/l[12] tmp/*4 tmp/*3
+( builtin echo tmp/l[12] tmp/*4 tmp/*3 ) 2>&1
 rm -r tmp
 shopt -u failglob
 

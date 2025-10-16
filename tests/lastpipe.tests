@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 binfalse()
 {
 	$binfalse || return 1	# normalize return value
@@ -70,8 +72,8 @@ binfalse | true | true | VAR=42
 echo $? $VAR
 set +o pipefail
 
-${THIS_SH} ./lastpipe1.sub
+test_runsub ./lastpipe1.sub
 echo lastpipe1.sub returns $?
 
-${THIS_SH} ./lastpipe2.sub
-${THIS_SH} ./lastpipe3.sub
+test_runsub ./lastpipe2.sub
+test_runsub ./lastpipe3.sub

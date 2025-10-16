@@ -15,6 +15,8 @@ if (( $UID == 0 )); then
 	echo "new-exp.tests: the test suite should not be run as root" >&2
 fi
 
+. ./test-aux-functions
+
 # must do this because posix mode causes process substitution to be disabled
 # and flagged as a syntax error, which causes the shell to exit
 set +o posix
@@ -292,15 +294,6 @@ echo "$BVAR"
 
 unset AVAR BVAR
 
-# run process substitution tests in a subshell so that syntax errors
-# caused by a shell not implementing process substitution (e.g., one
-# built on a NeXT) will not cause the whole test to exit prematurely
-${THIS_SH} ./new-exp1.sub
-
-# run the tests of $(<filename) in a subshell to avoid cluttering up
-# this script
-${THIS_SH} ./new-exp2.sub
-
 expect '<6>'
 recho ${#:-foo}
 expect $0: '${#:}: bad substitution'
@@ -540,12 +533,6 @@ recho "${RECEIVED:$((${#RECEIVED}-1)):1}"
 RECEIVED=""
 recho "${RECEIVED:$((${#RECEIVED}-1)):1}"
 
-# tests of new prefix expansion ${!prefix*}
-${THIS_SH} ./new-exp3.sub
-
-# bug with indirect expansion through bash-2.05b
-${THIS_SH} ./new-exp4.sub
-
 # these caused errors and core dumps in versions before bash-2.04
 c=""
 echo ${c//${$(($#-1))}/x/}
@@ -587,8 +574,6 @@ recho ${1%%[!/]*}
 recho ${1#*/}
 recho ${1##*/}
 
-${THIS_SH} ./new-exp5.sub
-
 unset var
 var=blah
 
@@ -607,37 +592,6 @@ var=(abcde abcfg abchi)
 echo ${var[*]//#abc/foo}
 echo ${var[*]/#abc/foo}
 unset var
-
-${THIS_SH} ./new-exp6.sub
-
-${THIS_SH} ./new-exp7.sub
-
-${THIS_SH} ./new-exp8.sub
-
-# tests to check whether things like indirect expansion of a variable whose
-# value is 'anothervar[@]' stop working
-${THIS_SH} ./new-exp9.sub
-
-# new parameter transformation `@' expansion operator
-${THIS_SH} ./new-exp10.sub
-
-# parameter substring replacement and removal operators with multibyte chars
-${THIS_SH} ./new-exp11.sub
-
-# indirect expansion with arrays and local variables
-${THIS_SH} ./new-exp12.sub
-
-# more indirect expansion and parameter transformation issues
-${THIS_SH} ./new-exp13.sub
-
-# new K parameter transformation operator
-${THIS_SH} ./new-exp14.sub
-
-# ongoing work with a/A parameter transformations and `nounset'
-${THIS_SH} ./new-exp15.sub
-
-# pattern substitution with `&' (quoted and unquoted) in the replacement string
-${THIS_SH} ./new-exp16.sub
 
 
 # problems with stray CTLNUL in bash-4.0-alpha
@@ -666,6 +620,54 @@ echo "${b//\#/%%}"
 echo "${b/\/#/%%}"
 
 unset a b
+
+# run process substitution tests in a subshell so that syntax errors
+# caused by a shell not implementing process substitution (e.g., one
+# built on a NeXT) will not cause the whole test to exit prematurely
+test_runsub ./new-exp1.sub
+
+# run the tests of $(<filename) in a subshell to avoid cluttering up
+# this script
+test_runsub ./new-exp2.sub
+
+# tests of new prefix expansion ${!prefix*}
+test_runsub ./new-exp3.sub
+
+# bug with indirect expansion through bash-2.05b
+test_runsub ./new-exp4.sub
+
+test_runsub ./new-exp5.sub
+
+test_runsub ./new-exp6.sub
+
+test_runsub ./new-exp7.sub
+
+test_runsub ./new-exp8.sub
+
+# tests to check whether things like indirect expansion of a variable whose
+# value is 'anothervar[@]' stop working
+test_runsub ./new-exp9.sub
+
+# new parameter transformation `@' expansion operator
+test_runsub ./new-exp10.sub
+
+# parameter substring replacement and removal operators with multibyte chars
+test_runsub ./new-exp11.sub
+
+# indirect expansion with arrays and local variables
+test_runsub ./new-exp12.sub
+
+# more indirect expansion and parameter transformation issues
+test_runsub ./new-exp13.sub
+
+# new K parameter transformation operator
+test_runsub ./new-exp14.sub
+
+# ongoing work with a/A parameter transformations and `nounset'
+test_runsub ./new-exp15.sub
+
+# pattern substitution with `&' (quoted and unquoted) in the replacement string
+test_runsub ./new-exp16.sub
 
 expect $0: 'ABXD: parameter unset'
 ${THIS_SH} -c 'recho ${ABXD:?"parameter unset"}' $0

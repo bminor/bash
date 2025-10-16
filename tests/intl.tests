@@ -54,17 +54,17 @@ printf '%s\n' "$*"
 printf '%s' "$*" | od -b | _intl_normalize_spaces
 
 # display differences make this problematic
-${THIS_SH} ./intl1.sub
+test_runsub ./intl1.sub
 
 # this tests both international handling in printf and temporary environments
-${THIS_SH} ./intl2.sub
+test_runsub ./intl2.sub
 
 # test splitting on characters instead of bytes
-${THIS_SH} ./intl3.sub
+test_runsub ./intl3.sub
 
-${THIS_SH} ./unicode1.sub # 2>/dev/null
-${THIS_SH} ./unicode2.sub
+test_runsub ./unicode1.sub # 2>/dev/null
+test_runsub ./unicode2.sub
 
-${THIS_SH} ./unicode3.sub 2>&1
+test_runsub ./unicode3.sub 2>&1
 
-${THIS_SH} ./intl4.sub
+test_runsub ./intl4.sub

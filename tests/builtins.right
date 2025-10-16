@@ -85,8 +85,8 @@ enable unset
 enable -n test worked
 enable -n test
 enable test worked
-./builtins.tests: line 126: enable: notbuiltin: not a shell builtin
-./builtins.tests: line 127: enable: test: not dynamically loaded
+./builtins.tests: line 128: enable: notbuiltin: not a shell builtin
+./builtins.tests: line 129: enable: test: not dynamically loaded
 specialname
 -specialname
 FOO=BAR
@@ -94,25 +94,34 @@ FOO=BAR
 hash: hash table empty
 0
 no-newline
+	source1.sub
 AVAR
 foo
+	source2.sub
 in source.sub2, calling return
 5
+	source3.sub
 a b c
+	source3.sub
 a b c
 x y z
 a b c
+	source4.sub
 a b c
 m n o p
+	source4.sub
 a b c
 m n o p
+	builtins1.sub
 /tmp/bash-dir-a
 /tmp/bash-dir-a
 /tmp/bash-dir-a
 /
+	source5.sub
 ./source5.sub: line 23: /tmp/source-notthere: No such file or directory
 after bad source 1
 ./source5.sub: line 30: /tmp/source-notthere: No such file or directory
+	source6.sub
 one - OK
 0
 0
@@ -122,6 +131,7 @@ three - OK
 0
 four - OK
 0
+	source7.sub
 abc
 def
 ghi
@@ -139,6 +149,7 @@ abc
 def
 ghi
 ok
+	source8.sub
 ./source8.sub: line 40: improbable-filename: No such file or directory
 ./source8.sub: line 41: improbable-filename: No such file or directory
 an improbable filename
@@ -152,6 +163,7 @@ bash: line 1: .: cwd-filename: file not found
 bash: line 1: .: cwd-filename: file not found
 file in the current directory
 file in the current directory
+	source1.sub
 AVAR
 foo
 foo
@@ -162,12 +174,13 @@ AVAR
 foo
 declare -x foo=""
 declare -x FOO="\$\$"
-./builtins.tests: line 242: declare: FOO: not found
+./builtins.tests: line 251: declare: FOO: not found
 declare -x FOO="\$\$"
 ok
 ok
-./builtins.tests: line 274: kill: 4096: invalid signal specification
+./builtins.tests: line 283: kill: 4096: invalid signal specification
 1
+	builtins2.sub
 a\n\n\nb
 a
 
@@ -175,9 +188,11 @@ a
 b
 -p
 a	b	c
+	builtins3.sub
 before: f = 4
 inside
 after: f = 8 bar = 4
+	builtins4.sub
 declare -a c
 declare -A d
 declare -a c=([0]="4")
@@ -188,6 +203,7 @@ declare -a c=([0]="1" [1]="2" [2]="3")
 declare -a c=([0]="1" [1]="2" [2]="3")
 unset
 unset
+	builtins5.sub
 assoc 1 unset
 array 1 unset
 assoc 2 unset
@@ -220,6 +236,7 @@ scalar: 0
 scalar: 1
 scalar: 0
 scalar: 0
+	builtins6.sub
 all set:
 one
 two
@@ -261,6 +278,7 @@ f2 ()
 funcs unset:
 one-two
 two-two
+	builtins7.sub
 bash: line 1: notthere: No such file or directory
 one
 bash: line 1: notthere: No such file or directory
@@ -297,6 +315,7 @@ type
 + command -p -- command -v type
 type
 + set +x
+	builtins8.sub
 u=rw,g=rx,o=rx
 u=r,g=rx,o=rx
 u=rwx,g=rwx,o=
@@ -315,6 +334,7 @@ u=rwx,g=rx,o=rx
 u=rwx,g=rx,o=rx
 u=rwx,g=rx,o=rx
 u=rwx,g=rx,o=x
+	builtins9.sub
 hash: hash table empty
 ./builtins9.sub: line 19: hash: notthere: not found
 1
@@ -333,6 +353,7 @@ builtin hash -p /nosuchdir/nosuchfile cat
 found
 ./builtins9.sub: line 52: hash: /: Is a directory
 builtin hash -p /nosuchfile cat
+	builtins10.sub
 ./builtins10.sub: line 17: help: -x: invalid option
 help: usage: help [-dms] [pattern ...]
 These shell commands are defined internally.  Type `help' to see this list.
@@ -475,6 +496,7 @@ A star (*) next to a name means that the command is disabled.
  hash [-lr] [-p pathname] [-dt] [name >  { COMMANDS ; }
  help [-dms] [pattern ...]
 ./builtins10.sub: line 39: help: no help topics match `bash'.  Try `help help' or `man -k bash' or `info bash'.
+	builtins11.sub
 unlimited
 unlimited
 ./builtins11.sub: line 27: ulimit: +1999: invalid number
@@ -483,6 +505,7 @@ unlimited
 ./builtins11.sub: line 37: ulimit: -g: invalid option
 ulimit: usage: ulimit [-SHabcdefiklmnpqrstuvxPRT] [limit]
 ./builtins11.sub: line 39: ulimit: max user processes: cannot modify limit: Operation not permitted
+	builtins12.sub
 /tmp /bin
 /tmp /bin
 /bin /tmp
@@ -502,5 +525,5 @@ popd: usage: popd [-n] [+N | -N]
 ./builtins12.sub: line 36: popd: +8: directory stack index out of range
 /tmp /
 /
-./builtins.tests: line 325: exit: status: numeric argument required
+./builtins.tests: line 334: exit: status: numeric argument required
 after non-numeric arg to exit: 2

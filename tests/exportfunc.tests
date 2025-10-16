@@ -44,9 +44,11 @@ eval  'X() { (a)>\' ; . ./bar 2>/dev/null
 rm -f cve7169-bad2 $TMPDIR/bar
 
 # CVE-2014-7186
+printf '\texportfunc1.sub\n'
 ${THIS_SH} ./exportfunc1.sub
 
 # CVE-2014-7187
+printf '\texportfunc2.sub\n'
 ${THIS_SH} ./exportfunc2.sub
 
 # CVE-2014-6277
@@ -90,4 +92,5 @@ unset -f foo
 env $'BASH_FUNC_#badname%%'=$'() { :; }\nfoo () { echo transform-4; }  ' ${THIS_SH} -c 'foo' 2>/dev/null
 
 # tests of exported names
+printf '\texportfunc3.sub\n'
 ${THIS_SH} ./exportfunc3.sub

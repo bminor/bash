@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 if : ; then
 	set -e
 	N=95
@@ -132,6 +134,6 @@ rm -f $FN
 
 set +e
 
-${THIS_SH} ./set-e1.sub
-${THIS_SH} ./set-e2.sub
-${THIS_SH} ./set-e3.sub
+test_runsub ./set-e1.sub
+test_runsub ./set-e2.sub
+test_runsub ./set-e3.sub

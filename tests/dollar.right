@@ -95,6 +95,7 @@ ok 1
 ok 2
 ok 3
 ok 4
+	dollar-at-star1.sub
 var=${a[*]}   ... one:::two:three:::four
 var="${a[*]}" ... one:::two:three:::four
 var=$*        ... one:::two:three:::four
@@ -103,6 +104,7 @@ var=${a[@]}   ... one:::two three:::four
 var="${a[@]}" ... one:::two three:::four
 var=$@        ... one:::two three:::four
 var="$@"      ... one:::two three:::four
+	dollar-at-star2.sub
 ok 1
 ok 2
 ok 3
@@ -156,6 +158,7 @@ ok at 6
 ok at 7
 ok at 8
 ok at 9
+	dollar-at-star3.sub
 argv[1] = <a>
 argv[1] = <a>
 argv[1] = <a>
@@ -169,6 +172,7 @@ argv[1] = <o>
 argv[1] = <one>
 <123 abc> <def> <ghi 456> 
 <123 abc> <def> <ghi\ 456> 
+	dollar-at-star4.sub
 <c>
 a bc
 a b
@@ -199,6 +203,7 @@ argv[1] = <a b>
 <c>
 <d>
 <d>
+	dollar-at-star5.sub
 0
 0
 1
@@ -232,6 +237,7 @@ argv[1] = <>
 variable
 argv[1] = <>
 dollar-at
+	dollar-at-star6.sub
 argv[1] = <'a'>
 argv[2] = <'b'>
 argv[3] = <'c'>
@@ -269,6 +275,7 @@ argv[3] = <'c'>
 argv[1] = <'a'>
 argv[2] = <'b'>
 argv[3] = <'c'>
+	dollar-at-star7.sub
 |this|
 |is|
 |a|
@@ -297,11 +304,13 @@ argv[3] = <'c'>
 |is|
 |a|
 |test|
+	dollar-at-star8.sub
 
 a1=a b c a,b,c a b c a,b,c a b c a,b,c
 a2=a b c a,b,c a b c a,b,c a b c a,b,c
 a3=a b c a,b,c a b c a,b,c a b c a,b,c
 a4=a b c a,b,c a b c a,b,c a b c a,b,c
+	dollar-at-star9.sub
 argv[1] = <  >
 argv[1] = <  >
 argv[1] = <  >
@@ -399,6 +408,7 @@ argv[1] = <^?>
 argv[1] = <^?>
 argv[1] = <>
 argv[1] = <>
+	dollar-at-star10.sub
 argv[1] = <>
 argv[1] = <>
 argv[1] = <>
@@ -427,6 +437,7 @@ argv[1] = <>
 argv[1] = <>
 argv[1] = <>
 argv[1] = <>
+	dollar-at-star11.sub
 argv[1] = <>
 argv[1] = <>
 argv[1] = <>
@@ -466,6 +477,7 @@ argv[1] = <>
 argv[1] = <>
 argv[1] = </>
 1:1
+	dollar-star1.sub
 xa|xb|xc
 xa|xb|xc
 a|b|c
@@ -482,6 +494,7 @@ a|b|c
 a|b|c
 xa|xb|xc
 xa|xb|xc
+	dollar-at1.sub
 3
 3
 3
@@ -490,12 +503,14 @@ xa|xb|xc
 3
 3
 3
+	dollar-at2.sub
 argv[1] = <echo 1 ; echo 1>
 argv[1] = <echo 1 2 ; echo 1>
 argv[2] = <2>
 argv[1] = <echo 1 ; echo 1>
 argv[1] = <echo 1 2 ; echo 1>
 argv[2] = <2>
+	dollar-star2.sub
 argv[1] = <AB>
 argv[1] = <AB>
 argv[1] = <A BC D>
@@ -505,6 +520,7 @@ argv[1] = <A B>
 argv[2] = <C D>
 argv[1] = <A BC D>
 argv[1] = <A BC D>
+	dollar-star3.sub
 argv[1] = <fooq//barq/>
 argv[1] = <fooq>
 argv[2] = <>
@@ -520,23 +536,27 @@ argv[1] = <ooq>
 argv[2] = <>
 argv[3] = <arq>
 argv[4] = <>
+	dollar-at3.sub
 0
 bar
 
 after 1
 
 after 2
+	dollar-star4.sub
 0
 bar
 
 after 1
 
 after 2
+	dollar-star5.sub
 a b
 ab
 cd
 ok 1
 ok 2
+	dollar-at4.sub
 argv[1] = <a  b>
 argv[2] = <c  d>
 argv[1] = <a>
@@ -545,6 +565,7 @@ argv[3] = <c>
 argv[4] = <d>
 argv[1] = <a  b c  d>
 argv[1] = <a  b c  d>
+	dollar-at5.sub
 <1> <2> <3> <4> <5 1> 
 <1 1> <2> <3> <4> <5> 
 <11> <2> <3> <4> <51> 
@@ -596,6 +617,7 @@ ${@:2}c$1 c2 c3     #works as long as quoting omitted
 set y zcx c2 c3
 0
 declare -a c=([0]="y" [1]="zcx" [2]="c2" [3]="c3")
+	dollar-at6.sub
 argv[1] = <>
 argv[2] = <x>
 argv[1] = <>
@@ -617,6 +639,7 @@ argv[1] = <>
 argv[1] = <>
 argv[1] = <>
 argv[1] = <>
+	dollar-star6.sub
 argv[1] = <AwR>
 argv[1] = <AwR>
 argv[1] = <AR>
@@ -629,6 +652,7 @@ argv[1] = <A^?R>
 argv[1] = <AwR>
 argv[1] = <AwR>
 argv[1] = <A^?R>
+	dollar-star7.sub
 <a> <b> <ca> <b> <c-a-b-c> 
 after 1: IFS -
 argv[1] = <a-b-c>
@@ -645,6 +669,7 @@ argv[2] = <b>
 argv[3] = <c>
 argv[4] = <d>
 argv[1] = <a b c d>
+	dollar-star8.sub
 <3>
 <abc>
 <def ghi>
@@ -675,6 +700,7 @@ argv[1] = <a b c d>
 <def>
 <ghi>
 <jkl>
+	dollar-at7.sub
 argv[1] = <1>
 argv[2] = <>
 argv[1] = <2>
@@ -722,6 +748,7 @@ argv[1] = <1>
 argv[2] = <>
 argv[1] = <2>
 argv[2] = <>
+	dollar-star9.sub
 <12><12><12><12><12><12>
 <12><12><12><12><12><12>
 <12><'1''2'>
@@ -742,6 +769,8 @@ argv[2] = <2>
 var=1 2
 argv[1] = <1 2>
 argv[1] = <1 2>
+	dollar-star10.sub
+	dollar-star11.sub
 argv[1] = <^Aaa^Abb^Acc^A--^Add^A>
 argv[1] = <^A--^A>
 ok 1

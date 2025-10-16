@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 # test the trap code
 
 trap 'echo exiting' 0
@@ -73,34 +75,36 @@ echo bad
 echo $?
 
 # hmmm...should this set the handling to SIG_IGN for children, too?
+printf '\ttrap1.sub\n'
 trap '' USR2
 ./trap1.sub
 trap - USR2
 
 # test ERR trap
+printf '\ttrap2.sub\n'
 ./trap2.sub
 
-${THIS_SH} ./trap3.sub
+test_runsub ./trap3.sub
 
-${THIS_SH} ./trap4.sub
+test_runsub ./trap4.sub
 
 # This doesn't work right on all Unix versions
-#${THIS_SH} ./trap5.sub
+#test_runsub ./trap5.sub
 
 # Return trap issues
-${THIS_SH} ./trap6.sub
+test_runsub ./trap6.sub
 
 # eval and ERR trap
-${THIS_SH} ./trap7.sub
+test_runsub ./trap7.sub
 
 # SIGCHLD traps
-${THIS_SH} ./trap8.sub
+test_runsub ./trap8.sub
 
 # return without argument in trap string 
-${THIS_SH} ./trap9.sub
+test_runsub ./trap9.sub
 
 # ERR trap and functions
-${THIS_SH} ./trap10.sub
+test_runsub ./trap10.sub
 
 #
 # show that setting a trap on SIGCHLD is not disastrous.

@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 OIFS="$IFS"
 IFS=":$IFS"
 eval foo="a:b:c"
@@ -73,4 +75,4 @@ echo $x
 
 IFS="$DEFIFS"
 
-${THIS_SH} ./ifs1.sub
+test_runsub ./ifs1.sub

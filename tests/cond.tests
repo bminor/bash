@@ -11,6 +11,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
 #
 # the test/[ code is tested elsewhere, and the [[...]] just uses the same
 # code.  this tests the special features of [[...]]
@@ -240,9 +241,9 @@ var=$'ab\001c'
 [[ $var == a* ]] && echo ok c5
 [[ $var == $'ab\001'* ]] && echo ok c6
 
-${THIS_SH} ./cond-regexp1.sub
-${THIS_SH} ./cond-regexp2.sub
-${THIS_SH} ./cond-regexp3.sub
+test_runsub ./cond-regexp1.sub
+test_runsub ./cond-regexp2.sub
+test_runsub ./cond-regexp3.sub
 
-${THIS_SH} ./cond-error1.sub
-${THIS_SH} ./cond-xtrace1.sub
+test_runsub ./cond-error1.sub
+test_runsub ./cond-xtrace1.sub

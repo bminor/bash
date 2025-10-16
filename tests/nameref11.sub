@@ -33,6 +33,8 @@ declare -n r; mapfile r < /dev/null ; declare -p r; unset r ; unset -n r
 mapfile r < /dev/null; declare -n r ; unset r ; unset -n r
 declare -n r; printf -v r / ; unset -n r
 
+declare -n r ; declare -u r r ; unset -n r
+
 declare -n r; r="" ; unset -n r
 declare -n r="" ; unset -n r
 declare -n r; : ${r=} ; unset -n r

@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+#
 : ${TMPDIR:=/var/tmp}
 dir=$PWD
 
@@ -51,6 +53,6 @@ echo **
 cd $dir
 rm -rf $GDIR
 
-${THIS_SH} ./globstar1.sub
-${THIS_SH} ./globstar2.sub
-${THIS_SH} ./globstar3.sub
+test_runsub ./globstar1.sub
+test_runsub ./globstar2.sub
+test_runsub ./globstar3.sub

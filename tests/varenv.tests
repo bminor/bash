@@ -17,6 +17,8 @@
 # Test the behavior of the shell with respect to variable and environment
 # assignments
 #
+. ./test-aux-functions
+
 expect()
 {
 	echo expect "$@"
@@ -210,59 +212,59 @@ printenv FOOFOO
 
 # test out export behavior of variable assignments preceding builtins and
 # functions
-$THIS_SH ./varenv1.sub
+test_runsub ./varenv1.sub
 
 # more tests; bugs in bash up to version 2.05a
-$THIS_SH ./varenv2.sub
+test_runsub ./varenv2.sub
 
 # more tests; bugs in bash IFS scoping up through version 4.2
-$THIS_SH ./varenv3.sub
+test_runsub ./varenv3.sub
 
 # scoping problems with declare -g through bash-4.2
-${THIS_SH} ./varenv4.sub
+test_runsub ./varenv4.sub
 
 # more scoping and declaration problems with -g and arrays through bash-4.2
-${THIS_SH} ./varenv5.sub
+test_runsub ./varenv5.sub
 
 # variable scoping in the presence of nameref
-${THIS_SH} ./varenv6.sub
+test_runsub ./varenv6.sub
 
 # variable declaration problems with arrays and readonly local variables
-${THIS_SH} ./varenv7.sub
+test_runsub ./varenv7.sub
 
 # variable visibility problems with process substitution subshells in
 # redirections
-${THIS_SH} ./varenv8.sub
+test_runsub ./varenv8.sub
 
 # make sure that builtins like readonly and export modify local array variables
 # if executed in shell functions, like they modify local scalar variables
-${THIS_SH} ./varenv9.sub
+test_runsub ./varenv9.sub
 
 # more tests of unset and local variables with dynamic scoping
-${THIS_SH} ./varenv10.sub
+test_runsub ./varenv10.sub
 
 # tests of compound assignments in function scope
-${THIS_SH} ./varenv11.sub
+test_runsub ./varenv11.sub
 
 # temporary environment variable propagation and scoping in posix mode
-${THIS_SH} ./varenv12.sub
+test_runsub ./varenv12.sub
 
 # temporary environment and invalid shell identifier names
-${THIS_SH} ./varenv13.sub
+test_runsub ./varenv13.sub
 
 # localvar_inherit
-${THIS_SH} ./varenv14.sub
-${THIS_SH} ./varenv15.sub
-${THIS_SH} ./varenv16.sub
-${THIS_SH} ./varenv17.sub
-${THIS_SH} ./varenv18.sub
-${THIS_SH} ./varenv19.sub
-${THIS_SH} ./varenv20.sub
-${THIS_SH} ./varenv21.sub
-${THIS_SH} ./varenv22.sub
-${THIS_SH} ./varenv23.sub
-${THIS_SH} ./varenv24.sub
-${THIS_SH} ./varenv25.sub
+test_runsub ./varenv14.sub
+test_runsub ./varenv15.sub
+test_runsub ./varenv16.sub
+test_runsub ./varenv17.sub
+test_runsub ./varenv18.sub
+test_runsub ./varenv19.sub
+test_runsub ./varenv20.sub
+test_runsub ./varenv21.sub
+test_runsub ./varenv22.sub
+test_runsub ./varenv23.sub
+test_runsub ./varenv24.sub
+test_runsub ./varenv25.sub
 
 # make sure variable scoping is done right
 tt() { typeset a=b;echo a=$a; };a=z;echo a=$a;tt;echo a=$a

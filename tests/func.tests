@@ -17,6 +17,8 @@ if [ -n "$funcs" ]; then
         unset -f $funcs
 fi
 
+. ./test-aux-functions
+
 a()
 {
 	x=$((x - 1))
@@ -168,20 +170,20 @@ ${THIS_SH} -c 'type -t zf'
 ${THIS_SH} -c 'type zf'
 unset -f zf
 
-${THIS_SH} ./func1.sub
+test_runsub ./func1.sub
 
 # tests for functions whose bodies are not group commands, with and without
 # attached redirections
-${THIS_SH} ./func2.sub
+test_runsub ./func2.sub
 
 # test for some posix-specific function behavior
-${THIS_SH} ./func3.sub
+test_runsub ./func3.sub
 
 # FUNCNEST testing
-${THIS_SH} ./func4.sub
+test_runsub ./func4.sub
 
 # function naming restrictions
-${THIS_SH} ./func5.sub
+test_runsub ./func5.sub
 
 unset -f myfunction
 myfunction() {

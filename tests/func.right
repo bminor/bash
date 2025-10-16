@@ -38,6 +38,7 @@ zf ()
 { 
     echo this is zf
 }
+	func1.sub
 f is a function
 f () 
 { 
@@ -118,6 +119,7 @@ testgrp ()
     } 1>&2;
     echo testgrp-b
 }
+	func2.sub
 funca is a function
 funca () 
 { 
@@ -141,6 +143,7 @@ foo-bar ()
 { 
     :
 }
+	func3.sub
 expect 5 10
 5 10
 expect 20
@@ -153,6 +156,7 @@ expect 2 40
 2 40
 expect 5 20
 5 20
+	func4.sub
 ./func4.sub: line 23: foo: maximum function nesting level exceeded (100)
 1
 after: f = 100
@@ -166,6 +170,7 @@ after FUNCNEST unset: f = 201
 ./func4.sub: line 23: foo: maximum function nesting level exceeded (20)
 1
 after FUNCNEST assign: f = 38
+	func5.sub
 ./func5.sub: line 31: `sys$read': not a valid identifier
 11111 () 
 { 

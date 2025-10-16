@@ -11,6 +11,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+. ./test-aux-functions
+
 # basic nameref tests
 bar=one
 flow=two
@@ -129,5 +131,5 @@ echo ${!x//c/x}
 echo ${v//c/x}
 
 for testfile in ./nameref[0-9].sub ./nameref[1-9][0-9].sub ; do
-	${THIS_SH} "$testfile"
+	test_runsub "$testfile"
 done

@@ -17,6 +17,8 @@ LC_NUMERIC=C
 : ${TMPDIR:=/tmp}
 TMPF=$TMPDIR/printf-oflow-$RANDOM
 
+. ./test-aux-functions
+
 printf_overflow ()
 {
         local r;
@@ -388,11 +390,11 @@ printf '%d\n' z
 printf '%d\n' ''
 
 # tests variable assignment with -v
-${THIS_SH} ./printf1.sub
-${THIS_SH} ./printf2.sub
-${THIS_SH} ./printf3.sub
-${THIS_SH} ./printf4.sub
-${THIS_SH} ./printf5.sub
+test_runsub ./printf1.sub
+test_runsub ./printf2.sub
+test_runsub ./printf3.sub
+test_runsub ./printf4.sub
+test_runsub ./printf5.sub
 # multibyte characters with %ls/%S and %lc/%C
-${THIS_SH} ./printf6.sub
-${THIS_SH} ./printf7.sub
+test_runsub ./printf6.sub
+test_runsub ./printf7.sub

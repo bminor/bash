@@ -34,6 +34,7 @@ hBP
 braceexpand:hashall:interactive-comments:physical
 declare -r SHELLOPTS="braceexpand:hashall:interactive-comments:physical"
 abcde
+	varenv1.sub
 20
 30
 40
@@ -41,6 +42,7 @@ abcde
 declare -x var="60"
 outside
 assignment
+	varenv2.sub
 |0|10|
 10
 |0|10|
@@ -54,9 +56,11 @@ after fff3: x=4
 |0|12|
 |y|
 |y|
+	varenv3.sub
 a:b:c:d
 a-b-c-d
 a:b:c:d
+	varenv4.sub
 g: , 
 f: , 
 FIN: asdf fdsa, asdf fdsa
@@ -66,12 +70,15 @@ FIN: v = two, w = one
 ./varenv4.sub: line 67: bbb: unique: cannot convert indexed to associative array
 ./varenv4.sub: line 67: declare: unique: cannot convert indexed to associative array
 after bbb: 1
+	varenv5.sub
 declare -Ar FOOBAR=([foo]="bar" )
 declare -Ar FOOBAR=([foo]="bar" )
 declare -ar FOOBAR2=([0]="bar")
 declare -ar FOOBAR2=([0]="bar")
+	varenv6.sub
 F OUTSIDE
 F OUTSIDE
+	varenv7.sub
 declare -ar outside=()
 declare -ir outside1="1"
 tempenv = foo
@@ -87,6 +94,7 @@ outside: outside
 local: unset1 unset2
 abc
 abc
+	varenv8.sub
 :1
 :2
 after: ----
@@ -95,6 +103,7 @@ global:2
 after: --global--
 after: ----
 x = :1:2
+	varenv9.sub
 in o1 (readonly modifying local scalars):
 declare -r i1="a b c"
 declare -r j1="1 2 3"
@@ -123,6 +132,7 @@ declare -ar i4=([0]="a" [1]="b" [2]="c")
 declare -ar j4=([0]="1" [1]="2" [2]="3")
 ./varenv9.sub: line 79: unset: i4: cannot unset: readonly variable
 ./varenv9.sub: line 79: unset: j4: cannot unset: readonly variable
+	varenv10.sub
 main: unset
 inner: res unset
 outer: res: X Y
@@ -132,6 +142,7 @@ outer: res: X Y
 main: after second call: X
 func: null or unset
 after func: x = outside
+	varenv11.sub
 ./varenv11.sub: line 17: local: qux: readonly variable
 ./varenv11.sub: line 18: qux: readonly variable
 ./varenv11.sub: line 18: local: qux: readonly variable
@@ -140,6 +151,7 @@ declare -a bar=([0]="zero" [1]="one")
 declare -A foo=([one]="one" [zero]="zero" )
 declare -a bar=([0]="zero" [1]="one")
 ./varenv11.sub: line 42: a: readonly variable
+	varenv12.sub
 foo=abc
 func1: var =
 
@@ -170,6 +182,7 @@ foo: hello world
 after foo: var=global
 bar: hello world
 after bar: var=global
+	varenv13.sub
 ./varenv13.sub: line 16: `var[0]': not a valid identifier
 ./varenv13.sub: line 16: `var[@]': not a valid identifier
 ./varenv13.sub: line 14: declare: var: not found
@@ -177,6 +190,7 @@ declare -A var=([0]="X" ["@"]="Y" )
 help
 ./varenv13.sub: line 35: `var[0]': not a valid identifier
 1
+	varenv14.sub
 declare -A var=([0]="X" )
 declare -A var=([Y]="Y" )
 declare -A var=([Y]="Y" )
@@ -197,6 +211,7 @@ declare -a v=([0]="7" [1]="1")
 declare -a array=([0]="1" [1]="2" [2]="3" [3]="list" [4]="of" [5]="four" [6]="words")
 ./varenv14.sub: line 85: declare: assoc: cannot convert associative to indexed array
 declare -A assoc=([four]="words" [two]="2" [three]="3" [one]="1" [list]="of" )
+	varenv15.sub
 f: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
 f1: after: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
 done: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100
@@ -227,6 +242,7 @@ after source 1: a b c d e f g h i j k l m n o p q r s t u v w x y z
 varenv15.in: before set: one two three four five six seven eight nine ten
 varenv15.in: after set: a b c d e f g h i j k l m n o p q r s t u v w x y z
 after source 2: a b c d e f g h i j k l m n o p q r s t u v w x y z
+	varenv16.sub
 foo=showfoo environment foo=showfoo
 foo=showfoo environment foo=showfoo
 foo=showfoo environment foo=showfoo
@@ -243,6 +259,7 @@ outside 2.0: foo=<unset>
 foo=foo environment foo=foo
 foo=<unset> environment foo=
 outside 2.1: foo=<unset>
+	varenv17.sub
 declare -- var="global"
 declare -- var
 declare -- var="local"
@@ -256,26 +273,31 @@ declare -- var
 declare -- var="local"
 declare -- var="f1"
 declare -- var="local"
+	varenv18.sub
 declare -a arr=([0]="zero" [1]="one" [2]="two" [3]="three" [4]="four" [5]="five")
 declare -a arr=([0]="zero" [1]="one" [2]="two")
 declare -a arr=([0]="three" [1]="four" [2]="five")
 declare -a arr=([0]="zero" [1]="one" [2]="two")
+	varenv19.sub
 ddd 0
 aaa 1 2 3
 bbb 4 5 6
 ccc 7 8 9
 declare -a x=([0]="one" [1]="two" [2]="three")
 ./varenv19.sub: line 51: declare: x: not found
+	varenv20.sub
 declare -x v="x"
 declare -x v="t"
 declare -- v
 declare -x v
+	varenv21.sub
 ignoreeof           	on
 ignoreeof           	off
 ignoreeof           	on
 10
 local -
 match 1
+	varenv22.sub
 trap -- 'echo trap:$FUNCNAME' EXIT
 trap:f
 trap -- 'echo trap:$FUNCNAME' EXIT
@@ -284,6 +306,7 @@ trap -- 'echo trap:$FUNCNAME' EXIT
 trap:f
 trap -- 'echo trap:$FUNCNAME' EXIT
 trap:f
+	varenv23.sub
 declare -rx x="4"
 declare -rx y="5"
 f:3
@@ -310,6 +333,7 @@ f: 3
 global: declare -rx c="3"
 f1: 4
 global: declare -- b="8"
+	varenv24.sub
 f1: x = local
 f2: x = local
 after f2: x = global
@@ -328,6 +352,7 @@ after unset f1: x = local
 f1: x = local
 after unset f1: x = unset
 1009: after posix f1: x = global
+	varenv25.sub
 global initial
 declare -- string
 declare -i int

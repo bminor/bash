@@ -3,7 +3,7 @@ argv[1] = <foo>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
-./new-exp.tests: line 41: HOME: }: arithmetic syntax error: operand expected (error token is "}")
+./new-exp.tests: line 43: HOME: }: arithmetic syntax error: operand expected (error token is "}")
 unset
 argv[1] = </usr/homes/chet>
 argv[1] = </usr/homes/chet>
@@ -59,7 +59,7 @@ argv[1] = <4>
 argv[1] = <op>
 argv[1] = <abcdefghijklmnop>
 argv[1] = <abcdefghijklmnop>
-./new-exp.tests: line 189: bad-var: invalid variable name
+./new-exp.tests: line 191: bad-var: invalid variable name
 argv[1] = <a>
 argv[2] = <b>
 argv[3] = <c>
@@ -67,8 +67,8 @@ argv[4] = <d>
 argv[1] = <a>
 argv[2] = <b c>
 argv[3] = <d>
-./new-exp.tests: line 202: ABX: unbound variable
-./new-exp.tests: line 206: $6: cannot assign in this way
+./new-exp.tests: line 204: ABX: unbound variable
+./new-exp.tests: line 208: $6: cannot assign in this way
 argv[1] = <xxcde>
 argv[1] = <axxde>
 argv[1] = <abxyz>
@@ -168,16 +168,8 @@ has
 multiple
 lines.
 This-string-has-multiple-lines.
-this is a test of proc subst
-this is test 2
-a
-./new-exp2.sub: line 55: /tmp/redir-notthere: No such file or directory
-1
-
-./new-exp2.sub: line 62: 1111111111111111111111: command not found
-
 argv[1] = <6>
-./new-exp.tests: line 307: ${#:}: bad substitution
+./new-exp.tests: line 300: ${#:}: bad substitution
 argv[1] = <'>
 argv[1] = <">
 argv[1] = <"hello">
@@ -412,17 +404,95 @@ argv[6] = <w>
 argv[7] = <x>
 argv[8] = <y>
 argv[9] = <z>
-./new-exp.tests: line 525: $9: unbound variable
-./new-exp.tests: line 526: 9: unbound variable
-./new-exp.tests: line 527: UNSET: unbound variable
-./new-exp.tests: line 528: UNSET: unbound variable
-./new-exp.tests: line 529: UNSET: unbound variable
-./new-exp.tests: line 530: UNSET: unbound variable
-./new-exp.tests: line 531: UNSET: unbound variable
+./new-exp.tests: line 518: $9: unbound variable
+./new-exp.tests: line 519: 9: unbound variable
+./new-exp.tests: line 520: UNSET: unbound variable
+./new-exp.tests: line 521: UNSET: unbound variable
+./new-exp.tests: line 522: UNSET: unbound variable
+./new-exp.tests: line 523: UNSET: unbound variable
+./new-exp.tests: line 524: UNSET: unbound variable
 argv[1] = <5>
 argv[1] = <#>
 argv[1] = <#>
 argv[1] = <>
+./new-exp.tests: line 538: ${$(($#-1))}: bad substitution
+argv[1] = <a>
+argv[2] = <b>
+argv[3] = <c>
+argv[4] = <d>
+argv[5] = <e>
+argv[6] = <f>
+argv[7] = <g>
+argv[1] = <a>
+argv[2] = <b>
+argv[3] = <c>
+argv[4] = <d>
+argv[5] = <e>
+argv[1] = <a>
+argv[1] = <a>
+argv[2] = <b>
+argv[1] = <>
+./new-exp.tests: line 557: $(($# - 2)): substring expression < 0
+./new-exp.tests: line 559: -2: substring expression < 0
+argv[1] = <bin>
+argv[2] = <bin>
+argv[3] = <ucb>
+argv[4] = <bin>
+argv[5] = <.>
+argv[6] = <sbin>
+argv[7] = <sbin>
+argv[1] = </>
+argv[2] = </>
+argv[3] = </>
+argv[4] = </>
+argv[5] = </>
+argv[6] = </>
+argv[1] = <bin>
+argv[2] = <usr/bin>
+argv[3] = <usr/ucb>
+argv[4] = <usr/local/bin>
+argv[5] = <.>
+argv[6] = <sbin>
+argv[7] = <usr/sbin>
+argv[1] = </bin>
+argv[2] = </usr/bin>
+argv[3] = </usr/ucb>
+argv[4] = </usr/local/bin>
+argv[5] = <.>
+argv[6] = </sbin>
+argv[7] = </usr/sbin>
+argv[1] = </full/path/to>
+argv[1] = </>
+argv[1] = <full/path/to/x16>
+argv[1] = <x16>
+h
+h
+--blah
+--blah
+lah
+lah
+abcde abcfg abchi
+foode foofg foohi
+argv[1] = </>
+argv[1] = </>
+
+1/##2/%3
+1/##2/##3
+1##2/%3
+1/%%2/#3
+1/%%2/%%3
+1%%2/#3
+	new-exp1.sub
+this is a test of proc subst
+this is test 2
+a
+	new-exp2.sub
+./new-exp2.sub: line 55: /tmp/redir-notthere: No such file or directory
+1
+
+./new-exp2.sub: line 62: 1111111111111111111111: command not found
+
+	new-exp3.sub
 argv[1] = <_QUANTITY>
 argv[2] = <_QUART>
 argv[3] = <_QUEST>
@@ -457,6 +527,7 @@ argv[6] = <_QUOTE>
 ./new-exp3.sub: line 36: ${!_Q* }: bad substitution
 ./new-exp3.sub: line 41: ${!1*}: bad substitution
 ./new-exp3.sub: line 43: ${!@*}: bad substitution
+	new-exp4.sub
 Case01---3---A:B:C---
 Case02---1---A B C::---
 Case03---3---A:B:C---
@@ -465,56 +536,7 @@ Case05---3---A:B:C---
 Case06---1---A B C::---
 Case07---3---A:B:C---
 Case08---3---A:B:C---
-./new-exp.tests: line 551: ${$(($#-1))}: bad substitution
-argv[1] = <a>
-argv[2] = <b>
-argv[3] = <c>
-argv[4] = <d>
-argv[5] = <e>
-argv[6] = <f>
-argv[7] = <g>
-argv[1] = <a>
-argv[2] = <b>
-argv[3] = <c>
-argv[4] = <d>
-argv[5] = <e>
-argv[1] = <a>
-argv[1] = <a>
-argv[2] = <b>
-argv[1] = <>
-./new-exp.tests: line 570: $(($# - 2)): substring expression < 0
-./new-exp.tests: line 572: -2: substring expression < 0
-argv[1] = <bin>
-argv[2] = <bin>
-argv[3] = <ucb>
-argv[4] = <bin>
-argv[5] = <.>
-argv[6] = <sbin>
-argv[7] = <sbin>
-argv[1] = </>
-argv[2] = </>
-argv[3] = </>
-argv[4] = </>
-argv[5] = </>
-argv[6] = </>
-argv[1] = <bin>
-argv[2] = <usr/bin>
-argv[3] = <usr/ucb>
-argv[4] = <usr/local/bin>
-argv[5] = <.>
-argv[6] = <sbin>
-argv[7] = <usr/sbin>
-argv[1] = </bin>
-argv[2] = </usr/bin>
-argv[3] = </usr/ucb>
-argv[4] = </usr/local/bin>
-argv[5] = <.>
-argv[6] = </sbin>
-argv[7] = </usr/sbin>
-argv[1] = </full/path/to>
-argv[1] = </>
-argv[1] = <full/path/to/x16>
-argv[1] = <x16>
+	new-exp5.sub
 two
 one
 ne
@@ -534,14 +556,7 @@ one
 9
 4, A B C D
 2, C D
-h
-h
---blah
---blah
-lah
-lah
-abcde abcfg abchi
-foode foofg foohi
+	new-exp6.sub
 argv[1] = <>
 argv[1] = <+>
 argv[1] = <+^?>
@@ -558,6 +573,7 @@ argv[1] = <12>
 argv[1] = <>
 argv[1] = <>
 argv[1] = </tmp/test/TEST>
+	new-exp7.sub
 foo is a function
 foo () 
 { 
@@ -573,6 +589,7 @@ bar ()
 { 
     echo < <(cat x1)
 }
+	new-exp8.sub
 start;ing0;ing1;ing2;ing3;ing4;ing5;ing6;ing7;ing8;ing9;ing10;ing11;ing12;ing13;ing14;ing15;ing16;ing17;ing18;ing19;ing20;ing21;ing22;ing23;ing24;ing25;ing26;ing27;ing28;ing29;ing30;ing31;ing32;ing33;ing34;ing35;ing36;ing37;ing38;ing39;ing40;ing41;ing42;ing43;ing44;ing45;ing46;ing47;ing48;ing49;ing50;ing51;ing52;ing53;ing54;ing55;ing56;ing57;ing58;ing59;ing60;ing61;ing62;ing63;ing64;ing65;ing66;ing67;ing68;ing69;ing70;ing71;ing72;ing73;ing74;ing75;ing76;ing77;ing78;ing79;ing80;ing81;ing82;ing83;ing84;ing85;ing86;ing87;ing88;ing89;ing90;ing91;ing92;ing93;ing94;ing95;ing96;ing97;ing98;ing99;ing100;ing101;ing102;ing103;ing104;ing105;ing106;ing107;ing108;ing109;ing110;ing111;ing112;ing113;ing114;ing115;ing116;ing117;ing118;ing119;ing120;ing121;ing122;ing123;ing124;ing125;ing126;ing127;ing128;ing129;ing130;ing131;ing132;ing133;ing134;ing135;ing136;ing137;ing138;ing139;ing140;ing141;ing142;ing143;ing144;ing145;ing146;ing147;ing148;ing149;ing150;ing151;ing152;ing153;ing154;ing155;ing156;ing157;ing158;ing159;ing160;ing161;ing162;ing163;ing164;ing165;ing166;ing167;ing168;ing169;ing170;ing171;ing172;ing173;ing174;ing175;ing176;ing177;ing178;ing179;ing180;ing181;ing182;ing183;ing184;ing185;ing186;ing187;ing188;ing189;ing190;ing191;ing192;ing193;ing194;ing195;ing196;ing197;ing198;ing199;ing200;ing201;ing202;ing203;ing204;ing205;ing206;ing207;ing208;ing209;ing210;ing211;ing212;ing213;ing214;ing215;ing216;ing217;ing218;ing219;ing220;ing221;ing222;ing223;ing224;ing225;ing226;ing227;ing228;ing229;ing230;ing231;ing232;ing233;ing234;ing235;ing236;ing237;ing238;ing239;ing240;ing241;ing242;ing243;ing244;ing245;ing246;ing247;ing248;ing249;ing250;ing251;ing252;ing253;ing254;ing255;ing256;ing257;ing258;ing259;ing260;ing261;ing262;ing263;ing264;ing265;ing266;ing267;ing268;ing269;ing270;ing271;ing272;ing273;ing274;ing275;ing276;ing277;ing278;ing279;ing280;ing281;ing282;ing283;ing284;ing285;ing286;ing287;ing288;ing289;ing290;ing291;ing292;ing293;ing294;ing295;ing296;ing297;ing298;ing299;ing300;ing301;ing302;ing303;ing304;ing305;ing306;ing307;ing308;ing309;ing310;ing311;ing312;ing313;ing314;ing315;ing316;ing317;ing318;ing319;ing320;ing321;ing322;ing323;ing324;ing325;ing326;ing327;ing328;ing329;ing330;ing331;ing332;ing333;ing334;ing335;ing336;ing337;ing338;ing339;ing340;ing341;ing342;ing343;ing344;ing345;ing346;ing347;ing348;ing349;ing350;ing351;ing352;ing353;ing354;ing355;ing356;ing357;ing358;ing359;ing360;ing361;ing362;ing363;ing364;ing365;ing366;ing367;ing368;ing369;ing370;ing371;ing372;ing373;ing374;ing375;ing376;ing377;ing378;ing379;ing380;ing381;ing382;ing383;ing384;ing385;ing386;ing387;ing388;ing389;ing390;ing391;ing392;ing393;ing394;ing395;ing396;ing397;ing398;ing399;ing400;ing401;ing402;ing403;ing404;ing405;ing406;ing407;ing408;ing409;ing410;ing411;ing412;ing413;ing414;ing415;ing416;ing417;ing418;ing419;ing420;ing421;ing422;ing423;ing424;ing425;ing426;ing427;ing428;ing429;ing430;ing431;ing432;ing433;ing434;ing435;ing436;ing437;ing438;ing439;ing440;ing441;ing442;ing443;ing444;ing445;ing446;ing447;ing448;ing449;ing450;ing451;ing452;ing453;ing454;ing455;ing456;ing457;ing458;ing459;ing460;ing461;ing462;ing463;ing464;ing465;ing466;ing467;ing468;ing469;ing470;ing471;ing472;ing473;ing474;ing475;ing476;ing477;ing478;ing479;ing480;ing481;ing482;ing483;ing484;ing485;ing486;ing487;ing488;ing489;ing490;ing491;ing492;ing493;ing494;ing495;ing496;ing497;ing498;ing499;ing500;ing501;ing502;ing503;ing504;ing505;ing506;ing507;ing508;ing509;ing510;ing511;ing512;ing513;ing514;ing515;ing516;ing517;ing518;ing519;ing520;ing521;ing522;ing523;ing524;ing525;ing526;ing527;ing528;ing529;ing530;ing531;ing532;ing533;ing534;ing535;ing536;ing537;ing538;ing539;ing540;ing541;ing542;ing543;ing544;ing545;ing546;ing547;ing548;ing549;ing550;ing551;ing552;ing553;ing554;ing555;ing556;ing557;ing558;ing559;ing560;ing561;ing562;ing563;ing564;ing565;ing566;ing567;ing568;ing569;ing570;ing571;ing572;ing573;ing574;ing575;ing576;ing577;ing578;ing579;ing580;ing581;ing582;ing583;ing584;ing585;ing586;ing587;ing588;ing589;ing590;ing591;ing592;ing593;ing594;ing595;ing596;ing597;ing598;ing599;ing600;ing601;ing602;ing603;ing604;ing605;ing606;ing607;ing608;ing609;ing610;ing611;ing612;ing613;ing614;ing615;ing616;ing617;ing618;ing619;ing620;ing621;ing622;ing623;ing624;ing625;ing626;ing627;ing628;ing629;ing630;ing631;ing632;ing633;ing634;ing635;ing636;ing637;ing638;ing639;ing640;ing641;ing642;ing643;ing644;ing645;ing646;ing647;ing648;ing649;ing650;ing651;ing652;ing653;ing654;ing655;ing656;ing657;ing658;ing659;ing660;ing661;ing662;ing663;ing664;ing665;ing666;ing667;ing668;ing669;ing670;ing671;ing672;ing673;ing674;ing675;ing676;ing677;ing678;ing679;ing680;ing681;ing682;ing683;ing684;ing685;ing686;ing687;ing688;ing689;ing690;ing691;ing692;ing693;ing694;ing695;ing696;ing697;ing698;ing699;ing700;ing701;ing702;ing703;ing704;ing705;ing706;ing707;ing708;ing709;ing710;ing711;ing712;ing713;ing714;ing715;ing716;ing717;ing718;ing719;ing720;ing721;ing722;ing723;ing724;ing725;ing726;ing727;ing728;ing729;ing730;ing731;ing732;ing733;ing734;ing735;ing736;ing737;ing738;ing739;ing740;ing741;ing742;ing743;ing744;ing745;ing746;ing747;ing748;ing749;ing750;ing751;ing752;ing753;ing754;ing755;ing756;ing757;ing758;ing759;ing760;ing761;ing762;ing763;ing764;ing765;ing766;ing767;ing768;ing769;ing770;ing771;ing772;ing773;ing774;ing775;ing776;ing777;ing778;ing779;ing780;ing781;ing782;ing783;ing784;ing785;ing786;ing787;ing788;ing789;ing790;ing791;ing792;ing793;ing794;ing795;ing796;ing797;ing798;ing799;ing800;ing801;ing802;ing803;ing804;ing805;ing806;ing807;ing808;ing809;ing810;ing811;ing812;ing813;ing814;ing815;ing816;ing817;ing818;ing819;ing820;ing821;ing822;ing823;ing824;ing825;ing826;ing827;ing828;ing829;ing830;ing831;ing832;ing833;ing834;ing835;ing836;ing837;ing838;ing839;ing840;ing841;ing842;ing843;ing844;ing845;ing846;ing847;ing848;ing849;ing850;ing851;ing852;ing853;ing854;ing855;ing856;ing857;ing858;ing859;ing860;ing861;ing862;ing863;ing864;ing865;ing866;ing867;ing868;ing869;ing870;ing871;ing872;ing873;ing874;ing875;ing876;ing877;ing878;ing879;ing880;ing881;ing882;ing883;ing884;ing885;ing886;ing887;ing888;ing889;ing890;ing891;ing892;ing893;ing894;ing895;ing896;ing897;ing898;ing899;ing900;ing901;ing902;ing903;ing904;ing905;ing906;ing907;ing908;ing909;ing910;ing911;ing912;ing913;ing914;ing915;ing916;ing917;ing918;ing919;ing920;ing921;ing922;ing923;ing924;ing925;ing926;ing927;ing928;ing929;ing930;ing931;ing932;ing933;ing934;ing935;ing936;ing937;ing938;ing939;ing940;ing941;ing942;ing943;ing944;ing945;ing946;ing947;ing948;ing949;ing950;ing951;ing952;ing953;ing954;ing955;ing956;ing957;ing958;ing959;ing960;ing961;ing962;ing963;ing964;ing965;ing966;ing967;ing968;ing969;ing970;ing971;ing972;ing973;ing974;ing975;ing976;ing977;ing978;ing979;ing980;ing981;ing982;ing983;ing984;ing985;ing986;ing987;ing988;ing989;ing990;ing991;ing992;ing993;ing994;ing995;ing996;ing997;ing998;ing999
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -605,6 +622,7 @@ axd
 axxd
 axxd
 zzzz
+	new-exp9.sub
 a Value = 1 2 3 4 5
 a Sub = 0 1 2 3 4
 b Value = a b c d e
@@ -613,6 +631,7 @@ c Value = 10 20 40 80
 c Sub = 0 2 4 8
 <1> <2> <3> <4> <5> 
 <10> <20> <40> <80> 
+	new-exp10.sub
 <>
 <>
 <>
@@ -658,6 +677,7 @@ argv[1] = <^A^G^B[0:1]~\$ >
 argv[1] = </ bash$ >
 argv[1] = <1^J/ bash$ >
 ./new-exp10.sub: line 153: ${V@}: bad substitution
+	new-exp11.sub
 abcxxxdef
 abcÃ¥def
 ḅć
@@ -678,9 +698,11 @@ prependÃ¥
 Ã¥
 ḅć
 ḅć
+	new-exp12.sub
 HELLO;1 foo;2 foo;
 PASS;1 foo;2 foo;
 after: PASS
+	new-exp13.sub
 'zzz'
 'zzz'
 declare -rl VAR1
@@ -712,6 +734,7 @@ aaa bbb
 'aaa' 'bbb'
 a bbb
 aaa bb
+	new-exp14.sub
 'string'
 'string'
 'value with spaces'
@@ -728,6 +751,7 @@ argv[5] = <2>
 argv[6] = <two t>
 argv[7] = <3>
 argv[8] = <three t>
+	new-exp15.sub
 declare -a foo=()
 ai
 declare -ai foo
@@ -739,6 +763,7 @@ a
 a
 a
 a
+	new-exp16.sub
 /homes/chetdefg
 /homes/chetdefg
 ~defg
@@ -798,13 +823,4 @@ two
 &two
 otwone
 &twone
-argv[1] = </>
-argv[1] = </>
-
-1/##2/%3
-1/##2/##3
-1##2/%3
-1/%%2/#3
-1/%%2/%%3
-1%%2/#3
 ./new-exp.tests: line 1: ABXD: parameter unset

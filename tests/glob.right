@@ -1,4 +1,6 @@
+	glob1.sub
 foo/bar foobar/bar
+	glob2.sub
 ok 1
 ok 2
 ok 3
@@ -13,6 +15,7 @@ argv[1] = <a�\b>
 0000004
 ok 6
 ok 7
+	glob3.sub
 invalid bracket expression
 == LANG=C ==
 [[:alpha:]
@@ -64,6 +67,7 @@ ok 2
 ok 3
 ok 4
 ok 5
+	glob4.sub
 argv[1] = <a\?>
 a\?
 argv[1] = <a\?>
@@ -71,6 +75,7 @@ a\?
 a\a
 <define\/\
 />
+	glob5.sub
 ./tmp/a/b/c ./tmp/a/b/c ./tmp/a/b/c
 ./tmp/a/b/c ./tmp/a/b/c ./tmp/a/b/c
 ./tmp/a/b/c
@@ -99,6 +104,7 @@ argv[1] = <./tmp/>
 argv[1] = <\$foo>
 argv[2] = <\$foo>
 argv[1] = <mixed\$foo/>
+	glob6.sub
 <abcdefg>
 <\.>
 *abc.c
@@ -111,20 +117,25 @@ readable/\.
 searchable/.
 searchable/.
 searchable/.
+	glob7.sub
 1: [qwe/qwe]
 2: [qwe/
 3: [qwe/]
 4:
 5: [qwe/
 6:
+	glob8.sub
 a\*b
 a\*b*
+	glob9.sub
 é/*
 é/*
+	glob10.sub
 a aa b bb
 .a .aa .b .bb a aa b bb
 .a .aa .b .bb
 . .. .a .aa .b .bb
+	glob11.sub
 mailcheck.o make_cmd.o mksignames mksignames.o mksyntax mksyntax.dSYM
 
 mailcheck.o make_cmd.o mksignames mksignames.o mksyntax mksyntax.dSYM
@@ -157,7 +168,7 @@ argv[2] = <abc>
 argv[3] = <abd>
 argv[4] = <abe>
 tmp/l1 tmp/l2 tmp/*4 tmp/l3
-./glob.tests: line 67: no match: tmp/*4
+./glob.tests: line 69: no match: tmp/*4
 argv[1] = <bdir/>
 argv[1] = <*>
 argv[1] = <a*>
