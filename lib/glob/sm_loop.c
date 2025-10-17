@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -397,9 +397,10 @@ PARSE_SUBBRACKET (CHAR *p, int flags)
 static CHAR *
 BRACKMATCH (CHAR *p, U_CHAR test, int flags)
 {
-  register CHAR cstart, cend, c;
-  register int not;    /* Nonzero if the sense of the character class is inverted.  */
-  int forcecoll, isrange;
+  CHAR c;
+  INT cstart, cend;
+  int not;    /* Nonzero if the sense of the character class is inverted.  */
+  int forcecoll;
   INT pc;
   CHAR *savep;
   CHAR *close;
@@ -417,13 +418,13 @@ BRACKMATCH (CHAR *p, U_CHAR test, int flags)
   if (not = (*p == L('!') || *p == L('^')))
     ++p;
 
-  c = *p++;
   for (;;)
     {
-      /* Initialize cstart and cend in case `-' is the last
-	 character of the pattern. */
-      cstart = cend = c;
-      forcecoll = 0;
+      c = *p++;
+
+      /* `]' ends the bracket expression, unless it is the first character. */
+      if (c == L(']') && (p > savep + not + 1))
+	break;
 
       /* POSIX.2 equivalence class:  [=c=].  See POSIX.2 2.8.3.2.  Find
 	 the end of the equivalence class, move the pattern pointer past
@@ -432,28 +433,15 @@ BRACKMATCH (CHAR *p, U_CHAR test, int flags)
 	{
 	  p++;
 	  pc = COLLSYM (p, close - p);
-	  pc = FOLD (pc);
 	  p = close + 2;
 
-	  if (COLLEQUIV (test, pc))
-	    {
-/*[*/	      /* Move past the closing `]', since the first thing we do at
-		 the `matched:' label is back p up one. */
-	      p++;
-	      goto matched;
-	    }
+	  if (pc != INVALID && COLLEQUIV (test, FOLD (pc)))
+	    goto matched;
+
 	  else
-	    {
-	      c = *p++;
-	      if (c == L('\0'))
-		return ((test == L('[')) ? savep : (CHAR *)0); /*]*/
-	      else if (c == L('/') && (flags & FNM_PATHNAME))
-		return ((test == L('[')) ? savep : (CHAR *)0); /*]*/
-	      else if (c == L(']'))
-		break;
-	      c = FOLD (c);
-	      continue;
-	    }
+	    /* Continue the loop here, since this expression can't be
+	       the first part of a range expression. */
+	    continue;
 	}
 
       /* POSIX.2 character class expression.  See POSIX.2 2.8.3.2. */
@@ -490,26 +478,11 @@ BRACKMATCH (CHAR *p, U_CHAR test, int flags)
 	  p = close + 2;
 
 	  if (pc)
-	    {
-/*[*/	      /* Move past the closing `]', since the first thing we do at
-		 the `matched:' label is back p up one. */
-	      p++;
-	      goto matched;
-	    }
+	    goto matched;
 	  else
-	    {
-	      /* continue the loop here, since this expression can't be
-		 the first part of a range expression. */
-	      c = *p++;
-	      if (c == L('\0'))
-		return ((test == L('[')) ? savep : (CHAR *)0);
-	      else if (c == L('/') && (flags & FNM_PATHNAME))
-		return ((test == L('[')) ? savep : (CHAR *)0); /*]*/
-	      else if (c == L(']'))
-		break;
-	      c = FOLD (c);
-	      continue;
-	    }
+	    /* Continue the loop here, since this expression can't be
+	       the first part of a range expression. */
+	    continue;
 	}
  
       /* POSIX.2 collating symbols.  See POSIX.2 2.8.3.2.  Find the end of
@@ -523,105 +496,92 @@ BRACKMATCH (CHAR *p, U_CHAR test, int flags)
 	  p = close + 2;
 	  forcecoll = 1;
 	}
-
-      if (!(flags & FNM_NOESCAPE) && c == L('\\'))
+      else
 	{
-	  if (*p == '\0')
+	  if ((flags & FNM_NOESCAPE) == 0 && c == L('\\'))
+	    c = *p++;
+
+	  /* POSIX.2 2.8.3.1.2 says: `An expression containing a `[' that
+	     is not preceded by a backslash and is not part of a bracket
+	     expression produces undefined results.'  This implementation
+	     treats the `[' as just a character to be matched if there is
+	     not a closing `]'. */
+	  if (c == L('\0'))
 	    return ((test == L('[')) ? savep : (CHAR *)0);
-	  else if (*p == L('/') && (flags & FNM_PATHNAME))
+
+	  /* POSIX.2 2.13.3 says: `If a <slash> character is found following an
+	     unescaped <left-square-bracket> character before a corresponding
+	     <right-square-bracket> is found, the open bracket shall be treated
+	     as an ordinary character.' If we find a slash in a bracket
+	     expression and the flags indicate we're supposed to be treating the
+	     string like a pathname, we have to treat the `[' as just a character
+	     to be matched. */
+	  if (c == L('/') && (flags & FNM_PATHNAME))
 	    return ((test == L('[')) ? savep : (CHAR *)0);
-	  cstart = cend = *p++;
+
+	  cstart = c;
+	  forcecoll = 0;
 	}
 
-      cstart = cend = FOLD (cstart);
-      isrange = 0;
-
-      /* POSIX.2 2.8.3.1.2 says: `An expression containing a `[' that
-	 is not preceded by a backslash and is not part of a bracket
-	 expression produces undefined results.'  This implementation
-	 treats the `[' as just a character to be matched if there is
-	 not a closing `]'. */
-      if (c == L('\0'))
-	return ((test == L('[')) ? savep : (CHAR *)0);
-
-      /* POSIX.2 2.13.3 says: `If a <slash> character is found following an
-         unescaped <left-square-bracket> character before a corresponding
-         <right-square-bracket> is found, the open bracket shall be treated
-         as an ordinary character.' If we find a slash in a bracket
-         expression and the flags indicate we're supposed to be treating the
-         string like a pathname, we have to treat the `[' as just a character
-         to be matched. */
-      if (c == L('/') && (flags & FNM_PATHNAME))
-	return ((test == L('[')) ? savep : (CHAR *)0);
-
-      c = *p++;
-      c = FOLD (c);
-
-      if (c == L('\0'))
-	return ((test == L('[')) ? savep : (CHAR *)0);
-      else if (c == L('/') && (flags & FNM_PATHNAME))
-	return ((test == L('[')) ? savep : (CHAR *)0);
-
-      /* This introduces a range, unless the `-' is the last
-	 character of the class.  Find the end of the range
-	 and move past it. */
-      if (c == L('-') && *p != L(']'))
+      /* Range expression, unless `-' is followed by a `]' or an equivalence
+	 class or a character class.  POSIX.1-2024 9.3.5.7 says: ``The starting
+	 range point and the ending range point shall be a collating element or
+	 collating symbol. An equivalence class expression used as a starting
+	 or ending point of a range expression produces unspecified results.''
+	 We treat the `-' in `a-[=c=]' as matching itself to be consistent with
+	 how we handled `[=c=]' above. */
+      if (p[0] == L('-') && p[1] != L(']') &&
+	  !(p[1] == L('[') && (p[2] == L('=') || p[2] == L(':')) && PARSE_SUBBRACKET (p + 2, flags) != NULL))
 	{
-	  cend = *p++;
-	  if (!(flags & FNM_NOESCAPE) && cend == L('\\'))
-	    cend = *p++;
-	  if (cend == L('\0'))
-	    return ((test == L('[')) ? savep : (CHAR *)0);
-	  else if (cend == L('/') && (flags & FNM_PATHNAME))
-	    return ((test == L('[')) ? savep : (CHAR *)0);
-	  if (cend == L('[') && *p == L('.') && (close = PARSE_SUBBRACKET (p, flags)) != NULL)
+	  p++;		/* step over `-' */
+	  c = *p++;
+	  if (c == L('[') && *p == L('.') && (close = PARSE_SUBBRACKET (p, flags)) != NULL)
 	    {
 	      p++;
 	      cend = COLLSYM (p, close - p);
 	      p = close + 2;
 	      forcecoll = 1;
 	    }
+	  else
+	    {
+	      if (!(flags & FNM_NOESCAPE) && c == L('\\'))
+	        c = *p++;
+	      if (c == L('\0'))
+	        return ((test == L('[')) ? savep : (CHAR *)0);
+	      else if (c == L('/') && (flags & FNM_PATHNAME))
+	        return ((test == L('[')) ? savep : (CHAR *)0);
+	      cend = c;
+	    }
+
+	  /* A range with an invalid start or end matches nothing. */
+	  if (cstart == INVALID || cend == INVALID)
+	    continue;
+
+	  cstart = FOLD (cstart);
 	  cend = FOLD (cend);
-
-	  c = *p++;
-
 	  /* POSIX.2 2.8.3.2:  ``The ending range point shall collate
 	     equal to or higher than the starting range point; otherwise
 	     the expression shall be treated as invalid.''  Note that this
 	     applies to only the range expression; the rest of the bracket
 	     expression is still checked for matches. */
-	  if (RANGECMP (cstart, cend, forcecoll) > 0)
-	    {
-	      if (c == L(']'))
-		break;
-	      c = FOLD (c);
-	      continue;
-	    }
-	  isrange = 1;
+	  if (RANGECMP (cstart, cend, forcecoll) <= 0 &&
+	      RANGECMP (test, cstart, forcecoll) >= 0 && RANGECMP (test, cend, forcecoll) <= 0)
+	    goto matched;
 	}
-
-      if (isrange == 0 && test == cstart)
-        goto matched;
-      if (isrange && RANGECMP (test, cstart, forcecoll) >= 0 && RANGECMP (test, cend, forcecoll) <= 0)
-	goto matched;
-
-      if (c == L(']'))
-	break;
+      else
+	{
+	  /* Not a range. */
+	  if (cstart != INVALID && test == FOLD (cstart))
+	    goto matched;
+	}
     }
   /* No match. */
   return (!not ? (CHAR *)0 : p);
 
 matched:
   /* Skip the rest of the [...] that already matched.  */
-  c = *--p;
   while (1)
     {
-      /* A `[' without a matching `]' is just another character to match. */
-      if (c == L('\0'))
-	return ((test == L('[')) ? savep : (CHAR *)0);
-      else if (c == L('/') && (flags & FNM_PATHNAME))
-	return ((test == L('[')) ? savep : (CHAR *)0);
-
       c = *p++;
       if (c == L('[') && (*p == L('=') || *p == L(':') || *p == L('.')))
 	{
@@ -637,15 +597,16 @@ matched:
          the bracket expression. */
       else if (c == L(']'))
 	break;
-      else if (!(flags & FNM_NOESCAPE) && c == L('\\'))
+      else
 	{
-	  if (*p == '\0')
+	  if (!(flags & FNM_NOESCAPE) && c == L('\\'))
+	    c = *p++;
+	  if (c == '\0')
 	    return ((test == L('[')) ? savep : (CHAR *)0);
 	  /* We don't allow backslash to quote slash if we're matching pathnames */
-	  else if (*p == L('/') && (flags & FNM_PATHNAME))
+	  else if (c == L('/') && (flags & FNM_PATHNAME))
 	    return ((test == L('[')) ? savep : (CHAR *)0);
 	  /* Posix issue 8 leaves this unspecified for the shell. */
-	  ++p;
 	}
     }
   return (not ? (CHAR *)0 : p);

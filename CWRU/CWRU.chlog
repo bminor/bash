@@ -12006,3 +12006,21 @@ tests/*.tests
 	  directly, so we can print a message with the name of the sub-test
 	  script into the output. This will help with identifying the script
 	  that fails
+	  Original suggestion from Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				   10/16
+				   -----
+tests/run-*
+	- highlight `warning' in warning messages
+
+				   10/17
+				   -----
+lib/glob/sm_loop.c
+	- BRACKMATCH: fix range parsing to treat collating symbols and
+	  character classes consistently, don't treat invalid collating
+	  symbols or equivalence classes as 0xFF, fix issue with escaped
+	  open brackets when parsing the end of a range expression
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+oslib.c
+	- bcopy: update function declaration to add `const'

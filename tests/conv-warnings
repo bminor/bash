@@ -1,0 +1,4 @@
+for f ; do
+	echo $f
+	sed 's|warning:|${CSTART}warning${CEND}:|' < $f > zzz && mv zzz $f
+done

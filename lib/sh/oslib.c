@@ -161,7 +161,7 @@ getdtablesize (void)
 #    undef bcopy
 #  endif
 void
-bcopy (void *s, void *d, size_t n)
+bcopy (const void *s, void *d, size_t n)
 {
   FASTCOPY (s, d, n);
 }

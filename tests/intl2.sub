@@ -16,8 +16,8 @@ unset LC_ALL LC_NUMERIC
 if locale -a | grep -i '^de_DE\.UTF.*8' >/dev/null ; then
 	export LANG=de_DE.UTF-8
 else
-	echo "intl2.sub: warning: you do not have the de_DE.UTF-8 locale installed;" >&2
-	echo "intl2.sub: that will cause some of these tests to fail." >&2
+	echo "${CSTART}intl2.sub: warning${CEND}: you do not have the de_DE.UTF-8 locale installed;" >&2
+	echo "${TAB}intl2.sub: that will cause some of these tests to fail." >&2
 fi
 
 printf '%.4f\n' 1
