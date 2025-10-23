@@ -44,6 +44,7 @@
 #include "filecntl.h"
 
 #include "../bashansi.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -1391,68 +1392,53 @@ write_documentation (FILE *stream, char **documentation, int indentation, int fl
 {
   int i, j;
   char *line;
-  int string_array, texinfo, base_indent, filename_p;
+  int string_array, texinfo, filename_p;
+  int full_indent, base_indent;
 
   if (stream == 0)
     return;
 
   string_array = flags & STRING_ARRAY;
   filename_p = flags & HELPFILE;
+  texinfo = flags & TEXINFO;
+
+  base_indent = (string_array && single_longdoc_strings && filename_p == 0) ? BASE_INDENT : 0;
+  full_indent = indentation + base_indent;
 
   if (string_array)
     {
       fprintf (stream, " {\n#if defined (HELP_BUILTIN)\n");	/* } */
-      if (single_longdoc_strings)
-	{
-	  if (filename_p == 0)
-	    {
-	      if (documentation && documentation[0] && documentation[0][0])
-		fprintf (stream,  "N_(\"");
-	      else
-		fprintf (stream, "N_(\" ");		/* the empty string translates specially. */
-	    }
-	  else
-	    fprintf (stream, "\"");
-	}
+      if (filename_p == 0 && single_longdoc_strings)
+	fprintf (stream, "N_(");
     }
 
-  base_indent = (string_array && single_longdoc_strings && filename_p == 0) ? BASE_INDENT : 0;
-
-  for (i = 0, texinfo = (flags & TEXINFO); documentation && (line = documentation[i]); i++)
+  for (i = 0; documentation && (line = documentation[i]); i++)
     {
+      bool first_line = i == 0;
+      bool last_line = documentation[i+1] == 0;
+      
       /* Allow #ifdef's to be written out verbatim, but don't put them into
 	 separate help files. */
       if (*line == '#')
 	{
-	  if (string_array && filename_p == 0 && single_longdoc_strings == 0)
+	  if (string_array)
 	    fprintf (stream, "%s\n", line);
 	  continue;
 	}
 
       /* prefix with N_( for gettext */
-      if (string_array && single_longdoc_strings == 0)
-	{
-	  if (filename_p == 0)
-	    {
-	      if (line[0])	      
-		fprintf (stream, "  N_(\"");
-	      else
-		fprintf (stream, "  N_(\" ");		/* the empty string translates specially. */
-	    }
-	  else
-	    fprintf (stream, "  \"");
-	}
-
-      if (indentation)
-	for (j = 0; j < indentation; j++)
-	  fprintf (stream, " ");
-
-      /* Don't indent the first line, because of how the help builtin works. */
-      if (i == 0)
-	indentation += base_indent;
-
       if (string_array)
 	{
+	  if (filename_p == 0 && single_longdoc_strings == 0)
+	    fprintf (stream,  "N_(");
+	  else if (first_line == 0)
+	    fputc ('\t', stream);
+	  fputc ('"', stream);
+	  if (filename_p == 0 && *line == 0 && last_line && first_line && indentation == 0)
+	    line = " ";		/* the empty string translates specially. */
+	  if (indentation && *line)
+	    fprintf (stream, "%*.0s", indentation, "");
+
 	  for (j = 0; line[j]; j++)
 	    {
 	      if (line[j] == '\\' || line[j] == '"')
@@ -1460,20 +1446,18 @@ write_documentation (FILE *stream, char **documentation, int indentation, int fl
 	      fputc (line[j], stream);
 	    }
 
-	  /* closing right paren for gettext */
-	  if (single_longdoc_strings == 0)
-	    {
-	      if (filename_p == 0)
-		fprintf (stream, "\"),\n");
-	      else
-		fprintf (stream, "\",\n");
-	    }
-	  else if (documentation[i+1])
-	    /* don't add extra newline after last line */
-	    fprintf (stream, "\\n\\\n");
+	  if (last_line == 0)
+	    fprintf (stream, "\\n");
+	  fputc ('"', stream);
+	  if (filename_p == 0 && single_longdoc_strings == 0)
+	    fprintf (stream,  "),");
+	  if (last_line == 0)
+	    fprintf (stream, "\n");
 	}
       else if (texinfo)
-	{
+	{	   
+	  if (indentation && *line)
+	    fprintf (stream, "%*.0s", indentation, "");
 	  for (j = 0; line[j]; j++)
 	    {
 	      switch (line[j])
@@ -1489,20 +1473,23 @@ write_documentation (FILE *stream, char **documentation, int indentation, int fl
 	  fputc ('\n', stream);
 	}
       else
-	fprintf (stream, "%s\n", line);
+	fprintf (stream, "%*.0s%s\n", indentation, "", line);
+
+      /* Don't indent the first line, because of how the help builtin works. */
+      indentation = full_indent;
     }
 
   /* closing right paren for gettext */
-  if (string_array && single_longdoc_strings)
-    {
-      if (filename_p == 0)
-	fprintf (stream, "\"),\n");
-      else
-	fprintf (stream, "\",\n");
-    }
-
   if (string_array)
-    fprintf (stream, "#endif /* HELP_BUILTIN */\n  (char *)NULL\n};\n");
+    {
+      if (single_longdoc_strings)
+	{
+	  if (filename_p == 0)
+	    fputc (')', stream);
+	  fputc (',', stream);
+	}
+      fprintf (stream, "\n#endif /* HELP_BUILTIN */\n\t(char *)NULL\n};\n");
+    }
 }
 
 int

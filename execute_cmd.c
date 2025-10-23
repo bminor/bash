@@ -1273,18 +1273,48 @@ extern int timeval_to_cpu (struct timeval *, struct timeval *, struct timeval *)
 #define BASH_TIMEFORMAT  "\nreal\t%3lR\nuser\t%3lU\nsys\t%3lS"
 
 static const int precs[] = { 0, 100000, 10000, 1000, 100, 10, 1 };
-static const int maxvals[] = { 1, 10, 100, 1000, 10000, 100000, 10000000 };
+static const int maxvals[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
 
 /* Expand one `%'-prefixed escape sequence from a time format string. */
 /* SEC_FRACTION is in usecs. We normalize and round that based on the
   precision. */
-int
+static int
 mkfmt (char *buf, int prec, int lng, time_t sec, long sec_fraction)
 {
   time_t min;
   char abuf[INT_STRLEN_BOUND(time_t) + 1];
   int ind, aind;
 
+  /* We want to add a decimal point and PREC places after it if PREC is
+     nonzero.  PREC is not greater than 6.  SEC_FRACTION is between 0
+     and 999999 (microseconds). */
+  if (prec < 6)
+    {
+      /* We round here because we changed timeval_to_secs to return
+	 microseconds and normalized clock_t_to_secs's fractional return
+	 value to microseconds, deferring the work to be done to now.
+
+	 sec_fraction is in microseconds. Take the value, cut off what we
+	 don't want, round up if necessary, then convert back to
+	 microseconds. */
+      int frac, rest, maxval;
+
+      maxval = maxvals[6 - prec];
+      frac = sec_fraction / maxval;
+      rest = sec_fraction % maxval;
+
+      if (rest >= maxval/2)
+	frac++;
+
+      if (frac == maxvals[prec])
+	{
+	  sec++;
+	  sec_fraction = 0;
+	}
+      else
+	sec_fraction = frac * (1000000 / maxvals[prec]);
+    }
+  
   ind = 0;
   abuf[sizeof(abuf) - 1] = '\0';
 
@@ -1312,32 +1342,8 @@ mkfmt (char *buf, int prec, int lng, time_t sec, long sec_fraction)
   while (abuf[aind])
     buf[ind++] = abuf[aind++];
 
-  /* We want to add a decimal point and PREC places after it if PREC is
-     nonzero.  PREC is not greater than 6.  SEC_FRACTION is between 0
-     and 999999 (microseconds). */
-  if (prec != 0)
+  if (prec > 0)
     {
-      /* We round here because we changed timeval_to_secs to return
-	 microseconds and normalized clock_t_to_secs's fractional return
-	 value to microseconds, deferring the work to be done to now.
-
-	 sec_fraction is in microseconds. Take the value, cut off what we
-	 don't want, round up if necessary, then convert back to
-	 microseconds. */
-      if (prec != 6)
-	{
-	  int frac, rest, maxval;
-
-	  maxval = maxvals[6 - prec];
-	  frac = sec_fraction / maxval;
-	  rest = sec_fraction % maxval;
-
-	  if (rest >= maxval/2)
-	  frac++;
-
-	  sec_fraction = frac * (1000000 / maxvals[prec]);
-	}
-  
       buf[ind++] = locale_decpoint ();
       for (aind = 1; aind <= prec; aind++)
 	{

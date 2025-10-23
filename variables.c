@@ -2824,6 +2824,13 @@ make_local_array_variable (const char *name, int flags)
   if (var == 0 || array_p (var) || (assoc_ok && assoc_p (var)))
     return var;
 
+  /* array variables cannot be namerefs */
+  if (var && nameref_p (var) && invisible_p (var))
+    {
+      internal_warning (_("%s: removing nameref attribute"), name);
+      VUNSETATTR (var, att_nameref);
+    }
+
   /* Validate any value we inherited from a variable instance at a previous
      scope and discard anything that's invalid. */
   if (localvar_inherit && assoc_p (var))
@@ -2879,6 +2886,13 @@ make_local_assoc_variable (const char *name, int flags)
      either flag an error or do the conversion itself. */
   if (var == 0 || assoc_p (var) || (array_ok && array_p (var)))
     return var;
+
+  /* assoc variables cannot be namerefs */
+  if (var && nameref_p (var) && invisible_p (var))
+    {
+      internal_warning (_("%s: removing nameref attribute"), name);
+      VUNSETATTR (var, att_nameref);
+    }
 
   /* Validate any value we inherited from a variable instance at a previous
      scope and discard anything that's invalid. */
@@ -3123,13 +3137,19 @@ bind_variable_internal (const char *name, const char *value, HASH_TABLE *table, 
 #endif
 	{
 	  entry = make_new_variable (newval, table);
-	  var_setvalue (entry, make_variable_value (entry, value, aflags));
+	  VSETATTR (entry, att_assigning);
+	  newval = make_variable_value (entry, value, aflags);
+	  VUNSETATTR (entry, att_assigning);
+	  var_setvalue (entry, newval);
 	}
     }
   else if (entry == 0)
     {
       entry = make_new_variable (name, table);
-      var_setvalue (entry, make_variable_value (entry, value, aflags)); /* XXX */
+      VSETATTR (entry, att_assigning);
+      newval = make_variable_value (entry, value, aflags); /* XXX */
+      VUNSETATTR (entry, att_assigning);
+      var_setvalue (entry, newval);
     }
   else if (entry->assign_func)	/* array vars have assign functions now */
     {
@@ -3141,7 +3161,9 @@ bind_variable_internal (const char *name, const char *value, HASH_TABLE *table, 
 	}
 
       INVALIDATE_EXPORTSTR (entry);
+      VSETATTR (entry, att_assigning);
       newval = (aflags & ASS_APPEND) ? make_variable_value (entry, value, aflags) : (char *)value;
+      VUNSETATTR (entry, att_assigning);
       if (assoc_p (entry))
 	entry = (*(entry->assign_func)) (entry, newval, -1, savestring ("0"));
       else if (array_p (entry))
@@ -3162,9 +3184,6 @@ assign_value:
 	  return (entry);
 	}
 
-      /* Variables which are bound are visible. */
-      VUNSETATTR (entry, att_invisible);
-
       /* If we can optimize the assignment, do so and return.  Right now, we
 	 optimize appends to string variables. */
       if (can_optimize_assignment (entry, value, aflags))
@@ -3178,15 +3197,23 @@ assign_value:
 	  if (exported_p (entry))
 	    array_needs_making = 1;
 
+	  /* Variables which are bound are visible. */
+	  VUNSETATTR (entry, att_invisible);
+
 	  return (entry);
 	}
 
+      VSETATTR (entry, att_assigning);
 #if defined (ARRAY_VARS)
       if (assoc_p (entry) || array_p (entry))
         newval = make_array_variable_value (entry, 0, "0", value, aflags);
       else
 #endif
       newval = make_variable_value (entry, value, aflags);	/* XXX */
+      VUNSETATTR (entry, att_assigning);
+
+      /* Variables which are bound are visible. */
+      VUNSETATTR (entry, att_invisible);
 
       /* Invalidate any cached export string */
       INVALIDATE_EXPORTSTR (entry);
@@ -3326,23 +3353,24 @@ SHELL_VAR *
 bind_variable_value (SHELL_VAR *var, char *value, int aflags)
 {
   char *t;
-  int invis;
-
-  invis = invisible_p (var);
-  VUNSETATTR (var, att_invisible);
 
   if (var->assign_func)
     {
       /* If we're appending, we need the old value, so use
 	 make_variable_value */
+      VSETATTR (var, att_assigning);
       t = (aflags & ASS_APPEND) ? make_variable_value (var, value, aflags) : value;
+      VUNSETATTR (var, att_assigning);
+      VUNSETATTR (var, att_invisible);
       (*(var->assign_func)) (var, t, -1, 0);
       if (t != value && t)
 	free (t);      
     }
   else
     {
+      VSETATTR (var, att_assigning);
       t = make_variable_value (var, value, aflags);
+      VUNSETATTR (var, att_assigning);
       if ((aflags & (ASS_NAMEREF|ASS_FORCE)) == ASS_NAMEREF && check_selfref (name_cell (var), t, 0))
 	{
 	  if (variable_context)
@@ -3351,20 +3379,17 @@ bind_variable_value (SHELL_VAR *var, char *value, int aflags)
 	    {
 	      internal_error (_("%s: nameref variable self references not allowed"), name_cell (var));
 	      free (t);
-	      if (invis)
-		VSETATTR (var, att_invisible);	/* XXX */
 	      return ((SHELL_VAR *)NULL);
 	    }
 	}
       if ((aflags & ASS_NAMEREF) && (valid_nameref_value (t, 0) == 0))
 	{
 	  free (t);
-	  if (invis)
-	    VSETATTR (var, att_invisible);	/* XXX */
 	  return ((SHELL_VAR *)NULL);
 	}
       FREE (value_cell (var));
       var_setvalue (var, t);
+      VUNSETATTR (var, att_invisible);
     }
 
   INVALIDATE_EXPORTSTR (var);
@@ -4000,6 +4025,36 @@ makunbound (const char *name, VAR_CONTEXT *vc)
       VSETATTR (old_var, att_invisible);
       var_setvalue (old_var, (char *)NULL);
       INVALIDATE_EXPORTSTR (old_var);
+
+      new_elt = hash_insert (savestring (old_var->name), v->table, 0);
+      new_elt->data = (PTR_T)old_var;
+      stupidly_hack_special_variables (old_var->name);
+
+      free (elt->key);
+      free (elt);
+      return (0);
+    }
+
+  /* If we are currently assigning this variable, but the evaluation of the
+     value causes it to be unset, we need to make sure pointers to the
+     variable struct remain valid, and insert a cleared-out version of the
+     variable back into the correct hash table. */
+  if (old_var && assigning_p (old_var))
+    {
+      dispose_variable_value (old_var);
+      var_setvalue (old_var, (char *)NULL);
+
+      old_var->attributes = 0;
+      VSETATTR (old_var, att_assigning);
+      VSETATTR (old_var, att_invisible);
+
+      INVALIDATE_EXPORTSTR (old_var);
+
+      old_var->dynamic_value = NULL;
+      old_var->assign_func = NULL;
+
+      /* leave the context unchanged if we're going to be assigning it */
+      /* old_var->context = 0; */
 
       new_elt = hash_insert (savestring (old_var->name), v->table, 0);
       new_elt->data = (PTR_T)old_var;

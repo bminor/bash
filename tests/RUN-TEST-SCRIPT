@@ -1,10 +1,22 @@
-: ${BUILD_DIR:=/usr/local/build/chet/bash/bash-current}
+: ${BUILD_DIR:=$PWD}
 THIS_SH=$BUILD_DIR/bash
 PATH=$PATH:$BUILD_DIR
 
-export THIS_SH PATH
+export THIS_SH PATH BUILD_DIR
+
+: ${TMPDIR:=/tmp}
+export TMPDIR
 
 export BASH_TSTOUT=/tmp/xx
 rm -f ${BASH_TSTOUT}
+
+if [ -t 1 ]; then
+        # can't rely on having $'...' or printf understanding \e
+        # bright red background, white foreground text
+        export CSTART=$(printf '\033[01;101;37m') CEND=$(printf '\033[0m')
+else
+        export CSTART= CEND=
+fi
+export TAB='	'
 
 ${THIS_SH} "$@"

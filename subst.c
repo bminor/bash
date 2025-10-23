@@ -2217,6 +2217,18 @@ skip_to_delim (const char *string, int start, const char *delims, int flags)
   arithexp = (flags & SD_ARITHEXP);
   skipcol = 0;
 
+  /* If the caller tells us we're skipping a quoted string after the opening
+     quote, and the delimiter is a single- or double-quote, skip all the logic
+     here and just call the same functions as word expansion. */
+  if ((flags & SD_QUOTEDSTR) && (*delims == '\'' || *delims == '"') && delims[1] == '\0')
+    {
+      if (*delims == '\'')
+	i = skip_single_quoted (string, slen, start, 0);
+      else
+	i = skip_double_quoted (string, slen, start, completeflag);
+      CQ_RETURN (i);
+    }
+
   i = start;
   pass_next = backq = dquote = 0;
   while (c = string[i])

@@ -13,7 +13,8 @@ Makefile.in
 				   -----
 builtins/wait.def
 	- wait_builtin: don't assign the variable given with -p if there are no
-	  jobs to wait for. Report and fix from OÄuz <oguzismailuysal@gmail.com>
+	  jobs to wait for.
+	  Report and fix from OÄuz <oguzismailuysal@gmail.com>
 
 arrayfunc.c
 	- kvpair_assignment_p: return non-zero if argument L appears to be a
@@ -28,8 +29,8 @@ arrayfunc.h
 subst.c
 	- expand_oneword: detect whether VALUE appears to be a key-value
 	  pair compound assignment and call the appropriate function to expand
-	  each word in the resulting list. Fixes inconsistency reported by
-	  oguzismailuysal@gmail.com
+	  each word in the resulting list.
+	  Fixes inconsistency reported by oguzismailuysal@gmail.com
 
 				   12/12
 				   -----
@@ -152,8 +153,8 @@ variables.c
 	  array variable that was the value of a nameref (used in the original
 	  assignment), don't call make_variable_value on the value, since that
 	  messes up +=. Just call assign_array_element and let that take care
-	  of calling make_variable_value appropriately. Fixes bug reported by
-	  Oguz <oguzismailuysal@gmail.com>
+	  of calling make_variable_value appropriately.
+	  Fixes bug reported by Oguz <oguzismailuysal@gmail.com>
 
 				   1/14
 				   ----
@@ -206,7 +207,8 @@ Makefile.in
 subst.c
 	- param_expand: if a nameref expands to array[@] or array[*], make sure
 	  to call chk_atstar so the right variables are set to split the
-	  result. Report from Oguz <oguzismailuysal@gmail.com>
+	  result.
+	  Report from Oguz <oguzismailuysal@gmail.com>
 
 				   1/22
 				   ----
@@ -12024,3 +12026,66 @@ lib/glob/sm_loop.c
 
 oslib.c
 	- bcopy: update function declaration to add `const'
+
+execute_cmd.c
+	- mkfmt: fix rounding of fractional part of the printed value to
+	  increment the seconds value if necessary (e.g., 0.9848 -> 1.0 if
+	  precision == 1)
+	- mkfmt: compute the seconds and seconds fraction before writing
+	  anything into the buffer in case we increment the seconds
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+subst.h
+	- SD_QUOTEDSTR: tell skip_to_delim that we're skipping over a quoted
+	  string; *delims is the close quote
+
+subst.c
+	- skip_to_delim: understand SD_QUOTEDSTR and call skip_single_quoted
+	  or skip_double_quoted immediately as appropriate
+
+bashline.c
+	- bash_forward_shellword: use SD_QUOTEDSTR in the call to skip_to_delim
+	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
+
+				   10/20
+				   -----
+execute_cmd.c
+	- mkfmt: round when the precision is 0 like with other precision values
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- make_local_array_variable,make_local_assoc_variable: if we're
+	  converting an unset nameref into an array, warn about it and turn
+	  off the nameref attribute
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+builtins/mkbuiltins.c
+	- write_documentation: change to use modern C-style strings, where
+	  adjacent strings are effectively concatenated
+	- write_documentation: don't add indent to otherwise blank lines
+	  Original patch from Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				   10/21
+				   -----
+builtins/read.def
+	- read_builtin: since referring to a pointer after realloc may have
+	  freed it is, in theory, undefined behavior, redo the unwind-protect
+	  every time we increase the size of input_string. This updates the
+	  CHERI-only change of 10/6
+	  From https://savannah.gnu.org/bugs/?67586
+
+				   10/22
+				   -----
+arrayfunc.c
+	- make_array_variable_value,assign_array_element_internal: set
+	  att_assigning while evaluating the value to be assigned so the rest
+	  of the shell knows not to unset the variable
+
+variables.c
+	- bind_variable_internal,bind_variable_value: set att_assigning
+	  around calls to make_variable_value to avoid unsetting the variable
+	- makunbound: if we are assigning to the variable being unset, just
+	  empty it out and set it to invisible, assuming the variable will be
+	  marked as visible after assignment
+	  Report from Oguz <oguzismailuysal@gmail.com> back on 8/8/2025
+

@@ -336,6 +336,7 @@ extern char *cond_expand_word (WORD_DESC *, int);
 #define SD_HISTEXP	0x200	/* skip_to_delim during history expansion */
 #define SD_ARITHEXP	0x400	/* skip_to_delim during arithmetic expansion */
 #define SD_NOERROR	0x800	/* don't print error messages */
+#define SD_QUOTEDSTR	0x1000	/* skipping a part of a single- or double-quoted string */
 
 extern int skip_to_delim (const char *, int, const char *, int);
 

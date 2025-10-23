@@ -1114,10 +1114,10 @@ bash_forward_shellword (int count, int key)
 		ADVANCE_CHAR (rl_line_buffer, slen, p);
 	      break;
 	    case '\'':
-	      p = skip_to_delim (rl_line_buffer, ++p, "'", SD_NOJMP);
+	      p = skip_to_delim (rl_line_buffer, ++p, "'", SD_NOJMP|SD_QUOTEDSTR|SD_COMPLETE);
 	      break;
 	    case '"':
-	      p = skip_to_delim (rl_line_buffer, ++p, "\"", SD_NOJMP);
+	      p = skip_to_delim (rl_line_buffer, ++p, "\"", SD_NOJMP|SD_QUOTEDSTR|SD_COMPLETE);
 	      break;
 	    }
 
@@ -1145,10 +1145,10 @@ bash_forward_shellword (int count, int key)
 		ADVANCE_CHAR (rl_line_buffer, slen, p);
 	      break;
 	    case '\'':
-	      p = skip_to_delim (rl_line_buffer, ++p, "'", SD_NOJMP);
+	      p = skip_to_delim (rl_line_buffer, ++p, "'", SD_NOJMP|SD_QUOTEDSTR|SD_COMPLETE);
 	      break;
 	    case '"':
-	      p = skip_to_delim (rl_line_buffer, ++p, "\"", SD_NOJMP);
+	      p = skip_to_delim (rl_line_buffer, ++p, "\"", SD_NOJMP|SD_QUOTEDSTR|SD_COMPLETE);
 	      break;
 	    }
 
