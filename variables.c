@@ -185,7 +185,7 @@ static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
 SHELL_VAR nameref_invalid_value;
 static SHELL_VAR nameref_maxloop_value;
 
-static HASH_TABLE *last_table_searched;	/* hash_lookup sets this */
+static HASH_TABLE *last_table_searched;	/* hash_lookup sets this, not checked right now */
 static VAR_CONTEXT *last_context_searched;
 
 /* Some forward declarations. */
@@ -284,6 +284,7 @@ static SHELL_VAR *new_shell_variable (const char *);
 static SHELL_VAR *make_new_variable (const char *, HASH_TABLE *);
 static SHELL_VAR *bind_variable_internal (const char *, const char *, HASH_TABLE *, int, int);
 
+static void init_variable (SHELL_VAR *);
 static void init_shell_variable (SHELL_VAR *);
 
 static void dispose_variable_value (SHELL_VAR *);
@@ -2013,6 +2014,7 @@ find_variable_nameref (SHELL_VAR *v)
   int level, flags;
   char *newname;
   SHELL_VAR *orig, *oldv;
+  HASH_TABLE *savelast;
 
   level = 0;
   orig = v;
@@ -2032,7 +2034,9 @@ find_variable_nameref (SHELL_VAR *v)
       v = find_variable_internal (newname, flags);
       if (v == orig || v == oldv)
 	{
+	  savelast = last_table_searched;
 	  internal_warning (_("%s: circular name reference"), orig->name);
+	  last_table_searched = savelast;
 #if 1
 	  /* XXX - provisional change - circular refs go to
 	     global scope for resolution, without namerefs. */
@@ -2609,10 +2613,14 @@ make_local_variable (const char *name, int flags)
      (which results in duplicate names in the same VAR_CONTEXT->table */
   /* We can't just test tmpvar_p because variables in the temporary env given
      to a shell function appear in the function's local variable VAR_CONTEXT
-     but retain their tempvar attribute.  We want temporary variables that are
-     found in temporary_env, hence the test for last_table_searched, which is
-     set in hash_lookup and only (so far) checked here. */
-  if (was_tmpvar && old_var->context == variable_context && last_table_searched != temporary_env)
+     but retain their tempvar attribute. We want to handle temporary
+     variables that are not found in temporary_env, hence the test that
+     temporary_env exists and it's where we found the variable.
+     If the variable appears in the temporary environment passed to
+     local/declare, declare_internal will handle it. */
+  /* This definitely bears rethinking. */
+  if (was_tmpvar && old_var->context == variable_context && temporary_env &&
+      (new_var = hash_lookup (name, temporary_env)) && new_var != old_var)
     {
       VUNSETATTR (old_var, att_invisible);	/* XXX */
       /* We still want to flag this variable as local, though, and set things
@@ -2624,8 +2632,6 @@ make_local_variable (const char *name, int flags)
 	if (vc_isfuncenv (vc) && vc->scope == variable_context)
 	  break;
       goto set_local_var_flags;
-
-      return (old_var);
     }
 
   /* If we want to change to "inherit the old variable's value" semantics,
@@ -2667,23 +2673,16 @@ make_local_variable (const char *name, int flags)
 
   if (old_var == 0)
     new_var = make_new_variable (name, vc->table);
-  else
+  else if (was_tmpvar && (new_var = hash_lookup (name, vc->table)) && new_var == old_var)
     {
-#if 0
       /* This handles the case where a variable is found in both the temporary
 	 environment *and* declared as a local variable. If we want to avoid
 	 multiple entries with the same name in VC->table (that might mess up
-	 unset), we need to use the existing variable entry and destroy the
-	 current value. Currently disabled because it doesn't matter -- the
-	 right things happen. */
-      new_var = 0;
-      if (was_tmpvar && (new_var = hash_lookup (name, vc->table)))
-	{
-	  dispose_variable_value (new_var);
-	  init_variable (new_var);
-	}
-      if (new_var == 0)
-#endif
+	 unset), we need to use the existing variable entry. declare_internal
+	 will do the remaining work. */
+    }
+  else
+    {
       new_var = make_new_variable (name, vc->table);
 
       /* If we found this variable in one of the temporary environments,
@@ -2825,7 +2824,7 @@ make_local_array_variable (const char *name, int flags)
     return var;
 
   /* array variables cannot be namerefs */
-  if (var && nameref_p (var) && invisible_p (var))
+  if (var && nameref_p (var) /* && invisible_p (var)*/)
     {
       internal_warning (_("%s: removing nameref attribute"), name);
       VUNSETATTR (var, att_nameref);
@@ -2888,7 +2887,7 @@ make_local_assoc_variable (const char *name, int flags)
     return var;
 
   /* assoc variables cannot be namerefs */
-  if (var && nameref_p (var) && invisible_p (var))
+  if (var && nameref_p (var) /*&& invisible_p (var)*/)
     {
       internal_warning (_("%s: removing nameref attribute"), name);
       VUNSETATTR (var, att_nameref);

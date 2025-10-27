@@ -60,16 +60,22 @@ extern int errno;
 extern void termsig_handler (int);
 
 /* Functions to handle reading input on systems that don't restart read(2)
-   if a signal is received. */
+   if a signal is received. This is a very minimal buffered input system
+   without synchronization, intended to read from the file descriptor
+   associated with a stdio stream. stream_setsize(size) allows the caller/
+   user to set the amount read with each call to read(2). */
 
-static char localbuf[1024];
-static int local_index = 0, local_bufused = 0;
+#define LOCALBUF_BUFSIZE 1024
+static char localbuf[LOCALBUF_BUFSIZE];
+static size_t local_index = 0;
+static ssize_t local_bufused = 0;
+static size_t read_bufsize = LOCALBUF_BUFSIZE;
 
 /* Posix and USG systems do not guarantee to restart read () if it is
    interrupted by a signal.  We do the read ourselves, and restart it
    if it returns EINTR. */
 int
-getc_with_restart (FILE *stream)
+stream_getc (FILE *stream)
 {
   unsigned char uc;
 
@@ -83,7 +89,7 @@ getc_with_restart (FILE *stream)
 	  QUIT;
 	  run_pending_traps ();
 
-	  local_bufused = read (fileno (stream), localbuf, sizeof(localbuf));
+	  local_bufused = read (fileno (stream), localbuf, read_bufsize);
 	  if (local_bufused > 0)
 	    break;
 	  else if (local_bufused == 0)
@@ -116,12 +122,21 @@ getc_with_restart (FILE *stream)
 }
 
 int
-ungetc_with_restart (int c, FILE *stream)
+stream_ungetc (int c, FILE *stream)
 {
   if (local_index == 0 || c == EOF)
     return EOF;
   localbuf[--local_index] = c;
   return c;
+}
+
+size_t
+stream_setsize (size_t size)
+{
+  size_t o;
+  o = read_bufsize;
+  read_bufsize = size;
+  return o;
 }
 
 /* A facility similar to stdio, but input-only. */

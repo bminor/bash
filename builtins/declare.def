@@ -656,19 +656,48 @@ restart_new_var_name:
 #endif
 	  if (offset == 0 && (flags_on & att_nameref))
 	    {
-	      /* First look for refvar at current scope */
+	      /* First look for refvar at current scope. Since we're turning
+		 on the nameref flag, it doesn't matter whether it's already
+		 a nameref. */
 	      refvar = find_variable_last_nameref (name, 1);
+
 	      /* VARIABLE_CONTEXT != 0, so we are attempting to create or modify
 		 the attributes for a local variable at the same scope.  If we've
 		 used a reference from a previous context to resolve VAR, we
-		 want to throw REFVAR and VAR away and create a new local var. */
+		 want to throw REFVAR and VAR away and create a new local var.
+		 If we use REFVAR at the same context, make sure the att_local
+		 attribute is set. By the time we exit this clause, VAR points
+		 to a local variable at the current context. */
 	      if (refvar && refvar->context != variable_context)
 		{
 		  refvar = 0;
 		  var = make_local_variable (name, inherit_flag);
 		}
 	      else if (refvar && refvar->context == variable_context)
-		var = refvar;
+		{
+		  SHELL_VAR *tv;
+
+		  /* We handle the difference between a variable found in
+		     the function's temporary environment and the temporary
+		     environment passed to declare/local. */
+		  /* handle case of something like `x=value local -n x' -- we
+		     want to make sure we create a local variable */
+		  tv = find_tempenv_variable (name);
+		  if (tv && tv == refvar)
+		    {
+		      refvar = 0;
+		      var = make_local_variable (name, inherit_flag);
+		    }
+		  else
+		    {
+		      /* Make sure we modify a variable in a function temporary
+			 environment to have the local attribute so it shows
+			 up as a local variable. */
+		      if (tempvar_p (refvar) && variable_context)
+			VSETATTR (refvar, att_local);
+		      var = refvar;
+		    }
+		}
 	      /* Maybe we just want to create a new local variable */
 	      else if ((var = find_variable (name)) == 0 || var->context != variable_context)
 		var = make_local_variable (name, inherit_flag);

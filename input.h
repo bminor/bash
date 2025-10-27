@@ -105,8 +105,9 @@ extern int *save_token_state (void);
 extern void restore_token_state (int *);
 
 /* Functions from input.c */
-extern int getc_with_restart (FILE *);
-extern int ungetc_with_restart (int, FILE *);
+extern int stream_getc (FILE *);
+extern int stream_ungetc (int, FILE *);
+extern size_t stream_setsize (size_t);
 
 /* Functions from input.c. */
 extern int fd_is_bash_input (int);

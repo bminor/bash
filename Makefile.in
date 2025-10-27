@@ -173,8 +173,8 @@ LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@ $(LOCAL_LDFLAGS) $(CFLAGS_FOR_BUILD)
 ASAN_XCFLAGS = -fsanitize=address -fno-omit-frame-pointer
 ASAN_XLDFLAGS = -fsanitize=address
 
-UBSAN_XCFLAGS = -fsanitize=undefined -fsanitize-recover -fstack-protector
-UBSAN_XLDFLAGS = -fsanitize=undefined
+UBSAN_XCFLAGS = -fsanitize=undefined -fsanitize=local-bounds -fsanitize=vptr -fsanitize-recover -fstack-protector 
+UBSAN_XLDFLAGS = -fsanitize=undefined -fsanitize=local-bounds -fsanitize=vptr
 
 GCOV_XCFLAGS = -fprofile-arcs -ftest-coverage
 GCOV_XLDFLAGS = -fprofile-arcs -ftest-coverage

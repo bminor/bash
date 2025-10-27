@@ -92,4 +92,56 @@ unset -f f f1
 
 # can't use c from here on
 
+foo()
+{
+	var=tempenv local -n var
+	local -p var
+}
 
+var=global
+var=funcenv foo
+declare -p var
+
+unset -f foo
+unset -v var
+
+foo()
+{
+	var=tempenv local var
+	local -p var
+}
+
+var=global
+var=funcenv foo
+declare -p var
+
+unset -f foo
+unset -v var
+
+foo()
+{
+         local -n var; local -p var
+}
+var=x foo
+unset -f foo
+unset -v var
+
+f()
+{
+        local -n var; local -p var
+        local -A var; local -p var
+        (local var=(z))
+}
+var=var f
+
+unset -f funset -v var
+
+f() { typeset var=x; unset var; typeset -p var; }
+var=g
+var=t f
+unset -f f
+
+f() { unset var; typeset -p var; }
+var=g
+var=t f
+unset -f f

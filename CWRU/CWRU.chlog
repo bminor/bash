@@ -14,7 +14,7 @@ Makefile.in
 builtins/wait.def
 	- wait_builtin: don't assign the variable given with -p if there are no
 	  jobs to wait for.
-	  Report and fix from O�uz <oguzismailuysal@gmail.com>
+	  Report and fix from Oğuz <oguzismailuysal@gmail.com>
 
 arrayfunc.c
 	- kvpair_assignment_p: return non-zero if argument L appears to be a
@@ -12087,5 +12087,60 @@ variables.c
 	- makunbound: if we are assigning to the variable being unset, just
 	  empty it out and set it to invisible, assuming the variable will be
 	  marked as visible after assignment
-	  Report from Oguz <oguzismailuysal@gmail.com> back on 8/8/2025
+	  Report from Oğuz <oguzismailuysal@gmail.com> back on 8/8/2025
 
+lib/sh/strtrans.c
+	- ansicstr: only consume an entire multibyte character with mbrtowc
+	  if we are in a locale where a backslash can appear as part of a
+	  multibyte character. UTF-8 encodings don't allow this, so we can
+	  consume a byte at a time
+	- ansic_quote,ansic_shouldquote: tighten check for potential start
+	  of a multibyte character, so we call mbrtowc fewer times
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- select_query: write '\n' to stderr like other `select' command output
+	  if `read' returns failure (EOF)
+	  Report from Stan Marsh <gazelle@xmission.com>
+
+				   10/23
+				   -----
+input.c,input.h,parse.y
+	- getc_with_restart -> stream_getc, ungetc_with_restart -> stream_ungetc
+	- stream_setsize: new function to allow caller to set the amount read
+	  by each call to read(2).
+
+shell.c
+	- set_bash_input: if we are forced interactive (-i), running under
+	  emacs (INSIDE_EMACS=something), and the default input is a pipe
+	  (fd_ispipe (0)), set the read size to 1 with stream_setsize
+	  Report from Rudi Horn <rh@rudi-horn.de>
+
+builtins/declare.def
+	- declare_internal: if we're making a local variable
+	  (VARIABLE_CONTEXT != 0) and we act on a variable from a function's
+	  temporary environment at the right context, make sure that variable
+	  has the local attribute so commands like `local -p' will find it.
+	  Report from Grisha Levit <grishalevit@gmail.com>
+	- declare_internal: if we're taking a variable from the temporary
+	  environment and making a local nameref out of it, make sure we
+	  create a local variable and inherit the value appropriately. Fixes
+	  `x=tempenv local -n x' not finding `x' as a local variable
+
+variables.c
+	- make_local_array_variable,make_local_assoc_variable: turn off the
+	  nameref attribute even if the nameref variable we're converting
+	  to an array already has a value. Modification of change from 10/20
+	- find_variable_nameref: save and restore last_table_searched around
+	  calls to internal_warning, since the gettext calls might look up
+	  LC_ variables and change it (not used right now anyway)
+	- make_local_variable: if we find a variable with att_tempenv set,
+	  make sure we actually have a temporary environment and we found
+	  the variable somewhere other than the temporary environment passed
+	  to declare/local -- we could have found it in a function-level
+	  temporary environment. This fixes the `local -n x; local -A x;' bug
+	  reported by Grisha Levit <grishalevit@gmail.com>
+	- make_local_variable: since declare_internal now adds the local
+	  attribute to variables from the temporary environment when
+	  `local -n' is executed (for now), return that variable instead of
+	  creating a new one

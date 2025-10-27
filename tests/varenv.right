@@ -333,6 +333,18 @@ f: 3
 global: declare -rx c="3"
 f1: 4
 global: declare -- b="8"
+declare -nx var="tempenv"
+declare -- var="global"
+declare -x var="tempenv"
+declare -- var="global"
+declare -nx var="x"
+declare -nx var="var"
+./varenv23.sub: line 132: warning: var: circular name reference
+./varenv23.sub: line 132: warning: var: circular name reference
+./varenv23.sub: line 132: warning: var: removing nameref attribute
+declare -Ax var=()
+declare -x var
+declare -- var="g"
 	varenv24.sub
 f1: x = local
 f2: x = local

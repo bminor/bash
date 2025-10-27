@@ -190,6 +190,7 @@ static int execute_coproc (COMMAND *, int, int, struct fd_bitmap *);
 
 static int execute_pipeline (COMMAND *, int, int, int, struct fd_bitmap *);
 
+static int execute_list (COMMAND *, int, int, int, struct fd_bitmap *);
 static int execute_connection (COMMAND *, int, int, int, struct fd_bitmap *);
 
 static int execute_intern_function (WORD_DESC *, FUNCTION_DEF *);
@@ -2841,6 +2842,45 @@ execute_pipeline (COMMAND *command, int asynchronous, int pipe_in, int pipe_out,
   return (exec_result);
 }
 
+/* This is a placeholder for future work */
+static int
+execute_list (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, struct fd_bitmap *fds_to_close)
+{
+  int ignore_return, invert, exec_result, n;
+  COMMAND *first, *second;
+
+  ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+  invert = (command->flags & CMD_INVERT_RETURN) != 0;
+    
+  interrupt_execution++; retain_fifos++;
+  QUIT;
+
+  first = command->value.Connection->first;
+  second = command->value.Connection->second;
+
+  if (ignore_return || invert)
+    {
+      if (first)
+	first->flags |= CMD_IGNORE_RETURN;
+      if (second)
+	second->flags |= CMD_IGNORE_RETURN;
+    }
+
+  exec_result = execute_command (first);
+
+  QUIT;
+#if defined (JOB_CONTROL)
+  if (command->value.Connection->connector == ';' && job_control && interactive && posixly_correct == 0)
+    notify_and_cleanup (-1);
+#endif
+  optimize_connection_fork (command);			/* XXX */
+  exec_result = execute_command_internal (second, asynchronous,
+					  pipe_in, pipe_out, fds_to_close);
+
+  interrupt_execution--; retain_fifos--;
+  return exec_result;
+}
+
 static int
 execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, struct fd_bitmap *fds_to_close)
 {
@@ -2897,34 +2937,7 @@ execute_connection (COMMAND *command, int asynchronous, int pipe_in, int pipe_ou
     /* Just call execute command on both sides. */
     case ';':
     case '\n':		/* special case, happens in command substitutions */
-      if (ignore_return || invert)
-	{
-	  if (command->value.Connection->first)
-	    command->value.Connection->first->flags |= CMD_IGNORE_RETURN;
-	  if (command->value.Connection->second)
-	    command->value.Connection->second->flags |= CMD_IGNORE_RETURN;
-	}
-      interrupt_execution++; retain_fifos++;
-      QUIT;
-
-#if 1
-      execute_command (command->value.Connection->first);
-#else
-      execute_command_internal (command->value.Connection->first,
-				  asynchronous, pipe_in, pipe_out,
-				  fds_to_close);
-#endif
-
-      QUIT;
-#if defined (JOB_CONTROL)
-      if (command->value.Connection->connector == ';' && job_control && interactive && posixly_correct == 0)
-        notify_and_cleanup (-1);
-#endif
-      optimize_connection_fork (command);			/* XXX */
-      exec_result = execute_command_internal (command->value.Connection->second,
-				      asynchronous, pipe_in, pipe_out,
-				      fds_to_close);
-      interrupt_execution--; retain_fifos--;
+      exec_result = execute_list (command, asynchronous, pipe_in, pipe_out, fds_to_close);
       break;
 
     case '|':
@@ -3480,7 +3493,7 @@ select_query (WORD_LIST *list, int list_len, char *prompt, int print_menu)
       executing_builtin = oe;
       if (r != EXECUTION_SUCCESS)
 	{
-	  putchar ('\n');
+	  fputc ('\n', stderr);
 	  return ((char *)NULL);
 	}
       repl_string = get_string_value ("REPLY");

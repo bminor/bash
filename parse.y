@@ -1846,9 +1846,9 @@ yy_stream_get (void)
   result = EOF;
   if (bash_input.location.file)
     {
-      /* XXX - don't need terminate_immediately; getc_with_restart checks
+      /* XXX - don't need terminate_immediately; stream_getc checks
 	 for terminating signals itself if read returns < 0 */
-      result = getc_with_restart (bash_input.location.file);
+      result = stream_getc (bash_input.location.file);
     }
   return (result);
 }
@@ -1856,7 +1856,7 @@ yy_stream_get (void)
 static int
 yy_stream_unget (int c)
 {
-  return (ungetc_with_restart (c, bash_input.location.file));
+  return (stream_ungetc (c, bash_input.location.file));
 }
 
 void

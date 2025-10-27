@@ -90,7 +90,6 @@ do
 		if sh $x; then
 			passed=$(( $passed + 1 ))
 		else
-			failed=$(( $failed + 1 ))
 			echo "${CSTART}${x}: NON-ZERO exit status $?${CEND}"
 			if [ -n "$BASH_TSTOUT_SAVEDIR" ]; then
 				mv ${BASH_TSTOUT} ${BASH_TSTOUT_SAVEDIR}/${x}-${SUFFIX}
@@ -98,6 +97,7 @@ do
 			elif [ $failed -eq 1 ]; then
 				echo "${CSTART}Set environment variable BASH_TSTOUT_SAVEDIR to a directory to save failed test output${CEND}"
 			fi
+			failed=$(( $failed + 1 ))
 		fi
 		rm -f ${BASH_TSTOUT}
 		;;

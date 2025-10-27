@@ -1751,7 +1751,11 @@ set_bash_input (void)
 	}
     }
   else
-    with_input_from_stream (default_input, dollar_vars[0]);
+    {
+      with_input_from_stream (default_input, dollar_vars[0]);
+      if (forced_interactive && running_under_emacs && fd_ispipe (fileno (default_input)))
+	stream_setsize (1);
+    }
 }
 
 /* Close the current shell script input source and forget about it.  This is
