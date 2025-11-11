@@ -2226,6 +2226,13 @@ skip_to_delim (const char *string, int start, const char *delims, int flags)
 	i = skip_single_quoted (string, slen, start, 0);
       else
 	i = skip_double_quoted (string, slen, start, completeflag);
+
+      /* skip_single_quoted and skip_double_quoted leave point one character
+	 past the end of the quoted string. That doesn't match the semantics
+	 we want here, so we back to the quote char and return that index. */
+      if (i > 0)
+	i--;
+
       CQ_RETURN (i);
     }
 

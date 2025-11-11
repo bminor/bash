@@ -62,9 +62,13 @@ echo Any output from any test, unless otherwise noted, indicates a possible anom
 
 # keep track of passed and failed tests and report them
 if [ -t 1 ]; then
-	# can't rely on having $'...' or printf understanding \e
-	# bright red background, white foreground text
-	CSTART=$(printf '\033[01;101;37m') CEND=$(printf '\033[0m')
+	if type -P tput >/dev/null; then
+		CSTART=$(tput setaf 15 setab 1) CEND=$(tput sgr0)
+	else
+		# can't rely on having $'...' or printf understanding \e
+		# bright red background, white foreground text
+		CSTART=$(printf '\033[01;101;37m') CEND=$(printf '\033[0m')
+	fi
 else
 	CSTART= CEND=
 fi

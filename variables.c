@@ -2849,6 +2849,8 @@ make_local_array_variable (const char *name, int flags)
       var_setarray (var, array);
     }
 
+  INVALIDATE_EXPORTSTR (var);
+
 /*itrace("make_local_array_variable: unsetting att_tempvar");*/
   VUNSETATTR (var, att_tempvar);
 
@@ -2911,6 +2913,8 @@ make_local_assoc_variable (const char *name, int flags)
       hash = assoc_create (ASSOC_HASH_BUCKETS);
       var_setassoc (var, hash);
     }
+
+  INVALIDATE_EXPORTSTR (var);
 
 /*itrace("make_local_assoc_variable: unsetting att_tempvar");*/
   VUNSETATTR (var, att_tempvar);

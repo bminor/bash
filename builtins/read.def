@@ -941,7 +941,7 @@ add_char:
       run_unwind_frame ("read_builtin");
       if (free_ifs)
 	free (ifs_chars);
-      return ((t_errno != EINTR) ? EXECUTION_FAILURE : 128+lastsig);
+      return ((t_errno != EINTR) ? EX_MISCERROR : 128+lastsig);
     }
 
   if (tmsec > 0 || tmusec > 0)

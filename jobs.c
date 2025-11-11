@@ -2482,9 +2482,11 @@ make_child (char *command, int flags)
 	 been reused. */
       delete_old_job (pid);
 
-      /* Perform the check for pid reuse unconditionally.  Some systems reuse
-	 PIDs before giving a process CHILD_MAX/_SC_CHILD_MAX unique ones. */
-      bgp_delete (pid);		/* new process, discard any saved status */
+      /* Perform the check for background pid reuse unconditionally.
+	 Some systems reuse PIDs before giving a process
+	 CHILD_MAX/_SC_CHILD_MAX unique ones. */
+      if (async_p)
+	bgp_delete (pid);	/* new background process, discard any saved status */
 
       last_made_pid = pid;
 

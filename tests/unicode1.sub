@@ -105,7 +105,6 @@ if [ -n "$FR_LOCALE" ]; then
 	TestCodePage ${FR_LOCALE} fr_FR_ISO_8859_1
 else
 	localewarn fr_FR.ISO8859-1
-
 fi
 
 zh_TW_BIG5=(
@@ -604,8 +603,9 @@ C_UTF_8=(
  )
 TestCodePage en_US.UTF-8 C_UTF_8
 
+echo "Failed ${ErrorCnt} Unicode tests"
 if [ ${ErrorCnt} -gt 0 ]; then
-  echo "Failed ${ErrorCnt} of ${TestCnt} Unicode tests"
-else
-  echo "Passed all ${TestCnt} Unicode tests"
+  echo "Passed $(( ${TestCnt} - ${ErrorCnt} )) of ${TestCnt} Unicode tests"
 fi
+
+exit ${ErrorCnt}

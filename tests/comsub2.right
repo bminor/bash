@@ -201,3 +201,26 @@ after: var = inside
 after: 42 var = inside
 var=inside 42
 after: 0 var = inside
+	comsub27.sub
+declare -- x="0"
+declare -- x="a[]"
+declare -- x="a[]"
+declare -- x=""
+declare -- x=""
+a[${ unset x;}]
+declare -i x
+declare -- x=""
+./comsub27.sub: line 36: ${ unset x;}: arithmetic syntax error: operand expected (error token is "${ unset x;}")
+declare -i x
+declare -- SECONDS=""
+declare -i SECONDS="0"
+declare -- x="0"
+declare -a x=([2]="a[]")
+declare -ai a=()
+./comsub27.sub: line 61: b[]: bad array subscript
+./comsub27.sub: line 61: b[]: bad array subscript
+declare -ai a=([0]="1" [1]="0" [2]="3")
+declare -Ai a=([0]="" )
+./comsub27.sub: line 71: b[]: bad array subscript
+./comsub27.sub: line 71: b[]: bad array subscript
+declare -Ai a=([3]="0" [1]="0" )

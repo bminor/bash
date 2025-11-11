@@ -55,7 +55,7 @@ ansicstr (const char *string, size_t len, int flags, int *sawc, size_t *rlen)
   const char *s;
   unsigned long v;
   size_t clen;
-  int mb_cur_max;
+  size_t mb_cur_max;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
 #endif
@@ -82,7 +82,7 @@ ansicstr (const char *string, size_t len, int flags, int *sawc, size_t *rlen)
 	  /* We read an entire multibyte character at a time if we are in a
 	     locale where a backslash can possibly appear as part of a
 	     multibyte character. UTF-8 encodings prohibit this. */
-	  if (locale_utf8locale == 0 && mb_cur_max > 0 && is_basic (c) == 0)
+	  if (locale_utf8locale == 0 && mb_cur_max > 1 && is_basic (c) == 0)
 	    {
 	      clen = mbrtowc (&wc, s - 1, mb_cur_max, 0);
 	      if (MB_NULLWCH (clen))

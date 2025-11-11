@@ -12144,3 +12144,50 @@ variables.c
 	  attribute to variables from the temporary environment when
 	  `local -n' is executed (for now), return that variable instead of
 	  creating a new one
+
+				   10/27
+				   -----
+tests/unicode1.sub
+	- report total number of failed tests to avoid script failure if some
+	  tests are skipped due to non-installed locales
+
+tests/run-all
+	- use tput for colored output strings if available
+	  Patches from G. Branden Robinson <g.branden.robinson@gmail.com>
+
+				   10/28
+				   -----
+variables.c
+	- make_local_array_variable,make_local_assoc_variable: call
+	  INVALIDATE_EXPORTSTR in case this is a variable from the function
+	  environment being converted into a local array/assoc variable
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   11/5
+				   ----
+sig.c
+	- throw_to_top_level: if we get a SIGINT (interrupt_state != 0) in an
+	  interactive shell (interactive != 0), call fpurge to throw away
+	  any pending output to stdout before undoing any redirections
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+subst.c
+	- skip_to_delim: if we're trying to skip to the close quote in a single-
+	  or double-quoted string, decrement the index by 1 before returning
+	  it because skip_single_quoted and skip_double_quoted return an
+	  index one past the end of the close quote.
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   11/6
+				   ----
+jobs.c
+	- make_child: only call bgp_delete on a newly-created pid if that
+	  process is asynchronous, since that is what will cause it to be
+	  put into the bgpids table. This mostly matters for procsubs and
+	  asynchronous jobs, but will happen for comsubs in async jobs
+	  and coprocs as well.
+	  From a report by Kerin Millar <kfm@plushkava.net>
+
+builtins/read.def
+	- read_builtin: POSIX says read must return >1 on a read error, 1
+	  is reserved for EOF

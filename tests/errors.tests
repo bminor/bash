@@ -267,6 +267,7 @@ read VAR < /dev/null
 # invalid file descriptor
 read -u XX < /dev/null
 read -u 42 < /dev/null
+read var <&- ; echo $?
 
 # same with mapfile
 mapfile -u XX A < /dev/null

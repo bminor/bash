@@ -1,0 +1,73 @@
+declare -i x
+x='a[${ unset x;}]'
+declare -p x
+unset x
+
+declare -a a
+x=a[${ unset x;}]
+declare -p x
+unset x
+
+x=a[${ unset x;}]
+declare -p x
+unset x
+
+x=${ unset x; }
+declare -p x
+unset x
+
+declare -a x
+x[0]=abc
+x=${ unset x; }
+declare -p x
+unset x
+
+declare -i x
+x='a[${ unset x;}]' printenv x
+declare -p x
+unset x
+
+declare -i x
+x=${ unset x;}
+declare -p x
+unset x
+
+declare -i x
+x='${ unset x;}'
+declare -p x
+unset x
+
+( SECONDS=${ unset SECONDS; }
+declare -p SECONDS
+unset SECONDS )
+
+( SECONDS='${ unset SECONDS; }'
+declare -p SECONDS )
+
+declare -i x='a[${ unset x; }]'
+declare -p x
+unset x
+
+declare -ia x=(3 5 7 9)
+declare -n foo='x[2]'
+foo=a[${ unset x; }]
+declare -p x
+unset x
+
+declare -ai a=(1 'b[${ unset a; }]' 3)
+declare -p a
+unset a
+
+declare -ai a=(1 "b[${ unset a; }]" 3)
+declare -p a
+unset a
+
+# uses kvpair-style
+declare -Ai a=(1 'b[${ unset a; }]' 3)
+declare -p a
+unset a
+
+# uses kvpair-style
+declare -Ai a=(1 "b[${ unset a; }]" 3)
+declare -p a
+unset a

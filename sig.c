@@ -462,6 +462,10 @@ throw_to_top_level (void)
   unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
+  /* We don't want any more output after a SIGINT. */
+  if (interactive && print_newline)
+    fpurge (stdout);
+
   run_unwind_protects ();
   loop_level = continuing = breaking = funcnest = 0;
   interrupt_execution = retain_fifos = executing_funsub = 0;
