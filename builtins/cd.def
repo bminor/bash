@@ -429,7 +429,7 @@ cd_builtin (WORD_LIST *list)
   if (temp != dirname)
     free (temp);
   /* posix says to return >1 if eflag && no_symlinks?? */
-  return (EXECUTION_FAILURE);
+  return ((eflag && no_symlinks) ? EX_MISCERROR : EXECUTION_FAILURE);
 }
 
 $BUILTIN pwd

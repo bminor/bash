@@ -611,7 +611,7 @@ scan_file (char *str, int fd, struct buffer *bufp)
   bufp->ateof = 0;
   *bufp->ptr = '\0';
 
-  lseek (fd, 0L, 0);
+  lseek (fd, 0L, SEEK_SET);
 
   while (!bufp->ateof)
     {

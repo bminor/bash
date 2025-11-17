@@ -756,6 +756,7 @@ assign_compound_array_list (SHELL_VAR *var, WORD_LIST *nlist, int flags)
 	  var_setassoc (var, nhash);
 	  assoc_dispose (h);
 	}
+      VSETATTR(var, att_assoc);		/* paranoia; could have been unset */
       return 1;		/* XXX - check return value */
     }
 #endif

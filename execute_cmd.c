@@ -1497,21 +1497,19 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
   getrusage (RUSAGE_SELF, &selfb);
   getrusage (RUSAGE_CHILDREN, &kidsb);
   gettimeofday (&before, NULL);
-#else
-#  if defined (HAVE_TIMES)
+#elif defined (HAVE_TIMES)
   tbefore = times (&before);
-#  endif
 #endif
 
   /* In posix mode, `time' without argument is equivalent to `times', but
      obeys TIMEFORMAT. This is from POSIX interp 267 */
   if (posixly_correct && nullcmd)
     {
-#if defined (HAVE_GETRUSAGE)
+#if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
       selfb.ru_utime.tv_sec = kidsb.ru_utime.tv_sec = selfb.ru_stime.tv_sec = kidsb.ru_stime.tv_sec = 0;
       selfb.ru_utime.tv_usec = kidsb.ru_utime.tv_usec = selfb.ru_stime.tv_usec = kidsb.ru_stime.tv_usec = 0;
       before = shellstart;
-#else
+#elif defined (HAVE_TIMES)
       before.tms_utime = before.tms_stime = before.tms_cutime = before.tms_cstime = 0;
       tbefore = shell_start_time * get_clk_tck ();
 #endif

@@ -12191,3 +12191,40 @@ jobs.c
 builtins/read.def
 	- read_builtin: POSIX says read must return >1 on a read error, 1
 	  is reserved for EOF
+
+				   11/7
+				   ----
+trap.c
+	- restore_default_signal: if we're restoring the default signal
+	  disposition for a signal that was ignored due to SIG_ASYNCSIG,
+	  make sure to mark the signal as not trapped after calling
+	  change_signal (..., DEFAULT_SIG)
+
+builtins/cd.def
+	- cd_builtin: POSIX says to return >1 if -P and -e are supplied and
+	  the directory can't be changed
+
+				   11/11
+				   -----
+arrayfunc.c
+	- assign_compound_array_list: paranoia: make sure to set att_assoc
+	  after assigning a kvpair-style list; the array could have been
+	  unset by some perverse script. This makes kvpair assignment, assoc
+	  subscripted compound assignment, and indexed array subscripted
+	  compound assignment behave consistently
+
+				   11/12
+				   -----
+externs.h
+	- gethostname, killpg: fixed prototypes for functions defined in
+	  lib/sh/oslib.c
+	  From andrew@andrewoates.com
+
+lib/termcap/termcap.c,shell.c
+	- lseek: use symbolic constants instead of 0 and 1
+	  From andrew@andrewoates.com
+
+execute_cmd.c
+	- time_command: make usage of the various preprocessor defines that
+	  determine how we measure the command's duration consistent
+	  From andrew@andrewoates.com

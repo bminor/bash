@@ -309,8 +309,12 @@ extern int getdtablesize (void);
 #endif /* !HAVE_GETDTABLESIZE */
 
 #if !defined (HAVE_GETHOSTNAME)
-extern int gethostname (char *, int);
+extern int gethostname (char *, size_t);
 #endif /* !HAVE_GETHOSTNAME */
+
+#if !defined (HAVE_KILLPG)
+extern int killpg (pid_t, int);
+#endif /* !HAVE_KILLPG */
 
 extern int getmaxgroups (void);
 extern long getmaxchild (void);

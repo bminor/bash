@@ -80,67 +80,69 @@ bash: line 1: PWD: readonly variable
 1
 bash: line 1: OLDPWD: readonly variable
 1
-./errors.tests: line 238: .: filename argument required
-.: usage: . [-p path] filename [arguments]
-./errors.tests: line 239: source: filename argument required
-source: usage: source [-p path] filename [arguments]
-./errors.tests: line 242: .: -i: invalid option
-.: usage: . [-p path] filename [arguments]
-./errors.tests: line 245: set: -q: invalid option
-set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 248: enable: sh: not a shell builtin
-./errors.tests: line 248: enable: bash: not a shell builtin
-./errors.tests: line 251: shopt: cannot set and unset shell options simultaneously
-./errors.tests: line 254: read: -x: invalid option
-read: usage: read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
-./errors.tests: line 257: read: var: invalid timeout specification
-./errors.tests: line 260: read: `/bin/sh': not a valid identifier
-./errors.tests: line 261: read: `/bin/sh': not a valid identifier
-./errors.tests: line 262: read: `invalid-name': not a valid identifier
-./errors.tests: line 265: VAR: readonly variable
-./errors.tests: line 268: read: XX: invalid file descriptor specification
-./errors.tests: line 269: read: 42: invalid file descriptor: Bad file descriptor
-./errors.tests: line 270: read: 0: read error: Bad file descriptor
+./errors.tests: line 237: cd: /notthere: No such file or directory
 2
-./errors.tests: line 273: mapfile: XX: invalid file descriptor specification
-./errors.tests: line 274: mapfile: 42: invalid file descriptor: Bad file descriptor
-./errors.tests: line 278: mapfile: empty array variable name
-./errors.tests: line 279: mapfile: `invalid-var': not a valid identifier
-./errors.tests: line 282: readonly: -x: invalid option
+./errors.tests: line 240: .: filename argument required
+.: usage: . [-p path] filename [arguments]
+./errors.tests: line 241: source: filename argument required
+source: usage: source [-p path] filename [arguments]
+./errors.tests: line 244: .: -i: invalid option
+.: usage: . [-p path] filename [arguments]
+./errors.tests: line 247: set: -q: invalid option
+set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
+./errors.tests: line 250: enable: sh: not a shell builtin
+./errors.tests: line 250: enable: bash: not a shell builtin
+./errors.tests: line 253: shopt: cannot set and unset shell options simultaneously
+./errors.tests: line 256: read: -x: invalid option
+read: usage: read [-Eers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
+./errors.tests: line 259: read: var: invalid timeout specification
+./errors.tests: line 262: read: `/bin/sh': not a valid identifier
+./errors.tests: line 263: read: `/bin/sh': not a valid identifier
+./errors.tests: line 264: read: `invalid-name': not a valid identifier
+./errors.tests: line 267: VAR: readonly variable
+./errors.tests: line 270: read: XX: invalid file descriptor specification
+./errors.tests: line 271: read: 42: invalid file descriptor: Bad file descriptor
+./errors.tests: line 272: read: 0: read error: Bad file descriptor
+2
+./errors.tests: line 275: mapfile: XX: invalid file descriptor specification
+./errors.tests: line 276: mapfile: 42: invalid file descriptor: Bad file descriptor
+./errors.tests: line 280: mapfile: empty array variable name
+./errors.tests: line 281: mapfile: `invalid-var': not a valid identifier
+./errors.tests: line 284: readonly: -x: invalid option
 readonly: usage: readonly [-aAf] [name[=value] ...] or readonly -p
-./errors.tests: line 285: eval: -i: invalid option
+./errors.tests: line 287: eval: -i: invalid option
 eval: usage: eval [arg ...]
-./errors.tests: line 286: command: -i: invalid option
+./errors.tests: line 288: command: -i: invalid option
 command: usage: command [-pVv] command [arg ...]
-./errors.tests: line 289: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
-./errors.tests: line 290: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
-./errors.tests: line 293: trap: NOSIG: invalid signal specification
-./errors.tests: line 296: trap: -s: invalid option
+./errors.tests: line 291: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 292: /bin/sh + 0: arithmetic syntax error: operand expected (error token is "/bin/sh + 0")
+./errors.tests: line 295: trap: NOSIG: invalid signal specification
+./errors.tests: line 298: trap: -s: invalid option
 trap: usage: trap [-Plp] [[action] signal_spec ...]
-./errors.tests: line 302: return: can only `return' from a function or sourced script
-./errors.tests: line 306: break: 0: loop count out of range
-./errors.tests: line 310: continue: 0: loop count out of range
-./errors.tests: line 315: builtin: -x: invalid option
+./errors.tests: line 304: return: can only `return' from a function or sourced script
+./errors.tests: line 308: break: 0: loop count out of range
+./errors.tests: line 312: continue: 0: loop count out of range
+./errors.tests: line 317: builtin: -x: invalid option
 builtin: usage: builtin [shell-builtin [arg ...]]
-./errors.tests: line 318: builtin: bash: not a shell builtin
-./errors.tests: line 322: bg: no job control
-./errors.tests: line 323: fg: no job control
+./errors.tests: line 320: builtin: bash: not a shell builtin
+./errors.tests: line 324: bg: no job control
+./errors.tests: line 325: fg: no job control
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
-./errors.tests: line 327: kill: -s: option requires an argument
-./errors.tests: line 329: kill: S: invalid signal specification
-./errors.tests: line 331: kill: `': not a pid or valid job spec
+./errors.tests: line 329: kill: -s: option requires an argument
+./errors.tests: line 331: kill: S: invalid signal specification
+./errors.tests: line 333: kill: `': not a pid or valid job spec
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
-./errors.tests: line 335: kill: SIGBAD: invalid signal specification
-./errors.tests: line 337: kill: BAD: invalid signal specification
-./errors.tests: line 339: kill: `@12': not a pid or valid job spec
-./errors.tests: line 342: unset: BASH_LINENO: cannot unset
-./errors.tests: line 342: unset: BASH_SOURCE: cannot unset
-./errors.tests: line 345: set: trackall: invalid option name
-./errors.tests: line 346: set: -q: invalid option
+./errors.tests: line 337: kill: SIGBAD: invalid signal specification
+./errors.tests: line 339: kill: BAD: invalid signal specification
+./errors.tests: line 341: kill: `@12': not a pid or valid job spec
+./errors.tests: line 344: unset: BASH_LINENO: cannot unset
+./errors.tests: line 344: unset: BASH_SOURCE: cannot unset
+./errors.tests: line 347: set: trackall: invalid option name
+./errors.tests: line 348: set: -q: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 347: set: -i: invalid option
+./errors.tests: line 349: set: -i: invalid option
 set: usage: set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
-./errors.tests: line 351: xx: readonly variable
+./errors.tests: line 353: xx: readonly variable
 1
 	errors1.sub
 ./errors1.sub: line 14: .: -i: invalid option

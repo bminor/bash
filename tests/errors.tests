@@ -233,6 +233,8 @@ cd one two three
 ${THIS_SH} -c 'readonly PWD ; cd / ; echo $?' bash
 # or if OLDPWD is readonly
 ${THIS_SH} -c 'readonly OLDPWD ; cd / ; echo $?' bash
+# POSIX says to return >1 if -P and -e are supplied and an error occurs
+cd -Pe /notthere ; echo $?
 
 # various `source/.' errors
 .
