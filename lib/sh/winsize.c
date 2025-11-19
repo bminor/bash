@@ -53,6 +53,7 @@
 #  endif /* HAVE_SYS_PTE_H */
 #endif /* !STRUCT_WINSIZE_IN_TERMIOS && !STRUCT_WINSIZE_IN_SYS_IOCTL */
 
+#include <errno.h>
 #include <stdio.h>
 
 /* Return the fd from which we are actually getting input. */

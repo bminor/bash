@@ -91,9 +91,9 @@ static void show_longdoc (int);
 int
 help_builtin (WORD_LIST *list)
 {
-  register int i;
+  int i;
   char *pattern, *name;
-  int match_found, sflag, dflag, mflag, m, pass, this_found;
+  int match_found, sflag, dflag, mflag, m, pass, this_found, globpat;
   size_t plen;
 
   dflag = sflag = mflag = 0;
@@ -128,17 +128,14 @@ help_builtin (WORD_LIST *list)
 
   /* We should consider making `help bash' do something. */
 
-  if (glob_pattern_p (list->word->word) == 1)
-    {
-      printf ("%s", ngettext ("Shell commands matching keyword `", "Shell commands matching keywords `", (list->next ? 2 : 1)));
-      print_word_list (list, ", ");
-      printf ("%s", _("'\n\n"));
-    }
-
   for (match_found = 0, pattern = ""; list; list = list->next)
     {
       pattern = list->word->word;
       plen = strlen (pattern);
+
+      globpat = glob_pattern_p (pattern);
+      if (globpat)
+	printf (_("Shell commands matching pattern '%s':\n\n"), pattern);
 
       for (pass = 1, this_found = 0; pass < 3; pass++)
 	{
@@ -178,15 +175,16 @@ help_builtin (WORD_LIST *list)
 	  if (pass == 1 && this_found == 1)
 	    break;
 	}
+      if (this_found == 0)
+	{
+	  if (globpat)
+	    builtin_error (_("no help topics match '%s'."), pattern);
+	  else
+	    builtin_error (_("no help topics match '%s'. Try 'help help', 'man -k %s', or 'info %s'."), pattern, pattern, pattern);
+	}
     }
 
-  if (match_found == 0)
-    {
-      builtin_error (_("no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."), pattern, pattern, pattern);
-      return (EXECUTION_FAILURE);
-    }
-
-  return (sh_chkwrite (EXECUTION_SUCCESS));
+  return (match_found ? sh_chkwrite (EXECUTION_SUCCESS) : sh_chkwrite (EXECUTION_FAILURE));
 }
 
 void

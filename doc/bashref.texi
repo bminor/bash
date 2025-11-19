@@ -5338,7 +5338,7 @@ special builtins.
 
 The @option{-f} option means to load the new builtin command @var{name}
 from shared object @var{filename}, on systems that support dynamic loading.
-If @var{filename} does not contain a slash.
+If @var{filename} does not contain a slash,
 Bash will use the value of the @env{BASH_LOADABLES_PATH} variable as a
 colon-separated list of directories in which to search for @var{filename}.
 The default for @env{BASH_LOADABLES_PATH} is system-dependent,
@@ -8941,8 +8941,9 @@ Remove the @var{N}th directory (counting from the right of the
 list printed by @code{dirs}), starting with zero, from the stack.
 @end table
 
-If the top element of the directory stack is modified, and
-the @option{-n} option was not supplied, @code{popd} uses the @code{cd}
+If the top element of the directory stack is modified,
+and the @option{-n} option was not supplied,
+@code{popd} uses the @code{cd}
 builtin to change to the directory at the top of the stack.
 If the @code{cd} fails, @code{popd} returns a non-zero value.
 

@@ -12228,3 +12228,28 @@ execute_cmd.c
 	- time_command: make usage of the various preprocessor defines that
 	  determine how we measure the command's duration consistent
 	  From andrew@andrewoates.com
+
+variables.c
+	- make_local_variable: if we inherit the export attribute from an
+	  existing variable at a previous scope, set array_needs_making
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+builtins/help.def
+	- help_builtin: treat each pattern individually; print one message per
+	  glob pattern instead of printing a comma-separated list of all
+	  patterns and print a potential error message once per failing
+	  pattern
+	- help_builtin: suggest using man or info only if the pattern is not
+	  a glob pattern
+	  Suggestion from Martin D Kealey <martin@kurahaupo.gen.nz>
+
+				   11/17
+				   -----
+sig.c
+	- NEED_FPURGE_DECL: add before including externs.h, since we now call
+	  fpurge
+	  Report by Emanuele Torre <torreemanuele6@gmail.com>
+
+doc/bash.1,doc/bashref.texi
+	- fix some options typeset in the wrong font
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>

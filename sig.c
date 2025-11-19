@@ -34,6 +34,8 @@
 
 #include "bashintl.h"
 
+#define NEED_FPURGE_DECL
+
 #include "shell.h"
 #include "execute_cmd.h"
 #if defined (JOB_CONTROL)

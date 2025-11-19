@@ -2724,6 +2724,9 @@ make_local_variable (const char *name, int flags)
       else
 	/* We inherit the export attribute, but no others. */
 	new_var->attributes = exported_p (old_var) ? att_exported : 0;
+
+      if (exported_p (new_var))
+	array_needs_making = 1;
     }
 
 set_local_var_flags:

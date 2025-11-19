@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Oct  6 09:57:24 EDT 2025
+.\"	Last Change: Mon Nov 17 11:37:04 EST 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -22,7 +22,7 @@
 .ds zX \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 October 6" "GNU Bash 5.3"
+.TH BASH 1 "2025 November 17" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -8525,7 +8525,7 @@ programmable completion performs \fBreadline\fP's default completion.
 .PP
 The options supplied to \fBcomplete\fP and \fBcompopt\fP
 can control how \fBreadline\fP treats the completions.
-For instance, the \fI\-o fullquote\fP option tells \fBreadline\fP
+For instance, the \fB\-o fullquote\fP option tells \fBreadline\fP
 to quote the matches as if they were filenames.
 See the description of \fBcomplete\fP below
 for details.
@@ -9080,8 +9080,8 @@ require \fB\-\-\fP to prevent this interpretation.
 .PP
 All builtins except
 \fB:\fP, \fBtrue\fP, \fBfalse\fP, \fBecho\fP, and \fBtest\fP/\fB[\fP
-accept \fB--help\fP as a special option.
-If \fB--help\fP is supplied, these builtins output
+accept \fB\-\-help\fP as a special option.
+If \fB\-\-help\fP is supplied, these builtins output
 a help message and exit with a status of 0.
 .PP
 .PD 0
@@ -10219,7 +10219,7 @@ to force a search of the current directory.
 The
 .B \-d
 option will delete a builtin previously loaded with \fB\-f\fP.
-If \fI\-s\fP is used with \fI\-f\fP, the new builtin becomes a
+If \fB\-s\fP is used with \fB\-f\fP, the new builtin becomes a
 .SM POSIX
 special builtin.
 .IP
@@ -11057,8 +11057,9 @@ the next to last.
 .PD
 .RE
 .IP
-If the top element of the directory stack is modified, and
-the \fI\-n\fP option was not supplied, \fBpopd\fP uses the \fBcd\fP
+If the top element of the directory stack is modified,
+and the \fB\-n\fP option was not supplied,
+\fBpopd\fP uses the \fBcd\fP
 builtin to change to the directory at the top of the stack.
 If the \fBcd\fP fails, \fBpopd\fP returns a non-zero value.
 .IP

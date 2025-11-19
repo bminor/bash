@@ -1607,6 +1607,10 @@ readtok (void)
 	c = GEQ;
       else if ((c == LT) && (c1 == EQ))
 	c = LEQ;
+      else if ((c == '&') && (c1 == '&'))
+	c = LAND;
+      else if ((c == '|') && (c1 == '|'))
+	c = LOR;
       else if ((c == '*') && (c1 == '*'))
 	c = POWER;
       else if ((c == '-' || c == '+') && c1 == c && curtok == STR)
