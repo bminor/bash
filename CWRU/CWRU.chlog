@@ -12253,3 +12253,32 @@ sig.c
 doc/bash.1,doc/bashref.texi
 	- fix some options typeset in the wrong font
 	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+subst.c
+	- list_remove_pattern,parameter_list_remove_pattern,array_remove_pattern,
+	  parameter_brace_remove_pattern: take an additional PFLAGS argument
+	  from the PFLAGS passed to parameter_brace_expand
+	- list_remove_pattern: pass PFLAGS to string_list_pos_params so it can
+	  get the right expansion of `@' and `*'
+	  Report by Emanuele Torre <torreemanuele6@gmail.com>
+
+				   11/18
+				   -----
+variables.c
+	- get_bash_name: only call sh_canonpath on the directory portion of
+	  the full pathname to the current executable; it only works on
+	  directories. Then glue the return value and the trailing component
+	  together to get the full pathname
+	  Report from Stan Marsh <gazelle@xmission.com>
+
+				   11/20
+				   -----
+subst.c
+	- parameter_list_transform,array_transform,list_transform: add an
+	  extra PFLAGS argument, passed down from parameter_brace_transform
+	- list_transform,array_transform: pass PFLAGS to string_list_pos_params
+	  so it can get the right expansion of `@' and `*'
+	  This makes all the quoted and unquoted expansions of `@' consistent
+	  when they are expanded in a context that will not perform word
+	  splitting
+	  Report by Emanuele Torre <torreemanuele6@gmail.com>

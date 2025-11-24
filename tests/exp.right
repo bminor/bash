@@ -446,3 +446,31 @@ declare -i a="7"
 declare -- a="42"
 FOO
 declare -u A="FOO"
+	exp14.sub
+!Q= <a b c> <a:b:c>
+ Q= <a b c> <a:b:c>
+!Q= <a b c> <a:b:c>
+Q= <a b c> <a:b:c>
+!Q- <a b c> <a:b:c>
+ Q- <a b c> <a:b:c>
+!Q? <a b c> <a:b:c>
+ Q? <a b c> <a:b:c>
+!Q+ <a b c> <a:b:c>
+ Q+ <a b c> <a:b:c>
++Q+ <a b c> <a:b:c>
+!Q: <a b c> <a:b:c>
+Q: <a:b:c> <a:b:c>
+!Q# <a b c> <a:b:c>
+Q# <a:b:c> <a:b:c>
+!Q% <a b c> <a:b:c>
+Q% <a:b:c> <a:b:c>
+!Q/ <x x x> <x:x:x>
+Q/ <x:x:x> <x:x:x>
+!Q^ <A B C> <A:B:C>
+Q^ <A:B:C> <A:B:C>
+!Q, <a b c> <a:b:c>
+Q, <a:b:c> <a:b:c>
+!Q@Q <'a' 'b' 'c'> <'a':'b':'c'>
+Q@Q <'a':'b':'c'> <'a':'b':'c'>
+!Q@A <set -- 'a':'b':'c'> <set -- 'a':'b':'c'>
+Q@A <set -- 'a':'b':'c'> <set -- 'a':'b':'c'>

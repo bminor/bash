@@ -299,23 +299,23 @@ static int match_pattern (char *, char *, int, char **, char **);
 static int getpatspec (int, const char *);
 static char *getpattern (char *, int, int);
 static char *variable_remove_pattern (char *, char *, int, int);
-static char *list_remove_pattern (WORD_LIST *, char *, int, int, int);
-static char *parameter_list_remove_pattern (int, char *, int, int);
+static char *list_remove_pattern (WORD_LIST *, char *, int, int, int, int);
+static char *parameter_list_remove_pattern (int, char *, int, int, int);
 #ifdef ARRAY_VARS
-static char *array_remove_pattern (SHELL_VAR *, char *, int, int, int);
+static char *array_remove_pattern (SHELL_VAR *, char *, int, int, int, int);
 #endif
-static char *parameter_brace_remove_pattern (char *, char *, array_eltstate_t *, char *, int, int, int);
+static char *parameter_brace_remove_pattern (char *, char *, array_eltstate_t *, char *, int, int, int, int);
 
 static char *string_var_assignment (SHELL_VAR *, char *);
 #if defined (ARRAY_VARS)
 static char *array_var_assignment (SHELL_VAR *, int, int, int);
 #endif
-static char *pos_params_assignment (WORD_LIST *, int, int);
+static char *pos_params_assignment (WORD_LIST *, int, int, int);
 static char *string_transform (int, SHELL_VAR *, char *);
-static char *list_transform (int, SHELL_VAR *, WORD_LIST *, int, int);
-static char *parameter_list_transform (int, int, int);
+static char *list_transform (int, SHELL_VAR *, WORD_LIST *, int, int, int);
+static char *parameter_list_transform (int, int, int, int);
 #if defined ARRAY_VARS
-static char *array_transform (int, SHELL_VAR *, int, int);
+static char *array_transform (int, SHELL_VAR *, int, int, int);
 #endif
 static char *parameter_brace_transform (char *, char *, array_eltstate_t *, char *, int, int, int, int);
 static int valid_parameter_transform (const char *);
@@ -3045,6 +3045,7 @@ string_list_dollar_at (WORD_LIST *list, int quoted, int flags)
    string_list as appropriate. */
 /* This needs to fully understand the additional contexts where word
    splitting does not occur (W_ASSIGNRHS, etc.) */
+/* XXX - does this need to handle (pflags & PF_NOSPLIT2)? */
 char *
 string_list_pos_params (int pchar, WORD_LIST *list, int quoted, int pflags)
 {
@@ -3086,9 +3087,18 @@ string_list_pos_params (int pchar, WORD_LIST *list, int quoted, int pflags)
   else if (pchar == '@' && quoted == 0 && ifs_is_null)	/* XXX */
     ret = string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
   else if (pchar == '@' && quoted == 0 && (pflags & PF_ASSIGNRHS))
+    /* XXX - param_expand uses quoted|Q_DOUBLE_QUOTES for this case, but
+       that quotes the escapes. We could use string_list_internal with " "
+       as the second argument. */
     ret = string_list_dollar_at (list, quoted, pflags);	/* Posix interp 888 */
   else if (pchar == '@')
+#if 0
+    /* XXX - param_expand uses string_list_dollar_at() for this case. */
+    /* string_list_dollar_at quotes CTLESC, even if quoted == 0 */
+    ret = string_list_dollar_at (list, quoted, 0);
+#else
     ret = string_list_dollar_star (list, quoted, 0);
+#endif
   else
     ret = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (list) : list);
 
@@ -5777,7 +5787,7 @@ variable_remove_pattern (char *value, char *pattern, int patspec, int quoted)
 #endif
 
 static char *
-list_remove_pattern (WORD_LIST *list, char *pattern, int patspec, int itype, int quoted)
+list_remove_pattern (WORD_LIST *list, char *pattern, int patspec, int itype, int quoted, int pflags)
 {
   WORD_LIST *new, *l;
   WORD_DESC *w;
@@ -5792,14 +5802,14 @@ list_remove_pattern (WORD_LIST *list, char *pattern, int patspec, int itype, int
     }
 
   l = REVERSE_LIST (new, WORD_LIST *);
-  tword = string_list_pos_params (itype, l, quoted, 0);
+  tword = string_list_pos_params (itype, l, quoted, pflags);
   dispose_words (l);
 
   return (tword);
 }
 
 static char *
-parameter_list_remove_pattern (int itype, char *pattern, int patspec, int quoted)
+parameter_list_remove_pattern (int itype, char *pattern, int patspec, int quoted, int pflags)
 {
   char *ret;
   WORD_LIST *list;
@@ -5807,7 +5817,7 @@ parameter_list_remove_pattern (int itype, char *pattern, int patspec, int quoted
   list = list_rest_of_args ();
   if (list == 0)
     return ((char *)NULL);
-  ret = list_remove_pattern (list, pattern, patspec, itype, quoted);
+  ret = list_remove_pattern (list, pattern, patspec, itype, quoted, pflags);
   dispose_words (list);
   return (ret);
 }
@@ -5815,7 +5825,7 @@ parameter_list_remove_pattern (int itype, char *pattern, int patspec, int quoted
 #if defined (ARRAY_VARS)
 /* STARSUB is so we can figure out how it's indexed */
 static char *
-array_remove_pattern (SHELL_VAR *var, char *pattern, int patspec, int starsub, int quoted)
+array_remove_pattern (SHELL_VAR *var, char *pattern, int patspec, int starsub, int quoted, int pflags)
 {
   ARRAY *a;
   HASH_TABLE *h;
@@ -5834,7 +5844,7 @@ array_remove_pattern (SHELL_VAR *var, char *pattern, int patspec, int starsub, i
   list = a ? array_to_word_list (a) : (h ? assoc_to_word_list (h) : 0);
   if (list == 0)
    return ((char *)NULL);
-  ret = list_remove_pattern (list, pattern, patspec, itype, quoted);
+  ret = list_remove_pattern (list, pattern, patspec, itype, quoted, pflags);
   dispose_words (list);
 
   return ret;
@@ -5844,7 +5854,7 @@ array_remove_pattern (SHELL_VAR *var, char *pattern, int patspec, int starsub, i
 static char *
 parameter_brace_remove_pattern (char *varname, char *value,
 				array_eltstate_t *estatep, char *patstr,
-				int rtype, int quoted, int flags)
+				int rtype, int quoted, int pflags, int flags)
 {
   int vtype, patspec, starsub;
   char *temp1, *val, *pattern, *oname;
@@ -5894,7 +5904,7 @@ parameter_brace_remove_pattern (char *varname, char *value,
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
-      temp1 = array_remove_pattern (v, pattern, patspec, starsub, quoted);
+      temp1 = array_remove_pattern (v, pattern, patspec, starsub, quoted, pflags);
       if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
 	{
 	  val = quote_escapes (temp1);
@@ -5904,7 +5914,7 @@ parameter_brace_remove_pattern (char *varname, char *value,
       break;
 #endif
     case VT_POSPARMS:
-      temp1 = parameter_list_remove_pattern (varname[0], pattern, patspec, quoted);
+      temp1 = parameter_list_remove_pattern (varname[0], pattern, patspec, quoted, pflags);
       if (temp1 && quoted == 0 && ifs_is_null)
 	{
 	  /* Posix interp 888 */
@@ -8783,12 +8793,12 @@ array_var_assignment (SHELL_VAR *v, int itype, int quoted, int atype)
 #endif
 
 static char *
-pos_params_assignment (WORD_LIST *list, int itype, int quoted)
+pos_params_assignment (WORD_LIST *list, int itype, int quoted, int pflags)
 {
   char *temp, *ret;
 
   /* first, we transform the list to quote each word. */
-  temp = list_transform ('Q', (SHELL_VAR *)0, list, itype, quoted);
+  temp = list_transform ('Q', (SHELL_VAR *)0, list, itype, quoted, 0);
   ret = (char *)xmalloc (strlen (temp) + 8);
   strcpy (ret, "set -- ");
   strcpy (ret + 7, temp);
@@ -8848,7 +8858,7 @@ string_transform (int xc, SHELL_VAR *v, char *s)
 }
 
 static char *
-list_transform (int xc, SHELL_VAR *v, WORD_LIST *list, int itype, int quoted)
+list_transform (int xc, SHELL_VAR *v, WORD_LIST *list, int itype, int quoted, int pflags)
 {
   WORD_LIST *new, *l;
   WORD_DESC *w;
@@ -8870,14 +8880,14 @@ list_transform (int xc, SHELL_VAR *v, WORD_LIST *list, int itype, int quoted)
   if (itype == '*' && expand_no_split_dollar_star && ifs_is_null)
     qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
-  tword = string_list_pos_params (itype, l, qflags, 0);
+  tword = string_list_pos_params (itype, l, qflags, pflags);
   dispose_words (l);
 
   return (tword);
 }
 
 static char *
-parameter_list_transform (int xc, int itype, int quoted)
+parameter_list_transform (int xc, int itype, int quoted, int pflags)
 {
   char *ret;
   WORD_LIST *list;
@@ -8886,9 +8896,9 @@ parameter_list_transform (int xc, int itype, int quoted)
   if (list == 0)
     return ((char *)NULL);
   if (xc == 'A')
-    ret = pos_params_assignment (list, itype, quoted);
+    ret = pos_params_assignment (list, itype, quoted, pflags);
   else
-    ret = list_transform (xc, (SHELL_VAR *)0, list, itype, quoted);
+    ret = list_transform (xc, (SHELL_VAR *)0, list, itype, quoted, pflags);
   dispose_words (list);
   return (ret);
 }
@@ -8896,7 +8906,7 @@ parameter_list_transform (int xc, int itype, int quoted)
 #if defined (ARRAY_VARS)
 /* STARSUB so we can figure out how it's indexed */
 static char *
-array_transform (int xc, SHELL_VAR *var, int starsub, int quoted)
+array_transform (int xc, SHELL_VAR *var, int starsub, int quoted, int pflags)
 {
   ARRAY *a;
   HASH_TABLE *h;
@@ -8939,7 +8949,7 @@ array_transform (int xc, SHELL_VAR *var, int starsub, int quoted)
       if (itype == '*' && expand_no_split_dollar_star && ifs_is_null)
 	qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
-      ret = string_list_pos_params (itype, list, qflags, 0);
+      ret = string_list_pos_params (itype, list, qflags, pflags);
       dispose_words (list);
       return ret;
     }
@@ -8947,7 +8957,7 @@ array_transform (int xc, SHELL_VAR *var, int starsub, int quoted)
   list = a ? array_to_word_list (a) : (h ? assoc_to_word_list (h) : 0);
   if (list == 0)
    return ((char *)NULL);
-  ret = list_transform (xc, v, list, itype, quoted);
+  ret = list_transform (xc, v, list, itype, quoted, pflags);
   dispose_words (list);
 
   return ret;
@@ -9035,7 +9045,7 @@ parameter_brace_transform (char *varname, char *value, array_eltstate_t *estatep
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
-      temp1 = array_transform (xc, v, starsub, quoted);
+      temp1 = array_transform (xc, v, starsub, quoted, pflags);
       if (temp1 && quoted == 0 && ifs_is_null)
 	{
 		/* Posix interp 888 */
@@ -9049,7 +9059,7 @@ parameter_brace_transform (char *varname, char *value, array_eltstate_t *estatep
       break;
 #endif
     case VT_POSPARMS:
-      temp1 = parameter_list_transform (xc, varname[0], quoted);
+      temp1 = parameter_list_transform (xc, varname[0], quoted, pflags);
       if (temp1 && quoted == 0 && ifs_is_null)
 	{
 		/* Posix interp 888 */
@@ -10391,7 +10401,7 @@ bad_substitution:
 	  FREE (value);
 	  break;
 	}
-      temp1 = parameter_brace_remove_pattern (name, temp, &es, value, c, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
+      temp1 = parameter_brace_remove_pattern (name, temp, &es, value, c, quoted, pflags, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
       free (temp);
       free (value);
 #if defined (ARRAY_VARS)

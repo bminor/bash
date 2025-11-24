@@ -12,7 +12,8 @@ rm -f ${BASH_TSTOUT}
 
 if [ -t 1 ]; then
 	if type -P tput >/dev/null; then
-		CSTART=$(tput setaf 15 setab 1) CEND=$(tput sgr0)
+#		CSTART=$(tput setaf 15 setab 1) CEND=$(tput sgr0)
+		CSTART=$(tput bold ; tput setab 9 ; tput setaf 7) CEND=$(tput sgr0)
 	else
 		# can't rely on having $'...' or printf understanding \e
 		# bright red background, white foreground text

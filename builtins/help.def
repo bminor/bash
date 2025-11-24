@@ -135,7 +135,7 @@ help_builtin (WORD_LIST *list)
 
       globpat = glob_pattern_p (pattern);
       if (globpat)
-	printf (_("Shell commands matching pattern '%s':\n\n"), pattern);
+	printf (_("Shell commands matching pattern '%s':\n"), pattern);
 
       for (pass = 1, this_found = 0; pass < 3; pass++)
 	{
@@ -153,6 +153,8 @@ help_builtin (WORD_LIST *list)
 
 	      if (m)
 	        {
+		  if (globpat && this_found == 0)
+		    putchar ('\n');
 	          this_found = 1;
 	          match_found++;
 	          if (dflag)
