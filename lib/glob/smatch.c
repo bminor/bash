@@ -390,7 +390,7 @@ charcmp_wc (wint_t c1, wint_t c2, int forcecoll)
   if (c1 == c2)
     return 0;
 
-  if (forcecoll == 0 && glob_asciirange && c1 <= UCHAR_MAX && c2 <= UCHAR_MAX)
+  if (forcecoll == 0 && glob_asciirange)
     return ((int)(c1 - c2));
 
   s1[0] = c1;
