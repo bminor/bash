@@ -904,6 +904,7 @@ globsort_sortarray (struct globsort_t *garray, size_t len)
       break;
     default:
       internal_error (_("invalid glob sort type"));
+      sortfunc = (QSFUNC *)globsort_namecmp;
       break;
     }
 

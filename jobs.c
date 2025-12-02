@@ -2317,7 +2317,7 @@ make_child (char *command, int flags)
 	break;
       forksleep <<= 1;
 
-      if (interrupt_state)
+      if (interrupt_state)	/* XXX - and terminating_signal? */
 	break;
       sigprocmask (SIG_SETMASK, &set, (sigset_t *)NULL);
     }

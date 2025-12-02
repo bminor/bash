@@ -12282,3 +12282,32 @@ subst.c
 	  when they are expanded in a context that will not perform word
 	  splitting
 	  Report by Emanuele Torre <torreemanuele6@gmail.com>
+
+execute_cmd.c
+	- time_command: make sure to initialize CODE in the posix and null
+	  command case so we don't longjmp to nowhere
+	  Report and patch from Grisha Levit <grishalevit@gmail.com>
+
+pathexp.c
+	- globsort_sortarray: if the sort type is unknown, default sortfunc
+	  to globsort_namecmp
+
+error.h
+	- programming_error: add `noreturn' attribute
+
+				   11/25
+				   -----
+variables.c
+	- get_bash_name: use sh_realpath instead of sh_canonpath; less code
+	  Modification of change from 11/18
+
+				   12/1
+				   ----
+trap.c, trap.h
+	- clear_exit_trap: new function to unset the exit trap and clear out
+	  the trap string
+
+execute_cmd.c
+	- execute_in_subshell: clear the exit trap before checking for a
+	  pending fatal signal
+	  From https://savannah.gnu.org/bugs/?67745

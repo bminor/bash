@@ -820,24 +820,11 @@ get_bash_name (void)
 	      tname = make_absolute (shell_name, get_string_value ("PWD"));
 	      if (*shell_name == '.')
 		{
-		  char *x, *fp;
-
-		  x = strrchr (tname, '/');
-		  *x = 0;
-		  name = sh_canonpath (tname, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
-		  *x++ = '/';
+		  name = sh_realpath (tname, 0);
 		  if (name == 0)
 		    name = tname;
 		  else
-		    {
-		      fp = sh_makepath (name, x, 0);
-		      free (tname);
-		      if (fp)
-			{
-			  free (name);
-			  name = fp;
-			}
-		    }
+		    free (tname);
 		}
 	     else
 		name = tname;

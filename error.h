@@ -30,7 +30,7 @@ extern char *get_name_for_error (void);
 extern void file_error (const char *);
 
 /* Report a programmer's error, and abort.  Pass REASON, and ARG1 ... ARG5. */
-extern void programming_error (const char *, ...) __attribute__((__format__ (printf, 1, 2)));
+extern void programming_error (const char *, ...) __attribute__((__format__ (printf, 1, 2))) __attribute__((__noreturn__));;
 
 /* General error reporting.  Pass FORMAT and ARG1 ... ARG5. */
 extern void report_error (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));

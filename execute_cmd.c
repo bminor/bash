@@ -1489,6 +1489,8 @@ time_command (COMMAND *command, int asynchronous, int pipe_in, int pipe_out, str
   rsf = usf = ssf = 0;
   cpu = 0;
 
+  code = 0;
+
   old_subshell = subshell_environment;
   posix_time = command && (command->flags & CMD_TIME_POSIX);
   nullcmd = (command == 0) || (command->type == cm_simple && command->value.Simple->words == 0 && command->value.Simple->redirects == 0);
@@ -1685,6 +1687,9 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
       if (user_coproc)
 	subshell_environment |= SUBSHELL_COPROC;
     }
+
+  /* clear the exit trap before checking for fatal signals */
+  clear_exit_trap ();
 
   QUIT;
   CHECK_TERMSIG;

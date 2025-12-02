@@ -1,6 +1,6 @@
 /* trap.h -- data structures used in the trap mechanism. */
 
-/* Copyright (C) 1993-2023 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2025 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -91,6 +91,8 @@ extern void set_signal (int, const char *);
 
 extern void restore_default_signal (int);
 extern void ignore_signal (int);
+
+extern void clear_exit_trap (void);
 extern int run_exit_trap (void);
 extern void run_trap_cleanup (int);
 extern int run_debug_trap (void);
