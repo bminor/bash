@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.23.0 -->
-<!-- CreationDate: Tue Oct  7 10:14:01 2025 -->
+<!-- CreationDate: Tue Dec  2 16:55:58 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -3736,6 +3736,10 @@ an index of &minus;1 references the last element.</p>
 assigning using the compound assignment syntax; see
 <b><small>PARAMETERS</small></b> above.</p>
 
+<p style="margin-left:9%; margin-top: 1em">If one of the
+word expansions in a compound array assignment unsets the
+variable, the results are unspecified.</p>
+
 <p style="margin-left:9%; margin-top: 1em">An array element
 is referenced using ${<i>name</i>[<i>subscript</i>]}. The
 braces are required to avoid conflicts with pathname
@@ -4056,7 +4060,7 @@ required when <i>parameter</i> is a positional parameter
 with more than one digit, or when <i>parameter</i> is
 followed by a character which is not to be interpreted as
 part of its name. The <i>parameter</i> is a shell parameter
-as described above <b>PARAMETERS</b>) or an array reference
+as described above (<b>PARAMETERS</b>) or an array reference
 (<b>Arrays</b>).</p>
 
 <p style="margin-left:9%; margin-top: 1em">If the first
@@ -7793,9 +7797,9 @@ with a statement of the form</p>
 <p style="margin-left:18%; margin-top: 1em"><b>set</b>
 <i>variable&minus;name value</i></p>
 
-<p style="margin-left:9%;">or using the <b>bind</b> builtin
-command (see <b><small>SHELL BUILTIN COMMANDS</small></b>
-below).</p>
+<p style="margin-left:9%; margin-top: 1em">or using the
+<b>bind</b> builtin command (see <b><small>SHELL BUILTIN
+COMMANDS</small></b> below).</p>
 
 <p style="margin-left:9%; margin-top: 1em">Except where
 noted, <b>readline</b> variables can take the values
@@ -9875,7 +9879,7 @@ completion.</p>
 <p style="margin-left:9%; margin-top: 1em">The options
 supplied to <b>complete</b> and <b>compopt</b> can control
 how <b>readline</b> treats the completions. For instance,
-the <i>&minus;o fullquote</i> option tells <b>readline</b>
+the <b>&minus;o fullquote</b> option tells <b>readline</b>
 to quote the matches as if they were filenames. See the
 description of <b>complete</b> below for details.</p>
 
@@ -10537,9 +10541,10 @@ interpretation.</p>
 
 <p style="margin-left:9%; margin-top: 1em">All builtins
 except <b>:</b>, <b>true</b>, <b>false</b>, <b>echo</b>, and
-<b>test</b>/<b>[</b> accept <b>--help</b> as a special
-option. If <b>--help</b> is supplied, these builtins output
-a help message and exit with a status of 0. <b><br>
+<b>test</b>/<b>[</b> accept <b>&minus;&minus;help</b> as a
+special option. If <b>&minus;&minus;help</b> is supplied,
+these builtins output a help message and exit with a status
+of 0. <b><br>
 :</b> [<i>arguments</i>]</p>
 
 <p style="margin-left:18%;">No effect; the command does
@@ -12119,8 +12124,8 @@ The default for <b>BASH_LOADABLES_PATH</b> is
 system-dependent, and may include &ldquo;.&rdquo; to force a
 search of the current directory. The <b>&minus;d</b> option
 will delete a builtin previously loaded with
-<b>&minus;f</b>. If <i>&minus;s</i> is used with
-<i>&minus;f</i>, the new builtin becomes a
+<b>&minus;f</b>. If <b>&minus;s</b> is used with
+<b>&minus;f</b>, the new builtin becomes a
 <small>POSIX</small> special builtin.</p>
 
 <p style="margin-left:18%; margin-top: 1em">If no options
@@ -13011,7 +13016,7 @@ directory, &ldquo;popd &minus;1&rdquo; the next to last.</p></td></tr>
 
 <p style="margin-left:18%; margin-top: 1em">If the top
 element of the directory stack is modified, and the
-<i>&minus;n</i> option was not supplied, <b>popd</b> uses
+<b>&minus;n</b> option was not supplied, <b>popd</b> uses
 the <b>cd</b> builtin to change to the directory at the top
 of the stack. If the <b>cd</b> fails, <b>popd</b> returns a
 non-zero value.</p>
@@ -13131,14 +13136,33 @@ the leading character is a single or double quote, the value
 is the numeric value of the following character, using the
 current locale.</p>
 
+<p style="margin-left:18%; margin-top: 1em">Format
+specifiers may apply to the <i>n</i>th argument rather than
+the next sequential argument. In this case, the
+&rsquo;%&rsquo; in the format specifier is replaced by the
+sequence &ldquo;%<i>n</i>$&rdquo;, where <i>n</i> is a
+decimal integer greater than 0, giving the argument number
+to use as the operand. The format string should not mix
+numbered and unnumbered argument specifiers, though this is
+allowed. Unnumbered argument specifiers always refer to the
+next argument following the last argument consumed by an
+unnumbered specifier; numbered argument specifiers refer to
+absolute positions in the argument list.</p>
+
 <p style="margin-left:18%; margin-top: 1em">The
 <i>format</i> is reused as necessary to consume all of the
 <i>arguments</i>. If the <i>format</i> requires more
 <i>arguments</i> than are supplied, the extra format
 specifications behave as if a zero value or null string, as
-appropriate, had been supplied. The return value is zero on
-success, non-zero if an invalid option is supplied or a
-write or assignment error occurs.</p>
+appropriate, had been supplied. If <i>format</i> is reused,
+a numbered argument specifier &ldquo;%<i>n</i>$&rdquo;
+refers to the <i>n</i>th argument following the highest
+numbered argument consumed by the previous use of
+<i>format</i>.</p>
+
+<p style="margin-left:18%; margin-top: 1em">The return
+value is zero on success, non-zero if an invalid option is
+supplied or a write or assignment error occurs.</p>
 
 <p style="margin-left:9%;"><b>pushd</b> [<b>&minus;n</b>]
 [+<i>n</i>] [&minus;<i>n</i>] <b><br>

@@ -1103,13 +1103,16 @@ run_trap_cleanup (int sig)
 }
 
 void
-clear_exit_trap ()
+clear_exit_trap (int freetrap)
 {
   if (sigmodes[EXIT_TRAP] & SIG_TRAPPED)
     {
       sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;	/* XXX - SIG_INPROGRESS? */
-      free_trap_command (EXIT_TRAP);
-      trap_list[EXIT_TRAP] = (char *)NULL;
+      if (freetrap)
+	{
+	  free_trap_command (EXIT_TRAP);
+	  trap_list[EXIT_TRAP] = (char *)NULL;
+	}
     }
 
 }

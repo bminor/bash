@@ -5,7 +5,7 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Nov 17 11:37:04 EST 2025
+.\"	Last Change: Tue Dec  2 16:43:36 EST 2025
 .\"
 .\" For bash_builtins, strip all but "SHELL BUILTIN COMMANDS" section
 .\" For rbash, strip all but "RESTRICTED SHELL" section
@@ -22,7 +22,7 @@
 .ds zX \" empty
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2025 November 17" "GNU Bash 5.3"
+.TH BASH 1 "2025 December 2" "GNU Bash 5.3"
 .\"
 .ie \n(.g \{\
 .ds ' \(aq
@@ -11148,10 +11148,28 @@ except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the numeric value of
 the following character, using the current locale.
 .IP
+Format specifiers may apply to the \fIn\fPth argument rather than the next
+sequential argument.
+In this case, the '%' in the format specifier is replaced by the
+sequence
+.Q %\fIn\fP$ ,
+where \fIn\fP is a decimal integer greater than 0,
+giving the argument number to use as the operand.
+The format string should not mix numbered and unnumbered argument specifiers,
+though this is allowed.
+Unnumbered argument specifiers always refer to the next argument following
+the last argument consumed by an unnumbered specifier; numbered argument
+specifiers refer to absolute positions in the argument list.
+.IP
 The \fIformat\fP is reused as necessary to consume all of the \fIarguments\fP.
 If the \fIformat\fP requires more \fIarguments\fP than are supplied, the
 extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.
+If \fIformat\fP is reused, a numbered argument specifier
+.Q %\fIn\fP$
+refers to the \fIn\fPth argument following the highest numbered argument
+consumed by the previous use of \fIformat\fP.
+.IP
 The return value is zero on success,
 non-zero if an invalid option is supplied or a write or assignment error
 occurs.

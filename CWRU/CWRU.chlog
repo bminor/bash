@@ -12311,3 +12311,19 @@ execute_cmd.c
 	- execute_in_subshell: clear the exit trap before checking for a
 	  pending fatal signal
 	  From https://savannah.gnu.org/bugs/?67745
+
+				   12/2
+				   ----
+builtins/printf.def
+	- import %N$ specifier implementation from printf-nspecifier branch;
+	  implementation is similar to coreutils'.
+	- we warn about mixing numbered and unnumbered format specifiers in
+	  posix mode
+	- getint: now takes second argument to deal with numbered specifiers
+	- getstar: new function to get precision and fieldwidth from argument
+	  list if `*' in format specifier, handling numbered arguments
+	- narg, nptr: we build a new format string as necessary
+	  Originally from https://savannah.gnu.org/support/?111166, also
+	  discussed in thread starting with
+	  https://lists.gnu.org/archive/html/bug-bash/2025-02/msg00151.html
+

@@ -1689,6 +1689,9 @@ PPAARRAAMMEETTEERRSS
        The "+=" operator appends to an array variable when assigning using the
        compound assignment syntax; see PPAARRAAMMEETTEERRSS above.
 
+       If one of the word expansions in a compound array assignment unsets the
+       variable, the results are unspecified.
+
        An  array  element  is referenced using ${_n_a_m_e[_s_u_b_s_c_r_i_p_t]}.  The braces
        are required to avoid conflicts with pathname expansion.  If  _s_u_b_s_c_r_i_p_t
        is @@ or **, the word expands to all members of _n_a_m_e, unless noted in the
@@ -1899,7 +1902,7 @@ EEXXPPAANNSSIIOONN
        _p_a_r_a_m_e_t_e_r  is  a positional parameter with more than one digit, or when
        _p_a_r_a_m_e_t_e_r is followed by a character which is not to be interpreted  as
        part  of  its  name.   The  _p_a_r_a_m_e_t_e_r is a shell parameter as described
-       above PPAARRAAMMEETTEERRSS) or an array reference (AArrrraayyss).
+       above (PPAARRAAMMEETTEERRSS) or an array reference (AArrrraayyss).
 
        If the first character of _p_a_r_a_m_e_t_e_r is an exclamation  point  (!!),  and
        _p_a_r_a_m_e_t_e_r is not a _n_a_m_e_r_e_f, it introduces a level of indirection.  BBaasshh
@@ -3729,6 +3732,7 @@ RREEAADDLLIINNEE
        form
 
               sseett _v_a_r_i_a_b_l_e_-_n_a_m_e _v_a_l_u_e
+
        or using the bbiinndd builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
        Except  where  noted,  rreeaaddlliinnee variables can take the values OOnn or OOffff
@@ -4829,7 +4833,7 @@ RREEAADDLLIINNEE
        fined, programmable completion performs rreeaaddlliinnee's default completion.
 
        The  options  supplied to ccoommpplleettee and ccoommppoopptt can control how rreeaaddlliinnee
-       treats the completions.  For instance, the _-_o  _f_u_l_l_q_u_o_t_e  option  tells
+       treats the completions.  For instance, the --oo  ffuullllqquuoottee  option  tells
        rreeaaddlliinnee  to  quote the matches as if they were filenames.  See the de-
        scription of ccoommpplleettee below for details.
 
@@ -5745,8 +5749,8 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               directories  in  which  to search for _f_i_l_e_n_a_m_e.  The default for
               BBAASSHH__LLOOAADDAABBLLEESS__PPAATTHH is system-dependent, and may include "."  to
               force  a  search  of  the current directory.  The --dd option will
-              delete a builtin previously loaded with --ff.  If _-_s is used  with
-              _-_f, the new builtin becomes a POSIX special builtin.
+              delete a builtin previously loaded with --ff.  If --ss is used  with
+              --ff, the new builtin becomes a POSIX special builtin.
 
               If  no  options  are supplied and a _n_a_m_e is not a shell builtin,
               eennaabbllee will attempt to load _n_a_m_e  from  a  shared  object  named
@@ -6164,7 +6168,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      last.
 
               If  the  top element of the directory stack is modified, and the
-              _-_n option was not supplied, ppooppdd uses the ccdd builtin  to  change
+              --nn option was not supplied, ppooppdd uses the ccdd builtin  to  change
               to the directory at the top of the stack.  If the ccdd fails, ppooppdd
               returns a non-zero value.
 
@@ -6232,12 +6236,27 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               is  the numeric value of the following character, using the cur-
               rent locale.
 
-              The _f_o_r_m_a_t is reused as necessary to consume all  of  the  _a_r_g_u_-
+              Format specifiers may apply to the _nth argument rather than  the
+              next  sequential  argument.  In this case, the '%' in the format
+              specifier is replaced by the sequence "%_n$", where _n is a  deci-
+              mal integer greater than 0, giving the argument number to use as
+              the  operand.  The format string should not mix numbered and un-
+              numbered argument specifiers, though this  is  allowed.   Unnum-
+              bered argument specifiers always refer to the next argument fol-
+              lowing  the  last  argument consumed by an unnumbered specifier;
+              numbered argument specifiers refer to absolute positions in  the
+              argument list.
+
+              The  _f_o_r_m_a_t  is  reused as necessary to consume all of the _a_r_g_u_-
               _m_e_n_t_s.  If the _f_o_r_m_a_t requires more _a_r_g_u_m_e_n_t_s than are supplied,
-              the  extra  format  specifications  behave as if a zero value or
-              null string, as appropriate,  had  been  supplied.   The  return
-              value  is zero on success, non-zero if an invalid option is sup-
-              plied or a write or assignment error occurs.
+              the extra format specifications behave as if  a  zero  value  or
+              null  string,  as  appropriate, had been supplied.  If _f_o_r_m_a_t is
+              reused, a numbered argument specifier "%_n$" refers  to  the  _nth
+              argument following the highest numbered argument consumed by the
+              previous use of _f_o_r_m_a_t.
+
+              The  return value is zero on success, non-zero if an invalid op-
+              tion is supplied or a write or assignment error occurs.
 
        ppuusshhdd [--nn] [+_n] [-_n]
        ppuusshhdd [--nn] [_d_i_r]
@@ -7555,4 +7574,4 @@ BBUUGGSS
 
        Array variables may not (yet) be exported.
 
-GNU Bash 5.3                    2025 October 6                         _B_A_S_H(1)
+GNU Bash 5.3                    2025 December 2                        _B_A_S_H(1)

@@ -1,0 +1,95 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# tests for printf numbered conversion specifications, mostly from coreutils
+
+# basic tests
+printf '%3$s %1$s\n' one two three
+printf '%2$s %1$s\n' world hello
+printf '%3$s %2$s %1$s\n' A B C D
+
+# repeat
+printf '%1$d %1$d\n' 42
+
+# reuse format string
+printf '%3$s %1$s\n' one two three four
+
+# repeat and reuse format string
+printf '%1$d%1$d\n' 1 2
+
+# cannot reliably mix numbered and unnumbered conversions
+printf '%s %3$s %s\n' A B C D
+printf '%s %s %1$s\n' A B
+
+# sometimes these will work
+printf '%1$*2$.*3$d\n' 1 3 2
+printf '%3$*.*d\n' 3 2 1
+# this is sketchy
+printf '%1$*.*d\n' 1 3 2
+printf '%3$*2$.*d\n' 2 3 1
+printf '%3$*.*2$d\n' 3 2 1
+printf '%2$*1$d\n' 4 1
+printf '%2$*d\n' 4 1
+
+printf '%3$s %1$s %s\n' one two three four
+# numbered conversion out of range -- we don't do this on format reuse
+printf '%2$d\n' 1
+printf '%999$s\n' 1
+
+printf '%3$s %s %2$s %s %1$s\n' A B C D E F G H
+
+printf =='%3$*2$.*1$s==\n'  2 4 6
+printf =='%3$*2$.*1$s==\n'  2 4 67
+printf =='%3$*2$.*1$s==\n'  2 4 678
+printf =='%3$*2$.*1$s==\n'  2 4 678 3
+
+printf =='%3$*2$.*1$s==\n'  2 4 678 3 5
+printf =='%3$*2$.*1$s==\n'  2 4 678 3 5 7
+printf =='%3$*2$.*1$s==\n'  2 4 678 3 5 78
+printf =='%3$*2$.*1$s==\n'  2 4 678 3 5 789
+printf =='%3$*2$.*1$s==\n'  2 4 678 3 5 7890
+
+printf =='%3$*.*2$s==\n'  4 2 6  
+printf =='%3$*.*2$s==\n'  4 2 67
+printf =='%3$*.*2$s==\n'  4 2 678
+
+printf =='%2$*1$.*1$s==\n'  2 45
+printf =='%2$*1$.*1$s==\n'  2 456
+printf =='%2$*1$.*1$s==\n'  2 456 3
+printf =='%2$*1$.*1$s==\n'  2 456 3 4
+printf =='%2$*1$.*1$s==\n'  2 456 3 45
+printf =='%2$*1$.*1$s==\n'  2 456 3 456
+printf =='%2$*1$.*1$s==\n'  2 456 3 4567
+
+# someday I may take out this warning
+printf '%s %s %999$s\n' 1 2 3 4 5 6 7 8 
+echo
+printf '%s %s %999$s\n'  A B C D E F G H
+echo
+
+# flags come after numbered conversions
+printf '%01$4d\n' 1	# 0 is not a flag here
+printf '%1$04d\n' 1
+printf '%1$0*2$d\n' 1 4
+
+# negative numeric conversion not allowed, not a flag
+printf '%-2$s %1$s\n' A B
+# space not allowed, not a flag
+printf '% 2$s %1$s\n' A B
+
+# only base 10 accepted
+printf '%0x1$s %2$s\n' A B
+
+# have to have a digit before the $
+printf '%$d\n' 1

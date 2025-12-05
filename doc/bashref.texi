@@ -5573,10 +5573,28 @@ except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the numeric value of
 the following character, using the current locale.
 
+Format specifiers may apply to the @var{n}th argument rather than the next
+sequential argument.
+In this case, the @samp{%} in the format specifier is replaced by the
+sequence
+@samp{%@var{n}$},
+where @var{n} is a decimal integer greater than 0,
+giving the argument number to use as the operand.
+The format string should not mix numbered and unnumbered argument specifiers,
+though this is allowed.
+Unnumbered argument specifiers always refer to the next argument following
+the last argument consumed by an unnumbered specifier; numbered argument
+specifiers refer to absolute positions in the argument list.
+
 The @var{format} is reused as necessary to consume all of the @var{arguments}.
 If the @var{format} requires more @var{arguments} than are supplied, the
 extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.
+If @var{format} is reused, a numbered argument specifier
+@samp{%@var{n}$}
+refers to the @var{n}th argument following the highest numbered argument
+consumed by the previous use of @var{format}.
+
 The return value is zero on success,
 non-zero if an invalid option is supplied or a write or assignment error
 occurs.

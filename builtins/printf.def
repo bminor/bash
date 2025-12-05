@@ -100,6 +100,8 @@ extern int errno;
     { \
       QUIT; \
       retval = value; \
+      if (narg_argc != -1) \
+	free (narg_argv); \
       if (conv_bufsize > 4096 ) \
 	{ \
 	  free (conv_buf); \
@@ -178,6 +180,10 @@ extern int errno;
 #define LENMODS "hjlLtz"
 #define DIGITS "0123456789"
 
+#ifndef NL_ARGMAX
+#  define NL_ARGMAX		999
+#endif
+
 #ifndef TIMELEN_MAX
 #  define TIMELEN_MAX 128
 #endif
@@ -202,7 +208,8 @@ static int vbprintf (const char *, ...) __attribute__((__format__ (printf, 1, 2)
 static char *mklong (char *, char *, size_t);
 static int getchr (void);
 static char *getstr (void);
-static int  getint (int);
+static int getint (int, int);
+static int getstar (char **, int);
 static intmax_t getintmax (void);
 static uintmax_t getuintmax (void);
 
@@ -247,12 +254,42 @@ static size_t vblen;
 static char **narg_argv;
 static int narg_argc;
 static int narg_maxind;
+static int narg_numind;		/* last numbered argument specification */
+static int narg_seqind;		/* only used when mixing numbered and unnumbered conversions */
+static int narg_base;		/* used on format reuse */
+static char *narg_arg;		/* argument corresponding to the numbered conversion spec */
+static int narg_convtype;	/* 1 = numbered, 0 = unnumbered */
+static int narg_convwarned;	/* want to minimize the warnings */
+static char *nfmt = 0;
 
 static intmax_t tw;
 
 static char *conv_buf;
 static size_t conv_bufsize;
 
+static void
+init_numarg ()
+{
+  size_t len;
+  WORD_LIST *l;
+
+  len = list_length ((GENERIC_LIST *)orig_arglist);
+  narg_argv = (char **)xmalloc ((len + 2) * sizeof (char *));	/* +2 because we don't use 0 */
+
+  for (narg_argc = 1, l = orig_arglist; l; l = l->next)
+    narg_argv[narg_argc++] = l->word->word;
+
+  /* If we've processed some unnumbered conversion specifications before
+     we get the first numbered one, count those as "previous conversion
+     specifications that consumed an argument." */
+  for (narg_seqind = 0, l = orig_arglist; l != garglist; l = l->next)
+    narg_seqind++;
+
+  narg_argv[narg_argc] = NULL;
+  narg_maxind = narg_numind = narg_base = 0;
+  narg_arg = NULL;
+}
+  
 static inline int
 decodeint (char **str, int diagnose, int overflow_return)
 {
@@ -281,7 +318,10 @@ printf_builtin (WORD_LIST *list)
 {
   int ch, fieldwidth, precision;
   int have_fieldwidth, have_precision, use_Lmod, altform, longform;
+  int moreargs;
   char convch, thisch, nextch, *format, *modstart, *precstart, *fmt, *start;
+  char *nptr, *origfmt;
+  size_t nargind;
 #if defined (HANDLE_MULTIBYTE)
   char mbch[25];		/* 25 > MB_LEN_MAX, plus can handle 4-byte UTF-8 and large Unicode characters*/
   int mbind, mblen, mb_cur_max;
@@ -292,6 +332,8 @@ printf_builtin (WORD_LIST *list)
 
   conversion_error = 0;
   vflag = 0;
+
+  narg_argc = -1;
 
   reset_internal_getopt ();
   while ((ch = internal_getopt (list, "v:")) != -1)
@@ -357,15 +399,23 @@ printf_builtin (WORD_LIST *list)
 
   mb_cur_max = MB_CUR_MAX;
 
+  nfmt = xrealloc (nfmt, strlen (format) + 1);	/* XXX error checking */
+  nfmt[0] = '\0';
+
   /* Basic algorithm is to scan the format string for conversion
      specifications -- once one is found, find out if the field
      width or precision is a '*'; if it is, gather up value.  Note,
      format strings are reused as necessary to use up the provided
      arguments, arguments of zero/null string are provided to use
      up the format string. */
+
+  /* We only warn once, even if we reuse the format, and we only warn in
+     posix mode. */
+  narg_convwarned = !posixly_correct;
   do
     {
       tw = 0;
+
       /* find next format specification */
       for (fmt = format; *fmt; fmt++)
 	{
@@ -409,7 +459,9 @@ printf_builtin (WORD_LIST *list)
 	    }
 
 	  /* ASSERT(*fmt == '%') */
-	  start = fmt++;
+	  origfmt = fmt;			/* saved for format errors */
+	  nptr = start = nfmt;			/* we construct our own format string */
+	  *nptr++ = *fmt++;
 
 	  if (*fmt == '%')		/* %% prints a % */
 	    {
@@ -417,37 +469,117 @@ printf_builtin (WORD_LIST *list)
 	      continue;
 	    }
 
+	  narg_convtype = 0;
+	  /* Look for possible %N$ numbered conversion specifier. */
+	  /* "Conversions can be applied to the nth argument operand rather
+	      than to the next argument operand. In this case, the conversion
+	      specifier character '%' is replaced by the sequence "%n$",
+	      where n is a decimal integer in the range [1,{NL_ARGMAX}],
+	      giving the argument operand number. This feature provides for
+	      the definition of format strings that select arguments in an
+	      order appropriate to specific languages." */
+	  /* This leaves nargv_curind pointing to the argument corresponding
+	     to the numbered conversion spec or the next sequential one after
+	     having processed a numbered spec, so the advancearg() in the
+	     various code handling the conversion specifiers advances it. */
+	  /* We don't allow N$ for precision or field width at this time. */
+	  nargind = strspn (fmt, DIGITS);
+	  if (nargind > 0 && fmt[nargind] == '$')
+	    {
+	      char *ep;
+	      int narg, thisarg;
+
+	      if (garglist != orig_arglist && narg_convwarned == 0)
+		{
+		  builtin_warning ("%s", _("should not mix numbered and unnumbered conversions"));
+		  narg_convwarned = 1;
+		}
+	      if (narg_argc == -1)
+		init_numarg ();
+	      thisarg = (int)strtol (fmt, &ep, 10);
+	      /* "If it is a numbered argument conversion specification,
+		  printf should write a diagnostic message to standard error
+		  and exit with non-zero status" */
+	      if (thisarg <= 0 || thisarg >= narg_argc)
+		{
+		  /* We don't want to print this error message for numbered
+		     conversions exceeding the number of arguments  unless
+		     we are in posix mode, so we set narg_numind = narg_argc
+		     if we are not. */
+		  if (thisarg <= 0 || posixly_correct)
+		    {
+		      builtin_error (_("%d: numbered conversion out of range"), thisarg);
+		      PRETURN (EXECUTION_FAILURE);
+		    }
+		  thisarg = narg_argc;
+		}
+	      thisarg += narg_base;
+	      narg_numind = (thisarg < narg_argc) ? thisarg : narg_argc;
+	      if (narg_numind > narg_maxind)
+		narg_maxind = narg_numind;
+	      narg_arg = narg_argv[narg_numind];
+	      narg_convtype = 1;
+	      fmt += nargind + 1;
+	    }
+	  else if (narg_argc != -1)
+	    {
+	      int thisarg;
+
+	      if (narg_convwarned == 0)
+		{
+		  builtin_warning ("%s", _("should not mix numbered and unnumbered conversions"));
+		  narg_convwarned = 1;
+		}
+	      /* There is genuine incompatibility here between macOS/FreeBSD
+		 printf and coreutils printf.
+		 Given '%s %3$s %s\n' A B C D, coreutils printf treats the
+		 unnumbered coversion specs sequentially, so it echoes "A C B",
+		 then "D" on a new line.
+		 FreeBSD printf treats the next unnumbered specifier following
+		 a numbered specifier as numbered + 1, and prints "A C D".
+		 zsh and ksh93 are like coreutils; mksh is like FreeBSD.
+		 We follow coreutils here for now, but subject to change. */
+	      narg_arg = (narg_seqind < narg_argc) ? narg_argv[++narg_seqind] : NULL;
+	      if (narg_seqind > narg_maxind)
+		narg_maxind = narg_seqind;
+	    }
+
 	  /* Found format specification, skip to field width. We check for
 	     alternate form for possible later use. */
-	  for (; *fmt && strchr(SKIP1, *fmt); ++fmt)
-	    if (*fmt == '#')
-	      altform++;
+	  while (*fmt && strchr(SKIP1, *fmt))
+	    {
+	      if (*fmt == '#')
+		altform++;
+	      *nptr++ = *fmt++;		/* build format string */
+	    }
+	  *nptr = '\0';
 
 	  /* Skip optional field width. */
 	  if (*fmt == '*')
 	    {
-	      fmt++;
+	      *nptr++ = *fmt++;
 	      have_fieldwidth = 1;
 	      /* Handle field with overflow by ignoring fieldwidth for now.
-		 getint() prints a message. */
-	      fieldwidth = getint (0);
+		 getstar() prints a message. */
+	      fieldwidth = getstar (&fmt, 0);
 	    }
 	  else
 	    while (DIGIT (*fmt))
-	      fmt++;
+	      *nptr++ = *fmt++;
+	  *nptr = '\0';
 
 	  /* Skip optional '.' and precision */
 	  if (*fmt == '.')
 	    {
-	      ++fmt;
+	      *nptr++ = *fmt++;
 	      if (*fmt == '*')
 		{
-		  fmt++;
+		  *nptr++ = *fmt++;
 		  have_precision = 1;
 		  /* Handle precision overflow by ignoring precision for now.
-		     getint() prints a message.
+		     getstar() prints a message.
 		     "A negative precision is treated as if it were missing." */
-		  precision = getint (-1);
+		  precision = getstar (&fmt, -1);
 		}
 	      else
 		{
@@ -460,12 +592,13 @@ printf_builtin (WORD_LIST *list)
 #else
 		  if (*fmt == '-')
 #endif
-		    fmt++;
+		    *nptr++ = *fmt++;
 		  if (DIGIT (*fmt))
 		    precstart = fmt;
 		  while (DIGIT (*fmt))
-		    fmt++;
+		    *nptr++ = *fmt++;
 		}
+	      *nptr = '\0';
 	    }
 
 	  /* skip possible format modifiers */
@@ -475,7 +608,7 @@ printf_builtin (WORD_LIST *list)
 	    {
 	      use_Lmod |= USE_LONG_DOUBLE && *fmt == 'L';
 	      longform |= *fmt == 'l';
-	      fmt++;
+	      *nptr++ = *fmt++;
 	    }
 	    
 	  if (*fmt == 0)
@@ -483,6 +616,9 @@ printf_builtin (WORD_LIST *list)
 	      builtin_error (_("`%s': missing format character"), start);
 	      PRETURN (EXECUTION_FAILURE);
 	    }
+
+	  *nptr++ = *fmt;
+	  *nptr = '\0';
 
 	  convch = *fmt;
 	  thisch = modstart[0];
@@ -607,7 +743,7 @@ printf_builtin (WORD_LIST *list)
 		if (*fmt != ')' || *++fmt != 'T')
 		  {
 		    builtin_warning (_("`%c': invalid time format specification"), *fmt);
-		    fmt = start;
+		    fmt = origfmt;
 		    free (timefmt);
 		    PC (*fmt);
 		    continue;
@@ -620,7 +756,10 @@ printf_builtin (WORD_LIST *list)
 		  }
 		/* argument is seconds since the epoch with special -1 and -2 */
 		/* default argument is equivalent to -1; special case */
-		arg = garglist ? getintmax () : -1;
+		if (narg_argc != -1)
+		  arg = (narg_numind < narg_argc && narg_argv[narg_numind]) ? getintmax (): -1;
+		else
+		  arg = garglist ? getintmax () : -1;
 		if (arg == -1)
 		  secs = NOW;		/* roughly date +%s */
 		else if (arg == -2)
@@ -643,8 +782,8 @@ printf_builtin (WORD_LIST *list)
 		else
 		  timebuf[sizeof(timebuf) - 1] = '\0';
 		/* convert to %s format that preserves fieldwidth and precision */
-		modstart[0] = 's';
-		modstart[1] = '\0';
+		*nptr++ = 's';
+		*nptr = '\0';
 		r = printstr (start, timebuf, strlen (timebuf), fieldwidth, precision);	/* XXX - %s for now */
 		if (r < 0)
 		  PRETURN (EXECUTION_FAILURE);
@@ -821,8 +960,44 @@ printf_builtin (WORD_LIST *list)
 	  /* PRETURN will print error message. */
 	  PRETURN (EXECUTION_FAILURE);
 	}
+
+      /* "The format operand shall be reused as often as necessary to satisfy
+	  the argument operands. If conversion specifications beginning with
+	  a "%n$" sequence are used, on format reuse the value of n shall
+	  refer to the nth argument operand following the highest numbered
+	  argument operand consumed by the previous use of the format operand." */
+      if (narg_argc != -1)
+	{
+	  /* If we consumed the last argument, we're done. */
+	  moreargs = (narg_numind < narg_argc) && (narg_maxind < narg_argc) && (narg_seqind < narg_argc);
+	  narg_base = narg_maxind;
+	  narg_maxind = 0;		/* need to recalculate this */
+	}
+      else
+	moreargs = garglist && garglist != list->next;
+
+      /* "on format reuse the value of n shall refer to the nth argument
+	  operand following the highest numbered argument operand consumed
+	  by the previous use of the format operand." */
+      /* This mess is to handle combining numbered and unnumbered conversion
+	 specifiers. */
+      if (moreargs && narg_argc != -1)
+	{
+	  /* If we decide to treat numbered and unnumbered specifiers with
+	     different counters. */
+	  if (garglist == 0 && orig_arglist != 0)
+	    moreargs = 0;
+	  /* I don't like this -- POSIX says "previous conversion specification
+	     that consumed an argument", not "highest-numbered argument
+	     processed" -- but this is what coreutils printf seems to do. */
+	  narg_seqind = narg_base;
+	  /* The second clause will be true if we processed the last
+	     argument (not necessarily all arguments). */
+	  if (narg_seqind >= narg_argc || (narg_base + 1) >= narg_argc)
+	    moreargs = 0;
+	}
     }
-  while (garglist && garglist != list->next);
+  while (moreargs);
 
   if (conversion_error)
     retval = EXECUTION_FAILURE;
@@ -1346,13 +1521,25 @@ mklong (char *str, char *modifiers, size_t mlen)
 static inline char *
 getarg (void)
 {
+  if (narg_argc != -1)
+    return narg_arg;
+
   return (garglist ? garglist->word->word : 0);
 }
 
 static inline void
 advancearg (void)
 {
-  garglist = garglist->next;
+  if (narg_argc != -1)
+    {
+#if 0
+      /* see if we need to manage narg_seqind here or in printf_builtin */
+      if (narg_numind < narg_argc)
+	narg_numind++;
+#endif
+    }
+  else
+    garglist = garglist->next;
 }
 
 static int
@@ -1404,15 +1591,19 @@ chk_converror (char *s, char *ep)
 }
 
 /* Don't call getintmax here because it may consume an argument on error, and
-   we call this to get field width/precision arguments. */
+   we call this to get field width/precision arguments. This is only called
+   by getstar() to get field width/precision values from arguments. It does
+   not call getarg() and it does not advance the argument with advancearg. */
 static int
-getint (int overflow_retval)
+getint (int numberedconv, int overflow_retval)
 {
   intmax_t ret;
   char *ep, *arg;
   int overflow;
 
-  arg = getarg ();
+  /* XXX - check here that narg_numind < narg_argc and return null in that case? */
+  arg = (narg_argc != -1) ? (numberedconv ? narg_argv[narg_numind] : narg_argv[narg_seqind])
+			  : (garglist ? garglist->word->word : 0);
 
   if (arg == 0)
     return (0);
@@ -1427,8 +1618,61 @@ getint (int overflow_retval)
 
   chk_converror (arg, ep);
 
-  advancearg ();
   return (overflow ? overflow_retval : (int)ret);
+}
+
+static int
+getstar (char **fmtp, int overflow_retval)
+{
+  int ret, numconv;
+  char *ep, **fp;
+  size_t l, ind;
+
+  fp = fmtp;
+
+  numconv = 0;
+  ep = *fp;
+  l = DIGIT (**fp) ? strspn (ep, DIGITS) : 0;
+  if (l > 0 && ep[l] == '$')
+    {
+      if (narg_argc == -1)
+	return overflow_retval;
+      ind = decodeint (fp, 1, -1);
+      if (**fp == '$')
+	{
+	  ep = *fp + 1;
+	  fp = &ep;
+	}
+      *fmtp = *fp;
+      ind += narg_base;
+      if (ind > 0 && ind <= narg_argc)		/* can't have 0-based indices */
+	narg_numind = ind;
+      else
+	return overflow_retval;
+      numconv = 1;
+      if (narg_numind > narg_maxind)
+	narg_maxind = narg_numind;
+    }
+  else if (narg_argc != -1)
+    {
+      if (narg_convwarned == 0)
+	{
+          builtin_warning ("%s", _("should not mix numbered and unnumbered conversions"));
+	  narg_convwarned = 1;
+	}
+     /* We manage the sequential index here and in printf_builtin */
+     if (narg_seqind < narg_argc)
+	++narg_seqind;
+     if (narg_seqind > narg_maxind)
+	narg_maxind = narg_seqind;
+    }
+
+  ret = getint (numconv, overflow_retval);
+
+  if (narg_argc == -1)
+    advancearg ();
+
+  return ret;
 }
 
 static intmax_t

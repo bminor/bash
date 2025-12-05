@@ -92,7 +92,7 @@ extern void set_signal (int, const char *);
 extern void restore_default_signal (int);
 extern void ignore_signal (int);
 
-extern void clear_exit_trap (void);
+extern void clear_exit_trap (int);
 extern int run_exit_trap (void);
 extern void run_trap_cleanup (int);
 extern int run_debug_trap (void);

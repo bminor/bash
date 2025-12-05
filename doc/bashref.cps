@@ -105,7 +105,7 @@
 \entry{pipeline}{10}
 \entry{POSIX}{3}
 \entry{POSIX description}{116}
-\entry{POSIX Mode}{116}
+\entry{POSIX Mode}{117}
 \entry{process group}{3}
 \entry{process group ID}{3}
 \entry{process substitution}{38}

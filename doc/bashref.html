@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 24 September 2025).
+the Bash shell (version 5.3, 2 December 2025).
 
-This is Edition 5.3, last updated 24 September 2025,
+This is Edition 5.3, last updated 2 December 2025,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.3.
 
@@ -77,10 +77,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top" id="Bash-Features-1"><span>Bash Features<a class="copiable-link" href="#Bash-Features-1"> &para;</a></span></h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.3, 24 September 2025).
+the Bash shell (version 5.3, 2 December 2025).
 The Bash home page is <a class="url" href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.3, last updated 24 September 2025,
+<p>This is Edition 5.3, last updated 2 December 2025,
 of <cite class="cite">The GNU Bash Reference Manual</cite>,
 for <code class="code">Bash</code>, Version 5.3.
 </p>
@@ -5894,7 +5894,7 @@ special builtins.
 </p>
 <p>The <samp class="option">-f</samp> option means to load the new builtin command <var class="var">name</var>
 from shared object <var class="var">filename</var>, on systems that support dynamic loading.
-If <var class="var">filename</var> does not contain a slash.
+If <var class="var">filename</var> does not contain a slash,
 Bash will use the value of the <code class="env">BASH_LOADABLES_PATH</code> variable as a
 colon-separated list of directories in which to search for <var class="var">filename</var>.
 The default for <code class="env">BASH_LOADABLES_PATH</code> is system-dependent,
@@ -6138,11 +6138,29 @@ except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the numeric value of
 the following character, using the current locale.
 </p>
+<p>Format specifiers may apply to the <var class="var">n</var>th argument rather than the next
+sequential argument.
+In this case, the &lsquo;<samp class="samp">%</samp>&rsquo; in the format specifier is replaced by the
+sequence
+&lsquo;<samp class="samp">%<var class="var">n</var>$</samp>&rsquo;,
+where <var class="var">n</var> is a decimal integer greater than 0,
+giving the argument number to use as the operand.
+The format string should not mix numbered and unnumbered argument specifiers,
+though this is allowed.
+Unnumbered argument specifiers always refer to the next argument following
+the last argument consumed by an unnumbered specifier; numbered argument
+specifiers refer to absolute positions in the argument list.
+</p>
 <p>The <var class="var">format</var> is reused as necessary to consume all of the <var class="var">arguments</var>.
 If the <var class="var">format</var> requires more <var class="var">arguments</var> than are supplied, the
 extra format specifications behave as if a zero value or null string, as
 appropriate, had been supplied.
-The return value is zero on success,
+If <var class="var">format</var> is reused, a numbered argument specifier
+&lsquo;<samp class="samp">%<var class="var">n</var>$</samp>&rsquo;
+refers to the <var class="var">n</var>th argument following the highest numbered argument
+consumed by the previous use of <var class="var">format</var>.
+</p>
+<p>The return value is zero on success,
 non-zero if an invalid option is supplied or a write or assignment error
 occurs.
 </p>
@@ -9723,6 +9741,9 @@ operator appends to an array variable when assigning
 using the compound assignment syntax; see
 <a class="ref" href="#Shell-Parameters">Shell Parameters</a> above.
 </p>
+<p>If one of the word expansions in a compound array assignment unsets the
+variable, the results are unspecified.
+</p>
 <p>An array element is referenced using
 <code class="code">${<var class="var">name</var>[<var class="var">subscript</var>]}</code>.
 The braces are required to avoid
@@ -9917,8 +9938,9 @@ list printed by <code class="code">dirs</code>), starting with zero, from the st
 </p></dd>
 </dl>
 
-<p>If the top element of the directory stack is modified, and
-the <samp class="option">-n</samp> option was not supplied, <code class="code">popd</code> uses the <code class="code">cd</code>
+<p>If the top element of the directory stack is modified,
+and the <samp class="option">-n</samp> option was not supplied,
+<code class="code">popd</code> uses the <code class="code">cd</code>
 builtin to change to the directory at the top of the stack.
 If the <code class="code">cd</code> fails, <code class="code">popd</code> returns a non-zero value.
 </p>
@@ -10080,7 +10102,7 @@ with <code class="env">$HOME</code> abbreviated with a tilde
 </p></dd>
 <dt><code class="code">\[</code></dt>
 <dd><p>Begin a sequence of non-printing characters.
-Thiss could be used to
+This could be used to
 embed a terminal control sequence into the prompt.
 </p></dd>
 <dt><code class="code">\]</code></dt>

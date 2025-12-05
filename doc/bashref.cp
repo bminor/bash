@@ -98,7 +98,7 @@
 \entry{prompting}{114}{prompting}
 \entry{restricted shell}{115}{restricted shell}
 \entry{POSIX description}{116}{POSIX description}
-\entry{POSIX Mode}{116}{POSIX Mode}
+\entry{POSIX Mode}{117}{POSIX Mode}
 \entry{Compatibility Level}{121}{Compatibility Level}
 \entry{Compatibility Mode}{121}{Compatibility Mode}
 \entry{job control}{125}{job control}

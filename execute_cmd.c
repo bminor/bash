@@ -1688,8 +1688,9 @@ execute_in_subshell (COMMAND *command, int asynchronous, int pipe_in, int pipe_o
 	subshell_environment |= SUBSHELL_COPROC;
     }
 
-  /* clear the exit trap before checking for fatal signals */
-  clear_exit_trap ();
+  /* clear the exit trap before checking for fatal signals, but don't free
+     the trap command (see below). */
+  clear_exit_trap (0);
 
   QUIT;
   CHECK_TERMSIG;
