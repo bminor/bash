@@ -889,12 +889,14 @@ opcode_dispatch:
 int
 _rl_isearch_cleanup (_rl_search_cxt *cxt, int r)
 {
+  RL_UNSETSTATE(RL_STATE_ISEARCH);
+  if (cxt == 0)
+    return (r != 0);
+
+  _rl_iscxt = 0;
   if (r >= 0)
     _rl_isearch_fini (cxt);
   _rl_scxt_dispose (cxt, 0);
-  _rl_iscxt = 0;
-
-  RL_UNSETSTATE(RL_STATE_ISEARCH);
 
   return (r != 0);
 }

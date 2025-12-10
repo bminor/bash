@@ -971,11 +971,11 @@ postproc_signal:
 	 call the application's signal event hook. */
       if (rl_signal_event_hook)
 	(*rl_signal_event_hook) ();
-#if defined (READLINE_CALLBACKS)
-      else if (osig == SIGINT && (ostate & RL_STATE_CALLBACK) && (ostate & (RL_STATE_ISEARCH|RL_STATE_NSEARCH|RL_STATE_NUMERICARG)))
+      /* If the application's SIGINT handler returns, make sure we abort out of
+	 searches and numeric arguments because we've freed necessary state. */
+      if (osig == SIGINT && (ostate & (RL_STATE_ISEARCH|RL_STATE_NSEARCH|RL_STATE_NUMERICARG)))
         /* just these cases for now */
         _rl_abort_internal ();
-#endif
     }
 }
 
